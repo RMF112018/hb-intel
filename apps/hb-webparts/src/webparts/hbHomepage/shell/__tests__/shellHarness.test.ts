@@ -63,10 +63,14 @@ describe('shellHarness — matrix coverage', () => {
     const outcomes = runShellConformanceMatrix();
     for (const outcome of outcomes) {
       const attrs = toShellConformanceDataAttributes(outcome.conformance);
+      expect(attrs['data-shell-blackbox-contract']).toBe('prompt07-blackbox-v1');
       const expectedPath = outcome.proof.entryState.shortHeightConstrained
         ? 'short-height-override'
         : 'usable-width-accounted';
       expect(attrs['data-shell-fit-path']).toBe(expectedPath);
+      expect(attrs['data-shell-pairing-guard-violations']).toBeGreaterThanOrEqual(0);
+      expect(attrs['data-shell-force-stacked-slot-count']).toBeGreaterThanOrEqual(0);
+      expect(attrs['data-shell-constrained-slot-count']).toBeGreaterThanOrEqual(0);
     }
   });
 

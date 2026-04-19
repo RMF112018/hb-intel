@@ -44,6 +44,7 @@ import {
   SHELL_WIDTH_SOURCE,
   resolveUsableShellWidth,
 } from '../useShellContainer.js';
+import { toShellConformanceDataAttributes } from '../shellConformance.js';
 
 describe('Phase-05 closure — Prompt-01 governance model', () => {
   it('exposes a unified governance surface with four categories', () => {
@@ -305,5 +306,21 @@ describe('Phase-05 closure — reflow-safe constrained-state proof', () => {
     const fallback = matrix.find((o) => o.matrixCase.label === 'below-narrowest-fallback');
     expect(fallback?.proof.entryState.id).toBe('phone-portrait');
     expect(fallback?.proof.entryState.reason).toBe('fallback-below-narrowest');
+  });
+});
+
+describe('Phase-09 closure — Prompt-07 black-box validation harness', () => {
+  it('exposes a stable black-box conformance contract for every matrix case', () => {
+    const outcomes = runShellConformanceMatrix();
+    for (const o of outcomes) {
+      const attrs = toShellConformanceDataAttributes(o.conformance);
+      expect(attrs['data-shell-blackbox-contract']).toBe('prompt07-blackbox-v1');
+      expect(attrs['data-shell-fit-path']).toMatch(
+        /usable-width-accounted|short-height-override/,
+      );
+      expect(attrs['data-shell-pairing-guard-violations']).toBeGreaterThanOrEqual(0);
+      expect(attrs['data-shell-force-stacked-slot-count']).toBeGreaterThanOrEqual(0);
+      expect(attrs['data-shell-constrained-slot-count']).toBeGreaterThanOrEqual(0);
+    }
   });
 });

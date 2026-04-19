@@ -219,6 +219,7 @@ export function resolveShellConformance(
 // -----------------------------------------------------------------------------
 
 export interface ShellConformanceDataAttributes {
+  readonly 'data-shell-blackbox-contract': 'prompt07-blackbox-v1';
   readonly 'data-shell-layout-mode': ShellLayoutMode;
   readonly 'data-shell-fit-path': 'usable-width-accounted' | 'short-height-override';
   readonly 'data-shell-entry-class': string;
@@ -228,6 +229,9 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-bands-total': number;
   readonly 'data-shell-entry-band-recipe': ShellBandRecipeId | 'none';
   readonly 'data-shell-fit-contract-denials': number;
+  readonly 'data-shell-pairing-guard-violations': number;
+  readonly 'data-shell-force-stacked-slot-count': number;
+  readonly 'data-shell-constrained-slot-count': number;
   readonly 'data-shell-first-lane-action-detail': FirstLaneDecision['action'] | 'none';
   readonly 'data-shell-first-lane-reason-detail': string;
   readonly 'data-shell-first-lane-candidates-considered': number;
@@ -240,7 +244,14 @@ export function toShellConformanceDataAttributes(
   const fitContractDenials = report.bands.filter(
     (b) => b.pairingDecision.reason === 'fit-contract-denies-pairing',
   ).length;
+  const pairingGuardViolations = report.bands.filter(
+    (b) => b.pairingDecision.reason === 'prohibited-pairing',
+  ).length;
+  const allSlots = report.bands.flatMap((b) => b.slots);
+  const forceStackedSlots = allSlots.filter((s) => s.state === 'force-stacked').length;
+  const constrainedSlots = allSlots.filter((s) => s.state === 'constrained').length;
   return {
+    'data-shell-blackbox-contract': 'prompt07-blackbox-v1',
     'data-shell-layout-mode': report.layoutMode,
     'data-shell-fit-path': report.shortHeightConstrained
       ? 'short-height-override'
@@ -252,6 +263,9 @@ export function toShellConformanceDataAttributes(
     'data-shell-bands-total': report.bands.length,
     'data-shell-entry-band-recipe': report.bands[0]?.recipe ?? 'none',
     'data-shell-fit-contract-denials': fitContractDenials,
+    'data-shell-pairing-guard-violations': pairingGuardViolations,
+    'data-shell-force-stacked-slot-count': forceStackedSlots,
+    'data-shell-constrained-slot-count': constrainedSlots,
     'data-shell-first-lane-action-detail': report.firstLaneDecision?.action ?? 'none',
     'data-shell-first-lane-reason-detail': report.firstLaneDecision?.reason ?? 'none',
     'data-shell-first-lane-candidates-considered':

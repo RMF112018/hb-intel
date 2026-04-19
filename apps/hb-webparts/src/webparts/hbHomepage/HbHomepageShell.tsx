@@ -287,6 +287,17 @@ interface ShellBodyProps {
 
 function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyProps): React.JSX.Element {
   const reports = useOccupantContentStateReports();
+  const prohibitedPairingDiagnostics = React.useMemo(
+    () =>
+      layoutState.diagnostics.filter(
+        (d) => d.code === 'PROHIBITED_PAIRING' && d.severity === 'error',
+      ).length,
+    [layoutState.diagnostics],
+  );
+  const widthAccountingValid =
+    container.width <= container.authoritativeWidth &&
+    container.width >= 0 &&
+    container.shellInlineInsetTotal >= 0;
 
   const firstLaneResolution = React.useMemo(
     () =>
@@ -344,9 +355,15 @@ function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyPro
       data-shell-width-inline-inset-total={Math.round(container.shellInlineInsetTotal)}
       data-shell-width-source={SHELL_WIDTH_SOURCE}
       data-shell-width-accounting={SHELL_WIDTH_ACCOUNTING_RULE}
+      data-shell-width-accounting-valid={widthAccountingValid ? 'true' : 'false'}
+      data-shell-no-overflow-guard={widthAccountingValid ? 'pass' : 'fail'}
+      data-shell-reflow-guard={
+        container.shortHeightConstrained ? 'degraded-state-governed' : 'standard-state-governed'
+      }
       data-shell-height={Math.round(container.height)}
       data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
       data-shell-diagnostics-count={layoutState.diagnostics.length}
+      data-shell-prohibited-pairing-diagnostics={prohibitedPairingDiagnostics}
       data-shell-normalized-from-default={layoutState.normalizedFromDefault}
       data-shell-first-lane-action={firstLaneResolution.decision.action}
       {...conformanceAttrs}

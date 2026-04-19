@@ -3,7 +3,7 @@
   "id": "e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf",
   "alias": "HbHomepageWebPart",
   "componentType": "WebPart",
-  "version": "1.1.30.0",
+  "version": "1.1.31.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],

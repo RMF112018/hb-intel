@@ -77,6 +77,7 @@ describe('shellConformance — data-attribute surface', () => {
   it('emits the canonical attribute set for harness/CSS inspection', () => {
     const report = buildReport('standard-laptop', 1300);
     const attrs = toShellConformanceDataAttributes(report);
+    expect(attrs['data-shell-blackbox-contract']).toBe('prompt07-blackbox-v1');
     expect(attrs['data-shell-fit-path']).toBe('usable-width-accounted');
     expect(attrs['data-shell-entry-class']).toBe('standard-laptop');
     expect(attrs['data-shell-layout-mode']).toBeDefined();
@@ -84,6 +85,9 @@ describe('shellConformance — data-attribute surface', () => {
     expect(attrs['data-shell-bands-total']).toBe(report.bands.length);
     expect(attrs['data-shell-short-height']).toBeUndefined();
     expect(attrs['data-shell-fit-contract-denials']).toBeGreaterThanOrEqual(0);
+    expect(attrs['data-shell-pairing-guard-violations']).toBeGreaterThanOrEqual(0);
+    expect(attrs['data-shell-force-stacked-slot-count']).toBeGreaterThanOrEqual(0);
+    expect(attrs['data-shell-constrained-slot-count']).toBeGreaterThanOrEqual(0);
     expect(attrs['data-shell-first-lane-action-detail']).toBe('none');
     expect(attrs['data-shell-first-lane-candidates-considered']).toBe(0);
   });
