@@ -1,4 +1,5 @@
 export { HbcHomepageLauncher } from './HbcHomepageLauncher.js';
+export { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 export { HbcHomepageLauncherChip } from './HbcHomepageLauncherChip.js';
 export { HbcHomepageLauncherOverflow } from './HbcHomepageLauncherOverflow.js';
 export {
@@ -8,6 +9,9 @@ export {
 } from './constants.js';
 export type {
   HbcHomepageLauncherProps,
+  HbcHomepageLauncherTileProps,
+  HomepageLauncherTileModel,
+  HomepageLauncherTileVariant,
   HbcHomepageLauncherChipProps,
   HbcHomepageLauncherOverflowProps,
   HomepageLauncherChipModel,

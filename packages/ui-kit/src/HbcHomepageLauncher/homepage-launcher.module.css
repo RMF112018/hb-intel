@@ -1,13 +1,5 @@
 /**
- * HbcHomepageLauncher — premium horizontal chip band.
- *
- * The launcher band replaces the prior vertical tile grid. Tiles are
- * horizontal capsule chips packed into a single dense row at every
- * desktop/tablet breakpoint; phone stacks vertically to keep primary
- * actions finger-safe.
- *
- * Tokens read from HB semantic palette with doctrine fallbacks so the
- * surface paints correctly in jsdom/test environments.
+ * HbcHomepageLauncher — premium tile family.
  */
 
 .root {
@@ -20,179 +12,222 @@
   --hbc-hl-brand-deep-rgb: var(--hb-brand-primary-deep-rgb, 20, 52, 96);
   --hbc-hl-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
   --hbc-hl-surface-rgb: var(--hb-surface-1-rgb, 255, 255, 255);
+  --hbc-hl-orange-rgb: var(--hb-brand-orange-rgb, 227, 114, 34);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--hbc-hl-text);
 }
 
-/* ── Band row ─────────────────────────────────────────────── */
-
 .band {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: stretch;
+  gap: 10px;
   min-width: 0;
 }
 
 .bandScroller {
   flex: 1 1 auto;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: stretch;
+  gap: 10px;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
+  padding-block: 2px;
 }
 
 .bandScroller::-webkit-scrollbar {
   display: none;
 }
 
-/* ── Chip anatomy — compact horizontal capsule ──────────── */
+/* ── Tile anatomy ───────────────────────────────────────── */
 
-.chip {
-  flex: 0 1 auto;
-  min-width: 136px;
-  max-width: 248px;
-  inline-size: fit-content;
-  display: flex;
-  flex-direction: row;
+.tile {
+  flex: 0 0 clamp(158px, 18cqw, 228px);
+  min-height: 72px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
-  height: 52px;
-  padding: 0 14px 0 10px;
-  border-radius: 14px;
-  background: linear-gradient(
-    120deg,
-    rgba(var(--hbc-hl-brand-rgb), 0.98) 0%,
-    rgba(var(--hbc-hl-brand-deep-rgb), 0.94) 100%
-  );
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--hbc-hl-brand-deep-rgb), 0.42),
-    0 1px 2px rgba(var(--hbc-hl-brand-rgb), 0.22),
-    0 6px 18px rgba(var(--hbc-hl-brand-rgb), 0.14);
-  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 140ms ease, box-shadow 180ms ease, background 180ms ease;
   position: relative;
+  transition: transform 140ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
-.chip:hover {
+.tilePrimary {
+  color: #ffffff;
+  border: 1px solid rgba(var(--hbc-hl-brand-deep-rgb), 0.4);
   background: linear-gradient(
-    120deg,
+    130deg,
+    rgba(var(--hbc-hl-brand-rgb), 0.99) 0%,
+    rgba(var(--hbc-hl-brand-deep-rgb), 0.96) 100%
+  );
+  box-shadow:
+    0 1px 2px rgba(var(--hbc-hl-brand-rgb), 0.2),
+    0 10px 20px rgba(var(--hbc-hl-brand-rgb), 0.18);
+}
+
+.tileSecondaryOverflowEntry {
+  color: #ffffff;
+  border: 1px solid rgba(var(--hbc-hl-orange-rgb), 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--hbc-hl-orange-rgb), 0.98) 0%,
+    rgba(var(--hbc-hl-brand-rgb), 0.95) 100%
+  );
+  box-shadow:
+    0 1px 2px rgba(var(--hbc-hl-orange-rgb), 0.22),
+    0 10px 20px rgba(var(--hbc-hl-orange-rgb), 0.16);
+}
+
+.tileMobileEntry {
+  color: #ffffff;
+  border: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.42);
+  background: linear-gradient(
+    130deg,
+    rgba(var(--hbc-hl-brand-rgb), 1) 0%,
+    rgba(var(--hbc-hl-brand-deep-rgb), 0.98) 100%
+  );
+  box-shadow:
+    0 1px 2px rgba(var(--hbc-hl-brand-rgb), 0.2),
+    0 8px 18px rgba(var(--hbc-hl-brand-rgb), 0.16);
+}
+
+.tile:hover {
+  transform: translateY(-1px);
+}
+
+.tilePrimary:hover,
+.tileMobileEntry:hover {
+  border-color: rgba(var(--hbc-hl-accent-rgb), 0.8);
+  background: linear-gradient(
+    130deg,
     rgba(var(--hbc-hl-accent-rgb), 1) 0%,
     rgba(var(--hbc-hl-brand-rgb), 1) 100%
   );
   box-shadow:
-    inset 0 0 0 1px rgba(var(--hbc-hl-brand-deep-rgb), 0.52),
-    0 2px 4px rgba(var(--hbc-hl-brand-rgb), 0.28),
-    0 14px 28px rgba(var(--hbc-hl-brand-rgb), 0.32);
+    0 2px 4px rgba(var(--hbc-hl-brand-rgb), 0.26),
+    0 14px 30px rgba(var(--hbc-hl-brand-rgb), 0.3);
 }
 
-.chip:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: -4px;
+.tileSecondaryOverflowEntry:hover {
+  border-color: rgba(var(--hbc-hl-orange-rgb), 0.86);
   box-shadow:
-    inset 0 0 0 1px rgba(var(--hbc-hl-brand-deep-rgb), 0.52),
-    0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.6);
+    0 2px 4px rgba(var(--hbc-hl-orange-rgb), 0.28),
+    0 14px 30px rgba(var(--hbc-hl-orange-rgb), 0.28);
 }
 
-.chipIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.96);
+.tile:focus-visible,
+.overflowTile:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -3px;
+  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.56);
+}
+
+.tileIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.95);
   color: var(--hbc-hl-brand);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 160ms ease, background 160ms ease;
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--hbc-hl-brand-deep-rgb), 0.08),
-    0 1px 1px rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-hl-brand-rgb), 0.12);
 }
 
-.chip:hover .chipIcon {
-  transform: translateX(2px);
-  background: #ffffff;
-}
-
-.chipTitle {
-  flex: 0 1 auto;
+.tileContent {
   min-width: 0;
-  max-width: 24ch;
-  font-size: 0.8125rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.tileTitle {
+  min-width: 0;
+  font-size: 0.84rem;
   font-weight: 700;
-  letter-spacing: -0.005em;
-  line-height: 1.15;
-  color: #ffffff;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.22;
+  letter-spacing: -0.006em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ── Overflow trigger — secondary command layer ──────────── */
+.tileSubtitle {
+  font-size: 0.69rem;
+  line-height: 1.2;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-.overflowTrigger {
-  display: inline-flex;
+/* ── Secondary overflow entry tile ─────────────────────── */
+
+.overflowTile {
+  flex: 0 0 clamp(156px, 17cqw, 212px);
+  min-height: 72px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--hbc-hl-orange-rgb), 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--hbc-hl-orange-rgb), 0.98) 0%,
+    rgba(var(--hbc-hl-brand-rgb), 0.95) 100%
+  );
+  color: #ffffff;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  height: 52px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 14px;
-  background: rgba(var(--hbc-hl-surface-rgb), 0.96);
-  color: var(--hbc-hl-brand);
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: inherit;
   cursor: pointer;
-  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-hl-brand-rgb), 0.28);
-  white-space: nowrap;
-  flex: 0 0 auto;
+  transition: transform 140ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  box-shadow:
+    0 1px 2px rgba(var(--hbc-hl-orange-rgb), 0.2),
+    0 10px 20px rgba(var(--hbc-hl-orange-rgb), 0.16);
 }
 
-.overflowTrigger:hover {
-  background: rgba(var(--hbc-hl-brand-rgb), 0.06);
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-hl-brand-rgb), 0.45);
+.overflowTile:hover {
   transform: translateY(-1px);
-}
-
-.overflowTrigger:focus-visible {
-  outline: 2px solid var(--hbc-hl-brand);
-  outline-offset: 2px;
+  border-color: rgba(var(--hbc-hl-orange-rgb), 0.86);
+  box-shadow:
+    0 2px 4px rgba(var(--hbc-hl-orange-rgb), 0.28),
+    0 14px 30px rgba(var(--hbc-hl-orange-rgb), 0.28);
 }
 
 .overflowTriggerLabel {
+  font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
 }
 
 .overflowTriggerCount {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 6px;
   border-radius: 999px;
-  background: rgba(var(--hbc-hl-brand-rgb), 0.12);
-  color: var(--hbc-hl-brand);
-  font-size: 0.6875rem;
-  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
 }
 
 /* ── Anchored menu (desktop/tablet overflow) ─────────────── */
@@ -372,11 +407,11 @@
 
 /* ── Breakpoint governance — binding visible-count matrix ──
  *
- *   Ultrawide         ≥1600        6 chips + More (menu)
- *   Desktop           1180–1599    5 chips + More (menu)
- *   Tablet landscape  980–1179     4 chips + More (menu)
- *   Tablet portrait   720–979      4 chips + More (menu)
- *   Phone             ≤719         3 chips + More (sheet), stacked column
+ *   Ultrawide         ≥1600        6 tiles + More (menu)
+ *   Desktop           1180–1599    5 tiles + More (menu)
+ *   Tablet landscape  980–1179     4 tiles + More (menu)
+ *   Tablet portrait   720–979      4 tiles + More (menu)
+ *   Phone             ≤719         3 tiles + More (sheet), stacked column
  *   Short-height      launcher rule subtracts 1 slot from the
  *                    per-device authoritative count (floor 1)
  *
@@ -388,117 +423,145 @@
 @container hbc-homepage-launcher (max-width: 719px) {
   .band {
     flex-direction: column;
-    gap: 8px;
+    gap: 9px;
   }
   .bandScroller {
     flex-direction: column;
-    gap: 8px;
+    gap: 9px;
     flex: 1 1 auto;
   }
-  .chip {
-    height: 56px;
-    padding: 0 16px 0 12px;
+  .tile {
+    min-height: 66px;
+    padding: 10px 12px;
     flex: 0 0 auto;
-    min-width: 0;
-    max-width: none;
     width: 100%;
+    max-width: 100%;
   }
-  .overflowTrigger {
-    height: 48px;
+  .tileIcon {
+    width: 34px;
+    height: 34px;
+  }
+  .tileTitle {
+    font-size: 0.8125rem;
+  }
+  .tileSubtitle {
+    display: none;
+  }
+  .overflowTile {
+    min-height: 58px;
     width: 100%;
+    max-width: 100%;
+    grid-template-columns: auto 1fr auto auto;
+  }
+  .overflowTriggerLabel {
+    font-size: 0.78rem;
+  }
+  .overflowTriggerCount {
+    min-width: 20px;
+    height: 20px;
+  }
+  .sheetBody .menuItem {
+    min-height: 50px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 720px) and (max-width: 979px) {
-  .chip {
-    height: 50px;
-    padding: 0 12px 0 10px;
-    gap: 8px;
-    min-width: 128px;
-    max-width: 196px;
+  .tile {
+    flex-basis: clamp(148px, 22cqw, 190px);
+    min-height: 68px;
   }
-  .chipTitle {
-    font-size: 0.75rem;
+  .tileIcon {
+    width: 34px;
+    height: 34px;
+  }
+  .tileTitle {
+    font-size: 0.78rem;
+  }
+  .tileSubtitle {
+    display: none;
+  }
+  .overflowTile {
+    flex-basis: clamp(144px, 21cqw, 184px);
+    min-height: 68px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
-  .chip {
-    height: 52px;
-    min-width: 136px;
-    max-width: 212px;
+  .tile {
+    flex-basis: clamp(154px, 19cqw, 200px);
+    min-height: 70px;
+  }
+  .overflowTile {
+    flex-basis: clamp(150px, 18cqw, 196px);
+    min-height: 70px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 1180px) and (max-width: 1599px) {
-  .chip {
-    height: 54px;
-    padding: 0 16px 0 12px;
-    min-width: 148px;
-    max-width: 228px;
+  .tile {
+    flex-basis: clamp(160px, 17.4cqw, 214px);
+    min-height: 72px;
   }
-  .chipTitle {
-    font-size: 0.8125rem;
+  .overflowTile {
+    flex-basis: clamp(156px, 16.4cqw, 208px);
+    min-height: 72px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 1600px) {
-  .chip {
-    height: 60px;
-    padding: 0 18px 0 14px;
-    gap: 12px;
-    border-radius: 16px;
-    min-width: 156px;
-    max-width: 244px;
+  .tile {
+    flex-basis: clamp(176px, 15.4cqw, 236px);
+    min-height: 76px;
+    border-radius: 13px;
   }
-  .chipIcon {
-    width: 36px;
-    height: 36px;
+  .tileIcon {
+    width: 38px;
+    height: 38px;
     border-radius: 11px;
   }
-  .chipTitle {
-    font-size: 0.875rem;
-    letter-spacing: -0.008em;
+  .tileTitle {
+    font-size: 0.9rem;
   }
-  .overflowTrigger {
-    height: 60px;
-    border-radius: 16px;
+  .tileSubtitle {
+    font-size: 0.72rem;
+  }
+  .overflowTile {
+    flex-basis: clamp(168px, 14.8cqw, 226px);
+    min-height: 76px;
+    border-radius: 13px;
   }
 }
 
-/* Short-height guard — constrained vertical viewports keep chips
- * finger-safe but tighter. */
 @media (max-height: 640px) {
-  .chip {
-    height: 44px;
-    padding: 0 12px 0 8px;
-    gap: 8px;
-    border-radius: 12px;
-    min-width: 124px;
-    max-width: 188px;
+  .tile {
+    min-height: 60px;
+    padding: 9px 10px;
+    border-radius: 11px;
   }
-  .chipIcon {
-    width: 28px;
-    height: 28px;
+  .tileIcon {
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
   }
-  .chipTitle {
-    font-size: 0.75rem;
+  .tileTitle {
+    font-size: 0.76rem;
   }
-  .overflowTrigger {
-    height: 44px;
-    border-radius: 12px;
+  .tileSubtitle {
+    display: none;
+  }
+  .overflowTile {
+    min-height: 60px;
+    border-radius: 11px;
   }
 }
 
-/* Reduced motion guard. */
 @media (prefers-reduced-motion: reduce) {
-  .chip,
-  .chipIcon,
-  .overflowTrigger {
+  .tile,
+  .overflowTile {
     transition: none !important;
   }
-  .chip:hover .chipIcon {
+  .tile:hover,
+  .overflowTile:hover {
     transform: none;
   }
 }

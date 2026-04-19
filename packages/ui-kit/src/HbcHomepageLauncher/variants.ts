@@ -9,4 +9,15 @@ import styles from './homepage-launcher.module.css';
 
 export const launcherRoot = cva(styles.root);
 export const launcherBand = cva(styles.band);
-export const launcherChip = cva(styles.chip);
+export const launcherTile = cva(styles.tile, {
+  variants: {
+    family: {
+      primary: styles.tilePrimary,
+      secondaryOverflowEntry: styles.tileSecondaryOverflowEntry,
+      mobileEntry: styles.tileMobileEntry,
+    },
+  },
+  defaultVariants: {
+    family: 'primary',
+  },
+});

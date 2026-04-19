@@ -11,9 +11,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { HbcHomepageLauncher } from '../HbcHomepageLauncher.js';
 import { HBC_HOMEPAGE_LAUNCHER_VERSION } from '../constants.js';
-import type { HomepageLauncherChipModel } from '../types.js';
+import type { HomepageLauncherTileModel } from '../types.js';
 
-const CHIPS: HomepageLauncherChipModel[] = [
+const TILES: HomepageLauncherTileModel[] = [
   { id: 'approve-rfi', serviceKey: 'approve-rfi', title: 'Approve RFI', href: '/rfi', icon: AlertTriangle, groupKey: 'approvals', groupTitle: 'Approvals' },
   { id: 'sign-co', serviceKey: 'sign-co', title: 'Sign CO #22', href: '/co/22', icon: ArrowRight, groupKey: 'approvals', groupTitle: 'Approvals' },
   { id: 'safety', serviceKey: 'safety', title: 'Safety Review', href: '/safety', icon: CheckCircle2, groupKey: 'field', groupTitle: 'Field Ops' },
@@ -25,11 +25,7 @@ const CHIPS: HomepageLauncherChipModel[] = [
 describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('emits the full hosted-parity marker set on the root', () => {
     const { container } = render(
-      <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 5)}
-        overflow={[CHIPS[5]!]}
-        deviceClass="desktop"
-      />,
+      <HbcHomepageLauncher primary={TILES.slice(0, 5)} overflow={[TILES[5]!]} deviceClass="desktop" />,
     );
     const root = container.querySelector('[data-hbc-ui="homepage-launcher"]');
     expect(root).not.toBeNull();
@@ -37,33 +33,32 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       HBC_HOMEPAGE_LAUNCHER_VERSION,
     );
     expect(root!.getAttribute('data-hbc-homepage-launcher-device-class')).toBe('desktop');
-    expect(root!.getAttribute('data-hbc-homepage-launcher-row-primitive')).toBe('variable-width');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-row-primitive')).toBe('tile-family');
     expect(root!.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('5');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-count')).toBe('1');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('menu');
     expect(root!.getAttribute('data-hbc-homepage-launcher-short-height')).toBe('false');
   });
 
-  it('renders one chip per primary action with a single dominant click target', () => {
-    render(<HbcHomepageLauncher primary={CHIPS.slice(0, 4)} deviceClass="desktop" />);
-    const chips = screen.getAllByRole('link');
-    expect(chips.length).toBe(4);
-    for (const chip of chips) {
-      expect(chip.getAttribute('data-hbc-ui')).toBe('homepage-launcher-chip');
-      expect(chip.getAttribute('data-hbc-chip-width-mode')).toBe('variable');
+  it('renders one tile per primary action with one dominant click target', () => {
+    render(<HbcHomepageLauncher primary={TILES.slice(0, 4)} deviceClass="desktop" />);
+    const tiles = screen.getAllByRole('link');
+    expect(tiles.length).toBe(4);
+    for (const tile of tiles) {
+      expect(tile.getAttribute('data-hbc-ui')).toBe('homepage-launcher-tile');
+      expect(tile.getAttribute('data-hbc-launcher-tile-variant')).toBe('primary');
     }
   });
 
   it('uses anchored menu overflow on desktop', () => {
     render(
-      <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 5)}
-        overflow={[CHIPS[5]!]}
-        deviceClass="desktop"
-      />,
+      <HbcHomepageLauncher primary={TILES.slice(0, 5)} overflow={[TILES[5]!]} deviceClass="desktop" />,
     );
     const trigger = screen.getByRole('button', { name: /More tools/i });
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('menu');
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
+      'secondary-overflow-entry',
+    );
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     fireEvent.click(trigger);
     expect(screen.getByRole('menu')).toBeInTheDocument();
@@ -73,21 +68,22 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('uses bottom-sheet overflow on phone', () => {
     render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 3)}
-        overflow={CHIPS.slice(3)}
+        primary={TILES.slice(0, 3)}
+        overflow={TILES.slice(3)}
         deviceClass="phone"
       />,
     );
     const trigger = screen.getByRole('button', { name: /More tools/i });
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe('mobile-entry');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
   });
 
   it('short-height forces sheet overflow even on desktop', () => {
     const { container } = render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 5)}
-        overflow={[CHIPS[5]!]}
+        primary={TILES.slice(0, 5)}
+        overflow={[TILES[5]!]}
         deviceClass="desktop"
         shortHeight
       />,
@@ -98,15 +94,15 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   });
 
   it('omits overflow trigger when no overflow items provided', () => {
-    render(<HbcHomepageLauncher primary={CHIPS.slice(0, 4)} deviceClass="tablet-portrait" />);
+    render(<HbcHomepageLauncher primary={TILES.slice(0, 4)} deviceClass="tablet-portrait" />);
     expect(screen.queryByRole('button', { name: /More tools/i })).toBeNull();
   });
 
   it('overflow trigger toggles aria-expanded on open and second click', () => {
     render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 5)}
-        overflow={[CHIPS[5]!]}
+        primary={TILES.slice(0, 5)}
+        overflow={[TILES[5]!]}
         deviceClass="desktop"
       />,
     );
@@ -127,7 +123,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const link = screen.getByRole('link', { name: /External Tool/ });
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(link.getAttribute('data-hbc-chip-external')).toBe('true');
+    expect(link.getAttribute('data-hbc-launcher-tile-external')).toBe('true');
   });
 
   it('honors explicit openInNewTab even for internal links', () => {
@@ -139,7 +135,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
     const link = screen.getByRole('link', { name: /Internal New Tab/ });
     expect(link.getAttribute('target')).toBe('_blank');
-    expect(link.getAttribute('data-hbc-chip-new-tab')).toBe('true');
+    expect(link.getAttribute('data-hbc-launcher-tile-new-tab')).toBe('true');
   });
 
   it('uses the visible chip title as truncation-rescue tooltip text', () => {
@@ -168,8 +164,8 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('renders overflow grouping headings when group metadata is provided', () => {
     render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 2)}
-        overflow={CHIPS.slice(2)}
+        primary={TILES.slice(0, 2)}
+        overflow={TILES.slice(2)}
         deviceClass="desktop"
       />,
     );
@@ -180,7 +176,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('renders grouped overflow deterministically in menu mode', () => {
     render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 1)}
+        primary={TILES.slice(0, 1)}
         overflow={[
           { id: 'z-qa', serviceKey: 'z-qa', title: 'QA Checklist', href: '/qa', groupKey: 'quality', groupTitle: 'Quality' },
           { id: 'a-approve', serviceKey: 'a-approve', title: 'Approve Budget', href: '/budget', groupKey: 'approvals', groupTitle: 'Approvals' },
@@ -199,7 +195,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('uses visible overflow title as truncation-rescue tooltip text', () => {
     render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 1)}
+        primary={TILES.slice(0, 1)}
         overflow={[
           {
             id: 'long-overflow',
@@ -224,7 +220,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('keeps grouped overflow intentional in sheet mode', async () => {
     render(
       <HbcHomepageLauncher
-        primary={CHIPS.slice(0, 2)}
+        primary={TILES.slice(0, 2)}
         overflow={[
           { id: 'field-log', serviceKey: 'field-log', title: 'Field Log', href: '/field-log', groupKey: 'field', groupTitle: 'Field Ops' },
           { id: 'incident', serviceKey: 'incident', title: 'Incident Report', href: '/incident', groupKey: 'field', groupTitle: 'Field Ops' },

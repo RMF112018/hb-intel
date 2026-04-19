@@ -288,7 +288,7 @@ export type {
 } from './HbcNewsroomSurface/index.js';
 
 // ── Homepage launcher band (destructive replacement of flagship rail) ──
-// Premium horizontal chip band owned by @hbc/ui-kit/homepage and
+// Premium horizontal launcher tile family owned by @hbc/ui-kit/homepage and
 // consumed by the homepage wrapper's entry-stack. Replaces the earlier
 // vertical-tile HbcPriorityRail "homepage-flagship" context on the
 // homepage render path. HbcPriorityRail remains the surface for
@@ -296,6 +296,7 @@ export type {
 
 export {
   HbcHomepageLauncher,
+  HbcHomepageLauncherTile,
   HbcHomepageLauncherChip,
   HbcHomepageLauncherOverflow,
   HBC_HOMEPAGE_LAUNCHER_SURFACE_ID,
@@ -304,6 +305,9 @@ export {
 } from './HbcHomepageLauncher/index.js';
 export type {
   HbcHomepageLauncherProps,
+  HbcHomepageLauncherTileProps,
+  HomepageLauncherTileModel,
+  HomepageLauncherTileVariant,
   HbcHomepageLauncherChipProps,
   HbcHomepageLauncherOverflowProps,
   HomepageLauncherChipModel,

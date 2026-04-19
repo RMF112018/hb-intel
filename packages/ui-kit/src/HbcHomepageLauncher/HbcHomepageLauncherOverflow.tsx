@@ -1,5 +1,5 @@
 /**
- * HbcHomepageLauncherOverflow — governed secondary command layer.
+ * HbcHomepageLauncherOverflow — governed secondary tile command layer.
  *
  * Two interaction modes:
  *   - `menu`  — anchored floating menu for desktop/tablet. Uses
@@ -8,9 +8,7 @@
  *   - `sheet` — bottom-sheet modal for phone / short-height. Focus
  *               trapped; Escape + backdrop dismiss.
  *
- * The trigger is a discrete "More tools" capsule with a count badge —
- * it is deliberately distinguishable from the primary chips so the
- * hierarchy reads as "primary row + escape hatch", not "one more chip".
+ * The trigger is an inline secondary launcher tile with a count badge.
  */
 import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -31,31 +29,34 @@ import {
 } from '@floating-ui/react';
 import type {
   HbcHomepageLauncherOverflowProps,
-  HomepageLauncherChipModel,
+  HomepageLauncherTileModel,
 } from './types.js';
 import styles from './homepage-launcher.module.css';
 
 interface OverflowGroup {
   key: string;
   title?: string;
-  items: HomepageLauncherChipModel[];
+  items: HomepageLauncherTileModel[];
 }
 
-function resolveOverflowGroups(items: HomepageLauncherChipModel[]): OverflowGroup[] {
+function resolveOverflowGroups(items: HomepageLauncherTileModel[]): OverflowGroup[] {
   const byKey = new Map<string, OverflowGroup>();
-  for (const chip of items) {
-    const normalizedGroupKey = chip.groupKey?.trim().toLowerCase() || '__ungrouped';
-    const groupTitle = chip.groupTitle?.trim() || undefined;
+  for (const tile of items) {
+    const normalizedGroupKey = tile.groupKey?.trim().toLowerCase() || '__ungrouped';
+    const groupTitle = tile.groupTitle?.trim() || undefined;
     const existing = byKey.get(normalizedGroupKey);
     if (existing) {
-      existing.items.push(chip);
+      existing.items.push(tile);
       if (!existing.title && groupTitle) existing.title = groupTitle;
       continue;
     }
     byKey.set(normalizedGroupKey, {
       key: normalizedGroupKey,
-      title: normalizedGroupKey === '__ungrouped' ? undefined : (groupTitle ?? chip.groupKey?.trim()),
-      items: [chip],
+      title:
+        normalizedGroupKey === '__ungrouped'
+          ? undefined
+          : (groupTitle ?? tile.groupKey?.trim()),
+      items: [tile],
     });
   }
 
@@ -72,25 +73,32 @@ function resolveOverflowGroups(items: HomepageLauncherChipModel[]): OverflowGrou
   return groups;
 }
 
-function MenuItem({ chip }: { chip: HomepageLauncherChipModel }): React.JSX.Element {
-  const Icon = chip.icon;
-  const shouldOpenInNewTab = chip.openInNewTab ?? Boolean(chip.external);
-  const isExternal = Boolean(chip.external);
+function MenuItem({ tile }: { tile: HomepageLauncherTileModel }): React.JSX.Element {
+  const Icon = tile.icon;
+  const shouldOpenInNewTab = tile.openInNewTab ?? Boolean(tile.external);
+  const isExternal = Boolean(tile.external);
   const linkProps = shouldOpenInNewTab
-    ? { href: chip.href, target: '_blank', rel: 'noopener noreferrer' }
-    : { href: chip.href };
+    ? { href: tile.href, target: '_blank', rel: 'noopener noreferrer' }
+    : { href: tile.href };
   return (
     <a
       {...linkProps}
       role="menuitem"
-      aria-label={chip.ariaLabel ?? chip.title}
-      title={chip.title}
+      aria-label={tile.ariaLabel ?? tile.title}
+      title={tile.title}
       className={styles.menuItem}
       data-hbc-ui="homepage-launcher-overflow-item"
-      data-hbc-chip-id={chip.id}
-      data-hbc-chip-service-key={chip.serviceKey}
-      data-hbc-chip-group-key={chip.groupKey}
-      data-hbc-chip-icon-key={chip.iconKey}
+      data-hbc-launcher-tile-id={tile.id}
+      data-hbc-launcher-tile-service-key={tile.serviceKey}
+      data-hbc-launcher-tile-group-key={tile.groupKey}
+      data-hbc-launcher-tile-icon-key={tile.iconKey}
+      data-hbc-launcher-tile-variant={tile.variant ?? 'secondary-overflow-entry'}
+      data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
+      data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
+      data-hbc-chip-id={tile.id}
+      data-hbc-chip-service-key={tile.serviceKey}
+      data-hbc-chip-group-key={tile.groupKey}
+      data-hbc-chip-icon-key={tile.iconKey}
       data-hbc-chip-external={isExternal ? 'true' : undefined}
       data-hbc-chip-new-tab={shouldOpenInNewTab ? 'true' : undefined}
     >
@@ -99,7 +107,7 @@ function MenuItem({ chip }: { chip: HomepageLauncherChipModel }): React.JSX.Elem
           <Icon size={14} strokeWidth={2.25} />
         </span>
       ) : null}
-      <span className={styles.menuItemTitle}>{chip.title}</span>
+      <span className={styles.menuItemTitle}>{tile.title}</span>
       {shouldOpenInNewTab ? <span className={styles.visuallyHidden}>(opens in new tab)</span> : null}
     </a>
   );
@@ -110,7 +118,7 @@ function MenuOverflow({
   label,
   className,
 }: {
-  items: HomepageLauncherChipModel[];
+  items: HomepageLauncherTileModel[];
   label: string;
   className?: string;
 }): React.JSX.Element {
@@ -146,8 +154,9 @@ function MenuOverflow({
       <button
         ref={refs.setReference}
         type="button"
-        className={styles.overflowTrigger}
+        className={styles.overflowTile}
         data-hbc-ui="homepage-launcher-overflow-trigger"
+        data-hbc-homepage-launcher-overflow-variant="secondary-overflow-entry"
         data-hbc-overflow-mode="menu"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -191,7 +200,7 @@ function MenuOverflow({
                       <div className={styles.overflowGroupTitle}>{group.title}</div>
                     ) : null}
                     {group.items.map((chip) => (
-                      <MenuItem key={chip.id} chip={chip} />
+                      <MenuItem key={chip.id} tile={chip} />
                     ))}
                   </div>
                 ))}
@@ -209,7 +218,7 @@ function SheetOverflow({
   label,
   className,
 }: {
-  items: HomepageLauncherChipModel[];
+  items: HomepageLauncherTileModel[];
   label: string;
   className?: string;
 }): React.JSX.Element {
@@ -230,8 +239,9 @@ function SheetOverflow({
       <button
         ref={refs.setReference}
         type="button"
-        className={styles.overflowTrigger}
+        className={styles.overflowTile}
         data-hbc-ui="homepage-launcher-overflow-trigger"
+        data-hbc-homepage-launcher-overflow-variant="mobile-entry"
         data-hbc-overflow-mode="sheet"
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -291,7 +301,7 @@ function SheetOverflow({
                           <div className={styles.overflowGroupTitle}>{group.title}</div>
                         ) : null}
                         {group.items.map((chip) => (
-                          <MenuItem key={chip.id} chip={chip} />
+                          <MenuItem key={chip.id} tile={chip} />
                         ))}
                       </div>
                     ))}

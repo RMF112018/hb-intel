@@ -1,10 +1,7 @@
 /**
  * HbcHomepageLauncher — type contracts.
  *
- * A compact, branded horizontal chip band that replaces the earlier
- * vertical tile grid beneath the homepage hero. Premium Quick-Links
- * derivative — one dominant click target per chip, no metadata band,
- * no corner chip, no numbering, no trailing arrow.
+ * Premium homepage launcher tile family with explicit tile variants.
  */
 import type { LucideIcon } from 'lucide-react';
 
@@ -17,7 +14,12 @@ export type HomepageLauncherDeviceClass =
 
 export type HomepageLauncherOverflowMode = 'menu' | 'sheet';
 
-export interface HomepageLauncherChipModel {
+export type HomepageLauncherTileVariant =
+  | 'primary'
+  | 'secondary-overflow-entry'
+  | 'mobile-entry';
+
+export interface HomepageLauncherTileModel {
   id: string;
   serviceKey: string;
   title: string;
@@ -30,12 +32,13 @@ export interface HomepageLauncherChipModel {
   external?: boolean;
   openInNewTab?: boolean;
   ariaLabel?: string;
+  variant?: HomepageLauncherTileVariant;
 }
 
 export interface HbcHomepageLauncherProps {
   title?: string;
-  primary: HomepageLauncherChipModel[];
-  overflow?: HomepageLauncherChipModel[];
+  primary: HomepageLauncherTileModel[];
+  overflow?: HomepageLauncherTileModel[];
   overflowLabel?: string;
   deviceClass: HomepageLauncherDeviceClass;
   overflowMode?: HomepageLauncherOverflowMode;
@@ -44,14 +47,24 @@ export interface HbcHomepageLauncherProps {
   'aria-label'?: string;
 }
 
-export interface HbcHomepageLauncherChipProps {
-  chip: HomepageLauncherChipModel;
+export interface HbcHomepageLauncherTileProps {
+  tile: HomepageLauncherTileModel;
   className?: string;
 }
 
 export interface HbcHomepageLauncherOverflowProps {
-  items: HomepageLauncherChipModel[];
+  items: HomepageLauncherTileModel[];
   label?: string;
   mode: HomepageLauncherOverflowMode;
+  className?: string;
+}
+
+/**
+ * Backward-compatible aliases retained for downstream imports while the
+ * launcher family shifts from chip to tile semantics.
+ */
+export type HomepageLauncherChipModel = HomepageLauncherTileModel;
+export interface HbcHomepageLauncherChipProps {
+  chip: HomepageLauncherTileModel;
   className?: string;
 }

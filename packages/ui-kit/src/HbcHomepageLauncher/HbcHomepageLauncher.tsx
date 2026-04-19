@@ -1,8 +1,8 @@
 /**
- * HbcHomepageLauncher — premium horizontal chip band beneath the hero.
+ * HbcHomepageLauncher — premium horizontal launcher tile family.
  *
  * Destructive replacement for the prior vertical tile grid. The band
- * renders a single row of compact brand-filled chips, one dominant
+ * renders a single row of premium tiles, one dominant
  * click target each, governed by a binding visible-count matrix per
  * device class (see `HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT`). Overflow
  * flows into an anchored menu (desktop/tablet) or a bottom sheet
@@ -15,7 +15,7 @@
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
-import { HbcHomepageLauncherChip } from './HbcHomepageLauncherChip.js';
+import { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 import { HbcHomepageLauncherOverflow } from './HbcHomepageLauncherOverflow.js';
 import {
   HBC_HOMEPAGE_LAUNCHER_SURFACE_ID,
@@ -25,6 +25,7 @@ import type {
   HbcHomepageLauncherProps,
   HomepageLauncherOverflowMode,
 } from './types.js';
+import { launcherBand, launcherRoot } from './variants.js';
 import styles from './homepage-launcher.module.css';
 
 function resolveOverflowMode(
@@ -54,10 +55,10 @@ export function HbcHomepageLauncher(
   return (
     <section
       aria-label={ariaLabel ?? title}
-      className={clsx(styles.root, className)}
+      className={clsx(launcherRoot(), className)}
       data-hbc-ui={HBC_HOMEPAGE_LAUNCHER_SURFACE_ID}
       data-hbc-homepage-launcher="root"
-      data-hbc-homepage-launcher-row-primitive="variable-width"
+      data-hbc-homepage-launcher-row-primitive="tile-family"
       data-hbc-homepage-launcher-version={HBC_HOMEPAGE_LAUNCHER_VERSION}
       data-hbc-homepage-launcher-device-class={deviceClass}
       data-hbc-homepage-launcher-visible-count={primary.length}
@@ -65,16 +66,16 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-overflow-mode={overflowMode}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
     >
-      <div className={styles.band} role="list">
+      <div className={launcherBand()} role="list">
         <div className={styles.bandScroller}>
-          {primary.map((chip) => (
+          {primary.map((tile) => (
             <div
-              key={chip.id}
+              key={tile.id}
               role="listitem"
-              data-hbc-launcher-chip-slot={chip.id}
+              data-hbc-launcher-tile-slot={tile.id}
               style={{ display: 'contents' }}
             >
-              <HbcHomepageLauncherChip chip={chip} />
+              <HbcHomepageLauncherTile tile={tile} />
             </div>
           ))}
         </div>

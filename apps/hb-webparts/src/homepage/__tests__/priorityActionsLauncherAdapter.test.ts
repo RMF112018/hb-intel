@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  mapItemToChip,
+  mapItemToTile,
   partitionItems,
   resolveLauncherDeviceClass,
 } from '../data/priorityActionsLauncherAdapter.js';
@@ -61,24 +61,24 @@ describe('priorityActionsLauncherAdapter', () => {
     const item = makeItem(5);
     item.iconKey = 'safety';
     item.badgeVariant = 'critical';
-    const chip = mapItemToChip(item);
-    expect(chip.icon).toBe(Shield);
+    const tile = mapItemToTile(item);
+    expect(tile.icon).toBe(Shield);
   });
 
   it('uses explicit launcher icon identity ahead of iconKey when provided', () => {
     const item = makeItem(6);
     item.launcherIconIdentity = 'finance';
     item.iconKey = 'safety';
-    const chip = mapItemToChip(item);
-    expect(chip.icon).toBe(DollarSign);
+    const tile = mapItemToTile(item);
+    expect(tile.icon).toBe(DollarSign);
   });
 
   it('falls back to governed service mapping when iconKey is invalid', () => {
     const item = makeItem(8);
     item.iconKey = 'not-governed';
     item.actionKey = 'weekly-project-sync';
-    const chip = mapItemToChip(item);
-    expect(chip.icon).toBe(Calendar);
+    const tile = mapItemToTile(item);
+    expect(tile.icon).toBe(Calendar);
   });
 
   it('falls back safely to neutral icon when no icon semantics resolve', () => {
@@ -88,16 +88,16 @@ describe('priorityActionsLauncherAdapter', () => {
     item.groupKey = '';
     item.groupTitle = '';
     item.title = 'Unknown Tool';
-    const chip = mapItemToChip(item);
-    expect(chip.icon).toBe(ArrowRight);
+    const tile = mapItemToTile(item);
+    expect(tile.icon).toBe(ArrowRight);
   });
 
   it('does not regress to badge-variant-first behavior', () => {
     const item = makeItem(10);
     item.badgeVariant = 'critical';
     item.iconKey = 'finance';
-    const chip = mapItemToChip(item);
-    expect(chip.icon).toBe(DollarSign);
+    const tile = mapItemToTile(item);
+    expect(tile.icon).toBe(DollarSign);
   });
 
   it('maps normalized item semantics into enriched launcher chip model', () => {
@@ -110,15 +110,15 @@ describe('priorityActionsLauncherAdapter', () => {
     item.openInNewTab = true;
     item.isExternal = false;
 
-    const chip = mapItemToChip(item);
-    expect(chip.id).toBe('safety-inspection');
-    expect(chip.serviceKey).toBe('safety-inspection');
-    expect(chip.groupKey).toBe('field-ops');
-    expect(chip.groupTitle).toBe('Field Ops');
-    expect(chip.iconKey).toBe('hard-hat');
-    expect(chip.openInNewTab).toBe(true);
-    expect(chip.description).toContain('Daily safety');
-    expect(chip.ariaLabel).toContain('safety and quality walkthrough');
+    const tile = mapItemToTile(item);
+    expect(tile.id).toBe('safety-inspection');
+    expect(tile.serviceKey).toBe('safety-inspection');
+    expect(tile.groupKey).toBe('field-ops');
+    expect(tile.groupTitle).toBe('Field Ops');
+    expect(tile.iconKey).toBe('hard-hat');
+    expect(tile.openInNewTab).toBe(true);
+    expect(tile.description).toContain('Daily safety');
+    expect(tile.ariaLabel).toContain('safety and quality walkthrough');
   });
 
   it('derives ultrawide launcher class from shared shell entry-state', () => {
@@ -166,6 +166,15 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(overflowIds).toContain('2');
   });
 
+  it('marks phone launcher entries as mobile-entry variants', () => {
+    const items = [makeItem(1), makeItem(2), makeItem(3), makeItem(4)];
+    const partition = partitionItems(items, 'phone', makeResolution({ deviceClass: 'phone' }), {
+      strictShellAlignment: true,
+    });
+    expect(partition.primary.every((item) => item.variant === 'mobile-entry')).toBe(true);
+    expect(partition.overflow.every((item) => item.variant === 'mobile-entry')).toBe(true);
+  });
+
   it('preserves grouping metadata on overflow chip mappings', () => {
     const grouped = makeItem(7, true);
     grouped.actionKey = 'qa-log';
@@ -177,6 +186,7 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(partition.overflow[0].groupKey).toBe('quality');
     expect(partition.overflow[0].groupTitle).toBe('Quality');
     expect(partition.overflow[0].serviceKey).toBe('qa-log');
+    expect(partition.overflow[0].variant).toBe('secondary-overflow-entry');
   });
 
   it('uses one authoritative visible-count regime regardless of alignment mode', () => {

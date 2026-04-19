@@ -6,7 +6,7 @@
  * directly to prove the deployed package matches the intended build.
  * Bump this in lockstep with `apps/hb-homepage/config/package-solution.json`.
  */
-export const HBC_HOMEPAGE_LAUNCHER_VERSION = '1.1.30.0';
+export const HBC_HOMEPAGE_LAUNCHER_VERSION = '1.1.40.0';
 export const HBC_HOMEPAGE_LAUNCHER_SURFACE_ID = 'homepage-launcher';
 
 /** Visible primary-chip count per device class. Binding per doctrine. */

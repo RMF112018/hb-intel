@@ -26,7 +26,7 @@ import {
   Users,
   type LucideIcon,
   HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
-  type HomepageLauncherChipModel,
+  type HomepageLauncherTileModel,
   type HomepageLauncherDeviceClass,
 } from '@hbc/ui-kit/homepage';
 import type { PriorityActionsItemNormalized } from './priorityActionsContracts.js';
@@ -111,9 +111,9 @@ export function resolveChipIcon(item: PriorityActionsItemNormalized): LucideIcon
   return ArrowRight;
 }
 
-export function mapItemToChip(
+export function mapItemToTile(
   item: PriorityActionsItemNormalized,
-): HomepageLauncherChipModel {
+): HomepageLauncherTileModel {
   const description = item.description?.trim() || undefined;
   const groupKey = item.groupKey?.trim() || undefined;
   const groupTitle = item.groupTitle?.trim() || undefined;
@@ -130,6 +130,7 @@ export function mapItemToChip(
     external: item.isExternal,
     openInNewTab: item.openInNewTab,
     ariaLabel: description ? `${item.title}. ${description}` : item.title,
+    variant: 'primary',
   };
 }
 
@@ -162,8 +163,8 @@ export function resolveLauncherDeviceClass(
 }
 
 export interface LauncherPartition {
-  primary: HomepageLauncherChipModel[];
-  overflow: HomepageLauncherChipModel[];
+  primary: HomepageLauncherTileModel[];
+  overflow: HomepageLauncherTileModel[];
   visibleBudget: number;
 }
 
@@ -198,10 +199,19 @@ export function partitionItems(
     else eligible.push(item);
   }
 
-  const primary = eligible.slice(0, maxVisible).map(mapItemToChip);
-  const overflow = [...eligible.slice(maxVisible), ...forced].map(mapItemToChip);
+  const primary = eligible.slice(0, maxVisible).map((item) => ({
+    ...mapItemToTile(item),
+    variant: deviceClass === 'phone' ? 'mobile-entry' : 'primary',
+  }));
+  const overflow = [...eligible.slice(maxVisible), ...forced].map((item) => ({
+    ...mapItemToTile(item),
+    variant: deviceClass === 'phone' ? 'mobile-entry' : 'secondary-overflow-entry',
+  }));
   return { primary, overflow, visibleBudget: maxVisible };
 }
+
+/** Backward-compatible alias during chip -> tile transition. */
+export const mapItemToChip = mapItemToTile;
 
 /** Re-export for convenience so the webpart only imports from this adapter. */
 export { Briefcase };
