@@ -135,6 +135,11 @@ describe('resolveBandLayout — renderMode', () => {
     const minor = result.slots.find((s) => s.slot.columnSpan === 'minor');
     expect(minor!.comfort.reason).toContain('constrained');
   });
+
+  it('uses summary-collapsed when fit contract allows it on constrained single-column', () => {
+    const result = resolveBandLayout(singleBand, PHONE_STATE, false, 400);
+    expect(result.slots[0].comfort.renderMode).toBe('summary-collapsed');
+  });
 });
 
 describe('resolveBandLayout — pairing decision diagnostics', () => {
@@ -197,6 +202,22 @@ describe('resolveBandLayout — pairing decision diagnostics', () => {
     for (const slot of result.slots) {
       expect(slot.comfort.reason).toBe('state-denies-pairing');
     }
+  });
+
+  it('reports fit-contract-denies-pairing when an occupant contract disallows pairing', () => {
+    const contractDeniedBand: ShellBand = {
+      id: 'band-contract-denied',
+      semanticRole: 'communications-newsroom',
+      recipe: 'feature-pair',
+      slots: [
+        { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
+        { id: 's2', occupantId: 'leadership-message', role: 'secondary', columnSpan: 'minor' },
+      ],
+      maxDominantOccupants: 1,
+    };
+    const result = resolveBandLayout(contractDeniedBand, DESKTOP_STATE, false, 1300);
+    expect(result.columns).toBe(1);
+    expect(result.pairingDecision.reason).toBe('fit-contract-denies-pairing');
   });
 });
 

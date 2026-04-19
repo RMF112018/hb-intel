@@ -26,6 +26,18 @@ describe('OCCUPANT_REGISTRY', () => {
 });
 
 describe('capability metadata', () => {
+  it('each active occupant exposes an explicit shell-fit contract', () => {
+    for (const occupant of getActiveOccupants()) {
+      expect(occupant.shellFit.narrowestStableShellWidth).toBeGreaterThan(0);
+      expect(occupant.shellFit.narrowestStablePairedWidth).toBeGreaterThan(0);
+      expect(occupant.shellFit.supportedModes.length).toBeGreaterThan(0);
+      expect(typeof occupant.shellFit.pairedLayoutEligible).toBe('boolean');
+      expect(['force-stack', 'deny-pairing', 'deny-recipe']).toContain(
+        occupant.shellFit.fallbackWhenUnsafe,
+      );
+    }
+  });
+
   it('people-culture-public has anchor prominence ceiling', () => {
     const pc = getOccupant('people-culture-public')!;
     expect(pc.prominenceCeiling).toBe('anchor');
@@ -49,6 +61,12 @@ describe('capability metadata', () => {
   it('company-pulse is first-lane eligible', () => {
     const cp = getOccupant('company-pulse')!;
     expect(cp.firstLaneEligible).toBe(true);
+  });
+
+  it('people-culture-public explicitly denies paired-layout participation', () => {
+    const pc = getOccupant('people-culture-public')!;
+    expect(pc.shellFit.pairedLayoutEligible).toBe(false);
+    expect(pc.shellFit.fallbackWhenUnsafe).toBe('deny-pairing');
   });
 });
 
@@ -89,9 +107,9 @@ describe('pairing restrictions', () => {
 });
 
 describe('narrowest stable paired width', () => {
-  it('people-culture-public cannot pair below 640px', () => {
+  it('people-culture-public cannot pair below 720px due to fit contract guard', () => {
     expect(canOccupantPairAtWidth('people-culture-public', 600)).toBe(false);
-    expect(canOccupantPairAtWidth('people-culture-public', 640)).toBe(true);
+    expect(canOccupantPairAtWidth('people-culture-public', 720)).toBe(true);
   });
 
   it('company-pulse can pair at 520px', () => {

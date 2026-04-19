@@ -29,6 +29,14 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    shellFit: {
+      narrowestStableShellWidth: 480,
+      narrowestStablePairedWidth: 520,
+      supportedModes: ['standard'],
+      pairedLayoutEligible: true,
+      fallbackWhenUnsafe: 'force-stack',
+      protectedConstraints: ['requires-standard-card-density'],
+    },
     allowedBandSemantics: ['communications-newsroom', 'operational-spotlight'],
     reorderDomain: 'within-compatible-bands',
     visibilityEligibility: LOCKED_VISIBILITY,
@@ -49,6 +57,14 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsCompact: false,
       supportsStandard: true,
       supportsSummaryCollapse: false,
+    },
+    shellFit: {
+      narrowestStableShellWidth: 480,
+      narrowestStablePairedWidth: 520,
+      supportedModes: ['standard'],
+      pairedLayoutEligible: true,
+      fallbackWhenUnsafe: 'force-stack',
+      protectedConstraints: ['requires-editorial-frame'],
     },
     allowedBandSemantics: ['communications-editorial', 'communications-newsroom'],
     reorderDomain: 'within-compatible-bands',
@@ -71,6 +87,14 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    shellFit: {
+      narrowestStableShellWidth: 520,
+      narrowestStablePairedWidth: 560,
+      supportedModes: ['standard'],
+      pairedLayoutEligible: true,
+      fallbackWhenUnsafe: 'force-stack',
+      protectedConstraints: ['locked-anchor-preferred'],
+    },
     allowedBandSemantics: ['operational-spotlight'],
     reorderDomain: 'locked',
     visibilityEligibility: LOCKED_VISIBILITY,
@@ -92,6 +116,14 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    shellFit: {
+      narrowestStableShellWidth: 680,
+      narrowestStablePairedWidth: 720,
+      supportedModes: ['standard'],
+      pairedLayoutEligible: false,
+      fallbackWhenUnsafe: 'deny-pairing',
+      protectedConstraints: ['people-culture-must-stack'],
+    },
     pairingRestrictions: ['hb-kudos'],
     allowedBandSemantics: ['people-culture'],
     reorderDomain: 'locked',
@@ -110,9 +142,17 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       minWidth: 480,
       preferredWidth: 720,
       narrowestStablePairedWidth: 520,
-      supportsCompact: false,
+      supportsCompact: true,
       supportsStandard: true,
-      supportsSummaryCollapse: false,
+      supportsSummaryCollapse: true,
+    },
+    shellFit: {
+      narrowestStableShellWidth: 420,
+      narrowestStablePairedWidth: 520,
+      supportedModes: ['standard', 'compact', 'summary-collapsed'],
+      pairedLayoutEligible: true,
+      fallbackWhenUnsafe: 'force-stack',
+      protectedConstraints: ['recognition-cannot-be-primary-anchor'],
     },
     pairingRestrictions: ['people-culture-public'],
     allowedBandSemantics: ['recognition'],
@@ -132,9 +172,17 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       minWidth: 480,
       preferredWidth: 720,
       narrowestStablePairedWidth: 520,
-      supportsCompact: false,
+      supportsCompact: true,
       supportsStandard: true,
       supportsSummaryCollapse: false,
+    },
+    shellFit: {
+      narrowestStableShellWidth: 440,
+      narrowestStablePairedWidth: 520,
+      supportedModes: ['standard', 'compact'],
+      pairedLayoutEligible: true,
+      fallbackWhenUnsafe: 'force-stack',
+      protectedConstraints: ['operational-strip-eligible'],
     },
     allowedBandSemantics: ['operational-spotlight'],
     reorderDomain: 'within-band',
@@ -177,7 +225,10 @@ export function areOccupantsPairableInBand(a: OccupantId, b: OccupantId): boolea
 export function canOccupantPairAtWidth(id: OccupantId, slotWidth: number): boolean {
   const occupant = OCCUPANT_REGISTRY.get(id);
   if (!occupant) return false;
-  return slotWidth >= occupant.comfort.narrowestStablePairedWidth;
+  return slotWidth >= Math.max(
+    occupant.comfort.narrowestStablePairedWidth,
+    occupant.shellFit.narrowestStablePairedWidth,
+  );
 }
 
 export interface OccupantGovernanceView {
@@ -186,6 +237,7 @@ export interface OccupantGovernanceView {
   readonly reorderDomain: ReorderDomain;
   readonly visibilityEligibility: VisibilityEligibility;
   readonly allowedBandSemantics: readonly OccupantDescriptor['allowedBandSemantics'][number][];
+  readonly shellFit: OccupantDescriptor['shellFit'];
   readonly persistedPolicyKeys: readonly string[];
 }
 
@@ -198,6 +250,7 @@ export function getOccupantGovernance(id: OccupantId): OccupantGovernanceView | 
     reorderDomain: occupant.reorderDomain,
     visibilityEligibility: occupant.visibilityEligibility,
     allowedBandSemantics: occupant.allowedBandSemantics,
+    shellFit: occupant.shellFit,
     persistedPolicyKeys: occupant.persistedPolicyKeys,
   };
 }

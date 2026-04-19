@@ -96,6 +96,7 @@ export const SHELL_FIT_DESCRIPTOR_KEYS = [
   'comfort',
   'pairingRestrictions',
   'allowedBandSemantics',
+  'shellFit',
   'reorderDomain',
   'visibilityEligibility',
 ] as const;

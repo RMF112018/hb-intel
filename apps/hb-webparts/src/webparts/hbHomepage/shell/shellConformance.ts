@@ -211,12 +211,16 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-bands-paired-count': number;
   readonly 'data-shell-bands-total': number;
   readonly 'data-shell-entry-band-recipe': ShellBandRecipeId | 'none';
+  readonly 'data-shell-fit-contract-denials': number;
 }
 
 export function toShellConformanceDataAttributes(
   report: ShellConformanceReport,
 ): ShellConformanceDataAttributes {
   const pairedCount = report.bands.filter((b) => b.columns === 2).length;
+  const fitContractDenials = report.bands.filter(
+    (b) => b.pairingDecision.reason === 'fit-contract-denies-pairing',
+  ).length;
   return {
     'data-shell-layout-mode': report.layoutMode,
     'data-shell-fit-path': report.shortHeightConstrained
@@ -228,5 +232,6 @@ export function toShellConformanceDataAttributes(
     'data-shell-bands-paired-count': pairedCount,
     'data-shell-bands-total': report.bands.length,
     'data-shell-entry-band-recipe': report.bands[0]?.recipe ?? 'none',
+    'data-shell-fit-contract-denials': fitContractDenials,
   };
 }

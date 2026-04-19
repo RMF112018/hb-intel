@@ -76,6 +76,24 @@ export interface OccupantComfort {
   readonly supportsSummaryCollapse: boolean;
 }
 
+export type HostedShellFitMode = 'standard' | 'compact' | 'summary-collapsed';
+export type HostedShellFitFallback = 'force-stack' | 'deny-pairing' | 'deny-recipe';
+
+export interface HostedShellFitContract {
+  /** Narrowest width where the occupant remains stable in shell-managed contexts. */
+  readonly narrowestStableShellWidth: number;
+  /** Narrowest slot width where paired placement remains stable. */
+  readonly narrowestStablePairedWidth: number;
+  /** Shell-fit modes this hosted surface can safely honor. */
+  readonly supportedModes: readonly HostedShellFitMode[];
+  /** Whether this surface may participate in paired layouts. */
+  readonly pairedLayoutEligible: boolean;
+  /** Shell-mandated fallback posture when the fit contract is violated. */
+  readonly fallbackWhenUnsafe: HostedShellFitFallback;
+  /** Protected fit constraints that shell resolvers must preserve. */
+  readonly protectedConstraints: readonly string[];
+}
+
 export type ReorderDomain = 'locked' | 'within-band' | 'within-compatible-bands';
 
 export interface VisibilityEligibility {
@@ -94,6 +112,7 @@ export interface OccupantDescriptor {
   readonly comfort: OccupantComfort;
   readonly pairingRestrictions?: readonly OccupantId[];
   readonly allowedBandSemantics: readonly BandSemanticRole[];
+  readonly shellFit: HostedShellFitContract;
   readonly reorderDomain: ReorderDomain;
   readonly visibilityEligibility: VisibilityEligibility;
   readonly persistedPolicyKeys: readonly string[];

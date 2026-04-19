@@ -115,6 +115,7 @@ function candidateAllowedInSlot(
   candidateId: OccupantId,
   slotRole: SlotRole,
   bandSemanticRole: ShellBand['semanticRole'],
+  entryState: ShellEntryState,
 ): boolean {
   const descriptor = getOccupant(candidateId);
   if (!descriptor) return false;
@@ -122,6 +123,13 @@ function candidateAllowedInSlot(
   if (!descriptor.firstLaneEligible) return false;
   if (!descriptor.allowedSlotRoles.includes(slotRole)) return false;
   if (!descriptor.allowedBandSemantics.includes(bandSemanticRole)) return false;
+  if (
+    slotRole !== 'primary' &&
+    entryState.firstLanePairingAllowed &&
+    !descriptor.shellFit.pairedLayoutEligible
+  ) {
+    return false;
+  }
   return true;
 }
 
@@ -141,11 +149,12 @@ function findPromotableCandidate(
   reports: OccupantContentStateMap,
   excludedIds: readonly OccupantId[],
   otherRetainedIds: readonly OccupantId[],
+  entryState: ShellEntryState,
 ): OccupantId | undefined {
   let best: { id: OccupantId; strength: number } | undefined;
   for (const [id] of OCCUPANT_REGISTRY) {
     if (excludedIds.includes(id)) continue;
-    if (!candidateAllowedInSlot(id, slot.role, bandSemanticRole)) continue;
+    if (!candidateAllowedInSlot(id, slot.role, bandSemanticRole, entryState)) continue;
     if (!occupantPairableWithAll(id, otherRetainedIds)) continue;
     const kind = kindFor(reports.get(id));
     if (!isStrong(kind)) continue;
@@ -172,7 +181,7 @@ function isLocked(occupantId: OccupantId | null): boolean {
  * preset's first band and splice the returned band back in at index 0.
  */
 export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneResolverResult {
-  const { band, reports } = input;
+  const { band, reports, entryState } = input;
 
   const slots = band.slots;
   const activeOccupants = slots
@@ -296,6 +305,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
       reports,
       primaryOccupant ? [primaryOccupant, secondaryOccupant] : [secondaryOccupant],
       primaryOccupant ? [primaryOccupant] : [],
+      entryState,
     );
     if (replacement) {
       slotDecisions.push({
@@ -346,9 +356,10 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
       secondaryOccupant,
       primary.slot.role,
       band.semanticRole,
+      entryState,
     );
     const primaryCanDemote = !isLocked(primaryOccupant)
-      && candidateAllowedInSlot(primaryOccupant, secondary.slot.role, band.semanticRole)
+      && candidateAllowedInSlot(primaryOccupant, secondary.slot.role, band.semanticRole, entryState)
       && areOccupantsPairableInBand(primaryOccupant, secondaryOccupant);
 
     if (secondaryFitsPrimary && primaryCanDemote) {
@@ -391,6 +402,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
       reports,
       [primaryOccupant, secondaryOccupant],
       [secondaryOccupant],
+      entryState,
     );
     if (replacement && !isLocked(primaryOccupant)) {
       slotDecisions.push({
@@ -440,6 +452,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
       reports,
       [primaryOccupant, secondaryOccupant].filter((id): id is OccupantId => id !== null),
       [],
+      entryState,
     );
     if (replacement) {
       slotDecisions.push(

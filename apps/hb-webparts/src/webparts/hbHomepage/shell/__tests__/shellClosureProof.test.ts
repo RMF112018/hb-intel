@@ -123,6 +123,26 @@ describe('Phase-05 closure — Prompt-03 canonical preset semantics', () => {
   });
 });
 
+describe('Phase-09 closure — Prompt-03 hosted-surface shell-fit contracts', () => {
+  it('every active occupant exposes a shell-fit declaration', () => {
+    for (const occupant of OCCUPANT_REGISTRY.values()) {
+      expect(occupant.shellFit.narrowestStableShellWidth).toBeGreaterThan(0);
+      expect(occupant.shellFit.narrowestStablePairedWidth).toBeGreaterThan(0);
+      expect(occupant.shellFit.supportedModes.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('constrained matrix cases demonstrate contract-driven nested mode degradation', () => {
+    const matrix = runShellHarnessMatrix();
+    const constrained = matrix.find(
+      (m) => m.matrixCase.label === 'phone-portrait-standard (iPhone 17 Pro)',
+    );
+    const renderModes = constrained?.proof.bands.flatMap((b) => b.slots.map((s) => s.renderMode));
+    expect(renderModes).toBeDefined();
+    expect(renderModes).toContain('summary-collapsed');
+  });
+});
+
 describe('Phase-05 closure — Prompt-04 entry-stack contract alignment', () => {
   it('every shell entry state maps to both production device class and rail device class', () => {
     for (const id of Object.keys(SHELL_ENTRY_STATE_TO_DEVICE_CLASS)) {

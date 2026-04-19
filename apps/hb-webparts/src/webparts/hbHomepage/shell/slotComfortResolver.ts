@@ -40,6 +40,8 @@ export type PairingDecisionReason =
   | 'recipe-ineligible-state'
   /** Recipe does not permit pairing under current active-slot shape. */
   | 'recipe-rule-denies-pairing'
+  /** Occupant shell-fit contract explicitly denies paired participation. */
+  | 'fit-contract-denies-pairing'
   /** All checks passed and the band is paired. */
   | 'paired';
 
@@ -81,13 +83,13 @@ function resolveRenderMode(
 
   if (
     isSingleColumn &&
-    descriptor.comfort.supportsSummaryCollapse &&
-    availableWidth < descriptor.comfort.minWidth * 1.2
+    descriptor.shellFit.supportedModes.includes('summary-collapsed') &&
+    availableWidth < descriptor.shellFit.narrowestStableShellWidth * 1.15
   ) {
     return 'summary-collapsed';
   }
 
-  if (isNarrow && descriptor.comfort.supportsCompact) {
+  if (isNarrow && descriptor.shellFit.supportedModes.includes('compact')) {
     return 'compact';
   }
 
@@ -102,6 +104,15 @@ function checkOccupantComfort(
   const descriptor = getOccupant(occupantId);
   if (!descriptor) {
     return { effectiveColumnSpan: 'full', shouldStack: false, renderMode: 'standard', reason: 'unknown-occupant' };
+  }
+
+  if (availableWidth < descriptor.shellFit.narrowestStableShellWidth) {
+    return {
+      effectiveColumnSpan: 'full',
+      shouldStack: true,
+      renderMode: 'standard',
+      reason: `fit-contract-shell-width ${availableWidth}px below stable ${descriptor.shellFit.narrowestStableShellWidth}px`,
+    };
   }
 
   if (availableWidth < descriptor.comfort.minWidth) {
@@ -189,6 +200,10 @@ function decideBandPairing(
   }
 
   for (const slot of activeSlots) {
+    const descriptor = getOccupant(slot.occupantId!);
+    if (descriptor && !descriptor.shellFit.pairedLayoutEligible) {
+      return { allowed: false, reason: 'fit-contract-denies-pairing' };
+    }
     const slotWidth = resolveSlotWidth(containerWidth, slot.columnSpan, 2);
     const comfort = checkOccupantComfort(slot.occupantId!, slotWidth, entryState);
     if (comfort.shouldStack) {
