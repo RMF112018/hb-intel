@@ -21,6 +21,8 @@ export type HomepageLauncherTileVariant =
   | 'primary'
   | 'secondary-overflow-entry'
   | 'mobile-entry';
+export type HomepageLauncherIconPresentation = 'standard' | 'compliant';
+export type HomepageLauncherIconAssetStrategy = 'img-filter-white';
 
 export interface HomepageLauncherTileModel {
   id: string;
@@ -29,6 +31,9 @@ export interface HomepageLauncherTileModel {
   href: string;
   description?: string;
   icon?: LucideIcon;
+  iconAssetSrc?: string;
+  iconAssetStrategy?: HomepageLauncherIconAssetStrategy;
+  iconPresentation?: HomepageLauncherIconPresentation;
   iconKey?: string;
   groupKey?: string;
   groupTitle?: string;

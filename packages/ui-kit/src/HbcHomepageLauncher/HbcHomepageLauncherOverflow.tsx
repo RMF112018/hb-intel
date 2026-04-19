@@ -23,6 +23,7 @@ import type {
   HomepageLauncherTileModel,
 } from './types.js';
 import { launcherTile } from './variants.js';
+import { HbcHomepageLauncherIcon } from './HbcHomepageLauncherIcon.js';
 import styles from './homepage-launcher.module.css';
 
 interface OverflowGroup {
@@ -66,7 +67,6 @@ function resolveOverflowGroups(items: HomepageLauncherTileModel[]): OverflowGrou
 }
 
 function DrawerTile({ tile }: { tile: HomepageLauncherTileModel }): React.JSX.Element {
-  const Icon = tile.icon;
   const shouldOpenInNewTab = tile.openInNewTab ?? Boolean(tile.external);
   const isExternal = Boolean(tile.external);
   const computedAriaLabel = tile.ariaLabel ?? (tile.description ? `${tile.title}. ${tile.description}` : tile.title);
@@ -85,17 +85,14 @@ function DrawerTile({ tile }: { tile: HomepageLauncherTileModel }): React.JSX.El
       data-hbc-launcher-tile-service-key={tile.serviceKey}
       data-hbc-launcher-tile-group-key={tile.groupKey}
       data-hbc-launcher-tile-icon-key={tile.iconKey}
+      data-hbc-launcher-tile-icon-source={tile.iconAssetSrc ? 'asset' : tile.icon ? 'lucide' : undefined}
       data-hbc-launcher-tile-variant={tile.variant ?? 'primary'}
       data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
       data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
       whileTap={{ scale: 0.985 }}
       transition={{ duration: 0.14 }}
     >
-      {Icon ? (
-        <span className={styles.tileIcon} aria-hidden="true">
-          <Icon size={18} strokeWidth={2.1} />
-        </span>
-      ) : null}
+      <HbcHomepageLauncherIcon tile={tile} />
       <span className={styles.drawerTileTitle}>{tile.title}</span>
       {shouldOpenInNewTab ? <span className={styles.visuallyHidden}>(opens in new tab)</span> : null}
     </motion.a>
@@ -142,7 +139,7 @@ function DrawerOverflow({
         aria-expanded={open}
         {...getReferenceProps()}
       >
-        <span className={styles.tileIcon} aria-hidden="true">
+        <span className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)} aria-hidden="true">
           <Layers size={16} strokeWidth={2.2} />
         </span>
         <span className={styles.overflowTriggerLabel}>{label}</span>

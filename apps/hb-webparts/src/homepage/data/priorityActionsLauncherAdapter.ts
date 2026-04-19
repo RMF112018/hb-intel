@@ -31,6 +31,7 @@ import {
 } from '@hbc/ui-kit/homepage';
 import type { PriorityActionsItemNormalized } from './priorityActionsContracts.js';
 import type { PriorityRailDeviceResolution } from './priorityActionsPresentation.js';
+import { resolveHomepageLauncherGovernedIcon } from '../../webparts/hbHomepage/launcherIconRegistry.js';
 
 const ICON_BY_GOVERNED_KEY: Readonly<Record<string, LucideIcon>> = Object.freeze({
   finance: DollarSign,
@@ -117,14 +118,21 @@ export function mapItemToTile(
   const description = item.description?.trim() || undefined;
   const groupKey = item.groupKey?.trim() || undefined;
   const groupTitle = item.groupTitle?.trim() || undefined;
+  const governedIcon = resolveHomepageLauncherGovernedIcon(item);
+  const fallbackIcon = resolveChipIcon(item);
+  const fallbackIconKey = item.iconKey || undefined;
+
   return {
     id: item.actionKey || String(item.id),
     serviceKey: item.actionKey || String(item.id),
     title: item.title,
     href: item.href,
     description,
-    icon: resolveChipIcon(item),
-    iconKey: item.iconKey || undefined,
+    icon: governedIcon?.icon ?? fallbackIcon,
+    iconAssetSrc: governedIcon?.iconAssetSrc,
+    iconAssetStrategy: governedIcon?.iconAssetSrc ? 'img-filter-white' : undefined,
+    iconPresentation: governedIcon ? 'compliant' : 'standard',
+    iconKey: governedIcon?.iconKey ?? fallbackIconKey,
     groupKey,
     groupTitle,
     external: item.isExternal,

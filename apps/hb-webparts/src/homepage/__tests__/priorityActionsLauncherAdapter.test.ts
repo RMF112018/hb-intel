@@ -7,6 +7,7 @@ import {
 import {
   ArrowRight,
   Calendar,
+  Building2,
   DollarSign,
   Shield,
 } from '@hbc/ui-kit/homepage';
@@ -99,6 +100,34 @@ describe('priorityActionsLauncherAdapter', () => {
     item.title = 'Unknown Tool';
     const tile = mapItemToTile(item);
     expect(tile.icon).toBe(ArrowRight);
+  });
+
+  it('maps HB Projects to governed Building2 with compliant icon presentation', () => {
+    const item = makeItem(11);
+    item.actionKey = 'hb-projects';
+    item.title = 'HB Projects';
+    const tile = mapItemToTile(item);
+    expect(tile.icon).toBe(Building2);
+    expect(tile.iconPresentation).toBe('compliant');
+    expect(tile.iconAssetSrc).toBeUndefined();
+    expect(tile.iconKey).toBe('hb-projects-building2');
+  });
+
+  it('maps branded tools to governed local SVG assets', () => {
+    const adp = makeItem(12);
+    adp.actionKey = 'my-adp';
+    adp.title = 'My ADP';
+    const adpTile = mapItemToTile(adp);
+    expect(adpTile.iconAssetSrc).toContain('adp_logo');
+    expect(adpTile.iconPresentation).toBe('compliant');
+    expect(adpTile.iconAssetStrategy).toBe('img-filter-white');
+
+    const procore = makeItem(13);
+    procore.actionKey = 'procore';
+    procore.title = 'Procore';
+    const procoreTile = mapItemToTile(procore);
+    expect(procoreTile.iconAssetSrc).toContain('data:image/svg+xml');
+    expect(procoreTile.iconPresentation).toBe('compliant');
   });
 
   it('does not regress to badge-variant-first behavior', () => {

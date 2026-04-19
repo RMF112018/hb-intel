@@ -54,6 +54,41 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     }
   });
 
+  it('renders governed asset icons with shared source markers in row and drawer tiles', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={[
+          {
+            id: 'my-adp',
+            serviceKey: 'my-adp',
+            title: 'My ADP',
+            href: '/my-adp',
+            iconAssetSrc: '/assets/adp_logo.svg',
+            iconPresentation: 'compliant',
+            iconKey: 'my-adp',
+          },
+        ]}
+        overflow={[
+          {
+            id: 'procore',
+            serviceKey: 'procore',
+            title: 'Procore',
+            href: '/procore',
+            iconAssetSrc: '/assets/procore.svg',
+            iconPresentation: 'compliant',
+            iconKey: 'procore',
+          },
+        ]}
+        deviceClass="desktop"
+      />,
+    );
+    const rowTile = screen.getByRole('link', { name: /My ADP/i });
+    expect(rowTile.getAttribute('data-hbc-launcher-tile-icon-source')).toBe('asset');
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const drawerTile = screen.getByRole('link', { name: /Procore/i });
+    expect(drawerTile.getAttribute('data-hbc-launcher-tile-icon-source')).toBe('asset');
+  });
+
   it('uses bottom drawer overflow on desktop', () => {
     const { container } = render(
       <HbcHomepageLauncher primary={TILES.slice(0, 5)} overflow={[TILES[5]!]} deviceClass="desktop" />,

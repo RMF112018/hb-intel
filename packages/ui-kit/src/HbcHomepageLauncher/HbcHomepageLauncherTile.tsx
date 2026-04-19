@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 import { motion, useReducedMotion } from 'motion/react';
 import type { HbcHomepageLauncherTileProps } from './types.js';
 import { launcherTile } from './variants.js';
+import { HbcHomepageLauncherIcon } from './HbcHomepageLauncherIcon.js';
 import styles from './homepage-launcher.module.css';
 
 function resolveFamily(
@@ -20,7 +21,6 @@ export function HbcHomepageLauncherTile({
   tile,
   className,
 }: HbcHomepageLauncherTileProps): React.JSX.Element {
-  const Icon = tile.icon;
   const shouldOpenInNewTab = tile.openInNewTab ?? Boolean(tile.external);
   const isExternal = Boolean(tile.external);
   const prefersReducedMotion = useReducedMotion();
@@ -42,6 +42,7 @@ export function HbcHomepageLauncherTile({
       data-hbc-launcher-tile-service-key={tile.serviceKey}
       data-hbc-launcher-tile-group-key={tile.groupKey}
       data-hbc-launcher-tile-icon-key={tile.iconKey}
+      data-hbc-launcher-tile-icon-source={tile.iconAssetSrc ? 'asset' : tile.icon ? 'lucide' : undefined}
       data-hbc-launcher-tile-variant={tile.variant ?? 'primary'}
       data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
       data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
@@ -55,11 +56,7 @@ export function HbcHomepageLauncherTile({
       whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
       transition={{ duration: 0.14 }}
     >
-      {Icon ? (
-        <span className={styles.tileIcon} aria-hidden="true">
-          <Icon size={18} strokeWidth={2.1} />
-        </span>
-      ) : null}
+      <HbcHomepageLauncherIcon tile={tile} />
       <span className={styles.tileContent}>
         <span className={styles.tileTitle}>{tile.title}</span>
       </span>
