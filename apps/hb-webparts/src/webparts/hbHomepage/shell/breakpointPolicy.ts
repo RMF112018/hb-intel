@@ -7,7 +7,7 @@
 // `docs/reference/shell/HB-Shell-Entry-Breakpoint-Spec.md`.
 //
 // Entry-state → practical shell design target (usable content width):
-//   ultrawide-desktop       → 1600–2200 px
+//   ultrawide-desktop       → 1600–2400 px
 //   standard-laptop         → ~1180–1400 px (primary baseline; max extends
 //                             up to 1599 so the band stays continuous with
 //                             ultrawide; CSS density still transitions at
@@ -40,7 +40,7 @@ export const SHELL_ENTRY_STATES: readonly ShellEntryState[] = [
     id: 'ultrawide-desktop',
     label: 'Premium wide composition',
     minWidth: 1600,
-    maxWidth: 2200,
+    maxWidth: 2400,
     firstLaneColumns: 2,
     firstLanePairingAllowed: true,
     dominanceRule: 'left-dominant',

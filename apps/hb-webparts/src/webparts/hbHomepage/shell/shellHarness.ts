@@ -192,6 +192,13 @@ export const SHELL_BREAKPOINT_MATRIX: readonly ShellBreakpointMatrixCase[] = [
     expectedFirstLanePairing: true,
   },
   {
+    label: 'ultrawide-desktop-expanded-canvas',
+    width: 2200,
+    height: 1100,
+    expectedEntryStateId: 'ultrawide-desktop',
+    expectedFirstLanePairing: true,
+  },
+  {
     label: 'standard-laptop (primary baseline)',
     width: 1300,
     height: 900,

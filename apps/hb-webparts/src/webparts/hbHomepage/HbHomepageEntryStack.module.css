@@ -5,7 +5,7 @@
      1. wrapper-owned priority-actions launcher band
      2. HbHomepageShell
 
-   Envelope width mirrors `HbHomepageShell.module.css` (max-width 2200px;
+   Envelope width mirrors `HbHomepageShell.module.css` (max-width 2400px;
    density steps at 768 / 1180 / 1600 / 1900) so the launcher band lives
    in the same page-canvas envelope as the shell below.
 
@@ -18,7 +18,7 @@
 .entryStack {
   container-type: inline-size;
   container-name: homepage-entry-stack;
-  --hb-homepage-outer-envelope-max-width: 2200px;
+  --hb-homepage-outer-envelope-max-width: 2400px;
   --hb-homepage-actions-inset-block-start: 0.75rem;
   --hb-homepage-actions-inset-inline: 1rem;
   display: flex;
@@ -57,13 +57,13 @@
 @container homepage-entry-stack (min-width: 1600px) {
   .entryStack {
     --hb-homepage-actions-inset-block-start: 1.5rem;
-    --hb-homepage-actions-inset-inline: 2.5rem;
+    --hb-homepage-actions-inset-inline: 2.125rem;
   }
 }
 
 @container homepage-entry-stack (min-width: 1900px) {
   .entryStack {
-    --hb-homepage-actions-inset-inline: 3.5rem;
+    --hb-homepage-actions-inset-inline: 2.75rem;
   }
 }
 

@@ -42,20 +42,22 @@
 @container homepage-shell (min-width: 1180px) {
   .shell {
     --hb-homepage-shell-body-inset-block: 2.5rem;
-    --hb-homepage-shell-body-inset-inline: 2rem;
+    --hb-homepage-shell-body-inset-inline: 1.75rem;
     gap: 3rem;
   }
 }
 
 @container homepage-shell (min-width: 1600px) {
   .shell {
-    --hb-homepage-shell-body-inset-inline: 3.5rem;
+    --hb-homepage-shell-body-inset-inline: 2.5rem;
+    gap: 3.25rem;
   }
 }
 
 @container homepage-shell (min-width: 1900px) {
   .shell {
-    --hb-homepage-shell-body-inset-inline: 5rem;
+    --hb-homepage-shell-body-inset-inline: 3rem;
+    gap: 3.5rem;
   }
 }
 
@@ -104,8 +106,38 @@
 
 @container homepage-shell (min-width: 1600px) {
   .bandPaired {
-    grid-template-columns: 3fr 2fr;
+    grid-template-columns: 8fr 5fr;
     gap: 2rem;
+  }
+
+  .bandRecipe_feature_pair {
+    grid-template-columns: 9fr 5fr;
+  }
+
+  .bandRecipe_asymmetric_two_up {
+    grid-template-columns: 7fr 4fr;
+  }
+
+  .bandRecipe_feature_utility_strip {
+    grid-template-columns: 7fr 3fr;
+  }
+}
+
+@container homepage-shell (min-width: 1900px) {
+  .bandPaired {
+    gap: 2.25rem;
+  }
+
+  .bandRecipe_feature_pair {
+    grid-template-columns: 10fr 5fr;
+  }
+
+  .bandRecipe_asymmetric_two_up {
+    grid-template-columns: 8fr 4fr;
+  }
+
+  .bandRecipe_feature_utility_strip {
+    grid-template-columns: 8fr 3fr;
   }
 }
 

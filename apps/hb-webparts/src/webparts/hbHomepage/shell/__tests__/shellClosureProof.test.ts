@@ -249,13 +249,13 @@ describe('Phase-05 closure — Prompt-05 + Prompt-06 harness + conformance proof
     // Prompt-06 overflow guard: authoritative width must remain the upper bound,
     // and shell usable width must be deductive from inline inset accounting.
     const authoritativeWidth = 1300;
-    const inlineInsetTotal = 64; // 2rem + 2rem at 16px base
+    const inlineInsetTotal = 56; // 1.75rem + 1.75rem at 16px base
     const usableWidth = resolveUsableShellWidth(authoritativeWidth, inlineInsetTotal);
     expect(SHELL_WIDTH_SOURCE).toBe('entry-stack-outer-envelope');
     expect(SHELL_WIDTH_ACCOUNTING_RULE).toBe(
       'authoritative-minus-shell-inline-inset',
     );
-    expect(usableWidth).toBe(1236);
+    expect(usableWidth).toBe(1244);
     expect(usableWidth).toBeLessThan(authoritativeWidth);
     expect(usableWidth).toBeGreaterThan(0);
 
@@ -263,6 +263,21 @@ describe('Phase-05 closure — Prompt-05 + Prompt-06 harness + conformance proof
       (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
     );
     expect(laptop?.conformance.entryState.id).toBe('standard-laptop');
+  });
+
+  it('expanded ultrawide canvas keeps higher usable-width budget without overflow', () => {
+    const authoritativeWidth = 2200;
+    const inlineInsetTotal = 96; // 3rem + 3rem at 16px base (>=1900 tier)
+    const usableWidth = resolveUsableShellWidth(authoritativeWidth, inlineInsetTotal);
+    expect(usableWidth).toBe(2104);
+    expect(usableWidth).toBeLessThan(authoritativeWidth);
+    expect(usableWidth).toBeGreaterThan(2000);
+
+    const ultrawideExpanded = outcomes.find(
+      (o) => o.matrixCase.label === 'ultrawide-desktop-expanded-canvas',
+    );
+    expect(ultrawideExpanded?.conformance.entryState.id).toBe('ultrawide-desktop');
+    expect(ultrawideExpanded?.conformance.bands[0].columns).toBe(2);
   });
 });
 

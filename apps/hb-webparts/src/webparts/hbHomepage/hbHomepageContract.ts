@@ -88,7 +88,7 @@ export const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
  * an inspectable data attribute/CSS variable seam so outer-envelope authority
  * is explicit in code.
  */
-export const HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX = 2200;
+export const HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX = 2400;
 /**
  * Stable id for the wrapper-owned outer-envelope containment contract.
  * Both wrapper actions strip and shell region must reference this id so the
