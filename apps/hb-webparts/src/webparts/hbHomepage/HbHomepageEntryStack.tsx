@@ -8,7 +8,7 @@ import { HbSignatureHero } from '../hbSignatureHero/HbSignatureHero.js';
 import { HbHomepageShell } from './HbHomepageShell.js';
 import { HbHomepageLauncherBand } from './HbHomepageLauncherBand.js';
 import { extractHbHomepageWrapperConfig } from './hbHomepageWrapperConfig.js';
-import { useShellContainer } from './shell/useShellContainer.js';
+import { toHeroEntryStackState, useShellContainer } from './shell/useShellContainer.js';
 import styles from './HbHomepageEntryStack.module.css';
 
 // ---------------------------------------------------------------------------
@@ -70,6 +70,10 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
           data-hb-homepage-region-inset-policy="hero-surface-owned"
           data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
           data-hb-homepage-entry-stack-order="1"
+          data-hb-homepage-entry-stack-hero-authority="shared-entry-state"
+          data-hb-homepage-entry-stack-hero-state={entryContainer.entryState.id}
+          data-hb-homepage-entry-stack-hero-state-reason={entryContainer.entryStateReason}
+          data-hb-homepage-entry-stack-hero-short-height={entryContainer.shortHeightConstrained || undefined}
           aria-label="Homepage hero"
         >
           <HbSignatureHero
@@ -77,6 +81,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
             backgroundImage={hero.backgroundImageUrl}
             assetBaseUrl={props.assetBaseUrl}
             siteUrl={props.siteUrl}
+            entryStackState={toHeroEntryStackState(entryContainer)}
           />
         </section>
       ) : null}

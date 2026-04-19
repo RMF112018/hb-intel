@@ -36,6 +36,22 @@ export interface SharedEntryStateSnapshot {
   readonly shortHeightConstrained: boolean;
 }
 
+/**
+ * Shared entry-stack authority payload for the flagship hero path.
+ * Mirrors wrapper-owned measurement + entry-state truth from the shell
+ * container seam so hero, launcher, and shell can read one authority.
+ */
+export type HeroEntryStackState = Pick<
+  ShellContainerState,
+  | 'width'
+  | 'authoritativeWidth'
+  | 'shellInlineInsetTotal'
+  | 'height'
+  | 'entryState'
+  | 'entryStateReason'
+  | 'shortHeightConstrained'
+>;
+
 const DEFAULT_WIDTH = 1200;
 const DEFAULT_HEIGHT = 800;
 
@@ -49,6 +65,18 @@ export function toSharedEntryStateSnapshot(
   state: Pick<ShellContainerState, 'entryState' | 'entryStateReason' | 'shortHeightConstrained'>,
 ): SharedEntryStateSnapshot {
   return {
+    entryState: state.entryState,
+    entryStateReason: state.entryStateReason,
+    shortHeightConstrained: state.shortHeightConstrained,
+  };
+}
+
+export function toHeroEntryStackState(state: ShellContainerState): HeroEntryStackState {
+  return {
+    width: state.width,
+    authoritativeWidth: state.authoritativeWidth,
+    shellInlineInsetTotal: state.shellInlineInsetTotal,
+    height: state.height,
     entryState: state.entryState,
     entryStateReason: state.entryStateReason,
     shortHeightConstrained: state.shortHeightConstrained,

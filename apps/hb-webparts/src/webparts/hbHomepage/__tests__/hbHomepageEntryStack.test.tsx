@@ -36,13 +36,19 @@ vi.mock('../HbHomepageLauncherBand.js', () => ({
 }));
 
 vi.mock('../../hbSignatureHero/HbSignatureHero.js', () => ({
-  HbSignatureHero: (props: Record<string, unknown>): React.JSX.Element =>
-    React.createElement('div', {
+  HbSignatureHero: (props: Record<string, unknown>): React.JSX.Element => {
+    const entryStackState = props.entryStackState as
+      | { entryState?: { id?: string } }
+      | undefined;
+    return React.createElement('div', {
       'data-test-mock': 'hb-signature-hero',
       'data-test-hero-has-identity': props.identity !== undefined ? 'true' : 'false',
       'data-test-hero-site-url': (props.siteUrl as string | undefined) ?? '',
       'data-test-hero-background-image': (props.backgroundImage as string | undefined) ?? '',
-    }),
+      'data-test-hero-has-entry-stack-state': props.entryStackState ? 'true' : 'false',
+      'data-test-hero-entry-state-id': entryStackState?.entryState?.id ?? '',
+    });
+  },
 }));
 
 import { HbHomepageEntryStack } from '../HbHomepageEntryStack.js';
@@ -130,6 +136,22 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(heroNode).not.toBeNull();
     expect(heroNode?.getAttribute('data-test-hero-has-identity')).toBe('true');
     expect(heroNode?.getAttribute('data-test-hero-site-url')).toBe('https://example');
+    expect(heroNode?.getAttribute('data-test-hero-has-entry-stack-state')).toBe('true');
+    expect(heroNode?.getAttribute('data-test-hero-entry-state-id')).toBe('standard-laptop');
+  });
+
+  it('marks hero region shared-entry-state diagnostics on wrapper runtime', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const heroRegion = container.querySelector('[data-hb-homepage-entry-stack-region="hero"]');
+    expect(heroRegion?.getAttribute('data-hb-homepage-entry-stack-hero-authority')).toBe(
+      'shared-entry-state',
+    );
+    expect(heroRegion?.getAttribute('data-hb-homepage-entry-stack-hero-state')).toBe(
+      'standard-laptop',
+    );
+    expect(heroRegion?.getAttribute('data-hb-homepage-entry-stack-hero-state-reason')).toBe(
+      'width-match',
+    );
   });
 
   it('threads wrapper-owned hero background image from hbHomepageWrapper.hero', () => {

@@ -60,6 +60,12 @@ import {
 import { hedrickLogo } from '@hbc/ui-kit/branding';
 import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
+import { resolveEntryStackPolicy } from '../hbHomepage/shell/entryStackPolicy.js';
+import {
+  SHELL_WIDTH_ACCOUNTING_RULE,
+  SHELL_WIDTH_SOURCE,
+  type HeroEntryStackState,
+} from '../hbHomepage/shell/useShellContainer.js';
 import styles from './signature-hero.module.css';
 
 /** Default banner filename deployed alongside JS/CSS in the .sppkg ClientSideAssets. */
@@ -71,6 +77,8 @@ export interface HbSignatureHeroHomepageProps {
   backgroundImage?: string;
   /** CDN base URL for static assets (injected by SPFx shell at runtime). */
   assetBaseUrl?: string;
+  /** Optional wrapper-owned shared entry-stack authority for flagship mode. */
+  entryStackState?: HeroEntryStackState;
   now?: Date;
 }
 
@@ -115,11 +123,16 @@ export function HbSignatureHeroHomepage({
   identity,
   backgroundImage,
   assetBaseUrl,
+  entryStackState,
   now = new Date(),
 }: HbSignatureHeroHomepageProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
   const heroBackground = backgroundImage ?? (assetBaseUrl ? assetBaseUrl + DEFAULT_BANNER : undefined);
   const hasImage = Boolean(heroBackground);
+  const entryStackPolicy = React.useMemo(
+    () => (entryStackState ? resolveEntryStackPolicy(entryStackState.entryState) : undefined),
+    [entryStackState],
+  );
 
   // Presentation-lane brand tokens exposed as CSS custom properties so the
   // CSS module's scrim warmth and fallback gradient stay anchored to the
@@ -127,6 +140,12 @@ export function HbSignatureHeroHomepage({
   const surfaceStyle = {
     '--hbc-hero-presentation-blue-rgb': HBC_PRESENTATION_BLUE_RGB,
     '--hbc-hero-presentation-orange-rgb': HBC_PRESENTATION_ORANGE_RGB,
+    ...(entryStackPolicy
+      ? {
+          minHeight: `${entryStackPolicy.heroHeightBudgetPx.min}px`,
+          maxHeight: `${entryStackPolicy.heroHeightBudgetPx.max}px`,
+        }
+      : {}),
   } as React.CSSProperties;
 
   const surfaceClassName = hasImage
@@ -139,6 +158,26 @@ export function HbSignatureHeroHomepage({
       className={surfaceClassName}
       style={surfaceStyle}
       data-hbc-premium="signature-hero"
+      data-hbc-hero-entry-authority={entryStackState ? 'shared-entry-state' : 'standalone-hero'}
+      data-hbc-hero-entry-state={entryStackState?.entryState.id}
+      data-hbc-hero-entry-reason={entryStackState?.entryStateReason}
+      data-hbc-hero-short-height={
+        entryStackState
+          ? (entryStackState.shortHeightConstrained ? 'true' : 'false')
+          : undefined
+      }
+      data-hbc-hero-width={entryStackState ? Math.round(entryStackState.width) : undefined}
+      data-hbc-hero-width-authoritative={
+        entryStackState ? Math.round(entryStackState.authoritativeWidth) : undefined
+      }
+      data-hbc-hero-width-inline-inset-total={
+        entryStackState ? Math.round(entryStackState.shellInlineInsetTotal) : undefined
+      }
+      data-hbc-hero-width-source={entryStackState ? SHELL_WIDTH_SOURCE : undefined}
+      data-hbc-hero-width-accounting={entryStackState ? SHELL_WIDTH_ACCOUNTING_RULE : undefined}
+      data-hbc-hero-height-budget-min={entryStackPolicy?.heroHeightBudgetPx.min}
+      data-hbc-hero-height-budget-max={entryStackPolicy?.heroHeightBudgetPx.max}
+      data-hbc-hero-short-height-posture={entryStackPolicy?.shortHeightPosture}
     >
       {/* ── Background ── */}
       {hasImage ? (

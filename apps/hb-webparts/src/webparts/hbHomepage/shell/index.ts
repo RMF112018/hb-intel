@@ -126,8 +126,16 @@ export {
   validatePresetStructure,
 } from './shellValidation.js';
 
-export { useShellContainer } from './useShellContainer.js';
-export type { ShellContainerState } from './useShellContainer.js';
+export {
+  toHeroEntryStackState,
+  toSharedEntryStateSnapshot,
+  useShellContainer,
+} from './useShellContainer.js';
+export type {
+  HeroEntryStackState,
+  SharedEntryStateSnapshot,
+  ShellContainerState,
+} from './useShellContainer.js';
 
 export {
   SHELL_BREAKPOINT_MATRIX,

@@ -4,6 +4,7 @@ import {
   SHELL_WIDTH_ACCOUNTING_RULE,
   SHELL_WIDTH_SOURCE,
   resolveUsableShellWidth,
+  toHeroEntryStackState,
   toSharedEntryStateSnapshot,
 } from '../useShellContainer.js';
 
@@ -32,6 +33,29 @@ describe('useShellContainer measurement helpers', () => {
         shortHeightConstrained: resolved.shortHeightConstrained,
       }),
     ).toEqual({
+      entryState: resolved.state,
+      entryStateReason: 'width-match',
+      shortHeightConstrained: false,
+    });
+  });
+
+  it('projects a hero-safe shared entry-stack payload with width accounting fields', () => {
+    const resolved = resolveEntryStateWithReason({ width: 1560, height: 900 });
+    expect(
+      toHeroEntryStackState({
+        width: 1560,
+        authoritativeWidth: 1600,
+        shellInlineInsetTotal: 40,
+        height: 900,
+        entryState: resolved.state,
+        entryStateReason: resolved.reason,
+        shortHeightConstrained: resolved.shortHeightConstrained,
+      }),
+    ).toEqual({
+      width: 1560,
+      authoritativeWidth: 1600,
+      shellInlineInsetTotal: 40,
+      height: 900,
       entryState: resolved.state,
       entryStateReason: 'width-match',
       shortHeightConstrained: false,

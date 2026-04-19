@@ -20,6 +20,7 @@
 import * as React from 'react';
 import type { PersonPhotoFn } from '@hbc/ui-kit/homepage';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
+import type { HeroEntryStackState } from '../hbHomepage/shell/useShellContainer.js';
 import { HbSignatureHeroHomepage } from './HbSignatureHeroHomepage.js';
 import { HbSignatureHeroArticle } from './HbSignatureHeroArticle.js';
 import type { HbSignatureHeroArticleContent } from './HbSignatureHeroArticleContract.js';
@@ -43,6 +44,8 @@ export interface HbSignatureHeroProps {
    * article mode to resolve the author's Graph photo by UPN.
    */
   fetchPersonPhoto?: PersonPhotoFn;
+  /** Optional wrapper-owned entry-stack authority for flagship homepage mode. */
+  entryStackState?: HeroEntryStackState;
   now?: Date;
 }
 
@@ -53,6 +56,7 @@ export function HbSignatureHero({
   siteUrl,
   article,
   fetchPersonPhoto,
+  entryStackState,
   now,
 }: HbSignatureHeroProps): React.JSX.Element | null {
   const mode = resolveHeroMode(siteUrl);
@@ -63,6 +67,7 @@ export function HbSignatureHero({
         identity={identity}
         backgroundImage={backgroundImage}
         assetBaseUrl={assetBaseUrl}
+        entryStackState={entryStackState}
         now={now}
       />
     );

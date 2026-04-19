@@ -178,3 +178,42 @@ describe('HbSignatureHero — article-mode dispatch', () => {
     expect(screen.getByText('Build with GRIT.')).not.toBeNull();
   });
 });
+
+describe('HbSignatureHeroHomepage — shared entry-stack authority', () => {
+  it('uses wrapper-provided entry-stack measurement and policy diagnostics', () => {
+    const { container } = render(
+      <HbSignatureHero
+        identity={{ preferredName: 'Jordan' }}
+        siteUrl="https://hedrickbrotherscom.sharepoint.com/sites/HBCentral"
+        entryStackState={{
+          width: 1320,
+          authoritativeWidth: 1400,
+          shellInlineInsetTotal: 80,
+          height: 860,
+          entryState: {
+            id: 'standard-laptop',
+            label: 'Compressed flagship desktop (primary baseline)',
+            minWidth: 1180,
+            maxWidth: 1599,
+            firstLaneColumns: 2,
+            firstLanePairingAllowed: true,
+            dominanceRule: 'left-dominant',
+          },
+          entryStateReason: 'width-match',
+          shortHeightConstrained: false,
+        }}
+      />,
+    );
+
+    const hero = container.querySelector('[data-hbc-premium="signature-hero"]');
+    expect(hero?.getAttribute('data-hbc-hero-entry-authority')).toBe('shared-entry-state');
+    expect(hero?.getAttribute('data-hbc-hero-entry-state')).toBe('standard-laptop');
+    expect(hero?.getAttribute('data-hbc-hero-entry-reason')).toBe('width-match');
+    expect(hero?.getAttribute('data-hbc-hero-width')).toBe('1320');
+    expect(hero?.getAttribute('data-hbc-hero-width-authoritative')).toBe('1400');
+    expect(hero?.getAttribute('data-hbc-hero-height-budget-min')).toBe('300');
+    expect(hero?.getAttribute('data-hbc-hero-height-budget-max')).toBe('340');
+    expect(hero?.getAttribute('style')).toContain('min-height: 300px');
+    expect(hero?.getAttribute('style')).toContain('max-height: 340px');
+  });
+});
