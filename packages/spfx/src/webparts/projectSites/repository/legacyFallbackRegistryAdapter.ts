@@ -28,12 +28,14 @@ export const LEGACY_FALLBACK_REGISTRY_LIST_TITLE = 'Legacy Project Fallback Regi
 export const LEGACY_FALLBACK_REGISTRY_FIELD = {
   ID: 'Id',
   PROJECT_NUMBER: 'ProjectNumber',
+  PROJECT_NAME_RAW: 'ProjectNameRaw',
   LEGACY_YEAR: 'LegacyYear',
   FOLDER_WEB_URL: 'FolderWebUrl',
   MATCH_STATUS: 'MatchStatus',
   MATCH_CONFIDENCE: 'MatchConfidence',
   MATCH_METHOD: 'MatchMethod',
   MATCHED_PROJECT_LIST_ITEM_ID: 'MatchedProjectListItemId',
+  MATCHED_PROJECT_TITLE: 'MatchedProjectTitle',
   LAST_VALIDATED_UTC: 'LastValidatedUtc',
   LAST_SEEN_UTC: 'LastSeenUtc',
   IS_ACTIVE: 'IsActive',
@@ -47,12 +49,14 @@ export const LEGACY_FALLBACK_REGISTRY_FIELD = {
 export const LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS = [
   LEGACY_FALLBACK_REGISTRY_FIELD.ID,
   LEGACY_FALLBACK_REGISTRY_FIELD.PROJECT_NUMBER,
+  LEGACY_FALLBACK_REGISTRY_FIELD.PROJECT_NAME_RAW,
   LEGACY_FALLBACK_REGISTRY_FIELD.LEGACY_YEAR,
   LEGACY_FALLBACK_REGISTRY_FIELD.FOLDER_WEB_URL,
   LEGACY_FALLBACK_REGISTRY_FIELD.MATCH_STATUS,
   LEGACY_FALLBACK_REGISTRY_FIELD.MATCH_CONFIDENCE,
   LEGACY_FALLBACK_REGISTRY_FIELD.MATCH_METHOD,
   LEGACY_FALLBACK_REGISTRY_FIELD.MATCHED_PROJECT_LIST_ITEM_ID,
+  LEGACY_FALLBACK_REGISTRY_FIELD.MATCHED_PROJECT_TITLE,
   LEGACY_FALLBACK_REGISTRY_FIELD.LAST_VALIDATED_UTC,
   LEGACY_FALLBACK_REGISTRY_FIELD.LAST_SEEN_UTC,
 ] as const;
@@ -110,12 +114,14 @@ const MATCH_METHOD_VALUES: readonly LegacyFallbackMatchMethod[] = [
 export interface IRawLegacyFallbackRegistryItem {
   Id: number;
   ProjectNumber?: unknown;
+  ProjectNameRaw?: unknown;
   LegacyYear?: unknown;
   FolderWebUrl?: unknown;
   MatchStatus?: unknown;
   MatchConfidence?: unknown;
   MatchMethod?: unknown;
   MatchedProjectListItemId?: unknown;
+  MatchedProjectTitle?: unknown;
   LastValidatedUtc?: unknown;
   LastSeenUtc?: unknown;
 }
@@ -128,11 +134,15 @@ export interface IRawLegacyFallbackRegistryItem {
 export interface ILegacyFallbackRegistryCandidate {
   id: number;
   projectNumber: string;
+  /** Raw project name discovered in the legacy folder. Empty when absent. */
+  projectNameRaw: string;
   legacyYear: number;
   folderWebUrl: string;
   matchStatus: 'matched';
   /** `null` when the registry row is not linked to a Projects list row. */
   matchedProjectListItemId: number | null;
+  /** Title of the linked Projects list row when present, else empty. */
+  matchedProjectTitle: string;
   /** `null` when the registry omitted a confidence value. */
   matchConfidence: LegacyFallbackMatchConfidence | null;
   /** `null` when the registry omitted a match-method value. */
@@ -228,10 +238,12 @@ export function toLegacyFallbackCandidate(
   return {
     id: parseOptionalInteger(row.Id) ?? 0,
     projectNumber,
+    projectNameRaw: trimString(row.ProjectNameRaw),
     legacyYear,
     folderWebUrl,
     matchStatus: 'matched',
     matchedProjectListItemId: parseOptionalInteger(row.MatchedProjectListItemId),
+    matchedProjectTitle: trimString(row.MatchedProjectTitle),
     matchConfidence: parseMatchConfidence(row.MatchConfidence),
     matchMethod: parseMatchMethod(row.MatchMethod),
     lastValidatedUtc: trimString(row.LastValidatedUtc),

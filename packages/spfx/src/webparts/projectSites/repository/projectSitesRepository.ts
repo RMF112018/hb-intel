@@ -6,7 +6,6 @@ import { getSpfxContext } from '@hbc/auth/spfx';
 import type { IRawProjectSiteItem, ProjectSitesScope } from '../types.js';
 import {
   PROJECT_SITES_ALL_SCOPE_LIMIT,
-  PROJECT_SITES_FALLBACK_FIELDS,
   PROJECT_SITES_SELECT_FIELDS,
   SP_PROJECTS_FIELDS,
   isValidYear,
@@ -18,9 +17,9 @@ import type {
 import {
   LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
   LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS,
-  buildLegacyFallbackLookup,
-  buildLegacyFallbackLookupKey,
+  toLegacyFallbackCandidate,
 } from './legacyFallbackRegistryAdapter.js';
+import type { IProjectSitesQueryResult } from '../projectSitesResolver.js';
 
 // Re-export the adapter surface for existing consumers (tests, callers)
 // that historically imported these names from the repository module.
@@ -41,54 +40,24 @@ const PROJECTS_LIST_TITLE = 'Projects';
 
 export interface IProjectSitesRepository {
   fetchDistinctYears(): Promise<number[]>;
-  fetchProjectSites(scope: ProjectSitesScope): Promise<IRawProjectSiteItem[]>;
+  /**
+   * Fetch the raw inputs required to resolve the merged project-site
+   * entry set for the given scope. The resolver (`projectSitesResolver.ts`)
+   * performs the merge; the repository is only responsible for I/O and
+   * narrowing registry rows into candidates.
+   */
+  fetchProjectSites(scope: ProjectSitesScope): Promise<IProjectSitesQueryResult>;
 }
 
-function trimString(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function parseTitleProjectNumber(title: string): string {
-  const trimmed = title.trim();
-  if (!trimmed) return '';
-  const separators = [' — ', ' – ', ' - '];
-  for (const sep of separators) {
-    const idx = trimmed.indexOf(sep);
-    if (idx > 0) {
-      return trimmed.substring(0, idx).trim();
-    }
+function toCandidates(
+  rows: readonly IRawLegacyFallbackRegistryItem[],
+): ILegacyFallbackRegistryCandidate[] {
+  const out: ILegacyFallbackRegistryCandidate[] = [];
+  for (const row of rows) {
+    const candidate = toLegacyFallbackCandidate(row);
+    if (candidate) out.push(candidate);
   }
-  return '';
-}
-
-function applyFallbackLookup(
-  projectRows: IRawProjectSiteItem[],
-  lookup: Map<string, ILegacyFallbackRegistryCandidate>,
-): IRawProjectSiteItem[] {
-  return projectRows.map((row) => {
-    const titleFallback = parseTitleProjectNumber(trimString(row[SP_PROJECTS_FIELDS.TITLE]));
-    const projectNumber = trimString(row[SP_PROJECTS_FIELDS.PROJECT_NUMBER] ?? row.ProjectNumber) || titleFallback;
-    const yearRaw = row[SP_PROJECTS_FIELDS.YEAR];
-    const year = typeof yearRaw === 'number' ? yearRaw : Number.parseInt(String(yearRaw ?? ''), 10);
-    const key = buildLegacyFallbackLookupKey(projectNumber, year);
-    const fallback = lookup.get(key);
-
-    if (!fallback) {
-      return {
-        ...row,
-        [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_FOLDER_URL]: '',
-        [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_SOURCE_YEAR]: null,
-        [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_MATCH_STATUS]: '',
-      };
-    }
-
-    return {
-      ...row,
-      [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_FOLDER_URL]: fallback.folderWebUrl,
-      [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_SOURCE_YEAR]: fallback.legacyYear,
-      [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_MATCH_STATUS]: fallback.matchStatus,
-    };
-  });
+  return out;
 }
 
 class SharePointProjectSitesRepository implements IProjectSitesRepository {
@@ -112,7 +81,7 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
     return Array.from(years).sort((a, b) => b - a);
   }
 
-  async fetchProjectSites(scope: ProjectSitesScope): Promise<IRawProjectSiteItem[]> {
+  async fetchProjectSites(scope: ProjectSitesScope): Promise<IProjectSitesQueryResult> {
     const context = getSpfxContext();
     const sp = spfi().using(SPFx(context));
 
@@ -121,41 +90,45 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
       .items
       .select(...PROJECT_SITES_SELECT_FIELDS);
 
-    const projectItems = scope.kind === 'year'
+    const projectRows = scope.kind === 'year'
       ? (await listItems
           .filter(`${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}`)()) as IRawProjectSiteItem[]
       : (await listItems
           .orderBy(SP_PROJECTS_FIELDS.YEAR, false)
           .top(PROJECT_SITES_ALL_SCOPE_LIMIT)()) as IRawProjectSiteItem[];
 
-    if (projectItems.length === 0) {
-      return projectItems;
-    }
-
+    // The registry-side fetch is keyed on `LegacyYear`, which is how the
+    // registry carries the legacy-source year even when no matching
+    // project exists. For year-scoped queries we fetch exactly that year;
+    // for All-Projects scope we scan the years present in the results
+    // plus emit synthetic rows for every registry year we pulled — the
+    // resolver handles legacy-only emission.
     const years = scope.kind === 'year'
       ? [scope.year]
       : Array.from(
           new Set(
-            projectItems
+            projectRows
               .map((item) => item[SP_PROJECTS_FIELDS.YEAR])
               .filter((year): year is number => typeof year === 'number' && Number.isInteger(year)),
           ),
         );
 
-    const fallbackRows = await Promise.all(
-      years.map(async (year) => {
-        const rows = await sp.web.lists
-          .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
-          .items
-          .select(...LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS)
-          .filter(`IsActive eq 1 and MatchStatus eq 'matched' and LegacyYear eq ${year}`)
-          .top(PROJECT_SITES_ALL_SCOPE_LIMIT)();
-        return rows as IRawLegacyFallbackRegistryItem[];
-      }),
-    );
+    const fallbackRowGroups = years.length > 0
+      ? await Promise.all(
+          years.map(async (year) => {
+            const rows = await sp.web.lists
+              .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
+              .items
+              .select(...LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS)
+              .filter(`IsActive eq 1 and MatchStatus eq 'matched' and LegacyYear eq ${year}`)
+              .top(PROJECT_SITES_ALL_SCOPE_LIMIT)();
+            return rows as IRawLegacyFallbackRegistryItem[];
+          }),
+        )
+      : [];
 
-    const fallbackLookup = buildLegacyFallbackLookup(fallbackRows.flat());
-    return applyFallbackLookup(projectItems, fallbackLookup);
+    const fallbackCandidates = toCandidates(fallbackRowGroups.flat());
+    return { projectRows, fallbackCandidates };
   }
 }
 

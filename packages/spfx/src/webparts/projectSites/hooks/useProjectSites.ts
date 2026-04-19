@@ -17,7 +17,7 @@ import type {
   IProjectSitesResult,
   ProjectSitesScope,
 } from '../types.js';
-import { normalizeProjectSiteEntries } from '../normalizeProjectSiteEntry.js';
+import { resolveProjectSiteEntries } from '../projectSitesResolver.js';
 import { getProjectSitesRepository } from '../repository/projectSitesRepository.js';
 
 /** Stale time: 5 minutes — project list data changes infrequently. */
@@ -47,7 +47,7 @@ export function useProjectSites(
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['project-sites', scope ? scopeCacheKey(scope) : 'none'],
     queryFn: () => repository.fetchProjectSites(scope!),
-    select: normalizeProjectSiteEntries,
+    select: resolveProjectSiteEntries,
     enabled,
     staleTime: STALE_TIME_MS,
     retry: 1,
