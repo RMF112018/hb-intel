@@ -67,8 +67,7 @@ import {
   SHELL_WIDTH_SOURCE,
   type HeroEntryStackState,
 } from '../hbHomepage/shell/useShellContainer.js';
-import { resolveHomepageHeroBannerAssetUrl } from './homepageHeroBannerAssetResolver.js';
-import { resolveHomepageHeroBannerFileNameAt } from './homepageHeroBannerTimeOfDaySelector.js';
+import { resolveHomepageHeroBannerSelection } from './homepageHeroBannerSourceSelector.js';
 import styles from './signature-hero.module.css';
 
 export interface HbSignatureHeroHomepageProps {
@@ -164,9 +163,12 @@ export function HbSignatureHeroHomepage({
   now = new Date(),
 }: HbSignatureHeroHomepageProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
-  const defaultBannerFileName = resolveHomepageHeroBannerFileNameAt(now);
-  const heroBackground =
-    backgroundImage ?? resolveHomepageHeroBannerAssetUrl(assetBaseUrl, defaultBannerFileName);
+  const bannerSelection = resolveHomepageHeroBannerSelection({
+    now,
+    assetBaseUrl,
+    authoredOverrideUrl: backgroundImage,
+  });
+  const heroBackground = bannerSelection.url;
   const hasImage = Boolean(heroBackground);
   const entryStackPolicy = React.useMemo(
     () => (entryStackState ? resolveEntryStackPolicy(entryStackState.entryState) : undefined),
@@ -203,6 +205,10 @@ export function HbSignatureHeroHomepage({
       data-hbc-premium="signature-hero"
       data-hbc-hero-blackbox-contract="prompt07-blackbox-v1"
       data-hbc-hero-flagship-render-path={flagshipRenderPath}
+      data-hbc-hero-banner-source={bannerSelection.source}
+      data-hbc-hero-banner-daypart={bannerSelection.daypart}
+      data-hbc-hero-banner-file={bannerSelection.fileName}
+      data-hbc-hero-banner-override-active={bannerSelection.overrideActive ? 'true' : 'false'}
       data-hbc-hero-entry-authority={entryStackState ? 'shared-entry-state' : 'standalone-hero'}
       data-hbc-hero-entry-state={entryStackState?.entryState.id}
       data-hbc-hero-entry-reason={entryStackState?.entryStateReason}

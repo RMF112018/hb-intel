@@ -75,4 +75,39 @@ describe('HbSignatureHeroHomepage — daypart precedence contract', () => {
       'https://example.com/authored-hero.jpg',
     );
   });
+
+  it('exposes inspectable banner-source diagnostics on the hero surface (daypart-default)', () => {
+    const { container } = render(
+      <HbSignatureHeroHomepage
+        identity={{}}
+        assetBaseUrl="https://cdn.example.invalid/assets/"
+        flagshipRenderPath="wrapper-embedded"
+        now={localDateAt(8, 20)}
+      />,
+    );
+    const surface = container.querySelector('[data-hbc-premium="signature-hero"]');
+    expect(surface).not.toBeNull();
+    expect(surface!.getAttribute('data-hbc-hero-banner-source')).toBe('daypart-default');
+    expect(surface!.getAttribute('data-hbc-hero-banner-daypart')).toBe('morning');
+    expect(surface!.getAttribute('data-hbc-hero-banner-file')).toBe('banner_home_7_morning.png');
+    expect(surface!.getAttribute('data-hbc-hero-banner-override-active')).toBe('false');
+    expect(surface!.getAttribute('data-hbc-hero-flagship-render-path')).toBe('wrapper-embedded');
+  });
+
+  it('exposes inspectable banner-source diagnostics when an override wins', () => {
+    const { container } = render(
+      <HbSignatureHeroHomepage
+        identity={{}}
+        assetBaseUrl="https://cdn.example.invalid/assets/"
+        backgroundImage="https://example.com/authored-hero.jpg"
+        flagshipRenderPath="wrapper-embedded"
+        now={localDateAt(18, 0)}
+      />,
+    );
+    const surface = container.querySelector('[data-hbc-premium="signature-hero"]');
+    expect(surface).not.toBeNull();
+    expect(surface!.getAttribute('data-hbc-hero-banner-source')).toBe('override');
+    expect(surface!.getAttribute('data-hbc-hero-banner-daypart')).toBe('evening');
+    expect(surface!.getAttribute('data-hbc-hero-banner-override-active')).toBe('true');
+  });
 });

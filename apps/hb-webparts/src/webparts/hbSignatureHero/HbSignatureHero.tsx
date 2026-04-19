@@ -110,10 +110,15 @@ export function HbSignatureHero({
   }
 
   if (mode === 'homepage') {
+    // Authored overrides are only honored on the wrapper-embedded flagship
+    // render path. A standalone HbSignatureHero placed on HBCentral cannot
+    // smuggle a stale `backgroundImage` past the daypart default — the
+    // standalone fallback always renders the time-of-day banner.
+    const wrapperEmbeddedOverride = entryStackState ? backgroundImage : undefined;
     return (
       <HbSignatureHeroHomepage
         identity={identity}
-        backgroundImage={backgroundImage}
+        backgroundImage={wrapperEmbeddedOverride}
         assetBaseUrl={assetBaseUrl}
         entryStackState={entryStackState}
         flagshipRenderPath={entryStackState ? 'wrapper-embedded' : 'standalone-webpart'}
