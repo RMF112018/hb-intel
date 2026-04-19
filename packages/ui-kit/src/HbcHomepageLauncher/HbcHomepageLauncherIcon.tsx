@@ -20,9 +20,9 @@ export function HbcHomepageLauncherIcon({
   const Icon = tile.icon;
   if (!Icon && !tile.iconAssetSrc) return null;
   const compliantIcon = true;
-  // Sized to dominate the square tile (~38–40% of tile width). CSS provides the
+  // Sized to dominate the square tile (~40% of tile width). CSS provides the
   // real bounding box via `--hbc-hl-icon-size`; these props seed the SVG default.
-  const iconSize = surface === 'drawer' ? 60 : 64;
+  const iconSize = surface === 'drawer' ? 52 : 44;
   const iconStrokeWidth = surface === 'drawer' ? 2.1 : 2.2;
 
   return (

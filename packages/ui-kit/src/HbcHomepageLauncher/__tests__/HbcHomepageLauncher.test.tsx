@@ -10,7 +10,10 @@ import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { HbcHomepageLauncher } from '../HbcHomepageLauncher.js';
-import { HBC_HOMEPAGE_LAUNCHER_VERSION } from '../constants.js';
+import {
+  HBC_HOMEPAGE_LAUNCHER_VERSION,
+  HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
+} from '../constants.js';
 import type { HomepageLauncherTileModel } from '../types.js';
 
 const TILES: HomepageLauncherTileModel[] = [
@@ -371,6 +374,14 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(
       screen.queryByRole('link', { name: /Sign CO #22/i })?.getAttribute('data-hbc-ui'),
     ).not.toBe('homepage-launcher-drawer-tile');
+  });
+
+  it('reserves a desktop visible-cap large enough for 7 primary tiles plus More Tools', () => {
+    expect(HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop).toBeGreaterThanOrEqual(7);
+    expect(HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.ultrawide).toBeGreaterThanOrEqual(
+      HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
+    );
+    expect(HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-landscape']).toBeGreaterThanOrEqual(5);
   });
 
   it('opens drawer with opaque-surface and elevation markers for hosted-parity', () => {

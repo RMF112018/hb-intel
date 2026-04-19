@@ -17,14 +17,14 @@
   --hbc-hl-brand-deep-rgb: var(--hb-brand-primary-deep-rgb, 20, 52, 96);
   --hbc-hl-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
   --hbc-hl-orange-rgb: var(--hb-brand-orange-rgb, 227, 114, 34);
-  --hbc-hl-row-gap: 14px;
+  --hbc-hl-row-gap: 10px;
   --hbc-hl-visible-tiles: 1;
-  --hbc-hl-tile-size: 168px;
-  --hbc-hl-drawer-tile-size: 168px;
-  --hbc-hl-icon-size: 64px;
-  --hbc-hl-drawer-icon-size: 60px;
-  --hbc-hl-drawer-pad-x: 32px;
-  --hbc-hl-drawer-pad-y: 28px;
+  --hbc-hl-tile-size: 116px;
+  --hbc-hl-drawer-tile-size: 144px;
+  --hbc-hl-icon-size: 48px;
+  --hbc-hl-drawer-icon-size: 56px;
+  --hbc-hl-drawer-pad-x: 28px;
+  --hbc-hl-drawer-pad-y: 22px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -67,13 +67,13 @@
   min-width: 0;
   height: var(--hbc-hl-tile-size);
   aspect-ratio: 1 / 1;
-  padding: 18px 14px 14px;
-  border-radius: 16px;
+  padding: 10px 8px 8px;
+  border-radius: 12px;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
   align-items: center;
-  row-gap: 10px;
+  row-gap: 6px;
   text-decoration: none;
   cursor: pointer;
   position: relative;
@@ -129,9 +129,9 @@
   flex: 0 0 var(--hbc-hl-drawer-tile-size);
   height: var(--hbc-hl-drawer-tile-size);
   aspect-ratio: 1 / 1;
-  padding: 18px 14px 14px;
+  padding: 14px 10px 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
+  border-radius: 14px;
   color: #ffffff;
   background: linear-gradient(
     150deg,
@@ -226,10 +226,10 @@
 .tileTitle {
   width: 100%;
   min-width: 0;
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.6875rem; /* 11px */
   font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.005em;
+  line-height: 1.2;
+  letter-spacing: -0.002em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -237,13 +237,16 @@
   text-overflow: ellipsis;
   text-align: center;
   color: #ffffff;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .drawerTileTitle {
-  font-size: 0.8125rem;
+  font-size: 0.8125rem; /* 13px */
   line-height: 1.25;
   -webkit-line-clamp: 2;
   font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
 /* ---------- MORE TOOLS TRIGGER ---------- */
@@ -253,14 +256,17 @@
   grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
   align-items: center;
-  row-gap: 10px;
+  row-gap: 6px;
   font: inherit;
   width: var(--hbc-hl-tile-size);
   flex: 0 0 var(--hbc-hl-tile-size);
   height: var(--hbc-hl-tile-size);
   aspect-ratio: 1 / 1;
-  padding: 18px 14px 14px;
+  padding: 10px 8px 8px;
   position: relative;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
 }
 
 .triggerIcon {
@@ -279,9 +285,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
-  font-size: 0.8125rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
   text-align: center;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -291,29 +297,25 @@
 
 .overflowTriggerCount {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 5px;
+  right: 5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
   color: #ffffff;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .overflowTile > svg:last-of-type {
-  position: absolute;
-  bottom: 6px;
-  right: 8px;
-  width: 14px;
-  height: 14px;
-  opacity: 0.85;
+  display: none;
 }
 
 /* ---------- DRAWER (BOTTOM SHEET) ---------- */
@@ -357,7 +359,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  column-gap: 16px;
+  column-gap: 14px;
   padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
@@ -366,45 +368,53 @@
 .sheetHeading {
   min-width: 0;
   display: grid;
-  gap: 4px;
+  gap: 2px;
+  align-content: center;
 }
 
 .sheetTitle {
-  font-size: 1.25rem; /* 20px / heading2 */
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
   letter-spacing: -0.005em;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sheetSubtitle {
   font-size: 0.75rem; /* 12px / label */
-  line-height: 1.4;
+  line-height: 1.35;
   letter-spacing: 0.01em;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.68);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .overflowHeaderCount {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 9px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .sheetClose {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
   cursor: pointer;
@@ -412,6 +422,7 @@
   align-items: center;
   justify-content: center;
   transition: background 160ms ease, border-color 160ms ease;
+  padding: 0;
 }
 
 .sheetClose:hover {
@@ -420,22 +431,23 @@
 }
 
 .sheetClose > svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .drawerBody {
-  padding: 24px var(--hbc-hl-drawer-pad-x) 40px;
+  padding: 22px var(--hbc-hl-drawer-pad-x) 32px;
   overflow-y: auto;
   overscroll-behavior: contain;
   display: grid;
-  gap: 32px;
+  gap: 26px;
   background: transparent;
 }
 
 .drawerGroup {
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .overflowGroupTitle {
@@ -464,21 +476,22 @@
 
 /* ---------- BREAKPOINT GOVERNANCE ---------- */
 
+/* phone — wraps to 2-up grid */
 @container hbc-homepage-launcher (max-width: 719px) {
   .root {
-    --hbc-hl-tile-size: 132px;
-    --hbc-hl-drawer-tile-size: 144px;
-    --hbc-hl-icon-size: 56px;
-    --hbc-hl-drawer-icon-size: 56px;
-    --hbc-hl-drawer-pad-x: 18px;
-    --hbc-hl-drawer-pad-y: 18px;
+    --hbc-hl-tile-size: 100px;
+    --hbc-hl-drawer-tile-size: 132px;
+    --hbc-hl-icon-size: 42px;
+    --hbc-hl-drawer-icon-size: 52px;
+    --hbc-hl-drawer-pad-x: 16px;
+    --hbc-hl-drawer-pad-y: 16px;
   }
 
   .bandScroller {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     flex: 1 1 auto;
     width: 100%;
   }
@@ -488,9 +501,15 @@
     width: var(--hbc-hl-tile-size);
     flex: 0 0 var(--hbc-hl-tile-size);
     height: var(--hbc-hl-tile-size);
-    padding: 14px 10px 10px;
-    border-radius: 14px;
-    row-gap: 8px;
+    padding: 8px 6px 6px;
+    border-radius: 11px;
+    row-gap: 4px;
+  }
+
+  .tileTitle,
+  .overflowTriggerLabel {
+    font-size: 0.625rem;
+    line-height: 1.15;
   }
 
   .sheetSurface {
@@ -500,17 +519,12 @@
     border-top-right-radius: 16px;
   }
 
-  .sheetTitle {
-    font-size: 1.0625rem;
-  }
-
-  .sheetSubtitle {
-    display: none;
-  }
+  .sheetTitle { font-size: 1.0625rem; }
+  .sheetSubtitle { display: none; }
 
   .drawerBody {
-    padding: 18px 14px 24px;
-    gap: 22px;
+    padding: 16px 14px 22px;
+    gap: 20px;
   }
 
   .drawerTileGrid {
@@ -519,71 +533,74 @@
   }
 }
 
+/* tablet portrait — 4 primary + More Tools = 5 cells */
 @container hbc-homepage-launcher (min-width: 720px) and (max-width: 979px) {
   .root {
-    --hbc-hl-tile-size: 148px;
-    --hbc-hl-drawer-tile-size: 160px;
-    --hbc-hl-icon-size: 60px;
-    --hbc-hl-drawer-icon-size: 60px;
-    --hbc-hl-drawer-pad-x: 24px;
-    --hbc-hl-drawer-pad-y: 22px;
+    --hbc-hl-tile-size: 110px;
+    --hbc-hl-drawer-tile-size: 140px;
+    --hbc-hl-icon-size: 46px;
+    --hbc-hl-drawer-icon-size: 54px;
+    --hbc-hl-drawer-pad-x: 22px;
+    --hbc-hl-drawer-pad-y: 20px;
   }
 
   .sheetSurface { width: min(100vw - 22px, 980px); }
 }
 
+/* tablet landscape — 5 primary + More Tools = 6 cells */
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
   .root {
-    --hbc-hl-tile-size: 160px;
-    --hbc-hl-drawer-tile-size: 168px;
-    --hbc-hl-icon-size: 64px;
-    --hbc-hl-drawer-icon-size: 64px;
+    --hbc-hl-tile-size: 116px;
+    --hbc-hl-drawer-tile-size: 144px;
+    --hbc-hl-icon-size: 48px;
+    --hbc-hl-drawer-icon-size: 56px;
   }
 }
 
+/* desktop standard — 7 primary + More Tools = 8 cells fits ≥1180px */
 @container hbc-homepage-launcher (min-width: 1180px) and (max-width: 1599px) {
   .root {
-    --hbc-hl-tile-size: 168px;
-    --hbc-hl-drawer-tile-size: 168px;
-    --hbc-hl-icon-size: 68px;
-    --hbc-hl-drawer-icon-size: 64px;
+    --hbc-hl-tile-size: 116px;
+    --hbc-hl-drawer-tile-size: 148px;
+    --hbc-hl-icon-size: 48px;
+    --hbc-hl-drawer-icon-size: 56px;
   }
 }
 
+/* ultrawide — 8 primary + More Tools = 9 cells */
 @container hbc-homepage-launcher (min-width: 1600px) {
   .root {
-    --hbc-hl-tile-size: 184px;
-    --hbc-hl-drawer-tile-size: 184px;
-    --hbc-hl-icon-size: 76px;
-    --hbc-hl-drawer-icon-size: 72px;
+    --hbc-hl-tile-size: 128px;
+    --hbc-hl-drawer-tile-size: 160px;
+    --hbc-hl-icon-size: 54px;
+    --hbc-hl-drawer-icon-size: 60px;
   }
 
   .tile,
   .overflowTile,
-  .tileDrawer {
-    border-radius: 18px;
-  }
+  .tileDrawer { border-radius: 14px; }
+
+  .tileTitle,
+  .overflowTriggerLabel { font-size: 0.75rem; }
 
   .sheetSurface { max-height: min(84vh, 980px); }
 }
 
 @media (max-height: 640px) {
   .root {
-    --hbc-hl-tile-size: 120px;
-    --hbc-hl-icon-size: 50px;
+    --hbc-hl-tile-size: 100px;
+    --hbc-hl-icon-size: 42px;
   }
 
   .tile,
   .overflowTile {
-    padding: 12px 9px 9px;
-    border-radius: 12px;
-    row-gap: 7px;
+    padding: 8px 6px 6px;
+    border-radius: 11px;
+    row-gap: 4px;
   }
 
   .tileTitle,
-  .overflowTriggerLabel {
-    font-size: 0.75rem;
-  }
+  .overflowTriggerLabel { font-size: 0.625rem; }
 
   .sheetSurface { max-height: 96vh; }
   .drawerBody { padding-top: 14px; gap: 18px; }
