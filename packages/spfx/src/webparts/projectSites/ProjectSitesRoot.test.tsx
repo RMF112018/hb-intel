@@ -617,6 +617,20 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
+  it('empty-state copy describes the merged surface, not the Projects list (truthfulness guard)', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'empty',
+      scope: scopeFromYear(2025),
+      entries: [],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    expect(screen.getByText(/No project sites are available for/i)).toBeInTheDocument();
+    expect(screen.queryByText(/from the Projects list/i)).not.toBeInTheDocument();
+  });
+
   it('renders section landmark with accessible label', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({

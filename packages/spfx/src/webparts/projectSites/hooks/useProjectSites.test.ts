@@ -162,6 +162,41 @@ describe('useProjectSites', () => {
     expect(resolved[0].sourceClassification).toBe('project-only');
   });
 
+  it('resolves fallback-only input into a single synthetic legacy-only entry (bridge closure)', () => {
+    // Guards the hook's `select` wiring end-to-end: when the repository
+    // returns no project rows but a matched registry candidate, the
+    // surface must still render a legacy-only entry — not silently drop
+    // the row the way the pre-merge pipeline did.
+    mockUseQuery.mockReturnValue({
+      data: [], isLoading: false, isError: false, error: null,
+    } as any);
+    useProjectSites(scopeFromYear(2022));
+    const config = mockUseQuery.mock.calls[0][0] as any;
+    const resolved = config.select({
+      projectRows: [],
+      fallbackCandidates: [{
+        id: 9001,
+        projectNumber: '22-100-01',
+        projectNameRaw: 'Orphan Legacy',
+        legacyYear: 2022,
+        folderWebUrl: 'https://tenant/orphan',
+        matchStatus: 'matched',
+        matchedProjectListItemId: null,
+        matchedProjectTitle: '',
+        matchConfidence: null,
+        matchMethod: null,
+        lastValidatedUtc: '',
+        lastSeenUtc: '',
+      }],
+    });
+
+    expect(resolved).toHaveLength(1);
+    expect(resolved[0].sourceClassification).toBe('legacy-only');
+    expect(resolved[0].recordKey).toBe('legacy:22-100-01:2022');
+    expect(resolved[0].launchTargetKind).toBe('legacy-fallback');
+    expect(resolved[0].siteUrl).toBe('https://tenant/orphan');
+  });
+
   it('preserves normalized entry identity when query data identity is unchanged', () => {
     const stableEntries = [{
       id: 1,
