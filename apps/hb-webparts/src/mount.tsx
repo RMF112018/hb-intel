@@ -34,13 +34,11 @@ import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract
 // Shared entry-stack orchestration seam. The canonical homepage entry
 // stages (hero, actions, first shell lane) are each independently
 // mountable through `WEBPART_RENDERERS` below for non-flagship hosts.
-// On the flagship HBCentral homepage, however, the actions stage is
-// composed as a wrapper-owned React surface inside `HbHomepage`
-// (see `HbHomepageEntryStack`) rather than dispatched separately.
-// The hero stage is also wrapper-composed on the flagship page. During
-// cutover, standalone hero dispatch remains available for non-flagship
-// hosts and transition diagnostics; runtime duplicate guardrails ensure
-// wrapper-owned hero remains the single flagship path when both appear.
+// On the flagship HBCentral homepage, the runtime dispatches a single
+// `HbHomepage` webpart. Inside that wrapper, hero and launcher/actions
+// are wrapper-owned entry regions (see `HbHomepageEntryStack`) followed
+// by the shell operating layer. Standalone hero/rail dispatch remains
+// available only for non-flagship hosts and transition diagnostics.
 // See `src/homepage/entryStack/entryStackOrchestration.ts`.
 import {
   ENTRY_STACK_SURFACES as _HOMEPAGE_ENTRY_STACK_SURFACES,

@@ -46,8 +46,8 @@ export type {
 // The shell never becomes a hero or command-band host. The standalone
 // `HbSignatureHero` and `PriorityActionsRail` webparts both remain
 // independently mountable for non-flagship hosts; on the flagship page
-// those surfaces are composed by the wrapper rather than dispatched
-// separately through `mount.tsx`.
+// the wrapper owns hero + launcher/actions entry regions rather than
+// separate webpart dispatch through `mount.tsx`.
 //
 // Shell-owned responsibilities (code-governed in this package):
 //   - placement: which occupants sit in which bands and slots

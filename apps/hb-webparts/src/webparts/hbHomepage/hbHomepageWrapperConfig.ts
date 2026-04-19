@@ -4,7 +4,7 @@ import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityC
 // HB Homepage wrapper config — wrapper-owned integration seam
 // -----------------------------------------------------------------------------
 // This module owns the typed surface the homepage wrapper uses to compose its
-// pre-shell regions (today: the embedded PriorityActionsRail). It is
+// pre-shell regions (hero + launcher/actions). It is
 // intentionally separate from:
 //
 //   - `ModuleConfigSlices` / shell validation — those describe shell-zone
@@ -13,9 +13,9 @@ import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityC
 //     occupant model.
 //
 //   - `PriorityActionsRailConfig` / rail list+admin data seams — those remain
-//     the rail product's authoring / data authority. The wrapper never
-//     becomes the content authority for the rail; it only carries
-//     integration inputs.
+//     the launcher data-authority source. The wrapper never becomes
+//     command content authority; it only carries integration inputs into
+//     wrapper-owned flagship surfaces.
 //
 // A reviewer reading this file alone should be able to understand what the
 // wrapper owns without opening shell occupant or rail data code.

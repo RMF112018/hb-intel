@@ -14,25 +14,20 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
  * Governed Homepage Composition Reference
  *
  * This composition is a REFERENCE ONLY. On the flagship HBCentral
- * homepage, production dispatches two SPFx webparts through
- * `mount.tsx`: the hero and `HbHomepage` (which owns a wrapper-
- * embedded `PriorityActionsRail` plus `HbHomepageShell`). The
- * standalone `PriorityActionsRail` webpart remains dispatchable for
- * non-flagship hosts but is not dispatched separately on the flagship
- * page. This file flattens the stage sequence inline so designers,
- * reviewers, and tests can see the full canonical entry sequence
- * without needing an SPFx page. Both paths — production and this
- * reference — read the same shared entry-stack orchestration seam at
- * `src/homepage/entryStack/entryStackOrchestration.ts`, so any drift
- * between the stage sequence and policy is detectable and recoverable.
+ * homepage, production dispatches one flagship runtime webpart through
+ * `mount.tsx`: `HbHomepage`. That wrapper owns the hero and launcher
+ * entry regions before `HbHomepageShell`. This file intentionally
+ * remains a non-production, flattened visual reference path so
+ * designers/reviewers can inspect sequence and tone without hosted
+ * SPFx authoring.
  *
  * Phase 16-03 — Unified signature hero with design breakout.
  * Phase 18 (01–04) — Signature hero canonicalized, rebuilt as minimal
  *   premium identity surface, gradient replaced with charcoal background
  *   system, accessibility and doctrine hardened.
  *
- * This is the authoritative composition reference for the HB Central
- * homepage. It demonstrates the premium 5-zone focal sequence:
+ * This is a non-production composition reference for the HB Central
+ * homepage experience. It demonstrates the premium 5-zone focal sequence:
  *
  *   1. Signature Hero — minimal premium identity surface (logo, tagline, greeting)
  *   2. Utility — command surfaces (priority actions + tool launcher)
@@ -49,10 +44,8 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
  * charcoal background system. Accessibility and authoring hardened.
  *
  * This is NOT the production rendering path. In production, the
- * flagship page dispatches the hero and the HbHomepage wrapper/shell
- * through the mount/dispatch seam; the priority actions rail is
- * composed inside the HbHomepage wrapper rather than dispatched as a
- * separate webpart on the flagship page.
+ * flagship page dispatches `HbHomepage` and the wrapper owns hero +
+ * launcher/actions entry regions before shell lanes.
  *
  * @see docs/architecture/plans/MASTER/spfx/homepage/phase-16/
  * @see docs/architecture/plans/MASTER/spfx/homepage/phase-18/

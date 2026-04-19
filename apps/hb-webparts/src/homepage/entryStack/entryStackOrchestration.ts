@@ -53,8 +53,9 @@ import {
 } from './entryStackContract.js';
 
 /**
- * Manifest id for the flagship hero webpart. Dispatched standalone on
- * HBCentral and reusable on non-flagship pages.
+ * Manifest id for the reusable hero webpart surface.
+ * On the flagship homepage this surface is wrapper-embedded; this id
+ * remains the standalone-dispatch id for non-flagship/article hosts.
  */
 export const HERO_ENTRY_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c' as const;
 
@@ -87,8 +88,8 @@ export interface EntryStackSurfaceDescriptor {
   readonly position: EntryStackPosition;
   /**
    * Manifest id used when the stage is dispatched as its own SPFx
-   * webpart (non-flagship hosts, or — for the hero and shell — on the
-   * flagship page itself).
+   * webpart on non-flagship hosts. On the flagship homepage, stages
+   * marked `wrapper-embedded` are composed inside `HbHomepage` instead.
    */
   readonly webPartId: string;
   readonly surfaceName: string;
@@ -120,10 +121,10 @@ export const ENTRY_STACK_SURFACES: readonly EntryStackSurfaceDescriptor[] = [
   {
     position: 'actions',
     webPartId: PRIORITY_ACTIONS_ENTRY_WEBPART_ID,
-    surfaceName: 'PriorityActionsRail',
+    surfaceName: 'HbHomepageLauncherBand (Priority Actions data)',
     flagshipComposition: 'wrapper-embedded',
     compositionRationale:
-      'On the flagship homepage, the rail is composed as a wrapper-owned React surface inside HbHomepage (see HbHomepageEntryStack). The standalone SPFx webpart remains available so non-flagship hosts can still mount the rail on its own and so the authoring/admin surface can own its list schema without shell coupling.',
+      'On the flagship homepage, the wrapper renders the launcher-band actions region fed by Priority Actions data (see HbHomepageEntryStack + HbHomepageLauncherBand). The standalone rail webpart id remains available for non-flagship hosts and authoring/admin list ownership.',
   },
   {
     position: 'first-lane',
