@@ -1,4 +1,4 @@
-import type { INotificationCenterFilter } from '../types/INotification';
+import type { INotificationCenterFilter } from '../types/INotification.js';
 
 export const notificationKeys = {
   all: ['notifications'] as const,

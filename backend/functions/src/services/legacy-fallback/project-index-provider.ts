@@ -1,4 +1,5 @@
 import { DefaultAzureCredential } from '@azure/identity';
+import { InjectHeaders } from '@pnp/queryable';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
 import '@pnp/sp/items/index.js';
@@ -65,13 +66,10 @@ export class LegacyFallbackProjectIndexProvider implements ILegacyFallbackProjec
       throw new Error('Unable to acquire SharePoint access token for project index provider.');
     }
 
-    return (spfi(this.siteUrl) as any).using({
-      bind(instance: any) {
-        instance.on.auth.replace(async (_: unknown, req: Request, done: (request: Request) => void) => {
-          req.headers.set('Authorization', `Bearer ${token.token}`);
-          done(req);
-        });
-      },
-    } as any);
+    return (spfi(this.siteUrl) as any).using(
+      InjectHeaders({
+        Authorization: `Bearer ${token.token}`,
+      }),
+    );
   }
 }

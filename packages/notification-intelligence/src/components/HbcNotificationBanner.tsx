@@ -18,7 +18,7 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import type { INotificationEvent } from '../types/INotification';
+import type { INotificationEvent } from '../types/INotification.js';
 
 const AUTO_DISMISS_MS = 30_000; // D-04: 30 seconds
 

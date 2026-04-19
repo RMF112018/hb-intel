@@ -6,7 +6,7 @@
  * Import this module from ProcessNotification.ts to ensure registrations
  * are loaded at module initialization time.
  */
-import { NotificationRegistry } from '@hbc/notification-intelligence';
+import { NotificationRegistry } from '@hbc/notification-intelligence/registry';
 import { PROVISIONING_NOTIFICATION_REGISTRATIONS } from '@hbc/provisioning';
 
 NotificationRegistry.register(PROVISIONING_NOTIFICATION_REGISTRATIONS);

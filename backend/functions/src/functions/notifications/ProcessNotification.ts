@@ -13,7 +13,7 @@ import './notificationBootstrap.js';
 import { app, output, type InvocationContext } from '@azure/functions';
 import { randomUUID } from 'crypto';
 import type { NotificationSendPayload } from '@hbc/notification-intelligence';
-import { NotificationRegistry } from '@hbc/notification-intelligence';
+import { NotificationRegistry } from '@hbc/notification-intelligence/registry';
 import { resolveEffectiveTier } from './lib/tierResolver.js';
 import { resolveChannels } from './lib/channelRouter.js';
 import { notificationStore } from './lib/notificationStore.js';

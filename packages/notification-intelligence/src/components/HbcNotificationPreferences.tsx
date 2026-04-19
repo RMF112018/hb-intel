@@ -11,9 +11,9 @@
 
 import React, { useState } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import { NotificationRegistry } from '../registry/NotificationRegistry';
-import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
-import type { NotificationTier } from '../types/INotification';
+import { NotificationRegistry } from '../registry/NotificationRegistry.js';
+import { useNotificationPreferences } from '../hooks/useNotificationPreferences.js';
+import type { NotificationTier } from '../types/INotification.js';
 
 export interface HbcNotificationPreferencesProps {
   /** Called after preferences are successfully saved */

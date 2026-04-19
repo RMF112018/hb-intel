@@ -12,13 +12,13 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { NotificationApi } from '../api/NotificationApi';
+import { NotificationApi } from '../api/NotificationApi.js';
 import type {
   INotificationCenterFilter,
   INotificationCenterResult,
   NotificationTier,
-} from '../types/INotification';
-import { notificationKeys } from './queryKeys';
+} from '../types/INotification.js';
+import { notificationKeys } from './queryKeys.js';
 
 export function useNotificationCenter(
   filter: Omit<INotificationCenterFilter, 'cursor'> = {}

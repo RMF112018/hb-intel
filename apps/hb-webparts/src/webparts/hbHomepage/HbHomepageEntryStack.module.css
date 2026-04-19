@@ -27,6 +27,7 @@
   width: 100%;
   max-width: var(--hb-homepage-outer-envelope-max-width);
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .actionsRegion {
@@ -34,6 +35,7 @@
   padding: var(--hb-homepage-actions-inset-block-start)
     var(--hb-homepage-actions-inset-inline)
     0;
+  box-sizing: border-box;
 }
 
 @container homepage-entry-stack (min-width: 768px) {
@@ -67,6 +69,7 @@
 
 .shellRegion {
   width: 100%;
+  box-sizing: border-box;
 }
 
 .actionsRegion,

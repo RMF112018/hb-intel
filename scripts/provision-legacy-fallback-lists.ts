@@ -7,9 +7,9 @@ import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
 import type { IFieldDefinition, IListDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
-  getLegacyFallbackListHostSiteUrl,
   LEGACY_FALLBACK_LIST_DESCRIPTORS,
-} from '../backend/functions/src/services/legacy-fallback/index.js';
+  getLegacyFallbackListHostSiteUrl,
+} from '../backend/functions/src/services/legacy-fallback/list-descriptors.js';
 import {
   getCompatibleSharePointFieldTypes,
   isSharePointFieldTypeCompatible,
@@ -323,7 +323,7 @@ async function provisionLegacyFallbackLists(): Promise<void> {
   for (const descriptor of LEGACY_FALLBACK_LIST_DESCRIPTORS) {
     const result = await withTimeout(
       ensureListDescriptor(sp, descriptor),
-      30_000,
+      180_000,
       `provisioning descriptor ${descriptor.title}`,
     );
     listResults.push(result);

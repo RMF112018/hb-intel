@@ -14,8 +14,8 @@ import type {
   INotificationCenterFilter,
   INotificationCenterResult,
   NotificationSendPayload,
-} from '../types/INotification';
-import { NotificationRegistry } from '../registry/NotificationRegistry';
+} from '../types/INotification.js';
+import { NotificationRegistry } from '../registry/NotificationRegistry.js';
 
 const BASE_URL = '/api/notifications';
 

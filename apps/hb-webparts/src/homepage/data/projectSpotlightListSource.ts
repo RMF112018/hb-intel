@@ -89,6 +89,26 @@ const SELECT_FIELDS = [
 
 const EXPAND_FIELDS = SP_FIELDS.ProjectTeamMembers;
 
+/**
+ * Conservative fallback select set for schema-drift scenarios.
+ *
+ * Keep this list intentionally small so the homepage can render a degraded
+ * spotlight collection when one or more optional/custom columns are missing
+ * in a tenant list, instead of hard-failing the entire runtime on a 400.
+ */
+const FALLBACK_SELECT_FIELDS = [
+  SP_FIELDS.Title,
+  SP_FIELDS.ProjectId,
+  SP_FIELDS.ProjectUrl,
+  SP_FIELDS.HomepageEnabled,
+  SP_FIELDS.IsFeatured,
+  SP_FIELDS.DisplayOrder,
+  SP_FIELDS.Headline,
+  SP_FIELDS.Summary,
+  SP_FIELDS.CtaLabel,
+  SP_FIELDS.CtaUrl,
+].join(',');
+
 /* ── Raw SharePoint item shape ──────────────────────────────────── */
 
 interface SpPersonValue {
@@ -167,6 +187,35 @@ function extractUrl(field: string | { Url?: string; Description?: string } | und
   if (!field) return undefined;
   if (typeof field === 'string') return field || undefined;
   return field.Url || undefined;
+}
+
+function toODataStringLiteral(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+interface SpotlightsEndpointOptions {
+  readonly select: string;
+  readonly filter: string;
+  readonly top: number;
+  readonly expand?: string;
+}
+
+function buildSpotlightsItemsEndpoint(siteUrl: string, options: SpotlightsEndpointOptions): string {
+  const params = [
+    `$select=${options.select}`,
+    options.expand ? `&$expand=${options.expand}` : '',
+    `&$filter=${options.filter}`,
+    `&$top=${options.top}`,
+  ].join('');
+  return (
+    `${siteUrl}/_api/web/lists/getbytitle('${toODataStringLiteral(SP_LIST_TITLE)}')/items?` +
+    params
+  );
+}
+
+function isHttp400Error(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return /\b400\b/.test(error.message);
 }
 
 /**
@@ -324,20 +373,35 @@ export async function fetchSpotlightListItems(
   staleAfterHours?: number;
 }> {
   const filter = `${SP_FIELDS.HomepageEnabled} eq 1`;
-  const url =
-    `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(SP_LIST_TITLE)}')/items` +
-    `?$select=${SELECT_FIELDS}` +
-    `&$expand=${EXPAND_FIELDS}` +
-    `&$filter=${filter}` +
-    `&$top=20`;
+  const fullQueryUrl = buildSpotlightsItemsEndpoint(siteUrl, {
+    select: SELECT_FIELDS,
+    expand: EXPAND_FIELDS,
+    filter,
+    top: 20,
+  });
+  const fallbackQueryUrl = buildSpotlightsItemsEndpoint(siteUrl, {
+    select: FALLBACK_SELECT_FIELDS,
+    filter,
+    top: 20,
+  });
 
   // Narrow mechanics reuse from @hbc/sharepoint-platform: GET with
   // odata=nometadata, non-OK → exception, value[] unwrap. Endpoint
   // construction stays title-bound here until a GUID is registered
   // for the Homepage Project Spotlights list.
-  const rawItems = await fetchListItemsJson<RawSpotlightListItem>(url, {
-    label: 'SharePoint list',
-  });
+  let rawItems: RawSpotlightListItem[];
+  try {
+    rawItems = await fetchListItemsJson<RawSpotlightListItem>(fullQueryUrl, {
+      label: 'SharePoint list',
+    });
+  } catch (error) {
+    if (!isHttp400Error(error)) throw error;
+    // Retry with a schema-light query so tenant field drift does not hard-fail
+    // the homepage runtime. Rendering degrades, but page boot remains stable.
+    rawItems = await fetchListItemsJson<RawSpotlightListItem>(fallbackQueryUrl, {
+      label: 'SharePoint list fallback',
+    });
+  }
 
   // Client-side publish window filter
   const activeItems = rawItems.filter((item) => isWithinPublishWindow(item, now));

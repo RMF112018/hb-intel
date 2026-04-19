@@ -13,8 +13,8 @@
 
 import React, { useState } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import { useNotificationCenter } from '../hooks/useNotificationCenter';
-import type { INotificationEvent, NotificationTier } from '../types/INotification';
+import { useNotificationCenter } from '../hooks/useNotificationCenter.js';
+import type { INotificationEvent, NotificationTier } from '../types/INotification.js';
 
 export interface HbcNotificationCenterProps {
   /** Initial tab selection. Defaults to 'all'. */

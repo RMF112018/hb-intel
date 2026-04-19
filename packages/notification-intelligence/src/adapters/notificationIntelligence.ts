@@ -4,7 +4,7 @@
  * Provides an imperative registerEvent() singleton that wraps
  * NotificationApi.send() for BIC transfer notifications.
  */
-import { NotificationApi } from '../api/NotificationApi';
+import { NotificationApi } from '../api/NotificationApi.js';
 
 export interface IBicNotificationEvent {
   tier: string;

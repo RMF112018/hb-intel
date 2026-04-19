@@ -12,7 +12,7 @@
 import React from 'react';
 import { useComplexity } from '@hbc/complexity';
 import { Notifications } from '@hbc/ui-kit/icons';
-import { useNotificationBadge } from '../hooks/useNotificationBadge';
+import { useNotificationBadge } from '../hooks/useNotificationBadge.js';
 
 export interface HbcNotificationBadgeProps {
   /** Click handler — typically opens the notification center panel */

@@ -20,6 +20,7 @@ export interface ILegacyFallbackDiscoveryRunOptions {
   readonly dryRun?: boolean;
   readonly maxFoldersPerRun?: number;
   readonly matchAnomalyThreshold?: number;
+  readonly boundaryTimeoutMs?: number;
 }
 
 export interface ILegacyFallbackDiscoverySourceSummary {
@@ -85,6 +86,8 @@ interface ILegacyFallbackMutableSamples {
   unmatched: ILegacyFallbackDiscoverySampleRecord | null;
 }
 
+const DEFAULT_BOUNDARY_TIMEOUT_MS = 45_000;
+
 function extractProjectNumber(folderName: string): string {
   const match = folderName.match(LEGACY_PROJECT_NUMBER_REGEX);
   return match?.[0] ?? '';
@@ -126,15 +129,82 @@ export class LegacyFallbackDiscoveryService {
     private readonly logger: ILogger,
   ) {}
 
+  private async runBoundary<T>(
+    name: string,
+    timeoutMs: number,
+    run: () => Promise<T>,
+    data?: Record<string, unknown>,
+  ): Promise<T> {
+    const startedAtMs = Date.now();
+    this.logger.info('legacy-fallback.boundary.start', {
+      domain: 'legacyFallback',
+      boundary: name,
+      timeoutMs,
+      ...(data ?? {}),
+    });
+
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    try {
+      const result = await Promise.race<T>([
+        run(),
+        new Promise<T>((_, reject) => {
+          timeoutHandle = setTimeout(() => {
+            reject(new Error(`legacy-fallback.boundary-timeout:${name}:${timeoutMs}ms`));
+          }, timeoutMs);
+        }),
+      ]);
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+
+      this.logger.info('legacy-fallback.boundary.success', {
+        domain: 'legacyFallback',
+        boundary: name,
+        durationMs: Date.now() - startedAtMs,
+        ...(data ?? {}),
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error('legacy-fallback.boundary.failure', {
+        domain: 'legacyFallback',
+        boundary: name,
+        durationMs: Date.now() - startedAtMs,
+        error: error instanceof Error ? error.message : String(error),
+        ...(data ?? {}),
+      });
+      throw error;
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
+  }
+
   async run(options: ILegacyFallbackDiscoveryRunOptions = {}): Promise<ILegacyFallbackDiscoveryRunSummary> {
     const years = resolveYears(options.years);
     const startedUtc = new Date().toISOString();
     const dryRun = options.dryRun === true;
     const maxFoldersPerRun = Math.max(1, options.maxFoldersPerRun ?? Number.MAX_SAFE_INTEGER);
     const matchAnomalyThreshold = Math.max(1, options.matchAnomalyThreshold ?? 25);
+    const boundaryTimeoutMs = Math.max(5_000, options.boundaryTimeoutMs ?? DEFAULT_BOUNDARY_TIMEOUT_MS);
+    this.logger.info('legacy-fallback.discovery.years-resolved', {
+      domain: 'legacyFallback',
+      dryRun,
+      years,
+      maxFoldersPerRun,
+      matchAnomalyThreshold,
+      boundaryTimeoutMs,
+    });
+
     const runStart: ILegacyFallbackSyncRunStart = dryRun
       ? { runId: `dry-run-${Date.now()}`, itemId: 0 }
-      : await this.repository.startSyncRun(years);
+      : await this.runBoundary(
+        'startSyncRun',
+        boundaryTimeoutMs,
+        async () => this.repository.startSyncRun(years),
+        { years },
+      );
 
     const errors: string[] = [];
     const sourceSummaries: ILegacyFallbackDiscoverySourceSummary[] = [];
@@ -154,9 +224,21 @@ export class LegacyFallbackDiscoveryService {
       unmatched: null,
     };
 
-    const projectIndex = await this.projectIndexProvider.loadIndex();
+    const projectIndex = await this.runBoundary(
+      'projectIndex.read',
+      boundaryTimeoutMs,
+      async () => this.projectIndexProvider.loadIndex(),
+      { runId: runStart.runId },
+    );
+    this.logger.info('legacy-fallback.project-index.loaded', {
+      domain: 'legacyFallback',
+      runId: runStart.runId,
+      count: projectIndex.length,
+    });
 
     try {
+      let firstEnumerationBoundaryCaptured = false;
+      let firstRegistryWriteBoundaryCaptured = false;
       for (const year of years) {
         if (foldersScanned >= maxFoldersPerRun) {
           break;
@@ -183,13 +265,47 @@ export class LegacyFallbackDiscoveryService {
         seenByYear.set(year, seenForYear);
 
         try {
-          const site: ILegacyGraphSite = await this.graphClient.resolveSite(source.siteUrl, source.sitePath);
-          const drive: ILegacyGraphDrive = await this.graphClient.resolveDrive(
-            site.id,
-            source.preferredLibraryName,
-            source.driveOverrideId,
+          const site: ILegacyGraphSite = await this.runBoundary(
+            'graph.resolveSite',
+            boundaryTimeoutMs,
+            async () => this.graphClient.resolveSite(source.siteUrl, source.sitePath),
+            {
+              runId: runStart.runId,
+              year,
+              sourceSiteUrl: source.siteUrl,
+              sourceSitePath: source.sitePath,
+            },
           );
-          const folders = await this.graphClient.listRootFolders(drive.id);
+          const drive: ILegacyGraphDrive = await this.runBoundary(
+            'graph.resolveDrive',
+            boundaryTimeoutMs,
+            async () => this.graphClient.resolveDrive(
+              site.id,
+              source.preferredLibraryName,
+              source.driveOverrideId,
+            ),
+            {
+              runId: runStart.runId,
+              year,
+              siteId: site.id,
+              preferredLibraryName: source.preferredLibraryName ?? '',
+              driveOverrideId: source.driveOverrideId ?? '',
+            },
+          );
+          const folders = await this.runBoundary(
+            firstEnumerationBoundaryCaptured ? 'graph.listRootFolders' : 'graph.listRootFolders.first',
+            boundaryTimeoutMs,
+            async () => this.graphClient.listRootFolders(drive.id),
+            {
+              runId: runStart.runId,
+              year,
+              driveId: drive.id,
+              sourceLibraryName: drive.name,
+            },
+          );
+          if (!firstEnumerationBoundaryCaptured) {
+            firstEnumerationBoundaryCaptured = true;
+          }
           const remainingCapacity = maxFoldersPerRun - foldersScanned;
           const foldersToProcess = folders.slice(0, Math.max(0, remainingCapacity));
 
@@ -260,23 +376,39 @@ export class LegacyFallbackDiscoveryService {
             foldersScanned += 1;
 
             if (!dryRun) {
-              const operation = await this.repository.upsertRegistryRecord({
-                runId: runStart.runId,
-                discoveredAtUtc: startedUtc,
-                projectNumber,
-                projectNameRaw,
-                projectNameNormalized,
-                legacyYear: year,
-                sourceSiteName: site.name,
-                sourceSitePath: source.sitePath,
-                sourceLibraryName: drive.name,
-                driveId: folder.driveId,
-                driveItemId: folder.driveItemId,
-                folderName: folder.folderName,
-                folderPath: folder.folderPath,
-                folderWebUrl: folder.folderWebUrl,
-                matching,
-              });
+              const upsertBoundary = firstRegistryWriteBoundaryCaptured
+                ? 'registry.upsert'
+                : 'registry.upsert.first-after-sync-run-start';
+              const operation = await this.runBoundary(
+                upsertBoundary,
+                boundaryTimeoutMs,
+                async () => this.repository.upsertRegistryRecord({
+                  runId: runStart.runId,
+                  discoveredAtUtc: startedUtc,
+                  projectNumber,
+                  projectNameRaw,
+                  projectNameNormalized,
+                  legacyYear: year,
+                  sourceSiteName: site.name,
+                  sourceSitePath: source.sitePath,
+                  sourceLibraryName: drive.name,
+                  driveId: folder.driveId,
+                  driveItemId: folder.driveItemId,
+                  folderName: folder.folderName,
+                  folderPath: folder.folderPath,
+                  folderWebUrl: folder.folderWebUrl,
+                  matching,
+                }),
+                {
+                  runId: runStart.runId,
+                  year,
+                  driveId: folder.driveId,
+                  driveItemId: folder.driveItemId,
+                },
+              );
+              if (!firstRegistryWriteBoundaryCaptured) {
+                firstRegistryWriteBoundaryCaptured = true;
+              }
 
               const recordKey = createLegacyFallbackRecordKey(folder.driveId, folder.driveItemId);
               seenForYear.add(recordKey);

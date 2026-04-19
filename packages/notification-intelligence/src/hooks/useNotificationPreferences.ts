@@ -10,9 +10,9 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { PreferencesApi } from '../api/PreferencesApi';
-import type { INotificationPreferences } from '../types/INotification';
-import { notificationKeys } from './queryKeys';
+import { PreferencesApi } from '../api/PreferencesApi.js';
+import type { INotificationPreferences } from '../types/INotification.js';
+import { notificationKeys } from './queryKeys.js';
 
 export function useNotificationPreferences() {
   const queryClient = useQueryClient();

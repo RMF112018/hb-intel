@@ -9,8 +9,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { NotificationApi } from '../api/NotificationApi';
-import { notificationKeys } from './queryKeys';
+import { NotificationApi } from '../api/NotificationApi.js';
+import { notificationKeys } from './queryKeys.js';
 
 const BADGE_POLL_INTERVAL_MS = 60_000; // 60 seconds
 

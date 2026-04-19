@@ -99,18 +99,37 @@ app.timer('legacyFallbackDiscoveryTimer', {
   runOnStartup: false,
   handler: async (_timer: Timer, context: InvocationContext): Promise<void> => {
     const logger = createLogger(context);
+    logger.info('legacy-fallback.timer.entry', {
+      domain: 'legacyFallback',
+      functionName: 'legacyFallbackDiscoveryTimer',
+      invocationId: context.invocationId,
+      schedule: TIMER_SCHEDULE,
+    });
 
     try {
       const discoveryConfig = getLegacyFallbackDiscoveryConfig();
+      logger.info('legacy-fallback.timer.config-resolved', {
+        domain: 'legacyFallback',
+        invocationId: context.invocationId,
+        enabled: discoveryConfig.enabled,
+        timerEnabled: discoveryConfig.timerEnabled,
+        years: discoveryConfig.defaultYears,
+        maxFoldersPerRun: discoveryConfig.maxFoldersPerRun,
+      });
       if (!discoveryConfig.enabled || !discoveryConfig.timerEnabled) {
         logger.info('Legacy fallback discovery timer skipped (disabled).', {
           timerEnabled: discoveryConfig.timerEnabled,
           enabled: discoveryConfig.enabled,
+          invocationId: context.invocationId,
         });
         return;
       }
 
       const service = createService(context);
+      logger.info('legacy-fallback.timer.create-service.success', {
+        domain: 'legacyFallback',
+        invocationId: context.invocationId,
+      });
       const summary = await service.run({
         years: discoveryConfig.defaultYears,
         dryRun: false,
@@ -119,6 +138,7 @@ app.timer('legacyFallbackDiscoveryTimer', {
       });
 
       logger.info('Legacy fallback discovery timer run completed.', {
+        invocationId: context.invocationId,
         runId: summary.runId,
         status: summary.status,
         foldersScanned: summary.foldersScanned,
@@ -127,6 +147,7 @@ app.timer('legacyFallbackDiscoveryTimer', {
       });
     } catch (error) {
       logger.error('Legacy fallback discovery timer failed.', {
+        invocationId: context.invocationId,
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;

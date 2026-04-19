@@ -15,7 +15,7 @@
  * @see docs/architecture/adr/0099-notification-intelligence-tiered-model.md
  */
 
-import type { INotificationRegistration } from '../types/INotification';
+import type { INotificationRegistration } from '../types/INotification.js';
 
 // Private store: eventType → registration record
 const _registry = new Map<string, INotificationRegistration>();

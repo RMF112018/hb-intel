@@ -5,7 +5,7 @@
  * NotificationApi.send() for step-wizard overdue notifications.
  */
 import { useMemo } from 'react';
-import { NotificationApi } from '../api/NotificationApi';
+import { NotificationApi } from '../api/NotificationApi.js';
 
 export interface INotificationClientEvent {
   tier: string;

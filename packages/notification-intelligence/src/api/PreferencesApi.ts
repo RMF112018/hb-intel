@@ -10,7 +10,7 @@
  * @see docs/architecture/adr/0099-notification-intelligence-tiered-model.md
  */
 
-import type { INotificationPreferences } from '../types/INotification';
+import type { INotificationPreferences } from '../types/INotification.js';
 
 const PREFERENCES_URL = '/api/notifications/preferences';
 
