@@ -113,8 +113,12 @@ const useStyles = makeStyles({
       boxShadow: elevationLevel2,
     },
   },
+  // Left-edge classification stripe reads as a deliberate identity
+  // marker (closer to a bookmark / rail) instead of a thin top band —
+  // making cards scannable by state at a glance without introducing
+  // chromatic noise in the body.
   activeAccent: {
-    ...shorthands.borderTop('3px', 'solid', HBC_PRIMARY_BLUE),
+    ...shorthands.borderLeft('4px', 'solid', HBC_PRIMARY_BLUE),
   },
 
   // ── Archived/other state (live site, non-active stage) ─────────────
@@ -136,7 +140,7 @@ const useStyles = makeStyles({
     },
   },
   archivedAccent: {
-    ...shorthands.borderTop('3px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+    ...shorthands.borderLeft('4px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
   },
 
   // ── Provisioning state (no site yet) ───────────────────────────────
@@ -146,7 +150,7 @@ const useStyles = makeStyles({
     boxShadow: 'none',
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
     ...shorthands.border('1px', 'dashed', HBC_SURFACE_LIGHT['surface-3']),
-    ...shorthands.borderTop('3px', 'solid', HBC_ACCENT_ORANGE),
+    ...shorthands.borderLeft('4px', 'solid', HBC_ACCENT_ORANGE),
     ':hover': {
       boxShadow: 'none',
       transform: 'none',
@@ -158,11 +162,19 @@ const useStyles = makeStyles({
     boxShadow: elevationLevel0,
     backgroundColor: '#fff5f5',
     ...shorthands.border('1px', 'solid', HBC_STATUS_COLORS.error),
-    ...shorthands.borderTop('3px', 'solid', HBC_STATUS_COLORS.error),
+    ...shorthands.borderLeft('4px', 'solid', HBC_STATUS_COLORS.error),
     ':hover': {
       boxShadow: elevationLevel0,
       transform: 'none',
     },
+  },
+  // ── Legacy-only classification accent (overrides launch-state stripe) ──
+  // Applied on top of the launch-state wrapper to signal "no Projects
+  // list row behind this card." Uses the same amber rail as
+  // provisioning because both states share the "not a modern site"
+  // signal; the small "Legacy" header badge disambiguates.
+  sourceLegacyOnlyAccent: {
+    ...shorthands.borderLeft('4px', 'solid', HBC_ACCENT_ORANGE),
   },
 
   // ── Header ─────────────────────────────────────────────────────────
@@ -200,8 +212,12 @@ const useStyles = makeStyles({
   },
   projectName: {
     fontSize: heading3.fontSize,
-    fontWeight: heading3.fontWeight,
+    // Bump weight over the default heading3 so the project name
+    // anchors the card visually — scanning should read
+    // "Riverside Medical Center" before anything else.
+    fontWeight: 700,
     lineHeight: heading3.lineHeight,
+    letterSpacing: '-0.01em',
     color: HBC_SURFACE_LIGHT['text-primary'],
     marginTop: 0,
     marginBottom: 0,
@@ -562,6 +578,10 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
     cardState === 'archived' && classes.archivedAccent,
     cardState === 'provisioning' && classes.provisioningWrapper,
     cardState === 'attention' && classes.attentionWrapper,
+    // Legacy-only accent applied last so the amber rail wins over the
+    // launch-state rail — provenance is the stronger identity signal
+    // for synthetic records with no Projects list row behind them.
+    entry.sourceClassification === 'legacy-only' && classes.sourceLegacyOnlyAccent,
   );
 
   if (entry.launchStatus.isLaunchable && entry.hasSiteUrl) {

@@ -228,12 +228,51 @@ const useStyles = makeStyles({
   },
 
   // ── Control bar (search / scope / sort / filters) ──────────────────
+  // Command-band surface: a deliberate operational container that
+  // frames the search / filter / sort / advanced-filter controls as a
+  // single command surface, instead of a flat floating row. Subtle
+  // material (surface-1 background + hairline border) reads as
+  // purpose-built command real estate without mimicking page chrome.
+  commandBand: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${HBC_SPACE_SM}px`,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+    borderRadius: HBC_RADIUS_XL,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    marginBottom: `${HBC_SPACE_LG}px`,
+    boxShadow: `0 1px 0 0 rgba(15, 23, 42, 0.02)`,
+  },
+  commandBandCompact: {
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+  },
   controlBar: {
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: `${HBC_SPACE_SM}px`,
-    marginBottom: `${HBC_SPACE_MD}px`,
+    marginBottom: 0,
+  },
+  // Hairline separator inserted between control clusters so grouping
+  // reads as intentional (search | year/sort | advanced) rather than
+  // wrapped overflow. Hidden in compact mode where the stack already
+  // communicates grouping.
+  controlDivider: {
+    width: '1px',
+    alignSelf: 'stretch',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+    marginTop: `${HBC_SPACE_XS}px`,
+    marginBottom: `${HBC_SPACE_XS}px`,
+  },
+  controlDividerHidden: {
+    display: 'none',
   },
   // Medium/tablet: deliberate two-lane composition. Lane 1 = search
   // (full width). Lane 2 = scope + sort + filters grouped in a single
@@ -1157,47 +1196,65 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       </div>
     );
 
+    const dividerClass = mergeClasses(
+      classes.controlDivider,
+      isCompactMode && classes.controlDividerHidden,
+    );
+
     return (
       <>
         <div
           className={mergeClasses(
-            classes.controlBar,
-            isMediumMode && classes.controlBarMedium,
-            isCompactMode && classes.controlBarCompact,
+            classes.commandBand,
+            isCompactMode && classes.commandBandCompact,
           )}
-          role="search"
-          aria-label="Project Sites controls"
-          data-project-sites-control-layout={describeLayoutMode(layoutMode)}
+          data-project-sites-command-band="true"
         >
           <div
             className={mergeClasses(
-              classes.searchSlot,
-              (isCompactMode || isMediumMode) && classes.searchSlotStacked,
+              classes.controlBar,
+              isMediumMode && classes.controlBarMedium,
+              isCompactMode && classes.controlBarCompact,
             )}
+            role="search"
+            aria-label="Project Sites controls"
+            data-project-sites-control-layout={describeLayoutMode(layoutMode)}
           >
-            <HbcSearch
-              variant="local"
-              value={searchInput}
-              onSearch={setSearchInput}
-              placeholder="Search by name, number, client, location, or team…"
-            />
-          </div>
-          {isMediumMode ? (
             <div
-              className={classes.secondaryControlLane}
-              data-project-sites-secondary-lane="medium"
+              className={mergeClasses(
+                classes.searchSlot,
+                (isCompactMode || isMediumMode) && classes.searchSlotStacked,
+              )}
             >
-              {scopeCluster}
-              {sortCluster}
-              {actionsCluster}
+              <HbcSearch
+                variant="local"
+                value={searchInput}
+                onSearch={setSearchInput}
+                placeholder="Search by name, number, client, location, or team…"
+              />
             </div>
-          ) : (
-            <>
-              {scopeCluster}
-              {sortCluster}
-              {actionsCluster}
-            </>
-          )}
+            {isMediumMode ? (
+              <div
+                className={classes.secondaryControlLane}
+                data-project-sites-secondary-lane="medium"
+              >
+                {scopeCluster}
+                <span className={dividerClass} aria-hidden="true" />
+                {sortCluster}
+                <span className={dividerClass} aria-hidden="true" />
+                {actionsCluster}
+              </div>
+            ) : (
+              <>
+                <span className={dividerClass} aria-hidden="true" />
+                {scopeCluster}
+                <span className={dividerClass} aria-hidden="true" />
+                {sortCluster}
+                <span className={dividerClass} aria-hidden="true" />
+                {actionsCluster}
+              </>
+            )}
+          </div>
         </div>
         {isFilterPanelOpen && facets && (
           <div
