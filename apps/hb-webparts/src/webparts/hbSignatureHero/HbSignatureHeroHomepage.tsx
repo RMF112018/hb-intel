@@ -84,6 +84,40 @@ export interface HbSignatureHeroHomepageProps {
 
 type Cubic = [number, number, number, number];
 const EASE: Cubic = [0.22, 1, 0.36, 1];
+type HomepageHeroLayoutMode =
+  | 'premium-wide'
+  | 'compressed-laptop'
+  | 'guided-single-column'
+  | 'compact-short-height'
+  | 'standalone-fallback';
+
+function resolveHomepageHeroLayoutMode(
+  entryStackState: HeroEntryStackState | undefined,
+): HomepageHeroLayoutMode {
+  if (!entryStackState) return 'standalone-fallback';
+  const policy = resolveEntryStackPolicy(entryStackState.entryState);
+  if (
+    entryStackState.shortHeightConstrained ||
+    policy.shortHeightPosture === 'compact-banner' ||
+    entryStackState.entryState.id === 'phone-landscape'
+  ) {
+    return 'compact-short-height';
+  }
+
+  switch (entryStackState.entryState.id) {
+    case 'ultrawide-desktop':
+      return 'premium-wide';
+    case 'standard-laptop':
+      return 'compressed-laptop';
+    case 'tablet-landscape':
+    case 'tablet-portrait-large':
+    case 'tablet-portrait':
+    case 'phone-portrait':
+      return 'guided-single-column';
+    default:
+      return 'guided-single-column';
+  }
+}
 
 /**
  * Reveal choreography — each slot fades up from below with a soft ease.
@@ -133,6 +167,10 @@ export function HbSignatureHeroHomepage({
     () => (entryStackState ? resolveEntryStackPolicy(entryStackState.entryState) : undefined),
     [entryStackState],
   );
+  const layoutMode = React.useMemo(
+    () => resolveHomepageHeroLayoutMode(entryStackState),
+    [entryStackState],
+  );
 
   // Presentation-lane brand tokens exposed as CSS custom properties so the
   // CSS module's scrim warmth and fallback gradient stay anchored to the
@@ -161,6 +199,10 @@ export function HbSignatureHeroHomepage({
       data-hbc-hero-entry-authority={entryStackState ? 'shared-entry-state' : 'standalone-hero'}
       data-hbc-hero-entry-state={entryStackState?.entryState.id}
       data-hbc-hero-entry-reason={entryStackState?.entryStateReason}
+      data-hbc-hero-layout-mode={layoutMode}
+      data-hbc-hero-layout-source={
+        entryStackState ? 'shared-entry-state-policy' : 'standalone-fallback'
+      }
       data-hbc-hero-short-height={
         entryStackState
           ? (entryStackState.shortHeightConstrained ? 'true' : 'false')

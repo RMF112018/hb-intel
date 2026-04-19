@@ -209,11 +209,46 @@ describe('HbSignatureHeroHomepage — shared entry-stack authority', () => {
     expect(hero?.getAttribute('data-hbc-hero-entry-authority')).toBe('shared-entry-state');
     expect(hero?.getAttribute('data-hbc-hero-entry-state')).toBe('standard-laptop');
     expect(hero?.getAttribute('data-hbc-hero-entry-reason')).toBe('width-match');
+    expect(hero?.getAttribute('data-hbc-hero-layout-mode')).toBe('compressed-laptop');
+    expect(hero?.getAttribute('data-hbc-hero-layout-source')).toBe('shared-entry-state-policy');
     expect(hero?.getAttribute('data-hbc-hero-width')).toBe('1320');
     expect(hero?.getAttribute('data-hbc-hero-width-authoritative')).toBe('1400');
     expect(hero?.getAttribute('data-hbc-hero-height-budget-min')).toBe('300');
     expect(hero?.getAttribute('data-hbc-hero-height-budget-max')).toBe('340');
     expect(hero?.getAttribute('style')).toContain('min-height: 300px');
     expect(hero?.getAttribute('style')).toContain('max-height: 340px');
+  });
+
+  it('switches to compact-short-height mode when shared authority reports short-height posture', () => {
+    const { container } = render(
+      <HbSignatureHero
+        identity={{ preferredName: 'Jordan' }}
+        siteUrl="https://hedrickbrotherscom.sharepoint.com/sites/HBCentral"
+        entryStackState={{
+          width: 720,
+          authoritativeWidth: 760,
+          shellInlineInsetTotal: 40,
+          height: 420,
+          entryState: {
+            id: 'phone-landscape',
+            label: 'Compact banner + fast actions',
+            minWidth: 480,
+            maxWidth: 960,
+            firstLaneColumns: 1,
+            firstLanePairingAllowed: false,
+            dominanceRule: 'single',
+          },
+          entryStateReason: 'short-height-override',
+          shortHeightConstrained: true,
+        }}
+      />,
+    );
+
+    const hero = container.querySelector('[data-hbc-premium="signature-hero"]');
+    expect(hero?.getAttribute('data-hbc-hero-layout-mode')).toBe('compact-short-height');
+    expect(hero?.getAttribute('data-hbc-hero-short-height')).toBe('true');
+    expect(hero?.getAttribute('data-hbc-hero-short-height-posture')).toBe('compact-banner');
+    expect(hero?.getAttribute('data-hbc-hero-height-budget-min')).toBe('120');
+    expect(hero?.getAttribute('data-hbc-hero-height-budget-max')).toBe('160');
   });
 });
