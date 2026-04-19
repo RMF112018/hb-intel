@@ -3,6 +3,7 @@ import {
   SHELL_ENTRY_STATES,
   SHORT_HEIGHT_THRESHOLD_PX,
   isFirstLanePairingAllowed,
+  resolveLauncherBreakpointMode,
   resolveEntryState,
   resolveEntryStateWithReason,
 } from '../breakpointPolicy.js';
@@ -120,6 +121,16 @@ describe('resolveEntryStateWithReason', () => {
     const state = resolveEntryState({ width: 1300 });
     const resolved = resolveEntryStateWithReason({ width: 1300 });
     expect(state).toBe(resolved.state);
+  });
+
+  it('projects launcher breakpoint mode for inspectable handheld governance', () => {
+    expect(resolveLauncherBreakpointMode({ width: 1300, height: 900 })).toBe('standard-row');
+    expect(resolveLauncherBreakpointMode({ width: 700, height: 900 })).toBe(
+      'single-entry-all-tools',
+    );
+    expect(resolveLauncherBreakpointMode({ width: 1000, height: 420 })).toBe(
+      'single-entry-all-tools',
+    );
   });
 });
 

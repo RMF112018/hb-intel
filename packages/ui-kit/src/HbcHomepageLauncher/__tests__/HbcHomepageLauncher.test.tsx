@@ -37,6 +37,10 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(root!.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('5');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-count')).toBe('1');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('menu');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-drawer-source')).toBe('overflow-only');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-cap-governance')).toBe(
+      'binding-visible-cap',
+    );
     expect(root!.getAttribute('data-hbc-homepage-launcher-short-height')).toBe('false');
   });
 
@@ -250,5 +254,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
     expect(root?.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('1');
     expect(root?.getAttribute('data-hbc-homepage-launcher-all-tools-count')).toBe('4');
+    expect(root?.getAttribute('data-hbc-homepage-launcher-drawer-source')).toBe('all-tools');
+    expect(root?.getAttribute('data-hbc-homepage-launcher-cap-governance')).toBe(
+      'all-tools-drawer',
+    );
   });
 });

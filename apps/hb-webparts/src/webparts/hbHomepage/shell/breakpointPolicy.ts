@@ -143,6 +143,8 @@ export type EntryStateSelectionReason =
   /** Width was below every state's minimum; fell back to phone-portrait. */
   | 'fallback-below-narrowest';
 
+export type LauncherBreakpointMode = 'standard-row' | 'single-entry-all-tools';
+
 /**
  * Runtime-resolved entry state plus diagnostic reason. Exposed so the
  * shell, harnesses, and tests can inspect *why* a given state applied.
@@ -201,6 +203,19 @@ export function resolveEntryStateWithReason(
     reason: 'fallback-below-narrowest',
     shortHeightConstrained: false,
   };
+}
+
+/**
+ * Launcher-specific inspectable projection from shell breakpoint authority.
+ * Keeps launcher mode derivation anchored to the same width/height decision.
+ */
+export function resolveLauncherBreakpointMode(
+  dimensions: ContainerDimensions,
+): LauncherBreakpointMode {
+  const resolved = resolveEntryStateWithReason(dimensions);
+  return resolved.shortHeightConstrained || resolved.state.id.startsWith('phone')
+    ? 'single-entry-all-tools'
+    : 'standard-row';
 }
 
 export function isFirstLanePairingAllowed(stateId: ShellEntryStateId): boolean {

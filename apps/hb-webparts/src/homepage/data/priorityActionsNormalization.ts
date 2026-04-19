@@ -211,6 +211,9 @@ export interface PriorityActionsBreakpointResult {
   overflowItems: PriorityActionsItemNormalized[];
   maxVisible: number;
   overflowLabel: string;
+  mode: 'standard-row' | 'single-entry-all-tools';
+  drawerSource: 'overflow-only' | 'all-tools';
+  capGovernance: 'binding-visible-cap' | 'all-tools-drawer';
 }
 
 /**
@@ -243,14 +246,22 @@ export const LAUNCHER_VISIBLE_CAP: Readonly<Record<DeviceClass, number>> = Objec
   phone: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.phone,
 });
 
+export type LauncherBreakpointMode = 'standard-row' | 'single-entry-all-tools';
+
 function getMaxVisibleForDevice(
   _config: PriorityActionsConfigResolved,
   device: DeviceClass,
+  mode: LauncherBreakpointMode,
 ): number {
+  if (mode === 'single-entry-all-tools') return 1;
   return LAUNCHER_VISIBLE_CAP[device] ?? LAUNCHER_VISIBLE_CAP.desktop;
 }
 
-export function getLauncherVisibleCap(device: DeviceClass): number {
+export function getLauncherVisibleCap(
+  device: DeviceClass,
+  mode: LauncherBreakpointMode = 'standard-row',
+): number {
+  if (mode === 'single-entry-all-tools') return 1;
   return (
     HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[toHomepageLauncherDeviceClass(device)] ??
     HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop
@@ -261,9 +272,22 @@ export function resolveByBreakpoint(
   items: readonly PriorityActionsItemNormalized[],
   config: PriorityActionsConfigResolved,
   device: DeviceClass,
+  mode: LauncherBreakpointMode = 'standard-row',
 ): PriorityActionsBreakpointResult {
-  const maxVisible = getMaxVisibleForDevice(config, device);
+  const maxVisible = getMaxVisibleForDevice(config, device, mode);
   const overflowLabel = config.overflowLabel || 'More tools';
+
+  if (mode === 'single-entry-all-tools') {
+    return {
+      primaryItems: items.length > 0 ? [items[0]!] : [],
+      overflowItems: [...items],
+      maxVisible,
+      overflowLabel,
+      mode,
+      drawerSource: 'all-tools',
+      capGovernance: 'all-tools-drawer',
+    };
+  }
 
   const forced: PriorityActionsItemNormalized[] = [];
   const eligible: PriorityActionsItemNormalized[] = [];
@@ -279,7 +303,15 @@ export function resolveByBreakpoint(
   const primaryItems = eligible.slice(0, maxVisible);
   const overflowItems = [...eligible.slice(maxVisible), ...forced];
 
-  return { primaryItems, overflowItems, maxVisible, overflowLabel };
+  return {
+    primaryItems,
+    overflowItems,
+    maxVisible,
+    overflowLabel,
+    mode,
+    drawerSource: 'overflow-only',
+    capGovernance: 'binding-visible-cap',
+  };
 }
 
 /* ── Combined pipeline ───────────────────────────────────────────── */
@@ -296,13 +328,14 @@ export function buildPriorityActionsRenderModel(
   activeAudience: string | undefined,
   device: DeviceClass,
   now: Date = new Date(),
+  mode: LauncherBreakpointMode = 'standard-row',
 ): PriorityActionsRenderModel {
   let items = normalizeItemRows(rawRows);
   items = filterByAudience(items, activeAudience);
   items = filterBySchedule(items, now);
   items = filterByDevice(items, device);
 
-  const breakpoint = resolveByBreakpoint(items, config, device);
+  const breakpoint = resolveByBreakpoint(items, config, device, mode);
 
   return { config, allItems: items, breakpoint };
 }

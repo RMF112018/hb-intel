@@ -79,6 +79,8 @@ describe('priorityActionsPresentation — launcher band', () => {
     } as Parameters<typeof resolveLauncherPresentation>[0]);
     expect(desktop.overflowStrategy).toBe('menu');
     expect(desktop.launcherHandheldMode).toBe('standard');
+    expect(desktop.launcherDrawerSource).toBe('overflow-only');
+    expect(desktop.launcherCapGovernance).toBe('binding-visible-cap');
 
     const laptop = resolveLauncherPresentation({
       deviceClass: 'laptop', shortHeightConstrained: false,
@@ -90,6 +92,8 @@ describe('priorityActionsPresentation — launcher band', () => {
     } as Parameters<typeof resolveLauncherPresentation>[0]);
     expect(phone.overflowStrategy).toBe('sheet');
     expect(phone.launcherHandheldMode).toBe('single-entry-all-tools');
+    expect(phone.launcherDrawerSource).toBe('all-tools');
+    expect(phone.launcherCapGovernance).toBe('all-tools-drawer');
 
     const shortHeight = resolveLauncherPresentation({
       deviceClass: 'desktop', shortHeightConstrained: true,

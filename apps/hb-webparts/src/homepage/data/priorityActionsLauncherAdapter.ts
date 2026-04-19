@@ -167,6 +167,8 @@ export interface LauncherPartition {
   overflow: HomepageLauncherTileModel[];
   visibleBudget: number;
   handheldMode: 'standard' | 'single-entry-all-tools';
+  drawerSource: 'overflow-only' | 'all-tools';
+  capGovernance: 'binding-visible-cap' | 'all-tools-drawer';
 }
 
 export interface LauncherBudgetOptions {
@@ -219,6 +221,8 @@ export function partitionItems(
       overflow: allTools,
       visibleBudget: entryTile.length,
       handheldMode,
+      drawerSource: 'all-tools',
+      capGovernance: 'all-tools-drawer',
     };
   }
 
@@ -230,7 +234,14 @@ export function partitionItems(
     ...mapItemToTile(item),
     variant: 'secondary-overflow-entry' as const,
   }));
-  return { primary, overflow, visibleBudget: maxVisible, handheldMode };
+  return {
+    primary,
+    overflow,
+    visibleBudget: maxVisible,
+    handheldMode,
+    drawerSource: 'overflow-only',
+    capGovernance: 'binding-visible-cap',
+  };
 }
 
 /** Backward-compatible alias during chip -> tile transition. */

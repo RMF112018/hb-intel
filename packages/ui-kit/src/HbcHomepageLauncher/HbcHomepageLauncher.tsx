@@ -22,6 +22,8 @@ import {
   HBC_HOMEPAGE_LAUNCHER_VERSION,
 } from './constants.js';
 import type {
+  HomepageLauncherCapGovernance,
+  HomepageLauncherDrawerSource,
   HbcHomepageLauncherProps,
   HomepageLauncherHandheldMode,
   HomepageLauncherOverflowMode,
@@ -46,6 +48,22 @@ function resolveHandheldMode(
     : 'standard';
 }
 
+function resolveDrawerSource(
+  props: HbcHomepageLauncherProps,
+  handheldMode: HomepageLauncherHandheldMode,
+): HomepageLauncherDrawerSource {
+  if (props.drawerSource) return props.drawerSource;
+  return handheldMode === 'single-entry-all-tools' ? 'all-tools' : 'overflow-only';
+}
+
+function resolveCapGovernance(
+  props: HbcHomepageLauncherProps,
+  drawerSource: HomepageLauncherDrawerSource,
+): HomepageLauncherCapGovernance {
+  if (props.capGovernance) return props.capGovernance;
+  return drawerSource === 'all-tools' ? 'all-tools-drawer' : 'binding-visible-cap';
+}
+
 export function HbcHomepageLauncher(
   props: HbcHomepageLauncherProps,
 ): React.JSX.Element {
@@ -62,6 +80,8 @@ export function HbcHomepageLauncher(
   const overflowMode = resolveOverflowMode(props);
   const handheldMode = resolveHandheldMode(props);
   const handheldSingleEntry = handheldMode === 'single-entry-all-tools';
+  const drawerSource = resolveDrawerSource(props, handheldMode);
+  const capGovernance = resolveCapGovernance(props, drawerSource);
   const renderedPrimary = handheldSingleEntry ? [] : primary;
   const hasOverflow = overflow.length > 0;
   const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
@@ -79,6 +99,8 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-overflow-count={overflow.length}
       data-hbc-homepage-launcher-overflow-mode={overflowMode}
       data-hbc-homepage-launcher-handheld-mode={handheldMode}
+      data-hbc-homepage-launcher-drawer-source={drawerSource}
+      data-hbc-homepage-launcher-cap-governance={capGovernance}
       data-hbc-homepage-launcher-all-tools-count={handheldSingleEntry ? overflow.length : undefined}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
     >

@@ -32,6 +32,16 @@ export interface PriorityRailContainerDimensions {
 
 export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'menu' | 'sheet';
 export type LauncherHandheldMode = 'standard' | 'single-entry-all-tools';
+export type LauncherDrawerSource = 'overflow-only' | 'all-tools';
+export type LauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
+
+export interface LauncherGovernanceDecision {
+  handheldMode: LauncherHandheldMode;
+  overflowStrategy: PriorityRailOverflowStrategy;
+  drawerSource: LauncherDrawerSource;
+  capGovernance: LauncherCapGovernance;
+  isHandheld: boolean;
+}
 
 export interface PriorityRailSectionModel {
   key: string;
@@ -46,6 +56,9 @@ export interface PriorityRailDeviceResolution {
   shortHeightConstrained: boolean;
   densityPosture: 'airy' | 'comfortable' | 'compact';
   launcherHandheldMode: LauncherHandheldMode;
+  launcherDrawerSource: LauncherDrawerSource;
+  launcherCapGovernance: LauncherCapGovernance;
+  launcherGovernance: LauncherGovernanceDecision;
 }
 
 export interface PriorityRailPresentationResolution {
@@ -54,6 +67,9 @@ export interface PriorityRailPresentationResolution {
   layout: PriorityRailLayoutMode;
   overflowStrategy: PriorityRailOverflowStrategy;
   launcherHandheldMode: LauncherHandheldMode;
+  launcherDrawerSource: LauncherDrawerSource;
+  launcherCapGovernance: LauncherCapGovernance;
+  launcherGovernance: LauncherGovernanceDecision;
   /** Back-compat field. The launcher band has no authored layout matrix. */
   authoredLayoutMode: string;
   /** Back-compat field. The launcher band applies no normalization steps. */
@@ -86,22 +102,40 @@ export function resolveLauncherHandheldMode(
     : 'standard';
 }
 
+export function resolveLauncherGovernance(
+  resolution: Pick<PriorityRailDeviceResolution, 'deviceClass' | 'shortHeightConstrained'>,
+): LauncherGovernanceDecision {
+  const handheldMode = resolveLauncherHandheldMode(resolution);
+  const isHandheld = handheldMode === 'single-entry-all-tools';
+  return {
+    handheldMode,
+    overflowStrategy: isHandheld ? 'sheet' : 'menu',
+    drawerSource: isHandheld ? 'all-tools' : 'overflow-only',
+    capGovernance: isHandheld ? 'all-tools-drawer' : 'binding-visible-cap',
+    isHandheld,
+  };
+}
+
 export function resolvePriorityRailDeviceForEntryState(
   entryState: SharedEntryStateSnapshot,
 ): PriorityRailDeviceResolution {
   const deviceClass = castRailDeviceClass(
     mapShellEntryStateToPriorityActionsDeviceClass(entryState.entryState.id),
   );
+  const launcherGovernance = resolveLauncherGovernance({
+    deviceClass,
+    shortHeightConstrained: entryState.shortHeightConstrained,
+  });
   return {
     deviceClass,
     shellState: entryState.entryState.id,
     entryStateReason: entryState.entryStateReason,
     shortHeightConstrained: entryState.shortHeightConstrained,
     densityPosture: resolveLauncherDensityPosture(entryState.entryState.id),
-    launcherHandheldMode: resolveLauncherHandheldMode({
-      deviceClass,
-      shortHeightConstrained: entryState.shortHeightConstrained,
-    }),
+    launcherHandheldMode: launcherGovernance.handheldMode,
+    launcherDrawerSource: launcherGovernance.drawerSource,
+    launcherCapGovernance: launcherGovernance.capGovernance,
+    launcherGovernance,
   };
 }
 
@@ -130,13 +164,23 @@ export function resolveLauncherPresentation(
       deviceClass: resolution.deviceClass,
       shortHeightConstrained: resolution.shortHeightConstrained,
     });
-  const useSheet = launcherHandheldMode === 'single-entry-all-tools';
+  const launcherGovernance =
+    resolution.launcherGovernance ??
+    resolveLauncherGovernance({
+      deviceClass: resolution.deviceClass,
+      shortHeightConstrained: resolution.shortHeightConstrained,
+    });
   return {
     deviceClass: resolution.deviceClass,
     shellState: mapPriorityActionsDeviceClassToShellState(resolution.deviceClass as PriorityActionsDeviceClass),
     layout: 'rail',
-    overflowStrategy: useSheet ? 'sheet' : 'menu',
+    overflowStrategy: launcherGovernance.overflowStrategy,
     launcherHandheldMode,
+    launcherDrawerSource:
+      resolution.launcherDrawerSource ?? launcherGovernance.drawerSource,
+    launcherCapGovernance:
+      resolution.launcherCapGovernance ?? launcherGovernance.capGovernance,
+    launcherGovernance,
     authoredLayoutMode: 'launcher',
     normalizations: [],
   };
@@ -153,12 +197,22 @@ export function resolvePriorityRailPresentationForDevice(
   deviceClass: DeviceClass,
 ): PriorityRailPresentationResolution {
   const isHandheld = deviceClass === 'phone';
+  const launcherGovernance: LauncherGovernanceDecision = {
+    handheldMode: isHandheld ? 'single-entry-all-tools' : 'standard',
+    overflowStrategy: isHandheld ? 'sheet' : 'menu',
+    drawerSource: isHandheld ? 'all-tools' : 'overflow-only',
+    capGovernance: isHandheld ? 'all-tools-drawer' : 'binding-visible-cap',
+    isHandheld,
+  };
   return {
     deviceClass,
     shellState: mapPriorityActionsDeviceClassToShellState(deviceClass as PriorityActionsDeviceClass),
     layout: 'rail',
-    overflowStrategy: isHandheld ? 'sheet' : 'menu',
-    launcherHandheldMode: isHandheld ? 'single-entry-all-tools' : 'standard',
+    overflowStrategy: launcherGovernance.overflowStrategy,
+    launcherHandheldMode: launcherGovernance.handheldMode,
+    launcherDrawerSource: launcherGovernance.drawerSource,
+    launcherCapGovernance: launcherGovernance.capGovernance,
+    launcherGovernance,
     authoredLayoutMode: 'launcher',
     normalizations: [],
   };

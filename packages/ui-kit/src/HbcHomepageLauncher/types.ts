@@ -14,6 +14,8 @@ export type HomepageLauncherDeviceClass =
 
 export type HomepageLauncherOverflowMode = 'menu' | 'sheet';
 export type HomepageLauncherHandheldMode = 'standard' | 'single-entry-all-tools';
+export type HomepageLauncherDrawerSource = 'overflow-only' | 'all-tools';
+export type HomepageLauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
 
 export type HomepageLauncherTileVariant =
   | 'primary'
@@ -44,6 +46,8 @@ export interface HbcHomepageLauncherProps {
   deviceClass: HomepageLauncherDeviceClass;
   overflowMode?: HomepageLauncherOverflowMode;
   handheldMode?: HomepageLauncherHandheldMode;
+  drawerSource?: HomepageLauncherDrawerSource;
+  capGovernance?: HomepageLauncherCapGovernance;
   shortHeight?: boolean;
   className?: string;
   'aria-label'?: string;

@@ -396,6 +396,9 @@ describe('resolveByBreakpoint', () => {
     const result = resolveByBreakpoint(items, config, 'phone');
     expect(result.primaryItems).toHaveLength(3);
     expect(result.overflowItems).toHaveLength(3);
+    expect(result.mode).toBe('standard-row');
+    expect(result.drawerSource).toBe('overflow-only');
+    expect(result.capGovernance).toBe('binding-visible-cap');
   });
 
   it('ignores authored maxVisible config knobs for runtime partitioning', () => {
