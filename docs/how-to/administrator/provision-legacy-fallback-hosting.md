@@ -1,6 +1,8 @@
-# Provision Legacy Fallback Hosting (Prompt 03)
+# Provision Legacy Fallback Hosting
 
 This runbook provisions Azure hosting for the Project Sites legacy fallback backend lane.
+
+**Hosting model:** Azure Functions **Flex Consumption** (plan SKU `FC1`, tier `FlexConsumption`, Linux, Node 22). This is the only supported hosting model for this lane. Dedicated App Service plans and legacy Consumption plans are out of scope.
 
 Scope for this phase:
 - staging deployment only,
@@ -43,27 +45,18 @@ The script performs:
 - `az deployment group create` (when `--apply` is provided),
 - smoke checks for Function App presence and required app settings.
 
-### Region/SKU override (if environment constraints block apply)
+### Region override (if environment constraints block apply)
 
-If staging fails due quota or region feature availability, rerun with explicit overrides:
-
-```bash
-AZURE_RESOURCE_GROUP="<staging-rg>" pnpm exec tsx scripts/provision-legacy-fallback-hosting.ts \
-  --environment staging \
-  --location "<supported-region>" \
-  --hosting-plan-sku-name FC1 \
-  --hosting-plan-sku-tier FlexConsumption \
-  --apply
-```
-
-If you already have a compatible hosting plan to reuse:
+If staging fails due to Flex Consumption region feature availability, rerun with an explicit region override:
 
 ```bash
 AZURE_RESOURCE_GROUP="<staging-rg>" pnpm exec tsx scripts/provision-legacy-fallback-hosting.ts \
   --environment staging \
-  --existing-plan-name "<existing-plan-name>" \
+  --location "<flex-supported-region>" \
   --apply
 ```
+
+`--hosting-plan-sku-name` / `--hosting-plan-sku-tier` overrides exist only for staying inside the Flex family (for example, a future Flex SKU). Do not use them to fall back to Dedicated or legacy Consumption SKUs.
 
 ## Post-deploy validation checklist
 

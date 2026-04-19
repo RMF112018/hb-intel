@@ -17,24 +17,16 @@ Authoritative host for the legacy fallback lane is the default Function App comp
 
 The review/admin registrations live in `backend/functions/src/functions/adminApi/legacy-fallback-routes.ts`; that module is the single registration source and is imported by both the default host (`src/index.ts`) and the admin-control-plane host. The admin-control-plane host remains intentionally out of scope for this lane's operational deployment.
 
-## Deployment model gate (required before publish)
+## Hosting model
 
-Capture hosting/runtime truth first and select the deployment command only after this gate:
+This lane is hosted on **Azure Functions Flex Consumption** (plan SKU `FC1`, tier `FlexConsumption`, Linux, Node 22). Flex Consumption is the only supported hosting model for this backend lane; Dedicated / legacy Consumption paths are not approved here. Provisioning is owned by `infra/legacy-fallback-hosting.bicep` and the matching `*.bicepparam` files.
+
+Confirm the target app still reports Flex Consumption before deploying:
 
 ```bash
 az functionapp show -g hb-intel -n hb-intel-function-app \
   --query "{name:name,kind:kind,sku:properties.sku,functionAppConfig:properties.functionAppConfig}" -o json
 ```
-
-Then validate command support:
-
-```bash
-az functionapp deploy -h
-az functionapp deployment source config-zip -h
-func azure functionapp publish --help
-```
-
-Use the command path that is confirmed to be supported by the discovered hosting model.
 
 ## Build and package artifact
 
@@ -54,14 +46,17 @@ The artifact includes:
 
 ## Deploy hosted artifact
 
-For Flex Consumption closure, deploy the packaged zip via Azure CLI:
+The approved deploy path is `.github/workflows/deploy-functions.yml` via `azure/functions-action@v1`. For manual parity (e.g. incident remediation), use the Flex-compatible OneDeploy command:
 
 ```bash
-az functionapp deployment source config-zip \
+az functionapp deploy \
   -g hb-intel \
   -n hb-intel-function-app \
-  --src "$PWD/functions-artifact.zip" -o json
+  --src-path "$PWD/functions-artifact.zip" \
+  --type zip -o json
 ```
+
+Do not use `az functionapp deployment source config-zip` for this lane — it is the legacy Dedicated/Consumption zip-deploy path and is not approved for Flex Consumption.
 
 If deploy status reports trigger sync failure (`status: 6`), force sync triggers and re-check function registration:
 

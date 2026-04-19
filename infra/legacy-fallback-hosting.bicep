@@ -18,17 +18,14 @@ param functionAppName string
 @maxLength(24)
 param hostStorageAccountName string
 
-@description('App Service plan name for Function App hosting.')
+@description('Flex Consumption plan name for Function App hosting. This lane is Flex-only.')
 param hostingPlanName string
 
-@description('Optional existing App Service plan name to reuse. When set, no plan is created.')
-param existingHostingPlanName string = ''
+@description('Flex Consumption plan SKU name. Flex Consumption uses FC1.')
+param hostingPlanSkuName string = 'FC1'
 
-@description('App Service plan SKU name for dedicated hosting.')
-param hostingPlanSkuName string = 'B1'
-
-@description('App Service plan SKU tier for dedicated hosting.')
-param hostingPlanSkuTier string = 'Basic'
+@description('Flex Consumption plan SKU tier.')
+param hostingPlanSkuTier string = 'FlexConsumption'
 
 @description('Application Insights component name.')
 param applicationInsightsName string
@@ -95,7 +92,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = if (empty(existingHostingPlanName)) {
+resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: hostingPlanName
   location: location
   sku: {
@@ -104,13 +101,11 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = if (empty(existing
   }
   kind: 'functionapp'
   properties: {
-    reserved: false
+    reserved: true
   }
 }
 
-var serverFarmId = empty(existingHostingPlanName)
-  ? hostingPlan.id
-  : resourceId('Microsoft.Web/serverfarms', existingHostingPlanName)
+var serverFarmId = hostingPlan.id
 
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: userAssignedIdentityName

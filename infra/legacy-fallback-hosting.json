@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.42.1.51946",
-      "templateHash": "9236096378176754036"
+      "templateHash": "8119125835785381775"
     }
   },
   "parameters": {
@@ -43,28 +43,21 @@
     "hostingPlanName": {
       "type": "string",
       "metadata": {
-        "description": "App Service plan name for Function App hosting."
-      }
-    },
-    "existingHostingPlanName": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Optional existing App Service plan name to reuse. When set, no plan is created."
+        "description": "Flex Consumption plan name for Function App hosting. This lane is Flex-only."
       }
     },
     "hostingPlanSkuName": {
       "type": "string",
-      "defaultValue": "B1",
+      "defaultValue": "FC1",
       "metadata": {
-        "description": "App Service plan SKU name for dedicated hosting."
+        "description": "Flex Consumption plan SKU name. Flex Consumption uses FC1."
       }
     },
     "hostingPlanSkuTier": {
       "type": "string",
-      "defaultValue": "Basic",
+      "defaultValue": "FlexConsumption",
       "metadata": {
-        "description": "App Service plan SKU tier for dedicated hosting."
+        "description": "Flex Consumption plan SKU tier."
       }
     },
     "applicationInsightsName": {
@@ -154,7 +147,7 @@
     "storageQueueDataContributor": "974c5e8b-45b9-4653-ba55-5f855dd0fb88",
     "storageTableDataContributor": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
     "keyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
-    "serverFarmId": "[if(empty(parameters('existingHostingPlanName')), resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName')), resourceId('Microsoft.Web/serverfarms', parameters('existingHostingPlanName')))]",
+    "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
     "deploymentPackageContainerUrl": "[format('https://{0}.blob.{1}/{2}', parameters('hostStorageAccountName'), environment().suffixes.storage, parameters('deploymentPackageContainerName'))]"
   },
   "resources": [
@@ -185,7 +178,6 @@
       }
     },
     {
-      "condition": "[empty(parameters('existingHostingPlanName'))]",
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
       "name": "[parameters('hostingPlanName')]",
@@ -196,7 +188,7 @@
       },
       "kind": "functionapp",
       "properties": {
-        "reserved": false
+        "reserved": true
       }
     },
     {

@@ -10,7 +10,6 @@ interface ProvisionOptions {
   readonly runApply: boolean;
   readonly runSmoke: boolean;
   readonly locationOverride: string | null;
-  readonly existingPlanName: string | null;
   readonly hostingPlanSkuName: string | null;
   readonly hostingPlanSkuTier: string | null;
 }
@@ -59,7 +58,6 @@ function parseArgs(argv: readonly string[]): ProvisionOptions {
     runApply,
     runSmoke,
     locationOverride: args.get('location') ?? null,
-    existingPlanName: args.get('existing-plan-name') ?? null,
     hostingPlanSkuName: args.get('hosting-plan-sku-name') ?? null,
     hostingPlanSkuTier: args.get('hosting-plan-sku-tier') ?? null,
   };
@@ -147,9 +145,6 @@ function main(): void {
   const parameterOverrides: string[] = [];
   if (options.locationOverride) {
     parameterOverrides.push(`location=${options.locationOverride}`);
-  }
-  if (options.existingPlanName) {
-    parameterOverrides.push(`existingHostingPlanName=${options.existingPlanName}`);
   }
   if (options.hostingPlanSkuName) {
     parameterOverrides.push(`hostingPlanSkuName=${options.hostingPlanSkuName}`);
