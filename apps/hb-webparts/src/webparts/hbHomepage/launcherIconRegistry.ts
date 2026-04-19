@@ -1,8 +1,9 @@
-import { Building2, type LucideIcon } from '@hbc/ui-kit/homepage';
+import { type LucideIcon } from '@hbc/ui-kit/homepage';
 import adpLogo from '../../../../hb-homepage/assets/icons/adp_logo.svg';
 import bambooHrLogo from '../../../../hb-homepage/assets/icons/bambooHR_white.svg';
 import compassLogo from '../../../../hb-homepage/assets/icons/compass_icon.svg';
 import documentCrunchLogo from '../../../../hb-homepage/assets/icons/document-crunch-logo.svg';
+import hbProjectsIcon from '../../../../hb-homepage/assets/icons/hb_projects_icon.svg';
 import hh2Logo from '../../../../hb-homepage/assets/icons/hh2.svg';
 import hbUniversityLogo from '../../../../hb-homepage/assets/icons/HB University.svg';
 import procoreLogo from '../../../../hb-homepage/assets/icons/Primary_Procore_LogoMark_2Col-Black_RGB.svg';
@@ -17,8 +18,8 @@ export interface HomepageLauncherGovernedIcon {
 
 const GOVERNED_ICON_BY_ACTION_KEY: Readonly<Record<string, HomepageLauncherGovernedIcon>> = Object.freeze({
   'hb-projects': {
-    icon: Building2,
-    iconKey: 'hb-projects-building2',
+    iconAssetSrc: hbProjectsIcon,
+    iconKey: 'hb-projects',
     iconPresentation: 'compliant',
   },
   'my-adp': {
