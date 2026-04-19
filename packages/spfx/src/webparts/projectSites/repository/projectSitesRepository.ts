@@ -1,3 +1,20 @@
+/**
+ * SharePoint I/O seam for the Project Sites surface.
+ *
+ * This module is the **I/O layer only**: it fetches raw Projects list
+ * rows and raw Legacy Project Fallback Registry rows via PnPjs, narrows
+ * the registry rows into adapter candidates
+ * (`legacyFallbackRegistryAdapter.ts`), and returns the pair as
+ * `IProjectSitesQueryResult`. All merge, dedup, source-classification,
+ * synthetic legacy-only emission, and launch-target resolution live in
+ * `projectSitesResolver.ts` — this file does not join rows, does not
+ * decide precedence, and does not construct `IProjectSiteEntry`.
+ *
+ * The explicit `PROJECT_SITES_SELECT_FIELDS` and adapter-owned
+ * `LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS` keep the SP-side read surface
+ * intentional. The re-exports below preserve import compatibility for
+ * callers that historically pulled adapter helpers from this module.
+ */
 import { spfi, SPFx } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';

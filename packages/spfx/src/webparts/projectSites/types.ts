@@ -1,22 +1,33 @@
 /**
  * Data contract for the Project Sites web part.
  *
- * Defines the normalized shape returned to the UI after querying the
- * HBCentral Projects list. The UI supports both year-scoped browsing
- * and an `All Projects` scope (W01r-P12), plus client-side search,
- * sort, and advanced filters over the normalized entry set.
+ * The surface is a **merged-source access layer** — not a single-list
+ * browser. Entries delivered to the UI are produced by
+ * `projectSitesResolver.ts` by joining the HBCentral Projects list and
+ * the Legacy Project Fallback Registry, and fall into three
+ * classifications on every record:
+ *
+ *   - `project-only` — Projects list row with no matched fallback
+ *   - `merged`       — Projects list row joined to an approved fallback
+ *   - `legacy-only`  — synthetic record from the fallback registry with
+ *                      no corresponding Projects list row
+ *
+ * `IProjectSiteEntry` is the flat, UI-ready shape all three classes
+ * collapse into. Clients should treat `recordKey` (not `id`) as the
+ * stable identity, and should branch on `sourceClassification` /
+ * `launchTargetKind` when origin or launch behavior matters.
+ *
+ * The UI supports both year-scoped browsing and an `All Projects` scope
+ * (W01r-P12), plus client-side search, sort, and advanced filters
+ * (including a source-aware dimension) over the merged entry set.
  *
  * IMPORTANT — Field name mapping:
  * The HBCentral Projects list was created from an import. The older
  * columns use generic internal names (`field_1`, `field_2`, …), while
  * newer columns (W01r-P12 added set) use their display name as their
  * internal name. The mapping below is confirmed from the live list
- * schema export (`/Users/bobbyfetting/Downloads/Projects-List-Schema.csv`,
- * 2026-04-09).
- *
- * The normalizer reads raw items by their confirmed internal names,
- * with display-name fallbacks for forward compatibility if the list
- * is ever re-provisioned.
+ * schema export. These constants describe the *Projects list source*
+ * the normalizer reads; they are not the merged contract itself.
  */
 
 // ── SharePoint field name mapping ──────────────────────────────────────────
@@ -107,8 +118,13 @@ export const PROJECT_SITES_ALL_SCOPE_LIMIT = 2000;
  * Normalized, UI-ready record for a single project site.
  *
  * Ownership contract:
- * - Shared with the UI (`ProjectSitesRoot`, `ProjectSiteCard`), the client-side
- *   filter pipeline (`projectSitesFilter.ts`), and the hook layer.
+ * - Produced by `projectSitesResolver.ts` (the single merge authority);
+ *   consumed by the UI (`ProjectSitesRoot`, `ProjectSiteCard`), the
+ *   client-side filter pipeline (`projectSitesFilter.ts`), and the hook
+ *   layer. No other module may fabricate this shape directly.
+ * - Represents all three source classes (`project-only` / `merged` /
+ *   `legacy-only`) in one flat structure; callers branch on
+ *   `sourceClassification` and `launchTargetKind` as needed.
  * - Intentionally flat and user-facing — no raw SharePoint field names.
  * - `ProjectId` is deliberately NOT exposed as a user-facing concern
  *   (see `docs/architecture/reviews/spfx/project-sites/project-sites-search-filter-sort-enhancement.md`).

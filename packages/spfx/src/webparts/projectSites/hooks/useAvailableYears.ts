@@ -1,9 +1,19 @@
 /**
- * React hook that fetches distinct Year values from the canonical
- * Project Sites repository adapter.
+ * React hook that supplies the year-selector options for the Project
+ * Sites surface.
  *
- * Returns a sorted (descending) array of valid years for the year selector UI.
- * Uses PnPjs v4 with SPFx context and @tanstack/react-query for caching.
+ * Years are fetched from the canonical Project Sites repository adapter,
+ * which today discovers them from the Projects list column (the surface's
+ * primary inventory source). Selecting a year here drives a scoped
+ * `useProjectSites` query; the resolver then joins fallback-registry
+ * rows for that year, so legacy-backed records surface within the
+ * selected year even though the year *options* currently originate from
+ * the Projects list. Expanding year discovery to be fallback-inclusive
+ * in All-Projects scope is a future lane.
+ *
+ * Returns a sorted (descending) array of valid years for the year
+ * selector UI. Uses PnPjs v4 with SPFx context and @tanstack/react-query
+ * for caching.
  */
 import { useQuery } from '@tanstack/react-query';
 import type { IAvailableYearsResult } from '../types.js';
