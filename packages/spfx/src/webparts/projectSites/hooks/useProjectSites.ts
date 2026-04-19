@@ -1,16 +1,21 @@
 /**
- * React hook that queries the HBCentral Projects list for project sites
- * in a user-selected scope.
+ * React hook that delivers the merged Project Sites record set for a
+ * user-selected scope.
+ *
+ * Flow:
+ *   repository → raw Projects list rows + narrowed registry candidates
+ *   resolver   → merged `IProjectSiteEntry[]` (project-only, merged,
+ *                synthetic legacy-only) with deterministic precedence
+ *   hook       → wraps status, scope, and error surface for the UI
+ *
+ * This hook does NOT run its own merge or normalization — the resolver
+ * (`projectSitesResolver.ts`) is the single authority. It also does NOT
+ * apply search / sort / filter; those are composed on top of the merged
+ * entries by the consumer via `projectSitesFilter.ts`.
  *
  * W01r-P12 scope model:
  *   - `{ kind: 'year', year }` — server-side filtered by `Year eq {year}`
- *   - `{ kind: 'all' }` — unfiltered, capped at `top(5000)`
- *
- * The hook does NOT apply search/sort/filter — those are composed on top
- * of the normalized entries by the consumer via `projectSitesFilter.ts`.
- *
- * Uses the canonical repository adapter which enforces an explicit `$select`
- * field contract and bounded all-projects strategy.
+ *   - `{ kind: 'all' }` — unfiltered, capped per repository policy
  */
 import { useQuery } from '@tanstack/react-query';
 import type {

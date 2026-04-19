@@ -248,12 +248,6 @@ export type ProjectSiteLaunchReasonCode =
   | 'site-not-provisioned'
   | 'critical-data-issue';
 
-export const PROJECT_SITES_FALLBACK_FIELDS = {
-  LEGACY_FALLBACK_FOLDER_URL: '__legacyFallbackFolderUrl',
-  LEGACY_FALLBACK_SOURCE_YEAR: '__legacyFallbackSourceYear',
-  LEGACY_FALLBACK_MATCH_STATUS: '__legacyFallbackMatchStatus',
-} as const;
-
 export interface IProjectSiteLaunchStatus {
   state: ProjectSiteLaunchState;
   reasonCode: ProjectSiteLaunchReasonCode;

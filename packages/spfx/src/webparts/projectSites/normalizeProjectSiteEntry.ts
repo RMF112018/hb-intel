@@ -1,16 +1,24 @@
 /**
- * Normalizes raw SharePoint Projects list items into UI-ready `IProjectSiteEntry`
- * records.
+ * Normalizes a single raw SharePoint Projects list item — in the context
+ * of an optional merged fallback candidate — into a UI-ready
+ * `IProjectSiteEntry`.
  *
- * Uses the confirmed internal field name mapping (legacy `field_N` columns for
- * the older set, display-name internal names for the W01r-P12 added set) from
- * the HBCentral Projects list schema. No fuzzy matching — direct key access
- * using the known internal names, with display-name fallbacks for forward
- * compatibility if the list is ever re-provisioned.
+ * Ownership:
+ * - This module is the project-row normalization seam. It is invoked by
+ *   the merged-source resolver (`projectSitesResolver.ts`); no other
+ *   caller should exist. Source classification (`project-only` vs
+ *   `merged`) and launch-target selection flow from the presence or
+ *   absence of a merged fallback candidate passed in `mergedContext`.
+ * - Legacy-only synthetic records are built by the resolver directly and
+ *   never pass through this module.
  *
- * The Title field (`{number} — {name}`) is used as a fallback when the
- * dedicated ProjectName (`field_3`) or ProjectNumber (`field_2`) fields are
- * empty.
+ * Field mapping: uses the confirmed internal field name mapping (legacy
+ * `field_N` columns for the older set, display-name internal names for
+ * the W01r-P12 added set) from the HBCentral Projects list schema. No
+ * fuzzy matching — direct key access with display-name fallbacks. The
+ * `Title` field (`{number} — {name}`) is used as a fallback when the
+ * dedicated `ProjectName` (`field_3`) or `ProjectNumber` (`field_2`)
+ * fields are empty.
  */
 import type {
   IProjectSiteEntry,
@@ -20,13 +28,26 @@ import type {
   ProjectSiteLaunchTargetKind,
   ProjectSiteSourceClassification,
 } from './types.js';
-import { PROJECT_SITES_FALLBACK_FIELDS, SP_PROJECTS_FIELDS, isValidYear } from './types.js';
+import { SP_PROJECTS_FIELDS, isValidYear } from './types.js';
 import { deriveProjectSiteLaunchStatus } from './projectSiteLaunchState.js';
 import {
   buildLegacyRegistryKey,
   buildProjectSiteRecordKey,
   recordKeySourceFor,
 } from './projectSiteRecordKey.js';
+import type { ILegacyFallbackRegistryCandidate } from './repository/legacyFallbackRegistryAdapter.js';
+
+/**
+ * Merged context passed in by the resolver. `candidate` is the approved
+ * fallback row that was joined to this project (by strong linkage or
+ * heuristic); `registryKeyOverride` lets the resolver preserve the
+ * registry row's own `(projectNumber, legacyYear)` in `sourceRefs` for
+ * strong-linkage joins where those differ from the project's.
+ */
+export interface IProjectRowMergedContext {
+  candidate: ILegacyFallbackRegistryCandidate | null;
+  registryKeyOverride?: string | null;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -135,12 +156,19 @@ function parseTitle(title: string): [string, string] {
 // ── Main normalizer ───────────────────────────────────────────────────────
 
 /**
- * Normalize a single raw SharePoint list item into a UI-ready record.
+ * Normalize a single raw Projects list item into a UI-ready record,
+ * incorporating the merged fallback candidate (if any) supplied by the
+ * resolver.
  *
- * Reads fields by their confirmed internal names with display-name fallbacks
- * for forward compatibility if the list is ever re-provisioned.
+ * Reads fields by their confirmed internal names with display-name
+ * fallbacks for forward compatibility if the list is ever re-provisioned.
+ * Fallback folder URL, match status, and source-year come from
+ * `mergedContext.candidate` — never from sentinel fields on the raw row.
  */
-export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjectSiteEntry {
+export function normalizeProjectSiteEntry(
+  raw: Record<string, unknown>,
+  mergedContext: IProjectRowMergedContext = { candidate: null },
+): IProjectSiteEntry {
   // Standard fields
   const id = typeof raw.Id === 'number' ? raw.Id : (typeof raw.ID === 'number' ? raw.ID : 0);
   const title = safeString(raw[SP_PROJECTS_FIELDS.TITLE]);
@@ -179,16 +207,13 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
   const rawPrimarySiteUrl = extractUrl(siteUrlRaw);
   const primarySiteUrl = isHttpUrl(rawPrimarySiteUrl) ? rawPrimarySiteUrl : '';
 
-  const rawLegacyFallbackFolderUrl = extractUrl(raw[PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_FOLDER_URL]);
-  const legacyFallbackFolderUrl = isHttpUrl(rawLegacyFallbackFolderUrl) ? rawLegacyFallbackFolderUrl : '';
-  const legacyFallbackSourceYearRaw = raw[PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_SOURCE_YEAR];
-  const legacyFallbackSourceYear =
-    typeof legacyFallbackSourceYearRaw === 'number' && Number.isInteger(legacyFallbackSourceYearRaw)
-      ? legacyFallbackSourceYearRaw
-      : null;
-  const legacyFallbackMatchStatusRaw = safeString(raw[PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_MATCH_STATUS]);
+  const candidate = mergedContext.candidate;
+  const legacyFallbackFolderUrl = candidate && isHttpUrl(candidate.folderWebUrl)
+    ? candidate.folderWebUrl
+    : '';
+  const legacyFallbackSourceYear = candidate ? candidate.legacyYear : null;
   const legacyFallbackMatchStatus: IProjectSiteEntry['legacyFallbackMatchStatus'] =
-    legacyFallbackMatchStatusRaw === 'matched' ? 'matched' : '';
+    candidate ? 'matched' : '';
 
   const launchTargetKind: ProjectSiteLaunchTargetKind = primarySiteUrl
     ? 'primary-site'
@@ -229,14 +254,21 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
   });
 
   // Source classification + merged record identity.
-  // This normalizer only ever sees Projects list rows, so `legacy-only`
-  // synthetic records are produced by a separate (future) path.
-  const sourceClassification: ProjectSiteSourceClassification =
-    legacyFallbackMatchStatus === 'matched' ? 'merged' : 'project-only';
-  const legacyRegistryKey = buildLegacyRegistryKey(projectNumber, legacyFallbackSourceYear);
+  // This normalizer only ever sees Projects list rows (legacy-only
+  // synthetic records are built by the resolver directly), so the
+  // classification is `merged` iff a candidate was supplied, otherwise
+  // `project-only`. The registry key prefers the resolver-supplied
+  // override — this preserves the registry row's own (projectNumber,
+  // legacyYear) for strong-linkage joins where those diverge from the
+  // project row's.
+  const sourceClassification: ProjectSiteSourceClassification = candidate ? 'merged' : 'project-only';
+  const derivedRegistryKey = candidate
+    ? buildLegacyRegistryKey(candidate.projectNumber, candidate.legacyYear)
+    : '';
+  const registryKey = mergedContext.registryKeyOverride ?? (derivedRegistryKey || null);
   const sourceRefs: IProjectSiteSourceRefs = {
     projectsListId: id > 0 ? id : null,
-    legacyRegistryKey: legacyRegistryKey.length > 0 ? legacyRegistryKey : null,
+    legacyRegistryKey: registryKey && registryKey.length > 0 ? registryKey : null,
     legacyRegistrySourceYear: legacyFallbackSourceYear,
   };
   const recordKey = buildProjectSiteRecordKey(recordKeySourceFor(sourceClassification), {
@@ -279,24 +311,4 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
     dataQuality,
     launchStatus,
   };
-}
-
-/**
- * Normalize an array of raw list items. Uses a stable default sort by
- * `projectNumber` then `projectName`, which the UI's sort pipeline will
- * override per the user's selected sort key.
- */
-export function normalizeProjectSiteEntries(
-  rawItems: Record<string, unknown>[],
-): IProjectSiteEntry[] {
-  return rawItems
-    .map(normalizeProjectSiteEntry)
-    .sort((a, b) => {
-      if (a.projectNumber && !b.projectNumber) return -1;
-      if (!a.projectNumber && b.projectNumber) return 1;
-      if (a.projectNumber !== b.projectNumber) {
-        return a.projectNumber.localeCompare(b.projectNumber);
-      }
-      return a.projectName.localeCompare(b.projectName);
-    });
 }

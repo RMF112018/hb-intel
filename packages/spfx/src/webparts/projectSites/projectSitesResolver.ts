@@ -29,12 +29,10 @@
 import type {
   IProjectSiteEntry,
   IProjectSiteDataQuality,
-  IProjectSiteSourceRefs,
   IRawProjectSiteItem,
   ProjectSiteDataIssueCode,
 } from './types.js';
 import {
-  PROJECT_SITES_FALLBACK_FIELDS,
   SP_PROJECTS_FIELDS,
   isValidYear,
 } from './types.js';
@@ -93,56 +91,6 @@ function groupBestByKey<K>(
     if (best) winners.set(key, best);
   }
   return winners;
-}
-
-/**
- * Decorate a raw Projects list row with the fallback-registry sentinel
- * fields consumed by `normalizeProjectSiteEntry`. This replaces the old
- * repository-local `applyFallbackLookup` so the decoration lives next to
- * the other merge rules.
- */
-function decorateProjectRowWithFallback(
-  row: IRawProjectSiteItem,
-  candidate: ILegacyFallbackRegistryCandidate | null,
-): IRawProjectSiteItem {
-  if (!candidate) {
-    return {
-      ...row,
-      [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_FOLDER_URL]: '',
-      [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_SOURCE_YEAR]: null,
-      [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_MATCH_STATUS]: '',
-    };
-  }
-  return {
-    ...row,
-    [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_FOLDER_URL]: candidate.folderWebUrl,
-    [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_SOURCE_YEAR]: candidate.legacyYear,
-    [PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_MATCH_STATUS]: candidate.matchStatus,
-  };
-}
-
-/**
- * Annotate a normalized project-anchored entry with the surviving
- * `sourceRefs.legacyRegistryKey` when the matched candidate was joined by
- * strong linkage rather than heuristic. The normalizer builds the
- * `legacyRegistryKey` from the *project's* `(projectNumber, legacyYear)`,
- * which is the right answer for heuristic joins; for strong-linkage
- * matches where the registry row's `(projectNumber, legacyYear)` might
- * differ, preserve the registry's own key so downstream linkage
- * diagnostics remain accurate.
- */
-function withStrongLinkageRegistryKey(
-  entry: IProjectSiteEntry,
-  candidate: ILegacyFallbackRegistryCandidate,
-): IProjectSiteEntry {
-  const registryKey = buildLegacyRegistryKey(candidate.projectNumber, candidate.legacyYear);
-  if (!registryKey) return entry;
-  const sourceRefs: IProjectSiteSourceRefs = {
-    ...entry.sourceRefs,
-    legacyRegistryKey: registryKey,
-    legacyRegistrySourceYear: candidate.legacyYear,
-  };
-  return { ...entry, sourceRefs };
 }
 
 function buildSyntheticLegacyEntry(
@@ -281,13 +229,23 @@ export function resolveProjectSiteEntries(
 
     if (chosen) consumedCandidateIds.add(chosen.id);
 
-    const decorated = decorateProjectRowWithFallback(row, chosen);
-    const entry = normalizeProjectSiteEntry(decorated);
-    const annotated = chosen && strongMatch ? withStrongLinkageRegistryKey(entry, chosen) : entry;
+    // For strong-linkage matches, preserve the registry row's own
+    // (projectNumber, legacyYear) in sourceRefs so downstream linkage
+    // diagnostics remain accurate even when those differ from the
+    // project's own values.
+    const registryKeyOverride =
+      chosen && strongMatch
+        ? buildLegacyRegistryKey(chosen.projectNumber, chosen.legacyYear) || null
+        : null;
 
-    if (!seenKeys.has(annotated.recordKey)) {
-      seenKeys.add(annotated.recordKey);
-      emitted.push(annotated);
+    const entry = normalizeProjectSiteEntry(row, {
+      candidate: chosen,
+      registryKeyOverride,
+    });
+
+    if (!seenKeys.has(entry.recordKey)) {
+      seenKeys.add(entry.recordKey);
+      emitted.push(entry);
     }
   }
 

@@ -1,8 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import {
-  normalizeProjectSiteEntry,
-  normalizeProjectSiteEntries,
-} from './normalizeProjectSiteEntry.js';
+import { normalizeProjectSiteEntry } from './normalizeProjectSiteEntry.js';
+import type { ILegacyFallbackRegistryCandidate } from './repository/legacyFallbackRegistryAdapter.js';
+
+function candidate(
+  overrides?: Partial<ILegacyFallbackRegistryCandidate>,
+): ILegacyFallbackRegistryCandidate {
+  return {
+    id: 500,
+    projectNumber: '25-244-01',
+    projectNameRaw: '',
+    legacyYear: 2025,
+    folderWebUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2F2025Projects%2FShared%20Documents%2F25%2D244%2D01',
+    matchStatus: 'matched',
+    matchedProjectListItemId: null,
+    matchedProjectTitle: '',
+    matchConfidence: null,
+    matchMethod: null,
+    lastValidatedUtc: '2026-04-18T10:00:00.000Z',
+    lastSeenUtc: '2026-04-18T09:00:00.000Z',
+    ...overrides,
+  };
+}
 
 // ── Factories using confirmed internal field names ────────────────────────
 
@@ -92,12 +110,9 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
   });
 
   it('uses legacy fallback folder when primary site is missing', () => {
-    const result = normalizeProjectSiteEntry(createItem({
-      field_23: '',
-      __legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2F2025Projects%2FShared%20Documents%2F25%2D244%2D01',
-      __legacyFallbackSourceYear: 2025,
-      __legacyFallbackMatchStatus: 'matched',
-    }));
+    const result = normalizeProjectSiteEntry(createItem({ field_23: '' }), {
+      candidate: candidate(),
+    });
 
     expect(result.primarySiteUrl).toBe('');
     expect(result.legacyFallbackFolderUrl).toContain('/sites/2025Projects/');
@@ -108,12 +123,16 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
   });
 
   it('keeps primary site precedence when both primary and fallback are present', () => {
-    const result = normalizeProjectSiteEntry(createItem({
-      field_23: 'https://hedrickbrotherscom.sharepoint.com/sites/25-244-01TheWellingtonEstateHomes',
-      __legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents',
-      __legacyFallbackSourceYear: 2025,
-      __legacyFallbackMatchStatus: 'matched',
-    }));
+    const result = normalizeProjectSiteEntry(
+      createItem({
+        field_23: 'https://hedrickbrotherscom.sharepoint.com/sites/25-244-01TheWellingtonEstateHomes',
+      }),
+      {
+        candidate: candidate({
+          folderWebUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents',
+        }),
+      },
+    );
 
     expect(result.launchTargetKind).toBe('primary-site');
     expect(result.primarySiteUrl).toContain('/sites/25-244-01TheWellingtonEstateHomes');
@@ -215,18 +234,28 @@ describe('normalizeProjectSiteEntry — merged record identity', () => {
   });
 
   it('classifies as merged and exposes a legacyRegistryKey when the fallback matched', () => {
-    const result = normalizeProjectSiteEntry(createItem({
-      Id: 7,
-      field_2: '25-244-01',
-      __legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents',
-      __legacyFallbackSourceYear: 2025,
-      __legacyFallbackMatchStatus: 'matched',
-    }));
+    const result = normalizeProjectSiteEntry(
+      createItem({ Id: 7, field_2: '25-244-01' }),
+      { candidate: candidate({ projectNumber: '25-244-01', legacyYear: 2025 }) },
+    );
     expect(result.sourceClassification).toBe('merged');
     expect(result.recordKey).toBe('project:7');
     expect(result.sourceRefs.projectsListId).toBe(7);
     expect(result.sourceRefs.legacyRegistryKey).toBe('25-244-01:2025');
     expect(result.sourceRefs.legacyRegistrySourceYear).toBe(2025);
+  });
+
+  it('honors registryKeyOverride for strong-linkage joins', () => {
+    const result = normalizeProjectSiteEntry(
+      createItem({ Id: 7, field_2: '25-244-01' }),
+      {
+        candidate: candidate({ projectNumber: '99-999-99', legacyYear: 1999 }),
+        registryKeyOverride: '99-999-99:1999',
+      },
+    );
+    expect(result.sourceClassification).toBe('merged');
+    expect(result.sourceRefs.legacyRegistryKey).toBe('99-999-99:1999');
+    expect(result.sourceRefs.legacyRegistrySourceYear).toBe(1999);
   });
 
   it('produces a non-empty recordKey for every normalized entry', () => {
@@ -239,23 +268,5 @@ describe('normalizeProjectSiteEntry — merged record identity', () => {
       const entry = normalizeProjectSiteEntry(item);
       expect(entry.recordKey.length).toBeGreaterThan(0);
     }
-  });
-});
-
-// ── Sorting ───────────────────────────────────────────────────────────────
-
-describe('normalizeProjectSiteEntries', () => {
-  it('sorts by project number ascending', () => {
-    const items = [
-      createItem({ Id: 3, field_2: '25-003-01', Title: '25-003-01 - C' }),
-      createItem({ Id: 1, field_2: '25-001-01', Title: '25-001-01 - A' }),
-      createItem({ Id: 2, field_2: '25-002-01', Title: '25-002-01 - B' }),
-    ];
-    const result = normalizeProjectSiteEntries(items);
-    expect(result.map((r) => r.projectNumber)).toEqual(['25-001-01', '25-002-01', '25-003-01']);
-  });
-
-  it('returns empty array for empty input', () => {
-    expect(normalizeProjectSiteEntries([])).toEqual([]);
   });
 });
