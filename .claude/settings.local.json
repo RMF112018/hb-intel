@@ -372,7 +372,11 @@
       "Bash(mkdir -p /tmp/wp-verify)",
       "Bash(rm -rf ./*)",
       "Bash(rm -rf /tmp/hb-pub-post)",
-      "Bash(mkdir /tmp/hb-pub-post)"
+      "Bash(mkdir /tmp/hb-pub-post)",
+      "Bash(az webapp *)",
+      "Bash(npm i *)",
+      "Bash(func start *)",
+      "Bash(func --help)"
     ]
   },
   "enabledPlugins": {

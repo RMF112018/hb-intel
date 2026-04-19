@@ -11,6 +11,7 @@
 - command-band/configuration: Priority Actions Band Config, Priority Actions Band Items
 - workflow/history: HB Article Workflow History
 - error/audit: HB Article Publishing Errors, Kudos Audit Events
+- legacy-fallback: Legacy Project Fallback Registry, Legacy Project Fallback Sync Runs
 - people-culture: People Culture Announcements, People Culture Celebrations, People Culture Kudos
 - other business: Bids, HB Article Media, HB Article Promotion Rules, HB Article Team Members, HB Articles, Tool Launcher Contents
 - Implementation-relevant system lists: TaxonomyHiddenList, User Information List
@@ -81,6 +82,20 @@
 - Outbound lookup dependencies: AppPrincipals, TaxonomyHiddenList, User Information List.
 - Critical key-like fields: ComplianceAssetId, ID, ProjectId, _ComplianceTagUserId.
 - Likely downstream consumers: webparts/services that query this list by internal-name contracts (verify in app code for exact consumers).
+
+### Legacy Project Fallback Registry
+- Likely role: canonical registry of legacy-project folder discoveries written by the `legacyFallbackDiscoveryTimer` / `legacyFallbackDiscoveryRun` Azure Functions handler.
+- Outbound lookup dependencies: AppPrincipals, User Information List.
+- Critical key-like fields: DriveId, DriveItemId (composite natural key; both indexed), DiscoveryRunId, ProjectNumber, MatchStatus, LegacyYear, IsActive.
+- Logical (non-enforced) joins: `DiscoveryRunId` → `Legacy Project Fallback Sync Runs.RunId`; `MatchedProjectListItemId` → `Projects.ID` when `MatchStatus=matched`.
+- Likely downstream consumers: legacy-fallback review UI/admin endpoints in `@hbc/functions`; see per-list report.
+
+### Legacy Project Fallback Sync Runs
+- Likely role: operational logging / audit — one row per discovery invocation (`Status=running` on start, patched to `completed`/`failed` on finish).
+- Outbound lookup dependencies: AppPrincipals, User Information List.
+- Critical key-like fields: RunId (indexed UUID), Status (indexed), StartedUtc, CompletedUtc, YearsProcessed, SummaryJson.
+- Logical (non-enforced) join: `RunId` is referenced by `Legacy Project Fallback Registry.DiscoveryRunId`.
+- Likely downstream consumers: legacy-fallback closure evidence tooling (`scripts/collect-legacy-fallback-closure-evidence.sh`) and App Insights dashboards.
 
 ### Kudos Audit Events
 - Likely role: operational logging / audit.

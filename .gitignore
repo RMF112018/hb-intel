@@ -132,3 +132,4 @@ docs/architecture/plans/MASTER/phase-1-deliverables/Deployment-*
 .tmp/functions-deploy/host.json
 .tmp/functions-deploy/package.json
 .tmp/functions-deploy/README.md
+functions-artifact.zip
