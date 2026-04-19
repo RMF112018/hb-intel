@@ -11,16 +11,45 @@ import { getLegacyFallbackListHostSiteUrl } from './list-descriptors.js';
 import { normalizeLegacyCandidateName } from './matching-contracts.js';
 import type { ILegacyFallbackProjectIndexRecord } from './matching-engine.js';
 
-interface IRawProjectsRow {
-  Id: number;
-  Title?: string;
-  field_2?: string;
-  field_3?: string;
-  Year?: number | null;
+export interface IProjectIndexFieldNames {
+  readonly numberField: string;
+  readonly nameField: string;
+  readonly yearField: string;
 }
 
 function trimToString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+export function resolveProjectIndexFieldNames(): IProjectIndexFieldNames {
+  return {
+    numberField: resolveSpField('projectNumber'),
+    nameField: resolveSpField('projectName'),
+    yearField: resolveSpField('year'),
+  };
+}
+
+export function mapProjectIndexRow(
+  row: Record<string, unknown>,
+  fieldNames: IProjectIndexFieldNames,
+): ILegacyFallbackProjectIndexRecord | null {
+  const projectNumber = trimToString(row[fieldNames.numberField]);
+  const explicitName = trimToString(row[fieldNames.nameField]);
+  const projectTitle = explicitName || trimToString(row.Title);
+  if (!projectTitle) {
+    return null;
+  }
+  const rawYear = row[fieldNames.yearField];
+  const year =
+    typeof rawYear === 'number' && Number.isInteger(rawYear) ? rawYear : null;
+  const projectListItemId = typeof row.Id === 'number' ? row.Id : Number(row.Id ?? 0);
+  return {
+    projectListItemId,
+    projectNumber,
+    projectTitle,
+    normalizedProjectTitle: normalizeLegacyCandidateName(projectTitle),
+    year,
+  };
 }
 
 export interface ILegacyFallbackProjectIndexProvider {
@@ -33,30 +62,15 @@ export class LegacyFallbackProjectIndexProvider implements ILegacyFallbackProjec
 
   async loadIndex(): Promise<readonly ILegacyFallbackProjectIndexRecord[]> {
     const sp: any = await this.getSP();
-    const numberField = resolveSpField('projectNumber');
-    const nameField = resolveSpField('projectName');
+    const fieldNames = resolveProjectIndexFieldNames();
     const rows = (await sp.web.lists
       .getByTitle(PROJECTS_LIST_NAME)
-      .items.select('Id', 'Title', numberField, nameField, 'Year')
-      .top(5000)()) as IRawProjectsRow[];
+      .items.select('Id', 'Title', fieldNames.numberField, fieldNames.nameField, fieldNames.yearField)
+      .top(5000)()) as Array<Record<string, unknown>>;
 
     return rows
-      .map((row) => {
-        const projectNumber = trimToString(row.field_2);
-        const explicitName = trimToString(row.field_3);
-        const projectTitle = explicitName || trimToString(row.Title);
-        if (!projectTitle) {
-          return null;
-        }
-        return {
-          projectListItemId: row.Id,
-          projectNumber,
-          projectTitle,
-          normalizedProjectTitle: normalizeLegacyCandidateName(projectTitle),
-          year: typeof row.Year === 'number' && Number.isInteger(row.Year) ? row.Year : null,
-        } satisfies ILegacyFallbackProjectIndexRecord;
-      })
-      .filter((entry): entry is ILegacyFallbackProjectIndexRecord => Boolean(entry));
+      .map((row) => mapProjectIndexRow(row, fieldNames))
+      .filter((entry): entry is ILegacyFallbackProjectIndexRecord => entry !== null);
   }
 
   private async getSP(): Promise<any> {
