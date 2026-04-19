@@ -501,7 +501,8 @@ export class LegacyFallbackDiscoveryService {
       };
 
       const anomalyCount = recordsReviewRequired + recordsUnmatched;
-      if (anomalyCount >= matchAnomalyThreshold) {
+      const matchAnomalyExceeded = anomalyCount >= matchAnomalyThreshold;
+      if (matchAnomalyExceeded) {
         this.logger.warn('legacy-fallback.match-anomaly threshold exceeded', {
           runId: runStart.runId,
           anomalyCount,
@@ -510,6 +511,10 @@ export class LegacyFallbackDiscoveryService {
           recordsUnmatched,
         });
       }
+
+      const durationMs = Math.max(0, Date.parse(completedUtc) - Date.parse(startedUtc));
+      const sourceFailureCount = sourceSummaries.filter((entry) => entry.status === 'failed').length;
+      const firstErrorMessage = (errors[0] ?? '').slice(0, 512);
 
       if (!dryRun) {
         await this.repository.completeSyncRun(runStart, {
@@ -525,6 +530,10 @@ export class LegacyFallbackDiscoveryService {
           errorCount: errors.length,
           yearsProcessed: years,
           summaryJson: JSON.stringify(summary),
+          durationMs,
+          sourceFailureCount,
+          matchAnomalyExceeded,
+          firstErrorMessage,
         });
       }
 
@@ -533,6 +542,9 @@ export class LegacyFallbackDiscoveryService {
       const completedUtc = new Date().toISOString();
       const message = fatal instanceof Error ? fatal.message : String(fatal);
       const errorsWithFatal = [...errors, message];
+      const durationMs = Math.max(0, Date.parse(completedUtc) - Date.parse(startedUtc));
+      const sourceFailureCount = sourceSummaries.filter((entry) => entry.status === 'failed').length;
+      const firstErrorMessage = (errorsWithFatal[0] ?? '').slice(0, 512);
       if (!dryRun) {
         await this.repository.completeSyncRun(runStart, {
           status: 'failed',
@@ -547,6 +559,10 @@ export class LegacyFallbackDiscoveryService {
           errorCount: errorsWithFatal.length,
           yearsProcessed: years,
           summaryJson: JSON.stringify({ errors: errorsWithFatal, foldersScanned }),
+          durationMs,
+          sourceFailureCount,
+          matchAnomalyExceeded: false,
+          firstErrorMessage,
         });
       }
       throw fatal;

@@ -55,6 +55,10 @@ export interface ILegacyFallbackSyncRunCompletion {
   readonly errorCount: number;
   readonly yearsProcessed: readonly number[];
   readonly summaryJson: string;
+  readonly durationMs: number;
+  readonly sourceFailureCount: number;
+  readonly matchAnomalyExceeded: boolean;
+  readonly firstErrorMessage: string;
 }
 
 export interface ILegacyFallbackRegistryIdentity {
@@ -118,6 +122,10 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
       errorCount: 0,
       summaryJson: JSON.stringify({ phase: 'started' }),
       completedUtc: null,
+      durationMs: 0,
+      sourceFailureCount: 0,
+      matchAnomalyExceeded: false,
+      firstErrorMessage: '',
     };
 
     const itemId = await withRetry(async () => {
@@ -137,6 +145,10 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
           RecordsUnmatched: payload.recordsUnmatched,
           RecordsMarkedInactive: payload.recordsMarkedInactive,
           ErrorCount: payload.errorCount,
+          DurationMs: payload.durationMs,
+          SourceFailureCount: payload.sourceFailureCount,
+          MatchAnomalyExceeded: payload.matchAnomalyExceeded,
+          FirstErrorMessage: payload.firstErrorMessage,
           SummaryJson: payload.summaryJson,
         });
         return parseRunItemId(addResult);
@@ -173,6 +185,10 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
             RecordsUnmatched: completion.recordsUnmatched,
             RecordsMarkedInactive: completion.recordsMarkedInactive,
             ErrorCount: completion.errorCount,
+            DurationMs: completion.durationMs,
+            SourceFailureCount: completion.sourceFailureCount,
+            MatchAnomalyExceeded: completion.matchAnomalyExceeded,
+            FirstErrorMessage: completion.firstErrorMessage,
             YearsProcessed: JSON.stringify(completion.yearsProcessed),
             SummaryJson: completion.summaryJson,
           });

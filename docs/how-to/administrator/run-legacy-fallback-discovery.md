@@ -167,7 +167,7 @@ After a hosted run:
    - `legacyFallbackDiscoveryTimer`
 1. `/admin/functions` also shows both discovery functions after trigger sync.
 1. HBCentral list **Legacy Project Fallback Registry** contains upserted folder records.
-2. HBCentral list **Legacy Project Fallback Sync Runs** contains a run entry with queryable counters (`FoldersScanned`, `RecordsCreated`, `RecordsUpdated`, `RecordsMatched`, `RecordsReviewRequired`, `RecordsUnmatched`, `RecordsMarkedInactive`, `ErrorCount`) and `SummaryJson`. The same run row is updated with a terminal `Status` (`completed` or `failed`) and `CompletedUtc`, proving both the start and complete boundaries wrote successfully.
+2. HBCentral list **Legacy Project Fallback Sync Runs** contains a run entry with queryable counters (`FoldersScanned`, `RecordsCreated`, `RecordsUpdated`, `RecordsMatched`, `RecordsReviewRequired`, `RecordsUnmatched`, `RecordsMarkedInactive`, `ErrorCount`) and first-class operational fields (`DurationMs`, `SourceFailureCount`, `MatchAnomalyExceeded`, `FirstErrorMessage`). `SummaryJson` remains a richer supplementary snapshot but is no longer the only place run-level truth lives. The same run row is updated with a terminal `Status` (`completed` or `failed`) and `CompletedUtc`, proving both the start and complete boundaries wrote successfully.
 3. Function logs include source-resolution and error telemetry for any failed year/site/drive resolution.
 
 ## Sync cadence, stale policy, and rerun posture

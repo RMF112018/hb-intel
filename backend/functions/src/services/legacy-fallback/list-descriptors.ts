@@ -104,6 +104,10 @@ export const LEGACY_FALLBACK_SYNC_RUNS_LIST_DESCRIPTOR: IListDefinition = {
     { internalName: 'RecordsUnmatched', displayName: 'Records Unmatched', type: 'Number' },
     { internalName: 'RecordsMarkedInactive', displayName: 'Records Marked Inactive', type: 'Number' },
     { internalName: 'ErrorCount', displayName: 'Error Count', type: 'Number' },
+    { internalName: 'DurationMs', displayName: 'Duration Ms', type: 'Number' },
+    { internalName: 'SourceFailureCount', displayName: 'Source Failure Count', type: 'Number' },
+    { internalName: 'MatchAnomalyExceeded', displayName: 'Match Anomaly Exceeded', type: 'Boolean' },
+    { internalName: 'FirstErrorMessage', displayName: 'First Error Message', type: 'Text' },
     { internalName: 'SummaryJson', displayName: 'Summary Json', type: 'MultiLineText' },
   ],
 };

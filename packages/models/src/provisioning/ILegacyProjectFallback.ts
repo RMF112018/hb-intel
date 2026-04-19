@@ -75,6 +75,10 @@ export interface ILegacyProjectFallbackSyncRun {
   recordsMarkedInactive: number;
   errorCount: number;
   summaryJson: string;
+  durationMs?: number | null;
+  sourceFailureCount?: number | null;
+  matchAnomalyExceeded?: boolean | null;
+  firstErrorMessage?: string | null;
 }
 
 export function createLegacyFallbackRecordKey(driveId: string, driveItemId: string): string {

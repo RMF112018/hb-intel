@@ -153,6 +153,13 @@ describe('LegacyFallbackDiscoveryService', () => {
     expect(repo.upserts[0].projectNumber).toBe('24-100-01');
     expect(repo.upserts[0].matching.matchStatus).toBe('matched');
     expect(summary.recordsMatched).toBe(1);
+    // Prompt 06: first-class operational fields flow through completeSyncRun on the success path.
+    expect(repo.completions).toHaveLength(1);
+    const completion = repo.completions[0];
+    expect(completion.durationMs).toBeGreaterThanOrEqual(0);
+    expect(completion.sourceFailureCount).toBe(0);
+    expect(completion.matchAnomalyExceeded).toBe(false);
+    expect(completion.firstErrorMessage).toBe('');
   });
 
   it('supports dry run without registry writes', async () => {
@@ -193,6 +200,10 @@ describe('LegacyFallbackDiscoveryService', () => {
     expect(summary.errors[0]).toContain('year=2024');
     expect(repo.completions).toHaveLength(1);
     expect(repo.completions[0].status).toBe('failed');
+    // Prompt 06: failure path populates operational fields so the sync-run row is queryable without SummaryJson.
+    expect(repo.completions[0].sourceFailureCount).toBe(1);
+    expect(repo.completions[0].firstErrorMessage).toContain('year=2024');
+    expect(repo.completions[0].durationMs).toBeGreaterThanOrEqual(0);
   });
 
   it('marks unseen active records as inactive during stale pass', async () => {
