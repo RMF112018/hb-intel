@@ -50,6 +50,11 @@ Canonical homepage banner ownership seam:
   - `banner_home_7_evening.png`
   - `banner_home_7_night.png`
 
+Default homepage hero banner URL assembly is resolver-owned by:
+- `apps/hb-webparts/src/webparts/hbSignatureHero/homepageHeroBannerAssetResolver.ts`
+- The runtime hero uses this resolver instead of raw `assetBaseUrl + fileName`
+  concatenation, so trailing slash formatting on `assetBaseUrl` is normalized.
+
 ## Effectiveness proof — what to inspect
 Open `dist/sppkg/hb-intel-homepage-effectiveness-proof.json` and
 confirm every one of:

@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { HbSignatureHeroArticle } from '../../webparts/hbSignatureHero/HbSignatureHeroArticle.js';
 import { HbSignatureHero } from '../../webparts/hbSignatureHero/HbSignatureHero.js';
+import { HbSignatureHeroHomepage } from '../../webparts/hbSignatureHero/HbSignatureHeroHomepage.js';
+import { resolveHomepageHeroBannerAssetUrl } from '../../webparts/hbSignatureHero/homepageHeroBannerAssetResolver.js';
 
 describe('HbSignatureHeroArticle — Phase-02 article-mode adapter', () => {
   it('renders title, subheading, byline, labels, and link', () => {
@@ -337,5 +339,61 @@ describe('HbSignatureHeroHomepage — shared entry-stack authority', () => {
       'guided-single-column',
     );
     expect(phonePortrait?.getAttribute('data-hbc-hero-entry-reason')).toBe('width-match');
+  });
+});
+
+describe('HbSignatureHeroHomepage — default banner asset resolver contract', () => {
+  it('normalizes trailing slash behavior for homepage banner URLs', () => {
+    expect(
+      resolveHomepageHeroBannerAssetUrl(
+        'https://cdn.example.invalid/homepage-assets/',
+        'banner_home_7_morning.png',
+      ),
+    ).toBe('https://cdn.example.invalid/homepage-assets/banner_home_7_morning.png');
+    expect(
+      resolveHomepageHeroBannerAssetUrl(
+        'https://cdn.example.invalid/homepage-assets',
+        'banner_home_7_morning.png',
+      ),
+    ).toBe('https://cdn.example.invalid/homepage-assets/banner_home_7_morning.png');
+  });
+
+  it('does not produce brittle base+filename concatenation for missing trailing slash', () => {
+    const resolved = resolveHomepageHeroBannerAssetUrl(
+      'https://cdn.example.invalid/assets',
+      'banner_home_7_morning.png',
+    );
+    expect(resolved).toBe('https://cdn.example.invalid/assets/banner_home_7_morning.png');
+    expect(resolved).not.toContain('assetsbanner_home_7_morning.png');
+  });
+
+  it('resolves the canonical default banner filename when authored override is absent', () => {
+    const { container } = render(
+      <HbSignatureHeroHomepage
+        identity={{ preferredName: 'Jordan' }}
+        assetBaseUrl="https://cdn.example.invalid/homepage-assets"
+      />,
+    );
+    const photo = container.querySelector('[aria-hidden="true"][style*="background-image"]');
+    const style = photo?.getAttribute('style') ?? '';
+    expect(style).toContain(
+      'background-image: url("https://cdn.example.invalid/homepage-assets/banner_home_7_morning.png")',
+    );
+  });
+
+  it('preserves authored background override precedence over default banner resolution', () => {
+    const { container } = render(
+      <HbSignatureHeroHomepage
+        identity={{ preferredName: 'Jordan' }}
+        backgroundImage="https://images.example.invalid/custom-hero.png"
+        assetBaseUrl="https://cdn.example.invalid/homepage-assets"
+      />,
+    );
+    const photo = container.querySelector('[aria-hidden="true"][style*="background-image"]');
+    const style = photo?.getAttribute('style') ?? '';
+    expect(style).toContain(
+      'background-image: url("https://images.example.invalid/custom-hero.png")',
+    );
+    expect(style).not.toContain('banner_home_7_morning.png');
   });
 });

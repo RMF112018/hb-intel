@@ -67,6 +67,7 @@ import {
   SHELL_WIDTH_SOURCE,
   type HeroEntryStackState,
 } from '../hbHomepage/shell/useShellContainer.js';
+import { resolveHomepageHeroBannerAssetUrl } from './homepageHeroBannerAssetResolver.js';
 import styles from './signature-hero.module.css';
 
 /**
@@ -169,7 +170,8 @@ export function HbSignatureHeroHomepage({
   now = new Date(),
 }: HbSignatureHeroHomepageProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
-  const heroBackground = backgroundImage ?? (assetBaseUrl ? assetBaseUrl + DEFAULT_BANNER : undefined);
+  const heroBackground =
+    backgroundImage ?? resolveHomepageHeroBannerAssetUrl(assetBaseUrl, DEFAULT_BANNER);
   const hasImage = Boolean(heroBackground);
   const entryStackPolicy = React.useMemo(
     () => (entryStackState ? resolveEntryStackPolicy(entryStackState.entryState) : undefined),
