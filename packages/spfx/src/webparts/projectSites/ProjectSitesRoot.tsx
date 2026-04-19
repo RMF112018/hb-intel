@@ -1672,7 +1672,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
           >
             {visibleEntries.map((entry) => (
               <ProjectSiteCardListItem
-                key={entry.id}
+                key={entry.recordKey}
                 entry={entry}
                 layoutMode={layoutMode}
                 peopleDisplayLabels={peopleDisplayLabels}

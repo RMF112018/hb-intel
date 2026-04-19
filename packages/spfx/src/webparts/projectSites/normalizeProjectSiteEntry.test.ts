@@ -202,6 +202,46 @@ describe('normalizeProjectSiteEntry — standard fields', () => {
   });
 });
 
+// ── Merged-record identity ────────────────────────────────────────────────
+
+describe('normalizeProjectSiteEntry — merged record identity', () => {
+  it('emits a project-anchored recordKey and project-only classification when no fallback matched', () => {
+    const result = normalizeProjectSiteEntry(createItem({ Id: 42 }));
+    expect(result.recordKey).toBe('project:42');
+    expect(result.sourceClassification).toBe('project-only');
+    expect(result.sourceRefs.projectsListId).toBe(42);
+    expect(result.sourceRefs.legacyRegistryKey).toBeNull();
+    expect(result.sourceRefs.legacyRegistrySourceYear).toBeNull();
+  });
+
+  it('classifies as merged and exposes a legacyRegistryKey when the fallback matched', () => {
+    const result = normalizeProjectSiteEntry(createItem({
+      Id: 7,
+      field_2: '25-244-01',
+      __legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents',
+      __legacyFallbackSourceYear: 2025,
+      __legacyFallbackMatchStatus: 'matched',
+    }));
+    expect(result.sourceClassification).toBe('merged');
+    expect(result.recordKey).toBe('project:7');
+    expect(result.sourceRefs.projectsListId).toBe(7);
+    expect(result.sourceRefs.legacyRegistryKey).toBe('25-244-01:2025');
+    expect(result.sourceRefs.legacyRegistrySourceYear).toBe(2025);
+  });
+
+  it('produces a non-empty recordKey for every normalized entry', () => {
+    const items = [
+      createItem({ Id: 1 }),
+      createItem({ Id: 2, field_23: null }),
+      createItem({ Id: 3, Year: 'not-a-year' }),
+    ];
+    for (const item of items) {
+      const entry = normalizeProjectSiteEntry(item);
+      expect(entry.recordKey.length).toBeGreaterThan(0);
+    }
+  });
+});
+
 // ── Sorting ───────────────────────────────────────────────────────────────
 
 describe('normalizeProjectSiteEntries', () => {

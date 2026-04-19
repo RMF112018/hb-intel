@@ -44,8 +44,16 @@ import { ProjectSitesRoot } from './ProjectSitesRoot.js';
 // ── Test entry factory ────────────────────────────────────────────────────
 
 function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
+  const id = overrides?.id ?? 1;
   return {
-    id: 1,
+    recordKey: `project:${id}`,
+    id,
+    sourceClassification: 'project-only',
+    sourceRefs: {
+      projectsListId: id,
+      legacyRegistryKey: null,
+      legacyRegistrySourceYear: null,
+    },
     projectName: 'Test Project',
     projectNumber: '25-001-01',
     siteUrl: 'https://example.com',

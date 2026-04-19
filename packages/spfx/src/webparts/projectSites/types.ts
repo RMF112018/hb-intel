@@ -115,7 +115,28 @@ export const PROJECT_SITES_ALL_SCOPE_LIMIT = 2000;
  */
 export interface IProjectSiteEntry {
   // Identity
+  /**
+   * Stable merged-record identity suitable for React keys, Map/Set membership,
+   * and dedup across sources. Prefer `recordKey` over `id` whenever an entry
+   * must be addressed as an entity — `id` is the raw Projects list primary
+   * key and cannot represent legacy-only synthetic rows.
+   *
+   * Format: `project:{projectsListId}` for project-only/merged records,
+   * `legacy:{normalizedProjectNumber}:{year}` for legacy-only synthetic
+   * records. See `projectSiteRecordKey.ts` for the builder.
+   */
+  recordKey: string;
+  /**
+   * Raw SharePoint Projects list item id. `0` for legacy-only synthetic
+   * entries. Prefer `recordKey` for identity, dedup, and React keys; this
+   * field is retained for diagnostics and for callers that must round-trip
+   * to the underlying list row.
+   */
   id: number;
+  /** Origin of this record across the Projects list and the legacy registry. */
+  sourceClassification: ProjectSiteSourceClassification;
+  /** Explicit source refs — decouples identity from any single source's primary key. */
+  sourceRefs: IProjectSiteSourceRefs;
   projectName: string;
   projectNumber: string;
   year: number;
@@ -149,15 +170,48 @@ export interface IProjectSiteEntry {
   procoreProject: string;
 
   // Site state
+  /** Canonical Projects-list SiteUrl, independent of launch resolution. Empty when absent or malformed. */
   primarySiteUrl: string;
+  /** Registry-matched fallback folder URL, independent of launch resolution. Empty when no match. */
   legacyFallbackFolderUrl: string;
   legacyFallbackSourceYear: number | null;
   legacyFallbackMatchStatus: 'matched' | '';
   launchTargetKind: ProjectSiteLaunchTargetKind;
+  /**
+   * Resolved launch target URL — equals `primarySiteUrl` when
+   * `launchTargetKind === 'primary-site'`, `legacyFallbackFolderUrl` when
+   * `'legacy-fallback'`, and `''` when `'none'`. Do not use this field to
+   * ask "does a primary site exist?"; use `primarySiteUrl` for that.
+   */
   siteUrl: string;
   hasSiteUrl: boolean;
   dataQuality: IProjectSiteDataQuality;
   launchStatus: IProjectSiteLaunchStatus;
+}
+
+/**
+ * Origin of a project-site record across the Projects list and the legacy
+ * fallback registry.
+ *
+ * - `project-only` — Projects list row with no matched legacy fallback.
+ * - `merged` — Projects list row with a matched legacy fallback entry
+ *   (`legacyFallbackMatchStatus === 'matched'`).
+ * - `legacy-only` — synthetic record derived solely from the legacy registry,
+ *   with no corresponding Projects list row. Producers for this class are a
+ *   downstream lane; the contract exists so downstream seams don't need to
+ *   infer origin heuristically.
+ */
+export type ProjectSiteSourceClassification = 'project-only' | 'merged' | 'legacy-only';
+
+/**
+ * Explicit source references for a normalized record. `projectsListId` is
+ * `null` only for `legacy-only` records; `legacyRegistryKey` is `null` only
+ * when no legacy match exists.
+ */
+export interface IProjectSiteSourceRefs {
+  projectsListId: number | null;
+  legacyRegistryKey: string | null;
+  legacyRegistrySourceYear: number | null;
 }
 
 export type ProjectSiteDataIssueCode =

@@ -16,7 +16,7 @@ const mockUseProjectSites = vi.fn<(scope: ProjectSitesScope | null) => IProjectS
 const mockUseProjectSitesContainerState = vi.fn<() => ProjectSitesContainerState>();
 const mockUseProjectSitesPeopleDisplayLabels = vi.fn<() => Record<string, string>>();
 const mockProjectSiteCardRender = vi.fn((props: { entry: IProjectSiteEntry }) => (
-  <div data-testid={`card-${props.entry.id}`}>{props.entry.projectName}</div>
+  <div data-testid={`card-${props.entry.recordKey}`}>{props.entry.projectName}</div>
 ));
 
 vi.mock('./hooks/useAvailableYears.js', () => ({
@@ -48,8 +48,16 @@ vi.mock('./components/ProjectSiteCard.js', () => ({
 import { ProjectSitesRoot } from './ProjectSitesRoot.js';
 
 function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
+  const id = overrides?.id ?? 1;
   return {
-    id: 1,
+    recordKey: `project:${id}`,
+    id,
+    sourceClassification: 'project-only',
+    sourceRefs: {
+      projectsListId: id,
+      legacyRegistryKey: null,
+      legacyRegistrySourceYear: null,
+    },
     projectName: 'Test Project',
     projectNumber: '25-001-01',
     siteUrl: 'https://example.com',
@@ -130,8 +138,8 @@ describe('ProjectSitesRoot rerender churn', () => {
   it('does not trigger avoidable full-card rerender before search debounce commits', () => {
     render(<ProjectSitesRoot />);
 
-    expect(screen.getByTestId('card-1')).toBeInTheDocument();
-    expect(screen.getByTestId('card-2')).toBeInTheDocument();
+    expect(screen.getByTestId('card-project:1')).toBeInTheDocument();
+    expect(screen.getByTestId('card-project:2')).toBeInTheDocument();
 
     const baselineCalls = mockProjectSiteCardRender.mock.calls.length;
     expect(baselineCalls).toBe(2);

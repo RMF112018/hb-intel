@@ -16,8 +16,16 @@ import type {
 import { DEFAULT_SORT_KEY, EMPTY_FILTERS } from './types.js';
 
 function makeEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
+  const id = overrides?.id ?? 1;
   return {
-    id: 1,
+    recordKey: `project:${id}`,
+    id,
+    sourceClassification: 'project-only',
+    sourceRefs: {
+      projectsListId: id,
+      legacyRegistryKey: null,
+      legacyRegistrySourceYear: null,
+    },
     projectName: 'Sample Project',
     projectNumber: '25-000-00',
     year: 2025,

@@ -6,8 +6,16 @@ import { ProjectSiteCard } from './ProjectSiteCard.js';
 // ── Factory ───────────────────────────────────────────────────────────────
 
 function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
+  const id = overrides?.id ?? 1;
   return {
-    id: 1,
+    recordKey: `project:${id}`,
+    id,
+    sourceClassification: 'project-only',
+    sourceRefs: {
+      projectsListId: id,
+      legacyRegistryKey: null,
+      legacyRegistrySourceYear: null,
+    },
     projectName: 'Riverside Medical Center',
     projectNumber: '24-001-01',
     siteUrl: 'https://example.sharepoint.com/sites/RMC',

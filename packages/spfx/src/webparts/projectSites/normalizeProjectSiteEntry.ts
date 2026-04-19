@@ -15,11 +15,18 @@
 import type {
   IProjectSiteEntry,
   IProjectSiteDataQuality,
+  IProjectSiteSourceRefs,
   ProjectSiteDataIssueCode,
   ProjectSiteLaunchTargetKind,
+  ProjectSiteSourceClassification,
 } from './types.js';
 import { PROJECT_SITES_FALLBACK_FIELDS, SP_PROJECTS_FIELDS, isValidYear } from './types.js';
 import { deriveProjectSiteLaunchStatus } from './projectSiteLaunchState.js';
+import {
+  buildLegacyRegistryKey,
+  buildProjectSiteRecordKey,
+  recordKeySourceFor,
+} from './projectSiteRecordKey.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -221,8 +228,28 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
     dataQuality,
   });
 
+  // Source classification + merged record identity.
+  // This normalizer only ever sees Projects list rows, so `legacy-only`
+  // synthetic records are produced by a separate (future) path.
+  const sourceClassification: ProjectSiteSourceClassification =
+    legacyFallbackMatchStatus === 'matched' ? 'merged' : 'project-only';
+  const legacyRegistryKey = buildLegacyRegistryKey(projectNumber, legacyFallbackSourceYear);
+  const sourceRefs: IProjectSiteSourceRefs = {
+    projectsListId: id > 0 ? id : null,
+    legacyRegistryKey: legacyRegistryKey.length > 0 ? legacyRegistryKey : null,
+    legacyRegistrySourceYear: legacyFallbackSourceYear,
+  };
+  const recordKey = buildProjectSiteRecordKey(recordKeySourceFor(sourceClassification), {
+    projectsListId: sourceRefs.projectsListId,
+    projectNumber,
+    year,
+  }) || `project:${id}`;
+
   return {
+    recordKey,
     id,
+    sourceClassification,
+    sourceRefs,
     projectName,
     projectNumber,
     year,
