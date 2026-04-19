@@ -3,7 +3,7 @@
  *
  * These tests pin the surface identity so hosted-runtime proof
  * scripts can assert the packaged homepage is rendering the new
- * chip-band launcher — not the retired vertical tile grid.
+ * tile-family launcher — not the retired vertical tile grid.
  */
 import * as React from 'react';
 import { describe, expect, it } from 'vitest';

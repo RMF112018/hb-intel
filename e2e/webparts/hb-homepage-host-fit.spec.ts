@@ -7,6 +7,10 @@ interface HostedCase {
   readonly expectedReason?: string;
 }
 
+function isHandheldViewport(label: string): boolean {
+  return label.includes('phone-portrait') || label === 'short-height-constrained';
+}
+
 const HOSTED_CASES: readonly HostedCase[] = [
   {
     label: 'ultrawide-desktop-1920x1080',
@@ -118,6 +122,7 @@ test.describe('HB Homepage hosted fit proof', () => {
       const heroRegion = page.locator('[data-hb-homepage-entry-stack-region="hero"]');
       const heroRoot = page.locator('[data-hbc-premium="signature-hero"]');
       const launcherRoot = page.locator('[data-hb-homepage-launcher-band="root"]');
+      const launcherSurface = page.locator('[data-hbc-ui="homepage-launcher"]');
       const heroRegionCount = await heroRegion.count();
       if (heroRegionCount > 0) {
         await expect(heroRegion).toBeVisible();
@@ -129,6 +134,21 @@ test.describe('HB Homepage hosted fit proof', () => {
       const launcherRootCount = await launcherRoot.count();
       if (launcherRootCount > 0) {
         await expect(launcherRoot).toBeVisible();
+        await expect(launcherSurface).toHaveAttribute('data-hbc-homepage-launcher-row-primitive', 'tile-family');
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode');
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source');
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-cap-governance');
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy');
+        if (isHandheldViewport(viewportCase.label)) {
+          await expect(launcherRoot).toHaveAttribute(
+            'data-hbc-launcher-handheld-mode',
+            'single-entry-all-tools',
+          );
+          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
+        } else {
+          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'standard');
+          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'overflow-only');
+        }
       }
       await expect(actionsRegion).toHaveAttribute(
         'data-hb-homepage-region-contained-by',
@@ -251,6 +271,57 @@ test.describe('HB Homepage hosted fit proof', () => {
       await assertNoHorizontalOverflow(page, '[data-shell-post-hero="true"]');
       await assertNoHorizontalOverflow(page, '.harness-content');
       await assertNoHorizontalOverflow(page, '#root');
+
+      const moreToolsTrigger = page.getByRole('button', { name: /More tools/i });
+      if (await moreToolsTrigger.count()) {
+        if (isHandheldViewport(viewportCase.label)) {
+          await expect(moreToolsTrigger.first()).toHaveAttribute(
+            'data-hbc-homepage-launcher-overflow-variant',
+            'mobile-entry',
+          );
+        } else {
+          await expect(moreToolsTrigger.first()).toHaveAttribute(
+            'data-hbc-homepage-launcher-overflow-variant',
+            'secondary-overflow-entry',
+          );
+        }
+        await moreToolsTrigger.first().click();
+        if (isHandheldViewport(viewportCase.label)) {
+          await expect(page.locator('[data-hbc-homepage-launcher-sheet-content="all-tools"]')).toBeVisible();
+          const openedDrawer = await page.screenshot({ fullPage: true });
+          await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-drawer`, {
+            body: openedDrawer,
+            contentType: 'image/png',
+          });
+          await page.keyboard.press('Escape');
+        } else {
+          await expect(page.getByRole('menu')).toBeVisible();
+          const openedMenu = await page.screenshot({ fullPage: true });
+          await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-menu`, {
+            body: openedMenu,
+            contentType: 'image/png',
+          });
+          await page.keyboard.press('Escape');
+        }
+      }
+
+      const launcherMarkerProof = await page.evaluate(() => {
+        const launcherBand = document.querySelector('[data-hb-homepage-launcher-band="root"]');
+        const launcherSurfaceNode = document.querySelector('[data-hbc-ui="homepage-launcher"]');
+        return {
+          launcherHandheldMode: launcherBand?.getAttribute('data-hbc-launcher-handheld-mode'),
+          launcherDrawerSource: launcherBand?.getAttribute('data-hbc-launcher-drawer-source'),
+          launcherCapGovernance: launcherBand?.getAttribute('data-hbc-launcher-cap-governance'),
+          launcherOverflowStrategy: launcherBand?.getAttribute('data-hbc-launcher-overflow-strategy'),
+          launcherVersion: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-version'),
+          launcherDeviceClass: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-device-class'),
+          launcherRowPrimitive: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-row-primitive'),
+        };
+      });
+      await testInfo.attach(`hb-homepage-${viewportCase.label}-launcher-markers`, {
+        body: Buffer.from(JSON.stringify(launcherMarkerProof, null, 2), 'utf-8'),
+        contentType: 'application/json',
+      });
 
       const screenshot = await page.screenshot({ fullPage: true });
       await testInfo.attach(`hb-homepage-${viewportCase.label}`, {
