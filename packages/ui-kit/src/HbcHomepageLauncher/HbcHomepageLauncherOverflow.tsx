@@ -152,11 +152,15 @@ function MenuOverflow({
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
 
   return (
-    <div className={className}>
+    <>
       <button
         ref={refs.setReference}
         type="button"
-        className={clsx(launcherTile({ family: 'secondaryOverflowEntry' }), styles.overflowTile)}
+        className={clsx(
+          launcherTile({ family: 'secondaryOverflowEntry' }),
+          styles.overflowTile,
+          className,
+        )}
         data-hbc-ui="homepage-launcher-overflow-trigger"
         data-hbc-homepage-launcher-overflow-variant="secondary-overflow-entry"
         data-hbc-launcher-tile-variant="secondary-overflow-entry"
@@ -214,7 +218,7 @@ function MenuOverflow({
           ) : null}
         </AnimatePresence>
       </FloatingPortal>
-    </div>
+    </>
   );
 }
 
@@ -240,11 +244,11 @@ function SheetOverflow({
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
 
   return (
-    <div className={className}>
+    <>
       <button
         ref={refs.setReference}
         type="button"
-        className={clsx(launcherTile({ family: 'mobileEntry' }), styles.overflowTile)}
+        className={clsx(launcherTile({ family: 'mobileEntry' }), styles.overflowTile, className)}
         data-hbc-ui="homepage-launcher-overflow-trigger"
         data-hbc-homepage-launcher-overflow-variant="mobile-entry"
         data-hbc-launcher-tile-variant="mobile-entry"
@@ -322,7 +326,7 @@ function SheetOverflow({
           ) : null}
         </AnimatePresence>
       </FloatingPortal>
-    </div>
+    </>
   );
 }
 

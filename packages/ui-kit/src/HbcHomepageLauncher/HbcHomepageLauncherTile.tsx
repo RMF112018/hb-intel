@@ -28,11 +28,12 @@ export function HbcHomepageLauncherTile({
     ? { href: tile.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: tile.href };
   const tileFamily = resolveFamily(tile.variant);
+  const computedAriaLabel = tile.ariaLabel ?? (tile.description ? `${tile.title}. ${tile.description}` : tile.title);
 
   return (
     <motion.a
       {...linkProps}
-      aria-label={tile.ariaLabel ?? tile.title}
+      aria-label={computedAriaLabel}
       title={tile.title}
       className={clsx(launcherTile({ family: tileFamily }), className)}
       data-hbc-ui="homepage-launcher-tile"
@@ -61,7 +62,6 @@ export function HbcHomepageLauncherTile({
       ) : null}
       <span className={styles.tileContent}>
         <span className={styles.tileTitle}>{tile.title}</span>
-        {tile.description ? <span className={styles.tileSubtitle}>{tile.description}</span> : null}
       </span>
       {shouldOpenInNewTab ? (
         <span className={styles.visuallyHidden}>(opens in new tab)</span>

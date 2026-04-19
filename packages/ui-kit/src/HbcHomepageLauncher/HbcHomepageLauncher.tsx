@@ -85,6 +85,12 @@ export function HbcHomepageLauncher(
   const renderedPrimary = handheldSingleEntry ? [] : primary;
   const hasOverflow = overflow.length > 0;
   const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
+  const visibleTileCount = handheldSingleEntry
+    ? visibleCount
+    : renderedPrimary.length + (hasOverflow ? 1 : 0);
+  const rootStyle = {
+    '--hbc-hl-visible-tiles': String(Math.max(visibleTileCount, 1)),
+  } as React.CSSProperties;
 
   return (
     <section
@@ -103,6 +109,7 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-cap-governance={capGovernance}
       data-hbc-homepage-launcher-all-tools-count={handheldSingleEntry ? overflow.length : undefined}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
+      style={rootStyle}
     >
       <div className={launcherBand()} role="list">
         <div className={styles.bandScroller} data-hbc-launcher-band-mode={handheldMode}>
@@ -116,14 +123,16 @@ export function HbcHomepageLauncher(
               <HbcHomepageLauncherTile tile={tile} />
             </div>
           ))}
+          {hasOverflow ? (
+            <div role="listitem" data-hbc-launcher-tile-slot="overflow" style={{ display: 'contents' }}>
+              <HbcHomepageLauncherOverflow
+                items={overflow}
+                label={overflowLabel}
+                mode={overflowMode}
+              />
+            </div>
+          ) : null}
         </div>
-        {hasOverflow ? (
-          <HbcHomepageLauncherOverflow
-            items={overflow}
-            label={overflowLabel}
-            mode={overflowMode}
-          />
-        ) : null}
       </div>
     </section>
   );

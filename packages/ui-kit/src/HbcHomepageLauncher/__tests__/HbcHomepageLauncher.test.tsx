@@ -55,10 +55,12 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   });
 
   it('uses anchored menu overflow on desktop', () => {
-    render(
+    const { container } = render(
       <HbcHomepageLauncher primary={TILES.slice(0, 5)} overflow={[TILES[5]!]} deviceClass="desktop" />,
     );
     const trigger = screen.getByRole('button', { name: /More tools/i });
+    const row = container.querySelector('[data-hbc-launcher-band-mode="standard"]');
+    expect(row?.contains(trigger)).toBe(true);
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('menu');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
@@ -68,6 +70,25 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     fireEvent.click(trigger);
     expect(screen.getByRole('menu')).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /Submit Timesheet/ })).toBeInTheDocument();
+  });
+
+  it('keeps tile descriptions out of the visible tile surface', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={[
+          {
+            id: 'desc-hidden',
+            serviceKey: 'desc-hidden',
+            title: 'Daily Field Snapshot',
+            description: 'Legacy subtitle should not render in tile face',
+            href: '/daily-field-snapshot',
+          },
+        ]}
+        deviceClass="desktop"
+      />,
+    );
+    expect(screen.getByRole('link', { name: /Daily Field Snapshot/ })).toBeInTheDocument();
+    expect(screen.queryByText('Legacy subtitle should not render in tile face')).toBeNull();
   });
 
   it('uses single-entry all-tools sheet mode on phone', () => {

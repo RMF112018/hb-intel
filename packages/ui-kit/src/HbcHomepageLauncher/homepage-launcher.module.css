@@ -13,6 +13,9 @@
   --hbc-hl-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
   --hbc-hl-surface-rgb: var(--hb-surface-1-rgb, 255, 255, 255);
   --hbc-hl-orange-rgb: var(--hb-brand-orange-rgb, 227, 114, 34);
+  --hbc-hl-row-gap: 10px;
+  --hbc-hl-visible-tiles: 1;
+  --hbc-hl-tile-max-width: 204px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -22,35 +25,37 @@
 
 .band {
   display: flex;
+  justify-content: center;
   align-items: stretch;
-  gap: 10px;
+  width: 100%;
   min-width: 0;
 }
 
 .bandScroller {
-  flex: 1 1 auto;
+  flex: 1 1 100%;
   display: flex;
+  justify-content: center;
   align-items: stretch;
-  gap: 10px;
+  gap: var(--hbc-hl-row-gap);
+  width: min(
+    100%,
+    calc(
+      (var(--hbc-hl-visible-tiles) * var(--hbc-hl-tile-max-width)) + (
+          (var(--hbc-hl-visible-tiles) - 1) * var(--hbc-hl-row-gap)
+        )
+    )
+  );
+  margin-inline: auto;
   min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
   padding-block: 2px;
-}
-
-.bandScroller::-webkit-scrollbar {
-  display: none;
-}
-
-.bandScroller[data-hbc-launcher-band-mode='single-entry-all-tools'] {
-  display: none;
 }
 
 /* ── Tile anatomy ───────────────────────────────────────── */
 
 .tile {
-  flex: 0 0 clamp(158px, 18cqw, 228px);
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: var(--hbc-hl-tile-max-width);
   min-height: 72px;
   padding: 10px 12px;
   border-radius: 12px;
@@ -152,7 +157,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 3px;
 }
 
 .tileTitle {
@@ -168,22 +172,9 @@
   text-overflow: ellipsis;
 }
 
-.tileSubtitle {
-  font-size: 0.69rem;
-  line-height: 1.2;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* ── Secondary overflow entry tile ─────────────────────── */
 
 .overflowTile {
-  flex: 0 0 clamp(156px, 17cqw, 212px);
-  min-height: 72px;
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   align-items: center;
@@ -192,6 +183,10 @@
 }
 
 .overflowTriggerLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.8rem;
   font-weight: 700;
   line-height: 1.15;
@@ -423,15 +418,17 @@
   }
   .bandScroller {
     flex-direction: column;
+    justify-content: flex-start;
     gap: 9px;
     flex: 1 1 auto;
+    width: 100%;
   }
   .tile {
+    max-width: none;
     min-height: 66px;
     padding: 10px 12px;
     flex: 0 0 auto;
     width: 100%;
-    max-width: 100%;
   }
   .tileIcon {
     width: 34px;
@@ -440,13 +437,9 @@
   .tileTitle {
     font-size: 0.8125rem;
   }
-  .tileSubtitle {
-    display: none;
-  }
   .overflowTile {
     min-height: 64px;
     width: 100%;
-    max-width: 100%;
     grid-template-columns: auto 1fr auto auto;
   }
   .overflowTriggerLabel {
@@ -462,10 +455,8 @@
 }
 
 @container hbc-homepage-launcher (min-width: 720px) and (max-width: 979px) {
-  .tile {
-    flex-basis: clamp(148px, 22cqw, 190px);
-    min-height: 68px;
-  }
+  .root { --hbc-hl-tile-max-width: 174px; }
+  .tile { min-height: 68px; }
   .tileIcon {
     width: 34px;
     height: 34px;
@@ -473,40 +464,24 @@
   .tileTitle {
     font-size: 0.78rem;
   }
-  .tileSubtitle {
-    display: none;
-  }
-  .overflowTile {
-    flex-basis: clamp(144px, 21cqw, 184px);
-    min-height: 68px;
-  }
+  .overflowTile { min-height: 68px; }
 }
 
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
-  .tile {
-    flex-basis: clamp(154px, 19cqw, 200px);
-    min-height: 70px;
-  }
-  .overflowTile {
-    flex-basis: clamp(150px, 18cqw, 196px);
-    min-height: 70px;
-  }
+  .root { --hbc-hl-tile-max-width: 186px; }
+  .tile { min-height: 70px; }
+  .overflowTile { min-height: 70px; }
 }
 
 @container hbc-homepage-launcher (min-width: 1180px) and (max-width: 1599px) {
-  .tile {
-    flex-basis: clamp(160px, 17.4cqw, 214px);
-    min-height: 72px;
-  }
-  .overflowTile {
-    flex-basis: clamp(156px, 16.4cqw, 208px);
-    min-height: 72px;
-  }
+  .root { --hbc-hl-tile-max-width: 198px; }
+  .tile { min-height: 72px; }
+  .overflowTile { min-height: 72px; }
 }
 
 @container hbc-homepage-launcher (min-width: 1600px) {
+  .root { --hbc-hl-tile-max-width: 214px; }
   .tile {
-    flex-basis: clamp(176px, 15.4cqw, 236px);
     min-height: 76px;
     border-radius: 13px;
   }
@@ -518,11 +493,7 @@
   .tileTitle {
     font-size: 0.9rem;
   }
-  .tileSubtitle {
-    font-size: 0.72rem;
-  }
   .overflowTile {
-    flex-basis: clamp(168px, 14.8cqw, 226px);
     min-height: 76px;
     border-radius: 13px;
   }
@@ -541,9 +512,6 @@
   }
   .tileTitle {
     font-size: 0.76rem;
-  }
-  .tileSubtitle {
-    display: none;
   }
   .overflowTile {
     min-height: 60px;
