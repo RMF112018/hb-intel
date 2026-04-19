@@ -495,6 +495,12 @@ export interface ProjectSitesFilters {
   departments: string[];
   /** Multi-select by office division. */
   officeDivisions: string[];
+  /**
+   * Multi-select by merged-record source classification. Empty array means
+   * "any origin". Lets users intentionally reason over modern (project-only),
+   * merged, or legacy-backed-only inventory during the migration period.
+   */
+  sourceClassifications: ProjectSiteSourceClassification[];
   /** Only show entries with a live site URL (true), or no site (false), or any (undefined). */
   hasSiteOnly?: boolean;
 }
@@ -506,6 +512,7 @@ export const EMPTY_FILTERS: ProjectSitesFilters = {
   projectExecutiveUpns: [],
   departments: [],
   officeDivisions: [],
+  sourceClassifications: [],
   hasSiteOnly: undefined,
 };
 
@@ -517,6 +524,7 @@ export function filtersAreEmpty(f: ProjectSitesFilters): boolean {
     f.projectExecutiveUpns.length === 0 &&
     f.departments.length === 0 &&
     f.officeDivisions.length === 0 &&
+    f.sourceClassifications.length === 0 &&
     f.hasSiteOnly === undefined
   );
 }
@@ -529,8 +537,31 @@ export function countActiveFilters(f: ProjectSitesFilters): number {
     f.projectExecutiveUpns.length +
     f.departments.length +
     f.officeDivisions.length +
+    f.sourceClassifications.length +
     (f.hasSiteOnly !== undefined ? 1 : 0)
   );
+}
+
+/**
+ * Canonical ordering of source classifications for facet display. The
+ * filter panel renders classifications in this order regardless of the
+ * arrival order in the entry set.
+ */
+export const PROJECT_SITE_SOURCE_CLASSIFICATION_ORDER: readonly ProjectSiteSourceClassification[] = [
+  'project-only',
+  'merged',
+  'legacy-only',
+];
+
+/** Short, user-facing display label for a source classification. */
+export function projectSiteSourceClassificationLabel(
+  value: ProjectSiteSourceClassification,
+): string {
+  switch (value) {
+    case 'project-only': return 'Project-only';
+    case 'merged': return 'Merged';
+    case 'legacy-only': return 'Legacy-only';
+  }
 }
 
 // ── Default year resolution ────────────────────────────────────────────────

@@ -16,9 +16,11 @@
  */
 import type {
   IProjectSiteEntry,
+  ProjectSiteSourceClassification,
   ProjectSitesFilters,
   ProjectSitesSortKey,
 } from './types.js';
+import { PROJECT_SITE_SOURCE_CLASSIFICATION_ORDER } from './types.js';
 
 // ── Search corpus ─────────────────────────────────────────────────────────
 
@@ -101,6 +103,12 @@ function entryMatchesFilters(
   if (!inMultiSelect(entry.projectExecutiveUpn, filters.projectExecutiveUpns)) return false;
   if (!inMultiSelect(entry.department, filters.departments)) return false;
   if (!inMultiSelect(entry.officeDivision, filters.officeDivisions)) return false;
+  if (
+    filters.sourceClassifications.length > 0 &&
+    !filters.sourceClassifications.includes(entry.sourceClassification)
+  ) {
+    return false;
+  }
   if (filters.hasSiteOnly === true && !entry.hasSiteUrl) return false;
   if (filters.hasSiteOnly === false && entry.hasSiteUrl) return false;
   return true;
@@ -176,6 +184,15 @@ export function applyProjectSitesPipeline({
  * strings are excluded; values are trimmed, de-duplicated (case-insensitive),
  * and sorted alphabetically.
  */
+/**
+ * Counted facet value — used where the UI wants to surface per-value
+ * inventory counts (e.g., "Legacy-only (8)") instead of unlabeled options.
+ */
+export interface ICountedFacet<V extends string> {
+  value: V;
+  count: number;
+}
+
 export interface ProjectSitesFacets {
   stages: string[];
   projectManagerUpns: string[];
@@ -183,6 +200,13 @@ export interface ProjectSitesFacets {
   projectExecutiveUpns: string[];
   departments: string[];
   officeDivisions: string[];
+  /**
+   * Observed source classifications with counts, in canonical display
+   * order (`project-only`, `merged`, `legacy-only`). Zero-count
+   * classifications are omitted so the filter panel only surfaces
+   * dimensions actually present in the result set.
+   */
+  sourceClassifications: ICountedFacet<ProjectSiteSourceClassification>[];
 }
 
 function dedupSorted(values: string[]): string[] {
@@ -196,6 +220,21 @@ function dedupSorted(values: string[]): string[] {
   return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
 }
 
+function countSourceClassifications(
+  entries: readonly IProjectSiteEntry[],
+): ICountedFacet<ProjectSiteSourceClassification>[] {
+  const counts = new Map<ProjectSiteSourceClassification, number>();
+  for (const entry of entries) {
+    counts.set(entry.sourceClassification, (counts.get(entry.sourceClassification) ?? 0) + 1);
+  }
+  const ordered: ICountedFacet<ProjectSiteSourceClassification>[] = [];
+  for (const value of PROJECT_SITE_SOURCE_CLASSIFICATION_ORDER) {
+    const count = counts.get(value) ?? 0;
+    if (count > 0) ordered.push({ value, count });
+  }
+  return ordered;
+}
+
 export function extractProjectSitesFacets(entries: IProjectSiteEntry[]): ProjectSitesFacets {
   return {
     stages: dedupSorted(entries.map((e) => e.projectStage)),
@@ -204,6 +243,7 @@ export function extractProjectSitesFacets(entries: IProjectSiteEntry[]): Project
     projectExecutiveUpns: dedupSorted(entries.map((e) => e.projectExecutiveUpn)),
     departments: dedupSorted(entries.map((e) => e.department)),
     officeDivisions: dedupSorted(entries.map((e) => e.officeDivision)),
+    sourceClassifications: countSourceClassifications(entries),
   };
 }
 

@@ -336,6 +336,41 @@ describe('applyProjectSitesPipeline — filters', () => {
     );
     expect(result.map((e) => e.id)).toEqual([2]);
   });
+
+  it('filters by sourceClassifications (single value)', () => {
+    const result = runPipeline(
+      [
+        makeEntry({ id: 1, sourceClassification: 'project-only' }),
+        makeEntry({ id: 2, sourceClassification: 'merged' }),
+        makeEntry({ id: 3, sourceClassification: 'legacy-only' }),
+      ],
+      { filters: { ...EMPTY_FILTERS, sourceClassifications: ['legacy-only'] } },
+    );
+    expect(result.map((e) => e.id)).toEqual([3]);
+  });
+
+  it('filters by sourceClassifications (OR within the field)', () => {
+    const result = runPipeline(
+      [
+        makeEntry({ id: 1, sourceClassification: 'project-only' }),
+        makeEntry({ id: 2, sourceClassification: 'merged' }),
+        makeEntry({ id: 3, sourceClassification: 'legacy-only' }),
+      ],
+      { filters: { ...EMPTY_FILTERS, sourceClassifications: ['merged', 'legacy-only'] } },
+    );
+    expect(result.map((e) => e.id)).toEqual([2, 3]);
+  });
+
+  it('returns all entries when sourceClassifications is empty', () => {
+    const result = runPipeline(
+      [
+        makeEntry({ id: 1, sourceClassification: 'project-only' }),
+        makeEntry({ id: 2, sourceClassification: 'merged' }),
+      ],
+      { filters: { ...EMPTY_FILTERS, sourceClassifications: [] } },
+    );
+    expect(result.map((e) => e.id)).toEqual([1, 2]);
+  });
 });
 
 // ── Composition ───────────────────────────────────────────────────────────
@@ -387,6 +422,24 @@ describe('extractProjectSitesFacets', () => {
       makeEntry({ id: 2, department: '' }),
     ]);
     expect(facets.departments).toEqual(['commercial']);
+  });
+
+  it('counts source classifications in canonical order, omitting zero-count values', () => {
+    const facets = extractProjectSitesFacets([
+      makeEntry({ id: 1, sourceClassification: 'legacy-only' }),
+      makeEntry({ id: 2, sourceClassification: 'project-only' }),
+      makeEntry({ id: 3, sourceClassification: 'project-only' }),
+      makeEntry({ id: 4, sourceClassification: 'legacy-only' }),
+    ]);
+    expect(facets.sourceClassifications).toEqual([
+      { value: 'project-only', count: 2 },
+      { value: 'legacy-only', count: 2 },
+    ]);
+  });
+
+  it('emits an empty source-classification facet list for an empty entry set', () => {
+    const facets = extractProjectSitesFacets([]);
+    expect(facets.sourceClassifications).toEqual([]);
   });
 });
 

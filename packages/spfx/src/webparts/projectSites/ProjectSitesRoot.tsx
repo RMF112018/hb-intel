@@ -66,6 +66,8 @@ import {
   SORT_OPTIONS,
   filtersAreEmpty,
   countActiveFilters,
+  projectSiteSourceClassificationLabel,
+  type ProjectSiteSourceClassification,
   type ProjectSitesScope,
   type ProjectSitesSortKey,
   type ProjectSitesFilters,
@@ -1018,7 +1020,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       const next = isSelected
         ? current.filter((s) => s.trim().toLowerCase() !== normalized)
         : [...current, value];
-      return { ...prev, [field]: next };
+      return { ...prev, [field]: next } as ProjectSitesFilters;
     });
   }, []);
 
@@ -1035,7 +1037,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       return {
         ...prev,
         [field]: current.filter((s) => s.trim().toLowerCase() !== value.trim().toLowerCase()),
-      };
+      } as ProjectSitesFilters;
     });
   }, []);
 
@@ -1307,6 +1309,23 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
                 selected={filters.officeDivisions}
                 onToggle={(v) => toggleMultiSelect('officeDivisions', v)}
               />
+              {facets.sourceClassifications.length > 1 && (
+                <FacetGroup
+                  heading="Record Source"
+                  values={facets.sourceClassifications.map((f) => f.value)}
+                  selected={filters.sourceClassifications}
+                  onToggle={(v) => toggleMultiSelect(
+                    'sourceClassifications',
+                    v as ProjectSiteSourceClassification,
+                  )}
+                  labelFor={(v) => {
+                    const classification = v as ProjectSiteSourceClassification;
+                    const count = facets.sourceClassifications
+                      .find((f) => f.value === classification)?.count ?? 0;
+                    return `${projectSiteSourceClassificationLabel(classification)} (${count})`;
+                  }}
+                />
+              )}
             </div>
           </div>
         )}
@@ -1400,6 +1419,20 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
                     className={removeClass}
                     aria-label={`Remove office division filter ${v}`}
                     onClick={() => removeChip('officeDivisions', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+              {filters.sourceClassifications.map((v) => (
+                <span key={`src-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>Source:</span>
+                  {projectSiteSourceClassificationLabel(v)}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove source filter ${v}`}
+                    onClick={() => removeChip('sourceClassifications', v)}
                   >
                     <Cancel size="sm" />
                   </button>
