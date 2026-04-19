@@ -21,8 +21,10 @@ export type HomepageLauncherTileVariant =
   | 'primary'
   | 'secondary-overflow-entry'
   | 'mobile-entry';
+export type HomepageLauncherTileFamily = 'row' | 'drawer';
 export type HomepageLauncherIconPresentation = 'standard' | 'compliant';
 export type HomepageLauncherIconAssetStrategy = 'img-filter-white';
+export type HomepageLauncherIconSurface = 'row' | 'drawer' | 'trigger';
 
 export interface HomepageLauncherTileModel {
   id: string;
@@ -60,6 +62,7 @@ export interface HbcHomepageLauncherProps {
 
 export interface HbcHomepageLauncherTileProps {
   tile: HomepageLauncherTileModel;
+  family?: HomepageLauncherTileFamily;
   className?: string;
 }
 

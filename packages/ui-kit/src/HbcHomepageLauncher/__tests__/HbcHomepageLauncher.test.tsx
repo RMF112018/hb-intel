@@ -7,7 +7,7 @@
  */
 import * as React from 'react';
 import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { HbcHomepageLauncher } from '../HbcHomepageLauncher.js';
 import { HBC_HOMEPAGE_LAUNCHER_VERSION } from '../constants.js';
@@ -103,7 +103,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     fireEvent.click(trigger);
-    expect(screen.getByLabelText(/More tools all tools/i)).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
     expect(screen.getByText('Field Ops')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Submit Timesheet/ })).toBeInTheDocument();
   });
@@ -180,7 +180,53 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(trigger);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.queryByLabelText(/More tools all tools/i)).not.toBeNull();
+    expect(screen.queryByRole('dialog', { name: /More tools/i })).not.toBeNull();
+  });
+
+  it('supports close button, escape key, and focus return to overflow trigger', async () => {
+    render(
+      <HbcHomepageLauncher
+        primary={TILES.slice(0, 3)}
+        overflow={TILES.slice(3)}
+        deviceClass="desktop"
+      />,
+    );
+    const trigger = screen.getByRole('button', { name: /More tools/i });
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /More tools/i })).toBeNull();
+    });
+    expect(trigger).toHaveFocus();
+
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('button', { name: /Close More tools/i }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /More tools/i })).toBeNull();
+    });
+    expect(trigger).toHaveFocus();
+  });
+
+  it('dismisses when the backdrop is clicked', async () => {
+    const { container } = render(
+      <HbcHomepageLauncher
+        primary={TILES.slice(0, 3)}
+        overflow={TILES.slice(3)}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
+    const backdrop = container.ownerDocument.querySelector(
+      '[data-hbc-homepage-launcher-sheet-backdrop="true"]',
+    );
+    expect(backdrop).not.toBeNull();
+    fireEvent.click(backdrop!);
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /More tools/i })).toBeNull();
+    });
   });
 
   it('external chips render with target=_blank and a visually-hidden affordance note', () => {
@@ -302,6 +348,23 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
     expect(await screen.findByText('Field Ops')).toBeInTheDocument();
     expect((await screen.findAllByRole('link')).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('renders drawer tools as tile-family links with drawer icon posture', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={TILES.slice(0, 1)}
+        overflow={TILES.slice(1, 4)}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const drawerLink = screen.getByRole('link', { name: /Sign CO #22/i });
+    expect(drawerLink.getAttribute('data-hbc-ui')).toBe('homepage-launcher-tile');
+    expect(drawerLink.getAttribute('data-hbc-launcher-tile-family')).toBe('drawer');
+    expect(
+      screen.queryByRole('link', { name: /Sign CO #22/i })?.getAttribute('data-hbc-ui'),
+    ).not.toBe('homepage-launcher-drawer-tile');
   });
 
   it('handheld mode emits all-tools runtime markers', () => {

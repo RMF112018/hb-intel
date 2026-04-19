@@ -19,6 +19,7 @@ function resolveFamily(
 
 export function HbcHomepageLauncherTile({
   tile,
+  family = 'row',
   className,
 }: HbcHomepageLauncherTileProps): React.JSX.Element {
   const shouldOpenInNewTab = tile.openInNewTab ?? Boolean(tile.external);
@@ -27,7 +28,7 @@ export function HbcHomepageLauncherTile({
   const linkProps = shouldOpenInNewTab
     ? { href: tile.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: tile.href };
-  const tileFamily = resolveFamily(tile.variant);
+  const tileFamily = family === 'drawer' ? 'drawer' : resolveFamily(tile.variant);
   const computedAriaLabel = tile.ariaLabel ?? (tile.description ? `${tile.title}. ${tile.description}` : tile.title);
 
   return (
@@ -46,6 +47,7 @@ export function HbcHomepageLauncherTile({
       data-hbc-launcher-tile-variant={tile.variant ?? 'primary'}
       data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
       data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
+      data-hbc-launcher-tile-family={family}
       data-hbc-chip-id={tile.id}
       data-hbc-chip-service-key={tile.serviceKey}
       data-hbc-chip-group-key={tile.groupKey}
@@ -56,9 +58,11 @@ export function HbcHomepageLauncherTile({
       whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
       transition={{ duration: 0.14 }}
     >
-      <HbcHomepageLauncherIcon tile={tile} />
+      <HbcHomepageLauncherIcon tile={tile} surface={family === 'drawer' ? 'drawer' : 'row'} />
       <span className={styles.tileContent}>
-        <span className={styles.tileTitle}>{tile.title}</span>
+        <span className={clsx(styles.tileTitle, family === 'drawer' ? styles.drawerTileTitle : undefined)}>
+          {tile.title}
+        </span>
       </span>
       {shouldOpenInNewTab ? (
         <span className={styles.visuallyHidden}>(opens in new tab)</span>

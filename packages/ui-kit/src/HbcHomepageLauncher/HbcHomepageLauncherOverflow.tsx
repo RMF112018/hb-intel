@@ -7,7 +7,7 @@
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ChevronDown, Layers, X } from 'lucide-react';
 import {
   useFloating,
@@ -23,7 +23,7 @@ import type {
   HomepageLauncherTileModel,
 } from './types.js';
 import { launcherTile } from './variants.js';
-import { HbcHomepageLauncherIcon } from './HbcHomepageLauncherIcon.js';
+import { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 import styles from './homepage-launcher.module.css';
 
 interface OverflowGroup {
@@ -66,39 +66,6 @@ function resolveOverflowGroups(items: HomepageLauncherTileModel[]): OverflowGrou
   return groups;
 }
 
-function DrawerTile({ tile }: { tile: HomepageLauncherTileModel }): React.JSX.Element {
-  const shouldOpenInNewTab = tile.openInNewTab ?? Boolean(tile.external);
-  const isExternal = Boolean(tile.external);
-  const computedAriaLabel = tile.ariaLabel ?? (tile.description ? `${tile.title}. ${tile.description}` : tile.title);
-  const linkProps = shouldOpenInNewTab
-    ? { href: tile.href, target: '_blank', rel: 'noopener noreferrer' }
-    : { href: tile.href };
-
-  return (
-    <motion.a
-      {...linkProps}
-      aria-label={computedAriaLabel}
-      title={tile.title}
-      className={clsx(launcherTile({ family: 'primary' }), styles.drawerTile)}
-      data-hbc-ui="homepage-launcher-drawer-tile"
-      data-hbc-launcher-tile-id={tile.id}
-      data-hbc-launcher-tile-service-key={tile.serviceKey}
-      data-hbc-launcher-tile-group-key={tile.groupKey}
-      data-hbc-launcher-tile-icon-key={tile.iconKey}
-      data-hbc-launcher-tile-icon-source={tile.iconAssetSrc ? 'asset' : tile.icon ? 'lucide' : undefined}
-      data-hbc-launcher-tile-variant={tile.variant ?? 'primary'}
-      data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
-      data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
-      whileTap={{ scale: 0.985 }}
-      transition={{ duration: 0.14 }}
-    >
-      <HbcHomepageLauncherIcon tile={tile} />
-      <span className={styles.drawerTileTitle}>{tile.title}</span>
-      {shouldOpenInNewTab ? <span className={styles.visuallyHidden}>(opens in new tab)</span> : null}
-    </motion.a>
-  );
-}
-
 function DrawerOverflow({
   items,
   label,
@@ -109,6 +76,10 @@ function DrawerOverflow({
   className?: string;
 }): React.JSX.Element {
   const [open, setOpen] = React.useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const dialogId = React.useId();
+  const titleId = React.useId();
+  const descriptionId = React.useId();
   const groupedItems = React.useMemo(() => resolveOverflowGroups(items), [items]);
   const { refs, context } = useFloating({
     open,
@@ -119,6 +90,11 @@ function DrawerOverflow({
   const dismiss = useDismiss(context, { escapeKey: true, outsidePress: true });
   const role = useRole(context, { role: 'dialog' });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
+  const closeSheet = React.useCallback(() => setOpen(false), []);
+  const surfaceTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { duration: 0.24, ease: 'easeOut' as const };
+  const backdropTransition = prefersReducedMotion ? { duration: 0 } : { duration: 0.2 };
 
   return (
     <>
@@ -135,11 +111,21 @@ function DrawerOverflow({
         data-hbc-launcher-tile-variant="secondary-overflow-entry"
         data-hbc-overflow-mode="sheet"
         data-hbc-homepage-launcher-sheet-content="all-tools"
+        data-hbc-launcher-tile-family="row"
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-controls={dialogId}
         {...getReferenceProps()}
       >
-        <span className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)} aria-hidden="true">
+        <span
+          className={clsx(
+            styles.tileIcon,
+            styles.tileIconCompliant,
+            styles.tileIconDrawer,
+            styles.triggerIcon,
+          )}
+          aria-hidden="true"
+        >
           <Layers size={16} strokeWidth={2.2} />
         </span>
         <span className={styles.overflowTriggerLabel}>{label}</span>
@@ -152,36 +138,45 @@ function DrawerOverflow({
         <AnimatePresence>
           {open ? (
             <FloatingFocusManager context={context} modal returnFocus>
-              <>
+              <div className={styles.sheetLayer} data-hbc-homepage-launcher-sheet-root="true">
                 <motion.div
                   className={styles.sheetBackdrop}
+                  data-hbc-homepage-launcher-sheet-backdrop="true"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18 }}
+                  transition={backdropTransition}
+                  onClick={closeSheet}
                   aria-hidden="true"
                 />
                 <motion.div
+                  id={dialogId}
                   ref={refs.setFloating}
                   className={styles.sheetSurface}
-                  initial={{ y: '100%' }}
+                  initial={{ y: prefersReducedMotion ? 0 : '100%' }}
                   animate={{ y: 0 }}
-                  exit={{ y: '100%' }}
-                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  exit={{ y: prefersReducedMotion ? 0 : '100%' }}
+                  transition={surfaceTransition}
                   {...getFloatingProps()}
-                  aria-label={`${label} all tools`}
+                  aria-labelledby={titleId}
+                  aria-describedby={descriptionId}
                   data-hbc-homepage-launcher-sheet-content="all-tools"
                 >
                   <div className={styles.sheetHeader}>
-                    <span className={styles.sheetTitle}>{label}</span>
+                    <div className={styles.sheetHeading}>
+                      <span id={titleId} className={styles.sheetTitle}>{label}</span>
+                      <span id={descriptionId} className={styles.sheetSubtitle}>
+                        Launcher tools grouped for quick scan and keyboard-safe access.
+                      </span>
+                    </div>
                     <span className={styles.overflowHeaderCount} aria-hidden="true">
                       {items.length}
                     </span>
                     <button
                       type="button"
                       className={styles.sheetClose}
-                      onClick={() => setOpen(false)}
-                      aria-label="Close overflow"
+                      onClick={closeSheet}
+                      aria-label={`Close ${label}`}
                     >
                       <X size={14} aria-hidden="true" />
                     </button>
@@ -200,14 +195,19 @@ function DrawerOverflow({
                         ) : null}
                         <div className={styles.drawerTileGrid}>
                           {group.items.map((tile) => (
-                            <DrawerTile key={tile.id} tile={tile} />
+                            <HbcHomepageLauncherTile
+                              key={tile.id}
+                              tile={tile}
+                              family="drawer"
+                              className={styles.drawerTile}
+                            />
                           ))}
                         </div>
                       </section>
                     ))}
                   </div>
                 </motion.div>
-              </>
+              </div>
             </FloatingFocusManager>
           ) : null}
         </AnimatePresence>

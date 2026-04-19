@@ -15,6 +15,7 @@ export const launcherTile = cva(styles.tile, {
       primary: styles.tilePrimary,
       secondaryOverflowEntry: styles.tileSecondaryOverflowEntry,
       mobileEntry: styles.tileMobileEntry,
+      drawer: styles.tileDrawer,
     },
   },
   defaultVariants: {

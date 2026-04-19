@@ -11,7 +11,6 @@
   --hbc-hl-brand-rgb: var(--hb-brand-primary-rgb, 34, 83, 145);
   --hbc-hl-brand-deep-rgb: var(--hb-brand-primary-deep-rgb, 20, 52, 96);
   --hbc-hl-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
-  --hbc-hl-surface-rgb: var(--hb-surface-1-rgb, 255, 255, 255);
   --hbc-hl-orange-rgb: var(--hb-brand-orange-rgb, 227, 114, 34);
   --hbc-hl-row-gap: 10px;
   --hbc-hl-visible-tiles: 1;
@@ -49,8 +48,6 @@
   min-width: 0;
   padding-block: 2px;
 }
-
-/* ── Tile anatomy ───────────────────────────────────────── */
 
 .tile {
   flex: 1 1 0;
@@ -108,6 +105,23 @@
     0 8px 18px rgba(var(--hbc-hl-brand-rgb), 0.16);
 }
 
+.tileDrawer {
+  max-width: none;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  color: #ffffff;
+  background: linear-gradient(
+    150deg,
+    rgba(var(--hbc-hl-brand-deep-rgb), 0.64) 0%,
+    rgba(var(--hbc-hl-brand-rgb), 0.4) 100%
+  );
+  box-shadow:
+    0 1px 2px rgba(5, 10, 24, 0.35),
+    0 8px 20px rgba(5, 10, 24, 0.24);
+}
+
 .tile:hover {
   transform: translateY(-1px);
 }
@@ -132,11 +146,19 @@
     0 14px 30px rgba(var(--hbc-hl-orange-rgb), 0.28);
 }
 
+.tileDrawer:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 2px 6px rgba(5, 10, 24, 0.4),
+    0 14px 28px rgba(5, 10, 24, 0.33);
+}
+
 .tile:focus-visible,
-.overflowTile:focus-visible {
+.overflowTile:focus-visible,
+.sheetClose:focus-visible {
   outline: 2px solid #ffffff;
-  outline-offset: -3px;
-  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.56);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.5);
 }
 
 .tileIcon {
@@ -155,6 +177,15 @@
 .tileIconCompliant {
   width: 22px;
   height: 22px;
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.tileIconDrawer {
+  width: 20px;
+  height: 20px;
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -188,7 +219,10 @@
   text-overflow: ellipsis;
 }
 
-/* ── Secondary overflow entry tile ─────────────────────── */
+.drawerTileTitle {
+  font-size: 0.82rem;
+  line-height: 1.24;
+}
 
 .overflowTile {
   display: grid;
@@ -222,89 +256,97 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: 800;
 }
 
-.overflowHeaderCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  color: #ffffff;
-  font-size: 0.6875rem;
-  font-weight: 800;
-}
-
-.overflowGroupTitle {
-  padding: 2px 2px 4px;
-  font-size: 0.6875rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-/* ── Sheet (phone / short-height overflow) ──────────────── */
-
-.sheetBackdrop {
+.sheetLayer {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.54);
-  z-index: 999;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.sheetBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.6);
+  backdrop-filter: blur(2px);
 }
 
 .sheetSurface {
-  position: fixed;
-  left: clamp(12px, 2.2vw, 24px);
-  right: clamp(12px, 2.2vw, 24px);
-  bottom: 0;
-  max-height: min(86vh, 920px);
+  position: relative;
+  width: min(1140px, calc(100vw - 28px));
+  max-height: min(84vh, 900px);
   display: flex;
   flex-direction: column;
   background: linear-gradient(
-    155deg,
+    160deg,
     rgba(var(--hbc-hl-brand-deep-rgb), 0.98) 0%,
-    rgba(var(--hbc-hl-brand-rgb), 0.96) 58%,
-    rgba(var(--hbc-hl-orange-rgb), 0.9) 100%
+    rgba(var(--hbc-hl-brand-rgb), 0.95) 56%,
+    rgba(var(--hbc-hl-orange-rgb), 0.86) 100%
   );
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.24);
-  z-index: 1000;
+  box-shadow:
+    0 -14px 40px rgba(0, 0, 0, 0.36),
+    0 6px 24px rgba(0, 0, 0, 0.24);
 }
 
 .sheetHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 14px 16px 12px;
+  column-gap: 10px;
+  padding: 14px 18px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.sheetHeading {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
 .sheetTitle {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
+.sheetSubtitle {
+  font-size: 0.75rem;
+  line-height: 1.24;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.overflowHeaderCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
 .sheetClose {
   width: 32px;
   height: 32px;
-  margin-left: auto;
   border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
@@ -312,69 +354,40 @@
   justify-content: center;
 }
 
-.sheetClose:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
 .drawerBody {
-  padding: 14px 14px 16px;
+  padding: 14px 16px 18px;
   overflow-y: auto;
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .drawerGroup {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+}
+
+.overflowGroupTitle {
+  margin: 0;
+  padding: 0 2px;
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .drawerTileGrid {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(186px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .drawerTile {
-  max-width: none;
-  min-height: 66px;
-  padding: 10px 12px;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 10px;
+  min-height: 64px;
 }
 
-.drawerTileTitle {
-  min-width: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ── Breakpoint governance — binding visible-count matrix ──
- *
- *   Ultrawide         ≥1600        6 tiles + More (drawer)
- *   Desktop           1180–1599    5 tiles + More (drawer)
- *   Tablet landscape  980–1179     4 tiles + More (drawer)
- *   Tablet portrait   720–979      4 tiles + More (drawer)
- *   Phone             ≤719         3 tiles + More (sheet), stacked column
- *   Short-height      launcher rule subtracts 1 slot from the
- *                    per-device authoritative count (floor 1)
- *
- * Container-query driven. Visible count is authored in TS (see
- * constants.ts) and asserted on the DOM via data attributes. CSS only
- * governs spacing/padding/height at each breakpoint.
- */
-
+/* Breakpoint governance */
 @container hbc-homepage-launcher (max-width: 719px) {
-  .band {
-    flex-direction: row;
-    gap: 8px;
-  }
   .bandScroller {
     flex-direction: column;
     justify-content: flex-start;
@@ -382,6 +395,7 @@
     flex: 1 1 auto;
     width: 100%;
   }
+
   .tile {
     max-width: none;
     min-height: 66px;
@@ -389,35 +403,45 @@
     flex: 0 0 auto;
     width: 100%;
   }
+
   .tileIcon {
     width: 34px;
     height: 34px;
   }
-  .tileTitle {
-    font-size: 0.8125rem;
-  }
+
   .overflowTile {
     min-height: 64px;
     width: 100%;
-    grid-template-columns: auto 1fr auto auto;
   }
-  .overflowTriggerLabel {
-    font-size: 0.78rem;
-  }
-  .overflowTriggerCount {
-    min-width: 20px;
-    height: 20px;
-  }
+
   .sheetSurface {
-    left: 0;
-    right: 0;
+    width: 100%;
+    max-height: 92vh;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
   }
+
+  .sheetHeader {
+    padding: 12px 14px 10px;
+  }
+
+  .sheetSubtitle {
+    display: none;
+  }
+
+  .drawerBody {
+    padding: 12px 12px 14px;
+    gap: 12px;
+  }
+
   .drawerTileGrid {
     grid-template-columns: 1fr;
     gap: 8px;
   }
+
   .drawerTile {
     min-height: 62px;
+    padding: 11px 12px;
   }
 }
 
@@ -429,9 +453,12 @@
     height: 34px;
   }
   .tileTitle {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
   .overflowTile { min-height: 68px; }
+  .sheetSurface {
+    width: min(100vw - 22px, 960px);
+  }
 }
 
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
@@ -457,12 +484,12 @@
     height: 38px;
     border-radius: 11px;
   }
-  .tileTitle {
-    font-size: 0.9rem;
-  }
   .overflowTile {
     min-height: 76px;
     border-radius: 13px;
+  }
+  .sheetSurface {
+    max-height: min(82vh, 960px);
   }
 }
 
@@ -472,18 +499,32 @@
     padding: 9px 10px;
     border-radius: 11px;
   }
+
   .tileIcon {
     width: 30px;
     height: 30px;
     border-radius: 8px;
   }
-  .tileTitle {
-    font-size: 0.76rem;
-  }
+
   .overflowTile {
     min-height: 60px;
     border-radius: 11px;
   }
+
+  .sheetSurface {
+    max-height: 96vh;
+  }
+
+  .sheetHeader {
+    padding-top: 11px;
+    padding-bottom: 9px;
+  }
+
+  .drawerBody {
+    padding-top: 10px;
+    gap: 10px;
+  }
+
   .drawerTile {
     min-height: 58px;
     padding: 9px 10px;
@@ -495,16 +536,11 @@
   .overflowTile {
     transition: none !important;
   }
+
   .tile:hover,
   .overflowTile:hover {
     transform: none;
   }
-}
-
-.tileIconCompliant {
-  width: 22px !important;
-  height: 22px !important;
-  border-radius: 0 !important;
 }
 
 .visuallyHidden {
