@@ -253,6 +253,11 @@ const HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   // Mount + webpart manifest — entry identity
   'apps/hb-homepage/src/mount.tsx',
   'apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json',
+  // Package-owned hero banner assets (Prompt 01 ownership lock)
+  'apps/hb-homepage/assets/hero-banners/banner_home_7_morning.png',
+  'apps/hb-homepage/assets/hero-banners/banner_home_7_mid-day.png',
+  'apps/hb-homepage/assets/hero-banners/banner_home_7_evening.png',
+  'apps/hb-homepage/assets/hero-banners/banner_home_7_night.png',
   // Wrapper composition path
   'apps/hb-webparts/src/webparts/hbHomepage/HbHomepage.tsx',
   'apps/hb-webparts/src/webparts/hbHomepage/HbHomepageEntryStack.tsx',
@@ -275,6 +280,14 @@ const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   'hb-publisher': HB_PUBLISHER_CRITICAL_RUNTIME_PATHS,
   'hb-homepage': HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
 };
+
+const HB_HOMEPAGE_CANONICAL_BANNER_FILES = [
+  'banner_home_7_morning.png',
+  'banner_home_7_mid-day.png',
+  'banner_home_7_evening.png',
+  'banner_home_7_night.png',
+] as const;
+const HB_HOMEPAGE_BANNER_SOURCE_RELATIVE_DIR = 'apps/hb-homepage/assets/hero-banners';
 
 interface PackageRuntimeMarker {
   id: string;
@@ -478,6 +491,77 @@ function getArchivePaths(sppkgPath: string): string[] {
     .split('\n')
     .map((entry) => entry.trim())
     .filter(Boolean);
+}
+
+function stageHomepageBannerAssets(distDir: string): void {
+  const sourceDir = path.join(ROOT, HB_HOMEPAGE_BANNER_SOURCE_RELATIVE_DIR);
+  if (!fs.existsSync(sourceDir)) {
+    throw new Error(`Homepage banner source directory not found: ${sourceDir}`);
+  }
+  for (const bannerFile of HB_HOMEPAGE_CANONICAL_BANNER_FILES) {
+    const sourcePath = path.join(sourceDir, bannerFile);
+    if (!fs.existsSync(sourcePath)) {
+      throw new Error(
+        `Homepage canonical banner is missing from source ownership seam: ${sourcePath}`,
+      );
+    }
+    fs.copyFileSync(sourcePath, path.join(distDir, bannerFile));
+  }
+  console.log(
+    `  ✓ Homepage canonical banners staged from ${HB_HOMEPAGE_BANNER_SOURCE_RELATIVE_DIR}: ` +
+      HB_HOMEPAGE_CANONICAL_BANNER_FILES.join(', '),
+  );
+}
+
+function collectPackagedClientSideAssetsByBasename(
+  sppkgPath: string,
+  basenames: readonly string[],
+): Array<{
+  fileName: string;
+  archivePath: string | null;
+  present: boolean;
+  sha256?: string;
+  sizeBytes?: number;
+}> {
+  const archivePaths = getArchivePaths(sppkgPath);
+  return basenames.map((fileName) => {
+    const archivePath = archivePaths.find(
+      (entry) =>
+        entry === `ClientSideAssets/${fileName}` ||
+        entry.endsWith(`/ClientSideAssets/${fileName}`),
+    );
+    if (!archivePath) {
+      return { fileName, archivePath: null, present: false };
+    }
+    const bytes = readArchiveBytes(sppkgPath, archivePath);
+    return {
+      fileName,
+      archivePath,
+      present: true,
+      sha256: sha256Hex(bytes),
+      sizeBytes: bytes.length,
+    };
+  });
+}
+
+function verifyPackagedClientSideAssetsByBasename(
+  sppkgPath: string,
+  domainDir: string,
+  basenames: readonly string[],
+): boolean {
+  const checks = collectPackagedClientSideAssetsByBasename(sppkgPath, basenames);
+  const missing = checks.filter((entry) => !entry.present);
+  if (missing.length > 0) {
+    for (const miss of missing) {
+      console.error(`  ❌ ${domainDir}: .sppkg missing ClientSideAssets/${miss.fileName}`);
+    }
+    return false;
+  }
+  console.log(
+    `  ✓ ${domainDir}: packaged ClientSideAssets include ${basenames.length} required asset(s): ` +
+      basenames.join(', '),
+  );
+  return true;
 }
 
 function stableJson(value: unknown): string {
@@ -2128,6 +2212,16 @@ for (const domain of domains) {
     console.log(`  ✓ Runtime smoke test passed: ${globalName}.${requiredFns.join('() + .')}() present (globalThis + window verified independently)`);
   }
 
+  if (domain.dir === 'hb-homepage') {
+    try {
+      stageHomepageBannerAssets(distDir);
+    } catch (err) {
+      console.error(`  ❌ ${domain.dir}: failed to stage canonical homepage banners — ${(err as Error).message}`);
+      allPassed = false;
+      continue;
+    }
+  }
+
   // ── Step 2: Prepare SPFx shell project ───────────────────────────────
   cleanShellTemp();
 
@@ -2557,6 +2651,12 @@ for (const domain of domains) {
     allPassed = false;
     continue;
   }
+  if (domain.dir === 'hb-homepage') {
+    if (!verifyPackagedClientSideAssetsByBasename(sppkgDest, domain.dir, HB_HOMEPAGE_CANONICAL_BANNER_FILES)) {
+      allPassed = false;
+      continue;
+    }
+  }
   if (enforceFreshBuild && freshnessEvidence) {
     if (!verifyPackagedBundleFreshness(sppkgDest, bundleName, freshnessEvidence, domain.dir)) {
       allPassed = false;
@@ -2809,6 +2909,11 @@ for (const domain of domains) {
         present: bundleText.includes(m.needle),
       }));
       const missingMarkers = markerResults.filter((r) => !r.present);
+      const bannerAssets = collectPackagedClientSideAssetsByBasename(
+        sppkgDest,
+        HB_HOMEPAGE_CANONICAL_BANNER_FILES,
+      );
+      const missingBannerAssets = bannerAssets.filter((entry) => !entry.present);
       const versionAuthority = {
         solutionVersion: String(domainPkgSolution?.solution?.version ?? ''),
         featureVersion: String(domainPkgSolution?.solution?.features?.[0]?.version ?? ''),
@@ -2830,6 +2935,9 @@ for (const domain of domains) {
         versionAuthority,
         packagedAppBundle: appBundleFingerprint,
         packagedShimEntries: packageTruth.proof.packagedAssets.shimEntries,
+        homepageCanonicalBannerSource: HB_HOMEPAGE_BANNER_SOURCE_RELATIVE_DIR,
+        homepageCanonicalBannerFiles: HB_HOMEPAGE_CANONICAL_BANNER_FILES,
+        packagedHomepageBannerAssets: bannerAssets,
         criticalRuntimePaths: HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
         flagshipMarkerChecks: markerResults,
         checks: {
@@ -2848,6 +2956,16 @@ for (const domain of domains) {
                     (m) => `Missing marker "${m.marker}" (needle="${m.needle}") in packaged bundle`,
                   ),
           },
+          homepageBannerAssetsPresent: {
+            pass: missingBannerAssets.length === 0,
+            details:
+              missingBannerAssets.length === 0
+                ? ['All canonical homepage hero banners are shipped in ClientSideAssets']
+                : missingBannerAssets.map(
+                    (asset) =>
+                      `Missing canonical homepage banner asset in package: ClientSideAssets/${asset.fileName}`,
+                  ),
+          },
         },
       };
       const effectivenessProofPath = path.join(
@@ -2859,7 +2977,7 @@ for (const domain of domains) {
         `${JSON.stringify(effectivenessProof, null, 2)}\n`,
       );
       console.log(`  ✓ Homepage effectiveness proof written: ${effectivenessProofPath}`);
-      if (!versionAuthority.aligned || missingMarkers.length > 0) {
+      if (!versionAuthority.aligned || missingMarkers.length > 0 || missingBannerAssets.length > 0) {
         console.error(
           `  ❌ hb-intel-homepage effectiveness proof failed; see ${effectivenessProofPath}`,
         );

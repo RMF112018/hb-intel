@@ -69,8 +69,12 @@ import {
 } from '../hbHomepage/shell/useShellContainer.js';
 import styles from './signature-hero.module.css';
 
-/** Default banner filename deployed alongside JS/CSS in the .sppkg ClientSideAssets. */
-const DEFAULT_BANNER = 'banner_home_7.png';
+/**
+ * Default flagship hero banner emitted by hb-intel-homepage package assets.
+ * Canonical source location:
+ * apps/hb-homepage/assets/hero-banners/banner_home_7_morning.png
+ */
+const DEFAULT_BANNER = 'banner_home_7_morning.png';
 
 export interface HbSignatureHeroHomepageProps {
   identity: HomepageIdentityInput;

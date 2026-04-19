@@ -3,10 +3,11 @@
 ## Purpose
 This is the focused runbook for proving that a rebuilt
 `hb-intel-homepage.sppkg` actually contains the wrapper-owned flagship
-Priority Actions Rail path **and** that the package version is
-trustworthy enough for SharePoint to apply. Use it whenever a change
-touches the HB Homepage flagship rail and you need to close on hosted
-effectiveness — not just local compile success.
+Priority Actions Rail path, the canonical homepage hero banner assets,
+**and** that the package version is trustworthy enough for SharePoint
+to apply. Use it whenever a change touches the HB Homepage flagship
+runtime and you need to close on hosted effectiveness — not just local
+compile success.
 
 ## Version authority
 The standalone homepage package has exactly one authoritative version
@@ -38,8 +39,16 @@ Outputs:
   freshness / semantic / runtime-marker proof for the package
 - `dist/sppkg/hb-homepage-shim-proof.json` — shim-entry proof
 - `dist/sppkg/hb-intel-homepage-effectiveness-proof.json` — **focused
-  effectiveness proof for the flagship rail path (this runbook's
+  effectiveness proof for the flagship rail path and canonical homepage
+  hero-banner shipping contract (this runbook's
   primary artifact)**
+
+Canonical homepage banner ownership seam:
+- `apps/hb-homepage/assets/hero-banners/`
+  - `banner_home_7_morning.png`
+  - `banner_home_7_mid-day.png`
+  - `banner_home_7_evening.png`
+  - `banner_home_7_night.png`
 
 ## Effectiveness proof — what to inspect
 Open `dist/sppkg/hb-intel-homepage-effectiveness-proof.json` and
@@ -52,13 +61,25 @@ confirm every one of:
 | `versionAuthority.webpartManifestVersion` | matches authority above |
 | `checks.versionAuthorityAligned.pass` | `true` |
 | `checks.flagshipMarkersPresent.pass` | `true` |
+| `checks.homepageBannerAssetsPresent.pass` | `true` |
 | `flagshipMarkerChecks[*].present` | all `true` |
+| `homepageCanonicalBannerSource` | `apps/hb-homepage/assets/hero-banners` |
+| `packagedHomepageBannerAssets[*].present` | all `true` |
 | `criticalRuntimePaths` | includes `HbHomepageEntryStack.tsx`, `PriorityActionsRail.tsx`, `HbcPriorityRailSurface.tsx`, `priority-rail.module.css`, `hbHomepageWrapperConfig.ts`, etc. |
 | `packagedAppBundle.sha256` | matches current source bundle SHA |
 
 If `flagshipMarkersPresent.pass === false`, the disputed rail code did
 **not** land in the packaged bundle — investigate the bundle
 assembly, tree-shaking, or entry-graph before deploying.
+
+If `homepageBannerAssetsPresent.pass === false`, the package is missing
+one or more canonical homepage hero banners. Do not deploy until all
+four banner files are present in `ClientSideAssets`.
+
+Quick archive proof command:
+```
+unzip -Z1 dist/sppkg/hb-intel-homepage.sppkg | rg "ClientSideAssets/banner_home_7_(morning|mid-day|evening|night)\\.png"
+```
 
 ## Critical runtime source coverage
 The effectiveness proof fingerprints these files. Edits to any must

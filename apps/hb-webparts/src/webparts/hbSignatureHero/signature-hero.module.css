@@ -61,7 +61,7 @@
 /* ── Background layers ─────────────────────────────────── */
 
 /* Background photography (covers full surface, behind scrim).
-   Default: repo-controlled banner_home_7.png resolved via CDN base URL.
+   Default: package-owned banner_home_7_morning.png resolved via CDN base URL.
    Override: backgroundImage prop. */
 .photo {
   position: absolute;
