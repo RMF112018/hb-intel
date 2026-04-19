@@ -49,7 +49,6 @@ import {
   bodySmall,
   label as labelType,
 } from '@hbc/ui-kit/theme';
-import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
 import type { ProjectSitesLayoutMode } from '../projectSitesLayoutMode.js';
 import { PROJECT_SITES_MODE_RESPONSIBILITIES } from '../projectSitesLayoutMode.js';
@@ -377,22 +376,6 @@ function resolveIdentityLocation(entry: IProjectSiteEntry): string {
   return entry.projectLocation;
 }
 
-function resolveLaunchConfidenceMessage(entry: IProjectSiteEntry): string {
-  if (entry.launchTargetKind === 'legacy-fallback' && entry.launchStatus.isLaunchable) {
-    return 'Launch confidence: Legacy fallback folder is available. Access depends on your SharePoint permissions.';
-  }
-  if (entry.launchStatus.state === 'live') {
-    return 'Launch confidence: Site link is available. Access depends on your SharePoint permissions.';
-  }
-  if (entry.launchStatus.state === 'archived') {
-    return 'Launch confidence: Archived site link is available. Access depends on your SharePoint permissions.';
-  }
-  if (entry.launchStatus.state === 'attention-needed') {
-    return 'Launch confidence: blocked until launch-critical data issues are corrected.';
-  }
-  return 'Launch confidence: site is still provisioning and not launchable yet.';
-}
-
 function resolveLaunchActionLabel(entry: IProjectSiteEntry): string {
   if (entry.launchTargetKind === 'legacy-fallback') {
     return 'Open Legacy Project Files';
@@ -497,7 +480,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
 
   const deptLabel = formatDepartment(entry.department);
   const officeDivisionLabel = formatOfficeDivision(entry.officeDivision);
-  const launchConfidenceMessage = resolveLaunchConfidenceMessage(entry);
 
   const headerContent = (
     <div className={classes.header}>
@@ -532,45 +514,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
     </div>
   );
 
-  const openSiteActionClass = mergeClasses(
-    classes.openSiteAction,
-    isCompactLayout && classes.openSiteActionCompact,
-    cardState === 'archived' && classes.openSiteActionArchived,
-  );
-
-  // Condensed density drops the footer department label entirely. At
-  // regular/comfortable the department chip still appears in the identity
-  // row, so dropping the footer echo is information-preserving and
-  // meaningfully shorter vertically when the launch affordance stacks.
-  const showFooterDepartment = !isCondensed && Boolean(deptLabel);
-  const footerContent = (
-    <div className={mergeClasses(classes.footer, isCompactLayout && classes.footerCompact)}>
-      {showFooterDepartment ? (
-        <span className={mergeClasses(classes.department, isCompactLayout && classes.departmentCompact)}>
-          {deptLabel}
-        </span>
-      ) : (
-        // Keep a flex anchor so the action still right-aligns in non-compact
-        // footer modes even when the label is dropped.
-        <span aria-hidden="true" />
-      )}
-      {entry.launchStatus.isLaunchable ? (
-        <span className={openSiteActionClass} aria-hidden="true">
-          {resolveLaunchActionLabel(entry)} <ExternalLink size="sm" />
-        </span>
-      ) : entry.launchStatus.state === 'attention-needed' ? (
-        <span className={mergeClasses(classes.provisioningLabel, isCompactLayout && classes.provisioningLabelCompact)}>
-          Attention Needed
-        </span>
-      ) : (
-        <span className={mergeClasses(classes.provisioningLabel, isCompactLayout && classes.provisioningLabelCompact)}>
-          <span className={classes.provisioningDot} aria-hidden="true" />
-          Provisioning
-        </span>
-      )}
-    </div>
-  );
-
   // Identity chips policy by density:
   //   comfortable: year + office division + department
   //   regular:     year + office division
@@ -579,14 +522,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
     !isCondensed && Boolean(officeDivisionLabel);
   const showDepartmentChip =
     !isCondensed && !isRegular && Boolean(deptLabel);
-
-  // Access-confidence copy is launch-state *reassurance* for launchable
-  // cards. At regular/condensed density the Open Site affordance itself
-  // already signals launchability, so suppress the always-on message for
-  // launchable entries. Non-launchable states always show the message so
-  // provisioning/attention meaning stays truthful.
-  const showAccessConfidence =
-    effectiveDensity === 'comfortable' || !entry.launchStatus.isLaunchable;
 
   const bodyContent = (
     <div className={classes.body}>
@@ -600,16 +535,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
           <span className={classes.identityChip}>{deptLabel}</span>
         )}
       </div>
-      {showAccessConfidence && (
-        <span
-          className={mergeClasses(
-            classes.accessConfidence,
-            !entry.launchStatus.isLaunchable && classes.accessConfidenceMuted,
-          )}
-        >
-          {launchConfidenceMessage}
-        </span>
-      )}
       {!entry.launchStatus.isLaunchable && (
         <span
           className={mergeClasses(
@@ -650,7 +575,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
         data-project-sites-card-density={effectiveDensity}
         aria-label={`${resolveLaunchActionLabel(entry)}: ${entry.projectName}${entry.projectNumber ? ` (${entry.projectNumber})` : ''}`}
       >
-        <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
+        <HbcCard weight="standard" header={headerContent} className={classes.cardFull}>
           {bodyContent}
         </HbcCard>
       </a>
@@ -664,7 +589,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
       data-project-sites-card-layout={layoutMode}
       aria-label={`${entry.projectName} — ${entry.launchStatus.userMessage}`}
     >
-      <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
+      <HbcCard weight="standard" header={headerContent} className={classes.cardFull}>
         {bodyContent}
       </HbcCard>
     </div>

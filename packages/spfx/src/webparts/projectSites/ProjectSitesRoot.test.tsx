@@ -405,7 +405,7 @@ describe('ProjectSitesRoot', () => {
     expect(screen.queryByText(/filter source:/i)).not.toBeInTheDocument();
   });
 
-  it('shows the filter-source pill on wide mode when an authoritative override drives the scope', () => {
+  it('honors author-override by scoping to the override year without surfacing a source pill', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
     mockUseProjectSites.mockImplementation((scope) => {
       if (!scope) return null;
@@ -425,10 +425,11 @@ describe('ProjectSitesRoot', () => {
       />,
     );
 
-    // Eyebrow + filter-source pill still present when a scope source is
-    // worth surfacing (author-override here).
+    // Eyebrow still present on wide.
     expect(screen.getByText('HB Central · Projects')).toBeInTheDocument();
-    expect(screen.getByText(/filter source:/i)).toBeInTheDocument();
+    // Scope-source narration is no longer surfaced to users.
+    expect(screen.queryByText(/filter source:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/scope source:/i)).not.toBeInTheDocument();
   });
 
   it('renders a progressive-disclosure filter summary (not inline chips) in compact mode', () => {
@@ -529,7 +530,8 @@ describe('ProjectSitesRoot', () => {
     await waitFor(() => {
       expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2026));
     });
-    expect(screen.getByText(/filter source: author override/i)).toBeInTheDocument();
+    // Author-override scopes the query correctly; no session-debug pill is surfaced.
+    expect(screen.queryByText(/filter source:/i)).not.toBeInTheDocument();
   });
 
   it('falls back to host page year when override is invalid', async () => {
@@ -556,7 +558,8 @@ describe('ProjectSitesRoot', () => {
     await waitFor(() => {
       expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2024));
     });
-    expect(screen.getByText(/filter source: host page year context/i)).toBeInTheDocument();
+    // Host-page-year scopes the query correctly; no session-debug pill is surfaced.
+    expect(screen.queryByText(/filter source:/i)).not.toBeInTheDocument();
   });
 
   it('defaults to All Projects when no override is present and switches to a year filter via the dropdown', async () => {

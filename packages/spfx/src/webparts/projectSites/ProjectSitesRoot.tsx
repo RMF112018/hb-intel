@@ -877,12 +877,6 @@ function scopeChoiceValue(scope: ProjectSitesScope): string {
   return scope.kind === 'all' ? 'all' : `year:${scope.year}`;
 }
 
-function describeScopeSource(source: ProjectSitesScopeSource): string {
-  if (source === 'author-override') return 'Filter source: author override (yearOverride)';
-  if (source === 'host-page-year') return 'Filter source: host page Year context';
-  if (source === 'all-projects-default') return 'Filter: All Projects (default)';
-  return 'Filter: user-selected';
-}
 
 function describeLayoutMode(mode: ProjectSitesLayoutMode): string {
   if (mode === 'compact') return 'compact';
@@ -890,19 +884,6 @@ function describeLayoutMode(mode: ProjectSitesLayoutMode): string {
   return 'wide';
 }
 
-function buildContextSummary(resolvedScope: IResolvedProjectSitesScope | null): string | null {
-  if (!resolvedScope) return null;
-  if (resolvedScope.source === 'author-override') {
-    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all project sites'} from author override.`;
-  }
-  if (resolvedScope.source === 'host-page-year') {
-    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all project sites'} from host page Year context.`;
-  }
-  // 'all-projects-default' and 'user-selected' are normal states — no
-  // context summary is surfaced for them (the dropdown communicates the
-  // active filter on its own).
-  return null;
-}
 
 // ── Component ────────────────────────────────────────────────────────────
 
@@ -985,7 +966,6 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   const provisioningCount = projectsResult?.status === 'success'
     ? projectsResult.entries.filter((e) => e.launchStatus.state === 'provisioning').length
     : 0;
-  const contextSummary = buildContextSummary(resolvedScope);
   // All-Projects-by-default is no longer a "warning" state; only surface
   // a warning if some future source explicitly flags one (none today).
   const showContextWarning = false;
@@ -1053,11 +1033,6 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
           <span className={classes.eyebrow}>HB Central · Projects</span>
         )}
         <h2 className={classes.title}>Project Sites</h2>
-        {showControls && resolvedScope && !tightHeader && (
-          <span className={classes.scopeContextPill}>
-            {describeScopeSource(resolvedScope.source)}
-          </span>
-        )}
       </div>
       {showControls && projectsResult?.status === 'success' && (
         <span
@@ -1572,12 +1547,10 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
 
       {renderHeader(true)}
       {(() => {
-        // First-screen compression: in compact mode the scope-source
-        // narration is suppressed (the Filter-by-Year dropdown already
-        // conveys the active selection). Attention/provisioning counts
-        // are always preserved because they are truthful system state.
-        const showScopeSourceText =
-          contextSummary !== null && (!isCompactMode || showContextWarning);
+        // Truthful operational state only: the Filter-by-Year dropdown
+        // communicates the active selection, so scope-source narration
+        // is not rendered. Attention/provisioning counts remain because
+        // they describe actionable data quality rather than plumbing.
         const stateCountsFragment =
           projectsResult?.status === 'success'
           && (attentionNeededCount > 0 || provisioningCount > 0)
@@ -1592,18 +1565,15 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
               </>
             )
             : null;
-        if (!showScopeSourceText && !stateCountsFragment) return null;
+        if (!stateCountsFragment) return null;
         return (
           <div
             className={mergeClasses(
               classes.contextSummary,
               isCompactMode && classes.contextSummaryCompact,
-              showContextWarning && classes.contextSummaryWarning,
             )}
             role="status"
           >
-            {showScopeSourceText && contextSummary}
-            {showScopeSourceText && stateCountsFragment && ' '}
             {stateCountsFragment}
           </div>
         );

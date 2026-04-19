@@ -88,12 +88,15 @@ describe('ProjectSiteCard', () => {
     );
   });
 
-  it('renders "Open Site" action text when hasSiteUrl', () => {
+  it('keeps launchable cards clickable via the card-wrapper anchor (no separate action chip)', () => {
     render(<ProjectSiteCard entry={createEntry()} />);
-    expect(screen.getByText('Open Site')).toBeInTheDocument();
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://example.sharepoint.com/sites/RMC');
+    // Action chip / footer copy is no longer rendered.
+    expect(screen.queryByText('Open Site')).not.toBeInTheDocument();
   });
 
-  it('renders fallback action and aria label for legacy fallback launch targets', () => {
+  it('wraps legacy-fallback cards in a clickable anchor and carries a truthful aria-label (no footer chip)', () => {
     render(
       <ProjectSiteCard
         entry={createEntry({
@@ -114,17 +117,17 @@ describe('ProjectSiteCard', () => {
     );
 
     const link = screen.getByRole('link');
-    expect(screen.getByText('Open Legacy Project Files')).toBeInTheDocument();
     expect(link).toHaveAttribute(
       'aria-label',
       'Open Legacy Project Files: Riverside Medical Center (24-001-01)',
     );
-    expect(
-      screen.getByText(/launch confidence: legacy fallback folder is available\./i),
-    ).toBeInTheDocument();
+    // Footer action chip + launch-confidence copy are gone; the whole
+    // card is the launch affordance.
+    expect(screen.queryByText('Open Legacy Project Files')).not.toBeInTheDocument();
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
   });
 
-  it('renders as disabled div when hasSiteUrl is false', () => {
+  it('renders as disabled div when hasSiteUrl is false and surfaces the status message in the body', () => {
     const { container } = render(
       <ProjectSiteCard entry={createEntry({
         hasSiteUrl: false,
@@ -139,11 +142,13 @@ describe('ProjectSiteCard', () => {
       />,
     );
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(screen.getByText(/^Provisioning$/)).toBeInTheDocument();
+    // Status lives in the body as userMessage; no footer "Provisioning" label.
+    expect(screen.getByText(/site has not been provisioned yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^Provisioning$/)).not.toBeInTheDocument();
     expect(container.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
   });
 
-  it('renders attention-needed state with explicit guidance', () => {
+  it('renders attention-needed state with explicit guidance in the body', () => {
     render(
       <ProjectSiteCard
         entry={createEntry({
@@ -157,8 +162,9 @@ describe('ProjectSiteCard', () => {
       />,
     );
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(screen.getByText(/attention needed/i)).toBeInTheDocument();
     expect(screen.getByText(/data correction/i)).toBeInTheDocument();
+    // No footer "Attention Needed" label.
+    expect(screen.queryByText(/^Attention Needed$/)).not.toBeInTheDocument();
   });
 
   it('renders stage badge for Active', () => {
@@ -259,23 +265,23 @@ describe('ProjectSiteCard', () => {
     );
   });
 
-  it('supports compact layout mode while preserving launch action visibility', () => {
+  it('preserves clickable card-wrapper in compact layout', () => {
     render(<ProjectSiteCard entry={createEntry()} layoutMode="compact" />);
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('data-project-sites-card-layout', 'compact');
-    expect(screen.getByText('Open Site')).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.sharepoint.com/sites/RMC');
+    // No footer action chip.
+    expect(screen.queryByText('Open Site')).not.toBeInTheDocument();
   });
 
-  it('shows identity chips and truthful launch confidence for live records', () => {
+  it('shows identity chips for live records without any launch-confidence copy', () => {
     render(<ProjectSiteCard entry={createEntry()} />);
     expect(screen.getByText('2024')).toBeInTheDocument();
     expect(screen.getByText('South Florida')).toBeInTheDocument();
-    expect(
-      screen.getByText(/launch confidence: site link is available\. access depends on your sharepoint permissions\./i),
-    ).toBeInTheDocument();
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
   });
 
-  it('shows non-speculative blocked launch-confidence message for provisioning records', () => {
+  it('surfaces the truthful status message for blocked/provisioning records in the body (no launch-confidence narration)', () => {
     render(
       <ProjectSiteCard
         entry={createEntry({
@@ -291,9 +297,8 @@ describe('ProjectSiteCard', () => {
       />,
     );
 
-    expect(
-      screen.getByText(/launch confidence: site is still provisioning and not launchable yet\./i),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Site has not been provisioned yet.')).toBeInTheDocument();
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
   });
 
   it('uses authoritative people labels in card metadata when provided', () => {
@@ -332,7 +337,7 @@ describe('ProjectSiteCard', () => {
 
   // ── Density variants ─────────────────────────────────────────────
 
-  it('renders comfortable density (wide layout) with full identity chips, launch-confidence message, and all metadata fields', () => {
+  it('renders comfortable density (wide layout) with full identity chips and all metadata fields', () => {
     render(
       <ProjectSiteCard
         entry={createEntry({
@@ -345,15 +350,12 @@ describe('ProjectSiteCard', () => {
     );
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('data-project-sites-card-density', 'comfortable');
-    // All three identity chips
+    // All three identity chips present; department appears exactly once
+    // now that the footer department echo is gone.
     expect(screen.getByText('2024')).toBeInTheDocument();
     expect(screen.getByText('South Florida')).toBeInTheDocument();
-    // "Commercial" appears both as an identity chip and the footer department label
-    expect(screen.getAllByText('Commercial').length).toBeGreaterThanOrEqual(2);
-    // Launch confidence message is on
-    expect(
-      screen.getByText(/launch confidence: site link is available/i),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText('Commercial').length).toBe(1);
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
     // Full metadata set
     expect(screen.getByText('Type')).toBeInTheDocument();
     expect(screen.getByText('Project Manager')).toBeInTheDocument();
@@ -374,17 +376,11 @@ describe('ProjectSiteCard', () => {
     );
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('data-project-sites-card-density', 'regular');
-    // Year + office division chips present, department chip dropped from identity row
+    // Year + office division chips present; department chip dropped at regular density.
     expect(screen.getByText('2024')).toBeInTheDocument();
     expect(screen.getByText('South Florida')).toBeInTheDocument();
-    // Department still appears in the footer label (commercial) but the
-    // identity chip duplication is gone. We assert the chip count:
-    const commercialMatches = screen.getAllByText('Commercial');
-    expect(commercialMatches.length).toBe(1);
-    // Launch confidence message is suppressed for launchable cards at regular density
-    expect(
-      screen.queryByText(/launch confidence: site link is available/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Commercial')).not.toBeInTheDocument();
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
     // Metadata trimmed: Type and Lead Estimator dropped, PM + Exec kept
     expect(screen.queryByText('Type')).not.toBeInTheDocument();
     expect(screen.queryByText('Lead Estimator')).not.toBeInTheDocument();
@@ -392,7 +388,7 @@ describe('ProjectSiteCard', () => {
     expect(screen.getByText('Project Executive')).toBeInTheDocument();
   });
 
-  it('renders condensed density (compact layout) with single year chip, no footer department, and minimal metadata', () => {
+  it('renders condensed density (compact layout) with a single year chip and minimal metadata; card remains clickable via wrapper', () => {
     render(
       <ProjectSiteCard
         entry={createEntry({
@@ -410,10 +406,7 @@ describe('ProjectSiteCard', () => {
     expect(screen.getByText('2024')).toBeInTheDocument();
     expect(screen.queryByText('South Florida')).not.toBeInTheDocument();
     expect(screen.queryByText('Commercial')).not.toBeInTheDocument();
-    // Launch-confidence message suppressed for launchable at condensed density
-    expect(
-      screen.queryByText(/launch confidence: site link is available/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
     // All people metadata dropped; Client + Location kept (if present)
     expect(screen.queryByText('Project Manager')).not.toBeInTheDocument();
     expect(screen.queryByText('Lead Estimator')).not.toBeInTheDocument();
@@ -421,8 +414,9 @@ describe('ProjectSiteCard', () => {
     expect(screen.queryByText('Type')).not.toBeInTheDocument();
     expect(screen.getByText('Client')).toBeInTheDocument();
     expect(screen.getByText('HCA Healthcare')).toBeInTheDocument();
-    // Primary action preserved in launchable state
-    expect(screen.getByText('Open Site')).toBeInTheDocument();
+    // Launch affordance lives in the wrapper anchor, not a footer chip.
+    expect(screen.queryByText('Open Site')).not.toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.sharepoint.com/sites/RMC');
   });
 
   it('preserves blocked launch-state messaging in condensed density (provisioning)', () => {
@@ -441,12 +435,11 @@ describe('ProjectSiteCard', () => {
         layoutMode="compact"
       />,
     );
-    // Truthful blocked messaging must still be present at condensed density
-    expect(
-      screen.getByText(/launch confidence: site is still provisioning/i),
-    ).toBeInTheDocument();
+    // Truthful blocked messaging still surfaces in the body.
     expect(screen.getByText('Site has not been provisioned yet.')).toBeInTheDocument();
-    expect(screen.getByText('Provisioning')).toBeInTheDocument();
+    // No launch-confidence narration; no footer "Provisioning" label.
+    expect(screen.queryByText(/launch confidence/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Provisioning$/)).not.toBeInTheDocument();
   });
 
   it('accepts an explicit density override that wins over layoutMode-derived density', () => {
@@ -457,18 +450,9 @@ describe('ProjectSiteCard', () => {
         density="comfortable"
       />,
     );
-    // Layout remains compact (affects footer stacking), but the density
-    // diagnostic confirms the override and launch-confidence comes back.
-    expect(screen.getByRole('link')).toHaveAttribute(
-      'data-project-sites-card-density',
-      'comfortable',
-    );
-    expect(screen.getByRole('link')).toHaveAttribute(
-      'data-project-sites-card-layout',
-      'compact',
-    );
-    expect(
-      screen.getByText(/launch confidence: site link is available/i),
-    ).toBeInTheDocument();
+    // Layout stays compact; density diagnostic reflects the override.
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('data-project-sites-card-layout', 'compact');
+    expect(link).toHaveAttribute('data-project-sites-card-density', 'comfortable');
   });
 });
