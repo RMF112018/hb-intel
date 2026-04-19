@@ -17,8 +17,8 @@
  * - Otherwise the daypart default banner asset URL wins, derived from
  *   `assetBaseUrl` + the daypart filename for `now`.
  * - When no override and no `assetBaseUrl` is available, the resolver
- *   returns a `'no-image'` source so the hero falls back to its tinted
- *   gradient surface without claiming a daypart-default win.
+ *   returns a `'no-image-fallback'` source so the hero falls back to its
+ *   tinted gradient surface without claiming a daypart-default win.
  */
 import { resolveHomepageHeroBannerAssetUrl } from './homepageHeroBannerAssetResolver.js';
 import {
@@ -27,7 +27,10 @@ import {
   type HomepageHeroBannerDaypart,
 } from './homepageHeroBannerTimeOfDaySelector.js';
 
-export type HomepageHeroBannerSource = 'override' | 'daypart-default' | 'no-image';
+export type HomepageHeroBannerSource =
+  | 'wrapper-override'
+  | 'daypart-default'
+  | 'no-image-fallback';
 
 export interface HomepageHeroBannerSelection {
   readonly source: HomepageHeroBannerSource;
@@ -53,7 +56,7 @@ export function resolveHomepageHeroBannerSelection(
 
   if (overrideActive) {
     return {
-      source: 'override',
+      source: 'wrapper-override',
       daypart,
       fileName,
       url: input.authoredOverrideUrl,
@@ -64,7 +67,7 @@ export function resolveHomepageHeroBannerSelection(
   const defaultUrl = resolveHomepageHeroBannerAssetUrl(input.assetBaseUrl, fileName);
   if (!defaultUrl) {
     return {
-      source: 'no-image',
+      source: 'no-image-fallback',
       daypart,
       fileName,
       url: undefined,

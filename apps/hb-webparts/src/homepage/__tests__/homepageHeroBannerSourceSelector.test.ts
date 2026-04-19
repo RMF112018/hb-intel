@@ -39,7 +39,7 @@ describe('homepageHeroBannerSourceSelector — winning-source contract', () => {
       assetBaseUrl: 'https://cdn.example.invalid/assets/',
       authoredOverrideUrl: 'https://example.com/authored.jpg',
     });
-    expect(result.source).toBe('override');
+    expect(result.source).toBe('wrapper-override');
     expect(result.daypart).toBe('morning');
     expect(result.fileName).toBe('banner_home_7_morning.png');
     expect(result.url).toBe('https://example.com/authored.jpg');
@@ -56,13 +56,13 @@ describe('homepageHeroBannerSourceSelector — winning-source contract', () => {
     expect(result.overrideActive).toBe(false);
   });
 
-  it('reports no-image when neither override nor assetBaseUrl can produce a URL', () => {
+  it('reports no-image-fallback when neither override nor assetBaseUrl can produce a URL', () => {
     const result = resolveHomepageHeroBannerSelection({
       now: localDateAt(8, 20),
       assetBaseUrl: undefined,
       authoredOverrideUrl: undefined,
     });
-    expect(result.source).toBe('no-image');
+    expect(result.source).toBe('no-image-fallback');
     expect(result.url).toBeUndefined();
     expect(result.overrideActive).toBe(false);
     expect(result.daypart).toBe('morning');

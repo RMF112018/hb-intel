@@ -87,8 +87,8 @@ describe('HbSignatureHeroHomepage — daypart precedence contract', () => {
     );
     const surface = container.querySelector('[data-hbc-premium="signature-hero"]');
     expect(surface).not.toBeNull();
-    expect(surface!.getAttribute('data-hbc-hero-banner-source')).toBe('daypart-default');
-    expect(surface!.getAttribute('data-hbc-hero-banner-daypart')).toBe('morning');
+    expect(surface!.getAttribute('data-hbc-hero-background-source')).toBe('daypart-default');
+    expect(surface!.getAttribute('data-hbc-hero-daypart')).toBe('morning');
     expect(surface!.getAttribute('data-hbc-hero-banner-file')).toBe('banner_home_7_morning.png');
     expect(surface!.getAttribute('data-hbc-hero-banner-override-active')).toBe('false');
     expect(surface!.getAttribute('data-hbc-hero-flagship-render-path')).toBe('wrapper-embedded');
@@ -106,8 +106,8 @@ describe('HbSignatureHeroHomepage — daypart precedence contract', () => {
     );
     const surface = container.querySelector('[data-hbc-premium="signature-hero"]');
     expect(surface).not.toBeNull();
-    expect(surface!.getAttribute('data-hbc-hero-banner-source')).toBe('override');
-    expect(surface!.getAttribute('data-hbc-hero-banner-daypart')).toBe('evening');
+    expect(surface!.getAttribute('data-hbc-hero-background-source')).toBe('wrapper-override');
+    expect(surface!.getAttribute('data-hbc-hero-daypart')).toBe('evening');
     expect(surface!.getAttribute('data-hbc-hero-banner-override-active')).toBe('true');
   });
 });

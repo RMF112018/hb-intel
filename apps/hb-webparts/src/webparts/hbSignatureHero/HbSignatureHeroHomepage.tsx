@@ -170,6 +170,29 @@ export function HbSignatureHeroHomepage({
   });
   const heroBackground = bannerSelection.url;
   const hasImage = Boolean(heroBackground);
+
+  // Structured runtime diagnostic: emits the same facts surfaced as
+  // `data-hbc-hero-*` attributes so hosted operators can confirm winning
+  // source selection without DOM inspection. Re-fires only when the
+  // selection identity changes (mount, daypart rollover, or override
+  // toggle) to avoid log spam from unrelated re-renders.
+  React.useEffect(() => {
+    console.debug('[hb-signature-hero] background source', {
+      source: bannerSelection.source,
+      daypart: bannerSelection.daypart,
+      fileName: bannerSelection.fileName,
+      url: bannerSelection.url,
+      overrideActive: bannerSelection.overrideActive,
+      flagshipRenderPath,
+    });
+  }, [
+    bannerSelection.source,
+    bannerSelection.daypart,
+    bannerSelection.fileName,
+    bannerSelection.url,
+    bannerSelection.overrideActive,
+    flagshipRenderPath,
+  ]);
   const entryStackPolicy = React.useMemo(
     () => (entryStackState ? resolveEntryStackPolicy(entryStackState.entryState) : undefined),
     [entryStackState],
@@ -205,8 +228,8 @@ export function HbSignatureHeroHomepage({
       data-hbc-premium="signature-hero"
       data-hbc-hero-blackbox-contract="prompt07-blackbox-v1"
       data-hbc-hero-flagship-render-path={flagshipRenderPath}
-      data-hbc-hero-banner-source={bannerSelection.source}
-      data-hbc-hero-banner-daypart={bannerSelection.daypart}
+      data-hbc-hero-background-source={bannerSelection.source}
+      data-hbc-hero-daypart={bannerSelection.daypart}
       data-hbc-hero-banner-file={bannerSelection.fileName}
       data-hbc-hero-banner-override-active={bannerSelection.overrideActive ? 'true' : 'false'}
       data-hbc-hero-entry-authority={entryStackState ? 'shared-entry-state' : 'standalone-hero'}
