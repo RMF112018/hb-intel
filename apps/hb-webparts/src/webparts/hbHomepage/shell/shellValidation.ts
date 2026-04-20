@@ -81,6 +81,16 @@ function validateBandConstraints(
     );
   }
 
+  if (band.recipe === 'stacked-full' && band.orientation !== undefined) {
+    diagnostics.push(
+      diagnostic(
+        'info',
+        'ORIENTATION_IGNORED_FOR_STACKED_BAND',
+        `Band "${band.id}" declares orientation "${band.orientation}" but uses recipe "stacked-full"; orientation is ignored for single-column bands.`,
+      ),
+    );
+  }
+
   if (
     activeSlots.length < recipeRule.minActiveSlots ||
     activeSlots.length > recipeRule.maxActiveSlots

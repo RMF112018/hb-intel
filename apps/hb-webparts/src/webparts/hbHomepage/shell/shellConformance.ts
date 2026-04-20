@@ -29,6 +29,7 @@ import { getEntryStackPolicy, type EntryStackPolicy } from './entryStackPolicy.j
 import type { BandLayoutResult, OccupantRenderMode, PairingDecision } from './slotComfortResolver.js';
 import type { FirstLaneDecision } from './firstLaneResolver.js';
 import type {
+  BandOrientation,
   BandSemanticRole,
   ColumnSpan,
   OccupantId,
@@ -37,6 +38,12 @@ import type {
   ShellEntryState,
   SlotRole,
 } from './shellTypes.js';
+import { effectiveBandOrientation } from './shellTypes.js';
+
+/** Orientation value emitted on the band conformance record. `stacked`
+ *  is reported for single-column bands so consumers can distinguish
+ *  "rendering as stacked" from "paired with no handedness declared". */
+export type BandOrientationState = BandOrientation | 'stacked';
 
 /**
  * Shell-picked macro layout mode for a given render frame. Distinct from
@@ -90,6 +97,9 @@ export interface BandConformance {
   readonly fallbackRecipe: ShellBandRecipeId;
   readonly isEntryBand: boolean;
   readonly columns: 1 | 2;
+  /** `'stacked'` for single-column bands; otherwise the band's declared
+   *  (or defaulted) handedness. */
+  readonly orientation: BandOrientationState;
   readonly pairingDecision: PairingDecision;
   readonly slots: readonly SlotConformance[];
 }
@@ -148,6 +158,8 @@ function resolveBandConformance(
   layout: BandLayoutResult,
   isEntryBand: boolean,
 ): BandConformance {
+  const orientation: BandOrientationState =
+    layout.columns === 2 ? effectiveBandOrientation(band) : 'stacked';
   return {
     bandId: band.id,
     semanticRole: band.semanticRole,
@@ -155,6 +167,7 @@ function resolveBandConformance(
     fallbackRecipe: layout.fallbackRecipe,
     isEntryBand,
     columns: layout.columns,
+    orientation,
     pairingDecision: layout.pairingDecision,
     slots: layout.slots.map((rs) => ({
       slotId: rs.slot.id,
@@ -236,6 +249,8 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-first-lane-action-detail': FirstLaneDecision['action'] | 'none';
   readonly 'data-shell-first-lane-reason-detail': string;
   readonly 'data-shell-first-lane-candidates-considered': number;
+  /** Comma-separated per-band orientation values, in preset order. */
+  readonly 'data-shell-band-orientations': string;
 }
 
 export function toShellConformanceDataAttributes(
@@ -272,5 +287,6 @@ export function toShellConformanceDataAttributes(
     'data-shell-first-lane-reason-detail': report.firstLaneDecision?.reason ?? 'none',
     'data-shell-first-lane-candidates-considered':
       report.firstLaneDecision?.candidatesConsidered ?? 0,
+    'data-shell-band-orientations': report.bands.map((b) => b.orientation).join(','),
   };
 }

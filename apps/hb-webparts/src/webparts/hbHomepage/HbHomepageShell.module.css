@@ -76,68 +76,54 @@
 }
 
 .bandPaired {
+  /* Narrow-container fallback: collapse to a single column until the
+     container query tiers below activate the orientation-driven grid. */
   grid-template-columns: 1fr;
 }
 
-.bandRecipe_feature_pair,
-.bandRecipe_balanced_two_up,
-.bandRecipe_asymmetric_two_up,
-.bandRecipe_feature_utility_strip {
+/* ----- Orientation-driven paired grid (Wave-01 Prompt-02) ----- */
+/* Paired bands carry exactly one of these classes:
+     .bandOrientation_left_dominant   → major column on the left
+     .bandOrientation_right_dominant  → major column on the right
+   Each class drives `grid-template-columns` at the container-query tiers
+   below, and is paired with the `.span_major / .span_minor` rules further
+   down which place each DOM slot into the correct grid column. Focus order
+   is preserved by keeping DOM order = preset slot-array order — orientation
+   only flips column mapping, never tab order. */
+
+.bandOrientation_left_dominant,
+.bandOrientation_right_dominant {
   grid-template-columns: 1fr;
 }
 
 @container homepage-shell (min-width: 1180px) {
-  .bandPaired {
-    grid-template-columns: 3fr 2fr;
+  .bandOrientation_left_dominant {
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
   }
 
-  .bandRecipe_balanced_two_up {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .bandRecipe_asymmetric_two_up {
-    grid-template-columns: 5fr 3fr;
-  }
-
-  .bandRecipe_feature_utility_strip {
-    grid-template-columns: 4fr 2fr;
+  .bandOrientation_right_dominant {
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
   }
 }
 
 @container homepage-shell (min-width: 1600px) {
-  .bandPaired {
-    grid-template-columns: 8fr 5fr;
-    gap: 2rem;
+  .bandOrientation_left_dominant {
+    grid-template-columns: 2fr 1fr;
+    gap: 2.25rem;
   }
 
-  .bandRecipe_feature_pair {
-    grid-template-columns: 9fr 5fr;
-  }
-
-  .bandRecipe_asymmetric_two_up {
-    grid-template-columns: 7fr 4fr;
-  }
-
-  .bandRecipe_feature_utility_strip {
-    grid-template-columns: 7fr 3fr;
+  .bandOrientation_right_dominant {
+    grid-template-columns: 1fr 2fr;
+    gap: 2.25rem;
   }
 }
 
 @container homepage-shell (min-width: 1900px) {
-  .bandPaired {
-    gap: 2.25rem;
-  }
-
-  .bandRecipe_feature_pair {
-    grid-template-columns: 10fr 5fr;
-  }
-
-  .bandRecipe_asymmetric_two_up {
-    grid-template-columns: 8fr 4fr;
-  }
-
-  .bandRecipe_feature_utility_strip {
-    grid-template-columns: 8fr 3fr;
+  .bandOrientation_left_dominant,
+  .bandOrientation_right_dominant {
+    gap: 2.5rem;
   }
 }
 
@@ -189,11 +175,33 @@
 }
 
 @container homepage-shell (min-width: 1180px) {
-  .bandPaired .span_major {
+  /* Left-dominant: major column on the left, minor on the right. */
+  .bandOrientation_left_dominant .span_major {
     grid-column: 1 / 2;
   }
 
-  .bandPaired .span_minor {
+  .bandOrientation_left_dominant .span_minor {
+    grid-column: 2 / 3;
+  }
+
+  /* Right-dominant: DOM order still goes slot[0] → slot[1], but the minor
+     slot is placed into the narrow left column and the major slot into the
+     wide right column. Tab/focus order follows DOM, not grid placement. */
+  .bandOrientation_right_dominant .span_minor {
+    grid-column: 1 / 2;
+  }
+
+  .bandOrientation_right_dominant .span_major {
+    grid-column: 2 / 3;
+  }
+
+  /* Fallback when a paired band ships no orientation class (e.g. legacy
+     presets authored before Prompt-01). Treat as left-dominant. */
+  .bandPaired:not(.bandOrientation_left_dominant):not(.bandOrientation_right_dominant) .span_major {
+    grid-column: 1 / 2;
+  }
+
+  .bandPaired:not(.bandOrientation_left_dominant):not(.bandOrientation_right_dominant) .span_minor {
     grid-column: 2 / 3;
   }
 

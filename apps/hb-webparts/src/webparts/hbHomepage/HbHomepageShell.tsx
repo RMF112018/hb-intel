@@ -23,7 +23,13 @@ import {
   toFirstLaneDecisionDataAttributes,
   type FirstLaneDecision,
 } from './shell/firstLaneResolver.js';
-import type { OccupantId, ShellBand as ShellBandType, ShellLayoutState } from './shell/shellTypes.js';
+import type {
+  BandOrientation,
+  OccupantId,
+  ShellBand as ShellBandType,
+  ShellLayoutState,
+} from './shell/shellTypes.js';
+import { effectiveBandOrientation } from './shell/shellTypes.js';
 import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
 import { ShellFallbackSurface } from './ShellFallbackSurface.js';
 import { CompanyPulseZone } from './zones/CompanyPulseZone.js';
@@ -147,14 +153,25 @@ const BAND_RECIPE_CLASS: Readonly<Record<ShellBandType['recipe'], string>> = {
   'single-column-fallback': styles.bandRecipe_single_column_fallback,
 };
 
+const BAND_ORIENTATION_CLASS: Readonly<Record<BandOrientation, string>> = {
+  'left-dominant': styles.bandOrientation_left_dominant,
+  'right-dominant': styles.bandOrientation_right_dominant,
+};
+
 function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDecision }: ShellBandRendererProps): React.JSX.Element | null {
   if (layout.slots.length === 0) return null;
+
+  const isPaired = layout.columns === 2;
+  const orientation = effectiveBandOrientation(band);
+  const orientationClass = isPaired ? BAND_ORIENTATION_CLASS[orientation] : '';
+  const orientationAttr = isPaired ? orientation : 'stacked';
 
   const bandClassName = [
     styles.band,
     isEntryBand ? styles.entryBand : '',
-    layout.columns === 2 ? styles.bandPaired : styles.bandStacked,
+    isPaired ? styles.bandPaired : styles.bandStacked,
     BAND_RECIPE_CLASS[layout.recipe],
+    orientationClass,
   ]
     .filter(Boolean)
     .join(' ');
@@ -170,6 +187,7 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDeci
       data-shell-entry-band={isEntryBand || undefined}
       data-shell-band-recipe={layout.recipe}
       data-shell-band-fallback-recipe={layout.fallbackRecipe}
+      data-shell-band-orientation={orientationAttr}
       data-shell-columns={layout.columns}
       data-shell-band-pairing-allowed={layout.pairingDecision.allowed}
       data-shell-band-pairing-reason={layout.pairingDecision.reason}

@@ -55,7 +55,9 @@ const singleBand: ShellBand = {
 
 describe('resolveBandLayout — paired state', () => {
   it('allows pairing on desktop entry band when comfort is met', () => {
-    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    // With the Wave-01 Prompt-02 2:1 ratio (major 2/3, minor 1/3), a 520px
+    // minor-slot comfort threshold needs a container ≥ 1560px.
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1600);
     expect(result.columns).toBe(2);
     expect(result.slots).toHaveLength(2);
   });
@@ -91,10 +93,11 @@ describe('resolveBandLayout — comfort-forced stacking', () => {
   });
 
   it('stacks with narrowest-stable-paired reason between minWidth and narrowestStablePairedWidth', () => {
-    // At 800px container, major slot is 480px (== minWidth, not below)
-    // but below narrowestStablePairedWidth (520), so the narrowest-stable
+    // With the 2:1 ratio, at 1440px the minor slot is 480px — exactly the
+    // CP/LM comfort minimum, so width is NOT below minimum, but it is below
+    // the 520px narrowest-stable-paired width, so the narrowest-stable
     // check fires first.
-    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 800);
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1440);
     expect(result.columns).toBe(1);
     expect(result.pairingDecision.reason).toBe('below-narrowest-stable-paired-width');
   });
@@ -117,7 +120,7 @@ describe('resolveBandLayout — renderMode', () => {
   });
 
   it('returns standard renderMode for paired slots at comfortable width', () => {
-    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1600);
     for (const slot of result.slots) {
       expect(slot.comfort.renderMode).toBe('standard');
     }
@@ -131,7 +134,10 @@ describe('resolveBandLayout — renderMode', () => {
   });
 
   it('reports constrained reason when below preferredWidth', () => {
-    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    // At 1800px the minor slot is 600px — above the 520 narrowest-paired
+    // threshold, above the 480 minimum, but below the 720 preferredWidth,
+    // so comfort reports a "constrained" reason.
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1800);
     const minor = result.slots.find((s) => s.slot.columnSpan === 'minor');
     expect(minor!.comfort.reason).toContain('constrained');
   });
@@ -144,7 +150,7 @@ describe('resolveBandLayout — renderMode', () => {
 
 describe('resolveBandLayout — pairing decision diagnostics', () => {
   it('reports "paired" reason when pairing succeeds on desktop', () => {
-    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1600);
     expect(result.pairingDecision).toEqual({ allowed: true, reason: 'paired' });
   });
 

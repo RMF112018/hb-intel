@@ -11,6 +11,8 @@ declare const styles: {
   readonly bandRecipe_stacked_full: string;
   readonly bandRecipe_stacked_secondary_strip: string;
   readonly bandRecipe_single_column_fallback: string;
+  readonly bandOrientation_left_dominant: string;
+  readonly bandOrientation_right_dominant: string;
   readonly entryBand: string;
   readonly slot: string;
   readonly slot_primary: string;

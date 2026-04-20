@@ -66,8 +66,11 @@ export interface ResolvedSlot {
 
 function resolveSlotWidth(containerWidth: number, columnSpan: ColumnSpan, bandColumns: number): number {
   if (bandColumns === 1 || columnSpan === 'full') return containerWidth;
-  if (columnSpan === 'major') return containerWidth * 0.6;
-  return containerWidth * 0.4;
+  // Matches the Wave-01 Prompt-02 paired grid-template (2fr 1fr / 1fr 2fr):
+  // major = 2/3 of container, minor = 1/3. Handedness only flips which DOM
+  // slot lives in which CSS column — width math is identical for both.
+  if (columnSpan === 'major') return containerWidth * (2 / 3);
+  return containerWidth * (1 / 3);
 }
 
 function resolveRenderMode(

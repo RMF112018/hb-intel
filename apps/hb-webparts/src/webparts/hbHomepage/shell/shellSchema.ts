@@ -28,11 +28,14 @@ const SHELL_BAND_RECIPES = [
   'single-column-fallback',
 ] as const;
 
+const BAND_ORIENTATIONS = ['left-dominant', 'right-dominant'] as const;
+
 export const OccupantIdSchema = z.enum(OCCUPANT_IDS);
 export const SlotRoleSchema = z.enum(SLOT_ROLES);
 export const ColumnSpanSchema = z.enum(COLUMN_SPANS);
 export const BandSemanticRoleSchema = z.enum(BAND_SEMANTIC_ROLES);
 export const ShellBandRecipeSchema = z.enum(SHELL_BAND_RECIPES);
+export const BandOrientationSchema = z.enum(BAND_ORIENTATIONS);
 
 export const ShellSlotSchema = z.object({
   id: z.string().min(1),
@@ -47,6 +50,7 @@ export const ShellBandSchema = z.object({
   recipe: ShellBandRecipeSchema,
   slots: z.array(ShellSlotSchema).min(1),
   maxDominantOccupants: z.number().int().min(1),
+  orientation: BandOrientationSchema.optional(),
 });
 
 export const ShellPresetSchema = z.object({

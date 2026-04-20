@@ -55,11 +55,19 @@ export interface ShellBand {
   readonly slots: readonly ShellSlot[];
   readonly maxDominantOccupants: number;
   /**
-   * Preset-declared handedness for paired bands. Prompt-01 emits this;
-   * Prompt-02 will wire CSS and validation to honor it. `undefined` is
-   * treated as `left-dominant` by downstream consumers until then.
+   * Preset-declared handedness for paired bands. `undefined` is treated as
+   * `left-dominant` by downstream consumers. Ignored for `stacked-full` bands.
    */
   readonly orientation?: BandOrientation;
+}
+
+/**
+ * Resolve the effective orientation for a band. Paired bands default to
+ * `left-dominant`; stacked-full bands report `left-dominant` as a stable
+ * default (CSS ignores orientation on single-column bands).
+ */
+export function effectiveBandOrientation(band: ShellBand): BandOrientation {
+  return band.orientation ?? 'left-dominant';
 }
 
 export interface ShellPreset {

@@ -120,18 +120,23 @@ describe('shellHarness — matrix coverage', () => {
     }
   });
 
-  it('standard-laptop stays paired while tablet-landscape degrades to stacked first lane', () => {
+  it('ultrawide-desktop stays paired while tablet-landscape degrades to stacked first lane', () => {
+    // Wave-01 Prompt-02 tightened the paired ratio to 2:1. With HB Kudos
+    // carrying a 520px narrowest-stable-paired comfort, Row 1 needs a
+    // container ≥ 1560px to honor pairing — standard-laptop widths
+    // (~1300–1512px) now collapse Row 1 until Wave-02 hardens Kudos for
+    // narrow-slot use. Ultrawide remains the clean "paired" proof.
     const outcomes = runShellConformanceMatrix();
-    const laptop = outcomes.find(
-      (o) => o.matrixCase.label === 'standard-laptop (1512x982)',
+    const ultrawide = outcomes.find(
+      (o) => o.matrixCase.label === 'ultrawide-desktop (1920x1080)',
     );
     const tabletLandscape = outcomes.find(
       (o) => o.matrixCase.label === 'tablet-landscape-large',
     );
 
-    expect(laptop?.conformance.entryState.id).toBe('standard-laptop');
-    expect(laptop?.conformance.bands[0].columns).toBe(2);
-    expect(laptop?.conformance.bands[0].pairingDecision.reason).toBe('paired');
+    expect(ultrawide?.conformance.entryState.id).toBe('ultrawide-desktop');
+    expect(ultrawide?.conformance.bands[0].columns).toBe(2);
+    expect(ultrawide?.conformance.bands[0].pairingDecision.reason).toBe('paired');
 
     expect(tabletLandscape?.conformance.entryState.id).toBe('tablet-landscape');
     expect(tabletLandscape?.conformance.bands[0].columns).toBe(1);
@@ -142,9 +147,12 @@ describe('shellHarness — matrix coverage', () => {
 });
 
 describe('shellHarness — inspectable proof object', () => {
-  it('desktop paired case produces a paired entry band with reason "paired"', () => {
-    const proof = runShellHarnessCase({ width: 1300, height: 900, label: 'desktop' });
-    expect(proof.entryState.id).toBe('standard-laptop');
+  it('ultrawide-desktop case produces a paired entry band with reason "paired"', () => {
+    // See the "ultrawide-desktop stays paired…" case above: the 2:1 ratio
+    // requires container ≥ 1560px for Row 1 to honor pairing under the
+    // current Kudos comfort contract.
+    const proof = runShellHarnessCase({ width: 1800, height: 900, label: 'ultrawide-desktop' });
+    expect(proof.entryState.id).toBe('ultrawide-desktop');
     const entryBand = proof.bands[0];
     expect(entryBand.isEntryBand).toBe(true);
     expect(entryBand.columns).toBe(2);
@@ -168,9 +176,9 @@ describe('shellHarness — inspectable proof object', () => {
   });
 
   it('summary line includes state, reason, preset, diagnostics count, and per-band summary', () => {
-    const proof = runShellHarnessCase({ width: 1300, label: 'summary-case' });
+    const proof = runShellHarnessCase({ width: 1800, label: 'summary-case' });
     const summary = summarizeHarnessProof(proof);
-    expect(summary).toContain('state=standard-laptop');
+    expect(summary).toContain('state=ultrawide-desktop');
     expect(summary).toContain('reason=width-match');
     expect(summary).toContain('preset=default-v2');
     expect(summary).toContain('bands=[');
