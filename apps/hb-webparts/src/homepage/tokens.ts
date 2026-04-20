@@ -328,6 +328,36 @@ export const hpLoadingStateContainer: React.CSSProperties = {
   gap: HP_SPACE.md,
 };
 
+/**
+ * Branded error state container — distinct from the neutral empty/no-data
+ * container so homepage users and page authors can tell a runtime
+ * failure apart from an authoring gap. Uses the error status-register
+ * ramp (soft red wash + red left accent) without requiring the
+ * theme-scoped Griffel banner primitive, so the error state works in
+ * consumer contexts that are not wrapped in HbcThemeProvider.
+ */
+export const hpErrorStateContainer: React.CSSProperties = {
+  padding: HP_SPACE['2xl'],
+  borderRadius: HP_RADIUS.card,
+  background: 'rgba(220, 38, 38, 0.06)',
+  borderLeft: '4px solid #DC2626',
+  border: '1px solid rgba(220, 38, 38, 0.28)',
+  borderLeftWidth: 4,
+};
+
+/** Detail text for the error state — subdued, monospace-ish breadcrumb. */
+export const hpErrorStateDetail: React.CSSProperties = {
+  marginTop: HP_SPACE.sm,
+  padding: `${HP_SPACE.xs}px ${HP_SPACE.sm}px`,
+  borderRadius: HP_RADIUS.image,
+  background: 'rgba(0, 0, 0, 0.04)',
+  color: 'rgba(0, 0, 0, 0.65)',
+  fontSize: '0.8125rem',
+  fontFamily:
+    'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace',
+  wordBreak: 'break-word',
+};
+
 /** Media container — stable aspect ratio, prevents layout shift */
 export const hpMediaContainer: React.CSSProperties = {
   position: 'relative',

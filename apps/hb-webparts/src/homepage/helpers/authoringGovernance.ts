@@ -162,6 +162,11 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
         title: 'Project spotlight items could not be displayed',
         description: 'Verify that list items have a Title, Summary, and valid status fields.',
       },
+      fetchError: {
+        title: 'Project spotlight is temporarily unavailable',
+        description:
+          'We could not load the Homepage Project Spotlights list. The page will retry on the next refresh — if this persists, notify Project Controls.',
+      },
     },
   },
   safetyFieldExcellence: {
@@ -210,7 +215,7 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
 
 export function resolveAuthoringMessage(
   webpartKey: keyof typeof HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY,
-  state: 'noData' | 'invalid' | 'noResults' | 'listEmpty',
+  state: 'noData' | 'invalid' | 'noResults' | 'listEmpty' | 'fetchError',
 ): AuthoringMessage {
   const entry = HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY[webpartKey];
 
@@ -220,6 +225,13 @@ export function resolveAuthoringMessage(
 
   if (state === 'listEmpty' && entry.messages.listEmpty) {
     return entry.messages.listEmpty;
+  }
+
+  if (state === 'fetchError') {
+    // Fall back to the `invalid` message when a webpart has not yet
+    // authored a dedicated fetch-error message, so callers always get a
+    // non-noData string for runtime failures.
+    return entry.messages.fetchError ?? entry.messages.invalid;
   }
 
   if (state === 'invalid') {

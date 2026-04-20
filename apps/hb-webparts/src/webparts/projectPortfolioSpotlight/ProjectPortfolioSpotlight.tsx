@@ -28,6 +28,7 @@ import {
   type NormalizedProjectPortfolioSpotlightItem,
 } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
+import { HomepageErrorState } from '../../homepage/shared/HomepageErrorState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
 import { useProjectSpotlightData } from '../../homepage/data/useProjectSpotlightData.js';
@@ -119,7 +120,11 @@ export function ProjectPortfolioSpotlight({
   activeAudience,
   isLoading = false,
 }: ProjectPortfolioSpotlightProps): React.JSX.Element {
-  const { listConfig, isLoading: listLoading } = useProjectSpotlightData();
+  const {
+    listConfig,
+    isLoading: listLoading,
+    error: listError,
+  } = useProjectSpotlightData();
 
   if (isLoading || listLoading) {
     return <HomepageLoadingState label="Loading project spotlight" />;
@@ -127,6 +132,11 @@ export function ProjectPortfolioSpotlight({
 
   // List-sourced data is the primary operating model.
   // Manifest config (props) is the narrow fallback for local dev / demo / packaging.
+  // When the live fetch failed, we still consult the manifest config —
+  // that preserves graceful degradation when a page author has
+  // authored a meaningful fallback locally (e.g., packaging, demo,
+  // or bootstrapped SharePoint pages). The error state only renders
+  // when neither path yields a valid featured item.
   const effectiveConfig = listConfig ?? config;
   const normalized = normalizeProjectPortfolioSpotlightConfig(
     effectiveConfig,
@@ -134,6 +144,22 @@ export function ProjectPortfolioSpotlight({
   );
 
   if (!normalized.featured) {
+    if (listError) {
+      // Runtime failure with no usable fallback — render an explicit
+      // error state distinct from authoring-gap messaging so users
+      // and page authors can tell the two apart.
+      const message = resolveAuthoringMessage(
+        'projectPortfolioSpotlight',
+        'fetchError',
+      );
+      return (
+        <HomepageErrorState
+          title={message.title}
+          description={message.description}
+          detail={listError}
+        />
+      );
+    }
     const message = resolveAuthoringMessage(
       'projectPortfolioSpotlight',
       effectiveConfig?.items?.length ? 'invalid' : 'noData',
