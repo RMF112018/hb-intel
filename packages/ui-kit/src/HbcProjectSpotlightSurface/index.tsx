@@ -316,35 +316,53 @@ function RailThumbnail({ image }: RailThumbnailProps): React.JSX.Element {
   );
 }
 
-interface MilestoneStripProps {
+interface MilestoneProgressPillProps {
   milestones: ProjectSpotlightMilestone[];
-  showProgress: boolean;
-  showList: boolean;
-  detailsOpenByDefault: boolean;
 }
 
-function MilestoneStrip({
+/**
+ * Always-visible compact milestone signal. Renders as a single
+ * progress pill (count + percent + thin bar) to anchor portfolio-
+ * health recognition in the essentials region when the full details
+ * region is collapsed. Returns null when there are no milestones.
+ */
+function MilestoneProgressPill({
   milestones,
-  showProgress,
-  showList,
-  detailsOpenByDefault,
-}: MilestoneStripProps): React.JSX.Element | null {
-  const [detailsOpen, setDetailsOpen] = React.useState(detailsOpenByDefault);
-  React.useEffect(() => {
-    setDetailsOpen(detailsOpenByDefault);
-  }, [detailsOpenByDefault]);
-
+}: MilestoneProgressPillProps): React.JSX.Element | null {
   if (milestones.length === 0) return null;
-  if (!showProgress && !showList) return null;
-
   const completed = milestones.filter((m) => m.completed).length;
   const total = milestones.length;
   const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
-  const listVisible = showList && detailsOpen;
-  const listToggleable = showList;
-
   return (
-    <div className={styles.milestones} data-details-open={listVisible ? 'true' : 'false'}>
+    <div className={styles.milestoneSignal} aria-label={`Milestone progress: ${completed} of ${total} complete`}>
+      <span className={styles.milestoneSignalLabel}>
+        <CheckCircle2 size={11} aria-hidden="true" strokeWidth={2.5} />
+        Milestones
+      </span>
+      <span className={styles.milestoneSignalCount}>
+        {completed}/{total} · {percent}%
+      </span>
+      <span className={styles.milestoneSignalBar} aria-hidden="true">
+        <span
+          className={styles.milestoneSignalBarFill}
+          style={{ width: `${percent}%` }}
+        />
+      </span>
+    </div>
+  );
+}
+
+interface MilestoneListProps {
+  milestones: ProjectSpotlightMilestone[];
+}
+
+function MilestoneList({ milestones }: MilestoneListProps): React.JSX.Element | null {
+  if (milestones.length === 0) return null;
+  const completed = milestones.filter((m) => m.completed).length;
+  const total = milestones.length;
+  const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+  return (
+    <div className={styles.milestones}>
       <div className={styles.milestonesHeader}>
         <span className={styles.milestonesLabel}>
           <CheckCircle2 size={12} aria-hidden="true" strokeWidth={2.5} />
@@ -354,47 +372,33 @@ function MilestoneStrip({
           {completed}/{total}  ·  {percent}%
         </span>
       </div>
-      {showProgress ? (
-        <div className={styles.milestonesBar}>
-          <div
-            className={styles.milestonesBarFill}
-            style={{ width: `${percent}%` }}
-            aria-hidden="true"
-          />
-        </div>
-      ) : null}
-      {listVisible ? (
-        <ul className={styles.milestonesList}>
-          {milestones.map((milestone) => (
-            <li
-              key={milestone.id}
-              className={clsx(
-                styles.milestoneItem,
-                milestone.completed && styles.milestoneItemDone,
-              )}
-            >
-              {milestone.completed ? (
-                <span className={styles.milestoneCheck} aria-hidden="true">
-                  <Check size={11} strokeWidth={3} />
-                </span>
-              ) : (
-                <span className={styles.milestoneCheckEmpty} aria-hidden="true" />
-              )}
-              <span className={styles.milestoneText}>{milestone.title}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {listToggleable ? (
-        <button
-          type="button"
-          className={styles.milestonesDisclosure}
-          onClick={() => setDetailsOpen((prev) => !prev)}
-          aria-expanded={listVisible}
-        >
-          {listVisible ? 'Hide milestone details' : 'Show milestone details'}
-        </button>
-      ) : null}
+      <div className={styles.milestonesBar}>
+        <div
+          className={styles.milestonesBarFill}
+          style={{ width: `${percent}%` }}
+          aria-hidden="true"
+        />
+      </div>
+      <ul className={styles.milestonesList}>
+        {milestones.map((milestone) => (
+          <li
+            key={milestone.id}
+            className={clsx(
+              styles.milestoneItem,
+              milestone.completed && styles.milestoneItemDone,
+            )}
+          >
+            {milestone.completed ? (
+              <span className={styles.milestoneCheck} aria-hidden="true">
+                <Check size={11} strokeWidth={3} />
+              </span>
+            ) : (
+              <span className={styles.milestoneCheckEmpty} aria-hidden="true" />
+            )}
+            <span className={styles.milestoneText}>{milestone.title}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -615,6 +619,14 @@ function FeaturedSlot({
   const milestones = featured.milestones ?? [];
   const teamMembers = featured.teamMembers ?? [];
 
+  const detailsId = React.useId();
+  const [detailsOpen, setDetailsOpen] = React.useState(
+    visibility.detailsOpenByDefault,
+  );
+  React.useEffect(() => {
+    setDetailsOpen(visibility.detailsOpenByDefault);
+  }, [visibility.detailsOpenByDefault, visibility.mode]);
+
   const motionProps = reducedMotion
     ? {}
     : {
@@ -622,6 +634,14 @@ function FeaturedSlot({
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0.55, ease: EASE_OUT_EXPO },
       };
+
+  const hasDetailsContent =
+    Boolean(featured.headline) ||
+    Boolean(featured.summary) ||
+    (visibility.showMilestoneList && milestones.length > 0) ||
+    Boolean(featured.freshnessLabel) ||
+    teamMembers.length > 0 ||
+    Boolean(featured.cta);
 
   return (
     <motion.article
@@ -639,55 +659,92 @@ function FeaturedSlot({
       />
 
       <div className={styles.featuredContent}>
-        <h3 className={styles.featuredTitle}>{featured.title}</h3>
+        {/* ── Essentials — always visible ─────────────────────── */}
+        <div className={styles.featuredEssentials}>
+          <h3 className={styles.featuredTitle}>{featured.title}</h3>
+          <MilestoneProgressPill milestones={milestones} />
+        </div>
 
-        {visibility.showHeadline && featured.headline ? (
-          <p className={styles.featuredHeadline}>{featured.headline}</p>
-        ) : null}
-
-        {featured.summary ? (
-          <p
-            className={styles.featuredSummary}
-            style={{ WebkitLineClamp: visibility.summaryLineClamp }}
+        {/* ── Disclosure control ─────────────────────────────── */}
+        {hasDetailsContent ? (
+          <button
+            type="button"
+            className={styles.featuredDisclosure}
+            onClick={() => setDetailsOpen((prev) => !prev)}
+            aria-expanded={detailsOpen}
+            aria-controls={detailsId}
           >
-            {featured.summary}
-          </p>
-        ) : null}
-
-        <MilestoneStrip
-          milestones={milestones}
-          showProgress={visibility.showMilestoneProgress}
-          showList={visibility.showMilestoneList}
-          detailsOpenByDefault={visibility.detailsOpenByDefault}
-        />
-
-        {visibility.historyOpenByDefault && featured.freshnessLabel ? (
-          <div className={styles.metaRow}>
-            <span className={styles.metaItem}>
-              <Calendar
-                size={12}
-                aria-hidden="true"
-                className={styles.metaIcon}
-                strokeWidth={2.25}
-              />
-              {featured.freshnessLabel}
+            <span className={styles.featuredDisclosureLabel}>
+              {detailsOpen ? 'Hide spotlight details' : 'Show spotlight details'}
             </span>
-          </div>
+            <span
+              className={clsx(
+                styles.featuredDisclosureChevron,
+                detailsOpen && styles.featuredDisclosureChevronOpen,
+              )}
+              aria-hidden="true"
+            >
+              ▾
+            </span>
+          </button>
         ) : null}
 
-        {visibility.mode !== 'minimal' ? (
-          <TeamStrip members={teamMembers} reducedMotion={reducedMotion} />
-        ) : null}
+        {/* ── Details region — behind disclosure ─────────────── */}
+        {hasDetailsContent ? (
+          <div
+            id={detailsId}
+            className={clsx(
+              styles.featuredDetails,
+              detailsOpen && styles.featuredDetailsOpen,
+            )}
+            hidden={!detailsOpen}
+          >
+            {visibility.showHeadline && featured.headline ? (
+              <p className={styles.featuredHeadline}>{featured.headline}</p>
+            ) : null}
 
-        {featured.cta ? (
-          <div className={styles.featuredCta}>
-            <HbcPremiumCta
-              label={featured.cta.label}
-              href={featured.cta.href}
-              variant="primary"
-              size="md"
-              arrow
-            />
+            {featured.summary ? (
+              <p
+                className={styles.featuredSummary}
+                style={{ WebkitLineClamp: visibility.summaryLineClamp }}
+              >
+                {featured.summary}
+              </p>
+            ) : null}
+
+            {visibility.showMilestoneList ? (
+              <MilestoneList milestones={milestones} />
+            ) : null}
+
+            {featured.freshnessLabel ? (
+              <div className={styles.metaRow}>
+                <span className={styles.metaItem}>
+                  <Calendar
+                    size={12}
+                    aria-hidden="true"
+                    className={styles.metaIcon}
+                    strokeWidth={2.25}
+                  />
+                  {featured.freshnessLabel}
+                </span>
+              </div>
+            ) : null}
+
+            {visibility.mode !== 'minimal' ? (
+              <TeamStrip members={teamMembers} reducedMotion={reducedMotion} />
+            ) : null}
+
+            {featured.cta ? (
+              <div className={styles.featuredCta}>
+                <HbcPremiumCta
+                  label={featured.cta.label}
+                  href={featured.cta.href}
+                  variant="primary"
+                  size="md"
+                  arrow
+                />
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

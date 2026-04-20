@@ -509,45 +509,167 @@
   max-width: 58ch;
 }
 
-/* Milestone disclosure toggle — shown in compact/minimal where the
-   milestone list is collapsed by the visibility matrix. Provides an
-   explicit, non-hover path to the same details, keeping the matrix
-   contract honored without hiding critical content behind hover. */
-.milestonesDisclosure {
+/* ═══════════════════════════════════════════════════════════════
+   ESSENTIALS + DETAILS DISCLOSURE
+   ═══════════════════════════════════════════════════════════════
+   The featured slot is partitioned into always-visible essentials
+   (title, compact milestone progress signal) and an explicit
+   details region (headline, summary, milestone list, freshness row,
+   team strip, CTA). The disclosure is keyboard/touch-safe and
+   governs the details region via `aria-expanded` / `aria-controls`.
+   Default open/closed posture follows `SPOTLIGHT_LAYOUT_VISIBILITY`:
+     wide + medium → open by default
+     compact + minimal → closed by default
+*/
+
+.featuredEssentials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.milestoneSignal {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 6px 12px;
+  width: fit-content;
+  background: rgba(34, 83, 145, 0.06);
+  border: 1px solid rgba(34, 83, 145, 0.14);
+  border-radius: 999px;
+}
+
+.milestoneSignalLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #225391;
+}
+
+.milestoneSignalCount {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #225391;
+  font-variant-numeric: tabular-nums;
+}
+
+.milestoneSignalBar {
+  position: relative;
+  display: inline-block;
+  width: 72px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(34, 83, 145, 0.14);
+  overflow: hidden;
+}
+
+.milestoneSignalBarFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #225391 0%, #3a73b3 100%);
+  transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestoneSignalBarFill {
+    transition: none !important;
+  }
+}
+
+.featuredDisclosure {
   margin-top: 2px;
   align-self: flex-start;
-  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: #225391;
   background: rgba(34, 83, 145, 0.06);
-  border: 1px solid rgba(34, 83, 145, 0.16);
+  border: 1px solid rgba(34, 83, 145, 0.18);
   border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
-  min-height: 32px;
+  min-height: 36px;
   transition:
     background-color 160ms ease,
-    border-color 160ms ease;
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
-.milestonesDisclosure:hover {
+.featuredDisclosure:hover {
   background: rgba(34, 83, 145, 0.1);
-  border-color: rgba(34, 83, 145, 0.28);
+  border-color: rgba(34, 83, 145, 0.32);
+  transform: translateY(-1px);
 }
 
-.milestonesDisclosure:focus-visible {
+.featuredDisclosure:focus-visible {
   outline: 2px solid #225391;
   outline-offset: 2px;
 }
 
-/* The disclosure only surfaces when milestoneList is gated off in the
-   matrix (compact / minimal). In wide/medium the button is rendered
-   but hidden — the list is already open. */
-.root[data-layout-mode='wide'] .milestonesDisclosure,
-.root[data-layout-mode='medium'] .milestonesDisclosure {
+@media (prefers-reduced-motion: reduce) {
+  .featuredDisclosure,
+  .featuredDisclosure:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+.featuredDisclosureLabel {
+  font-weight: 700;
+}
+
+.featuredDisclosureChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 0.75rem;
+  line-height: 1;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform: rotate(0deg);
+}
+
+.featuredDisclosureChevronOpen {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featuredDisclosureChevron,
+  .featuredDisclosureChevronOpen {
+    transition: none !important;
+  }
+}
+
+.featuredDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(34, 83, 145, 0.18);
+}
+
+.featuredDetails[hidden] {
   display: none;
+}
+
+.featuredDetailsOpen {
+  /* Reserved for future open-state polish; the `hidden` attribute on
+     the element governs visibility for a11y, so this class is purely
+     a hook for visual embellishments without changing semantics. */
 }
 
 .badgeRow {

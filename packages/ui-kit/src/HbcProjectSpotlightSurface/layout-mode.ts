@@ -44,6 +44,13 @@ export type SpotlightLayoutMode = 'wide' | 'medium' | 'compact' | 'minimal';
  */
 export interface SpotlightLayoutVisibility {
   readonly mode: SpotlightLayoutMode;
+  /**
+   * Whether the featured **details region** (headline, summary, milestone
+   * list, freshness row, team strip, CTA) is expanded by default. In
+   * closed state only the essentials — media, title, and a single compact
+   * signal — remain visible. Explicit disclosure always governs the
+   * state; this flag sets only the initial posture.
+   */
   readonly detailsOpenByDefault: boolean;
   readonly historyOpenByDefault: boolean;
   readonly mediaHeight: 'tall' | 'standard' | 'reduced' | 'compressed';
