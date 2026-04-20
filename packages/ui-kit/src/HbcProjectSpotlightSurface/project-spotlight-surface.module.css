@@ -93,17 +93,24 @@
   padding: 22px 22px 14px;
 }
 
-@media (min-width: 768px) {
-  .masthead {
-    padding: 26px 32px 16px;
-    gap: 12px;
-  }
+/* Mode-governed masthead rhythm. Compact and minimal trim the top pad
+   so the title + disclosures sit higher in the viewport and the
+   surface reads as intentionally selective on tighter screens. */
+.root[data-layout-mode='wide'] .masthead {
+  padding: 28px 32px 18px;
+  gap: 12px;
 }
-
-@media (min-width: 1200px) {
-  .masthead {
-    padding: 24px 30px 14px;
-  }
+.root[data-layout-mode='medium'] .masthead {
+  padding: 24px 28px 16px;
+  gap: 12px;
+}
+.root[data-layout-mode='compact'] .masthead {
+  padding: 18px 20px 12px;
+  gap: 8px;
+}
+.root[data-layout-mode='minimal'] .masthead {
+  padding: 14px 16px 10px;
+  gap: 6px;
 }
 
 .mastheadEyebrow {
@@ -167,16 +174,17 @@
   min-width: 0;
 }
 
-@media (min-width: 768px) {
-  .mastheadHeadline {
-    font-size: 1.75rem;
-  }
+.root[data-layout-mode='wide'] .mastheadHeadline {
+  font-size: 1.875rem;
 }
-
-@media (min-width: 1200px) {
-  .mastheadHeadline {
-    font-size: 1.75rem;
-  }
+.root[data-layout-mode='medium'] .mastheadHeadline {
+  font-size: 1.625rem;
+}
+.root[data-layout-mode='compact'] .mastheadHeadline {
+  font-size: 1.375rem;
+}
+.root[data-layout-mode='minimal'] .mastheadHeadline {
+  font-size: 1.1875rem;
 }
 
 .mastheadAction {
@@ -203,16 +211,29 @@
   border-radius: 1.5px;
 }
 
-@media (min-width: 768px) {
-  .separator {
-    margin: 0 32px;
-  }
+/* Align separator inset with the mode-governed masthead/composition
+   rhythm. Minimal trims the nameplate bar length as well so it reads
+   as a restrained marker rather than a brand banner. */
+.root[data-layout-mode='wide'] .separator {
+  margin: 0 32px;
 }
-
-@media (min-width: 1200px) {
-  .separator {
-    margin: 0 30px;
-  }
+.root[data-layout-mode='medium'] .separator {
+  margin: 0 28px;
+}
+.root[data-layout-mode='compact'] .separator {
+  margin: 0 20px;
+  height: 2px;
+}
+.root[data-layout-mode='minimal'] .separator {
+  margin: 0 16px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    #225391 0%,
+    #225391 48px,
+    rgba(34, 83, 145, 0.12) 48px,
+    transparent 100%
+  );
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -225,20 +246,21 @@
   padding: 22px 22px 0;
 }
 
-@media (min-width: 768px) {
-  .composition {
-    padding: 26px 32px 0;
-  }
+/* Mode-governed composition inset. Tighter states reduce side padding
+   so the featured hero + disclosures use more of the available width,
+   and the vertical gap between masthead and featured is trimmed so
+   compact/minimal feel intentionally dense, not airy. */
+.root[data-layout-mode='wide'] .composition {
+  padding: 24px 32px 0;
 }
-
-@media (min-width: 1200px) {
-  .composition {
-    /* W01r-P22: single-column stacked layout at desktop. Featured hero
-       fills the full section width and the supporting rail becomes an
-       editorial "more from the portfolio" block stacked below it.
-       Breathing room between the two is owned by .rail margin-top. */
-    padding: 22px 30px 0;
-  }
+.root[data-layout-mode='medium'] .composition {
+  padding: 22px 28px 0;
+}
+.root[data-layout-mode='compact'] .composition {
+  padding: 16px 20px 0;
+}
+.root[data-layout-mode='minimal'] .composition {
+  padding: 12px 16px 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -274,24 +296,41 @@
   overflow: hidden;
   background-color: rgba(34, 83, 145, 0.08);
   contain: layout style;
-  min-height: 260px;
+  /* Default height is a safe mid value; real posture is selected by
+     `data-layout-mode` below and by the aspect-ratio cap on wide/medium
+     so hero media never bloats on very wide containers. */
+  min-height: 220px;
 }
 
-/* Mode-governed hero media postures. The surface resolves its mode from
-   its own usable space (see `layout-mode.ts`) and exposes it as
-   `data-layout-mode` on the root. Media height reads from the
-   resolved posture, not from viewport width. */
+/* Mode-governed hero media postures. Media scale binds to the resolved
+   layout mode (see `layout-mode.ts`), not to viewport width. Wide and
+   medium also cap the hero with an aspect ratio so very wide containers
+   don't grow the hero past a credible editorial height — premium
+   without bloat. Compact/minimal are intentionally reduced so the
+   surface reads as title-led on tighter screens. */
 .root[data-layout-mode='wide'] .mediaZone {
-  min-height: 380px;
+  min-height: 440px;
+  /* Cap the hero to a 21:9-ish editorial band; under ~960px this has
+     no effect (min-height wins). Prevents hero bloat on 1400–1800px
+     containers where strict min-height alone would look shallow but an
+     unbounded image would overpower the featured content below. */
+  aspect-ratio: 21 / 9;
+  max-height: 520px;
 }
 .root[data-layout-mode='medium'] .mediaZone {
-  min-height: 340px;
+  min-height: 360px;
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
 }
 .root[data-layout-mode='compact'] .mediaZone {
-  min-height: 240px;
+  min-height: 220px;
+  max-height: 260px;
 }
 .root[data-layout-mode='minimal'] .mediaZone {
-  min-height: 180px;
+  /* Intentionally subordinate: image remains present for context but
+     does not dominate. Title + compact pill + disclosures lead. */
+  min-height: 140px;
+  max-height: 180px;
 }
 
 .mediaPlaceholder {
@@ -438,7 +477,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 24px 22px 26px;
+  padding: 22px 22px 24px;
   background: linear-gradient(
     180deg,
     #ffffff 0%,
@@ -446,18 +485,25 @@
   );
 }
 
-@media (min-width: 768px) {
-  .featuredContent {
-    gap: 16px;
-    padding: 28px 32px 30px;
-  }
+/* Mode-governed featured-body rhythm. Wide and medium keep premium
+   editorial breathing; compact and minimal tighten the gap + padding
+   so the disclosures sit close to the title and the vertical footprint
+   stays intentionally selective. */
+.root[data-layout-mode='wide'] .featuredContent {
+  gap: 16px;
+  padding: 28px 32px 30px;
 }
-
-@media (min-width: 1200px) {
-  .featuredContent {
-    gap: 14px;
-    padding: 26px 30px 28px;
-  }
+.root[data-layout-mode='medium'] .featuredContent {
+  gap: 14px;
+  padding: 24px 28px 26px;
+}
+.root[data-layout-mode='compact'] .featuredContent {
+  gap: 10px;
+  padding: 16px 18px 18px;
+}
+.root[data-layout-mode='minimal'] .featuredContent {
+  gap: 8px;
+  padding: 12px 14px 14px;
 }
 
 .featuredTitle {
@@ -468,6 +514,24 @@
   line-height: 1.12;
   color: #0a1b33;
   max-width: 24ch;
+}
+
+/* Mode-governed title scale. Compact/minimal ramp down so the title
+   fits next to the disclosure controls on tight widths without
+   wrapping into three lines. */
+.root[data-layout-mode='wide'] .featuredTitle {
+  font-size: 2rem;
+}
+.root[data-layout-mode='medium'] .featuredTitle {
+  font-size: 1.75rem;
+}
+.root[data-layout-mode='compact'] .featuredTitle {
+  font-size: 1.375rem;
+  line-height: 1.18;
+}
+.root[data-layout-mode='minimal'] .featuredTitle {
+  font-size: 1.1875rem;
+  line-height: 1.2;
 }
 
 @media (min-width: 768px) {
@@ -1055,6 +1119,26 @@
   gap: 14px;
 }
 
+/* Mode-governed history rhythm. Compact and minimal tighten the gap
+   between featured and the disclosure; when expanded, the rail
+   padding also tightens so history does not regrow the footprint. */
+.root[data-layout-mode='wide'] .history {
+  margin-top: 24px;
+  gap: 16px;
+}
+.root[data-layout-mode='medium'] .history {
+  margin-top: 20px;
+  gap: 14px;
+}
+.root[data-layout-mode='compact'] .history {
+  margin-top: 14px;
+  gap: 10px;
+}
+.root[data-layout-mode='minimal'] .history {
+  margin-top: 10px;
+  gap: 8px;
+}
+
 .historyDisclosure {
   align-self: flex-start;
   display: inline-flex;
@@ -1157,29 +1241,64 @@
   border-radius: 12px;
 }
 
-@media (min-width: 1200px) {
-  .rail {
-    /* W01r-P22: stacked editorial container below the featured hero,
-       not a right-side sidebar. Full width of the composition column,
-       slightly larger breathing room from the featured hero above, and
-       roomier padding so the wider tiles don't look cramped. */
-    flex: 1 1 100%;
-    min-width: 0;
-    margin-top: 28px;
-    padding: 22px 24px;
-    gap: 12px;
-  }
+/* Mode-governed rail posture. The rail's margin-top is always zero
+   inside the history panel (owned by `.history` gap). Padding, gap,
+   and thumbnail size step with the resolved mode so expanded history
+   stays in proportion with the featured hero above it. */
+.root[data-layout-mode='wide'] .rail {
+  padding: 22px 24px;
+  gap: 12px;
+}
+.root[data-layout-mode='wide'] .railTile {
+  padding: 12px 14px;
+  gap: 16px;
+}
+.root[data-layout-mode='wide'] .railThumbWrap,
+.root[data-layout-mode='wide'] .railThumb {
+  flex: 0 0 132px;
+  height: 88px;
+}
 
-  .railTile {
-    padding: 12px 14px;
-    gap: 16px;
-  }
+.root[data-layout-mode='medium'] .rail {
+  padding: 18px 18px;
+  gap: 10px;
+}
+.root[data-layout-mode='medium'] .railTile {
+  padding: 10px 12px;
+  gap: 14px;
+}
+.root[data-layout-mode='medium'] .railThumbWrap,
+.root[data-layout-mode='medium'] .railThumb {
+  flex: 0 0 116px;
+  height: 78px;
+}
 
-  .railThumbWrap,
-  .railThumb {
-    flex: 0 0 132px;
-    height: 88px;
-  }
+.root[data-layout-mode='compact'] .rail {
+  padding: 12px 12px;
+  gap: 8px;
+}
+.root[data-layout-mode='compact'] .railTile {
+  padding: 8px 10px;
+  gap: 10px;
+}
+.root[data-layout-mode='compact'] .railThumbWrap,
+.root[data-layout-mode='compact'] .railThumb {
+  flex: 0 0 88px;
+  height: 60px;
+}
+
+.root[data-layout-mode='minimal'] .rail {
+  padding: 10px 10px;
+  gap: 6px;
+}
+.root[data-layout-mode='minimal'] .railTile {
+  padding: 6px 8px;
+  gap: 8px;
+}
+.root[data-layout-mode='minimal'] .railThumbWrap,
+.root[data-layout-mode='minimal'] .railThumb {
+  flex: 0 0 72px;
+  height: 48px;
 }
 
 .railHeader {
@@ -1337,8 +1456,17 @@
   height: 24px;
 }
 
-@media (min-width: 768px) {
-  .bottomSpacer {
-    height: 28px;
-  }
+/* Trim the closing gutter in tighter modes so the surface ends
+   decisively; keep premium breathing room in wide/medium. */
+.root[data-layout-mode='wide'] .bottomSpacer {
+  height: 32px;
+}
+.root[data-layout-mode='medium'] .bottomSpacer {
+  height: 28px;
+}
+.root[data-layout-mode='compact'] .bottomSpacer {
+  height: 18px;
+}
+.root[data-layout-mode='minimal'] .bottomSpacer {
+  height: 12px;
 }
