@@ -135,6 +135,15 @@
   color: #225391;
 }
 
+/* Suppress the eyebrow icon bubble in tight modes. Wide/medium keep
+   the nameplate; compact/minimal demote the eyebrow to a thin
+   "Portfolio" label + rule so the section marker reads as quiet
+   furniture rather than a second brand nameplate. */
+.root[data-layout-mode='compact'] .mastheadEyebrowIcon,
+.root[data-layout-mode='minimal'] .mastheadEyebrowIcon {
+  display: none;
+}
+
 .mastheadEyebrowRule {
   flex: 1;
   height: 1px;
@@ -402,10 +411,14 @@
   pointer-events: none;
 }
 
-@media (min-width: 768px) {
-  .mediaOverlay {
-    inset: auto 28px 24px 28px;
-  }
+/* Mode-governed media-overlay inset. Wide/medium use the roomier
+   editorial inset; compact/minimal keep the tighter default so chip
+   rows (when authored) never push against the hero edge. Replaces
+   the previous `@media (min-width: 768px)` rule so overlay inset
+   tracks container mode, not viewport width. */
+.root[data-layout-mode='wide'] .mediaOverlay,
+.root[data-layout-mode='medium'] .mediaOverlay {
+  inset: auto 28px 24px 28px;
 }
 
 .mediaOverlay > * {
@@ -1309,6 +1322,21 @@
 .root[data-layout-mode='minimal'] .railThumb {
   flex: 0 0 72px;
   height: 48px;
+}
+
+/* Minimal rail tightenings. Drops the decorative editorial index and
+   the secondary location/sector meta line so each tile reads as a
+   clean thumb + title — unambiguously secondary history, not a
+   parallel primary list. Rail header demotes to a quieter register
+   so it reads as a section label, not a second masthead. */
+.root[data-layout-mode='minimal'] .railIndex,
+.root[data-layout-mode='minimal'] .railMeta {
+  display: none;
+}
+.root[data-layout-mode='minimal'] .railHeader {
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: rgba(34, 83, 145, 0.78);
 }
 
 .railHeader {
