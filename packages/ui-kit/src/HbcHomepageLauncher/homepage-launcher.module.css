@@ -270,8 +270,17 @@
   padding: 10px 8px 8px;
   position: relative;
   border-radius: 12px;
-  border: none;
   cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 140ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.overflowTile:hover {
+  transform: translateY(-2px);
 }
 
 .triggerIcon {

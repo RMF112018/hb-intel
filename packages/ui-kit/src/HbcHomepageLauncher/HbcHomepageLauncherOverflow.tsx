@@ -64,7 +64,7 @@ function DrawerOverflow({
 
   return (
     <>
-      <button
+      <motion.button
         ref={refs.setReference}
         type="button"
         className={clsx(
@@ -82,6 +82,9 @@ function DrawerOverflow({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
+        whileHover={prefersReducedMotion ? undefined : { y: -1 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
+        transition={{ duration: 0.14 }}
         {...getReferenceProps()}
       >
         <span
@@ -95,7 +98,7 @@ function DrawerOverflow({
           {items.length}
         </span>
         <ChevronDown size={14} aria-hidden="true" />
-      </button>
+      </motion.button>
       <FloatingPortal>
         <AnimatePresence>
           {open ? (
