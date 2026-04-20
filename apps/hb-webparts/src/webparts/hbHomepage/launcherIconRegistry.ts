@@ -1,10 +1,9 @@
-import { Building2, type LucideIcon } from '@hbc/ui-kit/homepage';
+import { Building2, GraduationCap, type LucideIcon } from '@hbc/ui-kit/homepage';
 import adpLogo from '../../../../hb-homepage/assets/icons/adp_logo.svg';
 import bambooHrLogo from '../../../../hb-homepage/assets/icons/bambooHR_white.svg';
 import compassLogo from '../../../../hb-homepage/assets/icons/compass_icon.svg';
 import documentCrunchLogo from '../../../../hb-homepage/assets/icons/document-crunch-logo.svg';
 import hh2Logo from '../../../../hb-homepage/assets/icons/hh2.svg';
-import hbUniversityLogo from '../../../../hb-homepage/assets/icons/HB University.svg';
 import procoreLogo from '../../../../hb-homepage/assets/icons/Primary_Procore_LogoMark_2Col-Black_RGB.svg';
 import type { PriorityActionsItemNormalized } from '../../homepage/data/priorityActionsContracts.js';
 
@@ -52,8 +51,8 @@ const GOVERNED_ICON_BY_ACTION_KEY: Readonly<Record<string, HomepageLauncherGover
     iconPresentation: 'compliant',
   },
   'hb-university': {
-    iconAssetSrc: hbUniversityLogo,
-    iconKey: 'hb-university',
+    icon: GraduationCap,
+    iconKey: 'hb-university-graduation-cap',
     iconPresentation: 'compliant',
   },
 });

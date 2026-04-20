@@ -313,7 +313,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(screen.getByRole('dialog', { name: /Company Tools/i })).toBeInTheDocument();
   });
 
-  it('renders all overflow tools flat under Company Tools sorted alphabetically', () => {
+  it('renders all overflow tools in incoming launcher order under Company Tools', () => {
     render(
       <HbcHomepageLauncher
         primary={TILES.slice(0, 1)}
@@ -334,10 +334,8 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(rail).not.toBeNull();
     const titles = Array.from(rail!.querySelectorAll('a[data-hbc-ui="homepage-launcher-tile"]'))
       .map((node) => node.getAttribute('data-hbc-launcher-tile-id'));
-    // drawer includes primary + overflow, sorted alphabetically by title:
-    // "Approve Budget" (a-approve), "Approve RFI" (approve-rfi),
-    // "QA Checklist" (z-qa), "Sign Change Order" (b-approve).
-    expect(titles).toEqual(['a-approve', 'approve-rfi', 'z-qa', 'b-approve']);
+    // drawer preserves launcher ordering: primary first, then overflow in source order.
+    expect(titles).toEqual(['approve-rfi', 'z-qa', 'a-approve', 'b-approve']);
   });
 
   it('renders a single centered horizontal drawer rail with governed overflow markers', () => {

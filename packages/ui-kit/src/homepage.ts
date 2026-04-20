@@ -116,6 +116,7 @@ export {
   FileText,
   Briefcase,
   Building2,
+  GraduationCap,
   HardHat,
   BarChart3,
   Landmark,

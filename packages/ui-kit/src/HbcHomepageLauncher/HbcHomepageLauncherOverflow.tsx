@@ -37,12 +37,6 @@ const DRAWER_RAIL_GAP_WIDE = 14;
 const DRAWER_RAIL_GAP_COMPACT = 12;
 const DRAWER_RAIL_GAP_TIGHT = 10;
 
-function sortTilesAlphabetically(
-  items: readonly HomepageLauncherTileModel[],
-): HomepageLauncherTileModel[] {
-  return [...items].sort((a, b) => a.title.localeCompare(b.title));
-}
-
 function resolveDrawerRailMetrics(availableWidth: number, itemCount: number): {
   tileSize: number;
   railGap: number;
@@ -96,7 +90,7 @@ function DrawerOverflow({
   const dialogId = React.useId();
   const titleId = React.useId();
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
-  const sortedItems = React.useMemo(() => sortTilesAlphabetically(items), [items]);
+  const drawerItems = React.useMemo(() => [...items], [items]);
   const [drawerCompactMode, setDrawerCompactMode] =
     React.useState<HomepageLauncherDrawerCompactMode>('comfortable');
   const [drawerRailVars, setDrawerRailVars] = React.useState<React.CSSProperties>(() => ({
@@ -104,7 +98,7 @@ function DrawerOverflow({
     '--hbc-hl-drawer-rail-gap': `${DRAWER_RAIL_GAP_WIDE}px`,
     '--hbc-hl-drawer-icon-size': '54px',
     '--hbc-hl-drawer-caption-size': '0.6875rem',
-  }));
+  } as React.CSSProperties));
   const [hasHorizontalOverflow, setHasHorizontalOverflow] = React.useState(false);
   const [canScrollForward, setCanScrollForward] = React.useState(false);
   const { refs, context } = useFloating({ open, onOpenChange: setOpen });
@@ -125,7 +119,7 @@ function DrawerOverflow({
       iconSize,
       captionSize,
       compactMode,
-    } = resolveDrawerRailMetrics(viewport.clientWidth, sortedItems.length);
+    } = resolveDrawerRailMetrics(viewport.clientWidth, drawerItems.length);
     setDrawerCompactMode(compactMode);
     setDrawerRailVars({
       '--hbc-hl-drawer-tile-size': `${tileSize}px`,
@@ -138,7 +132,7 @@ function DrawerOverflow({
     const hasMoreForward = viewport.scrollLeft < maxScrollLeft - 2;
     setHasHorizontalOverflow(hasOverflow);
     setCanScrollForward(hasOverflow && hasMoreForward);
-  }, [sortedItems.length]);
+  }, [drawerItems.length]);
   const handleViewportKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (
@@ -190,7 +184,7 @@ function DrawerOverflow({
     const resizeObserver = new ResizeObserver(() => updateDrawerRailState());
     resizeObserver.observe(viewport);
     return () => resizeObserver.disconnect();
-  }, [open, sortedItems.length, supportsScrollArea, updateDrawerRailState]);
+  }, [open, drawerItems.length, supportsScrollArea, updateDrawerRailState]);
 
   const surfaceTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -311,7 +305,7 @@ function DrawerOverflow({
                     className={styles.drawerBody}
                     data-hbc-ui="homepage-launcher-overflow-section"
                     data-hbc-overflow-category-key="company-tools"
-                    data-hbc-overflow-category-size={sortedItems.length}
+                    data-hbc-overflow-category-size={drawerItems.length}
                   >
                     {supportsScrollArea ? (
                       <ScrollArea.Root
@@ -338,7 +332,7 @@ function DrawerOverflow({
                             aria-label="Company Tools"
                             style={drawerRailVars}
                           >
-                            {sortedItems.map((tile) => (
+                            {drawerItems.map((tile) => (
                               <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
                                 <HbcHomepageLauncherTile
                                   tile={tile}
@@ -380,7 +374,7 @@ function DrawerOverflow({
                             aria-label="Company Tools"
                             style={drawerRailVars}
                           >
-                            {sortedItems.map((tile) => (
+                            {drawerItems.map((tile) => (
                               <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
                                 <HbcHomepageLauncherTile
                                   tile={tile}

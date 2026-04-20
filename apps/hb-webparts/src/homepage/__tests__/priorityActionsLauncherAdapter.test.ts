@@ -142,10 +142,11 @@ describe('priorityActionsLauncherAdapter', () => {
     hbUniversity.actionKey = 'hb-university';
     hbUniversity.title = 'HB University';
     const hbUniversityTile = mapItemToTile(hbUniversity);
-    expect(hbUniversityTile.iconAssetSrc).toMatch(/data:image\/svg\+xml|HB(?:%20|\s)University/i);
+    expect(hbUniversityTile.icon).toBeDefined();
+    expect(hbUniversityTile.iconAssetSrc).toBeUndefined();
     expect(hbUniversityTile.iconPresentation).toBe('compliant');
-    expect(hbUniversityTile.iconAssetStrategy).toBe('img-filter-white');
-    expect(hbUniversityTile.iconKey).toBe('hb-university');
+    expect(hbUniversityTile.iconAssetStrategy).toBeUndefined();
+    expect(hbUniversityTile.iconKey).toBe('hb-university-graduation-cap');
   });
 
   it('does not regress to badge-variant-first behavior', () => {
@@ -266,7 +267,54 @@ describe('priorityActionsLauncherAdapter', () => {
       makeResolution({ shellState: 'tablet-portrait' }),
       { strictShellAlignment: false },
     );
-    expect(strict.visibleBudget).toBe(5);
+    expect(strict.visibleBudget).toBe(7);
     expect(legacy.visibleBudget).toBe(strict.visibleBudget);
+  });
+
+  it('enforces governed launcher ordering ahead of non-governed items', () => {
+    const items = [
+      makeItem(101),
+      makeItem(102),
+      makeItem(103),
+      makeItem(104),
+      makeItem(105),
+      makeItem(106),
+      makeItem(107),
+      makeItem(108),
+      makeItem(109),
+    ];
+    items[0]!.actionKey = 'random-tool';
+    items[0]!.title = 'Random Tool';
+    items[1]!.actionKey = 'document-crunch';
+    items[1]!.title = 'Document Crunch';
+    items[2]!.actionKey = 'hb-university';
+    items[2]!.title = 'HB University';
+    items[3]!.actionKey = 'procore';
+    items[3]!.title = 'Procore';
+    items[4]!.actionKey = 'compass';
+    items[4]!.title = 'Compass';
+    items[5]!.actionKey = 'hb-projects';
+    items[5]!.title = 'HB Projects';
+    items[6]!.actionKey = 'bamboohr';
+    items[6]!.title = 'BambooHR';
+    items[7]!.actionKey = 'hh2';
+    items[7]!.title = 'hh2';
+    items[8]!.actionKey = 'zzz-tool';
+    items[8]!.title = 'Zzz Tool';
+
+    const partition = partitionItems(items, 'desktop', makeResolution({}), {
+      strictShellAlignment: true,
+    });
+    const orderedIds = [...partition.primary, ...partition.overflow].map((tile) => tile.id);
+    expect(orderedIds.slice(0, 7)).toEqual([
+      'hb-projects',
+      'hb-university',
+      'procore',
+      'compass',
+      'bamboohr',
+      'hh2',
+      'document-crunch',
+    ]);
+    expect(orderedIds.slice(7)).toEqual(['random-tool', 'zzz-tool']);
   });
 });

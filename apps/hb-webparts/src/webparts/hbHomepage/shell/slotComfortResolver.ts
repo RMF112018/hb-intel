@@ -257,14 +257,14 @@ export function resolveBandLayout(
       columns: 2,
       recipe: band.recipe,
       fallbackRecipe: getBandRecipeRule(band.recipe).fallbackRecipe,
-      slots: activeSlots.map((slot) => ({
-        slot,
-        comfort: checkOccupantComfort(
+      slots: activeSlots.map((slot) => {
+        const comfort = checkOccupantComfort(
           slot.occupantId!,
           resolveSlotWidth(containerWidth, slot.columnSpan, 2),
           entryState,
-        ),
-      })),
+        );
+        return { slot, comfort: { ...comfort, effectiveColumnSpan: slot.columnSpan } };
+      }),
       pairingDecision,
     };
   }

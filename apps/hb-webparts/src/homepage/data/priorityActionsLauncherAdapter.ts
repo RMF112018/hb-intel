@@ -33,6 +33,57 @@ import type { PriorityActionsItemNormalized } from './priorityActionsContracts.j
 import type { PriorityRailDeviceResolution } from './priorityActionsPresentation.js';
 import { resolveHomepageLauncherGovernedIcon } from '../../webparts/hbHomepage/launcherIconRegistry.js';
 
+const LAUNCHER_PRIORITY_ORDER: ReadonlyArray<string> = [
+  'hb-projects',
+  'hb-university',
+  'procore',
+  'compass',
+  'bamboohr',
+  'hh2',
+  'document-crunch',
+] as const;
+
+const LAUNCHER_PRIORITY_INDEX: Readonly<Record<string, number>> = Object.freeze(
+  LAUNCHER_PRIORITY_ORDER.reduce<Record<string, number>>((acc, key, index) => {
+    acc[key] = index;
+    return acc;
+  }, {}),
+);
+
+function normalizeForPriority(value: string | undefined): string {
+  return (value ?? '').trim().toLowerCase();
+}
+
+function resolveLauncherPriorityIndex(item: PriorityActionsItemNormalized): number {
+  const candidates = [
+    item.actionKey,
+    item.iconKey,
+    item.title,
+  ].map(normalizeForPriority);
+
+  for (const candidate of candidates) {
+    const direct = LAUNCHER_PRIORITY_INDEX[candidate];
+    if (direct !== undefined) return direct;
+  }
+
+  if (candidates.includes('document crunch')) {
+    return LAUNCHER_PRIORITY_INDEX['document-crunch'] ?? Number.MAX_SAFE_INTEGER;
+  }
+
+  return Number.MAX_SAFE_INTEGER;
+}
+
+function sortLauncherItems(
+  items: readonly PriorityActionsItemNormalized[],
+): PriorityActionsItemNormalized[] {
+  return [...items].sort((a, b) => {
+    const priorityA = resolveLauncherPriorityIndex(a);
+    const priorityB = resolveLauncherPriorityIndex(b);
+    if (priorityA !== priorityB) return priorityA - priorityB;
+    return 0;
+  });
+}
+
 const ICON_BY_GOVERNED_KEY: Readonly<Record<string, LucideIcon>> = Object.freeze({
   finance: DollarSign,
   field: HardHat,
@@ -201,6 +252,7 @@ export function partitionItems(
   options: LauncherBudgetOptions = { strictShellAlignment: true },
 ): LauncherPartition {
   void options;
+  const orderedItems = sortLauncherItems(items);
   const handheldMode =
     resolution.launcherHandheldMode ??
     (deviceClass === 'phone' || resolution.shortHeightConstrained
@@ -213,7 +265,7 @@ export function partitionItems(
 
   const forced: PriorityActionsItemNormalized[] = [];
   const eligible: PriorityActionsItemNormalized[] = [];
-  for (const item of items) {
+  for (const item of orderedItems) {
     if (item.overflowOnly) forced.push(item);
     else eligible.push(item);
   }
