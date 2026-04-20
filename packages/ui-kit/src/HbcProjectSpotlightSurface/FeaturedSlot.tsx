@@ -204,7 +204,11 @@ export function FeaturedSlot({
             ) : null}
 
             {posture.showTeamStrip ? (
-              <TeamStrip members={teamMembers} reducedMotion={reducedMotion} />
+              <TeamStrip
+                members={teamMembers}
+                reducedMotion={reducedMotion}
+                mode={visibility.mode}
+              />
             ) : null}
 
             {featured.cta ? (

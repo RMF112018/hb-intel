@@ -812,10 +812,13 @@
   list-style: none;
 }
 
-@media (min-width: 640px) {
-  .milestonesList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* Mode-governed milestone list density. Wide/medium carry two
+   columns when the container has room; compact/minimal stack to a
+   single column so milestones read cleanly in tight presentation
+   lanes regardless of viewport width. */
+.root[data-layout-mode='wide'] .milestonesList,
+.root[data-layout-mode='medium'] .milestonesList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .milestoneItem {
@@ -979,32 +982,39 @@
   overflow: hidden;
 }
 
-@media (max-width: 767px) {
-  .teamBackdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 24, 45, 0.38);
-    z-index: 99;
-  }
-  .teamPanel {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0;
-    z-index: 100;
-    min-width: 0;
-    max-width: none;
-    border-radius: 14px 14px 0 0;
-    border-bottom: none;
-    box-shadow:
-      0 -6px 28px rgba(10, 24, 45, 0.18),
-      0 -2px 8px rgba(10, 24, 45, 0.10);
-    max-height: 60vh;
-    overflow-y: auto;
-  }
+/* Mode-governed team-panel posture.
+   Anchored popover is the default (wide/medium) — stays positioned
+   under the avatar-stack trigger. The sheet posture (compact/minimal)
+   promotes the panel to a full-width bottom sheet with a scrim
+   backdrop so tight containers never clip the panel. Posture is
+   stamped from React via `data-panel-posture` rather than inferred
+   from viewport width, so the panel aligns with the Spotlight's
+   actual container, not the browser viewport. */
+.teamBackdrop[data-panel-posture='sheet'] {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 24, 45, 0.38);
+  z-index: 99;
+}
+
+.teamPanel[data-panel-posture='sheet'] {
+  position: fixed;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  z-index: 100;
+  min-width: 0;
+  max-width: none;
+  border-radius: 14px 14px 0 0;
+  border-bottom: none;
+  box-shadow:
+    0 -6px 28px rgba(10, 24, 45, 0.18),
+    0 -2px 8px rgba(10, 24, 45, 0.10);
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .teamPanelHeader {
@@ -1056,10 +1066,10 @@
   min-height: 44px;
 }
 
-@media (max-width: 767px) {
-  .teamPanelRow {
-    padding: 12px 18px;
-  }
+/* Sheet posture uses slightly roomier row padding so touch targets
+   stay comfortable in the bottom-sheet presentation. */
+.teamPanel[data-panel-posture='sheet'] .teamPanelRow {
+  padding: 12px 18px;
 }
 
 .teamPanelAvatar {

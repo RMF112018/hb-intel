@@ -11,6 +11,7 @@ import { motion } from 'motion/react';
 import { Users, X } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import type { ProjectSpotlightTeamMember } from './types.js';
+import type { SpotlightLayoutMode } from './layout-mode.js';
 import {
   EASE_OUT_EXPO,
   MAX_VISIBLE_AVATARS,
@@ -19,15 +20,46 @@ import {
 } from './internals.js';
 import styles from './project-spotlight-surface.module.css';
 
+export type TeamPanelPosture = 'anchored' | 'sheet';
+
+/**
+ * Resolve panel posture from the Spotlight's container-aware mode.
+ *
+ * Wide/medium render an anchored popover under the avatar-stack
+ * trigger — the container has room for a right-anchored floating
+ * surface without clipping the hero. Compact/minimal render a
+ * full-width bottom sheet with a scrim — anchored popovers would
+ * overflow the surface boundary in tight containers, and the sheet
+ * is the canonical overlay posture for narrow presentation lanes.
+ *
+ * This replaces the previous viewport-media-query switch, which
+ * produced a sheet posture on narrow viewports regardless of the
+ * Spotlight's actual container — a mismatch when the Spotlight is
+ * nested in a sidebar or split-view on a wide viewport, or when the
+ * container is wide inside a narrow viewport.
+ */
+export function resolveTeamPanelPosture(
+  mode: SpotlightLayoutMode,
+): TeamPanelPosture {
+  return mode === 'compact' || mode === 'minimal' ? 'sheet' : 'anchored';
+}
+
 export interface TeamStripProps {
   members: ProjectSpotlightTeamMember[];
   reducedMotion: boolean;
+  /**
+   * Resolved Spotlight layout mode. Drives team-panel posture —
+   * anchored popover in wide/medium, bottom sheet in compact/minimal.
+   */
+  mode: SpotlightLayoutMode;
 }
 
 export function TeamStrip({
   members,
   reducedMotion,
+  mode,
 }: TeamStripProps): React.JSX.Element | null {
+  const panelPosture = resolveTeamPanelPosture(mode);
   const [isOpen, setIsOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -105,6 +137,7 @@ export function TeamStrip({
         <>
           <div
             className={styles.teamBackdrop}
+            data-panel-posture={panelPosture}
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -113,6 +146,7 @@ export function TeamStrip({
             role="dialog"
             aria-label="Project team members"
             className={styles.teamPanel}
+            data-panel-posture={panelPosture}
             {...sheetMotionProps}
           >
             <div className={styles.teamPanelHeader}>
