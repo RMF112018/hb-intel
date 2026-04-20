@@ -15,7 +15,10 @@ import { clsx } from 'clsx';
 import { motion } from 'motion/react';
 import { Calendar } from 'lucide-react';
 import { HbcPremiumCta } from '../HbcPremiumCta/index.js';
-import type { ProjectSpotlightFeaturedItem } from './types.js';
+import type {
+  ProjectSpotlightCompleteness,
+  ProjectSpotlightFeaturedItem,
+} from './types.js';
 import type { SpotlightLayoutVisibility } from './layout-mode.js';
 import { EASE_OUT_EXPO } from './internals.js';
 import { FeaturedMedia } from './FeaturedMedia.js';
@@ -29,6 +32,56 @@ export interface FeaturedSlotProps {
   visibility: SpotlightLayoutVisibility;
 }
 
+/**
+ * Effective rendering posture derived from layout-mode visibility
+ * + authored-content completeness. Keeps the rule set in one place
+ * so the render tree stays free of scattered conditions.
+ */
+interface ContentPosture {
+  showHeadline: boolean;
+  showMilestoneList: boolean;
+  showTeamStrip: boolean;
+  summaryLineClamp: number;
+  detailsOpenByDefault: boolean;
+}
+
+function resolveContentPosture(
+  featured: ProjectSpotlightFeaturedItem,
+  visibility: SpotlightLayoutVisibility,
+): ContentPosture {
+  const completeness: ProjectSpotlightCompleteness =
+    featured.completeness ?? 'full';
+  const milestoneCount = featured.milestones?.length ?? 0;
+  const teamCount = featured.teamMembers?.length ?? 0;
+
+  // Start from the mode matrix; then trim for thin authored payloads.
+  const posture: ContentPosture = {
+    showHeadline: visibility.showHeadline && Boolean(featured.headline),
+    showMilestoneList: visibility.showMilestoneList && milestoneCount > 0,
+    showTeamStrip: visibility.mode !== 'minimal' && teamCount > 0,
+    summaryLineClamp: visibility.summaryLineClamp,
+    detailsOpenByDefault: visibility.detailsOpenByDefault,
+  };
+
+  if (completeness === 'minimal') {
+    // Minimal payloads: do not dress up the details region with
+    // optional chrome, and do not expand it by default.
+    posture.showHeadline = false;
+    posture.showMilestoneList = false;
+    posture.showTeamStrip = false;
+    posture.summaryLineClamp = Math.min(posture.summaryLineClamp, 2);
+    posture.detailsOpenByDefault = false;
+  } else if (completeness === 'partial') {
+    // Partial payloads: keep the milestone list only when it carries
+    // real progress signal; otherwise let the essentials pill speak.
+    if (milestoneCount < 2) posture.showMilestoneList = false;
+    // If headline is present but summary is thin, keep it. If headline
+    // is absent the mode check already suppresses it; nothing to do.
+  }
+
+  return posture;
+}
+
 export function FeaturedSlot({
   featured,
   reducedMotion,
@@ -40,13 +93,15 @@ export function FeaturedSlot({
   const milestones = featured.milestones ?? [];
   const teamMembers = featured.teamMembers ?? [];
 
+  const posture = resolveContentPosture(featured, visibility);
+
   const detailsId = React.useId();
   const [detailsOpen, setDetailsOpen] = React.useState(
-    visibility.detailsOpenByDefault,
+    posture.detailsOpenByDefault,
   );
   React.useEffect(() => {
-    setDetailsOpen(visibility.detailsOpenByDefault);
-  }, [visibility.detailsOpenByDefault, visibility.mode]);
+    setDetailsOpen(posture.detailsOpenByDefault);
+  }, [posture.detailsOpenByDefault, visibility.mode]);
 
   const motionProps = reducedMotion
     ? {}
@@ -57,11 +112,11 @@ export function FeaturedSlot({
       };
 
   const hasDetailsContent =
-    Boolean(featured.headline) ||
+    (posture.showHeadline && Boolean(featured.headline)) ||
     Boolean(featured.summary) ||
-    (visibility.showMilestoneList && milestones.length > 0) ||
+    posture.showMilestoneList ||
     Boolean(featured.freshnessLabel) ||
-    teamMembers.length > 0 ||
+    (posture.showTeamStrip && teamMembers.length > 0) ||
     Boolean(featured.cta);
 
   return (
@@ -117,20 +172,20 @@ export function FeaturedSlot({
             )}
             hidden={!detailsOpen}
           >
-            {visibility.showHeadline && featured.headline ? (
+            {posture.showHeadline && featured.headline ? (
               <p className={styles.featuredHeadline}>{featured.headline}</p>
             ) : null}
 
             {featured.summary ? (
               <p
                 className={styles.featuredSummary}
-                style={{ WebkitLineClamp: visibility.summaryLineClamp }}
+                style={{ WebkitLineClamp: posture.summaryLineClamp }}
               >
                 {featured.summary}
               </p>
             ) : null}
 
-            {visibility.showMilestoneList ? (
+            {posture.showMilestoneList ? (
               <MilestoneList milestones={milestones} />
             ) : null}
 
@@ -148,7 +203,7 @@ export function FeaturedSlot({
               </div>
             ) : null}
 
-            {visibility.mode !== 'minimal' ? (
+            {posture.showTeamStrip ? (
               <TeamStrip members={teamMembers} reducedMotion={reducedMotion} />
             ) : null}
 

@@ -43,6 +43,15 @@ export interface ProjectSpotlightTeamMember {
   photoUrl?: string;
 }
 
+/**
+ * Authored-content completeness signal. Computed upstream by the
+ * normalizer based on the density of authored signals (image,
+ * headline, status, etc.). The surface uses this to trim optional
+ * content so thin payloads don't leave filler-looking detail regions.
+ * Callers that don't provide it are treated as `'full'`.
+ */
+export type ProjectSpotlightCompleteness = 'full' | 'partial' | 'minimal';
+
 export interface ProjectSpotlightFeaturedItem {
   id: string;
   title: string;
@@ -59,6 +68,13 @@ export interface ProjectSpotlightFeaturedItem {
   milestones?: ProjectSpotlightMilestone[];
   teamMembers?: ProjectSpotlightTeamMember[];
   cta?: ProjectSpotlightCta;
+  /**
+   * Authored-content completeness, sourced from normalization. Drives
+   * rendering polish (suppress headline on minimal payloads, skip
+   * milestone list when sparse, force tight summary, keep details
+   * closed by default when there is effectively nothing to reveal).
+   */
+  completeness?: ProjectSpotlightCompleteness;
 }
 
 export interface ProjectSpotlightRailItem {
@@ -71,6 +87,12 @@ export interface ProjectSpotlightRailItem {
   isStale?: boolean;
   freshnessLabel?: string;
   cta?: ProjectSpotlightCta;
+  /**
+   * Advisory completeness for rail tiles. Reserved for future rail
+   * polish (e.g., dimmed meta treatment for `minimal` items); not
+   * currently consumed by the rail visuals.
+   */
+  completeness?: ProjectSpotlightCompleteness;
 }
 
 export interface ProjectSpotlightSurfaceModel {

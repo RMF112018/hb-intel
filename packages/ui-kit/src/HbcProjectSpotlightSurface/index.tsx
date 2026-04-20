@@ -45,6 +45,7 @@ export type {
   ProjectSpotlightFeaturedItem,
   ProjectSpotlightRailItem,
   ProjectSpotlightSurfaceModel,
+  ProjectSpotlightCompleteness,
 } from './types.js';
 
 export {

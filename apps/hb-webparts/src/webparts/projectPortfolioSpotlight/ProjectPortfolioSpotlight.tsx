@@ -83,6 +83,7 @@ function toFeatured(
           openInNewTab: item.cta.openInNewTab,
         }
       : undefined,
+    completeness: item.contentCompleteness,
   };
 }
 
@@ -109,6 +110,7 @@ function toRailItem(
           openInNewTab: item.cta.openInNewTab,
         }
       : undefined,
+    completeness: item.contentCompleteness,
   };
 }
 
