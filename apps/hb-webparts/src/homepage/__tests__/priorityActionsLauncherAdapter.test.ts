@@ -137,6 +137,15 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(bambooTile.iconPresentation).toBe('compliant');
     expect(bambooTile.iconAssetStrategy).toBe('img-filter-white');
     expect(bambooTile.iconKey).toBe('bamboohr');
+
+    const hbUniversity = makeItem(15);
+    hbUniversity.actionKey = 'hb-university';
+    hbUniversity.title = 'HB University';
+    const hbUniversityTile = mapItemToTile(hbUniversity);
+    expect(hbUniversityTile.iconAssetSrc).toMatch(/data:image\/svg\+xml|HB(?:%20|\s)University/i);
+    expect(hbUniversityTile.iconPresentation).toBe('compliant');
+    expect(hbUniversityTile.iconAssetStrategy).toBe('img-filter-white');
+    expect(hbUniversityTile.iconKey).toBe('hb-university');
   });
 
   it('does not regress to badge-variant-first behavior', () => {

@@ -15,6 +15,7 @@ export type HomepageLauncherDeviceClass =
 export type HomepageLauncherOverflowMode = 'sheet';
 export type HomepageLauncherHandheldMode = 'standard' | 'single-entry-all-tools';
 export type HomepageLauncherDrawerSource = 'all-tools';
+export type HomepageLauncherDrawerCompactMode = 'comfortable' | 'compact' | 'tight';
 export type HomepageLauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
 export type HomepageLauncherOverflowTriggerMode = 'tile' | 'linear-handheld';
 

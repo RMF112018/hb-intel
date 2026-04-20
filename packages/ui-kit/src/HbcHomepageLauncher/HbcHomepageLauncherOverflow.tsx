@@ -23,6 +23,7 @@ import {
 } from '@floating-ui/react';
 import type {
   HbcHomepageLauncherOverflowProps,
+  HomepageLauncherDrawerCompactMode,
   HomepageLauncherTileModel,
 } from './types.js';
 import { launcherTile } from './variants.js';
@@ -30,11 +31,52 @@ import { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 import styles from './homepage-launcher.module.css';
 
 const DRAWER_CATEGORY_LABEL = 'Company Tools';
+const DRAWER_TILE_SIZE_MIN = 86;
+const DRAWER_TILE_SIZE_MAX = 126;
+const DRAWER_RAIL_GAP_WIDE = 14;
+const DRAWER_RAIL_GAP_COMPACT = 12;
+const DRAWER_RAIL_GAP_TIGHT = 10;
 
 function sortTilesAlphabetically(
   items: readonly HomepageLauncherTileModel[],
 ): HomepageLauncherTileModel[] {
   return [...items].sort((a, b) => a.title.localeCompare(b.title));
+}
+
+function resolveDrawerRailMetrics(availableWidth: number, itemCount: number): {
+  tileSize: number;
+  railGap: number;
+  iconSize: number;
+  captionSize: number;
+  compactMode: 'comfortable' | 'compact' | 'tight';
+} {
+  const safeItemCount = Math.max(1, itemCount);
+  const targetTileSize = Math.floor(
+    (availableWidth - (safeItemCount - 1) * DRAWER_RAIL_GAP_WIDE) / safeItemCount,
+  );
+  const tileSize = Math.max(
+    DRAWER_TILE_SIZE_MIN,
+    Math.min(DRAWER_TILE_SIZE_MAX, Number.isFinite(targetTileSize) ? targetTileSize : DRAWER_TILE_SIZE_MAX),
+  );
+  const compactMode =
+    tileSize <= 94 ? 'tight' : tileSize <= 106 ? 'compact' : 'comfortable';
+  const railGap =
+    compactMode === 'tight'
+      ? DRAWER_RAIL_GAP_TIGHT
+      : compactMode === 'compact'
+        ? DRAWER_RAIL_GAP_COMPACT
+        : DRAWER_RAIL_GAP_WIDE;
+  const iconSize = Math.max(30, Math.min(54, Math.round(tileSize * 0.42)));
+  const captionSize =
+    compactMode === 'tight' ? 10 : compactMode === 'compact' ? 10.5 : 11;
+
+  return {
+    tileSize,
+    railGap,
+    iconSize,
+    captionSize,
+    compactMode,
+  };
 }
 
 function DrawerOverflow({
@@ -55,6 +97,14 @@ function DrawerOverflow({
   const titleId = React.useId();
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const sortedItems = React.useMemo(() => sortTilesAlphabetically(items), [items]);
+  const [drawerCompactMode, setDrawerCompactMode] =
+    React.useState<HomepageLauncherDrawerCompactMode>('comfortable');
+  const [drawerRailVars, setDrawerRailVars] = React.useState<React.CSSProperties>(() => ({
+    '--hbc-hl-drawer-tile-size': `${DRAWER_TILE_SIZE_MAX}px`,
+    '--hbc-hl-drawer-rail-gap': `${DRAWER_RAIL_GAP_WIDE}px`,
+    '--hbc-hl-drawer-icon-size': '54px',
+    '--hbc-hl-drawer-caption-size': '0.6875rem',
+  }));
   const [hasHorizontalOverflow, setHasHorizontalOverflow] = React.useState(false);
   const [canScrollForward, setCanScrollForward] = React.useState(false);
   const { refs, context } = useFloating({ open, onOpenChange: setOpen });
@@ -65,27 +115,62 @@ function DrawerOverflow({
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
   const closeSheet = React.useCallback(() => setOpen(false), []);
   const handheldLinearTrigger = triggerMode === 'linear-handheld';
-  const updateOverflowState = React.useCallback(() => {
+  const triggerLabel = handheldLinearTrigger ? 'HB Toolbox' : label;
+  const updateDrawerRailState = React.useCallback(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
+    const {
+      tileSize,
+      railGap,
+      iconSize,
+      captionSize,
+      compactMode,
+    } = resolveDrawerRailMetrics(viewport.clientWidth, sortedItems.length);
+    setDrawerCompactMode(compactMode);
+    setDrawerRailVars({
+      '--hbc-hl-drawer-tile-size': `${tileSize}px`,
+      '--hbc-hl-drawer-rail-gap': `${railGap}px`,
+      '--hbc-hl-drawer-icon-size': `${iconSize}px`,
+      '--hbc-hl-drawer-caption-size': `${captionSize / 16}rem`,
+    } as React.CSSProperties);
     const maxScrollLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
     const hasOverflow = maxScrollLeft > 2;
     const hasMoreForward = viewport.scrollLeft < maxScrollLeft - 2;
     setHasHorizontalOverflow(hasOverflow);
     setCanScrollForward(hasOverflow && hasMoreForward);
-  }, []);
+  }, [sortedItems.length]);
   const handleViewportKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      if (
+        event.key !== 'ArrowRight' &&
+        event.key !== 'ArrowLeft' &&
+        event.key !== 'Home' &&
+        event.key !== 'End'
+      ) {
+        return;
+      }
       const viewport = viewportRef.current;
       if (!viewport) return;
       event.preventDefault();
+      if (event.key === 'Home') {
+        viewport.scrollTo({ left: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+        updateDrawerRailState();
+        return;
+      }
+      if (event.key === 'End') {
+        viewport.scrollTo({
+          left: viewport.scrollWidth,
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        });
+        updateDrawerRailState();
+        return;
+      }
       const direction = event.key === 'ArrowRight' ? 1 : -1;
       const step = Math.max(48, viewport.clientWidth * 0.3);
       viewport.scrollBy({ left: step * direction, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-      updateOverflowState();
+      updateDrawerRailState();
     },
-    [prefersReducedMotion, updateOverflowState],
+    [prefersReducedMotion, updateDrawerRailState],
   );
 
   React.useEffect(() => {
@@ -97,15 +182,15 @@ function DrawerOverflow({
     }
     const viewport = viewportRef.current;
     if (!viewport) return;
-    updateOverflowState();
+    updateDrawerRailState();
     if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', updateOverflowState);
-      return () => window.removeEventListener('resize', updateOverflowState);
+      window.addEventListener('resize', updateDrawerRailState);
+      return () => window.removeEventListener('resize', updateDrawerRailState);
     }
-    const resizeObserver = new ResizeObserver(() => updateOverflowState());
+    const resizeObserver = new ResizeObserver(() => updateDrawerRailState());
     resizeObserver.observe(viewport);
     return () => resizeObserver.disconnect();
-  }, [open, sortedItems.length, supportsScrollArea, updateOverflowState]);
+  }, [open, sortedItems.length, supportsScrollArea, updateDrawerRailState]);
 
   const surfaceTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -150,7 +235,7 @@ function DrawerOverflow({
           >
             <Layers strokeWidth={2.2} />
           </span>
-          <span className={styles.overflowTriggerLabel}>{label}</span>
+          <span className={styles.overflowTriggerLabel}>{triggerLabel}</span>
           <span
             className={clsx(
               styles.overflowTriggerCount,
@@ -217,7 +302,7 @@ function DrawerOverflow({
                       type="button"
                       className={styles.sheetClose}
                       onClick={closeSheet}
-                      aria-label={`Close ${label}`}
+                      aria-label={`Close ${triggerLabel}`}
                     >
                       <X size={16} strokeWidth={2.4} aria-hidden="true" />
                     </button>
@@ -238,7 +323,7 @@ function DrawerOverflow({
                           ref={viewportRef}
                           className={styles.drawerRailViewport}
                           data-hbc-ui="homepage-launcher-drawer-rail-viewport"
-                          onScroll={updateOverflowState}
+                          onScroll={updateDrawerRailState}
                           onKeyDown={handleViewportKeyDown}
                           tabIndex={0}
                           aria-label="Company tools row"
@@ -246,9 +331,12 @@ function DrawerOverflow({
                           <div
                             className={styles.drawerTileRail}
                             data-hbc-ui="homepage-launcher-drawer-rail"
+                            data-hbc-launcher-drawer-layout="single-row-centered"
+                            data-hbc-launcher-drawer-density={drawerCompactMode}
                             data-hbc-launcher-drawer-overflow={hasHorizontalOverflow ? 'true' : 'false'}
                             role="list"
                             aria-label="Company Tools"
+                            style={drawerRailVars}
                           >
                             {sortedItems.map((tile) => (
                               <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
@@ -277,7 +365,7 @@ function DrawerOverflow({
                           ref={viewportRef}
                           className={styles.drawerRailViewport}
                           data-hbc-ui="homepage-launcher-drawer-rail-viewport"
-                          onScroll={updateOverflowState}
+                          onScroll={updateDrawerRailState}
                           onKeyDown={handleViewportKeyDown}
                           tabIndex={0}
                           aria-label="Company tools row"
@@ -285,9 +373,12 @@ function DrawerOverflow({
                           <div
                             className={styles.drawerTileRail}
                             data-hbc-ui="homepage-launcher-drawer-rail"
+                            data-hbc-launcher-drawer-layout="single-row-centered"
+                            data-hbc-launcher-drawer-density={drawerCompactMode}
                             data-hbc-launcher-drawer-overflow={hasHorizontalOverflow ? 'true' : 'false'}
                             role="list"
                             aria-label="Company Tools"
+                            style={drawerRailVars}
                           >
                             {sortedItems.map((tile) => (
                               <div key={tile.id} role="listitem" className={styles.drawerRailItem}>

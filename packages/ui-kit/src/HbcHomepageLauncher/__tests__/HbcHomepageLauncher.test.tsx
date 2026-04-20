@@ -44,6 +44,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(root!.getAttribute('data-hbc-homepage-launcher-cap-governance')).toBe(
       'binding-visible-cap',
     );
+    expect(root!.getAttribute('data-hbc-homepage-launcher-drawer-category')).toBe(
+      'company-tools',
+    );
     expect(root!.getAttribute('data-hbc-homepage-launcher-short-height')).toBe('false');
   });
 
@@ -149,7 +152,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
         deviceClass="phone"
       />,
     );
-    const trigger = screen.getByRole('button', { name: /More tools/i });
+    const trigger = screen.getByRole('button', { name: /HB Toolbox/i });
     expect(screen.queryByRole('link', { name: /Approve RFI/i })).toBeNull();
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
@@ -176,7 +179,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(root!.getAttribute('data-hbc-homepage-launcher-handheld-mode')).toBe(
       'single-entry-all-tools',
     );
-    const trigger = screen.getByRole('button', { name: /More tools/i });
+    const trigger = screen.getByRole('button', { name: /HB Toolbox/i });
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-shape')).toBe(
       'linear-handheld',
     );
@@ -356,7 +359,50 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(railViewport?.getAttribute('tabindex')).toBe('0');
     expect(rail).not.toBeNull();
     expect(rail?.getAttribute('role')).toBe('list');
+    expect(rail?.getAttribute('data-hbc-launcher-drawer-layout')).toBe('single-row-centered');
+    expect(rail?.getAttribute('data-hbc-launcher-drawer-density')).toBeTruthy();
     expect(overflowHint).not.toBeNull();
+  });
+
+  it('activates horizontal overflow marker only when rail width is constrained', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={TILES.slice(0, 2)}
+        overflow={TILES.slice(2)}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const dialog = screen.getByRole('dialog', { name: /Company Tools/i });
+    const railViewport = dialog.querySelector(
+      '[data-hbc-ui="homepage-launcher-drawer-rail-viewport"]',
+    ) as HTMLElement;
+    const rail = dialog.querySelector('[data-hbc-ui="homepage-launcher-drawer-rail"]');
+    expect(railViewport).not.toBeNull();
+    expect(rail).not.toBeNull();
+
+    Object.defineProperty(railViewport, 'clientWidth', {
+      configurable: true,
+      value: 320,
+    });
+    Object.defineProperty(railViewport, 'scrollWidth', {
+      configurable: true,
+      value: 920,
+    });
+    Object.defineProperty(railViewport, 'scrollLeft', {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    fireEvent.scroll(railViewport);
+    expect(rail?.getAttribute('data-hbc-launcher-drawer-overflow')).toBe('true');
+
+    Object.defineProperty(railViewport, 'scrollWidth', {
+      configurable: true,
+      value: 280,
+    });
+    fireEvent.scroll(railViewport);
+    expect(rail?.getAttribute('data-hbc-launcher-drawer-overflow')).toBe('false');
   });
 
   it('uses visible overflow title as truncation-rescue tooltip text', () => {
@@ -395,7 +441,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
         deviceClass="phone"
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    fireEvent.click(screen.getByRole('button', { name: /HB Toolbox/i }));
     expect(await screen.findByRole('dialog', { name: /Company Tools/i })).toBeInTheDocument();
     expect(screen.queryByText('Field Ops')).toBeNull();
     expect((await screen.findAllByRole('link')).length).toBeGreaterThanOrEqual(2);
@@ -413,6 +459,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const drawerLink = screen.getByRole('link', { name: /Sign CO #22/i });
     expect(drawerLink.getAttribute('data-hbc-ui')).toBe('homepage-launcher-tile');
     expect(drawerLink.getAttribute('data-hbc-launcher-tile-family')).toBe('drawer');
+    expect(drawerLink.getAttribute('data-hbc-launcher-tile-caption-policy')).toBe(
+      'drawer-wrap-no-clip',
+    );
     expect(
       screen.queryByRole('link', { name: /Sign CO #22/i })?.getAttribute('data-hbc-ui'),
     ).not.toBe('homepage-launcher-drawer-tile');

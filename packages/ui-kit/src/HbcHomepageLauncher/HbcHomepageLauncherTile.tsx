@@ -25,6 +25,7 @@ export function HbcHomepageLauncherTile({
   const shouldOpenInNewTab = tile.openInNewTab ?? Boolean(tile.external);
   const isExternal = Boolean(tile.external);
   const prefersReducedMotion = useReducedMotion();
+  const captionPolicy = family === 'drawer' ? 'drawer-wrap-no-clip' : 'row-two-line-clamp';
   const linkProps = shouldOpenInNewTab
     ? { href: tile.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: tile.href };
@@ -48,6 +49,7 @@ export function HbcHomepageLauncherTile({
       data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
       data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
       data-hbc-launcher-tile-family={family}
+      data-hbc-launcher-tile-caption-policy={captionPolicy}
       data-hbc-launcher-tile-geometry="icon-forward-square"
       data-hbc-chip-id={tile.id}
       data-hbc-chip-service-key={tile.serviceKey}

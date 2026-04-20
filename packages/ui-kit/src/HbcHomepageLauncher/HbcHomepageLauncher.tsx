@@ -107,6 +107,7 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-cap-governance={capGovernance}
       data-hbc-homepage-launcher-all-tools-count={handheldSingleEntry ? overflow.length : undefined}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
+      data-hbc-homepage-launcher-drawer-category="company-tools"
       style={rootStyle}
     >
       <div className={launcherBand()} role="list">

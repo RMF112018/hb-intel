@@ -133,11 +133,11 @@
 }
 
 .tileDrawer {
-  width: var(--hbc-hl-tile-size);
-  flex: 0 0 var(--hbc-hl-tile-size);
-  height: var(--hbc-hl-tile-size);
+  width: var(--hbc-hl-drawer-tile-size, var(--hbc-hl-tile-size));
+  flex: 0 0 var(--hbc-hl-drawer-tile-size, var(--hbc-hl-tile-size));
+  height: var(--hbc-hl-drawer-tile-size, var(--hbc-hl-tile-size));
   aspect-ratio: 1 / 1;
-  padding: 10px 8px 8px;
+  padding: 10px 8px 10px;
   border: 1px solid rgba(var(--hbc-hl-brand-deep-rgb), 0.7);
   border-radius: 12px;
   color: #ffffff;
@@ -212,8 +212,8 @@
 }
 
 .tileIconDrawer {
-  width: var(--hbc-hl-icon-size);
-  height: var(--hbc-hl-icon-size);
+  width: var(--hbc-hl-drawer-icon-size, var(--hbc-hl-icon-size));
+  height: var(--hbc-hl-drawer-icon-size, var(--hbc-hl-icon-size));
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -254,9 +254,17 @@
 }
 
 .drawerTileTitle {
-  font-size: var(--hbc-hl-caption-size);
-  line-height: var(--hbc-hl-caption-line-height);
-  -webkit-line-clamp: 2;
+  font-size: var(--hbc-hl-drawer-caption-size, var(--hbc-hl-caption-size));
+  line-height: 1.28;
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+  white-space: normal;
+  text-wrap: balance;
+  word-break: normal;
+  hyphens: manual;
   font-weight: 600;
   letter-spacing: -0.002em;
 }
@@ -403,8 +411,8 @@
   max-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
-  background-color: #0e2342;
-  background-image: linear-gradient(180deg, #143664 0%, #0c1f3c 100%);
+  background-color: #102a4b;
+  background-image: linear-gradient(180deg, #133a69 0%, #0e2444 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 0;
   border-top-left-radius: 20px;
@@ -423,7 +431,7 @@
   column-gap: 14px;
   padding: 20px var(--hbc-hl-drawer-pad-x);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+  background: rgba(10, 26, 48, 0.82);
 }
 
 .sheetHeading {
@@ -502,7 +510,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 10px;
+  gap: 12px;
 }
 
 .drawerRailRoot {
@@ -518,7 +526,8 @@
   scrollbar-gutter: stable both-edges;
   overscroll-behavior-x: contain;
   overscroll-behavior-y: none;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
+  padding-block: 2px 4px;
 }
 
 .drawerRailViewport:focus-visible {
@@ -528,6 +537,10 @@
 }
 
 .drawerTileRail {
+  --hbc-hl-drawer-tile-size: var(--hbc-hl-tile-size);
+  --hbc-hl-drawer-rail-gap: 14px;
+  --hbc-hl-drawer-icon-size: var(--hbc-hl-icon-size);
+  --hbc-hl-drawer-caption-size: var(--hbc-hl-caption-size);
   display: flex;
   align-items: stretch;
   gap: var(--hbc-hl-drawer-rail-gap);
@@ -539,13 +552,24 @@
 }
 
 .drawerRailItem {
-  flex: 0 0 auto;
+  flex: 0 0 var(--hbc-hl-drawer-tile-size);
   min-width: 0;
 }
 
 .drawerTile {
-  min-height: 0;
+  min-height: var(--hbc-hl-drawer-tile-size);
+  height: auto;
   scroll-snap-align: start;
+}
+
+.drawerTileRail[data-hbc-launcher-drawer-density="compact"] .tileDrawer {
+  padding: 9px 7px 9px;
+  border-radius: 11px;
+}
+
+.drawerTileRail[data-hbc-launcher-drawer-density="tight"] .tileDrawer {
+  padding: 8px 6px 8px;
+  border-radius: 10px;
 }
 
 .drawerRailScrollbar {
@@ -609,10 +633,14 @@
   }
 
   .tileTitle,
-  .overflowTriggerLabel,
-  .drawerTileTitle {
+  .overflowTriggerLabel {
     font-size: var(--hbc-hl-caption-size);
     line-height: var(--hbc-hl-caption-line-height);
+  }
+
+  .drawerTileTitle {
+    font-size: var(--hbc-hl-drawer-caption-size, var(--hbc-hl-caption-size));
+    line-height: 1.24;
   }
 
   .sheetSurface {
@@ -686,8 +714,12 @@
   .tileDrawer { border-radius: 14px; }
 
   .tileTitle,
-  .overflowTriggerLabel,
-  .drawerTileTitle { font-size: var(--hbc-hl-caption-size); }
+  .overflowTriggerLabel { font-size: var(--hbc-hl-caption-size); }
+
+  .drawerTileTitle {
+    font-size: var(--hbc-hl-drawer-caption-size, var(--hbc-hl-caption-size));
+    line-height: 1.3;
+  }
 }
 
 @media (max-height: 640px) {
@@ -712,8 +744,12 @@
   }
 
   .tileTitle,
-  .overflowTriggerLabel,
-  .drawerTileTitle { font-size: var(--hbc-hl-caption-size); }
+  .overflowTriggerLabel { font-size: var(--hbc-hl-caption-size); }
+
+  .drawerTileTitle {
+    font-size: var(--hbc-hl-drawer-caption-size, var(--hbc-hl-caption-size));
+    line-height: 1.22;
+  }
 
   .sheetSurface { max-height: calc(100vh - 16px); }
   .drawerBody { padding-top: var(--hbc-hl-drawer-pad-y); padding-bottom: var(--hbc-hl-drawer-pad-y); }
