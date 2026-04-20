@@ -319,15 +319,38 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
     expect(screen.queryByText('Approvals')).toBeNull();
     expect(screen.queryByText('Quality')).toBeNull();
-    const grid = screen.getByRole('dialog', { name: /Company Tools/i })
-      .querySelector('[data-hbc-ui="homepage-launcher-drawer-grid"]');
-    expect(grid).not.toBeNull();
-    const titles = Array.from(grid!.querySelectorAll('a[data-hbc-ui="homepage-launcher-tile"]'))
+    const rail = screen
+      .getByRole('dialog', { name: /Company Tools/i })
+      .querySelector('[data-hbc-ui="homepage-launcher-drawer-rail"]');
+    expect(rail).not.toBeNull();
+    const titles = Array.from(rail!.querySelectorAll('a[data-hbc-ui="homepage-launcher-tile"]'))
       .map((node) => node.getAttribute('data-hbc-launcher-tile-id'));
     // drawer includes primary + overflow, sorted alphabetically by title:
     // "Approve Budget" (a-approve), "Approve RFI" (approve-rfi),
     // "QA Checklist" (z-qa), "Sign Change Order" (b-approve).
     expect(titles).toEqual(['a-approve', 'approve-rfi', 'z-qa', 'b-approve']);
+  });
+
+  it('renders a single centered horizontal drawer rail with governed overflow markers', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={TILES.slice(0, 2)}
+        overflow={TILES.slice(2)}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const dialog = screen.getByRole('dialog', { name: /Company Tools/i });
+    const railRoot = dialog.querySelector('[data-hbc-ui="homepage-launcher-drawer-rail-root"]');
+    const railViewport = dialog.querySelector('[data-hbc-ui="homepage-launcher-drawer-rail-viewport"]');
+    const rail = dialog.querySelector('[data-hbc-ui="homepage-launcher-drawer-rail"]');
+    const overflowHint = dialog.querySelector('[data-hbc-ui="homepage-launcher-drawer-overflow-hint"]');
+    expect(railRoot).not.toBeNull();
+    expect(railViewport).not.toBeNull();
+    expect(railViewport?.getAttribute('tabindex')).toBe('0');
+    expect(rail).not.toBeNull();
+    expect(rail?.getAttribute('role')).toBe('list');
+    expect(overflowHint).not.toBeNull();
   });
 
   it('uses visible overflow title as truncation-rescue tooltip text', () => {

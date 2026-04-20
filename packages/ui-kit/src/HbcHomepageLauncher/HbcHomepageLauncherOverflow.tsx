@@ -11,6 +11,7 @@ import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ChevronDown, Layers, X } from 'lucide-react';
+import * as ScrollArea from '@radix-ui/react-scroll-area';
 import {
   useFloating,
   useClick,
@@ -45,11 +46,15 @@ function DrawerOverflow({
   label: string;
   className?: string;
 }): React.JSX.Element {
+  const supportsScrollArea = typeof ResizeObserver !== 'undefined';
   const [open, setOpen] = React.useState(false);
   const prefersReducedMotion = useReducedMotion();
   const dialogId = React.useId();
   const titleId = React.useId();
+  const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const sortedItems = React.useMemo(() => sortTilesAlphabetically(items), [items]);
+  const [hasHorizontalOverflow, setHasHorizontalOverflow] = React.useState(false);
+  const [canScrollForward, setCanScrollForward] = React.useState(false);
   const { refs, context } = useFloating({ open, onOpenChange: setOpen });
 
   const click = useClick(context);
@@ -57,6 +62,48 @@ function DrawerOverflow({
   const role = useRole(context, { role: 'dialog' });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
   const closeSheet = React.useCallback(() => setOpen(false), []);
+  const updateOverflowState = React.useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const maxScrollLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    const hasOverflow = maxScrollLeft > 2;
+    const hasMoreForward = viewport.scrollLeft < maxScrollLeft - 2;
+    setHasHorizontalOverflow(hasOverflow);
+    setCanScrollForward(hasOverflow && hasMoreForward);
+  }, []);
+  const handleViewportKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+      event.preventDefault();
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      const step = Math.max(48, viewport.clientWidth * 0.3);
+      viewport.scrollBy({ left: step * direction, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      updateOverflowState();
+    },
+    [prefersReducedMotion, updateOverflowState],
+  );
+
+  React.useEffect(() => {
+    if (!supportsScrollArea) return;
+    if (!open) {
+      setHasHorizontalOverflow(false);
+      setCanScrollForward(false);
+      return;
+    }
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    updateOverflowState();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateOverflowState);
+      return () => window.removeEventListener('resize', updateOverflowState);
+    }
+    const resizeObserver = new ResizeObserver(() => updateOverflowState());
+    resizeObserver.observe(viewport);
+    return () => resizeObserver.disconnect();
+  }, [open, sortedItems.length, supportsScrollArea, updateOverflowState]);
+
   const surfaceTransition = prefersReducedMotion
     ? { duration: 0 }
     : { duration: 0.26, ease: 'easeOut' as const };
@@ -160,19 +207,87 @@ function DrawerOverflow({
                     data-hbc-overflow-category-key="company-tools"
                     data-hbc-overflow-category-size={sortedItems.length}
                   >
-                    <div
-                      className={styles.drawerTileGrid}
-                      data-hbc-ui="homepage-launcher-drawer-grid"
+                    {supportsScrollArea ? (
+                      <ScrollArea.Root
+                        className={styles.drawerRailRoot}
+                        type="auto"
+                        data-hbc-ui="homepage-launcher-drawer-rail-root"
+                      >
+                        <ScrollArea.Viewport
+                          ref={viewportRef}
+                          className={styles.drawerRailViewport}
+                          data-hbc-ui="homepage-launcher-drawer-rail-viewport"
+                          onScroll={updateOverflowState}
+                          onKeyDown={handleViewportKeyDown}
+                          tabIndex={0}
+                          aria-label="Company tools row"
+                        >
+                          <div
+                            className={styles.drawerTileRail}
+                            data-hbc-ui="homepage-launcher-drawer-rail"
+                            data-hbc-launcher-drawer-overflow={hasHorizontalOverflow ? 'true' : 'false'}
+                            role="list"
+                            aria-label="Company Tools"
+                          >
+                            {sortedItems.map((tile) => (
+                              <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
+                                <HbcHomepageLauncherTile
+                                  tile={tile}
+                                  family="drawer"
+                                  className={styles.drawerTile}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea.Viewport>
+                        <ScrollArea.Scrollbar
+                          className={styles.drawerRailScrollbar}
+                          orientation="horizontal"
+                        >
+                          <ScrollArea.Thumb className={styles.drawerRailScrollbarThumb} />
+                        </ScrollArea.Scrollbar>
+                      </ScrollArea.Root>
+                    ) : (
+                      <div
+                        className={styles.drawerRailRoot}
+                        data-hbc-ui="homepage-launcher-drawer-rail-root"
+                      >
+                        <div
+                          ref={viewportRef}
+                          className={styles.drawerRailViewport}
+                          data-hbc-ui="homepage-launcher-drawer-rail-viewport"
+                          onScroll={updateOverflowState}
+                          onKeyDown={handleViewportKeyDown}
+                          tabIndex={0}
+                          aria-label="Company tools row"
+                        >
+                          <div
+                            className={styles.drawerTileRail}
+                            data-hbc-ui="homepage-launcher-drawer-rail"
+                            data-hbc-launcher-drawer-overflow={hasHorizontalOverflow ? 'true' : 'false'}
+                            role="list"
+                            aria-label="Company Tools"
+                          >
+                            {sortedItems.map((tile) => (
+                              <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
+                                <HbcHomepageLauncherTile
+                                  tile={tile}
+                                  family="drawer"
+                                  className={styles.drawerTile}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <p
+                      className={styles.drawerOverflowHint}
+                      data-hbc-ui="homepage-launcher-drawer-overflow-hint"
+                      data-hbc-launcher-drawer-overflow-active={canScrollForward ? 'true' : 'false'}
                     >
-                      {sortedItems.map((tile) => (
-                        <HbcHomepageLauncherTile
-                          key={tile.id}
-                          tile={tile}
-                          family="drawer"
-                          className={styles.drawerTile}
-                        />
-                      ))}
-                    </div>
+                      {canScrollForward ? 'Scroll to view more company tools' : 'All tools in view'}
+                    </p>
                   </div>
                 </motion.div>
               </div>
