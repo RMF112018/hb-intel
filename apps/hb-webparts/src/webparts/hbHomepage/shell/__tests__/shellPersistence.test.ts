@@ -432,11 +432,19 @@ describe('GOVERNANCE_BOUNDARY', () => {
     const sa = GOVERNANCE_BOUNDARY.systemAuthored;
     expect(sa.protectedEntryStateRules).toContain('phoneForceSingleColumn');
     expect(sa.protectedEntryStateRules).toContain('firstLaneMustBeginOnFirstView');
+    expect(sa.protectedEntryStateRules).toContain('protectedRowCompositionLocked');
     // Wave-01 Prompt-01 retired the PCP↔Kudos restriction and narrowed the
     // protected semantics to the three band roles live in the default preset.
     expect(sa.prohibitedPairings).toEqual([]);
     expect(sa.protectedBandSemantics).toHaveLength(3);
     expect(sa.maxDominantPerBand).toBe(1);
+    // Wave-01 Prompt-03: the three flagship rows are now code-governed.
+    expect(sa.protectedRowPairings).toHaveLength(3);
+    expect(sa.protectedRowPairings.map((p) => p.rowKey)).toEqual([
+      'row-1',
+      'row-2',
+      'row-3',
+    ]);
   });
 
   it('documents configurable decisions', () => {

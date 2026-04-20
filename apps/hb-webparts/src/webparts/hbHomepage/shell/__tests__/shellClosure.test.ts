@@ -59,6 +59,17 @@ describe('shell closure — protected-rule presence', () => {
     expect(SHELL_PROTECTED_DECISIONS.prohibitedPairings).toEqual([]);
   });
 
+  it('SHELL_PROTECTED_DECISIONS locks the three flagship row pairings', () => {
+    const pairings = SHELL_PROTECTED_DECISIONS.protectedRowPairings;
+    expect(pairings).toHaveLength(3);
+    expect(pairings.map((p) => p.rowKey)).toEqual(['row-1', 'row-2', 'row-3']);
+    expect(pairings.map((p) => p.bandSemanticRole)).toEqual([
+      'operational-spotlight',
+      'communications-newsroom',
+      'communications-editorial',
+    ]);
+  });
+
   it('protected entry-stack rules and configurable references are disjoint (closure invariant)', () => {
     const protectedKeys = new Set(Object.keys(PROTECTED_ENTRY_STACK_RULES));
     for (const k of Object.keys(CONFIGURABLE_ENTRY_STACK_REFERENCES)) {

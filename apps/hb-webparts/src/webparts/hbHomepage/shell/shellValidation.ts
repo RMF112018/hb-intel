@@ -5,9 +5,11 @@ import { getBandRecipeRule } from './bandRecipes.js';
 import { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
 import { isProminenceAllowed } from './slotComfortResolver.js';
 import { ModuleConfigSlicesSchema, ShellLayoutInputSchema, ShellPresetSchema } from './shellSchema.js';
+import { effectiveBandOrientation } from './shellTypes.js';
 import type {
   ModuleConfigSlices,
   OccupantId,
+  ProtectedRowPairing,
   ShellBand,
   ShellDiagnostic,
   ShellLayoutInput,
@@ -22,6 +24,67 @@ function diagnostic(
   message: string,
 ): ShellDiagnostic {
   return { severity, code, message };
+}
+
+/**
+ * Wave-01 Prompt-03: Evaluate a preset against the locked three-row
+ * composition governance and return a diagnostic stream. Exported so
+ * tooling can run the check independently of the full parse pipeline.
+ *
+ * Diagnostics emitted:
+ *   - `PROTECTED_ROW_PAIRING_MISSING` (warning) — no band in the preset
+ *     carries the target row's `bandSemanticRole`.
+ *   - `PROTECTED_ROW_PAIRING_DRIFT` (warning) — a band with the target
+ *     `bandSemanticRole` exists but the primary / secondary occupant
+ *     identities don't match the target.
+ *   - `PROTECTED_ROW_ORIENTATION_DRIFT` (info) — band matches on occupants
+ *     but declares a different orientation.
+ */
+export function validateProtectedRowPairings(
+  preset: ShellPreset,
+  pairings: readonly ProtectedRowPairing[],
+): readonly ShellDiagnostic[] {
+  const out: ShellDiagnostic[] = [];
+  for (const target of pairings) {
+    const band = preset.bands.find((b) => b.semanticRole === target.bandSemanticRole);
+    if (!band) {
+      out.push(
+        diagnostic(
+          'warning',
+          'PROTECTED_ROW_PAIRING_MISSING',
+          `Protected row "${target.rowKey}" expects band semantic "${target.bandSemanticRole}" but preset "${preset.id}" does not declare one.`,
+        ),
+      );
+      continue;
+    }
+
+    const primarySlot = band.slots.find((s) => s.role === 'primary' && s.occupantId !== null);
+    const secondarySlot = band.slots.find((s) => s.role === 'secondary' && s.occupantId !== null);
+    const primaryId = primarySlot?.occupantId ?? null;
+    const secondaryId = secondarySlot?.occupantId ?? null;
+
+    if (primaryId !== target.primaryOccupantId || secondaryId !== target.secondaryOccupantId) {
+      out.push(
+        diagnostic(
+          'warning',
+          'PROTECTED_ROW_PAIRING_DRIFT',
+          `Protected row "${target.rowKey}" expects primary="${target.primaryOccupantId}" secondary="${target.secondaryOccupantId}" in band "${band.id}" but found primary="${primaryId ?? 'none'}" secondary="${secondaryId ?? 'none'}".`,
+        ),
+      );
+      continue;
+    }
+
+    if (effectiveBandOrientation(band) !== target.orientation) {
+      out.push(
+        diagnostic(
+          'info',
+          'PROTECTED_ROW_ORIENTATION_DRIFT',
+          `Protected row "${target.rowKey}" expects orientation "${target.orientation}" but band "${band.id}" declares "${effectiveBandOrientation(band)}".`,
+        ),
+      );
+    }
+  }
+  return out;
 }
 
 function isValidOccupantId(id: string): id is OccupantId {
@@ -214,6 +277,15 @@ function validatePreset(
       );
     }
   }
+
+  // Wave-01 Prompt-03: first-class governance on the three locked rows.
+  // Drift surfaces as diagnostics (not parse errors) so authored presets
+  // still render while signaling the divergence for review.
+  const rowDiagnostics = validateProtectedRowPairings(
+    { ...preset, bands: validatedBands },
+    SHELL_PROTECTED_DECISIONS.protectedRowPairings,
+  );
+  for (const d of rowDiagnostics) diagnostics.push(d);
 
   const canonicalDiagnostics = validatePresetCanonicalSemantics({
     ...preset,

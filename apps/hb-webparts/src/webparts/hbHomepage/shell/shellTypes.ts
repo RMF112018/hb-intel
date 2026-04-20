@@ -117,6 +117,17 @@ export interface VisibilityEligibility {
   readonly hideableByMaintainer: boolean;
 }
 
+/**
+ * Inspectable anchor metadata: which target row and slot this occupant
+ * is authored to occupy under the locked three-row composition. Present
+ * on every active occupant after Wave-01 Prompt-03. Informational — the
+ * runtime enforcement is `SHELL_PROTECTED_DECISIONS.protectedRowPairings`.
+ */
+export interface OccupantLockedRow {
+  readonly bandSemanticRole: BandSemanticRole;
+  readonly role: SlotRole;
+}
+
 export interface OccupantDescriptor {
   readonly id: OccupantId;
   readonly status: OccupantStatus;
@@ -134,6 +145,9 @@ export interface OccupantDescriptor {
   readonly reorderDomain: ReorderDomain;
   readonly visibilityEligibility: VisibilityEligibility;
   readonly persistedPolicyKeys: readonly string[];
+  /** Target-row anchor metadata. Optional for back-compat with synthetic
+   *  test descriptors, but every production occupant publishes one. */
+  readonly lockedToRow?: OccupantLockedRow;
 }
 
 // ---------------------------------------------------------------------------
@@ -175,11 +189,25 @@ export interface ShellEntryState {
 // Protected decisions
 // ---------------------------------------------------------------------------
 
+/**
+ * A code-governed row pairing. Captures the target composition for one
+ * of the three flagship rows below the launcher so validation can catch
+ * silent drift (wrong occupants, wrong handedness, missing row).
+ */
+export interface ProtectedRowPairing {
+  readonly rowKey: 'row-1' | 'row-2' | 'row-3';
+  readonly bandSemanticRole: BandSemanticRole;
+  readonly primaryOccupantId: OccupantId;
+  readonly secondaryOccupantId: OccupantId;
+  readonly orientation: BandOrientation;
+}
+
 export interface ShellProtectedDecisions {
   readonly postHeroBoundary: true;
   readonly maxDominantPerBand: number;
   readonly prohibitedPairings: ReadonlyArray<readonly [OccupantId, OccupantId]>;
   readonly protectedBandSemantics: readonly BandSemanticRole[];
+  readonly protectedRowPairings: readonly ProtectedRowPairing[];
 }
 
 // ---------------------------------------------------------------------------

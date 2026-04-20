@@ -42,6 +42,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     reorderDomain: 'within-compatible-bands',
     visibilityEligibility: LOCKED_VISIBILITY,
     persistedPolicyKeys: ['limitedReorderWithinCompatibleBands'],
+    lockedToRow: { bandSemanticRole: 'communications-newsroom', role: 'primary' },
   },
   {
     id: 'leadership-message',
@@ -72,6 +73,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     reorderDomain: 'within-compatible-bands',
     visibilityEligibility: LOCKED_VISIBILITY,
     persistedPolicyKeys: ['limitedReorderWithinCompatibleBands'],
+    lockedToRow: { bandSemanticRole: 'communications-editorial', role: 'primary' },
   },
   {
     id: 'project-portfolio-spotlight',
@@ -102,6 +104,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     reorderDomain: 'locked',
     visibilityEligibility: LOCKED_VISIBILITY,
     persistedPolicyKeys: [],
+    lockedToRow: { bandSemanticRole: 'operational-spotlight', role: 'primary' },
   },
   {
     id: 'people-culture-public',
@@ -132,6 +135,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     reorderDomain: 'locked',
     visibilityEligibility: LOCKED_VISIBILITY,
     persistedPolicyKeys: [],
+    lockedToRow: { bandSemanticRole: 'communications-editorial', role: 'secondary' },
   },
   {
     id: 'hb-kudos',
@@ -162,6 +166,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     reorderDomain: 'locked',
     visibilityEligibility: LOCKED_VISIBILITY,
     persistedPolicyKeys: [],
+    lockedToRow: { bandSemanticRole: 'operational-spotlight', role: 'secondary' },
   },
   {
     id: 'safety-field-excellence',
@@ -192,6 +197,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     reorderDomain: 'within-band',
     visibilityEligibility: LOCKED_VISIBILITY,
     persistedPolicyKeys: [],
+    lockedToRow: { bandSemanticRole: 'communications-newsroom', role: 'secondary' },
   },
 ] as const;
 

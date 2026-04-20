@@ -35,21 +35,47 @@ export const SHELL_PROTECTED_DECISIONS: ShellProtectedDecisions = {
   maxDominantPerBand: 1,
 
   // Wave-01 Prompt-01 retired the People & Culture Public ↔ HB Kudos
-  // restriction. The locked three-row target does not pair them, and the
+  // restriction. The locked three-row target does not pair them and the
   // retained restriction would otherwise constrain future preset authoring
-  // without a current rationale. Prompt-03 owns the full pairing-
-  // restriction rebaseline.
+  // without a current rationale.
   prohibitedPairings: [],
 
-  // Wave-01 Prompt-01 narrows the protected-semantics list to the three
-  // band semantics present in the locked default three-row composition.
+  // Protected band semantics for the locked three-row composition.
   // `people-culture` and `recognition` are retired from protection because
   // their standalone `stacked-full` bands are gone from the default preset.
-  // Prompt-03 owns the full protected-decisions rebaseline.
   protectedBandSemantics: [
     'operational-spotlight',
     'communications-newsroom',
     'communications-editorial',
+  ],
+
+  // Wave-01 Prompt-03: first-class governance lock on the three flagship
+  // rows. Validation uses this list to emit drift diagnostics when a
+  // preset's expected band semantic is missing, when the primary /
+  // secondary occupants don't match the target, or when a band's declared
+  // orientation diverges from the target handedness.
+  protectedRowPairings: [
+    {
+      rowKey: 'row-1',
+      bandSemanticRole: 'operational-spotlight',
+      primaryOccupantId: 'project-portfolio-spotlight',
+      secondaryOccupantId: 'hb-kudos',
+      orientation: 'left-dominant',
+    },
+    {
+      rowKey: 'row-2',
+      bandSemanticRole: 'communications-newsroom',
+      primaryOccupantId: 'company-pulse',
+      secondaryOccupantId: 'safety-field-excellence',
+      orientation: 'right-dominant',
+    },
+    {
+      rowKey: 'row-3',
+      bandSemanticRole: 'communications-editorial',
+      primaryOccupantId: 'leadership-message',
+      secondaryOccupantId: 'people-culture-public',
+      orientation: 'left-dominant',
+    },
   ],
 } as const;
 
@@ -67,6 +93,10 @@ export const PROTECTED_ENTRY_STATE_RULES = {
   shortHeightConstrainedCompactBanner: true,
   firstLaneMustBeginOnFirstView: true,
   recognitionCeilingContextual: true,
+  /** Wave-01 Prompt-03 invariant — the three flagship rows are
+   *  code-governed and cannot be rearranged via persisted state. Drift
+   *  is surfaced through shell diagnostics, not silently normalized. */
+  protectedRowCompositionLocked: true,
 } as const;
 
 /**

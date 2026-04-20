@@ -489,6 +489,7 @@ export const GOVERNANCE_BOUNDARY = {
     protectedEntryStateRules: Object.keys(PROTECTED_ENTRY_STATE_RULES),
     prohibitedPairings: SHELL_PROTECTED_DECISIONS.prohibitedPairings,
     protectedBandSemantics: SHELL_PROTECTED_DECISIONS.protectedBandSemantics,
+    protectedRowPairings: SHELL_PROTECTED_DECISIONS.protectedRowPairings,
     maxDominantPerBand: SHELL_PROTECTED_DECISIONS.maxDominantPerBand,
     prominenceCeilings: 'Occupant prominence ceilings are code-governed by the occupant registry',
     heroHeightBudgets: 'Entry-stack hero height budgets are code-governed by entryStackPolicy.ts',
