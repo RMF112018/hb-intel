@@ -1040,6 +1040,103 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   HISTORY DISCLOSURE — governed "past spotlights" reveal
+   ═══════════════════════════════════════════════════════════════
+   The supporting rail is wrapped in an explicit disclosure so
+   compact and minimal modes can keep history collapsed by default.
+   When expanded, the rail renders exactly as below — numbered
+   editorial identity preserved.
+*/
+
+.history {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.historyDisclosure {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #225391;
+  background: rgba(34, 83, 145, 0.05);
+  border: 1px solid rgba(34, 83, 145, 0.18);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 40px;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.historyDisclosure:hover {
+  background: rgba(34, 83, 145, 0.1);
+  border-color: rgba(34, 83, 145, 0.32);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 83, 145, 0.12);
+}
+
+.historyDisclosure:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .historyDisclosure,
+  .historyDisclosure:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+.historyDisclosureLabel {
+  font-weight: 800;
+}
+
+.historyDisclosureChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 0.75rem;
+  line-height: 1;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform: rotate(0deg);
+}
+
+.historyDisclosureChevronOpen {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .historyDisclosureChevron,
+  .historyDisclosureChevronOpen {
+    transition: none !important;
+  }
+}
+
+.historyPanel[hidden] {
+  display: none;
+}
+
+/* Zero out the rail's own top gap when mounted inside the history
+   panel — the `.history` wrapper already owns vertical rhythm. */
+.historyPanel > .rail {
+  margin-top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    SUPPORTING RAIL
    ═══════════════════════════════════════════════════════════════ */
 

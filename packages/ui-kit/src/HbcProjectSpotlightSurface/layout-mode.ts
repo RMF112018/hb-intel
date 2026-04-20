@@ -55,6 +55,14 @@ export interface SpotlightLayoutVisibility {
   readonly historyOpenByDefault: boolean;
   readonly mediaHeight: 'tall' | 'standard' | 'reduced' | 'compressed';
   readonly showRail: boolean;
+  /**
+   * Whether the supporting rail ("past spotlights" history) is expanded
+   * by default when it is present. The rail is always reached through
+   * an explicit disclosure; this flag only sets the initial posture so
+   * compact and minimal modes do not let history compete with the
+   * featured spotlight on first paint.
+   */
+  readonly railOpenByDefault: boolean;
   readonly showInlineMeta: boolean;
   readonly showHeadline: boolean;
   readonly summaryLineClamp: number;
@@ -77,6 +85,7 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     historyOpenByDefault: true,
     mediaHeight: 'tall',
     showRail: true,
+    railOpenByDefault: true,
     showInlineMeta: true,
     showHeadline: true,
     summaryLineClamp: 4,
@@ -89,6 +98,7 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     historyOpenByDefault: true,
     mediaHeight: 'standard',
     showRail: true,
+    railOpenByDefault: true,
     showInlineMeta: true,
     showHeadline: true,
     summaryLineClamp: 3,
@@ -101,6 +111,7 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     historyOpenByDefault: true,
     mediaHeight: 'reduced',
     showRail: true,
+    railOpenByDefault: false,
     showInlineMeta: false,
     showHeadline: true,
     summaryLineClamp: 2,
@@ -112,7 +123,8 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     detailsOpenByDefault: false,
     historyOpenByDefault: false,
     mediaHeight: 'compressed',
-    showRail: false,
+    showRail: true,
+    railOpenByDefault: false,
     showInlineMeta: false,
     showHeadline: false,
     summaryLineClamp: 2,

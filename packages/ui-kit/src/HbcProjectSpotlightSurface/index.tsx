@@ -807,6 +807,94 @@ function SupportingRail({
 }
 
 // ---------------------------------------------------------------------------
+// History disclosure — governed "past spotlights" reveal
+// ---------------------------------------------------------------------------
+
+interface HistoryDisclosureProps {
+  items: ProjectSpotlightRailItem[];
+  label: string;
+  allProjectsLabel?: string;
+  allProjectsUrl?: string;
+  reducedMotion: boolean;
+  openByDefault: boolean;
+  mode: SpotlightLayoutMode;
+}
+
+/**
+ * Governed disclosure shell around the supporting rail ("past
+ * spotlights" / history). The rail is always reached through an
+ * explicit keyboard- and touch-safe control — never hover. Compact
+ * and minimal modes close history by default so it cannot compete
+ * with the featured spotlight on first paint. Wide and medium open
+ * by default to preserve premium editorial density.
+ *
+ * When expanded, the rail renders exactly as the standalone
+ * `SupportingRail` below: numbered editorial index, hover-lift,
+ * bordered footer CTA. The disclosure adds no drift to rail styling.
+ */
+function HistoryDisclosure({
+  items,
+  label,
+  allProjectsLabel,
+  allProjectsUrl,
+  reducedMotion,
+  openByDefault,
+  mode,
+}: HistoryDisclosureProps): React.JSX.Element {
+  const panelId = React.useId();
+  const [open, setOpen] = React.useState(openByDefault);
+  React.useEffect(() => {
+    setOpen(openByDefault);
+  }, [openByDefault, mode]);
+
+  const count = items.length;
+  const closedLabel = `Show past spotlights (${count})`;
+  const openLabel = 'Hide past spotlights';
+
+  return (
+    <div className={styles.history} data-history-open={open ? 'true' : 'false'}>
+      <button
+        type="button"
+        className={styles.historyDisclosure}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-controls={panelId}
+      >
+        <span className={styles.historyDisclosureLabel}>
+          {open ? openLabel : closedLabel}
+        </span>
+        <span
+          className={clsx(
+            styles.historyDisclosureChevron,
+            open && styles.historyDisclosureChevronOpen,
+          )}
+          aria-hidden="true"
+        >
+          ▾
+        </span>
+      </button>
+      <div
+        id={panelId}
+        className={styles.historyPanel}
+        hidden={!open}
+        role="region"
+        aria-label={label}
+      >
+        {open ? (
+          <SupportingRail
+            items={items}
+            label={label}
+            allProjectsLabel={allProjectsLabel}
+            allProjectsUrl={allProjectsUrl}
+            reducedMotion={reducedMotion}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Public component
 // ---------------------------------------------------------------------------
 
@@ -850,13 +938,15 @@ export function HbcProjectSpotlightSurface({
             visibility={visibility}
           />
         </div>
-        {visibility.showRail ? (
-          <SupportingRail
+        {visibility.showRail && model.secondary.length > 0 ? (
+          <HistoryDisclosure
             items={model.secondary}
             label={railLabel}
             allProjectsLabel={model.allProjectsLabel}
             allProjectsUrl={model.allProjectsUrl}
             reducedMotion={reducedMotion}
+            openByDefault={visibility.railOpenByDefault}
+            mode={mode}
           />
         ) : null}
       </div>
