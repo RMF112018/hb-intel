@@ -56,12 +56,12 @@ export const SHELL_ENTRY_STATES: readonly ShellEntryState[] = [
   },
   {
     id: 'tablet-landscape',
-    label: 'Tablet landscape guided',
+    label: 'Tablet landscape guided (paired)',
     minWidth: 980,
     maxWidth: 1179,
-    firstLaneColumns: 1,
-    firstLanePairingAllowed: false,
-    dominanceRule: 'single',
+    firstLaneColumns: 2,
+    firstLanePairingAllowed: true,
+    dominanceRule: 'left-dominant',
   },
   {
     id: 'tablet-portrait-large',

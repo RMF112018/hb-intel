@@ -134,9 +134,13 @@ describe('Phase-09 closure — Prompt-03 hosted-surface shell-fit contracts', ()
   });
 
   it('constrained matrix cases demonstrate contract-driven nested mode degradation', () => {
+    // After Wave-01 Prompt-05 lowered Kudos / Safety / PCP
+    // `shellFit.narrowestStableShellWidth` to 300, the summary-collapsed
+    // 1.15× window is ~345. Narrower cases — here `below-narrowest-fallback`
+    // at 280×700 — exercise the Kudos summary-collapsed fallback.
     const matrix = runShellHarnessMatrix();
     const constrained = matrix.find(
-      (m) => m.matrixCase.label === 'phone-portrait (390x844)',
+      (m) => m.matrixCase.label === 'below-narrowest-fallback',
     );
     const renderModes = constrained?.proof.bands.flatMap((b) => b.slots.map((s) => s.renderMode));
     expect(renderModes).toBeDefined();
@@ -287,8 +291,9 @@ describe('Phase-05 closure — reflow-safe constrained-state proof', () => {
   // to the state's own band and must never pair the entry band.
   const matrix = runShellHarnessMatrix();
   it('no constrained case pairs the entry band illegally', () => {
+    // Wave-01 Prompt-05 promoted `tablet-landscape` to a paired tier.
+    // Constrained cases are tablet-portrait-large and below.
     const constrainedIds = new Set([
-      'tablet-landscape',
       'tablet-portrait-large',
       'tablet-portrait',
       'phone-portrait',

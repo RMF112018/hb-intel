@@ -217,14 +217,14 @@ export const SHELL_BREAKPOINT_MATRIX: readonly ShellBreakpointMatrixCase[] = [
     width: 1150,
     height: 850,
     expectedEntryStateId: 'tablet-landscape',
-    expectedFirstLanePairing: false,
+    expectedFirstLanePairing: true,
   },
   {
     label: 'tablet-landscape-medium',
     width: 1000,
     height: 800,
     expectedEntryStateId: 'tablet-landscape',
-    expectedFirstLanePairing: false,
+    expectedFirstLanePairing: true,
   },
   {
     label: 'tablet-portrait-large',

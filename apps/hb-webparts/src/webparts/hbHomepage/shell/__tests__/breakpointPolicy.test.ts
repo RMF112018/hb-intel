@@ -23,11 +23,12 @@ describe('resolveEntryState', () => {
     expect(state.dominanceRule).toBe('left-dominant');
   });
 
-  it('resolves tablet-landscape at 1050px', () => {
+  it('resolves tablet-landscape at 1050px and now allows pairing', () => {
     const state = resolveEntryState({ width: 1050 });
     expect(state.id).toBe('tablet-landscape');
-    expect(state.firstLanePairingAllowed).toBe(false);
-    expect(state.dominanceRule).toBe('single');
+    expect(state.firstLaneColumns).toBe(2);
+    expect(state.firstLanePairingAllowed).toBe(true);
+    expect(state.dominanceRule).toBe('left-dominant');
   });
 
   it('resolves tablet-portrait-large at 900px', () => {
@@ -143,8 +144,8 @@ describe('isFirstLanePairingAllowed', () => {
     expect(isFirstLanePairingAllowed('standard-laptop')).toBe(true);
   });
 
-  it('denies pairing for tablet-landscape', () => {
-    expect(isFirstLanePairingAllowed('tablet-landscape')).toBe(false);
+  it('allows pairing for tablet-landscape', () => {
+    expect(isFirstLanePairingAllowed('tablet-landscape')).toBe(true);
   });
 
   it('denies pairing for tablet-portrait', () => {

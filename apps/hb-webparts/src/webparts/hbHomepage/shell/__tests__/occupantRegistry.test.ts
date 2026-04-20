@@ -107,9 +107,10 @@ describe('pairing restrictions', () => {
 });
 
 describe('narrowest stable paired width', () => {
-  it('people-culture-public cannot pair below 720px due to fit contract guard', () => {
-    expect(canOccupantPairAtWidth('people-culture-public', 600)).toBe(false);
-    expect(canOccupantPairAtWidth('people-culture-public', 720)).toBe(true);
+  it('people-culture-public pairs down to 320px after Wave-01 Prompt-05 fit-contract relaxation', () => {
+    // Minor slot ≈ 327 px at shell 980 (tablet-landscape floor).
+    expect(canOccupantPairAtWidth('people-culture-public', 310)).toBe(false);
+    expect(canOccupantPairAtWidth('people-culture-public', 320)).toBe(true);
   });
 
   it('company-pulse can pair at 520px', () => {

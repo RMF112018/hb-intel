@@ -115,18 +115,21 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     prominenceCeiling: 'anchor',
     firstLaneEligible: false,
     firstLanePromotionRank: 90,
+    // Wave-01 shell-legality contract: paired at tablet-landscape floor
+    // (minor slot ≈ 327 px at 980). Premium visual polish at narrow
+    // widths remains Wave-02 surface work.
     comfort: {
-      minWidth: 600,
+      minWidth: 300,
       preferredWidth: 960,
-      narrowestStablePairedWidth: 640,
-      supportsCompact: false,
+      narrowestStablePairedWidth: 320,
+      supportsCompact: true,
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
     shellFit: {
-      narrowestStableShellWidth: 680,
-      narrowestStablePairedWidth: 720,
-      supportedModes: ['standard'],
+      narrowestStableShellWidth: 300,
+      narrowestStablePairedWidth: 320,
+      supportedModes: ['standard', 'compact'],
       pairedLayoutEligible: true,
       fallbackWhenUnsafe: 'force-stack',
       protectedConstraints: [],
@@ -146,17 +149,19 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     prominenceCeiling: 'contextual',
     firstLaneEligible: false,
     firstLanePromotionRank: 95,
+    // Wave-01 shell-legality contract: paired at tablet-landscape floor
+    // (minor slot ≈ 327 px at 980). Wave-02 owns premium polish.
     comfort: {
-      minWidth: 480,
+      minWidth: 300,
       preferredWidth: 720,
-      narrowestStablePairedWidth: 520,
+      narrowestStablePairedWidth: 320,
       supportsCompact: true,
       supportsStandard: true,
       supportsSummaryCollapse: true,
     },
     shellFit: {
-      narrowestStableShellWidth: 420,
-      narrowestStablePairedWidth: 520,
+      narrowestStableShellWidth: 300,
+      narrowestStablePairedWidth: 320,
       supportedModes: ['standard', 'compact', 'summary-collapsed'],
       pairedLayoutEligible: true,
       fallbackWhenUnsafe: 'force-stack',
@@ -177,17 +182,19 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     prominenceCeiling: 'supporting',
     firstLaneEligible: false,
     firstLanePromotionRank: 80,
+    // Wave-01 shell-legality contract: paired at tablet-landscape floor
+    // (minor slot ≈ 327 px at 980). Wave-02 owns premium polish.
     comfort: {
-      minWidth: 480,
+      minWidth: 300,
       preferredWidth: 720,
-      narrowestStablePairedWidth: 520,
+      narrowestStablePairedWidth: 320,
       supportsCompact: true,
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
     shellFit: {
-      narrowestStableShellWidth: 440,
-      narrowestStablePairedWidth: 520,
+      narrowestStableShellWidth: 300,
+      narrowestStablePairedWidth: 320,
       supportedModes: ['standard', 'compact'],
       pairedLayoutEligible: true,
       fallbackWhenUnsafe: 'force-stack',

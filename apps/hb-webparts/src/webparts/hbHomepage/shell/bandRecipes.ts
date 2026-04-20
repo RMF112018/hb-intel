@@ -19,6 +19,7 @@ export interface ShellBandRecipeRule {
 const WIDE_ENTRY_STATES: readonly ShellEntryStateId[] = [
   'ultrawide-desktop',
   'standard-laptop',
+  'tablet-landscape',
 ];
 
 const MULTI_COLUMN_ENTRY_STATES: readonly ShellEntryStateId[] = [

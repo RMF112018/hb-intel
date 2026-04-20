@@ -120,12 +120,11 @@ describe('shellHarness — matrix coverage', () => {
     }
   });
 
-  it('ultrawide-desktop stays paired while tablet-landscape degrades to stacked first lane', () => {
-    // Wave-01 Prompt-02 tightened the paired ratio to 2:1. With HB Kudos
-    // carrying a 520px narrowest-stable-paired comfort, Row 1 needs a
-    // container ≥ 1560px to honor pairing — standard-laptop widths
-    // (~1300–1512px) now collapse Row 1 until Wave-02 hardens Kudos for
-    // narrow-slot use. Ultrawide remains the clean "paired" proof.
+  it('ultrawide-desktop AND tablet-landscape both pair the entry band (Prompt-05 directive)', () => {
+    // Wave-01 Prompt-05 flipped tablet-landscape to pair-eligible and
+    // lowered minor-slot comfort thresholds so Rows 1-3 legally pair
+    // down to the tablet-landscape floor. Tablet-portrait-large and
+    // below remain stacked.
     const outcomes = runShellConformanceMatrix();
     const ultrawide = outcomes.find(
       (o) => o.matrixCase.label === 'ultrawide-desktop (1920x1080)',
@@ -133,14 +132,21 @@ describe('shellHarness — matrix coverage', () => {
     const tabletLandscape = outcomes.find(
       (o) => o.matrixCase.label === 'tablet-landscape-large',
     );
+    const tabletPortraitLarge = outcomes.find(
+      (o) => o.matrixCase.label === 'tablet-portrait-large',
+    );
 
     expect(ultrawide?.conformance.entryState.id).toBe('ultrawide-desktop');
     expect(ultrawide?.conformance.bands[0].columns).toBe(2);
     expect(ultrawide?.conformance.bands[0].pairingDecision.reason).toBe('paired');
 
     expect(tabletLandscape?.conformance.entryState.id).toBe('tablet-landscape');
-    expect(tabletLandscape?.conformance.bands[0].columns).toBe(1);
-    expect(tabletLandscape?.conformance.bands[0].pairingDecision.reason).toBe(
+    expect(tabletLandscape?.conformance.bands[0].columns).toBe(2);
+    expect(tabletLandscape?.conformance.bands[0].pairingDecision.reason).toBe('paired');
+
+    expect(tabletPortraitLarge?.conformance.entryState.id).toBe('tablet-portrait-large');
+    expect(tabletPortraitLarge?.conformance.bands[0].columns).toBe(1);
+    expect(tabletPortraitLarge?.conformance.bands[0].pairingDecision.reason).toBe(
       'state-denies-pairing',
     );
   });

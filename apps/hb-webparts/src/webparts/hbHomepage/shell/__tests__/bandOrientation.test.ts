@@ -91,10 +91,13 @@ describe('slot-width math honors the Prompt-02 2:1 ratio', () => {
   });
 
   it('still force-stacks when the minor 1/3 slot falls below the occupant narrowest-stable-paired threshold', () => {
-    // At 1500px container the minor slot is ~500px — below PCP's
-    // narrowest-stable-paired width (720). Row 3 must fall back to stack.
-    const entry = getEntryState('standard-laptop')!;
-    const layout = resolveBandLayout(DEFAULT_PRESET.bands[2], entry, false, 1500);
+    // After Wave-01 Prompt-05 relaxed PCP to narrowest-stable-paired 320,
+    // Row 3 stacks when the minor slot drops below that threshold. At
+    // 900px container the minor slot is 300 — below 320 — so Row 3
+    // stacks. (Row 3 is not the entry band, so entry-state pairing gates
+    // do not fire here.)
+    const entry = getEntryState('tablet-portrait-large')!;
+    const layout = resolveBandLayout(DEFAULT_PRESET.bands[2], entry, false, 900);
     expect(layout.columns).toBe(1);
   });
 });

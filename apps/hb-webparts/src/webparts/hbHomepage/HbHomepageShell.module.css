@@ -96,14 +96,21 @@
   grid-template-columns: 1fr;
 }
 
-@container homepage-shell (min-width: 1180px) {
+@container homepage-shell (min-width: 940px) {
   .bandOrientation_left_dominant {
     grid-template-columns: 2fr 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   .bandOrientation_right_dominant {
     grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+  }
+}
+
+@container homepage-shell (min-width: 1180px) {
+  .bandOrientation_left_dominant,
+  .bandOrientation_right_dominant {
     gap: 2rem;
   }
 }
@@ -174,7 +181,7 @@
   grid-column: 1 / -1;
 }
 
-@container homepage-shell (min-width: 1180px) {
+@container homepage-shell (min-width: 940px) {
   /* Left-dominant: major column on the left, minor on the right. */
   .bandOrientation_left_dominant .span_major {
     grid-column: 1 / 2;
@@ -204,7 +211,9 @@
   .bandPaired:not(.bandOrientation_left_dominant):not(.bandOrientation_right_dominant) .span_minor {
     grid-column: 2 / 3;
   }
+}
 
+@container homepage-shell (min-width: 1180px) {
   .bandRecipe_stacked_secondary_strip .slot_secondary,
   .bandRecipe_stacked_secondary_strip .slot_compact {
     max-width: 78ch;

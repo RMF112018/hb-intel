@@ -100,8 +100,8 @@ describe('three-row composition — row order + membership (tier-independent)', 
   });
 });
 
-describe('three-row composition — ultrawide-desktop (highest tier currently reachable)', () => {
-  it('Rows 1 & 2 pair with the expected handedness; Row 3 stacks pending Wave-02', () => {
+describe('three-row composition — ultrawide-desktop (all three rows pair)', () => {
+  it('every band pairs with the expected handedness', () => {
     const { conformance } = buildProof(1800, 1080);
     expect(conformance.bands[0].columns).toBe(2);
     expect(conformance.bands[0].orientation).toBe('left-dominant');
@@ -109,25 +109,24 @@ describe('three-row composition — ultrawide-desktop (highest tier currently re
     expect(conformance.bands[1].columns).toBe(2);
     expect(conformance.bands[1].orientation).toBe('right-dominant');
     expect(conformance.bands[1].pairingDecision.reason).toBe('paired');
-    expect(conformance.bands[2].columns).toBe(1);
-    expect(conformance.bands[2].orientation).toBe('stacked');
+    expect(conformance.bands[2].columns).toBe(2);
+    expect(conformance.bands[2].orientation).toBe('left-dominant');
+    expect(conformance.bands[2].pairingDecision.reason).toBe('paired');
   });
 
-  it('orientationSequence surfaces left-right-stacked; expected paired sequence remains LRL', () => {
+  it('orientationSequence is left-right-left and handedness alternates', () => {
     const { closure } = buildProof(1800, 1080);
     expect(closure.orientationSequence).toEqual([
       'left-dominant',
       'right-dominant',
-      'stacked',
+      'left-dominant',
     ]);
     expect(closure.expectedOrientationSequenceAtPairedTier).toEqual([
       'left-dominant',
       'right-dominant',
       'left-dominant',
     ]);
-    // Full alternation is reachable only once Wave-02 hardens PCP for the
-    // narrow-slot fit — the proof surfaces that explicitly.
-    expect(closure.handednessAlternates).toBe(false);
+    expect(closure.handednessAlternates).toBe(true);
   });
 
   it('minor-slot width math follows the 1/3 contract and Row-1 pairing uses it', () => {
@@ -139,28 +138,28 @@ describe('three-row composition — ultrawide-desktop (highest tier currently re
     const secondary = row1.slots.find((s) => s.slot.columnSpan === 'minor')!;
     expect(row1.columns).toBe(2);
     // primary at 1200 is above PPS preferred 720 → comfortable;
-    // secondary at 600 is above Kudos narrow 520 but below preferred 720
+    // secondary at 600 is above Kudos narrow 320 but below preferred 720
     // → constrained.
     expect(primary.comfort.reason).toBe('comfortable');
     expect(secondary.comfort.reason).toContain('constrained');
   });
 
-  it('closureHolds = false at ultrawide with a stable note pointing at Wave-02 PCP narrow-slot fit', () => {
+  it('closureHolds = true at ultrawide with no closureNotes', () => {
     const { conformance, closure } = buildProof(1800, 1080);
-    expect(closure.closureHolds).toBe(false);
-    expect(closure.pairingResolvedAtTier).toBe(false);
-    expect(closure.closureNotes.join('\n')).toMatch(/Wave-02|narrow-slot fit/);
+    expect(closure.closureHolds).toBe(true);
+    expect(closure.pairingResolvedAtTier).toBe(true);
+    expect(closure.closureNotes).toEqual([]);
     const attrs = toShellConformanceDataAttributes(conformance, { closure });
-    expect(attrs['data-shell-closure-holds']).toBe('false');
+    expect(attrs['data-shell-closure-holds']).toBe('true');
     expect(attrs['data-shell-closure-row-order']).toBe(EXPECTED_ROW_ORDER.join(','));
     expect(attrs['data-shell-band-orientations']).toBe(
-      'left-dominant,right-dominant,stacked',
+      'left-dominant,right-dominant,left-dominant',
     );
   });
 });
 
-describe('three-row composition — standard-laptop (Wave-02 gap surfaced explicitly)', () => {
-  it('row order and membership still hold even when pairing does not', () => {
+describe('three-row composition — standard-laptop (closure holds)', () => {
+  it('row order, membership, and pairing all hold at 1300px', () => {
     const { closure } = buildProof(1300, 900);
     expect(closure.rowOrder).toEqual(EXPECTED_ROW_ORDER);
     expect(closure.rowOrderMatches).toBe(true);
@@ -168,15 +167,38 @@ describe('three-row composition — standard-laptop (Wave-02 gap surfaced explic
     expect(closure.extraOccupants).toEqual([]);
     expect(closure.missingOccupants).toEqual([]);
     expect(closure.driftDiagnosticsSurfaced).toBe(false);
+    expect(closure.pairingResolvedAtTier).toBe(true);
+    expect(closure.handednessAlternates).toBe(true);
   });
 
-  it('closureHolds = false with a stable note pointing at Wave-02 narrow-slot hardening', () => {
+  it('closureHolds = true and the attribute surface reflects it', () => {
     const { conformance, closure } = buildProof(1300, 900);
-    expect(closure.pairingResolvedAtTier).toBe(false);
-    expect(closure.closureHolds).toBe(false);
-    expect(closure.closureNotes.join('\n')).toMatch(/Wave-02|narrow-slot fit/);
+    expect(closure.closureHolds).toBe(true);
+    expect(closure.closureNotes).toEqual([]);
     const attrs = toShellConformanceDataAttributes(conformance, { closure });
-    expect(attrs['data-shell-closure-holds']).toBe('false');
+    expect(attrs['data-shell-closure-holds']).toBe('true');
+    expect(attrs['data-shell-band-orientations']).toBe(
+      'left-dominant,right-dominant,left-dominant',
+    );
+  });
+});
+
+describe('three-row composition — tablet-landscape (Prompt-05 closure)', () => {
+  it('every band pairs at 1050×800 Retina-default CSS viewport', () => {
+    const { conformance, closure } = buildProof(1050, 800);
+    expect(conformance.entryState.id).toBe('tablet-landscape');
+    for (const band of conformance.bands) {
+      expect(band.columns).toBe(2);
+      expect(band.pairingDecision.reason).toBe('paired');
+    }
+    expect(closure.handednessAlternates).toBe(true);
+    expect(closure.closureHolds).toBe(true);
+    expect(closure.closureNotes).toEqual([]);
+    const attrs = toShellConformanceDataAttributes(conformance, { closure });
+    expect(attrs['data-shell-closure-holds']).toBe('true');
+    expect(attrs['data-shell-band-orientations']).toBe(
+      'left-dominant,right-dominant,left-dominant',
+    );
   });
 });
 

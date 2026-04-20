@@ -143,7 +143,10 @@ describe('resolveBandLayout — renderMode', () => {
   });
 
   it('uses summary-collapsed when fit contract allows it on constrained single-column', () => {
-    const result = resolveBandLayout(singleBand, PHONE_STATE, false, 400);
+    // After Wave-01 Prompt-05 lowered HB Kudos `shellFit.narrowestStableShellWidth`
+    // from 420 to 300, the summary-collapsed 1.15× window shifts accordingly
+    // (300 × 1.15 ≈ 345). Use 330 to stay inside the shrunk window.
+    const result = resolveBandLayout(singleBand, PHONE_STATE, false, 330);
     expect(result.slots[0].comfort.renderMode).toBe('summary-collapsed');
   });
 });
