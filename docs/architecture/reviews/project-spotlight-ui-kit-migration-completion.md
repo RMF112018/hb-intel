@@ -222,3 +222,35 @@ typed view-model adapter. Import discipline is preserved
 throughout the new CSS module, and the migration leaves the UI-system
 migration posture materially stronger without introducing any new
 verification failures.
+
+## Addendum — post-migration redesign
+
+This report captures the **initial migration** from local presentation
+to shared `HbcProjectSpotlightSurface`. The surface was subsequently
+redesigned in place; specific claims elsewhere in this document that
+describe "full responsive layout via viewport media queries" or a
+single-column responsive composition are historical and no longer
+reflect current implementation truth.
+
+Current truth:
+
+- Presentation is **mode-governed**. The surface resolves an explicit
+  `SpotlightLayoutMode` (`wide | medium | compact | minimal`) from its
+  own usable container via `ResizeObserver`, and applies a visibility
+  matrix (`packages/ui-kit/src/HbcProjectSpotlightSurface/layout-mode.ts`).
+  Viewport media queries only polish the resolved posture.
+- The featured body is split into **always-visible essentials** and a
+  **details region behind a governed disclosure**; default state is
+  open in wide/medium, closed in compact/minimal.
+- The supporting rail is wrapped in a **history disclosure** with the
+  same open-by-mode defaults.
+- Media scale and vertical rhythm bind to the resolved mode (hero
+  min/max + aspect-ratio caps on wide/medium).
+- Normalized `contentCompleteness` is promoted into the shared
+  contract and trims optional content on thin payloads.
+- The surface module is split into focused seams (see the webpart
+  README's Migration-status section for the file list).
+
+For current, living documentation of behavior, modes, disclosures,
+completeness rules, and story coverage, see the webpart README:
+`apps/hb-webparts/src/webparts/projectPortfolioSpotlight/README.md`.
