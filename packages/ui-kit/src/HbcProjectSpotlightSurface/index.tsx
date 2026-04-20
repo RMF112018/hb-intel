@@ -26,6 +26,26 @@ import {
 import { HbcPremiumCta } from '../HbcPremiumCta/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import styles from './project-spotlight-surface.module.css';
+import {
+  getSpotlightLayoutVisibility,
+  type SpotlightLayoutMode,
+  type SpotlightLayoutVisibility,
+} from './layout-mode.js';
+import { useSpotlightLayoutMode } from './use-spotlight-layout-mode.js';
+
+export {
+  resolveSpotlightLayoutMode,
+  getSpotlightLayoutVisibility,
+  SPOTLIGHT_LAYOUT_VISIBILITY,
+  SPOTLIGHT_LAYOUT_WIDTH_THRESHOLDS,
+  SPOTLIGHT_LAYOUT_HEIGHT_PRESSURE_PX,
+} from './layout-mode.js';
+export type {
+  SpotlightLayoutMode,
+  SpotlightLayoutVisibility,
+  ResolveSpotlightLayoutInput,
+} from './layout-mode.js';
+export { useSpotlightLayoutMode } from './use-spotlight-layout-mode.js';
 
 // ---------------------------------------------------------------------------
 // View-model contract — decoupled from any consumer data shape
@@ -117,6 +137,13 @@ export interface HbcProjectSpotlightSurfaceProps {
   model: ProjectSpotlightSurfaceModel;
   className?: string;
   'aria-label'?: string;
+  /**
+   * Optional layout-mode override. When provided, the surface skips
+   * container measurement and renders in the requested mode verbatim.
+   * Use for stories, snapshot tests, or host environments that need
+   * deterministic posture. Omit for production (self-measuring).
+   */
+  forceMode?: SpotlightLayoutMode;
 }
 
 // ---------------------------------------------------------------------------
@@ -199,6 +226,7 @@ interface FeaturedMediaProps {
   status?: ProjectSpotlightStatus;
   strategicEmphasis?: boolean;
   isStale?: boolean;
+  showOverlayChips: boolean;
 }
 
 function FeaturedMedia({
@@ -207,10 +235,12 @@ function FeaturedMedia({
   status,
   strategicEmphasis,
   isStale,
+  showOverlayChips,
 }: FeaturedMediaProps): React.JSX.Element {
   const [errored, setErrored] = React.useState(false);
   const statusLabel = status?.label;
-  const hasOverlayChips = Boolean(statusLabel || strategicEmphasis || isStale);
+  const hasOverlayChips =
+    showOverlayChips && Boolean(statusLabel || strategicEmphasis || isStale);
 
   return (
     <div className={styles.mediaZone}>
@@ -288,16 +318,33 @@ function RailThumbnail({ image }: RailThumbnailProps): React.JSX.Element {
 
 interface MilestoneStripProps {
   milestones: ProjectSpotlightMilestone[];
+  showProgress: boolean;
+  showList: boolean;
+  detailsOpenByDefault: boolean;
 }
 
-function MilestoneStrip({ milestones }: MilestoneStripProps): React.JSX.Element | null {
+function MilestoneStrip({
+  milestones,
+  showProgress,
+  showList,
+  detailsOpenByDefault,
+}: MilestoneStripProps): React.JSX.Element | null {
+  const [detailsOpen, setDetailsOpen] = React.useState(detailsOpenByDefault);
+  React.useEffect(() => {
+    setDetailsOpen(detailsOpenByDefault);
+  }, [detailsOpenByDefault]);
+
   if (milestones.length === 0) return null;
+  if (!showProgress && !showList) return null;
+
   const completed = milestones.filter((m) => m.completed).length;
   const total = milestones.length;
   const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+  const listVisible = showList && detailsOpen;
+  const listToggleable = showList;
 
   return (
-    <div className={styles.milestones}>
+    <div className={styles.milestones} data-details-open={listVisible ? 'true' : 'false'}>
       <div className={styles.milestonesHeader}>
         <span className={styles.milestonesLabel}>
           <CheckCircle2 size={12} aria-hidden="true" strokeWidth={2.5} />
@@ -307,33 +354,47 @@ function MilestoneStrip({ milestones }: MilestoneStripProps): React.JSX.Element 
           {completed}/{total}  ·  {percent}%
         </span>
       </div>
-      <div className={styles.milestonesBar}>
-        <div
-          className={styles.milestonesBarFill}
-          style={{ width: `${percent}%` }}
-          aria-hidden="true"
-        />
-      </div>
-      <ul className={styles.milestonesList}>
-        {milestones.map((milestone) => (
-          <li
-            key={milestone.id}
-            className={clsx(
-              styles.milestoneItem,
-              milestone.completed && styles.milestoneItemDone,
-            )}
-          >
-            {milestone.completed ? (
-              <span className={styles.milestoneCheck} aria-hidden="true">
-                <Check size={11} strokeWidth={3} />
-              </span>
-            ) : (
-              <span className={styles.milestoneCheckEmpty} aria-hidden="true" />
-            )}
-            <span className={styles.milestoneText}>{milestone.title}</span>
-          </li>
-        ))}
-      </ul>
+      {showProgress ? (
+        <div className={styles.milestonesBar}>
+          <div
+            className={styles.milestonesBarFill}
+            style={{ width: `${percent}%` }}
+            aria-hidden="true"
+          />
+        </div>
+      ) : null}
+      {listVisible ? (
+        <ul className={styles.milestonesList}>
+          {milestones.map((milestone) => (
+            <li
+              key={milestone.id}
+              className={clsx(
+                styles.milestoneItem,
+                milestone.completed && styles.milestoneItemDone,
+              )}
+            >
+              {milestone.completed ? (
+                <span className={styles.milestoneCheck} aria-hidden="true">
+                  <Check size={11} strokeWidth={3} />
+                </span>
+              ) : (
+                <span className={styles.milestoneCheckEmpty} aria-hidden="true" />
+              )}
+              <span className={styles.milestoneText}>{milestone.title}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {listToggleable ? (
+        <button
+          type="button"
+          className={styles.milestonesDisclosure}
+          onClick={() => setDetailsOpen((prev) => !prev)}
+          aria-expanded={listVisible}
+        >
+          {listVisible ? 'Hide milestone details' : 'Show milestone details'}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -540,11 +601,13 @@ function RailTile({ item, index }: RailTileProps): React.JSX.Element {
 interface FeaturedSlotProps {
   featured: ProjectSpotlightFeaturedItem;
   reducedMotion: boolean;
+  visibility: SpotlightLayoutVisibility;
 }
 
 function FeaturedSlot({
   featured,
   reducedMotion,
+  visibility,
 }: FeaturedSlotProps): React.JSX.Element {
   const eyebrowText =
     [featured.sector, featured.location].filter(Boolean).join(' \u00B7 ') ||
@@ -572,22 +635,33 @@ function FeaturedSlot({
         status={featured.status}
         strategicEmphasis={featured.strategicEmphasis}
         isStale={featured.isStale}
+        showOverlayChips={visibility.showInlineMeta}
       />
 
       <div className={styles.featuredContent}>
         <h3 className={styles.featuredTitle}>{featured.title}</h3>
 
-        {featured.headline ? (
+        {visibility.showHeadline && featured.headline ? (
           <p className={styles.featuredHeadline}>{featured.headline}</p>
         ) : null}
 
         {featured.summary ? (
-          <p className={styles.featuredSummary}>{featured.summary}</p>
+          <p
+            className={styles.featuredSummary}
+            style={{ WebkitLineClamp: visibility.summaryLineClamp }}
+          >
+            {featured.summary}
+          </p>
         ) : null}
 
-        <MilestoneStrip milestones={milestones} />
+        <MilestoneStrip
+          milestones={milestones}
+          showProgress={visibility.showMilestoneProgress}
+          showList={visibility.showMilestoneList}
+          detailsOpenByDefault={visibility.detailsOpenByDefault}
+        />
 
-        {featured.freshnessLabel ? (
+        {visibility.historyOpenByDefault && featured.freshnessLabel ? (
           <div className={styles.metaRow}>
             <span className={styles.metaItem}>
               <Calendar
@@ -601,7 +675,9 @@ function FeaturedSlot({
           </div>
         ) : null}
 
-        <TeamStrip members={teamMembers} reducedMotion={reducedMotion} />
+        {visibility.mode !== 'minimal' ? (
+          <TeamStrip members={teamMembers} reducedMotion={reducedMotion} />
+        ) : null}
 
         {featured.cta ? (
           <div className={styles.featuredCta}>
@@ -681,17 +757,23 @@ export function HbcProjectSpotlightSurface({
   model,
   className,
   'aria-label': ariaLabel,
+  forceMode,
 }: HbcProjectSpotlightSurfaceProps): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
   const railLabel = model.railLabel ?? 'More projects';
   const sectionEyebrow = model.sectionEyebrow ?? 'Portfolio';
 
+  const { mode, ref } = useSpotlightLayoutMode({ forceMode });
+  const visibility = getSpotlightLayoutVisibility(mode);
+
   return (
     <section
+      ref={ref as React.RefObject<HTMLElement>}
       aria-label={ariaLabel ?? model.heading}
       className={clsx(styles.root, className)}
       data-hbc-presentation="project-spotlight-surface"
       data-hbc-homepage="project-spotlight"
+      data-layout-mode={mode}
     >
       <Masthead
         heading={model.heading}
@@ -705,15 +787,21 @@ export function HbcProjectSpotlightSurface({
 
       <div className={styles.composition}>
         <div className={styles.featuredWrap}>
-          <FeaturedSlot featured={model.featured} reducedMotion={reducedMotion} />
+          <FeaturedSlot
+            featured={model.featured}
+            reducedMotion={reducedMotion}
+            visibility={visibility}
+          />
         </div>
-        <SupportingRail
-          items={model.secondary}
-          label={railLabel}
-          allProjectsLabel={model.allProjectsLabel}
-          allProjectsUrl={model.allProjectsUrl}
-          reducedMotion={reducedMotion}
-        />
+        {visibility.showRail ? (
+          <SupportingRail
+            items={model.secondary}
+            label={railLabel}
+            allProjectsLabel={model.allProjectsLabel}
+            allProjectsUrl={model.allProjectsUrl}
+            reducedMotion={reducedMotion}
+          />
+        ) : null}
       </div>
 
       <div className={styles.bottomSpacer} aria-hidden="true" />

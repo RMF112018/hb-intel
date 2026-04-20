@@ -152,3 +152,45 @@ export const Mobile: Story = {
     </div>
   ),
 };
+
+// ── Explicit layout-mode stories — visual proof of the mode contract ──
+// These stories bypass container measurement via `forceMode` so reviewers
+// can audit each posture deterministically. In production the surface
+// resolves its mode from its own container; see `layout-mode.ts` for the
+// visibility matrix that drives default content visibility per mode.
+
+export const ModeWide: Story = {
+  name: 'Mode / Wide',
+  render: () => (
+    <div style={wrapStyle}>
+      <HbcProjectSpotlightSurface model={fullModel} forceMode="wide" />
+    </div>
+  ),
+};
+
+export const ModeMedium: Story = {
+  name: 'Mode / Medium',
+  render: () => (
+    <div style={narrowSectionWrapStyle}>
+      <HbcProjectSpotlightSurface model={fullModel} forceMode="medium" />
+    </div>
+  ),
+};
+
+export const ModeCompact: Story = {
+  name: 'Mode / Compact',
+  render: () => (
+    <div style={{ maxWidth: 560 }}>
+      <HbcProjectSpotlightSurface model={fullModel} forceMode="compact" />
+    </div>
+  ),
+};
+
+export const ModeMinimal: Story = {
+  name: 'Mode / Minimal (narrowest stable)',
+  render: () => (
+    <div style={{ maxWidth: 380 }}>
+      <HbcProjectSpotlightSurface model={fullModel} forceMode="minimal" />
+    </div>
+  ),
+};

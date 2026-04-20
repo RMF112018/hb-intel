@@ -69,18 +69,26 @@ items are demoted to the end of the supporting rail.
 
 ## Responsive behavior
 
-Responsive layout is handled entirely by the shared surface family's
-CSS module via viewport media queries. No `useResponsiveTier` hook is
-used by the consumer. The composition is single-column stacked at every
-breakpoint — featured hero first, supporting projects stacked below as
-an editorial "more from the portfolio" block — so the module fits a
-real SharePoint page section cleanly at every width.
+The shared surface is **mode-governed**, not breakpoint-styled. It
+resolves an explicit `SpotlightLayoutMode` from its own usable container
+space (measured via `ResizeObserver`) and then applies a visibility
+matrix that drives which regions are default-visible. CSS media queries
+only polish the resolved posture; they do not select it.
 
-| Breakpoint | Layout |
-|-----------|--------|
-| `< 768px` (mobile) | Featured image stacks above content; rail stacks below featured; team detail panel becomes a fixed bottom sheet. |
-| `768–1199px` (tablet) | Featured image + content still stack as a single column; rail stacks below featured with a bordered editorial container. |
-| `>= 1200px` (desktop) | Single-column stacked composition: featured hero fills the full section width at a slightly tightened scale, supporting rail stacks below as a full-width editorial block with larger 132×88 thumbnails and roomier tile padding; team detail panel becomes a popover. |
+| Mode | Typical container | Hero media | Milestone list | History row | Supporting rail | Overlay chips |
+|------|--------------------|------------|----------------|-------------|-----------------|----------------|
+| `wide`    | ≥ 1040px | tall (380px)      | open by default | inline | visible | visible |
+| `medium`  | 760–1040px | standard (340px)  | open by default | inline | visible | visible |
+| `compact` | 440–760px | reduced (240px)   | disclosure (closed by default, explicit toggle) | inline | visible | hidden |
+| `minimal` | < 440px | compressed (180px) | hidden            | hidden | hidden  | hidden |
+
+`minimal` is the narrowest stable nested mode. A short-but-wide container
+(vertical pressure below ~520px) steps the mode down one tier so the
+surface never renders tall media inside a cramped slot.
+
+Consumers do not select the mode; the Spotlight surface resolves it
+internally. An optional `forceMode` prop exists for stories / snapshot
+tests and is not used by this webpart.
 
 ## Media reliability
 

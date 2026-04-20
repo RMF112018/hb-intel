@@ -277,16 +277,21 @@
   min-height: 260px;
 }
 
-@media (min-width: 768px) {
-  .mediaZone {
-    min-height: 340px;
-  }
+/* Mode-governed hero media postures. The surface resolves its mode from
+   its own usable space (see `layout-mode.ts`) and exposes it as
+   `data-layout-mode` on the root. Media height reads from the
+   resolved posture, not from viewport width. */
+.root[data-layout-mode='wide'] .mediaZone {
+  min-height: 380px;
 }
-
-@media (min-width: 1200px) {
-  .mediaZone {
-    min-height: 380px;
-  }
+.root[data-layout-mode='medium'] .mediaZone {
+  min-height: 340px;
+}
+.root[data-layout-mode='compact'] .mediaZone {
+  min-height: 240px;
+}
+.root[data-layout-mode='minimal'] .mediaZone {
+  min-height: 180px;
 }
 
 .mediaPlaceholder {
@@ -502,6 +507,47 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 58ch;
+}
+
+/* Milestone disclosure toggle — shown in compact/minimal where the
+   milestone list is collapsed by the visibility matrix. Provides an
+   explicit, non-hover path to the same details, keeping the matrix
+   contract honored without hiding critical content behind hover. */
+.milestonesDisclosure {
+  margin-top: 2px;
+  align-self: flex-start;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #225391;
+  background: rgba(34, 83, 145, 0.06);
+  border: 1px solid rgba(34, 83, 145, 0.16);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 32px;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.milestonesDisclosure:hover {
+  background: rgba(34, 83, 145, 0.1);
+  border-color: rgba(34, 83, 145, 0.28);
+}
+
+.milestonesDisclosure:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+/* The disclosure only surfaces when milestoneList is gated off in the
+   matrix (compact / minimal). In wide/medium the button is rendered
+   but hidden — the list is already open. */
+.root[data-layout-mode='wide'] .milestonesDisclosure,
+.root[data-layout-mode='medium'] .milestonesDisclosure {
+  display: none;
 }
 
 .badgeRow {
