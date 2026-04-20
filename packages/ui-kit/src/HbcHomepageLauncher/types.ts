@@ -16,6 +16,7 @@ export type HomepageLauncherOverflowMode = 'sheet';
 export type HomepageLauncherHandheldMode = 'standard' | 'single-entry-all-tools';
 export type HomepageLauncherDrawerSource = 'all-tools';
 export type HomepageLauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
+export type HomepageLauncherOverflowTriggerMode = 'tile' | 'linear-handheld';
 
 export type HomepageLauncherTileVariant =
   | 'primary'
@@ -69,6 +70,7 @@ export interface HbcHomepageLauncherTileProps {
 export interface HbcHomepageLauncherOverflowProps {
   items: HomepageLauncherTileModel[];
   label?: string;
+  triggerMode?: HomepageLauncherOverflowTriggerMode;
   className?: string;
 }
 

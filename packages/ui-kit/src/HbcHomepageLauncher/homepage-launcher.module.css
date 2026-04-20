@@ -22,6 +22,10 @@
   --hbc-hl-visible-tiles: 1;
   --hbc-hl-tile-size: 116px;
   --hbc-hl-icon-size: 48px;
+  --hbc-hl-handheld-trigger-icon-size: 26px;
+  --hbc-hl-handheld-trigger-label-size: 0.75rem;
+  --hbc-hl-handheld-trigger-chevron-size: 12px;
+  --hbc-hl-handheld-trigger-height: 52px;
   --hbc-hl-caption-size: 0.6875rem;
   --hbc-hl-caption-line-height: 1.2;
   --hbc-hl-drawer-pad-x: 32px;
@@ -31,7 +35,7 @@
   --hbc-hl-drawer-max-inline: 1180px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--hbc-hl-text);
 }
@@ -60,7 +64,7 @@
   );
   margin-inline: auto;
   min-width: 0;
-  padding-block: 2px;
+  padding-block: 1px;
 }
 
 /* ---------- TILE CONTRACT ---------- */
@@ -283,6 +287,30 @@
     background 180ms ease;
 }
 
+.overflowTileLinearHandheld {
+  width: 100%;
+  flex: 1 1 100%;
+  height: var(--hbc-hl-handheld-trigger-height);
+  min-height: var(--hbc-hl-handheld-trigger-height);
+  aspect-ratio: auto;
+  grid-template-rows: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 0 16px;
+  row-gap: 0;
+}
+
+.overflowTriggerInlineContent {
+  width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 .overflowTile:hover {
   transform: translateY(-2px);
 }
@@ -330,6 +358,21 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1;
+}
+
+.overflowTriggerCountLinear {
+  position: static;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+.overflowTriggerChevronLinear {
+  width: var(--hbc-hl-handheld-trigger-chevron-size);
+  height: var(--hbc-hl-handheld-trigger-chevron-size);
+  flex-shrink: 0;
 }
 
 .overflowTile > svg:last-of-type {
@@ -540,6 +583,10 @@
     --hbc-hl-drawer-pad-y: 16px;
     --hbc-hl-drawer-rail-gap: 10px;
     --hbc-hl-drawer-scrollbar-size: 7px;
+    --hbc-hl-handheld-trigger-icon-size: 22px;
+    --hbc-hl-handheld-trigger-label-size: 0.6875rem;
+    --hbc-hl-handheld-trigger-chevron-size: 10px;
+    --hbc-hl-handheld-trigger-height: 46px;
   }
 
   .bandScroller {
@@ -651,6 +698,10 @@
     --hbc-hl-caption-line-height: 1.15;
     --hbc-hl-drawer-pad-y: 14px;
     --hbc-hl-drawer-rail-gap: 10px;
+    --hbc-hl-handheld-trigger-icon-size: 21px;
+    --hbc-hl-handheld-trigger-label-size: 0.65625rem;
+    --hbc-hl-handheld-trigger-chevron-size: 10px;
+    --hbc-hl-handheld-trigger-height: 44px;
   }
 
   .tile,
@@ -666,6 +717,37 @@
 
   .sheetSurface { max-height: calc(100vh - 16px); }
   .drawerBody { padding-top: var(--hbc-hl-drawer-pad-y); padding-bottom: var(--hbc-hl-drawer-pad-y); }
+}
+
+.bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] {
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 100%;
+  justify-content: center;
+}
+
+.bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .overflowTile {
+  width: 100%;
+  flex-basis: 100%;
+}
+
+.bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .overflowTileLinearHandheld {
+  width: 100%;
+  flex-basis: 100%;
+}
+
+.bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .triggerIcon {
+  width: var(--hbc-hl-handheld-trigger-icon-size);
+  height: var(--hbc-hl-handheld-trigger-icon-size);
+}
+
+.bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .overflowTriggerLabel {
+  font-size: var(--hbc-hl-handheld-trigger-label-size);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

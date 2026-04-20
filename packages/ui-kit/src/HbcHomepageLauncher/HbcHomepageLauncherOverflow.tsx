@@ -40,10 +40,12 @@ function sortTilesAlphabetically(
 function DrawerOverflow({
   items,
   label,
+  triggerMode = 'tile',
   className,
 }: {
   items: HomepageLauncherTileModel[];
   label: string;
+  triggerMode?: 'tile' | 'linear-handheld';
   className?: string;
 }): React.JSX.Element {
   const supportsScrollArea = typeof ResizeObserver !== 'undefined';
@@ -62,6 +64,7 @@ function DrawerOverflow({
   const role = useRole(context, { role: 'dialog' });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
   const closeSheet = React.useCallback(() => setOpen(false), []);
+  const handheldLinearTrigger = triggerMode === 'linear-handheld';
   const updateOverflowState = React.useCallback(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
@@ -117,6 +120,7 @@ function DrawerOverflow({
         className={clsx(
           launcherTile({ family: 'secondaryOverflowEntry' }),
           styles.overflowTile,
+          handheldLinearTrigger ? styles.overflowTileLinearHandheld : undefined,
           className,
         )}
         data-hbc-ui="homepage-launcher-overflow-trigger"
@@ -126,6 +130,7 @@ function DrawerOverflow({
         data-hbc-homepage-launcher-sheet-content="all-tools"
         data-hbc-launcher-tile-family="row"
         data-hbc-launcher-tile-geometry="icon-forward-square"
+        data-hbc-homepage-launcher-overflow-shape={handheldLinearTrigger ? 'linear-handheld' : 'tile'}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
@@ -135,16 +140,32 @@ function DrawerOverflow({
         {...getReferenceProps()}
       >
         <span
-          className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)}
-          aria-hidden="true"
+          className={clsx(
+            handheldLinearTrigger ? styles.overflowTriggerInlineContent : undefined,
+          )}
         >
-          <Layers strokeWidth={2.2} />
+          <span
+            className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)}
+            aria-hidden="true"
+          >
+            <Layers strokeWidth={2.2} />
+          </span>
+          <span className={styles.overflowTriggerLabel}>{label}</span>
+          <span
+            className={clsx(
+              styles.overflowTriggerCount,
+              handheldLinearTrigger ? styles.overflowTriggerCountLinear : undefined,
+            )}
+            aria-hidden="true"
+          >
+            {items.length}
+          </span>
+          <ChevronDown
+            size={handheldLinearTrigger ? 12 : 14}
+            className={handheldLinearTrigger ? styles.overflowTriggerChevronLinear : undefined}
+            aria-hidden="true"
+          />
         </span>
-        <span className={styles.overflowTriggerLabel}>{label}</span>
-        <span className={styles.overflowTriggerCount} aria-hidden="true">
-          {items.length}
-        </span>
-        <ChevronDown size={14} aria-hidden="true" />
       </motion.button>
       <FloatingPortal>
         <AnimatePresence>
@@ -302,8 +323,11 @@ function DrawerOverflow({
 export function HbcHomepageLauncherOverflow({
   items,
   label = 'More tools',
+  triggerMode = 'tile',
   className,
 }: HbcHomepageLauncherOverflowProps): React.JSX.Element | null {
   if (items.length === 0) return null;
-  return <DrawerOverflow items={items} label={label} className={className} />;
+  return (
+    <DrawerOverflow items={items} label={label} triggerMode={triggerMode} className={className} />
+  );
 }

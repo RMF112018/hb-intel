@@ -110,6 +110,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('data-hbc-launcher-tile-geometry')).toBe('icon-forward-square');
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-shape')).toBe('tile');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     fireEvent.click(trigger);
     const dialog = screen.getByRole('dialog', { name: /Company Tools/i });
@@ -156,6 +157,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-sheet-content')).toBe('all-tools');
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-shape')).toBe('linear-handheld');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
   });
 
@@ -173,6 +175,10 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(root!.getAttribute('data-hbc-homepage-launcher-short-height')).toBe('true');
     expect(root!.getAttribute('data-hbc-homepage-launcher-handheld-mode')).toBe(
       'single-entry-all-tools',
+    );
+    const trigger = screen.getByRole('button', { name: /More tools/i });
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-shape')).toBe(
+      'linear-handheld',
     );
   });
 

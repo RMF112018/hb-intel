@@ -126,6 +126,7 @@ export function HbcHomepageLauncher(
               <HbcHomepageLauncherOverflow
                 items={drawerItems}
                 label={overflowLabel}
+                triggerMode={handheldSingleEntry ? 'linear-handheld' : 'tile'}
               />
             </div>
           ) : null}
