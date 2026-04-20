@@ -6,6 +6,19 @@
  * vertical pressure. This is the authoritative runtime entry into the
  * mode system; `resolveSpotlightLayoutMode` is the pure equivalent
  * for tests and SSR-style deterministic rendering.
+ *
+ * First-paint strategy (Phase 02 Prompt 04):
+ *   1. The fallback default is `'minimal'`, not `'wide'`. Any surface
+ *      that cannot yet be measured reads as the most selective mode so
+ *      narrow containers never emit a visible false-wide first paint.
+ *   2. Measurement runs in `useLayoutEffect`. In client contexts that
+ *      means the synchronous first `getBoundingClientRect` read replaces
+ *      the conservative default before the browser paints — the user
+ *      never sees the `'minimal'` fallback when the container is
+ *      attached and laid out.
+ *   3. `ResizeObserver` is attached in the same layout effect and
+ *      drives subsequent container-aware transitions (SharePoint
+ *      section resize, split-view toggles, nested mounts).
  */
 import * as React from 'react';
 import {
@@ -22,7 +35,9 @@ export interface UseSpotlightLayoutModeOptions {
   readonly forceMode?: SpotlightLayoutMode;
   /**
    * Fallback mode used before the first measurement settles, for
-   * environments without `ResizeObserver`, or during SSR.
+   * environments without `ResizeObserver`, or during SSR. Defaults to
+   * `'minimal'` — the most selective posture — so a pre-measurement
+   * commit can never over-furnish a narrow container.
    */
   readonly initialMode?: SpotlightLayoutMode;
 }
@@ -31,6 +46,15 @@ export interface UseSpotlightLayoutModeResult {
   readonly mode: SpotlightLayoutMode;
   readonly ref: React.RefObject<HTMLElement | null>;
 }
+
+/**
+ * `useLayoutEffect` logs a warning on the server. The Spotlight is a
+ * client-only surface but the hook still prefers the SSR-safe alias so
+ * consumers that render on the server (tests, tooling) do not see a
+ * noisy warning — behavior is identical on the client where it matters.
+ */
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 /**
  * Returns the active layout mode for the Spotlight surface along with a
@@ -42,33 +66,39 @@ export interface UseSpotlightLayoutModeResult {
 export function useSpotlightLayoutMode(
   options: UseSpotlightLayoutModeOptions = {},
 ): UseSpotlightLayoutModeResult {
-  const { forceMode, initialMode = 'wide' } = options;
+  const { forceMode, initialMode = 'minimal' } = options;
   const ref = React.useRef<HTMLElement | null>(null);
   const [mode, setMode] = React.useState<SpotlightLayoutMode>(
     forceMode ?? initialMode,
   );
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (forceMode) {
       setMode(forceMode);
       return;
     }
     const node = ref.current;
     if (!node) return;
-    if (typeof ResizeObserver === 'undefined') {
-      const rect = node.getBoundingClientRect();
-      setMode(
-        resolveSpotlightLayoutMode({ width: rect.width, height: rect.height }),
-      );
-      return;
-    }
+
+    // Synchronous first-paint measurement. `useLayoutEffect` commits
+    // this setState before the browser paints, so the conservative
+    // `'minimal'` fallback never flashes when the container is
+    // attached and laid out at mount time.
+    const rect = node.getBoundingClientRect();
+    const initial = resolveSpotlightLayoutMode({
+      width: rect.width,
+      height: rect.height,
+    });
+    setMode((prev) => (prev === initial ? prev : initial));
+
+    if (typeof ResizeObserver === 'undefined') return;
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
-      const rect = (entry.target as HTMLElement).getBoundingClientRect();
-      const width = entry.contentRect.width || rect.width;
-      const height = entry.contentRect.height || rect.height;
+      const target = (entry.target as HTMLElement).getBoundingClientRect();
+      const width = entry.contentRect.width || target.width;
+      const height = entry.contentRect.height || target.height;
       const next = resolveSpotlightLayoutMode({ width, height });
       setMode((prev) => (prev === next ? prev : next));
     });
