@@ -63,10 +63,10 @@ describe('capability metadata', () => {
     expect(cp.firstLaneEligible).toBe(true);
   });
 
-  it('people-culture-public explicitly denies paired-layout participation', () => {
+  it('people-culture-public now supports paired-layout participation (Wave-01 Prompt-01)', () => {
     const pc = getOccupant('people-culture-public')!;
-    expect(pc.shellFit.pairedLayoutEligible).toBe(false);
-    expect(pc.shellFit.fallbackWhenUnsafe).toBe('deny-pairing');
+    expect(pc.shellFit.pairedLayoutEligible).toBe(true);
+    expect(pc.shellFit.fallbackWhenUnsafe).toBe('force-stack');
   });
 });
 
@@ -88,17 +88,17 @@ describe('slot eligibility', () => {
     expect(isOccupantAllowedInSlot('company-pulse', 'secondary')).toBe(true);
   });
 
-  it('restricts people-culture-public to primary only', () => {
+  it('allows people-culture-public in primary and secondary (Wave-01 Prompt-01)', () => {
     expect(isOccupantAllowedInSlot('people-culture-public', 'primary')).toBe(true);
-    expect(isOccupantAllowedInSlot('people-culture-public', 'secondary')).toBe(false);
+    expect(isOccupantAllowedInSlot('people-culture-public', 'secondary')).toBe(true);
     expect(isOccupantAllowedInSlot('people-culture-public', 'compact')).toBe(false);
   });
 });
 
 describe('pairing restrictions', () => {
-  it('prohibits people-culture-public and hb-kudos pairing', () => {
-    expect(areOccupantsPairableInBand('people-culture-public', 'hb-kudos')).toBe(false);
-    expect(areOccupantsPairableInBand('hb-kudos', 'people-culture-public')).toBe(false);
+  it('retires the people-culture-public ↔ hb-kudos restriction (Wave-01 Prompt-01)', () => {
+    expect(areOccupantsPairableInBand('people-culture-public', 'hb-kudos')).toBe(true);
+    expect(areOccupantsPairableInBand('hb-kudos', 'people-culture-public')).toBe(true);
   });
 
   it('allows company-pulse and leadership-message pairing', () => {

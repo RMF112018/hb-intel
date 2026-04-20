@@ -178,22 +178,22 @@ describe('resolveBandLayout — pairing decision diagnostics', () => {
     expect(result.pairingDecision.reason).toBe('comfort-forced-stack');
   });
 
-  it('reports "prohibited-pairing" for occupants on each other\'s restriction list', () => {
-    const prohibitedBand: ShellBand = {
-      id: 'band-prohibited',
-      semanticRole: 'people-culture',
+  it('no longer reports "prohibited-pairing" for the retired PCP ↔ HB Kudos pair', () => {
+    // Wave-01 Prompt-01 retired the restriction, so resolveBandLayout treats
+    // the pair like any other at the governance layer. Width-level comfort
+    // remains enforced; at 1300px both occupants pair cleanly.
+    const pair: ShellBand = {
+      id: 'band-retired-restriction',
+      semanticRole: 'communications-editorial',
       recipe: 'feature-pair',
       slots: [
-        { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
+        { id: 's1', occupantId: 'leadership-message', role: 'primary', columnSpan: 'major' },
         { id: 's2', occupantId: 'hb-kudos', role: 'secondary', columnSpan: 'minor' },
       ],
       maxDominantOccupants: 1,
     };
-    const result = resolveBandLayout(prohibitedBand, DESKTOP_STATE, false, 1300);
-    expect(result.pairingDecision).toEqual({
-      allowed: false,
-      reason: 'prohibited-pairing',
-    });
+    const result = resolveBandLayout(pair, DESKTOP_STATE, false, 1300);
+    expect(result.pairingDecision.reason).not.toBe('prohibited-pairing');
   });
 
   it('slot comfort.reason mirrors the band-level pairing reason when stacked', () => {
@@ -204,20 +204,21 @@ describe('resolveBandLayout — pairing decision diagnostics', () => {
     }
   });
 
-  it('reports fit-contract-denies-pairing when an occupant contract disallows pairing', () => {
-    const contractDeniedBand: ShellBand = {
-      id: 'band-contract-denied',
-      semanticRole: 'communications-newsroom',
-      recipe: 'feature-pair',
+  it('now pairs People & Culture Public under fit contract after Wave-01 made it pairedLayoutEligible', () => {
+    const pairedBand: ShellBand = {
+      id: 'band-pcp-newly-paired',
+      semanticRole: 'communications-editorial',
+      recipe: 'asymmetric-two-up',
       slots: [
-        { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
-        { id: 's2', occupantId: 'leadership-message', role: 'secondary', columnSpan: 'minor' },
+        { id: 's1', occupantId: 'leadership-message', role: 'primary', columnSpan: 'major' },
+        { id: 's2', occupantId: 'people-culture-public', role: 'secondary', columnSpan: 'minor' },
       ],
       maxDominantOccupants: 1,
     };
-    const result = resolveBandLayout(contractDeniedBand, DESKTOP_STATE, false, 1300);
-    expect(result.columns).toBe(1);
-    expect(result.pairingDecision.reason).toBe('fit-contract-denies-pairing');
+    // At 1800px container, minor-slot width is 720px — exactly PCP's
+    // narrowest-stable-paired threshold, so the pair is allowed.
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, false, 1800);
+    expect(result.pairingDecision.reason).not.toBe('fit-contract-denies-pairing');
   });
 });
 

@@ -55,10 +55,8 @@ describe('shell closure — protected-rule presence', () => {
     expect(PROTECTED_ENTRY_STATE_RULES[key]).toBe(true);
   });
 
-  it('SHELL_PROTECTED_DECISIONS retains the prohibited pairing invariant', () => {
-    expect(SHELL_PROTECTED_DECISIONS.prohibitedPairings).toEqual([
-      ['people-culture-public', 'hb-kudos'],
-    ]);
+  it('SHELL_PROTECTED_DECISIONS exposes an empty prohibited-pairing list after Wave-01 retirement', () => {
+    expect(SHELL_PROTECTED_DECISIONS.prohibitedPairings).toEqual([]);
   });
 
   it('protected entry-stack rules and configurable references are disjoint (closure invariant)', () => {
@@ -70,19 +68,10 @@ describe('shell closure — protected-rule presence', () => {
 });
 
 describe('shell closure — persisted-state normalization', () => {
-  it('unapproved preset + prohibited pairing attempt is sanitized + diagnosed', () => {
+  it('unapproved preset is sanitized + diagnosed through persisted hydration', () => {
     const hydrated = hydratePersistedState({
       version: 1,
       presetId: 'rogue-preset',
-      bandOverrides: [
-        {
-          bandId: 'band-people-culture',
-          slots: [
-            { slotId: 'slot-a', occupantId: 'people-culture-public' },
-            { slotId: 'slot-b', occupantId: 'hb-kudos' },
-          ],
-        },
-      ],
     });
     expect(hydrated.preset.id).toBe('default-v2');
     expect(

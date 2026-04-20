@@ -6,7 +6,17 @@ import {
 import { DEFAULT_PRESET } from '../defaultPreset.js';
 import { resolveBandLayout } from '../slotComfortResolver.js';
 import { getEntryState } from '../breakpointPolicy.js';
-import type { ShellEntryState } from '../shellTypes.js';
+import type { ShellBand, ShellEntryState } from '../shellTypes.js';
+
+const SYNTHETIC_SINGLE_OCCUPANT_BAND: ShellBand = {
+  id: 'band-synthetic-single',
+  semanticRole: 'recognition',
+  recipe: 'stacked-full',
+  slots: [
+    { id: 's-synth-1', occupantId: 'hb-kudos', role: 'primary', columnSpan: 'full' },
+  ],
+  maxDominantOccupants: 1,
+};
 
 function buildReport(entryStateId: Parameters<typeof getEntryState>[0], width: number, opts?: { shortHeight?: boolean }) {
   const entryState = getEntryState(entryStateId)!;
@@ -65,11 +75,12 @@ describe('shellConformance — per-band pairing reasons are preserved', () => {
   });
 
   it('bands with < 2 active occupants report single-occupant', () => {
-    const report = buildReport('ultrawide-desktop', 1800);
-    const singleOccupantBand = report.bands.find(
-      (b) => b.pairingDecision.reason === 'single-occupant',
-    );
-    expect(singleOccupantBand).toBeDefined();
+    // Default preset has no single-occupant bands — all three rows pair.
+    // Verify the single-occupant reason still surfaces via a synthetic band.
+    const entryState = getEntryState('ultrawide-desktop')!;
+    const layout = resolveBandLayout(SYNTHETIC_SINGLE_OCCUPANT_BAND, entryState, false, 1800);
+    expect(layout.pairingDecision.reason).toBe('single-occupant');
+    expect(layout.columns).toBe(1);
   });
 });
 
@@ -110,10 +121,14 @@ describe('shellConformance — slot state mapping', () => {
   });
 
   it('maps single-occupant bands to comfortable slots', () => {
-    const report = buildReport('ultrawide-desktop', 1800);
-    const singleBand = report.bands.find(
-      (b) => b.pairingDecision.reason === 'single-occupant' && b.slots.length === 1,
-    );
-    expect(singleBand?.slots[0].state).toBe('comfortable');
+    const entryState = getEntryState('ultrawide-desktop')!;
+    const layout = resolveBandLayout(SYNTHETIC_SINGLE_OCCUPANT_BAND, entryState, false, 1800);
+    const conformance = resolveShellConformance({
+      bands: [SYNTHETIC_SINGLE_OCCUPANT_BAND],
+      bandLayouts: [layout],
+      entryState,
+      shortHeightConstrained: false,
+    });
+    expect(conformance.bands[0].slots[0].state).toBe('comfortable');
   });
 });

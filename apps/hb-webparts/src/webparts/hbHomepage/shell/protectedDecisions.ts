@@ -34,14 +34,22 @@ export const SHELL_PROTECTED_DECISIONS: ShellProtectedDecisions = {
 
   maxDominantPerBand: 1,
 
-  prohibitedPairings: [['people-culture-public', 'hb-kudos']],
+  // Wave-01 Prompt-01 retired the People & Culture Public ↔ HB Kudos
+  // restriction. The locked three-row target does not pair them, and the
+  // retained restriction would otherwise constrain future preset authoring
+  // without a current rationale. Prompt-03 owns the full pairing-
+  // restriction rebaseline.
+  prohibitedPairings: [],
 
+  // Wave-01 Prompt-01 narrows the protected-semantics list to the three
+  // band semantics present in the locked default three-row composition.
+  // `people-culture` and `recognition` are retired from protection because
+  // their standalone `stacked-full` bands are gone from the default preset.
+  // Prompt-03 owns the full protected-decisions rebaseline.
   protectedBandSemantics: [
+    'operational-spotlight',
     'communications-newsroom',
     'communications-editorial',
-    'operational-spotlight',
-    'people-culture',
-    'recognition',
   ],
 } as const;
 

@@ -455,8 +455,8 @@ export const PERSISTED_POLICY_EXAMPLES = {
     presetId: 'default-v2',
     bandOverrides: [
       {
-        bandId: 'band-operational-spotlight',
-        slots: [{ slotId: 'slot-company-pulse', role: 'secondary' }],
+        bandId: 'band-row-2-communications-newsroom',
+        slots: [{ slotId: 'slot-row-2-company-pulse', role: 'secondary' }],
       },
     ],
     compactPreferences: { 'company-pulse': 'standard' },
@@ -471,20 +471,6 @@ export const PERSISTED_POLICY_EXAMPLES = {
     unknownPreset: {
       version: PERSISTED_STATE_VERSION,
       presetId: 'not-a-real-preset',
-    } satisfies PersistedShellState,
-
-    prohibitedPairing: {
-      version: PERSISTED_STATE_VERSION,
-      presetId: 'default-v2',
-      bandOverrides: [
-        {
-          bandId: 'band-people-culture',
-          slots: [
-            { slotId: 's1', occupantId: 'people-culture-public' },
-            { slotId: 's2', occupantId: 'hb-kudos' },
-          ],
-        },
-      ],
     } satisfies PersistedShellState,
 
     hidingNonHideable: {

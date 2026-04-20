@@ -75,7 +75,7 @@ describe('hydratePersistedState', () => {
     });
     const kudosSlot = result.preset.bands
       .flatMap((b) => b.slots)
-      .find((s) => s.id === 'slot-hb-kudos');
+      .find((s) => s.id === 'slot-row-1-hb-kudos');
     expect(kudosSlot?.occupantId).toBe('hb-kudos');
     expect(
       result.diagnostics.some(
@@ -111,13 +111,13 @@ describe('sanitizePersistedState', () => {
     expect(sanitized.presetId).toBe('default-v2');
   });
 
-  it('detects AND strips prohibited-pairing overrides rather than passing them through', () => {
+  it('passes a previously-prohibited pair through sanitization after Wave-01 retired the restriction', () => {
     const { sanitized, violations } = sanitizePersistedState({
       version: 1,
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-people-culture',
+          bandId: 'band-row-3-communications-editorial',
           slots: [
             { slotId: 's1', occupantId: 'people-culture-public' },
             { slotId: 's2', occupantId: 'hb-kudos' },
@@ -125,12 +125,11 @@ describe('sanitizePersistedState', () => {
         },
       ],
     });
-    expect(violations.some((v) => v.includes('prohibited pairing'))).toBe(true);
+    expect(violations.some((v) => v.includes('prohibited pairing'))).toBe(false);
     const people = sanitized.bandOverrides?.[0]?.slots?.find((s) => s.slotId === 's1');
     const kudos = sanitized.bandOverrides?.[0]?.slots?.find((s) => s.slotId === 's2');
-    // First offender kept; second stripped to '' so parseShellLayout nulls it out.
     expect(people?.occupantId).toBe('people-culture-public');
-    expect(kudos?.occupantId).toBe('');
+    expect(kudos?.occupantId).toBe('hb-kudos');
   });
 
   it('does not flag valid overrides', () => {
@@ -139,9 +138,9 @@ describe('sanitizePersistedState', () => {
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-operational-spotlight',
+          bandId: 'band-row-2-communications-newsroom',
           slots: [
-            { slotId: 'slot-company-pulse', role: 'secondary' },
+            { slotId: 'slot-row-2-company-pulse', role: 'secondary' },
           ],
         },
       ],
@@ -156,7 +155,7 @@ describe('applyOccupantVisibility', () => {
     const result = applyOccupantVisibility(layout, { 'hb-kudos': 'hidden' });
     const kudosSlot = result.preset.bands
       .flatMap((b) => b.slots)
-      .find((s) => s.id === 'slot-hb-kudos');
+      .find((s) => s.id === 'slot-row-1-hb-kudos');
     expect(kudosSlot?.occupantId).toBeNull();
   });
 
@@ -165,7 +164,7 @@ describe('applyOccupantVisibility', () => {
     const result = applyOccupantVisibility(layout, { 'company-pulse': 'visible' });
     const cpSlot = result.preset.bands
       .flatMap((b) => b.slots)
-      .find((s) => s.id === 'slot-company-pulse');
+      .find((s) => s.id === 'slot-row-2-company-pulse');
     expect(cpSlot?.occupantId).toBe('company-pulse');
   });
 
@@ -207,32 +206,30 @@ describe('hydratePersistedState — diagnostic surfacing', () => {
     expect(rejection?.severity).toBe('error');
   });
 
-  it('hydration strips prohibited pairings so runtime layout cannot hold the forbidden combo', () => {
+  it('retired prohibited-pairing restriction no longer blocks the runtime layout', () => {
     const result = hydratePersistedState({
       version: 1,
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-people-culture',
+          bandId: 'band-row-3-communications-editorial',
           slots: [
-            { slotId: 'slot-people-culture-public', occupantId: 'people-culture-public' },
-            { slotId: 'slot-hb-kudos', occupantId: 'hb-kudos' },
+            { slotId: 'slot-row-3-leadership-message', role: 'secondary' },
           ],
         },
       ],
     });
-    // Band `band-people-culture` does not exist in default preset, but
-    // the proof is that sanitization violations surfaced and the
-    // parsed layout does not contain a band with both occupants.
+    // No `PROHIBITED_PAIRING` rejection fires against the retired PCP↔Kudos
+    // pair, and the default preset continues to render with all six occupants.
     expect(
-      result.diagnostics.some((d) => d.code === 'PERSISTED_STATE_SANITIZED'),
-    ).toBe(true);
-    for (const band of result.preset.bands) {
-      const occupants = band.slots.map((s) => s.occupantId).filter(Boolean);
-      expect(
-        occupants.includes('people-culture-public') && occupants.includes('hb-kudos'),
-      ).toBe(false);
-    }
+      result.diagnostics.some((d) => d.code === 'PERSISTED_STATE_SANITIZED' && d.message.includes('prohibited pairing')),
+    ).toBe(false);
+    const occupantIds = result.preset.bands
+      .flatMap((b) => b.slots)
+      .map((s) => s.occupantId)
+      .filter(Boolean);
+    expect(occupantIds).toContain('people-culture-public');
+    expect(occupantIds).toContain('hb-kudos');
   });
 });
 
@@ -243,8 +240,8 @@ describe('shellValidation — override rejection diagnostics', () => {
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-operational-spotlight',
-          slots: [{ slotId: 'slot-company-pulse', role: 'garbage-role' }],
+          bandId: 'band-row-2-communications-newsroom',
+          slots: [{ slotId: 'slot-row-2-company-pulse', role: 'garbage-role' }],
         },
       ],
     });
@@ -257,8 +254,8 @@ describe('shellValidation — override rejection diagnostics', () => {
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-operational-spotlight',
-          slots: [{ slotId: 'slot-company-pulse', columnSpan: 'giant' }],
+          bandId: 'band-row-2-communications-newsroom',
+          slots: [{ slotId: 'slot-row-2-company-pulse', columnSpan: 'giant' }],
         },
       ],
     });
@@ -304,10 +301,12 @@ describe('previewPersistedState (dry-run)', () => {
     expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.UNKNOWN_PRESET)).toBe(true);
   });
 
-  it('rejects prohibited-pairing example with PROHIBITED_PAIRING code', () => {
-    const result = previewPersistedState(PERSISTED_POLICY_EXAMPLES.rejectedExamples.prohibitedPairing);
-    expect(result.accepted).toBe(false);
-    expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.PROHIBITED_PAIRING)).toBe(true);
+  it('retains the PROHIBITED_PAIRING rejection code for forward use even though the default restriction is retired', () => {
+    // Wave-01 Prompt-01 retired the PCP↔Kudos restriction, so the
+    // rejectedExamples shape no longer ships a ready-made prohibited pair.
+    // The rejection code must still be defined so future governance rules
+    // can reintroduce pairings without re-wiring the persistence taxonomy.
+    expect(PERSISTED_REJECTION_CODES.PROHIBITED_PAIRING).toBe('PERSISTED_PROHIBITED_PAIRING');
   });
 
   it('rejects hiding a non-hideable occupant with VISIBILITY_NOT_ELIGIBLE', () => {
@@ -345,8 +344,8 @@ describe('previewPersistedState (dry-run)', () => {
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-operational-spotlight',
-          slots: [{ slotId: 'slot-company-pulse', role: 'not-a-role' }],
+          bandId: 'band-row-2-communications-newsroom',
+          slots: [{ slotId: 'slot-row-2-company-pulse', role: 'not-a-role' }],
         },
       ],
     });
@@ -405,10 +404,10 @@ describe('persisted rejection taxonomy coverage', () => {
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-operational-spotlight',
+          bandId: 'band-row-1-operational-spotlight',
           slots: [
             {
-              slotId: 'slot-project-portfolio-spotlight',
+              slotId: 'slot-row-1-project-portfolio-spotlight',
               occupantId: 'safety-field-excellence',
             },
           ],
@@ -433,8 +432,10 @@ describe('GOVERNANCE_BOUNDARY', () => {
     const sa = GOVERNANCE_BOUNDARY.systemAuthored;
     expect(sa.protectedEntryStateRules).toContain('phoneForceSingleColumn');
     expect(sa.protectedEntryStateRules).toContain('firstLaneMustBeginOnFirstView');
-    expect(sa.prohibitedPairings).toEqual([['people-culture-public', 'hb-kudos']]);
-    expect(sa.protectedBandSemantics).toHaveLength(5);
+    // Wave-01 Prompt-01 retired the PCP↔Kudos restriction and narrowed the
+    // protected semantics to the three band roles live in the default preset.
+    expect(sa.prohibitedPairings).toEqual([]);
+    expect(sa.protectedBandSemantics).toHaveLength(3);
     expect(sa.maxDominantPerBand).toBe(1);
   });
 

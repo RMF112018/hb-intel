@@ -70,26 +70,26 @@ describe('firstLaneResolver', () => {
       band: FIRST_BAND,
       reports: buildReports({
         'project-portfolio-spotlight': 'strong',
-        'company-pulse': 'strong',
+        'hb-kudos': 'strong',
       }),
       entryState: STANDARD_LAPTOP,
     });
     expect(result.decision.action).toBe('retained');
     expect(result.band.slots.map((s) => s.occupantId)).toEqual([
       'project-portfolio-spotlight',
-      'company-pulse',
+      'hb-kudos',
     ]);
   });
 
   it('reduces to single when the secondary is empty and no legal replacement exists', () => {
-    // company-pulse (secondary) reports empty. Only project-portfolio-spotlight
-    // and safety-field-excellence are allowedBandSemantics=operational-spotlight,
-    // and safety-field-excellence is not firstLaneEligible — so no replacement
-    // is legal. The resolver nulls the secondary slot.
+    // hb-kudos (secondary) reports empty, company-pulse (first-lane-eligible,
+    // operational-spotlight-allowed) also reports empty — so no strong
+    // external candidate remains and the resolver nulls the secondary slot.
     const result = resolveFirstLaneBand({
       band: FIRST_BAND,
       reports: buildReports({
         'project-portfolio-spotlight': 'strong',
+        'hb-kudos': 'empty',
         'company-pulse': 'empty',
       }),
       entryState: STANDARD_LAPTOP,
@@ -97,30 +97,27 @@ describe('firstLaneResolver', () => {
     expect(result.decision.action).toBe('reduced-to-single');
     expect(result.band.slots[0].occupantId).toBe('project-portfolio-spotlight');
     expect(result.band.slots[1].occupantId).toBeNull();
-    expect(result.decision.slotDecisions[0].from).toBe('company-pulse');
+    expect(result.decision.slotDecisions[0].from).toBe('hb-kudos');
     expect(result.decision.slotDecisions[0].to).toBeNull();
   });
 
   it('retains when primary is weak but reorderDomain is locked and no swap/replacement is legal', () => {
     // project-portfolio-spotlight (primary) is reorderDomain:'locked'. When it
-    // reports empty and company-pulse (secondary) is strong, the resolver may
-    // consider swapping — but company-pulse allowedBandSemantics includes
-    // operational-spotlight AND primary role, so a swap is legal. However
-    // the primary is locked and cannot move, so the swap path is rejected.
-    // No external strong candidate can replace the primary in this band,
-    // therefore the band is retained with a diagnostic.
+    // reports empty, the primary slot cannot be replaced. hb-kudos (secondary)
+    // is not firstLaneEligible, so it cannot be promoted into primary. With no
+    // external legal replacement, the band is retained with a diagnostic.
     const result = resolveFirstLaneBand({
       band: FIRST_BAND,
       reports: buildReports({
         'project-portfolio-spotlight': 'empty',
-        'company-pulse': 'strong',
+        'hb-kudos': 'strong',
       }),
       entryState: STANDARD_LAPTOP,
     });
     expect(result.decision.action).toBe('retained');
     // Protected: locked primary never moves.
     expect(result.band.slots[0].occupantId).toBe('project-portfolio-spotlight');
-    expect(result.band.slots[1].occupantId).toBe('company-pulse');
+    expect(result.band.slots[1].occupantId).toBe('hb-kudos');
     const slotDecision = result.decision.slotDecisions.find((d) => d.slotId === FIRST_BAND.slots[0].id);
     expect(slotDecision?.reason).toBe('primary-locked');
   });
@@ -130,6 +127,7 @@ describe('firstLaneResolver', () => {
       band: FIRST_BAND,
       reports: buildReports({
         'project-portfolio-spotlight': 'empty',
+        'hb-kudos': 'empty',
         'company-pulse': 'empty',
       }),
       entryState: STANDARD_LAPTOP,
@@ -144,14 +142,14 @@ describe('firstLaneResolver', () => {
       band: FIRST_BAND,
       reports: buildReports({
         'project-portfolio-spotlight': 'loading',
-        'company-pulse': 'loading',
+        'hb-kudos': 'loading',
       }),
       entryState: STANDARD_LAPTOP,
     });
     expect(loading.decision.action).toBe('retained');
     expect(loading.band.slots.map((s) => s.occupantId)).toEqual([
       'project-portfolio-spotlight',
-      'company-pulse',
+      'hb-kudos',
     ]);
 
     const unknown = resolveFirstLaneBand({
@@ -209,6 +207,7 @@ describe('firstLaneResolver', () => {
       band: FIRST_BAND,
       reports: buildReports({
         'project-portfolio-spotlight': 'strong',
+        'hb-kudos': 'empty',
         'company-pulse': 'empty',
       }),
       entryState: STANDARD_LAPTOP,

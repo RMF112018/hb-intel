@@ -75,8 +75,8 @@ describe('parseShellLayout', () => {
       presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-operational-spotlight',
-          slots: [{ slotId: 'slot-company-pulse', occupantId: 'fake-occupant' }],
+          bandId: 'band-row-2-communications-newsroom',
+          slots: [{ slotId: 'slot-row-2-company-pulse', occupantId: 'fake-occupant' }],
         },
       ],
     });
@@ -107,17 +107,21 @@ describe('validatePresetStructure', () => {
     expect(result.preset.id).toBe(DEFAULT_PRESET.id);
   });
 
-  it('detects prohibited pairing in a preset', () => {
+  it('detects band-semantic incompatibility for an occupant placed in a disallowed band', () => {
+    // After Wave-01 Prompt-01 retired the PCP↔HB-Kudos prohibited pairing,
+    // governance still enforces `allowedBandSemantics`. HB Kudos is not
+    // allowed in `communications-editorial`, so a synthesized preset must
+    // still surface OCCUPANT_BAND_INCOMPATIBLE.
     const preset = {
-      id: 'test-prohibited',
+      id: 'test-band-incompatible',
       title: 'Test',
       bands: [
         {
           id: 'band-test',
-          semanticRole: 'people-culture',
-          recipe: 'feature-pair',
+          semanticRole: 'communications-editorial',
+          recipe: 'asymmetric-two-up',
           slots: [
-            { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
+            { id: 's1', occupantId: 'leadership-message', role: 'primary', columnSpan: 'major' },
             { id: 's2', occupantId: 'hb-kudos', role: 'secondary', columnSpan: 'minor' },
           ],
           maxDominantOccupants: 1,
@@ -125,7 +129,7 @@ describe('validatePresetStructure', () => {
       ],
     };
     const result = validatePresetStructure(preset);
-    expect(result.diagnostics.some((d) => d.code === 'PROHIBITED_PAIRING')).toBe(true);
+    expect(result.diagnostics.some((d) => d.code === 'OCCUPANT_BAND_INCOMPATIBLE')).toBe(true);
   });
 });
 
@@ -137,7 +141,8 @@ describe('preset library', () => {
   it('describePreset returns structured metadata', () => {
     const desc = describePreset(DEFAULT_PRESET);
     expect(desc.id).toBe('default-v2');
-    expect(desc.bandCount).toBeGreaterThanOrEqual(5);
+    expect(desc.bandCount).toBe(3);
+    expect(desc.pairedBandCount).toBe(3);
     expect(desc.occupantIds).toContain('project-portfolio-spotlight');
     expect(desc.occupantIds).toContain('safety-field-excellence');
   });
@@ -198,8 +203,8 @@ describe('previewBandOverride', () => {
   it('validates a valid slot change', () => {
     const result = previewBandOverride(
       'default-v2',
-      'band-operational-spotlight',
-      [{ slotId: 'slot-company-pulse', role: 'secondary' }],
+      'band-row-2-communications-newsroom',
+      [{ slotId: 'slot-row-2-company-pulse', role: 'secondary' }],
     );
     expect(result.valid).toBe(true);
   });
@@ -207,8 +212,8 @@ describe('previewBandOverride', () => {
   it('detects invalid occupant in slot change', () => {
     const result = previewBandOverride(
       'default-v2',
-      'band-operational-spotlight',
-      [{ slotId: 'slot-company-pulse', occupantId: 'nonexistent' }],
+      'band-row-2-communications-newsroom',
+      [{ slotId: 'slot-row-2-company-pulse', occupantId: 'nonexistent' }],
     );
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.code === 'INVALID_OVERRIDE_OCCUPANT')).toBe(true);
@@ -216,14 +221,14 @@ describe('previewBandOverride', () => {
 
   it('fails deterministically for unknown band override targets', () => {
     const result = previewBandOverride('default-v2', 'band-does-not-exist', [
-      { slotId: 'slot-company-pulse', role: 'secondary' },
+      { slotId: 'slot-row-2-company-pulse', role: 'secondary' },
     ]);
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.code === 'UNKNOWN_BAND_OVERRIDE')).toBe(true);
   });
 
   it('fails deterministically for unknown slot override targets', () => {
-    const result = previewBandOverride('default-v2', 'band-operational-spotlight', [
+    const result = previewBandOverride('default-v2', 'band-row-2-communications-newsroom', [
       { slotId: 'slot-does-not-exist', role: 'secondary' },
     ]);
     expect(result.valid).toBe(false);
@@ -273,11 +278,13 @@ describe('governance model', () => {
 });
 
 describe('governance enforcement in overrides', () => {
-  it('rejects placing hb-kudos into a non-recognition band', () => {
+  it('rejects placing hb-kudos into a band where its semantics are still not allowed', () => {
+    // HB Kudos `allowedBandSemantics` is now ['recognition', 'operational-spotlight'].
+    // Row 3 uses `communications-editorial`, which remains off-limits.
     const result = previewBandOverride(
       'default-v2',
-      'band-operational-spotlight',
-      [{ slotId: 'slot-company-pulse', occupantId: 'hb-kudos' }],
+      'band-row-3-communications-editorial',
+      [{ slotId: 'slot-row-3-leadership-message', occupantId: 'hb-kudos' }],
     );
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.code === 'OCCUPANT_BAND_INCOMPATIBLE')).toBe(true);
@@ -286,8 +293,8 @@ describe('governance enforcement in overrides', () => {
   it('rejects replacing a locked occupant via override', () => {
     const result = previewBandOverride(
       'default-v2',
-      'band-operational-spotlight',
-      [{ slotId: 'slot-project-portfolio-spotlight', occupantId: 'company-pulse' }],
+      'band-row-1-operational-spotlight',
+      [{ slotId: 'slot-row-1-project-portfolio-spotlight', occupantId: 'company-pulse' }],
     );
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.code === 'REORDER_DOMAIN_VIOLATION')).toBe(true);
@@ -296,8 +303,8 @@ describe('governance enforcement in overrides', () => {
   it('rejects clearing a non-removable occupant via override', () => {
     const result = previewBandOverride(
       'default-v2',
-      'band-recognition',
-      [{ slotId: 'slot-hb-kudos', occupantId: '' }],
+      'band-row-1-operational-spotlight',
+      [{ slotId: 'slot-row-1-hb-kudos', occupantId: '' }],
     );
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.code === 'VISIBILITY_NOT_ELIGIBLE')).toBe(true);
@@ -306,8 +313,8 @@ describe('governance enforcement in overrides', () => {
   it('accepts role-only override on a non-locked slot', () => {
     const result = previewBandOverride(
       'default-v2',
-      'band-operational-spotlight',
-      [{ slotId: 'slot-company-pulse', role: 'secondary' }],
+      'band-row-2-communications-newsroom',
+      [{ slotId: 'slot-row-2-company-pulse', role: 'secondary' }],
     );
     expect(result.valid).toBe(true);
   });

@@ -46,12 +46,20 @@ export interface ShellSlot {
   readonly columnSpan: ColumnSpan;
 }
 
+export type BandOrientation = 'left-dominant' | 'right-dominant';
+
 export interface ShellBand {
   readonly id: string;
   readonly semanticRole: BandSemanticRole;
   readonly recipe: ShellBandRecipeId;
   readonly slots: readonly ShellSlot[];
   readonly maxDominantOccupants: number;
+  /**
+   * Preset-declared handedness for paired bands. Prompt-01 emits this;
+   * Prompt-02 will wire CSS and validation to honor it. `undefined` is
+   * treated as `left-dominant` by downstream consumers until then.
+   */
+  readonly orientation?: BandOrientation;
 }
 
 export interface ShellPreset {

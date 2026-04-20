@@ -1,109 +1,79 @@
 import type { ShellPreset } from './shellTypes.js';
 
+/**
+ * DEFAULT_PRESET — Phase-11 Wave-01 locked three-row flagship layout.
+ *
+ * Each of the six approved homepage surfaces appears exactly once.
+ * Row 2 declares `orientation: 'right-dominant'`; Prompt-02 wires the
+ * CSS column templates and validation to honor that handedness.
+ * Until Prompt-02 lands, downstream CSS still renders left-dominant —
+ * the preset identity itself is the authoritative target shape.
+ */
 export const DEFAULT_PRESET: ShellPreset = {
   id: 'default-v2',
   title: 'Flagship Homepage Layout',
   description:
-    'Recipe-driven flagship layout with operational feature pairing, editorial two-up composition, and governed fallback-ready contextual bands.',
+    'Locked three-row flagship composition: Project Portfolio Spotlight + HB Kudos, then Safety + Company Pulse (right-dominant), then Leadership Message + People & Culture Public.',
   bands: [
     {
-      id: 'band-operational-spotlight',
+      id: 'band-row-1-operational-spotlight',
       semanticRole: 'operational-spotlight',
       recipe: 'feature-pair',
+      orientation: 'left-dominant',
       slots: [
         {
-          id: 'slot-project-portfolio-spotlight',
+          id: 'slot-row-1-project-portfolio-spotlight',
           occupantId: 'project-portfolio-spotlight',
           role: 'primary',
           columnSpan: 'major',
         },
         {
-          id: 'slot-company-pulse',
-          occupantId: 'company-pulse',
-          role: 'secondary',
-          columnSpan: 'minor',
-        },
-      ],
-      maxDominantOccupants: 1,
-    },
-    {
-      id: 'band-communications-newsroom',
-      semanticRole: 'communications-newsroom',
-      recipe: 'balanced-two-up',
-      slots: [
-        {
-          id: 'slot-company-pulse-newsroom',
-          occupantId: 'company-pulse',
-          role: 'primary',
-          columnSpan: 'major',
-        },
-        {
-          id: 'slot-leadership-message-newsroom',
-          occupantId: 'leadership-message',
-          role: 'secondary',
-          columnSpan: 'minor',
-        },
-      ],
-      maxDominantOccupants: 1,
-    },
-    {
-      id: 'band-communications-editorial',
-      semanticRole: 'communications-editorial',
-      recipe: 'stacked-full',
-      slots: [
-        {
-          id: 'slot-leadership-message',
-          occupantId: 'leadership-message',
-          role: 'primary',
-          columnSpan: 'full',
-        },
-      ],
-      maxDominantOccupants: 1,
-    },
-    {
-      id: 'band-safety-field',
-      semanticRole: 'operational-spotlight',
-      recipe: 'asymmetric-two-up',
-      slots: [
-        {
-          id: 'slot-safety-field-excellence',
-          occupantId: 'safety-field-excellence',
-          role: 'primary',
-          columnSpan: 'major',
-        },
-        {
-          id: 'slot-company-pulse-safety',
-          occupantId: 'company-pulse',
-          role: 'secondary',
-          columnSpan: 'minor',
-        },
-      ],
-      maxDominantOccupants: 1,
-    },
-    {
-      id: 'band-people-culture',
-      semanticRole: 'people-culture',
-      recipe: 'stacked-full',
-      slots: [
-        {
-          id: 'slot-people-culture-public',
-          occupantId: 'people-culture-public',
-          role: 'primary',
-          columnSpan: 'full',
-        },
-      ],
-      maxDominantOccupants: 1,
-    },
-    {
-      id: 'band-recognition',
-      semanticRole: 'recognition',
-      recipe: 'stacked-full',
-      slots: [
-        {
-          id: 'slot-hb-kudos',
+          id: 'slot-row-1-hb-kudos',
           occupantId: 'hb-kudos',
+          role: 'secondary',
+          columnSpan: 'minor',
+        },
+      ],
+      maxDominantOccupants: 1,
+    },
+    {
+      id: 'band-row-2-communications-newsroom',
+      semanticRole: 'communications-newsroom',
+      recipe: 'feature-pair',
+      orientation: 'right-dominant',
+      slots: [
+        {
+          id: 'slot-row-2-safety-field-excellence',
+          occupantId: 'safety-field-excellence',
+          role: 'secondary',
+          columnSpan: 'minor',
+        },
+        {
+          id: 'slot-row-2-company-pulse',
+          occupantId: 'company-pulse',
           role: 'primary',
-          columnSpan: 'full',
+          columnSpan: 'major',
+        },
+      ],
+      maxDominantOccupants: 1,
+    },
+    {
+      id: 'band-row-3-communications-editorial',
+      semanticRole: 'communications-editorial',
+      recipe: 'asymmetric-two-up',
+      orientation: 'left-dominant',
+      slots: [
+        {
+          id: 'slot-row-3-leadership-message',
+          occupantId: 'leadership-message',
+          role: 'primary',
+          columnSpan: 'major',
+        },
+        {
+          id: 'slot-row-3-people-culture-public',
+          occupantId: 'people-culture-public',
+          role: 'secondary',
+          columnSpan: 'minor',
         },
       ],
       maxDominantOccupants: 1,
