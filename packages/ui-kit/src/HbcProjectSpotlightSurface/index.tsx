@@ -109,6 +109,8 @@ export function HbcProjectSpotlightSurface({
         latestFreshnessLabel={model.featured.freshnessLabel}
         allProjectsLabel={model.allProjectsLabel}
         allProjectsUrl={model.allProjectsUrl}
+        showDate={visibility.showMastheadDate}
+        showAction={visibility.showMastheadAction}
       />
 
       <hr className={styles.separator} />
@@ -130,6 +132,7 @@ export function HbcProjectSpotlightSurface({
             reducedMotion={reducedMotion}
             openByDefault={visibility.railOpenByDefault}
             mode={mode}
+            showFooterCta={visibility.showRailFooterCta}
           />
         ) : null}
       </div>

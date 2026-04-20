@@ -21,6 +21,12 @@ export interface HistoryDisclosureProps {
   reducedMotion: boolean;
   openByDefault: boolean;
   mode: SpotlightLayoutMode;
+  /**
+   * Forwarded to the underlying rail — when false the rail suppresses
+   * its footer "View all projects" CTA. The surface passes this from
+   * `SpotlightLayoutVisibility.showRailFooterCta`.
+   */
+  showFooterCta?: boolean;
 }
 
 export function HistoryDisclosure({
@@ -31,6 +37,7 @@ export function HistoryDisclosure({
   reducedMotion,
   openByDefault,
   mode,
+  showFooterCta = true,
 }: HistoryDisclosureProps): React.JSX.Element {
   const panelId = React.useId();
   const [open, setOpen] = React.useState(openByDefault);
@@ -77,6 +84,7 @@ export function HistoryDisclosure({
             allProjectsLabel={allProjectsLabel}
             allProjectsUrl={allProjectsUrl}
             reducedMotion={reducedMotion}
+            showFooterCta={showFooterCta}
           />
         ) : null}
       </div>

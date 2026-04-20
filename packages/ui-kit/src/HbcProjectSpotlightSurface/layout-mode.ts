@@ -68,6 +68,27 @@ export interface SpotlightLayoutVisibility {
   readonly summaryLineClamp: number;
   readonly showMilestoneList: boolean;
   readonly showMilestoneProgress: boolean;
+  /**
+   * Whether the masthead renders the "updated …" dateline. Wide/medium
+   * keep the editorial dateline; compact/minimal drop it so the
+   * masthead reads as selective furniture rather than a full nameplate.
+   */
+  readonly showMastheadDate: boolean;
+  /**
+   * Whether the masthead renders the section-level "View all projects"
+   * CTA. Wide/medium own the section-level action at the top; compact
+   * and minimal hand it off to the (explicit) history disclosure so the
+   * smallest states are not double-furnished with section CTAs.
+   */
+  readonly showMastheadAction: boolean;
+  /**
+   * Whether the supporting rail's footer "View all projects" CTA
+   * renders when the rail is expanded. Mutually exclusive in intent
+   * with `showMastheadAction` — exactly one of the two should render
+   * per mode so the surface never carries a redundant section-level
+   * CTA.
+   */
+  readonly showRailFooterCta: boolean;
 }
 
 /**
@@ -91,6 +112,9 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     summaryLineClamp: 4,
     showMilestoneList: true,
     showMilestoneProgress: true,
+    showMastheadDate: true,
+    showMastheadAction: true,
+    showRailFooterCta: false,
   },
   medium: {
     mode: 'medium',
@@ -104,6 +128,9 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     summaryLineClamp: 3,
     showMilestoneList: true,
     showMilestoneProgress: true,
+    showMastheadDate: true,
+    showMastheadAction: true,
+    showRailFooterCta: false,
   },
   compact: {
     mode: 'compact',
@@ -117,6 +144,9 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     summaryLineClamp: 2,
     showMilestoneList: true,
     showMilestoneProgress: true,
+    showMastheadDate: false,
+    showMastheadAction: false,
+    showRailFooterCta: true,
   },
   minimal: {
     mode: 'minimal',
@@ -130,6 +160,9 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     summaryLineClamp: 2,
     showMilestoneList: false,
     showMilestoneProgress: true,
+    showMastheadDate: false,
+    showMastheadAction: false,
+    showRailFooterCta: true,
   },
 };
 

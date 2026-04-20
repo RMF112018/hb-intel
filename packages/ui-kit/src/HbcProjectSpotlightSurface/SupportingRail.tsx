@@ -94,6 +94,14 @@ export interface SupportingRailProps {
   allProjectsLabel?: string;
   allProjectsUrl?: string;
   reducedMotion: boolean;
+  /**
+   * When false, the rail omits its bordered footer "View all projects"
+   * CTA. Governed by `SpotlightLayoutVisibility.showRailFooterCta`;
+   * suppressed in wide/medium where the section-level CTA already
+   * lives in the masthead, preserved in compact/minimal where the
+   * masthead action is intentionally dropped.
+   */
+  showFooterCta?: boolean;
 }
 
 export function SupportingRail({
@@ -102,6 +110,7 @@ export function SupportingRail({
   allProjectsLabel,
   allProjectsUrl,
   reducedMotion,
+  showFooterCta = true,
 }: SupportingRailProps): React.JSX.Element | null {
   if (items.length === 0) return null;
 
@@ -127,7 +136,7 @@ export function SupportingRail({
       {items.map((item, i) => (
         <RailTile key={item.id} item={item} index={i + 1} />
       ))}
-      {allProjectsUrl ? (
+      {showFooterCta && allProjectsUrl ? (
         <div className={styles.railFooter}>
           <HbcPremiumCta
             label={allProjectsLabel ?? 'View all projects'}

@@ -1,7 +1,11 @@
 /**
  * Masthead — editorial nameplate at the top of the Spotlight surface.
  * Owns only presentation: eyebrow, rule, freshness date, headline, and
- * the section-level "View all projects" action.
+ * the section-level "View all projects" action. Presence of the
+ * dateline and section-level action is mode-governed via the
+ * `SPOTLIGHT_LAYOUT_VISIBILITY` matrix so compact and minimal states
+ * render as intentionally selective, not merely "the same masthead
+ * with smaller padding."
  */
 import * as React from 'react';
 import { Briefcase } from 'lucide-react';
@@ -14,6 +18,19 @@ export interface MastheadProps {
   latestFreshnessLabel?: string;
   allProjectsLabel?: string;
   allProjectsUrl?: string;
+  /**
+   * When false, the masthead does not render the "updated …" dateline.
+   * Governed by `SpotlightLayoutVisibility.showMastheadDate`.
+   */
+  showDate?: boolean;
+  /**
+   * When false, the masthead does not render the section-level
+   * "View all projects" CTA. Governed by
+   * `SpotlightLayoutVisibility.showMastheadAction`; compact and
+   * minimal hand that CTA off to the rail footer inside the explicit
+   * history disclosure so the section never double-furnishes.
+   */
+  showAction?: boolean;
 }
 
 export function Masthead({
@@ -22,7 +39,11 @@ export function Masthead({
   latestFreshnessLabel,
   allProjectsLabel,
   allProjectsUrl,
+  showDate = true,
+  showAction = true,
 }: MastheadProps): React.JSX.Element {
+  const renderDate = showDate && !!latestFreshnessLabel;
+  const renderAction = showAction && !!allProjectsUrl;
   return (
     <div className={styles.masthead}>
       <div className={styles.mastheadEyebrow}>
@@ -31,7 +52,7 @@ export function Masthead({
         </span>
         <span>{eyebrow}</span>
         <span className={styles.mastheadEyebrowRule} aria-hidden="true" />
-        {latestFreshnessLabel ? (
+        {renderDate ? (
           <span className={styles.mastheadEyebrowDate}>
             {latestFreshnessLabel}
           </span>
@@ -39,7 +60,7 @@ export function Masthead({
       </div>
       <div className={styles.mastheadRow}>
         <h2 className={styles.mastheadHeadline}>{heading}</h2>
-        {allProjectsUrl ? (
+        {renderAction ? (
           <div className={styles.mastheadAction}>
             <HbcPremiumCta
               label={allProjectsLabel ?? 'View all projects'}
