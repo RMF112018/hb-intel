@@ -8,6 +8,7 @@
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
+import { ChevronDown } from 'lucide-react';
 import type { ProjectSpotlightRailItem } from './types.js';
 import type { SpotlightLayoutMode } from './layout-mode.js';
 import { SupportingRail } from './SupportingRail.js';
@@ -67,7 +68,7 @@ export function HistoryDisclosure({
           )}
           aria-hidden="true"
         >
-          ▾
+          <ChevronDown size={14} strokeWidth={2.25} />
         </span>
       </button>
       <div

@@ -13,7 +13,7 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion } from 'motion/react';
-import { Calendar } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
 import { HbcPremiumCta } from '../HbcPremiumCta/index.js';
 import type {
   ProjectSpotlightCompleteness,
@@ -158,7 +158,7 @@ export function FeaturedSlot({
               )}
               aria-hidden="true"
             >
-              ▾
+              <ChevronDown size={14} strokeWidth={2.25} />
             </span>
           </button>
         ) : null}

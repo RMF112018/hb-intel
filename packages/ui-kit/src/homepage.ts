@@ -128,6 +128,7 @@ export {
   ThumbsUp,
   ChevronDown,
   Eye,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 

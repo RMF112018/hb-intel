@@ -8,7 +8,7 @@
  */
 import * as React from 'react';
 import { motion } from 'motion/react';
-import { Users } from 'lucide-react';
+import { Users, X } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import type { ProjectSpotlightTeamMember } from './types.js';
 import {
@@ -126,7 +126,7 @@ export function TeamStrip({
                 }}
                 aria-label="Close team panel"
               >
-                ✕
+                <X size={16} strokeWidth={2.25} aria-hidden="true" />
               </button>
             </div>
             <ul className={styles.teamPanelList}>
