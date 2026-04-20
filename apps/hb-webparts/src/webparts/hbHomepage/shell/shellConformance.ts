@@ -26,8 +26,10 @@
 // =============================================================================
 
 import { getEntryStackPolicy, type EntryStackPolicy } from './entryStackPolicy.js';
+import { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
 import type { BandLayoutResult, OccupantRenderMode, PairingDecision } from './slotComfortResolver.js';
 import type { FirstLaneDecision } from './firstLaneResolver.js';
+import type { ProtectedRowPairing, ShellDiagnostic, ShellPreset } from './shellTypes.js';
 import type {
   BandOrientation,
   BandSemanticRole,
@@ -222,6 +224,264 @@ export function resolveShellConformance(
   };
 }
 
+// =============================================================================
+// Wave-01 Prompt-04 — Shell closure proof
+// -----------------------------------------------------------------------------
+// `ShellClosureProof` is a deterministic, inspectable aggregate that asserts
+// the rendered shell matches the locked three-row composition governed by
+// `SHELL_PROTECTED_DECISIONS.protectedRowPairings`. It synthesizes only
+// from the existing conformance report + the active preset + the live
+// diagnostics list — no resolver re-entry, no child-zone coupling.
+//
+// The proof is intentionally flat and boolean-heavy so a harness, a test,
+// or a hosted DOM inspector can read it without any domain knowledge.
+// `closureHolds` is the single aggregate predicate; `closureNotes` is a
+// short human-readable log of every failing sub-claim for closure review.
+// =============================================================================
+
+export interface OccupantMembershipCheckRow {
+  readonly rowKey: ProtectedRowPairing['rowKey'];
+  readonly bandSemanticRole: ProtectedRowPairing['bandSemanticRole'];
+  readonly expectedPrimaryOccupantId: ProtectedRowPairing['primaryOccupantId'];
+  readonly expectedSecondaryOccupantId: ProtectedRowPairing['secondaryOccupantId'];
+  readonly actualPrimaryOccupantId: string | null;
+  readonly actualSecondaryOccupantId: string | null;
+  readonly primaryMatches: boolean;
+  readonly secondaryMatches: boolean;
+}
+
+export type BandOrientationSequence = readonly BandOrientationState[];
+
+export interface ShellClosureProof {
+  /** Locked row count. Always `3`. */
+  readonly expectedRowCount: 3;
+  readonly rowCount: number;
+
+  readonly expectedRowOrder: readonly ProtectedRowPairing['bandSemanticRole'][];
+  readonly rowOrder: readonly string[];
+  readonly rowOrderMatches: boolean;
+
+  readonly occupantMembership: readonly OccupantMembershipCheckRow[];
+  readonly occupantsAppearOnce: boolean;
+  /** Occupant ids rendered that are not part of the locked six-surface set. */
+  readonly extraOccupants: readonly string[];
+  /** Occupant ids from the locked six-surface set that are missing from the preset. */
+  readonly missingOccupants: readonly string[];
+
+  /** Per-band orientation reported by conformance. `'stacked'` for
+   *  single-column bands at handheld / narrow entry states. */
+  readonly orientationSequence: BandOrientationSequence;
+  readonly expectedOrientationSequenceAtPairedTier: readonly [
+    BandOrientationState,
+    BandOrientationState,
+    BandOrientationState,
+  ];
+  /** True only when every band is paired AND the orientation sequence
+   *  equals `['left-dominant','right-dominant','left-dominant']`. */
+  readonly handednessAlternates: boolean;
+
+  /** True when every band expected to pair at the active entry state
+   *  actually reports `columns === 2`. False surfaces the standard-laptop
+   *  case where minor-slot thresholds still force Rows 1 and 3 to stack. */
+  readonly pairingResolvedAtTier: boolean;
+
+  /** True when the entry state is a handheld / short-height state AND
+   *  every band reports `columns: 1` with `orientation: 'stacked'`. */
+  readonly handheldStackCollapseClean: boolean;
+
+  /** Mirrors whether validation surfaced any Prompt-03 protected-row
+   *  drift diagnostics. `false` when the preset is clean, `true` when
+   *  `PROTECTED_ROW_PAIRING_*` or `PROTECTED_ROW_ORIENTATION_*` fired. */
+  readonly driftDiagnosticsSurfaced: boolean;
+
+  /** Aggregate closure predicate. True when the shell is demonstrably
+   *  rendering the locked arrangement at the active entry state. */
+  readonly closureHolds: boolean;
+
+  /** Short human-readable reasons for any failing sub-claim. Empty when
+   *  `closureHolds === true`. */
+  readonly closureNotes: readonly string[];
+}
+
+export interface ShellClosureProofInput {
+  readonly conformance: ShellConformanceReport;
+  readonly preset: ShellPreset;
+  readonly diagnostics: readonly ShellDiagnostic[];
+}
+
+const HANDHELD_ENTRY_STATES = new Set([
+  'tablet-portrait-large',
+  'tablet-portrait',
+  'phone-portrait',
+  'phone-landscape',
+]);
+
+function isHandheldTier(report: ShellConformanceReport): boolean {
+  return (
+    HANDHELD_ENTRY_STATES.has(report.entryState.id) ||
+    report.shortHeightConstrained ||
+    !report.entryState.firstLanePairingAllowed
+  );
+}
+
+export function resolveShellClosureProof(input: ShellClosureProofInput): ShellClosureProof {
+  const { conformance, preset, diagnostics } = input;
+  const locked = SHELL_PROTECTED_DECISIONS.protectedRowPairings;
+  const expectedRowOrder = locked.map((p) => p.bandSemanticRole);
+  const expectedOrientationSequence: [
+    BandOrientationState,
+    BandOrientationState,
+    BandOrientationState,
+  ] = [locked[0]!.orientation, locked[1]!.orientation, locked[2]!.orientation];
+
+  const rowOrder = conformance.bands.map((b) => b.semanticRole);
+  const rowOrderMatches =
+    rowOrder.length === expectedRowOrder.length &&
+    rowOrder.every((role, i) => role === expectedRowOrder[i]);
+
+  // Build per-row membership check against the authored preset. Slot
+  // occupancy can diverge from conformance at handheld (first-lane
+  // resolver reshuffles) so we consult the preset slot array directly.
+  const occupantMembership: OccupantMembershipCheckRow[] = locked.map((target) => {
+    const band = preset.bands.find((b) => b.semanticRole === target.bandSemanticRole);
+    const primarySlot = band?.slots.find((s) => s.role === 'primary');
+    const secondarySlot = band?.slots.find((s) => s.role === 'secondary');
+    const actualPrimary = primarySlot?.occupantId ?? null;
+    const actualSecondary = secondarySlot?.occupantId ?? null;
+    return {
+      rowKey: target.rowKey,
+      bandSemanticRole: target.bandSemanticRole,
+      expectedPrimaryOccupantId: target.primaryOccupantId,
+      expectedSecondaryOccupantId: target.secondaryOccupantId,
+      actualPrimaryOccupantId: actualPrimary,
+      actualSecondaryOccupantId: actualSecondary,
+      primaryMatches: actualPrimary === target.primaryOccupantId,
+      secondaryMatches: actualSecondary === target.secondaryOccupantId,
+    };
+  });
+
+  const occupantCounts = new Map<string, number>();
+  for (const band of preset.bands) {
+    for (const slot of band.slots) {
+      if (slot.occupantId === null) continue;
+      const id: string = slot.occupantId;
+      occupantCounts.set(id, (occupantCounts.get(id) ?? 0) + 1);
+    }
+  }
+  const expectedOccupantIds = new Set<string>([
+    ...locked.map((p) => p.primaryOccupantId as string),
+    ...locked.map((p) => p.secondaryOccupantId as string),
+  ]);
+  const occupantsAppearOnce = [...occupantCounts.values()].every((c) => c === 1);
+  const extraOccupants = [...occupantCounts.keys()].filter((id) => !expectedOccupantIds.has(id));
+  const missingOccupants = [...expectedOccupantIds].filter((id) => !occupantCounts.has(id));
+
+  const orientationSequence: BandOrientationSequence = conformance.bands.map((b) => b.orientation);
+  const allPaired = conformance.bands.every((b) => b.columns === 2);
+  const handednessAlternates =
+    allPaired &&
+    orientationSequence.length === expectedOrientationSequence.length &&
+    orientationSequence.every((o, i) => o === expectedOrientationSequence[i]);
+
+  const handheld = isHandheldTier(conformance);
+  const pairingResolvedAtTier = handheld ? true : allPaired;
+
+  const handheldStackCollapseClean =
+    handheld &&
+    conformance.bands.every((b) => b.columns === 1 && b.orientation === 'stacked');
+
+  const driftDiagnosticsSurfaced = diagnostics.some(
+    (d) =>
+      d.code === 'PROTECTED_ROW_PAIRING_MISSING' ||
+      d.code === 'PROTECTED_ROW_PAIRING_DRIFT' ||
+      d.code === 'PROTECTED_ROW_ORIENTATION_DRIFT',
+  );
+
+  const notes: string[] = [];
+  if (!rowOrderMatches) {
+    notes.push(
+      `row-order-mismatch: expected [${expectedRowOrder.join(', ')}] got [${rowOrder.join(', ')}]`,
+    );
+  }
+  for (const row of occupantMembership) {
+    if (!row.primaryMatches) {
+      notes.push(
+        `${row.rowKey}-primary-drift: expected ${row.expectedPrimaryOccupantId} got ${row.actualPrimaryOccupantId ?? 'none'}`,
+      );
+    }
+    if (!row.secondaryMatches) {
+      notes.push(
+        `${row.rowKey}-secondary-drift: expected ${row.expectedSecondaryOccupantId} got ${row.actualSecondaryOccupantId ?? 'none'}`,
+      );
+    }
+  }
+  if (!occupantsAppearOnce) {
+    notes.push(
+      `occupant-duplication: ${[...occupantCounts.entries()]
+        .filter(([, c]) => c > 1)
+        .map(([id, c]) => `${id}×${c}`)
+        .join(', ')}`,
+    );
+  }
+  if (extraOccupants.length > 0) {
+    notes.push(`extra-occupants: ${extraOccupants.join(', ')}`);
+  }
+  if (missingOccupants.length > 0) {
+    notes.push(`missing-occupants: ${missingOccupants.join(', ')}`);
+  }
+  if (!handheld && !pairingResolvedAtTier) {
+    const stacked = conformance.bands
+      .filter((b) => b.columns !== 2)
+      .map((b) => `${b.bandId}:${b.pairingDecision.reason}`);
+    notes.push(
+      `pairing-not-resolved-at-${conformance.entryState.id}: ${stacked.join('; ')} — expected paired at this tier; surface-level thresholds keep Rows 1/3 stacked below ultrawide until Wave-02 hardens HB Kudos + PCP narrow-slot fit`,
+    );
+  }
+  if (!handheld && !handednessAlternates && allPaired) {
+    notes.push(
+      `handedness-sequence-drift: expected [${expectedOrientationSequence.join(', ')}] got [${orientationSequence.join(', ')}]`,
+    );
+  }
+  if (handheld && !handheldStackCollapseClean) {
+    const dirty = conformance.bands
+      .filter((b) => b.columns !== 1 || b.orientation !== 'stacked')
+      .map((b) => `${b.bandId}:columns=${b.columns},orientation=${b.orientation}`);
+    notes.push(`handheld-stack-not-clean: ${dirty.join('; ')}`);
+  }
+  if (driftDiagnosticsSurfaced) {
+    notes.push('protected-row-drift-diagnostics-surfaced');
+  }
+
+  const closureHolds =
+    rowOrderMatches &&
+    occupantMembership.every((r) => r.primaryMatches && r.secondaryMatches) &&
+    occupantsAppearOnce &&
+    extraOccupants.length === 0 &&
+    missingOccupants.length === 0 &&
+    !driftDiagnosticsSurfaced &&
+    (handheld ? handheldStackCollapseClean : handednessAlternates && pairingResolvedAtTier);
+
+  return {
+    expectedRowCount: 3,
+    rowCount: conformance.bands.length,
+    expectedRowOrder,
+    rowOrder,
+    rowOrderMatches,
+    occupantMembership,
+    occupantsAppearOnce,
+    extraOccupants,
+    missingOccupants,
+    orientationSequence,
+    expectedOrientationSequenceAtPairedTier: expectedOrientationSequence,
+    handednessAlternates,
+    pairingResolvedAtTier,
+    handheldStackCollapseClean,
+    driftDiagnosticsSurfaced,
+    closureHolds,
+    closureNotes: notes,
+  };
+}
+
 // -----------------------------------------------------------------------------
 // Data-attribute surface
 // -----------------------------------------------------------------------------
@@ -251,10 +511,22 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-first-lane-candidates-considered': number;
   /** Comma-separated per-band orientation values, in preset order. */
   readonly 'data-shell-band-orientations': string;
+  /** Wave-01 Prompt-04 closure aggregate. `'true'` when the shell
+   *  demonstrably matches the locked three-row composition at the
+   *  active entry state; `'false'` otherwise. */
+  readonly 'data-shell-closure-holds': 'true' | 'false';
+  /** Comma-separated row-order semantic roles, in rendered order.
+   *  Enables hosted DOM inspection without scraping React state. */
+  readonly 'data-shell-closure-row-order': string;
+}
+
+export interface ToShellConformanceDataAttributesOptions {
+  readonly closure?: ShellClosureProof;
 }
 
 export function toShellConformanceDataAttributes(
   report: ShellConformanceReport,
+  options: ToShellConformanceDataAttributesOptions = {},
 ): ShellConformanceDataAttributes {
   const pairedCount = report.bands.filter((b) => b.columns === 2).length;
   const fitContractDenials = report.bands.filter(
@@ -288,5 +560,8 @@ export function toShellConformanceDataAttributes(
     'data-shell-first-lane-candidates-considered':
       report.firstLaneDecision?.candidatesConsidered ?? 0,
     'data-shell-band-orientations': report.bands.map((b) => b.orientation).join(','),
+    'data-shell-closure-holds': options.closure?.closureHolds ? 'true' : 'false',
+    'data-shell-closure-row-order':
+      options.closure?.rowOrder.join(',') ?? report.bands.map((b) => b.semanticRole).join(','),
   };
 }

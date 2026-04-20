@@ -102,6 +102,12 @@ describe('shellConformance — data-attribute surface', () => {
     expect(attrs['data-shell-constrained-slot-count']).toBeGreaterThanOrEqual(0);
     expect(attrs['data-shell-first-lane-action-detail']).toBe('none');
     expect(attrs['data-shell-first-lane-candidates-considered']).toBe(0);
+    // Wave-01 Prompt-04 closure-proof attribute surface.
+    expect(attrs['data-shell-closure-holds']).toMatch(/^(true|false)$/);
+    expect(typeof attrs['data-shell-closure-row-order']).toBe('string');
+    expect(attrs['data-shell-closure-row-order']).toBe(
+      report.bands.map((b) => b.semanticRole).join(','),
+    );
   });
 
   it('flags short-height when the constraint applies', () => {

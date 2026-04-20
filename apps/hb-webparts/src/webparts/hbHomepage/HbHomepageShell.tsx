@@ -10,6 +10,7 @@ import {
 import type { ShellContainerState } from './shell/useShellContainer.js';
 import { resolveBandLayout } from './shell/slotComfortResolver.js';
 import {
+  resolveShellClosureProof,
   resolveShellConformance,
   toShellConformanceDataAttributes,
 } from './shell/shellConformance.js';
@@ -357,7 +358,18 @@ function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyPro
       firstLaneResolution.decision,
     ],
   );
-  const conformanceAttrs = toShellConformanceDataAttributes(conformance);
+  const closureProof = React.useMemo(
+    () =>
+      resolveShellClosureProof({
+        conformance,
+        preset: layoutState.preset,
+        diagnostics: layoutState.diagnostics,
+      }),
+    [conformance, layoutState.preset, layoutState.diagnostics],
+  );
+  const conformanceAttrs = toShellConformanceDataAttributes(conformance, {
+    closure: closureProof,
+  });
 
   return (
     <div
