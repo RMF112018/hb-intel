@@ -97,7 +97,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(drawerIcon?.className.includes('tileIconCompliant')).toBe(true);
   });
 
-  it('uses bottom drawer overflow on desktop', () => {
+  it('uses bottom drawer overflow on desktop with single Company Tools category', () => {
     const { container } = render(
       <HbcHomepageLauncher primary={TILES.slice(0, 5)} overflow={[TILES[5]!]} deviceClass="desktop" />,
     );
@@ -112,9 +112,13 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('data-hbc-launcher-tile-geometry')).toBe('icon-forward-square');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     fireEvent.click(trigger);
-    expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
-    expect(screen.getByText('Field Ops')).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog', { name: /Company Tools/i });
+    expect(dialog).toBeInTheDocument();
+    expect(dialog.getAttribute('data-hbc-launcher-drawer-category')).toBe('company-tools');
     expect(screen.getByRole('link', { name: /Submit Timesheet/ })).toBeInTheDocument();
+    // No fragmented departmental group headings render inside the drawer.
+    expect(screen.queryByText('Field Ops')).toBeNull();
+    expect(screen.queryByText('Approvals')).toBeNull();
   });
 
   it('keeps tile descriptions out of the visible tile surface', () => {
@@ -189,7 +193,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(trigger);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.queryByRole('dialog', { name: /More tools/i })).not.toBeNull();
+    expect(screen.queryByRole('dialog', { name: /Company Tools/i })).not.toBeNull();
   });
 
   it('supports close button, escape key, and focus return to overflow trigger', async () => {
@@ -203,17 +207,17 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const trigger = screen.getByRole('button', { name: /More tools/i });
     trigger.focus();
     fireEvent.click(trigger);
-    expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Company Tools/i })).toBeInTheDocument();
     fireEvent.keyDown(document, { key: 'Escape' });
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: /More tools/i })).toBeNull();
+      expect(screen.queryByRole('dialog', { name: /Company Tools/i })).toBeNull();
     });
     expect(trigger).toHaveFocus();
 
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole('button', { name: /Close More tools/i }));
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: /More tools/i })).toBeNull();
+      expect(screen.queryByRole('dialog', { name: /Company Tools/i })).toBeNull();
     });
     expect(trigger).toHaveFocus();
   });
@@ -227,14 +231,14 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
-    expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Company Tools/i })).toBeInTheDocument();
     const backdrop = container.ownerDocument.querySelector(
       '[data-hbc-homepage-launcher-sheet-backdrop="true"]',
     );
     expect(backdrop).not.toBeNull();
     fireEvent.click(backdrop!);
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: /More tools/i })).toBeNull();
+      expect(screen.queryByRole('dialog', { name: /Company Tools/i })).toBeNull();
     });
   });
 
@@ -286,7 +290,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
   });
 
-  it('renders overflow grouping headings when group metadata is provided', () => {
+  it('suppresses per-tile group metadata inside the one-category drawer', () => {
     render(
       <HbcHomepageLauncher
         primary={TILES.slice(0, 2)}
@@ -295,10 +299,12 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
-    expect(screen.getByText('Field Ops')).toBeInTheDocument();
+    expect(screen.queryByText('Field Ops')).toBeNull();
+    expect(screen.queryByText('Approvals')).toBeNull();
+    expect(screen.getByRole('dialog', { name: /Company Tools/i })).toBeInTheDocument();
   });
 
-  it('renders grouped overflow deterministically in drawer mode', () => {
+  it('renders all overflow tools flat under Company Tools sorted alphabetically', () => {
     render(
       <HbcHomepageLauncher
         primary={TILES.slice(0, 1)}
@@ -311,11 +317,17 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
-    const groupHeadings = screen.getAllByText(/Approvals|Quality/).map((node) => node.textContent);
-    expect(groupHeadings).toEqual(['Approvals', 'Quality']);
-    expect(screen.getByRole('link', { name: /Approve Budget/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Sign Change Order/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /QA Checklist/i })).toBeInTheDocument();
+    expect(screen.queryByText('Approvals')).toBeNull();
+    expect(screen.queryByText('Quality')).toBeNull();
+    const grid = screen.getByRole('dialog', { name: /Company Tools/i })
+      .querySelector('[data-hbc-ui="homepage-launcher-drawer-grid"]');
+    expect(grid).not.toBeNull();
+    const titles = Array.from(grid!.querySelectorAll('a[data-hbc-ui="homepage-launcher-tile"]'))
+      .map((node) => node.getAttribute('data-hbc-launcher-tile-id'));
+    // drawer includes primary + overflow, sorted alphabetically by title:
+    // "Approve Budget" (a-approve), "Approve RFI" (approve-rfi),
+    // "QA Checklist" (z-qa), "Sign Change Order" (b-approve).
+    expect(titles).toEqual(['a-approve', 'approve-rfi', 'z-qa', 'b-approve']);
   });
 
   it('uses visible overflow title as truncation-rescue tooltip text', () => {
@@ -343,7 +355,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
   });
 
-  it('keeps grouped overflow intentional in sheet mode', async () => {
+  it('renders one Company Tools category on phone with no departmental headings', async () => {
     render(
       <HbcHomepageLauncher
         primary={TILES.slice(0, 2)}
@@ -355,7 +367,8 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
-    expect(await screen.findByText('Field Ops')).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: /Company Tools/i })).toBeInTheDocument();
+    expect(screen.queryByText('Field Ops')).toBeNull();
     expect((await screen.findAllByRole('link')).length).toBeGreaterThanOrEqual(2);
   });
 
@@ -393,9 +406,10 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
-    const dialog = screen.getByRole('dialog', { name: /More tools/i });
+    const dialog = screen.getByRole('dialog', { name: /Company Tools/i });
     expect(dialog.getAttribute('data-hbc-launcher-drawer-opaque')).toBe('true');
     expect(dialog.getAttribute('data-hbc-launcher-drawer-elevation')).toBe('3');
+    expect(dialog.getAttribute('data-hbc-launcher-drawer-category')).toBe('company-tools');
   });
 
   it('handheld mode emits all-tools runtime markers', () => {

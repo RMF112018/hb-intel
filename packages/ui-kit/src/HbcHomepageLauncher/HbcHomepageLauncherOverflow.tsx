@@ -1,9 +1,11 @@
 /**
- * HbcHomepageLauncherOverflow — governed launcher drawer expansion.
+ * HbcHomepageLauncherOverflow — Company Tools drawer.
  *
- * Overflow is a single bottom drawer pattern across all display classes.
- * The trigger remains inline in the launcher row and opens a tile-based
- * all-tools surface with focus management and keyboard dismissal.
+ * Total rebuild: a single-category bottom sheet with one premium launcher
+ * tile grid. No per-tile grouping; every overflow tool surfaces under the
+ * `Company Tools` category. Content-driven height, horizontally centered
+ * grid, fully opaque surface. Focus trap, Escape, and return-focus behavior
+ * are provided by Floating UI.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -26,44 +28,12 @@ import { launcherTile } from './variants.js';
 import { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 import styles from './homepage-launcher.module.css';
 
-interface OverflowGroup {
-  key: string;
-  title?: string;
-  items: HomepageLauncherTileModel[];
-}
+const DRAWER_CATEGORY_LABEL = 'Company Tools';
 
-function resolveOverflowGroups(items: HomepageLauncherTileModel[]): OverflowGroup[] {
-  const byKey = new Map<string, OverflowGroup>();
-  for (const tile of items) {
-    const normalizedGroupKey = tile.groupKey?.trim().toLowerCase() || '__ungrouped';
-    const groupTitle = tile.groupTitle?.trim() || undefined;
-    const existing = byKey.get(normalizedGroupKey);
-    if (existing) {
-      existing.items.push(tile);
-      if (!existing.title && groupTitle) existing.title = groupTitle;
-      continue;
-    }
-    byKey.set(normalizedGroupKey, {
-      key: normalizedGroupKey,
-      title:
-        normalizedGroupKey === '__ungrouped'
-          ? undefined
-          : (groupTitle ?? tile.groupKey?.trim()),
-      items: [tile],
-    });
-  }
-
-  const groups = Array.from(byKey.values())
-    .map((group) => ({
-      ...group,
-      items: [...group.items].sort((a, b) => a.title.localeCompare(b.title)),
-    }))
-    .sort((a, b) => {
-      if (a.key === '__ungrouped') return 1;
-      if (b.key === '__ungrouped') return -1;
-      return (a.title ?? a.key).localeCompare(b.title ?? b.key);
-    });
-  return groups;
+function sortTilesAlphabetically(
+  items: readonly HomepageLauncherTileModel[],
+): HomepageLauncherTileModel[] {
+  return [...items].sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function DrawerOverflow({
@@ -79,12 +49,8 @@ function DrawerOverflow({
   const prefersReducedMotion = useReducedMotion();
   const dialogId = React.useId();
   const titleId = React.useId();
-  const descriptionId = React.useId();
-  const groupedItems = React.useMemo(() => resolveOverflowGroups(items), [items]);
-  const { refs, context } = useFloating({
-    open,
-    onOpenChange: setOpen,
-  });
+  const sortedItems = React.useMemo(() => sortTilesAlphabetically(items), [items]);
+  const { refs, context } = useFloating({ open, onOpenChange: setOpen });
 
   const click = useClick(context);
   const dismiss = useDismiss(context, { escapeKey: true, outsidePress: true });
@@ -93,7 +59,7 @@ function DrawerOverflow({
   const closeSheet = React.useCallback(() => setOpen(false), []);
   const surfaceTransition = prefersReducedMotion
     ? { duration: 0 }
-    : { duration: 0.24, ease: 'easeOut' as const };
+    : { duration: 0.26, ease: 'easeOut' as const };
   const backdropTransition = prefersReducedMotion ? { duration: 0 } : { duration: 0.2 };
 
   return (
@@ -155,19 +121,25 @@ function DrawerOverflow({
                   transition={surfaceTransition}
                   {...getFloatingProps()}
                   aria-labelledby={titleId}
-                  aria-describedby={descriptionId}
                   data-hbc-homepage-launcher-sheet-content="all-tools"
                   data-hbc-launcher-drawer-opaque="true"
                   data-hbc-launcher-drawer-elevation="3"
+                  data-hbc-launcher-drawer-category="company-tools"
                 >
-                  <div className={styles.sheetHeader}>
+                  <header className={styles.sheetHeader}>
                     <div className={styles.sheetHeading}>
-                      <span id={titleId} className={styles.sheetTitle}>{label}</span>
-                      <span id={descriptionId} className={styles.sheetSubtitle}>
-                        Launcher tools grouped for quick scan and keyboard-safe access.
+                      <span
+                        id={titleId}
+                        className={styles.sheetTitle}
+                        data-hbc-launcher-drawer-category-label="true"
+                      >
+                        {DRAWER_CATEGORY_LABEL}
                       </span>
                     </div>
-                    <span className={styles.overflowHeaderCount} aria-hidden="true">
+                    <span
+                      className={styles.sheetHeaderCount}
+                      aria-label={`${items.length} tools`}
+                    >
                       {items.length}
                     </span>
                     <button
@@ -176,33 +148,28 @@ function DrawerOverflow({
                       onClick={closeSheet}
                       aria-label={`Close ${label}`}
                     >
-                      <X size={14} aria-hidden="true" />
+                      <X size={16} strokeWidth={2.4} aria-hidden="true" />
                     </button>
-                  </div>
-                  <div className={styles.drawerBody}>
-                    {groupedItems.map((group) => (
-                      <section
-                        key={group.key}
-                        className={styles.drawerGroup}
-                        data-hbc-ui="homepage-launcher-overflow-group"
-                        data-hbc-overflow-group-key={group.key}
-                        data-hbc-overflow-group-size={group.items.length}
-                      >
-                        {group.title ? (
-                          <h3 className={styles.overflowGroupTitle}>{group.title}</h3>
-                        ) : null}
-                        <div className={styles.drawerTileGrid}>
-                          {group.items.map((tile) => (
-                            <HbcHomepageLauncherTile
-                              key={tile.id}
-                              tile={tile}
-                              family="drawer"
-                              className={styles.drawerTile}
-                            />
-                          ))}
-                        </div>
-                      </section>
-                    ))}
+                  </header>
+                  <div
+                    className={styles.drawerBody}
+                    data-hbc-ui="homepage-launcher-overflow-section"
+                    data-hbc-overflow-category-key="company-tools"
+                    data-hbc-overflow-category-size={sortedItems.length}
+                  >
+                    <div
+                      className={styles.drawerTileGrid}
+                      data-hbc-ui="homepage-launcher-drawer-grid"
+                    >
+                      {sortedItems.map((tile) => (
+                        <HbcHomepageLauncherTile
+                          key={tile.id}
+                          tile={tile}
+                          family="drawer"
+                          className={styles.drawerTile}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </motion.div>
               </div>
