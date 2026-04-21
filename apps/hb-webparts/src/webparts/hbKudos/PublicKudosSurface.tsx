@@ -72,24 +72,53 @@ export interface PublicKudosSurfaceProps {
   onOpenArticle: (entry: KudosEntry) => void;
 }
 
-function useIsCompact(breakpointPx = 768): boolean {
-  const [isCompact, setIsCompact] = React.useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia(`(max-width: ${breakpointPx - 1}px)`).matches;
+type FeaturedLayoutMode = 'default' | 'compact' | 'handheld';
+
+function useFeaturedLayoutMode(): FeaturedLayoutMode {
+  const [mode, setMode] = React.useState<FeaturedLayoutMode>(() => {
+    if (typeof window === 'undefined') return 'default';
+    const width = window.innerWidth;
+    if (width <= 559) return 'handheld';
+    if (width <= 959) return 'compact';
+    return 'default';
   });
+
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
-    const mq = window.matchMedia(`(max-width: ${breakpointPx - 1}px)`);
-    const onChange = (): void => setIsCompact(mq.matches);
-    if (typeof mq.addEventListener === 'function') {
-      mq.addEventListener('change', onChange);
-      return () => mq.removeEventListener('change', onChange);
+    const mqHandheld = window.matchMedia('(max-width: 559px)');
+    const mqCompact = window.matchMedia('(max-width: 959px)');
+    const updateMode = (): void => {
+      if (mqHandheld.matches) {
+        setMode('handheld');
+        return;
+      }
+      if (mqCompact.matches) {
+        setMode('compact');
+        return;
+      }
+      setMode('default');
+    };
+    updateMode();
+    if (
+      typeof mqHandheld.addEventListener === 'function' &&
+      typeof mqCompact.addEventListener === 'function'
+    ) {
+      mqHandheld.addEventListener('change', updateMode);
+      mqCompact.addEventListener('change', updateMode);
+      return () => {
+        mqHandheld.removeEventListener('change', updateMode);
+        mqCompact.removeEventListener('change', updateMode);
+      };
     }
     // Fallback for older Safari
-    mq.addListener(onChange);
-    return () => mq.removeListener(onChange);
-  }, [breakpointPx]);
-  return isCompact;
+    mqHandheld.addListener(updateMode);
+    mqCompact.addListener(updateMode);
+    return () => {
+      mqHandheld.removeListener(updateMode);
+      mqCompact.removeListener(updateMode);
+    };
+  }, []);
+  return mode;
 }
 
 function formatSubmittedBy(entry: KudosEntry): string {
@@ -113,8 +142,13 @@ export function PublicKudosSurface({
   celebrateLoading,
   onOpenArticle,
 }: PublicKudosSurfaceProps): React.JSX.Element {
-  const isCompact = useIsCompact(768);
-  const featuredBadgeLabel = isCompact ? 'Featured' : 'Featured Recognition';
+  const featuredLayoutMode = useFeaturedLayoutMode();
+  const featuredBadgeLabel =
+    featuredLayoutMode === 'handheld'
+      ? null
+      : featuredLayoutMode === 'compact'
+        ? 'Featured'
+        : 'Featured Recognition';
 
   return (
     <section
@@ -125,7 +159,7 @@ export function PublicKudosSurface({
       {/* Unified hero zone — masthead (upper band) + featured
           (nested content surface) share one gradient atmosphere. */}
       <div className={styles.hero} data-hbc-testid="hb-kudos-hero-zone">
-        <div className={styles.masthead}>
+        <div className={styles.masthead} data-layout-mode={featuredLayoutMode}>
           <h2 className={styles.title} data-hbc-testid="hb-kudos-hero-band">
             <span className={styles.titleIcon} aria-hidden="true">
               <Trophy size={16} strokeWidth={2.25} />
@@ -147,6 +181,7 @@ export function PublicKudosSurface({
           <FeaturedCard
             entry={featured}
             badgeLabel={featuredBadgeLabel}
+            layoutMode={featuredLayoutMode}
             onCelebrate={onCelebrate}
             celebrateLoading={celebrateLoading}
             onOpenArticle={onOpenArticle}
@@ -229,7 +264,8 @@ export function PublicKudosSurface({
 
 interface FeaturedCardProps {
   entry: KudosEntry;
-  badgeLabel: string;
+  badgeLabel: string | null;
+  layoutMode: FeaturedLayoutMode;
   onCelebrate?: (kudosId: string) => void;
   celebrateLoading?: boolean;
   onOpenArticle: (entry: KudosEntry) => void;
@@ -238,6 +274,7 @@ interface FeaturedCardProps {
 function FeaturedCard({
   entry,
   badgeLabel,
+  layoutMode,
   onCelebrate,
   celebrateLoading,
   onOpenArticle,
@@ -280,17 +317,28 @@ function FeaturedCard({
 
   const detailsExceedsPreview = rawDetails.length > rawExcerpt.length + 40;
   const showReadMore = hasPreview && (isClampTruncated || detailsExceedsPreview);
+  const showExcerpt = hasPreview && layoutMode !== 'handheld';
+  const showSubmittedBy = layoutMode !== 'handheld';
+  const featuredModeClass =
+    layoutMode === 'compact'
+      ? styles.featuredCompact
+      : layoutMode === 'handheld'
+        ? styles.featuredHandheld
+        : '';
 
   return (
     <article
-      className={styles.featured}
+      className={[styles.featured, featuredModeClass].filter(Boolean).join(' ')}
       data-hbc-testid="hb-kudos-featured-card"
+      data-layout-mode={layoutMode}
       aria-labelledby={`hb-kudos-featured-recipient-${entry.id}`}
     >
-      <span className={kudosFeaturedBadge()} aria-label={badgeLabel}>
-        <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
-        {badgeLabel}
-      </span>
+      {badgeLabel ? (
+        <span className={kudosFeaturedBadge()} aria-label={badgeLabel}>
+          <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
+          {badgeLabel}
+        </span>
+      ) : null}
 
       <div className={styles.featuredTop}>
         {entry.recipients.length > 0 ? (
@@ -317,7 +365,7 @@ function FeaturedCard({
         </div>
       </div>
 
-      {hasPreview ? (
+      {showExcerpt ? (
         <div className={styles.featuredBody}>
           {/* Clamped container is markup-only text so the webkit-box
               clamp never hides the action affordance below. */}
@@ -345,7 +393,18 @@ function FeaturedCard({
       ) : null}
 
       <div className={styles.featuredFooter}>
-        <span>{formatSubmittedBy(entry)}</span>
+        {showSubmittedBy ? <span>{formatSubmittedBy(entry)}</span> : <span />}
+        {layoutMode === 'handheld' ? (
+          <button
+            type="button"
+            className={[kudosReadmoreBtn(), styles.featuredOpenBtn].join(' ')}
+            onClick={() => onOpenArticle(entry)}
+            aria-label={`Open recognition for ${recipientDisplay}`}
+            data-hbc-testid="hb-kudos-featured-open"
+          >
+            Open recognition
+          </button>
+        ) : null}
         {onCelebrate ? (
           <button
             type="button"

@@ -7,6 +7,8 @@ declare const styles: {
   readonly titleIcon: string;
   readonly giveBtn: string;
   readonly featured: string;
+  readonly featuredCompact: string;
+  readonly featuredHandheld: string;
   readonly featuredBadge: string;
   readonly featuredTop: string;
   readonly featuredHeader: string;
@@ -16,6 +18,7 @@ declare const styles: {
   readonly featuredExcerpt: string;
   readonly readmoreBtn: string;
   readonly featuredFooter: string;
+  readonly featuredOpenBtn: string;
   readonly celebrateBtn: string;
   readonly celebrateIcon: string;
   readonly sectionHeader: string;
