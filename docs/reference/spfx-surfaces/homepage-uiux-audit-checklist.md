@@ -195,7 +195,7 @@ This checklist is not a substitute for those files. It is a practical audit tool
 - [ ] Overlay collisions, fixed controls, iframe conditions, or safe-area issues are accounted for where relevant.
 - [ ] The application survives common zoom conditions and constrained browser windows.
 - [ ] Hosted validation is part of acceptance, not optional polish.
-- [ ] Packaging truth matches source intent.
+- [ ] Packaging truth matches source intent. For the flagship hero + entry stack, record across the audited seven-breakpoint matrix in [`homepage-hosted-breakpoint-evidence.md`](./homepage-hosted-breakpoint-evidence.md).
 - [ ] The rendered SharePoint-hosted result preserves the intended structural and visual upgrade.
 - [ ] The application does not rely on brittle DOM assumptions about the host.
 - [ ] Critical controls are not hidden by host chrome, sticky assistants, or edge overlays.

@@ -192,6 +192,10 @@ Capture:
 4. The app catalog view showing the deployed `.sppkg` version
    matches the effectiveness-proof `versionAuthority.solutionVersion`.
 
+For full breakpoint-matrix and packaged-truth sign-off across the
+audited seven viewports, record evidence in
+[`../reference/spfx-surfaces/homepage-hosted-breakpoint-evidence.md`](../reference/spfx-surfaces/homepage-hosted-breakpoint-evidence.md).
+
 ## Signals the wrong surface / package is still being rendered
 - The homepage DOM has no `data-hb-homepage-entry-stack="root"`.
 - The homepage DOM has no `data-hb-homepage-entry-stack-region="hero"`.

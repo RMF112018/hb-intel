@@ -82,7 +82,7 @@ If the doctrine is stricter than the scorecard, the doctrine wins.
 - Strong purpose-fit and persona expression
 - Clear productized surface identity
 - Credible compact and hosted behavior
-- Evidence-backed closure (flagship hero: [`homepage-uiux-audit-evidence.md`](./homepage-uiux-audit-evidence.md))
+- Evidence-backed closure — readability: [`homepage-uiux-audit-evidence.md`](./homepage-uiux-audit-evidence.md); hosted + packaging breakpoint matrix: [`homepage-hosted-breakpoint-evidence.md`](./homepage-hosted-breakpoint-evidence.md)
 - Comparable rigor to the current hbKudos public runtime without cloning it
 
 ## Hard stop failures
