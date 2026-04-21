@@ -41,6 +41,7 @@ import {
   SHELL_WIDTH_SOURCE,
   type ShellContainerState,
 } from './shell/useShellContainer.js';
+import styles from './HbHomepageLauncherBand.module.css';
 
 export interface HbHomepageLauncherBandProps {
   bandKey?: string;
@@ -178,7 +179,14 @@ export function HbHomepageLauncherBand({
       data-hbc-launcher-entry-authority="shared-entry-state"
       data-hbc-launcher-alignment-mode={alignmentMode}
     >
-      {content}
+      <div
+        className={styles.bandShell}
+        data-hb-homepage-launcher-band-shell="root"
+        data-hbc-launcher-device-class={deviceClass}
+        data-hbc-launcher-short-height={resolution.shortHeightConstrained ? 'true' : 'false'}
+      >
+        {content}
+      </div>
     </div>
   );
 }
