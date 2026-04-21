@@ -110,6 +110,13 @@ export function FeaturedSlot({
   const milestones = featured.milestones ?? [];
   const teamMembers = featured.teamMembers ?? [];
   const hasImage = Boolean(featured.image?.src);
+  // Poster-led: in wide/medium with a hero image, the title and
+  // authored headline live inside the hero overlay so first view
+  // carries title + status + CTA without a tall image pushing them
+  // below the fold. Compact/minimal keep the classic posture.
+  const posterLed =
+    hasImage &&
+    (visibility.mode === 'wide' || visibility.mode === 'medium');
 
   const posture = resolveContentPosture(featured, visibility, hasImage);
 
@@ -129,14 +136,16 @@ export function FeaturedSlot({
         transition: { duration: 0.55, ease: EASE_OUT_EXPO },
       };
 
-  // Inline CTA rides above the disclosure in the title-led posture so
-  // the primary action is in first view. The details region drops the
-  // CTA duplicate in that case.
-  const renderInlineCta = !hasImage && Boolean(featured.cta);
-  const renderDetailsCta = hasImage && Boolean(featured.cta);
+  // Inline CTA sits above the disclosure in both the no-image
+  // (title-led) posture and the wide/medium poster-led posture so the
+  // primary action is in first view. Only the compact / minimal
+  // image-led posture still buries the CTA inside the collapsed
+  // details region.
+  const renderInlineCta = (!hasImage || posterLed) && Boolean(featured.cta);
+  const renderDetailsCta = !renderInlineCta && Boolean(featured.cta);
 
   const hasDetailsContent =
-    (posture.showHeadline && Boolean(featured.headline)) ||
+    (!posterLed && posture.showHeadline && Boolean(featured.headline)) ||
     Boolean(featured.summary) ||
     posture.showMilestoneList ||
     Boolean(featured.freshnessLabel) ||
@@ -165,6 +174,10 @@ export function FeaturedSlot({
           strategicEmphasis={featured.strategicEmphasis}
           isStale={featured.isStale}
           showOverlayChips={visibility.showInlineMeta}
+          posterTitle={posterLed ? featured.title : undefined}
+          posterHeadline={
+            posterLed && posture.showHeadline ? featured.headline : undefined
+          }
         />
       ) : null}
 
@@ -205,7 +218,9 @@ export function FeaturedSlot({
         ) : null}
 
         <div className={styles.featuredEssentials}>
-          <h3 className={styles.featuredTitle}>{featured.title}</h3>
+          {posterLed ? null : (
+            <h3 className={styles.featuredTitle}>{featured.title}</h3>
+          )}
           <MilestoneProgressPill milestones={milestones} />
           {renderInlineCta && featured.cta ? (
             <div className={styles.featuredCtaInline}>
@@ -252,7 +267,7 @@ export function FeaturedSlot({
             )}
             hidden={!detailsOpen}
           >
-            {posture.showHeadline && featured.headline ? (
+            {!posterLed && posture.showHeadline && featured.headline ? (
               <p className={styles.featuredHeadline}>{featured.headline}</p>
             ) : null}
 

@@ -439,3 +439,39 @@ export const NoImageFeaturedMinimal: Story = {
     </div>
   ),
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// Poster-led first view (wide / medium image-led).
+// ─────────────────────────────────────────────────────────────────────
+
+const retinaLaptopWrap: React.CSSProperties = { maxWidth: 1320 };
+
+/**
+ * Proves: in `wide` with an image, the featured title + authored
+ * headline render inside the hero over the scrim, the hero height
+ * is reduced, and the primary CTA sits inline above the disclosure.
+ * Title + status + CTA are all in first view on a retina-laptop
+ * viewport without the user scrolling past the image.
+ */
+export const PosterLedWide: Story = {
+  name: 'Poster-led / Wide — title in hero, CTA in first view',
+  render: () => (
+    <div style={retinaLaptopWrap}>
+      <HbcProjectSpotlightSurface model={fullModel} forceMode="wide" />
+    </div>
+  ),
+};
+
+/**
+ * Proves: poster-led composition holds at a realistic SharePoint
+ * section width. Hero retains authored-quality imagery but first
+ * view carries title + status + CTA without an oversized banner.
+ */
+export const PosterLedMedium: Story = {
+  name: 'Poster-led / Medium — title in hero, CTA in first view',
+  render: () => (
+    <div style={sharePointSectionWrap}>
+      <HbcProjectSpotlightSurface model={fullModel} forceMode="medium" />
+    </div>
+  ),
+};

@@ -196,3 +196,104 @@ describe('HbcProjectSpotlightSurface — title-led no-image posture', () => {
     ).toBeInTheDocument();
   });
 });
+
+describe('HbcProjectSpotlightSurface — poster-led image-led posture', () => {
+  function posterModel(
+    headline: string | undefined,
+  ): ProjectSpotlightSurfaceModel {
+    return {
+      heading: 'Project Spotlight',
+      featured: {
+        id: 'featured',
+        title: 'Palm Beach Medical Campus Expansion',
+        headline,
+        summary: 'Structural turnover enters final phase.',
+        status: { label: 'On Track', variant: 'success' },
+        strategicEmphasis: true,
+        image: {
+          src: 'https://cdn.example.invalid/projects/palm-beach.jpg',
+          alt: 'Palm Beach aerial',
+        },
+        milestones: [],
+        teamMembers: [],
+        cta: { label: 'View project brief', href: '#brief' },
+        completeness: 'full',
+      },
+      secondary: [],
+    };
+  }
+
+  it('renders the featured title inside the hero and suppresses the duplicate below-hero title (wide)', () => {
+    const { container } = render(
+      <HbcProjectSpotlightSurface model={posterModel('Final structural turnover phase')} forceMode="wide" />,
+    );
+    const layout = findFeaturedLayout(container);
+    const mediaZone = layout.querySelector<HTMLElement>(
+      '[data-has-image="true"]',
+    );
+    expect(mediaZone).not.toBeNull();
+    expect(mediaZone?.getAttribute('data-poster-led')).toBe('true');
+    // Exactly one title element, and it lives inside the hero.
+    const titles = layout.querySelectorAll('h3');
+    expect(titles.length).toBe(1);
+    expect(mediaZone?.contains(titles[0])).toBe(true);
+    expect(titles[0].textContent).toContain('Palm Beach Medical Campus');
+    // Authored headline also rides inside the hero.
+    expect(mediaZone?.textContent).toContain(
+      'Final structural turnover phase',
+    );
+  });
+
+  it('renders poster-led at medium and places the primary CTA above the disclosure', () => {
+    const { container, getByRole } = render(
+      <HbcProjectSpotlightSurface model={posterModel('Final structural turnover phase')} forceMode="medium" />,
+    );
+    const layout = findFeaturedLayout(container);
+    const mediaZone = layout.querySelector<HTMLElement>(
+      '[data-has-image="true"]',
+    );
+    expect(mediaZone?.getAttribute('data-poster-led')).toBe('true');
+    // CTA in first view (inline, not inside the closed details region).
+    const cta = getByRole('link', { name: /View project brief/i });
+    expect(cta).toBeInTheDocument();
+    // Disclosure still exists for the long-form details.
+    const disclosure = Array.from(
+      layout.querySelectorAll('button'),
+    ).find((b) => /spotlight details/i.test(b.textContent ?? ''));
+    expect(disclosure).toBeTruthy();
+  });
+
+  it('does not poster-lead at compact — title stays below the hero', () => {
+    const { container } = render(
+      <HbcProjectSpotlightSurface model={posterModel('Final structural turnover phase')} forceMode="compact" />,
+    );
+    const layout = findFeaturedLayout(container);
+    const mediaZone = layout.querySelector<HTMLElement>(
+      '[data-has-image="true"]',
+    );
+    expect(mediaZone?.getAttribute('data-poster-led')).toBe('false');
+    const titles = layout.querySelectorAll('h3');
+    expect(titles.length).toBe(1);
+    // Title is NOT inside the media zone at compact.
+    expect(mediaZone?.contains(titles[0])).toBe(false);
+  });
+
+  it('omits the poster headline when the authored headline is absent', () => {
+    const { container } = render(
+      <HbcProjectSpotlightSurface
+        model={posterModel(undefined)}
+        forceMode="wide"
+      />,
+    );
+    const layout = findFeaturedLayout(container);
+    const mediaZone = layout.querySelector<HTMLElement>(
+      '[data-has-image="true"]',
+    );
+    expect(mediaZone?.getAttribute('data-poster-led')).toBe('true');
+    // Title still present; no lingering empty headline.
+    expect(mediaZone?.textContent).toContain('Palm Beach Medical Campus');
+    expect(mediaZone?.textContent).not.toContain(
+      'Final structural turnover phase',
+    );
+  });
+});

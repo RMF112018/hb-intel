@@ -114,12 +114,12 @@
    so the title + disclosures sit higher in the viewport and the
    surface reads as intentionally selective on tighter screens. */
 .root[data-layout-mode='wide'] .masthead {
-  padding: 28px 32px 18px;
-  gap: 12px;
+  padding: 20px 32px 12px;
+  gap: 8px;
 }
 .root[data-layout-mode='medium'] .masthead {
-  padding: 24px 28px 16px;
-  gap: 12px;
+  padding: 16px 28px 10px;
+  gap: 8px;
 }
 .root[data-layout-mode='compact'] .masthead {
   padding: 18px 20px 12px;
@@ -278,10 +278,10 @@
    top gap is preserved below the nameplate rule so the media does not
    crash into the separator. Mode variants only tune that gap. */
 .root[data-layout-mode='wide'] .composition {
-  padding: 20px 0 0;
+  padding: 10px 0 0;
 }
 .root[data-layout-mode='medium'] .composition {
-  padding: 18px 0 0;
+  padding: 8px 0 0;
 }
 .root[data-layout-mode='compact'] .composition {
   padding: 12px 0 0;
@@ -339,18 +339,16 @@
    without bloat. Compact/minimal are intentionally reduced so the
    surface reads as title-led on tighter screens. */
 .root[data-layout-mode='wide'] .mediaZone {
-  min-height: 440px;
-  /* Cap the hero to a 21:9-ish editorial band; under ~960px this has
-     no effect (min-height wins). Prevents hero bloat on 1400–1800px
-     containers where strict min-height alone would look shallow but an
-     unbounded image would overpower the featured content below. */
-  aspect-ratio: 21 / 9;
-  max-height: 520px;
+  /* Prompt-03: hero height reduced so title + status + CTA land in
+     first view. Poster-led mode renders the title inside this zone
+     via `.mediaPosterTitle`, so the hero carries editorial signal,
+     not just photography. */
+  min-height: 340px;
+  max-height: 420px;
 }
 .root[data-layout-mode='medium'] .mediaZone {
-  min-height: 360px;
-  aspect-ratio: 16 / 9;
-  max-height: 420px;
+  min-height: 280px;
+  max-height: 340px;
 }
 .root[data-layout-mode='compact'] .mediaZone {
   min-height: 220px;
@@ -661,6 +659,62 @@
 
 .mediaOverlayChipStale {
   color: #b45309;
+}
+
+/* ── Poster-led overlay (wide / medium image-led) ────────────
+   When the surface is in wide or medium mode with an image, the
+   featured title lives inside the hero over the two-stop scrim so
+   first view carries title + status + CTA without a tall image
+   pushing them below the fold. The poster block sits between the
+   eyebrow chip and the status/strategic/stale chip row. */
+
+.mediaPosterBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 44ch;
+}
+
+.mediaPosterTitle {
+  margin: 0;
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(10, 24, 45, 0.45);
+  max-width: 22ch;
+  /* Hard two-line clamp so long titles never push the chip row off
+     the hero. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.root[data-layout-mode='wide'] .mediaPosterTitle {
+  font-size: 2.25rem;
+}
+.root[data-layout-mode='medium'] .mediaPosterTitle {
+  font-size: 1.875rem;
+}
+
+.mediaPosterHeadline {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 8px rgba(10, 24, 45, 0.35);
+  max-width: 48ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.root[data-layout-mode='wide'] .mediaPosterHeadline {
+  font-size: 1.0625rem;
 }
 
 /* ── Content zone ────────────────────────────────────────── */
