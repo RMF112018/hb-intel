@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildLauncherOverflowSections,
   mapItemToTile,
   partitionItems,
   resolveLauncherDeviceClass,
@@ -206,7 +207,10 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(resolveLauncherDeviceClass(makeResolution({ deviceClass: 'tabletPortrait' }))).toBe(
       'tablet-portrait',
     );
-    expect(resolveLauncherDeviceClass(makeResolution({ deviceClass: 'phone' }))).toBe('phone');
+    const phoneClass = resolveLauncherDeviceClass(makeResolution({ deviceClass: 'phone' }));
+    expect(phoneClass).toBe('phone');
+    expect(phoneClass).not.toBe('phone-portrait');
+    expect(phoneClass).not.toBe('phone-landscape');
   });
 
   it('switches to single-entry handheld model under short-height posture', () => {
@@ -260,6 +264,35 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(partition.overflow[0].groupTitle).toBe('Quality');
     expect(partition.overflow[0].serviceKey).toBe('qa-log');
     expect(partition.overflow[0].variant).toBe('secondary-overflow-entry');
+  });
+
+  it('builds grouped overflow sections from tile metadata with deterministic ordering', () => {
+    const approvalsA = mapItemToTile({
+      ...makeItem(200),
+      actionKey: 'approve-rfi',
+      title: 'Approve RFI',
+      groupKey: 'approvals',
+      groupTitle: 'Approvals',
+    });
+    const ungrouped = mapItemToTile({
+      ...makeItem(201),
+      actionKey: 'timesheet',
+      title: 'Submit Timesheet',
+      groupKey: '',
+      groupTitle: '',
+    });
+    const approvalsB = mapItemToTile({
+      ...makeItem(202),
+      actionKey: 'approve-co',
+      title: 'Approve CO',
+      groupKey: 'approvals',
+      groupTitle: 'Approvals',
+    });
+    const sections = buildLauncherOverflowSections([approvalsA, ungrouped, approvalsB]);
+    expect(sections.map((section) => section.key)).toEqual(['approvals', '__other_tools']);
+    expect(sections.map((section) => section.title)).toEqual(['Approvals', 'Other tools']);
+    expect(sections[0]?.items.map((tile) => tile.id)).toEqual(['approve-rfi', 'approve-co']);
+    expect(sections[1]?.items.map((tile) => tile.id)).toEqual(['timesheet']);
   });
 
   it('uses one authoritative visible-count regime regardless of alignment mode', () => {

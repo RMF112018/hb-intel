@@ -58,6 +58,13 @@
   box-sizing: border-box;
 }
 
+@container homepage-entry-stack (max-width: 719px) {
+  .entryStack {
+    --hb-homepage-entry-hero-to-launcher-gap: 0.25rem;
+    --hb-homepage-entry-launcher-to-shell-gap: 0.875rem;
+  }
+}
+
 @container homepage-entry-stack (min-width: 768px) {
   .entryStack {
     --hb-homepage-actions-inset-inline: 1.25rem;

@@ -1,0 +1,19 @@
+{
+  "pageUrl": "http://localhost:3000/?tab=hb-homepage",
+  "observed": {
+    "launcherBandPresent": true,
+    "launcherSurfacePresent": true
+  },
+  "band": {
+    "shellState": "phone-landscape",
+    "deviceClass": "phone",
+    "handheldMode": "single-entry-all-tools",
+    "capGovernance": "all-tools-drawer"
+  },
+  "launcher": {
+    "version": "1.1.64.0",
+    "deviceClass": "phone",
+    "handheldMode": "single-entry-all-tools",
+    "capGovernance": "all-tools-drawer"
+  }
+}

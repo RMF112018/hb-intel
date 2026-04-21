@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf",
+  "id": "e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
@@ -18,14 +18,15 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Homepage"
+        "default": "Project Sites"
       },
       "description": {
-        "default": "Composed homepage orchestrator surface rendering Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos in a governed shell with entry-stack contract and preset-driven layout."
+        "default": "Displays project-site link cards using authoritative scope resolution: yearOverride, host-page Year context, or default fallback."
       },
-      "officeFabricIconFontName": "Home",
-      "hiddenFromToolbox": false,
-      "properties": {}
+      "officeFabricIconFontName": "Globe",
+      "properties": {
+        "yearOverride": 0
+      }
     }
   ]
 }

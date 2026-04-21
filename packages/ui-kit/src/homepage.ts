@@ -322,6 +322,7 @@ export type {
   HbcHomepageLauncherProps,
   HbcHomepageLauncherTileProps,
   HomepageLauncherTileModel,
+  HomepageLauncherOverflowSectionModel,
   HomepageLauncherTileVariant,
   HbcHomepageLauncherChipProps,
   HbcHomepageLauncherOverflowProps,

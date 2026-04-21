@@ -28,6 +28,7 @@ import {
   HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
   type HomepageLauncherTileModel,
   type HomepageLauncherDeviceClass,
+  type HomepageLauncherOverflowSectionModel,
 } from '@hbc/ui-kit/homepage';
 import type { PriorityActionsItemNormalized } from './priorityActionsContracts.js';
 import type { PriorityRailDeviceResolution } from './priorityActionsPresentation.js';
@@ -228,6 +229,41 @@ export interface LauncherPartition {
   handheldMode: 'standard' | 'single-entry-all-tools';
   drawerSource: 'all-tools';
   capGovernance: 'binding-visible-cap' | 'all-tools-drawer';
+}
+
+function normalizeGroupToken(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+}
+
+/**
+ * Builds deterministic overflow sections from launcher tile metadata.
+ * - group key precedence: groupKey -> groupTitle -> __other_tools
+ * - group title precedence: groupTitle -> groupKey -> Other tools
+ * - group order follows first-seen item order
+ */
+export function buildLauncherOverflowSections(
+  items: readonly HomepageLauncherTileModel[],
+): HomepageLauncherOverflowSectionModel[] {
+  if (items.length === 0) return [];
+  const byKey = new Map<string, HomepageLauncherOverflowSectionModel>();
+  for (const item of items) {
+    const groupKey = normalizeGroupToken(item.groupKey);
+    const groupTitle = normalizeGroupToken(item.groupTitle);
+    const resolvedKey = (groupKey ?? groupTitle ?? '__other_tools').toLowerCase();
+    const resolvedTitle = groupTitle ?? groupKey ?? 'Other tools';
+    const existing = byKey.get(resolvedKey);
+    if (existing) {
+      existing.items.push(item);
+      continue;
+    }
+    byKey.set(resolvedKey, {
+      key: resolvedKey,
+      title: resolvedTitle,
+      items: [item],
+    });
+  }
+  return Array.from(byKey.values());
 }
 
 export interface LauncherBudgetOptions {
