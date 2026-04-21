@@ -3,9 +3,14 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NormalizedSafetyFieldExcellenceModel } from '../../../homepage/helpers/operationalAwarenessConfig.js';
 
-vi.mock('../../../homepage/helpers/operationalAwarenessConfig.js', () => ({
-  normalizeSafetyFieldExcellenceConfig: vi.fn(),
-}));
+vi.mock('../../../homepage/helpers/operationalAwarenessConfig.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../homepage/helpers/operationalAwarenessConfig.js')>();
+  return {
+    ...actual,
+    normalizeSafetyFieldExcellenceConfig: vi.fn(),
+    coerceSafetyFieldExcellenceConfig: (input: unknown) => input,
+  };
+});
 
 import { normalizeSafetyFieldExcellenceConfig } from '../../../homepage/helpers/operationalAwarenessConfig.js';
 import { SafetyFieldExcellence } from '../SafetyFieldExcellence.js';

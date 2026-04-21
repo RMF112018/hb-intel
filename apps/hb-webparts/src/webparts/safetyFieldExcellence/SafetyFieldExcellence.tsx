@@ -22,10 +22,13 @@ import {
   Shield,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
-import { normalizeSafetyFieldExcellenceConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
+import {
+  coerceSafetyFieldExcellenceConfig,
+  normalizeSafetyFieldExcellenceConfig,
+} from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
-import type { SafetyFieldExcellenceConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
+import type { SafetyFieldExcellenceConfigInput } from '../../homepage/webparts/operationalAwarenessContracts.js';
 import {
   mapSafetySurfaceModel,
   resolveConsumerState,
@@ -33,7 +36,7 @@ import {
 } from './safetyFieldExcellenceConsumerModel.js';
 
 export interface SafetyFieldExcellenceProps {
-  config?: Partial<SafetyFieldExcellenceConfig>;
+  config?: SafetyFieldExcellenceConfigInput;
   activeAudience?: string;
   isLoading?: boolean;
   shellRenderMode?: 'standard' | 'compact' | 'summary-collapsed';
@@ -50,8 +53,9 @@ export function SafetyFieldExcellence({
   }
 
   try {
-    const normalized = normalizeSafetyFieldExcellenceConfig(config, activeAudience);
-    const state = resolveConsumerState(config, normalized);
+    const canonicalConfig = coerceSafetyFieldExcellenceConfig(config);
+    const normalized = normalizeSafetyFieldExcellenceConfig(canonicalConfig, activeAudience);
+    const state = resolveConsumerState(canonicalConfig, normalized);
     if (state.state !== 'valid') {
       const message = resolveAuthoringMessage(
         'safetyFieldExcellence',

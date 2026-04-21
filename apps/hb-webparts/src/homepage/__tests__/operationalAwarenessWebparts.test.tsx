@@ -89,4 +89,34 @@ describe('Prompt-07 operational-awareness webparts', () => {
     const root = container.querySelector('[data-hbc-premium="safety-homepage-surface"]');
     expect(root?.getAttribute('data-hbc-safety-mode')).toBe('minimal');
   });
+
+  it('renders legacy safety items config without falling into no-data empty state', () => {
+    render(
+      <SafetyFieldExcellence
+        config={{
+          statusLabel: 'Safety posture: Attention',
+          summary: 'Legacy-authored safety items remain active.',
+          items: [
+            {
+              id: 'legacy-primary',
+              title: 'Legacy primary signal',
+              summary: 'Primary summary',
+              featured: true,
+              indicator: { label: 'Action today', variant: 'critical' },
+            },
+            {
+              id: 'legacy-secondary',
+              title: 'Legacy secondary signal',
+              summary: 'Secondary summary',
+              indicatorLabel: 'Monitor this week',
+              indicatorVariant: 'warning',
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Legacy primary signal')).toBeTruthy();
+    expect(screen.queryByText('No safety and field excellence items configured')).toBeNull();
+  });
 });

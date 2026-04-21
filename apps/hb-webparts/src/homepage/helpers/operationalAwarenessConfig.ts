@@ -3,9 +3,13 @@ import type { HomepageCtaLink, HomepageMediaSlot } from '../models/contentModels
 import {
   DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG,
   DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG,
+  type LegacySafetyFieldExcellenceConfig,
+  type LegacySafetyFieldExcellenceItem,
+  type OperationalStatusSignal,
   type ProjectMilestone,
   type ProjectPortfolioSpotlightConfig,
   type ProjectPortfolioSpotlightItem,
+  type SafetyFieldExcellenceConfigInput,
   type ProjectTeamMember,
   type SafetyContextMetadata,
   type SafetyFieldExcellenceConfig,
@@ -164,6 +168,193 @@ function normalizeSafetyUrgency(urgency: SafetyUrgencyLevel | undefined): Safety
   return 'routine';
 }
 
+function inferLegacySafetyUrgency(item: LegacySafetyFieldExcellenceItem): SafetyUrgencyLevel {
+  if (item.urgency === 'urgent' || item.urgency === 'attention' || item.urgency === 'routine') {
+    return item.urgency;
+  }
+
+  const variant = item.indicator?.variant ?? item.indicatorVariant;
+  if (variant === 'critical') return 'urgent';
+  if (variant === 'warning') return 'attention';
+
+  const eventType = hasText(item.eventType) ? item.eventType.trim().toLowerCase() : undefined;
+  if (eventType) {
+    if (
+      eventType.includes('incident') ||
+      eventType.includes('stop-work') ||
+      eventType.includes('critical') ||
+      eventType.includes('urgent')
+    ) {
+      return 'urgent';
+    }
+    if (
+      eventType.includes('near') ||
+      eventType.includes('corrective') ||
+      eventType.includes('attention') ||
+      eventType.includes('warning') ||
+      eventType.includes('audit')
+    ) {
+      return 'attention';
+    }
+  }
+
+  return item.featured ? 'attention' : 'routine';
+}
+
+function normalizeLegacySafetyIndicator(item: LegacySafetyFieldExcellenceItem): OperationalStatusSignal | undefined {
+  if (hasText(item.indicator?.label)) {
+    return {
+      label: item.indicator.label.trim(),
+      variant: item.indicator.variant ?? item.indicatorVariant ?? 'warning',
+    };
+  }
+
+  if (hasText(item.indicatorLabel)) {
+    return {
+      label: item.indicatorLabel.trim(),
+      variant: item.indicatorVariant ?? 'warning',
+    };
+  }
+
+  return undefined;
+}
+
+function normalizeLegacySafetyFreshness(
+  item: LegacySafetyFieldExcellenceItem,
+): LegacySafetyFieldExcellenceItem['freshness'] {
+  const source = item.freshness?.source;
+  const updatedAt = hasText(item.freshness?.updatedAt)
+    ? item.freshness!.updatedAt!.trim()
+    : hasText(item.updatedAt)
+      ? item.updatedAt.trim()
+      : undefined;
+  const expiresAt = hasText(item.freshness?.expiresAt)
+    ? item.freshness!.expiresAt!.trim()
+    : hasText(item.expiresAt)
+      ? item.expiresAt.trim()
+      : undefined;
+
+  return source || updatedAt || expiresAt
+    ? {
+        source,
+        updatedAt,
+        expiresAt,
+      }
+    : undefined;
+}
+
+function normalizeLegacySafetyContext(item: LegacySafetyFieldExcellenceItem): SafetyContextMetadata | undefined {
+  return normalizeSafetyContext({
+    region: hasText(item.context?.region) ? item.context.region : item.region,
+    site: hasText(item.context?.site) ? item.context.site : item.site,
+    project: hasText(item.context?.project) ? item.context.project : item.project,
+    scope: hasText(item.context?.scope) ? item.context.scope : item.scope,
+    owner: hasText(item.context?.owner) ? item.context.owner : item.owner,
+  });
+}
+
+function normalizeLegacySafetyItemCta(item: LegacySafetyFieldExcellenceItem): HomepageCtaLink | undefined {
+  return normalizeStandaloneCta(item.cta ?? {
+    label: item.ctaLabel,
+    href: item.ctaHref,
+    openInNewTab: item.ctaOpenInNewTab,
+  });
+}
+
+function toCanonicalSafetyItem(
+  item: LegacySafetyFieldExcellenceItem,
+  index: number,
+): SafetySecondarySignal | undefined {
+  const summarySource = hasText(item.summary)
+    ? item.summary
+    : hasText(item.compactSummary)
+      ? item.compactSummary
+      : hasText(item.metadata)
+        ? item.metadata
+        : undefined;
+  if (!hasText(item.title) || !summarySource) {
+    return undefined;
+  }
+
+  const order = Number.isFinite(item.order) ? (item.order as number) : index + 1;
+  return {
+    id: hasText(item.id) ? item.id.trim() : `legacy-safety-${index + 1}`,
+    title: item.title.trim(),
+    summary: summarySource.trim(),
+    compactSummary: hasText(item.compactSummary) ? item.compactSummary.trim() : undefined,
+    metadata: hasText(item.metadata) ? item.metadata.trim() : undefined,
+    urgency: inferLegacySafetyUrgency(item),
+    context: normalizeLegacySafetyContext(item),
+    indicator: normalizeLegacySafetyIndicator(item),
+    freshness: normalizeLegacySafetyFreshness(item),
+    cta: normalizeLegacySafetyItemCta(item),
+    audiences: item.audiences,
+    order,
+  };
+}
+
+function hasCanonicalSafetyStructure(input: SafetyFieldExcellenceConfigInput | undefined): boolean {
+  if (!input) return false;
+  return (
+    Object.prototype.hasOwnProperty.call(input, 'topLineSummary') ||
+    Object.prototype.hasOwnProperty.call(input, 'primarySpotlight') ||
+    Object.prototype.hasOwnProperty.call(input, 'secondarySignals') ||
+    Object.prototype.hasOwnProperty.call(input, 'sectionCta')
+  );
+}
+
+export function coerceSafetyFieldExcellenceConfig(
+  input: SafetyFieldExcellenceConfigInput | undefined,
+): Partial<SafetyFieldExcellenceConfig> | undefined {
+  if (!input) return undefined;
+  if (hasCanonicalSafetyStructure(input)) {
+    return input as Partial<SafetyFieldExcellenceConfig>;
+  }
+
+  const legacy = input as Partial<LegacySafetyFieldExcellenceConfig>;
+  const mappedItems = (legacy.items ?? [])
+    .map((item, index) => ({
+      item: toCanonicalSafetyItem(item, index),
+      featured: Boolean(item.featured),
+    }))
+    .filter((entry): entry is { item: SafetySecondarySignal; featured: boolean } => Boolean(entry.item))
+    .sort((a, b) =>
+      byPriority(
+        { ...a.item, featured: a.featured || a.item.urgency === 'urgent' },
+        { ...b.item, featured: b.featured || b.item.urgency === 'urgent' },
+      ),
+    );
+
+  const primarySpotlight = (mappedItems.find((entry) => entry.featured) ?? mappedItems[0])?.item;
+  const secondarySignals = mappedItems
+    .map((entry) => entry.item)
+    .filter((item) => item.id !== primarySpotlight?.id);
+
+  const topLineSummary =
+    hasText(legacy.statusLabel) && hasText(legacy.summary)
+      ? {
+          statusLabel: legacy.statusLabel.trim(),
+          statusVariant: legacy.statusVariant ?? primarySpotlight?.indicator?.variant ?? 'info',
+          summaryText: legacy.summary.trim(),
+          lastUpdatedLabel: hasText(legacy.lastUpdatedLabel) ? legacy.lastUpdatedLabel.trim() : undefined,
+        }
+      : undefined;
+
+  return {
+    heading: legacy.heading,
+    maxSecondaryItems: legacy.maxSecondaryItems,
+    staleAfterHours: legacy.staleAfterHours,
+    topLineSummary,
+    primarySpotlight,
+    secondarySignals,
+    sectionCta: normalizeStandaloneCta(legacy.cta ?? {
+      label: legacy.ctaLabel,
+      href: legacy.ctaHref,
+      openInNewTab: legacy.ctaOpenInNewTab,
+    }),
+  };
+}
+
 function normalizeMilestones(milestones: ProjectMilestone[] | undefined): ProjectMilestone[] {
   return (milestones ?? [])
     .filter((milestone) => hasText(milestone.id) && hasText(milestone.title))
@@ -308,56 +499,59 @@ export function normalizeProjectPortfolioSpotlightConfig(
 }
 
 export function normalizeSafetyFieldExcellenceConfig(
-  input: Partial<SafetyFieldExcellenceConfig> | undefined,
+  input: SafetyFieldExcellenceConfigInput | undefined,
   activeAudience?: string,
   now = new Date(),
 ): NormalizedSafetyFieldExcellenceModel {
-  const heading = hasText(input?.heading) ? input.heading.trim() : DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG.heading;
-  const maxSecondaryItems = Number.isFinite(input?.maxSecondaryItems) && (input?.maxSecondaryItems ?? 0) > 0
-    ? (input?.maxSecondaryItems as number)
+  const canonicalInput = coerceSafetyFieldExcellenceConfig(input);
+  const heading = hasText(canonicalInput?.heading)
+    ? canonicalInput.heading.trim()
+    : DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG.heading;
+  const maxSecondaryItems = Number.isFinite(canonicalInput?.maxSecondaryItems) && (canonicalInput?.maxSecondaryItems ?? 0) > 0
+    ? (canonicalInput?.maxSecondaryItems as number)
     : DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG.maxSecondaryItems;
-  const staleAfterHours = Number.isFinite(input?.staleAfterHours) && (input?.staleAfterHours ?? 0) > 0
-    ? (input?.staleAfterHours as number)
+  const staleAfterHours = Number.isFinite(canonicalInput?.staleAfterHours) && (canonicalInput?.staleAfterHours ?? 0) > 0
+    ? (canonicalInput?.staleAfterHours as number)
     : DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG.staleAfterHours;
 
   const topLineSummary =
-    hasText(input?.topLineSummary?.statusLabel) && hasText(input?.topLineSummary?.summaryText)
+    hasText(canonicalInput?.topLineSummary?.statusLabel) && hasText(canonicalInput?.topLineSummary?.summaryText)
       ? {
-          statusLabel: input!.topLineSummary!.statusLabel.trim(),
-          statusVariant: input!.topLineSummary!.statusVariant ?? 'info',
-          summaryText: input!.topLineSummary!.summaryText.trim(),
-          lastUpdatedLabel: hasText(input?.topLineSummary?.lastUpdatedLabel)
-            ? input!.topLineSummary!.lastUpdatedLabel!.trim()
+          statusLabel: canonicalInput!.topLineSummary!.statusLabel.trim(),
+          statusVariant: canonicalInput!.topLineSummary!.statusVariant ?? 'info',
+          summaryText: canonicalInput!.topLineSummary!.summaryText.trim(),
+          lastUpdatedLabel: hasText(canonicalInput?.topLineSummary?.lastUpdatedLabel)
+            ? canonicalInput!.topLineSummary!.lastUpdatedLabel!.trim()
             : undefined,
         }
       : undefined;
 
   const featured =
-    input?.primarySpotlight &&
-    hasText(input.primarySpotlight.id) &&
-    hasText(input.primarySpotlight.title) &&
-    hasText(input.primarySpotlight.summary) &&
-    isVisibleForAudience(input.primarySpotlight.audiences, activeAudience)
+    canonicalInput?.primarySpotlight &&
+    hasText(canonicalInput.primarySpotlight.id) &&
+    hasText(canonicalInput.primarySpotlight.title) &&
+    hasText(canonicalInput.primarySpotlight.summary) &&
+    isVisibleForAudience(canonicalInput.primarySpotlight.audiences, activeAudience)
       ? (() => {
-          const freshness = resolveFreshness(input.primarySpotlight!.freshness, staleAfterHours, now);
-          const compactSummary = hasText(input.primarySpotlight?.compactSummary)
-            ? input.primarySpotlight!.compactSummary!.trim()
-            : input.primarySpotlight!.summary.trim().slice(0, 96);
+          const freshness = resolveFreshness(canonicalInput.primarySpotlight!.freshness, staleAfterHours, now);
+          const compactSummary = hasText(canonicalInput.primarySpotlight?.compactSummary)
+            ? canonicalInput.primarySpotlight!.compactSummary!.trim()
+            : canonicalInput.primarySpotlight!.summary.trim().slice(0, 96);
           return normalizeCta({
-            ...input.primarySpotlight!,
-            id: input.primarySpotlight!.id.trim(),
-            title: input.primarySpotlight!.title.trim(),
-            summary: input.primarySpotlight!.summary.trim(),
+            ...canonicalInput.primarySpotlight!,
+            id: canonicalInput.primarySpotlight!.id.trim(),
+            title: canonicalInput.primarySpotlight!.title.trim(),
+            summary: canonicalInput.primarySpotlight!.summary.trim(),
             compactSummary,
-            metadata: hasText(input.primarySpotlight?.metadata)
-              ? input.primarySpotlight!.metadata!.trim()
+            metadata: hasText(canonicalInput.primarySpotlight?.metadata)
+              ? canonicalInput.primarySpotlight!.metadata!.trim()
               : undefined,
-            urgency: normalizeSafetyUrgency(input.primarySpotlight!.urgency),
-            context: normalizeSafetyContext(input.primarySpotlight!.context),
-            indicator: hasText(input.primarySpotlight?.indicator?.label)
+            urgency: normalizeSafetyUrgency(canonicalInput.primarySpotlight!.urgency),
+            context: normalizeSafetyContext(canonicalInput.primarySpotlight!.context),
+            indicator: hasText(canonicalInput.primarySpotlight?.indicator?.label)
               ? {
-                  label: input.primarySpotlight!.indicator!.label.trim(),
-                  variant: input.primarySpotlight!.indicator!.variant ?? 'warning',
+                  label: canonicalInput.primarySpotlight!.indicator!.label.trim(),
+                  variant: canonicalInput.primarySpotlight!.indicator!.variant ?? 'warning',
                 }
               : undefined,
             isStale: freshness.isStale,
@@ -366,7 +560,7 @@ export function normalizeSafetyFieldExcellenceConfig(
         })()
       : undefined;
 
-  const secondary = (input?.secondarySignals ?? [])
+  const secondary = (canonicalInput?.secondarySignals ?? [])
     .filter((item) => hasText(item.id) && hasText(item.title) && hasText(item.summary))
     .filter((item) => isVisibleForAudience(item.audiences, activeAudience))
     .filter((item) => item.id !== featured?.id)
@@ -413,7 +607,7 @@ export function normalizeSafetyFieldExcellenceConfig(
     })
     .slice(0, maxSecondaryItems);
 
-  const sectionCta = normalizeStandaloneCta(input?.sectionCta);
+  const sectionCta = normalizeStandaloneCta(canonicalInput?.sectionCta);
 
   return {
     heading,

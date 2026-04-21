@@ -111,6 +111,55 @@ export interface SafetySecondarySignal {
   audiences?: string[];
 }
 
+/**
+ * Legacy homepage-authored safety item contract.
+ * Older homepage instances persist SafetyFieldExcellence content in `items[]`
+ * before the canonical top-line / spotlight / secondary split.
+ */
+export interface LegacySafetyFieldExcellenceItem {
+  id?: string;
+  title?: string;
+  summary?: string;
+  compactSummary?: string;
+  metadata?: string;
+  featured?: boolean;
+  order?: number;
+  urgency?: SafetyUrgencyLevel;
+  eventType?: string;
+  indicator?: OperationalStatusSignal;
+  indicatorLabel?: string;
+  indicatorVariant?: OperationalStatusVariant;
+  freshness?: OperationalFreshness;
+  updatedAt?: string;
+  expiresAt?: string;
+  context?: SafetyContextMetadata;
+  region?: string;
+  site?: string;
+  project?: string;
+  scope?: string;
+  owner?: string;
+  cta?: HomepageCtaLink;
+  ctaLabel?: string;
+  ctaHref?: string;
+  ctaOpenInNewTab?: boolean;
+  audiences?: string[];
+}
+
+export interface LegacySafetyFieldExcellenceConfig {
+  heading?: string;
+  summary?: string;
+  statusLabel?: string;
+  statusVariant?: OperationalStatusVariant;
+  lastUpdatedLabel?: string;
+  items?: LegacySafetyFieldExcellenceItem[];
+  cta?: HomepageCtaLink;
+  ctaLabel?: string;
+  ctaHref?: string;
+  ctaOpenInNewTab?: boolean;
+  maxSecondaryItems?: number;
+  staleAfterHours?: number;
+}
+
 export interface SafetyFieldExcellenceConfig {
   heading?: string;
   topLineSummary?: SafetyTopLineSummary;
@@ -120,6 +169,10 @@ export interface SafetyFieldExcellenceConfig {
   maxSecondaryItems?: number;
   staleAfterHours?: number;
 }
+
+export type SafetyFieldExcellenceConfigInput =
+  | Partial<SafetyFieldExcellenceConfig>
+  | Partial<LegacySafetyFieldExcellenceConfig>;
 
 export const DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG: Required<
   Pick<ProjectPortfolioSpotlightConfig, 'heading' | 'maxSecondaryItems' | 'staleAfterHours' | 'allProjectsLabel' | 'allProjectsUrl'>
