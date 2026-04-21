@@ -88,6 +88,9 @@ const EASE: Cubic = [0.22, 1, 0.36, 1];
 type HomepageHeroLayoutMode =
   | 'premium-wide'
   | 'compressed-laptop'
+  | 'tablet-landscape-guided'
+  | 'tablet-portrait-guided'
+  | 'handheld-compact'
   | 'guided-single-column'
   | 'compact-short-height'
   | 'standalone-fallback';
@@ -111,10 +114,12 @@ function resolveHomepageHeroLayoutMode(
     case 'standard-laptop':
       return 'compressed-laptop';
     case 'tablet-landscape':
+      return 'tablet-landscape-guided';
     case 'tablet-portrait-large':
     case 'tablet-portrait':
+      return 'tablet-portrait-guided';
     case 'phone-portrait':
-      return 'guided-single-column';
+      return 'handheld-compact';
     default:
       return 'guided-single-column';
   }
