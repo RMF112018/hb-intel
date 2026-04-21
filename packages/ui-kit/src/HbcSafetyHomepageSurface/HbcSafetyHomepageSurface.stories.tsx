@@ -188,7 +188,76 @@ export const OneSignal: Story = {
   ),
 };
 
-export const DegradedErrorAdjacent: Story = {
+export const OnePrimarySignal: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <HbcSafetyHomepageSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        posture={{
+          label: 'Safety posture: Stable',
+          tone: 'success',
+          summary: 'Primary field signal is healthy and no secondary escalations are active.',
+          updatedLabel: 'Updated 20m ago',
+        }}
+        primary={{
+          title: 'Weekly safety audit sweep complete',
+          summary: 'North region closed with zero critical findings and two coaching items.',
+          compactSummary: 'North region audit sweep closed without critical findings.',
+          severity: 'success',
+          urgencyLabel: 'Recognition',
+          icon: CheckCircle2,
+          cta: { label: 'Review audit details', href: '#audit' },
+        }}
+        secondarySignals={[]}
+        action={{ label: 'Open safety operations hub', href: '#hub' }}
+      />
+    </div>
+  ),
+};
+
+export const MultipleActiveSignals: Story = {
+  render: () => (
+    <div style={{ maxWidth: 780 }}>
+      <HbcSafetyHomepageSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        posture={{
+          label: 'Safety posture: Attention',
+          tone: 'warning',
+          summary: 'Two active corrective actions remain open across field operations this week.',
+          updatedLabel: 'Updated 2h ago',
+        }}
+        primary={{
+          title: 'Site 47 scaffold corrective plan in flight',
+          summary:
+            'Superintendent and safety lead completed root-cause review and launched a three-step scaffold correction sequence.',
+          compactSummary: 'Scaffold corrective sequence underway at Site 47.',
+          severity: 'danger',
+          urgencyLabel: 'Urgent priority',
+          icon: AlertCircle,
+          badges: (
+            <>
+              <HbcPremiumBadge label="Urgent priority" status="critical" />
+              <HbcPremiumBadge label="Action required today" status="critical" />
+            </>
+          ),
+          metaItems: [
+            { label: 'South Region' },
+            { label: 'Riverside Tower' },
+            { label: 'Owner: Field Safety Lead' },
+            { label: 'Updated 2h ago', icon: Clock },
+          ],
+          cta: { label: 'Open corrective action log', href: '#corrective' },
+        }}
+        secondarySignals={signals}
+        action={{ label: 'View safety operations hub', href: '#hub' }}
+      />
+    </div>
+  ),
+};
+
+export const StaleContent: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <HbcSafetyHomepageSurface
@@ -220,6 +289,66 @@ export const DegradedErrorAdjacent: Story = {
           ],
         }}
         secondarySignals={signals.slice(0, 2)}
+        action={{ label: 'Open reliability runbook', href: '#runbook' }}
+      />
+    </div>
+  ),
+};
+
+export const DegradedErrorAdjacent = StaleContent;
+
+export const EmptyStateApplicable: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <HbcSafetyHomepageSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        posture={{
+          label: 'Safety posture: No active signals',
+          tone: 'neutral',
+          summary: 'No primary or secondary items are currently configured for this section.',
+          updatedLabel: 'Awaiting author input',
+        }}
+        secondarySignals={[]}
+      />
+    </div>
+  ),
+};
+
+export const InvalidStateApplicable: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <HbcSafetyHomepageSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        posture={{
+          label: 'Safety posture: Configuration issue',
+          tone: 'warning',
+          summary: 'Safety authoring inputs are incomplete. Primary content cannot be rendered.',
+          updatedLabel: 'Validation failed',
+        }}
+        degradedNotice="Configuration is incomplete. Review required spotlight fields to restore this surface."
+        secondarySignals={[]}
+        action={{ label: 'Open authoring guidance', href: '#authoring' }}
+      />
+    </div>
+  ),
+};
+
+export const RuntimeErrorStateApplicable: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <HbcSafetyHomepageSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        posture={{
+          label: 'Safety posture: Runtime disruption',
+          tone: 'critical',
+          summary: 'Live ingestion is unavailable. Surface is operating in a guarded fallback state.',
+          updatedLabel: 'Source unavailable',
+        }}
+        degradedNotice="Runtime ingestion failed; verify critical field conditions through the safety runbook."
+        secondarySignals={[]}
         action={{ label: 'Open reliability runbook', href: '#runbook' }}
       />
     </div>

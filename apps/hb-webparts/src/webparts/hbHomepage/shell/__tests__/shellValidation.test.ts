@@ -300,6 +300,16 @@ describe('governance enforcement in overrides', () => {
     expect(result.errors.some((e) => e.code === 'REORDER_DOMAIN_VIOLATION')).toBe(true);
   });
 
+  it('rejects replacing safety-field-excellence in row 2 via override', () => {
+    const result = previewBandOverride(
+      'default-v2',
+      'band-row-2-communications-newsroom',
+      [{ slotId: 'slot-row-2-safety-field-excellence', occupantId: 'hb-kudos' }],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'REORDER_DOMAIN_VIOLATION')).toBe(true);
+  });
+
   it('rejects clearing a non-removable occupant via override', () => {
     const result = previewBandOverride(
       'default-v2',

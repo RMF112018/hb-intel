@@ -10,6 +10,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { clsx } from 'clsx';
 import { motion } from 'motion/react';
 import { ArrowRight, ExternalLink } from 'lucide-react';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import styles from './cta.module.css';
 
 const ctaVariants = cva(styles.base, {
@@ -55,14 +56,15 @@ export function HbcPremiumCta({
   className,
 }: HbcPremiumCtaProps): React.JSX.Element {
   const iconSize = size === 'sm' ? 12 : size === 'lg' ? 16 : 14;
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   return (
     <motion.a
       href={href}
       className={clsx(ctaVariants({ variant, size }), className)}
       data-hbc-premium="cta"
-      whileHover={{ x: arrow ? 2 : 0 }}
-      transition={{ duration: 0.15 }}
+      whileHover={prefersReducedMotion ? undefined : { x: arrow ? 2 : 0 }}
+      transition={prefersReducedMotion ? undefined : { duration: 0.15 }}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
       <span>{label}</span>

@@ -168,5 +168,8 @@ export function curatePrimaryForFlagship(
     overflowItems: [...overflowResidue, ...forced],
     maxVisible,
     overflowLabel,
+    mode: 'standard-row',
+    drawerSource: 'all-tools',
+    capGovernance: 'binding-visible-cap',
   };
 }

@@ -7,7 +7,10 @@ import { join } from 'path';
 
 export default defineConfig({
   testDir: join(__dirname),
-  testMatch: 'capture-visual-proof.ts',
+  testMatch: [
+    'capture-visual-proof.ts',
+    'verify-safety-accessibility.spec.ts',
+  ],
   fullyParallel: false,
   retries: 0,
   workers: 1,

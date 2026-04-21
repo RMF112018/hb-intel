@@ -24,6 +24,15 @@ function makeResolution(
     shortHeightConstrained: false,
     densityPosture: 'comfortable',
     launcherHandheldMode: 'standard',
+    launcherDrawerSource: 'all-tools',
+    launcherCapGovernance: 'binding-visible-cap',
+    launcherGovernance: {
+      handheldMode: 'standard',
+      overflowStrategy: 'sheet',
+      drawerSource: 'all-tools',
+      capGovernance: 'binding-visible-cap',
+      isHandheld: false,
+    },
   };
   const merged = { ...base, ...overrides };
   return {

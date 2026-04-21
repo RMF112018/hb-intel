@@ -212,7 +212,7 @@ export function HbcSafetyHomepageSurface({
               href={action.href}
               external={action.openInNewTab}
               variant="ghost"
-              size="sm"
+              size="md"
               arrow
             />
           </div>

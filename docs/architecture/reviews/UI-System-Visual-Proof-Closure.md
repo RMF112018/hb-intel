@@ -1,69 +1,109 @@
 # UI System Visual Proof — Closure Note
 
-**Date:** 2026-04-08
-**Closes:** Visual proof gap identified in `docs/architecture/reviews/UI-System-Audit-Validation-Report.md`
+**Date:** 2026-04-21  
+**Closes:** Safety homepage state-matrix visual proof gap after rebuild  
 **Evidence location:** `docs/architecture/reviews/evidence/ui-system-visual-proof/`
 
 ---
 
-## Summary
+## Closure Scope
 
-The audit validation report identified visual proof as the weakest proof category: "No rendered visual evidence exists in the repository." This closure note documents the resolution of that gap.
+The rebuilt Safety consumer now renders `HbcSafetyHomepageSurface` (`apps/hb-webparts/src/webparts/safetyFieldExcellence/SafetyFieldExcellence.tsx`), so proof for safety closure must target Safety stories directly, not only the legacy `HbcOperationalSurface` family.
 
-13 PNG screenshots were captured via Playwright against a Storybook static build, covering all 5 shared-surface homepage consumers at desktop (1280px) and tablet (768px) viewports, plus 3 variant captures for the hero and command surfaces.
+This closure captures decisive proof for:
 
----
+- `standard`
+- `compact`
+- `minimal`
+- `one-primary-signal`
+- `multiple-active-signals`
+- `stale-content`
+- `empty-state-applicable`
+- `invalid-state-applicable`
+- `runtime-error-state-applicable`
 
-## Consumer-to-Proof Mapping
-
-### Shared-Surface Consumers (Required)
-
-| Consumer | File | Surface Family | Proof Demonstrates |
-|---|---|---|---|
-| **HbHeroBanner** | `apps/hb-webparts/src/webparts/hbHeroBanner/HbHeroBanner.tsx` | `HbcSignatureHeroSurface` | Full-width flagship hero with brand gradient, ambient decorations, two-column editorial layout, animated entry, CTA bar — materially distinct from generic card UI |
-| **LeadershipMessage** | `apps/hb-webparts/src/webparts/leadershipMessage/LeadershipMessage.tsx` | `HbcEditorialSurface` | Magazine-style editorial with featured item, eyebrow classification, excerpt, secondary item list with icons — editorial hierarchy beyond productive-lane patterns |
-| **PriorityActionsRail** | `apps/hb-webparts/src/webparts/priorityActionsRail/PriorityActionsRail.tsx` | `HbcCommandSurface` | Dense command band with icon-driven items, urgency variants (default/high/critical), hover motion — purpose-built action surface |
-| **SafetyFieldExcellence** | `apps/hb-webparts/src/webparts/safetyFieldExcellence/SafetyFieldExcellence.tsx` | `HbcOperationalSurface` | Operational intelligence with severity-coded signals (success/warning/danger), featured highlight with animated entry — safety-domain surface |
-| **SmartSearchWayfinding** | `apps/hb-webparts/src/webparts/smartSearchWayfinding/SmartSearchWayfinding.tsx` | `HbcDiscoverySurface` | Layered discovery with search, quick-path pills, collapsible categories, promoted items — navigation/wayfinding product surface |
-
-### Intentionally-Local Consumers (Not Required)
-
-CompanyPulse, ProjectPortfolioSpotlight, and PeopleCultureMerged were not captured because they are intentionally local by design and do not use shared surface families. Their exclusion from shared proof is architecturally correct.
+All states were captured in both desktop (1280) and tablet (768) widths via the repository-preferred Playwright capture workflow.
 
 ---
 
-## Proof Quality Assessment
+## Exact Routes Used
 
-**What is demonstrated:**
-- Each shared surface family renders as a distinct, purpose-built presentation-lane component
-- Surface families are materially different from each other and from productive-lane primitives (forms, tables, cards)
-- The premium distinction claimed by the two-lane model is visible in rendered output: brand gradients, editorial hierarchy, animated entry, severity signaling, discovery patterns
-- Responsive adaptation is captured at two viewports (desktop + tablet)
+All screenshots used Storybook iframe routes with this pattern:
 
-**What is not demonstrated:**
-- Consumer-level proof (the screenshots show the surface family components with representative data, not the actual consumer webparts running in SharePoint context)
-- Live SPFx runtime rendering
-- Interactive state transitions (hover, focus, animation sequences)
-- Field Mode / dark theme variants
+- `/iframe.html?id=<story-id>&viewMode=story`
 
-**Proof level:** Component-level visual proof. This materially closes the "no rendered visual evidence" gap. Full consumer-in-production proof would require SPFx runtime capture, which is outside this scope.
+Exact Safety routes:
+
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--standard&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--compact&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--minimal&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--one-primary-signal&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--multiple-active-signals&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--stale-content&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--empty-state-applicable&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--invalid-state-applicable&viewMode=story`
+- `/iframe.html?id=homepage-surfaces-hbcsafetyhomepagesurface--runtime-error-state-applicable&viewMode=story`
+
+---
+
+## State Validation Notes
+
+| State | Artifacts | Validation claim |
+|---|---|---|
+| `standard` | `HbcSafetyHomepageSurface--desktop.png`, `HbcSafetyHomepageSurface--tablet.png` | Confirms baseline hierarchy and safety posture structure are deliberate, not a generic lane card. |
+| `compact` | `HbcSafetyHomepageSurface-compact--desktop.png`, `HbcSafetyHomepageSurface-compact--tablet.png` | Confirms compact mode trims content intentionally and preserves premium structure at narrower slot pressure. |
+| `minimal` | `HbcSafetyHomepageSurface-minimal--desktop.png`, `HbcSafetyHomepageSurface-minimal--tablet.png` | Confirms summary-collapsed behavior maps to minimal signal-first posture without visual stress. |
+| `one-primary-signal` | `HbcSafetyHomepageSurface-one-primary-signal--desktop.png`, `HbcSafetyHomepageSurface-one-primary-signal--tablet.png` | Confirms primary-only state remains coherent with no secondary clutter. |
+| `multiple-active-signals` | `HbcSafetyHomepageSurface-multiple-active-signals--desktop.png`, `HbcSafetyHomepageSurface-multiple-active-signals--tablet.png` | Confirms severity hierarchy and scanability under denser active signal conditions. |
+| `stale-content` | `HbcSafetyHomepageSurface-stale-content--desktop.png`, `HbcSafetyHomepageSurface-stale-content--tablet.png` | Confirms stale/freshness risk is explicitly communicated through degraded notice and stale badges. |
+| `empty-state-applicable` | `HbcSafetyHomepageSurface-empty-state--desktop.png`, `HbcSafetyHomepageSurface-empty-state--tablet.png` | Confirms empty/no-signal posture is intentional and does not collapse into broken shell rendering. |
+| `invalid-state-applicable` | `HbcSafetyHomepageSurface-invalid-state--desktop.png`, `HbcSafetyHomepageSurface-invalid-state--tablet.png` | Confirms invalid authoring is presented as a guided degraded posture with recovery CTA. |
+| `runtime-error-state-applicable` | `HbcSafetyHomepageSurface-runtime-error-state--desktop.png`, `HbcSafetyHomepageSurface-runtime-error-state--tablet.png` | Confirms runtime disruption remains bounded with explicit fallback and operator path. |
+
+---
+
+## Doctrine and Anti-Regression Assessment
+
+Against governing doctrine and homepage overlay:
+
+- The Safety proof now targets the rebuilt Safety surface family directly.
+- The captured modes show purposeful posture band + dominant primary lane + bounded secondary lane structure.
+- No captured state regresses into thin-border generic card-grid posture as dominant structure.
+- Narrow/compact behavior is represented as selective reduction, not compressed duplication of the full desktop payload.
+
+---
+
+## Checklist and Scorecard Closure Gate
+
+Materially improved checklist categories in touched scope:
+
+- `0. Doctrine preflight`
+- `1. Doctrine and host compliance`
+- `5. Surface composition and hierarchy`
+- `6. Homepage-specific integration quality`
+- `7. Breakpoint and shell-fit quality`
+- `9. State-model completeness`
+- `14. Validation and closure`
+
+Categories still below acceptable threshold in touched scope:
+
+- `13. Host-runtime resilience` remains partially unproven because evidence is Storybook/component-level and not packaged SharePoint-hosted capture for these new Safety state variants.
+
+Scorecard impact note:
+
+- Improves homepage integration quality for Safety proof from weak/partial toward strong by replacing single-state narrow proof with an explicit multi-state, multi-width matrix.
+
+Remaining hard-stop risks for full closure:
+
+- Hosted runtime screenshots for the same Safety matrix are still absent.
+- Interactive a11y path proof (focus/keyboard flow) is not represented by static screenshots alone.
 
 ---
 
 ## Capture Method
 
-- **Tool:** Playwright (Chromium) against Storybook 8.6.0 static build
-- **Source:** 5 new Storybook story files in `packages/ui-kit/src/Hbc*Surface/` directories
-- **Script:** `scripts/capture-visual-proof.ts` with `scripts/capture-visual-proof.config.ts`
-- **Viewports:** 1280x900 (desktop), 768x900 (tablet)
-- **Animation settle:** 800ms wait after network idle before capture
-
----
-
-## Gap Status
-
-| Gap | Prior Status | Current Status |
-|---|---|---|
-| Visual proof artifacts | **Weak** — no rendered artifacts in repo | **Materially closed** — 13 PNG artifacts with evidence index |
-| Consumer-tied proof | **Absent** — no consumer-to-surface mapping with visual evidence | **Closed at component level** — each surface family mapped to its consumer with rendered proof |
-| Presentation-lane distinction | **Claimed but unproven** — import analysis only | **Demonstrated** — rendered output shows premium composition patterns distinct from productive lane |
+- **Tool:** Playwright (Chromium) against static Storybook build
+- **Script:** `scripts/capture-visual-proof.ts` + `scripts/capture-visual-proof.config.ts`
+- **Viewports:** `1280x900` and `768x900`
+- **Animation settle:** `800ms` after network idle
+- **Execution date run:** 2026-04-21 (`29` tests passed)

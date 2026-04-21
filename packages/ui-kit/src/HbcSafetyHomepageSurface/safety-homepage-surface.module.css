@@ -107,6 +107,13 @@
   margin-top: 2px;
 }
 
+.postureAction a,
+.primaryAction a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .body {
   display: grid;
   gap: 12px;
