@@ -363,13 +363,13 @@
   max-height: 180px;
 }
 
-/* No-image / errored-image fallback band.
-   Intentionally text-free — the authored featured content leads the
-   composition when there is no credible hero image. A soft branded
-   gradient carries a trace of surface identity without pretending to
-   be a photograph. `.mediaFallbackEmpty` is paired with a reduced
-   mode-governed min-height via `[data-has-image='false']` so a
-   missing image does not dominate the flagship slot. */
+/* Errored-image fallback band. Authored intent was a full hero, so
+   the zone keeps its editorial posture but renders a neutral branded
+   gradient with a subtle cross-hatch so field authors can spot the
+   broken asset without the slot reading as a photograph.
+   `.mediaFallback` is the gradient base; `.mediaFallbackErrored`
+   layers the cross-hatch on top. No `.mediaFallbackEmpty` variant —
+   the no-image posture does not render the media zone at all. */
 .mediaFallback {
   position: absolute;
   inset: 0;
@@ -381,9 +381,6 @@
   );
 }
 
-/* An image was authored but failed to load. Keep the editorial
-   posture (authored intent was a full hero) but mark with a subtle
-   cross-hatch so field authors can spot the broken asset. */
 .mediaFallbackErrored {
   background-image:
     linear-gradient(
@@ -400,49 +397,147 @@
     );
 }
 
-/* No image authored at all — the condensed posture. Soft single-stop
-   so the band reads as a quiet top accent rather than a filler card. */
-.mediaFallbackEmpty {
-  background: linear-gradient(
-    180deg,
-    rgba(var(--hbc-presentation-blue-rgb), 0.08) 0%,
-    rgba(var(--hbc-presentation-blue-rgb), 0.02) 100%
-  );
+/* ═══════════════════════════════════════════════════════════════
+   TITLE-LED POSTURE (no image)
+   ═══════════════════════════════════════════════════════════════
+   When the featured item has no image, `FeaturedSlot` stamps
+   `data-has-image="false"` on `.featuredLayout` and renders a
+   subordinate header strip + boosted title + inline primary CTA
+   instead of a media zone. The surface becomes materially shorter
+   and the title leads the composition.
+*/
+
+/* Subordinate top accent — a quiet branded rule so the featured
+   region still reads as a distinct editorial section without staging
+   fake hero chrome. Reuses the masthead separator gradient language. */
+.featuredLayout[data-has-image='false'] {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(
+    90deg,
+    var(--hbc-presentation-blue) 0%,
+    var(--hbc-presentation-blue) 48px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.14) 48px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.04) 40%,
+    transparent 100%
+  ) 1;
 }
 
-/* No-image posture collapses the mode-governed hero height so the
-   featured content block leads the composition. The overlay eyebrow
-   is still pinned for sectional identity. */
-.mediaZone[data-has-image='false'] {
-  min-height: 68px;
-  max-height: none;
-  aspect-ratio: auto;
-}
-.root[data-layout-mode='wide'] .mediaZone[data-has-image='false'] {
-  min-height: 88px;
-  aspect-ratio: auto;
-  max-height: none;
-}
-.root[data-layout-mode='medium'] .mediaZone[data-has-image='false'] {
-  min-height: 76px;
-  aspect-ratio: auto;
-  max-height: none;
-}
-.root[data-layout-mode='compact'] .mediaZone[data-has-image='false'] {
-  min-height: 60px;
-  max-height: none;
-}
-.root[data-layout-mode='minimal'] .mediaZone[data-has-image='false'] {
-  min-height: 48px;
-  max-height: none;
+/* Header strip — subordinate eyebrow + inline chip row above the
+   title. Intentionally quiet: the title is the hero. */
+.featuredHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: -2px; /* tuck under the accent rule */
 }
 
-/* Overlay eyebrow anchors to the bottom of the media zone by default;
-   in the no-image posture the zone is a thin band and the eyebrow sits
-   vertically centered so it reads as a section marker, not a caption. */
-.mediaZone[data-has-image='false'] .mediaOverlay {
-  inset: 0 20px 0 20px;
-  justify-content: center;
+.featuredHeaderEyebrow {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hbc-presentation-blue);
+}
+
+.featuredHeaderChips {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.featuredHeaderChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--hbc-presentation-blue);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.08);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
+  border-radius: 999px;
+}
+
+.featuredHeaderChipStrategic {
+  color: #c26434;
+  background: rgba(var(--hbc-presentation-orange-rgb), 0.10);
+  border-color: rgba(var(--hbc-presentation-orange-rgb), 0.24);
+}
+
+.featuredHeaderChipStale {
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.08);
+  border-color: rgba(180, 83, 9, 0.22);
+}
+
+/* Tighter content padding in the title-led posture so first-view
+   density rises and the surface reads as intentionally compact. */
+.featuredLayout[data-has-image='false'] .featuredContent {
+  padding: 18px 22px 20px;
+  border-top: none;
+  background: transparent;
+  gap: 12px;
+}
+.root[data-layout-mode='wide']
+  .featuredLayout[data-has-image='false']
+  .featuredContent {
+  padding: 22px 32px 24px;
+  gap: 14px;
+}
+.root[data-layout-mode='medium']
+  .featuredLayout[data-has-image='false']
+  .featuredContent {
+  padding: 20px 28px 22px;
+  gap: 12px;
+}
+.root[data-layout-mode='compact']
+  .featuredLayout[data-has-image='false']
+  .featuredContent {
+  padding: 14px 18px 16px;
+  gap: 10px;
+}
+.root[data-layout-mode='minimal']
+  .featuredLayout[data-has-image='false']
+  .featuredContent {
+  padding: 10px 14px 12px;
+  gap: 8px;
+}
+
+/* Boosted title — the title now leads the composition. */
+.featuredLayout[data-has-image='false'] .featuredTitle {
+  font-size: 1.625rem;
+  max-width: 28ch;
+}
+.root[data-layout-mode='wide']
+  .featuredLayout[data-has-image='false']
+  .featuredTitle {
+  font-size: 2.125rem;
+}
+.root[data-layout-mode='medium']
+  .featuredLayout[data-has-image='false']
+  .featuredTitle {
+  font-size: 1.875rem;
+}
+.root[data-layout-mode='compact']
+  .featuredLayout[data-has-image='false']
+  .featuredTitle {
+  font-size: 1.5rem;
+}
+.root[data-layout-mode='minimal']
+  .featuredLayout[data-has-image='false']
+  .featuredTitle {
+  font-size: 1.25rem;
+}
+
+/* Inline CTA slot — sits in the essentials block in the title-led
+   posture so the next-best action is in first view without waiting
+   for a disclosure click. */
+.featuredCtaInline {
+  margin-top: 2px;
 }
 
 .mediaImage {

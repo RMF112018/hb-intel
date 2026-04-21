@@ -99,6 +99,7 @@ export function HbcProjectSpotlightSurface({
   const visibility = getSpotlightLayoutVisibility(mode);
 
   const hasHistory = visibility.showRail && model.secondary.length > 0;
+  const hasFeaturedImage = Boolean(model.featured.image?.src);
 
   // Bind governed presentation-lane tokens to CSS custom properties so
   // the Spotlight stylesheet references one authoritative source for
@@ -125,6 +126,7 @@ export function HbcProjectSpotlightSurface({
       data-hbc-presentation="project-spotlight-surface"
       data-hbc-homepage="project-spotlight"
       data-layout-mode={mode}
+      data-featured-has-image={hasFeaturedImage ? 'true' : 'false'}
     >
       <Masthead
         heading={model.heading}

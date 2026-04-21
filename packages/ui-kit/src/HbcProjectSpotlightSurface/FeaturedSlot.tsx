@@ -2,13 +2,28 @@
  * FeaturedSlot — composes the featured project into essentials and a
  * details region governed by the layout-mode visibility matrix.
  *
- *   Essentials (always visible):  media + title + compact milestone pill
- *   Details region (disclosure):  headline, summary, milestone list,
- *                                 freshness, team strip, CTA
+ * Two macro-postures:
+ *
+ *   image-led (hasImage = true):
+ *     media zone → essentials (title + progress pill) → disclosure
+ *     → details (headline, summary, milestones, freshness, team, CTA)
+ *
+ *   title-led (hasImage = false):
+ *     subordinate header strip (eyebrow + inline status / strategic /
+ *     stale chips) → boosted title → progress pill → primary CTA
+ *     (inline) → disclosure → details (headline, summary, milestones,
+ *     freshness, team).
+ *
+ *   The title-led posture deliberately promotes the CTA out of the
+ *   collapsed details region so first-view density carries a real
+ *   next-best action without waiting for a disclosure click. The
+ *   media zone does not render at all in this posture — the surface
+ *   becomes materially shorter instead of staging a placeholder.
  *
  * The disclosure is explicit, keyboard- and touch-safe, and its initial
- * posture follows `visibility.detailsOpenByDefault`: open in wide/medium,
- * closed in compact/minimal.
+ * posture follows `visibility.detailsOpenByDefault` for the image-led
+ * posture. The title-led posture overrides to open-by-default in every
+ * mode except `minimal`, which keeps a tight default profile.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -48,13 +63,13 @@ interface ContentPosture {
 function resolveContentPosture(
   featured: ProjectSpotlightFeaturedItem,
   visibility: SpotlightLayoutVisibility,
+  hasImage: boolean,
 ): ContentPosture {
   const completeness: ProjectSpotlightCompleteness =
     featured.completeness ?? 'full';
   const milestoneCount = featured.milestones?.length ?? 0;
   const teamCount = featured.teamMembers?.length ?? 0;
 
-  // Start from the mode matrix; then trim for thin authored payloads.
   const posture: ContentPosture = {
     showHeadline: visibility.showHeadline && Boolean(featured.headline),
     showMilestoneList: visibility.showMilestoneList && milestoneCount > 0,
@@ -64,19 +79,21 @@ function resolveContentPosture(
   };
 
   if (completeness === 'minimal') {
-    // Minimal payloads: do not dress up the details region with
-    // optional chrome, and do not expand it by default.
     posture.showHeadline = false;
     posture.showMilestoneList = false;
     posture.showTeamStrip = false;
     posture.summaryLineClamp = Math.min(posture.summaryLineClamp, 2);
     posture.detailsOpenByDefault = false;
   } else if (completeness === 'partial') {
-    // Partial payloads: keep the milestone list only when it carries
-    // real progress signal; otherwise let the essentials pill speak.
     if (milestoneCount < 2) posture.showMilestoneList = false;
-    // If headline is present but summary is thin, keep it. If headline
-    // is absent the mode check already suppresses it; nothing to do.
+  }
+
+  // Title-led override: when there is no hero image, promote the
+  // details region so freshness + milestones + summary land in first
+  // view without a disclosure click. `minimal` keeps its tight profile —
+  // the inline CTA below still lands in first view for that mode.
+  if (!hasImage && visibility.mode !== 'minimal') {
+    posture.detailsOpenByDefault = true;
   }
 
   return posture;
@@ -92,8 +109,9 @@ export function FeaturedSlot({
     'Featured Project';
   const milestones = featured.milestones ?? [];
   const teamMembers = featured.teamMembers ?? [];
+  const hasImage = Boolean(featured.image?.src);
 
-  const posture = resolveContentPosture(featured, visibility);
+  const posture = resolveContentPosture(featured, visibility, hasImage);
 
   const detailsId = React.useId();
   const [detailsOpen, setDetailsOpen] = React.useState(
@@ -111,33 +129,95 @@ export function FeaturedSlot({
         transition: { duration: 0.55, ease: EASE_OUT_EXPO },
       };
 
+  // Inline CTA rides above the disclosure in the title-led posture so
+  // the primary action is in first view. The details region drops the
+  // CTA duplicate in that case.
+  const renderInlineCta = !hasImage && Boolean(featured.cta);
+  const renderDetailsCta = hasImage && Boolean(featured.cta);
+
   const hasDetailsContent =
     (posture.showHeadline && Boolean(featured.headline)) ||
     Boolean(featured.summary) ||
     posture.showMilestoneList ||
     Boolean(featured.freshnessLabel) ||
     (posture.showTeamStrip && teamMembers.length > 0) ||
-    Boolean(featured.cta);
+    renderDetailsCta;
+
+  // Title-led header chip row (status / strategic / stale). Shown only
+  // in the no-image posture; image-led keeps these as media overlays.
+  const statusLabel = featured.status?.label;
+  const showHeaderChips =
+    !hasImage &&
+    Boolean(statusLabel || featured.strategicEmphasis || featured.isStale);
 
   return (
     <motion.article
       className={styles.featuredLayout}
+      data-has-image={hasImage ? 'true' : 'false'}
       aria-label="Featured project spotlight"
       {...motionProps}
     >
-      <FeaturedMedia
-        image={featured.image}
-        eyebrowText={eyebrowText}
-        status={featured.status}
-        strategicEmphasis={featured.strategicEmphasis}
-        isStale={featured.isStale}
-        showOverlayChips={visibility.showInlineMeta}
-      />
+      {hasImage && featured.image ? (
+        <FeaturedMedia
+          image={featured.image}
+          eyebrowText={eyebrowText}
+          status={featured.status}
+          strategicEmphasis={featured.strategicEmphasis}
+          isStale={featured.isStale}
+          showOverlayChips={visibility.showInlineMeta}
+        />
+      ) : null}
 
       <div className={styles.featuredContent}>
+        {!hasImage ? (
+          <div className={styles.featuredHeader}>
+            <span className={styles.featuredHeaderEyebrow}>{eyebrowText}</span>
+            {showHeaderChips ? (
+              <div className={styles.featuredHeaderChips}>
+                {statusLabel ? (
+                  <span className={styles.featuredHeaderChip}>
+                    {statusLabel}
+                  </span>
+                ) : null}
+                {featured.strategicEmphasis ? (
+                  <span
+                    className={clsx(
+                      styles.featuredHeaderChip,
+                      styles.featuredHeaderChipStrategic,
+                    )}
+                  >
+                    Strategic
+                  </span>
+                ) : null}
+                {featured.isStale ? (
+                  <span
+                    className={clsx(
+                      styles.featuredHeaderChip,
+                      styles.featuredHeaderChipStale,
+                    )}
+                  >
+                    Stale
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className={styles.featuredEssentials}>
           <h3 className={styles.featuredTitle}>{featured.title}</h3>
           <MilestoneProgressPill milestones={milestones} />
+          {renderInlineCta && featured.cta ? (
+            <div className={styles.featuredCtaInline}>
+              <HbcPremiumCta
+                label={featured.cta.label}
+                href={featured.cta.href}
+                variant="primary"
+                size="md"
+                arrow
+              />
+            </div>
+          ) : null}
         </div>
 
         {hasDetailsContent ? (
@@ -211,7 +291,7 @@ export function FeaturedSlot({
               />
             ) : null}
 
-            {featured.cta ? (
+            {renderDetailsCta && featured.cta ? (
               <div className={styles.featuredCta}>
                 <HbcPremiumCta
                   label={featured.cta.label}

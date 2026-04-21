@@ -368,3 +368,74 @@ export const NoHistoryRailless: Story = {
     }
   },
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// No-image (title-led) posture proofs.
+// ─────────────────────────────────────────────────────────────────────
+
+const noImageModel: ProjectSpotlightSurfaceModel = {
+  ...fullModel,
+  featured: {
+    ...fullModel.featured,
+    image: undefined,
+  },
+};
+
+/**
+ * Proves: in `wide` with no hero image, the surface becomes title-led.
+ * No media zone renders; the subordinate header (eyebrow + status /
+ * strategic chips) sits above a boosted title; the primary CTA is in
+ * first view without clicking the disclosure. The major slot no
+ * longer reads as a blank billboard.
+ */
+export const NoImageFeaturedWide: Story = {
+  name: 'No Image / Wide — title-led first view',
+  render: () => (
+    <div style={wideWrap}>
+      <HbcProjectSpotlightSurface model={noImageModel} forceMode="wide" />
+    </div>
+  ),
+};
+
+/**
+ * Proves: the title-led posture holds at a realistic SharePoint
+ * section width. First-view footprint shrinks materially vs. the
+ * image-led medium posture.
+ */
+export const NoImageFeaturedMedium: Story = {
+  name: 'No Image / Medium — title-led first view',
+  render: () => (
+    <div style={sharePointSectionWrap}>
+      <HbcProjectSpotlightSurface model={noImageModel} forceMode="medium" />
+    </div>
+  ),
+};
+
+/**
+ * Proves: the title-led posture in `compact` (row-1 major slot beside
+ * HB Kudos). Details default open so summary + freshness join title +
+ * CTA in first view; footprint stays significantly smaller than the
+ * image-led compact posture.
+ */
+export const NoImageFeaturedCompact: Story = {
+  name: 'No Image / Compact — title-led first view',
+  render: () => (
+    <div style={compactWrap}>
+      <HbcProjectSpotlightSurface model={noImageModel} forceMode="compact" />
+    </div>
+  ),
+};
+
+/**
+ * Proves: `minimal` stays intentionally tight even in the title-led
+ * posture — no inline chips, trimmed typography — but the primary
+ * CTA still lands in first view for the smallest stable mode.
+ */
+export const NoImageFeaturedMinimal: Story = {
+  name: 'No Image / Minimal — title-led first view',
+  render: () => (
+    <div style={minimalWrap}>
+      <HbcProjectSpotlightSurface model={noImageModel} forceMode="minimal" />
+    </div>
+  ),
+};

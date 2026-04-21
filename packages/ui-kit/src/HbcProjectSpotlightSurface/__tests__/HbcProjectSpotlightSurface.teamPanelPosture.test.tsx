@@ -24,6 +24,10 @@ const MODEL: ProjectSpotlightSurfaceModel = {
     title: 'Palm Beach Medical Campus Expansion',
     summary: 'Structural turnover enters final phase.',
     status: { label: 'On Track', variant: 'success' },
+    image: {
+      src: 'https://cdn.example.invalid/projects/palm-beach.jpg',
+      alt: 'Palm Beach aerial',
+    },
     milestones: [],
     teamMembers: [
       { id: 't1', displayName: 'Jane Smith', role: 'PM' },

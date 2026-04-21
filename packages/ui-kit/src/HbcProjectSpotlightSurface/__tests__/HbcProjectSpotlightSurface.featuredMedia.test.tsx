@@ -1,19 +1,20 @@
 /**
  * HbcProjectSpotlightSurface — featured media posture contract.
  *
- * Pins the three supported media states so the flagship slot cannot
- * regress to the pre-fix behavior where a missing or broken image
- * filled the hero with a dominant "PROJECT IMAGE" placeholder label.
+ * Pins the three supported media states and the title-led rebuild
+ * for the no-image posture so the flagship slot cannot regress to
+ * the pre-fix behavior where a missing or broken image filled the
+ * hero with a dominant "PROJECT IMAGE" placeholder label.
  *
- *   1. authored image present → <img> renders, zone carries
- *                               data-has-image="true", no filler text
- *   2. authored image errored → <img> unmounts on `error`, zone still
- *                               carries data-has-image="true" (authored
- *                               intent was a full hero), fallback band
- *                               replaces it
- *   3. no authored image      → <img> never renders, zone carries
- *                               data-has-image="false" (CSS collapses
- *                               the mode-governed min-height)
+ *   1. authored image present → <img> renders inside .mediaZone,
+ *      root carries data-featured-has-image="true"
+ *   2. authored image errored → <img> unmounts on `error`, zone
+ *      preserves data-has-image="true" and renders a neutral
+ *      fallback band (no filler text)
+ *   3. no authored image      → the media zone does not render
+ *      at all; the surface is title-led: a subordinate header
+ *      strip + boosted title + primary CTA sit in first view
+ *      without a disclosure click
  */
 import * as React from 'react';
 import { fireEvent, render } from '@testing-library/react';
@@ -33,25 +34,35 @@ function modelWithImage(
       title: 'Palm Beach Medical Campus Expansion',
       summary: 'Structural turnover enters final phase.',
       status: { label: 'On Track', variant: 'success' },
+      strategicEmphasis: true,
       milestones: [],
       teamMembers: [],
       image,
+      cta: { label: 'View project brief', href: '#brief' },
       completeness: 'full',
     },
     secondary: [],
   };
 }
 
-function findMediaZone(container: HTMLElement): HTMLElement {
-  const zone = container.querySelector<HTMLElement>('[data-has-image]');
-  if (!zone) {
-    throw new Error('Spotlight media zone not rendered');
-  }
-  return zone;
+function findRoot(container: HTMLElement): HTMLElement {
+  const root = container.querySelector<HTMLElement>(
+    '[data-hbc-presentation="project-spotlight-surface"]',
+  );
+  if (!root) throw new Error('Spotlight root not rendered');
+  return root;
+}
+
+function findFeaturedLayout(container: HTMLElement): HTMLElement {
+  const layout = container.querySelector<HTMLElement>(
+    '[aria-label="Featured project spotlight"]',
+  );
+  if (!layout) throw new Error('Spotlight featuredLayout not rendered');
+  return layout;
 }
 
 describe('HbcProjectSpotlightSurface — featured media posture', () => {
-  it('renders the <img> and marks the zone as image-bearing when authored', () => {
+  it('renders <img>, marks the surface as image-bearing, and carries the image-led posture when authored', () => {
     const { container } = render(
       <HbcProjectSpotlightSurface
         model={modelWithImage({
@@ -61,19 +72,20 @@ describe('HbcProjectSpotlightSurface — featured media posture', () => {
         forceMode="wide"
       />,
     );
-    const zone = findMediaZone(container);
-    expect(zone.getAttribute('data-has-image')).toBe('true');
-    const img = zone.querySelector('img');
+    const root = findRoot(container);
+    expect(root.getAttribute('data-featured-has-image')).toBe('true');
+    const layout = findFeaturedLayout(container);
+    expect(layout.getAttribute('data-has-image')).toBe('true');
+    const img = layout.querySelector('img');
     expect(img).not.toBeNull();
     expect(img?.getAttribute('src')).toBe(
       'https://cdn.example.invalid/projects/palm-beach.jpg',
     );
     expect(img?.getAttribute('alt')).toBe('Palm Beach aerial');
-    // No dominant "PROJECT IMAGE" filler label anywhere in the zone.
-    expect(zone.textContent).not.toMatch(/project\s*image/i);
+    expect(layout.textContent).not.toMatch(/project\s*image/i);
   });
 
-  it('unmounts the <img> and preserves image-bearing posture when the image fails to load', () => {
+  it('unmounts <img> on load failure and renders the neutral branded fallback (no filler text)', () => {
     const { container } = render(
       <HbcProjectSpotlightSurface
         model={modelWithImage({
@@ -83,34 +95,14 @@ describe('HbcProjectSpotlightSurface — featured media posture', () => {
         forceMode="wide"
       />,
     );
-    const zone = findMediaZone(container);
-    const img = zone.querySelector('img');
+    const layout = findFeaturedLayout(container);
+    const img = layout.querySelector('img');
     expect(img).not.toBeNull();
     fireEvent.error(img!);
-    expect(zone.querySelector('img')).toBeNull();
-    // Authored intent was a hero, so the zone keeps its editorial posture
-    // rather than collapsing to the no-image height.
-    expect(zone.getAttribute('data-has-image')).toBe('true');
-    expect(zone.textContent).not.toMatch(/project\s*image/i);
-  });
-
-  it('marks the zone as image-less when no image is authored and renders no <img>', () => {
-    const { container } = render(
-      <HbcProjectSpotlightSurface
-        model={modelWithImage(undefined)}
-        forceMode="wide"
-      />,
-    );
-    const zone = findMediaZone(container);
-    expect(zone.getAttribute('data-has-image')).toBe('false');
-    expect(zone.querySelector('img')).toBeNull();
-    // The featured content (title) still renders — the composition
-    // pivots to content-led instead of image-led.
-    expect(container.textContent).toContain(
-      'Palm Beach Medical Campus Expansion',
-    );
-    // No dominant filler label.
-    expect(zone.textContent).not.toMatch(/project\s*image/i);
+    expect(layout.querySelector('img')).toBeNull();
+    // Authored intent was a hero, so the zone keeps its editorial posture.
+    expect(layout.getAttribute('data-has-image')).toBe('true');
+    expect(layout.textContent).not.toMatch(/project\s*image/i);
   });
 
   it('recovers from a prior image-load error when the image source changes', () => {
@@ -123,9 +115,8 @@ describe('HbcProjectSpotlightSurface — featured media posture', () => {
         forceMode="wide"
       />,
     );
-    const zone = findMediaZone(container);
-    fireEvent.error(zone.querySelector('img')!);
-    expect(zone.querySelector('img')).toBeNull();
+    fireEvent.error(findFeaturedLayout(container).querySelector('img')!);
+    expect(findFeaturedLayout(container).querySelector('img')).toBeNull();
 
     rerender(
       <HbcProjectSpotlightSurface
@@ -136,10 +127,72 @@ describe('HbcProjectSpotlightSurface — featured media posture', () => {
         forceMode="wide"
       />,
     );
-    const recoveredImg = findMediaZone(container).querySelector('img');
-    expect(recoveredImg).not.toBeNull();
-    expect(recoveredImg?.getAttribute('src')).toBe(
+    const recovered = findFeaturedLayout(container).querySelector('img');
+    expect(recovered).not.toBeNull();
+    expect(recovered?.getAttribute('src')).toBe(
       'https://cdn.example.invalid/projects/recovered.jpg',
     );
+  });
+});
+
+describe('HbcProjectSpotlightSurface — title-led no-image posture', () => {
+  it('stamps data-featured-has-image="false" on the root and omits the media zone entirely', () => {
+    const { container } = render(
+      <HbcProjectSpotlightSurface
+        model={modelWithImage(undefined)}
+        forceMode="wide"
+      />,
+    );
+    const root = findRoot(container);
+    expect(root.getAttribute('data-featured-has-image')).toBe('false');
+    const layout = findFeaturedLayout(container);
+    expect(layout.getAttribute('data-has-image')).toBe('false');
+    // No media zone at all — the surface is title-led.
+    expect(layout.querySelector('[data-has-image="true"]')).toBeNull();
+    // No <img>, no "Project Image" filler anywhere.
+    expect(layout.querySelector('img')).toBeNull();
+    expect(layout.textContent).not.toMatch(/project\s*image/i);
+  });
+
+  it('places the title, at least one authored signal, and the primary CTA in first view without opening the disclosure', () => {
+    const { container, getByRole } = render(
+      <HbcProjectSpotlightSurface
+        model={modelWithImage(undefined)}
+        forceMode="wide"
+      />,
+    );
+    const layout = findFeaturedLayout(container);
+
+    // Title present.
+    expect(layout.textContent).toContain(
+      'Palm Beach Medical Campus Expansion',
+    );
+    // At least one authored signal — status or strategic — visible.
+    expect(layout.textContent).toMatch(/On Track|Strategic/);
+    // Primary CTA rendered as a link, without clicking the details
+    // disclosure. The disclosure button text indicates closed state
+    // when "Show spotlight details" is present; we don't click it.
+    const cta = getByRole('link', { name: /View project brief/i });
+    expect(cta).toBeInTheDocument();
+  });
+
+  it('keeps minimal mode tight but still lands the CTA in first view', () => {
+    const { container, getByRole } = render(
+      <HbcProjectSpotlightSurface
+        model={modelWithImage(undefined)}
+        forceMode="minimal"
+      />,
+    );
+    const layout = findFeaturedLayout(container);
+    expect(layout.getAttribute('data-has-image')).toBe('false');
+    expect(layout.querySelector('img')).toBeNull();
+    // Title still present.
+    expect(layout.textContent).toContain(
+      'Palm Beach Medical Campus Expansion',
+    );
+    // CTA in first view even though minimal keeps details collapsed.
+    expect(
+      getByRole('link', { name: /View project brief/i }),
+    ).toBeInTheDocument();
   });
 });
