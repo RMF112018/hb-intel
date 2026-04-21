@@ -21,7 +21,6 @@ import {
   HbcPriorityRailErrorState,
   HbcPriorityRailSkeleton,
   type HomepageLauncherDeviceClass,
-  type HomepageLauncherOverflowSectionModel,
 } from '@hbc/ui-kit/homepage';
 import {
   usePriorityActionsData,
@@ -33,7 +32,6 @@ import {
 } from '../../homepage/data/priorityActionsNormalization.js';
 import { resolvePriorityRailDeviceForContainer } from '../../homepage/data/priorityActionsPresentation.js';
 import {
-  buildLauncherOverflowSections,
   partitionItems,
   resolveLauncherDeviceClass,
 } from '../../homepage/data/priorityActionsLauncherAdapter.js';
@@ -97,7 +95,6 @@ export function HbHomepageLauncherBand({
   let visibleBudget: number | undefined;
   let primaryCount: number | undefined;
   let overflowCount: number | undefined;
-  let overflowSections: HomepageLauncherOverflowSectionModel[] | undefined;
   let handheldMode: 'standard' | 'single-entry-all-tools' | undefined;
   let drawerSource: 'all-tools' | undefined;
   let capGovernance: 'binding-visible-cap' | 'all-tools-drawer' | undefined;
@@ -133,12 +130,6 @@ export function HbHomepageLauncherBand({
     drawerSource = resolution.launcherDrawerSource;
     capGovernance = resolution.launcherCapGovernance;
     overflowStrategy = resolution.launcherGovernance.overflowStrategy;
-    const drawerItemsForSections =
-      handheldMode === 'single-entry-all-tools'
-        ? partition.overflow
-        : [...partition.primary, ...partition.overflow];
-    overflowSections = buildLauncherOverflowSections(drawerItemsForSections);
-
     if (partition.primary.length === 0 && partition.overflow.length === 0) {
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
       content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
@@ -155,7 +146,6 @@ export function HbHomepageLauncherBand({
           handheldMode={handheldMode}
           drawerSource={drawerSource}
           capGovernance={capGovernance}
-          overflowSections={overflowSections}
         />
       );
     }

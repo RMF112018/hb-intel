@@ -201,17 +201,12 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
       primary: unknown[];
       overflow: unknown[];
       handheldMode?: string;
-      overflowSections?: Array<{ key: string; items: unknown[] }>;
     }): React.JSX.Element =>
       React.createElement('div', {
         'data-test-launcher': 'mock',
         'data-test-primary-count': props.primary.length,
         'data-test-overflow-count': props.overflow.length,
         'data-test-handheld-mode': props.handheldMode,
-        'data-test-overflow-sections': props.overflowSections?.length ?? 0,
-        'data-test-overflow-section-keys': (props.overflowSections ?? [])
-          .map((section) => section.key)
-          .join(','),
       }),
     HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
     HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
@@ -325,27 +320,6 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     expect(root?.getAttribute('data-hbc-launcher-device-class')).toBe('phone');
     expect(shell?.getAttribute('data-hbc-launcher-device-class')).toBe('phone');
     expect(root?.getAttribute('data-hbc-launcher-handheld-mode')).toBe('single-entry-all-tools');
-  });
-
-  it('passes grouped overflow sections into launcher runtime markers', () => {
-    MOCK_DATA_STATE.items = [
-      { ...MOCK_ITEMS[0]!, actionKey: 'approve-rfi', groupKey: 'approvals', groupTitle: 'Approvals' },
-      { ...MOCK_ITEMS[1]!, actionKey: 'field-report', groupKey: 'field', groupTitle: 'Field Ops' },
-      { ...MOCK_ITEMS[2]!, actionKey: 'timesheet', groupKey: '', groupTitle: '' },
-      { ...MOCK_ITEMS[3]!, actionKey: 'approve-co', groupKey: 'approvals', groupTitle: 'Approvals' },
-      { ...MOCK_ITEMS[4]!, actionKey: 'qa-check', groupKey: 'quality', groupTitle: 'Quality' },
-    ];
-    const { container } = render(
-      <HbHomepageLauncherBand
-        entryContainer={ENTRY_CONTAINER}
-        alignmentMode="shared-entry-governed"
-      />,
-    );
-    const launcher = container.querySelector('[data-test-launcher="mock"]');
-    expect(launcher?.getAttribute('data-test-overflow-sections')).toBe('4');
-    expect(launcher?.getAttribute('data-test-overflow-section-keys')).toBe(
-      'approvals,field,quality,__other_tools',
-    );
   });
 
   it('keeps loading-state density aligned with runtime visible-count governance', () => {

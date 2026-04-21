@@ -57,7 +57,6 @@ export interface HbcHomepageLauncherProps {
   title?: string;
   primary: HomepageLauncherTileModel[];
   overflow?: HomepageLauncherTileModel[];
-  overflowSections?: HomepageLauncherOverflowSectionModel[];
   overflowLabel?: string;
   deviceClass: HomepageLauncherDeviceClass;
   overflowMode?: HomepageLauncherOverflowMode;
@@ -77,7 +76,6 @@ export interface HbcHomepageLauncherTileProps {
 
 export interface HbcHomepageLauncherOverflowProps {
   items: HomepageLauncherTileModel[];
-  sections?: HomepageLauncherOverflowSectionModel[];
   label?: string;
   overflowMode?: HomepageLauncherOverflowMode;
   triggerMode?: HomepageLauncherOverflowTriggerMode;

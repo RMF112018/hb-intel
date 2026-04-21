@@ -1,9 +1,8 @@
 /**
  * HbcHomepageLauncherOverflow — Company Tools drawer.
  *
- * Grouped secondary-launcher IA:
- * tools are sectioned by launcher metadata (`groupKey`/`groupTitle`) while
- * preserving one coherent Company Tools drawer identity.
+ * Renders a single-row horizontal overflow tray inside the bottom drawer.
+ * Grouped/category section rendering is intentionally removed.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -19,7 +18,6 @@ import {
 } from '@floating-ui/react';
 import type {
   HbcHomepageLauncherOverflowProps,
-  HomepageLauncherOverflowSectionModel,
   HomepageLauncherTileModel,
 } from './types.js';
 import { launcherTile } from './variants.js';
@@ -27,52 +25,15 @@ import { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 import styles from './homepage-launcher.module.css';
 
 const DRAWER_CATEGORY_LABEL = 'Company Tools';
-const UNGROUPED_SECTION_KEY = '__other_tools';
-const UNGROUPED_SECTION_TITLE = 'Other tools';
-
-function normalizeGroupToken(value: string | undefined): string | undefined {
-  const normalized = value?.trim();
-  return normalized ? normalized : undefined;
-}
-
-function buildOverflowSections(
-  items: readonly HomepageLauncherTileModel[],
-): HomepageLauncherOverflowSectionModel[] {
-  if (items.length === 0) return [];
-  const grouped = new Map<string, HomepageLauncherOverflowSectionModel>();
-  for (const item of items) {
-    const groupKey = normalizeGroupToken(item.groupKey);
-    const groupTitle = normalizeGroupToken(item.groupTitle);
-    const resolvedKey = (groupKey ?? groupTitle ?? UNGROUPED_SECTION_KEY).toLowerCase();
-    const resolvedTitle = groupTitle ?? groupKey ?? UNGROUPED_SECTION_TITLE;
-    const existing = grouped.get(resolvedKey);
-    if (existing) {
-      existing.items.push(item);
-      continue;
-    }
-    grouped.set(resolvedKey, {
-      key: resolvedKey,
-      title: resolvedTitle,
-      items: [item],
-    });
-  }
-  return Array.from(grouped.values()).sort((a, b) => {
-    if (a.key === UNGROUPED_SECTION_KEY) return 1;
-    if (b.key === UNGROUPED_SECTION_KEY) return -1;
-    return a.title.localeCompare(b.title);
-  });
-}
 
 function DrawerOverflow({
   items,
-  sections,
   label,
   overflowMode,
   triggerMode = 'tile',
   className,
 }: {
   items: HomepageLauncherTileModel[];
-  sections?: HomepageLauncherOverflowSectionModel[];
   label: string;
   overflowMode?: 'sheet' | 'more-tools';
   triggerMode?: 'tile' | 'linear-handheld';
@@ -83,10 +44,6 @@ function DrawerOverflow({
   const dialogId = React.useId();
   const titleId = React.useId();
   const drawerItems = React.useMemo(() => [...items], [items]);
-  const drawerSections = React.useMemo(
-    () => (sections && sections.length > 0 ? sections : buildOverflowSections(drawerItems)),
-    [drawerItems, sections],
-  );
   const totalTools = drawerItems.length;
   const { refs, context } = useFloating({ open, onOpenChange: setOpen });
 
@@ -226,63 +183,35 @@ function DrawerOverflow({
                 </header>
                 <div
                   className={styles.drawerBody}
-                  data-hbc-ui="homepage-launcher-overflow-sections"
+                  data-hbc-ui="homepage-launcher-overflow-tray"
                 >
-                  {drawerSections.map((section) => (
-                    <section
-                      key={section.key}
-                      className={styles.drawerSection}
-                      data-hbc-ui="homepage-launcher-overflow-section"
-                      data-hbc-overflow-category-key={section.key}
-                      data-hbc-overflow-category-size={section.items.length}
+                  <div className={styles.drawerRailRoot}>
+                    <div
+                      className={styles.drawerTileGrid}
+                      data-hbc-ui="homepage-launcher-drawer-rail"
+                      data-hbc-launcher-drawer-layout="single-row-tray"
+                      role="list"
+                      aria-label="Company tools"
+                      data-hbc-launcher-drawer-scroll="horizontal"
+                      data-hbc-launcher-overflow-grouping="none"
                     >
-                      <header className={styles.drawerSectionHeader}>
-                        <h3
-                          className={styles.drawerSectionTitle}
-                          data-hbc-launcher-overflow-section-title="true"
-                        >
-                          {section.title}
-                        </h3>
-                        <span
-                          className={styles.drawerSectionCount}
-                          data-hbc-launcher-overflow-section-count="true"
-                          aria-label={`${section.items.length} tools`}
-                        >
-                          {section.items.length}
-                        </span>
-                      </header>
-                      <div className={styles.drawerRailRoot}>
-                        <div
-                          className={styles.drawerRailViewport}
-                          role="region"
-                          tabIndex={0}
-                          aria-label={`${section.title} tools rail`}
-                          data-hbc-launcher-drawer-scroll="x"
-                        >
-                          <div
-                            className={styles.drawerTileRail}
-                            data-hbc-ui="homepage-launcher-drawer-rail"
-                            data-hbc-launcher-drawer-layout="compact-rail"
-                            data-hbc-launcher-drawer-density={
-                              handheldLinearTrigger ? 'tight' : 'compact'
-                            }
-                            role="list"
-                            aria-label={`${section.title} tools`}
-                          >
-                            {section.items.map((tile) => (
-                              <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
-                                <HbcHomepageLauncherTile
-                                  tile={tile}
-                                  family="drawer"
-                                  className={styles.drawerTile}
-                                />
-                              </div>
-                            ))}
-                          </div>
+                      {drawerItems.map((tile) => (
+                        <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
+                          <HbcHomepageLauncherTile
+                            tile={tile}
+                            family="drawer"
+                            className={styles.drawerTile}
+                          />
                         </div>
-                      </div>
-                    </section>
-                  ))}
+                      ))}
+                    </div>
+                  </div>
+                  <p
+                    className={styles.drawerOverflowHint}
+                    data-hbc-homepage-launcher-overflow-hint="single-row"
+                  >
+                    Swipe horizontally to see more tools.
+                  </p>
                 </div>
               </motion.div>
             </div>
@@ -295,7 +224,6 @@ function DrawerOverflow({
 
 export function HbcHomepageLauncherOverflow({
   items,
-  sections,
   label = 'More tools',
   overflowMode = 'more-tools',
   triggerMode = 'tile',
@@ -305,7 +233,6 @@ export function HbcHomepageLauncherOverflow({
   return (
     <DrawerOverflow
       items={items}
-      sections={sections}
       label={label}
       overflowMode={overflowMode}
       triggerMode={triggerMode}
