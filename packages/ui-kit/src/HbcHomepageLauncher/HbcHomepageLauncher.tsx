@@ -135,7 +135,11 @@ export function HbcHomepageLauncher(
         </span>
       </header>
       <div className={launcherBand()} role="list">
-        <div className={styles.bandScroller} data-hbc-launcher-band-mode={handheldMode}>
+        <div
+          className={styles.bandScroller}
+          data-hbc-launcher-band-mode={handheldMode}
+          data-hbc-launcher-band-surface="flat"
+        >
           {renderedPrimary.map((tile) => (
             <div
               key={tile.id}

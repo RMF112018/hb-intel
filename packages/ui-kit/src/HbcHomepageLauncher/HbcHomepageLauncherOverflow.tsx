@@ -82,6 +82,7 @@ function DrawerOverflow({
         data-hbc-homepage-launcher-sheet-content="all-tools"
         data-hbc-launcher-tile-family="row"
         data-hbc-launcher-tile-geometry="icon-forward-square"
+        data-hbc-launcher-tile-size-contract="row"
         data-hbc-homepage-launcher-overflow-shape={handheldLinearTrigger ? 'linear-handheld' : 'tile'}
         aria-haspopup="dialog"
         aria-expanded={open}

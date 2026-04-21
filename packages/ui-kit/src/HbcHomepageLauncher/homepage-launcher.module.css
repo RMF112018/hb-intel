@@ -28,28 +28,15 @@
   --hbc-hl-handheld-trigger-height: 52px;
   --hbc-hl-caption-size: 0.625rem;
   --hbc-hl-caption-line-height: 1.18;
-  --hbc-hl-drawer-pad-x: 20px;
-  --hbc-hl-drawer-pad-y: 14px;
+  --hbc-hl-drawer-pad-x: 18px;
+  --hbc-hl-drawer-pad-y: 12px;
   --hbc-hl-drawer-rail-gap: 10px;
   --hbc-hl-drawer-scrollbar-size: 9px;
-  --hbc-hl-drawer-max-inline: 940px;
+  --hbc-hl-drawer-max-inline: 780px;
   --hbc-hl-drawer-max-block: 64vh;
   --hbc-hl-drawer-tile-size: var(--hbc-hl-tile-size);
   --hbc-hl-drawer-icon-size: var(--hbc-hl-icon-size);
   --hbc-hl-drawer-caption-size: var(--hbc-hl-caption-size);
-  --hbc-hl-surface-pad-inline: 6px;
-  --hbc-hl-surface-pad-block: 6px;
-  --hbc-hl-surface-radius: 13px;
-  --hbc-hl-surface-border: rgba(var(--hbc-hl-brand-deep-rgb), 0.12);
-  --hbc-hl-surface-shadow:
-    0 1px 2px rgba(2, 6, 23, 0.08),
-    0 10px 22px rgba(var(--hbc-hl-brand-deep-rgb), 0.12);
-  --hbc-hl-surface-bg:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.92) 0%,
-      rgba(244, 248, 253, 0.9) 100%
-    );
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -140,11 +127,12 @@
 }
 
 .bandScroller[data-hbc-launcher-band-mode="standard"] {
-  padding: var(--hbc-hl-surface-pad-block) var(--hbc-hl-surface-pad-inline);
-  border-radius: var(--hbc-hl-surface-radius);
-  border: 1px solid var(--hbc-hl-surface-border);
-  box-shadow: var(--hbc-hl-surface-shadow);
-  background: var(--hbc-hl-surface-bg);
+  /* Row sits directly in the launcher surface — no nested card treatment. */
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* ---------- TILE CONTRACT ---------- */
@@ -355,6 +343,16 @@
 .overflowTile {
   box-sizing: border-box;
   font: inherit;
+  /* Lock the row sizing contract explicitly so the More Tools trigger
+     matches the regular tile geometry at every breakpoint — no implicit
+     inheritance drift. */
+  width: var(--hbc-hl-tile-size);
+  flex: 0 0 var(--hbc-hl-tile-size);
+  min-width: 0;
+  height: var(--hbc-hl-tile-size);
+  aspect-ratio: 1 / 1;
+  padding: 8px 7px 7px;
+  border-radius: 11px;
 }
 
 .overflowTileLinearHandheld {
@@ -376,9 +374,11 @@
   border-color: rgba(var(--hbc-hl-orange-rgb), 0.65);
   background:
     linear-gradient(150deg, rgba(var(--hbc-hl-orange-rgb), 0.9) 0%, rgba(var(--hbc-hl-brand-rgb), 0.92) 100%);
+  /* Shadow spread matches .tilePrimary so the visible bounding footprint
+     is identical to row tiles — only the hue family (orange) differs. */
   box-shadow:
-    0 1px 3px rgba(8, 18, 35, 0.28),
-    0 8px 18px rgba(var(--hbc-hl-orange-rgb), 0.18);
+    0 1px 2px rgba(2, 6, 23, 0.28),
+    0 12px 26px rgba(var(--hbc-hl-orange-rgb), 0.32);
 }
 
 .overflowTriggerInlineContent {
@@ -489,8 +489,8 @@
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow:
-    0 -24px 60px rgba(0, 0, 0, 0.55),
-    0 -2px 0 rgba(255, 255, 255, 0.05) inset;
+    0 -18px 44px rgba(2, 6, 23, 0.42),
+    0 -1px 0 rgba(255, 255, 255, 0.06) inset;
   overflow: hidden;
   color: #ffffff;
 }
@@ -508,7 +508,7 @@
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   column-gap: 10px;
-  padding: 12px var(--hbc-hl-drawer-pad-x);
+  padding: 10px var(--hbc-hl-drawer-pad-x);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(10, 26, 48, 0.82);
 }
@@ -583,8 +583,7 @@
 }
 
 .drawerBody {
-  padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x)
-    var(--hbc-hl-drawer-pad-y);
+  padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x) 8px;
   background: transparent;
   overflow: hidden;
 }
@@ -601,7 +600,7 @@
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 
 .drawerRailItem {
@@ -629,8 +628,8 @@
 }
 
 .drawerOverflowHint {
-  margin: 0;
-  min-height: 16px;
+  margin: 2px 0 var(--hbc-hl-drawer-pad-y);
+  min-height: 14px;
   color: rgba(255, 255, 255, 0.82);
   font-size: 0.75rem;
   line-height: 1.3;
@@ -656,9 +655,6 @@
     --hbc-hl-handheld-trigger-label-size: 0.6875rem;
     --hbc-hl-handheld-trigger-chevron-size: 10px;
     --hbc-hl-handheld-trigger-height: 44px;
-    --hbc-hl-surface-pad-inline: 0px;
-    --hbc-hl-surface-pad-block: 0px;
-    --hbc-hl-surface-radius: 0px;
   }
 
   .launcherHeader {
@@ -749,12 +745,10 @@
     --hbc-hl-drawer-pad-x: 16px;
     --hbc-hl-drawer-pad-y: 12px;
     --hbc-hl-drawer-rail-gap: 9px;
-    --hbc-hl-surface-pad-inline: 8px;
-    --hbc-hl-surface-pad-block: 8px;
-    --hbc-hl-surface-radius: 14px;
+    --hbc-hl-drawer-max-inline: 720px;
   }
 
-  .sheetSurface { width: min(100dvw - 16px, 860px); }
+  .sheetSurface { width: min(100dvw - 16px, var(--hbc-hl-drawer-max-inline)); }
 }
 
 /* tablet landscape */
@@ -765,9 +759,6 @@
     --hbc-hl-caption-size: 0.675rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 9px;
-    --hbc-hl-surface-pad-inline: 10px;
-    --hbc-hl-surface-pad-block: 9px;
-    --hbc-hl-surface-radius: 15px;
   }
 }
 
@@ -779,9 +770,6 @@
     --hbc-hl-caption-size: 0.6875rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 10px;
-    --hbc-hl-surface-pad-inline: 12px;
-    --hbc-hl-surface-pad-block: 10px;
-    --hbc-hl-surface-radius: 16px;
   }
 }
 
@@ -793,10 +781,7 @@
     --hbc-hl-caption-size: 0.75rem;
     --hbc-hl-caption-line-height: 1.24;
     --hbc-hl-drawer-rail-gap: 11px;
-    --hbc-hl-drawer-max-inline: 1020px;
-    --hbc-hl-surface-pad-inline: 14px;
-    --hbc-hl-surface-pad-block: 11px;
-    --hbc-hl-surface-radius: 18px;
+    --hbc-hl-drawer-max-inline: 880px;
   }
 
   .tile,

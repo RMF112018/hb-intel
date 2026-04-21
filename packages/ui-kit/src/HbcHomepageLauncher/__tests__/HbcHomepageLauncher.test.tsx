@@ -110,12 +110,14 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const trigger = screen.getByRole('button', { name: /More tools/i });
     const row = container.querySelector('[data-hbc-launcher-band-mode="standard"]');
     expect(row?.contains(trigger)).toBe(true);
+    expect(row?.getAttribute('data-hbc-launcher-band-surface')).toBe('flat');
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('more-tools');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
     );
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('data-hbc-launcher-tile-geometry')).toBe('icon-forward-square');
+    expect(trigger.getAttribute('data-hbc-launcher-tile-size-contract')).toBe('row');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-shape')).toBe('tile');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     fireEvent.click(trigger);
