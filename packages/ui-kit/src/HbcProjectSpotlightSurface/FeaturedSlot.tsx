@@ -193,7 +193,7 @@ export function FeaturedSlot({
               <div className={styles.metaRow}>
                 <span className={styles.metaItem}>
                   <Calendar
-                    size={12}
+                    size={14}
                     aria-hidden="true"
                     className={styles.metaIcon}
                     strokeWidth={2.25}

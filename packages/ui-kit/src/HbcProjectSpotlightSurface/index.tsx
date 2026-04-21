@@ -22,6 +22,12 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
+import {
+  hbcPresentationCSSVars,
+  HBC_PRESENTATION_BLUE,
+  HBC_PRESENTATION_BLUE_RGB,
+  HBC_PRESENTATION_ORANGE_RGB,
+} from '../theme/tokens.js';
 import styles from './project-spotlight-surface.module.css';
 import type { ProjectSpotlightSurfaceModel } from './types.js';
 import {
@@ -94,11 +100,28 @@ export function HbcProjectSpotlightSurface({
 
   const hasHistory = visibility.showRail && model.secondary.length > 0;
 
+  // Bind governed presentation-lane tokens to CSS custom properties so
+  // the Spotlight stylesheet references one authoritative source for
+  // brand color instead of hardcoding `#225391` / `rgba(34, 83, 145, …)`
+  // across ~80 sites. The stylesheet still carries literal fallbacks
+  // on `.root` so Storybook/tests render correctly without injection.
+  const surfaceStyle = React.useMemo<React.CSSProperties>(
+    () =>
+      ({
+        ...hbcPresentationCSSVars(),
+        '--hbc-presentation-blue': HBC_PRESENTATION_BLUE,
+        '--hbc-presentation-blue-rgb': HBC_PRESENTATION_BLUE_RGB,
+        '--hbc-presentation-orange-rgb': HBC_PRESENTATION_ORANGE_RGB,
+      }) as React.CSSProperties,
+    [],
+  );
+
   return (
     <section
       ref={ref as React.RefObject<HTMLElement>}
       aria-label={ariaLabel ?? model.heading}
       className={clsx(styles.root, className)}
+      style={surfaceStyle}
       data-hbc-presentation="project-spotlight-surface"
       data-hbc-homepage="project-spotlight"
       data-layout-mode={mode}

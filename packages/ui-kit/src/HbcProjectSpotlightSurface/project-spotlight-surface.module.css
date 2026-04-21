@@ -29,9 +29,12 @@
  *   • Primary-variant CTA on the featured project so the flagship
  *     module carries real conversion weight
  *
- * Governed presentation-lane brand tokens inlined:
- *   HBC_PRESENTATION_BLUE   #225391 / 34, 83, 145
- *   HBC_PRESENTATION_ORANGE #e57e46 / 229, 126, 70
+ * Governed presentation-lane brand tokens inlined via CSS custom
+ * properties (see `.root` below). Values are injected at runtime by
+ * `hbcPresentationCSSVars()` + per-var overrides in `index.tsx`, with
+ * literal fallbacks on `.root` so the stylesheet remains self-hosting
+ * for Storybook/snapshot contexts. Canonical token source:
+ * `packages/ui-kit/src/theme/tokens.ts`.
  * Responsive via viewport media queries (mobile <768, tablet ≥768,
  * desktop ≥1200). Desktop is single-column stacked (W01r-P22) — the
  * rail no longer becomes a right-side sidebar. Team detail panel
@@ -39,19 +42,33 @@
  */
 
 .root {
+  /* Governed presentation-lane brand tokens are injected at runtime
+     via `hbcPresentationCSSVars()` + per-var overrides in index.tsx,
+     so this surface no longer hardcodes the brand hex / rgb triplets
+     at each use site. The fallbacks below keep the stylesheet
+     self-hosting for Storybook/snapshot contexts that bypass the JSX
+     injection. `--presentation-ink` and `--presentation-body-ink` are
+     local aliases — not foundation tokens — consolidating the two
+     presentation-lane text shades used across this surface. */
+  --hbc-presentation-blue: #225391;
+  --hbc-presentation-blue-rgb: 34, 83, 145;
+  --hbc-presentation-orange-rgb: 229, 126, 70;
+  --presentation-ink: #0a1b33;
+  --presentation-body-ink: 26, 19, 16;
+
   display: flex;
   flex-direction: column;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   color: #1a1a1a;
   background: #ffffff;
   border-radius: 12px;
-  border-left: 5px solid #225391;
+  border-left: 5px solid var(--hbc-presentation-blue);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   border-right: 1px solid rgba(0, 0, 0, 0.06);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
-    0 1px 3px rgba(34, 83, 145, 0.08),
-    0 6px 18px rgba(34, 83, 145, 0.08),
+    0 1px 3px rgba(var(--hbc-presentation-blue-rgb), 0.08),
+    0 6px 18px rgba(var(--hbc-presentation-blue-rgb), 0.08),
     0 22px 48px rgba(10, 24, 45, 0.06);
   overflow: hidden;
   position: relative;
@@ -121,7 +138,7 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
 }
 
 .mastheadEyebrowIcon {
@@ -131,8 +148,8 @@
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: rgba(34, 83, 145, 0.10);
-  color: #225391;
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.10);
+  color: var(--hbc-presentation-blue);
 }
 
 /* Suppress the eyebrow icon bubble in tight modes. Wide/medium keep
@@ -149,8 +166,8 @@
   height: 1px;
   background: linear-gradient(
     90deg,
-    rgba(34, 83, 145, 0.35) 0%,
-    rgba(34, 83, 145, 0.08) 60%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.35) 0%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.08) 60%,
     transparent 100%
   );
 }
@@ -178,7 +195,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  color: #0a1b33;
+  color: var(--presentation-ink);
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -209,11 +226,11 @@
   margin: 0 22px;
   background: linear-gradient(
     90deg,
-    #225391 0%,
-    #225391 72px,
-    rgba(34, 83, 145, 0.14) 72px,
-    rgba(34, 83, 145, 0.08) 32%,
-    rgba(229, 126, 70, 0.08) 58%,
+    var(--hbc-presentation-blue) 0%,
+    var(--hbc-presentation-blue) 72px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.14) 72px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.08) 32%,
+    rgba(var(--hbc-presentation-orange-rgb), 0.08) 58%,
     transparent 100%
   );
   border: none;
@@ -238,9 +255,9 @@
   height: 2px;
   background: linear-gradient(
     90deg,
-    #225391 0%,
-    #225391 48px,
-    rgba(34, 83, 145, 0.12) 48px,
+    var(--hbc-presentation-blue) 0%,
+    var(--hbc-presentation-blue) 48px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.12) 48px,
     transparent 100%
   );
 }
@@ -307,7 +324,7 @@
 .mediaZone {
   position: relative;
   overflow: hidden;
-  background-color: rgba(34, 83, 145, 0.08);
+  background-color: rgba(var(--hbc-presentation-blue-rgb), 0.08);
   contain: layout style;
   /* Default height is a safe mid value; real posture is selected by
      `data-layout-mode` below and by the aspect-ratio cap on wide/medium
@@ -355,10 +372,10 @@
   justify-content: center;
   background: linear-gradient(
     135deg,
-    rgba(34, 83, 145, 0.10) 0%,
-    rgba(229, 126, 70, 0.06) 100%
+    rgba(var(--hbc-presentation-blue-rgb), 0.10) 0%,
+    rgba(var(--hbc-presentation-orange-rgb), 0.06) 100%
   );
-  color: rgba(34, 83, 145, 0.32);
+  color: rgba(var(--hbc-presentation-blue-rgb), 0.32);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -398,7 +415,7 @@
     to top,
     rgba(10, 24, 45, 0.75) 0%,
     rgba(10, 24, 45, 0.35) 30%,
-    rgba(34, 83, 145, 0.12) 60%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.12) 60%,
     transparent 100%
   );
 }
@@ -440,7 +457,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #ffffff;
-  background: rgba(34, 83, 145, 0.80);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.80);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -471,7 +488,7 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -503,10 +520,10 @@
   padding: 22px 22px 24px;
   background: linear-gradient(
     180deg,
-    rgba(34, 83, 145, 0.015) 0%,
-    rgba(34, 83, 145, 0.035) 100%
+    rgba(var(--hbc-presentation-blue-rgb), 0.015) 0%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.035) 100%
   );
-  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.08);
 }
 
 /* Mode-governed featured-body rhythm. Wide and medium keep premium
@@ -536,7 +553,7 @@
   font-weight: 800;
   letter-spacing: -0.025em;
   line-height: 1.12;
-  color: #0a1b33;
+  color: var(--presentation-ink);
   max-width: 24ch;
 }
 
@@ -575,7 +592,7 @@
   font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.5;
-  color: rgba(26, 19, 16, 0.72);
+  color: rgba(var(--presentation-body-ink), 0.72);
   max-width: 52ch;
 }
 
@@ -589,7 +606,7 @@
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: rgba(26, 19, 16, 0.62);
+  color: rgba(var(--presentation-body-ink), 0.62);
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
@@ -623,8 +640,8 @@
   flex-wrap: wrap;
   padding: 6px 12px;
   width: fit-content;
-  background: rgba(34, 83, 145, 0.06);
-  border: 1px solid rgba(34, 83, 145, 0.14);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
   border-radius: 999px;
 }
 
@@ -636,13 +653,13 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
 }
 
 .milestoneSignalCount {
   font-size: 0.75rem;
   font-weight: 800;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   font-variant-numeric: tabular-nums;
 }
 
@@ -652,7 +669,7 @@
   width: 72px;
   height: 4px;
   border-radius: 2px;
-  background: rgba(34, 83, 145, 0.14);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.14);
   overflow: hidden;
 }
 
@@ -662,7 +679,7 @@
   left: 0;
   bottom: 0;
   border-radius: 2px;
-  background: linear-gradient(90deg, #225391 0%, #3a73b3 100%);
+  background: linear-gradient(90deg, var(--hbc-presentation-blue) 0%, #3a73b3 100%);
   transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -683,9 +700,9 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #225391;
-  background: rgba(34, 83, 145, 0.06);
-  border: 1px solid rgba(34, 83, 145, 0.18);
+  color: var(--hbc-presentation-blue);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
   border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
@@ -697,13 +714,13 @@
 }
 
 .featuredDisclosure:hover {
-  background: rgba(34, 83, 145, 0.1);
-  border-color: rgba(34, 83, 145, 0.32);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.1);
+  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.32);
   transform: translateY(-1px);
 }
 
 .featuredDisclosure:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hbc-presentation-blue);
   outline-offset: 2px;
 }
 
@@ -747,7 +764,7 @@
   flex-direction: column;
   gap: 14px;
   padding-top: 4px;
-  border-top: 1px dashed rgba(34, 83, 145, 0.18);
+  border-top: 1px dashed rgba(var(--hbc-presentation-blue-rgb), 0.18);
 }
 
 .featuredDetails[hidden] {
@@ -773,8 +790,8 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  background: rgba(34, 83, 145, 0.035);
-  border: 1px solid rgba(34, 83, 145, 0.10);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.035);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.10);
   border-radius: 10px;
 }
 
@@ -793,13 +810,13 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
 }
 
 .milestonesProgress {
   font-size: 0.8125rem;
   font-weight: 800;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   font-variant-numeric: tabular-nums;
 }
 
@@ -807,7 +824,7 @@
   position: relative;
   height: 6px;
   border-radius: 3px;
-  background: rgba(34, 83, 145, 0.10);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.10);
   overflow: hidden;
 }
 
@@ -817,7 +834,7 @@
   left: 0;
   bottom: 0;
   border-radius: 3px;
-  background: linear-gradient(90deg, #225391 0%, #3a73b3 100%);
+  background: linear-gradient(90deg, var(--hbc-presentation-blue) 0%, #3a73b3 100%);
   transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -850,13 +867,13 @@
   align-items: center;
   gap: 8px;
   font-size: 0.8125rem;
-  color: rgba(26, 19, 16, 0.72);
+  color: rgba(var(--presentation-body-ink), 0.72);
   line-height: 1.3;
   min-width: 0;
 }
 
 .milestoneItemDone {
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   font-weight: 600;
 }
 
@@ -867,7 +884,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #225391;
+  background: var(--hbc-presentation-blue);
   color: #ffffff;
   flex-shrink: 0;
 }
@@ -879,7 +896,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 1.5px dashed rgba(34, 83, 145, 0.40);
+  border: 1.5px dashed rgba(var(--hbc-presentation-blue-rgb), 0.40);
   flex-shrink: 0;
 }
 
@@ -899,11 +916,11 @@
   gap: 14px;
   flex-wrap: wrap;
   padding-top: 10px;
-  border-top: 1px dashed rgba(34, 83, 145, 0.22);
+  border-top: 1px dashed rgba(var(--hbc-presentation-blue-rgb), 0.22);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: rgba(26, 19, 16, 0.55);
+  color: rgba(var(--presentation-body-ink), 0.55);
 }
 
 .metaItem {
@@ -913,7 +930,7 @@
 }
 
 .metaIcon {
-  color: #225391;
+  color: var(--hbc-presentation-blue);
 }
 
 .featuredCta {
@@ -935,8 +952,8 @@
   gap: 10px;
   padding: 6px 14px 6px 6px;
   margin: 0;
-  border: 1px solid rgba(34, 83, 145, 0.14);
-  background: rgba(34, 83, 145, 0.04);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.04);
   cursor: pointer;
   border-radius: 999px;
   transition:
@@ -949,20 +966,20 @@
 }
 
 .teamStripButton:hover {
-  background: rgba(34, 83, 145, 0.08);
-  border-color: rgba(34, 83, 145, 0.28);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.08);
+  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.28);
   transform: translateY(-1px);
 }
 
 .teamStripButton:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hbc-presentation-blue);
   outline-offset: 2px;
 }
 
 .teamStripLabel {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   margin-left: 2px;
   white-space: nowrap;
   display: flex;
@@ -972,7 +989,7 @@
 }
 
 .teamStripIcon {
-  color: #225391;
+  color: var(--hbc-presentation-blue);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -999,9 +1016,9 @@
   max-width: 340px;
   background: #ffffff;
   border-radius: 12px;
-  border: 1px solid rgba(34, 83, 145, 0.14);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
   box-shadow:
-    0 8px 28px rgba(34, 83, 145, 0.14),
+    0 8px 28px rgba(var(--hbc-presentation-blue-rgb), 0.14),
     0 2px 6px rgba(10, 24, 45, 0.08);
   overflow: hidden;
 }
@@ -1047,11 +1064,11 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(34, 83, 145, 0.10);
+  border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.10);
 }
 
 .teamPanelClose {
@@ -1060,7 +1077,7 @@
   background: none;
   cursor: pointer;
   font-size: 0.8125rem;
-  color: rgba(26, 19, 16, 0.5);
+  color: rgba(var(--presentation-body-ink), 0.5);
   border-radius: 6px;
   line-height: 1;
   font-family: inherit;
@@ -1072,7 +1089,7 @@
 }
 
 .teamPanelClose:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hbc-presentation-blue);
   outline-offset: 2px;
 }
 
@@ -1102,7 +1119,7 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  box-shadow: 0 0 0 2px rgba(34, 83, 145, 0.10);
+  box-shadow: 0 0 0 2px rgba(var(--hbc-presentation-blue-rgb), 0.10);
 }
 
 .teamPanelInitials {
@@ -1113,8 +1130,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(34, 83, 145, 0.12);
-  color: #225391;
+  background-color: rgba(var(--hbc-presentation-blue-rgb), 0.12);
+  color: var(--hbc-presentation-blue);
   font-size: 0.8125rem;
   font-weight: 800;
 }
@@ -1127,12 +1144,12 @@
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.3;
-  color: #0a1b33;
+  color: var(--presentation-ink);
 }
 
 .teamPanelRole {
   font-size: 0.75rem;
-  color: rgba(26, 19, 16, 0.55);
+  color: rgba(var(--presentation-body-ink), 0.55);
   line-height: 1.3;
   margin-top: 1px;
 }
@@ -1190,9 +1207,9 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #225391;
-  background: rgba(34, 83, 145, 0.05);
-  border: 1px solid rgba(34, 83, 145, 0.18);
+  color: var(--hbc-presentation-blue);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.05);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
   border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
@@ -1205,14 +1222,14 @@
 }
 
 .historyDisclosure:hover {
-  background: rgba(34, 83, 145, 0.1);
-  border-color: rgba(34, 83, 145, 0.32);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.1);
+  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.32);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34, 83, 145, 0.12);
+  box-shadow: 0 4px 12px rgba(var(--hbc-presentation-blue-rgb), 0.12);
 }
 
 .historyDisclosure:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hbc-presentation-blue);
   outline-offset: 2px;
 }
 
@@ -1281,7 +1298,7 @@
   background: transparent;
   border: none;
   border-radius: 0;
-  border-top: 1px solid rgba(34, 83, 145, 0.10);
+  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.10);
 }
 
 /* Mode-governed rail posture. Padding and thumbnail size step with
@@ -1356,7 +1373,7 @@
 .root[data-layout-mode='minimal'] .railHeader {
   font-weight: 700;
   letter-spacing: 0.10em;
-  color: rgba(34, 83, 145, 0.78);
+  color: rgba(var(--hbc-presentation-blue-rgb), 0.78);
 }
 
 .railHeader {
@@ -1368,7 +1385,7 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
 }
 
 .railHeaderRule {
@@ -1376,8 +1393,8 @@
   height: 1px;
   background: linear-gradient(
     90deg,
-    rgba(34, 83, 145, 0.28) 0%,
-    rgba(34, 83, 145, 0.06) 60%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.28) 0%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.06) 60%,
     transparent 100%
   );
 }
@@ -1398,7 +1415,7 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  border-bottom: 1px solid rgba(34, 83, 145, 0.06);
+  border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.06);
   transition:
     background-color 160ms ease,
     border-color 160ms ease;
@@ -1409,12 +1426,12 @@
 }
 
 .railTile:hover {
-  background: rgba(34, 83, 145, 0.03);
-  border-bottom-color: rgba(34, 83, 145, 0.22);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.03);
+  border-bottom-color: rgba(var(--hbc-presentation-blue-rgb), 0.22);
 }
 
 .railTile:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hbc-presentation-blue);
   outline-offset: 2px;
 }
 
@@ -1435,7 +1452,7 @@
   font-size: 0.8125rem;
   font-weight: 800;
   letter-spacing: 0.02em;
-  color: #225391;
+  color: var(--hbc-presentation-blue);
   font-variant-numeric: tabular-nums;
   line-height: 1.25;
   padding-top: 6px;
@@ -1447,7 +1464,7 @@
   height: 72px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: rgba(34, 83, 145, 0.06);
+  background-color: rgba(var(--hbc-presentation-blue-rgb), 0.06);
   contain: strict;
   box-shadow: 0 1px 3px rgba(10, 24, 45, 0.08);
 }
@@ -1466,8 +1483,8 @@
   border-radius: 8px;
   background: linear-gradient(
     135deg,
-    rgba(34, 83, 145, 0.12) 0%,
-    rgba(229, 126, 70, 0.06) 100%
+    rgba(var(--hbc-presentation-blue-rgb), 0.12) 0%,
+    rgba(var(--hbc-presentation-orange-rgb), 0.06) 100%
   );
 }
 
@@ -1485,7 +1502,7 @@
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.01em;
-  color: #0a1b33;
+  color: var(--presentation-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -1496,7 +1513,7 @@
 .railMeta {
   font-size: 0.6875rem;
   font-weight: 600;
-  color: rgba(26, 19, 16, 0.52);
+  color: rgba(var(--presentation-body-ink), 0.52);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -123,7 +123,7 @@ export function TeamStrip({
         />
         <span className={styles.teamStripLabel}>
           <Users
-            size={12}
+            size={14}
             aria-hidden="true"
             className={styles.teamStripIcon}
             strokeWidth={2.25}
