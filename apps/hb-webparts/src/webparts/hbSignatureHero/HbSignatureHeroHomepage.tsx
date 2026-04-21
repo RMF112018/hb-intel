@@ -202,12 +202,32 @@ export function HbSignatureHeroHomepage({
     [entryStackState],
   );
 
+  // Per-image governance — focal point + safe-zone intensities resolved
+  // from the winning banner source. Drives `background-position` on the
+  // photo layer and density of the localized text-safe / logo-safe
+  // contrast zones in the CSS module so the global scrim can stay
+  // subtle while contrast still locks in where text and logo live.
+  const governance = bannerSelection.governance;
+  const tabletFocal = governance.tabletFocal ?? governance.focal;
+  const phoneFocal = governance.phoneFocal ?? tabletFocal;
+
   // Presentation-lane brand tokens exposed as CSS custom properties so the
   // CSS module's scrim warmth and fallback gradient stay anchored to the
-  // foundation without hand-editing literal hex/rgb values.
+  // foundation without hand-editing literal hex/rgb values. Per-image
+  // governance vars ride the same surface so every layer (photo focal,
+  // text-safe darken, logo-safe brighten, breakpoint focal overrides)
+  // resolves from one declarative source.
   const surfaceStyle = {
     '--hbc-hero-presentation-blue-rgb': HBC_PRESENTATION_BLUE_RGB,
     '--hbc-hero-presentation-orange-rgb': HBC_PRESENTATION_ORANGE_RGB,
+    '--hbc-hero-focal-x': `${governance.focal.x}%`,
+    '--hbc-hero-focal-y': `${governance.focal.y}%`,
+    '--hbc-hero-focal-x-tablet': `${tabletFocal.x}%`,
+    '--hbc-hero-focal-y-tablet': `${tabletFocal.y}%`,
+    '--hbc-hero-focal-x-phone': `${phoneFocal.x}%`,
+    '--hbc-hero-focal-y-phone': `${phoneFocal.y}%`,
+    '--hbc-hero-text-safe-intensity': governance.textSafeIntensity,
+    '--hbc-hero-logo-safe-intensity': governance.logoSafeIntensity,
     ...(entryStackPolicy
       ? {
           minHeight: `${entryStackPolicy.heroHeightBudgetPx.min}px`,
@@ -267,7 +287,8 @@ export function HbSignatureHeroHomepage({
       ) : null}
       <div className={styles.scrim} aria-hidden="true" />
       <div className={styles.grain} aria-hidden="true" />
-      <div className={styles.brighten} aria-hidden="true" />
+      <div className={styles.textSafe} aria-hidden="true" />
+      <div className={styles.logoSafe} aria-hidden="true" />
 
       {/* ── Content — text-left / logo-right ── */}
       <div className={styles.content}>

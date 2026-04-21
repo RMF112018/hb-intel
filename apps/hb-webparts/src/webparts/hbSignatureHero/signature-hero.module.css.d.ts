@@ -4,7 +4,8 @@ declare const styles: {
   readonly photo: string;
   readonly scrim: string;
   readonly grain: string;
-  readonly brighten: string;
+  readonly textSafe: string;
+  readonly logoSafe: string;
   readonly content: string;
   readonly textZone: string;
   readonly logoZone: string;

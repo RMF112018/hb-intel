@@ -20,7 +20,11 @@
  *   returns a `'no-image-fallback'` source so the hero falls back to its
  *   tinted gradient surface without claiming a daypart-default win.
  */
-import { resolveHomepageHeroBannerAssetUrl } from './homepageHeroBannerAssetResolver.js';
+import {
+  resolveHomepageHeroBannerAssetUrl,
+  resolveHomepageHeroBannerGovernance,
+  type HeroImageGovernance,
+} from './homepageHeroBannerAssetResolver.js';
 import {
   resolveHomepageHeroBannerDaypartAt,
   resolveHomepageHeroBannerFileNameAt,
@@ -38,6 +42,13 @@ export interface HomepageHeroBannerSelection {
   readonly fileName: string;
   readonly url: string | undefined;
   readonly overrideActive: boolean;
+  /**
+   * Tuned focal + safe-zone intensities for the resolved image. Override
+   * URLs that don't match a registered daypart banner receive neutral
+   * defaults (centered focal, 1.0 intensities) so contrast governance
+   * stays declarative for every winning source.
+   */
+  readonly governance: HeroImageGovernance;
 }
 
 export interface HomepageHeroBannerSelectionInput {
@@ -55,12 +66,17 @@ export function resolveHomepageHeroBannerSelection(
     && input.authoredOverrideUrl.length > 0;
 
   if (overrideActive) {
+    // Authored overrides may or may not match a registered daypart asset.
+    // Pull governance by URL basename when possible; otherwise the
+    // resolver returns neutral defaults so the contrast stack stays valid.
+    const overrideFileName = extractFileName(input.authoredOverrideUrl) ?? fileName;
     return {
       source: 'wrapper-override',
       daypart,
       fileName,
       url: input.authoredOverrideUrl,
       overrideActive: true,
+      governance: resolveHomepageHeroBannerGovernance(overrideFileName),
     };
   }
 
@@ -72,6 +88,7 @@ export function resolveHomepageHeroBannerSelection(
       fileName,
       url: undefined,
       overrideActive: false,
+      governance: resolveHomepageHeroBannerGovernance(fileName),
     };
   }
 
@@ -81,5 +98,14 @@ export function resolveHomepageHeroBannerSelection(
     fileName,
     url: defaultUrl,
     overrideActive: false,
+    governance: resolveHomepageHeroBannerGovernance(fileName),
   };
+}
+
+function extractFileName(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  const stripped = url.split(/[?#]/, 1)[0] ?? url;
+  const segments = stripped.split('/');
+  const last = segments[segments.length - 1];
+  return last && last.length > 0 ? last : undefined;
 }

@@ -61,36 +61,37 @@
 /* ── Background layers ─────────────────────────────────── */
 
 /* Background photography (covers full surface, behind scrim).
-   Default: package-owned banner_home_7_morning.png resolved via CDN base URL.
-   Override: backgroundImage prop. */
+   Default: package-owned banner_home_7_*.png resolved via CDN base URL.
+   Override: backgroundImage prop.
+   Focal point is per-image and resolved from the asset governance map;
+   --hbc-hero-focal-x/y default to 50% so unknown sources stay centered. */
 .photo {
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center center;
+  background-position: var(--hbc-hero-focal-x, 50%) var(--hbc-hero-focal-y, 50%);
   background-repeat: no-repeat;
 }
 
-/* Readability scrim — composite of two gradients:
-     1. Primary vertical cool scrim biased toward the text zone (heavier
-        at the bottom where the tagline sits).
-     2. Secondary horizontal warm bias in the bottom-left corner so the
-        cool scrim doesn't read as a generic dark overlay — tied to the
-        presentation-orange foundation via the custom property. */
+/* Readability scrim — global subtle wash, intentionally lighter than
+   prior generations so it never reads as a heavy overlay band. The
+   localized .textSafe and .logoSafe layers below carry the per-image
+   contrast load where text and logo actually live; this layer just
+   sets the unified mood so authored photography breathes through. */
 .scrim {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(
       to right,
-      rgba(var(--hbc-hero-presentation-orange-rgb, 229, 126, 70) / 0.10) 0%,
+      rgba(var(--hbc-hero-presentation-orange-rgb, 229, 126, 70) / 0.08) 0%,
       transparent 45%
     ),
     linear-gradient(
       175deg,
-      hsla(220 18% 6% / 0.32) 0%,
-      hsla(220 18% 6% / 0.55) 45%,
-      hsla(220 22% 4% / 0.82) 100%
+      hsla(220 18% 6% / 0.22) 0%,
+      hsla(220 18% 6% / 0.38) 45%,
+      hsla(220 22% 4% / 0.62) 100%
     );
 }
 
@@ -107,35 +108,54 @@
   background-size: 200px 200px;
 }
 
-/* ── Right-side luminance overlay ──────────────────────── */
+/* ── Localized safe-zone contrast layers ───────────────── */
 
-/* Authored right-side lighting that frames the logo zone.
-   Composed of:
-     1. Focused radial highlight centered on the logo
-     2. Softer, longer-falloff radial for ambient warmth
-     3. Easing linear right-lift
-   Reads as intentional lighting, not compensation. */
-.brighten {
+/* Text-safe zone — soft elliptical darken anchored to the greeting/
+   tagline column. Replaces brute global scrim density with a focused
+   shape so contrast under the text climbs without muddying the rest of
+   the photo. Density scales by --hbc-hero-text-safe-intensity (per
+   image), capped via calc() so a tuned 1.3 multiplier still stays
+   subtle. The shape is wide and feathered so it never reads as a card
+   plate or a generic overlay band. */
+.textSafe {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: calc(var(--hbc-hero-text-safe-intensity, 1) * 0.55);
   background:
     radial-gradient(
-      ellipse 38% 60% at 86% 50%,
-      hsla(0 0% 100% / 0.13) 0%,
+      ellipse 62% 90% at 22% 78%,
+      hsla(220 22% 4% / 0.85) 0%,
+      hsla(220 22% 4% / 0.55) 38%,
+      hsla(220 22% 4% / 0.18) 70%,
+      transparent 100%
+    );
+}
+
+/* Logo-safe zone — focused brighten + soft warm desaturate anchored to
+   the top-right where the full-color HBC logo lives. Replaces the
+   prior three-radial right-side wash. Density scales by
+   --hbc-hero-logo-safe-intensity (per image) so dark imagery (night)
+   gets more lift while already-bright skies (mid-day) get less. */
+.logoSafe {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: calc(var(--hbc-hero-logo-safe-intensity, 1) * 0.85);
+  background:
+    radial-gradient(
+      ellipse 30% 55% at 87% 38%,
+      hsla(0 0% 100% / 0.18) 0%,
+      hsla(0 0% 100% / 0.08) 45%,
       transparent 100%
     ),
     radial-gradient(
-      ellipse 70% 90% at 86% 50%,
-      hsla(0 0% 100% / 0.06) 0%,
+      ellipse 22% 38% at 88% 32%,
+      hsla(40 40% 96% / 0.12) 0%,
       transparent 100%
-    ),
-    linear-gradient(
-      to right,
-      transparent 35%,
-      hsla(0 0% 100% / 0.08) 65%,
-      hsla(0 0% 100% / 0.18) 100%
     );
 }
 
@@ -343,6 +363,42 @@
 
 .surface[data-hbc-hero-layout-mode="compact-short-height"] .greetingName {
   font-size: clamp(0.92rem, 0.65vw + 0.66rem, 1.12rem);
+}
+
+/* ── Per-breakpoint focal overrides ────────────────────── */
+
+/* Narrower crops shift composition: subjects that sat in the visual
+   gutter on desktop can slide under the text or logo on portrait
+   viewports. The governance map ships per-image tablet and phone focal
+   overrides so each daypart photo keeps its busiest content out of
+   the safe zones at every audited device class. */
+@media (max-width: 768px) {
+  .photo {
+    background-position:
+      var(--hbc-hero-focal-x-tablet, var(--hbc-hero-focal-x, 50%))
+      var(--hbc-hero-focal-y-tablet, var(--hbc-hero-focal-y, 50%));
+  }
+}
+
+@media (max-width: 480px) {
+  .photo {
+    background-position:
+      var(--hbc-hero-focal-x-phone, var(--hbc-hero-focal-x-tablet, var(--hbc-hero-focal-x, 50%)))
+      var(--hbc-hero-focal-y-phone, var(--hbc-hero-focal-y-tablet, var(--hbc-hero-focal-y, 50%)));
+  }
+
+  /* Phone portrait reflows greeting+tagline above the logo, so the
+     text-safe zone slides up into the column the text now occupies. */
+  .textSafe {
+    background:
+      radial-gradient(
+        ellipse 110% 70% at 50% 70%,
+        hsla(220 22% 4% / 0.85) 0%,
+        hsla(220 22% 4% / 0.55) 38%,
+        hsla(220 22% 4% / 0.18) 70%,
+        transparent 100%
+      );
+  }
 }
 
 /* ── Reduced motion ────────────────────────────────────── */

@@ -5,6 +5,7 @@ import { HbSignatureHeroArticle } from '../../webparts/hbSignatureHero/HbSignatu
 import { HbSignatureHero } from '../../webparts/hbSignatureHero/HbSignatureHero.js';
 import { HbSignatureHeroHomepage } from '../../webparts/hbSignatureHero/HbSignatureHeroHomepage.js';
 import { resolveHomepageHeroBannerAssetUrl } from '../../webparts/hbSignatureHero/homepageHeroBannerAssetResolver.js';
+import { resolveHomepageHeroBannerSelection } from '../../webparts/hbSignatureHero/homepageHeroBannerSourceSelector.js';
 
 describe('HbSignatureHeroArticle — Phase-02 article-mode adapter', () => {
   it('renders title, subheading, byline, labels, and link', () => {
@@ -397,6 +398,52 @@ describe('HbSignatureHeroHomepage — default banner asset resolver contract', (
       'background-image: url("https://images.example.invalid/custom-hero.png")',
     );
     expect(style).not.toContain('banner_home_7_morning.png');
+  });
+
+  it('applies per-image focal + safe-zone CSS variables on the hero surface', () => {
+    const { container } = render(
+      <HbSignatureHeroHomepage
+        identity={{ preferredName: 'Jordan' }}
+        assetBaseUrl="https://cdn.example.invalid/homepage-assets/"
+        now={new Date(2026, 3, 19, 22, 0, 0, 0)}
+      />,
+    );
+    const surface = container.querySelector('[data-hbc-premium="signature-hero"]');
+    const style = surface?.getAttribute('style') ?? '';
+    expect(style).toContain('--hbc-hero-focal-x: 48%');
+    expect(style).toContain('--hbc-hero-focal-y: 50%');
+    expect(style).toContain('--hbc-hero-focal-x-tablet: 50%');
+    expect(style).toContain('--hbc-hero-focal-x-phone: 52%');
+    expect(style).toContain('--hbc-hero-text-safe-intensity: 0.55');
+    expect(style).toContain('--hbc-hero-logo-safe-intensity: 1.3');
+  });
+
+  it('exposes per-image governance for daypart-default and override selections', () => {
+    const daypartDefault = resolveHomepageHeroBannerSelection({
+      now: new Date(2026, 3, 19, 12, 30, 0, 0),
+      assetBaseUrl: 'https://cdn.example.invalid/homepage-assets/',
+      authoredOverrideUrl: undefined,
+    });
+    expect(daypartDefault.source).toBe('daypart-default');
+    expect(daypartDefault.governance.textSafeIntensity).toBeGreaterThan(1);
+    expect(daypartDefault.governance.tabletFocal).toBeDefined();
+
+    const knownOverride = resolveHomepageHeroBannerSelection({
+      now: new Date(2026, 3, 19, 12, 30, 0, 0),
+      assetBaseUrl: 'https://cdn.example.invalid/homepage-assets/',
+      authoredOverrideUrl:
+        'https://cdn.example.invalid/homepage-assets/banner_home_7_night.png',
+    });
+    expect(knownOverride.source).toBe('wrapper-override');
+    expect(knownOverride.governance.textSafeIntensity).toBeLessThan(1);
+
+    const unknownOverride = resolveHomepageHeroBannerSelection({
+      now: new Date(2026, 3, 19, 12, 30, 0, 0),
+      assetBaseUrl: 'https://cdn.example.invalid/homepage-assets/',
+      authoredOverrideUrl: 'https://images.example.invalid/custom-hero.png',
+    });
+    expect(unknownOverride.governance.focal).toEqual({ x: 50, y: 50 });
+    expect(unknownOverride.governance.textSafeIntensity).toBe(1);
   });
 
   it('uses time-of-day default banner selection for representative dayparts', () => {
