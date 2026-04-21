@@ -1266,32 +1266,34 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .rail {
+  /* Flattened: the rail no longer renders as a bordered, filled
+     container. It is a subordinate section inside the parent shell —
+     a hairline top divider + a short quiet eyebrow row + editorial
+     list rows. No second background fill, no second border, no second
+     radius. Density is mode-governed below. */
   flex: 1 1 100%;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 22px;
-  padding: 18px 16px;
-  background: linear-gradient(
-    180deg,
-    rgba(34, 83, 145, 0.045) 0%,
-    rgba(34, 83, 145, 0.02) 100%
-  );
-  border: 1px solid rgba(34, 83, 145, 0.10);
-  border-radius: 12px;
+  gap: 4px;
+  margin-top: 0;
+  padding: 14px 0 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid rgba(34, 83, 145, 0.10);
 }
 
-/* Mode-governed rail posture. The rail's margin-top is always zero
-   inside the history panel (owned by `.history` gap). Padding, gap,
-   and thumbnail size step with the resolved mode so expanded history
-   stays in proportion with the featured hero above it. */
+/* Mode-governed rail posture. Padding and thumbnail size step with
+   the resolved mode so expanded history stays visually subordinate
+   to the featured hero above it. Rail rows stay edgeless so the
+   history area reads as a continuation of the parent shell. */
 .root[data-layout-mode='wide'] .rail {
-  padding: 22px 24px;
-  gap: 12px;
+  padding: 18px 0 0;
+  gap: 4px;
 }
 .root[data-layout-mode='wide'] .railTile {
-  padding: 12px 14px;
+  padding: 10px 6px;
   gap: 16px;
 }
 .root[data-layout-mode='wide'] .railThumbWrap,
@@ -1301,11 +1303,11 @@
 }
 
 .root[data-layout-mode='medium'] .rail {
-  padding: 18px 18px;
-  gap: 10px;
+  padding: 14px 0 0;
+  gap: 4px;
 }
 .root[data-layout-mode='medium'] .railTile {
-  padding: 10px 12px;
+  padding: 8px 6px;
   gap: 14px;
 }
 .root[data-layout-mode='medium'] .railThumbWrap,
@@ -1315,11 +1317,11 @@
 }
 
 .root[data-layout-mode='compact'] .rail {
-  padding: 12px 12px;
-  gap: 8px;
+  padding: 10px 0 0;
+  gap: 2px;
 }
 .root[data-layout-mode='compact'] .railTile {
-  padding: 8px 10px;
+  padding: 6px 4px;
   gap: 10px;
 }
 .root[data-layout-mode='compact'] .railThumbWrap,
@@ -1329,11 +1331,11 @@
 }
 
 .root[data-layout-mode='minimal'] .rail {
-  padding: 10px 10px;
-  gap: 6px;
+  padding: 8px 0 0;
+  gap: 2px;
 }
 .root[data-layout-mode='minimal'] .railTile {
-  padding: 6px 8px;
+  padding: 4px;
   gap: 8px;
 }
 .root[data-layout-mode='minimal'] .railThumbWrap,
@@ -1381,29 +1383,34 @@
 }
 
 .railTile {
+  /* Editorial list row, not a card. No persistent border, no solid
+     fill, no lift-and-shadow. Hover reveals a soft hairline underline
+     + a whisper of tinted background so affordance is still legible
+     without introducing a second card-grid language. */
   position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px;
+  padding: 10px 6px;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  border: 1px solid rgba(34, 83, 145, 0.10);
-  background: #ffffff;
-  border-radius: 10px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  border-bottom: 1px solid rgba(34, 83, 145, 0.06);
   transition:
     background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
+    border-color 160ms ease;
+}
+
+.railTile:last-child {
+  border-bottom: none;
 }
 
 .railTile:hover {
   background: rgba(34, 83, 145, 0.03);
-  border-color: rgba(34, 83, 145, 0.28);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(34, 83, 145, 0.10);
+  border-bottom-color: rgba(34, 83, 145, 0.22);
 }
 
 .railTile:focus-visible {
@@ -1499,9 +1506,8 @@
 .railFooter {
   display: flex;
   justify-content: flex-end;
-  padding-top: 6px;
-  border-top: 1px dashed rgba(34, 83, 145, 0.18);
-  margin-top: 4px;
+  padding-top: 10px;
+  margin-top: 6px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
