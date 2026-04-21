@@ -33,6 +33,19 @@
   --hbc-hl-drawer-rail-gap: 14px;
   --hbc-hl-drawer-scrollbar-size: 9px;
   --hbc-hl-drawer-max-inline: 1180px;
+  --hbc-hl-surface-pad-inline: 8px;
+  --hbc-hl-surface-pad-block: 8px;
+  --hbc-hl-surface-radius: 16px;
+  --hbc-hl-surface-border: rgba(var(--hbc-hl-brand-deep-rgb), 0.12);
+  --hbc-hl-surface-shadow:
+    0 1px 2px rgba(2, 6, 23, 0.08),
+    0 10px 22px rgba(var(--hbc-hl-brand-deep-rgb), 0.12);
+  --hbc-hl-surface-bg:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(244, 248, 253, 0.9) 100%
+    );
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -65,6 +78,14 @@
   margin-inline: auto;
   min-width: 0;
   padding-block: 1px;
+}
+
+.bandScroller[data-hbc-launcher-band-mode="standard"] {
+  padding: var(--hbc-hl-surface-pad-block) var(--hbc-hl-surface-pad-inline);
+  border-radius: var(--hbc-hl-surface-radius);
+  border: 1px solid var(--hbc-hl-surface-border);
+  box-shadow: var(--hbc-hl-surface-shadow);
+  background: var(--hbc-hl-surface-bg);
 }
 
 /* ---------- TILE CONTRACT ---------- */
@@ -504,13 +525,66 @@
 }
 
 .drawerBody {
+  --hbc-hl-drawer-tile-size: var(--hbc-hl-tile-size);
+  --hbc-hl-drawer-icon-size: var(--hbc-hl-icon-size);
+  --hbc-hl-drawer-caption-size: var(--hbc-hl-caption-size);
   padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x)
     var(--hbc-hl-drawer-pad-y);
   background: transparent;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 14px;
+}
+
+.drawerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drawerSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.drawerSectionTitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.drawerSectionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.drawerSectionRailRoot {
+  width: 100%;
+}
+
+.drawerSectionRail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--hbc-hl-drawer-rail-gap);
 }
 
 .drawerRailRoot {
@@ -610,7 +684,10 @@
     --hbc-hl-handheld-trigger-icon-size: 22px;
     --hbc-hl-handheld-trigger-label-size: 0.6875rem;
     --hbc-hl-handheld-trigger-chevron-size: 10px;
-    --hbc-hl-handheld-trigger-height: 46px;
+    --hbc-hl-handheld-trigger-height: 44px;
+    --hbc-hl-surface-pad-inline: 0px;
+    --hbc-hl-surface-pad-block: 0px;
+    --hbc-hl-surface-radius: 0px;
   }
 
   .bandScroller {
@@ -659,6 +736,14 @@
   .drawerOverflowHint {
     font-size: 0.6875rem;
   }
+
+  .bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .overflowTileLinearHandheld {
+    padding-inline: 12px;
+  }
+
+  .bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .overflowTriggerInlineContent {
+    gap: 8px;
+  }
 }
 
 /* tablet portrait */
@@ -671,6 +756,9 @@
     --hbc-hl-drawer-pad-x: 26px;
     --hbc-hl-drawer-pad-y: 20px;
     --hbc-hl-drawer-rail-gap: 12px;
+    --hbc-hl-surface-pad-inline: 8px;
+    --hbc-hl-surface-pad-block: 8px;
+    --hbc-hl-surface-radius: 14px;
   }
 
   .sheetSurface { width: min(100vw - 24px, 980px); }
@@ -684,6 +772,9 @@
     --hbc-hl-caption-size: 0.675rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 12px;
+    --hbc-hl-surface-pad-inline: 10px;
+    --hbc-hl-surface-pad-block: 9px;
+    --hbc-hl-surface-radius: 15px;
   }
 }
 
@@ -695,6 +786,9 @@
     --hbc-hl-caption-size: 0.6875rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 14px;
+    --hbc-hl-surface-pad-inline: 12px;
+    --hbc-hl-surface-pad-block: 10px;
+    --hbc-hl-surface-radius: 16px;
   }
 }
 
@@ -707,6 +801,9 @@
     --hbc-hl-caption-line-height: 1.24;
     --hbc-hl-drawer-rail-gap: 16px;
     --hbc-hl-drawer-max-inline: 1360px;
+    --hbc-hl-surface-pad-inline: 14px;
+    --hbc-hl-surface-pad-block: 11px;
+    --hbc-hl-surface-radius: 18px;
   }
 
   .tile,

@@ -26,6 +26,8 @@ import type {
   HbcHomepageLauncherProps,
   HomepageLauncherHandheldMode,
   HomepageLauncherOverflowMode,
+  HomepageLauncherOverflowSectionModel,
+  HomepageLauncherTileModel,
 } from './types.js';
 import { launcherBand, launcherRoot } from './variants.js';
 import styles from './homepage-launcher.module.css';
@@ -61,6 +63,35 @@ function resolveCapGovernance(
   return handheldMode === 'single-entry-all-tools' ? 'all-tools-drawer' : 'binding-visible-cap';
 }
 
+function normalizeGroupToken(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+}
+
+function buildOverflowSections(
+  items: readonly HomepageLauncherTileModel[],
+): HomepageLauncherOverflowSectionModel[] {
+  if (items.length === 0) return [];
+  const byKey = new Map<string, HomepageLauncherOverflowSectionModel>();
+  for (const item of items) {
+    const groupKey = normalizeGroupToken(item.groupKey);
+    const groupTitle = normalizeGroupToken(item.groupTitle);
+    const resolvedKey = (groupKey ?? groupTitle ?? '__other_tools').toLowerCase();
+    const resolvedTitle = groupTitle ?? groupKey ?? 'Other tools';
+    const existing = byKey.get(resolvedKey);
+    if (existing) {
+      existing.items.push(item);
+      continue;
+    }
+    byKey.set(resolvedKey, {
+      key: resolvedKey,
+      title: resolvedTitle,
+      items: [item],
+    });
+  }
+  return Array.from(byKey.values());
+}
+
 export function HbcHomepageLauncher(
   props: HbcHomepageLauncherProps,
 ): React.JSX.Element {
@@ -68,6 +99,7 @@ export function HbcHomepageLauncher(
     title = 'Priority Actions',
     primary,
     overflow = [],
+    overflowSections,
     overflowLabel = 'More tools',
     deviceClass,
     shortHeight = false,
@@ -82,6 +114,10 @@ export function HbcHomepageLauncher(
   const renderedPrimary = handheldSingleEntry ? [] : primary;
   const hasOverflow = overflow.length > 0;
   const drawerItems = handheldSingleEntry ? overflow : [...renderedPrimary, ...overflow];
+  const drawerSections =
+    overflowSections && overflowSections.length > 0
+      ? overflowSections
+      : buildOverflowSections(drawerItems);
   const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
   const visibleTileCount = handheldSingleEntry
     ? visibleCount
@@ -108,6 +144,7 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-all-tools-count={handheldSingleEntry ? overflow.length : undefined}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
       data-hbc-homepage-launcher-drawer-category="company-tools"
+      data-hbc-homepage-launcher-surface-grammar="flagship-utility-v1"
       style={rootStyle}
     >
       <div className={launcherBand()} role="list">
@@ -126,6 +163,7 @@ export function HbcHomepageLauncher(
             <div role="listitem" data-hbc-launcher-tile-slot="overflow" style={{ display: 'contents' }}>
               <HbcHomepageLauncherOverflow
                 items={drawerItems}
+                sections={drawerSections}
                 label={overflowLabel}
                 triggerMode={handheldSingleEntry ? 'linear-handheld' : 'tile'}
               />

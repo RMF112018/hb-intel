@@ -43,10 +43,18 @@
   padding-inline: var(--hb-homepage-band-shell-pad-inline);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 720px) {
   .bandShell {
-    --hb-homepage-band-shell-pad-block: 0.65rem;
-    --hb-homepage-band-shell-pad-inline: 0.75rem;
+    --hb-homepage-band-shell-pad-block: 0.6rem;
+    --hb-homepage-band-shell-pad-inline: 0.7rem;
+    border-radius: 11px;
+  }
+}
+
+@media (min-width: 980px) {
+  .bandShell {
+    --hb-homepage-band-shell-pad-block: 0.72rem;
+    --hb-homepage-band-shell-pad-inline: 0.85rem;
     border-radius: 12px;
   }
 }
@@ -70,8 +78,7 @@
    transparent surface so wrapped grids (phone) and single-entry rows
    (short height) keep their airy posture without a dark plate behind
    them. Governed by data attributes already emitted on the root. */
-.bandShell[data-hbc-launcher-device-class="phone-portrait"],
-.bandShell[data-hbc-launcher-device-class="phone-landscape"],
+.bandShell[data-hbc-launcher-device-class="phone"],
 .bandShell[data-hbc-launcher-short-height="true"] {
   background: transparent;
   box-shadow: none;

@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 
 interface HostedCase {
   readonly label: string;
   readonly viewport: { width: number; height: number };
   readonly expectedEntryState: string;
+  readonly expectedLauncherDeviceClass: string;
   readonly expectedReason?: string;
 }
 
@@ -16,39 +19,61 @@ const HOSTED_CASES: readonly HostedCase[] = [
     label: 'ultrawide-desktop-1920x1080',
     viewport: { width: 1920, height: 1080 },
     expectedEntryState: 'ultrawide-desktop',
+    expectedLauncherDeviceClass: 'ultrawide',
     expectedReason: 'width-match',
   },
   {
     label: 'standard-laptop-1512x982',
     viewport: { width: 1512, height: 982 },
     expectedEntryState: 'standard-laptop',
+    expectedLauncherDeviceClass: 'desktop',
     expectedReason: 'width-match',
   },
   {
     label: 'standard-laptop-1366x1024',
     viewport: { width: 1366, height: 1024 },
     expectedEntryState: 'standard-laptop',
+    expectedLauncherDeviceClass: 'desktop',
+    expectedReason: 'width-match',
+  },
+  {
+    label: 'tablet-landscape-1024x900',
+    viewport: { width: 1024, height: 900 },
+    expectedEntryState: 'tablet-landscape',
+    expectedLauncherDeviceClass: 'tablet-landscape',
     expectedReason: 'width-match',
   },
   {
     label: 'phone-portrait-430x992',
     viewport: { width: 430, height: 992 },
     expectedEntryState: 'phone-portrait',
+    expectedLauncherDeviceClass: 'phone',
     expectedReason: 'width-match',
   },
   {
     label: 'phone-portrait-390x844',
     viewport: { width: 390, height: 844 },
     expectedEntryState: 'phone-portrait',
+    expectedLauncherDeviceClass: 'phone',
     expectedReason: 'width-match',
   },
   {
     label: 'short-height-constrained',
     viewport: { width: 1300, height: 420 },
     expectedEntryState: 'phone-landscape',
+    expectedLauncherDeviceClass: 'phone',
     expectedReason: 'short-height-override',
   },
 ] as const;
+
+const CAPTURE_PHASE = process.env.HB_PRODUCTIZATION_CAPTURE_PHASE;
+const CAPTURE_ROOT = CAPTURE_PHASE
+  ? path.resolve(
+      process.cwd(),
+      'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-02/artifacts/prompt-02-desktop-tablet-productization',
+      CAPTURE_PHASE,
+    )
+  : undefined;
 
 async function assertNoHorizontalOverflow(
   page: import('@playwright/test').Page,
@@ -122,6 +147,7 @@ test.describe('HB Homepage hosted fit proof', () => {
       const heroRegion = page.locator('[data-hb-homepage-entry-stack-region="hero"]');
       const heroRoot = page.locator('[data-hbc-premium="signature-hero"]');
       const launcherRoot = page.locator('[data-hb-homepage-launcher-band="root"]');
+      const launcherShell = page.locator('[data-hb-homepage-launcher-band-shell="root"]');
       const launcherSurface = page.locator('[data-hbc-ui="homepage-launcher"]');
       const heroRegionCount = await heroRegion.count();
       if (heroRegionCount > 0) {
@@ -134,20 +160,51 @@ test.describe('HB Homepage hosted fit proof', () => {
       const launcherRootCount = await launcherRoot.count();
       if (launcherRootCount > 0) {
         await expect(launcherRoot).toBeVisible();
+        await expect(launcherShell).toBeVisible();
         await expect(launcherSurface).toHaveAttribute('data-hbc-homepage-launcher-row-primitive', 'tile-family');
+        await expect(launcherSurface).toHaveAttribute(
+          'data-hbc-homepage-launcher-surface-grammar',
+          'flagship-utility-v1',
+        );
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode');
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source');
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-cap-governance');
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy');
+        await expect(launcherRoot).toHaveAttribute(
+          'data-hbc-launcher-device-class',
+          viewportCase.expectedLauncherDeviceClass,
+        );
+        await expect(launcherSurface).toHaveAttribute(
+          'data-hbc-homepage-launcher-device-class',
+          viewportCase.expectedLauncherDeviceClass,
+        );
+        const launcherShellStyle = await launcherShell.evaluate((el) => {
+          const style = window.getComputedStyle(el);
+          return {
+            paddingTop: style.paddingTop,
+            paddingInlineStart: style.paddingInlineStart,
+            boxShadow: style.boxShadow,
+            borderRadius: style.borderRadius,
+            backgroundImage: style.backgroundImage,
+          };
+        });
         if (isHandheldViewport(viewportCase.label)) {
           await expect(launcherRoot).toHaveAttribute(
             'data-hbc-launcher-handheld-mode',
             'single-entry-all-tools',
           );
           await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
+          expect(launcherShellStyle.paddingTop).toBe('0px');
+          expect(launcherShellStyle.paddingInlineStart).toBe('0px');
+          expect(launcherShellStyle.boxShadow).toBe('none');
+          expect(launcherShellStyle.borderRadius).toBe('0px');
+          expect(launcherShellStyle.backgroundImage).toBe('none');
         } else {
           await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'standard');
           await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
+          expect(launcherShellStyle.paddingTop).not.toBe('0px');
+          expect(launcherShellStyle.paddingInlineStart).not.toBe('0px');
+          expect(launcherShellStyle.boxShadow).not.toBe('none');
         }
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy', 'sheet');
       }
@@ -270,17 +327,38 @@ test.describe('HB Homepage hosted fit proof', () => {
         '[data-hb-homepage-entry-stack-region="priority-actions"]',
       );
       await assertNoHorizontalOverflow(page, '[data-shell-post-hero="true"]');
+      if (launcherRootCount > 0) {
+        await assertNoHorizontalOverflow(page, '[data-hbc-ui="homepage-launcher"]');
+      }
       await assertNoHorizontalOverflow(page, '.harness-content');
       await assertNoHorizontalOverflow(page, '#root');
 
+      const handheldTrigger = page.getByRole('button', { name: /HB Toolbox/i });
       const moreToolsTrigger = page.getByRole('button', { name: /More tools/i });
-      if (await moreToolsTrigger.count()) {
-        await expect(moreToolsTrigger.first()).toHaveAttribute(
+      const overflowTrigger = isHandheldViewport(viewportCase.label)
+        ? handheldTrigger
+        : moreToolsTrigger;
+      if (await overflowTrigger.count()) {
+        const trigger = overflowTrigger.first();
+        if (isHandheldViewport(viewportCase.label)) {
+          await expect(trigger).toHaveAttribute('data-hbc-homepage-launcher-overflow-shape', 'linear-handheld');
+        }
+        await expect(trigger).toHaveAttribute(
           'data-hbc-homepage-launcher-overflow-variant',
           'secondary-overflow-entry',
         );
-        await moreToolsTrigger.first().click();
-        await expect(page.locator('[data-hbc-homepage-launcher-sheet-content="all-tools"]')).toBeVisible();
+        await trigger.click();
+        const drawer = page.locator('[data-hbc-homepage-launcher-sheet-content="all-tools"]');
+        await expect(drawer).toBeVisible();
+        const groupedSections = page.locator('[data-hbc-ui="homepage-launcher-overflow-section"]');
+        await expect(groupedSections.first()).toBeVisible();
+        const sectionCount = await groupedSections.count();
+        expect(sectionCount).toBeGreaterThan(0);
+        const firstSectionRail = groupedSections
+          .first()
+          .locator('[data-hbc-ui="homepage-launcher-drawer-rail"]');
+        await expect(firstSectionRail).toHaveAttribute('role', 'list');
+        await expect(firstSectionRail.locator('a[data-hbc-ui="homepage-launcher-tile"]').first()).toBeVisible();
         const openedDrawer = await page.screenshot({ fullPage: true });
         await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-drawer`, {
           body: openedDrawer,
@@ -293,13 +371,14 @@ test.describe('HB Homepage hosted fit proof', () => {
         const launcherBand = document.querySelector('[data-hb-homepage-launcher-band="root"]');
         const launcherSurfaceNode = document.querySelector('[data-hbc-ui="homepage-launcher"]');
         return {
-          launcherHandheldMode: launcherBand?.getAttribute('data-hbc-launcher-handheld-mode'),
-          launcherDrawerSource: launcherBand?.getAttribute('data-hbc-launcher-drawer-source'),
-          launcherCapGovernance: launcherBand?.getAttribute('data-hbc-launcher-cap-governance'),
-          launcherOverflowStrategy: launcherBand?.getAttribute('data-hbc-launcher-overflow-strategy'),
-          launcherVersion: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-version'),
-          launcherDeviceClass: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-device-class'),
-          launcherRowPrimitive: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-row-primitive'),
+          launcherHandheldMode: launcherBand?.getAttribute('data-hbc-launcher-handheld-mode') ?? null,
+          launcherDrawerSource: launcherBand?.getAttribute('data-hbc-launcher-drawer-source') ?? null,
+          launcherCapGovernance: launcherBand?.getAttribute('data-hbc-launcher-cap-governance') ?? null,
+          launcherOverflowStrategy: launcherBand?.getAttribute('data-hbc-launcher-overflow-strategy') ?? null,
+          launcherVersion: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-version') ?? null,
+          launcherDeviceClass: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-device-class') ?? null,
+          launcherRowPrimitive:
+            launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-row-primitive') ?? null,
         };
       });
       await testInfo.attach(`hb-homepage-${viewportCase.label}-launcher-markers`, {
@@ -312,6 +391,15 @@ test.describe('HB Homepage hosted fit proof', () => {
         body: screenshot,
         contentType: 'image/png',
       });
+      if (CAPTURE_ROOT) {
+        await mkdir(CAPTURE_ROOT, { recursive: true });
+        await writeFile(path.join(CAPTURE_ROOT, `${viewportCase.label}.png`), screenshot);
+        await writeFile(
+          path.join(CAPTURE_ROOT, `${viewportCase.label}.launcher-markers.json`),
+          JSON.stringify(launcherMarkerProof, null, 2),
+          'utf-8',
+        );
+      }
     });
   }
 });
