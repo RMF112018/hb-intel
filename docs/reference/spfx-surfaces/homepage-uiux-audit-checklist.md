@@ -207,7 +207,7 @@ This checklist is not a substitute for those files. It is a practical audit tool
 - [ ] Material gaps were either remediated or explicitly accepted as exceptions.
 - [ ] Hosted screenshots were captured.
 - [ ] Console and runtime behavior were reviewed.
-- [ ] Closure evidence is stored with the effort.
+- [ ] Closure evidence is stored with the effort. For the flagship hero, use the evidence appendix at [`homepage-uiux-audit-evidence.md`](./homepage-uiux-audit-evidence.md).
 - [ ] The application can credibly be described as homepage-grade.
 - [ ] The application is benchmark-grade without becoming a renamed clone of hbKudos.
 - [ ] Breakpoint behavior was validated as a design artifact, not treated as implicit.
