@@ -302,7 +302,16 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
       listTitle: PROJECTS_LIST_TITLE,
       select: PROJECT_SITES_SELECT_FIELDS,
       filter: scope.kind === 'year' ? `${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}` : undefined,
-      orderBy: scope.kind === 'all' ? { field: SP_PROJECTS_FIELDS.YEAR, ascending: false } : undefined,
+      // Deliberately no `$orderby` for either scope:
+      //   - `Year` is not a guaranteed-indexed column on the Projects
+      //     list, and `$orderby=Year desc` on an un-indexed column at
+      //     the 5000-item list-view threshold causes SharePoint to
+      //     silently return a partial result with **no continuation
+      //     token** — which reproduced in the field as "only 260 of
+      //     800+ records, missing entire years".
+      //   - The client-side pipeline (`projectSitesFilter.ts`) already
+      //     applies the user's chosen sort over the full drained set,
+      //     so server-side ordering adds risk without any UX benefit.
       top: PROJECT_SITES_PAGE_SIZE,
     });
 
