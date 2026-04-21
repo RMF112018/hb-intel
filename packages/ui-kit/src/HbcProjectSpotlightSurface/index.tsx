@@ -101,17 +101,23 @@ export function HbcProjectSpotlightSurface({
   const hasHistory = visibility.showRail && model.secondary.length > 0;
   const hasFeaturedImage = Boolean(model.featured.image?.src);
 
-  // Section-level CTA fallback — handed to the featured slot so a
-  // missing authored item CTA still produces a credible next step.
-  // Resolution: authored `featured.cta` wins; otherwise the section
-  // destination (typically `allProjectsUrl`) is rendered in the same
-  // CTA slot. Suppressed cleanly when neither exists.
-  const fallbackCta = model.allProjectsUrl
-    ? {
-        label: model.allProjectsLabel ?? 'View all projects',
-        href: model.allProjectsUrl,
-      }
-    : undefined;
+  // Section-level CTA fallback. One canonical section action per
+  // surface instance: masthead owns it in wide/medium, rail footer
+  // owns it in compact/minimal. The featured body only carries a
+  // section-level fallback when neither other slot will actually
+  // render — otherwise a missing item CTA must stay absent rather
+  // than duplicate the section action inside the same view.
+  const sectionActionRendered =
+    Boolean(model.allProjectsUrl) &&
+    (visibility.showMastheadAction ||
+      (hasHistory && visibility.showRailFooterCta));
+  const fallbackCta =
+    model.allProjectsUrl && !sectionActionRendered
+      ? {
+          label: model.allProjectsLabel ?? 'View all projects',
+          href: model.allProjectsUrl,
+        }
+      : undefined;
 
   // Bind governed presentation-lane tokens to CSS custom properties so
   // the Spotlight stylesheet references one authoritative source for

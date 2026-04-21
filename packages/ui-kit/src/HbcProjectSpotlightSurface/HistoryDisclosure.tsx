@@ -48,9 +48,26 @@ export function HistoryDisclosure({
 
   const closedLabel = `Show past spotlights (${items.length})`;
   const openLabel = 'Hide past spotlights';
+  // Wide/medium carry an explicit sectional identity so the rail
+  // reads as its own authored section even while collapsed. Compact
+  // and minimal stay button-only to preserve the tight body height
+  // the visibility matrix intends.
+  const showSectionHeader = mode === 'wide' || mode === 'medium';
 
   return (
-    <div className={styles.history} data-history-open={open ? 'true' : 'false'}>
+    <div
+      className={styles.history}
+      data-history-open={open ? 'true' : 'false'}
+      data-history-mode={mode}
+    >
+      {showSectionHeader ? (
+        <div className={styles.historyHeader}>
+          <span className={styles.historyEyebrow}>Previously spotlighted</span>
+          <span className={styles.historyCount} aria-hidden="true">
+            {items.length}
+          </span>
+        </div>
+      ) : null}
       <button
         type="button"
         className={styles.historyDisclosure}

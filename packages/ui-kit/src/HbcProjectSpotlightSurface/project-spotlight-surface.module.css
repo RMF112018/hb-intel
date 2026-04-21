@@ -436,19 +436,29 @@
    and the title leads the composition.
 */
 
-/* Subordinate top accent — a quiet branded rule so the featured
-   region still reads as a distinct editorial section without staging
-   fake hero chrome. Reuses the masthead separator gradient language. */
+/* No-image editorial accent — a stronger branded top rule so the
+   featured region carries real section authority even without a hero.
+   The rule is 3px so it reads as an authored sectional marker, not a
+   hairline. A subtle inset tonal strip sits beneath it (via the
+   `.featuredContent` gradient) to give the no-image band visible
+   editorial weight without staging fake hero chrome. */
 .featuredLayout[data-has-image='false'] {
-  border-top: 2px solid transparent;
+  border-top: 3px solid transparent;
   border-image: linear-gradient(
     90deg,
     var(--hbc-presentation-blue) 0%,
-    var(--hbc-presentation-blue) 48px,
-    rgba(var(--hbc-presentation-blue-rgb), 0.14) 48px,
-    rgba(var(--hbc-presentation-blue-rgb), 0.04) 40%,
+    var(--hbc-presentation-blue) 72px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.24) 72px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.08) 48%,
     transparent 100%
   ) 1;
+}
+
+/* No-image snippet — tight one-line clamp in every mode so first view
+   stays deliberately short. Additional depth lives behind the details
+   disclosure; the essentials block does not spill prose. */
+.featuredLayout[data-has-image='false'] .featuredSummarySnippet {
+  -webkit-line-clamp: 1;
 }
 
 /* Header strip — subordinate eyebrow + inline chip row above the
@@ -763,21 +773,34 @@
 
 .featuredContent {
   /* Sole owner of body horizontal inset now that the featured region
-     no longer renders as a framed card. The subtle tonal wash is a
-     continuation of the parent shell rather than a second surface fill,
-     and the hairline divider on top marks the sectional transition
-     from hero media → details band (replacing the removed card border
-     without reintroducing card-in-card furniture). */
+     no longer renders as a framed card. Hierarchy comes from three
+     integrated signals rather than a second bordered card:
+       • a deeper tonal wash that reads as a distinct editorial band
+         beneath the hero/title-led masthead,
+       • a hairline divider on top that marks the sectional transition,
+       • a blue accent rule on the left edge (wide/medium only, below)
+         that credits the band as an authored section without staging
+         card-in-card chrome. */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 22px 22px 24px;
   background: linear-gradient(
     180deg,
-    rgba(var(--hbc-presentation-blue-rgb), 0.015) 0%,
-    rgba(var(--hbc-presentation-blue-rgb), 0.035) 100%
+    rgba(var(--hbc-presentation-blue-rgb), 0.025) 0%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.055) 100%
   );
-  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.08);
+  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+}
+
+/* Left-edge accent rule in wide/medium — a narrow blue band that gives
+   the featured-body region authored identity at editorial widths
+   without reintroducing a full bordered card. Compact/minimal skip
+   this so the body stays tight against the surface edge. */
+.root[data-layout-mode='wide'] .featuredContent,
+.root[data-layout-mode='medium'] .featuredContent {
+  border-left: 3px solid rgba(var(--hbc-presentation-blue-rgb), 0.28);
 }
 
 /* Mode-governed featured-body rhythm. Wide and medium keep premium
@@ -1561,23 +1584,51 @@
   outline-offset: 2px;
 }
 
-/* Quieter disclosure in wide/medium — the collapsed affordance reads
-   as a subordinate "more" link rather than a second primary pill.
-   Kept on its own hairline row so it is obviously actionable without
-   competing with the featured CTA above. */
+/* Wide/medium disclosure — a real affordance with visible presence,
+   not an invisible "more" link. The button keeps subordinate weight
+   relative to the featured CTA above, but reads as an authored
+   section control rather than disappearing into the surface. */
 .root[data-layout-mode='wide'] .historyDisclosure,
 .root[data-layout-mode='medium'] .historyDisclosure {
-  padding: 6px 12px;
+  padding: 7px 14px;
   font-size: 0.6875rem;
   letter-spacing: 0.14em;
-  background: transparent;
-  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.22);
-  min-height: 32px;
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.04);
+  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.28);
+  min-height: 34px;
 }
 .root[data-layout-mode='wide'] .historyDisclosure:hover,
 .root[data-layout-mode='medium'] .historyDisclosure:hover {
-  background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.1);
+  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.42);
   box-shadow: none;
+}
+
+/* Sectional header for wide/medium — eyebrow label + count sit above
+   the disclosure button so the rail owns a real section identity
+   even when collapsed. Compact/minimal skip this header in favor of
+   the button-only collapsed affordance. */
+.historyHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+}
+
+.historyEyebrow {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hbc-presentation-blue);
+}
+
+.historyCount {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(var(--presentation-body-ink), 0.52);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1760,11 +1811,11 @@
 }
 
 .railTile {
-  /* Quiet list row — no border, no fill. Hover reveals a whisper of
-     tinted background so affordance is legible without introducing a
-     second card-grid language. Row separators come from grid gaps on
-     `.railTiles`, not per-tile borders, so the rail reads as a
-     subordinate strip instead of a bordered list. */
+  /* Quiet list row — subordinate but structured. A soft bottom
+     hairline separates consecutive rows so the list reads as
+     deliberate editorial content rather than a stack of floating
+     thumbnails. Hover lifts a faint tint so the affordance is legible
+     without introducing a second card-grid language. */
   position: relative;
   display: flex;
   align-items: center;
@@ -1776,11 +1827,12 @@
   border: none;
   background: transparent;
   border-radius: var(--spotlight-radius-row);
+  border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.08);
   transition: background-color var(--spotlight-motion-quick);
 }
 
 .railTile:hover {
-  background: rgba(var(--hbc-presentation-blue-rgb), 0.04);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
 }
 
 .railTile:focus-visible {

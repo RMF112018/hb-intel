@@ -97,14 +97,11 @@ function resolveContentPosture(
     if (milestoneCount < 2) posture.showMilestoneList = false;
   }
 
-  // Title-led override: when there is no hero image, promote the
-  // details region so freshness + milestones + team land in first
-  // view without a disclosure click. `minimal` keeps its tight
-  // profile — the essentials block still carries the four-beat
-  // hierarchy in that mode.
-  if (!hasImage && visibility.mode !== 'minimal') {
-    posture.detailsOpenByDefault = true;
-  }
+  // No-image posture respects the mode matrix for disclosure state.
+  // The first view keeps its four-beat structure (header strip,
+  // title, signal row, one-line summary, one CTA, one disclosure
+  // button) — auto-opening details when the hero is missing reads
+  // as collapsed content spilling out and is not permitted.
 
   return posture;
 }
