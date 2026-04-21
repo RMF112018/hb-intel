@@ -89,6 +89,21 @@ export interface SpotlightLayoutVisibility {
    * CTA.
    */
   readonly showRailFooterCta: boolean;
+  /**
+   * Number of past-spotlight tiles rendered in the rail preview at first
+   * paint, before the user expands the disclosure. The disclosure toggle
+   * reveals the remainder; the preview itself is always present when
+   * `showRail` is true. This makes portfolio depth visible on first view
+   * rather than hiding it behind a closed control.
+   */
+  readonly railPreviewCount: number;
+  /**
+   * Governs the no-image featured posture. `'nameplate'` renders the
+   * authored Nameplate Block (wide/medium): tonal band, display-weight
+   * title, progress anchor, editorial typography. `'kicker'` renders a
+   * tighter title-led treatment suitable for compact/minimal.
+   */
+  readonly noImagePosture: 'nameplate' | 'kicker';
 }
 
 /**
@@ -118,6 +133,8 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showMastheadDate: true,
     showMastheadAction: true,
     showRailFooterCta: false,
+    railPreviewCount: 3,
+    noImagePosture: 'nameplate',
   },
   medium: {
     mode: 'medium',
@@ -135,6 +152,8 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showMastheadDate: true,
     showMastheadAction: true,
     showRailFooterCta: false,
+    railPreviewCount: 2,
+    noImagePosture: 'nameplate',
   },
   compact: {
     mode: 'compact',
@@ -151,6 +170,8 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showMastheadDate: false,
     showMastheadAction: false,
     showRailFooterCta: true,
+    railPreviewCount: 2,
+    noImagePosture: 'kicker',
   },
   minimal: {
     mode: 'minimal',
@@ -167,6 +188,8 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showMastheadDate: false,
     showMastheadAction: false,
     showRailFooterCta: true,
+    railPreviewCount: 1,
+    noImagePosture: 'kicker',
   },
 };
 

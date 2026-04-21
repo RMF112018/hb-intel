@@ -58,6 +58,24 @@ const MODEL: ProjectSpotlightSurfaceModel = {
       cta: { label: 'Open', href: '#ftl' },
       completeness: 'full',
     },
+    {
+      id: 'secondary-2',
+      title: 'Orlando Civic Center Modernization',
+      location: 'Orlando, FL',
+      sector: 'Civic',
+      status: { label: 'On Track', variant: 'success' },
+      cta: { label: 'Open', href: '#orl' },
+      completeness: 'full',
+    },
+    {
+      id: 'secondary-3',
+      title: 'Tampa Riverfront Headquarters',
+      location: 'Tampa, FL',
+      sector: 'Commercial',
+      status: { label: 'On Track', variant: 'success' },
+      cta: { label: 'Open', href: '#tpa' },
+      completeness: 'full',
+    },
   ],
 };
 
@@ -124,40 +142,52 @@ describe('HbcProjectSpotlightSurface — mode-governed masthead furniture', () =
       expect(screen.getAllByText('View all projects')).toHaveLength(1);
     });
 
-    it('minimal hides dateline and masthead "View all"; rail footer CTA is the only section-level CTA when expanded', () => {
+    it('minimal hides dateline and masthead "View all"; overflow disclosure reveals rail footer CTA on expansion', () => {
       renderMode('minimal');
       const masthead = getMasthead();
       expect(within(masthead).queryByText('Updated today')).toBeNull();
       expect(within(masthead).queryByText('View all projects')).toBeNull();
-      // Past-spotlights disclosure is collapsed by default in minimal,
-      // so the rail footer CTA is not yet in the DOM.
+      // Minimal previews exactly 1 past spotlight (railPreviewCount=1).
+      // The overflow (2 remaining) is behind the disclosure; since the
+      // preview carries overflow, `previewShowsFooterCta` is false and
+      // no "View all projects" is in the DOM until expansion.
       expect(screen.queryByText('View all projects')).toBeNull();
 
-      // Expand the past-spotlights disclosure; the rail footer CTA
-      // becomes the single section-level "View all projects" affordance.
-      fireEvent.click(
-        screen.getByRole('button', { name: /show past spotlights/i }),
-      );
+      // Expand the overflow disclosure; the rail footer CTA on the
+      // overflow rail becomes the single section-level affordance.
+      fireEvent.click(screen.getByRole('button', { name: /show 2 more/i }));
       const viewAlls = screen.getAllByText('View all projects');
       expect(viewAlls).toHaveLength(1);
-      const historyRegion = screen.getByRole('region', {
-        name: /more projects/i,
-      });
-      expect(within(historyRegion).getByText('View all projects')).toBeTruthy();
     });
 
-    it('compact hides dateline and masthead action; disclosures remain explicit', () => {
+    it('compact hides dateline and masthead action; overflow disclosure is explicit and keyboard-safe', () => {
       renderMode('compact');
       const masthead = getMasthead();
       expect(within(masthead).queryByText('Updated today')).toBeNull();
       expect(within(masthead).queryByText('View all projects')).toBeNull();
-      // Explicit disclosures still present (guardrail).
+      // Details disclosure still present (guardrail).
       expect(
-        screen.getByRole('button', { name: /show spotlight details|hide spotlight details/i }),
+        screen.getByRole('button', {
+          name: /show spotlight details|hide spotlight details/i,
+        }),
       ).toBeTruthy();
+      // Compact previews 2 past spotlights; the 3rd lives behind an
+      // overflow disclosure labelled "Show 1 more".
       expect(
-        screen.getByRole('button', { name: /show past spotlights|hide past spotlights/i }),
+        screen.getByRole('button', { name: /show 1 more|hide full history/i }),
       ).toBeTruthy();
+    });
+
+    it('renders the history preview rail at first paint in every mode (always-visible preview)', () => {
+      for (const mode of ['wide', 'medium', 'compact', 'minimal'] as const) {
+        const { unmount } = renderMode(mode);
+        // At least one past-spotlight title is visible without clicking
+        // any disclosure — preview is always mounted.
+        expect(
+          screen.getByText(/Fort Lauderdale Waterfront Residence/),
+        ).toBeTruthy();
+        unmount();
+      }
     });
   });
 });

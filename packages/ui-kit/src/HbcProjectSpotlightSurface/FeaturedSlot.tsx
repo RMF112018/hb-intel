@@ -28,7 +28,7 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion } from 'motion/react';
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Calendar, ChevronDown, FolderKanban } from 'lucide-react';
 import { HbcPremiumCta } from '../HbcPremiumCta/index.js';
 import type {
   ProjectSpotlightCompleteness,
@@ -127,6 +127,26 @@ export function FeaturedSlot({
     (visibility.mode === 'wide' || visibility.mode === 'medium');
 
   const posture = resolveContentPosture(featured, visibility, hasImage);
+  // No-image posture — 'nameplate' (wide/medium) renders the authored
+  // Nameplate Block: tonal band, accent glyph, display-weight title,
+  // kicker, elevated progress anchor, wider summary clamp. 'kicker'
+  // (compact/minimal) stays tighter.
+  const noImagePosture = visibility.noImagePosture;
+  const isNameplate = !hasImage && noImagePosture === 'nameplate';
+  // The nameplate posture inlines the authored headline as a kicker
+  // directly beneath the title so the editorial reason-to-care lands
+  // in first view without a click. Prevents the subordinate header
+  // strip + oversized title slab outcome that the prior design produced.
+  const showNameplateKicker = isNameplate && Boolean(featured.headline);
+  // Essentials summary snippet clamp: no-image postures widen the
+  // snippet so the first-view reason-to-care carries real editorial
+  // weight (prior 1-line clamp produced a stub). Image-led keeps the
+  // 2-line clamp so the hero remains primary.
+  const essentialsSummaryClamp = hasImage
+    ? 2
+    : noImagePosture === 'nameplate'
+      ? 3
+      : 2;
 
   // Effective CTA — authored item CTA wins; otherwise the section-level
   // fallback. Missing both suppresses the slot cleanly. Stamped with a
@@ -195,7 +215,10 @@ export function FeaturedSlot({
   // line, team strip, and (unless poster already carries it) the
   // authored headline.
   const hasHeadlineInDetails =
-    !posterLed && posture.showHeadline && Boolean(featured.headline);
+    !posterLed &&
+    !showNameplateKicker &&
+    posture.showHeadline &&
+    Boolean(featured.headline);
   const hasFullSummary =
     Boolean(featured.summary) && posture.summaryLineClamp > 2;
   const hasFreshnessLine = Boolean(featured.freshnessLabel);
@@ -210,6 +233,7 @@ export function FeaturedSlot({
     <motion.article
       className={styles.featuredLayout}
       data-has-image={hasImage ? 'true' : 'false'}
+      data-no-image-posture={hasImage ? undefined : noImagePosture}
       aria-label="Featured project spotlight"
       {...motionProps}
     >
@@ -231,6 +255,14 @@ export function FeaturedSlot({
       <div className={styles.featuredContent}>
         {!hasImage ? (
           <div className={styles.featuredHeader}>
+            {isNameplate ? (
+              <span
+                className={styles.featuredNameplateGlyph}
+                aria-hidden="true"
+              >
+                <FolderKanban size={22} strokeWidth={1.75} />
+              </span>
+            ) : null}
             <span className={styles.featuredHeaderEyebrow}>{eyebrowText}</span>
             {showHeaderChips ? (
               <div className={styles.featuredHeaderChips}>
@@ -270,6 +302,12 @@ export function FeaturedSlot({
             <h3 className={styles.featuredTitle}>{featured.title}</h3>
           )}
 
+          {showNameplateKicker && featured.headline ? (
+            <p className={styles.featuredNameplateKicker}>
+              {featured.headline}
+            </p>
+          ) : null}
+
           {/* 2. signal — milestone progress + strongest secondary chip */}
           {hasSignalRow ? (
             <div className={styles.featuredSignalRow}>
@@ -297,8 +335,17 @@ export function FeaturedSlot({
 
           {/* 3. explanation — short summary snippet */}
           {summarySnippet ? (
-            <p className={styles.featuredSummarySnippet}>{summarySnippet}</p>
+            <p
+              className={styles.featuredSummarySnippet}
+              style={{ WebkitLineClamp: essentialsSummaryClamp }}
+            >
+              {summarySnippet}
+            </p>
           ) : null}
+
+          {/* Nameplate posture elides the headline from the disclosure
+              since it is already rendered as the kicker above. Prevents
+              double-rendering of the same authored string. */}
 
           {/* 4. action — item CTA, else section-level fallback */}
           {effectiveCta && ctaSource ? (

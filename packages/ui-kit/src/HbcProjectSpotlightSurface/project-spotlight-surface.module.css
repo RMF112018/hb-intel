@@ -164,6 +164,23 @@
   color: var(--hbc-presentation-blue);
 }
 
+/* Strengthened eyebrow pill — the "Portfolio" label reads as a
+   token-driven branded marker at editorial widths instead of a thin
+   stretch of uppercase text. Compact/minimal retain the thinner
+   treatment so the masthead stays selective. */
+.mastheadEyebrowLabel {
+  display: inline-flex;
+  align-items: center;
+}
+
+.root[data-layout-mode='wide'] .mastheadEyebrowLabel,
+.root[data-layout-mode='medium'] .mastheadEyebrowLabel {
+  padding: 4px 12px;
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.08);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
+  border-radius: var(--spotlight-radius-pill);
+}
+
 .mastheadEyebrowIcon {
   display: inline-flex;
   align-items: center;
@@ -427,42 +444,64 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TITLE-LED POSTURE (no image)
+   NO-IMAGE POSTURE — Nameplate Block (authored fallback)
    ═══════════════════════════════════════════════════════════════
    When the featured item has no image, `FeaturedSlot` stamps
-   `data-has-image="false"` on `.featuredLayout` and renders a
-   subordinate header strip + boosted title + inline primary CTA
-   instead of a media zone. The surface becomes materially shorter
-   and the title leads the composition.
-*/
+   `data-has-image="false"` + `data-no-image-posture` on `.featuredLayout`.
+   Two postures exist:
+     • nameplate (wide / medium) — authored tonal band: accent glyph,
+       display-weight title, editorial kicker, elevated progress
+       anchor. This is a first-class state, not a fallback stub.
+     • kicker (compact / minimal) — tighter title-led treatment that
+       preserves first-view density on narrow widths.
+   Neither posture renders a hero mediaZone. The title leads the
+   composition, but the band carries enough editorial weight that the
+   absence of photography never reads as "this module lost its backbone". */
 
-/* No-image editorial accent — a stronger branded top rule so the
-   featured region carries real section authority even without a hero.
-   The rule is 3px so it reads as an authored sectional marker, not a
-   hairline. A subtle inset tonal strip sits beneath it (via the
-   `.featuredContent` gradient) to give the no-image band visible
-   editorial weight without staging fake hero chrome. */
+/* Shared no-image top accent — a branded 3px marker so the featured
+   region still owns a sectional boundary even without a hero. */
 .featuredLayout[data-has-image='false'] {
   border-top: 3px solid transparent;
   border-image: linear-gradient(
     90deg,
     var(--hbc-presentation-blue) 0%,
-    var(--hbc-presentation-blue) 72px,
-    rgba(var(--hbc-presentation-blue-rgb), 0.24) 72px,
-    rgba(var(--hbc-presentation-blue-rgb), 0.08) 48%,
+    var(--hbc-presentation-blue) 96px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.28) 96px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.10) 52%,
     transparent 100%
   ) 1;
 }
 
-/* No-image snippet — tight one-line clamp in every mode so first view
-   stays deliberately short. Additional depth lives behind the details
-   disclosure; the essentials block does not spill prose. */
-.featuredLayout[data-has-image='false'] .featuredSummarySnippet {
-  -webkit-line-clamp: 1;
+/* Nameplate posture — authored tonal band. The featured content sits
+   on a deeper presentation-blue wash with a pattern-accent corner
+   glyph rendered by `FeaturedSlot` (FolderKanban). The band carries
+   editorial weight that substitutes for the missing hero without
+   staging fake hero chrome. */
+.featuredLayout[data-has-image='false'][data-no-image-posture='nameplate'] {
+  background: linear-gradient(
+    180deg,
+    rgba(var(--hbc-presentation-blue-rgb), 0.045) 0%,
+    rgba(var(--hbc-presentation-blue-rgb), 0.09) 100%
+  );
 }
 
-/* Header strip — subordinate eyebrow + inline chip row above the
-   title. Intentionally quiet: the title is the hero. */
+.featuredLayout[data-has-image='false'][data-no-image-posture='nameplate']
+  .featuredContent {
+  /* Tonal wash already owns the background on the Nameplate band;
+     prevent the default `.featuredContent` gradient from double-stacking
+     over it. The left-edge accent below gives the sectional rhythm. */
+  background: transparent;
+  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+}
+
+/* Kicker posture (compact / minimal) — keeps the tight default
+   `.featuredContent` wash; the accent rule above is the only
+   sectional marker. */
+
+/* Header strip — eyebrow + inline chip row above the title. In the
+   nameplate posture, the FolderKanban glyph anchors the row as an
+   editorial nameplate marker; in the kicker posture the glyph is
+   suppressed and the eyebrow stands alone. */
 .featuredHeader {
   display: flex;
   align-items: center;
@@ -472,12 +511,60 @@
   margin-top: -2px; /* tuck under the accent rule */
 }
 
+.featuredNameplateGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.10);
+  color: var(--hbc-presentation-blue);
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-presentation-blue-rgb), 0.16);
+}
+
+.root[data-layout-mode='compact'] .featuredNameplateGlyph,
+.root[data-layout-mode='minimal'] .featuredNameplateGlyph {
+  display: none;
+}
+
 .featuredHeaderEyebrow {
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--hbc-presentation-blue);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Nameplate kicker — the authored headline rendered inline beneath
+   the title so the editorial reason-to-care lands in first view
+   without a disclosure click. Italic + token-driven accent color
+   gives it editorial weight without competing with the title. */
+.featuredNameplateKicker {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: rgba(var(--hbc-presentation-blue-rgb), 0.82);
+  max-width: 54ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.root[data-layout-mode='wide'] .featuredNameplateKicker {
+  font-size: 1.125rem;
+  -webkit-line-clamp: 2;
+}
+.root[data-layout-mode='medium'] .featuredNameplateKicker {
+  font-size: 1.0625rem;
+  -webkit-line-clamp: 2;
 }
 
 .featuredHeaderChips {
@@ -852,31 +939,24 @@
   line-height: 1.2;
 }
 
-@media (min-width: 768px) {
-  .featuredTitle {
-    font-size: 1.875rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .featuredTitle {
-    font-size: 1.8125rem;
-  }
-}
+/* Note: prior viewport media queries on `.featuredTitle` and
+   `.featuredHeadline` were removed. Title and headline scale is now
+   governed by container-mode selectors (`data-layout-mode`) above —
+   matching the rest of the surface family. Viewport breakpoints
+   contradict the container-aware doctrine this surface follows. */
 
 .featuredHeadline {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
   color: rgba(var(--presentation-body-ink), 0.72);
   max-width: 52ch;
 }
 
-@media (min-width: 768px) {
-  .featuredHeadline {
-    font-size: 1rem;
-  }
+.root[data-layout-mode='compact'] .featuredHeadline,
+.root[data-layout-mode='minimal'] .featuredHeadline {
+  font-size: 0.9375rem;
 }
 
 .featuredSummary {
@@ -1515,11 +1595,23 @@
 */
 
 .history {
+  /* History band is visually distinct from the featured body. A cooler
+     neutral surface-1 tint + subtle top hairline marks the sectional
+     transition so "Previously spotlighted" reads as its own authored
+     section rather than an appendix to the featured story. Horizontal
+     padding owns the body inset now that `.composition` is edge-to-edge. */
+  position: relative;
   margin-top: 20px;
-  padding: 0 22px;
+  padding: 20px 22px 4px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--spotlight-shadow-ink-rgb), 0.025) 0%,
+    rgba(var(--spotlight-shadow-ink-rgb), 0.01) 100%
+  );
+  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.12);
 }
 
 /* Mode-governed history rhythm. Compact and minimal tighten the gap
@@ -1529,22 +1621,22 @@
    is edge-to-edge. */
 .root[data-layout-mode='wide'] .history {
   margin-top: 24px;
-  padding: 0 32px;
+  padding: 22px 32px 6px;
   gap: 16px;
 }
 .root[data-layout-mode='medium'] .history {
   margin-top: 20px;
-  padding: 0 28px;
+  padding: 18px 28px 6px;
   gap: 14px;
 }
 .root[data-layout-mode='compact'] .history {
   margin-top: 14px;
-  padding: 0 20px;
+  padding: 14px 20px 4px;
   gap: 10px;
 }
 .root[data-layout-mode='minimal'] .history {
   margin-top: 10px;
-  padding: 0 16px;
+  padding: 10px 16px 2px;
   gap: 8px;
 }
 
@@ -1676,6 +1768,23 @@
   margin-top: 0;
 }
 
+/* Preview rail — always rendered directly inside `.history`. It
+   carries no top hairline of its own (the `.history` band's border-top
+   already marks the sectional transition). */
+.history > .rail[data-rail-variant='preview'] {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Overflow rail — rendered inside the disclosed panel. A subtle
+   hairline separates overflow from the preview so the expansion
+   reads as "more from the portfolio" rather than a second list. */
+.historyPanel > .rail[data-rail-variant='overflow'] {
+  padding-top: 10px;
+  border-top: 1px dashed rgba(var(--hbc-presentation-blue-rgb), 0.16);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    SUPPORTING RAIL
    ═══════════════════════════════════════════════════════════════ */
@@ -1707,6 +1816,11 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 2px 16px;
+  /* CSS counter drives the numbered editorial index (01 / 02 / 03)
+     on each tile. Counter increments per tile so the numeral reads
+     as portfolio order without requiring JSX to pass an explicit
+     ordinal. Rendered via the `.railTile::before` pseudo below. */
+  counter-reset: hbc-spotlight-rail;
 }
 
 .root[data-layout-mode='wide'] .railTiles,
@@ -1724,7 +1838,7 @@
   gap: 6px;
 }
 .root[data-layout-mode='wide'] .railTile {
-  padding: 6px 4px;
+  padding: 8px 4px 8px 34px;
   gap: 12px;
 }
 .root[data-layout-mode='wide'] .railThumbWrap,
@@ -1738,7 +1852,7 @@
   gap: 6px;
 }
 .root[data-layout-mode='medium'] .railTile {
-  padding: 6px 4px;
+  padding: 8px 4px 8px 32px;
   gap: 10px;
 }
 .root[data-layout-mode='medium'] .railThumbWrap,
@@ -1752,7 +1866,7 @@
   gap: 2px;
 }
 .root[data-layout-mode='compact'] .railTile {
-  padding: 5px 4px;
+  padding: 6px 4px 6px 30px;
   gap: 10px;
 }
 .root[data-layout-mode='compact'] .railThumbWrap,
@@ -1820,7 +1934,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 6px;
+  padding: 10px 6px 10px 34px;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
@@ -1829,6 +1943,33 @@
   border-radius: var(--spotlight-radius-row);
   border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.08);
   transition: background-color var(--spotlight-motion-quick);
+  counter-increment: hbc-spotlight-rail;
+}
+
+/* Numbered editorial index — renders 01 / 02 / 03 in a branded
+   orange-echo. Absolute-positioned so it does not change the row
+   layout when absent on minimal mode. */
+.railTile::before {
+  content: counter(hbc-spotlight-rail, decimal-leading-zero);
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(var(--hbc-presentation-orange-rgb), 0.82);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* Minimal rail suppresses the numeral so the tightest mode keeps
+   thumb + title only — the rail reads as "more" at a glance. */
+.root[data-layout-mode='minimal'] .railTile {
+  padding-left: 4px;
+}
+.root[data-layout-mode='minimal'] .railTile::before {
+  display: none;
 }
 
 .railTile:hover {

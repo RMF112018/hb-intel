@@ -176,6 +176,7 @@ export function HbcProjectSpotlightSurface({
             reducedMotion={reducedMotion}
             openByDefault={visibility.railOpenByDefault}
             mode={mode}
+            previewCount={visibility.railPreviewCount}
             showFooterCta={visibility.showRailFooterCta}
           />
         ) : null}

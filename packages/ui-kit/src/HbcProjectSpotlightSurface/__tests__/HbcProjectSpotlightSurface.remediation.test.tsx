@@ -20,7 +20,7 @@
  *      button-only.
  */
 import * as React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {
   HbcProjectSpotlightSurface,
@@ -90,13 +90,10 @@ describe('HbcProjectSpotlightSurface — CTA hierarchy', () => {
     const { container } = render(
       <HbcProjectSpotlightSurface model={baseModel()} forceMode="compact" />,
     );
-    // History is closed by default in compact — force it open so the
-    // rail footer CTA mounts for the count to be observable.
-    const disclosure = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('button'),
-    ).find((b) => /past spotlights/i.test(b.textContent ?? ''));
-    expect(disclosure).toBeTruthy();
-    fireEvent.click(disclosure!);
+    // Compact previews 2 past spotlights; with exactly 2 items authored
+    // the preview carries all items and the rail footer renders on the
+    // preview itself (no overflow). The masthead drops its action in
+    // compact, so the preview footer is the single section-level CTA.
     expect(countSectionAllProjectsLinks(container)).toBe(1);
     // And no featured-body fallback while the rail owns the section
     // action.
@@ -190,17 +187,32 @@ describe('HbcProjectSpotlightSurface — rail sectional header', () => {
     expect(container.textContent).toMatch(/previously spotlighted/i);
   });
 
-  it('omits the "Previously spotlighted" header in compact (button-only)', () => {
+  it('renders the "Previously spotlighted" header in compact (preview is real editorial content)', () => {
     const { container } = render(
       <HbcProjectSpotlightSurface model={baseModel()} forceMode="compact" />,
     );
-    expect(container.textContent).not.toMatch(/previously spotlighted/i);
+    // Compact now owns a sectional header so the always-visible preview
+    // reads as a real editorial section, not a floating list.
+    expect(container.textContent).toMatch(/previously spotlighted/i);
   });
 
-  it('omits the "Previously spotlighted" header in minimal (button-only)', () => {
+  it('omits the "Previously spotlighted" header in minimal (tightest posture)', () => {
     const { container } = render(
       <HbcProjectSpotlightSurface model={baseModel()} forceMode="minimal" />,
     );
     expect(container.textContent).not.toMatch(/previously spotlighted/i);
+  });
+});
+
+describe('HbcProjectSpotlightSurface — always-visible history preview', () => {
+  it('renders the first past-spotlight at first paint in every mode (no click required)', () => {
+    for (const mode of ['wide', 'medium', 'compact', 'minimal'] as const) {
+      const { container, unmount } = render(
+        <HbcProjectSpotlightSurface model={baseModel()} forceMode={mode} />,
+      );
+      // "Downtown Transit Hub" is the first secondary item in baseModel.
+      expect(container.textContent).toContain('Downtown Transit Hub');
+      unmount();
+    }
   });
 });

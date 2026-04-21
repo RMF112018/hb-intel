@@ -50,7 +50,7 @@ export function Masthead({
         <span className={styles.mastheadEyebrowIcon} aria-hidden="true">
           <Briefcase size={14} strokeWidth={2.25} />
         </span>
-        <span>{eyebrow}</span>
+        <span className={styles.mastheadEyebrowLabel}>{eyebrow}</span>
         <span className={styles.mastheadEyebrowRule} aria-hidden="true" />
         {renderDate ? (
           <span className={styles.mastheadEyebrowDate}>

@@ -97,6 +97,19 @@ export interface SupportingRailProps {
    * masthead action is intentionally dropped.
    */
   showFooterCta?: boolean;
+  /**
+   * Suppresses the internal "More projects" header rule. HistoryDisclosure
+   * owns the section header ("Previously spotlighted"); when the rail is
+   * rendered inside the disclosure shell it should not duplicate the
+   * editorial header.
+   */
+  showRailHeader?: boolean;
+  /**
+   * Marks whether the rail is rendering the always-visible preview or
+   * the disclosure-gated overflow. Used by CSS to tune motion and
+   * internal rhythm; not part of the semantic output.
+   */
+  variant?: 'preview' | 'overflow' | 'standalone';
 }
 
 export function SupportingRail({
@@ -106,6 +119,8 @@ export function SupportingRail({
   allProjectsUrl,
   reducedMotion,
   showFooterCta = true,
+  showRailHeader = true,
+  variant = 'standalone',
 }: SupportingRailProps): React.JSX.Element | null {
   if (items.length === 0) return null;
 
@@ -121,13 +136,16 @@ export function SupportingRail({
     <motion.div
       className={styles.rail}
       role="list"
-      aria-label="Additional projects"
+      aria-label={label}
+      data-rail-variant={variant}
       {...motionProps}
     >
-      <div className={styles.railHeader}>
-        <span>{label}</span>
-        <span className={styles.railHeaderRule} aria-hidden="true" />
-      </div>
+      {showRailHeader ? (
+        <div className={styles.railHeader}>
+          <span>{label}</span>
+          <span className={styles.railHeaderRule} aria-hidden="true" />
+        </div>
+      ) : null}
       <div className={styles.railTiles}>
         {items.map((item) => (
           <RailTile key={item.id} item={item} />
