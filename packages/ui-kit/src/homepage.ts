@@ -187,6 +187,16 @@ export type {
 } from './HbcOperationalSurface/index.js';
 export { HBC_OPERATIONAL_SURFACE_MODE_CONTRACT } from './HbcOperationalSurface/index.js';
 
+export { HbcSafetyHomepageSurface } from './HbcSafetyHomepageSurface/index.js';
+export type {
+  HbcSafetyHomepageSurfaceProps,
+  HbcSafetyHomepageSurfaceMode,
+  SafetySignalSeverity,
+  SafetyPrimarySignal,
+  SafetySecondarySignal,
+  SafetyPostureSummary,
+} from './HbcSafetyHomepageSurface/index.js';
+
 // ── Wave 01 follow-on — People & Culture surface family ──────────────
 // Cohesive presentation-lane surface for the warm-celebratory recognition
 // zone, plus the kudos composer flyout/form/preview group and a shared

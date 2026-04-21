@@ -1,11 +1,11 @@
 /**
  * SafetyFieldExcellence — Safety-critical field intelligence surface.
  *
- * W01r-P20 — rebuild on the elevated `HbcOperationalSurface`:
- *   - Safety-register nameplate masthead driven by the shared surface
- *   - Severity spectrum strip anchors safety as a first-class HB value
- *   - Severity-aware featured signal block (icon + accent + chips)
- *   - Severity-accent signal rows for the supporting feed
+ * W02-P01 — rebuild on `HbcSafetyHomepageSurface`:
+ *   - Top-line safety posture band with status + cadence
+ *   - Dominant primary signal lane with decisive action posture
+ *   - Bounded secondary signal lane with severity treatment
+ *   - Explicit compact/minimal behavior for shell-fit states
  *
  * The webpart consumer owns only non-visual concerns:
  *   - manifest-config fallback
@@ -18,16 +18,16 @@
  */
 import * as React from 'react';
 import {
-  HbcOperationalSurface,
+  HbcSafetyHomepageSurface,
   HbcPremiumBadge,
   Shield,
   AlertCircle,
   Info,
   AlertTriangle,
   Clock,
-  type HbcOperationalSurfaceMode,
-  type OperationalSignal,
-  type OperationalSignalSeverity,
+  type HbcSafetyHomepageSurfaceMode,
+  type SafetySecondarySignal,
+  type SafetySignalSeverity,
   type LucideIcon,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
@@ -59,7 +59,7 @@ const URGENCY_ICON_MAP: Record<SafetyUrgencyLevel, LucideIcon> = {
   urgent: AlertCircle,
 };
 
-const URGENCY_SIGNAL_SEVERITY_MAP: Record<SafetyUrgencyLevel, OperationalSignalSeverity> = {
+const URGENCY_SIGNAL_SEVERITY_MAP: Record<SafetyUrgencyLevel, SafetySignalSeverity> = {
   routine: 'default',
   attention: 'warning',
   urgent: 'danger',
@@ -106,7 +106,7 @@ export function SafetyFieldExcellence({
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
-  const signals: OperationalSignal[] = normalized.secondary.map((item) => {
+  const signals: SafetySecondarySignal[] = normalized.secondary.map((item) => {
     const urgency = item.urgency;
     const context = contextLabels(item.context);
     return {
@@ -140,27 +140,36 @@ export function SafetyFieldExcellence({
   });
   const featuredUrgency = normalized.featured?.urgency ?? 'routine';
 
-  const operationalMode: HbcOperationalSurfaceMode =
+  const operationalMode: HbcSafetyHomepageSurfaceMode =
     shellRenderMode === 'summary-collapsed' ? 'minimal' : shellRenderMode;
+  const hasStaleSignal = Boolean(normalized.featured?.isStale || normalized.secondary.some((item) => item.isStale));
+  const degradedNotice = hasStaleSignal
+    ? 'Data freshness is degraded; verify stale signals before field action.'
+    : undefined;
 
   return (
-    <HbcOperationalSurface
+    <HbcSafetyHomepageSurface
       title={normalized.heading}
       icon={Shield}
-      mastheadEyebrow={normalized.topLineSummary?.statusLabel ?? 'Field Safety'}
-      latestUpdated={normalized.topLineSummary?.lastUpdatedLabel ?? normalized.featured?.freshnessLabel}
+      posture={{
+        label: normalized.topLineSummary?.statusLabel ?? 'Field Safety',
+        summary: normalized.topLineSummary?.summaryText,
+        updatedLabel: normalized.topLineSummary?.lastUpdatedLabel ?? normalized.featured?.freshnessLabel,
+        tone: normalized.topLineSummary?.statusVariant ?? 'info',
+      }}
+      degradedNotice={degradedNotice}
       action={normalized.sectionCta}
-      variant="safety-homepage"
       mode={operationalMode}
-      featured={
+      primary={
         normalized.featured
           ? {
               title: normalized.featured.title,
-              description: normalized.featured.summary,
-              eyebrow: URGENCY_LABEL_MAP[featuredUrgency],
+              summary: normalized.featured.summary,
+              compactSummary: normalized.featured.compactSummary,
+              urgencyLabel: URGENCY_LABEL_MAP[featuredUrgency],
               icon: URGENCY_ICON_MAP[featuredUrgency],
               severity: URGENCY_SIGNAL_SEVERITY_MAP[featuredUrgency],
-              badge: (
+              badges: (
                 <>
                   <HbcPremiumBadge
                     label={URGENCY_LABEL_MAP[featuredUrgency]}
@@ -199,7 +208,7 @@ export function SafetyFieldExcellence({
             }
           : undefined
       }
-      signals={signals}
+      secondarySignals={signals}
     />
   );
 }

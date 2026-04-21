@@ -3,7 +3,7 @@
   "id": "89ca5ff3-21f4-4b23-a953-4b7306ea1029",
   "alias": "SafetyFieldExcellenceWebPart",
   "componentType": "WebPart",
-  "version": "0.0.4.0",
+  "version": "0.0.5.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],

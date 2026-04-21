@@ -1,0 +1,441 @@
+.root {
+  --surface-ink: var(--hbc-text-primary, #0f172a);
+  --surface-muted: var(--hbc-text-secondary, #475569);
+  --surface-border: var(--hbc-border-subtle, rgba(34, 83, 145, 0.2));
+  --surface-shell: var(--hbc-surface-neutral, #f8fbff);
+  --surface-elevated: var(--hbc-surface-elevated, #ffffff);
+  --surface-brand: var(--hbc-presentation-blue, #225391);
+  --surface-danger: var(--hbc-status-danger, #b42318);
+  --surface-warning: var(--hbc-status-warning, #b54708);
+  --surface-success: var(--hbc-status-success, #15703d);
+  --surface-ring: var(--hbc-focus-ring, #225391);
+  display: grid;
+  gap: 0;
+  color: var(--surface-ink);
+  background:
+    linear-gradient(160deg, rgba(34, 83, 145, 0.08) 0%, rgba(34, 83, 145, 0.02) 48%, transparent 100%),
+    var(--surface-shell);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+
+.postureBand {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-bottom: 1px solid rgba(34, 83, 145, 0.15);
+  background: linear-gradient(180deg, rgba(34, 83, 145, 0.09) 0%, rgba(34, 83, 145, 0.03) 100%);
+}
+
+.postureLead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.postureChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.postureIcon {
+  display: inline-flex;
+}
+
+.postureInfo {
+  color: var(--surface-brand);
+  background: rgba(34, 83, 145, 0.1);
+}
+
+.postureSuccess {
+  color: var(--surface-success);
+  background: rgba(21, 112, 61, 0.1);
+}
+
+.postureWarning {
+  color: var(--surface-warning);
+  background: rgba(181, 71, 8, 0.1);
+}
+
+.postureCritical {
+  color: var(--surface-danger);
+  background: rgba(180, 35, 24, 0.1);
+}
+
+.postureNeutral {
+  color: var(--surface-muted);
+  background: rgba(71, 85, 105, 0.12);
+}
+
+.updatedLabel {
+  font-size: 0.6875rem;
+  color: var(--surface-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.headline {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.postureSummary {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--surface-muted);
+  max-width: 64ch;
+}
+
+.postureAction {
+  margin-top: 2px;
+}
+
+.body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.primaryRegion {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--surface-border);
+  border-left: 5px solid var(--surface-brand);
+}
+
+.degradedNotice {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(181, 71, 8, 0.3);
+  background: rgba(181, 71, 8, 0.08);
+  font-size: 0.75rem;
+  color: #8a4208;
+}
+
+.primaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.primaryKicker {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--surface-muted);
+}
+
+.primaryIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  background: rgba(34, 83, 145, 0.1);
+}
+
+.primaryTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.22;
+  letter-spacing: -0.016em;
+}
+
+.primarySummary {
+  margin: 0;
+  color: var(--surface-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.primaryBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.primaryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(34, 83, 145, 0.25);
+}
+
+.primaryMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--surface-muted);
+}
+
+.primaryAction {
+  margin-top: 2px;
+}
+
+.primaryFallback {
+  display: grid;
+  gap: 8px;
+}
+
+.secondaryRegion {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(34, 83, 145, 0.14);
+}
+
+.secondaryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--surface-brand);
+}
+
+.secondaryRule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(34, 83, 145, 0.35) 0%, rgba(34, 83, 145, 0.06) 100%);
+}
+
+.secondaryList {
+  display: grid;
+  gap: 8px;
+}
+
+.signalRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  width: 100%;
+  border: 1px solid rgba(34, 83, 145, 0.18);
+  border-left: 4px solid var(--surface-brand);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  background: var(--surface-elevated);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+button.signalRow {
+  cursor: pointer;
+}
+
+a.signalRow:hover,
+button.signalRow:hover {
+  transform: translateY(-1px);
+  border-color: rgba(34, 83, 145, 0.34);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+a.signalRow:focus-visible,
+button.signalRow:focus-visible {
+  outline: 2px solid var(--surface-ring);
+  outline-offset: 2px;
+}
+
+.signalRowCompact {
+  min-height: 46px;
+}
+
+.signalIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+}
+
+.signalCopy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.signalTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.signalMeta {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--surface-muted);
+}
+
+.signalBadge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.secondaryEmpty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--surface-muted);
+}
+
+.severityDefault {
+  border-left-color: var(--surface-brand);
+  color: var(--surface-brand);
+}
+
+.severitySuccess {
+  border-left-color: var(--surface-success);
+  color: var(--surface-success);
+}
+
+.severityWarning {
+  border-left-color: var(--surface-warning);
+  color: var(--surface-warning);
+}
+
+.severityDanger {
+  border-left-color: var(--surface-danger);
+  color: var(--surface-danger);
+}
+
+.severityDefault .signalIcon,
+.severityDefault .primaryIcon {
+  background: rgba(34, 83, 145, 0.1);
+}
+
+.severitySuccess .signalIcon,
+.severitySuccess .primaryIcon {
+  background: rgba(21, 112, 61, 0.1);
+}
+
+.severityWarning .signalIcon,
+.severityWarning .primaryIcon {
+  background: rgba(181, 71, 8, 0.1);
+}
+
+.severityDanger .signalIcon,
+.severityDanger .primaryIcon {
+  background: rgba(180, 35, 24, 0.1);
+}
+
+.modeCompact .postureBand {
+  gap: 8px;
+  padding: 14px;
+}
+
+.modeCompact .headline {
+  font-size: 1.28rem;
+}
+
+.modeCompact .body {
+  padding: 12px;
+}
+
+.modeCompact .primaryRegion {
+  gap: 8px;
+  padding: 13px;
+}
+
+.modeCompact .primaryTitle {
+  font-size: 1.05rem;
+}
+
+.modeCompact .primarySummary {
+  font-size: 0.84rem;
+}
+
+.modeMinimal .postureBand {
+  gap: 6px;
+  padding: 12px;
+}
+
+.modeMinimal .headline {
+  font-size: 1.1rem;
+}
+
+.modeMinimal .body {
+  gap: 10px;
+  padding: 10px;
+}
+
+.modeMinimal .primaryRegion {
+  gap: 7px;
+  padding: 11px;
+}
+
+.modeMinimal .primaryTitle {
+  font-size: 0.96rem;
+}
+
+.modeMinimal .secondaryRegion {
+  padding: 10px;
+}
+
+.modeMinimal .signalTitle {
+  font-size: 0.82rem;
+}
+
+@media (min-width: 1024px) {
+  .body {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .postureBand {
+    padding: 22px 22px 18px;
+  }
+
+  .headline {
+    font-size: 1.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signalRow {
+    transition: none;
+  }
+
+  a.signalRow:hover,
+  button.signalRow:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

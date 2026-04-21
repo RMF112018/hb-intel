@@ -72,7 +72,7 @@ describe('Prompt-07 operational-awareness webparts', () => {
     expect(screen.getByRole('link', { name: /Open packet/ }).getAttribute('href')).toBe('/safety');
   });
 
-  it('maps shell summary-collapsed render mode to minimal operational mode', () => {
+  it('maps shell summary-collapsed render mode to minimal safety mode', () => {
     const { container } = render(
       <SafetyFieldExcellence
         shellRenderMode="summary-collapsed"
@@ -86,7 +86,7 @@ describe('Prompt-07 operational-awareness webparts', () => {
         }}
       />,
     );
-    const root = container.querySelector('[data-hbc-premium="operational-surface"]');
-    expect(root?.getAttribute('data-hbc-operational-mode')).toBe('minimal');
+    const root = container.querySelector('[data-hbc-premium="safety-homepage-surface"]');
+    expect(root?.getAttribute('data-hbc-safety-mode')).toBe('minimal');
   });
 });

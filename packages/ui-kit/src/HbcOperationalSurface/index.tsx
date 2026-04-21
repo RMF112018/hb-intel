@@ -285,6 +285,7 @@ function FeaturedBlock({ item, reducedMotion, mode }: FeaturedBlockProps): React
   const showMeta = mode !== 'minimal' && visibleMetaItems.length > 0;
   const showLegacyMeta = mode !== 'minimal' && !visibleMetaItems.length && Boolean(item.meta);
   const showCta = mode === 'standard' && Boolean(item.cta);
+  const featuredCta = item.cta;
 
   const motionProps = reducedMotion
     ? {}
@@ -357,11 +358,11 @@ function FeaturedBlock({ item, reducedMotion, mode }: FeaturedBlockProps): React
           <div className={styles.featuredMeta}>{item.meta}</div>
         ) : null}
 
-        {showCta ? (
+        {showCta && featuredCta ? (
           <div className={styles.featuredCta}>
             <HbcPremiumCta
-              label={item.cta.label}
-              href={item.cta.href}
+              label={featuredCta.label}
+              href={featuredCta.href}
               variant="primary"
               size="md"
               arrow
