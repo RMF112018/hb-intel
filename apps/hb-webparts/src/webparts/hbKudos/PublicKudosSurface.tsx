@@ -133,6 +133,15 @@ function formatShortDate(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function dedupeEntries(featured: KudosEntry | undefined, recent: KudosEntry[]): KudosEntry[] {
+  const byId = new Map<string, KudosEntry>();
+  if (featured) byId.set(featured.id, featured);
+  recent.forEach((entry) => {
+    if (!byId.has(entry.id)) byId.set(entry.id, entry);
+  });
+  return Array.from(byId.values());
+}
+
 export function PublicKudosSurface({
   heading,
   featured,
@@ -143,6 +152,28 @@ export function PublicKudosSurface({
   onOpenArticle,
 }: PublicKudosSurfaceProps): React.JSX.Element {
   const featuredLayoutMode = useFeaturedLayoutMode();
+  const activityEntries = React.useMemo(() => dedupeEntries(featured, recent), [featured, recent]);
+  const recognitionCount = activityEntries.length;
+  const celebrationCount = activityEntries.reduce((sum, entry) => sum + (entry.celebrateCount ?? 0), 0);
+  const recognizedPeopleCount = React.useMemo(() => {
+    const people = new Set<string>();
+    activityEntries.forEach((entry) => {
+      entry.recipients.forEach((recipient) => {
+        const key = (recipient.id || recipient.name || '').trim();
+        if (key) people.add(key.toLowerCase());
+      });
+    });
+    return people.size;
+  }, [activityEntries]);
+  const latestActivityDate = React.useMemo(() => {
+    let latest = 0;
+    activityEntries.forEach((entry) => {
+      const parsed = new Date(entry.submittedDate).getTime();
+      if (!Number.isNaN(parsed) && parsed > latest) latest = parsed;
+    });
+    if (!latest) return '';
+    return formatShortDate(new Date(latest).toISOString());
+  }, [activityEntries]);
   const featuredBadgeLabel =
     featuredLayoutMode === 'handheld'
       ? null
@@ -193,6 +224,50 @@ export function PublicKudosSurface({
           />
         )}
       </div>
+
+      <section
+        aria-labelledby="hb-kudos-pulse-title"
+        data-hbc-webpart-section="hb-kudos-pulse"
+        data-hbc-testid="hb-kudos-pulse-section"
+      >
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionHeaderTop}>
+            <span className={styles.sectionEyebrow}>Recognition pulse</span>
+            <span className={styles.sectionMeta}>
+              {latestActivityDate ? `Updated ${latestActivityDate}` : 'Awaiting first recognition'}
+            </span>
+          </div>
+          <h3 id="hb-kudos-pulse-title" className={styles.sectionTitle}>
+            {recognitionCount > 0 ? 'At a glance this week' : 'Kick off this week at HB'}
+          </h3>
+        </div>
+        {recognitionCount > 0 ? (
+          <div className={styles.pulseStats}>
+            <div className={styles.pulseStat}>
+              <span className={styles.pulseStatValue}>{recognitionCount}</span>
+              <span className={styles.pulseStatLabel}>
+                {recognitionCount === 1 ? 'recognition' : 'recognitions'}
+              </span>
+            </div>
+            <div className={styles.pulseStat}>
+              <span className={styles.pulseStatValue}>{recognizedPeopleCount}</span>
+              <span className={styles.pulseStatLabel}>
+                {recognizedPeopleCount === 1 ? 'person recognized' : 'people recognized'}
+              </span>
+            </div>
+            <div className={styles.pulseStat}>
+              <span className={styles.pulseStatValue}>{celebrationCount}</span>
+              <span className={styles.pulseStatLabel}>
+                {celebrationCount === 1 ? 'celebration' : 'celebrations'}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <p className={styles.pulseEmpty}>
+            New recognition will appear here as soon as someone shares kudos.
+          </p>
+        )}
+      </section>
 
       {/* Recent — productized stream zone with section header + date spines */}
       {recent.length > 0 ? (

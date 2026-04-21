@@ -565,6 +565,47 @@
   gap: 6px;
 }
 
+.pulseStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pulseStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--hbk-radius-lg);
+  border: 1px solid var(--hbk-orange-18);
+  background:
+    linear-gradient(135deg, var(--hbk-warm-row-white-72) 0%, var(--hbk-warm-row-tint-72) 100%);
+  box-shadow: var(--hbk-elev-row-compact);
+}
+
+.pulseStatValue {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--hbk-text-heading);
+}
+
+.pulseStatLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--hbk-text-muted);
+}
+
+.pulseEmpty {
+  margin: 0;
+  padding: 8px 4px 2px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--hbk-text-secondary);
+}
+
 .recentRow {
   position: relative;
   display: flex;
@@ -644,6 +685,18 @@
   .celebrateIcon,
   .recentRow {
     transition: none !important;
+  }
+}
+
+@media (max-width: 959px) {
+  .pulseStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 559px) {
+  .pulseStats {
+    grid-template-columns: 1fr;
   }
 }
 

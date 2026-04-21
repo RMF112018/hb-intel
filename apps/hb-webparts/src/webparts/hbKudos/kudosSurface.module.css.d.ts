@@ -33,6 +33,11 @@ declare const styles: {
   readonly sectionMeta: string;
   readonly sectionTitle: string;
   readonly recentList: string;
+  readonly pulseStats: string;
+  readonly pulseStat: string;
+  readonly pulseStatValue: string;
+  readonly pulseStatLabel: string;
+  readonly pulseEmpty: string;
   readonly recentRow: string;
   readonly recentBody: string;
   readonly recentRecipient: string;
