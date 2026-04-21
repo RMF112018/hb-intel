@@ -244,7 +244,7 @@ describe('HbcProjectSpotlightSurface — poster-led image-led posture', () => {
     );
   });
 
-  it('renders poster-led at medium and places the primary CTA above the disclosure', () => {
+  it('renders poster-led at medium with primary CTA in first view and no detail-hiding disclosure', () => {
     const { container, getByRole } = render(
       <HbcProjectSpotlightSurface model={posterModel('Final structural turnover phase')} forceMode="medium" />,
     );
@@ -253,14 +253,15 @@ describe('HbcProjectSpotlightSurface — poster-led image-led posture', () => {
       '[data-has-image="true"]',
     );
     expect(mediaZone?.getAttribute('data-poster-led')).toBe('true');
-    // CTA in first view (inline, not inside the closed details region).
+    // CTA in first view (inline, not inside a closed region).
     const cta = getByRole('link', { name: /View project brief/i });
     expect(cta).toBeInTheDocument();
-    // Disclosure still exists for the long-form details.
+    // Wide/medium promote full-depth details to always-visible; the
+    // "Show spotlight details" disclosure must not render at medium.
     const disclosure = Array.from(
       layout.querySelectorAll('button'),
     ).find((b) => /spotlight details/i.test(b.textContent ?? ''));
-    expect(disclosure).toBeTruthy();
+    expect(disclosure).toBeUndefined();
   });
 
   it('does not poster-lead at compact — title stays below the hero', () => {

@@ -61,6 +61,82 @@ export function MilestoneProgressPill({
   );
 }
 
+export interface MilestoneProgressRingProps {
+  milestones: ProjectSpotlightMilestone[];
+  /**
+   * Outer diameter of the ring in CSS pixels. Caller tunes for mode —
+   * wide/medium use 96, compact uses 72, minimal uses 56. The component
+   * itself stays size-agnostic beyond the supplied diameter.
+   */
+  size?: number;
+}
+
+/**
+ * MilestoneProgressRing — SVG donut that reads as the featured region's
+ * flagship visual anchor. Replaces the thin MilestoneProgressPill as
+ * the primary signal in the no-image band and in the wide/medium
+ * always-open essentials — a module this important cannot ride on a
+ * text-sized progress chip.
+ */
+export function MilestoneProgressRing({
+  milestones,
+  size = 96,
+}: MilestoneProgressRingProps): React.JSX.Element | null {
+  if (milestones.length === 0) return null;
+  const { completed, total, percent } = computeCounts(milestones);
+  const stroke = Math.max(5, Math.round(size * 0.08));
+  const radius = (size - stroke) / 2;
+  const center = size / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - percent / 100);
+  return (
+    <div
+      className={styles.progressRing}
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={`Milestone progress: ${completed} of ${total} complete, ${percent}%`}
+    >
+      <svg
+        className={styles.progressRingSvg}
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        aria-hidden="true"
+      >
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          strokeWidth={stroke}
+          className={styles.progressRingTrack}
+          fill="none"
+        />
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          className={styles.progressRingFill}
+          fill="none"
+          style={{
+            strokeDasharray: circumference,
+            strokeDashoffset: offset,
+            transform: `rotate(-90deg)`,
+            transformOrigin: '50% 50%',
+          }}
+        />
+      </svg>
+      <div className={styles.progressRingCenter} aria-hidden="true">
+        <span className={styles.progressRingPercent}>{percent}%</span>
+        <span className={styles.progressRingCount}>
+          {completed}/{total}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export interface MilestoneListProps {
   milestones: ProjectSpotlightMilestone[];
 }

@@ -472,26 +472,52 @@
   ) 1;
 }
 
-/* Nameplate posture — authored tonal band. The featured content sits
-   on a deeper presentation-blue wash with a pattern-accent corner
-   glyph rendered by `FeaturedSlot` (FolderKanban). The band carries
-   editorial weight that substitutes for the missing hero without
-   staging fake hero chrome. */
+/* Nameplate posture — authored tonal band with material texture. The
+   band carries a deeper presentation-blue wash, a diagonal rule-line
+   SVG pattern for editorial weight, and an offset glyph badge rendered
+   by `FeaturedSlot`. The combined effect substitutes for a missing
+   hero without staging fake hero chrome. */
 .featuredLayout[data-has-image='false'][data-no-image-posture='nameplate'] {
-  background: linear-gradient(
-    180deg,
-    rgba(var(--hbc-presentation-blue-rgb), 0.045) 0%,
-    rgba(var(--hbc-presentation-blue-rgb), 0.09) 100%
+  position: relative;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(var(--hbc-presentation-orange-rgb), 0.08) 0%,
+      rgba(var(--hbc-presentation-orange-rgb), 0.02) 32%,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--hbc-presentation-blue-rgb), 0.06) 0%,
+      rgba(var(--hbc-presentation-blue-rgb), 0.11) 100%
+    );
+  overflow: hidden;
+}
+
+/* Diagonal rule-line pattern plate — SVG-via-url for material texture
+   at 3% opacity. Reads as authored composition, not a blank slab. */
+.featuredLayout[data-has-image='false'][data-no-image-posture='nameplate']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    -30deg,
+    rgba(var(--hbc-presentation-blue-rgb), 0.07) 0 1px,
+    transparent 1px 18px
   );
+  z-index: 0;
 }
 
 .featuredLayout[data-has-image='false'][data-no-image-posture='nameplate']
   .featuredContent {
-  /* Tonal wash already owns the background on the Nameplate band;
-     prevent the default `.featuredContent` gradient from double-stacking
-     over it. The left-edge accent below gives the sectional rhythm. */
+  /* The authored band already owns the background; prevent the default
+     `.featuredContent` gradient from double-stacking. The pattern plate
+     sits above via ::before; content sits above via z-index. */
+  position: relative;
+  z-index: 1;
   background: transparent;
-  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+  border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
 }
 
 /* Kicker posture (compact / minimal) — keeps the tight default
@@ -515,13 +541,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: rgba(var(--hbc-presentation-blue-rgb), 0.10);
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--hbc-presentation-blue-rgb), 0.14) 0%,
+    rgba(var(--hbc-presentation-orange-rgb), 0.10) 100%
+  );
   color: var(--hbc-presentation-blue);
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-presentation-blue-rgb), 0.16);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--hbc-presentation-blue-rgb), 0.24),
+    0 2px 6px rgba(var(--hbc-presentation-blue-rgb), 0.10);
+}
+
+.root[data-layout-mode='wide'] .featuredNameplateGlyph {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
 }
 
 .root[data-layout-mode='compact'] .featuredNameplateGlyph,
@@ -890,25 +928,25 @@
   border-left: 3px solid rgba(var(--hbc-presentation-blue-rgb), 0.28);
 }
 
-/* Mode-governed featured-body rhythm. Wide and medium keep premium
-   editorial breathing; compact and minimal tighten the gap + padding
-   so the disclosures sit close to the title and the vertical footprint
-   stays intentionally selective. */
+/* Mode-governed featured-body rhythm. Pass-2 density compression
+   removes ~10–12 px of vertical breathing on wide/medium so first
+   view no longer spends space it doesn't earn. Compact/minimal stay
+   tight. */
 .root[data-layout-mode='wide'] .featuredContent {
-  gap: 16px;
-  padding: 28px 32px 30px;
+  gap: 14px;
+  padding: 20px 32px 22px;
 }
 .root[data-layout-mode='medium'] .featuredContent {
-  gap: 14px;
-  padding: 24px 28px 26px;
+  gap: 12px;
+  padding: 18px 28px 20px;
 }
 .root[data-layout-mode='compact'] .featuredContent {
   gap: 10px;
-  padding: 16px 18px 18px;
+  padding: 14px 18px 16px;
 }
 .root[data-layout-mode='minimal'] .featuredContent {
   gap: 8px;
-  padding: 12px 14px 14px;
+  padding: 10px 14px 12px;
 }
 
 .featuredTitle {
@@ -988,6 +1026,186 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* Two-column flagship essentials layout when a Progress Ring qualifies.
+   Text column takes available space; the signal-anchor column is sized
+   to the ring width + meta column. The split only engages at wide and
+   medium — compact/minimal keep the stacked single-column posture so
+   the tightest modes never fragment at narrow widths. */
+.root[data-layout-mode='wide'] .featuredEssentials[data-has-ring='true'],
+.root[data-layout-mode='medium'] .featuredEssentials[data-has-ring='true'] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px 28px;
+  align-items: start;
+}
+
+.root[data-layout-mode='compact'] .featuredEssentials[data-has-ring='true'] {
+  /* Compact keeps single column but renders the ring-anchor cluster
+     beneath the text column so the ring still reads as a flagship
+     signal without stealing the title line width. */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.featuredEssentialsText {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.root[data-layout-mode='wide'] .featuredEssentialsText,
+.root[data-layout-mode='medium'] .featuredEssentialsText {
+  gap: 12px;
+}
+
+/* Signal-anchor cluster — the Progress Ring + meta chip stack. In wide
+   and medium it sits in the right column; in compact it appears below
+   the text column. The cluster carries deliberate breathing so the
+   ring reads as authored hero furniture, not a decoration. */
+.featuredSignalAnchor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+.root[data-layout-mode='wide'] .featuredSignalAnchor {
+  min-width: 152px;
+}
+.root[data-layout-mode='medium'] .featuredSignalAnchor {
+  min-width: 136px;
+}
+
+.root[data-layout-mode='compact'] .featuredSignalAnchor {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(var(--hbc-presentation-blue-rgb), 0.20);
+}
+
+.featuredAnchorMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.root[data-layout-mode='compact'] .featuredAnchorMeta {
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.featuredAnchorChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--spotlight-radius-pill);
+  white-space: nowrap;
+}
+
+.featuredAnchorChipStatus {
+  color: var(--hbc-presentation-blue);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.09);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.20);
+}
+
+.featuredAnchorChipStrategic {
+  color: var(--spotlight-strategic-deep);
+  background: rgba(var(--hbc-presentation-orange-rgb), 0.10);
+  border: 1px solid rgba(var(--hbc-presentation-orange-rgb), 0.24);
+}
+
+.featuredAnchorChipStale {
+  color: var(--spotlight-stale-deep);
+  background: rgba(var(--spotlight-stale-rgb), 0.08);
+  border: 1px solid rgba(var(--spotlight-stale-rgb), 0.22);
+}
+
+.featuredAnchorFreshness {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: 2px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(var(--presentation-body-ink), 0.55);
+}
+
+.featuredAnchorFreshness svg {
+  color: var(--hbc-presentation-blue);
+}
+
+/* ── Progress Ring (flagship visual anchor) ─────────────────── */
+
+.progressRing {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.progressRingSvg {
+  display: block;
+}
+
+.progressRingTrack {
+  stroke: rgba(var(--hbc-presentation-blue-rgb), 0.14);
+}
+
+.progressRingFill {
+  stroke: url(#progressRingGradient, var(--hbc-presentation-blue));
+  stroke: var(--hbc-presentation-blue);
+  transition: stroke-dashoffset 500ms var(--spotlight-motion-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressRingFill {
+    transition: none !important;
+  }
+}
+
+.progressRingCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.progressRingPercent {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--presentation-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.progressRingCount {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(var(--hbc-presentation-blue-rgb), 0.78);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
 }
 
 /* ── Four-beat essentials hierarchy ──────────────────────────
@@ -1702,10 +1920,30 @@
    the button-only collapsed affordance. */
 .historyHeader {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  position: relative;
+}
+
+/* Gradient-accent bottom rule under the history header — replaces the
+   flat hairline so the section boundary reads as authored rhythm. */
+.historyHeader::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--hbc-presentation-blue) 0%,
+    var(--hbc-presentation-blue) 48px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.18) 48px,
+    rgba(var(--hbc-presentation-blue-rgb), 0.04) 60%,
+    transparent 100%
+  );
+  border-radius: 1px;
 }
 
 .historyEyebrow {
@@ -1716,11 +1954,24 @@
   color: var(--hbc-presentation-blue);
 }
 
+/* Count pill — branded badge replacing the quiet grey numeral. Gives
+   "Previously spotlighted" header real editorial authority instead of
+   reading like drive-by metadata. */
 .historyCount {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(var(--presentation-body-ink), 0.52);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--hbc-presentation-blue);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.10);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.22);
+  border-radius: var(--spotlight-radius-pill);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2067,17 +2318,19 @@
   height: 24px;
 }
 
-/* Trim the closing gutter in tighter modes so the surface ends
-   decisively; keep premium breathing room in wide/medium. */
+/* Pass-2 density compression — the closing gutter is trimmed in every
+   mode so the surface ends decisively. Premium breathing still happens
+   inside the featured band; the bottom spacer no longer has to perform
+   it at the outer edge. */
 .root[data-layout-mode='wide'] .bottomSpacer {
-  height: 32px;
-}
-.root[data-layout-mode='medium'] .bottomSpacer {
-  height: 28px;
-}
-.root[data-layout-mode='compact'] .bottomSpacer {
   height: 18px;
 }
-.root[data-layout-mode='minimal'] .bottomSpacer {
+.root[data-layout-mode='medium'] .bottomSpacer {
+  height: 16px;
+}
+.root[data-layout-mode='compact'] .bottomSpacer {
   height: 12px;
+}
+.root[data-layout-mode='minimal'] .bottomSpacer {
+  height: 10px;
 }

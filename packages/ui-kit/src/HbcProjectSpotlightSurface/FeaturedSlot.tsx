@@ -38,7 +38,11 @@ import type {
 import type { SpotlightLayoutVisibility } from './layout-mode.js';
 import { EASE_OUT_EXPO } from './internals.js';
 import { FeaturedMedia } from './FeaturedMedia.js';
-import { MilestoneList, MilestoneProgressPill } from './Milestones.js';
+import {
+  MilestoneList,
+  MilestoneProgressPill,
+  MilestoneProgressRing,
+} from './Milestones.js';
 import { TeamStrip } from './TeamStrip.js';
 import styles from './project-spotlight-surface.module.css';
 
@@ -160,12 +164,31 @@ export function FeaturedSlot({
       : null;
 
   const detailsId = React.useId();
+  // `detailsAlwaysOpen` promotes the depth region to permanently
+  // visible for wide/medium — the flagship homepage lane must not
+  // hide milestones, team, and full summary behind a click. Compact
+  // and minimal retain the explicit disclosure so their footprint
+  // stays selective.
+  const alwaysOpen = visibility.detailsAlwaysOpen;
   const [detailsOpen, setDetailsOpen] = React.useState(
-    posture.detailsOpenByDefault,
+    alwaysOpen || posture.detailsOpenByDefault,
   );
   React.useEffect(() => {
-    setDetailsOpen(posture.detailsOpenByDefault);
-  }, [posture.detailsOpenByDefault, visibility.mode]);
+    setDetailsOpen(alwaysOpen || posture.detailsOpenByDefault);
+  }, [alwaysOpen, posture.detailsOpenByDefault, visibility.mode]);
+
+  // Milestones qualify for the flagship Progress Ring when at least one
+  // milestone is authored AND the mode can afford the ring footprint.
+  // Minimal drops the ring so the tightest posture stays title + snippet
+  // + CTA only; compact uses a smaller ring.
+  const hasMilestoneRing =
+    milestones.length > 0 && visibility.mode !== 'minimal';
+  const ringSize =
+    visibility.mode === 'wide'
+      ? 104
+      : visibility.mode === 'medium'
+        ? 92
+        : 72;
 
   const motionProps = reducedMotion
     ? {}
@@ -296,75 +319,133 @@ export function FeaturedSlot({
           </div>
         ) : null}
 
-        {/* 1. identity — title (suppressed when poster-led carries it) */}
-        <div className={styles.featuredEssentials}>
-          {posterLed ? null : (
-            <h3 className={styles.featuredTitle}>{featured.title}</h3>
-          )}
+        {/* Flagship essentials — two-column layout when a Progress Ring
+            qualifies: text column (identity → kicker → summary → CTA)
+            on the left, signal anchor column (ring + meta chips) on
+            the right. Without a ring, the single-column posture is
+            preserved and chips inline below the title as before. */}
+        <div
+          className={styles.featuredEssentials}
+          data-has-ring={hasMilestoneRing ? 'true' : 'false'}
+        >
+          <div className={styles.featuredEssentialsText}>
+            {posterLed ? null : (
+              <h3 className={styles.featuredTitle}>{featured.title}</h3>
+            )}
 
-          {showNameplateKicker && featured.headline ? (
-            <p className={styles.featuredNameplateKicker}>
-              {featured.headline}
-            </p>
-          ) : null}
+            {showNameplateKicker && featured.headline ? (
+              <p className={styles.featuredNameplateKicker}>
+                {featured.headline}
+              </p>
+            ) : null}
 
-          {/* 2. signal — milestone progress + strongest secondary chip */}
-          {hasSignalRow ? (
-            <div className={styles.featuredSignalRow}>
-              <MilestoneProgressPill milestones={milestones} />
-              {showStatusInSignalRow && statusLabel ? (
-                <span className={styles.featuredSignalChip}>{statusLabel}</span>
-              ) : null}
-              {signalFreshnessChip ? (
-                <span
-                  className={clsx(
-                    styles.featuredSignalChip,
-                    featured.isStale && styles.featuredSignalChipStale,
-                  )}
-                >
-                  <Calendar
-                    size={12}
-                    aria-hidden="true"
-                    strokeWidth={2.25}
-                  />
-                  {signalFreshnessChip}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
+            {/* Inline signal row only when no ring anchor is visible
+                (i.e. minimal or zero-milestones) — keeps the compact
+                posture from losing its signal chips. */}
+            {!hasMilestoneRing && hasSignalRow ? (
+              <div className={styles.featuredSignalRow}>
+                <MilestoneProgressPill milestones={milestones} />
+                {showStatusInSignalRow && statusLabel ? (
+                  <span className={styles.featuredSignalChip}>
+                    {statusLabel}
+                  </span>
+                ) : null}
+                {signalFreshnessChip ? (
+                  <span
+                    className={clsx(
+                      styles.featuredSignalChip,
+                      featured.isStale && styles.featuredSignalChipStale,
+                    )}
+                  >
+                    <Calendar
+                      size={12}
+                      aria-hidden="true"
+                      strokeWidth={2.25}
+                    />
+                    {signalFreshnessChip}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
 
-          {/* 3. explanation — short summary snippet */}
-          {summarySnippet ? (
-            <p
-              className={styles.featuredSummarySnippet}
-              style={{ WebkitLineClamp: essentialsSummaryClamp }}
+            {summarySnippet ? (
+              <p
+                className={styles.featuredSummarySnippet}
+                style={{ WebkitLineClamp: essentialsSummaryClamp }}
+              >
+                {summarySnippet}
+              </p>
+            ) : null}
+
+            {effectiveCta && ctaSource ? (
+              <div
+                className={styles.featuredCtaInline}
+                data-cta-source={ctaSource}
+              >
+                <HbcPremiumCta
+                  label={effectiveCta.label}
+                  href={effectiveCta.href}
+                  variant="primary"
+                  size="md"
+                  arrow
+                />
+              </div>
+            ) : null}
+          </div>
+
+          {hasMilestoneRing ? (
+            <aside
+              className={styles.featuredSignalAnchor}
+              aria-label="Project signal summary"
             >
-              {summarySnippet}
-            </p>
-          ) : null}
-
-          {/* Nameplate posture elides the headline from the disclosure
-              since it is already rendered as the kicker above. Prevents
-              double-rendering of the same authored string. */}
-
-          {/* 4. action — item CTA, else section-level fallback */}
-          {effectiveCta && ctaSource ? (
-            <div
-              className={styles.featuredCtaInline}
-              data-cta-source={ctaSource}
-            >
-              <HbcPremiumCta
-                label={effectiveCta.label}
-                href={effectiveCta.href}
-                variant="primary"
-                size="md"
-                arrow
-              />
-            </div>
+              <MilestoneProgressRing milestones={milestones} size={ringSize} />
+              <div className={styles.featuredAnchorMeta}>
+                {statusLabel ? (
+                  <span
+                    className={clsx(
+                      styles.featuredAnchorChip,
+                      styles.featuredAnchorChipStatus,
+                    )}
+                  >
+                    {statusLabel}
+                  </span>
+                ) : null}
+                {featured.strategicEmphasis ? (
+                  <span
+                    className={clsx(
+                      styles.featuredAnchorChip,
+                      styles.featuredAnchorChipStrategic,
+                    )}
+                  >
+                    Strategic
+                  </span>
+                ) : null}
+                {featured.isStale ? (
+                  <span
+                    className={clsx(
+                      styles.featuredAnchorChip,
+                      styles.featuredAnchorChipStale,
+                    )}
+                  >
+                    Stale
+                  </span>
+                ) : null}
+                {featured.freshnessLabel ? (
+                  <span className={styles.featuredAnchorFreshness}>
+                    <Calendar
+                      size={12}
+                      aria-hidden="true"
+                      strokeWidth={2.25}
+                    />
+                    {featured.freshnessLabel}
+                  </span>
+                ) : null}
+              </div>
+            </aside>
           ) : null}
         </div>
 
-        {hasDetailsContent ? (
+        {hasDetailsContent && !alwaysOpen ? (
           <button
             type="button"
             className={styles.featuredDisclosure}

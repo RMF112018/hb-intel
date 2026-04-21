@@ -104,6 +104,15 @@ export interface SpotlightLayoutVisibility {
    * tighter title-led treatment suitable for compact/minimal.
    */
   readonly noImagePosture: 'nameplate' | 'kicker';
+  /**
+   * When true, the featured depth region (milestone list, full-depth
+   * summary, freshness row, team strip) is always visible — no
+   * "Show spotlight details" disclosure affordance renders. Wide and
+   * medium enable this so the flagship surface stops hiding value
+   * behind a click; compact and minimal retain the disclosure so
+   * their first-view footprint stays intentionally selective.
+   */
+  readonly detailsAlwaysOpen: boolean;
 }
 
 /**
@@ -135,6 +144,7 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showRailFooterCta: false,
     railPreviewCount: 3,
     noImagePosture: 'nameplate',
+    detailsAlwaysOpen: true,
   },
   medium: {
     mode: 'medium',
@@ -152,8 +162,9 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showMastheadDate: true,
     showMastheadAction: true,
     showRailFooterCta: false,
-    railPreviewCount: 2,
+    railPreviewCount: 3,
     noImagePosture: 'nameplate',
+    detailsAlwaysOpen: true,
   },
   compact: {
     mode: 'compact',
@@ -172,6 +183,7 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showRailFooterCta: true,
     railPreviewCount: 2,
     noImagePosture: 'kicker',
+    detailsAlwaysOpen: false,
   },
   minimal: {
     mode: 'minimal',
@@ -190,6 +202,7 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     showRailFooterCta: true,
     railPreviewCount: 1,
     noImagePosture: 'kicker',
+    detailsAlwaysOpen: false,
   },
 };
 

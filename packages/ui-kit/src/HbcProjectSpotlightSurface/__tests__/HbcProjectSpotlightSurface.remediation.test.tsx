@@ -204,6 +204,74 @@ describe('HbcProjectSpotlightSurface — rail sectional header', () => {
   });
 });
 
+describe('HbcProjectSpotlightSurface — Progress Ring signal anchor (Pass 2)', () => {
+  function withMilestones(): ProjectSpotlightSurfaceModel {
+    return baseModel({
+      featured: {
+        ...baseModel().featured,
+        milestones: [
+          { id: 'm1', title: 'MEP closeout', completed: true },
+          { id: 'm2', title: 'Owner turnover', completed: true },
+          { id: 'm3', title: 'Envelope', completed: false },
+          { id: 'm4', title: 'Commissioning', completed: false },
+        ],
+      },
+    });
+  }
+
+  it('renders the Progress Ring as the flagship signal anchor in wide/medium/compact when milestones are authored', () => {
+    for (const mode of ['wide', 'medium', 'compact'] as const) {
+      const { container, unmount } = render(
+        <HbcProjectSpotlightSurface model={withMilestones()} forceMode={mode} />,
+      );
+      const anchor = container.querySelector<HTMLElement>(
+        '[aria-label="Project signal summary"]',
+      );
+      expect(anchor).not.toBeNull();
+      // Ring exposes an accessible name with percent + count.
+      const ring = container.querySelector<HTMLElement>(
+        '[role="img"][aria-label*="Milestone progress"]',
+      );
+      expect(ring).not.toBeNull();
+      expect(ring?.getAttribute('aria-label')).toMatch(/50%|2 of 4/);
+      unmount();
+    }
+  });
+
+  it('suppresses the Progress Ring in minimal to preserve the tightest posture', () => {
+    const { container } = render(
+      <HbcProjectSpotlightSurface model={withMilestones()} forceMode="minimal" />,
+    );
+    const anchor = container.querySelector<HTMLElement>(
+      '[aria-label="Project signal summary"]',
+    );
+    expect(anchor).toBeNull();
+  });
+
+  it('promotes featured details to always-visible in wide/medium (no "Show spotlight details" disclosure)', () => {
+    for (const mode of ['wide', 'medium'] as const) {
+      const { container, unmount } = render(
+        <HbcProjectSpotlightSurface model={withMilestones()} forceMode={mode} />,
+      );
+      const disclosures = Array.from(
+        container.querySelectorAll<HTMLButtonElement>('button'),
+      ).filter((b) => /spotlight details/i.test(b.textContent ?? ''));
+      expect(disclosures).toHaveLength(0);
+      unmount();
+    }
+  });
+
+  it('retains the featured details disclosure in compact (depth content still has meaningful additional surface)', () => {
+    const { container } = render(
+      <HbcProjectSpotlightSurface model={withMilestones('compact')} forceMode="compact" />,
+    );
+    const disclosure = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button'),
+    ).find((b) => /spotlight details/i.test(b.textContent ?? ''));
+    expect(disclosure).toBeTruthy();
+  });
+});
+
 describe('HbcProjectSpotlightSurface — always-visible history preview', () => {
   it('renders the first past-spotlight at first paint in every mode (no click required)', () => {
     for (const mode of ['wide', 'medium', 'compact', 'minimal'] as const) {
