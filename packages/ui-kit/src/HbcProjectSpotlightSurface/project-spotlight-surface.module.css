@@ -56,12 +56,35 @@
   --presentation-ink: #0a1b33;
   --presentation-body-ink: 26, 19, 16;
 
+  /* Surface-family local tokens. These consolidate repeated freehand
+     values across the Spotlight family so downstream rules reference a
+     governed seam instead of hand-tuned literals. Values are preserved
+     from the prior flagship-rebuild posture — this is a naming pass,
+     not a visual rethink. Brand identity still flows through the
+     presentation-lane tokens above. */
+  --spotlight-shadow-ink-rgb: 10, 24, 45;
+  --spotlight-strategic-deep: #c26434;
+  --spotlight-stale-deep: #b45309;
+  --spotlight-stale-rgb: 180, 83, 9;
+  --spotlight-progress-lift: #3a73b3;
+  --spotlight-surface-white: #ffffff;
+  --spotlight-body-ink: #1a1a1a;
+  --spotlight-radius-pill: 999px;
+  --spotlight-radius-card: 12px;
+  --spotlight-radius-tile: 10px;
+  --spotlight-radius-thumb: 8px;
+  --spotlight-radius-row: 6px;
+  --spotlight-radius-eyebrow: 7px;
+  --spotlight-motion-quick: 160ms ease;
+  --spotlight-motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --spotlight-focus-ring: var(--hbc-presentation-blue);
+
   display: flex;
   flex-direction: column;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1a1a1a;
-  background: #ffffff;
-  border-radius: 12px;
+  color: var(--spotlight-body-ink);
+  background: var(--spotlight-surface-white);
+  border-radius: var(--spotlight-radius-card);
   border-left: 5px solid var(--hbc-presentation-blue);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   border-right: 1px solid rgba(0, 0, 0, 0.06);
@@ -69,7 +92,7 @@
   box-shadow:
     0 1px 3px rgba(var(--hbc-presentation-blue-rgb), 0.08),
     0 6px 18px rgba(var(--hbc-presentation-blue-rgb), 0.08),
-    0 22px 48px rgba(10, 24, 45, 0.06);
+    0 22px 48px rgba(var(--spotlight-shadow-ink-rgb), 0.06);
   overflow: hidden;
   position: relative;
 }
@@ -147,7 +170,7 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  border-radius: 7px;
+  border-radius: var(--spotlight-radius-eyebrow);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.10);
   color: var(--hbc-presentation-blue);
 }
@@ -465,19 +488,19 @@
   color: var(--hbc-presentation-blue);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.08);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
 }
 
 .featuredHeaderChipStrategic {
-  color: #c26434;
+  color: var(--spotlight-strategic-deep);
   background: rgba(var(--hbc-presentation-orange-rgb), 0.10);
   border-color: rgba(var(--hbc-presentation-orange-rgb), 0.24);
 }
 
 .featuredHeaderChipStale {
-  color: #b45309;
-  background: rgba(180, 83, 9, 0.08);
-  border-color: rgba(180, 83, 9, 0.22);
+  color: var(--spotlight-stale-deep);
+  background: rgba(var(--spotlight-stale-rgb), 0.08);
+  border-color: rgba(var(--spotlight-stale-rgb), 0.22);
 }
 
 /* Tighter content padding in the title-led posture so first-view
@@ -565,7 +588,7 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 700ms var(--spotlight-motion-ease-out);
   transform: scale(1.0);
 }
 
@@ -588,8 +611,8 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgba(10, 24, 45, 0.75) 0%,
-    rgba(10, 24, 45, 0.35) 30%,
+    rgba(var(--spotlight-shadow-ink-rgb), 0.75) 0%,
+    rgba(var(--spotlight-shadow-ink-rgb), 0.35) 30%,
     rgba(var(--hbc-presentation-blue-rgb), 0.12) 60%,
     transparent 100%
   );
@@ -631,12 +654,12 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #ffffff;
+  color: var(--spotlight-surface-white);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.80);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
 }
 
 .mediaOverlayEyebrowDot {
@@ -644,7 +667,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--spotlight-surface-white);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
 }
 
@@ -668,16 +691,16 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(10, 24, 45, 0.18);
+  border-radius: var(--spotlight-radius-pill);
+  box-shadow: 0 2px 8px rgba(var(--spotlight-shadow-ink-rgb), 0.18);
 }
 
 .mediaOverlayChipStrategic {
-  color: #c26434;
+  color: var(--spotlight-strategic-deep);
 }
 
 .mediaOverlayChipStale {
-  color: #b45309;
+  color: var(--spotlight-stale-deep);
 }
 
 /* ── Poster-led overlay (wide / medium image-led) ────────────
@@ -700,8 +723,8 @@
   font-weight: 800;
   line-height: 1.12;
   letter-spacing: -0.02em;
-  color: #ffffff;
-  text-shadow: 0 2px 12px rgba(10, 24, 45, 0.45);
+  color: var(--spotlight-surface-white);
+  text-shadow: 0 2px 12px rgba(var(--spotlight-shadow-ink-rgb), 0.45);
   max-width: 22ch;
   /* Hard two-line clamp so long titles never push the chip row off
      the hero. */
@@ -724,7 +747,7 @@
   font-weight: 500;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.88);
-  text-shadow: 0 1px 8px rgba(10, 24, 45, 0.35);
+  text-shadow: 0 1px 8px rgba(var(--spotlight-shadow-ink-rgb), 0.35);
   max-width: 48ch;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -889,7 +912,7 @@
   color: var(--hbc-presentation-blue);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.05);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
   white-space: nowrap;
 }
 
@@ -898,13 +921,13 @@
 }
 
 .featuredSignalChipStale {
-  color: #b45309;
-  background: rgba(180, 83, 9, 0.06);
-  border-color: rgba(180, 83, 9, 0.22);
+  color: var(--spotlight-stale-deep);
+  background: rgba(var(--spotlight-stale-rgb), 0.06);
+  border-color: rgba(var(--spotlight-stale-rgb), 0.22);
 }
 
 .featuredSignalChipStale svg {
-  color: #b45309;
+  color: var(--spotlight-stale-deep);
 }
 
 .featuredSummarySnippet {
@@ -947,7 +970,7 @@
   width: fit-content;
   background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
 }
 
 .milestoneSignalLabel {
@@ -984,8 +1007,8 @@
   left: 0;
   bottom: 0;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--hbc-presentation-blue) 0%, #3a73b3 100%);
-  transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(90deg, var(--hbc-presentation-blue) 0%, var(--spotlight-progress-lift) 100%);
+  transition: width 400ms var(--spotlight-motion-ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1008,14 +1031,14 @@
   color: var(--hbc-presentation-blue);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
   cursor: pointer;
   font-family: inherit;
   min-height: 36px;
   transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
+    background-color var(--spotlight-motion-quick),
+    border-color var(--spotlight-motion-quick),
+    transform var(--spotlight-motion-quick);
 }
 
 .featuredDisclosure:hover {
@@ -1025,7 +1048,7 @@
 }
 
 .featuredDisclosure:focus-visible {
-  outline: 2px solid var(--hbc-presentation-blue);
+  outline: 2px solid var(--spotlight-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1049,7 +1072,7 @@
   height: 14px;
   font-size: 0.75rem;
   line-height: 1;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 200ms var(--spotlight-motion-ease-out);
   transform: rotate(0deg);
 }
 
@@ -1097,7 +1120,7 @@
   padding: 14px 16px;
   background: rgba(var(--hbc-presentation-blue-rgb), 0.035);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.10);
-  border-radius: 10px;
+  border-radius: var(--spotlight-radius-tile);
 }
 
 .milestonesHeader {
@@ -1139,8 +1162,8 @@
   left: 0;
   bottom: 0;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--hbc-presentation-blue) 0%, #3a73b3 100%);
-  transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(90deg, var(--hbc-presentation-blue) 0%, var(--spotlight-progress-lift) 100%);
+  transition: width 400ms var(--spotlight-motion-ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1190,7 +1213,7 @@
   height: 18px;
   border-radius: 50%;
   background: var(--hbc-presentation-blue);
-  color: #ffffff;
+  color: var(--spotlight-surface-white);
   flex-shrink: 0;
 }
 
@@ -1260,11 +1283,11 @@
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.04);
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
   transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
+    background-color var(--spotlight-motion-quick),
+    border-color var(--spotlight-motion-quick),
+    transform var(--spotlight-motion-quick);
   font-family: inherit;
   color: inherit;
   min-height: 44px;
@@ -1277,7 +1300,7 @@
 }
 
 .teamStripButton:focus-visible {
-  outline: 2px solid var(--hbc-presentation-blue);
+  outline: 2px solid var(--spotlight-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1319,12 +1342,12 @@
   z-index: 10;
   min-width: 280px;
   max-width: 340px;
-  background: #ffffff;
-  border-radius: 12px;
+  background: var(--spotlight-surface-white);
+  border-radius: var(--spotlight-radius-card);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
   box-shadow:
     0 8px 28px rgba(var(--hbc-presentation-blue-rgb), 0.14),
-    0 2px 6px rgba(10, 24, 45, 0.08);
+    0 2px 6px rgba(var(--spotlight-shadow-ink-rgb), 0.08);
   overflow: hidden;
 }
 
@@ -1340,7 +1363,7 @@
   display: block;
   position: fixed;
   inset: 0;
-  background: rgba(10, 24, 45, 0.38);
+  background: rgba(var(--spotlight-shadow-ink-rgb), 0.38);
   z-index: 99;
 }
 
@@ -1357,8 +1380,8 @@
   border-radius: 14px 14px 0 0;
   border-bottom: none;
   box-shadow:
-    0 -6px 28px rgba(10, 24, 45, 0.18),
-    0 -2px 8px rgba(10, 24, 45, 0.10);
+    0 -6px 28px rgba(var(--spotlight-shadow-ink-rgb), 0.18),
+    0 -2px 8px rgba(var(--spotlight-shadow-ink-rgb), 0.10);
   max-height: 60vh;
   overflow-y: auto;
 }
@@ -1383,7 +1406,7 @@
   cursor: pointer;
   font-size: 0.8125rem;
   color: rgba(var(--presentation-body-ink), 0.5);
-  border-radius: 6px;
+  border-radius: var(--spotlight-radius-row);
   line-height: 1;
   font-family: inherit;
   min-width: 32px;
@@ -1394,7 +1417,7 @@
 }
 
 .teamPanelClose:focus-visible {
-  outline: 2px solid var(--hbc-presentation-blue);
+  outline: 2px solid var(--spotlight-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1515,15 +1538,15 @@
   color: var(--hbc-presentation-blue);
   background: rgba(var(--hbc-presentation-blue-rgb), 0.05);
   border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.18);
-  border-radius: 999px;
+  border-radius: var(--spotlight-radius-pill);
   cursor: pointer;
   font-family: inherit;
   min-height: 40px;
   transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
+    background-color var(--spotlight-motion-quick),
+    border-color var(--spotlight-motion-quick),
+    transform var(--spotlight-motion-quick),
+    box-shadow var(--spotlight-motion-quick);
 }
 
 .historyDisclosure:hover {
@@ -1534,7 +1557,7 @@
 }
 
 .historyDisclosure:focus-visible {
-  outline: 2px solid var(--hbc-presentation-blue);
+  outline: 2px solid var(--spotlight-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1577,7 +1600,7 @@
   height: 14px;
   font-size: 0.75rem;
   line-height: 1;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 200ms var(--spotlight-motion-ease-out);
   transform: rotate(0deg);
 }
 
@@ -1752,8 +1775,8 @@
   cursor: pointer;
   border: none;
   background: transparent;
-  border-radius: 6px;
-  transition: background-color 160ms ease;
+  border-radius: var(--spotlight-radius-row);
+  transition: background-color var(--spotlight-motion-quick);
 }
 
 .railTile:hover {
@@ -1761,7 +1784,7 @@
 }
 
 .railTile:focus-visible {
-  outline: 2px solid var(--hbc-presentation-blue);
+  outline: 2px solid var(--spotlight-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1777,11 +1800,11 @@
   position: relative;
   flex: 0 0 100px;
   height: 72px;
-  border-radius: 8px;
+  border-radius: var(--spotlight-radius-thumb);
   overflow: hidden;
   background-color: rgba(var(--hbc-presentation-blue-rgb), 0.06);
   contain: strict;
-  box-shadow: 0 1px 3px rgba(10, 24, 45, 0.08);
+  box-shadow: 0 1px 3px rgba(var(--spotlight-shadow-ink-rgb), 0.08);
 }
 
 .railThumbImg {
@@ -1795,7 +1818,7 @@
 .railThumb {
   flex: 0 0 100px;
   height: 72px;
-  border-radius: 8px;
+  border-radius: var(--spotlight-radius-thumb);
   background: linear-gradient(
     135deg,
     rgba(var(--hbc-presentation-blue-rgb), 0.12) 0%,
