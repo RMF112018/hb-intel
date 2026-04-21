@@ -21,6 +21,7 @@ import {
   resolveEntryStateWithReason,
   type EntryStateSelectionReason,
 } from '../../webparts/hbHomepage/shell/breakpointPolicy.js';
+import { getEntryStackPolicy } from '../../webparts/hbHomepage/shell/entryStackPolicy.js';
 import type { ShellEntryStateId } from '../../webparts/hbHomepage/shell/shellTypes.js';
 import type { SharedEntryStateSnapshot } from '../../webparts/hbHomepage/shell/useShellContainer.js';
 import type { DeviceClass } from './priorityActionsNormalization.js';
@@ -30,7 +31,7 @@ export interface PriorityRailContainerDimensions {
   height: number;
 }
 
-export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'sheet';
+export type PriorityRailOverflowStrategy = 'more-tools' | 'sheet';
 export type LauncherHandheldMode = 'standard' | 'single-entry-all-tools';
 export type LauncherDrawerSource = 'all-tools';
 export type LauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
@@ -47,6 +48,23 @@ export interface PriorityRailSectionModel {
   key: string;
   title?: string;
   actions: PriorityRailActionModel[];
+}
+
+function normalizeGroupToken(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+}
+
+export function resolvePriorityActionGroupIdentity(action: {
+  groupKey?: string;
+  groupTitle?: string;
+}): { key: string; title?: string } {
+  const groupKey = normalizeGroupToken(action.groupKey);
+  const groupTitle = normalizeGroupToken(action.groupTitle);
+  return {
+    key: (groupKey ?? groupTitle ?? '__other_tools').toLowerCase(),
+    title: groupTitle ?? groupKey ?? 'Other tools',
+  };
 }
 
 export interface PriorityRailDeviceResolution {
@@ -103,13 +121,16 @@ export function resolveLauncherHandheldMode(
 }
 
 export function resolveLauncherGovernance(
-  resolution: Pick<PriorityRailDeviceResolution, 'deviceClass' | 'shortHeightConstrained'>,
+  resolution: Pick<PriorityRailDeviceResolution, 'deviceClass' | 'shortHeightConstrained' | 'shellState'>,
 ): LauncherGovernanceDecision {
   const handheldMode = resolveLauncherHandheldMode(resolution);
   const isHandheld = handheldMode === 'single-entry-all-tools';
+  const policy = resolution.shellState ? getEntryStackPolicy(resolution.shellState) : undefined;
+  const overflowStrategy: PriorityRailOverflowStrategy =
+    isHandheld || policy?.overflowPosture === 'sheet' ? 'sheet' : 'more-tools';
   return {
     handheldMode,
-    overflowStrategy: 'sheet',
+    overflowStrategy,
     drawerSource: 'all-tools',
     capGovernance: isHandheld ? 'all-tools-drawer' : 'binding-visible-cap',
     isHandheld,
@@ -125,6 +146,7 @@ export function resolvePriorityRailDeviceForEntryState(
   const launcherGovernance = resolveLauncherGovernance({
     deviceClass,
     shortHeightConstrained: entryState.shortHeightConstrained,
+    shellState: entryState.entryState.id,
   });
   return {
     deviceClass,
@@ -169,6 +191,7 @@ export function resolveLauncherPresentation(
     resolveLauncherGovernance({
       deviceClass: resolution.deviceClass,
       shortHeightConstrained: resolution.shortHeightConstrained,
+      shellState: resolution.shellState,
     });
   return {
     deviceClass: resolution.deviceClass,
@@ -199,7 +222,7 @@ export function resolvePriorityRailPresentationForDevice(
   const isHandheld = deviceClass === 'phone';
   const launcherGovernance: LauncherGovernanceDecision = {
     handheldMode: isHandheld ? 'single-entry-all-tools' : 'standard',
-    overflowStrategy: 'sheet',
+    overflowStrategy: isHandheld ? 'sheet' : 'more-tools',
     drawerSource: 'all-tools',
     capGovernance: isHandheld ? 'all-tools-drawer' : 'binding-visible-cap',
     isHandheld,
@@ -231,15 +254,15 @@ export function buildPriorityRailSections(
   if (!hasGrouping) return undefined;
   const map = new Map<string, PriorityRailSectionModel>();
   for (const action of actions) {
-    const key = (action.groupKey || action.groupTitle || '__ungrouped').trim() || '__ungrouped';
-    const existing = map.get(key);
+    const identity = resolvePriorityActionGroupIdentity(action);
+    const existing = map.get(identity.key);
     if (existing) {
       existing.actions.push(action);
       continue;
     }
-    map.set(key, {
-      key,
-      title: action.groupTitle || action.groupKey || undefined,
+    map.set(identity.key, {
+      key: identity.key,
+      title: identity.title,
       actions: [action],
     });
   }

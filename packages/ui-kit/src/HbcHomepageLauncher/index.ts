@@ -21,4 +21,5 @@ export type {
   HomepageLauncherCapGovernance,
   HomepageLauncherHandheldMode,
   HomepageLauncherOverflowMode,
+  HomepageLauncherOverflowSectionModel,
 } from './types.js';

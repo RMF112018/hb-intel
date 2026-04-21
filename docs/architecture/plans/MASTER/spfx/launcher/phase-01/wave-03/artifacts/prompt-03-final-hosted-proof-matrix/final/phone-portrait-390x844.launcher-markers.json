@@ -1,12 +1,12 @@
 {
-  "launcherVersion": null,
-  "launcherDrawerSource": null,
-  "launcherDeviceClass": null,
-  "launcherOverflowMode": null,
-  "launcherHandheldMode": null,
-  "launcherVisibleCount": null,
-  "launcherCapGovernance": null,
-  "launcherBandPrimaryCount": null,
-  "launcherBandOverflowCount": null,
-  "launcherRowPrimitive": null
+  "launcherVersion": "1.1.64.0",
+  "launcherDrawerSource": "all-tools",
+  "launcherDeviceClass": "phone",
+  "launcherOverflowMode": "sheet",
+  "launcherHandheldMode": "single-entry-all-tools",
+  "launcherVisibleCount": "1",
+  "launcherCapGovernance": "all-tools-drawer",
+  "launcherBandPrimaryCount": "1",
+  "launcherBandOverflowCount": "7",
+  "launcherRowPrimitive": "tile-family"
 }

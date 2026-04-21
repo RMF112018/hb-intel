@@ -5,6 +5,7 @@ import {
   resolvePriorityRailDeviceForContainer,
   resolvePriorityRailPresentationForDevice,
   buildPriorityRailSections,
+  resolvePriorityActionGroupIdentity,
 } from '../data/priorityActionsPresentation.js';
 import { resolveEntryStateWithReason } from '../../webparts/hbHomepage/shell/breakpointPolicy.js';
 
@@ -73,11 +74,12 @@ describe('priorityActionsPresentation — launcher band', () => {
     expect(result.launcherHandheldMode).toBe('single-entry-all-tools');
   });
 
-  it('resolveLauncherPresentation enforces drawer sheet overflow across all display classes', () => {
+  it('resolveLauncherPresentation keeps governance posture aligned to handheld and cap rules', () => {
     const desktop = resolveLauncherPresentation({
       deviceClass: 'desktop', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
-    expect(desktop.overflowStrategy).toBe('sheet');
+    expect(desktop.overflowStrategy).toBe(desktop.launcherGovernance.overflowStrategy);
+    expect(desktop.overflowStrategy).toBe('more-tools');
     expect(desktop.launcherHandheldMode).toBe('standard');
     expect(desktop.launcherDrawerSource).toBe('all-tools');
     expect(desktop.launcherCapGovernance).toBe('binding-visible-cap');
@@ -85,12 +87,14 @@ describe('priorityActionsPresentation — launcher band', () => {
     const laptop = resolveLauncherPresentation({
       deviceClass: 'laptop', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
-    expect(laptop.overflowStrategy).toBe('sheet');
+    expect(laptop.launcherHandheldMode).toBe('standard');
+    expect(laptop.overflowStrategy).toBe('more-tools');
+    expect(laptop.launcherCapGovernance).toBe('binding-visible-cap');
 
     const phone = resolveLauncherPresentation({
       deviceClass: 'phone', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
-    expect(phone.overflowStrategy).toBe('sheet');
+    expect(phone.overflowStrategy).toBe(phone.launcherGovernance.overflowStrategy);
     expect(phone.launcherHandheldMode).toBe('single-entry-all-tools');
     expect(phone.launcherDrawerSource).toBe('all-tools');
     expect(phone.launcherCapGovernance).toBe('all-tools-drawer');
@@ -98,13 +102,14 @@ describe('priorityActionsPresentation — launcher band', () => {
     const shortHeight = resolveLauncherPresentation({
       deviceClass: 'desktop', shortHeightConstrained: true,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
-    expect(shortHeight.overflowStrategy).toBe('sheet');
+    expect(shortHeight.overflowStrategy).toBe(shortHeight.launcherGovernance.overflowStrategy);
     expect(shortHeight.launcherHandheldMode).toBe('single-entry-all-tools');
+    expect(shortHeight.launcherCapGovernance).toBe('all-tools-drawer');
   });
 
   it('resolvePriorityRailPresentationForDevice shim returns uniform rail layout with drawer overflow', () => {
     expect(resolvePriorityRailPresentationForDevice({}, 'desktop').layout).toBe('rail');
-    expect(resolvePriorityRailPresentationForDevice({}, 'desktop').overflowStrategy).toBe('sheet');
+    expect(resolvePriorityRailPresentationForDevice({}, 'desktop').overflowStrategy).toBe('more-tools');
     expect(resolvePriorityRailPresentationForDevice({}, 'phone').overflowStrategy).toBe('sheet');
     expect(resolvePriorityRailPresentationForDevice({}, 'phone').launcherHandheldMode).toBe(
       'single-entry-all-tools',
@@ -123,5 +128,26 @@ describe('priorityActionsPresentation — launcher band', () => {
     for (const s of sections ?? []) {
       expect((s as { featured?: unknown }).featured).toBeUndefined();
     }
+  });
+
+  it('resolvePriorityActionGroupIdentity normalizes keys and applies deterministic fallback title', () => {
+    expect(
+      resolvePriorityActionGroupIdentity({ groupKey: ' approvals ', groupTitle: ' Approvals ' }),
+    ).toEqual({
+      key: 'approvals',
+      title: 'Approvals',
+    });
+    expect(
+      resolvePriorityActionGroupIdentity({ groupKey: 'field', groupTitle: '' }),
+    ).toEqual({
+      key: 'field',
+      title: 'field',
+    });
+    expect(
+      resolvePriorityActionGroupIdentity({ groupKey: ' ', groupTitle: ' ' }),
+    ).toEqual({
+      key: '__other_tools',
+      title: 'Other tools',
+    });
   });
 });

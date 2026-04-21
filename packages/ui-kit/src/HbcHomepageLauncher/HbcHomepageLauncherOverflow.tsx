@@ -1,17 +1,14 @@
 /**
  * HbcHomepageLauncherOverflow — Company Tools drawer.
  *
- * Total rebuild: a single-category bottom sheet with one premium launcher
- * tile grid. No per-tile grouping; every overflow tool surfaces under the
- * `Company Tools` category. Content-driven height, horizontally centered
- * grid, fully opaque surface. Focus trap, Escape, and return-focus behavior
- * are provided by Floating UI.
+ * Grouped secondary-launcher IA:
+ * tools are sectioned by launcher metadata (`groupKey`/`groupTitle`) while
+ * preserving one coherent Company Tools drawer identity.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ChevronDown, Layers, X } from 'lucide-react';
-import * as ScrollArea from '@radix-ui/react-scroll-area';
 import {
   useFloating,
   useClick,
@@ -23,7 +20,7 @@ import {
 } from '@floating-ui/react';
 import type {
   HbcHomepageLauncherOverflowProps,
-  HomepageLauncherDrawerCompactMode,
+  HomepageLauncherOverflowSectionModel,
   HomepageLauncherTileModel,
 } from './types.js';
 import { launcherTile } from './variants.js';
@@ -31,76 +28,63 @@ import { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 import styles from './homepage-launcher.module.css';
 
 const DRAWER_CATEGORY_LABEL = 'Company Tools';
-const DRAWER_TILE_SIZE_MIN = 86;
-const DRAWER_TILE_SIZE_MAX = 126;
-const DRAWER_RAIL_GAP_WIDE = 14;
-const DRAWER_RAIL_GAP_COMPACT = 12;
-const DRAWER_RAIL_GAP_TIGHT = 10;
+const UNGROUPED_SECTION_KEY = '__other_tools';
+const UNGROUPED_SECTION_TITLE = 'Other tools';
 
-function resolveDrawerRailMetrics(availableWidth: number, itemCount: number): {
-  tileSize: number;
-  railGap: number;
-  iconSize: number;
-  captionSize: number;
-  compactMode: 'comfortable' | 'compact' | 'tight';
-} {
-  const safeItemCount = Math.max(1, itemCount);
-  const targetTileSize = Math.floor(
-    (availableWidth - (safeItemCount - 1) * DRAWER_RAIL_GAP_WIDE) / safeItemCount,
-  );
-  const tileSize = Math.max(
-    DRAWER_TILE_SIZE_MIN,
-    Math.min(DRAWER_TILE_SIZE_MAX, Number.isFinite(targetTileSize) ? targetTileSize : DRAWER_TILE_SIZE_MAX),
-  );
-  const compactMode =
-    tileSize <= 94 ? 'tight' : tileSize <= 106 ? 'compact' : 'comfortable';
-  const railGap =
-    compactMode === 'tight'
-      ? DRAWER_RAIL_GAP_TIGHT
-      : compactMode === 'compact'
-        ? DRAWER_RAIL_GAP_COMPACT
-        : DRAWER_RAIL_GAP_WIDE;
-  const iconSize = Math.max(30, Math.min(54, Math.round(tileSize * 0.42)));
-  const captionSize =
-    compactMode === 'tight' ? 10 : compactMode === 'compact' ? 10.5 : 11;
+function normalizeGroupToken(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+}
 
-  return {
-    tileSize,
-    railGap,
-    iconSize,
-    captionSize,
-    compactMode,
-  };
+function buildOverflowSections(
+  items: readonly HomepageLauncherTileModel[],
+): HomepageLauncherOverflowSectionModel[] {
+  if (items.length === 0) return [];
+  const grouped = new Map<string, HomepageLauncherOverflowSectionModel>();
+  for (const item of items) {
+    const groupKey = normalizeGroupToken(item.groupKey);
+    const groupTitle = normalizeGroupToken(item.groupTitle);
+    const resolvedKey = (groupKey ?? groupTitle ?? UNGROUPED_SECTION_KEY).toLowerCase();
+    const resolvedTitle = groupTitle ?? groupKey ?? UNGROUPED_SECTION_TITLE;
+    const existing = grouped.get(resolvedKey);
+    if (existing) {
+      existing.items.push(item);
+      continue;
+    }
+    grouped.set(resolvedKey, {
+      key: resolvedKey,
+      title: resolvedTitle,
+      items: [item],
+    });
+  }
+  return Array.from(grouped.values());
 }
 
 function DrawerOverflow({
   items,
+  sections,
   label,
+  overflowMode,
   triggerMode = 'tile',
   className,
 }: {
   items: HomepageLauncherTileModel[];
+  sections?: HomepageLauncherOverflowSectionModel[];
   label: string;
+  overflowMode?: 'sheet' | 'more-tools';
   triggerMode?: 'tile' | 'linear-handheld';
   className?: string;
 }): React.JSX.Element {
-  const supportsScrollArea = typeof ResizeObserver !== 'undefined';
   const [open, setOpen] = React.useState(false);
   const prefersReducedMotion = useReducedMotion();
   const dialogId = React.useId();
   const titleId = React.useId();
-  const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const drawerItems = React.useMemo(() => [...items], [items]);
-  const [drawerCompactMode, setDrawerCompactMode] =
-    React.useState<HomepageLauncherDrawerCompactMode>('comfortable');
-  const [drawerRailVars, setDrawerRailVars] = React.useState<React.CSSProperties>(() => ({
-    '--hbc-hl-drawer-tile-size': `${DRAWER_TILE_SIZE_MAX}px`,
-    '--hbc-hl-drawer-rail-gap': `${DRAWER_RAIL_GAP_WIDE}px`,
-    '--hbc-hl-drawer-icon-size': '54px',
-    '--hbc-hl-drawer-caption-size': '0.6875rem',
-  } as React.CSSProperties));
-  const [hasHorizontalOverflow, setHasHorizontalOverflow] = React.useState(false);
-  const [canScrollForward, setCanScrollForward] = React.useState(false);
+  const drawerSections = React.useMemo(
+    () => (sections && sections.length > 0 ? sections : buildOverflowSections(drawerItems)),
+    [drawerItems, sections],
+  );
+  const totalTools = drawerItems.length;
   const { refs, context } = useFloating({ open, onOpenChange: setOpen });
 
   const click = useClick(context);
@@ -110,81 +94,7 @@ function DrawerOverflow({
   const closeSheet = React.useCallback(() => setOpen(false), []);
   const handheldLinearTrigger = triggerMode === 'linear-handheld';
   const triggerLabel = handheldLinearTrigger ? 'HB Toolbox' : label;
-  const updateDrawerRailState = React.useCallback(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const {
-      tileSize,
-      railGap,
-      iconSize,
-      captionSize,
-      compactMode,
-    } = resolveDrawerRailMetrics(viewport.clientWidth, drawerItems.length);
-    setDrawerCompactMode(compactMode);
-    setDrawerRailVars({
-      '--hbc-hl-drawer-tile-size': `${tileSize}px`,
-      '--hbc-hl-drawer-rail-gap': `${railGap}px`,
-      '--hbc-hl-drawer-icon-size': `${iconSize}px`,
-      '--hbc-hl-drawer-caption-size': `${captionSize / 16}rem`,
-    } as React.CSSProperties);
-    const maxScrollLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    const hasOverflow = maxScrollLeft > 2;
-    const hasMoreForward = viewport.scrollLeft < maxScrollLeft - 2;
-    setHasHorizontalOverflow(hasOverflow);
-    setCanScrollForward(hasOverflow && hasMoreForward);
-  }, [drawerItems.length]);
-  const handleViewportKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (
-        event.key !== 'ArrowRight' &&
-        event.key !== 'ArrowLeft' &&
-        event.key !== 'Home' &&
-        event.key !== 'End'
-      ) {
-        return;
-      }
-      const viewport = viewportRef.current;
-      if (!viewport) return;
-      event.preventDefault();
-      if (event.key === 'Home') {
-        viewport.scrollTo({ left: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-        updateDrawerRailState();
-        return;
-      }
-      if (event.key === 'End') {
-        viewport.scrollTo({
-          left: viewport.scrollWidth,
-          behavior: prefersReducedMotion ? 'auto' : 'smooth',
-        });
-        updateDrawerRailState();
-        return;
-      }
-      const direction = event.key === 'ArrowRight' ? 1 : -1;
-      const step = Math.max(48, viewport.clientWidth * 0.3);
-      viewport.scrollBy({ left: step * direction, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-      updateDrawerRailState();
-    },
-    [prefersReducedMotion, updateDrawerRailState],
-  );
-
-  React.useEffect(() => {
-    if (!supportsScrollArea) return;
-    if (!open) {
-      setHasHorizontalOverflow(false);
-      setCanScrollForward(false);
-      return;
-    }
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    updateDrawerRailState();
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', updateDrawerRailState);
-      return () => window.removeEventListener('resize', updateDrawerRailState);
-    }
-    const resizeObserver = new ResizeObserver(() => updateDrawerRailState());
-    resizeObserver.observe(viewport);
-    return () => resizeObserver.disconnect();
-  }, [open, drawerItems.length, supportsScrollArea, updateDrawerRailState]);
+  const resolvedOverflowMode = handheldLinearTrigger ? 'sheet' : (overflowMode ?? 'more-tools');
 
   const surfaceTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -205,7 +115,7 @@ function DrawerOverflow({
         data-hbc-ui="homepage-launcher-overflow-trigger"
         data-hbc-homepage-launcher-overflow-variant="secondary-overflow-entry"
         data-hbc-launcher-tile-variant="secondary-overflow-entry"
-        data-hbc-overflow-mode="sheet"
+        data-hbc-overflow-mode={resolvedOverflowMode}
         data-hbc-homepage-launcher-sheet-content="all-tools"
         data-hbc-launcher-tile-family="row"
         data-hbc-launcher-tile-geometry="icon-forward-square"
@@ -237,7 +147,7 @@ function DrawerOverflow({
             )}
             aria-hidden="true"
           >
-            {items.length}
+            {totalTools}
           </span>
           <ChevronDown
             size={handheldLinearTrigger ? 12 : 14}
@@ -288,9 +198,9 @@ function DrawerOverflow({
                     </div>
                     <span
                       className={styles.sheetHeaderCount}
-                      aria-label={`${items.length} tools`}
+                      aria-label={`${totalTools} tools`}
                     >
-                      {items.length}
+                      {totalTools}
                     </span>
                     <button
                       type="button"
@@ -303,78 +213,40 @@ function DrawerOverflow({
                   </header>
                   <div
                     className={styles.drawerBody}
-                    data-hbc-ui="homepage-launcher-overflow-section"
-                    data-hbc-overflow-category-key="company-tools"
-                    data-hbc-overflow-category-size={drawerItems.length}
+                    data-hbc-ui="homepage-launcher-overflow-sections"
                   >
-                    {supportsScrollArea ? (
-                      <ScrollArea.Root
-                        className={styles.drawerRailRoot}
-                        type="auto"
-                        data-hbc-ui="homepage-launcher-drawer-rail-root"
+                    {drawerSections.map((section) => (
+                      <section
+                        key={section.key}
+                        className={styles.drawerSection}
+                        data-hbc-ui="homepage-launcher-overflow-section"
+                        data-hbc-overflow-category-key={section.key}
+                        data-hbc-overflow-category-size={section.items.length}
                       >
-                        <ScrollArea.Viewport
-                          ref={viewportRef}
-                          className={styles.drawerRailViewport}
-                          data-hbc-ui="homepage-launcher-drawer-rail-viewport"
-                          onScroll={updateDrawerRailState}
-                          onKeyDown={handleViewportKeyDown}
-                          tabIndex={0}
-                          aria-label="Company tools row"
-                        >
-                          <div
-                            className={styles.drawerTileRail}
-                            data-hbc-ui="homepage-launcher-drawer-rail"
-                            data-hbc-launcher-drawer-layout="single-row-centered"
-                            data-hbc-launcher-drawer-density={drawerCompactMode}
-                            data-hbc-launcher-drawer-overflow={hasHorizontalOverflow ? 'true' : 'false'}
-                            role="list"
-                            aria-label="Company Tools"
-                            style={drawerRailVars}
+                        <header className={styles.drawerSectionHeader}>
+                          <h3
+                            className={styles.drawerSectionTitle}
+                            data-hbc-launcher-overflow-section-title="true"
                           >
-                            {drawerItems.map((tile) => (
-                              <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
-                                <HbcHomepageLauncherTile
-                                  tile={tile}
-                                  family="drawer"
-                                  className={styles.drawerTile}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea.Viewport>
-                        <ScrollArea.Scrollbar
-                          className={styles.drawerRailScrollbar}
-                          orientation="horizontal"
-                        >
-                          <ScrollArea.Thumb className={styles.drawerRailScrollbarThumb} />
-                        </ScrollArea.Scrollbar>
-                      </ScrollArea.Root>
-                    ) : (
-                      <div
-                        className={styles.drawerRailRoot}
-                        data-hbc-ui="homepage-launcher-drawer-rail-root"
-                      >
-                        <div
-                          ref={viewportRef}
-                          className={styles.drawerRailViewport}
-                          data-hbc-ui="homepage-launcher-drawer-rail-viewport"
-                          onScroll={updateDrawerRailState}
-                          onKeyDown={handleViewportKeyDown}
-                          tabIndex={0}
-                          aria-label="Company tools row"
-                        >
-                          <div
-                            className={styles.drawerTileRail}
-                            data-hbc-ui="homepage-launcher-drawer-rail"
-                            data-hbc-launcher-drawer-layout="single-row-centered"
-                            data-hbc-launcher-drawer-density={drawerCompactMode}
-                            data-hbc-launcher-drawer-overflow={hasHorizontalOverflow ? 'true' : 'false'}
-                            role="list"
-                            aria-label="Company Tools"
-                            style={drawerRailVars}
+                            {section.title}
+                          </h3>
+                          <span
+                            className={styles.drawerSectionCount}
+                            data-hbc-launcher-overflow-section-count="true"
+                            aria-label={`${section.items.length} tools`}
                           >
-                            {drawerItems.map((tile) => (
+                            {section.items.length}
+                          </span>
+                        </header>
+                        <div className={styles.drawerSectionRailRoot}>
+                          <div
+                            className={styles.drawerSectionRail}
+                            data-hbc-ui="homepage-launcher-drawer-rail"
+                            data-hbc-launcher-drawer-layout="grouped-sections"
+                            role="list"
+                            aria-label={`${section.title} tools`}
+                          >
+                            {section.items.map((tile) => (
                               <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
                                 <HbcHomepageLauncherTile
                                   tile={tile}
@@ -385,15 +257,8 @@ function DrawerOverflow({
                             ))}
                           </div>
                         </div>
-                      </div>
-                    )}
-                    <p
-                      className={styles.drawerOverflowHint}
-                      data-hbc-ui="homepage-launcher-drawer-overflow-hint"
-                      data-hbc-launcher-drawer-overflow-active={canScrollForward ? 'true' : 'false'}
-                    >
-                      {canScrollForward ? 'Scroll to view more company tools' : 'All tools in view'}
-                    </p>
+                      </section>
+                    ))}
                   </div>
                 </motion.div>
               </div>
@@ -407,12 +272,21 @@ function DrawerOverflow({
 
 export function HbcHomepageLauncherOverflow({
   items,
+  sections,
   label = 'More tools',
+  overflowMode = 'more-tools',
   triggerMode = 'tile',
   className,
 }: HbcHomepageLauncherOverflowProps): React.JSX.Element | null {
   if (items.length === 0) return null;
   return (
-    <DrawerOverflow items={items} label={label} triggerMode={triggerMode} className={className} />
+    <DrawerOverflow
+      items={items}
+      sections={sections}
+      label={label}
+      overflowMode={overflowMode}
+      triggerMode={triggerMode}
+      className={className}
+    />
   );
 }

@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 // Keep in lockstep with packages/ui-kit/src/HbcHomepageLauncher/constants.ts
-const EXPECTED_LAUNCHER_VERSION = '1.1.50.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.64.0';
 
 interface HostedCase {
   readonly label: string;
@@ -12,6 +12,7 @@ interface HostedCase {
   readonly expectedLauncherDeviceClass: string;
   readonly expectedHandheldMode: 'standard' | 'single-entry-all-tools';
   readonly expectedCapGovernance: 'binding-visible-cap' | 'all-tools-drawer';
+  readonly expectedOverflowMode: 'sheet' | 'more-tools';
   readonly expectedReason?: string;
 }
 
@@ -27,6 +28,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'ultrawide',
     expectedHandheldMode: 'standard',
     expectedCapGovernance: 'binding-visible-cap',
+    expectedOverflowMode: 'more-tools',
     expectedReason: 'width-match',
   },
   {
@@ -36,6 +38,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'desktop',
     expectedHandheldMode: 'standard',
     expectedCapGovernance: 'binding-visible-cap',
+    expectedOverflowMode: 'more-tools',
     expectedReason: 'width-match',
   },
   {
@@ -45,6 +48,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'desktop',
     expectedHandheldMode: 'standard',
     expectedCapGovernance: 'binding-visible-cap',
+    expectedOverflowMode: 'more-tools',
     expectedReason: 'width-match',
   },
   {
@@ -54,6 +58,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'tablet-landscape',
     expectedHandheldMode: 'standard',
     expectedCapGovernance: 'binding-visible-cap',
+    expectedOverflowMode: 'more-tools',
     expectedReason: 'width-match',
   },
   {
@@ -63,6 +68,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'tablet-portrait',
     expectedHandheldMode: 'standard',
     expectedCapGovernance: 'binding-visible-cap',
+    expectedOverflowMode: 'more-tools',
     expectedReason: 'width-match',
   },
   {
@@ -72,6 +78,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'phone',
     expectedHandheldMode: 'single-entry-all-tools',
     expectedCapGovernance: 'all-tools-drawer',
+    expectedOverflowMode: 'sheet',
     expectedReason: 'width-match',
   },
   {
@@ -81,6 +88,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'phone',
     expectedHandheldMode: 'single-entry-all-tools',
     expectedCapGovernance: 'all-tools-drawer',
+    expectedOverflowMode: 'sheet',
     expectedReason: 'width-match',
   },
   {
@@ -90,6 +98,7 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedLauncherDeviceClass: 'phone',
     expectedHandheldMode: 'single-entry-all-tools',
     expectedCapGovernance: 'all-tools-drawer',
+    expectedOverflowMode: 'sheet',
     expectedReason: 'short-height-override',
   },
 ] as const;
@@ -178,90 +187,84 @@ test.describe('HB Homepage hosted fit proof', () => {
       const launcherShell = page.locator('[data-hb-homepage-launcher-band-shell="root"]');
       const launcherSurface = page.locator('[data-hbc-ui="homepage-launcher"]');
       const heroRegionCount = await heroRegion.count();
-      if (heroRegionCount > 0) {
-        await expect(heroRegion).toBeVisible();
-      }
       const heroRootCount = await heroRoot.count();
-      if (heroRootCount > 0) {
-        await expect(heroRoot).toBeVisible();
+      await expect(launcherRoot).toBeVisible();
+      await expect(launcherShell).toBeVisible();
+      await expect(launcherSurface).toHaveAttribute('data-hbc-homepage-launcher-row-primitive', 'tile-family');
+      await expect(launcherSurface).toHaveAttribute(
+        'data-hbc-homepage-launcher-surface-grammar',
+        'flagship-utility-v1',
+      );
+      await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode');
+      await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source');
+      await expect(launcherRoot).toHaveAttribute(
+        'data-hbc-launcher-cap-governance',
+        viewportCase.expectedCapGovernance,
+      );
+      await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy');
+      await expect(launcherRoot).toHaveAttribute(
+        'data-hbc-launcher-device-class',
+        viewportCase.expectedLauncherDeviceClass,
+      );
+      await expect(launcherSurface).toHaveAttribute(
+        'data-hbc-homepage-launcher-device-class',
+        viewportCase.expectedLauncherDeviceClass,
+      );
+      await expect(launcherSurface).toHaveAttribute(
+        'data-hbc-homepage-launcher-overflow-mode',
+        viewportCase.expectedOverflowMode,
+      );
+      await expect(launcherSurface).toHaveAttribute(
+        'data-hbc-homepage-launcher-handheld-mode',
+        viewportCase.expectedHandheldMode,
+      );
+      await expect(launcherSurface).toHaveAttribute(
+        'data-hbc-homepage-launcher-cap-governance',
+        viewportCase.expectedCapGovernance,
+      );
+      await expect(launcherSurface).toHaveAttribute(
+        'data-hbc-homepage-launcher-version',
+        EXPECTED_LAUNCHER_VERSION,
+      );
+      const launcherShellStyle = await launcherShell.evaluate((el) => {
+        const style = window.getComputedStyle(el);
+        return {
+          paddingTop: style.paddingTop,
+          paddingInlineStart: style.paddingInlineStart,
+          boxShadow: style.boxShadow,
+          borderRadius: style.borderRadius,
+          backgroundImage: style.backgroundImage,
+        };
+      });
+      if (isHandheldViewport(viewportCase.label)) {
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'single-entry-all-tools');
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
+        expect(launcherShellStyle.paddingTop).toBe('0px');
+        expect(launcherShellStyle.paddingInlineStart).toBe('0px');
+        expect(launcherShellStyle.boxShadow).toBe('none');
+        expect(launcherShellStyle.borderRadius).toBe('0px');
+        expect(launcherShellStyle.backgroundImage).toBe('none');
+      } else {
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'standard');
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
+        expect(launcherShellStyle.paddingTop).not.toBe('0px');
+        expect(launcherShellStyle.paddingInlineStart).not.toBe('0px');
+        expect(launcherShellStyle.boxShadow).not.toBe('none');
       }
-      const launcherRootCount = await launcherRoot.count();
-      if (launcherRootCount > 0) {
-        await expect(launcherRoot).toBeVisible();
-        await expect(launcherShell).toBeVisible();
-        await expect(launcherSurface).toHaveAttribute('data-hbc-homepage-launcher-row-primitive', 'tile-family');
-        await expect(launcherSurface).toHaveAttribute(
-          'data-hbc-homepage-launcher-surface-grammar',
-          'flagship-utility-v1',
-        );
-        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode');
-        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source');
-        await expect(launcherRoot).toHaveAttribute(
-          'data-hbc-launcher-cap-governance',
-          viewportCase.expectedCapGovernance,
-        );
-        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy');
-        await expect(launcherRoot).toHaveAttribute(
-          'data-hbc-launcher-device-class',
-          viewportCase.expectedLauncherDeviceClass,
-        );
-        await expect(launcherSurface).toHaveAttribute(
-          'data-hbc-homepage-launcher-device-class',
-          viewportCase.expectedLauncherDeviceClass,
-        );
-        await expect(launcherSurface).toHaveAttribute(
-          'data-hbc-homepage-launcher-overflow-mode',
-          'sheet',
-        );
-        await expect(launcherSurface).toHaveAttribute(
-          'data-hbc-homepage-launcher-handheld-mode',
-          viewportCase.expectedHandheldMode,
-        );
-        await expect(launcherSurface).toHaveAttribute(
-          'data-hbc-homepage-launcher-cap-governance',
-          viewportCase.expectedCapGovernance,
-        );
-        await expect(launcherSurface).toHaveAttribute(
-          'data-hbc-homepage-launcher-version',
-          EXPECTED_LAUNCHER_VERSION,
-        );
-        const launcherShellStyle = await launcherShell.evaluate((el) => {
-          const style = window.getComputedStyle(el);
-          return {
-            paddingTop: style.paddingTop,
-            paddingInlineStart: style.paddingInlineStart,
-            boxShadow: style.boxShadow,
-            borderRadius: style.borderRadius,
-            backgroundImage: style.backgroundImage,
-          };
-        });
-        if (isHandheldViewport(viewportCase.label)) {
-          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'single-entry-all-tools');
-          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
-          expect(launcherShellStyle.paddingTop).toBe('0px');
-          expect(launcherShellStyle.paddingInlineStart).toBe('0px');
-          expect(launcherShellStyle.boxShadow).toBe('none');
-          expect(launcherShellStyle.borderRadius).toBe('0px');
-          expect(launcherShellStyle.backgroundImage).toBe('none');
-        } else {
-          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'standard');
-          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
-          expect(launcherShellStyle.paddingTop).not.toBe('0px');
-          expect(launcherShellStyle.paddingInlineStart).not.toBe('0px');
-          expect(launcherShellStyle.boxShadow).not.toBe('none');
-        }
-        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy', 'sheet');
-        const visibleCountProof = await launcherRoot.evaluate((el) => ({
-          bandPrimaryCount: Number(el.getAttribute('data-hbc-launcher-primary-count') ?? '-1'),
-          surfaceVisibleCount: Number(
-            document
-              .querySelector('[data-hbc-ui="homepage-launcher"]')
-              ?.getAttribute('data-hbc-homepage-launcher-visible-count') ?? '-1',
-          ),
-        }));
-        expect(visibleCountProof.bandPrimaryCount).toBeGreaterThanOrEqual(0);
-        expect(visibleCountProof.surfaceVisibleCount).toBe(visibleCountProof.bandPrimaryCount);
-      }
+      await expect(
+        launcherRoot,
+        'overflow strategy should align with entry-state policy posture',
+      ).toHaveAttribute('data-hbc-launcher-overflow-strategy', viewportCase.expectedOverflowMode);
+      const visibleCountProof = await launcherRoot.evaluate((el) => ({
+        bandPrimaryCount: Number(el.getAttribute('data-hbc-launcher-primary-count') ?? '-1'),
+        surfaceVisibleCount: Number(
+          document
+            .querySelector('[data-hbc-ui="homepage-launcher"]')
+            ?.getAttribute('data-hbc-homepage-launcher-visible-count') ?? '-1',
+        ),
+      }));
+      expect(visibleCountProof.bandPrimaryCount).toBeGreaterThanOrEqual(0);
+      expect(visibleCountProof.surfaceVisibleCount).toBe(visibleCountProof.bandPrimaryCount);
       await expect(actionsRegion).toHaveAttribute(
         'data-hb-homepage-region-contained-by',
         'hb-homepage-wrapper-outer-envelope-v1',
@@ -381,9 +384,7 @@ test.describe('HB Homepage hosted fit proof', () => {
         '[data-hb-homepage-entry-stack-region="priority-actions"]',
       );
       await assertNoHorizontalOverflow(page, '[data-shell-post-hero="true"]');
-      if (launcherRootCount > 0) {
-        await assertNoHorizontalOverflow(page, '[data-hbc-ui="homepage-launcher"]');
-      }
+      await assertNoHorizontalOverflow(page, '[data-hbc-ui="homepage-launcher"]');
       await assertNoHorizontalOverflow(page, '.harness-content');
       await assertNoHorizontalOverflow(page, '#root');
 
@@ -402,7 +403,9 @@ test.describe('HB Homepage hosted fit proof', () => {
           'secondary-overflow-entry',
         );
         await trigger.click();
-        const drawer = page.locator('[data-hbc-homepage-launcher-sheet-content="all-tools"]');
+        const drawer = page.locator(
+          '[role="dialog"][data-hbc-homepage-launcher-sheet-content="all-tools"]',
+        );
         await expect(drawer).toBeVisible();
         const groupedSections = page.locator('[data-hbc-ui="homepage-launcher-overflow-section"]');
         await expect(groupedSections.first()).toBeVisible();

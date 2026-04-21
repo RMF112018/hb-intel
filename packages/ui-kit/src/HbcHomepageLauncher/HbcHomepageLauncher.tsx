@@ -34,8 +34,10 @@ import styles from './homepage-launcher.module.css';
 
 function resolveOverflowMode(
   props: HbcHomepageLauncherProps,
+  handheldMode: HomepageLauncherHandheldMode,
 ): HomepageLauncherOverflowMode {
-  return props.overflowMode ?? 'sheet';
+  if (handheldMode === 'single-entry-all-tools') return 'sheet';
+  return props.overflowMode ?? 'more-tools';
 }
 
 function resolveHandheldMode(
@@ -106,8 +108,8 @@ export function HbcHomepageLauncher(
     className,
     'aria-label': ariaLabel,
   } = props;
-  const overflowMode = resolveOverflowMode(props);
   const handheldMode = resolveHandheldMode(props);
+  const overflowMode = resolveOverflowMode(props, handheldMode);
   const handheldSingleEntry = handheldMode === 'single-entry-all-tools';
   const drawerSource = resolveDrawerSource(props, handheldMode);
   const capGovernance = resolveCapGovernance(props, handheldMode);
@@ -165,6 +167,7 @@ export function HbcHomepageLauncher(
                 items={drawerItems}
                 sections={drawerSections}
                 label={overflowLabel}
+                overflowMode={overflowMode}
                 triggerMode={handheldSingleEntry ? 'linear-handheld' : 'tile'}
               />
             </div>

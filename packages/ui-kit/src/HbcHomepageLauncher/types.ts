@@ -12,7 +12,7 @@ export type HomepageLauncherDeviceClass =
   | 'tablet-portrait'
   | 'phone';
 
-export type HomepageLauncherOverflowMode = 'sheet';
+export type HomepageLauncherOverflowMode = 'sheet' | 'more-tools';
 export type HomepageLauncherHandheldMode = 'standard' | 'single-entry-all-tools';
 export type HomepageLauncherDrawerSource = 'all-tools';
 export type HomepageLauncherDrawerCompactMode = 'comfortable' | 'compact' | 'tight';
@@ -47,10 +47,17 @@ export interface HomepageLauncherTileModel {
   variant?: HomepageLauncherTileVariant;
 }
 
+export interface HomepageLauncherOverflowSectionModel {
+  key: string;
+  title: string;
+  items: HomepageLauncherTileModel[];
+}
+
 export interface HbcHomepageLauncherProps {
   title?: string;
   primary: HomepageLauncherTileModel[];
   overflow?: HomepageLauncherTileModel[];
+  overflowSections?: HomepageLauncherOverflowSectionModel[];
   overflowLabel?: string;
   deviceClass: HomepageLauncherDeviceClass;
   overflowMode?: HomepageLauncherOverflowMode;
@@ -70,7 +77,9 @@ export interface HbcHomepageLauncherTileProps {
 
 export interface HbcHomepageLauncherOverflowProps {
   items: HomepageLauncherTileModel[];
+  sections?: HomepageLauncherOverflowSectionModel[];
   label?: string;
+  overflowMode?: HomepageLauncherOverflowMode;
   triggerMode?: HomepageLauncherOverflowTriggerMode;
   className?: string;
 }

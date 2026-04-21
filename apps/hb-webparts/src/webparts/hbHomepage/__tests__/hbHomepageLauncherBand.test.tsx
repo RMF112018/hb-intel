@@ -201,12 +201,17 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
       primary: unknown[];
       overflow: unknown[];
       handheldMode?: string;
+      overflowSections?: Array<{ key: string; items: unknown[] }>;
     }): React.JSX.Element =>
       React.createElement('div', {
         'data-test-launcher': 'mock',
         'data-test-primary-count': props.primary.length,
         'data-test-overflow-count': props.overflow.length,
         'data-test-handheld-mode': props.handheldMode,
+        'data-test-overflow-sections': props.overflowSections?.length ?? 0,
+        'data-test-overflow-section-keys': (props.overflowSections ?? [])
+          .map((section) => section.key)
+          .join(','),
       }),
     HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
     HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
@@ -228,6 +233,24 @@ const ENTRY_CONTAINER: ShellContainerState = {
     label: 'tablet',
     minWidth: 720,
     maxWidth: 819,
+    firstLaneColumns: 1,
+    firstLanePairingAllowed: false,
+    dominanceRule: 'single',
+  },
+  entryStateReason: 'width-match' as const,
+  shortHeightConstrained: false,
+};
+
+const PHONE_ENTRY_CONTAINER: ShellContainerState = {
+  width: 390,
+  authoritativeWidth: 390,
+  shellInlineInsetTotal: 0,
+  height: 844,
+  entryState: {
+    id: 'phone-portrait',
+    label: 'phone',
+    minWidth: 320,
+    maxWidth: 719,
     firstLaneColumns: 1,
     firstLanePairingAllowed: false,
     dominanceRule: 'single',
@@ -266,7 +289,7 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     expect(root?.getAttribute('data-hbc-launcher-handheld-mode')).toBe('standard');
     expect(root?.getAttribute('data-hbc-launcher-drawer-source')).toBe('all-tools');
     expect(root?.getAttribute('data-hbc-launcher-cap-governance')).toBe('binding-visible-cap');
-    expect(root?.getAttribute('data-hbc-launcher-overflow-strategy')).toBe('sheet');
+    expect(root?.getAttribute('data-hbc-launcher-overflow-strategy')).toBe('more-tools');
     expect(root?.getAttribute('data-hbc-launcher-host-width')).toBe('900');
     expect(root?.getAttribute('data-hbc-launcher-host-width-source')).toBe(
       'entry-container-fallback',
@@ -287,6 +310,42 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     const strictBudget = Number(strict?.getAttribute('data-hbc-launcher-visible-budget') || 0);
     const legacyBudget = Number(legacy?.getAttribute('data-hbc-launcher-visible-budget') || 0);
     expect(strictBudget).toBe(legacyBudget);
+  });
+
+  it('emits phone handheld device-class markers expected by shell CSS contract', () => {
+    const { container } = render(
+      <HbHomepageLauncherBand
+        entryContainer={PHONE_ENTRY_CONTAINER}
+        alignmentMode="shared-entry-governed"
+      />,
+    );
+    const root = container.querySelector('[data-hb-homepage-launcher-band="root"]');
+    const shell = container.querySelector('[data-hb-homepage-launcher-band-shell="root"]');
+
+    expect(root?.getAttribute('data-hbc-launcher-device-class')).toBe('phone');
+    expect(shell?.getAttribute('data-hbc-launcher-device-class')).toBe('phone');
+    expect(root?.getAttribute('data-hbc-launcher-handheld-mode')).toBe('single-entry-all-tools');
+  });
+
+  it('passes grouped overflow sections into launcher runtime markers', () => {
+    MOCK_DATA_STATE.items = [
+      { ...MOCK_ITEMS[0]!, actionKey: 'approve-rfi', groupKey: 'approvals', groupTitle: 'Approvals' },
+      { ...MOCK_ITEMS[1]!, actionKey: 'field-report', groupKey: 'field', groupTitle: 'Field Ops' },
+      { ...MOCK_ITEMS[2]!, actionKey: 'timesheet', groupKey: '', groupTitle: '' },
+      { ...MOCK_ITEMS[3]!, actionKey: 'approve-co', groupKey: 'approvals', groupTitle: 'Approvals' },
+      { ...MOCK_ITEMS[4]!, actionKey: 'qa-check', groupKey: 'quality', groupTitle: 'Quality' },
+    ];
+    const { container } = render(
+      <HbHomepageLauncherBand
+        entryContainer={ENTRY_CONTAINER}
+        alignmentMode="shared-entry-governed"
+      />,
+    );
+    const launcher = container.querySelector('[data-test-launcher="mock"]');
+    expect(launcher?.getAttribute('data-test-overflow-sections')).toBe('4');
+    expect(launcher?.getAttribute('data-test-overflow-section-keys')).toBe(
+      'approvals,field,__other_tools,quality',
+    );
   });
 
   it('keeps loading-state density aligned with runtime visible-count governance', () => {

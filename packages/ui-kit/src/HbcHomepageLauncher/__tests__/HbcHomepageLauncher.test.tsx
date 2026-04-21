@@ -39,7 +39,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(root!.getAttribute('data-hbc-homepage-launcher-row-primitive')).toBe('tile-family');
     expect(root!.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('5');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-count')).toBe('1');
-    expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('sheet');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('more-tools');
     expect(root!.getAttribute('data-hbc-homepage-launcher-drawer-source')).toBe('all-tools');
     expect(root!.getAttribute('data-hbc-homepage-launcher-cap-governance')).toBe(
       'binding-visible-cap',
@@ -110,7 +110,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const trigger = screen.getByRole('button', { name: /More tools/i });
     const row = container.querySelector('[data-hbc-launcher-band-mode="standard"]');
     expect(row?.contains(trigger)).toBe(true);
-    expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
+    expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('more-tools');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
     );

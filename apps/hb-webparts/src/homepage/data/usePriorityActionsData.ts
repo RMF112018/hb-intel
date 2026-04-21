@@ -32,6 +32,220 @@ interface CacheEntry {
 
 let _cache: CacheEntry | undefined;
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const FALLBACK_CONFIG: PriorityActionsConfigResolved = {
+  id: 0,
+  title: 'Homepage Priority Actions',
+  bandKey: 'homepage-primary',
+  enabled: true,
+  isActive: true,
+  headingText: 'Priority Actions',
+  overflowLabel: 'More tools',
+  showHeading: true,
+  showBadges: false,
+  desktopLayoutMode: 'rail',
+  tabletLayoutMode: 'rail',
+  mobileLayoutMode: 'sheet-trigger',
+  maxVisibleDesktop: 7,
+  maxVisibleLaptop: 7,
+  maxVisibleTabletLandscape: 5,
+  maxVisibleTabletPortrait: 4,
+  maxVisiblePhone: 3,
+  openExternalInNewTabByDefault: true,
+  adminNotes: 'Fallback launcher config for non-SPFx hosts.',
+  modified: '1970-01-01T00:00:00.000Z',
+};
+
+const FALLBACK_ITEMS: PriorityActionsItemNormalized[] = [
+  {
+    id: 1,
+    actionKey: 'hb-projects',
+    title: 'HB Projects',
+    href: '/sites/HBIntel/SitePages/projects.aspx',
+    description: 'Project dashboard',
+    iconKey: 'project',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'operations',
+    groupTitle: 'Operations',
+    sortOrder: 1,
+    overflowOnly: false,
+    mobilePriority: 1,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: false,
+    openInNewTab: false,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 2,
+    actionKey: 'procore',
+    title: 'Procore',
+    href: 'https://app.procore.com',
+    description: 'Construction platform',
+    iconKey: 'field',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'operations',
+    groupTitle: 'Operations',
+    sortOrder: 2,
+    overflowOnly: false,
+    mobilePriority: 2,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: true,
+    openInNewTab: true,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 3,
+    actionKey: 'document-crunch',
+    title: 'Document Crunch',
+    href: '/sites/HBIntel/SitePages/document-crunch.aspx',
+    description: 'Contract intelligence',
+    iconKey: 'document',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'compliance',
+    groupTitle: 'Compliance',
+    sortOrder: 3,
+    overflowOnly: false,
+    mobilePriority: 3,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: false,
+    openInNewTab: false,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 4,
+    actionKey: 'hb-university',
+    title: 'HB University',
+    href: '/sites/HBIntel/SitePages/university.aspx',
+    description: 'Learning hub',
+    iconKey: 'team',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'people',
+    groupTitle: 'People',
+    sortOrder: 4,
+    overflowOnly: false,
+    mobilePriority: 4,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: false,
+    openInNewTab: false,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 5,
+    actionKey: 'hh2',
+    title: 'HH2',
+    href: 'https://secure.hh2.com',
+    description: 'Field payroll',
+    iconKey: 'finance',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'finance',
+    groupTitle: 'Finance',
+    sortOrder: 5,
+    overflowOnly: false,
+    mobilePriority: 5,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: true,
+    openInNewTab: true,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 6,
+    actionKey: 'bamboohr',
+    title: 'BambooHR',
+    href: 'https://app.bamboohr.com',
+    description: 'People operations',
+    iconKey: 'hr',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'people',
+    groupTitle: 'People',
+    sortOrder: 6,
+    overflowOnly: false,
+    mobilePriority: 6,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: true,
+    openInNewTab: true,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 7,
+    actionKey: 'safety-reporting',
+    title: 'Safety Reporting',
+    href: '/sites/HBIntel/SitePages/safety.aspx',
+    description: 'Safety workflows',
+    iconKey: 'safety',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: 'safety',
+    groupTitle: 'Safety',
+    sortOrder: 7,
+    overflowOnly: true,
+    mobilePriority: 7,
+    audienceMode: 'all',
+    audienceKeys: [],
+    isExternal: false,
+    openInNewTab: false,
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+];
 
 export function invalidatePriorityActionsCache(): void {
   _cache = undefined;
@@ -54,6 +268,27 @@ function deriveItems(
   return items;
 }
 
+function deriveFallbackItems(
+  activeAudience: string | undefined,
+): PriorityActionsItemNormalized[] {
+  let items = [...FALLBACK_ITEMS];
+  items = filterByAudience(items, activeAudience);
+  items = filterBySchedule(items);
+  return items;
+}
+
+function supportsHostedListFetch(siteUrl: string | undefined): boolean {
+  if (!siteUrl) return false;
+  try {
+    const host = new URL(siteUrl).hostname.toLowerCase();
+    if (!host.endsWith('.sharepoint.com')) return false;
+    if (host === 'example.sharepoint.com') return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export interface UsePriorityActionsDataOptions {
   bandKey?: string;
   activeAudience?: string;
@@ -63,12 +298,12 @@ export function usePriorityActionsData(
   options: UsePriorityActionsDataOptions = {},
 ): PriorityActionsDataResult {
   const { bandKey = 'homepage-primary', activeAudience } = options;
-  // Gate on SPFx presence via `getSiteUrl()` (the rail should not try to
-  // fetch lists outside SPFx), but resolve lookups against the canonical
-  // Priority Actions list host (HBCentral) so the homepage can be deployed
-  // to any site and still see the canonical action library.
-  const hasSpfxContext = Boolean(getSiteUrl());
-  const siteUrl = hasSpfxContext ? getPriorityActionsListHostUrl() : undefined;
+  const hostingSiteUrl = getSiteUrl();
+  // Fetch the canonical list host only when running in a SharePoint host.
+  // Non-SPFx hosts (dev harness, docs previews) render a stable fallback
+  // launcher so runtime markers remain auditable.
+  const canFetchHostedLists = supportsHostedListFetch(hostingSiteUrl);
+  const siteUrl = canFetchHostedLists ? getPriorityActionsListHostUrl() : undefined;
 
   const [result, setResult] = useState<PriorityActionsDataResult>(() => {
     if (siteUrl) {
@@ -83,13 +318,26 @@ export function usePriorityActionsData(
       }
       return { config: undefined, items: [], isLoading: true, error: undefined };
     }
-    return { config: undefined, items: [], isLoading: false, error: undefined };
+    return {
+      config: FALLBACK_CONFIG,
+      items: deriveFallbackItems(activeAudience),
+      isLoading: false,
+      error: undefined,
+    };
   });
 
   const abortRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
-    if (!siteUrl) return;
+    if (!siteUrl) {
+      setResult({
+        config: FALLBACK_CONFIG,
+        items: deriveFallbackItems(activeAudience),
+        isLoading: false,
+        error: undefined,
+      });
+      return;
+    }
     if (cacheHit(siteUrl, bandKey)) return;
 
     const controller = new AbortController();

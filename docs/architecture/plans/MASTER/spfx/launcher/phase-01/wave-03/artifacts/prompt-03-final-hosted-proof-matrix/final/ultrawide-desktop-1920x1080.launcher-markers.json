@@ -1,12 +1,12 @@
 {
-  "launcherVersion": null,
-  "launcherDrawerSource": null,
-  "launcherDeviceClass": null,
-  "launcherOverflowMode": null,
-  "launcherHandheldMode": null,
-  "launcherVisibleCount": null,
-  "launcherCapGovernance": null,
-  "launcherBandPrimaryCount": null,
-  "launcherBandOverflowCount": null,
-  "launcherRowPrimitive": null
+  "launcherVersion": "1.1.64.0",
+  "launcherDrawerSource": "all-tools",
+  "launcherDeviceClass": "ultrawide",
+  "launcherOverflowMode": "more-tools",
+  "launcherHandheldMode": "standard",
+  "launcherVisibleCount": "6",
+  "launcherCapGovernance": "binding-visible-cap",
+  "launcherBandPrimaryCount": "6",
+  "launcherBandOverflowCount": "1",
+  "launcherRowPrimitive": "tile-family"
 }

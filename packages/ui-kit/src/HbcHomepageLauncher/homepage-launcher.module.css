@@ -293,7 +293,7 @@
 /* ---------- MORE TOOLS TRIGGER ---------- */
 
 .overflowTile {
-  box-sizing: content-box;
+  box-sizing: border-box;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
