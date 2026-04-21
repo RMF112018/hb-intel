@@ -101,6 +101,18 @@ export function HbcProjectSpotlightSurface({
   const hasHistory = visibility.showRail && model.secondary.length > 0;
   const hasFeaturedImage = Boolean(model.featured.image?.src);
 
+  // Section-level CTA fallback — handed to the featured slot so a
+  // missing authored item CTA still produces a credible next step.
+  // Resolution: authored `featured.cta` wins; otherwise the section
+  // destination (typically `allProjectsUrl`) is rendered in the same
+  // CTA slot. Suppressed cleanly when neither exists.
+  const fallbackCta = model.allProjectsUrl
+    ? {
+        label: model.allProjectsLabel ?? 'View all projects',
+        href: model.allProjectsUrl,
+      }
+    : undefined;
+
   // Bind governed presentation-lane tokens to CSS custom properties so
   // the Spotlight stylesheet references one authoritative source for
   // brand color instead of hardcoding `#225391` / `rgba(34, 83, 145, …)`
@@ -146,6 +158,7 @@ export function HbcProjectSpotlightSurface({
             featured={model.featured}
             reducedMotion={reducedMotion}
             visibility={visibility}
+            fallbackCta={fallbackCta}
           />
         </div>
         {hasHistory ? (

@@ -1,29 +1,29 @@
 /**
- * FeaturedSlot — composes the featured project into essentials and a
- * details region governed by the layout-mode visibility matrix.
+ * FeaturedSlot — composes the featured project body into a four-beat
+ * information hierarchy so first view always carries a paced story
+ * rather than a stack of fields:
  *
- * Two macro-postures:
+ *   1. identity    — eyebrow + title (or poster overlay in wide/medium
+ *                    image-led). Header chip row in title-led.
+ *   2. signal      — milestone progress pill + strongest secondary
+ *                    chip (status / strategic / stale / freshness).
+ *                    This row lands in first view in every posture so
+ *                    the portfolio health signal never hides behind a
+ *                    disclosure.
+ *   3. explanation — short summary snippet (2-line clamp) as the
+ *                    editorial reason-to-care. Pulled out of the
+ *                    disclosure so the body reads without a click.
+ *   4. action      — primary CTA. Resolved as
+ *                      `featured.cta ?? fallbackCta`
+ *                    so a missing authored item CTA still produces a
+ *                    credible next step when the caller provides a
+ *                    section-level destination.
  *
- *   image-led (hasImage = true):
- *     media zone → essentials (title + progress pill) → disclosure
- *     → details (headline, summary, milestones, freshness, team, CTA)
- *
- *   title-led (hasImage = false):
- *     subordinate header strip (eyebrow + inline status / strategic /
- *     stale chips) → boosted title → progress pill → primary CTA
- *     (inline) → disclosure → details (headline, summary, milestones,
- *     freshness, team).
- *
- *   The title-led posture deliberately promotes the CTA out of the
- *   collapsed details region so first-view density carries a real
- *   next-best action without waiting for a disclosure click. The
- *   media zone does not render at all in this posture — the surface
- *   becomes materially shorter instead of staging a placeholder.
- *
- * The disclosure is explicit, keyboard- and touch-safe, and its initial
- * posture follows `visibility.detailsOpenByDefault` for the image-led
- * posture. The title-led posture overrides to open-by-default in every
- * mode except `minimal`, which keeps a tight default profile.
+ * The disclosure now carries only supporting depth: the full-depth
+ * summary, milestone list, freshness full line, team strip, and
+ * (when not already in the poster overlay) the authored headline.
+ * Disclosure remains explicit, keyboard- and touch-safe, with
+ * `detailsOpenByDefault` still driving its initial posture.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -32,6 +32,7 @@ import { Calendar, ChevronDown } from 'lucide-react';
 import { HbcPremiumCta } from '../HbcPremiumCta/index.js';
 import type {
   ProjectSpotlightCompleteness,
+  ProjectSpotlightCta,
   ProjectSpotlightFeaturedItem,
 } from './types.js';
 import type { SpotlightLayoutVisibility } from './layout-mode.js';
@@ -45,6 +46,14 @@ export interface FeaturedSlotProps {
   featured: ProjectSpotlightFeaturedItem;
   reducedMotion: boolean;
   visibility: SpotlightLayoutVisibility;
+  /**
+   * Section-level fallback CTA. Used when the authored `featured.cta`
+   * is absent but the surface's caller has a section-level destination
+   * (typically `allProjectsUrl`). The fallback is rendered with the
+   * same premium CTA treatment but stamped `data-cta-source="section"`
+   * so tests and styling can distinguish it from an item-authored CTA.
+   */
+  fallbackCta?: ProjectSpotlightCta;
 }
 
 /**
@@ -89,9 +98,10 @@ function resolveContentPosture(
   }
 
   // Title-led override: when there is no hero image, promote the
-  // details region so freshness + milestones + summary land in first
-  // view without a disclosure click. `minimal` keeps its tight profile —
-  // the inline CTA below still lands in first view for that mode.
+  // details region so freshness + milestones + team land in first
+  // view without a disclosure click. `minimal` keeps its tight
+  // profile — the essentials block still carries the four-beat
+  // hierarchy in that mode.
   if (!hasImage && visibility.mode !== 'minimal') {
     posture.detailsOpenByDefault = true;
   }
@@ -103,6 +113,7 @@ export function FeaturedSlot({
   featured,
   reducedMotion,
   visibility,
+  fallbackCta,
 }: FeaturedSlotProps): React.JSX.Element {
   const eyebrowText =
     [featured.sector, featured.location].filter(Boolean).join(' \u00B7 ') ||
@@ -120,6 +131,17 @@ export function FeaturedSlot({
 
   const posture = resolveContentPosture(featured, visibility, hasImage);
 
+  // Effective CTA — authored item CTA wins; otherwise the section-level
+  // fallback. Missing both suppresses the slot cleanly. Stamped with a
+  // source hint so QA / tests can verify the resolution path.
+  const effectiveCta: ProjectSpotlightCta | undefined =
+    featured.cta ?? fallbackCta;
+  const ctaSource: 'item' | 'section' | null = featured.cta
+    ? 'item'
+    : fallbackCta
+      ? 'section'
+      : null;
+
   const detailsId = React.useId();
   const [detailsOpen, setDetailsOpen] = React.useState(
     posture.detailsOpenByDefault,
@@ -136,28 +158,45 @@ export function FeaturedSlot({
         transition: { duration: 0.55, ease: EASE_OUT_EXPO },
       };
 
-  // Inline CTA sits above the disclosure in both the no-image
-  // (title-led) posture and the wide/medium poster-led posture so the
-  // primary action is in first view. Only the compact / minimal
-  // image-led posture still buries the CTA inside the collapsed
-  // details region.
-  const renderInlineCta = (!hasImage || posterLed) && Boolean(featured.cta);
-  const renderDetailsCta = !renderInlineCta && Boolean(featured.cta);
-
-  const hasDetailsContent =
-    (!posterLed && posture.showHeadline && Boolean(featured.headline)) ||
-    Boolean(featured.summary) ||
-    posture.showMilestoneList ||
-    Boolean(featured.freshnessLabel) ||
-    (posture.showTeamStrip && teamMembers.length > 0) ||
-    renderDetailsCta;
-
   // Title-led header chip row (status / strategic / stale). Shown only
   // in the no-image posture; image-led keeps these as media overlays.
   const statusLabel = featured.status?.label;
   const showHeaderChips =
     !hasImage &&
     Boolean(statusLabel || featured.strategicEmphasis || featured.isStale);
+
+  // Signal row — strongest secondary signal chip next to the milestone
+  // pill. In image-led postures the chips already live over the hero;
+  // the signal row then carries progress + a freshness chip only, and
+  // suppresses itself entirely when there's nothing to show.
+  const signalFreshnessChip =
+    featured.freshnessLabel && visibility.mode !== 'minimal'
+      ? featured.freshnessLabel
+      : undefined;
+  const hasSignalRow =
+    milestones.length > 0 || Boolean(signalFreshnessChip);
+
+  // Essentials-level summary snippet. Hard 2-line clamp so it never
+  // competes with the full-depth summary disclosed below, but still
+  // gives first-view readers a reason-to-care without a click. Always
+  // derived from `featured.summary`; no separate authoring surface.
+  const summarySnippet = featured.summary?.trim() || undefined;
+
+  // The disclosure governs depth content only: full-depth summary
+  // (with the mode's native clamp), milestone list, freshness full
+  // line, team strip, and (unless poster already carries it) the
+  // authored headline.
+  const hasHeadlineInDetails =
+    !posterLed && posture.showHeadline && Boolean(featured.headline);
+  const hasFullSummary =
+    Boolean(featured.summary) && posture.summaryLineClamp > 2;
+  const hasFreshnessLine = Boolean(featured.freshnessLabel);
+  const hasDetailsContent =
+    hasHeadlineInDetails ||
+    hasFullSummary ||
+    posture.showMilestoneList ||
+    hasFreshnessLine ||
+    (posture.showTeamStrip && teamMembers.length > 0);
 
   return (
     <motion.article
@@ -217,16 +256,48 @@ export function FeaturedSlot({
           </div>
         ) : null}
 
+        {/* 1. identity — title (suppressed when poster-led carries it) */}
         <div className={styles.featuredEssentials}>
           {posterLed ? null : (
             <h3 className={styles.featuredTitle}>{featured.title}</h3>
           )}
-          <MilestoneProgressPill milestones={milestones} />
-          {renderInlineCta && featured.cta ? (
-            <div className={styles.featuredCtaInline}>
+
+          {/* 2. signal — milestone progress + strongest secondary chip */}
+          {hasSignalRow ? (
+            <div className={styles.featuredSignalRow}>
+              <MilestoneProgressPill milestones={milestones} />
+              {signalFreshnessChip ? (
+                <span
+                  className={clsx(
+                    styles.featuredSignalChip,
+                    featured.isStale && styles.featuredSignalChipStale,
+                  )}
+                >
+                  <Calendar
+                    size={12}
+                    aria-hidden="true"
+                    strokeWidth={2.25}
+                  />
+                  {signalFreshnessChip}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* 3. explanation — short summary snippet */}
+          {summarySnippet ? (
+            <p className={styles.featuredSummarySnippet}>{summarySnippet}</p>
+          ) : null}
+
+          {/* 4. action — item CTA, else section-level fallback */}
+          {effectiveCta && ctaSource ? (
+            <div
+              className={styles.featuredCtaInline}
+              data-cta-source={ctaSource}
+            >
               <HbcPremiumCta
-                label={featured.cta.label}
-                href={featured.cta.href}
+                label={effectiveCta.label}
+                href={effectiveCta.href}
                 variant="primary"
                 size="md"
                 arrow
@@ -267,11 +338,11 @@ export function FeaturedSlot({
             )}
             hidden={!detailsOpen}
           >
-            {!posterLed && posture.showHeadline && featured.headline ? (
+            {hasHeadlineInDetails && featured.headline ? (
               <p className={styles.featuredHeadline}>{featured.headline}</p>
             ) : null}
 
-            {featured.summary ? (
+            {hasFullSummary && featured.summary ? (
               <p
                 className={styles.featuredSummary}
                 style={{ WebkitLineClamp: posture.summaryLineClamp }}
@@ -284,7 +355,7 @@ export function FeaturedSlot({
               <MilestoneList milestones={milestones} />
             ) : null}
 
-            {featured.freshnessLabel ? (
+            {hasFreshnessLine && featured.freshnessLabel ? (
               <div className={styles.metaRow}>
                 <span className={styles.metaItem}>
                   <Calendar
@@ -304,18 +375,6 @@ export function FeaturedSlot({
                 reducedMotion={reducedMotion}
                 mode={visibility.mode}
               />
-            ) : null}
-
-            {renderDetailsCta && featured.cta ? (
-              <div className={styles.featuredCta}>
-                <HbcPremiumCta
-                  label={featured.cta.label}
-                  href={featured.cta.href}
-                  variant="primary"
-                  size="md"
-                  arrow
-                />
-              </div>
             ) : null}
           </div>
         ) : null}

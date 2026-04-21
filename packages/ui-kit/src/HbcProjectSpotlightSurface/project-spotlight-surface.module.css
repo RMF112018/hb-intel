@@ -845,6 +845,80 @@
   gap: 10px;
 }
 
+/* ── Four-beat essentials hierarchy ──────────────────────────
+   The featured essentials block renders a paced body in every
+   posture: identity → signal → explanation → action. The signal
+   row wraps so progress + freshness chip never truncate, and the
+   summary snippet holds a hard 2-line clamp so it reads as a
+   first-view reason-to-care rather than a prose column. */
+
+.featuredSignalRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.featuredSignalChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--hbc-presentation-blue);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.05);
+  border: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.14);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.featuredSignalChip svg {
+  color: var(--hbc-presentation-blue);
+}
+
+.featuredSignalChipStale {
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.06);
+  border-color: rgba(180, 83, 9, 0.22);
+}
+
+.featuredSignalChipStale svg {
+  color: #b45309;
+}
+
+.featuredSummarySnippet {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgba(var(--presentation-body-ink), 0.72);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 58ch;
+}
+
+.root[data-layout-mode='wide'] .featuredSummarySnippet,
+.root[data-layout-mode='medium'] .featuredSummarySnippet {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.root[data-layout-mode='minimal'] .featuredSummarySnippet {
+  font-size: 0.875rem;
+  -webkit-line-clamp: 2;
+}
+
+/* CTA source hint — the inline CTA marks its origin so tests and
+   reviewers can verify the fallback path. Section-sourced CTAs
+   carry a subtle dashed edge on the wrapper so authored-item CTAs
+   remain visually primary where they exist. */
+.featuredCtaInline[data-cta-source='section'] {
+  position: relative;
+}
+
 .milestoneSignal {
   display: inline-flex;
   align-items: center;
