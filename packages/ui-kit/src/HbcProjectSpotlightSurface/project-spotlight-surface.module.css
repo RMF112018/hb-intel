@@ -1519,6 +1519,25 @@
   outline-offset: 2px;
 }
 
+/* Quieter disclosure in wide/medium — the collapsed affordance reads
+   as a subordinate "more" link rather than a second primary pill.
+   Kept on its own hairline row so it is obviously actionable without
+   competing with the featured CTA above. */
+.root[data-layout-mode='wide'] .historyDisclosure,
+.root[data-layout-mode='medium'] .historyDisclosure {
+  padding: 6px 12px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  background: transparent;
+  border-color: rgba(var(--hbc-presentation-blue-rgb), 0.22);
+  min-height: 32px;
+}
+.root[data-layout-mode='wide'] .historyDisclosure:hover,
+.root[data-layout-mode='medium'] .historyDisclosure:hover {
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.06);
+  box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .historyDisclosure,
   .historyDisclosure:hover {
@@ -1587,36 +1606,52 @@
   border-top: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.10);
 }
 
-/* Mode-governed rail posture. Padding and thumbnail size step with
-   the resolved mode so expanded history stays visually subordinate
-   to the featured hero above it. Rail rows stay edgeless so the
-   history area reads as a continuation of the parent shell. */
+/* Rail tiles container. Wide/medium pair tiles in a two-column grid
+   so the expanded history occupies roughly half the vertical footprint
+   of a stacked list. Compact/minimal stay single-column because their
+   widths cannot host a credible two-column layout. */
+.railTiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px 16px;
+}
+
+.root[data-layout-mode='wide'] .railTiles,
+.root[data-layout-mode='medium'] .railTiles {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 20px;
+}
+
+/* Mode-governed rail posture. Padding + thumbnail size step with the
+   resolved mode; tiles stay edgeless (no per-row border) so the rail
+   reads as a quiet strip of secondary history rather than a stacked
+   set of bordered rows. */
 .root[data-layout-mode='wide'] .rail {
-  padding: 18px 0 0;
-  gap: 4px;
+  padding: 14px 0 0;
+  gap: 6px;
 }
 .root[data-layout-mode='wide'] .railTile {
-  padding: 10px 6px;
-  gap: 16px;
+  padding: 6px 4px;
+  gap: 12px;
 }
 .root[data-layout-mode='wide'] .railThumbWrap,
 .root[data-layout-mode='wide'] .railThumb {
-  flex: 0 0 132px;
-  height: 88px;
+  flex: 0 0 112px;
+  height: 72px;
 }
 
 .root[data-layout-mode='medium'] .rail {
-  padding: 14px 0 0;
-  gap: 4px;
+  padding: 12px 0 0;
+  gap: 6px;
 }
 .root[data-layout-mode='medium'] .railTile {
-  padding: 8px 6px;
-  gap: 14px;
+  padding: 6px 4px;
+  gap: 10px;
 }
 .root[data-layout-mode='medium'] .railThumbWrap,
 .root[data-layout-mode='medium'] .railThumb {
-  flex: 0 0 116px;
-  height: 78px;
+  flex: 0 0 96px;
+  height: 64px;
 }
 
 .root[data-layout-mode='compact'] .rail {
@@ -1624,13 +1659,13 @@
   gap: 2px;
 }
 .root[data-layout-mode='compact'] .railTile {
-  padding: 6px 4px;
+  padding: 5px 4px;
   gap: 10px;
 }
 .root[data-layout-mode='compact'] .railThumbWrap,
 .root[data-layout-mode='compact'] .railThumb {
-  flex: 0 0 88px;
-  height: 60px;
+  flex: 0 0 80px;
+  height: 54px;
 }
 
 .root[data-layout-mode='minimal'] .rail {
@@ -1643,16 +1678,13 @@
 }
 .root[data-layout-mode='minimal'] .railThumbWrap,
 .root[data-layout-mode='minimal'] .railThumb {
-  flex: 0 0 72px;
-  height: 48px;
+  flex: 0 0 64px;
+  height: 44px;
 }
 
-/* Minimal rail tightenings. Drops the decorative editorial index and
-   the secondary location/sector meta line so each tile reads as a
-   clean thumb + title — unambiguously secondary history, not a
-   parallel primary list. Rail header demotes to a quieter register
-   so it reads as a section label, not a second masthead. */
-.root[data-layout-mode='minimal'] .railIndex,
+/* Minimal rail — already the quietest mode; drop the secondary meta
+   line so each tile reads as thumb + title. Rail header demotes to a
+   quieter register so it reads as a section label, not a masthead. */
 .root[data-layout-mode='minimal'] .railMeta {
   display: none;
 }
@@ -1686,10 +1718,11 @@
 }
 
 .railTile {
-  /* Editorial list row, not a card. No persistent border, no solid
-     fill, no lift-and-shadow. Hover reveals a soft hairline underline
-     + a whisper of tinted background so affordance is still legible
-     without introducing a second card-grid language. */
+  /* Quiet list row — no border, no fill. Hover reveals a whisper of
+     tinted background so affordance is legible without introducing a
+     second card-grid language. Row separators come from grid gaps on
+     `.railTiles`, not per-tile borders, so the rail reads as a
+     subordinate strip instead of a bordered list. */
   position: relative;
   display: flex;
   align-items: center;
@@ -1701,19 +1734,11 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  border-bottom: 1px solid rgba(var(--hbc-presentation-blue-rgb), 0.06);
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease;
-}
-
-.railTile:last-child {
-  border-bottom: none;
+  transition: background-color 160ms ease;
 }
 
 .railTile:hover {
-  background: rgba(var(--hbc-presentation-blue-rgb), 0.03);
-  border-bottom-color: rgba(var(--hbc-presentation-blue-rgb), 0.22);
+  background: rgba(var(--hbc-presentation-blue-rgb), 0.04);
 }
 
 .railTile:focus-visible {
@@ -1727,21 +1752,6 @@
     transform: none !important;
     transition: none !important;
   }
-}
-
-.railIndex {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  width: 26px;
-  flex-shrink: 0;
-  font-size: 0.8125rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: var(--hbc-presentation-blue);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.25;
-  padding-top: 6px;
 }
 
 .railThumbWrap {
@@ -1792,8 +1802,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+  white-space: normal;
 }
 
 .railMeta {

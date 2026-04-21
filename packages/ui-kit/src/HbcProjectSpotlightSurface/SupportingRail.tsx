@@ -12,7 +12,7 @@ import type {
   ProjectSpotlightMedia,
   ProjectSpotlightRailItem,
 } from './types.js';
-import { EASE_OUT_EXPO, formatEditorialIndex } from './internals.js';
+import { EASE_OUT_EXPO } from './internals.js';
 import styles from './project-spotlight-surface.module.css';
 
 interface RailThumbnailProps {
@@ -42,20 +42,15 @@ function RailThumbnail({ image }: RailThumbnailProps): React.JSX.Element {
 
 interface RailTileProps {
   item: ProjectSpotlightRailItem;
-  index: number;
 }
 
-function RailTile({ item, index }: RailTileProps): React.JSX.Element {
+function RailTile({ item }: RailTileProps): React.JSX.Element {
   const metaText =
     [item.location, item.sector].filter(Boolean).join(' \u00B7 ') ||
     item.freshnessLabel;
   const href = item.cta?.href;
-  const label = formatEditorialIndex(index);
   const content = (
     <>
-      <span className={styles.railIndex} aria-hidden="true">
-        {label}
-      </span>
       <RailThumbnail image={item.image} />
       <div className={styles.railContent}>
         <p className={styles.railTitle}>{item.title}</p>
@@ -133,9 +128,11 @@ export function SupportingRail({
         <span>{label}</span>
         <span className={styles.railHeaderRule} aria-hidden="true" />
       </div>
-      {items.map((item, i) => (
-        <RailTile key={item.id} item={item} index={i + 1} />
-      ))}
+      <div className={styles.railTiles}>
+        {items.map((item) => (
+          <RailTile key={item.id} item={item} />
+        ))}
+      </div>
       {showFooterCta && allProjectsUrl ? (
         <div className={styles.railFooter}>
           <HbcPremiumCta

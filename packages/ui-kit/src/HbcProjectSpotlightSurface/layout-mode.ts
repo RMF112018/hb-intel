@@ -106,7 +106,10 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     historyOpenByDefault: true,
     mediaHeight: 'tall',
     showRail: true,
-    railOpenByDefault: true,
+    // History stays closed by default so the featured project is
+    // unquestionably primary at first paint. The disclosure remains
+    // explicit and keyboard-safe for users who want past spotlights.
+    railOpenByDefault: false,
     showInlineMeta: true,
     showHeadline: true,
     summaryLineClamp: 4,
@@ -122,7 +125,8 @@ export const SPOTLIGHT_LAYOUT_VISIBILITY: Readonly<
     historyOpenByDefault: true,
     mediaHeight: 'standard',
     showRail: true,
-    railOpenByDefault: true,
+    // History closed by default — see `wide` comment.
+    railOpenByDefault: false,
     showInlineMeta: true,
     showHeadline: true,
     summaryLineClamp: 3,
