@@ -215,6 +215,16 @@
   gap: 12px;
 }
 
+.featuredCompact .featuredHeaderCluster {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.featuredCompact .featuredBadgeSlot {
+  margin-top: 0;
+}
+
 .featuredCompact .featuredRecipient {
   font-size: 1.125rem;
 }
@@ -242,6 +252,18 @@
 
 .featuredHandheld .featuredHeader {
   gap: 4px;
+}
+
+.featuredHandheld .featuredHeaderCluster {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.featuredHandheld .featuredBadge {
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  padding: 3px 8px;
 }
 
 .featuredHandheld .featuredRecipient {

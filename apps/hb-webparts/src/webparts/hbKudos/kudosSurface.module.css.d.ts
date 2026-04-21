@@ -11,7 +11,9 @@ declare const styles: {
   readonly featuredHandheld: string;
   readonly featuredBadge: string;
   readonly featuredTop: string;
+  readonly featuredHeaderCluster: string;
   readonly featuredHeader: string;
+  readonly featuredBadgeSlot: string;
   readonly featuredRecipient: string;
   readonly featuredHeadline: string;
   readonly featuredBody: string;

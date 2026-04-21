@@ -333,13 +333,6 @@ function FeaturedCard({
       data-layout-mode={layoutMode}
       aria-labelledby={`hb-kudos-featured-recipient-${entry.id}`}
     >
-      {badgeLabel ? (
-        <span className={kudosFeaturedBadge()} aria-label={badgeLabel}>
-          <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
-          {badgeLabel}
-        </span>
-      ) : null}
-
       <div className={styles.featuredTop}>
         {entry.recipients.length > 0 ? (
           <HbcAvatarStack
@@ -352,15 +345,23 @@ function FeaturedCard({
             max={3}
           />
         ) : null}
-        <div className={styles.featuredHeader}>
-          <h3
-            id={`hb-kudos-featured-recipient-${entry.id}`}
-            className={styles.featuredRecipient}
-          >
-            {recipientDisplay}
-          </h3>
-          {entry.headline ? (
-            <p className={styles.featuredHeadline}>{entry.headline}</p>
+        <div className={styles.featuredHeaderCluster}>
+          <div className={styles.featuredHeader}>
+            <h3
+              id={`hb-kudos-featured-recipient-${entry.id}`}
+              className={styles.featuredRecipient}
+            >
+              {recipientDisplay}
+            </h3>
+            {entry.headline ? (
+              <p className={styles.featuredHeadline}>{entry.headline}</p>
+            ) : null}
+          </div>
+          {badgeLabel ? (
+            <span className={[kudosFeaturedBadge(), styles.featuredBadgeSlot].join(' ')} aria-label={badgeLabel}>
+              <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
+              {badgeLabel}
+            </span>
           ) : null}
         </div>
       </div>
