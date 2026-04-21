@@ -21,9 +21,7 @@ import {
  */
 function makeFakeRequester<T>(pages: T[][]): {
   webUrl: string;
-  client: {
-    get: (url: string) => Promise<Response>;
-  };
+  fetch: (url: string) => Promise<Response>;
   getCallCount(): number;
 } {
   let callCount = 0;
@@ -31,22 +29,20 @@ function makeFakeRequester<T>(pages: T[][]): {
     idx < pages.length - 1 ? `https://fake.test/page/${idx + 1}` : null;
   return {
     webUrl: 'https://fake.test',
-    client: {
-      get: (url: string) => {
-        let idx = 0;
-        const match = /page\/(\d+)$/.exec(url);
-        if (match) idx = Number.parseInt(match[1], 10);
-        callCount += 1;
-        const body = {
-          value: pages[idx] ?? [],
-          'odata.nextLink': nextLinkFor(idx),
-        };
-        const response = new Response(JSON.stringify(body), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-        return Promise.resolve(response);
-      },
+    fetch: (url: string) => {
+      let idx = 0;
+      const match = /page\/(\d+)$/.exec(url);
+      if (match) idx = Number.parseInt(match[1], 10);
+      callCount += 1;
+      const body = {
+        value: pages[idx] ?? [],
+        'odata.nextLink': nextLinkFor(idx),
+      };
+      const response = new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return Promise.resolve(response);
     },
     getCallCount: () => callCount,
   };

@@ -26,7 +26,6 @@
  *   - The previous silent `.top(2000)` cap on All-Projects is removed —
  *     `All Projects` search is now truly full-scope within the ceiling.
  */
-import { SPHttpClient } from '@microsoft/sp-http';
 import { getSpfxContext } from '@hbc/auth/spfx';
 import type { IRawProjectSiteItem, ProjectSitesScope } from '../types.js';
 import {
@@ -87,32 +86,52 @@ function toCandidates(
   return out;
 }
 
+/**
+ * Minimal HTTP-GET contract used by the drain. Implemented by
+ * `window.fetch` in production and by a fake in tests. Kept narrow so
+ * the test can avoid faking the whole SPFx context.
+ */
+type ItemsFetch = (url: string) => Promise<Response>;
+
 interface ISpfxRequester {
   /** Absolute URL of the current SharePoint web. */
   webUrl: string;
-  /** SPFx HTTP client used for REST calls. */
-  client: SPHttpClient;
+  /** HTTP GET callable that returns a Response-like object. */
+  fetch: ItemsFetch;
 }
 
 /**
  * Read the SPFx context once and return everything the drain needs.
  *
- * Fail loudly if any expected field is missing — that is a bootstrap
- * problem, not an empty-list problem, and silently returning zero rows
- * would just reproduce the original silent-truncation bug in a new
- * shape.
+ * We deliberately avoid importing `@microsoft/sp-http` as a value: that
+ * package is externalized at bundle time and is not resolvable via
+ * SPFx's AMD loader inside the IIFE at runtime, which would cause a
+ * "Cannot read properties of undefined (reading 'SPHttpClient')"
+ * failure before the first request even leaves the page. Instead we
+ * use the browser `fetch` with same-origin credentials — valid for
+ * SharePoint REST GETs inside an authenticated SPFx webpart.
+ *
+ * Fail loudly if the webUrl is missing — that is a bootstrap problem,
+ * not an empty-list problem.
  */
 function getSpfxRequester(): ISpfxRequester {
   const context = getSpfxContext();
   const webUrl = context.pageContext?.web?.absoluteUrl;
-  const client = context.spHttpClient;
   if (typeof webUrl !== 'string' || webUrl.length === 0) {
     throw new Error('Project Sites repository: SPFx pageContext.web.absoluteUrl is missing.');
   }
-  if (!client) {
-    throw new Error('Project Sites repository: SPFx spHttpClient is missing.');
-  }
-  return { webUrl, client };
+  const fetchImpl: ItemsFetch = (url: string) =>
+    fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        // nometadata keeps the payload small; both response shapes are
+        // handled by `fetchItemsPage`.
+        Accept: 'application/json;odata=nometadata',
+        'OData-Version': '4.0',
+      },
+    });
+  return { webUrl, fetch: fetchImpl };
 }
 
 /**
@@ -164,7 +183,7 @@ async function fetchItemsPage<T>(
   requester: ISpfxRequester,
   url: string,
 ): Promise<IListItemsPage<T>> {
-  const response = await requester.client.get(url, SPHttpClient.configurations.v1);
+  const response = await requester.fetch(url);
   if (!response.ok) {
     const body = await response.text().catch(() => '');
     throw new Error(
