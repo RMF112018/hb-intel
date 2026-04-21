@@ -40,22 +40,32 @@
   background-color: hsl(220 12% 11%);
 }
 
-/* Brand-tinted fallback — cool presentation-blue pool top-left, warm
-   ember pool bottom-right, deep charcoal base. Anchored to presentation
-   tokens via CSS custom properties exposed on the section element. */
+/* Doctrine-aligned fallback (Homepage Overlay §6.8) — deep charcoal/
+   graphite base, restrained warmth only, subtle atmospheric vignetting.
+   No presentation-blue or presentation-orange pools: the homepage
+   overlay explicitly rejects gradient-wash enterprise-banner posture
+   for the flagship hero. The .grain layer (soft-light, 0.042) already
+   provides materiality and continues to apply over this fallback, and
+   the .textSafe / .logoSafe localized contrast zones still anchor
+   greeting/tagline/logo legibility in the absence of photography. */
 .surface.noImage {
   background:
+    /* Soft perimeter vignette — premium, not theatrical. */
     radial-gradient(
-      ellipse 80% 60% at 20% 40%,
-      rgba(var(--hbc-hero-presentation-blue-rgb, 34, 83, 145) / 0.22) 0%,
-      transparent 62%
+      ellipse 130% 110% at 50% 50%,
+      transparent 55%,
+      hsla(220 22% 4% / 0.42) 100%
     ),
+    /* Restrained warmth — neutral warm graphite, not orange. Low
+       opacity, anchored low-center so it reads as ambient floor light
+       rather than a colored pool. */
     radial-gradient(
-      ellipse 60% 50% at 85% 72%,
-      rgba(var(--hbc-hero-presentation-orange-rgb, 229, 126, 70) / 0.14) 0%,
-      transparent 66%
+      ellipse 70% 50% at 50% 92%,
+      hsla(28 12% 22% / 0.18) 0%,
+      transparent 70%
     ),
-    linear-gradient(165deg, hsl(220 20% 9%) 0%, hsl(220 22% 7%) 100%);
+    /* Atmospheric top→bottom charcoal falloff. */
+    linear-gradient(180deg, hsl(220 14% 12%) 0%, hsl(220 16% 9%) 100%);
 }
 
 /* ── Background layers ─────────────────────────────────── */
