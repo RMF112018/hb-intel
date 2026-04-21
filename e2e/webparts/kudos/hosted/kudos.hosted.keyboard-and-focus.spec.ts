@@ -10,7 +10,7 @@
 import { expect, test } from '@playwright/test';
 import { gotoKudosCompanion, gotoKudosPublic } from '../helpers/kudosHarnessPage';
 import { KUDOS_TESTIDS, matrixTag } from '../helpers/kudosLocators';
-import { governanceBaseline, workflowBaseline } from '../fixtures';
+import { governanceBaseline, visibilityBaseline, workflowBaseline } from '../fixtures';
 
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
@@ -93,5 +93,41 @@ test.describe('kudos.hosted.keyboard-and-focus', () => {
     expect(closeBox).not.toBeNull();
     expect(closeBox!.width).toBeGreaterThanOrEqual(44);
     expect(closeBox!.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test(`compact-mode controls keep keyboard reachability and 44px targets ${matrixTag('H4', 'H5', 'P2')}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 440, height: 956 });
+    await gotoKudosPublic(page, visibilityBaseline());
+
+    const trigger = page.locator(tid(KUDOS_TESTIDS.giveKudosFlyoutTrigger)).first();
+    const archiveToggle = page.locator('[data-hbc-testid="hb-kudos-archive-toggle"]');
+    const viewAll = page.locator(tid(KUDOS_TESTIDS.viewAllTrigger)).first();
+
+    let onGive = false;
+    let onArchive = false;
+    let onViewAll = false;
+
+    for (let i = 0; i < 50 && !(onGive && onArchive && onViewAll); i += 1) {
+      await page.keyboard.press('Tab');
+      if (!onGive) onGive = await trigger.evaluate((el) => el === document.activeElement);
+      if (!onArchive) {
+        onArchive = await archiveToggle.evaluate((el) => el === document.activeElement);
+      }
+      if (!onViewAll) onViewAll = await viewAll.evaluate((el) => el === document.activeElement);
+    }
+
+    expect(onGive, 'Give Kudos trigger reachable').toBe(true);
+    expect(onArchive, 'Archive toggle reachable').toBe(true);
+    expect(onViewAll, 'View all feed trigger reachable').toBe(true);
+
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    expect(triggerBox!.height).toBeGreaterThanOrEqual(44);
+
+    // Archive toggle minimum target size is statically guarded in
+    // hbKudosAccessibilityGuardrails.test.tsx; hosted runtime here
+    // focuses on keyboard reachability in compact mode.
   });
 });

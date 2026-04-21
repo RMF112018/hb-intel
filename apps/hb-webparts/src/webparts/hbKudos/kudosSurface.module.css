@@ -630,6 +630,7 @@
   gap: 12px;
   width: 100%;
   padding: 10px 12px;
+  min-height: 44px;
   border-radius: var(--hbk-radius-lg);
   border: 1px solid var(--hbk-on-dark-55);
   background:
@@ -758,8 +759,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
-  min-height: 28px;
+  padding: 10px 12px;
+  min-height: 44px;
   border: 1px solid var(--hbk-orange-18);
   background: var(--hbk-orange-02);
   border-radius: var(--hbk-radius-pill);
@@ -795,6 +796,7 @@
 
 .archiveSearch {
   padding: 8px 12px;
+  min-height: 44px;
   font-size: 0.8125rem;
   border-radius: var(--hbk-radius-sm);
   border: 1px solid var(--hbk-orange-18);
@@ -847,6 +849,7 @@
   border: 1px solid var(--hbk-warm-row-white-55);
   border-radius: var(--hbk-radius-lg);
   padding: 8px 12px;
+  min-height: 44px;
   cursor: pointer;
   color: inherit;
   font: inherit;
@@ -909,6 +912,7 @@
   gap: 14px;
   width: 100%;
   padding: 12px 14px;
+  min-height: 44px;
   margin-top: 10px;
   border-radius: var(--hbk-radius-lg);
   border: 1px solid var(--hbk-orange-18);
@@ -985,7 +989,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .archiveRow,
-  .archiveChevron {
+  .archiveChevron,
+  .archiveToggle,
+  .feedCta,
+  .feedCtaArrow,
+  .readmoreBtn {
     transition: none !important;
   }
 }

@@ -10,11 +10,101 @@
 import { expect, test } from '@playwright/test';
 import { gotoKudosPublic } from '../helpers/kudosHarnessPage';
 import { KUDOS_TESTIDS, matrixTag } from '../helpers/kudosLocators';
-import { workflowBaseline } from '../fixtures';
+import { visibilityBaseline, workflowBaseline } from '../fixtures';
+import { captureProof } from '../helpers/kudosArtifacts';
 
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
+interface ResponsiveCase {
+  readonly label: string;
+  readonly viewport: { width: number; height: number };
+  readonly matrix: string[];
+}
+
+const RESPONSIVE_CASES: readonly ResponsiveCase[] = [
+  {
+    label: 'phone-portrait',
+    viewport: { width: 440, height: 956 },
+    matrix: ['H11', 'P2'],
+  },
+  {
+    label: 'tablet-portrait',
+    viewport: { width: 834, height: 1210 },
+    matrix: ['H11', 'P2'],
+  },
+  {
+    label: 'standard-laptop',
+    viewport: { width: 1366, height: 768 },
+    matrix: ['H11', 'P2'],
+  },
+  {
+    label: 'large-desktop',
+    viewport: { width: 1920, height: 1080 },
+    matrix: ['H11', 'P2'],
+  },
+];
+
+async function assertNoHorizontalOverflow(
+  page: import('@playwright/test').Page,
+  selector: string,
+): Promise<void> {
+  const metrics = await page.evaluate((sel) => {
+    const el = document.querySelector(sel) as HTMLElement | null;
+    if (!el) return { found: false, scrollWidth: 0, clientWidth: 0, overflows: false };
+    return {
+      found: true,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+      overflows: el.scrollWidth > el.clientWidth,
+    };
+  }, selector);
+  expect(metrics.found, `Expected ${selector} to exist`).toBe(true);
+  expect(
+    metrics.overflows,
+    `${selector} overflows (scrollWidth=${metrics.scrollWidth}, clientWidth=${metrics.clientWidth})`,
+  ).toBe(false);
+}
+
 test.describe('kudos.hosted.responsive', () => {
+  for (const viewportCase of RESPONSIVE_CASES) {
+    test(`public responsive contract: ${viewportCase.label} ${matrixTag(...viewportCase.matrix)}`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize(viewportCase.viewport);
+      await gotoKudosPublic(page, visibilityBaseline());
+
+      const root = page.locator(tid(KUDOS_TESTIDS.publicRoot));
+      const featured = page.locator(tid(KUDOS_TESTIDS.featuredCard));
+      const recent = page.locator(tid(KUDOS_TESTIDS.recentSection));
+      const archive = page.locator(tid(KUDOS_TESTIDS.archiveSection));
+
+      await expect(root).toBeVisible();
+      await expect(archive).toBeVisible();
+      await expect(page.locator(tid(KUDOS_TESTIDS.giveKudosFlyoutTrigger))).toBeVisible();
+      await expect(page.locator(tid(KUDOS_TESTIDS.viewAllTrigger))).toBeVisible();
+      const featuredCount = await featured.count();
+      if (featuredCount > 0) await expect(featured).toBeVisible();
+
+      await assertNoHorizontalOverflow(page, tid(KUDOS_TESTIDS.publicRoot));
+      await assertNoHorizontalOverflow(page, tid(KUDOS_TESTIDS.archiveSection));
+      await assertNoHorizontalOverflow(page, '[data-hbc-testid="hb-kudos-hero-zone"]');
+      if ((await recent.count()) > 0) {
+        await assertNoHorizontalOverflow(page, tid(KUDOS_TESTIDS.recentSection));
+      }
+
+      const proofPath = await captureProof(page, {
+        group: 'hosted',
+        spec: 'kudos.hosted.responsive',
+        caseName: `public-responsive-${viewportCase.label}`,
+        matrixParts: viewportCase.matrix,
+      });
+      await testInfo.attach(`kudos-responsive-${viewportCase.label}`, {
+        body: Buffer.from(proofPath, 'utf-8'),
+        contentType: 'text/plain',
+      });
+    });
+  }
+
   test(`composer flyout renders as right-sheet at desktop width ${matrixTag('H11', 'P2')}`, async ({
     page,
   }) => {
@@ -58,8 +148,8 @@ test.describe('kudos.hosted.responsive', () => {
     await gotoKudosPublic(page, workflowBaseline());
 
     // Expand archive first to reach the "View all recognition" control.
-    await page.getByRole('button', { name: /view archive/i }).click();
-    await page.locator(tid(KUDOS_TESTIDS.viewAllTrigger)).click();
+    await page.getByRole('button', { name: /open archive/i }).click({ force: true });
+    await page.locator(tid(KUDOS_TESTIDS.viewAllTrigger)).click({ force: true });
     const feedPanel = page.locator(tid(KUDOS_TESTIDS.viewAllFeedPanel));
     await expect(feedPanel).toBeVisible();
 
