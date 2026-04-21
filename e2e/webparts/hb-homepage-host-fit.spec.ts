@@ -2,11 +2,16 @@ import { expect, test } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+// Keep in lockstep with packages/ui-kit/src/HbcHomepageLauncher/constants.ts
+const EXPECTED_LAUNCHER_VERSION = '1.1.50.0';
+
 interface HostedCase {
   readonly label: string;
   readonly viewport: { width: number; height: number };
   readonly expectedEntryState: string;
   readonly expectedLauncherDeviceClass: string;
+  readonly expectedHandheldMode: 'standard' | 'single-entry-all-tools';
+  readonly expectedCapGovernance: 'binding-visible-cap' | 'all-tools-drawer';
   readonly expectedReason?: string;
 }
 
@@ -20,6 +25,8 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 1920, height: 1080 },
     expectedEntryState: 'ultrawide-desktop',
     expectedLauncherDeviceClass: 'ultrawide',
+    expectedHandheldMode: 'standard',
+    expectedCapGovernance: 'binding-visible-cap',
     expectedReason: 'width-match',
   },
   {
@@ -27,6 +34,8 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 1512, height: 982 },
     expectedEntryState: 'standard-laptop',
     expectedLauncherDeviceClass: 'desktop',
+    expectedHandheldMode: 'standard',
+    expectedCapGovernance: 'binding-visible-cap',
     expectedReason: 'width-match',
   },
   {
@@ -34,6 +43,8 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 1366, height: 1024 },
     expectedEntryState: 'standard-laptop',
     expectedLauncherDeviceClass: 'desktop',
+    expectedHandheldMode: 'standard',
+    expectedCapGovernance: 'binding-visible-cap',
     expectedReason: 'width-match',
   },
   {
@@ -41,6 +52,17 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 1024, height: 900 },
     expectedEntryState: 'tablet-landscape',
     expectedLauncherDeviceClass: 'tablet-landscape',
+    expectedHandheldMode: 'standard',
+    expectedCapGovernance: 'binding-visible-cap',
+    expectedReason: 'width-match',
+  },
+  {
+    label: 'tablet-portrait-900x1024',
+    viewport: { width: 900, height: 1024 },
+    expectedEntryState: 'tablet-portrait-large',
+    expectedLauncherDeviceClass: 'tablet-portrait',
+    expectedHandheldMode: 'standard',
+    expectedCapGovernance: 'binding-visible-cap',
     expectedReason: 'width-match',
   },
   {
@@ -48,6 +70,8 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 430, height: 992 },
     expectedEntryState: 'phone-portrait',
     expectedLauncherDeviceClass: 'phone',
+    expectedHandheldMode: 'single-entry-all-tools',
+    expectedCapGovernance: 'all-tools-drawer',
     expectedReason: 'width-match',
   },
   {
@@ -55,6 +79,8 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 390, height: 844 },
     expectedEntryState: 'phone-portrait',
     expectedLauncherDeviceClass: 'phone',
+    expectedHandheldMode: 'single-entry-all-tools',
+    expectedCapGovernance: 'all-tools-drawer',
     expectedReason: 'width-match',
   },
   {
@@ -62,15 +88,17 @@ const HOSTED_CASES: readonly HostedCase[] = [
     viewport: { width: 1300, height: 420 },
     expectedEntryState: 'phone-landscape',
     expectedLauncherDeviceClass: 'phone',
+    expectedHandheldMode: 'single-entry-all-tools',
+    expectedCapGovernance: 'all-tools-drawer',
     expectedReason: 'short-height-override',
   },
 ] as const;
 
-const CAPTURE_PHASE = process.env.HB_PRODUCTIZATION_CAPTURE_PHASE;
+const CAPTURE_PHASE = process.env.HB_FINAL_PROOF_CAPTURE_PHASE ?? 'final';
 const CAPTURE_ROOT = CAPTURE_PHASE
   ? path.resolve(
       process.cwd(),
-      'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-02/artifacts/prompt-02-desktop-tablet-productization',
+      'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-03-final-hosted-proof-matrix',
       CAPTURE_PHASE,
     )
   : undefined;
@@ -168,7 +196,10 @@ test.describe('HB Homepage hosted fit proof', () => {
         );
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode');
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source');
-        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-cap-governance');
+        await expect(launcherRoot).toHaveAttribute(
+          'data-hbc-launcher-cap-governance',
+          viewportCase.expectedCapGovernance,
+        );
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy');
         await expect(launcherRoot).toHaveAttribute(
           'data-hbc-launcher-device-class',
@@ -177,6 +208,22 @@ test.describe('HB Homepage hosted fit proof', () => {
         await expect(launcherSurface).toHaveAttribute(
           'data-hbc-homepage-launcher-device-class',
           viewportCase.expectedLauncherDeviceClass,
+        );
+        await expect(launcherSurface).toHaveAttribute(
+          'data-hbc-homepage-launcher-overflow-mode',
+          'sheet',
+        );
+        await expect(launcherSurface).toHaveAttribute(
+          'data-hbc-homepage-launcher-handheld-mode',
+          viewportCase.expectedHandheldMode,
+        );
+        await expect(launcherSurface).toHaveAttribute(
+          'data-hbc-homepage-launcher-cap-governance',
+          viewportCase.expectedCapGovernance,
+        );
+        await expect(launcherSurface).toHaveAttribute(
+          'data-hbc-homepage-launcher-version',
+          EXPECTED_LAUNCHER_VERSION,
         );
         const launcherShellStyle = await launcherShell.evaluate((el) => {
           const style = window.getComputedStyle(el);
@@ -189,10 +236,7 @@ test.describe('HB Homepage hosted fit proof', () => {
           };
         });
         if (isHandheldViewport(viewportCase.label)) {
-          await expect(launcherRoot).toHaveAttribute(
-            'data-hbc-launcher-handheld-mode',
-            'single-entry-all-tools',
-          );
+          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'single-entry-all-tools');
           await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
           expect(launcherShellStyle.paddingTop).toBe('0px');
           expect(launcherShellStyle.paddingInlineStart).toBe('0px');
@@ -207,6 +251,16 @@ test.describe('HB Homepage hosted fit proof', () => {
           expect(launcherShellStyle.boxShadow).not.toBe('none');
         }
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy', 'sheet');
+        const visibleCountProof = await launcherRoot.evaluate((el) => ({
+          bandPrimaryCount: Number(el.getAttribute('data-hbc-launcher-primary-count') ?? '-1'),
+          surfaceVisibleCount: Number(
+            document
+              .querySelector('[data-hbc-ui="homepage-launcher"]')
+              ?.getAttribute('data-hbc-homepage-launcher-visible-count') ?? '-1',
+          ),
+        }));
+        expect(visibleCountProof.bandPrimaryCount).toBeGreaterThanOrEqual(0);
+        expect(visibleCountProof.surfaceVisibleCount).toBe(visibleCountProof.bandPrimaryCount);
       }
       await expect(actionsRegion).toHaveAttribute(
         'data-hb-homepage-region-contained-by',
@@ -371,12 +425,30 @@ test.describe('HB Homepage hosted fit proof', () => {
         const launcherBand = document.querySelector('[data-hb-homepage-launcher-band="root"]');
         const launcherSurfaceNode = document.querySelector('[data-hbc-ui="homepage-launcher"]');
         return {
-          launcherHandheldMode: launcherBand?.getAttribute('data-hbc-launcher-handheld-mode') ?? null,
-          launcherDrawerSource: launcherBand?.getAttribute('data-hbc-launcher-drawer-source') ?? null,
-          launcherCapGovernance: launcherBand?.getAttribute('data-hbc-launcher-cap-governance') ?? null,
-          launcherOverflowStrategy: launcherBand?.getAttribute('data-hbc-launcher-overflow-strategy') ?? null,
           launcherVersion: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-version') ?? null,
-          launcherDeviceClass: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-device-class') ?? null,
+          launcherDrawerSource: launcherBand?.getAttribute('data-hbc-launcher-drawer-source') ?? null,
+          launcherDeviceClass:
+            launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-device-class') ??
+            launcherBand?.getAttribute('data-hbc-launcher-device-class') ??
+            null,
+          launcherOverflowMode:
+            launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-overflow-mode') ??
+            launcherBand?.getAttribute('data-hbc-launcher-overflow-strategy') ??
+            null,
+          launcherHandheldMode:
+            launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-handheld-mode') ??
+            launcherBand?.getAttribute('data-hbc-launcher-handheld-mode') ??
+            null,
+          launcherVisibleCount:
+            launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-visible-count') ??
+            launcherBand?.getAttribute('data-hbc-launcher-visible-budget') ??
+            null,
+          launcherCapGovernance:
+            launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-cap-governance') ??
+            launcherBand?.getAttribute('data-hbc-launcher-cap-governance') ??
+            null,
+          launcherBandPrimaryCount: launcherBand?.getAttribute('data-hbc-launcher-primary-count') ?? null,
+          launcherBandOverflowCount: launcherBand?.getAttribute('data-hbc-launcher-overflow-count') ?? null,
           launcherRowPrimitive:
             launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-row-primitive') ?? null,
         };
