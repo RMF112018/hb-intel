@@ -10,6 +10,7 @@ declare const styles: {
   readonly textZone: string;
   readonly logoZone: string;
   readonly logo: string;
+  readonly lockupWordmark: string;
   readonly tagline: string;
   readonly greeting: string;
   readonly greetingLine: string;

@@ -318,7 +318,12 @@ export function HbSignatureHeroHomepage({
           </motion.h1>
         </div>
 
-        {/* Right zone: full-color logo */}
+        {/* Right zone: HB Central brand lockup (Hedrick Brothers mark +
+            "HB Central" wordmark) per Homepage Overlay §6.7. The wordmark
+            is rendered as visible typography beside the mark and marked
+            aria-hidden because the section already exposes "HB Central
+            homepage hero" via aria-label and the img carries the
+            "Hedrick Brothers" alt — no duplicate announcement. */}
         <motion.div
           className={styles.logoZone}
           variants={revealLogo}
@@ -330,6 +335,9 @@ export function HbSignatureHeroHomepage({
             alt="Hedrick Brothers"
             className={styles.logo}
           />
+          <span className={styles.lockupWordmark} aria-hidden="true">
+            HB Central
+          </span>
         </motion.div>
       </div>
     </section>
