@@ -174,17 +174,20 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
     zone: 'operationalAwareness',
     ownerRole: 'Safety and Field Excellence',
     freshnessCadence: 'weekly',
-    rotationExpectation: 'Rotate highlights and reminders with current field priorities.',
+    rotationExpectation: 'Refresh top-line safety posture, spotlight, and secondary signals with current field priorities.',
     zoneIntent: 'Safety and field signal awareness.',
-    allowedContentScope: 'Highlights, recognitions, reminders, notices, indicators, and CTA.',
+    allowedContentScope:
+      'Top-line status summary, one primary spotlight, bounded secondary signals, urgency/context metadata, and follow-on CTA.',
     messages: {
       noData: {
         title: 'No safety and field excellence items configured',
-        description: 'Add safety highlights, recognitions, reminders, or notices in the property pane to publish this section.',
+        description:
+          'Add a top-line summary, primary spotlight, and secondary safety signals in the property pane to publish this section.',
       },
       invalid: {
         title: 'Safety and field excellence configuration is invalid',
-        description: 'Review event types, indicator metadata, freshness fields, and CTA links.',
+        description:
+          'Review top-line summary, spotlight urgency/context metadata, secondary signal fields, and CTA links.',
       },
     },
   },

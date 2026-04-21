@@ -45,32 +45,58 @@ describe('Prompt-07 operational awareness normalization', () => {
     expect(result.featured?.milestones.map((milestone) => milestone.id)).toEqual(['m1']);
   });
 
-  it('filters safety items by audience and drops malformed fields', () => {
+  it('normalizes safety spotlight + bounded secondary signals with urgency and context', () => {
     const result = normalizeSafetyFieldExcellenceConfig(
       {
-        items: [
+        topLineSummary: {
+          statusLabel: ' Safety posture: Attention ',
+          summaryText: ' Two high-priority actions remain open. ',
+        },
+        primarySpotlight: {
+          id: 'field',
+          title: ' Field Notice ',
+          summary: ' Spotlight summary ',
+          urgency: 'urgent',
+          audiences: ['field'],
+          context: { region: ' South ', owner: ' Safety Lead ' },
+          indicator: { label: '  Action Required  ', variant: 'warning' },
+        },
+        secondarySignals: [
           {
-            id: 'field',
-            title: 'Field Notice',
+            id: 'secondary-a',
+            title: 'Secondary A',
             summary: 'Summary',
-            eventType: 'notice',
+            urgency: 'attention',
             audiences: ['field'],
-            indicator: { label: '  Action Required  ', variant: 'warning' },
+            order: 1,
           },
           {
-            id: 'admin',
-            title: 'Admin Notice',
+            id: 'secondary-b',
+            title: 'Secondary B',
             summary: 'Summary',
-            eventType: 'highlight',
+            urgency: 'routine',
             audiences: ['admin'],
           },
+          {
+            id: 'secondary-c',
+            title: 'Secondary C',
+            summary: 'Summary',
+            urgency: 'urgent',
+            audiences: ['field'],
+            order: 2,
+          },
         ],
+        maxSecondaryItems: 1,
       },
       'field',
     );
 
     expect(result.featured?.id).toBe('field');
+    expect(result.featured?.urgency).toBe('urgent');
+    expect(result.featured?.context?.region).toBe('South');
+    expect(result.topLineSummary?.statusLabel).toBe('Safety posture: Attention');
+    expect(result.topLineSummary?.summaryText).toBe('Two high-priority actions remain open.');
     expect(result.featured?.indicator?.label).toBe('Action Required');
-    expect(result.secondary).toEqual([]);
+    expect(result.secondary.map((item) => item.id)).toEqual(['secondary-c']);
   });
 });

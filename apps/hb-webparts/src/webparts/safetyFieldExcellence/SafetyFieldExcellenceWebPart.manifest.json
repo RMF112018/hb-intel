@@ -3,7 +3,7 @@
   "id": "89ca5ff3-21f4-4b23-a953-4b7306ea1029",
   "alias": "SafetyFieldExcellenceWebPart",
   "componentType": "WebPart",
-  "version": "0.0.2.0",
+  "version": "0.0.3.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
@@ -20,28 +20,82 @@
       "hiddenFromToolbox": true,
       "properties": {
         "heading": "Safety and Field Excellence",
-        "maxSecondaryItems": 4,
-        "items": [
+        "maxSecondaryItems": 3,
+        "topLineSummary": {
+          "statusLabel": "Safety posture: Attention",
+          "statusVariant": "warning",
+          "summaryText": "Two active corrective actions remain open across field operations this week.",
+          "lastUpdatedLabel": "Updated 2h ago"
+        },
+        "primarySpotlight": {
+          "id": "safety-spotlight-site-47",
+          "title": "Site 47 scaffold corrective plan in flight",
+          "summary": "Superintendent and safety lead completed root-cause review and launched a three-step scaffold correction sequence.",
+          "compactSummary": "Scaffold corrective sequence underway at Site 47.",
+          "urgency": "urgent",
+          "context": {
+            "region": "South Region",
+            "site": "Site 47",
+            "project": "Riverside Tower",
+            "scope": "Scaffold controls",
+            "owner": "Field Safety Lead"
+          },
+          "indicator": { "label": "Action required today", "variant": "critical" },
+          "freshness": { "source": "live", "updatedAt": "2026-04-21T10:00:00.000Z" },
+          "cta": { "label": "Open corrective action log", "href": "/sites/hb-central/safety/corrective-actions" }
+        },
+        "secondarySignals": [
           {
-            "id": "safety-featured",
-            "title": "Zero-Incident Week: South Region",
-            "summary": "South region crews completed the week with full pre-task planning compliance.",
-            "eventType": "recognition",
-            "featured": true,
+            "id": "safety-signal-toolbox",
+            "title": "Toolbox talk completion below target",
+            "summary": "Five crews still need this week's high-risk task toolbox talk signoff before shift close.",
+            "compactSummary": "Five crews pending toolbox talk signoff.",
+            "urgency": "attention",
             "order": 1,
-            "indicator": { "label": "Audit Complete", "variant": "success" },
-            "freshness": { "source": "live", "updatedAt": "2026-04-04T13:00:00.000Z" },
-            "cta": { "label": "View safety center", "href": "/sites/hb-central/safety" }
+            "context": {
+              "region": "South Region",
+              "scope": "Toolbox talks",
+              "owner": "Area Superintendent"
+            },
+            "indicator": { "label": "Due today", "variant": "warning" },
+            "freshness": { "source": "curated", "updatedAt": "2026-04-21T08:30:00.000Z" },
+            "cta": { "label": "Review pending crews", "href": "/sites/hb-central/safety/toolbox-talks" }
           },
           {
-            "id": "safety-secondary",
-            "title": "Heat Exposure Reminder",
-            "summary": "Shift starts this week require hydration checkpoints before 11:00 AM.",
-            "eventType": "reminder",
+            "id": "safety-signal-audit",
+            "title": "Weekly audit sweep complete in North Region",
+            "summary": "North region audit walkthrough closed with zero critical findings and two minor coaching items.",
+            "compactSummary": "North region audit sweep closed without critical findings.",
+            "urgency": "routine",
             "order": 2,
-            "indicator": { "label": "Action Required", "variant": "warning" }
+            "context": {
+              "region": "North Region",
+              "scope": "Weekly audits",
+              "owner": "Regional Safety Manager"
+            },
+            "indicator": { "label": "On track", "variant": "success" },
+            "freshness": { "source": "live", "updatedAt": "2026-04-20T16:00:00.000Z" }
+          },
+          {
+            "id": "safety-signal-orientation",
+            "title": "Subcontractor orientation backlog reduced",
+            "summary": "Orientation backlog dropped from 14 to 4 workers after weekend onboarding sessions.",
+            "compactSummary": "Orientation backlog reduced to 4 workers.",
+            "urgency": "attention",
+            "order": 3,
+            "context": {
+              "site": "Multi-site",
+              "scope": "Orientation readiness",
+              "owner": "Safety Coordinator"
+            },
+            "indicator": { "label": "Monitor this week", "variant": "warning" },
+            "freshness": { "source": "curated", "updatedAt": "2026-04-21T07:00:00.000Z" }
           }
-        ]
+        ],
+        "sectionCta": {
+          "label": "View safety operations hub",
+          "href": "/sites/hb-central/safety"
+        }
       }
     }
   ]

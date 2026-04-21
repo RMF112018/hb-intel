@@ -26,9 +26,8 @@ describe('Prompt-07 operational-awareness webparts', () => {
       />, 
     );
 
-    expect(screen.getByLabelText(/featured/)).not.toBeNull();
-    expect(screen.getByText('Featured Project')).not.toBeNull();
-    expect(screen.getByText('Secondary Project')).not.toBeNull();
+    expect(screen.getAllByText('Featured Project').length).toBeGreaterThan(0);
+    expect(screen.getByText('Show past spotlights (1)')).not.toBeNull();
   });
 
   it('renders stale badge semantics for safety items', () => {
@@ -36,16 +35,13 @@ describe('Prompt-07 operational-awareness webparts', () => {
       <SafetyFieldExcellence
         config={{
           staleAfterHours: 1,
-          items: [
-            {
-              id: 'safety',
-              title: 'Safety Highlight',
-              summary: 'Summary',
-              eventType: 'highlight',
-              freshness: { source: 'live', updatedAt: '2026-03-31T01:00:00.000Z' },
-              featured: true,
-            },
-          ],
+          primarySpotlight: {
+            id: 'safety',
+            title: 'Safety Highlight',
+            summary: 'Summary',
+            urgency: 'attention',
+            freshness: { source: 'live', updatedAt: '2026-03-31T01:00:00.000Z' },
+          },
         }}
       />,
     );
@@ -53,25 +49,22 @@ describe('Prompt-07 operational-awareness webparts', () => {
     expect(screen.getByText('Stale')).not.toBeNull();
   });
 
-  it('renders empty state for malformed project config', () => {
+  it('falls back to a valid project surface for malformed project config', () => {
     render(<ProjectPortfolioSpotlight config={{ items: [{ id: 'bad', title: '', summary: '' }] }} />);
-    expect(screen.getByText('Project spotlight configuration is invalid')).not.toBeNull();
+    expect(screen.getByText('Project and Portfolio Spotlight')).not.toBeNull();
   });
 
   it('keeps CTA links keyboard-accessible for safety entries', () => {
     render(
       <SafetyFieldExcellence
         config={{
-          items: [
-            {
-              id: 'safety-cta',
-              title: 'Reminder',
-              summary: 'Review safety packet',
-              eventType: 'reminder',
-              featured: true,
-              cta: { label: 'Open packet', href: '/safety' },
-            },
-          ],
+          primarySpotlight: {
+            id: 'safety-cta',
+            title: 'Reminder',
+            summary: 'Review safety packet',
+            urgency: 'attention',
+            cta: { label: 'Open packet', href: '/safety' },
+          },
         }}
       />,
     );

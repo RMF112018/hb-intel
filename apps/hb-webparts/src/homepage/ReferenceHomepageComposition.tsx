@@ -301,22 +301,32 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         <SafetyFieldExcellence
           activeAudience="field"
           config={{
-            items: [
-              {
-                id: 'safety-feature',
-                title: 'Field Excellence Recognition',
-                summary: 'North district crews completed all safety observations before Friday close.',
-                eventType: 'recognition',
-                featured: true,
-                indicator: { label: 'Audit Complete', variant: 'success' },
-                freshness: { source: 'live', updatedAt: '2026-04-05T13:00:00.000Z' },
-                cta: { label: 'Open safety hub', href: '/safety' },
+            topLineSummary: {
+              statusLabel: 'Safety posture: Attention',
+              statusVariant: 'warning',
+              summaryText: 'Field operations are tracking two open corrective actions for this week.',
+              lastUpdatedLabel: 'Updated 1h ago',
+            },
+            primarySpotlight: {
+              id: 'safety-feature',
+              title: 'Field Excellence Recognition',
+              summary: 'North district crews completed all safety observations before Friday close.',
+              urgency: 'attention',
+              context: {
+                region: 'North District',
+                scope: 'Observations',
+                owner: 'Safety Lead',
               },
+              indicator: { label: 'Audit Complete', variant: 'success' },
+              freshness: { source: 'live', updatedAt: '2026-04-05T13:00:00.000Z' },
+              cta: { label: 'Open safety hub', href: '/safety' },
+            },
+            secondarySignals: [
               {
                 id: 'safety-secondary',
                 title: 'Hydration Protocol Reminder',
                 summary: 'Shift planning now requires heat-index check before mobilization.',
-                eventType: 'reminder',
+                urgency: 'attention',
                 indicator: { label: 'Action Required', variant: 'warning' },
                 order: 2,
               },

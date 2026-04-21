@@ -21,10 +21,9 @@ import {
   HbcOperationalSurface,
   HbcPremiumBadge,
   Shield,
-  AlertTriangle,
-  CheckCircle2,
   AlertCircle,
   Info,
+  AlertTriangle,
   Clock,
   type OperationalSignal,
   type OperationalSignalSeverity,
@@ -34,7 +33,11 @@ import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGoverna
 import { normalizeSafetyFieldExcellenceConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
-import type { SafetyFieldExcellenceConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
+import type {
+  SafetyContextMetadata,
+  SafetyFieldExcellenceConfig,
+  SafetyUrgencyLevel,
+} from '../../homepage/webparts/operationalAwarenessContracts.js';
 
 export interface SafetyFieldExcellenceProps {
   config?: Partial<SafetyFieldExcellenceConfig>;
@@ -42,41 +45,39 @@ export interface SafetyFieldExcellenceProps {
   isLoading?: boolean;
 }
 
-type EventType = 'highlight' | 'recognition' | 'reminder' | 'notice';
-
-const EVENT_VARIANT_MAP: Record<EventType, 'info' | 'success' | 'warning' | 'critical'> = {
-  highlight: 'info',
-  recognition: 'success',
-  reminder: 'warning',
-  notice: 'critical',
+const URGENCY_VARIANT_MAP: Record<SafetyUrgencyLevel, 'info' | 'warning' | 'critical'> = {
+  routine: 'info',
+  attention: 'warning',
+  urgent: 'critical',
 };
 
-const EVENT_ICON_MAP: Record<EventType, LucideIcon> = {
-  highlight: Info,
-  recognition: CheckCircle2,
-  reminder: AlertTriangle,
-  notice: AlertCircle,
+const URGENCY_ICON_MAP: Record<SafetyUrgencyLevel, LucideIcon> = {
+  routine: Info,
+  attention: AlertTriangle,
+  urgent: AlertCircle,
 };
 
-const EVENT_SEVERITY_MAP: Record<EventType, OperationalSignalSeverity> = {
-  highlight: 'default',
-  recognition: 'success',
-  reminder: 'warning',
-  notice: 'danger',
+const URGENCY_SIGNAL_SEVERITY_MAP: Record<SafetyUrgencyLevel, OperationalSignalSeverity> = {
+  routine: 'default',
+  attention: 'warning',
+  urgent: 'danger',
 };
 
-const EVENT_EYEBROW_LABEL: Record<EventType, string> = {
-  highlight: 'Field highlight',
-  recognition: 'Safety recognition',
-  reminder: 'Field reminder',
-  notice: 'Critical notice',
+const URGENCY_LABEL_MAP: Record<SafetyUrgencyLevel, string> = {
+  routine: 'Routine focus',
+  attention: 'Needs attention',
+  urgent: 'Urgent priority',
 };
 
-function toEventType(value: string | undefined): EventType {
-  if (value === 'recognition' || value === 'reminder' || value === 'notice') {
-    return value;
-  }
-  return 'highlight';
+function contextLabels(context: SafetyContextMetadata | undefined): string[] {
+  if (!context) return [];
+  return [
+    context.region ? `Region: ${context.region}` : undefined,
+    context.site ? `Site: ${context.site}` : undefined,
+    context.project ? `Project: ${context.project}` : undefined,
+    context.scope ? `Scope: ${context.scope}` : undefined,
+    context.owner ? `Owner: ${context.owner}` : undefined,
+  ].filter((value): value is string => Boolean(value));
 }
 
 export function SafetyFieldExcellence({
@@ -91,28 +92,36 @@ export function SafetyFieldExcellence({
   const normalized = normalizeSafetyFieldExcellenceConfig(config, activeAudience);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
+    const hasAnyInput =
+      Boolean(config?.primarySpotlight) ||
+      Boolean(config?.topLineSummary) ||
+      Boolean(config?.secondarySignals?.length);
     const message = resolveAuthoringMessage(
       'safetyFieldExcellence',
-      config?.items?.length ? 'invalid' : 'noData',
+      hasAnyInput ? 'invalid' : 'noData',
     );
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
   const signals: OperationalSignal[] = normalized.secondary.map((item) => {
-    const eventType = toEventType(item.eventType);
+    const urgency = item.urgency;
+    const context = contextLabels(item.context);
     return {
       id: item.id,
       title: item.title,
-      meta: item.freshnessLabel ?? item.summary.slice(0, 80),
-      icon: EVENT_ICON_MAP[eventType],
-      severity: EVENT_SEVERITY_MAP[eventType],
+      meta:
+        item.freshnessLabel ??
+        context[0] ??
+        item.compactSummary,
+      icon: URGENCY_ICON_MAP[urgency],
+      severity: URGENCY_SIGNAL_SEVERITY_MAP[urgency],
       href: item.cta?.href,
       openInNewTab: item.cta?.openInNewTab,
       badge: (
         <>
           <HbcPremiumBadge
-            label={EVENT_EYEBROW_LABEL[eventType]}
-            status={EVENT_VARIANT_MAP[eventType]}
+            label={URGENCY_LABEL_MAP[urgency]}
+            status={URGENCY_VARIANT_MAP[urgency]}
             size="sm"
           />
           {item.indicator ? (
@@ -126,31 +135,29 @@ export function SafetyFieldExcellence({
       ),
     };
   });
-
-  const featuredEventType = normalized.featured
-    ? toEventType(normalized.featured.eventType)
-    : 'highlight';
+  const featuredUrgency = normalized.featured?.urgency ?? 'routine';
 
   return (
     <HbcOperationalSurface
       title={normalized.heading}
       icon={Shield}
-      mastheadEyebrow="Field Safety"
-      latestUpdated={normalized.featured?.freshnessLabel}
+      mastheadEyebrow={normalized.topLineSummary?.statusLabel ?? 'Field Safety'}
+      latestUpdated={normalized.topLineSummary?.lastUpdatedLabel ?? normalized.featured?.freshnessLabel}
+      action={normalized.sectionCta}
       variant="safety-homepage"
       featured={
         normalized.featured
           ? {
               title: normalized.featured.title,
               description: normalized.featured.summary,
-              eyebrow: EVENT_EYEBROW_LABEL[featuredEventType],
-              icon: EVENT_ICON_MAP[featuredEventType],
-              severity: EVENT_SEVERITY_MAP[featuredEventType],
+              eyebrow: URGENCY_LABEL_MAP[featuredUrgency],
+              icon: URGENCY_ICON_MAP[featuredUrgency],
+              severity: URGENCY_SIGNAL_SEVERITY_MAP[featuredUrgency],
               badge: (
                 <>
                   <HbcPremiumBadge
-                    label={EVENT_EYEBROW_LABEL[featuredEventType]}
-                    status={EVENT_VARIANT_MAP[featuredEventType]}
+                    label={URGENCY_LABEL_MAP[featuredUrgency]}
+                    status={URGENCY_VARIANT_MAP[featuredUrgency]}
                   />
                   {normalized.featured.indicator ? (
                     <HbcPremiumBadge
@@ -164,9 +171,13 @@ export function SafetyFieldExcellence({
                 </>
               ),
               metaItems: [
+                ...(normalized.topLineSummary?.summaryText
+                  ? [{ label: normalized.topLineSummary.summaryText }]
+                  : []),
                 ...(normalized.featured.metadata
                   ? [{ label: normalized.featured.metadata }]
                   : []),
+                ...contextLabels(normalized.featured.context).map((label) => ({ label })),
                 ...(normalized.featured.freshnessLabel
                   ? [{ label: normalized.featured.freshnessLabel, icon: Clock }]
                   : []),

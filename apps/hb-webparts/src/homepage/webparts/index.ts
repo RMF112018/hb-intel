@@ -162,9 +162,12 @@ export type {
   ProjectMilestone,
   ProjectPortfolioSpotlightConfig,
   ProjectPortfolioSpotlightItem,
-  SafetyFieldEventType,
+  SafetyContextMetadata,
   SafetyFieldExcellenceConfig,
-  SafetyFieldExcellenceItem,
+  SafetyPrimarySpotlight,
+  SafetySecondarySignal,
+  SafetyTopLineSummary,
+  SafetyUrgencyLevel,
 } from './operationalAwarenessContracts.js';
 export type {
   PriorityActionGroup,

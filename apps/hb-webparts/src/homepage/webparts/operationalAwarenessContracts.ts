@@ -65,25 +65,58 @@ export interface ProjectPortfolioSpotlightConfig {
   allProjectsUrl?: string;
 }
 
-export type SafetyFieldEventType = 'highlight' | 'recognition' | 'reminder' | 'notice';
+export type SafetyUrgencyLevel = 'routine' | 'attention' | 'urgent';
 
-export interface SafetyFieldExcellenceItem {
+export interface SafetyContextMetadata {
+  region?: string;
+  site?: string;
+  project?: string;
+  scope?: string;
+  owner?: string;
+}
+
+export interface SafetyTopLineSummary {
+  statusLabel: string;
+  statusVariant?: OperationalStatusVariant;
+  summaryText: string;
+  lastUpdatedLabel?: string;
+}
+
+export interface SafetyPrimarySpotlight {
   id: string;
   title: string;
   summary: string;
-  eventType: SafetyFieldEventType;
+  urgency?: SafetyUrgencyLevel;
+  context?: SafetyContextMetadata;
+  compactSummary?: string;
   metadata?: string;
   indicator?: OperationalStatusSignal;
   freshness?: OperationalFreshness;
   cta?: HomepageCtaLink;
-  featured?: boolean;
+  audiences?: string[];
+}
+
+export interface SafetySecondarySignal {
+  id: string;
+  title: string;
+  summary: string;
+  urgency?: SafetyUrgencyLevel;
+  context?: SafetyContextMetadata;
+  compactSummary?: string;
+  metadata?: string;
+  indicator?: OperationalStatusSignal;
+  freshness?: OperationalFreshness;
+  cta?: HomepageCtaLink;
   order?: number;
   audiences?: string[];
 }
 
 export interface SafetyFieldExcellenceConfig {
   heading?: string;
-  items?: SafetyFieldExcellenceItem[];
+  topLineSummary?: SafetyTopLineSummary;
+  primarySpotlight?: SafetyPrimarySpotlight;
+  secondarySignals?: SafetySecondarySignal[];
+  sectionCta?: HomepageCtaLink;
   maxSecondaryItems?: number;
   staleAfterHours?: number;
 }
