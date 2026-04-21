@@ -4,10 +4,10 @@ import type { ShellPreset } from './shellTypes.js';
  * DEFAULT_PRESET — Phase-11 Wave-01 locked three-row flagship layout.
  *
  * Each of the six approved homepage surfaces appears exactly once.
- * Row 2 declares `orientation: 'right-dominant'`; Prompt-02 wires the
- * CSS column templates and validation to honor that handedness.
- * Until Prompt-02 lands, downstream CSS still renders left-dominant —
- * the preset identity itself is the authoritative target shape.
+ * Row 2 intentionally keeps Company Pulse as the primary major slot and
+ * Safety Field Excellence as the secondary minor slot in a right-dominant
+ * pair. This is the locked flagship placement contract for the rebuilt
+ * Safety surface integration in the homepage shell.
  */
 export const DEFAULT_PRESET: ShellPreset = {
   id: 'default-v2',

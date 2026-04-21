@@ -182,8 +182,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     prominenceCeiling: 'anchor',
     firstLaneEligible: false,
     firstLanePromotionRank: 80,
-    // Wave-01 shell-legality contract: paired at tablet-landscape floor
-    // (minor slot ≈ 327 px at 980). Wave-02 owns premium polish.
+    // Rebuilt safety surface contract: shell can continue pairing at the
+    // tablet-landscape floor (minor slot ≈ 327 px at 980), while the child
+    // consumer maps shell render modes to the surface's explicit
+    // standard/compact/minimal behavior.
     comfort: {
       minWidth: 300,
       preferredWidth: 720,

@@ -53,6 +53,8 @@ export const EDITORIAL_FOCUS_PRESET: ShellPreset = {
       id: 'band-safety-field',
       semanticRole: 'operational-spotlight',
       recipe: 'stacked-full',
+      // Safety is intentionally promoted to a full-width primary band in this
+      // preset (editorial-first above, safety follows as a standalone lane).
       slots: [
         {
           id: 'slot-safety-field-excellence',
@@ -111,6 +113,7 @@ export const OPERATIONS_SAFETY_PRESET: ShellPreset = {
       id: 'band-operational-spotlight',
       semanticRole: 'operational-spotlight',
       recipe: 'feature-pair',
+      orientation: 'left-dominant',
       slots: [
         {
           id: 'slot-project-portfolio-spotlight',
@@ -245,6 +248,8 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
       id: 'band-safety-field',
       semanticRole: 'operational-spotlight',
       recipe: 'stacked-full',
+      // Linear preset keeps safety explicit as a dedicated full-width band
+      // rather than a residual minor companion.
       slots: [
         {
           id: 'slot-safety-field-excellence',
@@ -345,11 +350,9 @@ export function listApprovedPresets(): readonly PresetDescription[] {
 
 export const PRESET_CANONICAL_POLICY = {
   /**
-   * Bands with no active occupant are non-canonical. They are tolerated for
-   * back-compat (e.g., DEFAULT_PRESET still keeps an empty newsroom band to
-   * satisfy historical `protectedBandSemantics`), but validation surfaces
-   * NON_CANONICAL_EMPTY_BAND info-diagnostics so future authoring can
-   * eliminate them.
+   * Bands with no active occupant are non-canonical.
+   * Current approved presets, including DEFAULT_PRESET, are expected to
+   * avoid empty bands entirely.
    */
   allowEmptyBands: false,
 
