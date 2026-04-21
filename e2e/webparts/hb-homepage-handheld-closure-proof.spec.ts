@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const EXPECTED_LAUNCHER_VERSION = '1.1.64.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.66.0';
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
-  'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-01/artifacts/prompt-03-hosted-proof',
+  'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-03-final-hosted-proof-matrix/handheld-closure',
 );
 
 type ProofCase = {
@@ -70,9 +70,29 @@ test.describe('HB Homepage handheld closure proof', () => {
       const trigger = page.getByRole('button', { name: /HB Toolbox/i });
       if (await trigger.count()) {
         await trigger.click();
+        const drawer = page.locator('[role="dialog"][data-hbc-homepage-launcher-sheet-content="all-tools"]');
+        await expect(drawer).toBeVisible();
         await expect(
-          page.locator('[role="dialog"][data-hbc-homepage-launcher-sheet-content="all-tools"]'),
-        ).toBeVisible();
+          drawer.locator('[data-hbc-ui="homepage-launcher-drawer-rail"]').first(),
+        ).toHaveAttribute('data-hbc-launcher-drawer-layout', 'compact-rail');
+        const handheldDrawerMetrics = await drawer.evaluate((el) => {
+          const rect = el.getBoundingClientRect();
+          const firstTile = el.querySelector('a[data-hbc-ui="homepage-launcher-tile"]') as HTMLElement | null;
+          const tileRect = firstTile?.getBoundingClientRect();
+          return {
+            drawerHeight: rect.height,
+            viewportHeight: window.innerHeight,
+            tileWidth: tileRect?.width ?? 0,
+            tileHeight: tileRect?.height ?? 0,
+          };
+        });
+        expect(handheldDrawerMetrics.drawerHeight).toBeLessThanOrEqual(
+          Math.round(handheldDrawerMetrics.viewportHeight * 0.9),
+        );
+        expect(handheldDrawerMetrics.tileWidth).toBeGreaterThanOrEqual(68);
+        expect(handheldDrawerMetrics.tileWidth).toBeLessThanOrEqual(120);
+        expect(handheldDrawerMetrics.tileHeight).toBeGreaterThanOrEqual(68);
+        expect(handheldDrawerMetrics.tileHeight).toBeLessThanOrEqual(120);
         await page.keyboard.press('Escape');
       }
 

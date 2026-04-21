@@ -4,10 +4,10 @@ import path from 'node:path';
 
 const SITE_URL = process.env.HB_HOMEPAGE_LIVE_SITE_URL ?? 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
 const REQUIRE_AUTH = process.env.HB_HOMEPAGE_LIVE_REQUIRE_AUTH !== 'false';
-const EXPECTED_LAUNCHER_VERSION = '1.1.50.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.66.0';
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
-  'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-01/artifacts/prompt-03-hosted-proof',
+  'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-04-live-sharepoint-handheld-proof',
 );
 
 type HostedCase = {
@@ -87,6 +87,17 @@ test.describe('Homepage launcher handheld proof — live SharePoint', () => {
       expect(markerSnapshot.launcher.handheldMode).toBe(viewportCase.expectedHandheldMode);
       expect(markerSnapshot.band.capGovernance).toBe(viewportCase.expectedCapGovernance);
       expect(markerSnapshot.launcher.capGovernance).toBe(viewportCase.expectedCapGovernance);
+
+      const trigger = page.getByRole('button', { name: /HB Toolbox/i });
+      if (await trigger.count()) {
+        await trigger.click();
+        const drawer = page.locator('[role="dialog"][data-hbc-homepage-launcher-sheet-content="all-tools"]');
+        await expect(drawer).toBeVisible({ timeout: 60000 });
+        await expect(
+          drawer.locator('[data-hbc-ui="homepage-launcher-drawer-rail"]').first(),
+        ).toHaveAttribute('data-hbc-launcher-drawer-layout', 'compact-rail');
+        await page.keyboard.press('Escape');
+      }
 
       const screenshotPath = path.join(ARTIFACT_ROOT, `${viewportCase.label}.png`);
       const markersPath = path.join(ARTIFACT_ROOT, `${viewportCase.label}.markers.json`);

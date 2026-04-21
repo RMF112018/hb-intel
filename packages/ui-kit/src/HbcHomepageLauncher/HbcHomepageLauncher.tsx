@@ -91,7 +91,11 @@ function buildOverflowSections(
       items: [item],
     });
   }
-  return Array.from(byKey.values());
+  return Array.from(byKey.values()).sort((a, b) => {
+    if (a.key === '__other_tools') return 1;
+    if (b.key === '__other_tools') return -1;
+    return a.title.localeCompare(b.title);
+  });
 }
 
 export function HbcHomepageLauncher(
@@ -120,6 +124,7 @@ export function HbcHomepageLauncher(
     overflowSections && overflowSections.length > 0
       ? overflowSections
       : buildOverflowSections(drawerItems);
+  const totalToolCount = drawerItems.length;
   const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
   const visibleTileCount = handheldSingleEntry
     ? visibleCount
@@ -147,8 +152,28 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
       data-hbc-homepage-launcher-drawer-category="company-tools"
       data-hbc-homepage-launcher-surface-grammar="flagship-utility-v1"
+      data-hbc-homepage-launcher-display-class={
+        handheldSingleEntry ? 'handheld-toolbox' : 'desktop-priority-rail'
+      }
       style={rootStyle}
     >
+      <header
+        className={styles.launcherHeader}
+        data-hbc-homepage-launcher-header="visible"
+        data-hbc-homepage-launcher-header-mode={handheldSingleEntry ? 'compact' : 'standard'}
+      >
+        <div className={styles.launcherHeaderText}>
+          <span className={styles.launcherHeaderEyebrow}>Homepage tools</span>
+          <h2 className={styles.launcherHeaderTitle}>{title ?? 'Priority Actions'}</h2>
+        </div>
+        <span
+          className={styles.launcherHeaderMeta}
+          data-hbc-homepage-launcher-tool-count={totalToolCount}
+          aria-label={`${totalToolCount} tools available`}
+        >
+          {totalToolCount}
+        </span>
+      </header>
       <div className={launcherBand()} role="list">
         <div className={styles.bandScroller} data-hbc-launcher-band-mode={handheldMode}>
           {renderedPrimary.map((tile) => (

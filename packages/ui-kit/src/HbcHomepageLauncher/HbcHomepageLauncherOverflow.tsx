@@ -16,7 +16,6 @@ import {
   useRole,
   useInteractions,
   FloatingFocusManager,
-  FloatingPortal,
 } from '@floating-ui/react';
 import type {
   HbcHomepageLauncherOverflowProps,
@@ -57,7 +56,11 @@ function buildOverflowSections(
       items: [item],
     });
   }
-  return Array.from(grouped.values());
+  return Array.from(grouped.values()).sort((a, b) => {
+    if (a.key === UNGROUPED_SECTION_KEY) return 1;
+    if (b.key === UNGROUPED_SECTION_KEY) return -1;
+    return a.title.localeCompare(b.title);
+  });
 }
 
 function DrawerOverflow({
@@ -109,6 +112,9 @@ function DrawerOverflow({
         className={clsx(
           launcherTile({ family: 'secondaryOverflowEntry' }),
           styles.overflowTile,
+          !handheldLinearTrigger && resolvedOverflowMode === 'more-tools'
+            ? styles.overflowTileMoreToolsDesktop
+            : undefined,
           handheldLinearTrigger ? styles.overflowTileLinearHandheld : undefined,
           className,
         )}
@@ -156,93 +162,110 @@ function DrawerOverflow({
           />
         </span>
       </motion.button>
-      <FloatingPortal>
-        <AnimatePresence>
-          {open ? (
-            <FloatingFocusManager context={context} modal returnFocus>
-              <div className={styles.sheetLayer} data-hbc-homepage-launcher-sheet-root="true">
-                <motion.div
-                  className={styles.sheetBackdrop}
-                  data-hbc-homepage-launcher-sheet-backdrop="true"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={backdropTransition}
-                  onClick={closeSheet}
-                  aria-hidden="true"
-                />
-                <motion.div
-                  id={dialogId}
-                  ref={refs.setFloating}
-                  className={styles.sheetSurface}
-                  initial={{ y: prefersReducedMotion ? 0 : '100%' }}
-                  animate={{ y: 0 }}
-                  exit={{ y: prefersReducedMotion ? 0 : '100%' }}
-                  transition={surfaceTransition}
-                  {...getFloatingProps()}
-                  aria-labelledby={titleId}
-                  data-hbc-homepage-launcher-sheet-content="all-tools"
-                  data-hbc-launcher-drawer-opaque="true"
-                  data-hbc-launcher-drawer-elevation="3"
-                  data-hbc-launcher-drawer-category="company-tools"
-                >
-                  <header className={styles.sheetHeader}>
-                    <div className={styles.sheetHeading}>
-                      <span
-                        id={titleId}
-                        className={styles.sheetTitle}
-                        data-hbc-launcher-drawer-category-label="true"
-                      >
-                        {DRAWER_CATEGORY_LABEL}
-                      </span>
-                    </div>
+      <AnimatePresence>
+        {open ? (
+          <FloatingFocusManager context={context} modal returnFocus>
+            <div className={styles.sheetLayer} data-hbc-homepage-launcher-sheet-root="true">
+              <motion.div
+                className={styles.sheetBackdrop}
+                data-hbc-homepage-launcher-sheet-backdrop="true"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={backdropTransition}
+                onClick={closeSheet}
+                aria-hidden="true"
+              />
+              <motion.div
+                id={dialogId}
+                ref={refs.setFloating}
+                className={clsx(
+                  styles.sheetSurface,
+                  !handheldLinearTrigger && resolvedOverflowMode === 'more-tools'
+                    ? styles.sheetSurfaceDesktop
+                    : undefined,
+                )}
+                initial={{ y: prefersReducedMotion ? 0 : '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: prefersReducedMotion ? 0 : '100%' }}
+                transition={surfaceTransition}
+                {...getFloatingProps()}
+                aria-labelledby={titleId}
+                data-hbc-homepage-launcher-sheet-content="all-tools"
+                data-hbc-launcher-drawer-opaque="true"
+                data-hbc-launcher-drawer-elevation="3"
+                data-hbc-launcher-drawer-category="company-tools"
+                data-hbc-launcher-drawer-display-class={
+                  handheldLinearTrigger ? 'handheld-sheet' : 'desktop-company-tools'
+                }
+              >
+                <header className={styles.sheetHeader}>
+                  <div className={styles.sheetHeading}>
                     <span
-                      className={styles.sheetHeaderCount}
-                      aria-label={`${totalTools} tools`}
+                      id={titleId}
+                      className={styles.sheetTitle}
+                      data-hbc-launcher-drawer-category-label="true"
                     >
-                      {totalTools}
+                      {DRAWER_CATEGORY_LABEL}
                     </span>
-                    <button
-                      type="button"
-                      className={styles.sheetClose}
-                      onClick={closeSheet}
-                      aria-label={`Close ${triggerLabel}`}
-                    >
-                      <X size={16} strokeWidth={2.4} aria-hidden="true" />
-                    </button>
-                  </header>
-                  <div
-                    className={styles.drawerBody}
-                    data-hbc-ui="homepage-launcher-overflow-sections"
+                  </div>
+                  <span
+                    className={styles.sheetHeaderCount}
+                    aria-label={`${totalTools} tools`}
                   >
-                    {drawerSections.map((section) => (
-                      <section
-                        key={section.key}
-                        className={styles.drawerSection}
-                        data-hbc-ui="homepage-launcher-overflow-section"
-                        data-hbc-overflow-category-key={section.key}
-                        data-hbc-overflow-category-size={section.items.length}
-                      >
-                        <header className={styles.drawerSectionHeader}>
-                          <h3
-                            className={styles.drawerSectionTitle}
-                            data-hbc-launcher-overflow-section-title="true"
-                          >
-                            {section.title}
-                          </h3>
-                          <span
-                            className={styles.drawerSectionCount}
-                            data-hbc-launcher-overflow-section-count="true"
-                            aria-label={`${section.items.length} tools`}
-                          >
-                            {section.items.length}
-                          </span>
-                        </header>
-                        <div className={styles.drawerSectionRailRoot}>
+                    {totalTools}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.sheetClose}
+                    onClick={closeSheet}
+                    aria-label={`Close ${triggerLabel}`}
+                  >
+                    <X size={16} strokeWidth={2.4} aria-hidden="true" />
+                  </button>
+                </header>
+                <div
+                  className={styles.drawerBody}
+                  data-hbc-ui="homepage-launcher-overflow-sections"
+                >
+                  {drawerSections.map((section) => (
+                    <section
+                      key={section.key}
+                      className={styles.drawerSection}
+                      data-hbc-ui="homepage-launcher-overflow-section"
+                      data-hbc-overflow-category-key={section.key}
+                      data-hbc-overflow-category-size={section.items.length}
+                    >
+                      <header className={styles.drawerSectionHeader}>
+                        <h3
+                          className={styles.drawerSectionTitle}
+                          data-hbc-launcher-overflow-section-title="true"
+                        >
+                          {section.title}
+                        </h3>
+                        <span
+                          className={styles.drawerSectionCount}
+                          data-hbc-launcher-overflow-section-count="true"
+                          aria-label={`${section.items.length} tools`}
+                        >
+                          {section.items.length}
+                        </span>
+                      </header>
+                      <div className={styles.drawerRailRoot}>
+                        <div
+                          className={styles.drawerRailViewport}
+                          role="region"
+                          tabIndex={0}
+                          aria-label={`${section.title} tools rail`}
+                          data-hbc-launcher-drawer-scroll="x"
+                        >
                           <div
-                            className={styles.drawerSectionRail}
+                            className={styles.drawerTileRail}
                             data-hbc-ui="homepage-launcher-drawer-rail"
-                            data-hbc-launcher-drawer-layout="grouped-sections"
+                            data-hbc-launcher-drawer-layout="compact-rail"
+                            data-hbc-launcher-drawer-density={
+                              handheldLinearTrigger ? 'tight' : 'compact'
+                            }
                             role="list"
                             aria-label={`${section.title} tools`}
                           >
@@ -257,15 +280,15 @@ function DrawerOverflow({
                             ))}
                           </div>
                         </div>
-                      </section>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
-            </FloatingFocusManager>
-          ) : null}
-        </AnimatePresence>
-      </FloatingPortal>
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </FloatingFocusManager>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

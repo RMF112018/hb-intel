@@ -263,7 +263,11 @@ export function buildLauncherOverflowSections(
       items: [item],
     });
   }
-  return Array.from(byKey.values());
+  return Array.from(byKey.values()).sort((a, b) => {
+    if (a.key === '__other_tools') return 1;
+    if (b.key === '__other_tools') return -1;
+    return a.title.localeCompare(b.title);
+  });
 }
 
 export interface LauncherBudgetOptions {

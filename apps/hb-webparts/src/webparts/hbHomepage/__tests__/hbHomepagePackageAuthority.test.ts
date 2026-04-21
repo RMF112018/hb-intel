@@ -20,6 +20,14 @@ const WEBPART_MANIFEST = resolve(
   ROOT,
   'apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json',
 );
+const WEBPART_MANIFEST_RUNTIME_COPY = resolve(
+  ROOT,
+  'apps/hb-webparts/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json',
+);
+const LAUNCHER_CONSTANTS = resolve(
+  ROOT,
+  'packages/ui-kit/src/HbcHomepageLauncher/constants.ts',
+);
 
 interface PackageSolution {
   solution: {
@@ -35,6 +43,13 @@ interface WebpartManifest {
 describe('hb-intel-homepage version authority', () => {
   const solution = JSON.parse(readFileSync(PACKAGE_SOLUTION, 'utf8')) as PackageSolution;
   const manifest = JSON.parse(readFileSync(WEBPART_MANIFEST, 'utf8')) as WebpartManifest;
+  const runtimeManifest = JSON.parse(
+    readFileSync(WEBPART_MANIFEST_RUNTIME_COPY, 'utf8'),
+  ) as WebpartManifest;
+  const launcherConstantsSource = readFileSync(LAUNCHER_CONSTANTS, 'utf8');
+  const launcherVersionMatch = launcherConstantsSource.match(
+    /HBC_HOMEPAGE_LAUNCHER_VERSION\s*=\s*'([^']+)'/,
+  );
 
   it('solution.version and features[0].version are identical', () => {
     expect(solution.solution.version).toBe(solution.solution.features[0].version);
@@ -42,6 +57,18 @@ describe('hb-intel-homepage version authority', () => {
 
   it('HbHomepageWebPart.manifest.json::version matches solution.version', () => {
     expect(manifest.version).toBe(solution.solution.version);
+  });
+
+  it('runtime hb-webparts manifest copy version matches solution.version', () => {
+    expect(runtimeManifest.version).toBe(solution.solution.version);
+  });
+
+  it('duplicate homepage manifest copies remain in lockstep', () => {
+    expect(runtimeManifest.version).toBe(manifest.version);
+  });
+
+  it('launcher runtime version marker matches authoritative solution.version', () => {
+    expect(launcherVersionMatch?.[1]).toBe(solution.solution.version);
   });
 
   it('the authoritative solution.version uses the SPFx 4-part schema', () => {

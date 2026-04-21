@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 // Keep in lockstep with packages/ui-kit/src/HbcHomepageLauncher/constants.ts
-const EXPECTED_LAUNCHER_VERSION = '1.1.64.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.66.0';
 
 interface HostedCase {
   readonly label: string;
@@ -415,7 +415,33 @@ test.describe('HB Homepage hosted fit proof', () => {
           .first()
           .locator('[data-hbc-ui="homepage-launcher-drawer-rail"]');
         await expect(firstSectionRail).toHaveAttribute('role', 'list');
+        await expect(firstSectionRail).toHaveAttribute('data-hbc-launcher-drawer-layout', 'compact-rail');
         await expect(firstSectionRail.locator('a[data-hbc-ui="homepage-launcher-tile"]').first()).toBeVisible();
+        const drawerMetrics = await drawer.evaluate((el) => {
+          const rect = el.getBoundingClientRect();
+          const body = el.querySelector('[data-hbc-ui="homepage-launcher-overflow-sections"]') as HTMLElement | null;
+          const firstTile = el.querySelector('a[data-hbc-ui="homepage-launcher-tile"]') as HTMLElement | null;
+          const tileRect = firstTile?.getBoundingClientRect();
+          return {
+            drawerHeight: rect.height,
+            viewportHeight: window.innerHeight,
+            drawerWidth: rect.width,
+            viewportWidth: window.innerWidth,
+            bodyScrollableY: body ? body.scrollHeight >= body.clientHeight : false,
+            tileWidth: tileRect?.width ?? 0,
+            tileHeight: tileRect?.height ?? 0,
+          };
+        });
+        const maxDrawerHeightRatio = isHandheldViewport(viewportCase.label) ? 0.9 : 0.78;
+        expect(drawerMetrics.drawerHeight).toBeLessThanOrEqual(
+          Math.round(drawerMetrics.viewportHeight * maxDrawerHeightRatio),
+        );
+        expect(drawerMetrics.drawerWidth).toBeLessThanOrEqual(drawerMetrics.viewportWidth);
+        expect(drawerMetrics.bodyScrollableY).toBe(true);
+        expect(drawerMetrics.tileWidth).toBeGreaterThanOrEqual(72);
+        expect(drawerMetrics.tileWidth).toBeLessThanOrEqual(130);
+        expect(drawerMetrics.tileHeight).toBeGreaterThanOrEqual(72);
+        expect(drawerMetrics.tileHeight).toBeLessThanOrEqual(130);
         const openedDrawer = await page.screenshot({ fullPage: true });
         await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-drawer`, {
           body: openedDrawer,

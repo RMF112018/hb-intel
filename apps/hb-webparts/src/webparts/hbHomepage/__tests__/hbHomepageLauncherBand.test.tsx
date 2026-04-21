@@ -344,7 +344,7 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     const launcher = container.querySelector('[data-test-launcher="mock"]');
     expect(launcher?.getAttribute('data-test-overflow-sections')).toBe('4');
     expect(launcher?.getAttribute('data-test-overflow-section-keys')).toBe(
-      'approvals,field,__other_tools,quality',
+      'approvals,field,quality,__other_tools',
     );
   });
 

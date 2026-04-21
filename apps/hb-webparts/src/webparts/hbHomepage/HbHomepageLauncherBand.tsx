@@ -178,6 +178,9 @@ export function HbHomepageLauncherBand({
       data-hbc-launcher-drawer-source={drawerSource}
       data-hbc-launcher-cap-governance={capGovernance}
       data-hbc-launcher-overflow-strategy={overflowStrategy}
+      data-hbc-launcher-display-class={
+        handheldMode === 'single-entry-all-tools' ? 'handheld-toolbox' : 'desktop-priority-rail'
+      }
       data-hbc-launcher-width={Math.round(entryContainer.width)}
       data-hbc-launcher-width-authoritative={Math.round(entryContainer.authoritativeWidth)}
       data-hbc-launcher-width-inline-inset-total={Math.round(entryContainer.shellInlineInsetTotal)}

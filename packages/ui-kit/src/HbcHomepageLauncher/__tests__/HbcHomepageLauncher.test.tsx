@@ -122,6 +122,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const dialog = screen.getByRole('dialog', { name: /Company Tools/i });
     expect(dialog).toBeInTheDocument();
     expect(dialog.getAttribute('data-hbc-launcher-drawer-category')).toBe('company-tools');
+    expect(dialog.getAttribute('data-hbc-launcher-drawer-display-class')).toBe(
+      'desktop-company-tools',
+    );
     expect(screen.getByRole('link', { name: /Submit Timesheet/ })).toBeInTheDocument();
     expect(screen.getByText('Approvals')).toBeInTheDocument();
     expect(screen.getByText('Field Ops')).toBeInTheDocument();
@@ -364,7 +367,10 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       const rail = section.querySelector('[data-hbc-ui="homepage-launcher-drawer-rail"]');
       expect(rail).not.toBeNull();
       expect(rail?.getAttribute('role')).toBe('list');
-      expect(rail?.getAttribute('data-hbc-launcher-drawer-layout')).toBe('grouped-sections');
+      expect(rail?.getAttribute('data-hbc-launcher-drawer-layout')).toBe('compact-rail');
+      expect(
+        section.querySelector('[data-hbc-launcher-drawer-scroll="x"]')?.getAttribute('role'),
+      ).toBe('region');
       expect(rail?.querySelectorAll('a[data-hbc-ui="homepage-launcher-tile"]').length).toBeGreaterThan(0);
     }
   });

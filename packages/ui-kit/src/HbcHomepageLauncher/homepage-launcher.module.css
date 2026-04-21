@@ -32,7 +32,11 @@
   --hbc-hl-drawer-pad-y: 24px;
   --hbc-hl-drawer-rail-gap: 14px;
   --hbc-hl-drawer-scrollbar-size: 9px;
-  --hbc-hl-drawer-max-inline: 1180px;
+  --hbc-hl-drawer-max-inline: 1080px;
+  --hbc-hl-drawer-max-block: 72vh;
+  --hbc-hl-drawer-tile-size: 94px;
+  --hbc-hl-drawer-icon-size: 34px;
+  --hbc-hl-drawer-caption-size: 0.625rem;
   --hbc-hl-surface-pad-inline: 8px;
   --hbc-hl-surface-pad-block: 8px;
   --hbc-hl-surface-radius: 16px;
@@ -48,9 +52,64 @@
     );
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--hbc-hl-text);
+}
+
+.launcherHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px;
+}
+
+.launcherHeaderText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.launcherHeaderEyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-hl-brand-rgb), 0.88);
+}
+
+.launcherHeaderTitle {
+  margin: 0;
+  font-size: clamp(0.92rem, 0.66rem + 0.45vw, 1.08rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: rgba(var(--hbc-hl-brand-deep-rgb), 0.95);
+}
+
+.launcherHeaderMeta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: linear-gradient(
+    160deg,
+    rgba(var(--hbc-hl-brand-rgb), 0.16) 0%,
+    rgba(var(--hbc-hl-brand-rgb), 0.1) 100%
+  );
+  border: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.22);
+  color: rgba(var(--hbc-hl-brand-deep-rgb), 0.95);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .band {
@@ -233,8 +292,8 @@
 }
 
 .tileIconDrawer {
-  width: var(--hbc-hl-drawer-icon-size, var(--hbc-hl-icon-size));
-  height: var(--hbc-hl-drawer-icon-size, var(--hbc-hl-icon-size));
+  width: var(--hbc-hl-drawer-icon-size, 34px);
+  height: var(--hbc-hl-drawer-icon-size, 34px);
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -275,16 +334,17 @@
 }
 
 .drawerTileTitle {
-  font-size: var(--hbc-hl-drawer-caption-size, var(--hbc-hl-caption-size));
-  line-height: 1.28;
-  display: block;
-  overflow: visible;
-  text-overflow: clip;
-  -webkit-line-clamp: unset;
-  -webkit-box-orient: initial;
+  width: 100%;
+  font-size: var(--hbc-hl-drawer-caption-size, 0.625rem);
+  line-height: 1.22;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   white-space: normal;
   text-wrap: balance;
-  word-break: normal;
+  word-break: break-word;
   hyphens: manual;
   font-weight: 600;
   letter-spacing: -0.002em;
@@ -329,6 +389,16 @@
   border-radius: 12px;
   padding: 0 16px;
   row-gap: 0;
+}
+
+.overflowTileMoreToolsDesktop {
+  border-color: rgba(var(--hbc-hl-orange-rgb), 0.82);
+  background:
+    linear-gradient(140deg, rgb(var(--hbc-hl-orange-rgb)) 0%, rgb(var(--hbc-hl-brand-rgb)) 74%),
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.28) 0%, transparent 48%);
+  box-shadow:
+    0 2px 5px rgba(8, 18, 35, 0.34),
+    0 16px 30px rgba(var(--hbc-hl-orange-rgb), 0.34);
 }
 
 .overflowTriggerInlineContent {
@@ -428,8 +498,8 @@
 
 .sheetSurface {
   position: relative;
-  width: min(var(--hbc-hl-drawer-max-inline), calc(100vw - 24px));
-  max-height: calc(100vh - 48px);
+  width: min(var(--hbc-hl-drawer-max-inline), calc(100dvw - 24px));
+  max-height: min(var(--hbc-hl-drawer-max-block), calc(100dvh - 24px));
   display: flex;
   flex-direction: column;
   background-color: #102a4b;
@@ -443,6 +513,14 @@
     0 -2px 0 rgba(255, 255, 255, 0.05) inset;
   overflow: hidden;
   color: #ffffff;
+}
+
+.sheetSurfaceDesktop {
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+  background-image:
+    linear-gradient(180deg, #19487b 0%, #0f2c53 54%, #0c2343 100%),
+    radial-gradient(circle at 14% 2%, rgba(109, 178, 239, 0.18) 0%, transparent 42%);
 }
 
 .sheetHeader {
@@ -525,22 +603,22 @@
 }
 
 .drawerBody {
-  --hbc-hl-drawer-tile-size: var(--hbc-hl-tile-size);
-  --hbc-hl-drawer-icon-size: var(--hbc-hl-icon-size);
-  --hbc-hl-drawer-caption-size: var(--hbc-hl-caption-size);
   padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x)
     var(--hbc-hl-drawer-pad-y);
   background: transparent;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 14px;
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
 
 .drawerSection {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  padding-bottom: 4px;
 }
 
 .drawerSectionHeader {
@@ -552,7 +630,7 @@
 
 .drawerSectionTitle {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -564,33 +642,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 22px;
-  padding: 0 8px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1;
   color: #ffffff;
 }
 
-.drawerSectionRailRoot {
-  width: 100%;
-}
-
-.drawerSectionRail {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: var(--hbc-hl-drawer-rail-gap);
-}
-
 .drawerRailRoot {
   width: 100%;
-  max-width: calc(var(--hbc-hl-drawer-max-inline) - (var(--hbc-hl-drawer-pad-x) * 2));
-  margin-inline: auto;
 }
 
 .drawerRailViewport {
@@ -601,7 +666,10 @@
   overscroll-behavior-x: contain;
   overscroll-behavior-y: none;
   scroll-snap-type: x mandatory;
-  padding-block: 2px 4px;
+  padding-block: 2px 6px;
+  border-radius: 10px;
+  background: rgba(7, 18, 36, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .drawerRailViewport:focus-visible {
@@ -611,18 +679,14 @@
 }
 
 .drawerTileRail {
-  --hbc-hl-drawer-tile-size: var(--hbc-hl-tile-size);
-  --hbc-hl-drawer-rail-gap: 14px;
-  --hbc-hl-drawer-icon-size: var(--hbc-hl-icon-size);
-  --hbc-hl-drawer-caption-size: var(--hbc-hl-caption-size);
   display: flex;
   align-items: stretch;
   gap: var(--hbc-hl-drawer-rail-gap);
   width: max-content;
   min-width: 100%;
-  justify-content: center;
-  margin-inline: auto;
-  padding-inline: 1px;
+  justify-content: flex-start;
+  margin-inline: 0;
+  padding: 6px;
 }
 
 .drawerRailItem {
@@ -631,8 +695,9 @@
 }
 
 .drawerTile {
+  width: var(--hbc-hl-drawer-tile-size);
   min-height: var(--hbc-hl-drawer-tile-size);
-  height: auto;
+  height: var(--hbc-hl-drawer-tile-size);
   scroll-snap-align: start;
 }
 
@@ -677,10 +742,14 @@
     --hbc-hl-icon-size: 36px;
     --hbc-hl-caption-size: 0.625rem;
     --hbc-hl-caption-line-height: 1.15;
-    --hbc-hl-drawer-pad-x: 18px;
-    --hbc-hl-drawer-pad-y: 16px;
+    --hbc-hl-drawer-pad-x: 14px;
+    --hbc-hl-drawer-pad-y: 12px;
     --hbc-hl-drawer-rail-gap: 10px;
     --hbc-hl-drawer-scrollbar-size: 7px;
+    --hbc-hl-drawer-tile-size: 78px;
+    --hbc-hl-drawer-icon-size: 28px;
+    --hbc-hl-drawer-caption-size: 0.5625rem;
+    --hbc-hl-drawer-max-block: 78vh;
     --hbc-hl-handheld-trigger-icon-size: 22px;
     --hbc-hl-handheld-trigger-label-size: 0.6875rem;
     --hbc-hl-handheld-trigger-chevron-size: 10px;
@@ -688,6 +757,28 @@
     --hbc-hl-surface-pad-inline: 0px;
     --hbc-hl-surface-pad-block: 0px;
     --hbc-hl-surface-radius: 0px;
+  }
+
+  .launcherHeader {
+    align-items: center;
+    padding-inline: 4px;
+    gap: 8px;
+  }
+
+  .launcherHeaderEyebrow {
+    font-size: 0.625rem;
+    letter-spacing: 0.05em;
+  }
+
+  .launcherHeaderTitle {
+    font-size: 0.86rem;
+  }
+
+  .launcherHeaderMeta {
+    min-width: 28px;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 0.75rem;
   }
 
   .bandScroller {
@@ -721,8 +812,8 @@
   }
 
   .sheetSurface {
-    width: 100%;
-    max-height: calc(100vh - 24px);
+    width: calc(100dvw - 8px);
+    max-height: min(var(--hbc-hl-drawer-max-block), calc(100dvh - 12px));
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
   }
@@ -753,15 +844,18 @@
     --hbc-hl-icon-size: 40px;
     --hbc-hl-caption-size: 0.65625rem;
     --hbc-hl-caption-line-height: 1.18;
-    --hbc-hl-drawer-pad-x: 26px;
-    --hbc-hl-drawer-pad-y: 20px;
+    --hbc-hl-drawer-pad-x: 20px;
+    --hbc-hl-drawer-pad-y: 16px;
     --hbc-hl-drawer-rail-gap: 12px;
+    --hbc-hl-drawer-tile-size: 84px;
+    --hbc-hl-drawer-icon-size: 30px;
+    --hbc-hl-drawer-caption-size: 0.59375rem;
     --hbc-hl-surface-pad-inline: 8px;
     --hbc-hl-surface-pad-block: 8px;
     --hbc-hl-surface-radius: 14px;
   }
 
-  .sheetSurface { width: min(100vw - 24px, 980px); }
+  .sheetSurface { width: min(100dvw - 20px, 920px); }
 }
 
 /* tablet landscape */
@@ -772,6 +866,9 @@
     --hbc-hl-caption-size: 0.675rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 12px;
+    --hbc-hl-drawer-tile-size: 90px;
+    --hbc-hl-drawer-icon-size: 32px;
+    --hbc-hl-drawer-caption-size: 0.625rem;
     --hbc-hl-surface-pad-inline: 10px;
     --hbc-hl-surface-pad-block: 9px;
     --hbc-hl-surface-radius: 15px;
@@ -786,6 +883,9 @@
     --hbc-hl-caption-size: 0.6875rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 14px;
+    --hbc-hl-drawer-tile-size: 96px;
+    --hbc-hl-drawer-icon-size: 34px;
+    --hbc-hl-drawer-caption-size: 0.625rem;
     --hbc-hl-surface-pad-inline: 12px;
     --hbc-hl-surface-pad-block: 10px;
     --hbc-hl-surface-radius: 16px;
@@ -800,7 +900,10 @@
     --hbc-hl-caption-size: 0.75rem;
     --hbc-hl-caption-line-height: 1.24;
     --hbc-hl-drawer-rail-gap: 16px;
-    --hbc-hl-drawer-max-inline: 1360px;
+    --hbc-hl-drawer-max-inline: 1220px;
+    --hbc-hl-drawer-tile-size: 104px;
+    --hbc-hl-drawer-icon-size: 37px;
+    --hbc-hl-drawer-caption-size: 0.65625rem;
     --hbc-hl-surface-pad-inline: 14px;
     --hbc-hl-surface-pad-block: 11px;
     --hbc-hl-surface-radius: 18px;
@@ -825,12 +928,30 @@
     --hbc-hl-icon-size: 37px;
     --hbc-hl-caption-size: 0.625rem;
     --hbc-hl-caption-line-height: 1.15;
-    --hbc-hl-drawer-pad-y: 14px;
+    --hbc-hl-drawer-pad-y: 10px;
     --hbc-hl-drawer-rail-gap: 10px;
+    --hbc-hl-drawer-tile-size: 76px;
+    --hbc-hl-drawer-icon-size: 27px;
+    --hbc-hl-drawer-caption-size: 0.5625rem;
+    --hbc-hl-drawer-max-block: 82vh;
     --hbc-hl-handheld-trigger-icon-size: 21px;
     --hbc-hl-handheld-trigger-label-size: 0.65625rem;
     --hbc-hl-handheld-trigger-chevron-size: 10px;
     --hbc-hl-handheld-trigger-height: 44px;
+  }
+
+  .launcherHeader {
+    gap: 8px;
+  }
+
+  .launcherHeaderTitle {
+    font-size: 0.84rem;
+  }
+
+  .launcherHeaderMeta {
+    min-width: 26px;
+    height: 24px;
+    font-size: 0.75rem;
   }
 
   .tile,
@@ -848,7 +969,7 @@
     line-height: 1.22;
   }
 
-  .sheetSurface { max-height: calc(100vh - 16px); }
+  .sheetSurface { max-height: min(var(--hbc-hl-drawer-max-block), calc(100dvh - 12px)); }
   .drawerBody { padding-top: var(--hbc-hl-drawer-pad-y); padding-bottom: var(--hbc-hl-drawer-pad-y); }
 }
 
@@ -858,6 +979,7 @@
   flex: 1 1 100%;
   justify-content: center;
 }
+
 
 .bandScroller[data-hbc-launcher-band-mode="single-entry-all-tools"] .overflowTile {
   width: 100%;
