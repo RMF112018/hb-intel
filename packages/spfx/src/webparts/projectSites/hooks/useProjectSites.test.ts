@@ -29,6 +29,10 @@ vi.mock('@hbc/auth/spfx', () => ({
   getSpfxContext: () => ({}),
 }));
 
+vi.mock('@microsoft/sp-http', () => ({
+  SPHttpClient: { configurations: { v1: {} } },
+}));
+
 import { useQuery } from '@tanstack/react-query';
 import { useProjectSites } from './useProjectSites.js';
 import { scopeFromYear, SCOPE_ALL, type IProjectSiteEntry } from '../types.js';

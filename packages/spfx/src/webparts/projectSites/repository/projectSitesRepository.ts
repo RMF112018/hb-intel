@@ -2,8 +2,8 @@
  * SharePoint I/O seam for the Project Sites surface.
  *
  * This module is the **I/O layer only**: it fetches raw Projects list
- * rows and raw Legacy Project Fallback Registry rows via PnPjs, narrows
- * the registry rows into adapter candidates
+ * rows and raw Legacy Project Fallback Registry rows, narrows the
+ * registry rows into adapter candidates
  * (`legacyFallbackRegistryAdapter.ts`), and returns the pair as
  * `IProjectSitesQueryResult`. All merge, dedup, source-classification,
  * synthetic legacy-only emission, and launch-target resolution live in
@@ -12,19 +12,21 @@
  *
  * Retrieval contract (post-cap):
  *   - Year scope (`{ kind: 'year', year }`) and All-Projects scope
- *     (`{ kind: 'all' }`) both drain the eligible dataset via PnPjs
- *     async iteration with a per-request page size of
- *     `PROJECT_SITES_PAGE_SIZE` (5000 — SharePoint's max `$top`).
+ *     (`{ kind: 'all' }`) both drain the eligible dataset by following
+ *     SharePoint REST `__next` continuation links explicitly via the
+ *     SPFx `spHttpClient`. We deliberately avoid PnPjs v4's
+ *     `[Symbol.asyncIterator]` because its second-page fetch reuses an
+ *     SPCollection without the response binder, which silently truncates
+ *     the drain after the first page.
+ *   - Per-request page size is `PROJECT_SITES_PAGE_SIZE` (5000 —
+ *     SharePoint REST's documented `$top` maximum).
  *   - A defense-in-depth ceiling (`PROJECT_SITES_ALL_SCOPE_CEILING`)
  *     prevents runaway fetches; if hit, the result carries
  *     `bounded: true` so the UI can render an honest overflow notice.
  *   - The previous silent `.top(2000)` cap on All-Projects is removed —
  *     `All Projects` search is now truly full-scope within the ceiling.
  */
-import { spfi, SPFx } from '@pnp/sp';
-import '@pnp/sp/webs';
-import '@pnp/sp/lists';
-import '@pnp/sp/items';
+import { SPHttpClient } from '@microsoft/sp-http';
 import { getSpfxContext } from '@hbc/auth/spfx';
 import type { IRawProjectSiteItem, ProjectSitesScope } from '../types.js';
 import {
@@ -85,68 +87,177 @@ function toCandidates(
   return out;
 }
 
+interface ISpfxRequester {
+  /** Absolute URL of the current SharePoint web. */
+  webUrl: string;
+  /** SPFx HTTP client used for REST calls. */
+  client: SPHttpClient;
+}
+
 /**
- * Drain a PnPjs `_Items` query via async iteration up to `ceiling` rows.
+ * Read the SPFx context once and return everything the drain needs.
  *
- * PnPjs v4 exposes `[Symbol.asyncIterator]` on `_Items`, yielding one
- * page per iteration. We accumulate rows until either the iterator is
- * exhausted (the natural end of the dataset) or the ceiling is reached.
- * Returns `bounded: true` only when the ceiling actually halts the drain
- * — never as a soft signal.
+ * Fail loudly if any expected field is missing — that is a bootstrap
+ * problem, not an empty-list problem, and silently returning zero rows
+ * would just reproduce the original silent-truncation bug in a new
+ * shape.
  */
-async function drainPaged<T>(
-  source: AsyncIterable<T[]>,
+function getSpfxRequester(): ISpfxRequester {
+  const context = getSpfxContext();
+  const webUrl = context.pageContext?.web?.absoluteUrl;
+  const client = context.spHttpClient;
+  if (typeof webUrl !== 'string' || webUrl.length === 0) {
+    throw new Error('Project Sites repository: SPFx pageContext.web.absoluteUrl is missing.');
+  }
+  if (!client) {
+    throw new Error('Project Sites repository: SPFx spHttpClient is missing.');
+  }
+  return { webUrl, client };
+}
+
+/**
+ * Build the initial REST URL for a list-items query.
+ *
+ * Composes `$select`, optional `$filter`, optional `$orderby`, and
+ * `$top`. The result is an absolute URL ready for `SPHttpClient.get`.
+ */
+function buildItemsUrl(args: {
+  webUrl: string;
+  listTitle: string;
+  select: readonly string[];
+  filter?: string;
+  orderBy?: { field: string; ascending: boolean };
+  top: number;
+}): string {
+  const { webUrl, listTitle, select, filter, orderBy, top } = args;
+  const params: string[] = [];
+  if (select.length > 0) {
+    params.push(`$select=${encodeURIComponent(select.join(','))}`);
+  }
+  if (filter && filter.length > 0) {
+    params.push(`$filter=${encodeURIComponent(filter)}`);
+  }
+  if (orderBy && orderBy.field.length > 0) {
+    params.push(
+      `$orderby=${encodeURIComponent(`${orderBy.field} ${orderBy.ascending ? 'asc' : 'desc'}`)}`,
+    );
+  }
+  params.push(`$top=${top}`);
+  const qs = params.join('&');
+  const encodedTitle = encodeURIComponent(listTitle).replace(/'/g, "''");
+  return `${webUrl}/_api/web/lists/getByTitle('${encodedTitle}')/items?${qs}`;
+}
+
+interface IListItemsPage<T> {
+  rows: T[];
+  /** Absolute URL of the next page, or null when the dataset is exhausted. */
+  nextLink: string | null;
+}
+
+/**
+ * Fetch a single page of list items via `SPHttpClient`, parsing both
+ * the modern (`value` / `odata.nextLink`) and verbose
+ * (`d.results` / `d.__next`) response shapes. Returning the raw
+ * `nextLink` lets the drain follow continuation tokens explicitly.
+ */
+async function fetchItemsPage<T>(
+  requester: ISpfxRequester,
+  url: string,
+): Promise<IListItemsPage<T>> {
+  const response = await requester.client.get(url, SPHttpClient.configurations.v1);
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new Error(
+      `Project Sites repository: ${response.status} ${response.statusText} fetching ${url}` +
+        (body ? ` — ${body.slice(0, 200)}` : ''),
+    );
+  }
+  const json = await response.json();
+  const value: T[] = Array.isArray(json?.value)
+    ? json.value
+    : Array.isArray(json?.d?.results)
+    ? json.d.results
+    : [];
+  const nextLinkRaw =
+    typeof json?.['odata.nextLink'] === 'string'
+      ? json['odata.nextLink']
+      : typeof json?.d?.__next === 'string'
+      ? json.d.__next
+      : null;
+  return {
+    rows: value,
+    nextLink: nextLinkRaw && nextLinkRaw.length > 0 ? nextLinkRaw : null,
+  };
+}
+
+/**
+ * Drain a list-items query by following SharePoint's `__next`
+ * continuation token until either the dataset is exhausted or the
+ * defense-in-depth ceiling halts the fetch.
+ *
+ * Returns `bounded: true` only when the ceiling is the stop reason —
+ * landing exactly on the ceiling with no more pages remaining is still
+ * `bounded: false` (truthful: we drained the dataset).
+ */
+async function drainAllItems<T>(
+  requester: ISpfxRequester,
+  initialUrl: string,
   ceiling: number,
 ): Promise<{ rows: T[]; bounded: boolean }> {
   const rows: T[] = [];
-  for await (const page of source) {
-    if (Array.isArray(page) && page.length > 0) {
-      rows.push(...page);
+  let url: string | null = initialUrl;
+  // Hard cap on the number of paged requests we'll issue, just in case
+  // SharePoint produces a continuation cycle. The floor of 64 keeps
+  // legitimate small-ceiling tests and unusual low-item-per-page
+  // responses well under the safety net; the per-page computation
+  // covers production-sized drains.
+  const maxRequests = Math.max(64, Math.ceil(ceiling / PROJECT_SITES_PAGE_SIZE) + 2);
+  let requestsMade = 0;
+  while (url) {
+    if (requestsMade >= maxRequests) {
+      // Hit our own request-count safety net before the data ceiling.
+      // Treat as a bounded result so the UI surfaces an honest signal.
+      return { rows, bounded: true };
     }
-    // Overflow (strictly past the ceiling) means the dataset is larger
-    // than we're willing to hold client-side: trim and signal bounded.
-    // Landing exactly on the ceiling is NOT overflow — if the iterator
-    // has nothing else to yield we'll exit the loop naturally with
-    // bounded=false, which is the truthful signal.
+    const page: IListItemsPage<T> = await fetchItemsPage<T>(requester, url);
+    requestsMade += 1;
+    if (page.rows.length > 0) {
+      rows.push(...page.rows);
+    }
     if (rows.length > ceiling) {
       rows.length = ceiling;
       return { rows, bounded: true };
     }
+    url = page.nextLink;
   }
   return { rows, bounded: false };
 }
 
 class SharePointProjectSitesRepository implements IProjectSitesRepository {
   async fetchDistinctYears(): Promise<number[]> {
-    const context = getSpfxContext();
-    const sp = spfi().using(SPFx(context));
+    const requester = getSpfxRequester();
 
     // Year discovery is fallback-inclusive: the Filter-by-Year dropdown
     // should offer every year that has addressable inventory — Projects
     // list rows *or* approved legacy fallback registry rows. Both are
-    // drained in parallel via paged iteration (year discovery would
-    // otherwise miss every year populated by rows beyond the first page).
-    const projectsItems = sp.web.lists
-      .getByTitle(PROJECTS_LIST_TITLE)
-      .items.select(SP_PROJECTS_FIELDS.YEAR)
-      .top(PROJECT_SITES_PAGE_SIZE);
-
-    const registryItems = sp.web.lists
-      .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
-      .items
-      .select(LEGACY_FALLBACK_REGISTRY_FIELD.LEGACY_YEAR)
-      .filter(`IsActive eq 1 and MatchStatus eq 'matched'`)
-      .top(PROJECT_SITES_PAGE_SIZE);
+    // drained in parallel so latency stays off the critical path.
+    const projectsUrl = buildItemsUrl({
+      webUrl: requester.webUrl,
+      listTitle: PROJECTS_LIST_TITLE,
+      select: [SP_PROJECTS_FIELDS.YEAR],
+      top: PROJECT_SITES_PAGE_SIZE,
+    });
+    const registryUrl = buildItemsUrl({
+      webUrl: requester.webUrl,
+      listTitle: LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
+      select: [LEGACY_FALLBACK_REGISTRY_FIELD.LEGACY_YEAR],
+      filter: `IsActive eq 1 and MatchStatus eq 'matched'`,
+      top: PROJECT_SITES_PAGE_SIZE,
+    });
 
     const [projectDrain, registryDrain] = await Promise.all([
-      drainPaged<IRawProjectSiteItem>(
-        projectsItems as unknown as AsyncIterable<IRawProjectSiteItem[]>,
-        PROJECT_SITES_ALL_SCOPE_CEILING,
-      ),
-      drainPaged<Record<string, unknown>>(
-        registryItems as unknown as AsyncIterable<Array<Record<string, unknown>>>,
-        PROJECT_SITES_ALL_SCOPE_CEILING,
-      ),
+      drainAllItems<IRawProjectSiteItem>(requester, projectsUrl, PROJECT_SITES_ALL_SCOPE_CEILING),
+      drainAllItems<Record<string, unknown>>(requester, registryUrl, PROJECT_SITES_ALL_SCOPE_CEILING),
     ]);
 
     const years = new Set<number>();
@@ -165,27 +276,27 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
   }
 
   async fetchProjectSites(scope: ProjectSitesScope): Promise<IProjectSitesQueryResult> {
-    const context = getSpfxContext();
-    const sp = spfi().using(SPFx(context));
+    const requester = getSpfxRequester();
 
-    const baseListItems = sp.web.lists
-      .getByTitle(PROJECTS_LIST_TITLE)
-      .items
-      .select(...PROJECT_SITES_SELECT_FIELDS);
+    const projectsUrl = buildItemsUrl({
+      webUrl: requester.webUrl,
+      listTitle: PROJECTS_LIST_TITLE,
+      select: PROJECT_SITES_SELECT_FIELDS,
+      filter: scope.kind === 'year' ? `${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}` : undefined,
+      orderBy: scope.kind === 'all' ? { field: SP_PROJECTS_FIELDS.YEAR, ascending: false } : undefined,
+      top: PROJECT_SITES_PAGE_SIZE,
+    });
 
-    const scopedItems = scope.kind === 'year'
-      ? baseListItems.filter(`${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}`)
-      : baseListItems.orderBy(SP_PROJECTS_FIELDS.YEAR, false);
-
-    const projectDrain = await drainPaged<IRawProjectSiteItem>(
-      scopedItems.top(PROJECT_SITES_PAGE_SIZE) as unknown as AsyncIterable<IRawProjectSiteItem[]>,
+    const projectDrain = await drainAllItems<IRawProjectSiteItem>(
+      requester,
+      projectsUrl,
       PROJECT_SITES_ALL_SCOPE_CEILING,
     );
 
     // The registry-side fetch is keyed on `LegacyYear`. For year-scoped
-    // queries we fetch exactly that year; for All-Projects scope we scan
-    // every year present in the (now-fully-drained) project rows. The
-    // resolver handles synthetic legacy-only emission.
+    // queries we fetch exactly that year; for All-Projects scope we
+    // fetch one batch per year present in the drained project rows.
+    // The resolver handles synthetic legacy-only emission.
     const years = scope.kind === 'year'
       ? [scope.year]
       : Array.from(
@@ -199,14 +310,16 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
     const fallbackRowGroups = years.length > 0
       ? await Promise.all(
           years.map(async (year) => {
-            const registryItems = sp.web.lists
-              .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
-              .items
-              .select(...LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS)
-              .filter(`IsActive eq 1 and MatchStatus eq 'matched' and LegacyYear eq ${year}`)
-              .top(PROJECT_SITES_PAGE_SIZE);
-            const drain = await drainPaged<IRawLegacyFallbackRegistryItem>(
-              registryItems as unknown as AsyncIterable<IRawLegacyFallbackRegistryItem[]>,
+            const url = buildItemsUrl({
+              webUrl: requester.webUrl,
+              listTitle: LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
+              select: LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS,
+              filter: `IsActive eq 1 and MatchStatus eq 'matched' and LegacyYear eq ${year}`,
+              top: PROJECT_SITES_PAGE_SIZE,
+            });
+            const drain = await drainAllItems<IRawLegacyFallbackRegistryItem>(
+              requester,
+              url,
               PROJECT_SITES_ALL_SCOPE_CEILING,
             );
             return drain.rows;
@@ -237,6 +350,8 @@ export function setProjectSitesRepositoryForTests(repo: IProjectSitesRepository 
   repositorySingleton = repo;
 }
 
-// Exported for unit testing — drains a paged async iterable up to a
-// ceiling and reports whether the ceiling was the stop reason.
-export const __drainPagedForTests = drainPaged;
+// Exported for unit testing — exposes the URL builder and the drain
+// helper so tests can assert query composition and pagination behavior
+// without a SharePoint context.
+export const __buildItemsUrlForTests = buildItemsUrl;
+export const __drainAllItemsForTests = drainAllItems;

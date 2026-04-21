@@ -1,13 +1,55 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@microsoft/sp-http', () => ({
+  SPHttpClient: { configurations: { v1: {} } },
+}));
+
 import {
-  __drainPagedForTests,
+  __buildItemsUrlForTests,
+  __drainAllItemsForTests,
   buildLegacyFallbackLookup,
   pickBestLegacyFallbackCandidate,
   toLegacyFallbackCandidate,
 } from './projectSitesRepository.js';
 
-async function* pages<T>(...pageBatches: T[][]): AsyncGenerator<T[]> {
-  for (const batch of pageBatches) yield batch;
+/**
+ * Fake SPFx requester: fabricates paged responses from a pre-built
+ * chain of batches. `pages[0]` is returned for the initial URL;
+ * subsequent calls resolve to the URL this fake wrote into the
+ * previous response's `odata.nextLink`. When the chain is exhausted,
+ * the last response carries `nextLink: null`, terminating the drain.
+ */
+function makeFakeRequester<T>(pages: T[][]): {
+  webUrl: string;
+  client: {
+    get: (url: string) => Promise<Response>;
+  };
+  getCallCount(): number;
+} {
+  let callCount = 0;
+  const nextLinkFor = (idx: number) =>
+    idx < pages.length - 1 ? `https://fake.test/page/${idx + 1}` : null;
+  return {
+    webUrl: 'https://fake.test',
+    client: {
+      get: (url: string) => {
+        let idx = 0;
+        const match = /page\/(\d+)$/.exec(url);
+        if (match) idx = Number.parseInt(match[1], 10);
+        callCount += 1;
+        const body = {
+          value: pages[idx] ?? [],
+          'odata.nextLink': nextLinkFor(idx),
+        };
+        const response = new Response(JSON.stringify(body), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+        return Promise.resolve(response);
+      },
+    },
+    getCallCount: () => callCount,
+  };
 }
 
 describe('projectSitesRepository fallback selection', () => {
@@ -126,30 +168,61 @@ describe('projectSitesRepository fallback selection', () => {
     expect(candidate?.matchMethod).toBeNull();
   });
 
-  it('drains a paged async iterable to completion when ceiling is comfortably above the dataset', async () => {
-    const result = await __drainPagedForTests(
-      pages([1, 2, 3], [4, 5], [6]),
+  it('builds the initial REST URL with encoded select, filter, orderby, and top', () => {
+    const url = __buildItemsUrlForTests({
+      webUrl: 'https://tenant.sharepoint.com/sites/hb',
+      listTitle: 'Projects',
+      select: ['Id', 'Title', 'Year'],
+      filter: 'Year eq 2025',
+      orderBy: { field: 'Year', ascending: false },
+      top: 5000,
+    });
+    expect(url).toContain("getByTitle('Projects')/items?");
+    expect(url).toContain('%24select=Id%2CTitle%2CYear'.replace('%24', '$') || '$select=Id%2CTitle%2CYear');
+    expect(url).toContain('$select=Id%2CTitle%2CYear');
+    expect(url).toContain('$filter=Year%20eq%202025');
+    expect(url).toContain('$orderby=Year%20desc');
+    expect(url).toContain('$top=5000');
+  });
+
+  it('escapes single-quotes in list titles to survive SharePoint REST', () => {
+    const url = __buildItemsUrlForTests({
+      webUrl: 'https://tenant.sharepoint.com',
+      listTitle: "Bob's Projects",
+      select: ['Id'],
+      top: 100,
+    });
+    expect(url).toContain("getByTitle('Bob''s%20Projects')");
+  });
+
+  it('drains the full dataset by following nextLink continuation tokens', async () => {
+    const fake = makeFakeRequester<number>([[1, 2, 3], [4, 5], [6]]);
+    const result = await __drainAllItemsForTests<number>(
+      fake as unknown as Parameters<typeof __drainAllItemsForTests>[0],
+      'https://fake.test/initial',
       100,
     );
     expect(result.rows).toEqual([1, 2, 3, 4, 5, 6]);
     expect(result.bounded).toBe(false);
+    expect(fake.getCallCount()).toBe(3);
   });
 
   it('signals bounded=true when the ceiling halts the drain mid-dataset', async () => {
-    // Three pages of two items would naturally yield six rows; ceiling
-    // of four must trim to exactly four and report bounded=true.
-    const result = await __drainPagedForTests(
-      pages([1, 2], [3, 4], [5, 6]),
+    const fake = makeFakeRequester<number>([[1, 2], [3, 4], [5, 6]]);
+    const result = await __drainAllItemsForTests<number>(
+      fake as unknown as Parameters<typeof __drainAllItemsForTests>[0],
+      'https://fake.test/initial',
       4,
     );
     expect(result.rows).toEqual([1, 2, 3, 4]);
     expect(result.bounded).toBe(true);
   });
 
-  it('reports bounded=false when the natural end coincides with the ceiling', async () => {
-    // Exactly-at-ceiling means we drained the dataset; no overflow.
-    const result = await __drainPagedForTests(
-      pages([1, 2], [3, 4]),
+  it('reports bounded=false when the dataset ends exactly at the ceiling', async () => {
+    const fake = makeFakeRequester<number>([[1, 2], [3, 4]]);
+    const result = await __drainAllItemsForTests<number>(
+      fake as unknown as Parameters<typeof __drainAllItemsForTests>[0],
+      'https://fake.test/initial',
       4,
     );
     expect(result.rows).toEqual([1, 2, 3, 4]);
@@ -157,8 +230,10 @@ describe('projectSitesRepository fallback selection', () => {
   });
 
   it('handles empty pages without inflating the result', async () => {
-    const result = await __drainPagedForTests(
-      pages<number>([], [1], [], [2, 3]),
+    const fake = makeFakeRequester<number>([[], [1], [], [2, 3]]);
+    const result = await __drainAllItemsForTests<number>(
+      fake as unknown as Parameters<typeof __drainAllItemsForTests>[0],
+      'https://fake.test/initial',
       100,
     );
     expect(result.rows).toEqual([1, 2, 3]);

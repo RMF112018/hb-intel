@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@microsoft/sp-core-library": "^1.20.0",
+    "@microsoft/sp-http": "^1.20.0",
     "@microsoft/sp-property-pane": "^1.20.0",
     "@microsoft/sp-webpart-base": "^1.20.0",
     "@testing-library/jest-dom": "^6.6.0",

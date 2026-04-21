@@ -20,6 +20,10 @@ vi.mock('@hbc/auth/spfx', () => ({
   getSpfxContext: () => ({}),
 }));
 
+vi.mock('@microsoft/sp-http', () => ({
+  SPHttpClient: { configurations: { v1: {} } },
+}));
+
 import { useQuery } from '@tanstack/react-query';
 import { useAvailableYears } from './useAvailableYears.js';
 
