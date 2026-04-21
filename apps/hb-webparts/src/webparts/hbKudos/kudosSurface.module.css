@@ -606,6 +606,23 @@
   color: var(--hbk-text-secondary);
 }
 
+.pulseStory {
+  margin: 0;
+  padding: 6px 4px 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--hbk-text-secondary);
+}
+
+.pulsePrompt {
+  margin: 0;
+  padding: 2px 4px 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--hbk-text-heading);
+}
+
 .recentRow {
   position: relative;
   display: flex;

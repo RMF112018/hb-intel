@@ -38,6 +38,8 @@ declare const styles: {
   readonly pulseStatValue: string;
   readonly pulseStatLabel: string;
   readonly pulseEmpty: string;
+  readonly pulseStory: string;
+  readonly pulsePrompt: string;
   readonly recentRow: string;
   readonly recentBody: string;
   readonly recentRecipient: string;

@@ -184,6 +184,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
   // public list is featured; remaining (up to 7) flow to the recent rail.
   const sortedPublic = sortByRecency(hydrate(publicKudos));
   const { featured: featuredEntry, recent: recentEntries } = selectFeaturedAndRecent(sortedPublic);
+  const hydratedArchive = hydrate(archiveKudos);
 
   const handleOpenArticle = (entry: KudosEntry): void => {
     setDetailEntry(entry);
@@ -207,6 +208,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         heading={heading}
         featured={featuredEntry}
         recent={recentEntries}
+        archiveCount={hydratedArchive.length}
         onGiveKudos={composerActions.open}
         onCelebrate={handleCelebrate}
         celebrateLoading={celebrating}
@@ -215,7 +217,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
 
       {showArchive ? (
         <ArchiveList
-          entries={hydrate(archiveKudos)}
+          entries={hydratedArchive}
           searchText={archiveSearch}
           onSearchChange={setArchiveSearch}
           onOpenEntry={handleOpenArticle}

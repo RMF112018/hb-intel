@@ -66,6 +66,7 @@ export interface PublicKudosSurfaceProps {
   heading: string;
   featured?: KudosEntry;
   recent: KudosEntry[];
+  archiveCount?: number;
   onGiveKudos: () => void;
   onCelebrate?: (kudosId: string) => void;
   celebrateLoading?: boolean;
@@ -142,10 +143,57 @@ function dedupeEntries(featured: KudosEntry | undefined, recent: KudosEntry[]): 
   return Array.from(byId.values());
 }
 
+interface LightDataStory {
+  title: string;
+  body: string;
+  prompt: string;
+}
+
+function buildLightDataStory(input: {
+  hasFeatured: boolean;
+  recentCount: number;
+  archiveCount: number;
+  activityCount: number;
+  latestActivityDate: string;
+}): LightDataStory {
+  const { hasFeatured, recentCount, archiveCount, activityCount, latestActivityDate } = input;
+  if (hasFeatured && recentCount === 0) {
+    return {
+      title: 'No new recognition this week',
+      body: latestActivityDate
+        ? `The current spotlight still reflects active appreciation from ${latestActivityDate}.`
+        : 'The current spotlight still reflects active appreciation across HB.',
+      prompt: 'Add one new kudos today to keep this week’s recognition story moving.',
+    };
+  }
+  if (!hasFeatured && activityCount === 0 && archiveCount > 0) {
+    return {
+      title: 'This week is ready for its first spotlight',
+      body: `${archiveCount} past ${archiveCount === 1 ? 'recognition is' : 'recognitions are'} available in the archive while new kudos builds.`,
+      prompt: 'Use Give Kudos to start the next recognition moment on the homepage.',
+    };
+  }
+  if (!hasFeatured && activityCount === 0 && archiveCount === 0) {
+    return {
+      title: 'Start this week at HB',
+      body: 'The recognition board is open and ready for the first story.',
+      prompt: 'Share one meaningful kudos to set the tone for the team.',
+    };
+  }
+  return {
+    title: recentCount <= 2 ? 'Recognition is active and building' : 'Recognition pulse this week',
+    body: latestActivityDate
+      ? `Recent activity was updated ${latestActivityDate} and continues to grow.`
+      : 'Recent activity is starting to build across teams.',
+    prompt: 'Keep momentum going by recognizing a teammate’s impact.',
+  };
+}
+
 export function PublicKudosSurface({
   heading,
   featured,
   recent,
+  archiveCount = 0,
   onGiveKudos,
   onCelebrate,
   celebrateLoading,
@@ -174,6 +222,18 @@ export function PublicKudosSurface({
     if (!latest) return '';
     return formatShortDate(new Date(latest).toISOString());
   }, [activityEntries]);
+  const showLightDataStory = !featured || recent.length <= 2;
+  const lightDataStory = React.useMemo(
+    () =>
+      buildLightDataStory({
+        hasFeatured: Boolean(featured),
+        recentCount: recent.length,
+        archiveCount,
+        activityCount: recognitionCount,
+        latestActivityDate,
+      }),
+    [featured, recent.length, archiveCount, recognitionCount, latestActivityDate],
+  );
   const featuredBadgeLabel =
     featuredLayoutMode === 'handheld'
       ? null
@@ -225,49 +285,51 @@ export function PublicKudosSurface({
         )}
       </div>
 
-      <section
-        aria-labelledby="hb-kudos-pulse-title"
-        data-hbc-webpart-section="hb-kudos-pulse"
-        data-hbc-testid="hb-kudos-pulse-section"
-      >
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionHeaderTop}>
-            <span className={styles.sectionEyebrow}>Recognition pulse</span>
-            <span className={styles.sectionMeta}>
-              {latestActivityDate ? `Updated ${latestActivityDate}` : 'Awaiting first recognition'}
-            </span>
+      {showLightDataStory ? (
+        <section
+          aria-labelledby="hb-kudos-pulse-title"
+          data-hbc-webpart-section="hb-kudos-pulse"
+          data-hbc-testid="hb-kudos-pulse-section"
+        >
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionHeaderTop}>
+              <span className={styles.sectionEyebrow}>Recognition pulse</span>
+              <span className={styles.sectionMeta}>
+                {latestActivityDate ? `Updated ${latestActivityDate}` : 'This week'}
+              </span>
+            </div>
+            <h3 id="hb-kudos-pulse-title" className={styles.sectionTitle}>
+              {lightDataStory.title}
+            </h3>
           </div>
-          <h3 id="hb-kudos-pulse-title" className={styles.sectionTitle}>
-            {recognitionCount > 0 ? 'At a glance this week' : 'Kick off this week at HB'}
-          </h3>
-        </div>
-        {recognitionCount > 0 ? (
-          <div className={styles.pulseStats}>
-            <div className={styles.pulseStat}>
-              <span className={styles.pulseStatValue}>{recognitionCount}</span>
-              <span className={styles.pulseStatLabel}>
-                {recognitionCount === 1 ? 'recognition' : 'recognitions'}
-              </span>
+          {recognitionCount > 0 ? (
+            <div className={styles.pulseStats}>
+              <div className={styles.pulseStat}>
+                <span className={styles.pulseStatValue}>{recognitionCount}</span>
+                <span className={styles.pulseStatLabel}>
+                  {recognitionCount === 1 ? 'recognition' : 'recognitions'}
+                </span>
+              </div>
+              <div className={styles.pulseStat}>
+                <span className={styles.pulseStatValue}>{recognizedPeopleCount}</span>
+                <span className={styles.pulseStatLabel}>
+                  {recognizedPeopleCount === 1 ? 'person recognized' : 'people recognized'}
+                </span>
+              </div>
+              <div className={styles.pulseStat}>
+                <span className={styles.pulseStatValue}>{celebrationCount}</span>
+                <span className={styles.pulseStatLabel}>
+                  {celebrationCount === 1 ? 'celebration' : 'celebrations'}
+                </span>
+              </div>
             </div>
-            <div className={styles.pulseStat}>
-              <span className={styles.pulseStatValue}>{recognizedPeopleCount}</span>
-              <span className={styles.pulseStatLabel}>
-                {recognizedPeopleCount === 1 ? 'person recognized' : 'people recognized'}
-              </span>
-            </div>
-            <div className={styles.pulseStat}>
-              <span className={styles.pulseStatValue}>{celebrationCount}</span>
-              <span className={styles.pulseStatLabel}>
-                {celebrationCount === 1 ? 'celebration' : 'celebrations'}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <p className={styles.pulseEmpty}>
-            New recognition will appear here as soon as someone shares kudos.
-          </p>
-        )}
-      </section>
+          ) : (
+            <p className={styles.pulseEmpty}>No new recognition has landed yet this week.</p>
+          )}
+          <p className={styles.pulseStory}>{lightDataStory.body}</p>
+          <p className={styles.pulsePrompt}>{lightDataStory.prompt}</p>
+        </section>
+      ) : null}
 
       {/* Recent — productized stream zone with section header + date spines */}
       {recent.length > 0 ? (
