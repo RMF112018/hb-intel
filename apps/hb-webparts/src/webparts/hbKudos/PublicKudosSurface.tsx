@@ -318,7 +318,8 @@ function FeaturedCard({
   const detailsExceedsPreview = rawDetails.length > rawExcerpt.length + 40;
   const showReadMore = hasPreview && (isClampTruncated || detailsExceedsPreview);
   const showExcerpt = hasPreview && layoutMode !== 'handheld';
-  const showSubmittedBy = layoutMode !== 'handheld';
+  const isHandheld = layoutMode === 'handheld';
+  const showSubmittedBy = !isHandheld;
   const featuredModeClass =
     layoutMode === 'compact'
       ? styles.featuredCompact
@@ -394,34 +395,58 @@ function FeaturedCard({
       ) : null}
 
       <div className={styles.featuredFooter}>
-        {showSubmittedBy ? <span>{formatSubmittedBy(entry)}</span> : <span />}
-        {layoutMode === 'handheld' ? (
-          <button
-            type="button"
-            className={[kudosReadmoreBtn(), styles.featuredOpenBtn].join(' ')}
-            onClick={() => onOpenArticle(entry)}
-            aria-label={`Open recognition for ${recipientDisplay}`}
-            data-hbc-testid="hb-kudos-featured-open"
-          >
-            Open recognition
-          </button>
-        ) : null}
-        {onCelebrate ? (
-          <button
-            type="button"
-            className={kudosCelebrateBtn()}
-            onClick={() => onCelebrate(entry.id)}
-            disabled={celebrateLoading}
-            aria-busy={celebrateLoading ? 'true' : undefined}
-            aria-label="Celebrate this recognition"
-            data-hbc-testid="hb-kudos-celebrate"
-          >
-            <span className={kudosCelebrateIcon()} aria-hidden="true">
-              <ThumbsUp size={13} strokeWidth={2.25} />
-            </span>
-            <span data-hbc-testid="hb-kudos-celebrate-count">{celebrateCount}</span>
-          </button>
-        ) : null}
+        {isHandheld ? (
+          <>
+            <span className={styles.featuredHandheldMeta}>{formatSubmittedBy(entry)}</span>
+            <div className={styles.featuredHandheldActions}>
+              <button
+                type="button"
+                className={[kudosReadmoreBtn(), styles.featuredOpenBtn, styles.featuredOpenBtnPrimary].join(' ')}
+                onClick={() => onOpenArticle(entry)}
+                aria-label={`Open recognition for ${recipientDisplay}`}
+                data-hbc-testid="hb-kudos-featured-open"
+              >
+                Open recognition
+              </button>
+              {onCelebrate ? (
+                <button
+                  type="button"
+                  className={[kudosCelebrateBtn(), styles.featuredCelebrateHandheld].join(' ')}
+                  onClick={() => onCelebrate(entry.id)}
+                  disabled={celebrateLoading}
+                  aria-busy={celebrateLoading ? 'true' : undefined}
+                  aria-label="Celebrate this recognition"
+                  data-hbc-testid="hb-kudos-celebrate"
+                >
+                  <span className={kudosCelebrateIcon()} aria-hidden="true">
+                    <ThumbsUp size={13} strokeWidth={2.25} />
+                  </span>
+                  <span data-hbc-testid="hb-kudos-celebrate-count">{celebrateCount}</span>
+                </button>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <>
+            {showSubmittedBy ? <span>{formatSubmittedBy(entry)}</span> : <span />}
+            {onCelebrate ? (
+              <button
+                type="button"
+                className={kudosCelebrateBtn()}
+                onClick={() => onCelebrate(entry.id)}
+                disabled={celebrateLoading}
+                aria-busy={celebrateLoading ? 'true' : undefined}
+                aria-label="Celebrate this recognition"
+                data-hbc-testid="hb-kudos-celebrate"
+              >
+                <span className={kudosCelebrateIcon()} aria-hidden="true">
+                  <ThumbsUp size={13} strokeWidth={2.25} />
+                </span>
+                <span data-hbc-testid="hb-kudos-celebrate-count">{celebrateCount}</span>
+              </button>
+            ) : null}
+          </>
+        )}
       </div>
     </article>
   );

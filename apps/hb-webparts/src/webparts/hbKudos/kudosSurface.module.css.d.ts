@@ -20,7 +20,11 @@ declare const styles: {
   readonly featuredExcerpt: string;
   readonly readmoreBtn: string;
   readonly featuredFooter: string;
+  readonly featuredHandheldMeta: string;
+  readonly featuredHandheldActions: string;
   readonly featuredOpenBtn: string;
+  readonly featuredOpenBtnPrimary: string;
+  readonly featuredCelebrateHandheld: string;
   readonly celebrateBtn: string;
   readonly celebrateIcon: string;
   readonly sectionHeader: string;

@@ -401,12 +401,25 @@
 }
 
 .featuredHandheld .featuredFooter {
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
   padding-top: 8px;
 }
 
-.featuredHandheld .featuredFooter > span:first-child {
-  display: none;
+.featuredHandheldMeta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--hbk-on-dark-72);
+  letter-spacing: 0.01em;
+}
+
+.featuredHandheldActions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
 }
 
 .featuredOpenBtn {
@@ -420,6 +433,18 @@
 
 .featuredOpenBtn:hover {
   background: var(--hbk-on-dark-20);
+}
+
+.featuredOpenBtnPrimary {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: var(--hbk-radius-md);
+  text-align: center;
+}
+
+.featuredCelebrateHandheld {
+  min-height: 44px;
+  padding: 10px 14px;
 }
 
 .celebrateBtn {
