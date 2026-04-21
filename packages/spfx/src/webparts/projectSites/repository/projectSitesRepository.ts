@@ -122,14 +122,14 @@ function getSpfxRequester(): ISpfxRequester {
   }
   const fetchImpl: ItemsFetch = (url: string) =>
     fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        // nometadata keeps the payload small; both response shapes are
-        // handled by `fetchItemsPage`.
-        Accept: 'application/json;odata=nometadata',
-        'OData-Version': '4.0',
-      },
+      // Matches the canonical SharePoint REST pattern in
+      // `packages/sharepoint-platform/src/listRead.ts`: nometadata Accept
+      // keeps the payload small, and no `OData-Version` header because
+      // SharePoint's list-items endpoint is OData v3 — sending v4
+      // triggers a 406 "ACCEPT is missing or invalid" response.
+      // Same-origin `fetch` auto-includes session cookies, so we do
+      // not override `credentials`.
+      headers: { Accept: 'application/json;odata=nometadata' },
     });
   return { webUrl, fetch: fetchImpl };
 }
