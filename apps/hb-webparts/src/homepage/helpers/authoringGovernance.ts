@@ -189,6 +189,11 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
         description:
           'Review top-line summary, spotlight urgency/context metadata, secondary signal fields, and CTA links.',
       },
+      fetchError: {
+        title: 'Safety and field excellence is temporarily unavailable',
+        description:
+          'We could not load the safety experience at this moment. Refresh the page to retry, and notify Safety and Field Excellence if the issue persists.',
+      },
     },
   },
   smartSearchWayfinding: {
