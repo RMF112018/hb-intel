@@ -166,15 +166,26 @@ export function FeaturedSlot({
     Boolean(statusLabel || featured.strategicEmphasis || featured.isStale);
 
   // Signal row — strongest secondary signal chip next to the milestone
-  // pill. In image-led postures the chips already live over the hero;
-  // the signal row then carries progress + a freshness chip only, and
-  // suppresses itself entirely when there's nothing to show.
+  // pill. In image-led postures the chips normally live over the hero;
+  // when the mode suppresses overlay chips (compact/minimal) the signal
+  // row adopts the authored status as its own chip so the user does
+  // not lose the state marker. Minimal deliberately stays status-blind:
+  // the smallest mode is "title + progress + one-line summary + CTA"
+  // by design, not status-stacked. Freshness chip is compact-only for
+  // the same reason.
+  const showStatusInSignalRow =
+    hasImage &&
+    !visibility.showInlineMeta &&
+    visibility.mode === 'compact' &&
+    Boolean(statusLabel);
   const signalFreshnessChip =
     featured.freshnessLabel && visibility.mode !== 'minimal'
       ? featured.freshnessLabel
       : undefined;
   const hasSignalRow =
-    milestones.length > 0 || Boolean(signalFreshnessChip);
+    milestones.length > 0 ||
+    showStatusInSignalRow ||
+    Boolean(signalFreshnessChip);
 
   // Essentials-level summary snippet. Hard 2-line clamp so it never
   // competes with the full-depth summary disclosed below, but still
@@ -266,6 +277,9 @@ export function FeaturedSlot({
           {hasSignalRow ? (
             <div className={styles.featuredSignalRow}>
               <MilestoneProgressPill milestones={milestones} />
+              {showStatusInSignalRow && statusLabel ? (
+                <span className={styles.featuredSignalChip}>{statusLabel}</span>
+              ) : null}
               {signalFreshnessChip ? (
                 <span
                   className={clsx(

@@ -351,14 +351,22 @@
   max-height: 340px;
 }
 .root[data-layout-mode='compact'] .mediaZone {
-  min-height: 220px;
-  max-height: 260px;
+  /* Compact hero trimmed so the title + signal row + CTA reliably sit
+     in first view on narrow viewports. */
+  min-height: 160px;
+  max-height: 200px;
 }
 .root[data-layout-mode='minimal'] .mediaZone {
-  /* Intentionally subordinate: image remains present for context but
-     does not dominate. Title + compact pill + disclosures lead. */
-  min-height: 140px;
-  max-height: 180px;
+  /* Minimal treats the hero as an unmistakable thumbnail, not a hero
+     band. Title leads; image is a context marker. */
+  min-height: 96px;
+  max-height: 120px;
+}
+
+/* Minimal is too tight to host the overlay eyebrow chip legibly — the
+   section eyebrow already lives in the masthead above. */
+.root[data-layout-mode='minimal'] .mediaOverlayEyebrow {
+  display: none;
 }
 
 /* Errored-image fallback band. Authored intent was a full hero, so
@@ -523,12 +531,23 @@
 .root[data-layout-mode='compact']
   .featuredLayout[data-has-image='false']
   .featuredTitle {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
 }
 .root[data-layout-mode='minimal']
   .featuredLayout[data-has-image='false']
   .featuredTitle {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+}
+
+/* Minimal + no-image is the tightest posture — the title carries the
+   composition. Drop the subordinate header chip row entirely so the
+   title never shares emphasis with status/strategic/stale chips at
+   the smallest width. Status is still authored and still normalized;
+   it simply doesn't render at minimal no-image. */
+.root[data-layout-mode='minimal']
+  .featuredLayout[data-has-image='false']
+  .featuredHeaderChips {
+  display: none;
 }
 
 /* Inline CTA slot — sits in the essentials block in the title-led
@@ -779,11 +798,11 @@
   font-size: 1.75rem;
 }
 .root[data-layout-mode='compact'] .featuredTitle {
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   line-height: 1.18;
 }
 .root[data-layout-mode='minimal'] .featuredTitle {
-  font-size: 1.1875rem;
+  font-size: 1.3125rem;
   line-height: 1.2;
 }
 
@@ -908,7 +927,7 @@
 
 .root[data-layout-mode='minimal'] .featuredSummarySnippet {
   font-size: 0.875rem;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 /* CTA source hint — the inline CTA marks its origin so tests and
