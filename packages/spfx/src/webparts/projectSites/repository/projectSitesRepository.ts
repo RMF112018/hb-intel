@@ -297,44 +297,56 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
   async fetchProjectSites(scope: ProjectSitesScope): Promise<IProjectSitesQueryResult> {
     const requester = getSpfxRequester();
 
-    const projectsUrl = buildItemsUrl({
-      webUrl: requester.webUrl,
-      listTitle: PROJECTS_LIST_TITLE,
-      select: PROJECT_SITES_SELECT_FIELDS,
-      filter: scope.kind === 'year' ? `${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}` : undefined,
-      // Deliberately no `$orderby` for either scope:
-      //   - `Year` is not a guaranteed-indexed column on the Projects
-      //     list, and `$orderby=Year desc` on an un-indexed column at
-      //     the 5000-item list-view threshold causes SharePoint to
-      //     silently return a partial result with **no continuation
-      //     token** — which reproduced in the field as "only 260 of
-      //     800+ records, missing entire years".
-      //   - The client-side pipeline (`projectSitesFilter.ts`) already
-      //     applies the user's chosen sort over the full drained set,
-      //     so server-side ordering adds risk without any UX benefit.
-      top: PROJECT_SITES_PAGE_SIZE,
-    });
-
-    const projectDrain = await drainAllItems<IRawProjectSiteItem>(
-      requester,
-      projectsUrl,
-      PROJECT_SITES_ALL_SCOPE_CEILING,
-    );
-
-    // The registry-side fetch is keyed on `LegacyYear`. For year-scoped
-    // queries we fetch exactly that year; for All-Projects scope we
-    // fetch one batch per year present in the drained project rows.
-    // The resolver handles synthetic legacy-only emission.
-    const years = scope.kind === 'year'
+    // ── Resolve the year set this fetch needs to cover ────────────────
+    // SharePoint's list-view threshold (5000 items) hard-throttles
+    // unfiltered queries against large lists, even when the sort/select
+    // columns are indexed: SP returns a partial slice and omits the
+    // `odata.nextLink` continuation token, which reproduced in the
+    // field as "only 260 of 800+ records, missing entire years". The
+    // safe pattern is to keep every list-items query bounded by an
+    // indexed `$filter` so each request stays well below the threshold.
+    //
+    //   - Year scope → fetch the single year directly.
+    //   - All scope  → year-discover first (indexed `$select=Year`
+    //                  query), then fan out one indexed
+    //                  `$filter=Year eq N` query per year in parallel.
+    const years: number[] = scope.kind === 'year'
       ? [scope.year]
-      : Array.from(
-          new Set(
-            projectDrain.rows
-              .map((item) => item[SP_PROJECTS_FIELDS.YEAR])
-              .filter((year): year is number => typeof year === 'number' && Number.isInteger(year)),
-          ),
-        );
+      : await this.fetchDistinctYears();
 
+    // ── Drain project rows year-by-year ───────────────────────────────
+    // Each per-year drain is itself paged (via `__next` continuation),
+    // so a year that legitimately exceeds 5000 items still drains
+    // safely. The defense-in-depth ceiling caps the total accumulation
+    // across all years; if the All-Projects total exceeds the ceiling,
+    // the bounded signal flows through to the UI overflow notice.
+    const projectRowGroups: Array<{ rows: IRawProjectSiteItem[]; bounded: boolean }> = years.length > 0
+      ? await Promise.all(
+          years.map(async (year) => {
+            const url = buildItemsUrl({
+              webUrl: requester.webUrl,
+              listTitle: PROJECTS_LIST_TITLE,
+              select: PROJECT_SITES_SELECT_FIELDS,
+              filter: `${SP_PROJECTS_FIELDS.YEAR} eq ${year}`,
+              top: PROJECT_SITES_PAGE_SIZE,
+            });
+            return drainAllItems<IRawProjectSiteItem>(
+              requester,
+              url,
+              PROJECT_SITES_ALL_SCOPE_CEILING,
+            );
+          }),
+        )
+      : [];
+
+    const projectRows = projectRowGroups.flatMap((g) => g.rows);
+    const projectBounded = projectRowGroups.some((g) => g.bounded)
+      || projectRows.length >= PROJECT_SITES_ALL_SCOPE_CEILING;
+    if (projectRows.length > PROJECT_SITES_ALL_SCOPE_CEILING) {
+      projectRows.length = PROJECT_SITES_ALL_SCOPE_CEILING;
+    }
+
+    // ── Drain registry rows year-by-year (same threshold-safe path) ──
     const fallbackRowGroups = years.length > 0
       ? await Promise.all(
           years.map(async (year) => {
@@ -357,10 +369,10 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
 
     const fallbackCandidates = toCandidates(fallbackRowGroups.flat());
     return {
-      projectRows: projectDrain.rows,
+      projectRows,
       fallbackCandidates,
-      bounded: projectDrain.bounded,
-      fetchedCount: projectDrain.rows.length,
+      bounded: projectBounded,
+      fetchedCount: projectRows.length,
     };
   }
 }
