@@ -45,11 +45,14 @@ declare const styles: {
   readonly recentRecipient: string;
   readonly recentHeadline: string;
   readonly rowDate: string;
+  readonly archiveTier: string;
+  readonly archiveLead: string;
   readonly archiveTitleRow: string;
   readonly archiveToggle: string;
   readonly archiveChevron: string;
   readonly archiveSearch: string;
   readonly archiveBody: string;
+  readonly archiveHint: string;
   readonly archiveRows: string;
   readonly archiveRow: string;
   readonly archiveRowBody: string;

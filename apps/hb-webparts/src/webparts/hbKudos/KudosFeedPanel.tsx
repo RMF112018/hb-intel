@@ -46,8 +46,8 @@ export function KudosFeedPanel({
     <KudosFeedShell
       open={open}
       onClose={onClose}
-      title="HB Kudos"
-      subtitle="All recognition across the company"
+      title="HB Kudos Feed"
+      subtitle="Current and archived recognition across HB"
       testId="hb-kudos-view-all-panel"
       ariaLabel="All HB Kudos recognition"
     >

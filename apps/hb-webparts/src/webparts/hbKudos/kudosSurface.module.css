@@ -718,6 +718,26 @@
 }
 
 /* ── Archive zone (ArchiveList) ────────────────────────────────────── */
+.archiveTier {
+  margin-top: 2px;
+  padding: 8px 10px 10px;
+  border: 1px solid var(--hbk-orange-12);
+  border-radius: var(--hbk-radius-xl);
+  background:
+    linear-gradient(180deg, var(--hbk-orange-02) 0%, var(--hbk-surface-0) 55%);
+}
+
+.archiveTier .sectionHeader {
+  margin-top: 0;
+  padding-top: 2px;
+}
+
+.archiveLead {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--hbk-text-secondary);
+}
 
 /*
  * The archive reuses the shared `.sectionHeader` grammar. The header
@@ -796,6 +816,19 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 6px;
+  padding: 8px;
+  border: 1px solid var(--hbk-orange-08);
+  border-radius: var(--hbk-radius-lg);
+  background: var(--hbk-orange-02);
+}
+
+.archiveHint {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--hbk-text-faint);
 }
 
 .archiveRows {
@@ -875,27 +908,27 @@
   justify-content: space-between;
   gap: 14px;
   width: 100%;
-  padding: 14px 16px;
-  margin-top: 6px;
+  padding: 12px 14px;
+  margin-top: 10px;
   border-radius: var(--hbk-radius-lg);
   border: 1px solid var(--hbk-orange-18);
   background:
-    linear-gradient(135deg, var(--hbk-warm-row-white-72) 0%, var(--hbk-warm-row-tint-72) 100%);
+    linear-gradient(135deg, var(--hbk-warm-row-white-72) 0%, var(--hbk-warm-row-tint-62) 100%);
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
   transition: background var(--hbk-motion-mid), border-color var(--hbk-motion-mid), transform var(--hbk-motion-mid), box-shadow var(--hbk-motion-mid);
   outline: none;
-  box-shadow: var(--hbk-elev-feed-cta-rest);
+  box-shadow: var(--hbk-elev-row-compact);
 }
 
 .feedCta:hover {
   background:
-    linear-gradient(135deg, var(--hbk-warm-row-tint-95) 0%, var(--hbk-warm-row-hover-95) 100%);
+    linear-gradient(135deg, var(--hbk-warm-row-tint-92) 0%, var(--hbk-warm-row-hover-92) 100%);
   border-color: var(--hbk-orange-22);
   transform: translateY(-1px);
-  box-shadow: var(--hbk-elev-feed-cta-hover);
+  box-shadow: var(--hbk-elev-row-hover);
 }
 
 .feedCta:focus-visible {

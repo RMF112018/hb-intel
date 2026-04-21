@@ -81,6 +81,7 @@ export function ArchiveList({
   return (
     <section
       id="hb-kudos-archive"
+      className={styles.archiveTier}
       aria-labelledby="hb-kudos-archive-title"
       data-hbc-webpart-section="hb-kudos-archive"
       data-hbc-testid="hb-kudos-archive-section"
@@ -111,10 +112,14 @@ export function ArchiveList({
             </span>
           </button>
         </div>
+        <p className={styles.archiveLead}>
+          Recognition history stays visible as new kudos rotates through the spotlight.
+        </p>
       </div>
 
       {expanded ? (
         <div id="hb-kudos-archive-body" className={styles.archiveBody}>
+          <p className={styles.archiveHint}>Search by teammate, headline, or recognition details.</p>
           <input
             type="search"
             value={searchText}
@@ -186,10 +191,10 @@ export function ArchiveList({
           aria-label="Browse the full Kudos feed"
         >
           <span className={styles.feedCtaBody}>
-            <span className={styles.feedCtaEyebrow}>Browse all</span>
-            <span className={styles.feedCtaTitle}>The full Kudos feed</span>
+            <span className={styles.feedCtaEyebrow}>Continue exploring</span>
+            <span className={styles.feedCtaTitle}>Browse all recognition</span>
             <span className={styles.feedCtaMeta}>
-              Search and explore every approved recognition across HB.
+              Open the full feed for current and archived recognition moments.
             </span>
           </span>
           <span className={styles.feedCtaArrow} aria-hidden="true">
