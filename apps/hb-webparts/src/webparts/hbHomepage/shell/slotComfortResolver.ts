@@ -86,13 +86,18 @@ function resolveRenderMode(
 
   if (
     isSingleColumn &&
+    descriptor.comfort.supportsSummaryCollapse &&
     descriptor.shellFit.supportedModes.includes('summary-collapsed') &&
     availableWidth < descriptor.shellFit.narrowestStableShellWidth * 1.15
   ) {
     return 'summary-collapsed';
   }
 
-  if (isNarrow && descriptor.shellFit.supportedModes.includes('compact')) {
+  if (
+    isNarrow &&
+    descriptor.comfort.supportsCompact &&
+    descriptor.shellFit.supportedModes.includes('compact')
+  ) {
     return 'compact';
   }
 

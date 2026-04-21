@@ -180,10 +180,12 @@ export type {
 export { HbcOperationalSurface } from './HbcOperationalSurface/index.js';
 export type {
   HbcOperationalSurfaceProps,
+  HbcOperationalSurfaceMode,
   OperationalSignalSeverity,
   OperationalFeatured,
   OperationalSignal,
 } from './HbcOperationalSurface/index.js';
+export { HBC_OPERATIONAL_SURFACE_MODE_CONTRACT } from './HbcOperationalSurface/index.js';
 
 // ── Wave 01 follow-on — People & Culture surface family ──────────────
 // Cohesive presentation-lane surface for the warm-celebratory recognition

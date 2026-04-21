@@ -53,6 +53,16 @@ const singleBand: ShellBand = {
   maxDominantOccupants: 1,
 };
 
+const singleSafetyBand: ShellBand = {
+  id: 'band-safety',
+  semanticRole: 'communications-newsroom',
+  recipe: 'stacked-full',
+  slots: [
+    { id: 's1', occupantId: 'safety-field-excellence', role: 'secondary', columnSpan: 'full' },
+  ],
+  maxDominantOccupants: 1,
+};
+
 describe('resolveBandLayout — paired state', () => {
   it('allows pairing on desktop entry band when comfort is met', () => {
     // With the Wave-01 Prompt-02 2:1 ratio (major 2/3, minor 1/3), a 520px
@@ -147,6 +157,13 @@ describe('resolveBandLayout — renderMode', () => {
     // from 420 to 300, the summary-collapsed 1.15× window shifts accordingly
     // (300 × 1.15 ≈ 345). Use 330 to stay inside the shrunk window.
     const result = resolveBandLayout(singleBand, PHONE_STATE, false, 330);
+    expect(result.slots[0].comfort.renderMode).toBe('summary-collapsed');
+  });
+
+  it('uses summary-collapsed for safety when single-column width enters minimal-equivalent window', () => {
+    // Safety shell-fit contract now declares 320px narrowest shell width.
+    // Summary-collapsed triggers below 1.15× threshold (~368px) in single-column states.
+    const result = resolveBandLayout(singleSafetyBand, PHONE_STATE, false, 340);
     expect(result.slots[0].comfort.renderMode).toBe('summary-collapsed');
   });
 });

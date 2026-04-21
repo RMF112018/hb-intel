@@ -3,13 +3,14 @@ import { SafetyFieldExcellence } from '../../safetyFieldExcellence/SafetyFieldEx
 import { ZoneErrorBoundary } from '../ZoneErrorBoundary.js';
 import type { HbHomepageZoneProps } from '../hbHomepageContract.js';
 
-export function SafetyFieldExcellenceZone({ moduleConfig }: HbHomepageZoneProps): React.JSX.Element {
+export function SafetyFieldExcellenceZone({ moduleConfig, shellRenderMode }: HbHomepageZoneProps): React.JSX.Element {
   return (
     <ZoneErrorBoundary zoneName="safety-field-excellence">
       <section aria-label="Safety and Field Excellence">
         <SafetyFieldExcellence
           config={moduleConfig.safetyFieldExcellence}
           activeAudience={moduleConfig.activeAudience}
+          shellRenderMode={shellRenderMode}
         />
       </section>
     </ZoneErrorBoundary>

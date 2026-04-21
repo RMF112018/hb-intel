@@ -1,6 +1,7 @@
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { ProfilePhotoResolver } from '../../homepage/helpers/peopleCultureSplitModel.js';
 import type { ModuleConfigSlices, RendererContext, ShellLayoutInput } from './shell/shellTypes.js';
+import type { OccupantRenderMode } from './shell/slotComfortResolver.js';
 import type {
   HbHomepageWrapperConfig,
   HbHomepageWrapperHeroConfig,
@@ -129,6 +130,7 @@ export interface HbHomepageProps {
 
 export interface HbHomepageZoneProps {
   moduleConfig: ModuleConfigSlices;
+  shellRenderMode?: OccupantRenderMode;
   identity?: HomepageIdentityInput;
   assetBaseUrl?: string;
   siteUrl?: string;

@@ -25,6 +25,7 @@ import {
   Info,
   AlertTriangle,
   Clock,
+  type HbcOperationalSurfaceMode,
   type OperationalSignal,
   type OperationalSignalSeverity,
   type LucideIcon,
@@ -43,6 +44,7 @@ export interface SafetyFieldExcellenceProps {
   config?: Partial<SafetyFieldExcellenceConfig>;
   activeAudience?: string;
   isLoading?: boolean;
+  shellRenderMode?: 'standard' | 'compact' | 'summary-collapsed';
 }
 
 const URGENCY_VARIANT_MAP: Record<SafetyUrgencyLevel, 'info' | 'warning' | 'critical'> = {
@@ -84,6 +86,7 @@ export function SafetyFieldExcellence({
   config,
   activeAudience,
   isLoading = false,
+  shellRenderMode = 'standard',
 }: SafetyFieldExcellenceProps): React.JSX.Element {
   if (isLoading) {
     return <HomepageLoadingState label="Loading safety and field excellence" />;
@@ -137,6 +140,9 @@ export function SafetyFieldExcellence({
   });
   const featuredUrgency = normalized.featured?.urgency ?? 'routine';
 
+  const operationalMode: HbcOperationalSurfaceMode =
+    shellRenderMode === 'summary-collapsed' ? 'minimal' : shellRenderMode;
+
   return (
     <HbcOperationalSurface
       title={normalized.heading}
@@ -145,6 +151,7 @@ export function SafetyFieldExcellence({
       latestUpdated={normalized.topLineSummary?.lastUpdatedLabel ?? normalized.featured?.freshnessLabel}
       action={normalized.sectionCta}
       variant="safety-homepage"
+      mode={operationalMode}
       featured={
         normalized.featured
           ? {

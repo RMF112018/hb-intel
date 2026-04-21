@@ -127,7 +127,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
       data-shell-slot-state="active"
       {...contentStateAttrs}
     >
-      <ZoneComponent {...zoneProps} />
+      <ZoneComponent {...zoneProps} shellRenderMode={comfort.renderMode} />
     </div>
   );
 }

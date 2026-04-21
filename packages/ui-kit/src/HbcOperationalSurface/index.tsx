@@ -120,6 +120,26 @@ export interface OperationalSignal {
   openInNewTab?: boolean;
 }
 
+export type HbcOperationalSurfaceMode = 'standard' | 'compact' | 'minimal';
+
+export const HBC_OPERATIONAL_SURFACE_MODE_CONTRACT = {
+  standard: {
+    narrowestStableWidth: 640,
+    behavior:
+      'Full masthead dateline/action, full featured narrative/meta/cta, and full signal metadata with badges.',
+  },
+  compact: {
+    narrowestStableWidth: 420,
+    behavior:
+      'Preserve spotlight and active signals with shortened descriptions, capped meta rows, and reduced signal ornamentation.',
+  },
+  minimal: {
+    narrowestStableWidth: 320,
+    behavior:
+      'Spotlight-first essentials: hide non-critical masthead metadata, collapse featured/supporting extras, and cap signal depth.',
+  },
+} as const;
+
 /**
  * Layout variant. `"safety-homepage"` opts into a scoped homepage-fit
  * refinement designed for the Safety & Field Excellence webpart's
@@ -148,6 +168,13 @@ export interface HbcOperationalSurfaceProps {
    * to opt into the homepage-fit refinement. Defaults to `"default"`.
    */
   variant?: HbcOperationalSurfaceVariant;
+  /**
+   * Application-level shell-fit mode contract.
+   * - standard: full fidelity
+   * - compact: reduced but complete
+   * - minimal: essentials only for narrow nested slots
+   */
+  mode?: HbcOperationalSurfaceMode;
   children?: React.ReactNode;
   className?: string;
   'aria-label'?: string;
@@ -177,6 +204,7 @@ interface MastheadProps {
   latestUpdated?: string;
   headerAction?: React.ReactNode;
   action?: OperationalCta;
+  mode: HbcOperationalSurfaceMode;
 }
 
 function Masthead({
@@ -186,7 +214,10 @@ function Masthead({
   latestUpdated,
   headerAction,
   action,
+  mode,
 }: MastheadProps): React.JSX.Element {
+  const showDateline = mode !== 'minimal';
+  const showAction = mode === 'standard' || mode === 'compact';
   return (
     <div className={styles.masthead}>
       <div className={styles.mastheadEyebrow}>
@@ -197,15 +228,15 @@ function Masthead({
         ) : null}
         <span>{eyebrow}</span>
         <span className={styles.mastheadEyebrowRule} aria-hidden="true" />
-        {latestUpdated ? (
+        {showDateline && latestUpdated ? (
           <span className={styles.mastheadEyebrowDate}>{latestUpdated}</span>
         ) : null}
       </div>
       <div className={styles.mastheadRow}>
         <h2 className={styles.mastheadHeadline}>{title}</h2>
-        {headerAction ? (
+        {showAction && headerAction ? (
           <div className={styles.mastheadAction}>{headerAction}</div>
-        ) : action ? (
+        ) : showAction && action ? (
           <div className={styles.mastheadAction}>
             <HbcPremiumCta
               label={action.label}
@@ -235,13 +266,25 @@ function SeverityStrip(): React.JSX.Element {
 interface FeaturedBlockProps {
   item: OperationalFeatured;
   reducedMotion: boolean;
+  mode: HbcOperationalSurfaceMode;
 }
 
-function FeaturedBlock({ item, reducedMotion }: FeaturedBlockProps): React.JSX.Element {
+function FeaturedBlock({ item, reducedMotion, mode }: FeaturedBlockProps): React.JSX.Element {
   const severity: OperationalSignalSeverity = item.severity ?? 'default';
   const FeaturedIcon = item.icon;
   const eyebrow = item.eyebrow ?? SEVERITY_LABELS[severity];
   const metaItems = item.metaItems ?? [];
+  const showDescription = Boolean(item.description) && mode !== 'minimal';
+  const descriptionClassName =
+    mode === 'compact'
+      ? clsx(styles.featuredDescription, styles.featuredDescriptionCompact)
+      : styles.featuredDescription;
+  const visibleMetaItems =
+    mode === 'standard' ? metaItems : mode === 'compact' ? metaItems.slice(0, 3) : metaItems.slice(0, 1);
+  const showBadge = mode !== 'minimal';
+  const showMeta = mode !== 'minimal' && visibleMetaItems.length > 0;
+  const showLegacyMeta = mode !== 'minimal' && !visibleMetaItems.length && Boolean(item.meta);
+  const showCta = mode === 'standard' && Boolean(item.cta);
 
   const motionProps = reducedMotion
     ? {}
@@ -285,15 +328,15 @@ function FeaturedBlock({ item, reducedMotion }: FeaturedBlockProps): React.JSX.E
 
         <h3 className={styles.featuredTitle}>{item.title}</h3>
 
-        {item.description ? (
-          <p className={styles.featuredDescription}>{item.description}</p>
+        {showDescription ? (
+          <p className={descriptionClassName}>{item.description}</p>
         ) : null}
 
-        {item.badge ? <div className={styles.featuredBadgeRow}>{item.badge}</div> : null}
+        {showBadge && item.badge ? <div className={styles.featuredBadgeRow}>{item.badge}</div> : null}
 
-        {metaItems.length > 0 ? (
+        {showMeta ? (
           <div className={styles.featuredMeta}>
-            {metaItems.map((entry, idx) => {
+            {visibleMetaItems.map((entry, idx) => {
               const Icon = entry.icon;
               return (
                 <span key={`${entry.label}-${idx}`} className={styles.featuredMetaItem}>
@@ -310,11 +353,11 @@ function FeaturedBlock({ item, reducedMotion }: FeaturedBlockProps): React.JSX.E
               );
             })}
           </div>
-        ) : item.meta ? (
+        ) : showLegacyMeta ? (
           <div className={styles.featuredMeta}>{item.meta}</div>
         ) : null}
 
-        {item.cta ? (
+        {showCta ? (
           <div className={styles.featuredCta}>
             <HbcPremiumCta
               label={item.cta.label}
@@ -332,12 +375,22 @@ function FeaturedBlock({ item, reducedMotion }: FeaturedBlockProps): React.JSX.E
 
 interface SignalRowProps {
   signal: OperationalSignal;
+  mode: HbcOperationalSurfaceMode;
 }
 
-function SignalRow({ signal }: SignalRowProps): React.JSX.Element {
+function SignalRow({ signal, mode }: SignalRowProps): React.JSX.Element {
   const severity: OperationalSignalSeverity = signal.severity ?? 'default';
   const SignalIcon = signal.icon;
   const tileClass = clsx(styles.signal, SEVERITY_TILE_CLASS[severity]);
+
+  const showMeta = mode !== 'minimal' && Boolean(signal.meta);
+  const showBadge = mode === 'standard' && Boolean(signal.badge);
+  const signalClassName =
+    mode === 'compact'
+      ? clsx(tileClass, styles.signalCompact)
+      : mode === 'minimal'
+        ? clsx(tileClass, styles.signalMinimal)
+        : tileClass;
 
   const content = (
     <>
@@ -351,16 +404,16 @@ function SignalRow({ signal }: SignalRowProps): React.JSX.Element {
       ) : null}
       <div className={styles.signalContent}>
         <span className={styles.signalTitle}>{signal.title}</span>
-        {signal.meta ? <span className={styles.signalMeta}>{signal.meta}</span> : null}
+        {showMeta ? <span className={styles.signalMeta}>{signal.meta}</span> : null}
       </div>
-      {signal.badge ? <span className={styles.signalBadge}>{signal.badge}</span> : null}
+      {showBadge ? <span className={styles.signalBadge}>{signal.badge}</span> : null}
     </>
   );
 
   if (signal.href) {
     return (
       <a
-        className={tileClass}
+        className={signalClassName}
         href={signal.href}
         target={signal.openInNewTab ? '_blank' : undefined}
         rel={signal.openInNewTab ? 'noopener noreferrer' : undefined}
@@ -373,7 +426,7 @@ function SignalRow({ signal }: SignalRowProps): React.JSX.Element {
   if (signal.onClick) {
     return (
       <div
-        className={tileClass}
+        className={signalClassName}
         role="button"
         tabIndex={0}
         onClick={signal.onClick}
@@ -389,7 +442,7 @@ function SignalRow({ signal }: SignalRowProps): React.JSX.Element {
     );
   }
 
-  return <div className={tileClass}>{content}</div>;
+  return <div className={signalClassName}>{content}</div>;
 }
 
 // ---------------------------------------------------------------------------
@@ -406,12 +459,15 @@ export function HbcOperationalSurface({
   featured,
   signals,
   variant = 'default',
+  mode = 'standard',
   children,
   className,
   'aria-label': ariaLabel,
 }: HbcOperationalSurfaceProps): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
   const signalList = signals ?? [];
+  const visibleSignals =
+    mode === 'standard' ? signalList : mode === 'compact' ? signalList.slice(0, 3) : signalList.slice(0, 2);
 
   return (
     <section
@@ -419,11 +475,14 @@ export function HbcOperationalSurface({
       className={clsx(
         styles.root,
         variant === 'safety-homepage' && styles.safetyHomepage,
+        mode === 'compact' && styles.modeCompact,
+        mode === 'minimal' && styles.modeMinimal,
         className,
       )}
       data-hbc-premium="operational-surface"
       data-hbc-homepage="operational-safety"
       data-hbc-operational-variant={variant}
+      data-hbc-operational-mode={mode}
     >
       <Masthead
         title={title}
@@ -432,22 +491,23 @@ export function HbcOperationalSurface({
         latestUpdated={latestUpdated}
         headerAction={headerAction}
         action={action}
+        mode={mode}
       />
 
       <SeverityStrip />
 
       <div className={styles.content}>
-        {featured ? <FeaturedBlock item={featured} reducedMotion={reducedMotion} /> : null}
+        {featured ? <FeaturedBlock item={featured} reducedMotion={reducedMotion} mode={mode} /> : null}
 
-        {signalList.length > 0 ? (
+        {visibleSignals.length > 0 ? (
           <>
             <div className={styles.signalsHeader}>
-              <span>Active signals</span>
+              <span>{mode === 'minimal' ? 'Priority signals' : 'Active signals'}</span>
               <span className={styles.signalsHeaderRule} aria-hidden="true" />
             </div>
             <div className={styles.signals}>
-              {signalList.map((signal) => (
-                <SignalRow key={signal.id} signal={signal} />
+              {visibleSignals.map((signal) => (
+                <SignalRow key={signal.id} signal={signal} mode={mode} />
               ))}
             </div>
           </>

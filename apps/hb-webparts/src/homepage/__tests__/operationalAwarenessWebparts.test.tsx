@@ -71,4 +71,22 @@ describe('Prompt-07 operational-awareness webparts', () => {
 
     expect(screen.getByRole('link', { name: /Open packet/ }).getAttribute('href')).toBe('/safety');
   });
+
+  it('maps shell summary-collapsed render mode to minimal operational mode', () => {
+    const { container } = render(
+      <SafetyFieldExcellence
+        shellRenderMode="summary-collapsed"
+        config={{
+          primarySpotlight: {
+            id: 'safety-compact',
+            title: 'Compact safety spotlight',
+            summary: 'Summary',
+            urgency: 'attention',
+          },
+        }}
+      />,
+    );
+    const root = container.querySelector('[data-hbc-premium="operational-surface"]');
+    expect(root?.getAttribute('data-hbc-operational-mode')).toBe('minimal');
+  });
 });

@@ -53,6 +53,11 @@ describe('capability metadata', () => {
     expect(pps.prominenceCeiling).toBe('anchor');
   });
 
+  it('safety-field-excellence has anchor prominence ceiling', () => {
+    const safety = getOccupant('safety-field-excellence')!;
+    expect(safety.prominenceCeiling).toBe('anchor');
+  });
+
   it('people-culture-public is not first-lane eligible', () => {
     const pc = getOccupant('people-culture-public')!;
     expect(pc.firstLaneEligible).toBe(false);
@@ -61,6 +66,28 @@ describe('capability metadata', () => {
   it('company-pulse is first-lane eligible', () => {
     const cp = getOccupant('company-pulse')!;
     expect(cp.firstLaneEligible).toBe(true);
+  });
+
+  it('safety-field-excellence remains row-2 locked and not first-lane eligible', () => {
+    const safety = getOccupant('safety-field-excellence')!;
+    expect(safety.firstLaneEligible).toBe(false);
+    expect(safety.reorderDomain).toBe('locked');
+    expect(safety.lockedToRow).toEqual({
+      bandSemanticRole: 'communications-newsroom',
+      role: 'secondary',
+    });
+  });
+
+  it('safety-field-excellence publishes explicit standard/compact/minimal-equivalent shell-fit modes', () => {
+    const safety = getOccupant('safety-field-excellence')!;
+    expect(safety.shellFit.narrowestStableShellWidth).toBe(320);
+    expect(safety.shellFit.supportedModes).toEqual([
+      'standard',
+      'compact',
+      'summary-collapsed',
+    ]);
+    expect(safety.comfort.supportsCompact).toBe(true);
+    expect(safety.comfort.supportsSummaryCollapse).toBe(true);
   });
 
   it('people-culture-public now supports paired-layout participation (Wave-01 Prompt-01)', () => {

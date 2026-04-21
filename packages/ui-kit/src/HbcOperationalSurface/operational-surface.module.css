@@ -402,6 +402,13 @@
   max-width: 58ch;
 }
 
+.featuredDescriptionCompact {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
 .featuredBadgeRow {
   display: flex;
   gap: 8px;
@@ -616,6 +623,30 @@
   flex-shrink: 0;
 }
 
+.signalCompact {
+  min-height: 50px;
+}
+
+.signalCompact .signalMeta {
+  font-size: 0.6875rem;
+}
+
+.signalMinimal {
+  min-height: 44px;
+  padding: 9px 12px 9px 12px;
+  gap: 10px;
+}
+
+.signalMinimal .signalIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+}
+
+.signalMinimal .signalTitle {
+  font-size: 0.8125rem;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    REDUCED MOTION
    ═══════════════════════════════════════════════════════════════ */
@@ -760,6 +791,56 @@
 .safetyHomepage .signalMeta {
   font-size: 0.6875rem;
   line-height: 1.35;
+}
+
+.modeCompact .masthead {
+  padding-bottom: 10px;
+}
+
+.modeCompact .content {
+  gap: 14px;
+}
+
+.modeCompact .featured {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.modeCompact .featuredMeta {
+  gap: 10px;
+}
+
+.modeMinimal .masthead {
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.modeMinimal .mastheadHeadline {
+  font-size: 1.25rem;
+}
+
+.modeMinimal .content {
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.modeMinimal .featured {
+  padding: 14px 14px 14px 16px;
+  gap: 12px;
+}
+
+.modeMinimal .featuredIcon {
+  width: 36px;
+  height: 36px;
+}
+
+.modeMinimal .featuredBody {
+  gap: 6px;
+}
+
+.modeMinimal .featuredTitle {
+  font-size: 1.0625rem;
+  line-height: 1.22;
 }
 
 /* Hold the homepage-fit scale at tablet/desktop viewports. The
