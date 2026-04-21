@@ -526,7 +526,7 @@ importers:
     devDependencies:
       '@microsoft/sp-webpart-base':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@types/react':
         specifier: ^18.3.0
         version: 18.3.28
@@ -605,10 +605,10 @@ importers:
     devDependencies:
       '@microsoft/sp-property-pane':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-webpart-base':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -806,10 +806,10 @@ importers:
     devDependencies:
       '@microsoft/sp-property-pane':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-webpart-base':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -1165,10 +1165,10 @@ importers:
     devDependencies:
       '@microsoft/sp-property-pane':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-webpart-base':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@types/react':
         specifier: ^18.3.0
         version: 18.3.28
@@ -1757,7 +1757,7 @@ importers:
     devDependencies:
       '@microsoft/sp-webpart-base':
         specifier: ^1.18.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@types/react':
         specifier: ^18.3.0
         version: 18.3.28
@@ -3322,6 +3322,9 @@ importers:
 
   packages/spfx:
     dependencies:
+      '@floating-ui/react':
+        specifier: ^0.27.0
+        version: 0.27.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@griffel/react':
         specifier: ^1.5.0
         version: 1.5.32(react@18.3.1)
@@ -3337,9 +3340,27 @@ importers:
       '@pnp/sp':
         specifier: ^4.0.0
         version: 4.18.0
+      '@radix-ui/react-slot':
+        specifier: ^1.1.0
+        version: 1.2.4(@types/react@18.3.28)(react@18.3.1)
+      '@radix-ui/react-tooltip':
+        specifier: ^1.1.0
+        version: 1.2.8(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.90.21(react@18.3.1)
+      class-variance-authority:
+        specifier: ^0.7.0
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      lucide-react:
+        specifier: ^0.475.0
+        version: 0.475.0(react@18.3.1)
+      motion:
+        specifier: ^12.0.0
+        version: 12.38.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.0.0
         version: 18.3.1
@@ -3352,10 +3373,10 @@ importers:
         version: 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@microsoft/sp-property-pane':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-webpart-base':
         specifier: ^1.20.0
-        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@testing-library/jest-dom':
         specifier: ^6.6.0
         version: 6.9.1
@@ -15041,14 +15062,14 @@ snapshots:
       - scheduler
       - supports-color
 
-  '@microsoft/sp-component-base@1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)':
+  '@microsoft/sp-component-base@1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)':
     dependencies:
       '@fluentui/react': 8.125.5(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@fluentui/react-components': 9.73.2(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)(scheduler@0.23.2)
       '@microsoft/sp-core-library': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-diagnostics': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-dynamic-data': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-lodash-subset': 1.22.2
       '@microsoft/sp-module-interfaces': 1.22.2(@types/node@24.12.2)
       '@microsoft/sp-page-context': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
@@ -15072,7 +15093,7 @@ snapshots:
       '@microsoft/sp-core-library': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-diagnostics': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-dynamic-data': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-lodash-subset': 1.22.2
       '@microsoft/sp-module-interfaces': 1.22.2(@types/node@24.12.2)
       '@microsoft/sp-page-context': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
@@ -15243,7 +15264,7 @@ snapshots:
       - react-dom
       - supports-color
 
-  '@microsoft/sp-http-msgraph@1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)':
+  '@microsoft/sp-http-msgraph@1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)':
     dependencies:
       '@microsoft/microsoft-graph-client': 3.0.7(@azure/msal-browser@4.29.0)
       '@microsoft/microsoft-graph-clientv1': '@microsoft/microsoft-graph-client@1.7.2-spfx'
@@ -15281,12 +15302,12 @@ snapshots:
       - react-dom
       - supports-color
 
-  '@microsoft/sp-http@1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)':
+  '@microsoft/sp-http@1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)':
     dependencies:
       '@microsoft/sp-core-library': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-diagnostics': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-http-base': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-http-msgraph': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-http-msgraph': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@swc/helpers': 0.5.19
       tslib: 2.3.1
     transitivePeerDependencies:
@@ -15410,14 +15431,14 @@ snapshots:
       - react
       - react-dom
 
-  '@microsoft/sp-property-pane@1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)':
+  '@microsoft/sp-property-pane@1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)':
     dependencies:
       '@fluentui/react': 8.125.5(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@fluentui/react-components': 9.73.2(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)(scheduler@0.23.2)
       '@fluentui/react-icons': 2.0.306(react@17.0.1)
       '@fluentui/react-tabster': 9.26.13(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@fluentui/utilities': 8.17.2(@types/react@18.3.28)(react@17.0.1)
-      '@microsoft/sp-component-base': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-component-base': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-core-library': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-diagnostics': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-dynamic-data': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
@@ -15487,19 +15508,19 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.19
 
-  '@microsoft/sp-webpart-base@1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)':
+  '@microsoft/sp-webpart-base@1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)':
     dependencies:
       '@fluentui/react': 8.125.5(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-component-base': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-component-base': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-core-library': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-diagnostics': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-http-base': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-loader': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-lodash-subset': 1.22.2
       '@microsoft/sp-module-interfaces': 1.22.2(@types/node@24.12.2)
       '@microsoft/sp-page-context': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-property-pane': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+      '@microsoft/sp-property-pane': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-top-actions': 1.22.2
       '@microsoft/teams-js-v2': '@microsoft/teams-js@2.32.0'
       '@swc/helpers': 0.5.19
@@ -15522,7 +15543,7 @@ snapshots:
       '@microsoft/sp-component-base': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)(scheduler@0.23.2)
       '@microsoft/sp-core-library': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-diagnostics': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
-      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7(@azure/msal-browser@4.29.0))(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
+      '@microsoft/sp-http': 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-http-base': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@17.0.1(react@17.0.1))(react@17.0.1)
       '@microsoft/sp-loader': 1.22.2(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
       '@microsoft/sp-lodash-subset': 1.22.2
@@ -17129,14 +17150,14 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@3.2.4(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(vite@6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0))':
+  '@vitest/mocker@3.2.4(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(vite@6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0))':
     dependencies:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
       msw: 2.12.10(@types/node@20.19.35)(typescript@5.9.3)
-      vite: 6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0)
+      vite: 6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0)
 
   '@vitest/mocker@3.2.4(msw@2.12.10(@types/node@24.12.2)(typescript@5.9.3))(vite@6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0))':
     dependencies:
@@ -21304,7 +21325,7 @@ snapshots:
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(vite@6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0))
+      '@vitest/mocker': 3.2.4(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(vite@6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0))
       '@vitest/pretty-format': 3.2.4
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4

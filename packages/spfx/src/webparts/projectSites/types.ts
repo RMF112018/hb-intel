@@ -109,8 +109,35 @@ export const PROJECT_SITES_SELECT_FIELDS = [
   SP_PROJECTS_FIELDS.SUPPORTING_ESTIMATOR_UPNS,
 ] as const;
 
-/** Bounded All Projects cap for repository reads. */
-export const PROJECT_SITES_ALL_SCOPE_LIMIT = 2000;
+/**
+ * Per-request page size used by the paged repository fetch path.
+ *
+ * Set to SharePoint's maximum REST `$top` (5000) so the repository pulls
+ * the largest legal page in a single round-trip and minimizes the number
+ * of paged calls needed to drain the eligible dataset.
+ */
+export const PROJECT_SITES_PAGE_SIZE = 5000;
+
+/**
+ * Hard safety ceiling for the All-Projects fetch.
+ *
+ * This is **not** a search cap — it is a defense-in-depth limit so a
+ * runaway list (e.g. a misconfigured view returning hundreds of thousands
+ * of rows) cannot exhaust client memory. When this ceiling is reached,
+ * the repository returns `bounded: true` and the UI surfaces an honest
+ * overflow notice. Keep this value comfortably above the known-good
+ * cardinality of the Projects list.
+ */
+export const PROJECT_SITES_ALL_SCOPE_CEILING = 25000;
+
+/**
+ * @deprecated Replaced by `PROJECT_SITES_ALL_SCOPE_CEILING` (defense-in-depth
+ *   ceiling, not a search cap) and `PROJECT_SITES_PAGE_SIZE` (per-request
+ *   page size). Retained as a re-export for one release so external
+ *   consumers fail loudly during type-check rather than silently capping at
+ *   2000. Will be removed in a follow-up.
+ */
+export const PROJECT_SITES_ALL_SCOPE_LIMIT = PROJECT_SITES_ALL_SCOPE_CEILING;
 
 // ── Normalized UI-ready record ─────────────────────────────────────────────
 
@@ -449,6 +476,25 @@ export interface IProjectSitesResult {
   scope: ProjectSitesScope;
   entries: IProjectSiteEntry[];
   errorMessage: string | null;
+  /**
+   * True when the repository hit the safety ceiling
+   * (`PROJECT_SITES_ALL_SCOPE_CEILING`) before exhausting the eligible
+   * dataset. The UI uses this signal to render a truthful overflow
+   * notice instead of silently presenting partial results.
+   *
+   * Optional in the contract so legacy test fixtures continue to compile;
+   * the hook always sets it (default `false`).
+   */
+  bounded?: boolean;
+  /**
+   * Number of project rows actually fetched from SharePoint for this
+   * scope. Distinct from `entries.length`, which reflects the merged
+   * record set (project + legacy fallbacks) after resolution.
+   *
+   * Optional in the contract so legacy test fixtures continue to compile;
+   * the hook always sets it (default `0`).
+   */
+  fetchedCount?: number;
 }
 
 // ── Sort model ─────────────────────────────────────────────────────────────

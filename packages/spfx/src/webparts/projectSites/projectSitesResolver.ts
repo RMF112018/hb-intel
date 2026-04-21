@@ -48,6 +48,21 @@ import { pickBestLegacyFallbackCandidate } from './repository/legacyFallbackRegi
 export interface IProjectSitesQueryResult {
   projectRows: IRawProjectSiteItem[];
   fallbackCandidates: ILegacyFallbackRegistryCandidate[];
+  /**
+   * True when the repository hit the safety ceiling before exhausting
+   * the eligible Projects-list dataset. Distinct from "no results" —
+   * `bounded` means the fetch was deliberately stopped, not that the
+   * underlying inventory is empty. Optional so legacy merge-only test
+   * fixtures continue to compile; the repository always sets it.
+   */
+  bounded?: boolean;
+  /**
+   * Number of raw Projects-list rows fetched from SharePoint. Mirrors
+   * `projectRows.length` so the field travels with the query result
+   * through hooks without re-derivation. Optional in the contract so
+   * legacy merge-only test fixtures continue to compile.
+   */
+  fetchedCount?: number;
 }
 
 function trimString(value: unknown): string {

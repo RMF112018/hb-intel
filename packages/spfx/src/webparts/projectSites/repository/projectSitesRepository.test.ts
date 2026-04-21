@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  __drainPagedForTests,
   buildLegacyFallbackLookup,
   pickBestLegacyFallbackCandidate,
   toLegacyFallbackCandidate,
 } from './projectSitesRepository.js';
+
+async function* pages<T>(...pageBatches: T[][]): AsyncGenerator<T[]> {
+  for (const batch of pageBatches) yield batch;
+}
 
 describe('projectSitesRepository fallback selection', () => {
   it('accepts only matched rows with valid folder URLs', () => {
@@ -119,6 +124,45 @@ describe('projectSitesRepository fallback selection', () => {
     });
     expect(candidate?.matchConfidence).toBeNull();
     expect(candidate?.matchMethod).toBeNull();
+  });
+
+  it('drains a paged async iterable to completion when ceiling is comfortably above the dataset', async () => {
+    const result = await __drainPagedForTests(
+      pages([1, 2, 3], [4, 5], [6]),
+      100,
+    );
+    expect(result.rows).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(result.bounded).toBe(false);
+  });
+
+  it('signals bounded=true when the ceiling halts the drain mid-dataset', async () => {
+    // Three pages of two items would naturally yield six rows; ceiling
+    // of four must trim to exactly four and report bounded=true.
+    const result = await __drainPagedForTests(
+      pages([1, 2], [3, 4], [5, 6]),
+      4,
+    );
+    expect(result.rows).toEqual([1, 2, 3, 4]);
+    expect(result.bounded).toBe(true);
+  });
+
+  it('reports bounded=false when the natural end coincides with the ceiling', async () => {
+    // Exactly-at-ceiling means we drained the dataset; no overflow.
+    const result = await __drainPagedForTests(
+      pages([1, 2], [3, 4]),
+      4,
+    );
+    expect(result.rows).toEqual([1, 2, 3, 4]);
+    expect(result.bounded).toBe(false);
+  });
+
+  it('handles empty pages without inflating the result', async () => {
+    const result = await __drainPagedForTests(
+      pages<number>([], [1], [], [2, 3]),
+      100,
+    );
+    expect(result.rows).toEqual([1, 2, 3]);
+    expect(result.bounded).toBe(false);
   });
 
   it('builds one lookup winner per project number + year', () => {

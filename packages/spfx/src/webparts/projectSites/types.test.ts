@@ -3,7 +3,8 @@ import {
   isValidYear,
   normalizeProjectSitesRuntimeConfig,
   parseProjectSitesRuntimeYear,
-  PROJECT_SITES_ALL_SCOPE_LIMIT,
+  PROJECT_SITES_ALL_SCOPE_CEILING,
+  PROJECT_SITES_PAGE_SIZE,
   PROJECT_SITES_SELECT_FIELDS,
   SP_PROJECTS_FIELDS,
   resolveInitialProjectSitesScope,
@@ -148,8 +149,17 @@ describe('repository field contract', () => {
     expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('SiteUrl');
   });
 
-  it('keeps all-projects reads explicitly bounded', () => {
-    expect(PROJECT_SITES_ALL_SCOPE_LIMIT).toBeGreaterThan(0);
-    expect(PROJECT_SITES_ALL_SCOPE_LIMIT).toBeLessThanOrEqual(5000);
+  it('declares a defense-in-depth ceiling well above SharePoint single-page max', () => {
+    // The ceiling is a safety net, not a search cap. It must be large
+    // enough that real Projects-list cardinality fits under it without
+    // bounding, but small enough to prevent runaway memory use.
+    expect(PROJECT_SITES_ALL_SCOPE_CEILING).toBeGreaterThan(PROJECT_SITES_PAGE_SIZE);
+    expect(PROJECT_SITES_ALL_SCOPE_CEILING).toBeGreaterThanOrEqual(10000);
+  });
+
+  it('uses SharePoint REST max page size for paged fetch', () => {
+    // SharePoint REST `$top` caps at 5000 per request; using the max
+    // minimizes round-trips when draining the eligible dataset.
+    expect(PROJECT_SITES_PAGE_SIZE).toBe(5000);
   });
 });

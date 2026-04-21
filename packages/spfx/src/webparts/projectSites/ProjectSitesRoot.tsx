@@ -86,6 +86,15 @@ import {
   useProjectSitesContainerState,
   type ProjectSitesLayoutMode,
 } from './projectSitesLayoutMode.js';
+import {
+  paginate,
+  pageSizeForMode,
+  filtersSignature,
+  buildPaginationResetSignature,
+} from './projectSitesPagination.js';
+import { ProjectSitesPaginationControl } from './components/ProjectSitesPaginationControl.js';
+import { ProjectSitesOverflowNotice } from './components/ProjectSitesOverflowNotice.js';
+import { PROJECT_SITES_ALL_SCOPE_CEILING } from './types.js';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
@@ -994,8 +1003,38 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     });
   }, [projectsResult, debouncedSearch, sortKey, filters]);
 
+  // ── Pagination state ────────────────────────────────────────────────
+  // Client-side pagination over the post-pipeline result. The page index
+  // resets to 1 whenever the inputs that govern the result set change
+  // (search, sort, filters, scope) so a stale page never silently hides
+  // matches.
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = pageSizeForMode(layoutMode);
+  const scopeKey = scope ? (scope.kind === 'all' ? 'all' : `year:${scope.year}`) : 'none';
+  const resetSignature = buildPaginationResetSignature({
+    entriesIdentity: projectsResult?.status === 'success' ? projectsResult.entries : null,
+    searchTerm: debouncedSearch,
+    sortKey,
+    filtersSignature: filtersSignature(filters),
+    scopeKey,
+  });
+  const lastResetSignatureRef = useRef(resetSignature);
+  useEffect(() => {
+    if (lastResetSignatureRef.current !== resetSignature) {
+      lastResetSignatureRef.current = resetSignature;
+      setCurrentPage(1);
+    }
+  }, [resetSignature]);
+
+  const pagedResult = useMemo(
+    () => paginate(visibleEntries, currentPage, pageSize),
+    [visibleEntries, currentPage, pageSize],
+  );
+
   const totalEntryCount = projectsResult?.status === 'success' ? projectsResult.entries.length : 0;
   const visibleCount = visibleEntries.length;
+  const isBoundedFetch = projectsResult?.status === 'success' && projectsResult.bounded;
+  const fetchedRowCount = projectsResult?.fetchedCount ?? 0;
   const isFiltered = debouncedSearch.trim().length > 0 || !filtersAreEmpty(filters);
   const isSparse = visibleCount > 0 && visibleCount <= 2;
   const activeFilterCount = countActiveFilters(filters);
@@ -1677,6 +1716,16 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
         </div>
       )}
 
+      {/* Bounded-fetch overflow notice — only rendered when the
+          repository hit its safety ceiling. Always above the grid so the
+          user understands the visible counts before scanning results. */}
+      {isBoundedFetch && (
+        <ProjectSitesOverflowNotice
+          fetchedCount={fetchedRowCount}
+          ceiling={PROJECT_SITES_ALL_SCOPE_CEILING}
+        />
+      )}
+
       {/* Success with visible entries */}
       {projectsResult?.status === 'success' && visibleCount > 0 && (() => {
         const sparseCluster = isSparse && layoutMode !== 'compact';
@@ -1689,31 +1738,43 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
           ? 'bounded'
           : 'dense';
         return (
-          <div
-            className={mergeClasses(
-              classes.grid,
-              layoutMode === 'wide' && classes.gridModeWide,
-              layoutMode === 'medium' && classes.gridModeMedium,
-              layoutMode === 'compact' && classes.gridModeCompact,
-              isSparse && classes.gridSparse,
-              sparseCluster && classes.gridSparseCluster,
-              sparseFeatured && classes.gridSparseFeatured,
-            )}
-            role="list"
-            aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort}`}
-            data-project-sites-grid-sparse={sparseVariant}
-            data-project-sites-grid-alignment="start"
-          >
-            {visibleEntries.map((entry) => (
-              <ProjectSiteCardListItem
-                key={entry.recordKey}
-                entry={entry}
-                layoutMode={layoutMode}
-                peopleDisplayLabels={peopleDisplayLabels}
-                className={classes.gridItem}
-              />
-            ))}
-          </div>
+          <>
+            <div
+              id="project-sites-grid"
+              className={mergeClasses(
+                classes.grid,
+                layoutMode === 'wide' && classes.gridModeWide,
+                layoutMode === 'medium' && classes.gridModeMedium,
+                layoutMode === 'compact' && classes.gridModeCompact,
+                isSparse && classes.gridSparse,
+                sparseCluster && classes.gridSparseCluster,
+                sparseFeatured && classes.gridSparseFeatured,
+              )}
+              role="list"
+              aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort} (page ${pagedResult.page} of ${pagedResult.totalPages})`}
+              data-project-sites-grid-sparse={sparseVariant}
+              data-project-sites-grid-alignment="start"
+            >
+              {pagedResult.items.map((entry) => (
+                <ProjectSiteCardListItem
+                  key={entry.recordKey}
+                  entry={entry}
+                  layoutMode={layoutMode}
+                  peopleDisplayLabels={peopleDisplayLabels}
+                  className={classes.gridItem}
+                />
+              ))}
+            </div>
+            <ProjectSitesPaginationControl
+              page={pagedResult.page}
+              totalPages={pagedResult.totalPages}
+              totalItems={pagedResult.totalItems}
+              range={pagedResult.range}
+              layoutMode={layoutMode}
+              onPageChange={setCurrentPage}
+              controlsId="project-sites-grid"
+            />
+          </>
         );
       })()}
     </section>

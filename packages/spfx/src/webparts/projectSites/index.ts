@@ -34,6 +34,10 @@ export {
   normalizeProjectSitesRuntimeConfig,
   resolveInitialProjectSitesScope,
   PROJECT_SITES_SELECT_FIELDS,
+  PROJECT_SITES_ALL_SCOPE_CEILING,
+  PROJECT_SITES_PAGE_SIZE,
+  // Deprecated re-export retained for one release; consumers should
+  // migrate to PROJECT_SITES_ALL_SCOPE_CEILING.
   PROJECT_SITES_ALL_SCOPE_LIMIT,
 } from './types.js';
 
