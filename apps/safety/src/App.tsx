@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
 import { ComplexityProvider } from '@hbc/complexity';
+import { ForceOfficeMode } from './ForceOfficeMode.js';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import {
   SafetyRepositoryProvider,
@@ -43,12 +44,16 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
     return createSafetyInspectionRepository({ mode: 'mock' });
   }, [typed]);
 
-  // Safety is office-only (Phase-2 G-01): lock the theme to light so no
-  // shell/field-mode inheritance can surface the field theme on this
-  // SPFx-over-SharePoint surface. See plan §3.
+  // Safety is office-only (Phase-2 G-01): lock the theme to light AND
+  // force isFieldMode=false on the ambient theme context so ui-kit
+  // consumers (WorkspacePageShell, HbcDataTable, HbcCommandPalette, …)
+  // never engage field-mode UI variants on this SPFx-over-SharePoint
+  // surface — even on touch devices or when a dev persisted a field
+  // override in localStorage. See plan §3.
   return (
     <HbcThemeProvider forceTheme="light">
-      <QueryClientProvider client={queryClient}>
+      <ForceOfficeMode>
+        <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <ComplexityProvider
             spfxContext={
@@ -63,6 +68,7 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
           </ComplexityProvider>
         </HbcErrorBoundary>
       </QueryClientProvider>
+      </ForceOfficeMode>
     </HbcThemeProvider>
   );
 }

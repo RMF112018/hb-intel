@@ -18,6 +18,20 @@ describe('Wave 1 — shell-level theme lock (plan §6 #4, G-01)', () => {
     const appTsx = fs.readFileSync(path.resolve(__dirname, '../App.tsx'), 'utf-8');
     expect(appTsx).toMatch(/<HbcThemeProvider\s+forceTheme=['"]light['"]/);
   });
+
+  it('App.tsx wraps the tree in ForceOfficeMode so isFieldMode cannot leak in', () => {
+    const appTsx = fs.readFileSync(path.resolve(__dirname, '../App.tsx'), 'utf-8');
+    expect(appTsx).toMatch(/<ForceOfficeMode>/);
+    expect(appTsx).toMatch(/<\/ForceOfficeMode>/);
+  });
+
+  it('ForceOfficeMode re-provides HbcThemeContext with isFieldMode=false', () => {
+    const src = fs.readFileSync(path.resolve(__dirname, '../ForceOfficeMode.tsx'), 'utf-8');
+    expect(src).toMatch(/HbcThemeContext\.Provider/);
+    expect(src).toMatch(/isFieldMode:\s*false/);
+    expect(src).toMatch(/mode:\s*['"]office['"]/);
+    expect(src).toMatch(/toggleFieldMode:\s*\(\)\s*=>\s*undefined/);
+  });
 });
 
 describe('Wave 1 — page-level supportedModes lock (plan §6 #5, G-01)', () => {
