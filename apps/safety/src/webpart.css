@@ -22,6 +22,19 @@
 [data-hbc-shell='shell-body'] { display: flex; flex: 1; }
 [data-hbc-shell='shell-content'] { flex: 1; padding: 24px; overflow-y: auto; }
 
+/* --- Safety app content container (mode-aware layout root) ----------- *
+ * Phase-04 audit G-02 foundation: this element is ref-measured by
+ * useSafetyLayoutMode and carries the authoritative data-safety-mode
+ * attribute for Safety-owned layout rules. It must not constrain the
+ * shell layout beneath it — it is a full-slot flow container.
+ */
+.safety-app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
 /* --- Layout rhythm ---------------------------------------------------- */
 
 .safety-page {
@@ -132,14 +145,22 @@
 
 /* --- Upload workflow surface ----------------------------------------- */
 
+/* Upload surface mode contract (Phase-04 audit G-02 foundation): the
+ * 2-column intake + aside layout engages at the "medium" and "wide"
+ * Safety modes, which are derived from the app content container's
+ * actual width — not raw viewport. No competing @media rules govern
+ * this class; the mode attribute is the single source of truth for
+ * this surface's layout decision.
+ */
 .safety-upload {
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 1fr);
 }
 
-@media (min-width: 960px) {
-  .safety-upload { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+[data-safety-mode='medium'] .safety-upload,
+[data-safety-mode='wide'] .safety-upload {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
 }
 
 .safety-upload__primary { display: grid; gap: 16px; }
@@ -165,6 +186,57 @@
   display: grid;
   gap: 8px;
   padding-left: 1.25rem;
+}
+
+/* --- SafetyFileInput (G-09 governed primitive) ---------------------- *
+ * Minimal local styling for the native trigger button. Matches
+ * HbcButton secondary visually while allowing full aria-* wiring that
+ * HbcButton does not forward in the current ui-kit API.
+ */
+
+.safety-file-input {
+  display: grid;
+  gap: 8px;
+}
+
+.safety-file-input__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--colorNeutralForeground1);
+  background-color: var(--colorNeutralBackground1);
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 120ms ease-in-out, box-shadow 120ms ease-in-out;
+}
+
+.safety-file-input__trigger:hover:not(:disabled) {
+  background-color: var(--colorNeutralBackground2);
+}
+
+.safety-file-input__trigger:active:not(:disabled) {
+  background-color: var(--colorNeutralBackground3);
+}
+
+.safety-file-input__trigger:focus-visible {
+  outline: 2px solid var(--colorBrandStroke1, var(--colorBrandForeground1));
+  outline-offset: 2px;
+}
+
+.safety-file-input__trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.safety-file-input__error {
+  color: var(--colorStatusDangerForeground1, var(--colorPaletteRedForeground1));
 }
 
 /* --- Findings list (severity-aware) ---------------------------------- */

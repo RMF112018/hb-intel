@@ -1,10 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import {
-  HbcBanner,
-  HbcButton,
   HbcDataTable,
-  HbcEmptyState,
   HbcSelect,
   HbcStatusBadge,
   HbcTypography,
@@ -14,7 +11,7 @@ import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import type { KpiCardData } from '@hbc/models';
 import { useProjectWeeks, useReportingPeriods } from '@hbc/features-safety';
 import type { SafetyProjectWeekRecord } from '@hbc/features-safety';
-import { SafetyMasthead } from '../components/index.js';
+import { SafetyMasthead, SafetyStatusPanel } from '../components/index.js';
 import {
   derivePeriodsDashboardState,
   type PeriodsDashboardState,
@@ -208,10 +205,12 @@ export function ReportingPeriodDashboardPage(): ReactNode {
     >
       <div className="safety-page">
         {showRedirectBanner && (
-          <HbcBanner variant="info" onDismiss={() => setBannerDismissed(true)}>
-            Incidents tracking is not available in this release. You&apos;ve been redirected to the
-            reporting-period dashboard.
-          </HbcBanner>
+          <SafetyStatusPanel
+            intent="advisory"
+            data-safety-ui="dashboard-incidents-redirect"
+            description="Incidents tracking is not available in this release. You’ve been redirected to the reporting-period dashboard."
+            onDismiss={() => setBannerDismissed(true)}
+          />
         )}
 
         <SafetyMasthead
@@ -241,14 +240,23 @@ export function ReportingPeriodDashboardPage(): ReactNode {
           </div>
 
           {state.variant === 'subordinate-project-weeks' ? (
-            <ProjectWeeksSubordinateError
-              message={state.message}
+            <SafetyStatusPanel
+              intent="partial-failure"
+              data-safety-ui="project-weeks-subordinate-error"
+              description={state.message}
               detail={state.detail}
-              onRetry={retryProjectWeeks}
-              isRetrying={projectWeeksQuery.isPending}
+              action={{
+                label: 'Retry project-week records',
+                pendingLabel: 'Retrying…',
+                isPending: projectWeeksQuery.isPending,
+                variant: 'secondary',
+                onClick: retryProjectWeeks,
+              }}
             />
           ) : state.variant === 'empty' ? (
-            <HbcEmptyState
+            <SafetyStatusPanel
+              intent="empty"
+              data-safety-ui="project-weeks-empty"
               title="No project-week records for this reporting period"
               description="Project-week records are generated after checklist uploads commit against this period."
             />
@@ -265,41 +273,3 @@ export function ReportingPeriodDashboardPage(): ReactNode {
   );
 }
 
-interface ProjectWeeksSubordinateErrorProps {
-  readonly message: string;
-  readonly detail?: string;
-  readonly onRetry: () => void;
-  readonly isRetrying: boolean;
-}
-
-/**
- * Subordinate-error card rendered *inside* the page body when reporting
- * periods loaded but the project-week query failed. Keeps the masthead +
- * period selector interactive; surfaces the real adapter error (list name,
- * HTTP status) so the failing seam is visible; offers a scoped retry that
- * only re-fetches project-weeks.
- */
-function ProjectWeeksSubordinateError({
-  message,
-  detail,
-  onRetry,
-  isRetrying,
-}: ProjectWeeksSubordinateErrorProps): ReactNode {
-  return (
-    <HbcBanner variant="warning" data-safety-ui="project-weeks-subordinate-error">
-      <div className="safety-section">
-        <HbcTypography intent="body">{message}</HbcTypography>
-        {detail && (
-          <HbcTypography intent="bodySmall">
-            <strong>Adapter reported:</strong> {detail}
-          </HbcTypography>
-        )}
-        <div>
-          <HbcButton variant="secondary" onClick={onRetry} disabled={isRetrying}>
-            {isRetrying ? 'Retrying…' : 'Retry project-week records'}
-          </HbcButton>
-        </div>
-      </div>
-    </HbcBanner>
-  );
-}
