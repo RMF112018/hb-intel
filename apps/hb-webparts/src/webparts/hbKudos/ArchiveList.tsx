@@ -50,6 +50,7 @@ export interface ArchiveListProps {
   searchText: string;
   onSearchChange: (value: string) => void;
   onOpenEntry: (entry: KudosEntry) => void;
+  laneMode: 'standard' | 'compact' | 'handheld';
   /** Optional "View all recognition" handler rendered inside the expanded
    *  archive as a subordinate entry point for the feed flyout. */
   onViewAll?: () => void;
@@ -60,9 +61,11 @@ export function ArchiveList({
   searchText,
   onSearchChange,
   onOpenEntry,
+  laneMode,
   onViewAll,
 }: ArchiveListProps): React.JSX.Element {
   const [expanded, setExpanded] = React.useState<boolean>(false);
+  const isCompactLane = laneMode === 'compact';
 
   const filtered = React.useMemo(() => {
     if (!expanded) return entries;
@@ -86,6 +89,7 @@ export function ArchiveList({
       data-hbc-webpart-section="hb-kudos-archive"
       data-hbc-testid="hb-kudos-archive-section"
       data-hbc-archive-expanded={expanded ? 'true' : 'false'}
+      data-lane-mode={laneMode}
     >
       <div className={styles.sectionHeader}>
         <div className={styles.sectionHeaderTop}>
@@ -112,9 +116,11 @@ export function ArchiveList({
             </span>
           </button>
         </div>
-        <p className={styles.archiveLead}>
-          Recognition history stays visible as new kudos rotates through the spotlight.
-        </p>
+        {!isCompactLane ? (
+          <p className={styles.archiveLead}>
+            Recognition history stays visible as new kudos rotates through the spotlight.
+          </p>
+        ) : null}
       </div>
 
       {expanded ? (
@@ -193,9 +199,11 @@ export function ArchiveList({
           <span className={styles.feedCtaBody}>
             <span className={styles.feedCtaEyebrow}>Continue exploring</span>
             <span className={styles.feedCtaTitle}>Browse all recognition</span>
-            <span className={styles.feedCtaMeta}>
-              Open the full feed for current and archived recognition moments.
-            </span>
+            {!isCompactLane ? (
+              <span className={styles.feedCtaMeta}>
+                Open the full feed for current and archived recognition moments.
+              </span>
+            ) : null}
           </span>
           <span className={styles.feedCtaArrow} aria-hidden="true">
             <ArrowRight size={14} strokeWidth={2.5} />

@@ -81,6 +81,15 @@ export interface HbKudosProps {
 }
 
 const DEFAULT_AGE_OFF_DAYS = 14;
+const HANDHELD_MAX_WIDTH_PX = 559;
+const COMPACT_LANE_MAX_WIDTH_PX = 860;
+type KudosLaneMode = 'standard' | 'compact' | 'handheld';
+
+function resolveKudosLaneMode(containerWidth: number, handheldViewport: boolean): KudosLaneMode {
+  if (handheldViewport) return 'handheld';
+  if (containerWidth > 0 && containerWidth <= COMPACT_LANE_MAX_WIDTH_PX) return 'compact';
+  return 'standard';
+}
 
 function resolveConfig(config: HbKudosProps['config']): {
   heading: string;
@@ -142,6 +151,8 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
   const [discardDialog, setDiscardDialog] = React.useState(false);
   const [feedOpen, setFeedOpen] = React.useState(false);
   const [archiveSearch, setArchiveSearch] = React.useState('');
+  const surfaceRootRef = React.useRef<HTMLElement | null>(null);
+  const [laneMode, setLaneMode] = React.useState<KudosLaneMode>('standard');
 
   const handleComposerClose = (): void => {
     if (composerState.isDirty && composerState.status === 'editing') {
@@ -152,6 +163,38 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
   };
 
   const { isHosted, safeZonePadding } = useHostSafeLayout();
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mqHandheld = window.matchMedia(`(max-width: ${HANDHELD_MAX_WIDTH_PX}px)`);
+    const root = surfaceRootRef.current;
+    if (!root) return;
+
+    const updateMode = (): void => {
+      const measuredWidth = root.getBoundingClientRect().width;
+      setLaneMode(resolveKudosLaneMode(measuredWidth, mqHandheld.matches));
+    };
+
+    updateMode();
+
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateMode) : null;
+    if (ro) ro.observe(root);
+
+    if (typeof mqHandheld.addEventListener === 'function') {
+      mqHandheld.addEventListener('change', updateMode);
+    } else {
+      mqHandheld.addListener(updateMode);
+    }
+
+    return () => {
+      if (ro) ro.disconnect();
+      if (typeof mqHandheld.removeEventListener === 'function') {
+        mqHandheld.removeEventListener('change', updateMode);
+      } else {
+        mqHandheld.removeListener(updateMode);
+      }
+    };
+  }, [isHosted]);
 
   if (isLoading) {
     return (
@@ -192,10 +235,12 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
 
   return (
     <section
+      ref={surfaceRootRef}
       data-hbc-webpart="hb-kudos"
       data-hbc-webpart-phase="phase-14-kudos-phase-05"
       data-hbc-testid="hb-kudos-public-root"
       data-hbc-hosted={isHosted ? 'true' : 'false'}
+      data-hbc-lane-mode={laneMode}
       aria-label="HB Kudos recognition"
       className={kudosSurfaceStyles.shellRoot}
       style={{
@@ -209,6 +254,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         featured={featuredEntry}
         recent={recentEntries}
         archiveCount={hydratedArchive.length}
+        laneMode={laneMode}
         onGiveKudos={composerActions.open}
         onCelebrate={handleCelebrate}
         celebrateLoading={celebrating}
@@ -221,6 +267,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
           searchText={archiveSearch}
           onSearchChange={setArchiveSearch}
           onOpenEntry={handleOpenArticle}
+          laneMode={laneMode}
           onViewAll={() => setFeedOpen(true)}
         />
       ) : null}

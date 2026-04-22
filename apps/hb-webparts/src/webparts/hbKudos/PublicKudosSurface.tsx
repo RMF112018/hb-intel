@@ -67,6 +67,7 @@ export interface PublicKudosSurfaceProps {
   featured?: KudosEntry;
   recent: KudosEntry[];
   archiveCount?: number;
+  laneMode?: 'standard' | 'compact' | 'handheld';
   onGiveKudos: () => void;
   onCelebrate?: (kudosId: string) => void;
   celebrateLoading?: boolean;
@@ -75,14 +76,8 @@ export interface PublicKudosSurfaceProps {
 
 type FeaturedLayoutMode = 'default' | 'compact' | 'handheld';
 
-function useFeaturedLayoutMode(): FeaturedLayoutMode {
-  const [mode, setMode] = React.useState<FeaturedLayoutMode>(() => {
-    if (typeof window === 'undefined') return 'default';
-    const width = window.innerWidth;
-    if (width <= 559) return 'handheld';
-    if (width <= 959) return 'compact';
-    return 'default';
-  });
+function useViewportFeaturedLayoutMode(): FeaturedLayoutMode {
+  const [mode, setMode] = React.useState<FeaturedLayoutMode>('default');
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -111,7 +106,6 @@ function useFeaturedLayoutMode(): FeaturedLayoutMode {
         mqCompact.removeEventListener('change', updateMode);
       };
     }
-    // Fallback for older Safari
     mqHandheld.addListener(updateMode);
     mqCompact.addListener(updateMode);
     return () => {
@@ -119,6 +113,7 @@ function useFeaturedLayoutMode(): FeaturedLayoutMode {
       mqCompact.removeListener(updateMode);
     };
   }, []);
+
   return mode;
 }
 
@@ -194,12 +189,21 @@ export function PublicKudosSurface({
   featured,
   recent,
   archiveCount = 0,
+  laneMode,
   onGiveKudos,
   onCelebrate,
   celebrateLoading,
   onOpenArticle,
 }: PublicKudosSurfaceProps): React.JSX.Element {
-  const featuredLayoutMode = useFeaturedLayoutMode();
+  const viewportFallbackMode = useViewportFeaturedLayoutMode();
+  const resolvedLaneMode = laneMode ?? (viewportFallbackMode === 'handheld' ? 'handheld' : viewportFallbackMode === 'compact' ? 'compact' : 'standard');
+  const featuredLayoutMode: FeaturedLayoutMode =
+    resolvedLaneMode === 'handheld'
+      ? 'handheld'
+      : resolvedLaneMode === 'compact'
+        ? 'compact'
+        : 'default';
+  const isCompactLane = resolvedLaneMode === 'compact';
   const activityEntries = React.useMemo(() => dedupeEntries(featured, recent), [featured, recent]);
   const recognitionCount = activityEntries.length;
   const celebrationCount = activityEntries.reduce((sum, entry) => sum + (entry.celebrateCount ?? 0), 0);
@@ -245,6 +249,7 @@ export function PublicKudosSurface({
     <section
       className={styles.section}
       data-hbc-webpart-section="hb-kudos-public-surface"
+      data-lane-mode={resolvedLaneMode}
       aria-label={heading}
     >
       {/* Unified hero zone — masthead (upper band) + featured
@@ -289,6 +294,7 @@ export function PublicKudosSurface({
         <section
           aria-labelledby="hb-kudos-pulse-title"
           data-hbc-webpart-section="hb-kudos-pulse"
+          data-lane-mode={resolvedLaneMode}
           data-hbc-testid="hb-kudos-pulse-section"
         >
           <div className={styles.sectionHeader}>
@@ -303,31 +309,54 @@ export function PublicKudosSurface({
             </h3>
           </div>
           {recognitionCount > 0 ? (
-            <div className={styles.pulseStats}>
-              <div className={styles.pulseStat}>
-                <span className={styles.pulseStatValue}>{recognitionCount}</span>
-                <span className={styles.pulseStatLabel}>
+            isCompactLane ? (
+              <div className={styles.pulseSummaryRow} aria-label="Recognition pulse summary">
+                <span className={styles.pulseSummaryItem}>
+                  <strong>{recognitionCount}</strong>{' '}
                   {recognitionCount === 1 ? 'recognition' : 'recognitions'}
                 </span>
-              </div>
-              <div className={styles.pulseStat}>
-                <span className={styles.pulseStatValue}>{recognizedPeopleCount}</span>
-                <span className={styles.pulseStatLabel}>
+                <span className={styles.pulseSummaryDivider} aria-hidden="true">
+                  /
+                </span>
+                <span className={styles.pulseSummaryItem}>
+                  <strong>{recognizedPeopleCount}</strong>{' '}
                   {recognizedPeopleCount === 1 ? 'person recognized' : 'people recognized'}
                 </span>
-              </div>
-              <div className={styles.pulseStat}>
-                <span className={styles.pulseStatValue}>{celebrationCount}</span>
-                <span className={styles.pulseStatLabel}>
+                <span className={styles.pulseSummaryDivider} aria-hidden="true">
+                  /
+                </span>
+                <span className={styles.pulseSummaryItem}>
+                  <strong>{celebrationCount}</strong>{' '}
                   {celebrationCount === 1 ? 'celebration' : 'celebrations'}
                 </span>
               </div>
-            </div>
+            ) : (
+              <div className={styles.pulseStats}>
+                <div className={styles.pulseStat}>
+                  <span className={styles.pulseStatValue}>{recognitionCount}</span>
+                  <span className={styles.pulseStatLabel}>
+                    {recognitionCount === 1 ? 'recognition' : 'recognitions'}
+                  </span>
+                </div>
+                <div className={styles.pulseStat}>
+                  <span className={styles.pulseStatValue}>{recognizedPeopleCount}</span>
+                  <span className={styles.pulseStatLabel}>
+                    {recognizedPeopleCount === 1 ? 'person recognized' : 'people recognized'}
+                  </span>
+                </div>
+                <div className={styles.pulseStat}>
+                  <span className={styles.pulseStatValue}>{celebrationCount}</span>
+                  <span className={styles.pulseStatLabel}>
+                    {celebrationCount === 1 ? 'celebration' : 'celebrations'}
+                  </span>
+                </div>
+              </div>
+            )
           ) : (
             <p className={styles.pulseEmpty}>No new recognition has landed yet this week.</p>
           )}
           <p className={styles.pulseStory}>{lightDataStory.body}</p>
-          <p className={styles.pulsePrompt}>{lightDataStory.prompt}</p>
+          {!isCompactLane ? <p className={styles.pulsePrompt}>{lightDataStory.prompt}</p> : null}
         </section>
       ) : null}
 
