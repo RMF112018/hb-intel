@@ -362,14 +362,29 @@
 
 .safety-intake-runway {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+/* Upload intake workflow — content-width cap at wide / medium modes.
+ * The Upload journey is a form workflow, not a document page; capping the
+ * runway keeps each step readable as an authored surface instead of
+ * stretching to the hosted SharePoint canvas width. Compact / minimal
+ * stay full-width so narrow viewports don't introduce dead horizontal
+ * space. Applied via the Safety mode-attribute contract, not viewport
+ * @media, so it stays coherent with the foundation-pass responsive system.
+ */
+[data-safety-mode='medium'] .safety-intake-runway,
+[data-safety-mode='wide'] .safety-intake-runway {
+  max-width: 960px;
+  margin-inline: auto;
+  width: 100%;
 }
 
 .safety-intake-step {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 16px;
-  padding: 20px 24px;
+  padding: 18px 22px;
   border: 1px solid var(--colorNeutralStroke2);
   border-radius: 12px;
   background-color: var(--colorNeutralBackground1);

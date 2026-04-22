@@ -90,6 +90,17 @@ describe('Safety webpart CSS — mode-attribute contract coherence', () => {
     expect(layoutMediaRulesTargeting('safety-intake-readiness__row')).toEqual([]);
   });
 
+  it('Upload intake runway has a content-width cap governed by [data-safety-mode] (medium/wide), with no competing viewport @media', () => {
+    // Layout regression fix: at wide/medium the runway caps its width and
+    // centers itself so steps read as an authored workflow rather than a
+    // full-canvas rail on hosted SharePoint.
+    const modeCapped = cssSource.match(
+      /\[data-safety-mode=['"](?:medium|wide)['"][^{]*\]\s+\.safety-intake-runway\s*\{[^}]*max-width\s*:[^}]*\}/,
+    );
+    expect(modeCapped).not.toBeNull();
+    expect(layoutMediaRulesTargeting('safety-intake-runway')).toEqual([]);
+  });
+
   it('Wave-2 triage surfaces (safety-triage-summary, safety-triage-group) are governed by [data-safety-mode] selectors only', () => {
     expect(cssSource).toMatch(
       /\[data-safety-mode=['"](?:minimal|compact)['"][^{]*\]\s+\.safety-triage-(?:summary__categories|group__cards)/,
