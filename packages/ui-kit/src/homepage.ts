@@ -301,43 +301,15 @@ export type {
   HbcNewsroomLayoutMode,
 } from './HbcNewsroomSurface/index.js';
 
-// ── Homepage launcher band (destructive replacement of flagship rail) ──
-// Premium horizontal launcher tile family owned by @hbc/ui-kit/homepage and
-// consumed by the homepage wrapper's entry-stack. Replaces the earlier
-// vertical-tile HbcPriorityRail "homepage-flagship" context on the
-// homepage render path. HbcPriorityRail remains the surface for
-// standalone / admin-preview rail mounts.
-
-export {
-  HbcHomepageLauncher,
-  HbcHomepageLauncherTile,
-  HbcHomepageLauncherChip,
-  HbcHomepageLauncherOverflow,
-  HBC_HOMEPAGE_LAUNCHER_SURFACE_ID,
-  HBC_HOMEPAGE_LAUNCHER_HANDHELD_MODE_RULE,
-  HBC_HOMEPAGE_LAUNCHER_VERSION,
-  HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
-} from './HbcHomepageLauncher/index.js';
-export type {
-  HbcHomepageLauncherProps,
-  HbcHomepageLauncherTileProps,
-  HomepageLauncherTileModel,
-  HomepageLauncherOverflowSectionModel,
-  HomepageLauncherTileVariant,
-  HbcHomepageLauncherChipProps,
-  HbcHomepageLauncherOverflowProps,
-  HomepageLauncherChipModel,
-  HomepageLauncherDeviceClass,
-  HomepageLauncherDrawerSource,
-  HomepageLauncherCapGovernance,
-  HomepageLauncherHandheldMode,
-  HomepageLauncherOverflowMode,
-} from './HbcHomepageLauncher/index.js';
+// ── Homepage launcher authority ───────────────────────────────────────────
+// Flagship homepage launcher authority now lives in @hbc/homepage-launcher.
+// The legacy HbcHomepageLauncher family remains internal/compatibility-only
+// and is intentionally not re-exported from this governed homepage barrel.
 
 // ── Phase 02 — Priority Rail surface family ─────────────────────────
 // Governed rail/list surface family for standalone priority-action mounts.
 // Shared by the public runtime rail and admin preview surface.
-// Hosted homepage launcher authority is the `HbcHomepageLauncher` family.
+// Hosted homepage launcher authority is the dedicated @hbc/homepage-launcher package.
 
 export {
   HbcPriorityRailSurface,

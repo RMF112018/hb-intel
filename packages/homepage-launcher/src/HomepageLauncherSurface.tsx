@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, Layers, X } from 'lucide-react';
-import {
-  HOMEPAGE_LAUNCHER_SURFACE_ID,
-  HOMEPAGE_LAUNCHER_VERSION,
-} from './constants.js';
+import { HOMEPAGE_LAUNCHER_SURFACE_ID, HOMEPAGE_LAUNCHER_VERSION } from './constants.js';
 import type {
   HomepageLauncherCapGovernance,
   HomepageLauncherDrawerSource,
@@ -14,6 +11,27 @@ import type {
   HomepageLauncherTileModel,
 } from './types.js';
 import styles from './homepage-launcher-surface.module.css';
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    onChange();
+    mediaQuery.addEventListener('change', onChange);
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }, []);
+
+  return prefersReducedMotion;
+}
 
 function resolveHandheldMode(props: HomepageLauncherSurfaceProps): HomepageLauncherHandheldMode {
   if (props.handheldMode) return props.handheldMode;
@@ -50,10 +68,7 @@ function Tile({ tile, family = 'row' }: { tile: HomepageLauncherTileModel; famil
       href={tile.href}
       target={shouldOpenInNewTab ? '_blank' : undefined}
       rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
-      className={clsx(
-        styles.tile,
-        isOverflowTile ? styles.tileOverflow : styles.tilePrimary,
-      )}
+      className={clsx(styles.tile, isOverflowTile ? styles.tileOverflow : styles.tilePrimary)}
       data-hbc-ui="homepage-launcher-tile"
       data-hbc-launcher-tile-id={tile.id}
       data-hbc-launcher-tile-service-key={tile.serviceKey}
@@ -67,11 +82,7 @@ function Tile({ tile, family = 'row' }: { tile: HomepageLauncherTileModel; famil
     >
       <span className={styles.tileIcon} aria-hidden="true">
         {tile.iconAssetSrc ? (
-          <img
-            src={tile.iconAssetSrc}
-            alt=""
-            className={styles.tileIconAsset}
-          />
+          <img src={tile.iconAssetSrc} alt="" className={styles.tileIconAsset} />
         ) : Icon ? (
           <Icon />
         ) : (
@@ -79,21 +90,14 @@ function Tile({ tile, family = 'row' }: { tile: HomepageLauncherTileModel; famil
         )}
       </span>
       <span className={styles.tileTitle}>{tile.title}</span>
-      {shouldOpenInNewTab ? (
-        <span className={styles.visuallyHidden}>(opens in new tab)</span>
-      ) : null}
+      {shouldOpenInNewTab ? <span className={styles.visuallyHidden}>(opens in new tab)</span> : null}
     </a>
   );
 }
 
 export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): React.JSX.Element {
-  const {
-    primary,
-    overflow = [],
-    overflowLabel = 'More tools',
-    className,
-    shortHeight = false,
-  } = props;
+  const { primary, overflow = [], overflowLabel = 'More tools', className, shortHeight = false } = props;
+  const reducedMotion = usePrefersReducedMotion();
   const handheldMode = resolveHandheldMode(props);
   const overflowMode = resolveOverflowMode(props, handheldMode);
   const drawerSource = resolveDrawerSource(props);
@@ -103,39 +107,95 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
   const drawerItems = handheld ? overflow : [...primary, ...overflow];
   const hasOverflow = drawerItems.length > 0;
   const visibleCount = handheld ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
+
   const [open, setOpen] = React.useState(false);
   const dialogId = React.useId();
   const titleId = React.useId();
   const railRef = React.useRef<HTMLDivElement | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+  const dialogRef = React.useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const previousFocusRef = React.useRef<HTMLElement | null>(null);
+
+  const closeDrawer = React.useCallback(() => {
+    setOpen(false);
+    window.requestAnimationFrame(() => {
+      triggerRef.current?.focus();
+      previousFocusRef.current = null;
+    });
+  }, []);
+
+  const openDrawer = React.useCallback(() => {
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setOpen(true);
+  }, []);
 
   React.useEffect(() => {
     if (!open) return;
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('keydown', onEscape);
-    return () => window.removeEventListener('keydown', onEscape);
+    closeButtonRef.current?.focus();
   }, [open]);
 
-  const handleRailKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.currentTarget !== event.target) return;
-    const rail = railRef.current;
-    if (!rail) return;
-    const pageDelta = Math.max(Math.round(rail.clientWidth * 0.75), 96);
-    if (event.key === 'ArrowRight') {
-      event.preventDefault();
-      rail.scrollBy({ left: pageDelta, behavior: 'smooth' });
-    } else if (event.key === 'ArrowLeft') {
-      event.preventDefault();
-      rail.scrollBy({ left: -pageDelta, behavior: 'smooth' });
-    } else if (event.key === 'Home') {
-      event.preventDefault();
-      rail.scrollTo({ left: 0, behavior: 'smooth' });
-    } else if (event.key === 'End') {
-      event.preventDefault();
-      rail.scrollTo({ left: rail.scrollWidth, behavior: 'smooth' });
-    }
-  }, []);
+  React.useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeDrawer();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusableNodes = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+      ).filter((node) => !node.hasAttribute('disabled'));
+
+      if (focusableNodes.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstNode = focusableNodes[0]!;
+      const lastNode = focusableNodes[focusableNodes.length - 1]!;
+      const active = document.activeElement as HTMLElement | null;
+      const isShift = event.shiftKey;
+
+      if (!isShift && active === lastNode) {
+        event.preventDefault();
+        firstNode.focus();
+      } else if (isShift && active === firstNode) {
+        event.preventDefault();
+        lastNode.focus();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [open, closeDrawer]);
+
+  const handleRailKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.currentTarget !== event.target) return;
+      const rail = railRef.current;
+      if (!rail) return;
+      const pageDelta = Math.max(Math.round(rail.clientWidth * 0.75), 96);
+      const behavior = reducedMotion ? 'auto' : 'smooth';
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        rail.scrollBy({ left: pageDelta, behavior });
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        rail.scrollBy({ left: -pageDelta, behavior });
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        rail.scrollTo({ left: 0, behavior });
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        rail.scrollTo({ left: rail.scrollWidth, behavior });
+      }
+    },
+    [reducedMotion],
+  );
 
   const handleRailWheel = React.useCallback((event: React.WheelEvent<HTMLDivElement>) => {
     const rail = railRef.current;
@@ -163,9 +223,7 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
       data-hbc-homepage-launcher-cap-governance={capGovernance}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
       data-hbc-homepage-launcher-surface-grammar="flagship-utility-v1"
-      data-hbc-homepage-launcher-display-class={
-        handheld ? 'handheld-toolbox' : 'desktop-priority-rail'
-      }
+      data-hbc-homepage-launcher-display-class={handheld ? 'handheld-toolbox' : 'desktop-priority-rail'}
       aria-label={props['aria-label'] ?? 'Homepage launcher'}
     >
       <div className={styles.row} role="list" data-hbc-launcher-band-mode={handheldMode}>
@@ -177,6 +235,7 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
         {hasOverflow ? (
           <div role="listitem" style={{ display: 'contents' }}>
             <button
+              ref={triggerRef}
               type="button"
               className={clsx(
                 styles.tile,
@@ -192,7 +251,7 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
               aria-haspopup="dialog"
               aria-expanded={open}
               aria-controls={dialogId}
-              onClick={() => setOpen(true)}
+              onClick={openDrawer}
             >
               <span className={styles.tileIcon} aria-hidden="true">
                 <Layers />
@@ -219,8 +278,9 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
 
       {open ? (
         <div className={styles.drawerLayer} data-hbc-homepage-launcher-sheet-root="true">
-          <div className={styles.drawerBackdrop} aria-hidden="true" onClick={() => setOpen(false)} />
+          <div className={styles.drawerBackdrop} aria-hidden="true" onClick={closeDrawer} />
           <div
+            ref={dialogRef}
             id={dialogId}
             role="dialog"
             aria-modal="true"
@@ -237,9 +297,10 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
                 Company Tools
               </span>
               <button
+                ref={closeButtonRef}
                 type="button"
                 className={styles.drawerClose}
-                onClick={() => setOpen(false)}
+                onClick={closeDrawer}
                 aria-label={`Close ${triggerLabel}`}
               >
                 <X size={16} aria-hidden="true" />

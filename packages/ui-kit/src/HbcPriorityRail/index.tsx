@@ -3,7 +3,7 @@
  *
  * Governed rail/list surface family for standalone priority-action mounts,
  * including the public runtime rail and admin preview surface.
- * Hosted homepage launcher authority remains `HbcHomepageLauncher`.
+ * Hosted homepage launcher authority lives in `@hbc/homepage-launcher`.
  *
  * Import via `@hbc/ui-kit/homepage`.
  */

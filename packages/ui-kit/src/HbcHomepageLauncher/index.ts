@@ -1,3 +1,10 @@
+/**
+ * @deprecated Legacy compatibility surface.
+ *
+ * Flagship homepage launcher authority is @hbc/homepage-launcher.
+ * This module remains only for compatibility and should not be used
+ * for new homepage launcher integrations.
+ */
 export { HbcHomepageLauncher } from './HbcHomepageLauncher.js';
 export { HbcHomepageLauncherTile } from './HbcHomepageLauncherTile.js';
 export { HbcHomepageLauncherChip } from './HbcHomepageLauncherChip.js';

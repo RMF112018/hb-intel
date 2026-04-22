@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 // Keep in lockstep with packages/homepage-launcher/src/constants.ts
-const EXPECTED_LAUNCHER_VERSION = '1.1.72.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.73.0';
 
 interface HostedCase {
   readonly label: string;
