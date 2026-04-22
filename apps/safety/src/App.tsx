@@ -9,19 +9,14 @@ import {
   SafetyRepositoryProvider,
   createSafetyInspectionRepository,
   currentSafetyGuidOverlay,
-  type SpHttpClient,
 } from '@hbc/features-safety';
 import { createWebpartRouter } from './router/index.js';
 import { useSafetyLayoutMode } from './responsive/safetyBreakpoints.js';
 import { findMissingHostedSafetyGuidBindings } from './runtime/hostedSafetyGuidBinding.js';
+import { adaptSpfxHttpClient, type SpfxLikeContext } from './spfxHttpAdapter.js';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: defaultQueryOptions } });
 const router = createWebpartRouter();
-
-interface SpfxLikeContext {
-  pageContext?: { user?: { loginName?: string } };
-  spHttpClient?: unknown;
-}
 
 interface AppProps {
   spfxContext?: unknown;
@@ -102,24 +97,3 @@ function logSafetyOverlayDiagnostic(): void {
   }
 }
 
-interface SpHttpClientLike {
-  get: (url: string, configuration: unknown, options?: Record<string, unknown>) => Promise<Response>;
-  post: (url: string, configuration: unknown, options?: Record<string, unknown>) => Promise<Response>;
-}
-
-function adaptSpfxHttpClient(spfxContext?: SpfxLikeContext): SpHttpClient | null {
-  const sp = spfxContext?.spHttpClient as SpHttpClientLike | undefined;
-  if (!sp || typeof sp.get !== 'function' || typeof sp.post !== 'function') return null;
-  const SPHttpClientConfig = 1;
-  return {
-    get: (url, init) =>
-      sp.get(url, SPHttpClientConfig, {
-        headers: init?.headers,
-      }),
-    post: (url, body, init) =>
-      sp.post(url, SPHttpClientConfig, {
-        headers: init?.headers,
-        body: body as BodyInit,
-      }),
-  };
-}

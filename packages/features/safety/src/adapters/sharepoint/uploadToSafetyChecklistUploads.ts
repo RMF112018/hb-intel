@@ -9,6 +9,7 @@ export interface UploadOptions {
 }
 
 export type UploadFailureKind =
+  | 'security-validation'
   | 'permission'
   | 'not-found'
   | 'binding'
@@ -19,18 +20,21 @@ export class SafetyUploadError extends Error {
   readonly kind: UploadFailureKind;
   readonly status: number;
   readonly stage: 'upload-post' | 'list-item-lookup';
+  readonly bodySnippet?: string;
 
   constructor(params: {
     kind: UploadFailureKind;
     status: number;
     stage: 'upload-post' | 'list-item-lookup';
     message: string;
+    bodySnippet?: string;
   }) {
     super(params.message);
     this.name = 'SafetyUploadError';
     this.kind = params.kind;
     this.status = params.status;
     this.stage = params.stage;
+    this.bodySnippet = params.bodySnippet;
   }
 }
 
@@ -59,11 +63,13 @@ export async function uploadToSafetyChecklistUploads(
     headers: { Accept: 'application/json;odata=nometadata' },
   });
   if (!response.ok) {
+    const bodySnippet = await readBodySnippet(response);
     throw new SafetyUploadError({
-      kind: classifyUploadFailure(response.status),
+      kind: classifyUploadFailure(response.status, bodySnippet),
       status: response.status,
       stage: 'upload-post',
       message: `Upload to Safety Checklist Uploads failed (${response.status}).`,
+      bodySnippet,
     });
   }
   const payload = (await response.json()) as {
@@ -101,8 +107,28 @@ export async function uploadToSafetyChecklistUploads(
   return { sourceUploadItemId, sourceUploadWebUrl, checksum };
 }
 
-function classifyUploadFailure(status: number): UploadFailureKind {
+function classifyUploadFailure(status: number, bodySnippet?: string): UploadFailureKind {
+  if (status === 403 && isSecurityValidationFailure(bodySnippet)) return 'security-validation';
   if (status === 403) return 'permission';
   if (status === 404) return 'not-found';
   return 'unknown';
+}
+
+function isSecurityValidationFailure(bodySnippet?: string): boolean {
+  const haystack = bodySnippet?.toLowerCase() ?? '';
+  return (
+    haystack.includes('security validation for this page is invalid') ||
+    haystack.includes('microsoft.sharepoint.spexception') ||
+    haystack.includes('-2130575251')
+  );
+}
+
+async function readBodySnippet(response: Response): Promise<string | undefined> {
+  try {
+    const text = await response.text();
+    if (!text) return undefined;
+    return text.length > 300 ? `${text.slice(0, 300)}…` : text;
+  } catch {
+    return undefined;
+  }
 }

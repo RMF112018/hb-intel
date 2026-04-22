@@ -85,6 +85,42 @@ describe('uploadToSafetyChecklistUploads (W1 G1 write-seam reachability)', () =>
     expect(uploadError.status).toBe(403);
   });
 
+  it('classifies security validation failures separately from permission denial', async () => {
+    resetSafetyListGuidOverlay();
+    configureSafetyListGuids({
+      SafetyChecklistUploads: 'ad498f9c-d0dd-4dd5-ba85-fe36d585adc6',
+    });
+    const client: SpHttpClient = {
+      get: async () =>
+        ({
+          ok: true,
+          status: 200,
+          json: async () => ({}),
+          text: async () => '',
+        }) as unknown as Response,
+      post: async () =>
+        ({
+          ok: false,
+          status: 403,
+          json: async () => ({}),
+          text: async () =>
+            '{"odata.error":{"code":"-2130575251, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"The security validation for this page is invalid and might be corrupted."}}}',
+        }) as unknown as Response,
+    };
+    let caught: unknown;
+    try {
+      await uploadToSafetyChecklistUploads(client, new Uint8Array([1]).buffer, { fileName: 'x.xlsx' });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(SafetyUploadError);
+    const uploadError = caught as SafetyUploadError;
+    expect(uploadError.kind).toBe('security-validation');
+    expect(uploadError.stage).toBe('upload-post');
+    expect(uploadError.status).toBe(403);
+    expect(uploadError.bodySnippet).toContain('security validation');
+  });
+
   it('classifies metadata lookup failure after successful upload', async () => {
     resetSafetyListGuidOverlay();
     configureSafetyListGuids({
