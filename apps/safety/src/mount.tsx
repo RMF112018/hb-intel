@@ -6,7 +6,16 @@
  * calls `mount(domElement, spfxContext, config)`.
  *
  * Not used during local Vite dev — `main.tsx` handles that path.
+ *
+ * CSS delivery: `webpart.css` is imported here (production entry) AND in
+ * `main.tsx` (dev entry). In production, `vite-plugin-css-injected-by-js`
+ * inlines the imported stylesheet as a runtime <style> tag inside the
+ * IIFE bundle, so any SPFx shell that loads `safety-app.js` automatically
+ * gets the Safety global stylesheet without additional asset wiring.
+ * Missing this import was the root cause of the prior Upload-layout no-op:
+ * the stylesheet existed in source and in tests but never reached hosted.
  */
+import './webpart.css';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { App } from './App.js';

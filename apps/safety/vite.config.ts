@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import cssInjectedByJs from 'vite-plugin-css-injected-by-js';
 import path from 'node:path';
 import { resolve } from 'path';
 
@@ -7,7 +8,13 @@ export default defineConfig(({ command, mode }) => {
   const isProduction = command === 'build';
 
   return {
-    plugins: [react()],
+    // In production (lib / IIFE), vite normally emits a sibling CSS file that
+    // the SPFx shell would have to load separately. We instead inline the
+    // CSS into the JS bundle via vite-plugin-css-injected-by-js so any host
+    // that loads `safety-app.js` automatically gets the Safety stylesheet at
+    // runtime — no extra SPFx asset wiring needed. Dev server ignores this
+    // (CSS is handled by Vite HMR via `main.tsx`).
+    plugins: [react(), ...(isProduction ? [cssInjectedByJs()] : [])],
     resolve: {
       alias: {
         '@hbc/models': path.resolve(__dirname, '../../packages/models/src/index.ts'),
