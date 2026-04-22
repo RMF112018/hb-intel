@@ -136,7 +136,6 @@ export function HbHomepageLauncherBand({
     } else {
       content = (
         <HbcHomepageLauncher
-          title={config.showHeading ? config.headingText || 'Priority Actions' : undefined}
           primary={partition.primary}
           overflow={partition.overflow}
           overflowLabel={config.overflowLabel || 'More tools'}

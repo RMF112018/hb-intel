@@ -51,6 +51,10 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       'flagship-utility-v1',
     );
     expect(root!.getAttribute('data-hbc-homepage-launcher-short-height')).toBe('false');
+    expect(container.querySelector('[data-hbc-homepage-launcher-header]')).toBeNull();
+    expect(container.querySelector('[data-hbc-homepage-launcher-tool-count]')).toBeNull();
+    expect(screen.queryByText('Homepage tools')).toBeNull();
+    expect(screen.queryByRole('heading', { name: /Priority Actions/i })).toBeNull();
   });
 
   it('renders one tile per primary action with one dominant click target', () => {

@@ -198,12 +198,14 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
   return {
     ...actual,
     HbcHomepageLauncher: (props: {
+      title?: string;
       primary: unknown[];
       overflow: unknown[];
       handheldMode?: string;
     }): React.JSX.Element =>
       React.createElement('div', {
         'data-test-launcher': 'mock',
+        'data-test-title': props.title,
         'data-test-primary-count': props.primary.length,
         'data-test-overflow-count': props.overflow.length,
         'data-test-handheld-mode': props.handheldMode,
@@ -332,5 +334,16 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     );
     const skeleton = container.querySelector('[data-test-skeleton="mock"]');
     expect(skeleton?.getAttribute('data-test-skeleton-count')).toBe('4');
+  });
+
+  it('does not pass homepage row title chrome into launcher surface', () => {
+    const { container } = render(
+      <HbHomepageLauncherBand
+        entryContainer={ENTRY_CONTAINER}
+        alignmentMode="shared-entry-governed"
+      />,
+    );
+    const launcher = container.querySelector('[data-test-launcher="mock"]');
+    expect(launcher?.getAttribute('data-test-title')).toBeNull();
   });
 });

@@ -67,7 +67,7 @@ export function HbcHomepageLauncher(
   props: HbcHomepageLauncherProps,
 ): React.JSX.Element {
   const {
-    title = 'Priority Actions',
+    title,
     primary,
     overflow = [],
     overflowLabel = 'More tools',
@@ -84,7 +84,6 @@ export function HbcHomepageLauncher(
   const renderedPrimary = handheldSingleEntry ? [] : primary;
   const hasOverflow = overflow.length > 0;
   const drawerItems = handheldSingleEntry ? overflow : [...renderedPrimary, ...overflow];
-  const totalToolCount = drawerItems.length;
   const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
   const visibleTileCount = handheldSingleEntry
     ? visibleCount
@@ -95,7 +94,7 @@ export function HbcHomepageLauncher(
 
   return (
     <section
-      aria-label={ariaLabel ?? title}
+      aria-label={ariaLabel ?? title ?? 'Homepage launcher'}
       className={clsx(launcherRoot(), className)}
       data-hbc-ui={HBC_HOMEPAGE_LAUNCHER_SURFACE_ID}
       data-hbc-homepage-launcher="root"
@@ -117,23 +116,6 @@ export function HbcHomepageLauncher(
       }
       style={rootStyle}
     >
-      <header
-        className={styles.launcherHeader}
-        data-hbc-homepage-launcher-header="visible"
-        data-hbc-homepage-launcher-header-mode={handheldSingleEntry ? 'compact' : 'standard'}
-      >
-        <div className={styles.launcherHeaderText}>
-          <span className={styles.launcherHeaderEyebrow}>Homepage tools</span>
-          <h2 className={styles.launcherHeaderTitle}>{title ?? 'Priority Actions'}</h2>
-        </div>
-        <span
-          className={styles.launcherHeaderMeta}
-          data-hbc-homepage-launcher-tool-count={totalToolCount}
-          aria-label={`${totalToolCount} tools available`}
-        >
-          {totalToolCount}
-        </span>
-      </header>
       <div className={launcherBand()} role="list">
         <div
           className={styles.bandScroller}
