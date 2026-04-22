@@ -1,9 +1,37 @@
-import { useState, type ReactNode } from 'react';
-import { Link } from '@tanstack/react-router';
-import { HbcButton, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import { useMemo, useState, type ReactNode } from 'react';
+import {
+  HbcDataTable,
+  HbcStatusBadge,
+  HbcTypography,
+  WorkspacePageShell,
+} from '@hbc/ui-kit';
+import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import { useReplayIngestion, useReviewQueue } from '@hbc/features-safety';
+import type { ReviewQueueEntry } from '@hbc/features-safety';
+import { SafetyReviewActions, SafetySectionHeader } from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
+
+function terminalVariantFor(status: string): StatusVariant {
+  switch (status) {
+    case 'review-required':
+      return 'atRisk';
+    case 'parse-error':
+    case 'invalid-template':
+    case 'commit-failed':
+      return 'error';
+    case 'unresolved-project':
+    case 'reporting-period-mismatch':
+      return 'warning';
+    case 'replayed-success':
+    case 'committed':
+      return 'success';
+    case 'replayed-failed':
+      return 'critical';
+    default:
+      return 'neutral';
+  }
+}
 
 export function ReviewQueuePage(): ReactNode {
   const reviewQueue = useReviewQueue();
@@ -19,6 +47,67 @@ export function ReviewQueuePage(): ReactNode {
     );
   };
 
+  const columns = useMemo<ColumnDef<ReviewQueueEntry, unknown>[]>(
+    () => [
+      {
+        id: 'file',
+        header: 'File',
+        cell: ({ row }) => (
+          <div>
+            <HbcTypography intent="body">{row.original.run.uploadFileName}</HbcTypography>
+            <HbcTypography intent="bodySmall">Run {row.original.run.id}</HbcTypography>
+          </div>
+        ),
+      },
+      {
+        id: 'project',
+        header: 'Project',
+        cell: ({ row }) => (
+          <div>
+            <HbcTypography intent="body">{row.original.projectNumber ?? '—'}</HbcTypography>
+            {row.original.projectNameSnapshot && (
+              <HbcTypography intent="bodySmall">
+                {row.original.projectNameSnapshot}
+              </HbcTypography>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: 'terminal',
+        header: 'Terminal',
+        cell: ({ row }) => (
+          <HbcStatusBadge
+            variant={terminalVariantFor(row.original.run.terminalStatus)}
+            label={row.original.run.terminalStatus}
+            size="small"
+          />
+        ),
+      },
+      {
+        accessorKey: 'reason',
+        header: 'Reason',
+        cell: ({ row }) => (
+          <HbcTypography intent="bodySmall">{row.original.reason}</HbcTypography>
+        ),
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <SafetyReviewActions
+            runId={row.original.run.id}
+            inspectionEventId={row.original.inspectionEventId}
+            isDuplicate={row.original.run.errorClass === 'duplicate-suspected'}
+            isPending={pendingRunId === row.original.run.id && replay.isPending}
+            onRetry={handleRetry}
+          />
+        ),
+      },
+    ],
+    [pendingRunId, replay.isPending],
+  );
+
   return (
     <WorkspacePageShell
       layout="list"
@@ -30,73 +119,23 @@ export function ReviewQueuePage(): ReactNode {
       onRetry={() => reviewQueue.refetch()}
       isEmpty={!reviewQueue.isPending && !reviewQueue.isError && entries.length === 0}
       emptyMessage="Nothing awaiting review — weekly ingestion is clean."
+      listConfig={{
+        filterStoreKey: 'safety-review-queue',
+      }}
     >
-      <section style={{ display: 'grid', gap: '1rem' }}>
-        <HbcTypography intent="bodySmall">
-          Uploads that ended in review-required, invalid-template, parse-error,
-          reporting-period-mismatch, unresolved-project, or commit-failed. Retry replays against
-          the retained source workbook in Safety Checklist Uploads.
-        </HbcTypography>
-
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left' }}>Run</th>
-              <th style={{ textAlign: 'left' }}>File</th>
-              <th style={{ textAlign: 'left' }}>Project</th>
-              <th style={{ textAlign: 'left' }}>Terminal</th>
-              <th style={{ textAlign: 'left' }}>Reason</th>
-              <th style={{ textAlign: 'left' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((entry) => {
-              const isPending = pendingRunId === entry.run.id && replay.isPending;
-              const isDuplicate = entry.run.errorClass === 'duplicate-suspected';
-              return (
-                <tr key={entry.run.id}>
-                  <td>{entry.run.id}</td>
-                  <td>{entry.run.uploadFileName}</td>
-                  <td>
-                    <HbcTypography intent="body">{entry.projectNumber ?? '—'}</HbcTypography>
-                    {entry.projectNameSnapshot && (
-                      <HbcTypography intent="bodySmall">{entry.projectNameSnapshot}</HbcTypography>
-                    )}
-                  </td>
-                  <td>{entry.run.terminalStatus}</td>
-                  <td>{entry.reason}</td>
-                  <td style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <HbcButton
-                      variant="secondary"
-                      disabled={isPending}
-                      onClick={() => handleRetry(entry.run.id, false)}
-                    >
-                      {isPending ? 'Replaying…' : 'Retry'}
-                    </HbcButton>
-                    {isDuplicate && (
-                      <HbcButton
-                        variant="secondary"
-                        disabled={isPending}
-                        onClick={() => handleRetry(entry.run.id, true)}
-                      >
-                        Supersede & commit
-                      </HbcButton>
-                    )}
-                    {entry.inspectionEventId && (
-                      <Link
-                        to="/inspections/$inspectionEventId"
-                        params={{ inspectionEventId: entry.inspectionEventId }}
-                      >
-                        Open
-                      </Link>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </section>
+      <div className="safety-page">
+        <section className="safety-section">
+          <SafetySectionHeader
+            title="Uploads awaiting action"
+            description="Uploads that ended in review-required, invalid-template, parse-error, reporting-period-mismatch, unresolved-project, or commit-failed. Retry replays against the retained source workbook in Safety Checklist Uploads."
+          />
+          <HbcDataTable<ReviewQueueEntry>
+            data={entries as ReviewQueueEntry[]}
+            columns={columns}
+            toolId="safety-review-queue-table"
+          />
+        </section>
+      </div>
     </WorkspacePageShell>
   );
 }

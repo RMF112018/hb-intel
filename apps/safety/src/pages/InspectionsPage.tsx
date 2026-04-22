@@ -1,13 +1,41 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
-import { HbcSelect, HbcTextField, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import {
+  HbcDataTable,
+  HbcSelect,
+  HbcStatusBadge,
+  HbcTextField,
+  HbcTypography,
+  WorkspacePageShell,
+} from '@hbc/ui-kit';
+import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import { useInspections, useReportingPeriods } from '@hbc/features-safety';
+import type { SafetyInspectionEvent } from '@hbc/features-safety';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
 function formatPercent(value: number | null): string {
   if (value === null) return '—';
   return `${Math.round(value * 100)}%`;
+}
+
+function statusVariantFor(status: string): StatusVariant {
+  switch (status) {
+    case 'committed':
+      return 'completed';
+    case 'replayed-success':
+      return 'success';
+    case 'review-required':
+      return 'atRisk';
+    case 'parse-error':
+    case 'invalid-template':
+    case 'commit-failed':
+      return 'error';
+    case 'superseded':
+      return 'neutral';
+    default:
+      return 'draft';
+  }
 }
 
 export function InspectionsPage(): ReactNode {
@@ -34,6 +62,53 @@ export function InspectionsPage(): ReactNode {
   const isFilteredEmpty = hasAnyInspections && filtered.length === 0;
   const isTrulyEmpty = !isLoading && !isError && inspections.length === 0;
 
+  const columns = useMemo<ColumnDef<SafetyInspectionEvent, unknown>[]>(
+    () => [
+      {
+        accessorKey: 'projectNumber',
+        header: 'Project',
+        cell: ({ row }) => (
+          <div>
+            <HbcTypography intent="body">{row.original.projectNumber}</HbcTypography>
+            <HbcTypography intent="bodySmall">{row.original.projectNameSnapshot}</HbcTypography>
+          </div>
+        ),
+      },
+      { accessorKey: 'inspectionDate', header: 'Date' },
+      { accessorKey: 'inspectionNumber', header: 'Insp #' },
+      {
+        id: 'score',
+        header: 'Score',
+        cell: ({ row }) => formatPercent(row.original.inspectionScore),
+      },
+      {
+        accessorKey: 'ingestionStatus',
+        header: 'Status',
+        cell: ({ row }) => (
+          <HbcStatusBadge
+            variant={statusVariantFor(row.original.ingestionStatus)}
+            label={row.original.ingestionStatus}
+            size="small"
+          />
+        ),
+      },
+      {
+        id: 'actions',
+        header: 'Open',
+        cell: ({ row }) => (
+          <Link
+            className="safety-link"
+            to="/inspections/$inspectionEventId"
+            params={{ inspectionEventId: row.original.id }}
+          >
+            Open
+          </Link>
+        ),
+      },
+    ],
+    [],
+  );
+
   return (
     <WorkspacePageShell
       layout="list"
@@ -52,62 +127,38 @@ export function InspectionsPage(): ReactNode {
           ? 'No inspections match the current filter.'
           : 'No inspections recorded for this period.'
       }
+      listConfig={{
+        filterStoreKey: 'safety-inspections',
+      }}
     >
-      <section style={{ display: 'grid', gap: '1rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ minWidth: '16rem' }}>
-            <HbcSelect
-              label="Reporting period"
-              value={activePeriodId}
-              onChange={(value) => setSelectedPeriodId(value)}
-              options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
-            />
+      <div className="safety-page">
+        <section className="safety-section">
+          <div className="safety-filter-bar">
+            <div className="safety-filter-bar__field">
+              <HbcSelect
+                label="Reporting period"
+                value={activePeriodId}
+                onChange={(value) => setSelectedPeriodId(value)}
+                options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
+              />
+            </div>
+            <div className="safety-filter-bar__field">
+              <HbcTextField
+                label="Project number"
+                value={projectFilter}
+                onChange={(value) => setProjectFilter(value)}
+                placeholder="e.g. 2024-118"
+              />
+            </div>
           </div>
-          <div style={{ minWidth: '16rem' }}>
-            <HbcTextField
-              label="Project number"
-              value={projectFilter}
-              onChange={(value) => setProjectFilter(value)}
-              placeholder="e.g. 2024-118"
-            />
-          </div>
-        </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left' }}>Project</th>
-              <th style={{ textAlign: 'left' }}>Date</th>
-              <th style={{ textAlign: 'left' }}>Insp #</th>
-              <th style={{ textAlign: 'left' }}>Score</th>
-              <th style={{ textAlign: 'left' }}>Status</th>
-              <th style={{ textAlign: 'left' }}>Open</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((ie) => (
-              <tr key={ie.id}>
-                <td>
-                  <HbcTypography intent="body">{ie.projectNumber}</HbcTypography>
-                  <HbcTypography intent="bodySmall">{ie.projectNameSnapshot}</HbcTypography>
-                </td>
-                <td>{ie.inspectionDate}</td>
-                <td>{ie.inspectionNumber}</td>
-                <td>{formatPercent(ie.inspectionScore)}</td>
-                <td>{ie.ingestionStatus}</td>
-                <td>
-                  <Link
-                    to="/inspections/$inspectionEventId"
-                    params={{ inspectionEventId: ie.id }}
-                  >
-                    Open
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+          <HbcDataTable<SafetyInspectionEvent>
+            data={filtered as SafetyInspectionEvent[]}
+            columns={columns}
+            toolId="safety-inspections-table"
+          />
+        </section>
+      </div>
     </WorkspacePageShell>
   );
 }

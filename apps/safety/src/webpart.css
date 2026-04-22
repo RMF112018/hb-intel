@@ -1,5 +1,216 @@
-:root { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5; color: #242424; background-color: #ffffff; }
+/* HB Intel Safety — webpart-scoped styles.
+ *
+ * Phase-3 audit (G-07, G-12): structural CSS with authored breakpoint contract.
+ * All class names are prefixed with `safety-` to avoid global collisions.
+ * Tokens mirror @hbc/ui-kit HBC_SPACE_* / HBC_RADIUS_* values so the safety
+ * surface tracks ui-kit rhythm without importing ui-kit internals here.
+ */
+
+:root {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #242424;
+  background-color: #ffffff;
+}
 #root { min-height: 100vh; }
-[data-hbc-shell="shell-layout"] { min-height: 100vh; display: flex; flex-direction: column; }
-[data-hbc-shell="shell-body"] { display: flex; flex: 1; }
-[data-hbc-shell="shell-content"] { flex: 1; padding: 24px; overflow-y: auto; }
+[data-hbc-shell='shell-layout'] { min-height: 100vh; display: flex; flex-direction: column; }
+[data-hbc-shell='shell-body'] { display: flex; flex: 1; }
+[data-hbc-shell='shell-content'] { flex: 1; padding: 24px; overflow-y: auto; }
+
+/* --- Layout rhythm ---------------------------------------------------- */
+
+.safety-page {
+  display: grid;
+  gap: 24px;
+}
+
+.safety-section {
+  display: grid;
+  gap: 12px;
+}
+
+.safety-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.safety-section__header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* --- Stat strip (4-up → 2-up → 1-up) ---------------------------------- */
+
+.safety-stat-strip {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+  .safety-stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 540px) {
+  .safety-stat-strip { grid-template-columns: 1fr; }
+}
+
+/* --- Filter bar (flex wrap with min-width fields) --------------------- */
+
+.safety-filter-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.safety-filter-bar__field {
+  flex: 1 1 16rem;
+  min-width: 14rem;
+  max-width: 22rem;
+}
+
+/* --- Upload workflow surface ----------------------------------------- */
+
+.safety-upload {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 960px) {
+  .safety-upload { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+}
+
+.safety-upload__primary {
+  display: grid;
+  gap: 16px;
+}
+
+.safety-upload__aside {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.safety-upload__drop-zone {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px dashed #c8c6c4;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.safety-upload__drop-zone-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.safety-upload__next-step {
+  display: grid;
+  gap: 8px;
+}
+
+/* --- Findings list (severity-aware) ---------------------------------- */
+
+.safety-findings {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.safety-findings__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid #edebe9;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.safety-findings__row-body {
+  display: grid;
+  gap: 4px;
+}
+
+.safety-findings__row-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: #605e5c;
+}
+
+/* --- Score strip (section summary as cards) -------------------------- */
+
+.safety-score-strip {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.safety-score-strip__item {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid #edebe9;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.safety-score-strip__item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.safety-score-strip__counts {
+  display: flex;
+  gap: 8px;
+  color: #605e5c;
+  font-size: 12px;
+}
+
+/* --- Review actions cluster ----------------------------------------- */
+
+.safety-review-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* --- Link affordance inside tables / detail ------------------------- */
+
+.safety-link {
+  color: #0078d4;
+  text-decoration: none;
+  font-weight: 500;
+}
+.safety-link:hover { text-decoration: underline; }
+
+/* --- Inspection detail header --------------------------------------- */
+
+.safety-detail-header {
+  display: grid;
+  gap: 6px;
+}
+
+.safety-detail-header__meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: #605e5c;
+}

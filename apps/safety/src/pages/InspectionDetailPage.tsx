@@ -1,23 +1,22 @@
 import { useMemo, type ReactNode } from 'react';
 import { useParams } from '@tanstack/react-router';
-import { HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import { HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import type { KpiCardData } from '@hbc/models';
 import { useFindings, useInspection } from '@hbc/features-safety';
 import type { ParsedInspection } from '@hbc/features-safety';
+import {
+  SafetyFindingsList,
+  SafetyScoreStrip,
+  SafetySectionHeader,
+  SafetyStatStrip,
+  type SafetyScoreStripItem,
+} from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
 function formatPercent(value: number | null | undefined): string {
   if (value === null || value === undefined) return '—';
   return `${Math.round(value * 100)}%`;
-}
-
-interface SectionSummaryRow {
-  sectionNumber: number;
-  sectionName: string;
-  yes: number;
-  no: number;
-  na: number;
-  scorePct: number;
 }
 
 export function InspectionDetailPage(): ReactNode {
@@ -36,7 +35,6 @@ export function InspectionDetailPage(): ReactNode {
     }
   }, [inspection]);
 
-  // Per plan §4: not-found → isError (a missing record is a navigation error).
   const isNotFound =
     !inspectionQuery.isPending && !inspectionQuery.isError && inspection === null;
   const isError = inspectionQuery.isError || isNotFound;
@@ -44,62 +42,18 @@ export function InspectionDetailPage(): ReactNode {
     ? 'Inspection not found.'
     : 'Failed to load inspection.';
 
-  return (
-    <WorkspacePageShell
-      layout="detail"
-      title={inspection?.title ?? 'Inspection'}
-      supportedModes={OFFICE_ONLY}
-      isLoading={inspectionQuery.isPending}
-      isError={isError}
-      errorMessage={errorMessage}
-      onRetry={() => inspectionQuery.refetch()}
-    >
-      {inspection && (
-        <section style={{ display: 'grid', gap: '1rem' }}>
-          <header style={{ display: 'grid' }}>
-            <HbcTypography intent="heading3">
-              {inspection.projectNumber} — {inspection.projectNameSnapshot}
-            </HbcTypography>
-            <HbcTypography intent="bodySmall">
-              Inspected {inspection.inspectionDate} — {inspection.inspectorUpn ?? 'unknown'}
-            </HbcTypography>
-            <a href={inspection.sourceUploadWebUrl} target="_blank" rel="noreferrer">
-              Source workbook
-            </a>
-          </header>
+  const kpiCards = useMemo<KpiCardData[]>(() => {
+    if (!inspection) return [];
+    return [
+      { id: 'score', label: 'Score', value: formatPercent(inspection.inspectionScore) },
+      { id: 'yes', label: 'Yes', value: inspection.totalYes },
+      { id: 'no', label: 'No', value: inspection.totalNo },
+      { id: 'na', label: 'N/A', value: inspection.totalNa },
+    ];
+  }, [inspection]);
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-            <Stat label="Score" value={formatPercent(inspection.inspectionScore)} />
-            <Stat label="Yes" value={String(inspection.totalYes)} />
-            <Stat label="No" value={String(inspection.totalNo)} />
-            <Stat label="N/A" value={String(inspection.totalNa)} />
-          </div>
-
-          <section>
-            <HbcTypography intent="heading3">Findings</HbcTypography>
-            {findings.length === 0 ? (
-              <HbcTypography intent="bodySmall">No findings extracted.</HbcTypography>
-            ) : (
-              <ul>
-                {findings.map((f) => (
-                  <li key={f.id}>
-                    <strong>[{f.severity.toUpperCase()}]</strong>{' '}
-                    {f.sectionName} — row {f.checklistRowNumber}: {f.findingSummary}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {parsed && <SectionSummary parsed={parsed} />}
-        </section>
-      )}
-    </WorkspacePageShell>
-  );
-}
-
-function SectionSummary({ parsed }: { parsed: ParsedInspection }): ReactNode {
-  const rows = useMemo<SectionSummaryRow[]>(() => {
+  const sectionItems = useMemo<SafetyScoreStripItem[]>(() => {
+    if (!parsed) return [];
     const bySection = new Map<number, { name: string; yes: number; no: number; na: number }>();
     for (const row of parsed.rows) {
       const current =
@@ -130,39 +84,63 @@ function SectionSummary({ parsed }: { parsed: ParsedInspection }): ReactNode {
   }, [parsed]);
 
   return (
-    <section>
-      <HbcTypography intent="heading3">Section summary</HbcTypography>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th style={{ textAlign: 'left' }}>Section</th>
-            <th style={{ textAlign: 'left' }}>Yes</th>
-            <th style={{ textAlign: 'left' }}>No</th>
-            <th style={{ textAlign: 'left' }}>N/A</th>
-            <th style={{ textAlign: 'left' }}>Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.sectionNumber}>
-              <td>{row.sectionName}</td>
-              <td>{row.yes}</td>
-              <td>{row.no}</td>
-              <td>{row.na}</td>
-              <td>{Math.round(row.scorePct * 100)}%</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  );
-}
+    <WorkspacePageShell
+      layout="detail"
+      title={inspection?.title ?? 'Inspection'}
+      supportedModes={OFFICE_ONLY}
+      isLoading={inspectionQuery.isPending}
+      isError={isError}
+      errorMessage={errorMessage}
+      onRetry={() => inspectionQuery.refetch()}
+    >
+      {inspection && (
+        <div className="safety-page">
+          <header className="safety-detail-header">
+            <HbcTypography intent="heading3">
+              {inspection.projectNumber} — {inspection.projectNameSnapshot}
+            </HbcTypography>
+            <div className="safety-detail-header__meta">
+              <HbcTypography intent="bodySmall">
+                Inspected {inspection.inspectionDate}
+              </HbcTypography>
+              <HbcTypography intent="bodySmall">
+                {inspection.inspectorUpn ?? 'unknown inspector'}
+              </HbcTypography>
+              <a
+                className="safety-link"
+                href={inspection.sourceUploadWebUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Source workbook
+              </a>
+            </div>
+          </header>
 
-function Stat({ label, value }: { label: string; value: string }): ReactNode {
-  return (
-    <div style={{ display: 'grid' }}>
-      <HbcTypography intent="bodySmall">{label}</HbcTypography>
-      <HbcTypography intent="heading3">{value}</HbcTypography>
-    </div>
+          <SafetyStatStrip cards={kpiCards} />
+
+          <HbcCard
+            header={
+              <SafetySectionHeader
+                title="Findings"
+                description={`${findings.length} extracted`}
+              />
+            }
+            weight="supporting"
+          >
+            <SafetyFindingsList findings={findings} />
+          </HbcCard>
+
+          {sectionItems.length > 0 && (
+            <HbcCard
+              header={<SafetySectionHeader title="Section summary" />}
+              weight="supporting"
+            >
+              <SafetyScoreStrip items={sectionItems} />
+            </HbcCard>
+          )}
+        </div>
+      )}
+    </WorkspacePageShell>
   );
 }

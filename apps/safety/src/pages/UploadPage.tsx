@@ -2,10 +2,13 @@ import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   HbcBanner,
   HbcButton,
+  HbcCard,
   HbcSelect,
+  HbcStatusBadge,
   HbcTypography,
   WorkspacePageShell,
 } from '@hbc/ui-kit';
+import type { StatusVariant } from '@hbc/ui-kit';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 import {
@@ -13,6 +16,7 @@ import {
   useSafetyIngestion,
   type IngestionRunResult,
 } from '@hbc/features-safety';
+import { SafetySectionHeader } from '../components/index.js';
 
 function currentUserUpn(): string {
   if (typeof window === 'undefined') return 'coordinator@hedrickbrothers.com';
@@ -55,61 +59,131 @@ export function UploadPage(): ReactNode {
       title="Upload Safety Checklist"
       supportedModes={OFFICE_ONLY}
     >
-      <section style={{ display: 'grid', gap: '1rem', maxWidth: '42rem' }}>
-        <HbcTypography intent="body">
-          Upload a completed Safety Checklist Template (v1) workbook. The system validates the template,
-          resolves the project against HBCentral, parses responses, and writes authoritative inspection
-          records. Source files are retained in the Safety Checklist Uploads library.
-        </HbcTypography>
-
-        <HbcSelect
-          label="Reporting period"
-          value={activePeriod?.id ?? ''}
-          onChange={(value) => setReportingPeriodId(value)}
-          options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
-        />
-
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <HbcTypography intent="bodySmall">Checklist workbook (.xlsx)</HbcTypography>
-          {/* eslint-disable-next-line @hb-intel/hbc/no-raw-form-elements -- Release 1 file picker; no HbcFileInput exists yet. */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            style={{ display: 'none' }}
-          />
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <HbcButton variant="secondary" onClick={handleFileSelect}>
-              Choose file
-            </HbcButton>
-            <HbcTypography intent="bodySmall">
-              {file ? file.name : 'No file selected'}
-            </HbcTypography>
-          </div>
-        </div>
-
-        <div>
-          <HbcButton
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={!file || !activePeriod || ingestion.isPending}
+      <div className="safety-page safety-upload">
+        <section className="safety-upload__primary">
+          <HbcCard
+            weight="primary"
+            header={
+              <SafetySectionHeader
+                title="Submit a completed checklist"
+                description="Upload a v1 Safety Checklist workbook. The system validates the template, resolves the project against HBCentral, parses responses, and writes authoritative inspection records."
+              />
+            }
           >
-            {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
-          </HbcButton>
-        </div>
+            <div className="safety-section">
+              <div className="safety-filter-bar">
+                <div className="safety-filter-bar__field">
+                  <HbcSelect
+                    label="Reporting period"
+                    value={activePeriod?.id ?? ''}
+                    onChange={(value) => setReportingPeriodId(value)}
+                    options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
+                  />
+                </div>
+              </div>
 
-        {ingestion.data && <IngestionResultBanner result={ingestion.data} />}
-        {ingestion.error && (
-          <HbcBanner variant="error">Upload failed: {ingestion.error.message}</HbcBanner>
-        )}
-      </section>
+              <div className="safety-upload__drop-zone">
+                <HbcTypography intent="label">Checklist workbook (.xlsx)</HbcTypography>
+                {/* eslint-disable-next-line @hb-intel/hbc/no-raw-form-elements -- Release 1 file picker; no HbcFileInput exists yet. */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  style={{ display: 'none' }}
+                />
+                <div className="safety-upload__drop-zone-row">
+                  <HbcButton variant="secondary" onClick={handleFileSelect}>
+                    Choose file
+                  </HbcButton>
+                  <HbcTypography intent="bodySmall">
+                    {file ? file.name : 'No file selected'}
+                  </HbcTypography>
+                </div>
+              </div>
+
+              <div>
+                <HbcButton
+                  variant="primary"
+                  onClick={handleSubmit}
+                  disabled={!file || !activePeriod || ingestion.isPending}
+                >
+                  {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
+                </HbcButton>
+              </div>
+
+              {ingestion.data && <IngestionResultBanner result={ingestion.data} />}
+              {ingestion.error && (
+                <HbcBanner variant="error">Upload failed: {ingestion.error.message}</HbcBanner>
+              )}
+            </div>
+          </HbcCard>
+        </section>
+
+        <aside className="safety-upload__aside">
+          <HbcCard
+            header={<SafetySectionHeader title="What happens on submit" />}
+            weight="supporting"
+          >
+            <ol className="safety-upload__next-step">
+              <li>
+                <HbcTypography intent="body">Template + version are validated.</HbcTypography>
+              </li>
+              <li>
+                <HbcTypography intent="body">
+                  The project is resolved against HBCentral.
+                </HbcTypography>
+              </li>
+              <li>
+                <HbcTypography intent="body">
+                  Responses are parsed, scored, and written as an authoritative inspection.
+                </HbcTypography>
+              </li>
+              <li>
+                <HbcTypography intent="body">
+                  The source workbook is retained in Safety Checklist Uploads.
+                </HbcTypography>
+              </li>
+            </ol>
+          </HbcCard>
+          <HbcCard
+            header={<SafetySectionHeader title="If something needs attention" />}
+            weight="supporting"
+          >
+            <HbcTypography intent="body">
+              Uploads that can&apos;t commit (review required, parse errors, template mismatches)
+              appear in the <strong>Review queue</strong> with one-click retry and supersede options.
+            </HbcTypography>
+          </HbcCard>
+        </aside>
+      </div>
     </WorkspacePageShell>
   );
 }
 
+function variantFor(state: IngestionRunResult['state']): { variant: StatusVariant; label: string } {
+  switch (state) {
+    case 'committed':
+      return { variant: 'success', label: 'Committed' };
+    case 'review-required':
+      return { variant: 'atRisk', label: 'Review required' };
+    case 'unresolved-project':
+      return { variant: 'warning', label: 'Project unresolved' };
+    case 'reporting-period-mismatch':
+      return { variant: 'warning', label: 'Period mismatch' };
+    case 'parse-error':
+      return { variant: 'error', label: 'Parse error' };
+    case 'invalid-template':
+      return { variant: 'error', label: 'Invalid template' };
+    case 'commit-failed':
+      return { variant: 'error', label: 'Commit failed' };
+    default:
+      return { variant: 'neutral', label: state };
+  }
+}
+
 function IngestionResultBanner({ result }: { result: IngestionRunResult }): ReactNode {
-  const variant: 'success' | 'warning' | 'error' =
+  const bannerVariant =
     result.state === 'committed'
       ? 'success'
       : result.state === 'review-required' ||
@@ -117,42 +191,25 @@ function IngestionResultBanner({ result }: { result: IngestionRunResult }): Reac
           result.state === 'reporting-period-mismatch'
         ? 'warning'
         : 'error';
-  const headline = headlineFor(result.state);
+  const status = variantFor(result.state);
   return (
-    <HbcBanner variant={variant}>
-      <div style={{ display: 'grid', gap: '0.25rem' }}>
-        <strong>{headline}</strong>
-        <span>Run: {result.run.id}</span>
-        {result.run.errorSummary && <span>{result.run.errorSummary}</span>}
+    <HbcBanner variant={bannerVariant}>
+      <div className="safety-section">
+        <div className="safety-filter-bar">
+          <HbcStatusBadge variant={status.variant} label={status.label} />
+          <HbcTypography intent="bodySmall">Run: {result.run.id}</HbcTypography>
+        </div>
+        {result.run.errorSummary && (
+          <HbcTypography intent="body">{result.run.errorSummary}</HbcTypography>
+        )}
         {result.committed && (
-          <span>
+          <HbcTypography intent="body">
             Inspection committed: {result.committed.inspectionEvent.id} (
             {Math.round(result.committed.inspectionEvent.inspectionScore * 100)}% score,{' '}
             {result.committed.findings.length} findings)
-          </span>
+          </HbcTypography>
         )}
       </div>
     </HbcBanner>
   );
-}
-
-function headlineFor(state: IngestionRunResult['state']): string {
-  switch (state) {
-    case 'committed':
-      return 'Committed';
-    case 'review-required':
-      return 'Review required';
-    case 'unresolved-project':
-      return 'Project could not be resolved';
-    case 'reporting-period-mismatch':
-      return 'Workbook date is outside the selected reporting period';
-    case 'parse-error':
-      return 'Workbook could not be parsed';
-    case 'invalid-template':
-      return 'Workbook template is invalid';
-    case 'commit-failed':
-      return 'Commit to HBCentral failed';
-    default:
-      return `Status: ${state}`;
-  }
 }
