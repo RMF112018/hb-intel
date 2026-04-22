@@ -1493,6 +1493,9 @@ importers:
       '@hbc/smart-empty-state':
         specifier: workspace:*
         version: link:../../packages/smart-empty-state
+      '@hbc/spfx':
+        specifier: workspace:*
+        version: link:../../packages/spfx
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit

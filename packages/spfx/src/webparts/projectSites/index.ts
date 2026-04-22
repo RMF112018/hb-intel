@@ -28,6 +28,15 @@ export type {
   ProjectSiteLaunchState,
   ProjectSiteLaunchTargetKind,
   ProjectSiteLaunchReasonCode,
+  // G-03 Wave 2 revision — shared search seam for cross-surface reuse
+  // (Safety Upload's SafetyProjectPicker consumes these via the
+  // `@hbc/spfx/project-sites` barrel so Safety runs the same grounded
+  // matching + resolver behavior the project-sites grid uses).
+  ProjectSitesScope,
+  ProjectSitesSortKey,
+  ProjectSitesFilters,
+  ProjectSiteSourceClassification,
+  IProjectSiteSourceRefs,
 } from './types.js';
 
 export {
@@ -39,7 +48,20 @@ export {
   // Deprecated re-export retained for one release; consumers should
   // migrate to PROJECT_SITES_ALL_SCOPE_CEILING.
   PROJECT_SITES_ALL_SCOPE_LIMIT,
+  // G-03 Wave 2 revision — shared search seam symbols.
+  SCOPE_ALL,
+  scopeFromYear,
+  scopesEqual,
+  DEFAULT_SORT_KEY,
+  EMPTY_FILTERS,
 } from './types.js';
 
 export { getProjectSitesRepository } from './repository/projectSitesRepository.js';
 export { deriveProjectSiteLaunchStatus } from './projectSiteLaunchState.js';
+
+// G-03 Wave 2 revision — shared search seam. Safety's SafetyProjectPicker
+// imports these directly so the two surfaces run the same matcher,
+// resolver, and data-access behavior. No new search variant is introduced.
+export { applyProjectSitesPipeline, extractProjectSitesFacets } from './projectSitesFilter.js';
+export { resolveProjectSiteEntries } from './projectSitesResolver.js';
+export { useProjectSites } from './hooks/useProjectSites.js';

@@ -239,4 +239,193 @@ describe('runIngestionPipeline', () => {
     expect(result.state).toBe('commit-failed');
     expect(calls.runs).toBe(1);
   });
+
+  // ── G-03 Wave 2 revision: structured intake authority ─────────────────
+
+  describe('G-03 structured intake authority (Wave 2 revision)', () => {
+    function operatorContext(overrides: Partial<UploadContext> = {}): UploadContext {
+      return {
+        ...baseContext(),
+        projectNumber: '2024-999',
+        projectNameSnapshot: 'Operator-picked Project',
+        projectLocationSnapshot: 'Delray',
+        projectStageSnapshot: 'Construction',
+        projectSourceClassification: 'project',
+        projectLookupId: 555,
+        inspectionNumber: '7',
+        inspectionDate: '2026-04-20',
+        ...overrides,
+      };
+    }
+
+    it('uses operator-entered inspectionDate, inspectionNumber, projectNumber on the committed draft', async () => {
+      const resolveByNumber = vi.fn(
+        async (projectNumber: string, classification, hints): Promise<ProjectResolutionResult> => ({
+          classification,
+          projectNumber,
+          projectNameSnapshot: hints?.projectNameSnapshot ?? 'from-adapter',
+          projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
+          projectStageSnapshot: hints?.projectStageSnapshot ?? '',
+          projectLookupId: hints?.projectLookupId,
+          legacyRegistryItemId: hints?.legacyRegistryItemId,
+        }),
+      );
+      const { adapter, captured } = makeAdapter({ resolveProjectByNumber: resolveByNumber });
+
+      const result = await runIngestionPipeline({
+        view: buildCleanAllYesWorkbook(),
+        context: operatorContext(),
+        uploadedRef: baseRef(),
+        adapter,
+      });
+
+      expect(result.state).toBe('committed');
+      expect(captured.inspection?.inspectionDate).toBe('2026-04-20');
+      expect(captured.inspection?.inspectionNumber).toBe('7');
+      expect(captured.inspection?.projectNumber).toBe('2024-999');
+      expect(captured.inspection?.projectNameSnapshot).toBe('Operator-picked Project');
+      expect(captured.inspection?.title).toContain('2024-999');
+      expect(captured.inspection?.title).toContain('7');
+      expect(resolveByNumber).toHaveBeenCalledWith(
+        '2024-999',
+        'project',
+        expect.objectContaining({ projectLookupId: 555 }),
+      );
+    });
+
+    it('validates reporting-period range against operator-entered date, not parsed date', async () => {
+      // Workbook parses to 2026-04-22 (inside range); operator enters
+      // 2026-05-15 (outside). The operator value must drive the mismatch.
+      const { adapter } = makeAdapter({
+        resolveReportingPeriod: vi.fn(async () => ({
+          id: 'period-1001',
+          spItemId: 1001,
+          title: 'P',
+          weekStartDate: '2026-04-20',
+          weekEndDate: '2026-04-26',
+          periodLabel: 'Week of 2026-04-20',
+          status: 'open',
+        })),
+      });
+
+      const result = await runIngestionPipeline({
+        view: buildCleanAllYesWorkbook(),
+        context: operatorContext({ inspectionDate: '2026-05-15' }),
+        uploadedRef: baseRef(),
+        adapter,
+      });
+
+      expect(result.state).toBe('reporting-period-mismatch');
+      expect(result.run.errorSummary).toContain('2026-05-15');
+    });
+
+    it('emits metadataMismatch advisory when parsed values disagree, without changing terminal state', async () => {
+      const { adapter } = makeAdapter({
+        resolveProjectByNumber: vi.fn(async (projectNumber, classification) => ({
+          classification,
+          projectNumber,
+          projectNameSnapshot: 'Operator-picked Project',
+          projectLocationSnapshot: '',
+          projectStageSnapshot: '',
+        })),
+      });
+
+      // Fixture parses to inspectionDate 2026-04-22 and inspectionNumber '1'.
+      // Operator enters different values.
+      const result = await runIngestionPipeline({
+        view: buildCleanAllYesWorkbook(),
+        context: operatorContext({
+          inspectionDate: '2026-04-20',
+          inspectionNumber: '7',
+        }),
+        uploadedRef: baseRef(),
+        adapter,
+      });
+
+      expect(result.state).toBe('committed');
+      expect(result.metadataMismatch).toBeDefined();
+      expect(result.metadataMismatch?.inspectionDateMismatch).toEqual({
+        entered: '2026-04-20',
+        parsed: '2026-04-22',
+      });
+      expect(result.metadataMismatch?.inspectionNumberMismatch).toEqual({
+        entered: '7',
+        parsed: '1',
+      });
+    });
+
+    it('does not emit metadataMismatch when values agree', async () => {
+      const { adapter } = makeAdapter({
+        resolveProjectByNumber: vi.fn(async (projectNumber, classification) => ({
+          classification,
+          projectNumber,
+          projectNameSnapshot: 'P',
+          projectLocationSnapshot: '',
+          projectStageSnapshot: '',
+        })),
+      });
+
+      // Align operator values with fixture parsed values
+      // (fixture parses project number '2024-118' from the workbook cell).
+      const result = await runIngestionPipeline({
+        view: buildCleanAllYesWorkbook(),
+        context: operatorContext({
+          projectNumber: '2024-118',
+          inspectionDate: '2026-04-22',
+          inspectionNumber: '1',
+        }),
+        uploadedRef: baseRef(),
+        adapter,
+      });
+
+      expect(result.state).toBe('committed');
+      expect(result.metadataMismatch).toBeUndefined();
+    });
+
+    it('preserves operator calendar-date verbatim with no timezone drift', async () => {
+      const originalTZ = process.env.TZ;
+      process.env.TZ = 'America/Los_Angeles';
+      try {
+        const { adapter, captured } = makeAdapter({
+          resolveProjectByNumber: vi.fn(async (projectNumber, classification) => ({
+            classification,
+            projectNumber,
+            projectNameSnapshot: 'P',
+            projectLocationSnapshot: '',
+            projectStageSnapshot: '',
+          })),
+        });
+        const result = await runIngestionPipeline({
+          view: buildCleanAllYesWorkbook(),
+          context: operatorContext({ inspectionDate: '2026-04-22' }),
+          uploadedRef: baseRef(),
+          adapter,
+        });
+        expect(result.state).toBe('committed');
+        // Naive `new Date('2026-04-22').toISOString()` under TZ LA would
+        // yield 2026-04-22 (Date parses as UTC) but any `new Date()` on a
+        // local-TZ-interpreted string would drift. The pipeline must not
+        // introduce any such conversion — the day stays as entered.
+        expect(captured.inspection?.inspectionDate).toBe('2026-04-22');
+      } finally {
+        if (originalTZ === undefined) delete process.env.TZ;
+        else process.env.TZ = originalTZ;
+      }
+    });
+
+    it('legacy path (no operator fields) falls back to workbook-parsed values', async () => {
+      const { adapter, captured } = makeAdapter();
+      const result = await runIngestionPipeline({
+        view: buildCleanAllYesWorkbook(),
+        context: baseContext(),
+        uploadedRef: baseRef(),
+        adapter,
+      });
+      expect(result.state).toBe('committed');
+      // Fixture parses to inspectionDate 2026-04-22, inspectionNumber '1'.
+      expect(captured.inspection?.inspectionDate).toBe('2026-04-22');
+      expect(captured.inspection?.inspectionNumber).toBe('1');
+      expect(result.metadataMismatch).toBeUndefined();
+    });
+  });
 });

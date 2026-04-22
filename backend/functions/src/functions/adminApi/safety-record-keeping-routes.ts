@@ -6,7 +6,29 @@ import { errorResponse, successResponse } from '../../utils/response-helpers.js'
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
 import { MockSharePointService, SharePointService } from '../../services/sharepoint-service.js';
-import type { UploadContext } from '../../../../../packages/features/safety/src/domain/types.js';
+import type { ProjectSourceClassification, UploadContext } from '../../../../../packages/features/safety/src/domain/types.js';
+
+const VALID_PROJECT_SOURCE_CLASSIFICATIONS: ReadonlyArray<ProjectSourceClassification> = [
+  'project',
+  'legacy-only',
+  'project+legacy',
+  'unresolved',
+];
+
+function parseOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+function parseOptionalNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function parseProjectSourceClassification(
+  value: unknown,
+): ProjectSourceClassification | undefined {
+  if (typeof value !== 'string') return undefined;
+  return VALID_PROJECT_SOURCE_CLASSIFICATIONS.find((c) => c === value);
+}
 
 function parseDryRun(body: Record<string, unknown>): boolean {
   return body.dryRun === true;
@@ -27,6 +49,7 @@ function parseIngestionBody(body: Record<string, unknown>): {
   const context: UploadContext = {
     uploadedByUpn:
       typeof rawContext.uploadedByUpn === 'string' ? rawContext.uploadedByUpn : '',
+    uploadedByDisplayName: parseOptionalString(rawContext.uploadedByDisplayName),
     uploadedAt:
       typeof rawContext.uploadedAt === 'string' ? rawContext.uploadedAt : '',
     fileName:
@@ -37,6 +60,21 @@ function parseIngestionBody(body: Record<string, unknown>): {
       typeof rawContext.reportingPeriodSpItemId === 'number'
         ? rawContext.reportingPeriodSpItemId
         : 0,
+    // G-03 structured intake authority (Wave 2 revision): operator-entered
+    // intake metadata flows through the backend as-is. Calendar-date
+    // semantics are preserved (`inspectionDate` stays as `YYYY-MM-DD`;
+    // no timezone conversion here).
+    projectNumber: parseOptionalString(rawContext.projectNumber),
+    projectNameSnapshot: parseOptionalString(rawContext.projectNameSnapshot),
+    projectLocationSnapshot: parseOptionalString(rawContext.projectLocationSnapshot),
+    projectStageSnapshot: parseOptionalString(rawContext.projectStageSnapshot),
+    projectSourceClassification: parseProjectSourceClassification(
+      rawContext.projectSourceClassification,
+    ),
+    projectLookupId: parseOptionalNumber(rawContext.projectLookupId),
+    legacyRegistryItemId: parseOptionalNumber(rawContext.legacyRegistryItemId),
+    inspectionNumber: parseOptionalString(rawContext.inspectionNumber),
+    inspectionDate: parseOptionalString(rawContext.inspectionDate),
   };
 
   if (!context.reportingPeriodId || !context.uploadedByUpn || !context.uploadedAt) return null;

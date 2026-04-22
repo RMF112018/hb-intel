@@ -21,9 +21,11 @@ import {
   type CommittedArtifacts,
   type DuplicateConfidence,
   type IngestionCommittedIds,
+  type IngestionMetadataMismatch,
   type IngestionRunResult,
   type ParsedInspection,
   type ProjectResolutionResult,
+  type ProjectSourceClassification,
   type SafetyFinding,
   type SafetyFindingDraft,
   type SafetyIngestionRun,
@@ -47,6 +49,26 @@ export interface IngestionAdapter {
   resolveProject(
     projectSiteText: string,
     projectNumberHint: string | null,
+  ): Promise<ProjectResolutionResult | null>;
+  /**
+   * G-03 structured intake authority (Wave 2 revision).
+   * Resolve a project directly from the operator-entered project number +
+   * source classification (as selected in the Upload project picker).
+   * Adapters may enrich from the Projects list / Legacy Fallback Registry
+   * if useful, but must not override the operator-entered `projectNumber`.
+   * When `null` is returned, the pipeline falls back to the legacy
+   * workbook-led `resolveProject` path (migration shim only).
+   */
+  resolveProjectByNumber?(
+    projectNumber: string,
+    classification: ProjectSourceClassification,
+    hints?: {
+      readonly projectNameSnapshot?: string;
+      readonly projectLocationSnapshot?: string;
+      readonly projectStageSnapshot?: string;
+      readonly projectLookupId?: number;
+      readonly legacyRegistryItemId?: number;
+    },
   ): Promise<ProjectResolutionResult | null>;
   /** Wave 2 week-scoped rollup source — includes all accepted/duplicate-suspected inspections. */
   findInspectionsForProjectWeek(filter: {
@@ -188,11 +210,25 @@ export async function runIngestionPipeline(
   }
   const parsed = parsedCache;
 
-  // Stage 5: validate workbook date against the selected reporting period.
+  // G-03 (Wave 2 revision): operator-entered intake metadata is authoritative
+  // for inspectionDate / inspectionNumber / projectNumber writes. When
+  // absent (legacy migration shim), fall back to workbook-parsed values so
+  // older callers keep working during rollout. The new Upload path always
+  // provides these fields.
+  const authoritativeInspectionDate =
+    context.inspectionDate && context.inspectionDate.length > 0
+      ? context.inspectionDate
+      : parsed.metadata.inspectionDate;
+  const authoritativeInspectionNumber =
+    context.inspectionNumber && context.inspectionNumber.length > 0
+      ? context.inspectionNumber
+      : parsed.metadata.inspectionNumber;
+
+  // Stage 5: validate authoritative date against the selected reporting period.
   const period = await adapter.resolveReportingPeriod(context.reportingPeriodId);
   if (period && period.weekStartDate && period.weekEndDate) {
     const range = { weekStartDate: period.weekStartDate, weekEndDate: period.weekEndDate };
-    if (parsed.metadata.inspectionDate && !isDateInRange(parsed.metadata.inspectionDate, range)) {
+    if (authoritativeInspectionDate && !isDateInRange(authoritativeInspectionDate, range)) {
       const run = await finalize(
         buildRunDraft({
           validationStatus: 'passed',
@@ -200,7 +236,7 @@ export async function runIngestionPipeline(
           projectResolutionStatus: 'skipped',
           terminalStatus: 'reporting-period-mismatch',
           errorClass: 'reporting-period-mismatch',
-          errorSummary: `Workbook date ${parsed.metadata.inspectionDate} is not within selected period ${period.weekStartDate} … ${period.weekEndDate}.`,
+          errorSummary: `Inspection date ${authoritativeInspectionDate} is not within selected period ${period.weekStartDate} … ${period.weekEndDate}.`,
           templateVersionDetected: parsed.templateVersion,
           reviewStatus: 'pending-review',
         }),
@@ -209,11 +245,34 @@ export async function runIngestionPipeline(
     }
   }
 
-  // Stage 6: resolve project (hint extracted from metadata in Wave 2).
-  const resolution = await adapter.resolveProject(
-    parsed.metadata.projectSiteText,
-    parsed.metadata.projectNumberHint,
-  );
+  // Stage 6: resolve project. When the operator selected a project on the
+  // Upload panel, honor that selection directly (resolveProjectByNumber).
+  // Otherwise (legacy shim), fall back to workbook-text-led resolution.
+  let resolution: ProjectResolutionResult | null = null;
+  if (
+    context.projectNumber &&
+    context.projectNumber.length > 0 &&
+    context.projectSourceClassification &&
+    adapter.resolveProjectByNumber
+  ) {
+    resolution = await adapter.resolveProjectByNumber(
+      context.projectNumber,
+      context.projectSourceClassification,
+      {
+        projectNameSnapshot: context.projectNameSnapshot,
+        projectLocationSnapshot: context.projectLocationSnapshot,
+        projectStageSnapshot: context.projectStageSnapshot,
+        projectLookupId: context.projectLookupId,
+        legacyRegistryItemId: context.legacyRegistryItemId,
+      },
+    );
+  }
+  if (!resolution) {
+    resolution = await adapter.resolveProject(
+      parsed.metadata.projectSiteText,
+      parsed.metadata.projectNumberHint,
+    );
+  }
   if (!resolution) {
     const run = await finalize(
       buildRunDraft({
@@ -231,12 +290,23 @@ export async function runIngestionPipeline(
     return { run, state: 'unresolved-project' };
   }
 
+  // G-03 (Wave 2 revision): compute advisory metadata mismatch between
+  // workbook-parsed values and operator-entered authoritative values.
+  // Surfaces on the IngestionRunResult so the Upload outcome zone can show
+  // a bounded advisory. Never changes terminal state.
+  const metadataMismatch = buildMetadataMismatch(parsed, context, resolution.projectNumber);
+
   // Stage: duplicate detection against prior week-scoped inspections.
   const weeklyInspections = await adapter.findInspectionsForProjectWeek({
     projectNumber: resolution.projectNumber,
     reportingPeriodId: context.reportingPeriodId,
   });
-  const duplicate = classifyDuplicate(weeklyInspections, parsed, uploadedRef.checksum);
+  const duplicate = classifyDuplicate(
+    weeklyInspections,
+    authoritativeInspectionDate,
+    authoritativeInspectionNumber,
+    uploadedRef.checksum,
+  );
 
   if (duplicate.confidence === 'high-confidence-duplicate' && !supersedePrior) {
     // Idempotent retry: short-circuit to the existing committed event when
@@ -257,7 +327,7 @@ export async function runIngestionPipeline(
           reviewStatus: 'replayed-success',
         }),
       );
-      return { run, state: 'committed' };
+      return { run, state: 'committed', metadataMismatch };
     }
     // Duplicate exists but previously superseded — fall through as review-required.
     const run = await finalize(
@@ -274,7 +344,7 @@ export async function runIngestionPipeline(
         reviewStatus: 'pending-review',
       }),
     );
-    return { run, state: 'review-required' };
+    return { run, state: 'review-required', metadataMismatch };
   }
 
   // Stage 7: scoring + stage 8: finding extraction
@@ -287,11 +357,14 @@ export async function runIngestionPipeline(
       resolution,
       context.reportingPeriodId,
       context.reportingPeriodSpItemId,
-      weekRangeForDate(parsed.metadata.inspectionDate).weekStartDate,
+      weekRangeForDate(authoritativeInspectionDate).weekStartDate,
     );
 
+    // G-03 (Wave 2 revision): operator-entered values are authoritative
+    // for inspectionDate, inspectionNumber, projectNumber, and
+    // projectNameSnapshot on the committed SafetyInspectionEvents row.
     const inspectionEventDraft: SafetyInspectionEventDraft = {
-      title: `${resolution.projectNumber} — Inspection ${parsed.metadata.inspectionNumber || 'new'}`,
+      title: `${resolution.projectNumber} — Inspection ${authoritativeInspectionNumber || 'new'}`,
       projectWeekRecordId: projectWeek.id,
       projectWeekRecordSpItemId: projectWeek.spItemId,
       reportingPeriodId: context.reportingPeriodId,
@@ -302,8 +375,8 @@ export async function runIngestionPipeline(
       templateVersion: parsed.templateVersion,
       parserVersion: parsed.parserVersion,
       scoringMode: score.scoringMode,
-      inspectionDate: parsed.metadata.inspectionDate,
-      inspectionNumber: parsed.metadata.inspectionNumber,
+      inspectionDate: authoritativeInspectionDate,
+      inspectionNumber: authoritativeInspectionNumber,
       inspectorName: context.uploadedByDisplayName,
       inspectorUpn: context.uploadedByUpn,
       projectNumber: resolution.projectNumber,
@@ -419,6 +492,7 @@ export async function runIngestionPipeline(
       run,
       committed,
       state: 'committed',
+      metadataMismatch,
     };
   } catch (err) {
     const partialIds =
@@ -440,13 +514,14 @@ export async function runIngestionPipeline(
         reviewStatus: parentRunId ? 'replayed-failed' : 'pending-review',
       }),
     );
-    return { run, state: 'commit-failed' };
+    return { run, state: 'commit-failed', metadataMismatch };
   }
 }
 
 function classifyDuplicate(
   recent: ReadonlyArray<SafetyInspectionEvent>,
-  parsed: ParsedInspection,
+  inspectionDate: string,
+  inspectionNumber: string,
   checksum: string,
 ): { confidence: DuplicateConfidence; matchedId?: string } {
   if (recent.length === 0) return { confidence: 'none' };
@@ -455,9 +530,9 @@ function classifyDuplicate(
     (ie) =>
       ie.ingestionStatus !== 'superseded' &&
       ie.projectNumber &&
-      ie.inspectionDate === parsed.metadata.inspectionDate &&
+      ie.inspectionDate === inspectionDate &&
       (ie.inspectionNumber ?? '').toLowerCase() ===
-        (parsed.metadata.inspectionNumber ?? '').toLowerCase(),
+        (inspectionNumber ?? '').toLowerCase(),
   );
 
   if (!sameBusinessKey) return { confidence: 'none' };
@@ -465,6 +540,76 @@ function classifyDuplicate(
     return { confidence: 'high-confidence-duplicate', matchedId: sameBusinessKey.id };
   }
   return { confidence: 'near-duplicate', matchedId: sameBusinessKey.id };
+}
+
+/**
+ * G-03 (Wave 2 revision): compute advisory per-field mismatch between
+ * workbook-parsed metadata and operator-entered authoritative metadata.
+ * Returns `undefined` when no authoritative intake metadata was provided
+ * (legacy migration shim path) or when there is no disagreement to show.
+ */
+function buildMetadataMismatch(
+  parsed: ParsedInspection,
+  context: UploadContext,
+  resolvedProjectNumber: string,
+): IngestionMetadataMismatch | undefined {
+  const mismatch: {
+    projectNumberMismatch?: { entered: string; parsed: string };
+    inspectionNumberMismatch?: { entered: string; parsed: string };
+    inspectionDateMismatch?: { entered: string; parsed: string };
+  } = {};
+
+  if (context.projectNumber && context.projectNumber.length > 0) {
+    const parsedHint = parsed.metadata.projectNumberHint ?? '';
+    if (parsedHint && parsedHint !== context.projectNumber) {
+      mismatch.projectNumberMismatch = {
+        entered: context.projectNumber,
+        parsed: parsedHint,
+      };
+    }
+    // Also surface mismatch vs. the free-text project-site cell when it
+    // contains an identifiable project number that disagrees.
+    if (!parsedHint && parsed.metadata.projectSiteText) {
+      const containsResolvedNumber = parsed.metadata.projectSiteText.includes(
+        resolvedProjectNumber,
+      );
+      if (!containsResolvedNumber) {
+        mismatch.projectNumberMismatch = {
+          entered: context.projectNumber,
+          parsed: parsed.metadata.projectSiteText,
+        };
+      }
+    }
+  }
+
+  if (context.inspectionNumber && context.inspectionNumber.length > 0) {
+    const parsedNum = parsed.metadata.inspectionNumber ?? '';
+    if (parsedNum && parsedNum !== context.inspectionNumber) {
+      mismatch.inspectionNumberMismatch = {
+        entered: context.inspectionNumber,
+        parsed: parsedNum,
+      };
+    }
+  }
+
+  if (context.inspectionDate && context.inspectionDate.length > 0) {
+    const parsedDate = parsed.metadata.inspectionDate ?? '';
+    if (parsedDate && parsedDate !== context.inspectionDate) {
+      mismatch.inspectionDateMismatch = {
+        entered: context.inspectionDate,
+        parsed: parsedDate,
+      };
+    }
+  }
+
+  if (
+    !mismatch.projectNumberMismatch &&
+    !mismatch.inspectionNumberMismatch &&
+    !mismatch.inspectionDateMismatch
+  ) {
+    return undefined;
+  }
+  return mismatch;
 }
 
 export function __testOnly_weekStartFromDate(dateIso: string): string {

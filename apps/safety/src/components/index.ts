@@ -46,3 +46,11 @@ export { SafetyPriorityProjects } from './SafetyPriorityProjects.js';
 export type { SafetyPriorityProjectsProps } from './SafetyPriorityProjects.js';
 export { SafetyPriorityProjectCard } from './SafetyPriorityProjectCard.js';
 export type { SafetyPriorityProjectCardProps } from './SafetyPriorityProjectCard.js';
+export {
+  SafetyProjectPicker,
+  toSafetyProjectSourceClassification,
+} from './SafetyProjectPicker.js';
+export type {
+  SafetyProjectPickerProps,
+  SafetyProjectPickerValue,
+} from './SafetyProjectPicker.js';

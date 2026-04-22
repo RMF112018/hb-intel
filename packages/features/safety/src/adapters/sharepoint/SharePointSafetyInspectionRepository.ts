@@ -14,6 +14,7 @@ import type {
   CommittedArtifacts,
   IngestionRunResult,
   ProjectResolutionResult,
+  ProjectSourceClassification,
   ReviewStatus,
   SafetyFinding,
   SafetyFindingDraft,
@@ -347,6 +348,58 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     return {
       resolveProject: async (projectSiteText: string, projectNumberHint: string | null) =>
         this.resolveProject(projectSiteText, projectNumberHint ?? undefined),
+      // G-03 structured intake authority: honor the operator-entered
+      // project selection. Enrich missing snapshot fields from the live
+      // Projects list or Legacy Fallback Registry when hints are absent.
+      resolveProjectByNumber: async (
+        projectNumber: string,
+        classification: ProjectSourceClassification,
+        hints?: {
+          readonly projectNameSnapshot?: string;
+          readonly projectLocationSnapshot?: string;
+          readonly projectStageSnapshot?: string;
+          readonly projectLookupId?: number;
+          readonly legacyRegistryItemId?: number;
+        },
+      ): Promise<ProjectResolutionResult | null> => {
+        if (!projectNumber) return null;
+        // When hints carry a full snapshot set, trust them and avoid the
+        // network round-trip. Otherwise enrich from the existing resolver.
+        const hasFullSnapshot =
+          hints?.projectNameSnapshot &&
+          hints.projectNameSnapshot.length > 0;
+        if (hasFullSnapshot) {
+          return {
+            classification,
+            projectNumber,
+            projectNameSnapshot: hints!.projectNameSnapshot!,
+            projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
+            projectStageSnapshot: hints?.projectStageSnapshot ?? '',
+            projectLookupId: hints?.projectLookupId,
+            legacyRegistryItemId: hints?.legacyRegistryItemId,
+          };
+        }
+        const enriched = await this.resolveProject('', projectNumber);
+        if (enriched) {
+          return {
+            ...enriched,
+            // Operator-selected classification is authoritative when provided.
+            classification,
+            projectNumber,
+          };
+        }
+        // No live row available — trust the operator and return a
+        // minimally-populated resolution so the commit can proceed.
+        return {
+          classification,
+          projectNumber,
+          projectNameSnapshot: hints?.projectNameSnapshot ?? '',
+          projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
+          projectStageSnapshot: hints?.projectStageSnapshot ?? '',
+          projectLookupId: hints?.projectLookupId,
+          legacyRegistryItemId: hints?.legacyRegistryItemId,
+        };
+      },
       findInspectionsForProjectWeek: async (filter: ProjectWeekInspectionFilter) =>
         this.findInspectionsForProjectWeek(filter),
       findFindingsForProjectWeek: async (filter: { projectWeekRecordSpItemId: number }) => {

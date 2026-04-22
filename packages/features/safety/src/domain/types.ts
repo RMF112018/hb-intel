@@ -153,6 +153,57 @@ export interface UploadContext {
   readonly reportingPeriodId: string;
   /** Numeric parent item Id for the reporting period — carried into Lookup payloads. */
   readonly reportingPeriodSpItemId: number;
+
+  /**
+   * G-03 structured intake authority (Wave 2 revision).
+   *
+   * These fields are operator-entered on the Upload panel and are
+   * **authoritative** for the corresponding Safety list-field writes.
+   * Workbook-parsed equivalents (`parsed.metadata.inspectionDate`,
+   * `parsed.metadata.inspectionNumber`, `parsed.metadata.projectSiteText`,
+   * `parsed.metadata.projectNumberHint`) are secondary: used only for
+   * provenance, mismatch advisory, and duplicate signaling.
+   *
+   * Calendar-date semantics: `inspectionDate` is a plain `YYYY-MM-DD`
+   * string. Do not construct a `Date` from it, do not convert through UTC,
+   * do not timezone-shift it at any boundary.
+   *
+   * Migration tolerance: these fields are optional for back-compat during
+   * the Upload-redesign rollout window. Older callers that do not supply
+   * them fall back to workbook-parsed values. This is a temporary shim,
+   * not a supported alternative input mode — the new Upload path always
+   * supplies all three.
+   */
+  readonly projectNumber?: string;
+  readonly projectNameSnapshot?: string;
+  readonly projectLocationSnapshot?: string;
+  readonly projectStageSnapshot?: string;
+  readonly projectSourceClassification?: ProjectSourceClassification;
+  readonly projectLookupId?: number;
+  readonly legacyRegistryItemId?: number;
+  readonly inspectionNumber?: string;
+  readonly inspectionDate?: string;
+}
+
+/**
+ * Advisory payload carried on `IngestionRunResult` when workbook-parsed
+ * metadata disagrees with operator-entered authoritative metadata.
+ * Does not change terminal state; surfaces as a bounded advisory in the
+ * Upload outcome zone.
+ */
+export interface IngestionMetadataMismatch {
+  readonly projectNumberMismatch?: {
+    readonly entered: string;
+    readonly parsed: string;
+  };
+  readonly inspectionNumberMismatch?: {
+    readonly entered: string;
+    readonly parsed: string;
+  };
+  readonly inspectionDateMismatch?: {
+    readonly entered: string;
+    readonly parsed: string;
+  };
 }
 
 /**
@@ -332,6 +383,13 @@ export interface IngestionRunResult {
     readonly findings: ReadonlyArray<SafetyFinding>;
   };
   readonly state: IngestionTerminalStatus;
+  /**
+   * G-03 (Wave 2 revision) advisory: surfaces per-field disagreement
+   * between operator-entered authoritative intake metadata and the
+   * workbook-parsed equivalents. Absent when no disagreement existed
+   * or when authoritative metadata was not provided (legacy path).
+   */
+  readonly metadataMismatch?: IngestionMetadataMismatch;
 }
 
 export class TemplateInvalidError extends Error {

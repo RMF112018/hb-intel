@@ -19,10 +19,33 @@ describe('UploadPage — intake-runway structural composition', () => {
     expect(source).toMatch(/className="safety-intake-runway"/);
   });
 
-  it('composes five numbered intake steps (stepNumber 1 through 5)', () => {
-    for (const n of [1, 2, 3, 4, 5]) {
+  it('composes seven numbered intake steps (stepNumber 1 through 7) — G-03 Wave 2 revision adds Project + Inspection Details', () => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7]) {
       expect(source).toMatch(new RegExp(`stepNumber=\\{${n}\\}`));
     }
+  });
+
+  it('G-03 Wave 2 revision: runway includes the SafetyProjectPicker and inspection-details inputs via HbcTextField', () => {
+    expect(source).toContain('SafetyProjectPicker');
+    // Inspection details are governed HbcTextField inputs (D-07).
+    expect(source).toMatch(/HbcTextField[\s\S]*?label="Inspection number"/);
+    expect(source).toMatch(/HbcTextField[\s\S]*?label="Inspection date"/);
+    expect(source).toMatch(/type="date"/);
+    expect(source).toMatch(/data-safety-ui="inspection-details"/);
+  });
+
+  it('G-03 Wave 2 revision: submit passes operator-entered authoritative metadata verbatim', () => {
+    expect(source).toMatch(/projectNumber:\s*selectedProject\.projectNumber/);
+    expect(source).toMatch(/projectNameSnapshot:\s*selectedProject\.projectName/);
+    expect(source).toMatch(/inspectionNumber,/);
+    expect(source).toMatch(/inspectionDate,/);
+    // Calendar-date discipline — no `new Date(inspectionDate)` anywhere.
+    expect(source).not.toMatch(/new Date\(inspectionDate\)/);
+  });
+
+  it('G-03 Wave 2 revision: mismatch advisory banner renders from ingestion metadata', () => {
+    expect(source).toContain('safety-mismatch-advisory');
+    expect(source).toContain('metadata-mismatch-advisory');
   });
 
   it('adopts the authored readiness primitive (SafetyIntakeReadiness)', () => {

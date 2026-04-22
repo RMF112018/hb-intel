@@ -295,6 +295,26 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
           projectStageSnapshot: match.projectStageSnapshot,
         };
       },
+      // G-03 structured intake authority: honor the operator-entered
+      // project selection. Enrichment from the in-memory project-week
+      // catalog is used only to populate optional snapshot fields; the
+      // operator's projectNumber + classification are authoritative.
+      resolveProjectByNumber: async (projectNumber, classification, hints) => {
+        const enrich = this.projectWeeks.find((pw) => pw.projectNumber === projectNumber);
+        return {
+          classification,
+          projectNumber,
+          projectNameSnapshot:
+            hints?.projectNameSnapshot ?? enrich?.projectNameSnapshot ?? '',
+          projectLocationSnapshot:
+            hints?.projectLocationSnapshot ?? enrich?.projectLocationSnapshot ?? '',
+          projectStageSnapshot:
+            hints?.projectStageSnapshot ?? enrich?.projectStageSnapshot ?? '',
+          projectLookupId: hints?.projectLookupId ?? enrich?.projectLookupId,
+          legacyRegistryItemId:
+            hints?.legacyRegistryItemId ?? enrich?.legacyRegistryItemId,
+        };
+      },
       findInspectionsForProjectWeek: async (filter) =>
         this.findInspectionsForProjectWeek(filter),
       findFindingsForProjectWeek: async (filter) =>

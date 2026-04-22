@@ -4,6 +4,7 @@ import {
   HbcCard,
   HbcSelect,
   HbcStatusBadge,
+  HbcTextField,
   HbcTypography,
   WorkspacePageShell,
 } from '@hbc/ui-kit';
@@ -22,9 +23,12 @@ import {
   SafetyIntakeReadiness,
   SafetyIntakeStep,
   SafetyMasthead,
+  SafetyProjectPicker,
   SafetyStatusPanel,
+  toSafetyProjectSourceClassification,
   type SafetyIntakeReadinessRow,
   type SafetyIntakeStepStatus,
+  type SafetyProjectPickerValue,
 } from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
@@ -34,39 +38,64 @@ function currentUserUpn(): string {
   return (window as unknown as { _hbcUpn?: string })._hbcUpn ?? 'coordinator@hedrickbrothers.com';
 }
 
+const INSPECTION_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function isValidCalendarDate(value: string): boolean {
+  // Plain-calendar-date contract (G-03 Wave 2 revision): `YYYY-MM-DD`,
+  // no time component, no timezone conversion. We validate the shape
+  // only; no Date construction (that would risk a local-TZ shift).
+  return INSPECTION_DATE_PATTERN.test(value);
+}
+
+function isValidInspectionNumber(value: string): boolean {
+  if (value.length === 0) return false;
+  return /^\d+$/.test(value);
+}
+
 /**
- * UploadPage — Phase-04 audit G-03 flagship Upload redesign.
+ * UploadPage — Phase-04 audit G-03 Wave 2 revision.
  *
- * Authored intake workflow with five explicit zones:
- *   1. Masthead (context / purpose / period status)
- *   2. Step 1 — Reporting period (required input; honest blocked posture)
- *   3. Step 2 — Checklist workbook (SafetyFileInput, unchanged)
- *   4. Step 3 — Readiness (authored three-row readiness list)
- *   5. Step 4 — Submit (authoritative primary CTA)
- *   6. Step 5 — Downstream orientation (what submission triggers)
- *   7. Outcome zone (post-submit SafetyIngestionOutcome; mutation-level
- *      transport error routes to SafetyStatusPanel intent="partial-failure")
+ * Structured intake + workbook submission. Operators confirm project and
+ * inspection metadata BEFORE uploading; those operator-entered values are
+ * authoritative for SafetyInspectionEvents.ProjectNumber, InspectionNumber,
+ * and InspectionDate writes. Workbook-parsed equivalents become secondary
+ * (provenance + advisory mismatch).
  *
- * Fatal page states remain owned by WorkspacePageShell; this page does not
- * route periodsQuery fatal through WPS because periods are only one input
- * to the intake workflow — their failure is an in-page blocked step, not
- * a page-level fatal. Transport-level ingestion errors stay local (partial
- * failure), run-level outcomes go through SafetyIngestionOutcome.
+ * Runway:
+ *   1. Masthead
+ *   2. Step 1 — Project (SafetyProjectPicker)
+ *   3. Step 2 — Inspection details (InspectionNumber + InspectionDate)
+ *   4. Step 3 — Reporting period
+ *   5. Step 4 — Checklist workbook
+ *   6. Step 5 — Readiness
+ *   7. Step 6 — Submit
+ *   8. Step 7 — What happens next
+ *   9. Outcome zone (terminal + mismatch advisory)
  */
 export function UploadPage(): ReactNode {
   const periodsQuery = useReportingPeriods();
   const periods = periodsQuery.data ?? [];
   const ingestion = useSafetyIngestion();
+
   const [file, setFile] = useState<File | null>(null);
   const [reportingPeriodId, setReportingPeriodId] = useState<string>('');
+  const [selectedProject, setSelectedProject] =
+    useState<SafetyProjectPickerValue | null>(null);
+  const [inspectionNumber, setInspectionNumber] = useState<string>('');
+  const [inspectionDate, setInspectionDate] = useState<string>('');
 
   const activePeriod = useMemo(
     () => periods.find((p) => p.id === reportingPeriodId) ?? periods[0],
     [periods, reportingPeriodId],
   );
 
+  const inspectionNumberValid = isValidInspectionNumber(inspectionNumber);
+  const inspectionDateValid = isValidCalendarDate(inspectionDate);
+
   const handleSubmit = (): void => {
     if (!file || !activePeriod) return;
+    if (!selectedProject) return;
+    if (!inspectionNumberValid || !inspectionDateValid) return;
     ingestion.mutate({
       file,
       context: {
@@ -75,11 +104,34 @@ export function UploadPage(): ReactNode {
         fileName: file.name,
         reportingPeriodId: activePeriod.id,
         reportingPeriodSpItemId: activePeriod.spItemId,
+        // G-03 structured intake authority (Wave 2 revision). These
+        // operator-entered values are authoritative for ProjectNumber,
+        // InspectionNumber, and InspectionDate writes. `inspectionDate`
+        // travels as the operator-selected calendar day verbatim — no
+        // Date construction, no UTC conversion.
+        projectNumber: selectedProject.projectNumber,
+        projectNameSnapshot: selectedProject.projectName,
+        projectLocationSnapshot: selectedProject.projectLocation,
+        projectStageSnapshot: selectedProject.projectStage,
+        projectSourceClassification: toSafetyProjectSourceClassification(
+          selectedProject.sourceClassification,
+        ),
+        projectLookupId:
+          selectedProject.sourceRefs.projectsListId ?? undefined,
+        legacyRegistryItemId:
+          selectedProject.sourceClassification === 'legacy-only'
+            ? selectedProject.id
+            : undefined,
+        inspectionNumber,
+        inspectionDate,
       },
     });
   };
 
   // ── Readiness model ──────────────────────────────────────────────────
+  const projectStatus: SafetyIntakeStepStatus = selectedProject ? 'ready' : 'pending';
+  const inspectionDetailsStatus: SafetyIntakeStepStatus =
+    inspectionNumberValid && inspectionDateValid ? 'ready' : 'pending';
   const periodStatus: SafetyIntakeStepStatus = periodsQuery.isError
     ? 'blocked'
     : periodsQuery.isPending
@@ -87,7 +139,6 @@ export function UploadPage(): ReactNode {
       : activePeriod
         ? 'ready'
         : 'blocked';
-
   const workbookStatus: SafetyIntakeStepStatus = file ? 'ready' : 'pending';
 
   const submitBlockedReason = computeSubmitBlockedReason({
@@ -96,6 +147,9 @@ export function UploadPage(): ReactNode {
     activePeriod,
     file,
     ingestionPending: ingestion.isPending,
+    projectSelected: selectedProject !== null,
+    inspectionNumberValid,
+    inspectionDateValid,
   });
 
   const submitStatus: SafetyIntakeStepStatus = ingestion.isPending
@@ -105,6 +159,24 @@ export function UploadPage(): ReactNode {
       : 'ready';
 
   const readinessRows: SafetyIntakeReadinessRow[] = [
+    {
+      id: 'project',
+      label: 'Project selected',
+      status: projectStatus === 'ready' ? 'ready' : 'pending',
+      detail:
+        selectedProject
+          ? `${selectedProject.projectName || 'Project'} · ${selectedProject.projectNumber || '—'}`
+          : 'No project selected yet.',
+    },
+    {
+      id: 'inspection-details',
+      label: 'Inspection number and date entered',
+      status: inspectionDetailsStatus,
+      detail:
+        inspectionDetailsStatus === 'ready'
+          ? `Inspection #${inspectionNumber} on ${inspectionDate}`
+          : 'Inspection number (integer) and inspection date (YYYY-MM-DD) are required.',
+    },
     {
       id: 'period',
       label: 'Reporting period selected',
@@ -151,9 +223,14 @@ export function UploadPage(): ReactNode {
   const submitDisabled =
     !file ||
     !activePeriod ||
+    !selectedProject ||
+    !inspectionNumberValid ||
+    !inspectionDateValid ||
     ingestion.isPending ||
     periodsQuery.isPending ||
     periodsQuery.isError;
+
+  const mismatch = ingestion.data?.metadataMismatch;
 
   return (
     <WorkspacePageShell
@@ -165,7 +242,7 @@ export function UploadPage(): ReactNode {
         <SafetyMasthead
           eyebrow="Safety · Upload"
           title="Submit a completed checklist"
-          description="Upload a v1 Safety Checklist workbook. The system validates the template, resolves the project against HBCentral, parses responses, and writes authoritative inspection records."
+          description="Confirm the project and inspection details, then upload the completed v1 Safety Checklist workbook. Your selections populate the authoritative Safety record; the workbook provides provenance and scoring."
           meta={
             activePeriod
               ? [
@@ -182,6 +259,70 @@ export function UploadPage(): ReactNode {
         <div className="safety-intake-runway" data-safety-ui="intake-runway">
           <SafetyIntakeStep
             stepNumber={1}
+            title="Project"
+            description="Search by project name or number. Operator-selected project populates the authoritative Safety inspection record."
+            status={projectStatus}
+            statusLabel={projectStatus === 'ready' ? 'Selected' : undefined}
+          >
+            <SafetyProjectPicker
+              label="Project"
+              helpText="Matches cover current and legacy projects (same seam the Project Sites directory uses)."
+              selected={selectedProject}
+              onSelect={setSelectedProject}
+            />
+          </SafetyIntakeStep>
+
+          <SafetyIntakeStep
+            stepNumber={2}
+            title="Inspection details"
+            description="Enter the inspection number and the calendar date the inspection was performed."
+            status={inspectionDetailsStatus}
+            statusLabel={inspectionDetailsStatus === 'ready' ? 'Ready' : undefined}
+          >
+            <div
+              className="safety-project-picker-fields"
+              data-safety-ui="inspection-details"
+            >
+              <div className="safety-project-picker-field">
+                <HbcTextField
+                  label="Inspection number"
+                  type="number"
+                  value={inspectionNumber}
+                  onChange={setInspectionNumber}
+                  placeholder="e.g. 3"
+                  validationMessage={
+                    inspectionNumber.length > 0 && !inspectionNumberValid
+                      ? 'Inspection number must be a non-negative integer.'
+                      : undefined
+                  }
+                />
+                <HbcTypography intent="bodySmall">
+                  Integer inspection number from the source workbook. This is
+                  the authoritative value for the safety record.
+                </HbcTypography>
+              </div>
+              <div className="safety-project-picker-field">
+                <HbcTextField
+                  label="Inspection date"
+                  type="date"
+                  value={inspectionDate}
+                  onChange={setInspectionDate}
+                  validationMessage={
+                    inspectionDate.length > 0 && !inspectionDateValid
+                      ? 'Inspection date must be a calendar day (YYYY-MM-DD).'
+                      : undefined
+                  }
+                />
+                <HbcTypography intent="bodySmall">
+                  Calendar day the inspection was performed. Stored as-is, never
+                  timezone-shifted.
+                </HbcTypography>
+              </div>
+            </div>
+          </SafetyIntakeStep>
+
+          <SafetyIntakeStep
+            stepNumber={3}
             title="Reporting period"
             description="Submission requires an open reporting period. Select one below."
             status={periodStatus}
@@ -234,7 +375,7 @@ export function UploadPage(): ReactNode {
           </SafetyIntakeStep>
 
           <SafetyIntakeStep
-            stepNumber={2}
+            stepNumber={4}
             title="Checklist workbook"
             description="Upload a completed v1 Safety Checklist (.xlsx). The source workbook is retained in Safety Checklist Uploads."
             status={workbookStatus}
@@ -251,7 +392,7 @@ export function UploadPage(): ReactNode {
           </SafetyIntakeStep>
 
           <SafetyIntakeStep
-            stepNumber={3}
+            stepNumber={5}
             title="Readiness"
             description="Each precondition must be ready before submission."
             status={submitStatus === 'ready' ? 'ready' : submitStatus}
@@ -263,9 +404,9 @@ export function UploadPage(): ReactNode {
           </SafetyIntakeStep>
 
           <SafetyIntakeStep
-            stepNumber={4}
+            stepNumber={6}
             title="Submit"
-            description="Submission commits against the selected reporting period. The pipeline validates, resolves, parses, scores, and writes the authoritative inspection record."
+            description="Submission commits against the selected reporting period. The pipeline validates the template, parses responses, scores, and writes the authoritative inspection record."
             status={submitStatus}
             statusLabel={
               ingestion.isPending
@@ -293,7 +434,7 @@ export function UploadPage(): ReactNode {
           </SafetyIntakeStep>
 
           <SafetyIntakeStep
-            stepNumber={5}
+            stepNumber={7}
             title="What happens next"
             description="Every submission runs through the same governed pipeline."
           >
@@ -306,13 +447,15 @@ export function UploadPage(): ReactNode {
                 </li>
                 <li>
                   <HbcTypography intent="body">
-                    The project is resolved against HBCentral.
+                    The operator-selected project is honored (workbook values are
+                    kept for provenance only).
                   </HbcTypography>
                 </li>
                 <li>
                   <HbcTypography intent="body">
                     Responses are parsed, scored, and written as an authoritative
-                    inspection.
+                    inspection — with your inspection number and date as the
+                    authoritative source.
                   </HbcTypography>
                 </li>
                 <li>
@@ -339,6 +482,50 @@ export function UploadPage(): ReactNode {
                 </HbcTypography>
               </div>
               {ingestion.data && <SafetyIngestionOutcome result={ingestion.data} />}
+              {mismatch && (
+                <div
+                  className="safety-mismatch-advisory"
+                  data-safety-ui="metadata-mismatch-advisory"
+                  role="status"
+                >
+                  <HbcTypography intent="label">
+                    Workbook metadata did not match your intake entries
+                  </HbcTypography>
+                  <HbcTypography intent="bodySmall">
+                    The committed record uses your entered values. Workbook values
+                    are kept as provenance.
+                  </HbcTypography>
+                  <ul>
+                    {mismatch.projectNumberMismatch && (
+                      <li>
+                        <HbcTypography intent="bodySmall">
+                          Project number — entered{' '}
+                          <strong>{mismatch.projectNumberMismatch.entered}</strong>,
+                          workbook <em>{mismatch.projectNumberMismatch.parsed}</em>
+                        </HbcTypography>
+                      </li>
+                    )}
+                    {mismatch.inspectionNumberMismatch && (
+                      <li>
+                        <HbcTypography intent="bodySmall">
+                          Inspection number — entered{' '}
+                          <strong>{mismatch.inspectionNumberMismatch.entered}</strong>,
+                          workbook <em>{mismatch.inspectionNumberMismatch.parsed}</em>
+                        </HbcTypography>
+                      </li>
+                    )}
+                    {mismatch.inspectionDateMismatch && (
+                      <li>
+                        <HbcTypography intent="bodySmall">
+                          Inspection date — entered{' '}
+                          <strong>{mismatch.inspectionDateMismatch.entered}</strong>,
+                          workbook <em>{mismatch.inspectionDateMismatch.parsed}</em>
+                        </HbcTypography>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
               {ingestion.error && (
                 <SafetyStatusPanel
                   intent="partial-failure"
@@ -361,10 +548,16 @@ interface SubmitReadinessInput {
   readonly activePeriod: SafetyReportingPeriod | undefined;
   readonly file: File | null;
   readonly ingestionPending: boolean;
+  readonly projectSelected: boolean;
+  readonly inspectionNumberValid: boolean;
+  readonly inspectionDateValid: boolean;
 }
 
 function computeSubmitBlockedReason(input: SubmitReadinessInput): string | null {
   if (input.ingestionPending) return null;
+  if (!input.projectSelected) return 'Select a project before submission.';
+  if (!input.inspectionNumberValid) return 'Enter a valid inspection number.';
+  if (!input.inspectionDateValid) return 'Enter a valid inspection date (YYYY-MM-DD).';
   if (input.periodsLoading) return 'Loading reporting periods.';
   if (input.periodsErrored) return 'Reporting periods failed to load — resolve before submission.';
   if (!input.activePeriod) return 'No reporting period selected.';
