@@ -23,6 +23,7 @@ import {
   getOverlayGuid,
   type SafetyOverlayKey,
 } from './guidConfig.js';
+import { SafetyConfigurationError } from '../adapters/sharepoint/errors.js';
 
 export const HBCENTRAL_SITE_URL =
   'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral' as const;
@@ -185,8 +186,9 @@ export function resolveDescriptor(key: SafetyOverlayKey): SiteScopedListDescript
     ? { ...base, id: overlayGuid }
     : base;
   if (effective.id === ZERO_GUID) {
-    throw new Error(
-      `Safety list descriptor "${key}" is bound to the zero GUID. ` +
+    throw new SafetyConfigurationError(
+      base.title,
+      `Safety list "${base.title}" (key "${key}") is bound to the zero GUID. ` +
         'Populate the list GUID via `configureSafetyListGuids()` at tenant-provisioning time ' +
         'before using this adapter in production.',
     );

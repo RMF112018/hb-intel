@@ -46,6 +46,7 @@ import { runIngestionPipeline } from '../../ingestion/runIngestionPipeline.js';
 import { uploadToSafetyChecklistUploads } from './uploadToSafetyChecklistUploads.js';
 import { downloadUploadedWorkbook } from './downloadUploadedWorkbook.js';
 import { JSON_HEADERS, type SpHttpClient } from './spHttp.js';
+import { SafetyAdapterFetchError } from './errors.js';
 
 const VERBOSE_HEADERS = {
   Accept: 'application/json;odata=verbose',
@@ -579,7 +580,15 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     const endpoint = `${descriptor.siteUrl}/_api/web/lists(guid'${descriptor.id}')/items${query}`;
     const response = await this.client.get(endpoint, { headers: JSON_HEADERS });
     if (!response.ok) {
-      throw new Error(`Fetch ${descriptor.title} failed (${response.status}).`);
+      const bodySnippet = await readBodySnippet(response);
+      throw new SafetyAdapterFetchError({
+        listName: descriptor.title,
+        siteUrl: descriptor.siteUrl,
+        endpoint,
+        httpStatus: response.status,
+        bodySnippet,
+        operation: 'Fetch',
+      });
     }
     const body = (await response.json()) as { value?: T[] };
     return body.value ?? [];
@@ -593,7 +602,15 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     const response = await this.client.get(endpoint, { headers: JSON_HEADERS });
     if (response.status === 404) return null;
     if (!response.ok) {
-      throw new Error(`Fetch ${descriptor.title} item ${id} failed (${response.status}).`);
+      const bodySnippet = await readBodySnippet(response);
+      throw new SafetyAdapterFetchError({
+        listName: descriptor.title,
+        siteUrl: descriptor.siteUrl,
+        endpoint,
+        httpStatus: response.status,
+        bodySnippet,
+        operation: `Fetch item ${id} from`,
+      });
     }
     return (await response.json()) as T;
   }
@@ -607,10 +624,27 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
       headers: VERBOSE_HEADERS,
     });
     if (!response.ok) {
-      const text = await response.text().catch(() => '<no body>');
-      throw new Error(`Create ${descriptor.title} item failed (${response.status}): ${text}`);
+      const bodySnippet = await readBodySnippet(response);
+      throw new SafetyAdapterFetchError({
+        listName: descriptor.title,
+        siteUrl: descriptor.siteUrl,
+        endpoint,
+        httpStatus: response.status,
+        bodySnippet,
+        operation: 'Create item in',
+      });
     }
     return (await response.json()) as T;
+  }
+}
+
+async function readBodySnippet(response: Response): Promise<string | undefined> {
+  try {
+    const text = await response.text();
+    if (!text) return undefined;
+    return text.length > 200 ? `${text.slice(0, 200)}…` : text;
+  } catch {
+    return undefined;
   }
 }
 

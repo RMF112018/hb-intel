@@ -2,7 +2,9 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import {
   HbcBanner,
+  HbcButton,
   HbcDataTable,
+  HbcEmptyState,
   HbcSelect,
   HbcStatusBadge,
   HbcTypography,
@@ -13,6 +15,10 @@ import type { KpiCardData } from '@hbc/models';
 import { useProjectWeeks, useReportingPeriods } from '@hbc/features-safety';
 import type { SafetyProjectWeekRecord } from '@hbc/features-safety';
 import { SafetyMasthead } from '../components/index.js';
+import {
+  derivePeriodsDashboardState,
+  type PeriodsDashboardState,
+} from './periodsDashboardState.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -49,6 +55,15 @@ function riskVariantFor(level: string | null): StatusVariant {
   }
 }
 
+/**
+ * ReportingPeriodDashboardPage — Phase-3 root-cause remediation.
+ *
+ * The page no longer collapses `periods.isError || projectWeeks.isError`
+ * into one lie ("Failed to load reporting periods."). It consumes the
+ * pure `derivePeriodsDashboardState` helper to distinguish fatal-parent,
+ * subordinate-dependent, true-empty, and ready states, and routes retries
+ * to the actual failing seam.
+ */
 export function ReportingPeriodDashboardPage(): ReactNode {
   const periodsQuery = useReportingPeriods();
   const periods = periodsQuery.data ?? [];
@@ -70,12 +85,19 @@ export function ReportingPeriodDashboardPage(): ReactNode {
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const showRedirectBanner = Boolean(fromIncidents) && !bannerDismissed;
 
-  // Page-level state: both parent (periods) and child (project-weeks) queries
-  // participate. Periods error is fatal (without periods we cannot pick a
-  // scope); project-weeks error is fatal for the dashboard body specifically.
-  const isLoading = periodsQuery.isPending || projectWeeksQuery.isPending;
-  const isError = periodsQuery.isError || projectWeeksQuery.isError;
-  const isTrulyEmpty = !isLoading && !isError && projectWeeks.length === 0;
+  const state: PeriodsDashboardState = derivePeriodsDashboardState(
+    periodsQuery,
+    projectWeeksQuery,
+    projectWeeks.length,
+  );
+
+  const retryPeriods = (): void => {
+    void periodsQuery.refetch();
+    void projectWeeksQuery.refetch();
+  };
+  const retryProjectWeeks = (): void => {
+    void projectWeeksQuery.refetch();
+  };
 
   const kpiCards = useMemo<KpiCardData[]>(() => {
     if (projectWeeks.length === 0) return [];
@@ -162,20 +184,26 @@ export function ReportingPeriodDashboardPage(): ReactNode {
     [activePeriod],
   );
 
+  // WorkspacePageShell-level state: only page-fatal variants collapse the
+  // full page. Subordinate failures stay *inside* the page body so the
+  // period selector and redirect banner remain interactive and honest.
+  const isFatal = state.variant === 'fatal-periods' || state.variant === 'fatal-both';
+  const errorMessage =
+    state.variant === 'fatal-periods'
+      ? state.message
+      : state.variant === 'fatal-both'
+        ? state.message
+        : undefined;
+
   return (
     <WorkspacePageShell
       layout="dashboard"
       title="Reporting period dashboard"
       supportedModes={OFFICE_ONLY}
-      isLoading={isLoading}
-      isError={isError}
-      errorMessage="Failed to load reporting periods."
-      onRetry={() => {
-        void periodsQuery.refetch();
-        void projectWeeksQuery.refetch();
-      }}
-      isEmpty={isTrulyEmpty}
-      emptyMessage="No project-week records have been generated yet for this period."
+      isLoading={state.variant === 'loading'}
+      isError={isFatal}
+      errorMessage={errorMessage}
+      onRetry={retryPeriods}
       dashboardConfig={{ kpiCards }}
     >
       <div className="safety-page">
@@ -212,13 +240,66 @@ export function ReportingPeriodDashboardPage(): ReactNode {
             </div>
           </div>
 
-          <HbcDataTable<SafetyProjectWeekRecord>
-            data={projectWeeks as SafetyProjectWeekRecord[]}
-            columns={columns}
-            toolId="safety-periods-table"
-          />
+          {state.variant === 'subordinate-project-weeks' ? (
+            <ProjectWeeksSubordinateError
+              message={state.message}
+              detail={state.detail}
+              onRetry={retryProjectWeeks}
+              isRetrying={projectWeeksQuery.isPending}
+            />
+          ) : state.variant === 'empty' ? (
+            <HbcEmptyState
+              title="No project-week records for this reporting period"
+              description="Project-week records are generated after checklist uploads commit against this period."
+            />
+          ) : (
+            <HbcDataTable<SafetyProjectWeekRecord>
+              data={projectWeeks as SafetyProjectWeekRecord[]}
+              columns={columns}
+              toolId="safety-periods-table"
+            />
+          )}
         </section>
       </div>
     </WorkspacePageShell>
+  );
+}
+
+interface ProjectWeeksSubordinateErrorProps {
+  readonly message: string;
+  readonly detail?: string;
+  readonly onRetry: () => void;
+  readonly isRetrying: boolean;
+}
+
+/**
+ * Subordinate-error card rendered *inside* the page body when reporting
+ * periods loaded but the project-week query failed. Keeps the masthead +
+ * period selector interactive; surfaces the real adapter error (list name,
+ * HTTP status) so the failing seam is visible; offers a scoped retry that
+ * only re-fetches project-weeks.
+ */
+function ProjectWeeksSubordinateError({
+  message,
+  detail,
+  onRetry,
+  isRetrying,
+}: ProjectWeeksSubordinateErrorProps): ReactNode {
+  return (
+    <HbcBanner variant="warning" data-safety-ui="project-weeks-subordinate-error">
+      <div className="safety-section">
+        <HbcTypography intent="body">{message}</HbcTypography>
+        {detail && (
+          <HbcTypography intent="bodySmall">
+            <strong>Adapter reported:</strong> {detail}
+          </HbcTypography>
+        )}
+        <div>
+          <HbcButton variant="secondary" onClick={onRetry} disabled={isRetrying}>
+            {isRetrying ? 'Retrying…' : 'Retry project-week records'}
+          </HbcButton>
+        </div>
+      </div>
+    </HbcBanner>
   );
 }

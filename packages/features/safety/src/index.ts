@@ -104,6 +104,12 @@ export { REVIEW_QUEUE_TERMINAL_STATUSES } from './ports/ISafetyInspectionReposit
 export { MockSafetyInspectionRepository } from './adapters/mock/MockSafetyInspectionRepository.js';
 export { SharePointSafetyInspectionRepository } from './adapters/sharepoint/SharePointSafetyInspectionRepository.js';
 export type { SharePointAdapterOptions } from './adapters/sharepoint/SharePointSafetyInspectionRepository.js';
+export {
+  SafetyAdapterFetchError,
+  SafetyConfigurationError,
+  isSafetyAdapterFetchError,
+  isSafetyConfigurationError,
+} from './adapters/sharepoint/errors.js';
 export type { SpHttpClient } from './adapters/sharepoint/spHttp.js';
 export { uploadToSafetyChecklistUploads } from './adapters/sharepoint/uploadToSafetyChecklistUploads.js';
 export {

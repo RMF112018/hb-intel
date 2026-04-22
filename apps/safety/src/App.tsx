@@ -33,6 +33,12 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
       const overlay = (window as unknown as { __HB_SAFETY_LIST_GUIDS__?: SafetyGuidOverlay })
         .__HB_SAFETY_LIST_GUIDS__;
       if (overlay) configureSafetyListGuids(overlay);
+      // Phase-3 "Periods tab" remediation: surface overlay gaps in dev so a
+      // partial/missing overlay isn't invisible behind the governed
+      // subordinate-error UX. Production never dumps this noise.
+      if (import.meta.env?.DEV) {
+        logSafetyOverlayDiagnostic(overlay);
+      }
     }
     const client = adaptSpfxHttpClient(typed);
     if (client) {
@@ -71,6 +77,45 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
       </ForceOfficeMode>
     </HbcThemeProvider>
   );
+}
+
+const EXPECTED_SAFETY_OVERLAY_KEYS: ReadonlyArray<keyof SafetyGuidOverlay> = [
+  'SafetyReportingPeriods',
+  'SafetyProjectWeekRecords',
+  'SafetyInspectionEvents',
+  'SafetyFindings',
+  'SafetyIngestionRuns',
+  'SafetyChecklistUploads',
+  'Projects',
+  'LegacyProjectFallbackRegistry',
+];
+
+function logSafetyOverlayDiagnostic(overlay?: SafetyGuidOverlay): void {
+  if (!overlay) {
+    // eslint-disable-next-line no-console -- dev-only diagnostic guarded by import.meta.env.DEV
+    console.warn(
+      '[safety] window.__HB_SAFETY_LIST_GUIDS__ is not set. Every SharePoint adapter ' +
+        'call will throw SafetyConfigurationError (zero-GUID fail-closed). Provision ' +
+        'the overlay in the SPFx runtime before mount.',
+    );
+    return;
+  }
+  const present: string[] = [];
+  const missing: string[] = [];
+  for (const key of EXPECTED_SAFETY_OVERLAY_KEYS) {
+    if (overlay[key]) present.push(key);
+    else missing.push(key);
+  }
+  if (missing.length > 0) {
+    // eslint-disable-next-line no-console -- dev-only diagnostic guarded by import.meta.env.DEV
+    console.warn(
+      `[safety] overlay loaded but missing ${missing.length} key(s). Calls to those ` +
+        `lists will throw SafetyConfigurationError. Missing: ${missing.join(', ')}.`,
+    );
+  } else {
+    // eslint-disable-next-line no-console -- dev-only diagnostic guarded by import.meta.env.DEV
+    console.info(`[safety] overlay fully populated (${present.length} keys).`);
+  }
 }
 
 interface SpHttpClientLike {
