@@ -73,15 +73,62 @@ Before deploying Release 1 to a tenant, site admins must:
    - `Safety Inspection Events`
    - `Safety Findings`
    - `Safety Ingestion Runs`
-   Field schema for each list is in `src/lists/fieldSchema.ts`.
-3. Capture each list's GUID and populate the corresponding descriptor in
-   `src/lists/descriptors.ts`. The runtime fails closed if a descriptor still
-   holds the zero-value GUID.
+   Field schema for each list is in `src/lists/fieldSchema.ts`. Lookup columns
+   (`ReportingPeriodId`, `ProjectWeekRecordId`, `InspectionEventId`) must target
+   the corresponding HBCentral list by title.
+3. Capture each list's GUID and the upload library's GUID. At runtime, those
+   GUIDs are injected through `configureSafetyListGuids()` (see below); **the
+   source descriptor files are never edited for tenant-specific GUIDs**. The
+   runtime fails closed if a list is queried before its GUID is supplied.
 4. Grant safety coordinators **Contribute** on `Safety Checklist Uploads` and
    **Contribute** on the five HBCentral lists.
 5. Grant safety coordinators **Read** on `Projects` and
    `Legacy Project Fallback Registry` on HBCentral.
 6. Deploy the SPFx solution (`apps/safety/`).
+
+### Supplying tenant GUIDs at runtime
+
+```ts
+import { configureSafetyListGuids } from '@hbc/features-safety';
+
+configureSafetyListGuids({
+  SafetyReportingPeriods: '<guid>',
+  SafetyProjectWeekRecords: '<guid>',
+  SafetyInspectionEvents: '<guid>',
+  SafetyFindings: '<guid>',
+  SafetyIngestionRuns: '<guid>',
+  SafetyChecklistUploads: '<guid>',
+  Projects: '<guid>',
+  LegacyProjectFallbackRegistry: '<guid>',
+});
+```
+
+`apps/safety/src/App.tsx` reads these values from a bootstrap hook (e.g.
+`window.__HB_SAFETY_LIST_GUIDS__`) before the repository is constructed, so
+list GUIDs stay out of source control.
+
+### Site topology contract
+
+| Concern | Site |
+|---|---|
+| SPFx app shell, pages | `/sites/Safety` |
+| `Safety Checklist Uploads` document library | `/sites/Safety` |
+| Every authoritative safety list + `Projects` + `Legacy Project Fallback Registry` | `/sites/HBCentral` |
+
+The `SharePointSafetyInspectionRepository` writes every authoritative record to
+`/sites/HBCentral`. Cross-site writes use the SPFx user's auth context in
+Release 1; service-principal flows are a future upgrade.
+
+### SharePoint Lookup contract
+
+Every domain entity carries both:
+
+- a stable `id: string` (e.g. `"ie-3001"`) for UI routing, and
+- an authoritative `spItemId: number` — the numeric SharePoint list item Id.
+
+Every Lookup-backed field (`ReportingPeriodId`, `ProjectWeekRecordId`,
+`InspectionEventId`) is populated with the numeric parent `spItemId`. The
+pipeline never parses a business-string into a fake numeric Lookup parent.
 
 ## Scoring mode
 

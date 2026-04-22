@@ -42,6 +42,7 @@ export function UploadPage(): ReactNode {
         uploadedAt: new Date().toISOString(),
         fileName: file.name,
         reportingPeriodId: activePeriod.id,
+        reportingPeriodSpItemId: activePeriod.spItemId,
       },
     });
   };

@@ -1,7 +1,9 @@
 import type {
+  CommittedArtifacts,
   IngestionRunResult,
   SafetyFinding,
   SafetyIngestionRun,
+  SafetyIngestionRunDraft,
   SafetyInspectionEvent,
   SafetyProjectWeekRecord,
   SafetyReportingPeriod,
@@ -26,7 +28,14 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   private readonly inspections: SafetyInspectionEvent[];
   private readonly findings: SafetyFinding[];
   private readonly ingestionRuns: SafetyIngestionRun[];
-  private idSeq = 10_000;
+  private spItemIdSeqByPrefix: Record<string, number> = {
+    period: 1000,
+    pw: 2000,
+    ie: 3000,
+    fd: 4000,
+    run: 5000,
+  };
+  private uploadIdSeq = 9000;
 
   constructor() {
     const seed = buildSeed();
@@ -35,6 +44,27 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
     this.inspections = [...seed.inspections];
     this.findings = [...seed.findings];
     this.ingestionRuns = [...seed.ingestionRuns];
+
+    this.spItemIdSeqByPrefix.period = Math.max(
+      this.spItemIdSeqByPrefix.period,
+      ...this.periods.map((p) => p.spItemId),
+    );
+    this.spItemIdSeqByPrefix.pw = Math.max(
+      this.spItemIdSeqByPrefix.pw,
+      ...this.projectWeeks.map((pw) => pw.spItemId),
+    );
+    this.spItemIdSeqByPrefix.ie = Math.max(
+      this.spItemIdSeqByPrefix.ie,
+      ...this.inspections.map((ie) => ie.spItemId),
+    );
+    this.spItemIdSeqByPrefix.fd = Math.max(
+      this.spItemIdSeqByPrefix.fd,
+      ...this.findings.map((f) => f.spItemId),
+    );
+    this.spItemIdSeqByPrefix.run = Math.max(
+      this.spItemIdSeqByPrefix.run,
+      ...this.ingestionRuns.map((r) => r.spItemId),
+    );
   }
 
   async listReportingPeriods(): Promise<ReadonlyArray<SafetyReportingPeriod>> {
@@ -46,9 +76,10 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   }
 
   async createReportingPeriod(
-    input: Omit<SafetyReportingPeriod, 'id'>,
+    input: Omit<SafetyReportingPeriod, 'id' | 'spItemId'>,
   ): Promise<SafetyReportingPeriod> {
-    const created: SafetyReportingPeriod = { ...input, id: `period-${++this.idSeq}` };
+    const spItemId = this.nextSpItemId('period');
+    const created: SafetyReportingPeriod = { ...input, spItemId, id: `period-${spItemId}` };
     this.periods.push(created);
     return created;
   }
@@ -132,7 +163,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
     const view = await readWorkbookFromFile(new Blob([buffer]));
 
     const uploadedRef: UploadedWorkbookRef = {
-      sourceUploadItemId: this.idSeq++,
+      sourceUploadItemId: ++this.uploadIdSeq,
       sourceUploadWebUrl: `https://mock.local/${context.fileName}`,
       checksum,
     };
@@ -141,9 +172,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
       resolveProject: async (projectSiteText, projectNumberHint) => {
         const hint = projectNumberHint ?? extractProjectNumber(projectSiteText);
         const match = this.projectWeeks.find((pw) => pw.projectNumber === hint);
-        if (!match) {
-          return null;
-        }
+        if (!match) return null;
         return {
           classification: 'project',
           projectNumber: match.projectNumber,
@@ -156,26 +185,25 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
         this.inspections.filter(
           (ie) => ie.projectNumber === projectNumber && ie.inspectionDate === inspectionDate,
         ),
-      persistCommit: async (committed) => {
-        this.inspections.push(committed.inspectionEvent);
-        this.findings.push(...committed.findings);
-        const existingIdx = this.projectWeeks.findIndex(
-          (pw) => pw.id === committed.projectWeekRecord.id,
-        );
-        if (existingIdx >= 0) this.projectWeeks[existingIdx] = committed.projectWeekRecord;
-        else this.projectWeeks.push(committed.projectWeekRecord);
-      },
-      ensureProjectWeekRecord: async (resolution, reportingPeriodId, weekStartDate) => {
+      ensureProjectWeekRecord: async (
+        resolution,
+        reportingPeriodId,
+        reportingPeriodSpItemId,
+        weekStartDate,
+      ) => {
         const existing = this.projectWeeks.find(
           (pw) =>
             pw.reportingPeriodId === reportingPeriodId &&
             pw.projectNumber === resolution.projectNumber,
         );
         if (existing) return existing;
+        const spItemId = this.nextSpItemId('pw');
         const created: SafetyProjectWeekRecord = {
-          id: `pw-${resolution.projectNumber}-${weekStartDate}`,
+          id: `pw-${spItemId}`,
+          spItemId,
           title: `${resolution.projectNumber} — ${weekStartDate}`,
           reportingPeriodId,
+          reportingPeriodSpItemId,
           projectNumber: resolution.projectNumber,
           projectNameSnapshot: resolution.projectNameSnapshot,
           projectLocationSnapshot: resolution.projectLocationSnapshot,
@@ -194,24 +222,63 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
         this.projectWeeks.push(created);
         return created;
       },
-      recordIngestionRun: async (run) => {
-        this.ingestionRuns.push(run);
+      persistCommit: async (drafts) => {
+        const ieSpItemId = this.nextSpItemId('ie');
+        const inspectionEvent: SafetyInspectionEvent = {
+          id: `ie-${ieSpItemId}`,
+          spItemId: ieSpItemId,
+          ...drafts.inspectionEventDraft,
+        };
+        this.inspections.push(inspectionEvent);
+
+        const findings: SafetyFinding[] = drafts.findingDrafts.map((draft) => {
+          const fdSpItemId = this.nextSpItemId('fd');
+          return {
+            id: `fd-${fdSpItemId}`,
+            spItemId: fdSpItemId,
+            inspectionEventId: inspectionEvent.id,
+            inspectionEventSpItemId: inspectionEvent.spItemId,
+            ...draft,
+          };
+        });
+        this.findings.push(...findings);
+
+        const existingIdx = this.projectWeeks.findIndex(
+          (pw) => pw.id === drafts.projectWeekRecordUpdate.id,
+        );
+        if (existingIdx >= 0) this.projectWeeks[existingIdx] = drafts.projectWeekRecordUpdate;
+        else this.projectWeeks.push(drafts.projectWeekRecordUpdate);
+
+        return {
+          inspectionEvent,
+          findings,
+          projectWeekRecord: drafts.projectWeekRecordUpdate,
+        } satisfies CommittedArtifacts;
       },
-      allocateId: (prefix) => `${prefix}-${++this.idSeq}`,
+      recordIngestionRun: async (draft: SafetyIngestionRunDraft) => {
+        const spItemId = this.nextSpItemId('run');
+        const run: SafetyIngestionRun = {
+          id: `run-${spItemId}`,
+          spItemId,
+          ...draft,
+        };
+        this.ingestionRuns.push(run);
+        return run;
+      },
     };
 
-    return runIngestionPipeline({
-      view,
-      context,
-      uploadedRef,
-      adapter,
-    });
+    return runIngestionPipeline({ view, context, uploadedRef, adapter });
   }
 
   async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
     const existing = this.ingestionRuns.find((r) => r.id === ingestionRunId);
     if (!existing) throw new Error(`Ingestion run not found: ${ingestionRunId}`);
-    throw new Error('Mock retryIngestion: source workbook is not retained; re-upload required.');
+    throw new Error('Mock retryIngestion: Wave 2 replay path is not yet wired.');
+  }
+
+  private nextSpItemId(prefix: 'period' | 'pw' | 'ie' | 'fd' | 'run'): number {
+    const next = ++this.spItemIdSeqByPrefix[prefix];
+    return next;
   }
 }
 

@@ -57,6 +57,8 @@ export type { DuplicateKeyInput } from './scoring/duplicateKey.js';
 // -- Lists ---------------------------------------------------------------
 export {
   HBCENTRAL_SITE_URL,
+  LegacyProjectFallbackRegistryList,
+  ProjectsReferenceList,
   SAFETY_SITE_URL,
   SafetyFindingsList,
   SafetyIngestionRunsList,
@@ -65,12 +67,21 @@ export {
   SafetyReportingPeriodsList,
   getListDescriptor,
   isZeroGuid,
+  resolveDescriptor,
 } from './lists/descriptors.js';
 export type { SafetyListName, SiteScopedListDescriptor } from './lists/descriptors.js';
 export {
   SafetyChecklistUploadsLibrary,
   SAFETY_UPLOAD_LIBRARY_SERVER_RELATIVE_PATH,
+  resolveUploadLibraryDescriptor,
 } from './lists/safetyUploadLibrary.js';
+export {
+  configureSafetyListGuids,
+  currentSafetyGuidOverlay,
+  getOverlayGuid,
+  resetSafetyListGuidOverlay,
+} from './lists/guidConfig.js';
+export type { SafetyGuidOverlay, SafetyOverlayKey } from './lists/guidConfig.js';
 export {
   FIELD_SCHEMA_BY_LIST,
   SAFETY_FINDINGS_FIELDS,
@@ -94,6 +105,10 @@ export { SharePointSafetyInspectionRepository } from './adapters/sharepoint/Shar
 export type { SharePointAdapterOptions } from './adapters/sharepoint/SharePointSafetyInspectionRepository.js';
 export type { SpHttpClient } from './adapters/sharepoint/spHttp.js';
 export { uploadToSafetyChecklistUploads } from './adapters/sharepoint/uploadToSafetyChecklistUploads.js';
+export {
+  downloadUploadedWorkbook,
+  type DownloadedWorkbook,
+} from './adapters/sharepoint/downloadUploadedWorkbook.js';
 
 // -- Ingestion -----------------------------------------------------------
 export { runIngestionPipeline } from './ingestion/runIngestionPipeline.js';

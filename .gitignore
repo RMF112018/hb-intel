@@ -41,6 +41,9 @@ yarn-error.log*
 lib/
 temp/
 sharepoint/
+# Safety Record Keeping SharePoint adapter source — not an SPFx build artifact.
+!packages/features/safety/src/adapters/sharepoint/
+!packages/features/safety/src/adapters/sharepoint/**
 solution/
 *.sppkg
 

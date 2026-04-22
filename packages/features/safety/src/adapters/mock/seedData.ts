@@ -1,11 +1,12 @@
 /**
  * Seed data for the mock Safety Inspection Repository.
  *
- * Mirrors the shape observed in the legacy `Jobsite Safety Scores.xlsx`:
- * - one reporting period,
- * - five projects,
- * - one project carries two inspections in the same week (the `92.2% + 93.3%`
- *   compound-cell pattern that motivated the design model).
+ * Wave 1 audit remediation: every seeded entity carries a real numeric
+ * `spItemId` and the numeric Lookup-parent ids required by the field schema.
+ *
+ * Mirrors the shape observed in the legacy `Jobsite Safety Scores.xlsx`,
+ * including the `92.2% + 93.3%` compound-cell pattern that produces two
+ * inspections in the same reporting week for one project.
  */
 
 import type {
@@ -16,12 +17,14 @@ import type {
   SafetyReportingPeriod,
 } from '../../domain/types.js';
 
-const PERIOD_ID = 'period-2026-04-20';
+const PERIOD_SP_ITEM_ID = 1001;
+const PERIOD_ID = `period-${PERIOD_SP_ITEM_ID}`;
 const WEEK_START = '2026-04-20';
 const WEEK_END = '2026-04-26';
 
 export const seedReportingPeriod: SafetyReportingPeriod = {
   id: PERIOD_ID,
+  spItemId: PERIOD_SP_ITEM_ID,
   title: 'Week of 2026-04-20',
   weekStartDate: WEEK_START,
   weekEndDate: WEEK_END,
@@ -92,21 +95,28 @@ export function buildSeed(): {
   const findings: SafetyFinding[] = [];
   const ingestionRuns: SafetyIngestionRun[] = [];
 
-  let inspectionCounter = 1;
-  let runCounter = 1;
-  let findingCounter = 1;
+  let pwSpItemId = 2000;
+  let ieSpItemId = 3000;
+  let fdSpItemId = 4000;
+  let runSpItemId = 5000;
 
   for (const project of SEED_PROJECTS) {
-    const projectWeekId = `pw-${project.projectNumber}-${WEEK_START}`;
+    pwSpItemId += 1;
+    const projectWeekId = `pw-${pwSpItemId}`;
+
     const inspectionEvents: SafetyInspectionEvent[] = project.inspectionScores.map(
       (score, idx) => {
-        const id = `ie-${String(inspectionCounter++).padStart(4, '0')}`;
+        ieSpItemId += 1;
+        const id = `ie-${ieSpItemId}`;
         return {
           id,
+          spItemId: ieSpItemId,
           title: `${project.projectNumber} — Inspection #${idx + 1}`,
           projectWeekRecordId: projectWeekId,
+          projectWeekRecordSpItemId: pwSpItemId,
           reportingPeriodId: PERIOD_ID,
-          sourceUploadItemId: 1000 + inspectionCounter,
+          reportingPeriodSpItemId: PERIOD_SP_ITEM_ID,
+          sourceUploadItemId: 10_000 + ieSpItemId,
           sourceUploadWebUrl: `https://hedrickbrotherscom.sharepoint.com/sites/Safety/SafetyChecklistUploads/${project.projectNumber}-${idx + 1}.xlsx`,
           checksum: `seed-checksum-${id}`,
           templateVersion: 'v1',
@@ -134,18 +144,23 @@ export function buildSeed(): {
     inspections.push(...inspectionEvents);
 
     if (project.reviewRequired && inspectionEvents[0]) {
+      fdSpItemId += 1;
       const finding: SafetyFinding = {
-        id: `fd-${String(findingCounter++).padStart(4, '0')}`,
+        id: `fd-${fdSpItemId}`,
+        spItemId: fdSpItemId,
         title: 'Fall protection not tied off',
         inspectionEventId: inspectionEvents[0].id,
+        inspectionEventSpItemId: inspectionEvents[0].spItemId,
         projectWeekRecordId: projectWeekId,
+        projectWeekRecordSpItemId: pwSpItemId,
         sectionNumber: 4,
         sectionName: '4. Fall Protection & Openings',
         checklistRowNumber: 44,
         checklistItemLabel: 'Tie-off to approved anchor points only',
         findingType: 'no-response',
         severity: 'high',
-        findingSummary: 'Failed: Tie-off to approved anchor points only — worker observed without tie-off',
+        findingSummary:
+          'Failed: Tie-off to approved anchor points only — worker observed without tie-off',
         originalNoteText: 'Worker observed without tie-off on NE corner',
         requiresCorrectiveAction: true,
         isOpen: true,
@@ -161,8 +176,10 @@ export function buildSeed(): {
 
     projectWeeks.push({
       id: projectWeekId,
+      spItemId: pwSpItemId,
       title: `${project.projectNumber} — ${WEEK_START}`,
       reportingPeriodId: PERIOD_ID,
+      reportingPeriodSpItemId: PERIOD_SP_ITEM_ID,
       projectNumber: project.projectNumber,
       projectNameSnapshot: project.projectName,
       projectLocationSnapshot: project.projectLocation,
@@ -188,8 +205,10 @@ export function buildSeed(): {
     });
 
     if (project.invalidTemplate) {
+      runSpItemId += 1;
       ingestionRuns.push({
-        id: `run-${String(runCounter++).padStart(4, '0')}`,
+        id: `run-${runSpItemId}`,
+        spItemId: runSpItemId,
         title: `${project.projectNumber} upload — invalid template`,
         sourceUploadItemId: 999,
         uploadFileName: `${project.projectNumber}-week-of-${WEEK_START}.xlsx`,
@@ -209,8 +228,10 @@ export function buildSeed(): {
     }
 
     for (const inspection of inspectionEvents) {
+      runSpItemId += 1;
       ingestionRuns.push({
-        id: `run-${String(runCounter++).padStart(4, '0')}`,
+        id: `run-${runSpItemId}`,
+        spItemId: runSpItemId,
         title: `${project.projectNumber} upload — ${inspection.inspectionDate}`,
         sourceUploadItemId: inspection.sourceUploadItemId,
         uploadFileName: `${project.projectNumber}-${inspection.inspectionDate}.xlsx`,
@@ -219,7 +240,8 @@ export function buildSeed(): {
         validationStatus: 'passed',
         parseStatus: 'passed',
         projectResolutionStatus: 'resolved',
-        terminalStatus: inspection.ingestionStatus === 'review-required' ? 'review-required' : 'committed',
+        terminalStatus:
+          inspection.ingestionStatus === 'review-required' ? 'review-required' : 'committed',
         committedEntityIdsJson: JSON.stringify({ inspectionEventId: inspection.id }),
         runStartedAt: `${inspection.inspectionDate}T13:00:00Z`,
         runCompletedAt: `${inspection.inspectionDate}T13:05:00Z`,

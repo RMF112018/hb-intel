@@ -137,6 +137,25 @@ export interface UploadContext {
   readonly uploadedAt: string;
   readonly fileName: string;
   readonly reportingPeriodId: string;
+  /** Numeric parent item Id for the reporting period — carried into Lookup payloads. */
+  readonly reportingPeriodSpItemId: number;
+}
+
+/**
+ * Draft types — identity fields are filled in by the adapter during commit.
+ * SharePoint assigns the real item Id on POST; the mock allocates monotonically.
+ */
+export type SafetyInspectionEventDraft = Omit<SafetyInspectionEvent, 'id' | 'spItemId'>;
+export type SafetyFindingDraft = Omit<
+  SafetyFinding,
+  'id' | 'spItemId' | 'inspectionEventId' | 'inspectionEventSpItemId'
+>;
+export type SafetyIngestionRunDraft = Omit<SafetyIngestionRun, 'id' | 'spItemId'>;
+
+export interface CommittedArtifacts {
+  readonly inspectionEvent: SafetyInspectionEvent;
+  readonly findings: ReadonlyArray<SafetyFinding>;
+  readonly projectWeekRecord: SafetyProjectWeekRecord;
 }
 
 export interface UploadedWorkbookRef {
@@ -147,6 +166,8 @@ export interface UploadedWorkbookRef {
 
 export interface SafetyReportingPeriod {
   readonly id: string;
+  /** Authoritative SharePoint list item Id — parent target for Lookup fields. */
+  readonly spItemId: number;
   readonly title: string;
   readonly weekStartDate: string;
   readonly weekEndDate: string;
@@ -160,8 +181,12 @@ export interface SafetyReportingPeriod {
 
 export interface SafetyProjectWeekRecord {
   readonly id: string;
+  /** Authoritative SharePoint list item Id — parent target for Lookup fields. */
+  readonly spItemId: number;
   readonly title: string;
   readonly reportingPeriodId: string;
+  /** Numeric lookup parent for SharePoint `ReportingPeriodId` lookup column. */
+  readonly reportingPeriodSpItemId: number;
   readonly projectNumber: string;
   readonly projectNameSnapshot: string;
   readonly projectLocationSnapshot: string;
@@ -180,9 +205,15 @@ export interface SafetyProjectWeekRecord {
 
 export interface SafetyInspectionEvent {
   readonly id: string;
+  /** Authoritative SharePoint list item Id — parent target for Lookup fields. */
+  readonly spItemId: number;
   readonly title: string;
   readonly projectWeekRecordId: string;
+  /** Numeric lookup parent for SharePoint `ProjectWeekRecordId` lookup column. */
+  readonly projectWeekRecordSpItemId: number;
   readonly reportingPeriodId: string;
+  /** Numeric lookup parent for SharePoint `ReportingPeriodId` lookup column. */
+  readonly reportingPeriodSpItemId: number;
   readonly sourceUploadItemId: number;
   readonly sourceUploadWebUrl: string;
   readonly checksum: string;
@@ -209,9 +240,15 @@ export interface SafetyInspectionEvent {
 
 export interface SafetyFinding {
   readonly id: string;
+  /** Authoritative SharePoint list item Id. */
+  readonly spItemId: number;
   readonly title: string;
   readonly inspectionEventId: string;
+  /** Numeric lookup parent for SharePoint `InspectionEventId` lookup column. */
+  readonly inspectionEventSpItemId: number;
   readonly projectWeekRecordId: string;
+  /** Numeric lookup parent for SharePoint `ProjectWeekRecordId` lookup column. */
+  readonly projectWeekRecordSpItemId: number;
   readonly sectionNumber: number;
   readonly sectionName: string;
   readonly checklistRowNumber: number;
@@ -226,6 +263,8 @@ export interface SafetyFinding {
 
 export interface SafetyIngestionRun {
   readonly id: string;
+  /** Authoritative SharePoint list item Id. */
+  readonly spItemId: number;
   readonly title: string;
   readonly sourceUploadItemId: number;
   readonly uploadFileName: string;

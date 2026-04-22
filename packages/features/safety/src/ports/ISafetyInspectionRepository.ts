@@ -36,7 +36,7 @@ export interface ISafetyInspectionRepository {
   listReportingPeriods(): Promise<ReadonlyArray<SafetyReportingPeriod>>;
   getReportingPeriod(id: string): Promise<SafetyReportingPeriod | null>;
   createReportingPeriod(
-    input: Omit<SafetyReportingPeriod, 'id'>,
+    input: Omit<SafetyReportingPeriod, 'id' | 'spItemId'>,
   ): Promise<SafetyReportingPeriod>;
 
   listProjectWeeks(filter: ProjectWeekFilter): Promise<ReadonlyArray<SafetyProjectWeekRecord>>;

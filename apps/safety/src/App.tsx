@@ -6,7 +6,9 @@ import { ComplexityProvider } from '@hbc/complexity';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import {
   SafetyRepositoryProvider,
+  configureSafetyListGuids,
   createSafetyInspectionRepository,
+  type SafetyGuidOverlay,
   type SpHttpClient,
 } from '@hbc/features-safety';
 import { createWebpartRouter } from './router/index.js';
@@ -26,6 +28,11 @@ interface AppProps {
 export function App({ spfxContext }: AppProps): React.ReactNode {
   const typed = spfxContext as SpfxLikeContext | undefined;
   const repository = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const overlay = (window as unknown as { __HB_SAFETY_LIST_GUIDS__?: SafetyGuidOverlay })
+        .__HB_SAFETY_LIST_GUIDS__;
+      if (overlay) configureSafetyListGuids(overlay);
+    }
     const client = adaptSpfxHttpClient(typed);
     if (client) {
       return createSafetyInspectionRepository({

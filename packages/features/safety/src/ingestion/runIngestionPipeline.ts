@@ -2,29 +2,27 @@
  * Ingestion orchestrator — the only place that decides state transitions
  * for a single workbook upload.
  *
- * States (see docs/architecture/plans/MASTER/spfx/safety-records/design-pacakge/):
- *   uploaded → validating → resolving-project → parsed → duplicate-checked
- *            → scoring → commit-pending → committed
- *
- * Terminal failure states: invalid-template, unresolved-project (→review-required),
- *   review-required (duplicate), commit-failed.
- *
- * Every terminal state writes a Safety Ingestion Run row via the adapter.
+ * Wave 1 audit remediation:
+ * - Adapter owns identity allocation (numeric `spItemId` is authoritative for
+ *   SharePoint Lookup fields; string `id` is derived for stable UI routing).
+ * - Pipeline never parses business IDs into fake numeric Lookup parents.
+ * - `UploadContext.reportingPeriodSpItemId` is threaded into Lookup payloads.
  */
 
 import {
   CommitError,
-  ProjectUnresolvedError,
   TemplateInvalidError,
+  type CommittedArtifacts,
   type DuplicateConfidence,
   type IngestionCommittedIds,
   type IngestionRunResult,
-  type IngestionTerminalStatus,
   type ParsedInspection,
   type ProjectResolutionResult,
-  type SafetyFinding,
+  type SafetyFindingDraft,
   type SafetyIngestionRun,
+  type SafetyIngestionRunDraft,
   type SafetyInspectionEvent,
+  type SafetyInspectionEventDraft,
   type SafetyProjectWeekRecord,
   type UploadContext,
   type UploadedWorkbookRef,
@@ -35,8 +33,11 @@ import type { WorkbookView } from '../parser/workbookView.js';
 import { extractFindings } from '../scoring/findingExtraction.js';
 import { computeProjectWeekRollup } from '../scoring/projectWeekRollup.js';
 import { computeInspectionScore } from '../scoring/scoringEngine.js';
-import { TEMPLATE_VERSION } from '../domain/templateContract.js';
 
+/**
+ * Adapter contract for the pipeline. The adapter is the sole owner of
+ * persistence, ID allocation, and Lookup-parent binding.
+ */
 export interface IngestionAdapter {
   resolveProject(
     projectSiteText: string,
@@ -46,18 +47,31 @@ export interface IngestionAdapter {
     projectNumber: string,
     inspectionDate: string,
   ): Promise<ReadonlyArray<SafetyInspectionEvent>>;
+  /**
+   * Ensure a project-week record exists for the (project, reporting period).
+   * Returned record carries real `spItemId` and `reportingPeriodSpItemId`.
+   */
   ensureProjectWeekRecord(
     resolution: ProjectResolutionResult,
     reportingPeriodId: string,
+    reportingPeriodSpItemId: number,
     weekStartDate: string,
   ): Promise<SafetyProjectWeekRecord>;
-  persistCommit(committed: {
-    inspectionEvent: SafetyInspectionEvent;
-    findings: ReadonlyArray<SafetyFinding>;
-    projectWeekRecord: SafetyProjectWeekRecord;
-  }): Promise<void>;
-  recordIngestionRun(run: SafetyIngestionRun): Promise<void>;
-  allocateId(prefix: 'ie' | 'fd' | 'run'): string;
+  /**
+   * Persist the inspection event + findings + updated project-week record.
+   * The adapter assigns real `spItemId`s (SharePoint: from REST; mock:
+   * monotonic), wires up Lookup relationships, and returns the finalized
+   * records.
+   */
+  persistCommit(drafts: {
+    inspectionEventDraft: SafetyInspectionEventDraft;
+    findingDrafts: ReadonlyArray<SafetyFindingDraft>;
+    projectWeekRecordUpdate: SafetyProjectWeekRecord;
+  }): Promise<CommittedArtifacts>;
+  /**
+   * Write an ingestion-run audit row. Adapter assigns `spItemId` / `id`.
+   */
+  recordIngestionRun(runDraft: SafetyIngestionRunDraft): Promise<SafetyIngestionRun>;
 }
 
 export interface IngestionPipelineInput {
@@ -74,13 +88,12 @@ export async function runIngestionPipeline(
   const { view, context, uploadedRef, adapter } = input;
   const attemptNumber = input.attemptNumber ?? 1;
   const runStartedAt = new Date().toISOString();
-  const runId = adapter.allocateId('run');
-  const committedIds: IngestionCommittedIds = { ingestionRunId: runId };
+  const committedIds: IngestionCommittedIds = {};
 
-  const baseRun = (
-    overrides: Partial<SafetyIngestionRun> & Pick<SafetyIngestionRun, 'terminalStatus'>,
-  ): SafetyIngestionRun => ({
-    id: runId,
+  const buildRunDraft = (
+    overrides: Partial<SafetyIngestionRunDraft> &
+      Pick<SafetyIngestionRunDraft, 'terminalStatus'>,
+  ): SafetyIngestionRunDraft => ({
     title: `Ingestion ${context.fileName} — attempt ${attemptNumber}`,
     sourceUploadItemId: uploadedRef.sourceUploadItemId,
     uploadFileName: context.fileName,
@@ -96,20 +109,32 @@ export async function runIngestionPipeline(
     ...overrides,
   });
 
+  const finalize = async (
+    draft: SafetyIngestionRunDraft,
+  ): Promise<SafetyIngestionRun> => {
+    const finalized = await adapter.recordIngestionRun({
+      ...draft,
+      committedEntityIdsJson: JSON.stringify(committedIds),
+    });
+    committedIds.ingestionRunId = finalized.id;
+    return finalized;
+  };
+
   // Stage 1/2: validate
   try {
     validateTemplate(view);
   } catch (err) {
     if (err instanceof TemplateInvalidError) {
-      const run = baseRun({
-        validationStatus: 'failed',
-        parseStatus: 'skipped',
-        projectResolutionStatus: 'skipped',
-        terminalStatus: 'invalid-template',
-        errorClass: 'template-invalid',
-        errorSummary: err.message,
-      });
-      await adapter.recordIngestionRun(run);
+      const run = await finalize(
+        buildRunDraft({
+          validationStatus: 'failed',
+          parseStatus: 'skipped',
+          projectResolutionStatus: 'skipped',
+          terminalStatus: 'invalid-template',
+          errorClass: 'template-invalid',
+          errorSummary: err.message,
+        }),
+      );
       return { run, state: 'invalid-template' };
     }
     throw err;
@@ -120,32 +145,33 @@ export async function runIngestionPipeline(
   try {
     parsed = parseChecklist(view);
   } catch (err) {
-    const run = baseRun({
-      validationStatus: 'passed',
-      parseStatus: 'failed',
-      projectResolutionStatus: 'skipped',
-      terminalStatus: 'invalid-template',
-      errorClass: 'parse-error',
-      errorSummary: err instanceof Error ? err.message : 'Unknown parser error',
-      templateVersionDetected: TEMPLATE_VERSION,
-    });
-    await adapter.recordIngestionRun(run);
+    const run = await finalize(
+      buildRunDraft({
+        validationStatus: 'passed',
+        parseStatus: 'failed',
+        projectResolutionStatus: 'skipped',
+        terminalStatus: 'invalid-template',
+        errorClass: 'parse-error',
+        errorSummary: err instanceof Error ? err.message : 'Unknown parser error',
+      }),
+    );
     return { run, state: 'invalid-template' };
   }
 
   // Stage 5: resolve project
   const resolution = await adapter.resolveProject(parsed.metadata.projectSiteText);
   if (!resolution) {
-    const run = baseRun({
-      validationStatus: 'passed',
-      parseStatus: 'passed',
-      projectResolutionStatus: 'unresolved',
-      terminalStatus: 'unresolved-project',
-      errorClass: 'project-unresolved',
-      errorSummary: `Could not resolve project from "${parsed.metadata.projectSiteText}".`,
-      templateVersionDetected: parsed.templateVersion,
-    });
-    await adapter.recordIngestionRun(run);
+    const run = await finalize(
+      buildRunDraft({
+        validationStatus: 'passed',
+        parseStatus: 'passed',
+        projectResolutionStatus: 'unresolved',
+        terminalStatus: 'unresolved-project',
+        errorClass: 'project-unresolved',
+        errorSummary: `Could not resolve project from "${parsed.metadata.projectSiteText}".`,
+        templateVersionDetected: parsed.templateVersion,
+      }),
+    );
     return { run, state: 'unresolved-project' };
   }
 
@@ -157,40 +183,39 @@ export async function runIngestionPipeline(
   const duplicate = classifyDuplicate(recent, parsed, uploadedRef.checksum);
 
   if (duplicate.confidence === 'high-confidence-duplicate') {
-    const run = baseRun({
-      validationStatus: 'passed',
-      parseStatus: 'passed',
-      projectResolutionStatus: 'resolved',
-      terminalStatus: 'review-required',
-      errorClass: 'duplicate-suspected',
-      errorSummary: `High-confidence duplicate of inspection event ${duplicate.matchedId}.`,
-      templateVersionDetected: parsed.templateVersion,
-    });
-    await adapter.recordIngestionRun(run);
+    const run = await finalize(
+      buildRunDraft({
+        validationStatus: 'passed',
+        parseStatus: 'passed',
+        projectResolutionStatus: 'resolved',
+        terminalStatus: 'review-required',
+        errorClass: 'duplicate-suspected',
+        errorSummary: `High-confidence duplicate of inspection event ${duplicate.matchedId}.`,
+        templateVersionDetected: parsed.templateVersion,
+      }),
+    );
     return { run, state: 'review-required' };
   }
 
-  // Stage 6: scoring
+  // Stage 6: scoring + stage 7: finding extraction
   const score = computeInspectionScore(parsed, 'template-compat-v1');
-
-  // Stage 7: finding extraction
-  const findingDraftList = extractFindings(parsed);
+  const findingDraftsFromParser = extractFindings(parsed);
 
   // Commit
   try {
     const projectWeek = await adapter.ensureProjectWeekRecord(
       resolution,
       context.reportingPeriodId,
+      context.reportingPeriodSpItemId,
       weekStartFromDate(parsed.metadata.inspectionDate),
     );
 
-    const inspectionEventId = adapter.allocateId('ie');
-    const now = new Date().toISOString();
-    const inspectionEvent: SafetyInspectionEvent = {
-      id: inspectionEventId,
-      title: `${resolution.projectNumber} — Inspection ${parsed.metadata.inspectionNumber || inspectionEventId}`,
+    const inspectionEventDraft: SafetyInspectionEventDraft = {
+      title: `${resolution.projectNumber} — Inspection ${parsed.metadata.inspectionNumber || 'new'}`,
       projectWeekRecordId: projectWeek.id,
+      projectWeekRecordSpItemId: projectWeek.spItemId,
       reportingPeriodId: context.reportingPeriodId,
+      reportingPeriodSpItemId: context.reportingPeriodSpItemId,
       sourceUploadItemId: uploadedRef.sourceUploadItemId,
       sourceUploadWebUrl: uploadedRef.sourceUploadWebUrl,
       checksum: uploadedRef.checksum,
@@ -213,36 +238,45 @@ export async function runIngestionPipeline(
       duplicateStatus: duplicate.confidence,
       requiresReview: duplicate.confidence === 'near-duplicate',
       submittedAt: context.uploadedAt,
-      committedAt: now,
+      committedAt: new Date().toISOString(),
     };
-    committedIds.inspectionEventId = inspectionEventId;
 
-    const findings: SafetyFinding[] = findingDraftList.map((draft) => ({
-      id: adapter.allocateId('fd'),
-      title: `${resolution.projectNumber} — ${draft.sectionName} — row ${draft.checklistRowNumber}`,
-      inspectionEventId,
-      projectWeekRecordId: projectWeek.id,
-      sectionNumber: draft.sectionNumber,
-      sectionName: draft.sectionName,
-      checklistRowNumber: draft.checklistRowNumber,
-      checklistItemLabel: draft.checklistItemLabel,
-      findingType: draft.findingType,
-      severity: draft.severity,
-      findingSummary: draft.findingSummary,
-      originalNoteText: draft.originalNoteText,
-      requiresCorrectiveAction: draft.requiresCorrectiveAction,
-      isOpen: true,
-    }));
-    committedIds.findingIds = findings.map((f) => f.id);
+    const findingDrafts: ReadonlyArray<SafetyFindingDraft> = findingDraftsFromParser.map(
+      (draft) => ({
+        title: `${resolution.projectNumber} — ${draft.sectionName} — row ${draft.checklistRowNumber}`,
+        projectWeekRecordId: projectWeek.id,
+        projectWeekRecordSpItemId: projectWeek.spItemId,
+        sectionNumber: draft.sectionNumber,
+        sectionName: draft.sectionName,
+        checklistRowNumber: draft.checklistRowNumber,
+        checklistItemLabel: draft.checklistItemLabel,
+        findingType: draft.findingType,
+        severity: draft.severity,
+        findingSummary: draft.findingSummary,
+        originalNoteText: draft.originalNoteText,
+        requiresCorrectiveAction: draft.requiresCorrectiveAction,
+        isOpen: true,
+      }),
+    );
 
-    const rolledInspections = [
+    // Recompute rollup from the persisted weekly set plus the in-flight event.
+    // Wave 1 retains the same-date query contract; Wave 2 replaces it with
+    // `findInspectionsForProjectWeek` for true weekly scope.
+    const rolledInspections: SafetyInspectionEvent[] = [
       ...(await adapter.findRecentInspectionsForProject(
         resolution.projectNumber,
         parsed.metadata.inspectionDate,
       )),
-      inspectionEvent,
     ];
-    const rollup = computeProjectWeekRollup(rolledInspections, findings);
+    // Synthesize a preliminary inspection event for rollup-score input only.
+    const rollupCandidateEvent: SafetyInspectionEvent = {
+      id: 'in-flight',
+      spItemId: 0,
+      ...inspectionEventDraft,
+    };
+    rolledInspections.push(rollupCandidateEvent);
+
+    const rollup = computeProjectWeekRollup(rolledInspections, []);
     const updatedProjectWeek: SafetyProjectWeekRecord = {
       ...projectWeek,
       inspectionCount: rollup.inspectionCount,
@@ -255,52 +289,50 @@ export async function runIngestionPipeline(
             ? 'in-progress'
             : projectWeek.publishStatus,
     };
-    committedIds.projectWeekRecordId = updatedProjectWeek.id;
 
-    await adapter.persistCommit({
-      inspectionEvent,
-      findings,
-      projectWeekRecord: updatedProjectWeek,
+    const committed = await adapter.persistCommit({
+      inspectionEventDraft,
+      findingDrafts,
+      projectWeekRecordUpdate: updatedProjectWeek,
     });
 
-    const run = baseRun({
-      validationStatus: 'passed',
-      parseStatus: 'passed',
-      projectResolutionStatus: 'resolved',
-      terminalStatus: 'committed',
-      committedEntityIdsJson: JSON.stringify(committedIds),
-      templateVersionDetected: parsed.templateVersion,
-      runCompletedAt: now,
-    });
-    await adapter.recordIngestionRun(run);
+    committedIds.inspectionEventId = committed.inspectionEvent.id;
+    committedIds.findingIds = committed.findings.map((f) => f.id);
+    committedIds.projectWeekRecordId = committed.projectWeekRecord.id;
+
+    const run = await finalize(
+      buildRunDraft({
+        validationStatus: 'passed',
+        parseStatus: 'passed',
+        projectResolutionStatus: 'resolved',
+        terminalStatus: 'committed',
+        templateVersionDetected: parsed.templateVersion,
+        runCompletedAt: new Date().toISOString(),
+      }),
+    );
 
     return {
       run,
-      committed: {
-        inspectionEvent,
-        findings,
-        projectWeekRecord: updatedProjectWeek,
-      },
+      committed,
       state: 'committed',
     };
   } catch (err) {
-    const partial =
-      err instanceof CommitError
-        ? err.partialIds
-        : (err instanceof ProjectUnresolvedError
-            ? { ingestionRunId: runId }
-            : committedIds);
-    const run = baseRun({
-      validationStatus: 'passed',
-      parseStatus: 'passed',
-      projectResolutionStatus: 'resolved',
-      terminalStatus: 'commit-failed',
-      errorClass: 'commit-error',
-      errorSummary: err instanceof Error ? err.message : 'Unknown commit error',
-      committedEntityIdsJson: JSON.stringify(partial),
-      templateVersionDetected: parsed.templateVersion,
-    });
-    await adapter.recordIngestionRun(run);
+    const partialIds =
+      err instanceof CommitError ? { ...committedIds, ...err.partialIds } : committedIds;
+    committedIds.inspectionEventId = partialIds.inspectionEventId;
+    committedIds.findingIds = partialIds.findingIds;
+    committedIds.projectWeekRecordId = partialIds.projectWeekRecordId;
+    const run = await finalize(
+      buildRunDraft({
+        validationStatus: 'passed',
+        parseStatus: 'passed',
+        projectResolutionStatus: 'resolved',
+        terminalStatus: 'commit-failed',
+        errorClass: 'commit-error',
+        errorSummary: err instanceof Error ? err.message : 'Unknown commit error',
+        templateVersionDetected: parsed.templateVersion,
+      }),
+    );
     return { run, state: 'commit-failed' };
   }
 }
@@ -338,12 +370,4 @@ function weekStartFromDate(dateIso: string): string {
 
 export function __testOnly_weekStartFromDate(dateIso: string): string {
   return weekStartFromDate(dateIso);
-}
-
-export function __testOnly_classifyDuplicate(
-  recent: ReadonlyArray<SafetyInspectionEvent>,
-  parsed: ParsedInspection,
-  checksum: string,
-): { confidence: IngestionTerminalStatus | DuplicateConfidence; matchedId?: string } {
-  return classifyDuplicate(recent, parsed, checksum);
 }

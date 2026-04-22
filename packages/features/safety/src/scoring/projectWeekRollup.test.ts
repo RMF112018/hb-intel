@@ -5,9 +5,12 @@ import type { SafetyInspectionEvent, SafetyFinding } from '../domain/types.js';
 function makeInspection(id: string, score: number, overrides: Partial<SafetyInspectionEvent> = {}): SafetyInspectionEvent {
   return {
     id,
+    spItemId: Number(id.split('-').pop() ?? '0') || 9000,
     title: id,
     projectWeekRecordId: 'pw-test',
+    projectWeekRecordSpItemId: 1,
     reportingPeriodId: 'period-test',
+    reportingPeriodSpItemId: 1,
     sourceUploadItemId: 1,
     sourceUploadWebUrl: '',
     checksum: '',
@@ -73,9 +76,12 @@ describe('computeProjectWeekRollup', () => {
 function mkFinding(id: string, severity: 'info' | 'medium' | 'high'): SafetyFinding {
   return {
     id,
+    spItemId: Number(id.split('-').pop() ?? '0') || 9000,
     title: id,
     inspectionEventId: 'ie-1',
+    inspectionEventSpItemId: 1,
     projectWeekRecordId: 'pw-test',
+    projectWeekRecordSpItemId: 1,
     sectionNumber: 4,
     sectionName: '4. Fall Protection & Openings',
     checklistRowNumber: 44,
