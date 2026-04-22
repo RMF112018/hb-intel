@@ -1,3 +1,8 @@
+export { SafetyMasthead } from './SafetyMasthead.js';
+export type {
+  SafetyMastheadMetaItem,
+  SafetyMastheadProps,
+} from './SafetyMasthead.js';
 export { SafetySectionHeader } from './SafetySectionHeader.js';
 export type { SafetySectionHeaderProps } from './SafetySectionHeader.js';
 export { SafetyStatStrip } from './SafetyStatStrip.js';

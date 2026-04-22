@@ -1,17 +1,21 @@
 /* HB Intel Safety — webpart-scoped styles.
  *
- * Phase-3 audit (G-07, G-12): structural CSS with authored breakpoint contract.
- * All class names are prefixed with `safety-` to avoid global collisions.
- * Tokens mirror @hbc/ui-kit HBC_SPACE_* / HBC_RADIUS_* values so the safety
- * surface tracks ui-kit rhythm without importing ui-kit internals here.
+ * Phase-3 closure (Task A — token discipline): this stylesheet consumes the
+ * governed CSS custom properties injected by FluentProvider + HbcThemeProvider
+ * via ShellLayout. No Safety-owned hex values remain for surface, stroke, or
+ * foreground. Spacing keeps px values that mirror HBC_SPACE_* rhythm.
+ *
+ * The single exception is the :root font-family / font-size / line-height /
+ * color declaration below. The SPFx host places this webpart inside the
+ * SharePoint page canvas before FluentProvider mounts; keeping the base text
+ * posture literal prevents a flash of unstyled text. Typography intent after
+ * first paint is delegated to HbcTypography / Fluent tokens.
  */
 
 :root {
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #242424;
-  background-color: #ffffff;
 }
 #root { min-height: 100vh; }
 [data-hbc-shell='shell-layout'] { min-height: 100vh; display: flex; flex-direction: column; }
@@ -23,6 +27,19 @@
 .safety-page {
   display: grid;
   gap: 24px;
+}
+
+.safety-page--detail {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1200px) {
+  .safety-page--detail {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+  .safety-page--detail > .safety-page__main { grid-column: 1; }
+  .safety-page--detail > .safety-page__aside { grid-column: 2; display: grid; gap: 16px; align-content: start; }
 }
 
 .safety-section {
@@ -44,6 +61,44 @@
   flex-wrap: wrap;
 }
 
+/* --- Masthead (product-family voice) ---------------------------------- */
+
+.safety-masthead {
+  display: grid;
+  gap: 6px;
+  padding: 20px 24px;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 12px;
+  background-color: var(--colorNeutralBackground2);
+}
+
+.safety-masthead__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--colorBrandForeground1);
+}
+
+.safety-masthead__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.safety-masthead__meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--colorNeutralForeground2);
+}
+
+.safety-masthead__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* --- Stat strip (4-up → 2-up → 1-up) ---------------------------------- */
 
 .safety-stat-strip {
@@ -60,7 +115,7 @@
   .safety-stat-strip { grid-template-columns: 1fr; }
 }
 
-/* --- Filter bar (flex wrap with min-width fields) --------------------- */
+/* --- Filter bar ------------------------------------------------------- */
 
 .safety-filter-bar {
   display: flex;
@@ -87,24 +142,16 @@
   .safety-upload { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
 }
 
-.safety-upload__primary {
-  display: grid;
-  gap: 16px;
-}
-
-.safety-upload__aside {
-  display: grid;
-  gap: 16px;
-  align-content: start;
-}
+.safety-upload__primary { display: grid; gap: 16px; }
+.safety-upload__aside { display: grid; gap: 16px; align-content: start; }
 
 .safety-upload__drop-zone {
   display: grid;
   gap: 8px;
   padding: 20px;
-  border: 1px dashed #c8c6c4;
+  border: 1px dashed var(--colorNeutralStroke1);
   border-radius: 8px;
-  background-color: #fafafa;
+  background-color: var(--colorNeutralBackground2);
 }
 
 .safety-upload__drop-zone-row {
@@ -117,6 +164,7 @@
 .safety-upload__next-step {
   display: grid;
   gap: 8px;
+  padding-left: 1.25rem;
 }
 
 /* --- Findings list (severity-aware) ---------------------------------- */
@@ -135,9 +183,9 @@
   gap: 12px;
   align-items: start;
   padding: 12px 14px;
-  border: 1px solid #edebe9;
+  border: 1px solid var(--colorNeutralStroke2);
   border-radius: 8px;
-  background-color: #ffffff;
+  background-color: var(--colorNeutralBackground1);
 }
 
 .safety-findings__row-body {
@@ -149,10 +197,10 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  color: #605e5c;
+  color: var(--colorNeutralForeground2);
 }
 
-/* --- Score strip (section summary as cards) -------------------------- */
+/* --- Score strip ----------------------------------------------------- */
 
 .safety-score-strip {
   display: grid;
@@ -164,9 +212,9 @@
   display: grid;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid #edebe9;
+  border: 1px solid var(--colorNeutralStroke2);
   border-radius: 8px;
-  background-color: #ffffff;
+  background-color: var(--colorNeutralBackground1);
 }
 
 .safety-score-strip__item-row {
@@ -179,7 +227,7 @@
 .safety-score-strip__counts {
   display: flex;
   gap: 8px;
-  color: #605e5c;
+  color: var(--colorNeutralForeground2);
   font-size: 12px;
 }
 
@@ -192,14 +240,25 @@
   align-items: center;
 }
 
-/* --- Link affordance inside tables / detail ------------------------- */
+/* --- Link affordance (focus + touch safe) --------------------------- */
 
 .safety-link {
-  color: #0078d4;
+  color: var(--colorBrandForeground1);
   text-decoration: none;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 4px;
+  outline-offset: 2px;
 }
 .safety-link:hover { text-decoration: underline; }
+.safety-link:focus-visible {
+  outline: 2px solid var(--colorStrokeFocus2, var(--colorBrandForeground1));
+  text-decoration: underline;
+}
 
 /* --- Inspection detail header --------------------------------------- */
 
@@ -212,5 +271,25 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  color: #605e5c;
+  color: var(--colorNeutralForeground2);
+  align-items: center;
+}
+
+/* --- Partial-failure banner spacing --------------------------------- */
+
+.safety-partial-banner {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* --- Reduced-motion discipline -------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .safety-link,
+  .safety-findings__row,
+  .safety-score-strip__item,
+  .safety-masthead {
+    transition: none !important;
+    animation: none !important;
+  }
 }

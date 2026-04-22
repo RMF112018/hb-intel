@@ -9,14 +9,14 @@ import {
   WorkspacePageShell,
 } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
-
-const OFFICE_ONLY: Array<'office'> = ['office'];
 import {
   useReportingPeriods,
   useSafetyIngestion,
   type IngestionRunResult,
 } from '@hbc/features-safety';
-import { SafetySectionHeader } from '../components/index.js';
+import { SafetyMasthead, SafetySectionHeader } from '../components/index.js';
+
+const OFFICE_ONLY: Array<'office'> = ['office'];
 
 function currentUserUpn(): string {
   if (typeof window === 'undefined') return 'coordinator@hedrickbrothers.com';
@@ -24,7 +24,8 @@ function currentUserUpn(): string {
 }
 
 export function UploadPage(): ReactNode {
-  const { data: periods = [] } = useReportingPeriods();
+  const periodsQuery = useReportingPeriods();
+  const periods = periodsQuery.data ?? [];
   const ingestion = useSafetyIngestion();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -59,103 +60,129 @@ export function UploadPage(): ReactNode {
       title="Upload Safety Checklist"
       supportedModes={OFFICE_ONLY}
     >
-      <div className="safety-page safety-upload">
-        <section className="safety-upload__primary">
-          <HbcCard
-            weight="primary"
-            header={
-              <SafetySectionHeader
-                title="Submit a completed checklist"
-                description="Upload a v1 Safety Checklist workbook. The system validates the template, resolves the project against HBCentral, parses responses, and writes authoritative inspection records."
-              />
-            }
-          >
-            <div className="safety-section">
-              <div className="safety-filter-bar">
-                <div className="safety-filter-bar__field">
-                  <HbcSelect
-                    label="Reporting period"
-                    value={activePeriod?.id ?? ''}
-                    onChange={(value) => setReportingPeriodId(value)}
-                    options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
+      <div className="safety-page">
+        <SafetyMasthead
+          eyebrow="Safety · Upload"
+          title="Submit a completed checklist"
+          description="Upload a v1 Safety Checklist workbook. The system validates the template, resolves the project against HBCentral, parses responses, and writes authoritative inspection records."
+        />
+
+        <div className="safety-upload">
+          <section className="safety-upload__primary">
+            <HbcCard weight="primary">
+              <div className="safety-section">
+                <SafetySectionHeader title="Workbook intake" />
+
+                {periodsQuery.isError && (
+                  <HbcBanner variant="error">
+                    Could not load reporting periods. Submission is disabled until the period list
+                    is available.
+                  </HbcBanner>
+                )}
+
+                <div className="safety-filter-bar">
+                  <div className="safety-filter-bar__field">
+                    <HbcSelect
+                      label="Reporting period"
+                      value={activePeriod?.id ?? ''}
+                      onChange={(value) => setReportingPeriodId(value)}
+                      options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
+                      disabled={periodsQuery.isPending || periodsQuery.isError}
+                    />
+                  </div>
+                  {periodsQuery.isPending && (
+                    <HbcTypography intent="bodySmall">Loading reporting periods…</HbcTypography>
+                  )}
+                </div>
+
+                <div className="safety-upload__drop-zone">
+                  <HbcTypography intent="label">Checklist workbook (.xlsx)</HbcTypography>
+                  {/* eslint-disable @hb-intel/hbc/no-raw-form-elements, @hb-intel/hbc/no-inline-styles -- Release 1 hidden file picker; no HbcFileInput primitive exists yet and the hidden-input pattern requires `display: none` to stay tab-inert. */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    style={{ display: 'none' }}
+                    aria-label="Choose safety checklist workbook"
                   />
+                  {/* eslint-enable @hb-intel/hbc/no-raw-form-elements, @hb-intel/hbc/no-inline-styles */}
+                  <div className="safety-upload__drop-zone-row">
+                    <HbcButton
+                      variant="secondary"
+                      onClick={handleFileSelect}
+                      aria-label="Choose a safety checklist workbook to upload"
+                    >
+                      Choose file
+                    </HbcButton>
+                    <HbcTypography intent="bodySmall">
+                      {file ? file.name : 'No file selected'}
+                    </HbcTypography>
+                  </div>
                 </div>
-              </div>
 
-              <div className="safety-upload__drop-zone">
-                <HbcTypography intent="label">Checklist workbook (.xlsx)</HbcTypography>
-                {/* eslint-disable-next-line @hb-intel/hbc/no-raw-form-elements -- Release 1 file picker; no HbcFileInput exists yet. */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  style={{ display: 'none' }}
-                />
-                <div className="safety-upload__drop-zone-row">
-                  <HbcButton variant="secondary" onClick={handleFileSelect}>
-                    Choose file
+                <div>
+                  <HbcButton
+                    variant="primary"
+                    onClick={handleSubmit}
+                    disabled={
+                      !file ||
+                      !activePeriod ||
+                      ingestion.isPending ||
+                      periodsQuery.isPending ||
+                      periodsQuery.isError
+                    }
+                  >
+                    {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
                   </HbcButton>
-                  <HbcTypography intent="bodySmall">
-                    {file ? file.name : 'No file selected'}
-                  </HbcTypography>
                 </div>
+
+                {ingestion.data && <IngestionResultBanner result={ingestion.data} />}
+                {ingestion.error && (
+                  <HbcBanner variant="error">Upload failed: {ingestion.error.message}</HbcBanner>
+                )}
               </div>
+            </HbcCard>
+          </section>
 
-              <div>
-                <HbcButton
-                  variant="primary"
-                  onClick={handleSubmit}
-                  disabled={!file || !activePeriod || ingestion.isPending}
-                >
-                  {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
-                </HbcButton>
-              </div>
-
-              {ingestion.data && <IngestionResultBanner result={ingestion.data} />}
-              {ingestion.error && (
-                <HbcBanner variant="error">Upload failed: {ingestion.error.message}</HbcBanner>
-              )}
-            </div>
-          </HbcCard>
-        </section>
-
-        <aside className="safety-upload__aside">
-          <HbcCard
-            header={<SafetySectionHeader title="What happens on submit" />}
-            weight="supporting"
-          >
-            <ol className="safety-upload__next-step">
-              <li>
-                <HbcTypography intent="body">Template + version are validated.</HbcTypography>
-              </li>
-              <li>
-                <HbcTypography intent="body">
-                  The project is resolved against HBCentral.
-                </HbcTypography>
-              </li>
-              <li>
-                <HbcTypography intent="body">
-                  Responses are parsed, scored, and written as an authoritative inspection.
-                </HbcTypography>
-              </li>
-              <li>
-                <HbcTypography intent="body">
-                  The source workbook is retained in Safety Checklist Uploads.
-                </HbcTypography>
-              </li>
-            </ol>
-          </HbcCard>
-          <HbcCard
-            header={<SafetySectionHeader title="If something needs attention" />}
-            weight="supporting"
-          >
-            <HbcTypography intent="body">
-              Uploads that can&apos;t commit (review required, parse errors, template mismatches)
-              appear in the <strong>Review queue</strong> with one-click retry and supersede options.
-            </HbcTypography>
-          </HbcCard>
-        </aside>
+          <aside className="safety-upload__aside">
+            <HbcCard
+              header={<SafetySectionHeader title="What happens on submit" />}
+              weight="supporting"
+            >
+              <ol className="safety-upload__next-step">
+                <li>
+                  <HbcTypography intent="body">Template + version are validated.</HbcTypography>
+                </li>
+                <li>
+                  <HbcTypography intent="body">
+                    The project is resolved against HBCentral.
+                  </HbcTypography>
+                </li>
+                <li>
+                  <HbcTypography intent="body">
+                    Responses are parsed, scored, and written as an authoritative inspection.
+                  </HbcTypography>
+                </li>
+                <li>
+                  <HbcTypography intent="body">
+                    The source workbook is retained in Safety Checklist Uploads.
+                  </HbcTypography>
+                </li>
+              </ol>
+            </HbcCard>
+            <HbcCard
+              header={<SafetySectionHeader title="If something needs attention" />}
+              weight="supporting"
+            >
+              <HbcTypography intent="body">
+                Uploads that can&apos;t commit (review required, parse errors, template mismatches)
+                appear in the <strong>Review queue</strong> with one-click retry and a governed
+                supersede flow for duplicate-suspected runs.
+              </HbcTypography>
+            </HbcCard>
+          </aside>
+        </div>
       </div>
     </WorkspacePageShell>
   );

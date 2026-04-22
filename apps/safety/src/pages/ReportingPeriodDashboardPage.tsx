@@ -12,6 +12,7 @@ import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import type { KpiCardData } from '@hbc/models';
 import { useProjectWeeks, useReportingPeriods } from '@hbc/features-safety';
 import type { SafetyProjectWeekRecord } from '@hbc/features-safety';
+import { SafetyMasthead } from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -59,8 +60,7 @@ export function ReportingPeriodDashboardPage(): ReactNode {
   const projectWeeksQuery = useProjectWeeks({ reportingPeriodId: activePeriod?.id });
   const projectWeeks = projectWeeksQuery.data ?? [];
 
-  // G-11: `/incidents` redirects here with `?from=incidents`. Show a one-time
-  // banner explaining the redirect. Dismissible; clears on next navigation.
+  // G-11: `/incidents` redirects here with `?from=incidents`. One-time banner.
   const location = useLocation();
   const search = location.search as Record<string, unknown> | string;
   const fromIncidents =
@@ -70,6 +70,9 @@ export function ReportingPeriodDashboardPage(): ReactNode {
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const showRedirectBanner = Boolean(fromIncidents) && !bannerDismissed;
 
+  // Page-level state: both parent (periods) and child (project-weeks) queries
+  // participate. Periods error is fatal (without periods we cannot pick a
+  // scope); project-weeks error is fatal for the dashboard body specifically.
   const isLoading = periodsQuery.isPending || projectWeeksQuery.isPending;
   const isError = periodsQuery.isError || projectWeeksQuery.isError;
   const isTrulyEmpty = !isLoading && !isError && projectWeeks.length === 0;
@@ -182,6 +185,20 @@ export function ReportingPeriodDashboardPage(): ReactNode {
             reporting-period dashboard.
           </HbcBanner>
         )}
+
+        <SafetyMasthead
+          eyebrow="Safety · Dashboard"
+          title={activePeriod ? activePeriod.periodLabel : 'Reporting period dashboard'}
+          description="Project-week rollups for the selected reporting period. Drill into any row for inspection detail."
+          meta={
+            activePeriod
+              ? [
+                  { key: 'week', label: `Week of ${activePeriod.weekStartDate}` },
+                  { key: 'status', label: `Period status: ${activePeriod.status}` },
+                ]
+              : undefined
+          }
+        />
 
         <section className="safety-section">
           <div className="safety-filter-bar">

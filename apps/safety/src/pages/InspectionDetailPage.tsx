@@ -1,11 +1,17 @@
 import { useMemo, type ReactNode } from 'react';
 import { useParams } from '@tanstack/react-router';
-import { HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import {
+  HbcBanner,
+  HbcCard,
+  HbcTypography,
+  WorkspacePageShell,
+} from '@hbc/ui-kit';
 import type { KpiCardData } from '@hbc/models';
 import { useFindings, useInspection } from '@hbc/features-safety';
 import type { ParsedInspection } from '@hbc/features-safety';
 import {
   SafetyFindingsList,
+  SafetyMasthead,
   SafetyScoreStrip,
   SafetySectionHeader,
   SafetyStatStrip,
@@ -35,12 +41,19 @@ export function InspectionDetailPage(): ReactNode {
     }
   }, [inspection]);
 
+  // Page-level state: inspection record is fatal. Findings list failure is a
+  // partial failure — the inspection body still renders and the user can
+  // still read the score summary; the findings card explicitly reports its
+  // degraded state and offers retry (Task C).
   const isNotFound =
     !inspectionQuery.isPending && !inspectionQuery.isError && inspection === null;
   const isError = inspectionQuery.isError || isNotFound;
   const errorMessage = isNotFound
     ? 'Inspection not found.'
     : 'Failed to load inspection.';
+
+  const findingsPartialFailure = !isError && findingsQuery.isError;
+  const findingsLoading = !isError && findingsQuery.isPending;
 
   const kpiCards = useMemo<KpiCardData[]>(() => {
     if (!inspection) return [];
@@ -94,51 +107,100 @@ export function InspectionDetailPage(): ReactNode {
       onRetry={() => inspectionQuery.refetch()}
     >
       {inspection && (
-        <div className="safety-page">
-          <header className="safety-detail-header">
-            <HbcTypography intent="heading3">
-              {inspection.projectNumber} — {inspection.projectNameSnapshot}
-            </HbcTypography>
-            <div className="safety-detail-header__meta">
-              <HbcTypography intent="bodySmall">
-                Inspected {inspection.inspectionDate}
-              </HbcTypography>
-              <HbcTypography intent="bodySmall">
-                {inspection.inspectorUpn ?? 'unknown inspector'}
-              </HbcTypography>
-              <a
-                className="safety-link"
-                href={inspection.sourceUploadWebUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Source workbook
-              </a>
-            </div>
-          </header>
-
-          <SafetyStatStrip cards={kpiCards} />
-
-          <HbcCard
-            header={
-              <SafetySectionHeader
-                title="Findings"
-                description={`${findings.length} extracted`}
+        <div className="safety-page safety-page--detail">
+          <div className="safety-page__main">
+            <div className="safety-page">
+              <SafetyMasthead
+                eyebrow="Safety · Inspection"
+                title={`${inspection.projectNumber} — ${inspection.projectNameSnapshot}`}
+                description={`Inspected ${inspection.inspectionDate} by ${inspection.inspectorUpn ?? 'unknown inspector'}.`}
+                meta={[
+                  { key: 'number', label: `Inspection # ${inspection.inspectionNumber}` },
+                  {
+                    key: 'status',
+                    label: `Status: ${inspection.ingestionStatus}`,
+                  },
+                  {
+                    key: 'source',
+                    label: (
+                      <a
+                        className="safety-link"
+                        href={inspection.sourceUploadWebUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Source workbook
+                      </a>
+                    ),
+                  },
+                ]}
               />
-            }
-            weight="supporting"
-          >
-            <SafetyFindingsList findings={findings} />
-          </HbcCard>
 
-          {sectionItems.length > 0 && (
+              <SafetyStatStrip cards={kpiCards} />
+
+              <HbcCard
+                header={
+                  <SafetySectionHeader
+                    title="Findings"
+                    description={
+                      findingsPartialFailure
+                        ? 'Load failed'
+                        : findingsLoading
+                          ? 'Loading…'
+                          : `${findings.length} extracted`
+                    }
+                  />
+                }
+                weight="primary"
+              >
+                {findingsPartialFailure ? (
+                  <HbcBanner variant="warning">
+                    Findings could not be loaded. The inspection summary above is authoritative;
+                    only the per-finding breakdown is missing.{' '}
+                    <button
+                      type="button"
+                      className="safety-link"
+                      onClick={() => void findingsQuery.refetch()}
+                    >
+                      Retry findings
+                    </button>
+                  </HbcBanner>
+                ) : findingsLoading ? (
+                  <HbcTypography intent="bodySmall">Loading findings…</HbcTypography>
+                ) : (
+                  <SafetyFindingsList findings={findings} />
+                )}
+              </HbcCard>
+            </div>
+          </div>
+
+          <aside className="safety-page__aside">
+            {sectionItems.length > 0 && (
+              <HbcCard
+                header={<SafetySectionHeader title="Section summary" />}
+                weight="supporting"
+              >
+                <SafetyScoreStrip items={sectionItems} />
+              </HbcCard>
+            )}
             <HbcCard
-              header={<SafetySectionHeader title="Section summary" />}
+              header={<SafetySectionHeader title="Provenance" />}
               weight="supporting"
             >
-              <SafetyScoreStrip items={sectionItems} />
+              <HbcTypography intent="bodySmall">
+                Template {inspection.templateVersion} · Parser {inspection.parserVersion}
+              </HbcTypography>
+              <HbcTypography intent="bodySmall">
+                Submitted {inspection.submittedAt}
+                {inspection.committedAt ? ` · Committed ${inspection.committedAt}` : ''}
+              </HbcTypography>
+              {inspection.supersededByInspectionEventId && (
+                <HbcTypography intent="bodySmall">
+                  Superseded by {inspection.supersededByInspectionEventId}
+                </HbcTypography>
+              )}
             </HbcCard>
-          )}
+          </aside>
         </div>
       )}
     </WorkspacePageShell>

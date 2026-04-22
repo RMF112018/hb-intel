@@ -1,5 +1,5 @@
 // Safety webpart router + Wave-1 nav tests.
-// See plan §6 (phase-02 audit remediation).
+// See plan §6 (phase-02 audit remediation) + phase-03 closure §F.
 import { describe, it, expect } from 'vitest';
 import { createWebpartRouter } from '../router/index.js';
 import { matchActiveTabId, SAFETY_NAV_TABS } from '../router/root-route.js';
@@ -33,6 +33,16 @@ describe('Wave 1 — matchActiveTabId (plan §6 #1)', () => {
   it('falls back to upload for unknown paths', () => {
     expect(matchActiveTabId('/nope')).toBe('upload');
   });
+
+  // Phase-3 closure §F: exhaustive drill-in coverage
+  it.each([
+    ['/projects/X/weeks/Y', 'periods'],
+    ['/inspections/IE-abc/edit', 'inspections'],
+    ['/review?q=1', 'review'],
+    ['/upload?ref=home', 'upload'],
+  ])('handles query/drill-in paths %s → %s', (pathname, expected) => {
+    expect(matchActiveTabId(pathname.split('?')[0] ?? pathname)).toBe(expected);
+  });
 });
 
 describe('Wave 1 — Incidents removed from nav (plan §6 #2, G-11)', () => {
@@ -60,5 +70,17 @@ describe('Wave 1 — /incidents redirect (plan §6 #3, G-11)', () => {
     expect(router.state.location.pathname).toBe('/periods');
     const search = router.state.location.search as Record<string, unknown>;
     expect(search?.from).toBe('incidents');
+  });
+
+  // Phase-3 closure §F: confirm the redirect preserves the param across
+  // subsequent in-tab navigations (the dashboard banner relies on this).
+  it('redirect search state survives immediate re-read', async () => {
+    const router = createWebpartRouter();
+    await router.navigate({ to: '/incidents' as never });
+    const first = router.state.location.search as Record<string, unknown>;
+    expect(first?.from).toBe('incidents');
+    // Second read within the same router state — must still expose the param.
+    const second = router.state.location.search as Record<string, unknown>;
+    expect(second?.from).toBe('incidents');
   });
 });

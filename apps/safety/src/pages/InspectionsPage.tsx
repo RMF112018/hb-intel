@@ -11,6 +11,7 @@ import {
 import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import { useInspections, useReportingPeriods } from '@hbc/features-safety';
 import type { SafetyInspectionEvent } from '@hbc/features-safety';
+import { SafetyMasthead } from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -132,6 +133,11 @@ export function InspectionsPage(): ReactNode {
       }}
     >
       <div className="safety-page">
+        <SafetyMasthead
+          eyebrow="Safety · Inspections"
+          title="Committed inspections"
+          description="Authoritative per-inspection records for the selected reporting period. Filter by project number; open any row for findings, section scores, and the source workbook."
+        />
         <section className="safety-section">
           <div className="safety-filter-bar">
             <div className="safety-filter-bar__field">

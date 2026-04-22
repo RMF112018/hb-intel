@@ -8,7 +8,11 @@ import {
 import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import { useReplayIngestion, useReviewQueue } from '@hbc/features-safety';
 import type { ReviewQueueEntry } from '@hbc/features-safety';
-import { SafetyReviewActions, SafetySectionHeader } from '../components/index.js';
+import {
+  SafetyMasthead,
+  SafetyReviewActions,
+  SafetySectionHeader,
+} from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -124,11 +128,14 @@ export function ReviewQueuePage(): ReactNode {
       }}
     >
       <div className="safety-page">
+        <SafetyMasthead
+          eyebrow="Safety · Review"
+          title="Review queue"
+          description="Uploads that ended in review-required, invalid-template, parse-error, reporting-period-mismatch, unresolved-project, or commit-failed. Retry replays against the retained source workbook; supersede is governed and confirmed."
+          meta={[{ key: 'count', label: `${entries.length} awaiting action` }]}
+        />
         <section className="safety-section">
-          <SafetySectionHeader
-            title="Uploads awaiting action"
-            description="Uploads that ended in review-required, invalid-template, parse-error, reporting-period-mismatch, unresolved-project, or commit-failed. Retry replays against the retained source workbook in Safety Checklist Uploads."
-          />
+          <SafetySectionHeader title="Uploads awaiting action" />
           <HbcDataTable<ReviewQueueEntry>
             data={entries as ReviewQueueEntry[]}
             columns={columns}

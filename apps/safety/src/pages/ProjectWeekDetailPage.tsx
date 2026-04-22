@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import {
+  HbcBanner,
   HbcCard,
   HbcDataTable,
   HbcStatusBadge,
@@ -11,7 +12,7 @@ import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import type { KpiCardData } from '@hbc/models';
 import { useInspections, useProjectWeek, useReportingPeriods } from '@hbc/features-safety';
 import type { SafetyInspectionEvent } from '@hbc/features-safety';
-import { SafetySectionHeader, SafetyStatStrip } from '../components/index.js';
+import { SafetyMasthead, SafetySectionHeader, SafetyStatStrip } from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -57,6 +58,9 @@ export function ProjectWeekDetailPage(): ReactNode {
   });
   const inspections = inspectionsQuery.data ?? [];
 
+  // Page-level state: project-week record is fatal. Inspections list failure
+  // is a partial failure — the rollup stats still render; only the events
+  // table degrades (Task C honesty rule).
   const isLoading = periodsQuery.isPending || projectWeekQuery.isPending;
   const isNotFound =
     !isLoading && !projectWeekQuery.isError && projectWeekQuery.data === null;
@@ -64,6 +68,9 @@ export function ProjectWeekDetailPage(): ReactNode {
   const errorMessage = isNotFound
     ? 'Project-week record not found.'
     : 'Failed to load project-week record.';
+
+  const inspectionsPartialFailure =
+    !isError && inspectionsQuery.isError;
 
   const kpiCards = useMemo<KpiCardData[]>(() => {
     if (!projectWeek) return [];
@@ -143,19 +150,21 @@ export function ProjectWeekDetailPage(): ReactNode {
     >
       {projectWeek && (
         <div className="safety-page">
-          <header className="safety-detail-header">
-            <HbcTypography intent="heading3">
-              {projectWeek.projectNameSnapshot ?? '…'}
-            </HbcTypography>
-            <div className="safety-detail-header__meta">
-              <HbcTypography intent="bodySmall">
-                {projectWeek.projectLocationSnapshot}
-              </HbcTypography>
-              <HbcTypography intent="bodySmall">
-                Week of {weekStartDate}
-              </HbcTypography>
-            </div>
-          </header>
+          <SafetyMasthead
+            eyebrow={`Safety · Project Week`}
+            title={projectWeek.projectNameSnapshot ?? projectNumber}
+            description={`Project-week rollup for ${projectNumber}.`}
+            meta={[
+              { key: 'location', label: projectWeek.projectLocationSnapshot },
+              { key: 'week', label: `Week of ${weekStartDate}` },
+              {
+                key: 'stage',
+                label: projectWeek.projectStageSnapshot
+                  ? `Stage: ${projectWeek.projectStageSnapshot}`
+                  : 'Stage: —',
+              },
+            ]}
+          />
 
           <SafetyStatStrip cards={kpiCards} />
 
@@ -173,10 +182,24 @@ export function ProjectWeekDetailPage(): ReactNode {
               title="Inspection events"
               description={`${inspections.length} recorded`}
             />
+            {inspectionsPartialFailure && (
+              <HbcBanner variant="warning" className="safety-partial-banner">
+                Inspection events could not be loaded. The rollup stats above are from the cached
+                project-week record and may be stale.{' '}
+                <button
+                  type="button"
+                  className="safety-link"
+                  onClick={() => void inspectionsQuery.refetch()}
+                >
+                  Retry inspections
+                </button>
+              </HbcBanner>
+            )}
             <HbcDataTable<SafetyInspectionEvent>
               data={inspections as SafetyInspectionEvent[]}
               columns={columns}
               toolId="safety-project-week-inspections"
+              isLoading={inspectionsQuery.isPending}
               emptyStateConfig={{
                 title: 'No inspection events recorded yet',
                 description:
