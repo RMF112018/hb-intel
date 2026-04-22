@@ -1,9 +1,13 @@
-import { DefaultAzureCredential } from '@azure/identity';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
 import '@pnp/sp/items/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
+import {
+  createSharePointBearerTokenBehavior,
+  ManagedIdentityTokenService,
+  type IManagedIdentityTokenService,
+} from '../managed-identity-token-service.js';
 import { withRetry } from '../../utils/retry.js';
 import {
   LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
@@ -106,8 +110,12 @@ function toRecord(row: Record<string, unknown>): ILegacyFallbackReviewRecord {
 }
 
 export class LegacyFallbackReviewRepository implements ILegacyFallbackReviewRepository {
-  private readonly credential = new DefaultAzureCredential();
+  private readonly tokenService: IManagedIdentityTokenService;
   private readonly siteUrl = getLegacyFallbackListHostSiteUrl();
+  
+  constructor(tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService()) {
+    this.tokenService = tokenService;
+  }
 
   async listRecords(): Promise<readonly ILegacyFallbackReviewRecord[]> {
     return withRetry(async () => {
@@ -213,20 +221,18 @@ export class LegacyFallbackReviewRepository implements ILegacyFallbackReviewRepo
   }
 
   private async getSP(): Promise<any> {
-    const origin = new URL(this.siteUrl).origin;
     const overrideToken = process.env.SHAREPOINT_BEARER_TOKEN?.trim();
-    const token = overrideToken ? { token: overrideToken } : await this.credential.getToken(`${origin}/.default`);
-    if (!token?.token) {
-      throw new Error('Unable to acquire SharePoint access token for legacy fallback review repository.');
+    const behavior = overrideToken
+      ? await createSharePointBearerTokenBehavior(this.siteUrl, {
+        acquireAppToken: async () => overrideToken,
+        getSharePointToken: async () => overrideToken,
+      })
+      : await createSharePointBearerTokenBehavior(this.siteUrl, this.tokenService);
+
+    if (!behavior) {
+      throw new Error('Unable to acquire SharePoint access token behavior for legacy fallback review repository.');
     }
 
-    return (spfi(this.siteUrl) as any).using({
-      bind(instance: any) {
-        instance.on.auth.replace(async (_: unknown, req: Request, done: (request: Request) => void) => {
-          req.headers.set('Authorization', `Bearer ${token.token}`);
-          done(req);
-        });
-      },
-    } as any);
+    return (spfi(this.siteUrl) as any).using(behavior);
   }
 }

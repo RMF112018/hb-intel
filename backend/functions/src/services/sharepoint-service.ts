@@ -1,6 +1,5 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { DefaultAzureCredential } from '@azure/identity';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
 import '@pnp/sp/appcatalog/index.js';
@@ -13,6 +12,20 @@ import '@pnp/sp/security/index.js';
 import '@pnp/sp/sites/index.js';
 import '@pnp/sp/webs/index.js';
 import type { IProvisioningAuditRecord } from '@hbc/models';
+import {
+  createSharePointBearerTokenBehavior,
+  formatSharePointTokenAcquisitionDiagnostic,
+  ManagedIdentityTokenService,
+  SharePointTokenAcquisitionError,
+  type IManagedIdentityTokenService,
+} from './managed-identity-token-service.js';
+import {
+  SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS,
+  SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS,
+  SAFETY_RECORD_KEEPING_REFERENCE_LIST_TITLES,
+  type ISafetyProvisionContainerDefinition,
+  type SafetyProvisionContainerKind,
+} from '../config/safety-record-keeping-list-definitions.js';
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -48,6 +61,14 @@ export interface ISharePointService {
     permissionLevel: string
   ): Promise<void>;
 
+  /** Provisions bounded Safety Record Keeping SharePoint containers. */
+  provisionSafetyRecordKeepingSharePoint(
+    input?: { dryRun?: boolean }
+  ): Promise<ISafetyRecordKeepingProvisionResult>;
+
+  /** Ensures one current-week Safety Reporting Period item exists (bounded idempotent seed). */
+  ensureCurrentWeekSafetyReportingPeriod(): Promise<ISafetyReportingPeriodSeedResult>;
+
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
   setPermissions(siteUrl: string, projectId: string): Promise<void>;
@@ -77,16 +98,95 @@ export interface IFieldDefinition {
   lookupFieldName?: string;
 }
 
+export type SafetyProvisionOutcome =
+  | 'created'
+  | 'alreadyExisted'
+  | 'updatedOrRepaired'
+  | 'failed'
+  | 'skipped';
+
+export interface ISafetyProvisionDiagnostic {
+  code: string;
+  message: string;
+}
+
+export interface ISafetyFieldProvisionResult {
+  internalName: string;
+  outcome: SafetyProvisionOutcome;
+  message?: string;
+}
+
+export interface ISafetyContainerProvisionResult {
+  key: string;
+  title: string;
+  kind: SafetyProvisionContainerKind;
+  siteUrl: string;
+  outcome: SafetyProvisionOutcome;
+  fields: ISafetyFieldProvisionResult[];
+  message?: string;
+}
+
+export interface ISafetyReferenceListValidationResult {
+  title: string;
+  outcome: SafetyProvisionOutcome;
+  exists: boolean;
+  message?: string;
+}
+
+export interface ISafetyRecordKeepingProvisionResult {
+  dryRun: boolean;
+  success: boolean;
+  siteTargets: {
+    safetySiteUrl: string;
+    hbCentralSiteUrl: string;
+  };
+  counts: {
+    created: number;
+    alreadyExisted: number;
+    updatedOrRepaired: number;
+    failed: number;
+    skipped: number;
+  };
+  referenceLists: ISafetyReferenceListValidationResult[];
+  containers: ISafetyContainerProvisionResult[];
+  diagnostics: ISafetyProvisionDiagnostic[];
+}
+
+export type SafetyReportingPeriodSeedOutcome =
+  | 'created'
+  | 'alreadyExisted'
+  | 'duplicateDetected'
+  | 'failed';
+
+export interface ISafetyReportingPeriodSeedResult {
+  success: boolean;
+  outcome: SafetyReportingPeriodSeedOutcome;
+  matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20';
+  targetSiteUrl: string;
+  targetListTitle: 'Safety Reporting Periods';
+  duplicateCount: number;
+  createdItemId?: number;
+  item: {
+    Title: string;
+    WeekStartDate: string;
+    WeekEndDate: string;
+    PeriodLabel: string;
+    Status: 'open';
+  };
+  diagnostics: ISafetyProvisionDiagnostic[];
+}
+
 /**
  * D-PH6-05: Real SharePoint adapter for provisioning saga idempotency + compensation contracts.
  * Uses Managed Identity tokens with PnPjs and centralizes list/site operations for Steps 1-7.
  */
 export class SharePointService implements ISharePointService {
   private readonly tenantUrl: string;
-  private readonly credential = new DefaultAzureCredential();
+  private readonly tokenService: IManagedIdentityTokenService;
 
-  constructor() {
+  constructor(tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService()) {
     this.tenantUrl = process.env.SHAREPOINT_TENANT_URL!;
+    this.tokenService = tokenService;
     if (!this.tenantUrl) throw new Error('SHAREPOINT_TENANT_URL env var is required');
   }
 
@@ -261,6 +361,179 @@ export class SharePointService implements ISharePointService {
     }
   }
 
+  async provisionSafetyRecordKeepingSharePoint(
+    input?: { dryRun?: boolean }
+  ): Promise<ISafetyRecordKeepingProvisionResult> {
+    const dryRun = input?.dryRun === true;
+    const diagnostics: ISafetyProvisionDiagnostic[] = [];
+    const containers: ISafetyContainerProvisionResult[] = [];
+    const referenceLists: ISafetyReferenceListValidationResult[] = [];
+    const targets = this.resolveSafetyProvisioningTargets(diagnostics);
+    const counts = {
+      created: 0,
+      alreadyExisted: 0,
+      updatedOrRepaired: 0,
+      failed: 0,
+      skipped: 0,
+    };
+
+    if (!targets) {
+      return {
+        dryRun,
+        success: false,
+        siteTargets: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS,
+        counts,
+        referenceLists,
+        containers,
+        diagnostics,
+      };
+    }
+
+    const referenceValidationFailed = await this.validateReferenceLists(
+      targets.hbCentralSiteUrl,
+      referenceLists,
+      diagnostics,
+    );
+    this.bumpCounts(referenceLists.map((ref) => ref.outcome), counts);
+    if (referenceValidationFailed) {
+      return {
+        dryRun,
+        success: false,
+        siteTargets: targets,
+        counts,
+        referenceLists,
+        containers,
+        diagnostics,
+      };
+    }
+
+    const definitions = [...SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS].sort(
+      (a, b) => a.provisioningOrder - b.provisioningOrder
+    );
+
+    for (const definition of definitions) {
+      const result = await this.provisionSafetyContainer(definition, dryRun, diagnostics);
+      containers.push(result);
+    }
+
+    this.bumpCounts(containers.map((container) => container.outcome), counts);
+    const success = counts.failed === 0 && diagnostics.length === 0;
+    return {
+      dryRun,
+      success,
+      siteTargets: targets,
+      counts,
+      referenceLists,
+      containers,
+      diagnostics,
+    };
+  }
+
+  async ensureCurrentWeekSafetyReportingPeriod(): Promise<ISafetyReportingPeriodSeedResult> {
+    const diagnostics: ISafetyProvisionDiagnostic[] = [];
+    const targets = this.resolveSafetyProvisioningTargets(diagnostics);
+    const seedItem = {
+      Title: 'Week of 2026-04-20',
+      WeekStartDate: '2026-04-20',
+      WeekEndDate: '2026-04-24',
+      PeriodLabel: 'Apr 20 – Apr 24, 2026',
+      Status: 'open' as const,
+    };
+
+    if (!targets) {
+      return {
+        success: false,
+        outcome: 'failed',
+        matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20',
+        targetSiteUrl: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl,
+        targetListTitle: 'Safety Reporting Periods',
+        duplicateCount: 0,
+        item: seedItem,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_REPORTING_PERIOD_SEED_FAILED',
+            message: 'Authoritative site targets could not be resolved safely.',
+          },
+        ]),
+      };
+    }
+
+    try {
+      const sp: any = await this.getSP(targets.hbCentralSiteUrl);
+      const list = sp.web.lists.getByTitle('Safety Reporting Periods');
+      const existingItems: any[] = await list.items
+        .select('Id', 'Title', 'WeekStartDate', 'WeekEndDate', 'PeriodLabel', 'Status')();
+
+      const matches = existingItems.filter((entry) => {
+        const weekStart = this.normalizeSeedDate(entry?.WeekStartDate);
+        const title = String(entry?.Title ?? '');
+        return weekStart === seedItem.WeekStartDate || title === seedItem.Title;
+      });
+
+      if (matches.length > 1) {
+        return {
+          success: false,
+          outcome: 'duplicateDetected',
+          matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20',
+          targetSiteUrl: targets.hbCentralSiteUrl,
+          targetListTitle: 'Safety Reporting Periods',
+          duplicateCount: matches.length,
+          item: seedItem,
+          diagnostics: [
+            {
+              code: 'SAFETY_REPORTING_PERIOD_DUPLICATES',
+              message:
+                'Multiple current-week Safety Reporting Period records matched identity rule; no mutation performed.',
+            },
+          ],
+        };
+      }
+
+      if (matches.length === 1) {
+        return {
+          success: true,
+          outcome: 'alreadyExisted',
+          matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20',
+          targetSiteUrl: targets.hbCentralSiteUrl,
+          targetListTitle: 'Safety Reporting Periods',
+          duplicateCount: 0,
+          item: seedItem,
+          diagnostics,
+        };
+      }
+
+      const created = await list.items.add(seedItem);
+      const createdId = Number(created?.data?.Id);
+      return {
+        success: true,
+        outcome: 'created',
+        matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20',
+        targetSiteUrl: targets.hbCentralSiteUrl,
+        targetListTitle: 'Safety Reporting Periods',
+        duplicateCount: 0,
+        createdItemId: Number.isFinite(createdId) ? createdId : undefined,
+        item: seedItem,
+        diagnostics,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        outcome: 'failed',
+        matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20',
+        targetSiteUrl: targets.hbCentralSiteUrl,
+        targetListTitle: 'Safety Reporting Periods',
+        duplicateCount: 0,
+        item: seedItem,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_REPORTING_PERIOD_SEED_FAILED',
+            message: formatSharePointTokenAcquisitionDiagnostic(err),
+          },
+        ]),
+      };
+    }
+  }
+
   async listExists(siteUrl: string, listTitle: string): Promise<boolean> {
     const sp: any = await this.getSP(siteUrl);
     try {
@@ -268,6 +541,474 @@ export class SharePointService implements ISharePointService {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  private resolveSafetyProvisioningTargets(
+    diagnostics: ISafetyProvisionDiagnostic[]
+  ): { safetySiteUrl: string; hbCentralSiteUrl: string } | null {
+    const expected = SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS;
+    const expectedSafety = this.normalizeSiteUrl(expected.safetySiteUrl);
+    const expectedHbCentral = this.normalizeSiteUrl(expected.hbCentralSiteUrl);
+
+    if (expectedSafety.pathname !== '/sites/safety') {
+      diagnostics.push({
+        code: 'INVALID_SAFETY_SITE_CONSTANT',
+        message: `Expected Safety site path to be /sites/Safety, found ${expected.safetySiteUrl}`,
+      });
+    }
+    if (expectedHbCentral.pathname !== '/sites/hbcentral') {
+      diagnostics.push({
+        code: 'INVALID_HBCENTRAL_SITE_CONSTANT',
+        message: `Expected HBCentral site path to be /sites/HBCentral, found ${expected.hbCentralSiteUrl}`,
+      });
+    }
+    if (expectedSafety.origin !== expectedHbCentral.origin) {
+      diagnostics.push({
+        code: 'SITE_ORIGIN_MISMATCH',
+        message:
+          'Safety and HBCentral site constants do not share the same SharePoint tenant origin.',
+      });
+    }
+
+    const configuredProjectsSite = process.env.SHAREPOINT_PROJECTS_SITE_URL?.trim();
+    if (configuredProjectsSite) {
+      const configured = this.normalizeSiteUrl(configuredProjectsSite);
+      if (configured.href !== expectedHbCentral.href) {
+        diagnostics.push({
+          code: 'SHAREPOINT_PROJECTS_SITE_URL_CONFLICT',
+          message:
+            `SHAREPOINT_PROJECTS_SITE_URL is ${configuredProjectsSite}, expected ${expected.hbCentralSiteUrl} for bounded Safety provisioning.`,
+        });
+      }
+    }
+
+    const configuredTenantUrl = process.env.SHAREPOINT_TENANT_URL?.trim();
+    if (configuredTenantUrl) {
+      const configuredTenant = this.normalizeSiteUrl(configuredTenantUrl);
+      if (configuredTenant.origin !== expectedSafety.origin) {
+        diagnostics.push({
+          code: 'SHAREPOINT_TENANT_URL_CONFLICT',
+          message:
+            `SHAREPOINT_TENANT_URL origin ${configuredTenant.origin} does not match authoritative safety origin ${expectedSafety.origin}.`,
+        });
+      }
+    }
+
+    if (diagnostics.length > 0) {
+      return null;
+    }
+
+    return {
+      safetySiteUrl: expected.safetySiteUrl,
+      hbCentralSiteUrl: expected.hbCentralSiteUrl,
+    };
+  }
+
+  private normalizeSiteUrl(urlValue: string): URL {
+    const url = new URL(urlValue);
+    const normalizedPath = url.pathname.replace(/\/+$/, '') || '/';
+    return new URL(`${url.origin}${normalizedPath.toLowerCase()}`);
+  }
+
+  private async validateReferenceLists(
+    siteUrl: string,
+    results: ISafetyReferenceListValidationResult[],
+    diagnostics: ISafetyProvisionDiagnostic[],
+  ): Promise<boolean> {
+    let failed = false;
+    for (const title of SAFETY_RECORD_KEEPING_REFERENCE_LIST_TITLES) {
+      let exists = false;
+      try {
+        exists = await this.ensureListExistsDetailed(siteUrl, title);
+      } catch (err) {
+        failed = true;
+        const errorMessage = formatSharePointTokenAcquisitionDiagnostic(err);
+        results.push({
+          title,
+          exists: false,
+          outcome: 'failed',
+          message: errorMessage,
+        });
+        diagnostics.push({
+          code: this.toProvisioningErrorCode(err, 'REFERENCE_LIST_VALIDATION_ERROR'),
+          message: `${title} validation failed on ${siteUrl}: ${errorMessage}`,
+        });
+        continue;
+      }
+      if (exists) {
+        results.push({ title, exists: true, outcome: 'alreadyExisted' });
+        continue;
+      }
+      failed = true;
+      const message = `Required reference list "${title}" was not found on ${siteUrl}.`;
+      results.push({ title, exists: false, outcome: 'failed', message });
+      diagnostics.push({
+        code: 'MISSING_REFERENCE_LIST',
+        message,
+      });
+    }
+    return failed;
+  }
+
+  private async provisionSafetyContainer(
+    definition: ISafetyProvisionContainerDefinition,
+    dryRun: boolean,
+    diagnostics: ISafetyProvisionDiagnostic[],
+  ): Promise<ISafetyContainerProvisionResult> {
+    const fieldOutcomes: ISafetyFieldProvisionResult[] = [];
+    const sp: any = await this.getSP(definition.siteUrl);
+    let exists = false;
+    try {
+      exists =
+        definition.kind === 'library'
+          ? await this.ensureLibraryExistsDetailed(definition.siteUrl, definition.title)
+          : await this.ensureListExistsDetailed(definition.siteUrl, definition.title);
+    } catch (err) {
+      const errorMessage = formatSharePointTokenAcquisitionDiagnostic(err);
+      diagnostics.push({
+        code: this.toProvisioningErrorCode(err, 'CONTAINER_ACCESS_ERROR'),
+        message: `${definition.title} on ${definition.siteUrl}: ${errorMessage}`,
+      });
+      return {
+        key: definition.key,
+        title: definition.title,
+        kind: definition.kind,
+        siteUrl: definition.siteUrl,
+        outcome: 'failed',
+        fields: [],
+        message: errorMessage,
+      };
+    }
+
+    let list: any = sp.web.lists.getByTitle(definition.title);
+    let outcome: SafetyProvisionOutcome = exists ? 'alreadyExisted' : 'created';
+    let message: string | undefined;
+
+    if (!exists && !dryRun) {
+      const created = await sp.web.lists.add(definition.title, '', definition.template, true);
+      list = created.list;
+    } else if (!exists && dryRun) {
+      message = 'Dry-run: container would be created.';
+    }
+
+    let existingFieldsByInternalName = new Map<string, any>();
+    if (exists || (!dryRun && definition.fields.length > 0)) {
+      const existingFields: any[] = await list.fields
+        .select('InternalName', 'TypeAsString', 'Required', 'LookupField', 'LookupList')();
+      existingFieldsByInternalName = new Map(
+        existingFields.map((field) => [String(field.InternalName), field]),
+      );
+    }
+
+    const lookupListIdCache = new Map<string, string>();
+
+    for (const field of definition.fields) {
+      if (field.internalName === 'Title' && definition.kind === 'list') {
+        // SharePoint creates Title automatically for custom lists.
+        continue;
+      }
+
+      const existing = existingFieldsByInternalName.get(field.internalName);
+      if (!existing) {
+        if (dryRun) {
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'created',
+            message: 'Dry-run: field would be created.',
+          });
+          continue;
+        }
+
+        try {
+          await this.addListField(list, field, definition.siteUrl);
+          fieldOutcomes.push({ internalName: field.internalName, outcome: 'created' });
+          if (exists) outcome = 'updatedOrRepaired';
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'failed',
+            message: errorMessage,
+          });
+          diagnostics.push({
+            code: 'FIELD_CREATE_FAILED',
+            message: `${definition.title}.${field.internalName}: ${errorMessage}`,
+          });
+          outcome = 'failed';
+        }
+        continue;
+      }
+
+      const compatibilityError = await this.getFieldCompatibilityError(
+        field,
+        existing,
+        definition.siteUrl,
+        lookupListIdCache,
+      );
+      if (compatibilityError) {
+        fieldOutcomes.push({
+          internalName: field.internalName,
+          outcome: 'failed',
+          message: compatibilityError,
+        });
+        diagnostics.push({
+          code: 'FIELD_SCHEMA_DRIFT',
+          message: `${definition.title}.${field.internalName}: ${compatibilityError}`,
+        });
+        outcome = 'failed';
+        continue;
+      }
+
+      if (field.required !== undefined && Boolean(existing.Required) !== field.required) {
+        if (dryRun) {
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'updatedOrRepaired',
+            message: `Dry-run: Required would be set to ${field.required}.`,
+          });
+          if (outcome === 'alreadyExisted') outcome = 'updatedOrRepaired';
+          continue;
+        }
+        try {
+          await list.fields
+            .getByInternalNameOrTitle(field.internalName)
+            .update({ Required: field.required });
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'updatedOrRepaired',
+          });
+          if (outcome === 'alreadyExisted') outcome = 'updatedOrRepaired';
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'failed',
+            message: errorMessage,
+          });
+          diagnostics.push({
+            code: 'FIELD_UPDATE_FAILED',
+            message: `${definition.title}.${field.internalName}: ${errorMessage}`,
+          });
+          outcome = 'failed';
+        }
+        continue;
+      }
+
+      fieldOutcomes.push({
+        internalName: field.internalName,
+        outcome: 'alreadyExisted',
+      });
+    }
+
+    if (outcome !== 'failed' && fieldOutcomes.some((field) => field.outcome === 'failed')) {
+      outcome = 'failed';
+    }
+    if (
+      outcome === 'alreadyExisted' &&
+      fieldOutcomes.some((field) => field.outcome === 'created' || field.outcome === 'updatedOrRepaired')
+    ) {
+      outcome = 'updatedOrRepaired';
+    }
+
+    return {
+      key: definition.key,
+      title: definition.title,
+      kind: definition.kind,
+      siteUrl: definition.siteUrl,
+      outcome,
+      fields: fieldOutcomes,
+      message,
+    };
+  }
+
+  private async addListField(list: any, field: IFieldDefinition, siteUrl: string): Promise<void> {
+    switch (field.type) {
+      case 'Number':
+        await list.fields.addNumber(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+        });
+        break;
+      case 'DateTime':
+        await list.fields.addDateTime(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+        });
+        break;
+      case 'Boolean':
+        await list.fields.addBoolean(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+        });
+        break;
+      case 'Choice':
+        await list.fields.addChoice(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+          Choices: field.choices ?? [],
+        });
+        break;
+      case 'User':
+        await list.fields.addUser(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+        });
+        break;
+      case 'URL':
+        await list.fields.addUrl(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+        });
+        break;
+      case 'Lookup': {
+        const sp: any = await this.getSP(siteUrl);
+        const targetList = sp.web.lists.getByTitle(field.lookupListTitle ?? '');
+        const targetInfo = await targetList.select('Id')();
+        await list.fields.addLookup(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+          LookupListId: targetInfo.Id,
+          LookupFieldName: field.lookupFieldName ?? 'ID',
+        });
+        break;
+      }
+      case 'MultiLineText':
+        await list.fields.addMultilineText(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+          RichText: false,
+        });
+        break;
+      case 'Text':
+      default:
+        await list.fields.addText(field.internalName, {
+          Required: field.required ?? false,
+          Title: field.displayName,
+        });
+        break;
+    }
+  }
+
+  private async getFieldCompatibilityError(
+    expected: IFieldDefinition,
+    actual: any,
+    siteUrl: string,
+    lookupListIdCache: Map<string, string>,
+  ): Promise<string | null> {
+    const typeValue = String(actual.TypeAsString ?? '');
+    const compatibleTypes = this.compatibleSharePointTypes(expected.type);
+    if (!compatibleTypes.includes(typeValue)) {
+      return `Expected type ${expected.type}, found ${typeValue}.`;
+    }
+
+    if (expected.type === 'Lookup' && expected.lookupListTitle) {
+      const expectedLookupListId = await this.getLookupListId(
+        siteUrl,
+        expected.lookupListTitle,
+        lookupListIdCache,
+      );
+      const actualLookupListId = this.normalizeGuid(String(actual.LookupList ?? ''));
+      if (!actualLookupListId) {
+        return 'Lookup column is missing LookupList binding.';
+      }
+      if (actualLookupListId !== expectedLookupListId) {
+        return `Expected lookup list ${expected.lookupListTitle}, found ${actualLookupListId}.`;
+      }
+    }
+
+    return null;
+  }
+
+  private compatibleSharePointTypes(type: IFieldDefinition['type']): string[] {
+    switch (type) {
+      case 'MultiLineText':
+        return ['Note'];
+      case 'User':
+        return ['User', 'UserMulti'];
+      case 'Lookup':
+        return ['Lookup', 'LookupMulti'];
+      case 'URL':
+        return ['URL'];
+      case 'DateTime':
+        return ['DateTime'];
+      case 'Number':
+        return ['Number', 'Currency'];
+      case 'Choice':
+        return ['Choice'];
+      case 'Boolean':
+        return ['Boolean'];
+      case 'Text':
+      default:
+        return ['Text'];
+    }
+  }
+
+  private async getLookupListId(
+    siteUrl: string,
+    listTitle: string,
+    cache: Map<string, string>,
+  ): Promise<string> {
+    const cacheKey = `${siteUrl}::${listTitle}`;
+    const cached = cache.get(cacheKey);
+    if (cached) return cached;
+
+    const sp: any = await this.getSP(siteUrl);
+    const list = await sp.web.lists.getByTitle(listTitle).select('Id')();
+    const normalized = this.normalizeGuid(String(list.Id));
+    if (!normalized) {
+      throw new Error(`Lookup list ${listTitle} on ${siteUrl} has invalid Id`);
+    }
+    cache.set(cacheKey, normalized);
+    return normalized;
+  }
+
+  private normalizeGuid(value: string): string | null {
+    const normalized = value.replace(/[{}]/g, '').toLowerCase();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(normalized)
+      ? normalized
+      : null;
+  }
+
+  private normalizeSeedDate(value: unknown): string | null {
+    if (typeof value === 'string') {
+      const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+      return match ? match[1] : null;
+    }
+    if (value instanceof Date && !Number.isNaN(value.valueOf())) {
+      return value.toISOString().slice(0, 10);
+    }
+    return null;
+  }
+
+  private isNotFoundError(err: unknown): boolean {
+    const message = (err instanceof Error ? err.message : String(err)).toLowerCase();
+    return (
+      message.includes('404') ||
+      message.includes('not found') ||
+      message.includes('does not exist') ||
+      message.includes('cannot find resource')
+    );
+  }
+
+  private async ensureListExistsDetailed(siteUrl: string, listTitle: string): Promise<boolean> {
+    const sp: any = await this.getSP(siteUrl);
+    try {
+      await sp.web.lists.getByTitle(listTitle).select('Id')();
+      return true;
+    } catch (err) {
+      if (this.isNotFoundError(err)) return false;
+      throw err;
+    }
+  }
+
+  private async ensureLibraryExistsDetailed(siteUrl: string, libraryName: string): Promise<boolean> {
+    return this.ensureListExistsDetailed(siteUrl, libraryName);
+  }
+
+  private bumpCounts(outcomes: SafetyProvisionOutcome[], counts: ISafetyRecordKeepingProvisionResult['counts']): void {
+    for (const outcome of outcomes) {
+      counts[outcome] += 1;
     }
   }
 
@@ -454,16 +1195,14 @@ export class SharePointService implements ISharePointService {
   }
 
   private async getSP(siteUrl: string): Promise<any> {
-    const token = await this.credential.getToken(`${new URL(this.tenantUrl).origin}/.default`);
-    return (spfi(siteUrl) as any).using({
-      // D-PH6-05 Managed Identity token binding for all PnPjs requests.
-      bind(instance: any) {
-        instance.on.auth.replace(async (_: unknown, req: Request, done: (request: Request) => void) => {
-          req.headers.set('Authorization', `Bearer ${token!.token}`);
-          done(req);
-        });
-      },
-    } as any);
+    const behavior = await createSharePointBearerTokenBehavior(siteUrl, this.tokenService);
+    return (spfi(siteUrl) as any).using(behavior);
+  }
+
+  private toProvisioningErrorCode(err: unknown, fallback: string): string {
+    return err instanceof SharePointTokenAcquisitionError
+      ? err.code
+      : fallback;
   }
 
   /** D-PH6-05 readiness poll loop for post-create eventual consistency in SharePoint. */
@@ -565,5 +1304,44 @@ export class MockSharePointService implements ISharePointService {
     console.log(
       `[MockSharePoint] Assigned group ${entraGroupId} → ${permissionLevel} on ${siteUrl}`
     );
+  }
+
+  async provisionSafetyRecordKeepingSharePoint(
+    input?: { dryRun?: boolean }
+  ): Promise<ISafetyRecordKeepingProvisionResult> {
+    return {
+      dryRun: input?.dryRun === true,
+      success: true,
+      siteTargets: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS,
+      counts: {
+        created: 0,
+        alreadyExisted: 0,
+        updatedOrRepaired: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      referenceLists: [],
+      containers: [],
+      diagnostics: [],
+    };
+  }
+
+  async ensureCurrentWeekSafetyReportingPeriod(): Promise<ISafetyReportingPeriodSeedResult> {
+    return {
+      success: true,
+      outcome: 'alreadyExisted',
+      matchingRule: 'WeekStartDate == 2026-04-20 OR Title == Week of 2026-04-20',
+      targetSiteUrl: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl,
+      targetListTitle: 'Safety Reporting Periods',
+      duplicateCount: 0,
+      item: {
+        Title: 'Week of 2026-04-20',
+        WeekStartDate: '2026-04-20',
+        WeekEndDate: '2026-04-24',
+        PeriodLabel: 'Apr 20 – Apr 24, 2026',
+        Status: 'open',
+      },
+      diagnostics: [],
+    };
   }
 }

@@ -12,6 +12,7 @@
 - workflow/history: HB Article Workflow History
 - error/audit: HB Article Publishing Errors, Kudos Audit Events
 - legacy-fallback: Legacy Project Fallback Registry, Legacy Project Fallback Sync Runs
+- safety-record-keeping: Safety Reporting Periods, Safety Project Week Records, Safety Inspection Events, Safety Findings, Safety Ingestion Runs
 - people-culture: People Culture Announcements, People Culture Celebrations, People Culture Kudos
 - other business: Bids, HB Article Media, HB Article Promotion Rules, HB Article Team Members, HB Articles, Tool Launcher Contents
 - Implementation-relevant system lists: TaxonomyHiddenList, User Information List
@@ -96,6 +97,36 @@
 - Critical key-like fields: RunId (indexed UUID), Status (indexed), StartedUtc, CompletedUtc, YearsProcessed, SummaryJson.
 - Logical (non-enforced) join: `RunId` is referenced by `Legacy Project Fallback Registry.DiscoveryRunId`.
 - Likely downstream consumers: legacy-fallback closure evidence tooling (`scripts/collect-legacy-fallback-closure-evidence.sh`) and App Insights dashboards.
+
+### Safety Reporting Periods
+- Likely role: weekly parent cycle records for Safety Record Keeping ingestion and publish workflow.
+- Outbound lookup dependencies: AppPrincipals, User Information List.
+- Critical key-like fields: WeekStartDate, WeekEndDate, PeriodLabel, Status.
+- Likely downstream consumers: safety ingestion/repository flows in `packages/features/safety` and `@hbc/functions` provisioning/seed operations.
+
+### Safety Project Week Records
+- Likely role: project-scoped weekly rollup parent keyed by reporting period plus project identity.
+- Outbound lookup dependencies: Safety Reporting Periods, Projects, AppPrincipals, User Information List.
+- Critical key-like fields: ReportingPeriodId, ProjectLookupId, ProjectNumber, ProjectSourceClassification, PublishStatus.
+- Logical (non-enforced) joins: `LegacyRegistryItemId` maps to `Legacy Project Fallback Registry.ID` when fallback resolution path is used.
+
+### Safety Inspection Events
+- Likely role: authoritative per-inspection event row preserving parse output and duplicate-review state.
+- Outbound lookup dependencies: Safety Project Week Records, Safety Reporting Periods, Safety Inspection Events (self), AppPrincipals, User Information List.
+- Critical key-like fields: ProjectWeekRecordId, ReportingPeriodId, SourceUploadItemId, InspectionDate, InspectionNumber, Checksum, IngestionStatus.
+- Logical (non-enforced) join: `SourceUploadItemId` references `/sites/Safety` upload-library item identity.
+
+### Safety Findings
+- Likely role: normalized findings child records extracted from Safety Inspection Events.
+- Outbound lookup dependencies: Safety Inspection Events, Safety Project Week Records, AppPrincipals, User Information List.
+- Critical key-like fields: InspectionEventId, ProjectWeekRecordId, ChecklistRowNumber, FindingType, Severity, IsOpen.
+- Likely downstream consumers: safety quality/risk rollups and review workflows.
+
+### Safety Ingestion Runs
+- Likely role: audit trail and replay lineage for ingestion attempts and commit outcomes.
+- Outbound lookup dependencies: Safety Reporting Periods, Safety Ingestion Runs (self), AppPrincipals, User Information List.
+- Critical key-like fields: SourceUploadItemId, ValidationStatus, ParseStatus, ProjectResolutionStatus, TerminalStatus, RunStartedAt, ParentRunId.
+- Logical (non-enforced) join: `SourceUploadItemId` aligns to upload-library item identity on `/sites/Safety`.
 
 ### Kudos Audit Events
 - Likely role: operational logging / audit.
@@ -198,6 +229,7 @@
 | Notes | HB Article Promotion Rules, HB Article Template Registry, projectViewerGroups | Shared schema pattern |
 | PrimaryImage | People Culture Announcements, People Culture Celebrations, People Culture Kudos | Shared schema pattern |
 | AnnouncementId | People Culture Announcements, People Culture Celebrations | Possible join/filter dimension |
+| Checksum | Safety Inspection Events, Safety Ingestion Runs | Idempotency/deduplication signal across Safety ingestion entities |
 | BindingId | HB Article Destination Pages, HB Article Publishing Errors | Possible join/filter dimension |
 | CtaLabel | Homepage Project Spotlights, People Culture Announcements | Shared schema pattern |
 | CtaUrl | Homepage Project Spotlights, People Culture Announcements | Shared schema pattern |
@@ -224,6 +256,17 @@
 | PageTemplateKey | HB Article Destination Pages, HB Articles | Shared schema pattern |
 | PageUrl | HB Article Destination Pages, HB Articles | Shared schema pattern |
 | PersonDisplayName | People Culture Announcements, People Culture Celebrations | Shared schema pattern |
+| ProjectNumber | Projects, Safety Project Week Records, Safety Inspection Events, Safety Ingestion Runs | Cross-system project identity and safety resolution key |
+| ProjectSourceClassification | Safety Project Week Records, Safety Ingestion Runs | Safety source-resolution contract (`project`, `legacy-only`, `project+legacy`, `unresolved`) |
+| ReportingPeriodId | Safety Project Week Records, Safety Inspection Events, Safety Ingestion Runs | Safety reporting-period join key |
+| ProjectWeekRecordId | Safety Inspection Events, Safety Findings | Safety parent-child join key |
+| InspectionEventId | Safety Findings | Safety finding-to-event parent link |
+| WeekStartDate | Safety Reporting Periods | Primary week identity used for period selection and seed idempotency |
+| WeekEndDate | Safety Reporting Periods | Business-week boundary for period records |
+| Status | Safety Reporting Periods, Legacy Project Fallback Sync Runs | Operational status field reused by distinct domains; semantics differ by list |
+| IngestionStatus | Safety Inspection Events | Inspection acceptance/duplicate/supersession lifecycle |
+| TerminalStatus | Safety Ingestion Runs | End-state of ingestion pipeline |
+| ParentRunId | Safety Ingestion Runs | Self-referential replay lineage key |
 | ProjectId | HB Articles, Homepage Project Spotlights | Possible join/filter dimension |
 | PublishedDateUtc | HB Article Destination Pages, HB Articles | Shared schema pattern |
 | RenderVersion | HB Article Destination Pages, HB Articles | Shared schema pattern |
@@ -239,6 +282,8 @@
 - Internal/display name drift exists (for example generic `field_*` internal names in some lists); always use internal names from per-list reports.
 - System/OOB metadata fields appear across most lists; ignore by default unless audit/compliance/authoring semantics require them.
 - Where multiple lists share similarly named keys, document authoritative source before implementing cross-list writes.
+- Safety lookup chain is ordered and contract-sensitive: `Safety Reporting Periods` -> `Safety Project Week Records` -> `Safety Inspection Events` -> `Safety Findings`, with `Safety Ingestion Runs` as the operational audit surface.
+- Safety runtime/provisioning treats GUID binding as authoritative for HBCentral Safety lists; titles are logging-friendly and must not be treated as mutable runtime identity.
 
 ## 6. Development Guidance
 - Always consult this map + target per-list report before adding new list relationships.

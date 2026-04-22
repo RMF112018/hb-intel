@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Calendar,
   Building2,
+  Compass,
   DollarSign,
   Shield,
 } from '@hbc/ui-kit/homepage';
@@ -139,6 +140,15 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(procoreTile.iconAssetSrc).toContain('data:image/svg+xml');
     expect(procoreTile.iconPresentation).toBe('compliant');
 
+    const concur = makeItem(16);
+    concur.actionKey = 'concur';
+    concur.title = 'Concur';
+    const concurTile = mapItemToTile(concur);
+    expect(concurTile.iconAssetSrc).toContain('sap_concur_logo');
+    expect(concurTile.iconPresentation).toBe('compliant');
+    expect(concurTile.iconAssetStrategy).toBe('img-filter-white');
+    expect(concurTile.iconKey).toBe('concur');
+
     const bamboo = makeItem(14);
     bamboo.actionKey = 'bamboohr';
     bamboo.title = 'BambooHR';
@@ -157,6 +167,23 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(hbUniversityTile.iconPresentation).toBe('compliant');
     expect(hbUniversityTile.iconAssetStrategy).toBeUndefined();
     expect(hbUniversityTile.iconKey).toBe('hb-university-graduation-cap');
+  });
+
+  it('maps Employee Navigator to lucide Compass while preserving Compass asset tile', () => {
+    const employeeNavigator = makeItem(21);
+    employeeNavigator.actionKey = 'employee-navigator';
+    employeeNavigator.title = 'Employee Navigator';
+    const employeeNavigatorTile = mapItemToTile(employeeNavigator);
+    expect(employeeNavigatorTile.icon).toBe(Compass);
+    expect(employeeNavigatorTile.iconAssetSrc).toBeUndefined();
+    expect(employeeNavigatorTile.iconKey).toBe('employee-navigator-compass');
+
+    const compass = makeItem(22);
+    compass.actionKey = 'compass';
+    compass.title = 'Compass';
+    const compassTile = mapItemToTile(compass);
+    expect(compassTile.iconAssetSrc).toContain('compass_icon');
+    expect(compassTile.iconKey).toBe('compass');
   });
 
   it('does not regress to badge-variant-first behavior', () => {
@@ -353,9 +380,9 @@ describe('priorityActionsLauncherAdapter', () => {
       'hb-university',
       'procore',
       'compass',
+      'document-crunch',
       'bamboohr',
       'hh2',
-      'document-crunch',
     ]);
     expect(orderedIds.slice(7)).toEqual(['random-tool', 'zzz-tool']);
   });

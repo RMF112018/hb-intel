@@ -1,4 +1,3 @@
-import { DefaultAzureCredential } from '@azure/identity';
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
@@ -6,6 +5,11 @@ import '@pnp/sp/items/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
 import type { ILogger } from '../utils/logger.js';
+import {
+  createSharePointBearerTokenBehavior,
+  ManagedIdentityTokenService,
+  type IManagedIdentityTokenService,
+} from './managed-identity-token-service.js';
 import { PROJECTS_LIST_NAME, PROJECTS_LIST_SELECT_FIELDS } from './projects-list-contract.js';
 import { toDomain, toListItem, resolveSpField } from './projects-list-mapper.js';
 
@@ -37,11 +41,15 @@ export interface IProjectRequestsRepository {
 export class SharePointProjectRequestsAdapter implements IProjectRequestsRepository {
   private readonly siteUrl: string;
   private readonly tenantUrl: string;
-  private readonly credential = new DefaultAzureCredential();
+  private readonly tokenService: IManagedIdentityTokenService;
   private readonly logger?: ILogger;
 
-  constructor(logger?: ILogger) {
+  constructor(
+    logger?: ILogger,
+    tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService(),
+  ) {
     this.logger = logger;
+    this.tokenService = tokenService;
     // Prefer the site-scoped URL when available; fall back to tenant root.
     this.siteUrl = process.env.SHAREPOINT_PROJECTS_SITE_URL ?? process.env.SHAREPOINT_TENANT_URL ?? '';
     this.tenantUrl = process.env.SHAREPOINT_TENANT_URL ?? '';
@@ -113,18 +121,8 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
   }
 
   private async getSP(): Promise<any> {
-    // Token scope uses tenant origin; PnPjs connects to the site-scoped URL.
-    const origin = new URL(this.siteUrl).origin;
-    const token = await this.credential.getToken(`${origin}/.default`);
-    return (spfi(this.siteUrl) as any).using({
-      // D-PH6-08 Managed Identity binding for Projects-list request lifecycle operations.
-      bind(instance: any) {
-        instance.on.auth.replace(async (_: unknown, req: Request, done: (request: Request) => void) => {
-          req.headers.set('Authorization', `Bearer ${token!.token}`);
-          done(req);
-        });
-      },
-    } as any);
+    const behavior = await createSharePointBearerTokenBehavior(this.siteUrl, this.tokenService);
+    return (spfi(this.siteUrl) as any).using(behavior);
   }
 }
 

@@ -34,6 +34,7 @@ export interface IMockServices extends IServiceContainer {
     uploadTemplateFile: Mock;
     createFolderIfNotExists: Mock;
     fileExists: Mock;
+    provisionSafetyRecordKeepingSharePoint: Mock;
   };
   tableStorage: {
     upsertProvisioningStatus: Mock;
@@ -103,6 +104,24 @@ export function createMockServices(): IMockServices {
       uploadTemplateFile: vi.fn(async () => true),
       createFolderIfNotExists: vi.fn(async () => {}),
       fileExists: vi.fn(async () => false),
+      provisionSafetyRecordKeepingSharePoint: vi.fn(async (_input?: { dryRun?: boolean }) => ({
+        dryRun: _input?.dryRun === true,
+        success: true,
+        siteTargets: {
+          safetySiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/Safety',
+          hbCentralSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+        },
+        counts: {
+          created: 0,
+          alreadyExisted: 0,
+          updatedOrRepaired: 0,
+          failed: 0,
+          skipped: 0,
+        },
+        referenceLists: [],
+        containers: [],
+        diagnostics: [],
+      })),
     },
     graph: {
       createSecurityGroup: vi.fn(async (_displayName: string, _description: string) => 'mock-group-id'),

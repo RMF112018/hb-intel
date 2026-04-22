@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-homepage",
-    "id": "b7d3f8a1-4c62-4e9b-a851-2d6f0e3c7a49",
-    "version": "1.1.70.0",
+    "name": "hb-intel-safety",
+    "id": "e78a16be-7853-40a4-be18-3b01b3ca405d",
+    "version": "1.2.4.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Homepage"
+        "default": "HB Intel Safety Record Keeping"
       },
       "longDescription": {
-        "default": "Governed homepage shell orchestrating Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos with entry-stack contract, preset-driven layout, and occupant capability metadata."
+        "default": "HB Intel Safety Record Keeping — governed checklist upload, parsing, scoring, and structured safety records."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,17 +27,17 @@
     },
     "features": [
       {
-        "title": "hb-intel-homepage Feature",
-        "description": "Deploys HB Intel Homepage webpart assets.",
-        "id": "c4e91f7d-8a23-4b56-9d0e-1f3c5a7b2d84",
-        "version": "1.1.70.0",
+        "title": "hb-intel-safety Feature",
+        "description": "Deploys HB Intel Safety Record Keeping webpart assets.",
+        "id": "2673ffd9-9581-4cdb-9261-7b8bfb604baa",
+        "version": "1.2.4.0",
         "componentIds": [
-          "e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf"
+          "ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e"
         ]
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-homepage.sppkg"
+    "zippedPackage": "solution/hb-intel-safety.sppkg"
   }
 }

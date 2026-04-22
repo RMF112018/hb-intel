@@ -7,7 +7,7 @@
 - Audience: engineers, maintainers, and code agents building features against HBCentral data contracts.
 
 ## 2. Scope
-- Extracted all resolvable lists/libraries visible at the site (42 resolved, 0 failed in baseline extraction) and added phase-01 command-band list references provisioned on April 17, 2026.
+- Extracted all resolvable lists/libraries visible at the site (42 resolved, 0 failed in baseline extraction), added phase-01 command-band list references provisioned on April 17, 2026, and added Safety Record Keeping list reports from current repo schema authority seams.
 - Inventory separates business/custom lists, system/OOB lists, hidden/system lists, and document libraries.
 - Detailed per-list reports include all business/custom lists plus implementation-relevant system lists.
 - Libraries are inventoried; detailed reports are focused on list schemas unless a library behaves as app data store.
@@ -62,6 +62,11 @@
 | Preservation Hold Library | hidden/system | true | 18 | No | Inventory-only |
 | Project Media library | document library | false | 30 | No | Library inventoried only |
 | Projects | business/custom | false | 4 | Yes | Implementation-relevant |
+| Safety Findings | business/custom | false | n/a | Yes | Implementation-relevant (schema-authority modeled; tenant count not refreshed in this extraction cycle) |
+| Safety Ingestion Runs | business/custom | false | n/a | Yes | Implementation-relevant (schema-authority modeled; tenant count not refreshed in this extraction cycle) |
+| Safety Inspection Events | business/custom | false | n/a | Yes | Implementation-relevant (schema-authority modeled; tenant count not refreshed in this extraction cycle) |
+| Safety Project Week Records | business/custom | false | n/a | Yes | Implementation-relevant (schema-authority modeled; tenant count not refreshed in this extraction cycle) |
+| Safety Reporting Periods | business/custom | false | n/a | Yes | Implementation-relevant (schema-authority modeled; tenant count not refreshed in this extraction cycle) |
 | projectViewerGroups | business/custom | false | 2 | Yes | Implementation-relevant |
 | Site Assets | document library | false | 106 | No | Library inventoried only |
 | Site Pages | document library | false | 10 | No | Library inventoried only |

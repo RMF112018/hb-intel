@@ -1,9 +1,13 @@
-import { DefaultAzureCredential } from '@azure/identity';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
 import '@pnp/sp/items/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
+import {
+  createSharePointBearerTokenBehavior,
+  ManagedIdentityTokenService,
+  type IManagedIdentityTokenService,
+} from './managed-identity-token-service.js';
 
 const LIST_NAME = 'HbcAcknowledgmentEvents';
 
@@ -39,10 +43,11 @@ export interface IAcknowledgmentService {
  */
 export class RealAcknowledgmentService implements IAcknowledgmentService {
   private readonly tenantUrl: string;
-  private readonly credential = new DefaultAzureCredential();
+  private readonly tokenService: IManagedIdentityTokenService;
 
-  constructor() {
+  constructor(tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService()) {
     this.tenantUrl = process.env.SHAREPOINT_TENANT_URL!;
+    this.tokenService = tokenService;
     if (!this.tenantUrl) throw new Error('SHAREPOINT_TENANT_URL env var is required');
   }
 
@@ -101,15 +106,8 @@ export class RealAcknowledgmentService implements IAcknowledgmentService {
   }
 
   private async getSP(): Promise<any> {
-    const token = await this.credential.getToken(`${new URL(this.tenantUrl).origin}/.default`);
-    return (spfi(this.tenantUrl) as any).using({
-      bind(instance: any) {
-        instance.on.auth.replace(async (_: unknown, req: Request, done: (request: Request) => void) => {
-          req.headers.set('Authorization', `Bearer ${token!.token}`);
-          done(req);
-        });
-      },
-    } as any);
+    const behavior = await createSharePointBearerTokenBehavior(this.tenantUrl, this.tokenService);
+    return (spfi(this.tenantUrl) as any).using(behavior);
   }
 }
 

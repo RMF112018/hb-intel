@@ -44,6 +44,16 @@ sharepoint/
 # Safety Record Keeping SharePoint adapter source — not an SPFx build artifact.
 !packages/features/safety/src/adapters/sharepoint/
 !packages/features/safety/src/adapters/sharepoint/**
+# Safety HBCentral list-schema reports are canonical docs and must be versioned.
+!docs/reference/sharepoint/
+!docs/reference/sharepoint/list-schemas/
+!docs/reference/sharepoint/list-schemas/hbcentral/
+!docs/reference/sharepoint/list-schemas/hbcentral/lists/
+!docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-reporting-periods.md
+!docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-project-week-records.md
+!docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-inspection-events.md
+!docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-findings.md
+!docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-ingestion-runs.md
 solution/
 *.sppkg
 

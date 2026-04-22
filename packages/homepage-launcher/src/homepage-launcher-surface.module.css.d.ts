@@ -18,6 +18,8 @@ declare const styles: {
   readonly drawerTitle: string;
   readonly drawerClose: string;
   readonly drawerBody: string;
+  readonly drawerEdgeControlLeft: string;
+  readonly drawerEdgeControlRight: string;
   readonly drawerRail: string;
   readonly drawerTileSlot: string;
   readonly visuallyHidden: string;

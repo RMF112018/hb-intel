@@ -52,6 +52,7 @@ All admin endpoints require `withAuth()` JWT authentication and are namespaced u
 | POST | `/api/admin/runs/preview` | `adminPreview` | Preview / dry-run |
 | GET | `/api/admin/config/{scope}` | `adminGetConfig` | Get config state |
 | GET | `/api/admin/actions` | `adminListActions` | List action metadata |
+| POST | `/api/admin/safety-records/provision-sharepoint` | `adminProvisionSafetyRecordKeepingSharePoint` | Idempotent Safety Record Keeping SharePoint provisioning (supports dry-run) |
 
 Request/response DTOs are defined in `@hbc/models/admin-control-plane` (Phase 2 contracts). See the [API contract catalog](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-api-contract-catalog.md) for full contract details.
 

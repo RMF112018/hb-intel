@@ -10,6 +10,7 @@ export default defineConfig(({ command }) => ({
     alias: [
       { find: '@hbc/auth/spfx', replacement: resolve(__dirname, '../../packages/auth/src/spfx/index.ts') },
       { find: '@hbc/auth', replacement: resolve(__dirname, '../../packages/auth/src/index.ts') },
+      { find: '@hbc/homepage-launcher', replacement: resolve(__dirname, '../../packages/homepage-launcher/src/index.ts') },
       { find: '@hbc/ui-kit/app-shell', replacement: resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts') },
       { find: '@hbc/ui-kit/homepage', replacement: resolve(__dirname, '../../packages/ui-kit/src/homepage.ts') },
       { find: '@hbc/ui-kit/primitives', replacement: resolve(__dirname, '../../packages/ui-kit/src/primitives.ts') },

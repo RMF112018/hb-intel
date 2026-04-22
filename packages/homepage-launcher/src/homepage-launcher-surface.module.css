@@ -51,6 +51,7 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
+  justify-content: center;
   gap: var(--launcher-gap);
   width: 100%;
   min-width: 0;
@@ -229,6 +230,7 @@
   padding: var(--launcher-pad-drawer-y) var(--launcher-pad-drawer-x) calc(var(--launcher-pad-drawer-y) + 4px);
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .drawerRail {
@@ -239,6 +241,42 @@
   overflow-y: hidden;
   padding-bottom: var(--launcher-rail-scroll-padding);
   scrollbar-width: none;
+}
+
+.drawerEdgeControlLeft,
+.drawerEdgeControlRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--launcher-border-soft);
+  border-radius: 999px;
+  background: rgba(var(--launcher-overlay-rgb), 0.28);
+  color: var(--launcher-text-inverse);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0.68;
+  transition: opacity var(--launcher-transition-fast) ease, background var(--launcher-transition-fast) ease;
+}
+
+.drawerEdgeControlLeft {
+  left: calc(var(--launcher-pad-drawer-x) - 2px);
+}
+
+.drawerEdgeControlRight {
+  right: calc(var(--launcher-pad-drawer-x) - 2px);
+}
+
+.drawerEdgeControlLeft:hover,
+.drawerEdgeControlLeft:focus-visible,
+.drawerEdgeControlRight:hover,
+.drawerEdgeControlRight:focus-visible {
+  opacity: 1;
+  background: rgba(var(--launcher-overlay-rgb), 0.46);
 }
 
 .drawerRail::-webkit-scrollbar {

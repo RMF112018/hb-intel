@@ -16,6 +16,7 @@
  *   POST   /api/admin/runs/preview                 — Preview / dry-run
  *   GET    /api/admin/config/{scope}               — Get config state
  *   GET    /api/admin/actions                      — List action metadata
+ *   POST   /api/admin/safety-records/provision-sharepoint — Provision bounded Safety Record Keeping SharePoint containers
  *
  * See: Phase 2 API contract catalog, Phase 3 Summary Plan (P3-04)
  *
@@ -45,6 +46,7 @@ import './observability-routes.js';
 // P9.1-04: White-glove device deployment routes (side-effect import for route registration)
 import './white-glove-routes.js';
 import './legacy-fallback-routes.js';
+import './safety-record-keeping-routes.js';
 
 // ── Launch Run ─────────────────────────────────────────────────────────────────
 

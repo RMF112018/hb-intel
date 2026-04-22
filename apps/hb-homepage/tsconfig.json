@@ -6,6 +6,8 @@
     "paths": {
       "@hbc/auth/spfx": ["packages/auth/src/spfx/index.ts"],
       "@hbc/auth": ["packages/auth/src/index.ts"],
+      "@hbc/homepage-launcher": ["packages/homepage-launcher/src/index.ts"],
+      "@hbc/homepage-launcher/*": ["packages/homepage-launcher/src/*"],
       "@hbc/ui-kit/app-shell": ["packages/ui-kit/src/app-shell.ts"],
       "@hbc/ui-kit/homepage": ["packages/ui-kit/src/homepage.ts"],
       "@hbc/ui-kit/primitives": ["packages/ui-kit/src/primitives.ts"],

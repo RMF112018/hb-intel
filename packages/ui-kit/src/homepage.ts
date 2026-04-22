@@ -126,6 +126,7 @@ export {
   Trophy,
   Sparkles,
   ThumbsUp,
+  Compass,
   ChevronDown,
   Eye,
   X,

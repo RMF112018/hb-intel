@@ -1,10 +1,11 @@
-import { Building2, GraduationCap, type LucideIcon } from '@hbc/ui-kit/homepage';
+import { Building2, Compass, GraduationCap, type LucideIcon } from '@hbc/ui-kit/homepage';
 import adpLogo from '../../../../hb-homepage/assets/icons/adp_logo.svg';
 import bambooHrLogo from '../../../../hb-homepage/assets/icons/bambooHR_white.svg';
 import compassLogo from '../../../../hb-homepage/assets/icons/compass_icon.svg';
 import documentCrunchLogo from '../../../../hb-homepage/assets/icons/document-crunch-logo.svg';
 import hh2Logo from '../../../../hb-homepage/assets/icons/hh2.svg';
 import procoreLogo from '../../../../hb-homepage/assets/icons/Primary_Procore_LogoMark_2Col-Black_RGB.svg';
+import sapConcurLogo from '../../../../hb-homepage/assets/icons/sap_concur_logo.svg';
 import type { PriorityActionsItemNormalized } from '../../homepage/data/priorityActionsContracts.js';
 
 export interface HomepageLauncherGovernedIcon {
@@ -25,9 +26,19 @@ const GOVERNED_ICON_BY_ACTION_KEY: Readonly<Record<string, HomepageLauncherGover
     iconKey: 'my-adp',
     iconPresentation: 'compliant',
   },
+  concur: {
+    iconAssetSrc: sapConcurLogo,
+    iconKey: 'concur',
+    iconPresentation: 'compliant',
+  },
   compass: {
     iconAssetSrc: compassLogo,
     iconKey: 'compass',
+    iconPresentation: 'compliant',
+  },
+  'employee-navigator': {
+    icon: Compass,
+    iconKey: 'employee-navigator-compass',
     iconPresentation: 'compliant',
   },
   bamboohr: {
@@ -61,6 +72,10 @@ const ALIASES: Readonly<Record<string, string>> = Object.freeze({
   'hb projects': 'hb-projects',
   adp: 'my-adp',
   'my adp': 'my-adp',
+  'sap concur': 'concur',
+  'sap-concur': 'concur',
+  'employee navigator': 'employee-navigator',
+  'employee-navigator': 'employee-navigator',
   'bamboo hr': 'bamboohr',
   documentcrunch: 'document-crunch',
   'document crunch': 'document-crunch',

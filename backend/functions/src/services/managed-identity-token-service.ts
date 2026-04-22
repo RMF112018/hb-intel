@@ -1,4 +1,5 @@
 import { DefaultAzureCredential } from '@azure/identity';
+import { BearerToken } from '@pnp/queryable';
 
 /**
  * P3-04: Service interface for app-only token acquisition via Managed Identity.
@@ -17,6 +18,63 @@ export interface IManagedIdentityTokenService {
    * Uses user-assigned Managed Identity (production) via DefaultAzureCredential — no user delegation.
    */
   acquireAppToken(scopes: string[]): Promise<string>;
+}
+
+export class SharePointTokenAcquisitionError extends Error {
+  readonly code = 'SHAREPOINT_TOKEN_ACQUISITION_FAILED';
+  readonly siteUrl: string;
+  readonly scope: string;
+  readonly remediation: string;
+  override readonly cause?: unknown;
+
+  constructor(input: {
+    siteUrl: string;
+    scope: string;
+    message: string;
+    remediation: string;
+    cause?: unknown;
+  }) {
+    super(input.message);
+    this.name = 'SharePointTokenAcquisitionError';
+    this.siteUrl = input.siteUrl;
+    this.scope = input.scope;
+    this.remediation = input.remediation;
+    this.cause = input.cause;
+  }
+}
+
+function formatTokenAcquisitionFailureMessage(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  return `Unable to acquire app-only SharePoint token: ${raw}`;
+}
+
+export function formatSharePointTokenAcquisitionDiagnostic(err: unknown): string {
+  if (err instanceof SharePointTokenAcquisitionError) {
+    return `${err.message} [scope=${err.scope}] [site=${err.siteUrl}] ${err.remediation}`;
+  }
+  return err instanceof Error ? err.message : String(err);
+}
+
+export async function createSharePointBearerTokenBehavior(
+  siteUrl: string,
+  tokenService: IManagedIdentityTokenService,
+): Promise<ReturnType<typeof BearerToken>> {
+  const origin = new URL(siteUrl).origin;
+  const scope = `${origin}/.default`;
+
+  try {
+    const token = await tokenService.getSharePointToken(siteUrl);
+    return BearerToken(token);
+  } catch (err) {
+    throw new SharePointTokenAcquisitionError({
+      siteUrl,
+      scope,
+      message: formatTokenAcquisitionFailureMessage(err),
+      remediation:
+        'Verify AZURE_TENANT_ID/AZURE_CLIENT_ID posture, app-only permissions consent, and outbound network access to login.microsoftonline.com.',
+      cause: err,
+    });
+  }
 }
 
 /**

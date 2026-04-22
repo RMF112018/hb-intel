@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
-import { ChevronDown, Layers, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Layers, X } from 'lucide-react';
 import { HOMEPAGE_LAUNCHER_SURFACE_ID, HOMEPAGE_LAUNCHER_VERSION } from './constants.js';
 import type {
   HomepageLauncherCapGovernance,
@@ -117,6 +117,10 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
   const dialogRef = React.useRef<HTMLDivElement | null>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const previousFocusRef = React.useRef<HTMLElement | null>(null);
+  const [drawerOverflowState, setDrawerOverflowState] = React.useState({
+    hasLeftOverflow: false,
+    hasRightOverflow: false,
+  });
 
   const closeDrawer = React.useCallback(() => {
     setOpen(false);
@@ -152,6 +156,51 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
       document.body.style.overflow = previousOverflow;
     };
   }, [open]);
+
+  const syncDrawerOverflowState = React.useCallback(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const maxScrollLeft = Math.max(rail.scrollWidth - rail.clientWidth, 0);
+    const hasLeftOverflow = rail.scrollLeft > 1;
+    const hasRightOverflow = rail.scrollLeft < maxScrollLeft - 1;
+    setDrawerOverflowState((previous) => {
+      if (
+        previous.hasLeftOverflow === hasLeftOverflow &&
+        previous.hasRightOverflow === hasRightOverflow
+      ) {
+        return previous;
+      }
+      return { hasLeftOverflow, hasRightOverflow };
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) {
+      setDrawerOverflowState({
+        hasLeftOverflow: false,
+        hasRightOverflow: false,
+      });
+      return;
+    }
+
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const animationFrame = window.requestAnimationFrame(syncDrawerOverflowState);
+    rail.addEventListener('scroll', syncDrawerOverflowState, { passive: true });
+
+    let resizeObserver: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => syncDrawerOverflowState());
+      resizeObserver.observe(rail);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      rail.removeEventListener('scroll', syncDrawerOverflowState);
+      resizeObserver?.disconnect();
+    };
+  }, [open, syncDrawerOverflowState, drawerItems.length]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -222,6 +271,20 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
     event.preventDefault();
     rail.scrollBy({ left: event.deltaY });
   }, []);
+
+  const handleDrawerEdgeNavigate = React.useCallback(
+    (direction: 'left' | 'right') => {
+      const rail = railRef.current;
+      if (!rail) return;
+      const pageDelta = Math.max(Math.round(rail.clientWidth * 0.72), 96);
+      const delta = direction === 'right' ? pageDelta : -pageDelta;
+      rail.scrollBy({
+        left: delta,
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
+    },
+    [reducedMotion],
+  );
 
   const triggerLabel = handheld ? 'HB Toolbox' : overflowLabel;
 
@@ -330,6 +393,26 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
               Company Tools drawer. Use arrow keys or swipe to move across launcher tiles.
             </p>
             <div className={styles.drawerBody} data-hbc-ui="homepage-launcher-overflow-sections">
+              {drawerOverflowState.hasLeftOverflow ? (
+                <button
+                  type="button"
+                  className={styles.drawerEdgeControlLeft}
+                  aria-label="Scroll launcher tools left"
+                  onClick={() => handleDrawerEdgeNavigate('left')}
+                >
+                  <ChevronLeft size={14} aria-hidden="true" />
+                </button>
+              ) : null}
+              {drawerOverflowState.hasRightOverflow ? (
+                <button
+                  type="button"
+                  className={styles.drawerEdgeControlRight}
+                  aria-label="Scroll launcher tools right"
+                  onClick={() => handleDrawerEdgeNavigate('right')}
+                >
+                  <ChevronRight size={14} aria-hidden="true" />
+                </button>
+              ) : null}
               <div
                 ref={railRef}
                 className={styles.drawerRail}

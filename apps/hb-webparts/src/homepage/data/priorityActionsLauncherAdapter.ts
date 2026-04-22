@@ -41,9 +41,9 @@ const LAUNCHER_PRIORITY_ORDER: ReadonlyArray<string> = [
   'hb-university',
   'procore',
   'compass',
+  'document-crunch',
   'bamboohr',
   'hh2',
-  'document-crunch',
 ] as const;
 
 const LAUNCHER_PRIORITY_INDEX: Readonly<Record<string, number>> = Object.freeze(
