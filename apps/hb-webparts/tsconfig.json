@@ -3,6 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
+      "@hbc/homepage-launcher": ["packages/homepage-launcher/src/index.ts"],
+      "@hbc/homepage-launcher/*": ["packages/homepage-launcher/src/*"],
       "@hbc/ui-kit/homepage": ["../../packages/ui-kit/src/homepage.ts"],
       "@hbc/ui-kit/theme": ["../../packages/ui-kit/src/theme/index.ts"],
       "@hbc/ui-kit/icons": ["../../packages/ui-kit/src/icons/index.tsx"],

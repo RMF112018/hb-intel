@@ -26,7 +26,7 @@ const WEBPART_MANIFEST_RUNTIME_COPY = resolve(
 );
 const LAUNCHER_CONSTANTS = resolve(
   ROOT,
-  'packages/ui-kit/src/HbcHomepageLauncher/constants.ts',
+  'packages/homepage-launcher/src/constants.ts',
 );
 
 interface PackageSolution {
@@ -48,7 +48,7 @@ describe('hb-intel-homepage version authority', () => {
   ) as WebpartManifest;
   const launcherConstantsSource = readFileSync(LAUNCHER_CONSTANTS, 'utf8');
   const launcherVersionMatch = launcherConstantsSource.match(
-    /HBC_HOMEPAGE_LAUNCHER_VERSION\s*=\s*'([^']+)'/,
+    /HOMEPAGE_LAUNCHER_VERSION\s*=\s*'([^']+)'/,
   );
 
   it('solution.version and features[0].version are identical', () => {

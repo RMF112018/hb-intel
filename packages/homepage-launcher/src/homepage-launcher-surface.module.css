@@ -1,0 +1,231 @@
+.surface {
+  --launcher-gap: 8px;
+  --launcher-tile-size: 104px;
+  --launcher-icon-size: 38px;
+  --launcher-caption-size: 0.69rem;
+  --launcher-caption-line-height: 1.2;
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: var(--launcher-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.tile {
+  width: var(--launcher-tile-size);
+  min-width: var(--launcher-tile-size);
+  height: var(--launcher-tile-size);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-items: center;
+  padding: 9px 8px 8px;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: transform 130ms ease, box-shadow 130ms ease;
+}
+
+.tile:hover {
+  transform: translateY(-1px);
+}
+
+.tilePrimary {
+  background: linear-gradient(150deg, #245b9b 0%, #173a68 100%);
+  box-shadow: 0 10px 22px rgba(11, 28, 52, 0.3);
+}
+
+.tileOverflow {
+  background: linear-gradient(150deg, #de7122 0%, #245b9b 100%);
+  box-shadow: 0 10px 22px rgba(99, 53, 18, 0.3);
+}
+
+.tileIcon {
+  width: var(--launcher-icon-size);
+  height: var(--launcher-icon-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tileIcon > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tileIconAsset {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.tileTitle {
+  font-size: var(--launcher-caption-size);
+  line-height: var(--launcher-caption-line-height);
+  text-align: center;
+  width: 100%;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.overflowButton {
+  font: inherit;
+  cursor: pointer;
+}
+
+.handheldTrigger {
+  width: 100%;
+  min-width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+.handheldLabel {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.handheldCount {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.drawerLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.drawerBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 10, 23, 0.72);
+}
+
+.drawer {
+  position: relative;
+  width: min(1100px, calc(100vw - 14px));
+  max-height: min(74vh, calc(100vh - 12px));
+  display: flex;
+  flex-direction: column;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 0;
+  background: linear-gradient(180deg, #143d6e 0%, #0e284a 100%);
+  color: #fff;
+  box-shadow: 0 -18px 44px rgba(2, 6, 23, 0.44);
+}
+
+.drawerHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.drawerTitle {
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.drawerClose {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.drawerBody {
+  padding: 12px 18px 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.drawerRail {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.drawerRail::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.drawerTileSlot {
+  display: block;
+  flex: 0 0 var(--launcher-tile-size);
+  min-width: var(--launcher-tile-size);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@container (max-width: 979px) {
+  .surface {
+    --launcher-tile-size: 92px;
+    --launcher-icon-size: 34px;
+    --launcher-caption-size: 0.66rem;
+  }
+}
+
+@container (max-width: 719px) {
+  .surface {
+    --launcher-tile-size: 84px;
+    --launcher-icon-size: 30px;
+    --launcher-caption-size: 0.62rem;
+  }
+}

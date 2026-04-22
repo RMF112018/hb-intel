@@ -4,7 +4,7 @@
  * Renders shared rail/list presentation through `HbcPriorityRailSurface`
  * for standalone, embedded, and admin-preview usage. The hosted homepage
  * wrapper runtime is governed by `HbHomepageEntryStack` +
- * `HbHomepageLauncherBand` + `HbcHomepageLauncher`, not by this webpart.
+ * `HbHomepageLauncherBand` + `HomepageLauncherSurface`, not by this webpart.
  */
 import * as React from 'react';
 import {

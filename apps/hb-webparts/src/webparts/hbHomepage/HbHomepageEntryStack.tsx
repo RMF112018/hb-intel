@@ -21,8 +21,8 @@ import styles from './HbHomepageEntryStack.module.css';
 //
 // The launcher band is rendered as a React surface via
 // `HbHomepageLauncherBand` which internally consumes the shared
-// Priority Actions data pipeline and feeds the `@hbc/ui-kit/homepage`
-// `HbcHomepageLauncher` surface. This replaces the earlier
+// Priority Actions data pipeline and feeds the dedicated
+// `@hbc/homepage-launcher` surface. This replaces the earlier
 // `PriorityActionsRail` flagship path — the rail remains available for
 // standalone / admin-preview mounts elsewhere but no longer governs
 // the homepage render tree.

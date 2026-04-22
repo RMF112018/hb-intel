@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const EXPECTED_LAUNCHER_VERSION = '1.1.67.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.72.0';
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
   'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-03-final-hosted-proof-matrix/handheld-closure',
@@ -74,7 +74,7 @@ test.describe('HB Homepage handheld closure proof', () => {
         await expect(drawer).toBeVisible();
         await expect(
           drawer.locator('[data-hbc-ui="homepage-launcher-drawer-rail"]').first(),
-        ).toHaveAttribute('data-hbc-launcher-drawer-layout', 'compact-grid');
+        ).toHaveAttribute('data-hbc-launcher-drawer-layout', 'single-row-tray');
         const handheldDrawerMetrics = await drawer.evaluate((el) => {
           const rect = el.getBoundingClientRect();
           const firstTile = el.querySelector('a[data-hbc-ui="homepage-launcher-tile"]') as HTMLElement | null;

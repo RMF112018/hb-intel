@@ -18,9 +18,9 @@ import type {
   AudienceMode,
 } from './priorityActionsContracts.js';
 import {
-  HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
+  HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
   type HomepageLauncherDeviceClass,
-} from '@hbc/ui-kit/homepage';
+} from '@hbc/homepage-launcher';
 import type { RawPriorityActionsItemRow } from './priorityActionsItemsListDescriptor.js';
 import {
   normalizeActionKey,
@@ -239,11 +239,11 @@ function toHomepageLauncherDeviceClass(device: DeviceClass): HomepageLauncherDev
 }
 
 export const LAUNCHER_VISIBLE_CAP: Readonly<Record<DeviceClass, number>> = Object.freeze({
-  desktop: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
-  laptop: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
-  tabletLandscape: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-landscape'],
-  tabletPortrait: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-portrait'],
-  phone: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.phone,
+  desktop: HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
+  laptop: HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
+  tabletLandscape: HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-landscape'],
+  tabletPortrait: HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-portrait'],
+  phone: HOMEPAGE_LAUNCHER_VISIBLE_COUNT.phone,
 });
 
 export type LauncherBreakpointMode = 'standard-row' | 'single-entry-all-tools';
@@ -263,8 +263,8 @@ export function getLauncherVisibleCap(
 ): number {
   if (mode === 'single-entry-all-tools') return 1;
   return (
-    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[toHomepageLauncherDeviceClass(device)] ??
-    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop
+    HOMEPAGE_LAUNCHER_VISIBLE_COUNT[toHomepageLauncherDeviceClass(device)] ??
+    HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop
   );
 }
 

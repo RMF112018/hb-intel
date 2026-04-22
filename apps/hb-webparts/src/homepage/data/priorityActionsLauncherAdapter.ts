@@ -1,9 +1,9 @@
 /**
- * Adapter: Priority Actions normalized items → HbcHomepageLauncher chips.
+ * Adapter: Priority Actions normalized items → dedicated homepage launcher tiles.
  *
  * Bridges the shared Priority Actions data pipeline
  * (`usePriorityActionsData` + normalization + filtering) to the new
- * `@hbc/ui-kit/homepage` launcher band contract.
+ * `@hbc/homepage-launcher` surface contract.
  *
  * The launcher band governs visible-chip density explicitly per device
  * class (binding per UI-Doctrine-SPFx-Homepage-Overlay § 7.1–7.4),
@@ -25,11 +25,13 @@ import {
   Shield,
   Users,
   type LucideIcon,
-  HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
+} from '@hbc/ui-kit/homepage';
+import {
+  HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
   type HomepageLauncherTileModel,
   type HomepageLauncherDeviceClass,
   type HomepageLauncherOverflowSectionModel,
-} from '@hbc/ui-kit/homepage';
+} from '@hbc/homepage-launcher';
 import type { PriorityActionsItemNormalized } from './priorityActionsContracts.js';
 import type { PriorityRailDeviceResolution } from './priorityActionsPresentation.js';
 import { resolveHomepageLauncherGovernedIcon } from '../../webparts/hbHomepage/launcherIconRegistry.js';
@@ -300,7 +302,7 @@ export function partitionItems(
       : 'standard');
   const maxVisible = Math.max(
     1,
-    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[deviceClass] - (resolution.shortHeightConstrained ? 1 : 0),
+    HOMEPAGE_LAUNCHER_VISIBLE_COUNT[deviceClass] - (resolution.shortHeightConstrained ? 1 : 0),
   );
 
   const forced: PriorityActionsItemNormalized[] = [];

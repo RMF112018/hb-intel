@@ -2,7 +2,7 @@
  * Priority Actions presentation — launcher band.
  *
  * Shared presentation helpers for two adjacent surfaces:
- * - homepage launcher band (`HbHomepageLauncherBand` + `HbcHomepageLauncher`)
+ * - homepage launcher band (`HbHomepageLauncherBand` + `HomepageLauncherSurface`)
  * - standalone rail webpart (`PriorityActionsRail` + `HbcPriorityRailSurface`)
  *
  * The hosted homepage authority is the launcher band path above. This file

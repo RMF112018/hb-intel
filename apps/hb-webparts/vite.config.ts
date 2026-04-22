@@ -11,6 +11,10 @@ export default defineConfig(({ command }) => ({
     alias: {
       '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/auth': resolve(__dirname, '../../packages/auth/src/index.ts'),
+      '@hbc/homepage-launcher': resolve(
+        __dirname,
+        '../../packages/homepage-launcher/src/index.ts',
+      ),
       '@hbc/ui-kit/branding': resolve(__dirname, '../../packages/ui-kit/src/branding/index.ts'),
       '@hbc/ui-kit/homepage': resolve(__dirname, '../../packages/ui-kit/src/homepage.ts'),
       '@hbc/ui-kit/icons': resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx'),

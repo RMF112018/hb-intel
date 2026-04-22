@@ -197,7 +197,21 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@hbc/ui-kit/homepage')>();
   return {
     ...actual,
-    HbcHomepageLauncher: (props: {
+    HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
+    HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
+    HbcPriorityRailSkeleton: (props: { count: number }): React.JSX.Element =>
+      React.createElement('div', {
+        'data-test-skeleton': 'mock',
+        'data-test-skeleton-count': props.count,
+      }),
+  };
+});
+
+vi.mock('@hbc/homepage-launcher', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@hbc/homepage-launcher')>();
+  return {
+    ...actual,
+    HomepageLauncherSurface: (props: {
       title?: string;
       primary: unknown[];
       overflow: unknown[];
@@ -209,13 +223,6 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
         'data-test-primary-count': props.primary.length,
         'data-test-overflow-count': props.overflow.length,
         'data-test-handheld-mode': props.handheldMode,
-      }),
-    HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
-    HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
-    HbcPriorityRailSkeleton: (props: { count: number }): React.JSX.Element =>
-      React.createElement('div', {
-        'data-test-skeleton': 'mock',
-        'data-test-skeleton-count': props.count,
       }),
   };
 });

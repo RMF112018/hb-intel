@@ -3,10 +3,10 @@
  *
  * Replaces the earlier `<PriorityActionsRail surfaceContext="homepage-flagship">`
  * that rendered a vertical tile grid beneath the hero. Renders the new
- * `@hbc/ui-kit/homepage` launcher surface (horizontal chip band) using
+ * `@hbc/homepage-launcher` surface using
  * the same Priority Actions data pipeline — list-driven items, audience
  * filter, schedule filter, device filter — fed through an adapter that
- * maps to the launcher's chip contract and partitions chips into
+ * maps to the launcher's tile contract and partitions tiles into
  * primary + overflow per the binding visible-count matrix.
  *
  * Data seams preserved: `usePriorityActionsData`, `filterByDevice`,
@@ -16,12 +16,14 @@
  */
 import * as React from 'react';
 import {
-  HbcHomepageLauncher,
   HbcPriorityRailEmptyState,
   HbcPriorityRailErrorState,
   HbcPriorityRailSkeleton,
-  type HomepageLauncherDeviceClass,
 } from '@hbc/ui-kit/homepage';
+import {
+  HomepageLauncherSurface,
+  type HomepageLauncherDeviceClass,
+} from '@hbc/homepage-launcher';
 import {
   usePriorityActionsData,
   invalidatePriorityActionsCache,
@@ -135,7 +137,7 @@ export function HbHomepageLauncherBand({
       content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
     } else {
       content = (
-        <HbcHomepageLauncher
+        <HomepageLauncherSurface
           primary={partition.primary}
           overflow={partition.overflow}
           overflowLabel={config.overflowLabel || 'More tools'}
