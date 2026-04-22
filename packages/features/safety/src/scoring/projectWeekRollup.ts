@@ -6,9 +6,16 @@ export interface ProjectWeekRollup {
   readonly highestRiskFindingLevel: FindingSeverity | null;
 }
 
+/**
+ * Minimal finding shape used by the rollup. Accepts any object carrying
+ * `severity` — the pipeline synthesises in-flight finding sketches from
+ * draft findings without allocating full `SafetyFinding` records.
+ */
+export type RollupFinding = Pick<SafetyFinding, 'severity'>;
+
 export function computeProjectWeekRollup(
   inspections: ReadonlyArray<SafetyInspectionEvent>,
-  findings: ReadonlyArray<SafetyFinding>,
+  findings: ReadonlyArray<RollupFinding>,
 ): ProjectWeekRollup {
   const accepted = inspections.filter(
     (i) => i.ingestionStatus === 'accepted' || i.ingestionStatus === 'duplicate-suspected',

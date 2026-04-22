@@ -26,14 +26,15 @@ import type {
   UploadContext,
 } from '../../domain/types.js';
 import { SAFETY_SITE_URL } from '../../lists/descriptors.js';
-import type {
-  ISafetyInspectionRepository,
-  IngestionRunFilter,
-  InspectionFilter,
-  ProjectWeekFilter,
-  ProjectWeekInspectionFilter,
-  ReplayOptions,
-  ReviewQueueEntry,
+import {
+  REVIEW_QUEUE_TERMINAL_STATUSES,
+  type ISafetyInspectionRepository,
+  type IngestionRunFilter,
+  type InspectionFilter,
+  type ProjectWeekFilter,
+  type ProjectWeekInspectionFilter,
+  type ReplayOptions,
+  type ReviewQueueEntry,
 } from '../../ports/ISafetyInspectionRepository.js';
 import {
   resolveDescriptor,
@@ -166,6 +167,9 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
   ): Promise<ReadonlyArray<SafetyIngestionRun>> {
     const desc = this.boundDescriptor('SafetyIngestionRuns');
     const filters: string[] = [];
+    if (filter.reportingPeriodId) {
+      filters.push(`ReportingPeriodId eq ${spItemIdFromString(filter.reportingPeriodId)}`);
+    }
     if (filter.terminalStatus && filter.terminalStatus.length > 0) {
       const clauses = filter.terminalStatus.map((s) => `TerminalStatus eq '${s}'`);
       filters.push(`(${clauses.join(' or ')})`);
@@ -180,7 +184,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
   async listReviewQueue(reportingPeriodId?: string): Promise<ReadonlyArray<ReviewQueueEntry>> {
     const runs = await this.listIngestionRuns({
       reportingPeriodId,
-      terminalStatus: ['review-required', 'invalid-template', 'commit-failed'],
+      terminalStatus: REVIEW_QUEUE_TERMINAL_STATUSES,
     });
     return runs.map((run) => {
       const committed = safeParse(run.committedEntityIdsJson);
@@ -281,6 +285,19 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
         this.resolveProject(projectSiteText, projectNumberHint ?? undefined),
       findInspectionsForProjectWeek: async (filter: ProjectWeekInspectionFilter) =>
         this.findInspectionsForProjectWeek(filter),
+      findFindingsForProjectWeek: async (filter: { projectWeekRecordSpItemId: number }) => {
+        const desc = this.boundDescriptor('SafetyFindings');
+        const query = `?$top=500&$select=Id,InspectionEventId,Severity&$filter=ProjectWeekRecordId eq ${filter.projectWeekRecordSpItemId}`;
+        const items = await this.fetchItems<{
+          Id: number;
+          InspectionEventId: number;
+          Severity: SafetyFinding['severity'];
+        }>(desc, query);
+        return items.map((raw) => ({
+          severity: raw.Severity,
+          inspectionEventId: `ie-${raw.InspectionEventId}`,
+        }));
+      },
       resolveReportingPeriod: async (reportingPeriodId: string) =>
         this.getReportingPeriod(reportingPeriodId),
       ensureProjectWeekRecord: async (

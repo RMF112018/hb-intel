@@ -1,5 +1,6 @@
 import type {
   IngestionRunResult,
+  IngestionTerminalStatus,
   SafetyFinding,
   SafetyIngestionRun,
   SafetyInspectionEvent,
@@ -7,6 +8,23 @@ import type {
   SafetyReportingPeriod,
   UploadContext,
 } from '../domain/types.js';
+
+/**
+ * The exact terminal statuses that surface in the operational review queue.
+ * `committed` is the only non-reviewable terminal.
+ *
+ * Shared by both the mock and SharePoint adapters so the UI copy in
+ * `apps/safety/src/pages/ReviewQueuePage.tsx` stays aligned with the
+ * real backend query.
+ */
+export const REVIEW_QUEUE_TERMINAL_STATUSES: ReadonlyArray<IngestionTerminalStatus> = [
+  'review-required',
+  'invalid-template',
+  'parse-error',
+  'reporting-period-mismatch',
+  'unresolved-project',
+  'commit-failed',
+];
 
 export interface InspectionFilter {
   readonly reportingPeriodId?: string;

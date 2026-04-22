@@ -10,14 +10,15 @@ import type {
   UploadContext,
   UploadedWorkbookRef,
 } from '../../domain/types.js';
-import type {
-  ISafetyInspectionRepository,
-  IngestionRunFilter,
-  InspectionFilter,
-  ProjectWeekFilter,
-  ProjectWeekInspectionFilter,
-  ReplayOptions,
-  ReviewQueueEntry,
+import {
+  REVIEW_QUEUE_TERMINAL_STATUSES,
+  type ISafetyInspectionRepository,
+  type IngestionRunFilter,
+  type InspectionFilter,
+  type ProjectWeekFilter,
+  type ProjectWeekInspectionFilter,
+  type ReplayOptions,
+  type ReviewQueueEntry,
 } from '../../ports/ISafetyInspectionRepository.js';
 import { runIngestionPipeline } from '../../ingestion/runIngestionPipeline.js';
 import type { IngestionAdapter } from '../../ingestion/runIngestionPipeline.js';
@@ -164,16 +165,8 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   }
 
   async listReviewQueue(reportingPeriodId?: string): Promise<ReadonlyArray<ReviewQueueEntry>> {
-    const reviewStatuses: ReadonlyArray<string> = [
-      'review-required',
-      'invalid-template',
-      'parse-error',
-      'reporting-period-mismatch',
-      'unresolved-project',
-      'commit-failed',
-    ];
     const runs = await this.listIngestionRuns({
-      terminalStatus: reviewStatuses,
+      terminalStatus: REVIEW_QUEUE_TERMINAL_STATUSES,
       reportingPeriodId,
     });
     return runs.map((run) => {
@@ -304,6 +297,10 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
       },
       findInspectionsForProjectWeek: async (filter) =>
         this.findInspectionsForProjectWeek(filter),
+      findFindingsForProjectWeek: async (filter) =>
+        this.findings
+          .filter((f) => f.projectWeekRecordSpItemId === filter.projectWeekRecordSpItemId)
+          .map((f) => ({ severity: f.severity, inspectionEventId: f.inspectionEventId })),
       resolveReportingPeriod: async (reportingPeriodId) =>
         this.getReportingPeriod(reportingPeriodId),
       ensureProjectWeekRecord: async (

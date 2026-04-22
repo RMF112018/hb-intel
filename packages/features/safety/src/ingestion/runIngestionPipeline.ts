@@ -24,6 +24,7 @@ import {
   type IngestionRunResult,
   type ParsedInspection,
   type ProjectResolutionResult,
+  type SafetyFinding,
   type SafetyFindingDraft,
   type SafetyIngestionRun,
   type SafetyIngestionRunDraft,
@@ -52,6 +53,16 @@ export interface IngestionAdapter {
     projectNumber: string;
     reportingPeriodId: string;
   }): Promise<ReadonlyArray<SafetyInspectionEvent>>;
+  /**
+   * Prior findings attached to a project-week, used for correct
+   * `HighestRiskFindingLevel` derivation on the commit path. Intentionally
+   * pipeline-internal — not on the public repository port.
+   */
+  findFindingsForProjectWeek(filter: {
+    projectWeekRecordSpItemId: number;
+  }): Promise<
+    ReadonlyArray<Pick<SafetyFinding, 'severity' | 'inspectionEventId'>>
+  >;
   /** Look up a reporting period by id so the pipeline can validate the workbook date. */
   resolveReportingPeriod(
     reportingPeriodId: string,
@@ -330,11 +341,39 @@ export async function runIngestionPipeline(
 
     // Week-scoped rollup input: all accepted/duplicate-suspected events in the
     // reporting period for this project, plus the in-flight event (pre-persist).
+    const supersededPriorId =
+      supersedePrior && duplicate.matchedId ? duplicate.matchedId : undefined;
     const rolledInspections: SafetyInspectionEvent[] = weeklyInspections.filter(
-      (ie) => !(supersedePrior && duplicate.matchedId && ie.id === duplicate.matchedId),
+      (ie) => ie.id !== supersededPriorId,
     );
     rolledInspections.push({ id: 'in-flight', spItemId: 0, ...inspectionEventDraft });
-    const rollup = computeProjectWeekRollup(rolledInspections, []);
+
+    // Findings included in `HighestRiskFindingLevel`:
+    //   - previously-committed findings for this project-week whose parent
+    //     inspection event is still in the included set (i.e. not superseded,
+    //     not the supersede-target),
+    //   - plus findings for the in-flight commit.
+    // Skip the prior-findings fetch when the project-week is brand-new
+    // (spItemId === 0 means it has not been persisted yet).
+    const excludedParentIds = new Set(
+      weeklyInspections
+        .filter((ie) => ie.ingestionStatus === 'superseded' || ie.id === supersededPriorId)
+        .map((ie) => ie.id),
+    );
+    const priorFindings =
+      projectWeek.spItemId > 0
+        ? await adapter.findFindingsForProjectWeek({
+            projectWeekRecordSpItemId: projectWeek.spItemId,
+          })
+        : [];
+    const includedPriorFindings = priorFindings.filter(
+      (f) => !excludedParentIds.has(f.inspectionEventId),
+    );
+    const inFlightFindings = findingDrafts.map((draft) => ({ severity: draft.severity }));
+    const rollup = computeProjectWeekRollup(rolledInspections, [
+      ...includedPriorFindings,
+      ...inFlightFindings,
+    ]);
     const updatedProjectWeek: SafetyProjectWeekRecord = {
       ...projectWeek,
       inspectionCount: rollup.inspectionCount,

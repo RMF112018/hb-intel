@@ -100,6 +100,7 @@ export type {
   IngestionRunFilter,
   ReviewQueueEntry,
 } from './ports/ISafetyInspectionRepository.js';
+export { REVIEW_QUEUE_TERMINAL_STATUSES } from './ports/ISafetyInspectionRepository.js';
 export { MockSafetyInspectionRepository } from './adapters/mock/MockSafetyInspectionRepository.js';
 export { SharePointSafetyInspectionRepository } from './adapters/sharepoint/SharePointSafetyInspectionRepository.js';
 export type { SharePointAdapterOptions } from './adapters/sharepoint/SharePointSafetyInspectionRepository.js';

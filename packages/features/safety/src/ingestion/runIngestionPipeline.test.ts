@@ -58,6 +58,7 @@ function makeAdapter(overrides: Partial<IngestionAdapter> = {}): {
   const adapter: IngestionAdapter = {
     resolveProject: vi.fn(async () => resolvedProject()),
     findInspectionsForProjectWeek: vi.fn(async () => persistedInspections),
+    findFindingsForProjectWeek: vi.fn(async () => []),
     resolveReportingPeriod: vi.fn(async () => null),
     markInspectionSuperseded: vi.fn(async () => undefined),
     ensureProjectWeekRecord: vi.fn(
