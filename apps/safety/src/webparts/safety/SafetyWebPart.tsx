@@ -15,6 +15,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { createRoot, type Root } from 'react-dom/client';
 import { App } from '../../App.js';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
+import { bindHostedSafetyGuidOverlay } from '../../runtime/hostedSafetyGuidBinding.js';
 
 export interface ISafetyWebPartProps {
   description: string;
@@ -39,6 +40,7 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
    */
   public async onInit(): Promise<void> {
     await super.onInit();
+    bindHostedSafetyGuidOverlay();
     const permissionKeys = await resolveSpfxPermissions(this.context);
     await bootstrapSpfxAuth(this.context, permissionKeys);
   }

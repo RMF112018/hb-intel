@@ -57,10 +57,10 @@ function makeFakeClient(): {
           value: [
             {
               Id: 500,
-              ProjectNumber: '2024-118',
-              ProjectName: 'Riverside',
-              ProjectLocation: 'WPB',
-              ProjectStage: 'Construction',
+              field_2: '2024-118',
+              field_3: 'Riverside',
+              field_4: 'WPB',
+              field_6: 'Construction',
             },
           ],
         });
@@ -280,6 +280,18 @@ describe('SharePoint adapter Lookup payload contract (W1 G2)', () => {
       c.url.includes("getbytitle('Legacy Project Fallback Registry')"),
     );
     expect(anyLegacyGetByTitle).toBeFalsy();
+    expect(projectsLookup?.url).toContain('$select=Id,field_2,field_3,field_4,field_6');
+    expect(projectsLookup?.url).toContain("$filter=field_2 eq '2024-118'");
+    expect(projectsLookup?.url).not.toContain('ProjectNumber');
+    const pwPost = calls.find(
+      (c) =>
+        c.method === 'POST' &&
+        c.url.includes(`lists(guid'${PW_GUID}')/items`) &&
+        !c.url.includes(')/items('),
+    );
+    expect((pwPost?.body as Record<string, unknown>)?.ProjectNameSnapshot).toBe('Riverside');
+    expect((pwPost?.body as Record<string, unknown>)?.ProjectLocationSnapshot).toBe('WPB');
+    expect((pwPost?.body as Record<string, unknown>)?.ProjectStageSnapshot).toBe('Construction');
   });
 
   it('ingestion-run POST carries all required audit fields', async () => {

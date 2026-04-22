@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   HbcBanner,
   HbcButton,
@@ -10,11 +10,18 @@ import {
 } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 import {
+  isSafetyAdapterFetchError,
+  isSafetyConfigurationError,
   useReportingPeriods,
   useSafetyIngestion,
   type IngestionRunResult,
 } from '@hbc/features-safety';
-import { SafetyMasthead, SafetySectionHeader } from '../components/index.js';
+import {
+  SafetyFileInput,
+  SafetyMasthead,
+  SafetySectionHeader,
+  SafetyStatusPanel,
+} from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -27,7 +34,6 @@ export function UploadPage(): ReactNode {
   const periodsQuery = useReportingPeriods();
   const periods = periodsQuery.data ?? [];
   const ingestion = useSafetyIngestion();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [reportingPeriodId, setReportingPeriodId] = useState<string>('');
 
@@ -35,10 +41,6 @@ export function UploadPage(): ReactNode {
     () => periods.find((p) => p.id === reportingPeriodId) ?? periods[0],
     [periods, reportingPeriodId],
   );
-
-  const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
 
   const handleSubmit = () => {
     if (!file || !activePeriod) return;
@@ -74,10 +76,18 @@ export function UploadPage(): ReactNode {
                 <SafetySectionHeader title="Workbook intake" />
 
                 {periodsQuery.isError && (
-                  <HbcBanner variant="error">
-                    Could not load reporting periods. Submission is disabled until the period list
-                    is available.
-                  </HbcBanner>
+                  <SafetyStatusPanel
+                    intent="blocked"
+                    data-safety-ui="upload-periods-blocked"
+                    description={reportingPeriodLoadMessage(periodsQuery.error)}
+                    action={{
+                      label: 'Retry loading periods',
+                      variant: 'secondary',
+                      onClick: () => void periodsQuery.refetch(),
+                      isPending: periodsQuery.isFetching,
+                      pendingLabel: 'Retrying…',
+                    }}
+                  />
                 )}
 
                 <div className="safety-filter-bar">
@@ -96,29 +106,14 @@ export function UploadPage(): ReactNode {
                 </div>
 
                 <div className="safety-upload__drop-zone">
-                  <HbcTypography intent="label">Checklist workbook (.xlsx)</HbcTypography>
-                  {/* eslint-disable @hb-intel/hbc/no-raw-form-elements, @hb-intel/hbc/no-inline-styles -- Release 1 hidden file picker; no HbcFileInput primitive exists yet and the hidden-input pattern requires `display: none` to stay tab-inert. */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
+                  <SafetyFileInput
+                    label="Checklist workbook (.xlsx)"
                     accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    style={{ display: 'none' }}
-                    aria-label="Choose safety checklist workbook"
+                    selectedFile={file}
+                    onFileSelected={setFile}
+                    onClear={() => setFile(null)}
+                    disabled={periodsQuery.isError}
                   />
-                  {/* eslint-enable @hb-intel/hbc/no-raw-form-elements, @hb-intel/hbc/no-inline-styles */}
-                  <div className="safety-upload__drop-zone-row">
-                    <HbcButton
-                      variant="secondary"
-                      onClick={handleFileSelect}
-                      aria-label="Choose a safety checklist workbook to upload"
-                    >
-                      Choose file
-                    </HbcButton>
-                    <HbcTypography intent="bodySmall">
-                      {file ? file.name : 'No file selected'}
-                    </HbcTypography>
-                  </div>
                 </div>
 
                 <div>
@@ -139,7 +134,12 @@ export function UploadPage(): ReactNode {
 
                 {ingestion.data && <IngestionResultBanner result={ingestion.data} />}
                 {ingestion.error && (
-                  <HbcBanner variant="error">Upload failed: {ingestion.error.message}</HbcBanner>
+                  <SafetyStatusPanel
+                    intent="partial-failure"
+                    data-safety-ui="upload-ingestion-error"
+                    description="Upload failed."
+                    detail={ingestion.error.message}
+                  />
                 )}
               </div>
             </HbcCard>
@@ -239,4 +239,24 @@ function IngestionResultBanner({ result }: { result: IngestionRunResult }): Reac
       </div>
     </HbcBanner>
   );
+}
+
+function reportingPeriodLoadMessage(error: unknown): string {
+  if (isSafetyConfigurationError(error)) {
+    return (
+      `Could not load reporting periods because safety list binding is incomplete ` +
+      `(${error.listName}${error.descriptorKey ? ` / ${error.descriptorKey}` : ''}). ` +
+      'Submission is disabled until hosted list GUID binding is fixed.'
+    );
+  }
+  if (isSafetyAdapterFetchError(error)) {
+    return (
+      `Could not load reporting periods from ${error.listName} ` +
+      `(${error.httpStatus}). Submission is disabled until the data source is reachable.`
+    );
+  }
+  if (error instanceof Error && error.message) {
+    return `Could not load reporting periods. Submission is disabled: ${error.message}`;
+  }
+  return 'Could not load reporting periods. Submission is disabled until the period list is available.';
 }

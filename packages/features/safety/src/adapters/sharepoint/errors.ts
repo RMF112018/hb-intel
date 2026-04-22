@@ -20,10 +20,12 @@
  */
 export class SafetyConfigurationError extends Error {
   readonly listName: string;
-  constructor(listName: string, message: string) {
+  readonly descriptorKey?: string;
+  constructor(listName: string, message: string, descriptorKey?: string) {
     super(message);
     this.name = 'SafetyConfigurationError';
     this.listName = listName;
+    this.descriptorKey = descriptorKey;
   }
 }
 

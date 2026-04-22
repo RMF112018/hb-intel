@@ -53,6 +53,13 @@ const VERBOSE_HEADERS = {
   'Content-Type': 'application/json;odata=verbose',
 } as const;
 
+const PROJECTS_FIELD = {
+  NUMBER: 'field_2',
+  NAME: 'field_3',
+  LOCATION: 'field_4',
+  STAGE: 'field_6',
+} as const;
+
 export interface SharePointAdapterOptions {
   readonly client: SpHttpClient;
 }
@@ -363,7 +370,11 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     if (!projectNumber) return null;
 
     const projectsDesc = resolveDescriptor('Projects');
-    const projectsEndpoint = `${projectsDesc.siteUrl}/_api/web/lists(guid'${projectsDesc.id}')/items?$select=Id,ProjectNumber,ProjectName,ProjectLocation,ProjectStage&$top=1&$filter=ProjectNumber eq '${escapeODataString(projectNumber)}'`;
+    const projectsEndpoint =
+      `${projectsDesc.siteUrl}/_api/web/lists(guid'${projectsDesc.id}')/items` +
+      `?$select=Id,${PROJECTS_FIELD.NUMBER},${PROJECTS_FIELD.NAME},` +
+      `${PROJECTS_FIELD.LOCATION},${PROJECTS_FIELD.STAGE}` +
+      `&$top=1&$filter=${PROJECTS_FIELD.NUMBER} eq '${escapeODataString(projectNumber)}'`;
     const projectsResp = await this.client.get(projectsEndpoint, { headers: JSON_HEADERS });
     if (projectsResp.ok) {
       const body = (await projectsResp.json()) as { value?: RawProjectRef[] };
@@ -371,10 +382,10 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
       if (match) {
         return {
           classification: 'project',
-          projectNumber: match.ProjectNumber ?? projectNumber,
-          projectNameSnapshot: match.ProjectName ?? '',
-          projectLocationSnapshot: match.ProjectLocation ?? '',
-          projectStageSnapshot: match.ProjectStage ?? '',
+          projectNumber: match.field_2 ?? projectNumber,
+          projectNameSnapshot: match.field_3 ?? '',
+          projectLocationSnapshot: match.field_4 ?? '',
+          projectStageSnapshot: match.field_6 ?? '',
           projectLookupId: match.Id,
         };
       }
@@ -913,10 +924,10 @@ function mapIngestionRun(raw: RawIngestionRun): SafetyIngestionRun {
 
 interface RawProjectRef {
   Id: number;
-  ProjectNumber?: string;
-  ProjectName?: string;
-  ProjectLocation?: string;
-  ProjectStage?: string;
+  field_2?: string;
+  field_3?: string;
+  field_4?: string;
+  field_6?: string;
 }
 
 interface RawLegacyRef {

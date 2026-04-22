@@ -11,6 +11,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { App } from './App.js';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
+import { bindHostedSafetyGuidOverlay } from './runtime/hostedSafetyGuidBinding.js';
 
 /** Shell-injected runtime configuration. Reserved for future wiring. */
 export interface IMountConfig {
@@ -28,6 +29,7 @@ export async function mount(
   _config?: IMountConfig,
 ): Promise<void> {
   if (spfxContext) {
+    bindHostedSafetyGuidOverlay();
     const permissionKeys = await resolveSpfxPermissions(spfxContext);
     await bootstrapSpfxAuth(spfxContext, permissionKeys);
   }

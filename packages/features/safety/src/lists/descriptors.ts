@@ -129,10 +129,10 @@ export const ProjectsReferenceList = descriptor(
   'Projects',
   'Canonical HB Intel project registry (source of truth for project resolution).',
   [
-    'ProjectNumber',
-    'ProjectName',
-    'ProjectLocation',
-    'ProjectStage',
+    'field_2',
+    'field_3',
+    'field_4',
+    'field_6',
     'projectExecutiveUpn',
     'projectManagerUpn',
   ],
@@ -191,6 +191,7 @@ export function resolveDescriptor(key: SafetyOverlayKey): SiteScopedListDescript
       `Safety list "${base.title}" (key "${key}") is bound to the zero GUID. ` +
         'Populate the list GUID via `configureSafetyListGuids()` at tenant-provisioning time ' +
         'before using this adapter in production.',
+      key,
     );
   }
   return effective;

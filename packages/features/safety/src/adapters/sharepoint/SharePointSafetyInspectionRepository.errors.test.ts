@@ -102,6 +102,7 @@ describe('SharePointSafetyInspectionRepository — typed error taxonomy', () => 
       // The error must name the specific list that is unconfigured — this is
       // the single most actionable diagnostic for a hosted overlay gap.
       expect(err.listName).toBe('Safety Project Week Records');
+      expect(err.descriptorKey).toBe('SafetyProjectWeekRecords');
       expect(err.message).toMatch(/Safety Project Week Records/);
       expect(err.message).toMatch(/zero GUID/);
     });
