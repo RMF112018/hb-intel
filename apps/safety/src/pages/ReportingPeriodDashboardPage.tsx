@@ -11,11 +11,22 @@ import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import type { KpiCardData } from '@hbc/models';
 import { useProjectWeeks, useReportingPeriods } from '@hbc/features-safety';
 import type { SafetyProjectWeekRecord } from '@hbc/features-safety';
-import { SafetyMasthead, SafetyStatusPanel } from '../components/index.js';
+import {
+  SafetyMasthead,
+  SafetyPeriodHealthPanel,
+  SafetyPriorityProjects,
+  SafetySectionHeader,
+  SafetyStatStrip,
+  SafetyStatusPanel,
+} from '../components/index.js';
 import {
   derivePeriodsDashboardState,
   type PeriodsDashboardState,
 } from './periodsDashboardState.js';
+import {
+  classifyPeriodHealth,
+  rankProjectWeeks,
+} from './reportingPeriodDashboardDerivation.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -24,16 +35,20 @@ function formatPercent(value: number | null): string {
   return `${Math.round(value * 100)}%`;
 }
 
-function statusVariantFor(status: string): StatusVariant {
+function publishStatusVariantFor(status: string): StatusVariant {
   switch (status) {
     case 'published':
       return 'success';
-    case 'pending':
-      return 'pending';
-    case 'in-review':
+    case 'review-required':
       return 'atRisk';
-    case 'draft':
-      return 'draft';
+    case 'completed':
+      return 'info';
+    case 'in-progress':
+      return 'info';
+    case 'awaiting-upload':
+      return 'pending';
+    case 'not-started':
+      return 'neutral';
     default:
       return 'neutral';
   }
@@ -53,13 +68,30 @@ function riskVariantFor(level: string | null): StatusVariant {
 }
 
 /**
- * ReportingPeriodDashboardPage — Phase-3 root-cause remediation.
+ * ReportingPeriodDashboardPage — Phase-04 audit G-04 dashboard recomposition.
  *
- * The page no longer collapses `periods.isError || projectWeeks.isError`
- * into one lie ("Failed to load reporting periods."). It consumes the
- * pure `derivePeriodsDashboardState` helper to distinguish fatal-parent,
- * subordinate-dependent, true-empty, and ready states, and routes retries
- * to the actual failing seam.
+ * Layout order (top → bottom), when state.variant === 'ready':
+ *   1. Masthead (period-health chip in meta)
+ *   2. SafetyPeriodHealthPanel (authored operational summary)
+ *   3. SafetyPriorityProjects (attention list, drill-in cards)
+ *   4. SafetyStatStrip (supporting KPI layer, in body — the previous
+ *      dashboardConfig-based KPI row is removed so KPIs support the
+ *      story rather than lead it)
+ *   5. HbcDataTable under "All project-weeks in this reporting period"
+ *      (supporting coverage)
+ *
+ * Empty-state split (locked):
+ *   - state.variant === 'empty': render SafetyStatusPanel intent="empty"
+ *     only; health panel / priority projects / stat strip / table are
+ *     not rendered.
+ *   - Priority-list secondary-empty ("Nothing flagged…") renders inside
+ *     SafetyPriorityProjects only when project-weeks exist but none cross
+ *     prioritization thresholds — never stacks with the page-empty posture.
+ *
+ * WorkspacePageShell continues to own fatal / loading state via
+ * derivePeriodsDashboardState. SafetyStatusPanel continues to govern
+ * in-page non-fatal states (subordinate project-weeks failure, empty,
+ * incidents advisory).
  */
 export function ReportingPeriodDashboardPage(): ReactNode {
   const periodsQuery = useReportingPeriods();
@@ -70,7 +102,7 @@ export function ReportingPeriodDashboardPage(): ReactNode {
     [periods, selected],
   );
   const projectWeeksQuery = useProjectWeeks({ reportingPeriodId: activePeriod?.id });
-  const projectWeeks = projectWeeksQuery.data ?? [];
+  const projectWeeks = (projectWeeksQuery.data ?? []) as SafetyProjectWeekRecord[];
 
   // G-11: `/incidents` redirects here with `?from=incidents`. One-time banner.
   const location = useLocation();
@@ -96,14 +128,31 @@ export function ReportingPeriodDashboardPage(): ReactNode {
     void projectWeeksQuery.refetch();
   };
 
+  const health = useMemo(
+    () => classifyPeriodHealth(projectWeeks),
+    [projectWeeks],
+  );
+  const priorityItems = useMemo(
+    () => rankProjectWeeks(projectWeeks),
+    [projectWeeks],
+  );
+
   const kpiCards = useMemo<KpiCardData[]>(() => {
     if (projectWeeks.length === 0) return [];
-    const totalInspections = projectWeeks.reduce((acc, pw) => acc + (pw.inspectionCount ?? 0), 0);
-    const scored = projectWeeks.filter((pw) => pw.averageInspectionScore !== null);
+    const totalInspections = projectWeeks.reduce(
+      (acc, pw) => acc + (pw.inspectionCount ?? 0),
+      0,
+    );
+    const scored = projectWeeks.filter(
+      (pw) => pw.averageInspectionScore !== null,
+    );
     const avgScore =
       scored.length === 0
         ? null
-        : scored.reduce((acc, pw) => acc + (pw.averageInspectionScore ?? 0), 0) / scored.length;
+        : scored.reduce(
+            (acc, pw) => acc + (pw.averageInspectionScore ?? 0),
+            0,
+          ) / scored.length;
     const atRisk = projectWeeks.filter(
       (pw) =>
         pw.highestRiskFindingLevel === 'high' ||
@@ -154,7 +203,7 @@ export function ReportingPeriodDashboardPage(): ReactNode {
         header: 'Status',
         cell: ({ row }) => (
           <HbcStatusBadge
-            variant={statusVariantFor(row.original.publishStatus)}
+            variant={publishStatusVariantFor(row.original.publishStatus)}
             label={row.original.publishStatus}
             size="small"
           />
@@ -164,7 +213,7 @@ export function ReportingPeriodDashboardPage(): ReactNode {
         id: 'drillIn',
         header: 'Drill-in',
         cell: ({ row }) =>
-          activePeriod ? (
+          activePeriod && row.original.projectNumber && activePeriod.weekStartDate ? (
             <Link
               className="safety-link"
               to="/projects/$projectNumber/weeks/$weekStartDate"
@@ -181,9 +230,6 @@ export function ReportingPeriodDashboardPage(): ReactNode {
     [activePeriod],
   );
 
-  // WorkspacePageShell-level state: only page-fatal variants collapse the
-  // full page. Subordinate failures stay *inside* the page body so the
-  // period selector and redirect banner remain interactive and honest.
   const isFatal = state.variant === 'fatal-periods' || state.variant === 'fatal-both';
   const errorMessage =
     state.variant === 'fatal-periods'
@@ -191,6 +237,16 @@ export function ReportingPeriodDashboardPage(): ReactNode {
       : state.variant === 'fatal-both'
         ? state.message
         : undefined;
+
+  const isReady = state.variant === 'ready';
+  const isEmpty = state.variant === 'empty';
+
+  const healthStateLabel: Record<typeof health.state, string> = {
+    'on-track': 'On track',
+    watchlist: 'Watchlist',
+    'attention-needed': 'Attention needed',
+    critical: 'Critical',
+  };
 
   return (
     <WorkspacePageShell
@@ -201,7 +257,6 @@ export function ReportingPeriodDashboardPage(): ReactNode {
       isError={isFatal}
       errorMessage={errorMessage}
       onRetry={retryPeriods}
-      dashboardConfig={{ kpiCards }}
     >
       <div className="safety-page">
         {showRedirectBanner && (
@@ -216,12 +271,15 @@ export function ReportingPeriodDashboardPage(): ReactNode {
         <SafetyMasthead
           eyebrow="Safety · Dashboard"
           title={activePeriod ? activePeriod.periodLabel : 'Reporting period dashboard'}
-          description="Project-week rollups for the selected reporting period. Drill into any row for inspection detail."
+          description="Project-week rollups for the selected reporting period. Drill into any priority card or table row for inspection detail."
           meta={
             activePeriod
               ? [
                   { key: 'week', label: `Week of ${activePeriod.weekStartDate}` },
                   { key: 'status', label: `Period status: ${activePeriod.status}` },
+                  ...(isReady
+                    ? [{ key: 'health', label: `Health: ${healthStateLabel[health.state]}` }]
+                    : []),
                 ]
               : undefined
           }
@@ -239,7 +297,7 @@ export function ReportingPeriodDashboardPage(): ReactNode {
             </div>
           </div>
 
-          {state.variant === 'subordinate-project-weeks' ? (
+          {state.variant === 'subordinate-project-weeks' && (
             <SafetyStatusPanel
               intent="partial-failure"
               data-safety-ui="project-weeks-subordinate-error"
@@ -253,23 +311,59 @@ export function ReportingPeriodDashboardPage(): ReactNode {
                 onClick: retryProjectWeeks,
               }}
             />
-          ) : state.variant === 'empty' ? (
+          )}
+
+          {isEmpty && (
             <SafetyStatusPanel
               intent="empty"
               data-safety-ui="project-weeks-empty"
               title="No project-week records for this reporting period"
               description="Project-week records are generated after checklist uploads commit against this period."
             />
-          ) : (
-            <HbcDataTable<SafetyProjectWeekRecord>
-              data={projectWeeks as SafetyProjectWeekRecord[]}
-              columns={columns}
-              toolId="safety-periods-table"
-            />
+          )}
+
+          {isReady && (
+            <>
+              <SafetyPeriodHealthPanel
+                health={health}
+                periodLabel={
+                  activePeriod?.periodLabel ?? 'Selected reporting period'
+                }
+              />
+
+              <SafetyPriorityProjects
+                items={priorityItems}
+                activePeriod={activePeriod}
+                hasProjectWeeks={projectWeeks.length > 0}
+              />
+
+              <section
+                className="safety-dashboard-stat-layer"
+                data-safety-ui="dashboard-stat-layer"
+                aria-label="Supporting KPIs"
+              >
+                <SafetyStatStrip cards={kpiCards} />
+              </section>
+
+              <section
+                className="safety-section"
+                data-safety-ui="dashboard-all-project-weeks"
+                aria-labelledby="safety-dashboard-all-project-weeks-heading"
+              >
+                <SafetySectionHeader
+                  title="All project-weeks in this reporting period"
+                  description="Supporting table view of every project-week in this period. The priority list above surfaces the most attention-worthy entries first."
+                />
+                <HbcDataTable<SafetyProjectWeekRecord>
+                  data={projectWeeks}
+                  columns={columns}
+                  toolId="safety-periods-table"
+                />
+              </section>
+            </>
           )}
         </section>
       </div>
     </WorkspacePageShell>
   );
 }
-

@@ -757,6 +757,163 @@
   padding-left: 12px;
 }
 
+/* ==================================================================== *
+ * Phase-04 Wave 3 — G-04 Reporting Period dashboard recomposition.
+ * All responsive rules key off [data-safety-mode]. No viewport-only
+ * @media rule governs these surfaces.
+ * ==================================================================== */
+
+.safety-period-health-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.safety-period-health-panel__header {
+  display: grid;
+  gap: 6px;
+}
+
+.safety-period-health-panel__badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.safety-period-health-panel__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--colorNeutralStroke2);
+}
+
+.safety-period-health-panel__signal {
+  display: inline-flex;
+}
+
+.safety-period-health-panel[data-health-state='critical'] {
+  border-left: 4px solid var(--colorStatusDangerBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+.safety-period-health-panel[data-health-state='attention-needed'] {
+  border-left: 4px solid var(--colorStatusWarningBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+.safety-period-health-panel[data-health-state='watchlist'] {
+  border-left: 4px solid var(--colorStatusInfoBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+.safety-period-health-panel[data-health-state='on-track'] {
+  border-left: 4px solid var(--colorStatusSuccessBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+/* --- Priority projects list -------------------------------------- */
+
+.safety-priority-projects {
+  display: grid;
+  gap: 14px;
+}
+
+.safety-priority-projects__header {
+  display: grid;
+  gap: 4px;
+}
+
+.safety-priority-projects__list {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+}
+
+[data-safety-mode='minimal'] .safety-priority-projects__list,
+[data-safety-mode='compact'] .safety-priority-projects__list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.safety-priority-projects__list-item {
+  display: block;
+  min-width: 0;
+}
+
+/* --- Priority project card --------------------------------------- */
+
+.safety-priority-project-card {
+  display: grid;
+  gap: 12px;
+}
+
+.safety-priority-project-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.safety-priority-project-card__identity {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.safety-priority-project-card__stats {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+[data-safety-mode='minimal'] .safety-priority-project-card__stats,
+[data-safety-mode='compact'] .safety-priority-project-card__stats {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.safety-priority-project-card__stat {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 6px;
+  background-color: var(--colorNeutralBackground1);
+}
+
+.safety-priority-project-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--colorNeutralStroke2);
+}
+
+.safety-priority-project-card__cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--colorBrandForeground1);
+  border: 1px solid var(--colorNeutralStroke1);
+  background-color: transparent;
+}
+
+.safety-priority-project-card__cta:hover {
+  text-decoration: none;
+  background-color: var(--colorNeutralBackground2);
+}
+
+/* --- Dashboard body stat layer ----------------------------------- */
+
+.safety-dashboard-stat-layer {
+  display: grid;
+  gap: 12px;
+}
+
 /* --- Reduced-motion discipline -------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -767,7 +924,9 @@
   .safety-intake-step,
   .safety-ingestion-outcome,
   .safety-review-card,
-  .safety-triage-summary {
+  .safety-triage-summary,
+  .safety-period-health-panel,
+  .safety-priority-project-card {
     transition: none !important;
     animation: none !important;
   }

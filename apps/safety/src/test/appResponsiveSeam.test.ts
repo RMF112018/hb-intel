@@ -97,4 +97,16 @@ describe('Safety webpart CSS — mode-attribute contract coherence', () => {
     expect(layoutMediaRulesTargeting('safety-triage-summary__categories')).toEqual([]);
     expect(layoutMediaRulesTargeting('safety-triage-group__cards')).toEqual([]);
   });
+
+  it('Wave-3 dashboard surfaces (safety-priority-projects, safety-priority-project-card) are governed by [data-safety-mode] selectors only', () => {
+    expect(cssSource).toMatch(
+      /\[data-safety-mode=['"](?:minimal|compact)['"][^{]*\]\s+\.safety-priority-projects__list/,
+    );
+    expect(cssSource).toMatch(
+      /\[data-safety-mode=['"](?:minimal|compact)['"][^{]*\]\s+\.safety-priority-project-card__stats/,
+    );
+    expect(layoutMediaRulesTargeting('safety-priority-projects__list')).toEqual([]);
+    expect(layoutMediaRulesTargeting('safety-priority-project-card__stats')).toEqual([]);
+    expect(layoutMediaRulesTargeting('safety-period-health-panel')).toEqual([]);
+  });
 });
