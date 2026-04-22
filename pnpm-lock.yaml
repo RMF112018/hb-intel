@@ -1475,6 +1475,9 @@ importers:
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
+      '@hbc/features-safety':
+        specifier: workspace:*
+        version: link:../../packages/features/safety
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
@@ -2483,18 +2486,49 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../auth
+      '@hbc/data-access':
+        specifier: workspace:*
+        version: link:../../data-access
       '@hbc/models':
         specifier: workspace:*
         version: link:../../models
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../query-hooks
+      '@hbc/sharepoint-platform':
+        specifier: workspace:*
+        version: link:../../sharepoint-platform
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../shell
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../../smart-empty-state
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../ui-kit
+      '@tanstack/react-query':
+        specifier: ^5.75.0
+        version: 5.90.21(react@18.3.1)
+      react:
+        specifier: ^18.3.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.0
+        version: 18.3.1(react@18.3.1)
+      xlsx:
+        specifier: ^0.18.5
+        version: 0.18.5
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.12.2)(happy-dom@18.0.1)(jsdom@26.1.0)(msw@2.12.10(@types/node@24.12.2)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0)
 
   packages/field-annotations:
     dependencies:

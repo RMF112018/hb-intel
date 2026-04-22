@@ -1,16 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist"
+    "composite": false,
+    "noEmit": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "references": [
-    { "path": "../../models" },
-    { "path": "../../query-hooks" },
-    { "path": "../../ui-kit" },
-    { "path": "../../auth" },
-    { "path": "../../shell" }
-  ]
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

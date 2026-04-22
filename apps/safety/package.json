@@ -16,6 +16,7 @@
     "@hbc/complexity": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/data-access": "workspace:*",
+    "@hbc/features-safety": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",

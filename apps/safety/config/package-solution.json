@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-safety",
     "id": "e78a16be-7853-40a4-be18-3b01b3ca405d",
-    "version": "1.0.0.0",
+    "version": "1.1.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Safety workspace"
+        "default": "HB Intel Safety Record Keeping"
       },
       "longDescription": {
-        "default": "HB Intel Safety workspace for construction project management."
+        "default": "HB Intel Safety Record Keeping — governed checklist upload, parsing, scoring, and structured safety records."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -28,9 +28,9 @@
     "features": [
       {
         "title": "hb-intel-safety Feature",
-        "description": "Deploys HB Intel Safety webpart assets.",
+        "description": "Deploys HB Intel Safety Record Keeping webpart assets.",
         "id": "2673ffd9-9581-4cdb-9261-7b8bfb604baa",
-        "version": "1.0.0.0"
+        "version": "1.1.0.0"
       }
     ]
   },

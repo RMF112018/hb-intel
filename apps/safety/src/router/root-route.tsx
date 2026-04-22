@@ -3,16 +3,19 @@ import { ShellLayout, resolveProjectHubUrl } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
 
 /**
- * D-PH7-BW-6: Safety root route with simplified shell config.
- * Project-scoped domain — shows Back to Project Hub.
+ * Safety Record Keeping — simplified shell config.
+ * Release 1 navigation: Upload, Periods, Review, Inspections, Incidents.
  */
 const SAFETY_SHELL_CONFIG: SimplifiedShellConfig = {
   workspaceName: 'Safety',
   showBackToProjectHub: true,
   projectHubUrl: resolveProjectHubUrl(),
   toolPickerItems: [
-    { label: 'Incidents', path: '/' },
+    { label: 'Upload', path: '/upload' },
+    { label: 'Periods', path: '/periods' },
+    { label: 'Review', path: '/review' },
     { label: 'Inspections', path: '/inspections' },
+    { label: 'Incidents', path: '/incidents' },
   ],
 };
 
