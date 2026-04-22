@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const SITE_URL = process.env.HB_HOMEPAGE_LIVE_SITE_URL ?? 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
 const REQUIRE_AUTH = process.env.HB_HOMEPAGE_LIVE_REQUIRE_AUTH !== 'false';
-const EXPECTED_LAUNCHER_VERSION = '1.1.73.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.74.0';
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
   'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-04-live-sharepoint-handheld-proof',

@@ -2892,7 +2892,7 @@ for (const domain of domains) {
       //
       // The flagship rail path was retired from the homepage render tree
       // in 1.1.30.0 and replaced by the new `@hbc/ui-kit/homepage`
-      // HbcHomepageLauncher chip band. These markers verify the NEW
+      // Dedicated homepage-launcher runtime band. These markers verify the NEW
       // surface is actually compiled into the packaged bundle — not the
       // retired vertical-tile grid — so a stale deployment cannot silently
       // mask the rebuild.

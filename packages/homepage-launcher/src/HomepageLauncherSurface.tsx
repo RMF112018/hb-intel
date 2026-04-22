@@ -111,6 +111,7 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
   const [open, setOpen] = React.useState(false);
   const dialogId = React.useId();
   const titleId = React.useId();
+  const descriptionId = React.useId();
   const railRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
   const dialogRef = React.useRef<HTMLDivElement | null>(null);
@@ -120,7 +121,11 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
   const closeDrawer = React.useCallback(() => {
     setOpen(false);
     window.requestAnimationFrame(() => {
-      triggerRef.current?.focus();
+      if (triggerRef.current) {
+        triggerRef.current.focus();
+      } else {
+        previousFocusRef.current?.focus();
+      }
       previousFocusRef.current = null;
     });
   }, []);
@@ -132,7 +137,20 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
 
   React.useEffect(() => {
     if (!open) return;
-    closeButtonRef.current?.focus();
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+      return;
+    }
+    dialogRef.current?.focus();
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   React.useEffect(() => {
@@ -285,6 +303,8 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
+            aria-describedby={descriptionId}
+            tabIndex={-1}
             className={styles.drawer}
             data-hbc-homepage-launcher-sheet-content="all-tools"
             data-hbc-launcher-drawer-opaque="true"
@@ -306,6 +326,9 @@ export function HomepageLauncherSurface(props: HomepageLauncherSurfaceProps): Re
                 <X size={16} aria-hidden="true" />
               </button>
             </header>
+            <p id={descriptionId} className={styles.visuallyHidden}>
+              Company Tools drawer. Use arrow keys or swipe to move across launcher tiles.
+            </p>
             <div className={styles.drawerBody} data-hbc-ui="homepage-launcher-overflow-sections">
               <div
                 ref={railRef}

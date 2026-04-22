@@ -302,9 +302,8 @@ export type {
 } from './HbcNewsroomSurface/index.js';
 
 // ── Homepage launcher authority ───────────────────────────────────────────
-// Flagship homepage launcher authority now lives in @hbc/homepage-launcher.
-// The legacy HbcHomepageLauncher family remains internal/compatibility-only
-// and is intentionally not re-exported from this governed homepage barrel.
+// Flagship homepage launcher authority lives in @hbc/homepage-launcher.
+// Legacy ui-kit launcher implementations have been retired from this package.
 
 // ── Phase 02 — Priority Rail surface family ─────────────────────────
 // Governed rail/list surface family for standalone priority-action mounts.

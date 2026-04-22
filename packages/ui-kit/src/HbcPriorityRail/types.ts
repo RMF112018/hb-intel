@@ -27,7 +27,7 @@ export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'menu' | 'sheet
  * - `homepage-flagship` — an explicit flagship variant of the
  *   `HbcPriorityRailSurface` for selective embeds/tests that need the
  *   vertical tile presentation posture. The hosted homepage wrapper path
- *   is governed by `HbcHomepageLauncher`; this context does not redefine
+ *   is governed by `@hbc/homepage-launcher`; this context does not redefine
  *   runtime authority.
  *
  * Isolation contract:

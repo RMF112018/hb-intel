@@ -13,7 +13,7 @@
  *   unchanged for that path.
  *
  * Runtime-authority note: hosted homepage launcher rendering is governed
- * by `HbHomepageLauncherBand` + `HbcHomepageLauncher`, not this component.
+ * by `HbHomepageLauncherBand` + `@hbc/homepage-launcher`, not this component.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';

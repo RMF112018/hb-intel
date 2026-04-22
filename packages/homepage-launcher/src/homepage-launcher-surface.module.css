@@ -6,12 +6,42 @@
   --launcher-overlay-rgb: var(--hb-overlay-rgb, 4, 10, 23);
   --launcher-text-inverse: var(--hb-text-inverse, #ffffff);
   --launcher-shadow-ambient: var(--hb-shadow-ambient-rgb, 11, 28, 52);
-  --launcher-transition-fast: 130ms;
+  --launcher-border-strong: rgba(255, 255, 255, 0.2);
+  --launcher-border-soft: rgba(255, 255, 255, 0.14);
+  --launcher-border-subtle: rgba(255, 255, 255, 0.1);
+  --launcher-surface-alpha: 0.92;
+  --launcher-surface-alpha-deep: 0.98;
+  --launcher-shadow-elevation-alpha: 0.3;
+  --launcher-shadow-drawer-alpha: 0.44;
   --launcher-gap: 8px;
+  --launcher-radius-tile: 12px;
+  --launcher-radius-sheet: 18px;
+  --launcher-radius-control: 8px;
+  --launcher-pad-tile-inline: 8px;
+  --launcher-pad-tile-block-start: 9px;
+  --launcher-pad-tile-block-end: 8px;
+  --launcher-pad-trigger-inline: 14px;
+  --launcher-pad-drawer-x: 18px;
+  --launcher-pad-drawer-y: 12px;
+  --launcher-pad-drawer-header-y: 10px;
+  --launcher-control-size: 30px;
+  --launcher-transition-fast: 130ms;
   --launcher-tile-size: 104px;
   --launcher-icon-size: 38px;
   --launcher-caption-size: 0.69rem;
   --launcher-caption-line-height: 1.2;
+  --launcher-drawer-max-width: 1100px;
+  --launcher-drawer-inline-gutter: 14px;
+  --launcher-drawer-max-height: 74vh;
+  --launcher-drawer-block-gutter: 12px;
+  --launcher-rail-gap: 10px;
+  --launcher-rail-scroll-padding: 2px;
+  --launcher-focus-ring-size: 3px;
+  --launcher-focus-outline-size: 2px;
+  --launcher-handheld-height: 50px;
+  --launcher-handheld-gap: 10px;
+  --launcher-handheld-badge-size: 18px;
+  --launcher-handheld-badge-inline: 6px;
   position: relative;
   width: 100%;
   container-type: inline-size;
@@ -30,14 +60,14 @@
   width: var(--launcher-tile-size);
   min-width: var(--launcher-tile-size);
   height: var(--launcher-tile-size);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--launcher-radius-tile);
+  border: 1px solid var(--launcher-border-strong);
   color: var(--launcher-text-inverse);
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   align-items: center;
   justify-items: center;
-  padding: 9px 8px 8px;
+  padding: var(--launcher-pad-tile-block-start) var(--launcher-pad-tile-inline) var(--launcher-pad-tile-block-end);
   text-decoration: none;
   box-sizing: border-box;
   transition: transform var(--launcher-transition-fast) ease, box-shadow var(--launcher-transition-fast) ease;
@@ -53,7 +83,7 @@
     rgb(var(--launcher-brand-rgb)) 0%,
     rgb(var(--launcher-brand-deep-rgb)) 100%
   );
-  box-shadow: 0 10px 22px rgba(var(--launcher-shadow-ambient), 0.3);
+  box-shadow: 0 10px 22px rgba(var(--launcher-shadow-ambient), var(--launcher-shadow-elevation-alpha));
 }
 
 .tileOverflow {
@@ -62,7 +92,7 @@
     rgb(var(--launcher-orange-rgb)) 0%,
     rgb(var(--launcher-brand-rgb)) 100%
   );
-  box-shadow: 0 10px 22px rgba(var(--launcher-orange-rgb), 0.32);
+  box-shadow: 0 10px 22px rgba(var(--launcher-orange-rgb), calc(var(--launcher-shadow-elevation-alpha) + 0.02));
 }
 
 .tileIcon {
@@ -105,13 +135,13 @@
 .handheldTrigger {
   width: 100%;
   min-width: 100%;
-  height: 50px;
-  border-radius: 12px;
+  height: var(--launcher-handheld-height);
+  border-radius: var(--launcher-radius-tile);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 0 14px;
+  gap: var(--launcher-handheld-gap);
+  padding: 0 var(--launcher-pad-trigger-inline);
 }
 
 .handheldLabel {
@@ -124,9 +154,9 @@
 .handheldCount {
   background: rgba(var(--launcher-overlay-rgb), 0.2);
   border-radius: 999px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
+  min-width: var(--launcher-handheld-badge-size);
+  height: var(--launcher-handheld-badge-size);
+  padding: 0 var(--launcher-handheld-badge-inline);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -151,30 +181,30 @@
 
 .drawer {
   position: relative;
-  width: min(1100px, calc(100vw - 14px));
-  max-height: min(74vh, calc(100vh - 12px));
+  width: min(var(--launcher-drawer-max-width), calc(100vw - var(--launcher-drawer-inline-gutter)));
+  max-height: min(var(--launcher-drawer-max-height), calc(100vh - var(--launcher-drawer-block-gutter)));
   display: flex;
   flex-direction: column;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top-left-radius: var(--launcher-radius-sheet);
+  border-top-right-radius: var(--launcher-radius-sheet);
+  border: 1px solid var(--launcher-border-soft);
   border-bottom: 0;
   background: linear-gradient(
     180deg,
-    rgba(var(--launcher-brand-rgb), 0.92) 0%,
-    rgba(var(--launcher-brand-deep-rgb), 0.98) 100%
+    rgba(var(--launcher-brand-rgb), var(--launcher-surface-alpha)) 0%,
+    rgba(var(--launcher-brand-deep-rgb), var(--launcher-surface-alpha-deep)) 100%
   );
   color: var(--launcher-text-inverse);
-  box-shadow: 0 -18px 44px rgba(var(--launcher-overlay-rgb), 0.44);
+  box-shadow: 0 -18px 44px rgba(var(--launcher-overlay-rgb), var(--launcher-shadow-drawer-alpha));
 }
 
 .drawerHeader {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  gap: var(--launcher-gap);
+  padding: var(--launcher-pad-drawer-header-y) var(--launcher-pad-drawer-x);
+  border-bottom: 1px solid var(--launcher-border-soft);
 }
 
 .drawerTitle {
@@ -183,10 +213,10 @@
 }
 
 .drawerClose {
-  width: 30px;
-  height: 30px;
+  width: var(--launcher-control-size);
+  height: var(--launcher-control-size);
   border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 8px;
+  border-radius: var(--launcher-radius-control);
   background: rgba(255, 255, 255, 0.08);
   color: var(--launcher-text-inverse);
   display: inline-flex;
@@ -196,7 +226,7 @@
 }
 
 .drawerBody {
-  padding: 12px 18px 16px;
+  padding: var(--launcher-pad-drawer-y) var(--launcher-pad-drawer-x) calc(var(--launcher-pad-drawer-y) + 4px);
   min-height: 0;
   overflow: hidden;
 }
@@ -204,10 +234,10 @@
 .drawerRail {
   display: flex;
   flex-wrap: nowrap;
-  gap: 10px;
+  gap: var(--launcher-rail-gap);
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 2px;
+  padding-bottom: var(--launcher-rail-scroll-padding);
   scrollbar-width: none;
 }
 
@@ -237,9 +267,9 @@
 .tile:focus-visible,
 .overflowButton:focus-visible,
 .drawerClose:focus-visible {
-  outline: 2px solid var(--launcher-text-inverse);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(var(--launcher-accent-rgb), 0.55);
+  outline: var(--launcher-focus-outline-size) solid var(--launcher-text-inverse);
+  outline-offset: var(--launcher-focus-outline-size);
+  box-shadow: 0 0 0 var(--launcher-focus-ring-size) rgba(var(--launcher-accent-rgb), 0.55);
 }
 
 @container (max-width: 979px) {
@@ -255,5 +285,28 @@
     --launcher-tile-size: 84px;
     --launcher-icon-size: 30px;
     --launcher-caption-size: 0.62rem;
+    --launcher-radius-tile: 10px;
+    --launcher-pad-tile-block-start: 7px;
+    --launcher-pad-tile-inline: 6px;
+    --launcher-pad-tile-block-end: 6px;
+    --launcher-handheld-height: 44px;
+    --launcher-handheld-gap: 8px;
+    --launcher-pad-trigger-inline: 12px;
+    --launcher-drawer-inline-gutter: 8px;
+    --launcher-drawer-max-height: 78vh;
+    --launcher-pad-drawer-x: 14px;
+    --launcher-pad-drawer-y: 10px;
+    --launcher-rail-gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .overflowButton {
+    transition: none;
+  }
+
+  .tile:hover {
+    transform: none;
   }
 }
