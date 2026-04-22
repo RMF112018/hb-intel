@@ -11,8 +11,16 @@ import type { ReviewQueueEntry } from '@hbc/features-safety';
 import {
   SafetyMasthead,
   SafetyReviewActions,
+  SafetyReviewEntryCard,
   SafetySectionHeader,
+  SafetyTriageGroup,
+  SafetyTriageSummary,
 } from '../components/index.js';
+import {
+  bucketEntries,
+  classifyQueueState,
+  narrativeForQueueState,
+} from './reviewQueueTriage.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -37,19 +45,42 @@ function terminalVariantFor(status: string): StatusVariant {
   }
 }
 
+/**
+ * ReviewQueuePage — Phase-04 audit G-05 triage-framing redesign.
+ *
+ * Triage workspace rather than passive table:
+ *   1. Masthead with queue-state meta
+ *   2. SafetyTriageSummary — authored queue-state panel (clean / light /
+ *      active / backed-up / duplicate-heavy / failure-heavy)
+ *   3. SafetyTriageGroup sections in priority order — each holds
+ *      SafetyReviewEntryCard instances with authored why-here /
+ *      what-the-action-does framing
+ *   4. All entries table retained as supporting structure
+ *
+ * Fatal page states remain owned by WorkspacePageShell (isLoading, isError,
+ * isEmpty, onRetry). The triage summary + groups render only inside the
+ * page body when there are entries (or the clean-state narrative).
+ */
 export function ReviewQueuePage(): ReactNode {
   const reviewQueue = useReviewQueue();
-  const entries = reviewQueue.data ?? [];
+  const entries = (reviewQueue.data ?? []) as ReviewQueueEntry[];
   const replay = useReplayIngestion();
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
 
-  const handleRetry = (runId: string, supersedePrior: boolean) => {
+  const handleRetry = (runId: string, supersedePrior: boolean): void => {
     setPendingRunId(runId);
     replay.mutate(
       { parentRunId: runId, supersedePrior },
       { onSettled: () => setPendingRunId(null) },
     );
   };
+
+  const queueState = useMemo(() => classifyQueueState(entries), [entries]);
+  const categories = useMemo(() => bucketEntries(entries), [entries]);
+  const narrative = useMemo(
+    () => narrativeForQueueState(queueState, entries.length),
+    [queueState, entries.length],
+  );
 
   const columns = useMemo<ColumnDef<ReviewQueueEntry, unknown>[]>(
     () => [
@@ -58,7 +89,9 @@ export function ReviewQueuePage(): ReactNode {
         header: 'File',
         cell: ({ row }) => (
           <div>
-            <HbcTypography intent="body">{row.original.run.uploadFileName}</HbcTypography>
+            <HbcTypography intent="body">
+              {row.original.run.uploadFileName}
+            </HbcTypography>
             <HbcTypography intent="bodySmall">Run {row.original.run.id}</HbcTypography>
           </div>
         ),
@@ -68,7 +101,9 @@ export function ReviewQueuePage(): ReactNode {
         header: 'Project',
         cell: ({ row }) => (
           <div>
-            <HbcTypography intent="body">{row.original.projectNumber ?? '—'}</HbcTypography>
+            <HbcTypography intent="body">
+              {row.original.projectNumber ?? '—'}
+            </HbcTypography>
             {row.original.projectNameSnapshot && (
               <HbcTypography intent="bodySmall">
                 {row.original.projectNameSnapshot}
@@ -112,6 +147,8 @@ export function ReviewQueuePage(): ReactNode {
     [pendingRunId, replay.isPending],
   );
 
+  const isClean = queueState === 'clean';
+
   return (
     <WorkspacePageShell
       layout="list"
@@ -132,16 +169,68 @@ export function ReviewQueuePage(): ReactNode {
           eyebrow="Safety · Review"
           title="Review queue"
           description="Uploads that ended in review-required, invalid-template, parse-error, reporting-period-mismatch, unresolved-project, or commit-failed. Retry replays against the retained source workbook; supersede is governed and confirmed."
-          meta={[{ key: 'count', label: `${entries.length} awaiting action` }]}
+          meta={[
+            { key: 'state', label: narrative.headline },
+            {
+              key: 'count',
+              label: `${entries.length} awaiting action`,
+            },
+          ]}
         />
-        <section className="safety-section">
-          <SafetySectionHeader title="Uploads awaiting action" />
-          <HbcDataTable<ReviewQueueEntry>
-            data={entries as ReviewQueueEntry[]}
-            columns={columns}
-            toolId="safety-review-queue-table"
-          />
-        </section>
+
+        <SafetyTriageSummary
+          narrative={narrative}
+          categories={categories}
+          totalEntries={entries.length}
+        />
+
+        {!isClean && (
+          <div className="safety-triage-groups" data-safety-ui="triage-groups">
+            {categories.map((cat) => (
+              <SafetyTriageGroup key={cat.id} category={cat}>
+                <div
+                  className="safety-triage-group__cards"
+                  role="list"
+                  aria-label={`${cat.title} entries`}
+                >
+                  {cat.entries.map((entry) => (
+                    <div
+                      key={entry.run.id}
+                      role="listitem"
+                      className="safety-triage-group__card-slot"
+                    >
+                      <SafetyReviewEntryCard
+                        entry={entry}
+                        isPending={
+                          pendingRunId === entry.run.id && replay.isPending
+                        }
+                        onRetry={handleRetry}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </SafetyTriageGroup>
+            ))}
+          </div>
+        )}
+
+        {!isClean && (
+          <section
+            className="safety-section"
+            data-safety-ui="review-all-entries"
+            aria-labelledby="safety-review-all-entries-heading"
+          >
+            <SafetySectionHeader
+              title="All entries in this queue"
+              description="Supporting table view of every entry above. Actions mirror the per-card affordances."
+            />
+            <HbcDataTable<ReviewQueueEntry>
+              data={entries}
+              columns={columns}
+              toolId="safety-review-queue-table"
+            />
+          </section>
+        )}
       </div>
     </WorkspacePageShell>
   );

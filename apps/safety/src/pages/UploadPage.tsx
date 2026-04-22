@@ -1,6 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import {
-  HbcBanner,
   HbcButton,
   HbcCard,
   HbcSelect,
@@ -15,13 +14,17 @@ import {
   isSafetyConfigurationError,
   useReportingPeriods,
   useSafetyIngestion,
-  type IngestionRunResult,
+  type SafetyReportingPeriod,
 } from '@hbc/features-safety';
 import {
   SafetyFileInput,
+  SafetyIngestionOutcome,
+  SafetyIntakeReadiness,
+  SafetyIntakeStep,
   SafetyMasthead,
-  SafetySectionHeader,
   SafetyStatusPanel,
+  type SafetyIntakeReadinessRow,
+  type SafetyIntakeStepStatus,
 } from '../components/index.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
@@ -31,6 +34,25 @@ function currentUserUpn(): string {
   return (window as unknown as { _hbcUpn?: string })._hbcUpn ?? 'coordinator@hedrickbrothers.com';
 }
 
+/**
+ * UploadPage — Phase-04 audit G-03 flagship Upload redesign.
+ *
+ * Authored intake workflow with five explicit zones:
+ *   1. Masthead (context / purpose / period status)
+ *   2. Step 1 — Reporting period (required input; honest blocked posture)
+ *   3. Step 2 — Checklist workbook (SafetyFileInput, unchanged)
+ *   4. Step 3 — Readiness (authored three-row readiness list)
+ *   5. Step 4 — Submit (authoritative primary CTA)
+ *   6. Step 5 — Downstream orientation (what submission triggers)
+ *   7. Outcome zone (post-submit SafetyIngestionOutcome; mutation-level
+ *      transport error routes to SafetyStatusPanel intent="partial-failure")
+ *
+ * Fatal page states remain owned by WorkspacePageShell; this page does not
+ * route periodsQuery fatal through WPS because periods are only one input
+ * to the intake workflow — their failure is an in-page blocked step, not
+ * a page-level fatal. Transport-level ingestion errors stay local (partial
+ * failure), run-level outcomes go through SafetyIngestionOutcome.
+ */
 export function UploadPage(): ReactNode {
   const periodsQuery = useReportingPeriods();
   const periods = periodsQuery.data ?? [];
@@ -43,7 +65,7 @@ export function UploadPage(): ReactNode {
     [periods, reportingPeriodId],
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     if (!file || !activePeriod) return;
     ingestion.mutate({
       file,
@@ -57,6 +79,82 @@ export function UploadPage(): ReactNode {
     });
   };
 
+  // ── Readiness model ──────────────────────────────────────────────────
+  const periodStatus: SafetyIntakeStepStatus = periodsQuery.isError
+    ? 'blocked'
+    : periodsQuery.isPending
+      ? 'pending'
+      : activePeriod
+        ? 'ready'
+        : 'blocked';
+
+  const workbookStatus: SafetyIntakeStepStatus = file ? 'ready' : 'pending';
+
+  const submitBlockedReason = computeSubmitBlockedReason({
+    periodsLoading: periodsQuery.isPending,
+    periodsErrored: periodsQuery.isError,
+    activePeriod,
+    file,
+    ingestionPending: ingestion.isPending,
+  });
+
+  const submitStatus: SafetyIntakeStepStatus = ingestion.isPending
+    ? 'active'
+    : submitBlockedReason
+      ? 'blocked'
+      : 'ready';
+
+  const readinessRows: SafetyIntakeReadinessRow[] = [
+    {
+      id: 'period',
+      label: 'Reporting period selected',
+      status:
+        periodStatus === 'ready'
+          ? 'ready'
+          : periodStatus === 'blocked'
+            ? 'blocked'
+            : 'pending',
+      detail:
+        periodStatus === 'ready' && activePeriod
+          ? `${activePeriod.periodLabel} · status ${activePeriod.status}`
+          : periodStatus === 'blocked'
+            ? 'Reporting period list is unavailable or empty.'
+            : 'Loading reporting periods…',
+    },
+    {
+      id: 'workbook',
+      label: 'Checklist workbook chosen',
+      status: workbookStatus === 'ready' ? 'ready' : 'pending',
+      detail:
+        workbookStatus === 'ready' && file
+          ? file.name
+          : 'No workbook selected yet.',
+    },
+    {
+      id: 'submission',
+      label: 'Submission ready',
+      status:
+        submitStatus === 'ready'
+          ? 'ready'
+          : submitStatus === 'blocked'
+            ? 'blocked'
+            : 'pending',
+      detail:
+        submitStatus === 'ready'
+          ? 'All preconditions satisfied. Submit when ready.'
+          : submitStatus === 'active'
+            ? 'Ingestion in progress.'
+            : (submitBlockedReason ?? 'Pending earlier steps.'),
+    },
+  ];
+
+  const submitDisabled =
+    !file ||
+    !activePeriod ||
+    ingestion.isPending ||
+    periodsQuery.isPending ||
+    periodsQuery.isError;
+
   return (
     <WorkspacePageShell
       layout="form"
@@ -68,92 +166,143 @@ export function UploadPage(): ReactNode {
           eyebrow="Safety · Upload"
           title="Submit a completed checklist"
           description="Upload a v1 Safety Checklist workbook. The system validates the template, resolves the project against HBCentral, parses responses, and writes authoritative inspection records."
+          meta={
+            activePeriod
+              ? [
+                  { key: 'period', label: activePeriod.periodLabel },
+                  {
+                    key: 'status',
+                    label: `Period status: ${activePeriod.status}`,
+                  },
+                ]
+              : undefined
+          }
         />
 
-        <div className="safety-upload">
-          <section className="safety-upload__primary">
-            <HbcCard weight="primary">
-              <div className="safety-section">
-                <SafetySectionHeader title="Workbook intake" />
-
-                {periodsQuery.isError && (
-                  <SafetyStatusPanel
-                    intent="blocked"
-                    data-safety-ui="upload-periods-blocked"
-                    description={reportingPeriodLoadMessage(periodsQuery.error)}
-                    action={{
-                      label: 'Retry loading periods',
-                      variant: 'secondary',
-                      onClick: () => void periodsQuery.refetch(),
-                      isPending: periodsQuery.isFetching,
-                      pendingLabel: 'Retrying…',
-                    }}
-                  />
-                )}
-
-                <div className="safety-filter-bar">
-                  <div className="safety-filter-bar__field">
-                    <HbcSelect
-                      label="Reporting period"
-                      value={activePeriod?.id ?? ''}
-                      onChange={(value) => setReportingPeriodId(value)}
-                      options={periods.map((p) => ({ value: p.id, label: p.periodLabel }))}
-                      disabled={periodsQuery.isPending || periodsQuery.isError}
-                    />
-                  </div>
-                  {periodsQuery.isPending && (
-                    <HbcTypography intent="bodySmall">Loading reporting periods…</HbcTypography>
-                  )}
-                </div>
-
-                <div className="safety-upload__drop-zone">
-                  <SafetyFileInput
-                    label="Checklist workbook (.xlsx)"
-                    accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    selectedFile={file}
-                    onFileSelected={setFile}
-                    onClear={() => setFile(null)}
-                    disabled={periodsQuery.isError}
-                  />
-                </div>
-
-                <div>
-                  <HbcButton
-                    variant="primary"
-                    onClick={handleSubmit}
-                    disabled={
-                      !file ||
-                      !activePeriod ||
-                      ingestion.isPending ||
-                      periodsQuery.isPending ||
-                      periodsQuery.isError
-                    }
-                  >
-                    {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
-                  </HbcButton>
-                </div>
-
-                {ingestion.data && <IngestionResultBanner result={ingestion.data} />}
-                {ingestion.error && (
-                  <SafetyStatusPanel
-                    intent="partial-failure"
-                    data-safety-ui="upload-ingestion-error"
-                    description="Upload failed."
-                    detail={uploadErrorMessage(ingestion.error)}
-                  />
-                )}
+        <div className="safety-intake-runway" data-safety-ui="intake-runway">
+          <SafetyIntakeStep
+            stepNumber={1}
+            title="Reporting period"
+            description="Submission requires an open reporting period. Select one below."
+            status={periodStatus}
+            statusLabel={
+              periodStatus === 'ready' && activePeriod
+                ? `Selected · ${activePeriod.status}`
+                : undefined
+            }
+          >
+            {periodsQuery.isError && (
+              <SafetyStatusPanel
+                intent="blocked"
+                data-safety-ui="upload-periods-blocked"
+                description={reportingPeriodLoadMessage(periodsQuery.error)}
+                action={{
+                  label: 'Retry loading periods',
+                  variant: 'secondary',
+                  onClick: () => void periodsQuery.refetch(),
+                  isPending: periodsQuery.isFetching,
+                  pendingLabel: 'Retrying…',
+                }}
+              />
+            )}
+            <div className="safety-filter-bar">
+              <div className="safety-filter-bar__field">
+                <HbcSelect
+                  label="Reporting period"
+                  value={activePeriod?.id ?? ''}
+                  onChange={(value) => setReportingPeriodId(value)}
+                  options={periods.map((p) => ({
+                    value: p.id,
+                    label: p.periodLabel,
+                  }))}
+                  disabled={periodsQuery.isPending || periodsQuery.isError}
+                />
               </div>
-            </HbcCard>
-          </section>
+              {activePeriod && (
+                <HbcStatusBadge
+                  variant={periodBadgeVariant(activePeriod)}
+                  label={`Period status: ${activePeriod.status}`}
+                  size="small"
+                />
+              )}
+              {periodsQuery.isPending && (
+                <HbcTypography intent="bodySmall">
+                  Loading reporting periods…
+                </HbcTypography>
+              )}
+            </div>
+          </SafetyIntakeStep>
 
-          <aside className="safety-upload__aside">
-            <HbcCard
-              header={<SafetySectionHeader title="What happens on submit" />}
-              weight="supporting"
-            >
+          <SafetyIntakeStep
+            stepNumber={2}
+            title="Checklist workbook"
+            description="Upload a completed v1 Safety Checklist (.xlsx). The source workbook is retained in Safety Checklist Uploads."
+            status={workbookStatus}
+          >
+            <SafetyFileInput
+              label="Checklist workbook (.xlsx)"
+              helpText="Use the current v1 Safety Checklist template. The parser expects the canonical template structure."
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              selectedFile={file}
+              onFileSelected={setFile}
+              onClear={() => setFile(null)}
+              disabled={periodsQuery.isError}
+            />
+          </SafetyIntakeStep>
+
+          <SafetyIntakeStep
+            stepNumber={3}
+            title="Readiness"
+            description="Each precondition must be ready before submission."
+            status={submitStatus === 'ready' ? 'ready' : submitStatus}
+          >
+            <SafetyIntakeReadiness
+              rows={readinessRows}
+              ariaLabel="Upload submission readiness"
+            />
+          </SafetyIntakeStep>
+
+          <SafetyIntakeStep
+            stepNumber={4}
+            title="Submit"
+            description="Submission commits against the selected reporting period. The pipeline validates, resolves, parses, scores, and writes the authoritative inspection record."
+            status={submitStatus}
+            statusLabel={
+              ingestion.isPending
+                ? 'Processing'
+                : submitStatus === 'ready'
+                  ? 'Ready to submit'
+                  : undefined
+            }
+          >
+            <div className="safety-intake-submit">
+              <HbcButton
+                variant="primary"
+                onClick={handleSubmit}
+                disabled={submitDisabled}
+                loading={ingestion.isPending}
+              >
+                {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
+              </HbcButton>
+              {submitBlockedReason && !ingestion.isPending && (
+                <HbcTypography intent="bodySmall">
+                  {submitBlockedReason}
+                </HbcTypography>
+              )}
+            </div>
+          </SafetyIntakeStep>
+
+          <SafetyIntakeStep
+            stepNumber={5}
+            title="What happens next"
+            description="Every submission runs through the same governed pipeline."
+          >
+            <HbcCard weight="supporting">
               <ol className="safety-upload__next-step">
                 <li>
-                  <HbcTypography intent="body">Template + version are validated.</HbcTypography>
+                  <HbcTypography intent="body">
+                    Template + version are validated.
+                  </HbcTypography>
                 </li>
                 <li>
                   <HbcTypography intent="body">
@@ -162,84 +311,78 @@ export function UploadPage(): ReactNode {
                 </li>
                 <li>
                   <HbcTypography intent="body">
-                    Responses are parsed, scored, and written as an authoritative inspection.
+                    Responses are parsed, scored, and written as an authoritative
+                    inspection.
                   </HbcTypography>
                 </li>
                 <li>
                   <HbcTypography intent="body">
-                    The source workbook is retained in Safety Checklist Uploads.
+                    Uploads that can&apos;t commit (review required, parse errors,
+                    template mismatches) appear in the <strong>Review queue</strong>{' '}
+                    with one-click retry and a governed supersede flow for
+                    duplicate-suspected runs.
                   </HbcTypography>
                 </li>
               </ol>
             </HbcCard>
-            <HbcCard
-              header={<SafetySectionHeader title="If something needs attention" />}
-              weight="supporting"
+          </SafetyIntakeStep>
+
+          {(ingestion.data || ingestion.error) && (
+            <section
+              className="safety-intake-outcome-zone"
+              data-safety-ui="intake-outcome-zone"
+              aria-labelledby="safety-intake-outcome-heading"
             >
-              <HbcTypography intent="body">
-                Uploads that can&apos;t commit (review required, parse errors, template mismatches)
-                appear in the <strong>Review queue</strong> with one-click retry and a governed
-                supersede flow for duplicate-suspected runs.
-              </HbcTypography>
-            </HbcCard>
-          </aside>
+              <div className="safety-intake-outcome-zone__heading">
+                <HbcTypography intent="label">
+                  <span id="safety-intake-outcome-heading">Submission outcome</span>
+                </HbcTypography>
+              </div>
+              {ingestion.data && <SafetyIngestionOutcome result={ingestion.data} />}
+              {ingestion.error && (
+                <SafetyStatusPanel
+                  intent="partial-failure"
+                  data-safety-ui="upload-ingestion-error"
+                  description="Upload transport failed before the pipeline could terminate."
+                  detail={uploadErrorMessage(ingestion.error)}
+                />
+              )}
+            </section>
+          )}
         </div>
       </div>
     </WorkspacePageShell>
   );
 }
 
-function variantFor(state: IngestionRunResult['state']): { variant: StatusVariant; label: string } {
-  switch (state) {
-    case 'committed':
-      return { variant: 'success', label: 'Committed' };
-    case 'review-required':
-      return { variant: 'atRisk', label: 'Review required' };
-    case 'unresolved-project':
-      return { variant: 'warning', label: 'Project unresolved' };
-    case 'reporting-period-mismatch':
-      return { variant: 'warning', label: 'Period mismatch' };
-    case 'parse-error':
-      return { variant: 'error', label: 'Parse error' };
-    case 'invalid-template':
-      return { variant: 'error', label: 'Invalid template' };
-    case 'commit-failed':
-      return { variant: 'error', label: 'Commit failed' };
-    default:
-      return { variant: 'neutral', label: state };
-  }
+interface SubmitReadinessInput {
+  readonly periodsLoading: boolean;
+  readonly periodsErrored: boolean;
+  readonly activePeriod: SafetyReportingPeriod | undefined;
+  readonly file: File | null;
+  readonly ingestionPending: boolean;
 }
 
-function IngestionResultBanner({ result }: { result: IngestionRunResult }): ReactNode {
-  const bannerVariant =
-    result.state === 'committed'
-      ? 'success'
-      : result.state === 'review-required' ||
-          result.state === 'unresolved-project' ||
-          result.state === 'reporting-period-mismatch'
-        ? 'warning'
-        : 'error';
-  const status = variantFor(result.state);
-  return (
-    <HbcBanner variant={bannerVariant}>
-      <div className="safety-section">
-        <div className="safety-filter-bar">
-          <HbcStatusBadge variant={status.variant} label={status.label} />
-          <HbcTypography intent="bodySmall">Run: {result.run.id}</HbcTypography>
-        </div>
-        {result.run.errorSummary && (
-          <HbcTypography intent="body">{result.run.errorSummary}</HbcTypography>
-        )}
-        {result.committed && (
-          <HbcTypography intent="body">
-            Inspection committed: {result.committed.inspectionEvent.id} (
-            {Math.round(result.committed.inspectionEvent.inspectionScore * 100)}% score,{' '}
-            {result.committed.findings.length} findings)
-          </HbcTypography>
-        )}
-      </div>
-    </HbcBanner>
-  );
+function computeSubmitBlockedReason(input: SubmitReadinessInput): string | null {
+  if (input.ingestionPending) return null;
+  if (input.periodsLoading) return 'Loading reporting periods.';
+  if (input.periodsErrored) return 'Reporting periods failed to load — resolve before submission.';
+  if (!input.activePeriod) return 'No reporting period selected.';
+  if (!input.file) return 'No workbook chosen yet.';
+  return null;
+}
+
+function periodBadgeVariant(period: SafetyReportingPeriod): StatusVariant {
+  switch (period.status) {
+    case 'open':
+      return 'success';
+    case 'closed':
+      return 'atRisk';
+    case 'published':
+      return 'info';
+    default:
+      return 'neutral';
+  }
 }
 
 function reportingPeriodLoadMessage(error: unknown): string {
@@ -264,6 +407,12 @@ function reportingPeriodLoadMessage(error: unknown): string {
 
 function uploadErrorMessage(error: unknown): string {
   if (error instanceof SafetyUploadError) {
+    if (error.kind === 'security-validation') {
+      return (
+        'SharePoint rejected the upload request due to security validation. ' +
+        'Retry the upload; if this continues, contact support with this error.'
+      );
+    }
     if (error.kind === 'permission' && error.stage === 'upload-post') {
       return (
         'You do not have permission to upload to Safety Checklist Uploads. ' +

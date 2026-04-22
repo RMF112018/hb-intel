@@ -66,4 +66,35 @@ describe('Safety webpart CSS — mode-attribute contract coherence', () => {
     );
     expect(mediaUpload).toBeNull();
   });
+
+  // Helper: return width/viewport @media rules that govern a given class,
+  // excluding orthogonal concerns (prefers-reduced-motion, prefers-color-scheme,
+  // print). Those are explicitly permitted by the plan — only width-based
+  // layout queries must flow through [data-safety-mode].
+  const layoutMediaRulesTargeting = (klass: string): string[] => {
+    const pattern = new RegExp(`@media[^{]+\\{[^}]*\\.${klass}[^{}]*\\{`, 'g');
+    const all = cssSource.match(pattern) ?? [];
+    return all.filter(
+      (rule) =>
+        !/prefers-reduced-motion/.test(rule) &&
+        !/prefers-color-scheme/.test(rule) &&
+        !/\bprint\b/.test(rule),
+    );
+  };
+
+  it('Wave-2 intake surfaces (safety-intake-step, safety-intake-readiness) are governed by [data-safety-mode] selectors only', () => {
+    expect(cssSource).toMatch(
+      /\[data-safety-mode=['"](?:minimal|compact)['"][^{]*\]\s+\.safety-intake-step/,
+    );
+    expect(layoutMediaRulesTargeting('safety-intake-step')).toEqual([]);
+    expect(layoutMediaRulesTargeting('safety-intake-readiness__row')).toEqual([]);
+  });
+
+  it('Wave-2 triage surfaces (safety-triage-summary, safety-triage-group) are governed by [data-safety-mode] selectors only', () => {
+    expect(cssSource).toMatch(
+      /\[data-safety-mode=['"](?:minimal|compact)['"][^{]*\]\s+\.safety-triage-(?:summary__categories|group__cards)/,
+    );
+    expect(layoutMediaRulesTargeting('safety-triage-summary__categories')).toEqual([]);
+    expect(layoutMediaRulesTargeting('safety-triage-group__cards')).toEqual([]);
+  });
 });

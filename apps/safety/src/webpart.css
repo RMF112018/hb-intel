@@ -354,13 +354,420 @@
   margin-bottom: 8px;
 }
 
+/* ==================================================================== *
+ * Phase-04 Wave 2 — G-03 Upload intake runway, outcome zone.
+ * All responsive rules below key off [data-safety-mode]; no viewport-only
+ * @media rule governs these surfaces (reconciliation with foundation pass).
+ * ==================================================================== */
+
+.safety-intake-runway {
+  display: grid;
+  gap: 20px;
+}
+
+.safety-intake-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 12px;
+  background-color: var(--colorNeutralBackground1);
+  align-items: start;
+}
+
+.safety-intake-step[data-step-status='ready'] {
+  border-color: var(--colorStatusSuccessBorder1, var(--colorNeutralStroke1));
+  background-color: var(--colorNeutralBackground1);
+}
+
+.safety-intake-step[data-step-status='blocked'] {
+  border-color: var(--colorStatusWarningBorder1, var(--colorNeutralStroke1));
+}
+
+.safety-intake-step[data-step-status='active'] {
+  border-color: var(--colorBrandStroke1, var(--colorNeutralStroke1));
+  box-shadow: 0 0 0 1px var(--colorBrandStroke2, transparent);
+}
+
+.safety-intake-step__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--colorNeutralStroke1);
+  background-color: var(--colorNeutralBackground2);
+  color: var(--colorNeutralForeground1);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.safety-intake-step[data-step-status='ready'] .safety-intake-step__marker {
+  background-color: var(--colorStatusSuccessBackground1, var(--colorNeutralBackground2));
+  border-color: var(--colorStatusSuccessBorder1, var(--colorNeutralStroke1));
+}
+
+.safety-intake-step[data-step-status='blocked'] .safety-intake-step__marker {
+  background-color: var(--colorStatusWarningBackground1, var(--colorNeutralBackground2));
+  border-color: var(--colorStatusWarningBorder1, var(--colorNeutralStroke1));
+}
+
+.safety-intake-step[data-step-status='active'] .safety-intake-step__marker {
+  background-color: var(--colorBrandBackground2, var(--colorNeutralBackground2));
+  border-color: var(--colorBrandStroke1, var(--colorNeutralStroke1));
+  color: var(--colorBrandForeground1);
+}
+
+.safety-intake-step__body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.safety-intake-step__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.safety-intake-step__content {
+  display: grid;
+  gap: 12px;
+}
+
+/* Compact modes simplify: the marker moves inline with the title and
+ * occupies its own row; body flows to full width.
+ */
+[data-safety-mode='minimal'] .safety-intake-step,
+[data-safety-mode='compact'] .safety-intake-step {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 16px 18px;
+  gap: 12px;
+}
+
+[data-safety-mode='minimal'] .safety-intake-step__marker,
+[data-safety-mode='compact'] .safety-intake-step__marker {
+  width: 28px;
+  height: 28px;
+  font-size: 0.8125rem;
+}
+
+/* --- Readiness list ------------------------------------------------ */
+
+.safety-intake-readiness {
+  display: grid;
+  gap: 8px;
+}
+
+.safety-intake-readiness__row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 8px;
+  background-color: var(--colorNeutralBackground1);
+}
+
+.safety-intake-readiness__row[data-row-status='ready'] {
+  border-color: var(--colorStatusSuccessBorder1, var(--colorNeutralStroke1));
+}
+
+.safety-intake-readiness__row[data-row-status='blocked'] {
+  border-color: var(--colorStatusWarningBorder1, var(--colorNeutralStroke1));
+  background-color: var(--colorStatusWarningBackground1, var(--colorNeutralBackground1));
+}
+
+.safety-intake-readiness__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+[data-safety-mode='minimal'] .safety-intake-readiness__row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+/* --- Submit panel -------------------------------------------------- */
+
+.safety-intake-submit {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* --- Outcome zone -------------------------------------------------- */
+
+.safety-intake-outcome-zone {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.safety-intake-outcome-zone__heading {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--colorBrandForeground1);
+}
+
+.safety-ingestion-outcome {
+  display: grid;
+  gap: 16px;
+}
+
+.safety-ingestion-outcome__header {
+  display: grid;
+  gap: 6px;
+}
+
+.safety-ingestion-outcome__badge {
+  display: flex;
+}
+
+.safety-ingestion-outcome__sections {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.safety-ingestion-outcome__section {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.safety-ingestion-outcome__section > dt {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--colorNeutralForeground2);
+  margin: 0;
+}
+
+.safety-ingestion-outcome__section > dd {
+  margin: 0;
+}
+
+.safety-ingestion-outcome__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 4px;
+  border-top: 1px solid var(--colorNeutralStroke2);
+}
+
+.safety-ingestion-outcome__cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  margin: 0;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.safety-ingestion-outcome__cta--primary {
+  color: var(--colorNeutralForegroundOnBrand, #ffffff);
+  background-color: var(--colorBrandBackground, var(--colorBrandForeground1));
+}
+
+.safety-ingestion-outcome__cta--primary:hover {
+  text-decoration: none;
+  background-color: var(--colorBrandBackgroundHover, var(--colorBrandForeground1));
+}
+
+.safety-ingestion-outcome__cta--secondary {
+  color: var(--colorBrandForeground1);
+  background-color: transparent;
+  border-color: var(--colorNeutralStroke1);
+}
+
+.safety-ingestion-outcome__cta--secondary:hover {
+  background-color: var(--colorNeutralBackground2);
+  text-decoration: none;
+}
+
+.safety-ingestion-outcome[data-outcome-tone='success'] {
+  border-left: 4px solid var(--colorStatusSuccessBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+.safety-ingestion-outcome[data-outcome-tone='warning'] {
+  border-left: 4px solid var(--colorStatusWarningBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+.safety-ingestion-outcome[data-outcome-tone='error'] {
+  border-left: 4px solid var(--colorStatusDangerBorder2, var(--colorBrandForeground1));
+  padding-left: 16px;
+}
+
+/* ==================================================================== *
+ * Phase-04 Wave 2 — G-05 Review triage framing.
+ * All responsive rules below key off [data-safety-mode].
+ * ==================================================================== */
+
+.safety-triage-summary {
+  display: grid;
+  gap: 16px;
+}
+
+.safety-triage-summary__header {
+  display: grid;
+  gap: 6px;
+}
+
+.safety-triage-summary__categories {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+[data-safety-mode='minimal'] .safety-triage-summary__categories,
+[data-safety-mode='compact'] .safety-triage-summary__categories {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.safety-triage-summary__category {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 8px;
+  background-color: var(--colorNeutralBackground1);
+}
+
+.safety-triage-summary__category[data-category-id='duplicates-suspected'] {
+  border-left: 3px solid var(--colorStatusWarningBorder2, var(--colorBrandForeground1));
+}
+
+.safety-triage-summary__category[data-category-id='workflow-failures'] {
+  border-left: 3px solid var(--colorStatusDangerBorder2, var(--colorBrandForeground1));
+}
+
+.safety-triage-summary__clean {
+  padding: 8px 4px;
+  color: var(--colorNeutralForeground2);
+}
+
+.safety-triage-groups {
+  display: grid;
+  gap: 24px;
+}
+
+.safety-triage-group {
+  display: grid;
+  gap: 12px;
+}
+
+.safety-triage-group__header {
+  display: grid;
+  gap: 2px;
+}
+
+.safety-triage-group__cards {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
+[data-safety-mode='minimal'] .safety-triage-group__cards,
+[data-safety-mode='compact'] .safety-triage-group__cards {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.safety-triage-group__card-slot {
+  display: block;
+  min-width: 0;
+}
+
+.safety-review-card {
+  display: grid;
+  gap: 12px;
+}
+
+.safety-review-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.safety-review-card__project {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.safety-review-card__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.safety-review-card__meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--colorNeutralForeground2);
+}
+
+.safety-review-card__framing {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.safety-review-card__framing-row {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.safety-review-card__framing-row > dt {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--colorNeutralForeground2);
+  margin: 0;
+}
+
+.safety-review-card__framing-row > dd {
+  margin: 0;
+}
+
+.safety-review-card__actions {
+  padding-top: 4px;
+  border-top: 1px solid var(--colorNeutralStroke2);
+}
+
+.safety-review-card[data-duplicate='true'] {
+  border-left: 3px solid var(--colorStatusWarningBorder2, var(--colorBrandForeground1));
+  padding-left: 12px;
+}
+
 /* --- Reduced-motion discipline -------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .safety-link,
   .safety-findings__row,
   .safety-score-strip__item,
-  .safety-masthead {
+  .safety-masthead,
+  .safety-intake-step,
+  .safety-ingestion-outcome,
+  .safety-review-card,
+  .safety-triage-summary {
     transition: none !important;
     animation: none !important;
   }
