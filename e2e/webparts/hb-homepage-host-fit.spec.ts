@@ -102,6 +102,10 @@ const HOSTED_CASES: readonly HostedCase[] = [
     expectedReason: 'short-height-override',
   },
 ] as const;
+const STRICT_PEER_TILE_CASES = new Set([
+  'standard-laptop-1512x982',
+  'tablet-landscape-1024x900',
+]);
 
 const CAPTURE_PHASE = process.env.HB_FINAL_PROOF_CAPTURE_PHASE ?? 'final';
 const CAPTURE_ROOT = CAPTURE_PHASE
@@ -199,6 +203,11 @@ test.describe('HB Homepage hosted fit proof', () => {
       await expect(page.locator('[data-hbc-homepage-launcher-tool-count]')).toHaveCount(0);
       await expect(page.getByText('Homepage tools', { exact: true })).toHaveCount(0);
       await expect(page.getByRole('heading', { name: 'Priority Actions' })).toHaveCount(0);
+      if (!isHandheldViewport(viewportCase.label)) {
+        await expect(
+          page.locator('[data-hbc-homepage-launcher-overflow-count-badge="handheld"]'),
+        ).toHaveCount(0);
+      }
       await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode');
       await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source');
       await expect(launcherRoot).toHaveAttribute(
@@ -230,6 +239,41 @@ test.describe('HB Homepage hosted fit proof', () => {
         'data-hbc-homepage-launcher-version',
         EXPECTED_LAUNCHER_VERSION,
       );
+      const peerTileMetrics = await page.evaluate(() => {
+        const primaryTile = document.querySelector(
+          '[data-hbc-ui="homepage-launcher-tile"][data-hbc-launcher-tile-variant="primary"]',
+        ) as HTMLElement | null;
+        const overflowTrigger = document.querySelector(
+          '[data-hbc-ui="homepage-launcher-overflow-trigger"]',
+        ) as HTMLElement | null;
+        const readMetrics = (el: HTMLElement | null) => {
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          return {
+            width: Number(rect.width.toFixed(2)),
+            height: Number(rect.height.toFixed(2)),
+            paddingTop: style.paddingTop,
+            paddingRight: style.paddingRight,
+            paddingBottom: style.paddingBottom,
+            paddingLeft: style.paddingLeft,
+          };
+        };
+        return {
+          primary: readMetrics(primaryTile),
+          overflow: readMetrics(overflowTrigger),
+        };
+      });
+      if (STRICT_PEER_TILE_CASES.has(viewportCase.label)) {
+        expect(peerTileMetrics.primary).not.toBeNull();
+        expect(peerTileMetrics.overflow).not.toBeNull();
+        expect(peerTileMetrics.primary?.width).toBe(peerTileMetrics.overflow?.width);
+        expect(peerTileMetrics.primary?.height).toBe(peerTileMetrics.overflow?.height);
+        expect(peerTileMetrics.primary?.paddingTop).toBe(peerTileMetrics.overflow?.paddingTop);
+        expect(peerTileMetrics.primary?.paddingRight).toBe(peerTileMetrics.overflow?.paddingRight);
+        expect(peerTileMetrics.primary?.paddingBottom).toBe(peerTileMetrics.overflow?.paddingBottom);
+        expect(peerTileMetrics.primary?.paddingLeft).toBe(peerTileMetrics.overflow?.paddingLeft);
+      }
       if (isHandheldViewport(viewportCase.label)) {
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'single-entry-all-tools');
         await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
@@ -431,6 +475,25 @@ test.describe('HB Homepage hosted fit proof', () => {
       const launcherMarkerProof = await page.evaluate(() => {
         const launcherBand = document.querySelector('[data-hb-homepage-launcher-band="root"]');
         const launcherSurfaceNode = document.querySelector('[data-hbc-ui="homepage-launcher"]');
+        const primaryTile = document.querySelector(
+          '[data-hbc-ui="homepage-launcher-tile"][data-hbc-launcher-tile-variant="primary"]',
+        ) as HTMLElement | null;
+        const overflowTrigger = document.querySelector(
+          '[data-hbc-ui="homepage-launcher-overflow-trigger"]',
+        ) as HTMLElement | null;
+        const readMetrics = (el: HTMLElement | null) => {
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          return {
+            width: Number(rect.width.toFixed(2)),
+            height: Number(rect.height.toFixed(2)),
+            paddingTop: style.paddingTop,
+            paddingRight: style.paddingRight,
+            paddingBottom: style.paddingBottom,
+            paddingLeft: style.paddingLeft,
+          };
+        };
         return {
           launcherVersion: launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-version') ?? null,
           launcherDrawerSource: launcherBand?.getAttribute('data-hbc-launcher-drawer-source') ?? null,
@@ -458,6 +521,10 @@ test.describe('HB Homepage hosted fit proof', () => {
           launcherBandOverflowCount: launcherBand?.getAttribute('data-hbc-launcher-overflow-count') ?? null,
           launcherRowPrimitive:
             launcherSurfaceNode?.getAttribute('data-hbc-homepage-launcher-row-primitive') ?? null,
+          peerTileMetrics: {
+            primary: readMetrics(primaryTile),
+            overflow: readMetrics(overflowTrigger),
+          },
         };
       });
       await testInfo.attach(`hb-homepage-${viewportCase.label}-launcher-markers`, {

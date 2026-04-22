@@ -288,9 +288,8 @@
 .overflowTile {
   box-sizing: border-box;
   font: inherit;
-  /* Lock the row sizing contract explicitly so the More Tools trigger
-     matches the regular tile geometry at every breakpoint — no implicit
-     inheritance drift. */
+  /* Standard-mode overflow trigger intentionally mirrors the primary tile
+     size and spacing contract at non-handheld breakpoints. */
   width: var(--hbc-hl-tile-size);
   flex: 0 0 var(--hbc-hl-tile-size);
   min-width: 0;
@@ -350,46 +349,27 @@
 }
 
 .overflowTriggerLabel {
-  width: 100%;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
+  white-space: nowrap;
   font-size: var(--hbc-hl-caption-size);
   font-weight: 600;
-  line-height: var(--hbc-hl-caption-line-height);
-  text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  line-height: 1.2;
   color: #ffffff;
 }
 
-.overflowTriggerCount {
-  position: absolute;
-  top: 5px;
-  right: 5px;
+.overflowTriggerCountLinear {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
   color: #ffffff;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1;
-}
-
-.overflowTriggerCountLinear {
-  position: static;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
-  font-size: 0.625rem;
   line-height: 1;
 }
 

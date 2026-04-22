@@ -119,6 +119,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
     );
+    expect(
+      trigger.querySelector('[data-hbc-homepage-launcher-overflow-count-badge="handheld"]'),
+    ).toBeNull();
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('data-hbc-launcher-tile-geometry')).toBe('icon-forward-square');
     expect(trigger.getAttribute('data-hbc-launcher-tile-size-contract')).toBe('row');
@@ -170,6 +173,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
     );
+    expect(
+      trigger.querySelector('[data-hbc-homepage-launcher-overflow-count-badge="handheld"]'),
+    ).not.toBeNull();
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-sheet-content')).toBe('all-tools');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-shape')).toBe('linear-handheld');

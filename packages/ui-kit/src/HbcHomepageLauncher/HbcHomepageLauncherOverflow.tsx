@@ -60,6 +60,41 @@ function DrawerOverflow({
     ? { duration: 0 }
     : { duration: 0.26, ease: 'easeOut' as const };
   const backdropTransition = prefersReducedMotion ? { duration: 0 } : { duration: 0.2 };
+  const triggerContent = handheldLinearTrigger ? (
+    <span className={styles.overflowTriggerInlineContent}>
+      <span
+        className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)}
+        aria-hidden="true"
+      >
+        <Layers strokeWidth={2.2} />
+      </span>
+      <span className={styles.overflowTriggerLabel}>{triggerLabel}</span>
+      <span
+        className={styles.overflowTriggerCountLinear}
+        data-hbc-homepage-launcher-overflow-count-badge="handheld"
+        aria-hidden="true"
+      >
+        {totalTools}
+      </span>
+      <ChevronDown
+        size={12}
+        className={styles.overflowTriggerChevronLinear}
+        aria-hidden="true"
+      />
+    </span>
+  ) : (
+    <>
+      <span
+        className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)}
+        aria-hidden="true"
+      >
+        <Layers strokeWidth={2.2} />
+      </span>
+      <span className={styles.tileContent}>
+        <span className={styles.tileTitle}>{triggerLabel}</span>
+      </span>
+    </>
+  );
 
   return (
     <>
@@ -92,33 +127,7 @@ function DrawerOverflow({
         transition={{ duration: 0.14 }}
         {...getReferenceProps()}
       >
-        <span
-          className={clsx(
-            handheldLinearTrigger ? styles.overflowTriggerInlineContent : undefined,
-          )}
-        >
-          <span
-            className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)}
-            aria-hidden="true"
-          >
-            <Layers strokeWidth={2.2} />
-          </span>
-          <span className={styles.overflowTriggerLabel}>{triggerLabel}</span>
-          <span
-            className={clsx(
-              styles.overflowTriggerCount,
-              handheldLinearTrigger ? styles.overflowTriggerCountLinear : undefined,
-            )}
-            aria-hidden="true"
-          >
-            {totalTools}
-          </span>
-          <ChevronDown
-            size={handheldLinearTrigger ? 12 : 14}
-            className={handheldLinearTrigger ? styles.overflowTriggerChevronLinear : undefined}
-            aria-hidden="true"
-          />
-        </span>
+        {triggerContent}
       </motion.button>
       <AnimatePresence>
         {open ? (
