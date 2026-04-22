@@ -1,0 +1,88 @@
+[
+  {
+    "label": "desktop-1920x1080",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "drawer": {
+      "top": 1037.75341796875,
+      "right": 1420,
+      "bottom": 1241.34716796875,
+      "left": 500,
+      "width": 920,
+      "height": 203.59375
+    },
+    "rail": {
+      "top": 1097.75341796875,
+      "right": 1401,
+      "bottom": 1205.75341796875,
+      "left": 519,
+      "width": 882,
+      "height": 108
+    },
+    "hint": {
+      "top": 1213.75341796875,
+      "right": 1401,
+      "bottom": 1229.34716796875,
+      "left": 519,
+      "width": 882,
+      "height": 15.59375
+    },
+    "firstItem": {
+      "top": 1097.75341796875,
+      "right": 625,
+      "bottom": 1203.75341796875,
+      "left": 519,
+      "width": 106,
+      "height": 106
+    },
+    "hasRailHintOverlap": false,
+    "railClippedByDrawer": false,
+    "itemClippedByRail": false,
+    "noOverlapOrClip": true
+  },
+  {
+    "label": "tablet-1024x900",
+    "viewport": {
+      "width": 1024,
+      "height": 900
+    },
+    "drawer": {
+      "top": 888.2855834960938,
+      "right": 972,
+      "bottom": 1091.87939453125,
+      "left": 52,
+      "width": 920,
+      "height": 203.59381103515625
+    },
+    "rail": {
+      "top": 948.2855834960938,
+      "right": 953,
+      "bottom": 1056.28564453125,
+      "left": 71,
+      "width": 882,
+      "height": 108.00006103515625
+    },
+    "hint": {
+      "top": 1064.28564453125,
+      "right": 953,
+      "bottom": 1079.87939453125,
+      "left": 71,
+      "width": 882,
+      "height": 15.59375
+    },
+    "firstItem": {
+      "top": 948.2855834960938,
+      "right": 177,
+      "bottom": 1054.28564453125,
+      "left": 71,
+      "width": 106,
+      "height": 106.00006103515625
+    },
+    "hasRailHintOverlap": false,
+    "railClippedByDrawer": false,
+    "itemClippedByRail": false,
+    "noOverlapOrClip": true
+  }
+]

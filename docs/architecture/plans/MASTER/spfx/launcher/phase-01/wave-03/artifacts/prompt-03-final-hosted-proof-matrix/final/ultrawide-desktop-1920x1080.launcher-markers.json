@@ -1,5 +1,5 @@
 {
-  "launcherVersion": "1.1.66.0",
+  "launcherVersion": "1.1.70.0",
   "launcherDrawerSource": "all-tools",
   "launcherDeviceClass": "ultrawide",
   "launcherOverflowMode": "more-tools",
@@ -8,5 +8,23 @@
   "launcherCapGovernance": "binding-visible-cap",
   "launcherBandPrimaryCount": "6",
   "launcherBandOverflowCount": "1",
-  "launcherRowPrimitive": "tile-family"
+  "launcherRowPrimitive": "tile-family",
+  "peerTileMetrics": {
+    "primary": {
+      "width": 106,
+      "height": 106,
+      "paddingTop": "8px",
+      "paddingRight": "7px",
+      "paddingBottom": "7px",
+      "paddingLeft": "7px"
+    },
+    "overflow": {
+      "width": 106,
+      "height": 106,
+      "paddingTop": "8px",
+      "paddingRight": "7px",
+      "paddingBottom": "7px",
+      "paddingLeft": "7px"
+    }
+  }
 }

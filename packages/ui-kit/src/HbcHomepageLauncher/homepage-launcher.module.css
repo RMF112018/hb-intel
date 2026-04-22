@@ -32,7 +32,7 @@
   --hbc-hl-drawer-pad-y: 12px;
   --hbc-hl-drawer-rail-gap: 10px;
   --hbc-hl-drawer-scrollbar-size: 9px;
-  --hbc-hl-drawer-max-inline: 780px;
+  --hbc-hl-drawer-max-inline: 920px;
   --hbc-hl-drawer-max-block: 64vh;
   --hbc-hl-drawer-tile-size: var(--hbc-hl-tile-size);
   --hbc-hl-drawer-icon-size: var(--hbc-hl-icon-size);
@@ -424,48 +424,30 @@
 
 .sheetHeader {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: 10px;
-  padding: 10px var(--hbc-hl-drawer-pad-x);
+  column-gap: 8px;
+  padding: 8px var(--hbc-hl-drawer-pad-x);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(10, 26, 48, 0.82);
+  background: rgba(10, 26, 48, 0.68);
 }
 
 .sheetHeading {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0;
 }
 
 .sheetTitle {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
+  font-weight: 600;
   line-height: 1.2;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.006em;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.sheetHeaderCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
 }
 
 .sheetClose {
@@ -502,16 +484,21 @@
 }
 
 .drawerBody {
-  padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x) 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x);
   background: transparent;
   overflow: hidden;
 }
 
-.drawerRailRoot {
-  width: 100%;
-}
 .drawerTileGrid {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-wrap: nowrap;
   gap: var(--hbc-hl-drawer-rail-gap);
   align-items: flex-start;
@@ -519,7 +506,48 @@
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding-bottom: 2px;
+  padding-inline-end: 18px;
+}
+
+.drawerTileGrid::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.drawerBody::before,
+.drawerBody::after {
+  content: "";
+  position: absolute;
+  top: var(--hbc-hl-drawer-pad-y);
+  height: var(--hbc-hl-drawer-tile-size);
+  width: clamp(16px, 2.2vw, 28px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 1;
+}
+
+.drawerBody::before {
+  left: var(--hbc-hl-drawer-pad-x);
+  background: linear-gradient(90deg, rgba(16, 42, 75, 0.96) 0%, rgba(16, 42, 75, 0) 100%);
+}
+
+.drawerBody::after {
+  right: var(--hbc-hl-drawer-pad-x);
+  background: linear-gradient(270deg, rgba(16, 42, 75, 0.96) 0%, rgba(16, 42, 75, 0) 100%);
+}
+
+.drawerBody[data-hbc-launcher-overflow-present="true"][data-hbc-launcher-overflow-at-start="false"]::before {
+  opacity: 1;
+}
+
+.drawerBody[data-hbc-launcher-overflow-present="true"][data-hbc-launcher-overflow-at-end="false"]::after {
+  opacity: 1;
 }
 
 .drawerRailItem {
@@ -530,24 +558,11 @@
 
 .drawerTile {
   width: var(--hbc-hl-tile-size);
-  min-height: var(--hbc-hl-tile-size);
   height: var(--hbc-hl-tile-size);
 }
 
-.drawerRailScrollbar {
-  height: var(--hbc-hl-drawer-scrollbar-size);
-  margin-top: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-}
-
-.drawerRailScrollbarThumb {
-  background: rgba(255, 255, 255, 0.42);
-  border-radius: 999px;
-}
-
 .drawerOverflowHint {
-  margin: 2px 0 var(--hbc-hl-drawer-pad-y);
+  margin: 0;
   min-height: 14px;
   color: rgba(255, 255, 255, 0.82);
   font-size: 0.75rem;
@@ -642,7 +657,7 @@
     --hbc-hl-drawer-pad-x: 16px;
     --hbc-hl-drawer-pad-y: 12px;
     --hbc-hl-drawer-rail-gap: 9px;
-    --hbc-hl-drawer-max-inline: 720px;
+    --hbc-hl-drawer-max-inline: 820px;
   }
 
   .sheetSurface { width: min(100dvw - 16px, var(--hbc-hl-drawer-max-inline)); }
@@ -656,6 +671,7 @@
     --hbc-hl-caption-size: 0.675rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 9px;
+    --hbc-hl-drawer-max-inline: 940px;
   }
 }
 
@@ -667,6 +683,7 @@
     --hbc-hl-caption-size: 0.6875rem;
     --hbc-hl-caption-line-height: 1.2;
     --hbc-hl-drawer-rail-gap: 10px;
+    --hbc-hl-drawer-max-inline: 1120px;
   }
 }
 
@@ -678,7 +695,7 @@
     --hbc-hl-caption-size: 0.75rem;
     --hbc-hl-caption-line-height: 1.24;
     --hbc-hl-drawer-rail-gap: 11px;
-    --hbc-hl-drawer-max-inline: 880px;
+    --hbc-hl-drawer-max-inline: 1280px;
   }
 
   .tile,

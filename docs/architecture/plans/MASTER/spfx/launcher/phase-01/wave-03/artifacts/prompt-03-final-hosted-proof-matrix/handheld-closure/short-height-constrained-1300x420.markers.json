@@ -11,7 +11,7 @@
     "capGovernance": "all-tools-drawer"
   },
   "launcher": {
-    "version": "1.1.66.0",
+    "version": "1.1.67.0",
     "deviceClass": "phone",
     "handheldMode": "single-entry-all-tools",
     "capGovernance": "all-tools-drawer"

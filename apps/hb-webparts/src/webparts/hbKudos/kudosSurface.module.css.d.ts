@@ -34,6 +34,9 @@ declare const styles: {
   readonly sectionTitle: string;
   readonly recentList: string;
   readonly pulseStats: string;
+  readonly pulseSummaryRow: string;
+  readonly pulseSummaryItem: string;
+  readonly pulseSummaryDivider: string;
   readonly pulseStat: string;
   readonly pulseStatValue: string;
   readonly pulseStatLabel: string;

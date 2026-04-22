@@ -14,30 +14,30 @@
 
 ## Source ↔ Package ↔ Runtime Version Truth
 - Runtime constant source: `packages/ui-kit/src/HbcHomepageLauncher/constants.ts`
-  - `HBC_HOMEPAGE_LAUNCHER_VERSION = 1.1.66.0`
+  - `HBC_HOMEPAGE_LAUNCHER_VERSION = 1.1.67.0`
 - Package authority source: `apps/hb-homepage/config/package-solution.json`
-  - `solution.version = 1.1.66.0`
-  - `features[0].version = 1.1.66.0`
+  - `solution.version = 1.1.67.0`
+  - `features[0].version = 1.1.67.0`
 - Webpart manifests:
-  - `apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json = 1.1.66.0`
-  - `apps/hb-webparts/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json = 1.1.66.0`
+  - `apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json = 1.1.67.0`
+  - `apps/hb-webparts/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json = 1.1.67.0`
 - Package-truth proof: `dist/sppkg/hb-intel-homepage-effectiveness-proof.json`
   - `versionAuthority.aligned = true`
 - Bundled runtime marker proof:
-  - `ClientSideAssets/hb-homepage-app-804c6d0d.js` contains `data-hbc-homepage-launcher-version` and `1.1.66.0`
+  - `ClientSideAssets/hb-homepage-app-8303b7bd.js` contains `data-hbc-homepage-launcher-version` and `1.1.67.0`
 
 ## Hosted Proof Matrix
 
 | Viewport | Expected device class | Expected handheld mode | Expected cap governance | Observed launcher marker status |
 | --- | --- | --- | --- | --- |
-| ultrawide-desktop-1920x1080 | ultrawide | standard | binding-visible-cap | pass (`version=1.1.66.0`, `overflow=more-tools`, `visible=6`) |
-| standard-laptop-1512x982 | desktop | standard | binding-visible-cap | pass (`version=1.1.66.0`, `overflow=more-tools`, `visible=6`) |
-| standard-laptop-1366x1024 | desktop | standard | binding-visible-cap | pass (`version=1.1.66.0`, `overflow=more-tools`, `visible=6`) |
-| tablet-landscape-1024x900 | tablet-landscape | standard | binding-visible-cap | pass (`version=1.1.66.0`, `overflow=more-tools`, `visible=5`) |
-| tablet-portrait-900x1024 | tablet-portrait | standard | binding-visible-cap | pass (`version=1.1.66.0`, `overflow=more-tools`, `visible=4`) |
-| phone-portrait-430x992 | phone | single-entry-all-tools | all-tools-drawer | pass (`version=1.1.66.0`, `overflow=sheet`, `visible=1`) |
-| phone-portrait-390x844 | phone | single-entry-all-tools | all-tools-drawer | pass (`version=1.1.66.0`, `overflow=sheet`, `visible=1`) |
-| short-height-constrained-1300x420 | phone | single-entry-all-tools | all-tools-drawer | pass (`version=1.1.66.0`, `overflow=sheet`, `visible=1`) |
+| ultrawide-desktop-1920x1080 | ultrawide | standard | binding-visible-cap | pass (`version=1.1.67.0`, `overflow=more-tools`, `visible=6`) |
+| standard-laptop-1512x982 | desktop | standard | binding-visible-cap | pass (`version=1.1.67.0`, `overflow=more-tools`, `visible=6`) |
+| standard-laptop-1366x1024 | desktop | standard | binding-visible-cap | pass (`version=1.1.67.0`, `overflow=more-tools`, `visible=6`) |
+| tablet-landscape-1024x900 | tablet-landscape | standard | binding-visible-cap | pass (`version=1.1.67.0`, `overflow=more-tools`, `visible=5`) |
+| tablet-portrait-900x1024 | tablet-portrait | standard | binding-visible-cap | pass (`version=1.1.67.0`, `overflow=more-tools`, `visible=4`) |
+| phone-portrait-430x992 | phone | single-entry-all-tools | all-tools-drawer | pass (`version=1.1.67.0`, `overflow=sheet`, `visible=1`) |
+| phone-portrait-390x844 | phone | single-entry-all-tools | all-tools-drawer | pass (`version=1.1.67.0`, `overflow=sheet`, `visible=1`) |
+| short-height-constrained-1300x420 | phone | single-entry-all-tools | all-tools-drawer | pass (`version=1.1.67.0`, `overflow=sheet`, `visible=1`) |
 
 ## Artifacts
 - Root: `docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-03-final-hosted-proof-matrix/final/`
@@ -45,7 +45,7 @@
   - `{label}.png`
   - `{label}.launcher-markers.json`
 - Build/package truth artifacts:
-  - `dist/sppkg/hb-intel-homepage.sppkg` (`sha256: ba18794a999d2d4be87352f8f2d4ce1fd1b5988defc490ae9549107775706ee2`)
+  - `dist/sppkg/hb-intel-homepage.sppkg` (`sha256: 54087b954b2d719fc732bb9c74179ddb4ab96753f4b4a0e7566a27370f505408`)
   - `dist/sppkg/hb-intel-homepage-effectiveness-proof.json`
   - `dist/sppkg/hb-homepage-package-truth-proof.json`
   - `dist/sppkg/hb-homepage-shim-proof.json`
@@ -59,7 +59,7 @@
 
 ## Drift Verdict
 - **Drift resolved**:
-  - version/package/manifest/runtime markers now all align to `1.1.66.0`
+  - version/package/manifest/runtime markers now all align to `1.1.67.0`
   - hosted matrix assertions are strict and pass in harness proof
   - live SharePoint proof seam is now version-correct and artifact-isolated
 
@@ -90,5 +90,5 @@ Threshold interpretation:
 
 ## Closure Notes
 - Hosted proof seam hard-fails on missing launcher markers and mismatched version.
-- Handheld closure proof and matrix proof are pinned to launcher version `1.1.66.0`.
+- Handheld closure proof and matrix proof are pinned to launcher version `1.1.67.0`.
 - Live SharePoint proof seam is updated to the same version and uses isolated artifact capture root (`prompt-04-live-sharepoint-handheld-proof`).

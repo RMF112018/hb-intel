@@ -43,8 +43,15 @@ function DrawerOverflow({
   const prefersReducedMotion = useReducedMotion();
   const dialogId = React.useId();
   const titleId = React.useId();
+  const hintId = React.useId();
   const drawerItems = React.useMemo(() => [...items], [items]);
   const totalTools = drawerItems.length;
+  const railRef = React.useRef<HTMLDivElement | null>(null);
+  const [railOverflowState, setRailOverflowState] = React.useState({
+    hasOverflow: false,
+    atStart: true,
+    atEnd: true,
+  });
   const { refs, context } = useFloating({ open, onOpenChange: setOpen });
 
   const click = useClick(context);
@@ -55,6 +62,87 @@ function DrawerOverflow({
   const handheldLinearTrigger = triggerMode === 'linear-handheld';
   const triggerLabel = handheldLinearTrigger ? 'HB Toolbox' : label;
   const resolvedOverflowMode = handheldLinearTrigger ? 'sheet' : (overflowMode ?? 'more-tools');
+  const syncRailOverflowState = React.useCallback(() => {
+    const rail = railRef.current;
+    if (!rail) {
+      return;
+    }
+    const maxScrollLeft = Math.max(rail.scrollWidth - rail.clientWidth, 0);
+    const hasOverflow = maxScrollLeft > 1;
+    const atStart = !hasOverflow || rail.scrollLeft <= 1;
+    const atEnd = !hasOverflow || rail.scrollLeft >= maxScrollLeft - 1;
+
+    setRailOverflowState((prev) => {
+      if (
+        prev.hasOverflow === hasOverflow &&
+        prev.atStart === atStart &&
+        prev.atEnd === atEnd
+      ) {
+        return prev;
+      }
+      return { hasOverflow, atStart, atEnd };
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) {
+      setRailOverflowState({ hasOverflow: false, atStart: true, atEnd: true });
+      return;
+    }
+    const rail = railRef.current;
+    if (!rail) {
+      return;
+    }
+
+    const rafId = window.requestAnimationFrame(syncRailOverflowState);
+    rail.addEventListener('scroll', syncRailOverflowState, { passive: true });
+
+    let resizeObserver: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => syncRailOverflowState());
+      resizeObserver.observe(rail);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      rail.removeEventListener('scroll', syncRailOverflowState);
+      resizeObserver?.disconnect();
+    };
+  }, [open, drawerItems.length, syncRailOverflowState]);
+
+  const handleRailKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target) {
+      return;
+    }
+    const rail = railRef.current;
+    if (!rail) {
+      return;
+    }
+    const pageDelta = Math.max(Math.round(rail.clientWidth * 0.75), 96);
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      rail.scrollBy({ left: pageDelta, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      return;
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      rail.scrollBy({ left: -pageDelta, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      return;
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      rail.scrollTo({ left: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      return;
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      rail.scrollTo({
+        left: rail.scrollWidth,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
+    }
+  }, [prefersReducedMotion]);
 
   const surfaceTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -176,12 +264,6 @@ function DrawerOverflow({
                       {DRAWER_CATEGORY_LABEL}
                     </span>
                   </div>
-                  <span
-                    className={styles.sheetHeaderCount}
-                    aria-label={`${totalTools} tools`}
-                  >
-                    {totalTools}
-                  </span>
                   <button
                     type="button"
                     className={styles.sheetClose}
@@ -194,29 +276,38 @@ function DrawerOverflow({
                 <div
                   className={styles.drawerBody}
                   data-hbc-ui="homepage-launcher-overflow-tray"
+                  data-hbc-launcher-overflow-present={railOverflowState.hasOverflow ? 'true' : 'false'}
+                  data-hbc-launcher-overflow-at-start={railOverflowState.atStart ? 'true' : 'false'}
+                  data-hbc-launcher-overflow-at-end={railOverflowState.atEnd ? 'true' : 'false'}
                 >
-                  <div className={styles.drawerRailRoot}>
-                    <div
-                      className={styles.drawerTileGrid}
-                      data-hbc-ui="homepage-launcher-drawer-rail"
-                      data-hbc-launcher-drawer-layout="single-row-tray"
-                      role="list"
-                      aria-label="Company tools"
-                      data-hbc-launcher-drawer-scroll="horizontal"
-                      data-hbc-launcher-overflow-grouping="none"
-                    >
-                      {drawerItems.map((tile) => (
-                        <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
-                          <HbcHomepageLauncherTile
-                            tile={tile}
-                            family="drawer"
-                            className={styles.drawerTile}
-                          />
-                        </div>
-                      ))}
-                    </div>
+                  <div
+                    ref={railRef}
+                    className={styles.drawerTileGrid}
+                    data-hbc-ui="homepage-launcher-drawer-rail"
+                    data-hbc-launcher-drawer-layout="single-row-tray"
+                    role="list"
+                    aria-label="Company tools"
+                    aria-describedby={hintId}
+                    tabIndex={0}
+                    onKeyDown={handleRailKeyDown}
+                    data-hbc-launcher-drawer-scroll="horizontal"
+                    data-hbc-launcher-overflow-grouping="none"
+                    data-hbc-launcher-overflow-present={railOverflowState.hasOverflow ? 'true' : 'false'}
+                    data-hbc-launcher-overflow-at-start={railOverflowState.atStart ? 'true' : 'false'}
+                    data-hbc-launcher-overflow-at-end={railOverflowState.atEnd ? 'true' : 'false'}
+                  >
+                    {drawerItems.map((tile) => (
+                      <div key={tile.id} role="listitem" className={styles.drawerRailItem}>
+                        <HbcHomepageLauncherTile
+                          tile={tile}
+                          family="drawer"
+                          className={styles.drawerTile}
+                        />
+                      </div>
+                    ))}
                   </div>
                   <p
+                    id={hintId}
                     className={styles.drawerOverflowHint}
                     data-hbc-homepage-launcher-overflow-hint="single-row"
                   >

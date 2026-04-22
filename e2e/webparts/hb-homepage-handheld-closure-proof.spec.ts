@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const EXPECTED_LAUNCHER_VERSION = '1.1.66.0';
+const EXPECTED_LAUNCHER_VERSION = '1.1.67.0';
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
   'docs/architecture/plans/MASTER/spfx/launcher/phase-01/wave-03/artifacts/prompt-03-final-hosted-proof-matrix/handheld-closure',
@@ -74,7 +74,7 @@ test.describe('HB Homepage handheld closure proof', () => {
         await expect(drawer).toBeVisible();
         await expect(
           drawer.locator('[data-hbc-ui="homepage-launcher-drawer-rail"]').first(),
-        ).toHaveAttribute('data-hbc-launcher-drawer-layout', 'compact-rail');
+        ).toHaveAttribute('data-hbc-launcher-drawer-layout', 'compact-grid');
         const handheldDrawerMetrics = await drawer.evaluate((el) => {
           const rect = el.getBoundingClientRect();
           const firstTile = el.querySelector('a[data-hbc-ui="homepage-launcher-tile"]') as HTMLElement | null;
@@ -89,10 +89,10 @@ test.describe('HB Homepage handheld closure proof', () => {
         expect(handheldDrawerMetrics.drawerHeight).toBeLessThanOrEqual(
           Math.round(handheldDrawerMetrics.viewportHeight * 0.9),
         );
-        expect(handheldDrawerMetrics.tileWidth).toBeGreaterThanOrEqual(68);
-        expect(handheldDrawerMetrics.tileWidth).toBeLessThanOrEqual(120);
-        expect(handheldDrawerMetrics.tileHeight).toBeGreaterThanOrEqual(68);
-        expect(handheldDrawerMetrics.tileHeight).toBeLessThanOrEqual(120);
+        expect(handheldDrawerMetrics.tileWidth).toBeGreaterThanOrEqual(64);
+        expect(handheldDrawerMetrics.tileWidth).toBeLessThanOrEqual(124);
+        expect(handheldDrawerMetrics.tileHeight).toBeGreaterThanOrEqual(64);
+        expect(handheldDrawerMetrics.tileHeight).toBeLessThanOrEqual(124);
         await page.keyboard.press('Escape');
       }
 

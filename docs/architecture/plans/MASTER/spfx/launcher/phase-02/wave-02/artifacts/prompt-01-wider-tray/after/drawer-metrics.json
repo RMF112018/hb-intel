@@ -1,0 +1,29 @@
+[
+  {
+    "label": "desktop-1920x1080",
+    "drawerWidth": 920,
+    "drawerHeight": 205.59,
+    "viewportWidth": 1920,
+    "viewportHeight": 1080,
+    "deviceClass": "ultrawide",
+    "overflowShape": "tile"
+  },
+  {
+    "label": "tablet-1024x900",
+    "drawerWidth": 920,
+    "drawerHeight": 205.59,
+    "viewportWidth": 1024,
+    "viewportHeight": 900,
+    "deviceClass": "tablet-landscape",
+    "overflowShape": "tile"
+  },
+  {
+    "label": "phone-390x844",
+    "drawerWidth": 384,
+    "drawerHeight": 208.3,
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "deviceClass": "phone",
+    "overflowShape": "linear-handheld"
+  }
+]
