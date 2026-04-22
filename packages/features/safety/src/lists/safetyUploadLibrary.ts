@@ -13,7 +13,7 @@ const BASE: SiteScopedListDescriptor = {
 export const SafetyChecklistUploadsLibrary: SiteScopedListDescriptor = BASE;
 
 export const SAFETY_UPLOAD_LIBRARY_SERVER_RELATIVE_PATH =
-  '/sites/Safety/SafetyChecklistUploads' as const;
+  '/sites/Safety/Safety Checklist Uploads' as const;
 
 /**
  * Resolve the upload-library descriptor with any runtime overlay applied.

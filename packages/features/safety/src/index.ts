@@ -111,7 +111,11 @@ export {
   isSafetyConfigurationError,
 } from './adapters/sharepoint/errors.js';
 export type { SpHttpClient } from './adapters/sharepoint/spHttp.js';
-export { uploadToSafetyChecklistUploads } from './adapters/sharepoint/uploadToSafetyChecklistUploads.js';
+export {
+  SafetyUploadError,
+  uploadToSafetyChecklistUploads,
+  type UploadFailureKind,
+} from './adapters/sharepoint/uploadToSafetyChecklistUploads.js';
 export {
   downloadUploadedWorkbook,
   type DownloadedWorkbook,

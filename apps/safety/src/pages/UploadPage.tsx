@@ -10,6 +10,7 @@ import {
 } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 import {
+  SafetyUploadError,
   isSafetyAdapterFetchError,
   isSafetyConfigurationError,
   useReportingPeriods,
@@ -138,7 +139,7 @@ export function UploadPage(): ReactNode {
                     intent="partial-failure"
                     data-safety-ui="upload-ingestion-error"
                     description="Upload failed."
-                    detail={ingestion.error.message}
+                    detail={uploadErrorMessage(ingestion.error)}
                   />
                 )}
               </div>
@@ -259,4 +260,35 @@ function reportingPeriodLoadMessage(error: unknown): string {
     return `Could not load reporting periods. Submission is disabled: ${error.message}`;
   }
   return 'Could not load reporting periods. Submission is disabled until the period list is available.';
+}
+
+function uploadErrorMessage(error: unknown): string {
+  if (error instanceof SafetyUploadError) {
+    if (error.kind === 'permission' && error.stage === 'upload-post') {
+      return (
+        'You do not have permission to upload to Safety Checklist Uploads. ' +
+        'Contact the Safety site owner if upload access should be available.'
+      );
+    }
+    if (error.kind === 'not-found') {
+      return (
+        'Safety Checklist Uploads could not be found at the configured location. ' +
+        'Verify upload-library binding and path configuration.'
+      );
+    }
+    if (error.kind === 'binding') {
+      return (
+        'Upload library identity is not configured in this runtime. ' +
+        'SafetyChecklistUploads GUID binding is required before submission.'
+      );
+    }
+    if (error.kind === 'metadata-lookup') {
+      return (
+        'The file was uploaded but metadata lookup failed, so the run could not continue. ' +
+        'Retry or contact support with this failure.'
+      );
+    }
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return 'Upload failed due to an unexpected error.';
 }

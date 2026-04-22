@@ -10,6 +10,7 @@ const REQUIRED_HOSTED_KEYS = [
   'SafetyInspectionEvents',
   'SafetyFindings',
   'SafetyIngestionRuns',
+  'SafetyChecklistUploads',
   'Projects',
   'LegacyProjectFallbackRegistry',
 ] as const;
@@ -22,6 +23,7 @@ const HBCENTRAL_HOSTED_GUID_OVERLAY: Readonly<Record<HostedRequiredKey, string>>
   SafetyInspectionEvents: 'dca4537f-7f3a-4159-b48f-f06f2944dc59',
   SafetyFindings: '8140e59a-0fed-4681-8e8d-8360c93d2d08',
   SafetyIngestionRuns: '965d5b6a-6bec-425a-b19c-6fb56c717c30',
+  SafetyChecklistUploads: 'ad498f9c-d0dd-4dd5-ba85-fe36d585adc6',
   Projects: '1ac57cbb-9f0a-457f-9c97-081a29f45b12',
   LegacyProjectFallbackRegistry: '2c24aa84-38f4-4793-9576-2ee23bedd74a',
 };
