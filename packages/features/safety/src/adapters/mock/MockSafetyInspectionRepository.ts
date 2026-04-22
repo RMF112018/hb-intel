@@ -15,12 +15,24 @@ import type {
   IngestionRunFilter,
   InspectionFilter,
   ProjectWeekFilter,
+  ProjectWeekInspectionFilter,
+  ReplayOptions,
   ReviewQueueEntry,
 } from '../../ports/ISafetyInspectionRepository.js';
 import { runIngestionPipeline } from '../../ingestion/runIngestionPipeline.js';
 import type { IngestionAdapter } from '../../ingestion/runIngestionPipeline.js';
-import { readWorkbookFromFile, computeChecksum } from '../../parser/xlsxWorkbookView.js';
+import { readWorkbookFromArrayBuffer, computeChecksum } from '../../parser/xlsxWorkbookView.js';
 import { buildSeed } from './seedData.js';
+
+interface RetainedUpload {
+  readonly bytes: ArrayBuffer;
+  readonly fileName: string;
+  readonly uploadedByUpn: string;
+  readonly uploadedAt: string;
+  readonly reportingPeriodId: string;
+  readonly reportingPeriodSpItemId: number;
+  readonly checksum: string;
+}
 
 export class MockSafetyInspectionRepository implements ISafetyInspectionRepository {
   private readonly periods: SafetyReportingPeriod[];
@@ -28,6 +40,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   private readonly inspections: SafetyInspectionEvent[];
   private readonly findings: SafetyFinding[];
   private readonly ingestionRuns: SafetyIngestionRun[];
+  private readonly retainedUploads = new Map<number, RetainedUpload>();
   private spItemIdSeqByPrefix: Record<string, number> = {
     period: 1000,
     pw: 2000,
@@ -114,6 +127,16 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
     });
   }
 
+  async findInspectionsForProjectWeek(
+    filter: ProjectWeekInspectionFilter,
+  ): Promise<ReadonlyArray<SafetyInspectionEvent>> {
+    return this.inspections.filter(
+      (ie) =>
+        ie.projectNumber === filter.projectNumber &&
+        ie.reportingPeriodId === filter.reportingPeriodId,
+    );
+  }
+
   async getInspection(id: string): Promise<SafetyInspectionEvent | null> {
     return this.inspections.find((ie) => ie.id === id) ?? null;
   }
@@ -128,6 +151,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
     filter: IngestionRunFilter,
   ): Promise<ReadonlyArray<SafetyIngestionRun>> {
     return this.ingestionRuns.filter((run) => {
+      if (filter.reportingPeriodId && run.reportingPeriodId !== filter.reportingPeriodId) return false;
       if (
         filter.terminalStatus &&
         filter.terminalStatus.length > 0 &&
@@ -140,17 +164,31 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   }
 
   async listReviewQueue(reportingPeriodId?: string): Promise<ReadonlyArray<ReviewQueueEntry>> {
-    const reviewStatuses: ReadonlyArray<string> = ['review-required', 'invalid-template', 'commit-failed'];
-    const runs = await this.listIngestionRuns({ terminalStatus: reviewStatuses, reportingPeriodId });
+    const reviewStatuses: ReadonlyArray<string> = [
+      'review-required',
+      'invalid-template',
+      'parse-error',
+      'reporting-period-mismatch',
+      'unresolved-project',
+      'commit-failed',
+    ];
+    const runs = await this.listIngestionRuns({
+      terminalStatus: reviewStatuses,
+      reportingPeriodId,
+    });
     return runs.map((run) => {
       const committed = safelyParseJson(run.committedEntityIdsJson);
       const inspectionEventId =
-        committed && typeof committed.inspectionEventId === 'string' ? committed.inspectionEventId : undefined;
-      const inspection = inspectionEventId ? this.inspections.find((ie) => ie.id === inspectionEventId) : undefined;
+        committed && typeof committed.inspectionEventId === 'string'
+          ? committed.inspectionEventId
+          : undefined;
+      const inspection = inspectionEventId
+        ? this.inspections.find((ie) => ie.id === inspectionEventId)
+        : undefined;
       return {
         run,
         inspectionEventId,
-        projectNumber: inspection?.projectNumber,
+        projectNumber: run.resolvedProjectNumber ?? inspection?.projectNumber,
         projectNameSnapshot: inspection?.projectNameSnapshot,
         reason: run.errorSummary ?? run.terminalStatus,
       };
@@ -160,17 +198,100 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   async ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult> {
     const buffer = await file.arrayBuffer();
     const checksum = await computeChecksum(buffer);
-    const view = await readWorkbookFromFile(new Blob([buffer]));
+    const sourceUploadItemId = ++this.uploadIdSeq;
+    this.retainedUploads.set(sourceUploadItemId, {
+      bytes: buffer,
+      fileName: context.fileName,
+      uploadedByUpn: context.uploadedByUpn,
+      uploadedAt: context.uploadedAt,
+      reportingPeriodId: context.reportingPeriodId,
+      reportingPeriodSpItemId: context.reportingPeriodSpItemId,
+      checksum,
+    });
 
+    const view = readWorkbookFromArrayBuffer(buffer);
     const uploadedRef: UploadedWorkbookRef = {
-      sourceUploadItemId: ++this.uploadIdSeq,
+      sourceUploadItemId,
       sourceUploadWebUrl: `https://mock.local/${context.fileName}`,
       checksum,
     };
 
-    const adapter: IngestionAdapter = {
+    return runIngestionPipeline({
+      view,
+      context,
+      uploadedRef,
+      adapter: this.buildIngestionAdapter(),
+    });
+  }
+
+  async replayIngestion(
+    parentRunId: string,
+    options: ReplayOptions = {},
+  ): Promise<IngestionRunResult> {
+    const parent = this.ingestionRuns.find((r) => r.id === parentRunId);
+    if (!parent) throw new Error(`Ingestion run not found: ${parentRunId}`);
+    const retained = this.retainedUploads.get(parent.sourceUploadItemId);
+    if (!retained) {
+      const run = await this.buildIngestionAdapter().recordIngestionRun({
+        title: `Replay ${parent.uploadFileName} — attempt ${parent.attemptNumber + 1}`,
+        sourceUploadItemId: parent.sourceUploadItemId,
+        uploadFileName: parent.uploadFileName,
+        templateVersionDetected: undefined,
+        checksum: parent.checksum,
+        validationStatus: 'skipped' as never,
+        parseStatus: 'skipped',
+        projectResolutionStatus: 'skipped',
+        terminalStatus: 'commit-failed',
+        committedEntityIdsJson: '{}',
+        errorClass: 'replay-source-missing',
+        errorSummary: 'Source workbook is no longer retained in Safety Checklist Uploads.',
+        runStartedAt: new Date().toISOString(),
+        runCompletedAt: new Date().toISOString(),
+        attemptNumber: parent.attemptNumber + 1,
+        reportingPeriodId: parent.reportingPeriodId,
+        reportingPeriodSpItemId: parent.reportingPeriodSpItemId,
+        attemptedProjectSiteText: parent.attemptedProjectSiteText,
+        reviewStatus: 'replayed-failed',
+        parentRunId: parent.id,
+        parentRunSpItemId: parent.spItemId,
+      });
+      return { run, state: 'commit-failed' };
+    }
+
+    const view = readWorkbookFromArrayBuffer(retained.bytes);
+    const uploadedRef: UploadedWorkbookRef = {
+      sourceUploadItemId: parent.sourceUploadItemId,
+      sourceUploadWebUrl: `https://mock.local/${retained.fileName}`,
+      checksum: retained.checksum,
+    };
+
+    return runIngestionPipeline({
+      view,
+      context: {
+        uploadedByUpn: retained.uploadedByUpn,
+        uploadedAt: retained.uploadedAt,
+        fileName: retained.fileName,
+        reportingPeriodId: retained.reportingPeriodId,
+        reportingPeriodSpItemId: retained.reportingPeriodSpItemId,
+      },
+      uploadedRef,
+      adapter: this.buildIngestionAdapter(),
+      attemptNumber: parent.attemptNumber + 1,
+      parentRunId: parent.id,
+      parentRunSpItemId: parent.spItemId,
+      supersedePrior: options.supersedePrior ?? false,
+    });
+  }
+
+  async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
+    return this.replayIngestion(ingestionRunId);
+  }
+
+  private buildIngestionAdapter(): IngestionAdapter {
+    return {
       resolveProject: async (projectSiteText, projectNumberHint) => {
         const hint = projectNumberHint ?? extractProjectNumber(projectSiteText);
+        if (!hint) return null;
         const match = this.projectWeeks.find((pw) => pw.projectNumber === hint);
         if (!match) return null;
         return {
@@ -181,10 +302,10 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
           projectStageSnapshot: match.projectStageSnapshot,
         };
       },
-      findRecentInspectionsForProject: async (projectNumber, inspectionDate) =>
-        this.inspections.filter(
-          (ie) => ie.projectNumber === projectNumber && ie.inspectionDate === inspectionDate,
-        ),
+      findInspectionsForProjectWeek: async (filter) =>
+        this.findInspectionsForProjectWeek(filter),
+      resolveReportingPeriod: async (reportingPeriodId) =>
+        this.getReportingPeriod(reportingPeriodId),
       ensureProjectWeekRecord: async (
         resolution,
         reportingPeriodId,
@@ -255,6 +376,16 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
           projectWeekRecord: drafts.projectWeekRecordUpdate,
         } satisfies CommittedArtifacts;
       },
+      markInspectionSuperseded: async (priorId, replacementId) => {
+        const idx = this.inspections.findIndex((ie) => ie.id === priorId);
+        if (idx < 0) return;
+        const prior = this.inspections[idx];
+        this.inspections[idx] = {
+          ...prior,
+          ingestionStatus: 'superseded',
+          supersededByInspectionEventId: replacementId,
+        };
+      },
       recordIngestionRun: async (draft: SafetyIngestionRunDraft) => {
         const spItemId = this.nextSpItemId('run');
         const run: SafetyIngestionRun = {
@@ -266,14 +397,6 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
         return run;
       },
     };
-
-    return runIngestionPipeline({ view, context, uploadedRef, adapter });
-  }
-
-  async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
-    const existing = this.ingestionRuns.find((r) => r.id === ingestionRunId);
-    if (!existing) throw new Error(`Ingestion run not found: ${ingestionRunId}`);
-    throw new Error('Mock retryIngestion: Wave 2 replay path is not yet wired.');
   }
 
   private nextSpItemId(prefix: 'period' | 'pw' | 'ie' | 'fd' | 'run'): number {
@@ -290,7 +413,7 @@ function safelyParseJson(value: string): Record<string, unknown> | null {
   }
 }
 
-function extractProjectNumber(projectSiteText: string): string {
+function extractProjectNumber(projectSiteText: string): string | null {
   const match = projectSiteText.match(/\d{4}-\d{2,4}/);
-  return match ? match[0] : projectSiteText.trim();
+  return match ? match[0] : null;
 }

@@ -2,11 +2,17 @@
  * Ingestion orchestrator — the only place that decides state transitions
  * for a single workbook upload.
  *
- * Wave 1 audit remediation:
- * - Adapter owns identity allocation (numeric `spItemId` is authoritative for
- *   SharePoint Lookup fields; string `id` is derived for stable UI routing).
- * - Pipeline never parses business IDs into fake numeric Lookup parents.
- * - `UploadContext.reportingPeriodSpItemId` is threaded into Lookup payloads.
+ * Wave 1 audit remediation: numeric SP item-ID Lookup contract.
+ * Wave 2 audit remediation:
+ * - distinct `parse-error` terminal (P2-10) — no more flattening into
+ *   `invalid-template`.
+ * - distinct `reporting-period-mismatch` terminal (P2-9) — workbook date
+ *   must fall inside the selected reporting period's week range.
+ * - week-scoped rollup via `findInspectionsForProjectWeek` (P1-3).
+ * - project-number hint plumbed from metadata (P2-12).
+ * - enriched `SafetyIngestionRun` persistence (P1-4, P1-5).
+ * - replay lineage: `attemptNumber`, `parentRunId`, `parentRunSpItemId`
+ *   carried through every terminal.
  */
 
 import {
@@ -24,6 +30,7 @@ import {
   type SafetyInspectionEvent,
   type SafetyInspectionEventDraft,
   type SafetyProjectWeekRecord,
+  type SafetyReportingPeriod,
   type UploadContext,
   type UploadedWorkbookRef,
 } from '../domain/types.js';
@@ -33,44 +40,38 @@ import type { WorkbookView } from '../parser/workbookView.js';
 import { extractFindings } from '../scoring/findingExtraction.js';
 import { computeProjectWeekRollup } from '../scoring/projectWeekRollup.js';
 import { computeInspectionScore } from '../scoring/scoringEngine.js';
+import { isDateInRange, weekRangeForDate } from './weekRangeForDate.js';
 
-/**
- * Adapter contract for the pipeline. The adapter is the sole owner of
- * persistence, ID allocation, and Lookup-parent binding.
- */
 export interface IngestionAdapter {
   resolveProject(
     projectSiteText: string,
-    projectNumberHint?: string,
+    projectNumberHint: string | null,
   ): Promise<ProjectResolutionResult | null>;
-  findRecentInspectionsForProject(
-    projectNumber: string,
-    inspectionDate: string,
-  ): Promise<ReadonlyArray<SafetyInspectionEvent>>;
-  /**
-   * Ensure a project-week record exists for the (project, reporting period).
-   * Returned record carries real `spItemId` and `reportingPeriodSpItemId`.
-   */
+  /** Wave 2 week-scoped rollup source — includes all accepted/duplicate-suspected inspections. */
+  findInspectionsForProjectWeek(filter: {
+    projectNumber: string;
+    reportingPeriodId: string;
+  }): Promise<ReadonlyArray<SafetyInspectionEvent>>;
+  /** Look up a reporting period by id so the pipeline can validate the workbook date. */
+  resolveReportingPeriod(
+    reportingPeriodId: string,
+  ): Promise<SafetyReportingPeriod | null>;
   ensureProjectWeekRecord(
     resolution: ProjectResolutionResult,
     reportingPeriodId: string,
     reportingPeriodSpItemId: number,
     weekStartDate: string,
   ): Promise<SafetyProjectWeekRecord>;
-  /**
-   * Persist the inspection event + findings + updated project-week record.
-   * The adapter assigns real `spItemId`s (SharePoint: from REST; mock:
-   * monotonic), wires up Lookup relationships, and returns the finalized
-   * records.
-   */
   persistCommit(drafts: {
     inspectionEventDraft: SafetyInspectionEventDraft;
     findingDrafts: ReadonlyArray<SafetyFindingDraft>;
     projectWeekRecordUpdate: SafetyProjectWeekRecord;
   }): Promise<CommittedArtifacts>;
-  /**
-   * Write an ingestion-run audit row. Adapter assigns `spItemId` / `id`.
-   */
+  /** Flip a prior inspection event to `superseded` and attach `supersededByInspectionEventId`. */
+  markInspectionSuperseded(
+    priorInspectionEventId: string,
+    replacementInspectionEventId: string,
+  ): Promise<void>;
   recordIngestionRun(runDraft: SafetyIngestionRunDraft): Promise<SafetyIngestionRun>;
 }
 
@@ -80,15 +81,23 @@ export interface IngestionPipelineInput {
   readonly uploadedRef: UploadedWorkbookRef;
   readonly adapter: IngestionAdapter;
   readonly attemptNumber?: number;
+  readonly parentRunId?: string;
+  readonly parentRunSpItemId?: number;
+  /**
+   * When true and a high-confidence duplicate is detected, the prior
+   * inspection event is flipped to `superseded` and a fresh commit proceeds.
+   */
+  readonly supersedePrior?: boolean;
 }
 
 export async function runIngestionPipeline(
   input: IngestionPipelineInput,
 ): Promise<IngestionRunResult> {
-  const { view, context, uploadedRef, adapter } = input;
+  const { view, context, uploadedRef, adapter, parentRunId, parentRunSpItemId, supersedePrior } = input;
   const attemptNumber = input.attemptNumber ?? 1;
   const runStartedAt = new Date().toISOString();
   const committedIds: IngestionCommittedIds = {};
+  let parsedCache: ParsedInspection | null = null;
 
   const buildRunDraft = (
     overrides: Partial<SafetyIngestionRunDraft> &
@@ -106,6 +115,12 @@ export async function runIngestionPipeline(
     runStartedAt,
     runCompletedAt: new Date().toISOString(),
     attemptNumber,
+    reportingPeriodId: context.reportingPeriodId,
+    reportingPeriodSpItemId: context.reportingPeriodSpItemId,
+    attemptedProjectSiteText: parsedCache?.metadata.projectSiteText,
+    reviewStatus: 'none',
+    parentRunId,
+    parentRunSpItemId,
     ...overrides,
   });
 
@@ -115,6 +130,8 @@ export async function runIngestionPipeline(
     const finalized = await adapter.recordIngestionRun({
       ...draft,
       committedEntityIdsJson: JSON.stringify(committedIds),
+      attemptedProjectSiteText:
+        draft.attemptedProjectSiteText ?? parsedCache?.metadata.projectSiteText,
     });
     committedIds.ingestionRunId = finalized.id;
     return finalized;
@@ -133,6 +150,7 @@ export async function runIngestionPipeline(
           terminalStatus: 'invalid-template',
           errorClass: 'template-invalid',
           errorSummary: err.message,
+          reviewStatus: 'pending-review',
         }),
       );
       return { run, state: 'invalid-template' };
@@ -141,25 +159,50 @@ export async function runIngestionPipeline(
   }
 
   // Stage 3/4: extract + parse
-  let parsed: ParsedInspection;
   try {
-    parsed = parseChecklist(view);
+    parsedCache = parseChecklist(view);
   } catch (err) {
     const run = await finalize(
       buildRunDraft({
         validationStatus: 'passed',
         parseStatus: 'failed',
         projectResolutionStatus: 'skipped',
-        terminalStatus: 'invalid-template',
+        terminalStatus: 'parse-error',
         errorClass: 'parse-error',
         errorSummary: err instanceof Error ? err.message : 'Unknown parser error',
+        reviewStatus: 'pending-review',
       }),
     );
-    return { run, state: 'invalid-template' };
+    return { run, state: 'parse-error' };
+  }
+  const parsed = parsedCache;
+
+  // Stage 5: validate workbook date against the selected reporting period.
+  const period = await adapter.resolveReportingPeriod(context.reportingPeriodId);
+  if (period && period.weekStartDate && period.weekEndDate) {
+    const range = { weekStartDate: period.weekStartDate, weekEndDate: period.weekEndDate };
+    if (parsed.metadata.inspectionDate && !isDateInRange(parsed.metadata.inspectionDate, range)) {
+      const run = await finalize(
+        buildRunDraft({
+          validationStatus: 'passed',
+          parseStatus: 'passed',
+          projectResolutionStatus: 'skipped',
+          terminalStatus: 'reporting-period-mismatch',
+          errorClass: 'reporting-period-mismatch',
+          errorSummary: `Workbook date ${parsed.metadata.inspectionDate} is not within selected period ${period.weekStartDate} … ${period.weekEndDate}.`,
+          templateVersionDetected: parsed.templateVersion,
+          reviewStatus: 'pending-review',
+        }),
+      );
+      return { run, state: 'reporting-period-mismatch' };
+    }
   }
 
-  // Stage 5: resolve project
-  const resolution = await adapter.resolveProject(parsed.metadata.projectSiteText);
+  // Stage 6: resolve project (hint extracted from metadata in Wave 2).
+  const resolution = await adapter.resolveProject(
+    parsed.metadata.projectSiteText,
+    parsed.metadata.projectNumberHint,
+  );
   if (!resolution) {
     const run = await finalize(
       buildRunDraft({
@@ -170,19 +213,42 @@ export async function runIngestionPipeline(
         errorClass: 'project-unresolved',
         errorSummary: `Could not resolve project from "${parsed.metadata.projectSiteText}".`,
         templateVersionDetected: parsed.templateVersion,
+        projectSourceClassification: 'unresolved',
+        reviewStatus: 'pending-review',
       }),
     );
     return { run, state: 'unresolved-project' };
   }
 
-  // Stage: duplicate detection
-  const recent = await adapter.findRecentInspectionsForProject(
-    resolution.projectNumber,
-    parsed.metadata.inspectionDate,
-  );
-  const duplicate = classifyDuplicate(recent, parsed, uploadedRef.checksum);
+  // Stage: duplicate detection against prior week-scoped inspections.
+  const weeklyInspections = await adapter.findInspectionsForProjectWeek({
+    projectNumber: resolution.projectNumber,
+    reportingPeriodId: context.reportingPeriodId,
+  });
+  const duplicate = classifyDuplicate(weeklyInspections, parsed, uploadedRef.checksum);
 
-  if (duplicate.confidence === 'high-confidence-duplicate') {
+  if (duplicate.confidence === 'high-confidence-duplicate' && !supersedePrior) {
+    // Idempotent retry: short-circuit to the existing committed event when
+    // the parent run chain is already represented by a committed match.
+    const matched = weeklyInspections.find((ie) => ie.id === duplicate.matchedId);
+    if (matched && matched.ingestionStatus !== 'superseded') {
+      committedIds.inspectionEventId = matched.id;
+      committedIds.projectWeekRecordId = matched.projectWeekRecordId;
+      const run = await finalize(
+        buildRunDraft({
+          validationStatus: 'passed',
+          parseStatus: 'passed',
+          projectResolutionStatus: 'resolved',
+          terminalStatus: 'committed',
+          templateVersionDetected: parsed.templateVersion,
+          resolvedProjectNumber: resolution.projectNumber,
+          projectSourceClassification: resolution.classification,
+          reviewStatus: 'replayed-success',
+        }),
+      );
+      return { run, state: 'committed' };
+    }
+    // Duplicate exists but previously superseded — fall through as review-required.
     const run = await finalize(
       buildRunDraft({
         validationStatus: 'passed',
@@ -192,12 +258,15 @@ export async function runIngestionPipeline(
         errorClass: 'duplicate-suspected',
         errorSummary: `High-confidence duplicate of inspection event ${duplicate.matchedId}.`,
         templateVersionDetected: parsed.templateVersion,
+        resolvedProjectNumber: resolution.projectNumber,
+        projectSourceClassification: resolution.classification,
+        reviewStatus: 'pending-review',
       }),
     );
     return { run, state: 'review-required' };
   }
 
-  // Stage 6: scoring + stage 7: finding extraction
+  // Stage 7: scoring + stage 8: finding extraction
   const score = computeInspectionScore(parsed, 'template-compat-v1');
   const findingDraftsFromParser = extractFindings(parsed);
 
@@ -207,7 +276,7 @@ export async function runIngestionPipeline(
       resolution,
       context.reportingPeriodId,
       context.reportingPeriodSpItemId,
-      weekStartFromDate(parsed.metadata.inspectionDate),
+      weekRangeForDate(parsed.metadata.inspectionDate).weekStartDate,
     );
 
     const inspectionEventDraft: SafetyInspectionEventDraft = {
@@ -259,23 +328,12 @@ export async function runIngestionPipeline(
       }),
     );
 
-    // Recompute rollup from the persisted weekly set plus the in-flight event.
-    // Wave 1 retains the same-date query contract; Wave 2 replaces it with
-    // `findInspectionsForProjectWeek` for true weekly scope.
-    const rolledInspections: SafetyInspectionEvent[] = [
-      ...(await adapter.findRecentInspectionsForProject(
-        resolution.projectNumber,
-        parsed.metadata.inspectionDate,
-      )),
-    ];
-    // Synthesize a preliminary inspection event for rollup-score input only.
-    const rollupCandidateEvent: SafetyInspectionEvent = {
-      id: 'in-flight',
-      spItemId: 0,
-      ...inspectionEventDraft,
-    };
-    rolledInspections.push(rollupCandidateEvent);
-
+    // Week-scoped rollup input: all accepted/duplicate-suspected events in the
+    // reporting period for this project, plus the in-flight event (pre-persist).
+    const rolledInspections: SafetyInspectionEvent[] = weeklyInspections.filter(
+      (ie) => !(supersedePrior && duplicate.matchedId && ie.id === duplicate.matchedId),
+    );
+    rolledInspections.push({ id: 'in-flight', spItemId: 0, ...inspectionEventDraft });
     const rollup = computeProjectWeekRollup(rolledInspections, []);
     const updatedProjectWeek: SafetyProjectWeekRecord = {
       ...projectWeek,
@@ -296,6 +354,10 @@ export async function runIngestionPipeline(
       projectWeekRecordUpdate: updatedProjectWeek,
     });
 
+    if (supersedePrior && duplicate.matchedId) {
+      await adapter.markInspectionSuperseded(duplicate.matchedId, committed.inspectionEvent.id);
+    }
+
     committedIds.inspectionEventId = committed.inspectionEvent.id;
     committedIds.findingIds = committed.findings.map((f) => f.id);
     committedIds.projectWeekRecordId = committed.projectWeekRecord.id;
@@ -308,6 +370,9 @@ export async function runIngestionPipeline(
         terminalStatus: 'committed',
         templateVersionDetected: parsed.templateVersion,
         runCompletedAt: new Date().toISOString(),
+        resolvedProjectNumber: resolution.projectNumber,
+        projectSourceClassification: resolution.classification,
+        reviewStatus: parentRunId ? 'replayed-success' : 'none',
       }),
     );
 
@@ -331,6 +396,9 @@ export async function runIngestionPipeline(
         errorClass: 'commit-error',
         errorSummary: err instanceof Error ? err.message : 'Unknown commit error',
         templateVersionDetected: parsed.templateVersion,
+        resolvedProjectNumber: resolution.projectNumber,
+        projectSourceClassification: resolution.classification,
+        reviewStatus: parentRunId ? 'replayed-failed' : 'pending-review',
       }),
     );
     return { run, state: 'commit-failed' };
@@ -346,6 +414,7 @@ function classifyDuplicate(
 
   const sameBusinessKey = recent.find(
     (ie) =>
+      ie.ingestionStatus !== 'superseded' &&
       ie.projectNumber &&
       ie.inspectionDate === parsed.metadata.inspectionDate &&
       (ie.inspectionNumber ?? '').toLowerCase() ===
@@ -359,15 +428,6 @@ function classifyDuplicate(
   return { confidence: 'near-duplicate', matchedId: sameBusinessKey.id };
 }
 
-function weekStartFromDate(dateIso: string): string {
-  if (!dateIso) return new Date().toISOString().slice(0, 10);
-  const d = new Date(`${dateIso}T00:00:00Z`);
-  const day = d.getUTCDay();
-  const offset = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + offset);
-  return d.toISOString().slice(0, 10);
-}
-
 export function __testOnly_weekStartFromDate(dateIso: string): string {
-  return weekStartFromDate(dateIso);
+  return weekRangeForDate(dateIso).weekStartDate;
 }

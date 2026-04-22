@@ -35,10 +35,20 @@ export type InspectionEventStatus =
 
 export type IngestionTerminalStatus =
   | 'invalid-template'
+  | 'parse-error'
+  | 'reporting-period-mismatch'
   | 'unresolved-project'
   | 'review-required'
   | 'committed'
   | 'commit-failed';
+
+export type ReviewStatus =
+  | 'none'
+  | 'pending-review'
+  | 'in-review'
+  | 'resolved'
+  | 'replayed-success'
+  | 'replayed-failed';
 
 export type IngestionState =
   | 'uploaded'
@@ -60,7 +70,9 @@ export type ErrorClass =
   | 'project-unresolved'
   | 'duplicate-suspected'
   | 'parse-error'
-  | 'commit-error';
+  | 'commit-error'
+  | 'reporting-period-mismatch'
+  | 'replay-source-missing';
 
 export interface ChecklistRow {
   readonly sectionNumber: number;
@@ -77,6 +89,8 @@ export interface InspectionMetadata {
   readonly inspectionDate: string;
   readonly projectSiteText: string;
   readonly inspectionNumber: string;
+  /** Best-effort parsed project number extracted from `projectSiteText`. */
+  readonly projectNumberHint: string | null;
   readonly workbookTotalYes: number | null;
   readonly workbookTotalNo: number | null;
   readonly workbookTotalNa: number | null;
@@ -236,6 +250,8 @@ export interface SafetyInspectionEvent {
   readonly requiresReview: boolean;
   readonly submittedAt: string;
   readonly committedAt?: string;
+  /** When this event is superseded by a replay, the id of the replacement. */
+  readonly supersededByInspectionEventId?: string;
 }
 
 export interface SafetyFinding {
@@ -280,6 +296,25 @@ export interface SafetyIngestionRun {
   readonly runStartedAt: string;
   readonly runCompletedAt: string;
   readonly attemptNumber: number;
+  /** Reporting period this run was submitted under. */
+  readonly reportingPeriodId?: string;
+  /** Numeric Lookup parent for the reporting period. */
+  readonly reportingPeriodSpItemId?: number;
+  /** Raw `Project/Site` cell value from the uploaded workbook. */
+  readonly attemptedProjectSiteText?: string;
+  /** Project number resolved against HBCentral (absent when unresolved). */
+  readonly resolvedProjectNumber?: string;
+  /** How the project was resolved. */
+  readonly projectSourceClassification?: ProjectSourceClassification;
+  /** Operational review status; used by the review queue. */
+  readonly reviewStatus: ReviewStatus;
+  /** Parent run in a replay chain. */
+  readonly parentRunId?: string;
+  readonly parentRunSpItemId?: number;
+  /** Review disposition — reserved fields, populated in later phases. */
+  readonly reviewedAt?: string;
+  readonly reviewedBy?: string;
+  readonly resolutionNote?: string;
 }
 
 export interface IngestionCommittedIds {

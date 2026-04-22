@@ -14,6 +14,7 @@ import type {
   CommittedArtifacts,
   IngestionRunResult,
   ProjectResolutionResult,
+  ReviewStatus,
   SafetyFinding,
   SafetyFindingDraft,
   SafetyIngestionRun,
@@ -24,11 +25,14 @@ import type {
   SafetyReportingPeriod,
   UploadContext,
 } from '../../domain/types.js';
+import { SAFETY_SITE_URL } from '../../lists/descriptors.js';
 import type {
   ISafetyInspectionRepository,
   IngestionRunFilter,
   InspectionFilter,
   ProjectWeekFilter,
+  ProjectWeekInspectionFilter,
+  ReplayOptions,
   ReviewQueueEntry,
 } from '../../ports/ISafetyInspectionRepository.js';
 import {
@@ -39,6 +43,7 @@ import {
 import { readWorkbookFromArrayBuffer } from '../../parser/xlsxWorkbookView.js';
 import { runIngestionPipeline } from '../../ingestion/runIngestionPipeline.js';
 import { uploadToSafetyChecklistUploads } from './uploadToSafetyChecklistUploads.js';
+import { downloadUploadedWorkbook } from './downloadUploadedWorkbook.js';
 import { JSON_HEADERS, type SpHttpClient } from './spHttp.js';
 
 const VERBOSE_HEADERS = {
@@ -109,6 +114,15 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     )} and ProjectNumber eq '${escapeODataString(projectNumber)}'`;
     const items = await this.fetchItems<RawProjectWeek>(desc, filter);
     return items[0] ? mapProjectWeek(items[0]) : null;
+  }
+
+  async findInspectionsForProjectWeek(
+    filter: ProjectWeekInspectionFilter,
+  ): Promise<ReadonlyArray<SafetyInspectionEvent>> {
+    const desc = this.boundDescriptor('SafetyInspectionEvents');
+    const query = `?$top=500&$filter=ReportingPeriodId eq ${spItemIdFromString(filter.reportingPeriodId)} and ProjectNumber eq '${escapeODataString(filter.projectNumber)}'`;
+    const items = await this.fetchItems<RawInspectionEvent>(desc, query);
+    return items.map(mapInspectionEvent);
   }
 
   async listInspections(
@@ -193,38 +207,128 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
       view,
       context,
       uploadedRef,
-      adapter: {
-        resolveProject: async (projectSiteText, projectNumberHint) =>
-          this.resolveProject(projectSiteText, projectNumberHint),
-        findRecentInspectionsForProject: async (projectNumber, inspectionDate) => {
-          const items = await this.listInspections({ projectNumber });
-          return items.filter((ie) => ie.inspectionDate === inspectionDate);
+      adapter: this.buildIngestionAdapter(),
+    });
+  }
+
+  async replayIngestion(
+    parentRunId: string,
+    options: ReplayOptions = {},
+  ): Promise<IngestionRunResult> {
+    const parent = await this.fetchIngestionRunById(parentRunId);
+    if (!parent) {
+      throw new Error(`Ingestion run not found: ${parentRunId}`);
+    }
+    try {
+      const { bytes } = await downloadUploadedWorkbook(this.client, parent.sourceUploadItemId);
+      const view = readWorkbookFromArrayBuffer(bytes);
+      return runIngestionPipeline({
+        view,
+        context: {
+          uploadedByUpn: parent.attemptedProjectSiteText ? 'replay@hbc' : 'replay@hbc',
+          uploadedAt: new Date().toISOString(),
+          fileName: parent.uploadFileName,
+          reportingPeriodId: parent.reportingPeriodId ?? '',
+          reportingPeriodSpItemId: parent.reportingPeriodSpItemId ?? 0,
         },
-        ensureProjectWeekRecord: async (
+        uploadedRef: {
+          sourceUploadItemId: parent.sourceUploadItemId,
+          sourceUploadWebUrl: `${SAFETY_SITE_URL}/SafetyChecklistUploads/${parent.uploadFileName}`,
+          checksum: parent.checksum ?? '',
+        },
+        adapter: this.buildIngestionAdapter(),
+        attemptNumber: parent.attemptNumber + 1,
+        parentRunId: parent.id,
+        parentRunSpItemId: parent.spItemId,
+        supersedePrior: options.supersedePrior ?? false,
+      });
+    } catch (err) {
+      const adapter = this.buildIngestionAdapter();
+      const run = await adapter.recordIngestionRun({
+        title: `Replay ${parent.uploadFileName} — attempt ${parent.attemptNumber + 1}`,
+        sourceUploadItemId: parent.sourceUploadItemId,
+        uploadFileName: parent.uploadFileName,
+        templateVersionDetected: undefined,
+        checksum: parent.checksum,
+        validationStatus: 'failed',
+        parseStatus: 'skipped',
+        projectResolutionStatus: 'skipped',
+        terminalStatus: 'commit-failed',
+        committedEntityIdsJson: '{}',
+        errorClass: 'replay-source-missing',
+        errorSummary: err instanceof Error ? err.message : 'Unknown replay failure',
+        runStartedAt: new Date().toISOString(),
+        runCompletedAt: new Date().toISOString(),
+        attemptNumber: parent.attemptNumber + 1,
+        reportingPeriodId: parent.reportingPeriodId,
+        reportingPeriodSpItemId: parent.reportingPeriodSpItemId,
+        attemptedProjectSiteText: parent.attemptedProjectSiteText,
+        reviewStatus: 'replayed-failed',
+        parentRunId: parent.id,
+        parentRunSpItemId: parent.spItemId,
+      });
+      return { run, state: 'commit-failed' };
+    }
+  }
+
+  async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
+    return this.replayIngestion(ingestionRunId);
+  }
+
+  private buildIngestionAdapter() {
+    return {
+      resolveProject: async (projectSiteText: string, projectNumberHint: string | null) =>
+        this.resolveProject(projectSiteText, projectNumberHint ?? undefined),
+      findInspectionsForProjectWeek: async (filter: ProjectWeekInspectionFilter) =>
+        this.findInspectionsForProjectWeek(filter),
+      resolveReportingPeriod: async (reportingPeriodId: string) =>
+        this.getReportingPeriod(reportingPeriodId),
+      ensureProjectWeekRecord: async (
+        resolution: ProjectResolutionResult,
+        reportingPeriodId: string,
+        reportingPeriodSpItemId: number,
+        weekStartDate: string,
+      ) => {
+        const existing = await this.getProjectWeek(reportingPeriodId, resolution.projectNumber);
+        if (existing) return existing;
+        return this.createProjectWeekRecord(
           resolution,
           reportingPeriodId,
           reportingPeriodSpItemId,
           weekStartDate,
-        ) => {
-          const existing = await this.getProjectWeek(reportingPeriodId, resolution.projectNumber);
-          if (existing) return existing;
-          return this.createProjectWeekRecord(
-            resolution,
-            reportingPeriodId,
-            reportingPeriodSpItemId,
-            weekStartDate,
-          );
-        },
-        persistCommit: async (drafts) => this.commit(drafts),
-        recordIngestionRun: async (runDraft) => this.insertIngestionRun(runDraft),
+        );
       },
-    });
+      persistCommit: async (drafts: Parameters<typeof this.commit>[0]) => this.commit(drafts),
+      markInspectionSuperseded: async (priorId: string, replacementId: string) =>
+        this.markInspectionSuperseded(priorId, replacementId),
+      recordIngestionRun: async (runDraft: SafetyIngestionRunDraft) =>
+        this.insertIngestionRun(runDraft),
+    };
   }
 
-  async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
-    throw new Error(
-      `Retry not yet wired for ${ingestionRunId}: Wave 2 replay path is pending tenant-ready replay wiring.`,
-    );
+  private async fetchIngestionRunById(id: string): Promise<SafetyIngestionRun | null> {
+    const desc = this.boundDescriptor('SafetyIngestionRuns');
+    const item = await this.fetchItem<RawIngestionRun>(desc, spItemIdFromString(id));
+    return item ? mapIngestionRun(item) : null;
+  }
+
+  private async markInspectionSuperseded(
+    priorInspectionEventId: string,
+    replacementInspectionEventId: string,
+  ): Promise<void> {
+    const desc = this.boundDescriptor('SafetyInspectionEvents');
+    const endpoint = `${desc.siteUrl}/_api/web/lists(guid'${desc.id}')/items(${spItemIdFromString(priorInspectionEventId)})`;
+    const body = {
+      __metadata: { type: `SP.Data.${desc.urlSegment}ListItem` },
+      IngestionStatus: 'superseded',
+      SupersededByInspectionEventId: spItemIdFromString(replacementInspectionEventId),
+    };
+    const response = await this.client.post(endpoint, JSON.stringify(body), {
+      headers: { ...VERBOSE_HEADERS, 'X-HTTP-Method': 'MERGE', 'IF-MATCH': '*' },
+    });
+    if (!response.ok) {
+      throw new Error(`Supersede update failed (${response.status}) for ${priorInspectionEventId}.`);
+    }
   }
 
   // -- private REST helpers -----------------------------------------------
@@ -415,7 +519,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     draft: SafetyIngestionRunDraft,
   ): Promise<SafetyIngestionRun> {
     const desc = this.boundDescriptor('SafetyIngestionRuns');
-    const body = {
+    const body: Record<string, unknown> = {
       __metadata: { type: `SP.Data.${desc.urlSegment}ListItem` },
       Title: draft.title,
       SourceUploadItemId: draft.sourceUploadItemId,
@@ -432,7 +536,17 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
       RunStartedAt: draft.runStartedAt,
       RunCompletedAt: draft.runCompletedAt,
       AttemptNumber: draft.attemptNumber,
+      AttemptedProjectSiteText: draft.attemptedProjectSiteText,
+      ResolvedProjectNumber: draft.resolvedProjectNumber,
+      ProjectSourceClassification: draft.projectSourceClassification,
+      ReviewStatus: draft.reviewStatus,
     };
+    if (draft.reportingPeriodSpItemId !== undefined) {
+      body.ReportingPeriodId = draft.reportingPeriodSpItemId;
+    }
+    if (draft.parentRunSpItemId !== undefined) {
+      body.ParentRunId = draft.parentRunSpItemId;
+    }
     const created = await this.postItem<{ Id: number; Title?: string }>(desc, body);
     return {
       id: `run-${created.Id}`,
@@ -612,6 +726,7 @@ interface RawInspectionEvent {
   RequiresReview?: boolean;
   SubmittedAt?: string;
   CommittedAt?: string;
+  SupersededByInspectionEventId?: number;
 }
 
 function mapInspectionEvent(raw: RawInspectionEvent): SafetyInspectionEvent {
@@ -645,6 +760,9 @@ function mapInspectionEvent(raw: RawInspectionEvent): SafetyInspectionEvent {
     requiresReview: raw.RequiresReview ?? false,
     submittedAt: raw.SubmittedAt ?? '',
     committedAt: raw.CommittedAt,
+    supersededByInspectionEventId: raw.SupersededByInspectionEventId
+      ? `ie-${raw.SupersededByInspectionEventId}`
+      : undefined,
   };
 }
 
@@ -704,6 +822,12 @@ interface RawIngestionRun {
   RunStartedAt: string;
   RunCompletedAt: string;
   AttemptNumber?: number;
+  ReportingPeriodId?: number;
+  AttemptedProjectSiteText?: string;
+  ResolvedProjectNumber?: string;
+  ProjectSourceClassification?: SafetyIngestionRun['projectSourceClassification'];
+  ReviewStatus?: ReviewStatus;
+  ParentRunId?: number;
 }
 
 function mapIngestionRun(raw: RawIngestionRun): SafetyIngestionRun {
@@ -725,6 +849,14 @@ function mapIngestionRun(raw: RawIngestionRun): SafetyIngestionRun {
     runStartedAt: raw.RunStartedAt,
     runCompletedAt: raw.RunCompletedAt,
     attemptNumber: raw.AttemptNumber ?? 1,
+    reportingPeriodId: raw.ReportingPeriodId ? `period-${raw.ReportingPeriodId}` : undefined,
+    reportingPeriodSpItemId: raw.ReportingPeriodId ?? undefined,
+    attemptedProjectSiteText: raw.AttemptedProjectSiteText,
+    resolvedProjectNumber: raw.ResolvedProjectNumber,
+    projectSourceClassification: raw.ProjectSourceClassification,
+    reviewStatus: raw.ReviewStatus ?? 'none',
+    parentRunId: raw.ParentRunId ? `run-${raw.ParentRunId}` : undefined,
+    parentRunSpItemId: raw.ParentRunId ?? undefined,
   };
 }
 

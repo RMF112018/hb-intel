@@ -7,6 +7,7 @@
 import * as XLSX from 'xlsx';
 import { TemplateInvalidError } from '../domain/types.js';
 import type { WorkbookView } from './workbookView.js';
+import { normalizeInspectionDate } from './dateNormalization.js';
 
 export async function readWorkbookFromFile(file: File | Blob): Promise<WorkbookView> {
   const buffer = await file.arrayBuffer();
@@ -38,7 +39,9 @@ export function wrapWorkbook(workbook: XLSX.WorkBook): WorkbookView {
       const cell = sheet[a1];
       if (!cell) return null;
       if (cell.v === null || cell.v === undefined) return null;
-      if (cell.v instanceof Date) return cell.v.toISOString().slice(0, 10);
+      if (cell.v instanceof Date) {
+        return normalizeInspectionDate(cell.v) ?? cell.v.toISOString().slice(0, 10);
+      }
       return typeof cell.v === 'string' ? cell.v : String(cell.v);
     },
     cellNumber: (name, a1) => {

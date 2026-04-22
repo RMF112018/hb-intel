@@ -110,3 +110,20 @@ export function useSafetyIngestion() {
     },
   });
 }
+
+export interface ReplayIngestionInput {
+  readonly parentRunId: string;
+  readonly supersedePrior?: boolean;
+}
+
+export function useReplayIngestion() {
+  const repo = useSafetyRepository();
+  const queryClient = useQueryClient();
+  return useMutation<IngestionRunResult, Error, ReplayIngestionInput>({
+    mutationFn: ({ parentRunId, supersedePrior }) =>
+      repo.replayIngestion(parentRunId, { supersedePrior }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['safety'] });
+    },
+  });
+}

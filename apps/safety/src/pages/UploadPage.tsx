@@ -106,13 +106,16 @@ function IngestionResultBanner({ result }: { result: IngestionRunResult }): Reac
   const variant: 'success' | 'warning' | 'error' =
     result.state === 'committed'
       ? 'success'
-      : result.state === 'review-required' || result.state === 'unresolved-project'
+      : result.state === 'review-required' ||
+          result.state === 'unresolved-project' ||
+          result.state === 'reporting-period-mismatch'
         ? 'warning'
         : 'error';
+  const headline = headlineFor(result.state);
   return (
     <HbcBanner variant={variant}>
       <div style={{ display: 'grid', gap: '0.25rem' }}>
-        <strong>Status: {result.state}</strong>
+        <strong>{headline}</strong>
         <span>Run: {result.run.id}</span>
         {result.run.errorSummary && <span>{result.run.errorSummary}</span>}
         {result.committed && (
@@ -125,4 +128,25 @@ function IngestionResultBanner({ result }: { result: IngestionRunResult }): Reac
       </div>
     </HbcBanner>
   );
+}
+
+function headlineFor(state: IngestionRunResult['state']): string {
+  switch (state) {
+    case 'committed':
+      return 'Committed';
+    case 'review-required':
+      return 'Review required';
+    case 'unresolved-project':
+      return 'Project could not be resolved';
+    case 'reporting-period-mismatch':
+      return 'Workbook date is outside the selected reporting period';
+    case 'parse-error':
+      return 'Workbook could not be parsed';
+    case 'invalid-template':
+      return 'Workbook template is invalid';
+    case 'commit-failed':
+      return 'Commit to HBCentral failed';
+    default:
+      return `Status: ${state}`;
+  }
 }

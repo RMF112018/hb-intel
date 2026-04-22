@@ -126,20 +126,22 @@ describe('Wave 1 closure — G4 overlay integrity', () => {
 });
 
 describe('Wave 1 closure — G5 repository contract shape stability', () => {
-  it('ISafetyInspectionRepository surface does not include Wave 2 symbols', () => {
+  it('ISafetyInspectionRepository surface exposes Wave 1 methods', () => {
     const repo = new MockSafetyInspectionRepository();
-    // Wave 1 surface
     expect(typeof repo.ingestWorkbook).toBe('function');
     expect(typeof repo.retryIngestion).toBe('function');
     expect(typeof repo.listReportingPeriods).toBe('function');
     expect(typeof repo.listProjectWeeks).toBe('function');
     expect(typeof repo.listInspections).toBe('function');
     expect(typeof repo.listIngestionRuns).toBe('function');
-    // Wave 2 additions must NOT yet be present on the repository.
-    const repoKeys = Object.getOwnPropertyNames(
-      Object.getPrototypeOf(repo),
-    ) as Array<keyof typeof repo>;
-    expect(repoKeys).not.toContain('findInspectionsForProjectWeek' as keyof typeof repo);
-    expect(repoKeys).not.toContain('replayIngestion' as keyof typeof repo);
+  });
+
+  // Wave 2 extensions — `findInspectionsForProjectWeek` and `replayIngestion`
+  // are introduced in the Wave 2 commit and proven by that wave's closure
+  // tests. Once Wave 2 lands these symbols become load-bearing.
+  it('Wave 2 extensions are now present on the repository', () => {
+    const repo = new MockSafetyInspectionRepository();
+    expect(typeof repo.findInspectionsForProjectWeek).toBe('function');
+    expect(typeof repo.replayIngestion).toBe('function');
   });
 });

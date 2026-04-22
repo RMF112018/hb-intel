@@ -224,6 +224,10 @@ export function buildSeed(): {
         runStartedAt: `${WEEK_START}T08:00:00Z`,
         runCompletedAt: `${WEEK_START}T08:00:05Z`,
         attemptNumber: 1,
+        reportingPeriodId: PERIOD_ID,
+        reportingPeriodSpItemId: PERIOD_SP_ITEM_ID,
+        attemptedProjectSiteText: `${project.projectNumber} ${project.projectName}`,
+        reviewStatus: 'pending-review',
       });
     }
 
@@ -246,6 +250,13 @@ export function buildSeed(): {
         runStartedAt: `${inspection.inspectionDate}T13:00:00Z`,
         runCompletedAt: `${inspection.inspectionDate}T13:05:00Z`,
         attemptNumber: 1,
+        reportingPeriodId: PERIOD_ID,
+        reportingPeriodSpItemId: PERIOD_SP_ITEM_ID,
+        attemptedProjectSiteText: `${project.projectNumber} ${project.projectName}`,
+        resolvedProjectNumber: project.projectNumber,
+        projectSourceClassification: 'project',
+        reviewStatus:
+          inspection.ingestionStatus === 'review-required' ? 'pending-review' : 'none',
       });
     }
   }

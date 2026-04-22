@@ -41,18 +41,35 @@ The structured records are never authored as a primary system on `/sites/Safety`
 ```
 uploaded
   → validating ─ invalid-template (terminal)
-      → resolving-project ─ unresolved-project (terminal review-required)
-          → parsed
-              → duplicate-checked ─ high-confidence-duplicate (terminal review-required)
-                  → scoring
-                      → commit-pending
-                          ├── committed (terminal success)
-                          └── commit-failed (terminal retryable)
+      → parsing ─ parse-error (terminal)
+          → period-check ─ reporting-period-mismatch (terminal)
+              → resolving-project ─ unresolved-project (terminal review-required)
+                  → duplicate-checked
+                      ├── high-confidence-duplicate + retained commit → committed (idempotent short-circuit)
+                      ├── high-confidence-duplicate + supersedePrior → supersede prior + committed
+                      └── (no duplicate) → scoring
+                                           → commit-pending
+                                              ├── committed (terminal success)
+                                              └── commit-failed (terminal retryable)
 ```
 
-Every terminal state writes a `Safety Ingestion Run` row. Retries re-read the
-workbook from the upload library and write a new run with
-`AttemptNumber += 1`.
+Every terminal state writes a `Safety Ingestion Run` row. Replays re-read the
+retained workbook from the upload library and write a new run with
+`AttemptNumber += 1` and `ParentRunId` set. Replay lineage is **parent/child**
+— the original run is never mutated, and superseded prior inspection events
+carry `SupersededByInspectionEventId` pointing at the replacement.
+
+Terminal states:
+
+| State | Meaning | Appears in review queue |
+|---|---|---|
+| `committed` | Authoritative inspection event written | no (unless a replay chain is under review) |
+| `invalid-template` | Template contract broken (missing sheet / anchor drift) | yes |
+| `parse-error` | Template valid but row-level parse threw | yes |
+| `reporting-period-mismatch` | Workbook date outside selected reporting week | yes |
+| `unresolved-project` | Project could not be resolved against HBCentral | yes |
+| `review-required` | High-confidence duplicate against a prior superseded event | yes |
+| `commit-failed` | REST commit to HBCentral failed mid-write | yes (retryable) |
 
 ## Raw vs derived persistence
 

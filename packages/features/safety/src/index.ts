@@ -135,8 +135,12 @@ export {
   useInspections,
   useProjectWeek,
   useProjectWeeks,
+  useReplayIngestion,
   useReportingPeriods,
   useReviewQueue,
   useSafetyIngestion,
 } from './hooks/queries.js';
-export type { IngestionMutationInput } from './hooks/queries.js';
+export type {
+  IngestionMutationInput,
+  ReplayIngestionInput,
+} from './hooks/queries.js';

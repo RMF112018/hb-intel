@@ -57,7 +57,9 @@ function makeAdapter(overrides: Partial<IngestionAdapter> = {}): {
 
   const adapter: IngestionAdapter = {
     resolveProject: vi.fn(async () => resolvedProject()),
-    findRecentInspectionsForProject: vi.fn(async () => persistedInspections),
+    findInspectionsForProjectWeek: vi.fn(async () => persistedInspections),
+    resolveReportingPeriod: vi.fn(async () => null),
+    markInspectionSuperseded: vi.fn(async () => undefined),
     ensureProjectWeekRecord: vi.fn(
       async (resolution, reportingPeriodId, reportingPeriodSpItemId, weekStartDate) => {
         pwCounter += 1;
@@ -176,7 +178,7 @@ describe('runIngestionPipeline', () => {
     expect(calls.runs).toBe(1);
   });
 
-  it('terminates at review-required on high-confidence duplicate', async () => {
+  it('short-circuits to committed when a prior identical commit already exists (idempotent retry)', async () => {
     const existing: SafetyInspectionEvent = {
       id: 'ie-existing',
       spItemId: 3001,
@@ -206,7 +208,7 @@ describe('runIngestionPipeline', () => {
       submittedAt: '2026-04-20T00:00:00Z',
     };
     const { adapter, calls } = makeAdapter({
-      findRecentInspectionsForProject: vi.fn(async () => [existing]),
+      findInspectionsForProjectWeek: vi.fn(async () => [existing]),
     });
     const result = await runIngestionPipeline({
       view: buildCleanAllYesWorkbook(),
@@ -214,7 +216,9 @@ describe('runIngestionPipeline', () => {
       uploadedRef: baseRef(),
       adapter,
     });
-    expect(result.state).toBe('review-required');
+    expect(result.state).toBe('committed');
+    expect(result.run.committedEntityIdsJson).toContain('ie-existing');
+    // No new commit is issued on idempotent short-circuit.
     expect(calls.commits).toBe(0);
     expect(calls.runs).toBe(1);
   });

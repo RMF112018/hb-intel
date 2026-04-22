@@ -163,6 +163,12 @@ export const SAFETY_INSPECTION_EVENTS_FIELDS: ReadonlyArray<SpFieldDefinition> =
   { internalName: 'RequiresReview', displayName: 'Requires Review', type: 'Boolean' },
   { internalName: 'SubmittedAt', displayName: 'Submitted At', type: 'DateTime' },
   { internalName: 'CommittedAt', displayName: 'Committed At', type: 'DateTime' },
+  {
+    internalName: 'SupersededByInspectionEventId',
+    displayName: 'Superseded By',
+    type: 'Lookup',
+    lookupList: 'Safety Inspection Events',
+  },
 ];
 
 export const SAFETY_FINDINGS_FIELDS: ReadonlyArray<SpFieldDefinition> = [
@@ -232,6 +238,8 @@ export const SAFETY_INGESTION_RUNS_FIELDS: ReadonlyArray<SpFieldDefinition> = [
     type: 'Choice',
     choices: [
       'invalid-template',
+      'parse-error',
+      'reporting-period-mismatch',
       'unresolved-project',
       'review-required',
       'committed',
@@ -244,6 +252,35 @@ export const SAFETY_INGESTION_RUNS_FIELDS: ReadonlyArray<SpFieldDefinition> = [
   { internalName: 'RunStartedAt', displayName: 'Run Started', type: 'DateTime' },
   { internalName: 'RunCompletedAt', displayName: 'Run Completed', type: 'DateTime' },
   { internalName: 'AttemptNumber', displayName: 'Attempt Number', type: 'Number' },
+  {
+    internalName: 'ReportingPeriodId',
+    displayName: 'Reporting Period',
+    type: 'Lookup',
+    lookupList: 'Safety Reporting Periods',
+  },
+  { internalName: 'AttemptedProjectSiteText', displayName: 'Attempted Project/Site', type: 'Note' },
+  { internalName: 'ResolvedProjectNumber', displayName: 'Resolved Project Number', type: 'Text' },
+  {
+    internalName: 'ProjectSourceClassification',
+    displayName: 'Project Source',
+    type: 'Choice',
+    choices: ['project', 'legacy-only', 'project+legacy', 'unresolved'],
+  },
+  {
+    internalName: 'ReviewStatus',
+    displayName: 'Review Status',
+    type: 'Choice',
+    choices: ['none', 'pending-review', 'in-review', 'resolved', 'replayed-success', 'replayed-failed'],
+  },
+  {
+    internalName: 'ParentRunId',
+    displayName: 'Parent Run',
+    type: 'Lookup',
+    lookupList: 'Safety Ingestion Runs',
+  },
+  { internalName: 'ReviewedAt', displayName: 'Reviewed At', type: 'DateTime' },
+  { internalName: 'ReviewedBy', displayName: 'Reviewed By', type: 'User' },
+  { internalName: 'ResolutionNote', displayName: 'Resolution Note', type: 'Note' },
 ];
 
 export const FIELD_SCHEMA_BY_LIST = {
