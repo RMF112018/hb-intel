@@ -46,7 +46,7 @@
 
 .band {
   display: flex;
-  justify-content: center;
+  justify-content: stretch;
   align-items: stretch;
   width: 100%;
   min-width: 0;
@@ -55,19 +55,13 @@
 .bandScroller {
   flex: 1 1 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: stretch;
   gap: var(--hbc-hl-row-gap);
-  width: min(
-    100%,
-    calc(
-      (var(--hbc-hl-visible-tiles) * var(--hbc-hl-tile-size)) + (
-          (var(--hbc-hl-visible-tiles) - 1) * var(--hbc-hl-row-gap)
-        )
-    )
-  );
-  margin-inline: auto;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+  padding-inline: clamp(8px, 1.9vw, 28px);
   padding-block: 1px;
 }
 
