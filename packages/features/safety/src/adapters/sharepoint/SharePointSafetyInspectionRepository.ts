@@ -62,13 +62,19 @@ const PROJECTS_FIELD = {
 
 export interface SharePointAdapterOptions {
   readonly client: SpHttpClient;
+  readonly backendIngestion?: {
+    readonly baseUrl?: string;
+    readonly getApiToken?: () => Promise<string>;
+  };
 }
 
 export class SharePointSafetyInspectionRepository implements ISafetyInspectionRepository {
   private readonly client: SpHttpClient;
+  private readonly backendIngestion?: SharePointAdapterOptions['backendIngestion'];
 
   constructor(options: SharePointAdapterOptions) {
     this.client = options.client;
+    this.backendIngestion = options.backendIngestion;
   }
 
   async listReportingPeriods(): Promise<ReadonlyArray<SafetyReportingPeriod>> {
@@ -209,6 +215,9 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
   }
 
   async ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult> {
+    if (this.backendIngestion) {
+      return this.ingestWorkbookViaBackend(file, context);
+    }
     const buffer = await file.arrayBuffer();
     const uploadedRef = await uploadToSafetyChecklistUploads(this.client, buffer, {
       fileName: context.fileName,
@@ -285,6 +294,53 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
 
   async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
     return this.replayIngestion(ingestionRunId);
+  }
+
+  private async ingestWorkbookViaBackend(
+    file: File | Blob,
+    context: UploadContext,
+  ): Promise<IngestionRunResult> {
+    const fileName = file instanceof File ? file.name : context.fileName;
+    const body = {
+      fileName,
+      fileContentBase64: await toBase64(file),
+      context: {
+        ...context,
+        fileName,
+      },
+    };
+    const endpoint = `${trimTrailingSlash(this.backendIngestion?.baseUrl ?? '')}/api/admin/safety-records/ingest`;
+    const token = this.backendIngestion?.getApiToken
+      ? await this.backendIngestion.getApiToken()
+      : undefined;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+    const payload = (await response.json()) as {
+      data?: {
+        result?: IngestionRunResult;
+        diagnostics?: Array<{ code?: string; message?: string }>;
+      };
+      code?: string;
+      message?: string;
+    };
+    if (!response.ok || !payload.data?.result) {
+      const diagnosticMessage = payload.data?.diagnostics?.map((entry) => entry.message).filter(Boolean).join(' | ');
+      throw new SafetyAdapterFetchError({
+        listName: 'Safety Ingestion API',
+        siteUrl: endpoint,
+        endpoint,
+        httpStatus: response.status,
+        bodySnippet: diagnosticMessage || payload.message,
+        operation: 'Invoke',
+      });
+    }
+    return payload.data.result;
   }
 
   private buildIngestionAdapter() {
@@ -688,6 +744,39 @@ function safeParse(value: string): Record<string, unknown> | null {
   } catch {
     return null;
   }
+}
+
+async function toBase64(file: File | Blob): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (typeof btoa === 'function') {
+    let binary = '';
+    for (const byte of bytes) {
+      binary += String.fromCharCode(byte);
+    }
+    return btoa(binary);
+  }
+  return encodeBase64Bytes(bytes);
+}
+
+function trimTrailingSlash(value: string): string {
+  return value.endsWith('/') ? value.slice(0, -1) : value;
+}
+
+function encodeBase64Bytes(bytes: Uint8Array): string {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let output = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    const b0 = bytes[i] ?? 0;
+    const b1 = bytes[i + 1] ?? 0;
+    const b2 = bytes[i + 2] ?? 0;
+    const value = (b0 << 16) | (b1 << 8) | b2;
+    const c0 = alphabet[(value >> 18) & 63];
+    const c1 = alphabet[(value >> 12) & 63];
+    const c2 = i + 1 < bytes.length ? alphabet[(value >> 6) & 63] : '=';
+    const c3 = i + 2 < bytes.length ? alphabet[value & 63] : '=';
+    output += `${c0}${c1}${c2}${c3}`;
+  }
+  return output;
 }
 
 // -- raw → domain mappers ----------------------------------------------

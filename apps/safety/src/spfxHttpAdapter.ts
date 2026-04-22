@@ -1,8 +1,14 @@
 import type { SpHttpClient } from '@hbc/features-safety';
 
 export interface SpfxLikeContext {
-  pageContext?: { user?: { loginName?: string } };
+  pageContext?: {
+    user?: { loginName?: string };
+    web?: { absoluteUrl?: string };
+  };
   spHttpClient?: unknown;
+  aadTokenProviderFactory?: {
+    getTokenProvider: () => Promise<{ getToken: (audience: string) => Promise<string> }>;
+  };
 }
 
 interface SpHttpClientLike {

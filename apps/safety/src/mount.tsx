@@ -26,7 +26,7 @@ let root: Root | undefined;
 export async function mount(
   el: HTMLElement,
   spfxContext?: WebPartContext,
-  _config?: IMountConfig,
+  config?: IMountConfig,
 ): Promise<void> {
   if (spfxContext) {
     bindHostedSafetyGuidOverlay();
@@ -35,7 +35,13 @@ export async function mount(
   }
 
   root = createRoot(el);
-  root.render(<App spfxContext={spfxContext} />);
+  root.render(
+    <App
+      spfxContext={spfxContext}
+      functionAppUrl={config?.functionAppUrl}
+      apiAudience={config?.apiAudience}
+    />,
+  );
 }
 
 export function unmount(): void {

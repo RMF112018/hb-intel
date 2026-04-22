@@ -20,9 +20,11 @@ const router = createWebpartRouter();
 
 interface AppProps {
   spfxContext?: unknown;
+  functionAppUrl?: string;
+  apiAudience?: string;
 }
 
-export function App({ spfxContext }: AppProps): React.ReactNode {
+export function App({ spfxContext, functionAppUrl, apiAudience }: AppProps): React.ReactNode {
   const typed = spfxContext as SpfxLikeContext | undefined;
   // Phase-04 audit G-02 foundation: derive a mode-aware layout contract from
   // the actual Safety app content container width, not raw viewport. The ref
@@ -39,11 +41,28 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
     if (client) {
       return createSafetyInspectionRepository({
         mode: 'sharepoint',
-        sharepoint: { client },
+        sharepoint: {
+          client,
+          backendIngestion: {
+            baseUrl: functionAppUrl,
+            getApiToken: async (): Promise<string> => {
+              if (!typed || !apiAudience) {
+                throw new Error(
+                  'Safety backend ingestion requires apiAudience and SPFx context token provider configuration.',
+                );
+              }
+              const provider = await typed.aadTokenProviderFactory?.getTokenProvider();
+              if (!provider) {
+                throw new Error('SPFx AadTokenProviderFactory is unavailable for Safety backend ingestion.');
+              }
+              return provider.getToken(apiAudience);
+            },
+          },
+        },
       });
     }
     return createSafetyInspectionRepository({ mode: 'mock' });
-  }, [typed]);
+  }, [typed, functionAppUrl, apiAudience]);
 
   // Safety is office-only (Phase-2 G-01): lock the theme to light AND
   // force isFieldMode=false on the ambient theme context so ui-kit
@@ -96,4 +115,3 @@ function logSafetyOverlayDiagnostic(): void {
     console.info(`[safety] overlay fully populated (${present.length} keys).`);
   }
 }
-

@@ -26,6 +26,15 @@ import {
   type ISafetyProvisionContainerDefinition,
   type SafetyProvisionContainerKind,
 } from '../config/safety-record-keeping-list-definitions.js';
+import { configureSafetyListGuids } from '../../../../packages/features/safety/src/lists/guidConfig.js';
+import type { SafetyGuidOverlay } from '../../../../packages/features/safety/src/lists/guidConfig.js';
+import { SharePointSafetyInspectionRepository } from '../../../../packages/features/safety/src/adapters/sharepoint/SharePointSafetyInspectionRepository.js';
+import type { IngestionRunResult, UploadContext } from '../../../../packages/features/safety/src/domain/types.js';
+
+interface IBackendSpHttpClient {
+  get(url: string, init?: { headers?: Record<string, string> }): Promise<Response>;
+  post(url: string, body: string | Blob | ArrayBuffer | null, init?: { headers?: Record<string, string> }): Promise<Response>;
+}
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -68,6 +77,12 @@ export interface ISharePointService {
 
   /** Ensures one current-week Safety Reporting Period item exists (bounded idempotent seed). */
   ensureCurrentWeekSafetyReportingPeriod(): Promise<ISafetyReportingPeriodSeedResult>;
+
+  /** Runs authoritative Safety workbook ingestion using app-only backend writes. */
+  ingestSafetyWorkbook(
+    input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionOperationResult>;
 
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
@@ -173,6 +188,20 @@ export interface ISafetyReportingPeriodSeedResult {
     PeriodLabel: string;
     Status: 'open';
   };
+  diagnostics: ISafetyProvisionDiagnostic[];
+}
+
+export interface ISafetyIngestionRequest {
+  fileName: string;
+  fileContentBase64: string;
+  context: UploadContext;
+}
+
+export interface ISafetyIngestionOperationResult {
+  success: boolean;
+  requestAccepted: boolean;
+  requestId?: string;
+  result?: IngestionRunResult;
   diagnostics: ISafetyProvisionDiagnostic[];
 }
 
@@ -534,6 +563,152 @@ export class SharePointService implements ISharePointService {
     }
   }
 
+  async ingestSafetyWorkbook(
+    input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionOperationResult> {
+    const diagnostics: ISafetyProvisionDiagnostic[] = [];
+    console.log(JSON.stringify({
+      level: 'info',
+      event: 'safety.ingestion.request.received',
+      requestId,
+      fileName: input.fileName,
+      reportingPeriodId: input.context.reportingPeriodId,
+      uploadedByUpn: input.context.uploadedByUpn,
+      timestamp: new Date().toISOString(),
+    }));
+
+    const targets = this.resolveSafetyProvisioningTargets(diagnostics);
+    if (!targets) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_TARGET_RESOLUTION_FAILED',
+            message: 'Safety/HBCentral site targets could not be resolved safely.',
+          },
+        ]),
+      };
+    }
+
+    const referenceValidation: ISafetyReferenceListValidationResult[] = [];
+    const referenceFailed = await this.validateReferenceLists(
+      targets.hbCentralSiteUrl,
+      referenceValidation,
+      diagnostics,
+    );
+    if (referenceFailed) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_REFERENCE_VALIDATION_FAILED',
+            message: 'Required Safety reference lists are missing or inaccessible.',
+          },
+        ]),
+      };
+    }
+
+    const contractErrors = await this.validateSafetyIngestionContracts();
+    if (contractErrors.length > 0) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat(contractErrors),
+      };
+    }
+
+    const overlay = await this.resolveSafetyGuidOverlay();
+    configureSafetyListGuids(overlay);
+
+    try {
+      const repo = new SharePointSafetyInspectionRepository({
+        client: this.createSafetyAppOnlySpHttpClient(),
+      });
+
+      const period = await repo.getReportingPeriod(input.context.reportingPeriodId);
+      if (!period) {
+        return {
+          success: false,
+          requestAccepted: false,
+          requestId,
+          diagnostics: diagnostics.concat([
+            {
+              code: 'SAFETY_INGESTION_REPORTING_PERIOD_NOT_FOUND',
+              message: `Reporting period ${input.context.reportingPeriodId} was not found.`,
+            },
+          ]),
+        };
+      }
+
+      const bytes = Buffer.from(input.fileContentBase64, 'base64');
+      if (bytes.length === 0) {
+        return {
+          success: false,
+          requestAccepted: false,
+          requestId,
+          diagnostics: diagnostics.concat([
+            {
+              code: 'SAFETY_INGESTION_EMPTY_PAYLOAD',
+              message: 'Workbook payload is empty after base64 decoding.',
+            },
+          ]),
+        };
+      }
+
+      const result = await repo.ingestWorkbook(new Blob([bytes]), {
+        ...input.context,
+        fileName: input.fileName,
+        reportingPeriodId: period.id,
+        reportingPeriodSpItemId: period.spItemId,
+      });
+
+      console.log(JSON.stringify({
+        level: 'info',
+        event: 'safety.ingestion.request.completed',
+        requestId,
+        state: result.state,
+        runId: result.run.id,
+        runSpItemId: result.run.spItemId,
+        reportingPeriodId: period.id,
+        timestamp: new Date().toISOString(),
+      }));
+
+      return {
+        success: true,
+        requestAccepted: true,
+        requestId,
+        result,
+        diagnostics,
+      };
+    } catch (err) {
+      const message = formatSharePointTokenAcquisitionDiagnostic(err);
+      console.error(JSON.stringify({
+        level: 'error',
+        event: 'safety.ingestion.request.failed',
+        requestId,
+        message,
+        timestamp: new Date().toISOString(),
+      }));
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_FAILED'),
+            message,
+          },
+        ]),
+      };
+    }
+  }
+
   async listExists(siteUrl: string, listTitle: string): Promise<boolean> {
     const sp: any = await this.getSP(siteUrl);
     try {
@@ -542,6 +717,142 @@ export class SharePointService implements ISharePointService {
     } catch {
       return false;
     }
+  }
+
+  private createSafetyAppOnlySpHttpClient(): IBackendSpHttpClient {
+    const digestCache = new Map<string, string>();
+    const ensureHeaders = async (url: string, headers?: Record<string, string>, includeDigest?: boolean): Promise<Record<string, string>> => {
+      const siteUrl = this.extractSiteUrl(url);
+      const token = await this.tokenService.getSharePointToken(siteUrl);
+      const merged: Record<string, string> = {
+        Accept: 'application/json;odata=nometadata',
+        Authorization: `Bearer ${token}`,
+        ...(headers ?? {}),
+      };
+      if (includeDigest) {
+        merged['X-RequestDigest'] = await this.getRequestDigest(siteUrl, digestCache);
+      }
+      return merged;
+    };
+
+    return {
+      get: async (url, init) => fetch(url, {
+        method: 'GET',
+        headers: await ensureHeaders(url, init?.headers, false),
+      }),
+      post: async (url, body, init) => {
+        const hasMergeMethod = Boolean(init?.headers?.['X-HTTP-Method']);
+        const includeDigest = this.isSharePointApiWrite(url) || hasMergeMethod;
+        return fetch(url, {
+          method: 'POST',
+          body,
+          headers: await ensureHeaders(url, init?.headers, includeDigest),
+        });
+      },
+    };
+  }
+
+  private async getRequestDigest(siteUrl: string, cache: Map<string, string>): Promise<string> {
+    const cached = cache.get(siteUrl);
+    if (cached) return cached;
+    const token = await this.tokenService.getSharePointToken(siteUrl);
+    const response = await fetch(`${siteUrl}/_api/contextinfo`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json;odata=verbose',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to acquire request digest (${response.status}) for ${siteUrl}`);
+    }
+    const body = (await response.json()) as {
+      d?: { GetContextWebInformation?: { FormDigestValue?: string } };
+    };
+    const digest = body?.d?.GetContextWebInformation?.FormDigestValue;
+    if (!digest) {
+      throw new Error(`SharePoint contextinfo digest missing for ${siteUrl}`);
+    }
+    cache.set(siteUrl, digest);
+    return digest;
+  }
+
+  private isSharePointApiWrite(url: string): boolean {
+    return /\/_api\/web\/lists/i.test(url);
+  }
+
+  private extractSiteUrl(url: string): string {
+    const parsed = new URL(url);
+    const marker = parsed.pathname.toLowerCase().indexOf('/_api/');
+    if (marker > 0) {
+      return `${parsed.origin}${parsed.pathname.slice(0, marker)}`;
+    }
+    return `${parsed.origin}${parsed.pathname}`;
+  }
+
+  private async resolveSafetyGuidOverlay(): Promise<SafetyGuidOverlay> {
+    const uploadSp: any = await this.getSP(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.safetySiteUrl);
+    const hbCentralSp: any = await this.getSP(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl);
+
+    const [
+      uploads,
+      periods,
+      weeks,
+      inspections,
+      findings,
+      runs,
+      projects,
+      legacy,
+    ] = await Promise.all([
+      uploadSp.web.lists.getByTitle('Safety Checklist Uploads').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Safety Reporting Periods').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Safety Project Week Records').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Safety Inspection Events').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Safety Findings').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Safety Ingestion Runs').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Projects').select('Id')(),
+      hbCentralSp.web.lists.getByTitle('Legacy Project Fallback Registry').select('Id')(),
+    ]);
+
+    return {
+      SafetyChecklistUploads: String(uploads.Id),
+      SafetyReportingPeriods: String(periods.Id),
+      SafetyProjectWeekRecords: String(weeks.Id),
+      SafetyInspectionEvents: String(inspections.Id),
+      SafetyFindings: String(findings.Id),
+      SafetyIngestionRuns: String(runs.Id),
+      Projects: String(projects.Id),
+      LegacyProjectFallbackRegistry: String(legacy.Id),
+    };
+  }
+
+  private async validateSafetyIngestionContracts(): Promise<ISafetyProvisionDiagnostic[]> {
+    const diagnostics: ISafetyProvisionDiagnostic[] = [];
+    for (const definition of SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS) {
+      if (definition.fields.length === 0 || definition.kind !== 'list') continue;
+      try {
+        const sp: any = await this.getSP(definition.siteUrl);
+        const fields: Array<{ InternalName: string }> = await sp.web.lists
+          .getByTitle(definition.title)
+          .fields.select('InternalName')();
+        const present = new Set(fields.map((f) => String(f.InternalName)));
+        const missing = definition.fields
+          .map((field) => field.internalName)
+          .filter((name) => name !== 'Title' && !present.has(name));
+        if (missing.length > 0) {
+          diagnostics.push({
+            code: 'SAFETY_INGESTION_FIELD_CONTRACT_MISSING',
+            message: `${definition.title} missing fields: ${missing.join(', ')}`,
+          });
+        }
+      } catch (err) {
+        diagnostics.push({
+          code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_FIELD_CONTRACT_FAILED'),
+          message: `${definition.title} contract check failed: ${formatSharePointTokenAcquisitionDiagnostic(err)}`,
+        });
+      }
+    }
+    return diagnostics;
   }
 
   private resolveSafetyProvisioningTargets(
@@ -1341,6 +1652,18 @@ export class MockSharePointService implements ISharePointService {
         PeriodLabel: 'Apr 20 – Apr 24, 2026',
         Status: 'open',
       },
+      diagnostics: [],
+    };
+  }
+
+  async ingestSafetyWorkbook(
+    _input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionOperationResult> {
+    return {
+      success: true,
+      requestAccepted: true,
+      requestId,
       diagnostics: [],
     };
   }
