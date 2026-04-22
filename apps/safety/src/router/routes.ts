@@ -1,4 +1,4 @@
-import { createRoute, lazyRouteComponent } from '@tanstack/react-router';
+import { createRoute, lazyRouteComponent, redirect } from '@tanstack/react-router';
 import { useNavStore } from '@hbc/shell';
 import { rootRoute } from './root-route.js';
 
@@ -61,12 +61,19 @@ const reviewRoute = createRoute({
   ),
 });
 
+/**
+ * Phase-2 Wave 1 (G-11): `/incidents` is not a real feature in this release.
+ * Direct navigation redirects to `/periods` with `?from=incidents` so the
+ * reporting-period dashboard can surface a one-time banner explaining the
+ * redirect. The page file itself has been deleted.
+ */
 const incidentsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/incidents',
-  component: lazyRouteComponent(() =>
-    import('../pages/IncidentsPage.js').then((m) => ({ default: m.IncidentsPage })),
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: '/periods', search: { from: 'incidents' } });
+  },
+  component: () => null,
 });
 
 export const webpartRoutes = [

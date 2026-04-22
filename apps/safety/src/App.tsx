@@ -43,8 +43,11 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
     return createSafetyInspectionRepository({ mode: 'mock' });
   }, [typed]);
 
+  // Safety is office-only (Phase-2 G-01): lock the theme to light so no
+  // shell/field-mode inheritance can surface the field theme on this
+  // SPFx-over-SharePoint surface. See plan §3.
   return (
-    <HbcThemeProvider>
+    <HbcThemeProvider forceTheme="light">
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <ComplexityProvider

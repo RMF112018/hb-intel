@@ -3,8 +3,11 @@ import { Link } from '@tanstack/react-router';
 import { HbcButton, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
 import { useReplayIngestion, useReviewQueue } from '@hbc/features-safety';
 
+const OFFICE_ONLY: Array<'office'> = ['office'];
+
 export function ReviewQueuePage(): ReactNode {
-  const { data: entries = [] } = useReviewQueue();
+  const reviewQueue = useReviewQueue();
+  const entries = reviewQueue.data ?? [];
   const replay = useReplayIngestion();
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
 
@@ -12,14 +15,22 @@ export function ReviewQueuePage(): ReactNode {
     setPendingRunId(runId);
     replay.mutate(
       { parentRunId: runId, supersedePrior },
-      {
-        onSettled: () => setPendingRunId(null),
-      },
+      { onSettled: () => setPendingRunId(null) },
     );
   };
 
   return (
-    <WorkspacePageShell layout="list" title="Review queue">
+    <WorkspacePageShell
+      layout="list"
+      title="Review queue"
+      supportedModes={OFFICE_ONLY}
+      isLoading={reviewQueue.isPending}
+      isError={reviewQueue.isError}
+      errorMessage="Failed to load the review queue."
+      onRetry={() => reviewQueue.refetch()}
+      isEmpty={!reviewQueue.isPending && !reviewQueue.isError && entries.length === 0}
+      emptyMessage="Nothing awaiting review — weekly ingestion is clean."
+    >
       <section style={{ display: 'grid', gap: '1rem' }}>
         <HbcTypography intent="bodySmall">
           Uploads that ended in review-required, invalid-template, parse-error,
@@ -41,8 +52,7 @@ export function ReviewQueuePage(): ReactNode {
           <tbody>
             {entries.map((entry) => {
               const isPending = pendingRunId === entry.run.id && replay.isPending;
-              const isDuplicate =
-                entry.run.errorClass === 'duplicate-suspected';
+              const isDuplicate = entry.run.errorClass === 'duplicate-suspected';
               return (
                 <tr key={entry.run.id}>
                   <td>{entry.run.id}</td>
@@ -84,15 +94,6 @@ export function ReviewQueuePage(): ReactNode {
                 </tr>
               );
             })}
-            {entries.length === 0 && (
-              <tr>
-                <td colSpan={6}>
-                  <HbcTypography intent="bodySmall">
-                    Nothing awaiting review — weekly ingestion is clean.
-                  </HbcTypography>
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </section>

@@ -10,6 +10,7 @@
     "SharePointWebPart",
     "TeamsPersonalApp"
   ],
+  "supportsFullBleed": true,
   "supportsThemeVariants": true,
   "preconfiguredEntries": [
     {

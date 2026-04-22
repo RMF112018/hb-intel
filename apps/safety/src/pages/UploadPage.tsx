@@ -6,6 +6,8 @@ import {
   HbcTypography,
   WorkspacePageShell,
 } from '@hbc/ui-kit';
+
+const OFFICE_ONLY: Array<'office'> = ['office'];
 import {
   useReportingPeriods,
   useSafetyIngestion,
@@ -48,7 +50,11 @@ export function UploadPage(): ReactNode {
   };
 
   return (
-    <WorkspacePageShell layout="form" title="Upload Safety Checklist">
+    <WorkspacePageShell
+      layout="form"
+      title="Upload Safety Checklist"
+      supportedModes={OFFICE_ONLY}
+    >
       <section style={{ display: 'grid', gap: '1rem', maxWidth: '42rem' }}>
         <HbcTypography intent="body">
           Upload a completed Safety Checklist Template (v1) workbook. The system validates the template,

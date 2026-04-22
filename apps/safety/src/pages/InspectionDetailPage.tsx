@@ -4,6 +4,8 @@ import { HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
 import { useFindings, useInspection } from '@hbc/features-safety';
 import type { ParsedInspection } from '@hbc/features-safety';
 
+const OFFICE_ONLY: Array<'office'> = ['office'];
+
 function formatPercent(value: number | null | undefined): string {
   if (value === null || value === undefined) return '—';
   return `${Math.round(value * 100)}%`;
@@ -20,8 +22,10 @@ interface SectionSummaryRow {
 
 export function InspectionDetailPage(): ReactNode {
   const { inspectionEventId } = useParams({ from: '/inspections/$inspectionEventId' });
-  const { data: inspection } = useInspection(inspectionEventId);
-  const { data: findings = [] } = useFindings(inspectionEventId);
+  const inspectionQuery = useInspection(inspectionEventId);
+  const inspection = inspectionQuery.data;
+  const findingsQuery = useFindings(inspectionEventId);
+  const findings = findingsQuery.data ?? [];
 
   const parsed = useMemo<ParsedInspection | null>(() => {
     if (!inspection?.rawChecklistJson) return null;
@@ -32,9 +36,24 @@ export function InspectionDetailPage(): ReactNode {
     }
   }, [inspection]);
 
+  // Per plan §4: not-found → isError (a missing record is a navigation error).
+  const isNotFound =
+    !inspectionQuery.isPending && !inspectionQuery.isError && inspection === null;
+  const isError = inspectionQuery.isError || isNotFound;
+  const errorMessage = isNotFound
+    ? 'Inspection not found.'
+    : 'Failed to load inspection.';
+
   return (
-    <WorkspacePageShell layout="detail" title={inspection?.title ?? 'Inspection'}>
-      {!inspection && <HbcTypography intent="body">Loading…</HbcTypography>}
+    <WorkspacePageShell
+      layout="detail"
+      title={inspection?.title ?? 'Inspection'}
+      supportedModes={OFFICE_ONLY}
+      isLoading={inspectionQuery.isPending}
+      isError={isError}
+      errorMessage={errorMessage}
+      onRetry={() => inspectionQuery.refetch()}
+    >
       {inspection && (
         <section style={{ display: 'grid', gap: '1rem' }}>
           <header style={{ display: 'grid' }}>
