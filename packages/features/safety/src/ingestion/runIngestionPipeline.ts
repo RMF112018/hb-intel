@@ -301,7 +301,7 @@ export async function runIngestionPipeline(
     projectNumber: resolution.projectNumber,
     reportingPeriodId: context.reportingPeriodId,
   });
-  const duplicate = classifyDuplicate(
+  const duplicate = classifyDuplicateRisk(
     weeklyInspections,
     authoritativeInspectionDate,
     authoritativeInspectionNumber,
@@ -518,7 +518,7 @@ export async function runIngestionPipeline(
   }
 }
 
-function classifyDuplicate(
+export function classifyDuplicateRisk(
   recent: ReadonlyArray<SafetyInspectionEvent>,
   inspectionDate: string,
   inspectionNumber: string,

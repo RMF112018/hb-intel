@@ -232,4 +232,71 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(payload.ReportingPeriodIdLookupId).toBe(14);
     expect(payload.ParentRunIdLookupId).toBe(500);
   });
+
+  it('resolves project for preview from operator-entered project context', async () => {
+    const { repo } = makeRepository();
+
+    const result = await repo.resolveProjectForPreview({
+      context: {
+        uploadedByUpn: 'inspector@hbc.test',
+        uploadedAt: '2026-04-23T10:00:00Z',
+        fileName: 'test.xlsx',
+        reportingPeriodId: 'period-14',
+        reportingPeriodSpItemId: 14,
+        projectNumber: '2026-601',
+        projectSourceClassification: 'project',
+        projectNameSnapshot: 'Project 601',
+        inspectionDate: '2026-04-22',
+        inspectionNumber: '2',
+      },
+      projectSiteText: '2026-001 Legacy Text',
+      projectNumberHint: '2026-001',
+    });
+
+    expect(result?.projectNumber).toBe('2026-601');
+    expect(result?.classification).toBe('project');
+    expect(result?.projectNameSnapshot).toBe('Project 601');
+  });
+
+  it('lists prior inspections for duplicate preview checks', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.listItems.mockResolvedValue([
+      {
+        id: '91',
+        fields: {
+          Title: 'Inspection 91',
+          ProjectWeekRecordIdLookupId: 55,
+          ReportingPeriodIdLookupId: 14,
+          SourceUploadItemId: 300,
+          SourceUploadWebUrl: 'https://example.test/upload.xlsx',
+          Checksum: 'abc',
+          TemplateVersion: 'v1',
+          ParserVersion: 'parse-first-2026-04',
+          ScoringMode: 'template-compat-v1',
+          InspectionDate: '2026-04-22T00:00:00Z',
+          InspectionNumber: '3',
+          ProjectNumber: '2026-100',
+          ProjectNameSnapshot: 'Project 100',
+          InspectionScore: 92,
+          TotalYes: 10,
+          TotalNo: 1,
+          TotalNA: 1,
+          RawChecklistJson: '{}',
+          IngestionStatus: 'accepted',
+          DuplicateStatus: 'none',
+          RequiresReview: false,
+          SubmittedAt: '2026-04-23T10:00:00Z',
+        },
+      },
+    ]);
+
+    const inspections = await repo.findInspectionsForProjectWeek({
+      projectNumber: '2026-100',
+      reportingPeriodId: 'period-14',
+    });
+
+    expect(inspections).toHaveLength(1);
+    expect(inspections[0]?.id).toBe('ie-91');
+    expect(fakeGraph.listItems).toHaveBeenCalledOnce();
+  });
 });

@@ -9,10 +9,12 @@ describe('admin safety record-keeping provisioning route wiring', () => {
 
   it('registers the expected handler key and route', () => {
     expect(source).toContain("'adminProvisionSafetyRecordKeepingSharePoint'");
-    expect(source).toContain("route: 'admin/safety-records/provision-sharepoint'");
+    expect(source).toContain("route: 'safety-records/provision-sharepoint'");
     expect(source).toContain("methods: ['POST']");
     expect(source).toContain("'safetyIngestWorkbook'");
-    expect(source).toContain("route: 'admin/safety-records/ingest'");
+    expect(source).toContain("route: 'safety-records/ingest'");
+    expect(source).toContain("'safetyPreviewWorkbook'");
+    expect(source).toContain("route: 'safety-records/ingest/preview'");
   });
 
   it('uses standard auth posture (delegated scope + admin)', () => {
@@ -26,6 +28,7 @@ describe('admin safety record-keeping provisioning route wiring', () => {
     expect(source).toContain('MockSharePointService');
     expect(source).toContain('provisionSafetyRecordKeepingSharePoint');
     expect(source).toContain('ingestSafetyWorkbook');
+    expect(source).toContain('previewSafetyWorkbook');
   });
 
   it('supports dryRun request body input', () => {

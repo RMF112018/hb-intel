@@ -28,9 +28,17 @@ import {
 } from '../config/safety-record-keeping-list-definitions.js';
 import { configureSafetyListGuids } from '../../../../packages/features/safety/src/lists/guidConfig.js';
 import type { SafetyGuidOverlay } from '../../../../packages/features/safety/src/lists/guidConfig.js';
-import type { IngestionRunResult, UploadContext } from '../../../../packages/features/safety/src/domain/types.js';
+import type {
+  IngestionRunResult,
+  SafetyIngestionPreviewResult,
+  UploadContext,
+} from '../../../../packages/features/safety/src/domain/types.js';
 import { GraphListClient } from './legacy-fallback/graph-list-client.js';
 import { SafetyIngestionGraphRepository } from './safety-ingestion-graph-repository.js';
+import {
+  evaluateSafetyIngestionPreview,
+  type ISafetyIngestionPreviewRequest,
+} from './safety-ingestion-preview-evaluator.js';
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -79,6 +87,11 @@ export interface ISharePointService {
     input: ISafetyIngestionRequest,
     requestId?: string,
   ): Promise<ISafetyIngestionOperationResult>;
+
+  previewSafetyWorkbook(
+    input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionPreviewOperationResult>;
 
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
@@ -198,6 +211,16 @@ export interface ISafetyIngestionOperationResult {
   requestAccepted: boolean;
   requestId?: string;
   result?: IngestionRunResult;
+  preview?: SafetyIngestionPreviewResult;
+  previewPassed?: boolean;
+  diagnostics: ISafetyProvisionDiagnostic[];
+}
+
+export interface ISafetyIngestionPreviewOperationResult {
+  success: boolean;
+  requestAccepted: boolean;
+  requestId?: string;
+  preview?: SafetyIngestionPreviewResult;
   diagnostics: ISafetyProvisionDiagnostic[];
 }
 
@@ -642,21 +665,6 @@ export class SharePointService implements ISharePointService {
     try {
       const repo = new SafetyIngestionGraphRepository(this.tokenService);
 
-      const period = await repo.getReportingPeriod(input.context.reportingPeriodId);
-      if (!period) {
-        return {
-          success: false,
-          requestAccepted: false,
-          requestId,
-          diagnostics: diagnostics.concat([
-            {
-              code: 'SAFETY_INGESTION_REPORTING_PERIOD_NOT_FOUND',
-              message: `Reporting period ${input.context.reportingPeriodId} was not found.`,
-            },
-          ]),
-        };
-      }
-
       const bytes = Buffer.from(input.fileContentBase64, 'base64');
       if (bytes.length === 0) {
         return {
@@ -667,6 +675,68 @@ export class SharePointService implements ISharePointService {
             {
               code: 'SAFETY_INGESTION_EMPTY_PAYLOAD',
               message: 'Workbook payload is empty after base64 decoding.',
+            },
+          ]),
+        };
+      }
+
+      const preview = await this.evaluatePreviewAndLog(
+        repo,
+        {
+          fileName: input.fileName,
+          fileBytes: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+          context: input.context,
+        },
+        requestId,
+      );
+      if (!preview.commitReadiness) {
+        console.log(JSON.stringify({
+          level: 'warn',
+          event: 'safety.ingestion.commit.gate.blocked',
+          requestId,
+          fileName: input.fileName,
+          readiness: preview.commitReadiness,
+          blockingCodes: preview.blockingErrors.map((item) => item.code),
+          duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
+          timestamp: new Date().toISOString(),
+        }));
+        return {
+          success: false,
+          requestAccepted: false,
+          requestId,
+          preview,
+          previewPassed: false,
+          diagnostics: diagnostics.concat([
+            {
+              code: 'SAFETY_INGESTION_COMMIT_NOT_READY',
+              message: 'Commit blocked by preview readiness gate.',
+            },
+          ]),
+        };
+      }
+
+      console.log(JSON.stringify({
+        level: 'info',
+        event: 'safety.ingestion.commit.gate.allowed',
+        requestId,
+        fileName: input.fileName,
+        readiness: preview.commitReadiness,
+        duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
+        timestamp: new Date().toISOString(),
+      }));
+
+      const period = await repo.getReportingPeriod(input.context.reportingPeriodId);
+      if (!period) {
+        return {
+          success: false,
+          requestAccepted: false,
+          requestId,
+          preview,
+          previewPassed: true,
+          diagnostics: diagnostics.concat([
+            {
+              code: 'SAFETY_INGESTION_REPORTING_PERIOD_NOT_FOUND',
+              message: `Reporting period ${input.context.reportingPeriodId} was not found.`,
             },
           ]),
         };
@@ -698,6 +768,8 @@ export class SharePointService implements ISharePointService {
         success: true,
         requestAccepted: true,
         requestId,
+        preview,
+        previewPassed: true,
         result,
         diagnostics,
       };
@@ -714,6 +786,7 @@ export class SharePointService implements ISharePointService {
         success: false,
         requestAccepted: false,
         requestId,
+        previewPassed: false,
         diagnostics: diagnostics.concat([
           {
             code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_FAILED'),
@@ -722,6 +795,157 @@ export class SharePointService implements ISharePointService {
         ]),
       };
     }
+  }
+
+  async previewSafetyWorkbook(
+    input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionPreviewOperationResult> {
+    const diagnostics: ISafetyProvisionDiagnostic[] = [];
+    console.log(JSON.stringify({
+      level: 'info',
+      event: 'safety.ingestion.preview.request.received',
+      requestId,
+      fileName: input.fileName,
+      reportingPeriodId: input.context.reportingPeriodId,
+      uploadedByUpn: input.context.uploadedByUpn,
+      timestamp: new Date().toISOString(),
+    }));
+
+    const targets = this.resolveSafetyProvisioningTargets(diagnostics);
+    if (!targets) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_TARGET_RESOLUTION_FAILED',
+            message: 'Safety/HBCentral site targets could not be resolved safely.',
+          },
+        ]),
+      };
+    }
+
+    const referenceValidation: ISafetyReferenceListValidationResult[] = [];
+    const referenceFailed = await this.validateReferenceLists(
+      targets.hbCentralSiteUrl,
+      referenceValidation,
+      diagnostics,
+    );
+    if (referenceFailed) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_REFERENCE_VALIDATION_FAILED',
+            message: 'Required Safety reference lists are missing or inaccessible.',
+          },
+        ]),
+      };
+    }
+
+    const contractErrors = await this.validateSafetyIngestionContracts();
+    if (contractErrors.length > 0) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat(contractErrors),
+      };
+    }
+
+    const overlay = await this.resolveSafetyGuidOverlay();
+    configureSafetyListGuids(overlay);
+
+    const bytes = Buffer.from(input.fileContentBase64, 'base64');
+    if (bytes.length === 0) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_EMPTY_PAYLOAD',
+            message: 'Workbook payload is empty after base64 decoding.',
+          },
+        ]),
+      };
+    }
+
+    try {
+      const repo = new SafetyIngestionGraphRepository(this.tokenService);
+      const preview = await this.evaluatePreviewAndLog(
+        repo,
+        {
+          fileName: input.fileName,
+          fileBytes: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+          context: input.context,
+        },
+        requestId,
+      );
+
+      console.log(JSON.stringify({
+        level: 'info',
+        event: 'safety.ingestion.preview.request.completed',
+        requestId,
+        fileName: input.fileName,
+        commitReadiness: preview.commitReadiness,
+        blockingCodes: preview.blockingErrors.map((item) => item.code),
+        duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
+        timestamp: new Date().toISOString(),
+      }));
+
+      return {
+        success: true,
+        requestAccepted: true,
+        requestId,
+        preview,
+        diagnostics,
+      };
+    } catch (err) {
+      const message = formatSharePointTokenAcquisitionDiagnostic(err);
+      console.error(JSON.stringify({
+        level: 'error',
+        event: 'safety.ingestion.preview.request.failed',
+        requestId,
+        message,
+        timestamp: new Date().toISOString(),
+      }));
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_PREVIEW_FAILED'),
+            message,
+          },
+        ]),
+      };
+    }
+  }
+
+  private async evaluatePreviewAndLog(
+    repository: SafetyIngestionGraphRepository,
+    input: ISafetyIngestionPreviewRequest,
+    requestId?: string,
+  ): Promise<SafetyIngestionPreviewResult> {
+    const preview = await evaluateSafetyIngestionPreview(repository, input);
+    console.log(JSON.stringify({
+      level: 'info',
+      event: 'safety.ingestion.preview.evaluated',
+      requestId,
+      fileName: input.fileName,
+      commitReadiness: preview.commitReadiness,
+      blockingCodes: preview.blockingErrors.map((item) => item.code),
+      warningCodes: preview.warnings.map((item) => item.code),
+      duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
+      timestamp: new Date().toISOString(),
+    }));
+    return preview;
   }
 
   async listExists(siteUrl: string, listTitle: string): Promise<boolean> {
@@ -1703,6 +1927,39 @@ export class MockSharePointService implements ISharePointService {
       success: true,
       requestAccepted: true,
       requestId,
+      previewPassed: true,
+      diagnostics: [],
+    };
+  }
+
+  async previewSafetyWorkbook(
+    _input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionPreviewOperationResult> {
+    return {
+      success: true,
+      requestAccepted: true,
+      requestId,
+      preview: {
+        commitReadiness: true,
+        template: {
+          templateVersion: 'SafetyChecklist_v1',
+          parserContractVersion: 'parse-first-2026-04',
+          valid: true,
+        },
+        projectResolution: {
+          resolved: true,
+          classification: 'project',
+          projectNumber: '2026-001',
+          projectNameSnapshot: 'Mock Project',
+        },
+        duplicateRisk: {
+          confidence: 'none',
+          supersessionRisk: false,
+        },
+        warnings: [],
+        blockingErrors: [],
+      },
       diagnostics: [],
     };
   }

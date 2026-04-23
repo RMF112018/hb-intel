@@ -86,6 +86,36 @@ export class SafetyIngestionGraphRepository {
     return mapReportingPeriod(created);
   }
 
+  async resolveProjectForPreview(input: {
+    context: UploadContext;
+    projectSiteText: string;
+    projectNumberHint: string | null;
+  }): Promise<ProjectResolutionResult | null> {
+    const { context, projectSiteText, projectNumberHint } = input;
+    if (context.projectNumber && context.projectSourceClassification) {
+      const byNumber = await this.resolveProjectByNumber(
+        context.projectNumber,
+        context.projectSourceClassification,
+        {
+          projectNameSnapshot: context.projectNameSnapshot,
+          projectLocationSnapshot: context.projectLocationSnapshot,
+          projectStageSnapshot: context.projectStageSnapshot,
+          projectLookupId: context.projectLookupId,
+          legacyRegistryItemId: context.legacyRegistryItemId,
+        },
+      );
+      if (byNumber) return byNumber;
+    }
+    return this.resolveProject(projectSiteText, projectNumberHint ?? undefined);
+  }
+
+  async findInspectionsForProjectWeek(input: {
+    projectNumber: string;
+    reportingPeriodId: string;
+  }): Promise<ReadonlyArray<SafetyInspectionEvent>> {
+    return this.fetchInspectionsForProjectWeek(input.projectNumber, input.reportingPeriodId);
+  }
+
   private buildIngestionAdapter(): IngestionAdapter {
     return {
       resolveProject: async (projectSiteText: string, projectNumberHint: string | null) =>
@@ -95,50 +125,10 @@ export class SafetyIngestionGraphRepository {
         classification: ProjectSourceClassification,
         hints,
       ): Promise<ProjectResolutionResult | null> => {
-        if (!projectNumber) return null;
-
-        if (hints?.projectNameSnapshot && hints.projectNameSnapshot.length > 0) {
-          return {
-            classification,
-            projectNumber,
-            projectNameSnapshot: hints.projectNameSnapshot,
-            projectLocationSnapshot: hints.projectLocationSnapshot ?? '',
-            projectStageSnapshot: hints.projectStageSnapshot ?? '',
-            projectLookupId: hints.projectLookupId,
-            legacyRegistryItemId: hints.legacyRegistryItemId,
-          };
-        }
-
-        const enriched = await this.resolveProject('', projectNumber);
-        if (enriched) {
-          return {
-            ...enriched,
-            classification,
-            projectNumber,
-          };
-        }
-
-        return {
-          classification,
-          projectNumber,
-          projectNameSnapshot: hints?.projectNameSnapshot ?? '',
-          projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
-          projectStageSnapshot: hints?.projectStageSnapshot ?? '',
-          projectLookupId: hints?.projectLookupId,
-          legacyRegistryItemId: hints?.legacyRegistryItemId,
-        };
+        return this.resolveProjectByNumber(projectNumber, classification, hints);
       },
-      findInspectionsForProjectWeek: async (filter) => {
-        const descriptor = this.list('SafetyInspectionEvents');
-        const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
-          filter:
-            `fields/ReportingPeriodIdLookupId eq ${spItemIdFromString(filter.reportingPeriodId)} and ` +
-            `fields/ProjectNumber eq '${escapeGraphString(filter.projectNumber)}'`,
-          top: 500,
-          select: INSPECTION_SELECT,
-        });
-        return rows.map(mapInspectionEvent);
-      },
+      findInspectionsForProjectWeek: async (filter) =>
+        this.fetchInspectionsForProjectWeek(filter.projectNumber, filter.reportingPeriodId),
       findFindingsForProjectWeek: async (filter) => {
         const descriptor = this.list('SafetyFindings');
         const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
@@ -172,6 +162,66 @@ export class SafetyIngestionGraphRepository {
         this.markInspectionSuperseded(priorId, replacementId),
       recordIngestionRun: async (runDraft: SafetyIngestionRunDraft) => this.insertIngestionRun(runDraft),
     };
+  }
+
+  private async resolveProjectByNumber(
+    projectNumber: string,
+    classification: ProjectSourceClassification,
+    hints?: {
+      readonly projectNameSnapshot?: string;
+      readonly projectLocationSnapshot?: string;
+      readonly projectStageSnapshot?: string;
+      readonly projectLookupId?: number;
+      readonly legacyRegistryItemId?: number;
+    },
+  ): Promise<ProjectResolutionResult | null> {
+    if (!projectNumber) return null;
+
+    if (hints?.projectNameSnapshot && hints.projectNameSnapshot.length > 0) {
+      return {
+        classification,
+        projectNumber,
+        projectNameSnapshot: hints.projectNameSnapshot,
+        projectLocationSnapshot: hints.projectLocationSnapshot ?? '',
+        projectStageSnapshot: hints.projectStageSnapshot ?? '',
+        projectLookupId: hints.projectLookupId,
+        legacyRegistryItemId: hints.legacyRegistryItemId,
+      };
+    }
+
+    const enriched = await this.resolveProject('', projectNumber);
+    if (enriched) {
+      return {
+        ...enriched,
+        classification,
+        projectNumber,
+      };
+    }
+
+    return {
+      classification,
+      projectNumber,
+      projectNameSnapshot: hints?.projectNameSnapshot ?? '',
+      projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
+      projectStageSnapshot: hints?.projectStageSnapshot ?? '',
+      projectLookupId: hints?.projectLookupId,
+      legacyRegistryItemId: hints?.legacyRegistryItemId,
+    };
+  }
+
+  private async fetchInspectionsForProjectWeek(
+    projectNumber: string,
+    reportingPeriodId: string,
+  ): Promise<ReadonlyArray<SafetyInspectionEvent>> {
+    const descriptor = this.list('SafetyInspectionEvents');
+    const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
+      filter:
+        `fields/ReportingPeriodIdLookupId eq ${spItemIdFromString(reportingPeriodId)} and ` +
+        `fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
+      top: 500,
+      select: INSPECTION_SELECT,
+    });
+    return rows.map(mapInspectionEvent);
   }
 
   private async uploadWorkbook(fileName: string, bytes: ArrayBuffer): Promise<{

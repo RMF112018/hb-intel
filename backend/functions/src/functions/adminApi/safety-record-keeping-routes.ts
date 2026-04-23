@@ -84,7 +84,7 @@ function parseIngestionBody(body: Record<string, unknown>): {
 app.http('adminProvisionSafetyRecordKeepingSharePoint', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'admin/safety-records/provision-sharepoint',
+  route: 'safety-records/provision-sharepoint',
   handler: withAuth(
     withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
       const requestId = extractOrGenerateRequestId(request);
@@ -137,7 +137,7 @@ app.http('adminProvisionSafetyRecordKeepingSharePoint', {
 app.http('safetyIngestWorkbook', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'admin/safety-records/ingest',
+  route: 'safety-records/ingest',
   handler: withAuth(
     withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
       const requestId = extractOrGenerateRequestId(request);
@@ -189,5 +189,63 @@ app.http('safetyIngestWorkbook', {
         return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
       }
     }, { domain: 'adminControlPlane', operation: 'safetyIngestWorkbook' }),
+  ),
+});
+
+app.http('safetyPreviewWorkbook', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'safety-records/ingest/preview',
+  handler: withAuth(
+    withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+      const requestId = extractOrGenerateRequestId(request);
+      const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+      if (scopeDenied) return scopeDenied;
+
+      let body: Record<string, unknown> = {};
+      try {
+        body = (await request.json()) as Record<string, unknown>;
+      } catch {
+        return errorResponse(400, 'VALIDATION_ERROR', 'Request body must be valid JSON.', requestId);
+      }
+
+      const parsed = parseIngestionBody(body);
+      if (!parsed) {
+        return errorResponse(
+          400,
+          'VALIDATION_ERROR',
+          'fileName, fileContentBase64, and context.{uploadedByUpn, uploadedAt, reportingPeriodId} are required.',
+          requestId,
+        );
+      }
+
+      try {
+        const mode = assertAdapterModeValid();
+        const sharePoint = mode === 'mock' || process.env.NODE_ENV === 'test'
+          ? new MockSharePointService()
+          : new SharePointService();
+
+        const operation = await sharePoint.previewSafetyWorkbook(parsed, requestId);
+        if (!operation.success || !operation.preview) {
+          return {
+            status: 422,
+            jsonBody: {
+              message: 'Safety ingestion preview failed.',
+              code: 'SAFETY_INGESTION_PREVIEW_FAILED',
+              requestId,
+              data: operation,
+            },
+            headers: {
+              'X-Request-Id': requestId,
+            },
+          };
+        }
+
+        return successResponse(operation);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
+      }
+    }, { domain: 'adminControlPlane', operation: 'safetyPreviewWorkbook' }),
   ),
 });

@@ -392,6 +392,58 @@ export interface IngestionRunResult {
   readonly metadataMismatch?: IngestionMetadataMismatch;
 }
 
+export type PreviewSeverity = 'warning' | 'error';
+
+export interface PreviewDiagnostic {
+  readonly code: string;
+  readonly message: string;
+  readonly severity: PreviewSeverity;
+}
+
+export interface TemplateCompatibilityStatus {
+  readonly templateVersion: string | null;
+  readonly parserContractVersion: string | null;
+  readonly valid: boolean;
+}
+
+export interface ReportingPeriodPreview {
+  readonly id: string;
+  readonly spItemId: number;
+  readonly title: string;
+  readonly weekStartDate: string;
+  readonly weekEndDate: string;
+  readonly resolved: boolean;
+  readonly dateInRange: boolean;
+}
+
+export interface ProjectResolutionPreview {
+  readonly resolved: boolean;
+  readonly classification: ProjectSourceClassification | 'unresolved';
+  readonly projectNumber?: string;
+  readonly projectNameSnapshot?: string;
+  readonly projectLookupId?: number;
+  readonly legacyRegistryItemId?: number;
+}
+
+export interface DuplicateSupersessionPreview {
+  readonly confidence: DuplicateConfidence;
+  readonly matchedInspectionEventId?: string;
+  readonly matchedInspectionStatus?: InspectionEventStatus;
+  readonly supersessionRisk: boolean;
+}
+
+export interface SafetyIngestionPreviewResult {
+  readonly commitReadiness: boolean;
+  readonly template: TemplateCompatibilityStatus;
+  readonly metadata?: InspectionMetadata;
+  readonly reportingPeriod?: ReportingPeriodPreview;
+  readonly projectResolution: ProjectResolutionPreview;
+  readonly duplicateRisk?: DuplicateSupersessionPreview;
+  readonly normalizedKeyFindingsPreview?: string;
+  readonly warnings: ReadonlyArray<PreviewDiagnostic>;
+  readonly blockingErrors: ReadonlyArray<PreviewDiagnostic>;
+}
+
 export class TemplateInvalidError extends Error {
   readonly errorClass: ErrorClass = 'template-invalid';
   constructor(message: string) {
