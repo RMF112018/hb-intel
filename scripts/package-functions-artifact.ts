@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -56,6 +57,29 @@ function runOrThrow(command: string, args: readonly string[], cwd: string): void
   if (result.status !== 0) {
     throw new Error(`Command failed (${command} ${args.join(' ')})`);
   }
+}
+
+function runCapture(command: string, args: readonly string[], cwd: string): string | undefined {
+  const result = spawnSync(command, args, {
+    cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    shell: false,
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) return undefined;
+  const out = (result.stdout ?? '').toString().trim();
+  return out.length > 0 ? out : undefined;
+}
+
+function resolveCommitSha(root: string): string {
+  const fromEnv = (process.env.GITHUB_SHA ?? '').trim();
+  if (fromEnv.length > 0) return fromEnv;
+  return runCapture('git', ['rev-parse', 'HEAD'], root) ?? 'unknown';
+}
+
+function sha256OfFile(filePath: string): string {
+  const bytes = readFileSync(filePath);
+  return createHash('sha256').update(bytes).digest('hex');
 }
 
 // Assertions are scoped to the legacy-fallback lane objective. Other workspace
@@ -289,11 +313,44 @@ function main(): void {
   // Dereference symlinks for deployment compatibility on hosted Linux Functions.
   runOrThrow('zip', ['-qr', options.outputZipPath, '.'], options.stagingDir);
 
+  // Emit the out-of-zip deterministic stamp. This is what the CI workflow
+  // reads to drive the runtime appsettings stamp and the post-deploy
+  // identity proof — closing phase-02 audit gap G-01 (artifact truth).
+  const stagedPkg = JSON.parse(readFileSync(path.join(options.stagingDir, 'package.json'), 'utf8')) as {
+    name?: string;
+    version?: string;
+    main?: string;
+  };
+  const sha256 = sha256OfFile(options.outputZipPath);
+  const zipBytes = statSync(options.outputZipPath).size;
+  const commitSha = resolveCommitSha(root);
+  const buildTimestamp = new Date().toISOString();
+  const manifest = {
+    packageName: stagedPkg.name ?? '@hbc/functions',
+    packageVersion: stagedPkg.version ?? '0.0.0',
+    commitSha,
+    buildTimestamp,
+    zipPath: path.basename(options.outputZipPath),
+    zipBytes,
+    sha256,
+    entrypoint: stagedPkg.main ?? mainEntrypoint,
+    hostJson: 'host.json',
+    stagedWorkspacePackages: collectStagedWorkspacePackages(options.stagingDir),
+  };
+  const manifestPath = path.join(outputDir, 'artifact-manifest.json');
+  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
   const summary = {
     outputZipPath: options.outputZipPath,
     stagingDir: options.stagingDir,
     inventoryPath,
     inventoryInZip: 'artifact-inventory.json',
+    manifestPath,
+    packageVersion: manifest.packageVersion,
+    commitSha: manifest.commitSha,
+    buildTimestamp: manifest.buildTimestamp,
+    sha256,
+    zipBytes,
     deployCommand: 'az functionapp deploy --type zip --src-path <artifact.zip>',
   };
   console.log(JSON.stringify(summary, null, 2));

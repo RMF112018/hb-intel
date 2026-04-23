@@ -1,4 +1,4 @@
-import { createRequire } from 'node:module';
+import { resolveBackendArtifactIdentity } from '../utils/backend-version.js';
 
 export type SafetyIngestionTelemetryOperation = 'ingest' | 'preview' | 'replay';
 
@@ -12,43 +12,15 @@ export interface ISafetyIngestionTelemetryContext {
 
 /**
  * Backend artifact version stamped onto every Safety ingestion telemetry
- * payload. Derived from the backend/functions `package.json` via a read at
- * module load time; if the read fails (bundled artifact, unusual runtime),
- * falls back to the env var `HBC_FUNCTIONS_BUILD_VERSION` or the literal
- * `unknown`. Stamping at the telemetry layer guarantees every ingest /
- * preview / replay event in live logs proves which artifact executed —
- * directly closing the "deployment drift vs source" ambiguity identified
- * in phase-02 audit gap G-01.
+ * payload. Resolved once at module load via `resolveBackendArtifactIdentity()`
+ * so the telemetry constant and the `/api/health` `artifact` block share a
+ * single source of truth for version identity. Stamping at the telemetry
+ * layer guarantees every ingest / preview / replay event in live logs proves
+ * which artifact executed — directly closing the "deployment drift vs source"
+ * ambiguity identified in phase-02 audit gap G-01.
  */
-export const SAFETY_INGESTION_BACKEND_VERSION: string = resolveBackendVersion();
-
-function resolveBackendVersion(): string {
-  const envOverride = process.env.HBC_FUNCTIONS_BUILD_VERSION?.trim();
-  if (envOverride) return envOverride;
-  try {
-    // createRequire on import.meta.url resolves sibling package.json
-    // without JSON-import assertions. Works under tsc + vitest + Azure
-    // Functions host.
-    const req = createRequire(import.meta.url);
-    const candidates = [
-      '../../package.json', // from dist/services
-      '../../../package.json', // from src/services (tests)
-    ];
-    for (const candidate of candidates) {
-      try {
-        const parsed = req(candidate) as { name?: string; version?: string };
-        if (parsed.name === '@hbc/functions' && typeof parsed.version === 'string') {
-          return parsed.version;
-        }
-      } catch {
-        // Try next candidate.
-      }
-    }
-  } catch {
-    // Fall through.
-  }
-  return 'unknown';
-}
+export const SAFETY_INGESTION_BACKEND_VERSION: string =
+  resolveBackendArtifactIdentity().version;
 
 type TelemetryPropertyValue = string | number | boolean | null | undefined;
 

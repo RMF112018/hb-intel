@@ -11,6 +11,7 @@
  */
 
 import { app, type HttpResponseInit } from '@azure/functions';
+import { resolveBackendArtifactIdentity } from '../../utils/backend-version.js';
 import { deriveSafetyRolloutReadiness } from '../../utils/safety-rollout-readiness.js';
 import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
 
@@ -93,12 +94,22 @@ app.http('health', {
       integrations.signalR === 'ready',
     );
 
+    // Artifact identity block (G-01 / G-10). Cheap, zero-auth proof of
+    // which build is actually running — consumed by the post-deploy CI
+    // gate to assert both commitSha and version match the intended release.
+    const artifactIdentity = resolveBackendArtifactIdentity();
+
     // /health remains HTTP 200 by contract — readiness is expressed in the body.
     return {
       status: 200,
       jsonBody: {
         status: 'healthy',
         operationalReadiness,
+        artifact: {
+          version: artifactIdentity.version,
+          commitSha: artifactIdentity.commitSha,
+          buildTimestamp: artifactIdentity.buildTimestamp,
+        },
         environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT ?? 'unknown',
         adapterMode,
         coreConfigReady: corePresent,

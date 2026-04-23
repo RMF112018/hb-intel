@@ -79,6 +79,21 @@ Prefer:
 - manifest validation when applicable,
 - stub scans when touched areas are known to use scaffold or placeholder patterns.
 
+## Backend deploy artifact
+
+These commands prove the `@hbc/functions` deploy artifact and its runtime identity. Use when touching the backend deploy pipeline, the packaging helper, `/api/health`, or when diagnosing artifact/runtime drift (phase-02 audit G-01 / G-10).
+
+- `pnpm exec tsx scripts/package-functions-artifact.ts --output functions-artifact.zip --staging .tmp/functions-deploy`
+  Build the backend-scoped zip locally. Emits `artifact-manifest.json` next to the zip with `packageVersion`, `commitSha`, `buildTimestamp`, `sha256`, and `stagedWorkspacePackages`.
+- `shasum -a 256 functions-artifact.zip`
+  Local zip checksum — must equal `.sha256` in `artifact-manifest.json`.
+- `jq . artifact-manifest.json`
+  Inspect the deterministic stamp that drives CI's runtime identity setting and post-deploy proof.
+- `curl -s https://hb-intel-function-app.azurewebsites.net/api/health | jq .artifact`
+  Live artifact identity. After a successful deploy, `artifact.version` must equal `manifest.packageVersion` and `artifact.commitSha` must equal the deployed git SHA.
+- `pnpm --filter @hbc/functions test` / `pnpm --filter @hbc/functions check-types`
+  Gate both the telemetry version stamp and the `/api/health` artifact block.
+
 ## How to choose the right level
 
 Use the smallest level below that matches the risk:

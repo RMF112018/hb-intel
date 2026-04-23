@@ -113,6 +113,18 @@ Operator-facing observability endpoints for alert management, probe health, erro
 
 Observability contracts are in `@hbc/models/admin-control-plane` (11 enums + 22 interfaces). See the [Phase 12 API map](../../docs/architecture/plans/MASTER/spfx/admin/phase-12/admin-spfx-phase-12-observability-api-map.md) for full endpoint documentation.
 
+## Deployment and artifact truth
+
+The GitHub Actions workflow `.github/workflows/main_hb-intel-function-app.yml` deploys this package to the Flex Consumption function app `hb-intel-function-app`. The pipeline closes phase-02 backend audit gaps **G-01 (artifact truth)** and **G-10 (deployment observability)**:
+
+- **Single zip producer.** `scripts/package-functions-artifact.ts` is the sole source of the deploy zip. It stages `backend/functions` via a clean `pnpm deploy --prod --legacy`, copies `host.json`, rewrites `package.json.main` to the resolved entrypoint, asserts required route/runtime files are present, self-imports the entrypoint in a child Node process, and zips the result. The repo root is never packaged.
+- **Deterministic manifest.** The helper emits `artifact-manifest.json` **next to** the zip with `packageName`, `packageVersion`, `commitSha`, `buildTimestamp`, `zipBytes`, `sha256`, `entrypoint`, `hostJson`, and `stagedWorkspacePackages`. CI uploads the zip + manifest together as a single artifact.
+- **Runtime identity stamp (hard gate).** Before the deploy step, the workflow runs `az functionapp config appsettings set` to write `HBC_FUNCTIONS_BUILD_VERSION`, `HBC_FUNCTIONS_BUILD_SHA`, and `HBC_FUNCTIONS_BUILD_TIMESTAMP` from the manifest. It then re-queries those three settings and fails the job if any value does not match, guarding against Azure's partial-success case.
+- **Post-deploy identity proof (hard gate).** The anonymous `/api/health` endpoint returns an `artifact` block sourced from `resolveBackendArtifactIdentity()` (env vars above, with `@hbc/functions/package.json` as the version fallback). CI polls `/api/health` after deploy and fails unless BOTH `artifact.commitSha === github.sha` AND `artifact.version === manifest.packageVersion`. Both comparisons are written to the job summary.
+- **Telemetry stamp.** `SAFETY_INGESTION_BACKEND_VERSION` delegates to the same resolver, so every Safety ingestion event/metric in App Insights carries the running artifact's version.
+
+Manual verification commands live in `docs/reference/developer/verification-commands.md` under "Backend deploy artifact". Full rationale and proof-of-closure requirements are in `docs/architecture/plans/MASTER/backend/phase-02/wave-02/Prompt-01-Harden-Deployment-Pipeline-And-Artifact-Truth.md`.
+
 ## Local Development Setup
 
 `local.settings.json` is gitignored and must be created per developer machine.
