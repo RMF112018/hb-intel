@@ -11,6 +11,7 @@ import {
 } from '../domain/templateContract.js';
 import {
   createSyntheticWorkbookView,
+  type SyntheticNamedRange,
   type WorkbookView,
 } from '../parser/workbookView.js';
 
@@ -24,6 +25,8 @@ export interface FixtureOptions {
   readonly inspectionDate?: string;
   readonly inspectionNumber?: string;
   readonly missingResponseHeader?: 'item' | 'yes' | 'no' | 'na' | 'notes' | 'score' | 'flag';
+  readonly extraSheets?: Readonly<Record<string, Record<string, string | number | null>>>;
+  readonly namedRanges?: Readonly<Record<string, SyntheticNamedRange>>;
 }
 
 export function buildCleanAllYesWorkbook(options: FixtureOptions = {}): WorkbookView {
@@ -94,8 +97,12 @@ export function buildCleanAllYesWorkbook(options: FixtureOptions = {}): Workbook
     scoringWeights[`D${row}`] = s.rationale;
   }
 
-  return createSyntheticWorkbookView({
-    [SHEET_SCORECARD]: scoreCard,
-    [SHEET_SCORING_WEIGHTS]: scoringWeights,
-  });
+  return createSyntheticWorkbookView(
+    {
+      [SHEET_SCORECARD]: scoreCard,
+      [SHEET_SCORING_WEIGHTS]: scoringWeights,
+      ...(options.extraSheets ?? {}),
+    },
+    { ...(options.namedRanges ?? {}) },
+  );
 }

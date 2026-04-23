@@ -1,14 +1,24 @@
 import {
   ANCHOR_CELLS,
   EXPECTED_RESPONSE_HEADER_LABELS,
+  PARSER_CONTRACT_VERSION_ACCEPTED,
+  PARSER_META_FIELDS,
+  PARSER_NAMED_RANGES,
+  PARSER_TEMPLATE_MARKER_ACCEPTED,
   REQUIRED_SHEETS,
   RESPONSE_HEADERS,
   SECTIONS,
   SHEET_SCORECARD,
   SHEET_SCORING_WEIGHTS,
-  TEMPLATE_VERSION,
 } from '../domain/templateContract.js';
 import { TemplateInvalidError } from '../domain/types.js';
+import {
+  readNamedRangeString,
+  readParserMetaFieldString,
+  resolveContractMarkers,
+} from './contractWorkbookAccess.js';
+import { extractMetadata } from './extractMetadata.js';
+import { normalizeInspectionDate } from './dateNormalization.js';
 import type { WorkbookView } from './workbookView.js';
 
 export interface ValidateTemplateResult {
@@ -77,5 +87,77 @@ export function validateTemplate(view: WorkbookView): ValidateTemplateResult {
     }
   }
 
-  return { templateVersion: TEMPLATE_VERSION, warnings };
+  const markers = resolveContractMarkers(view);
+  if (markers.markersPresent) {
+    if (!markers.templateVersion) {
+      throw new TemplateInvalidError(
+        'Parser marker validation failed: TemplateVersion marker is missing while parser markers are present.',
+      );
+    }
+    if (!markers.parserContractVersion) {
+      throw new TemplateInvalidError(
+        'Parser marker validation failed: ParserContractVersion marker is missing while parser markers are present.',
+      );
+    }
+    if (!PARSER_TEMPLATE_MARKER_ACCEPTED.includes(markers.templateVersion as (typeof PARSER_TEMPLATE_MARKER_ACCEPTED)[number])) {
+      throw new TemplateInvalidError(
+        `Unsupported TemplateVersion marker "${markers.templateVersion}".`,
+      );
+    }
+    if (!PARSER_CONTRACT_VERSION_ACCEPTED.includes(markers.parserContractVersion as (typeof PARSER_CONTRACT_VERSION_ACCEPTED)[number])) {
+      throw new TemplateInvalidError(
+        `Unsupported ParserContractVersion marker "${markers.parserContractVersion}".`,
+      );
+    }
+  }
+
+  const metadata = extractMetadata(view);
+  if (!normalizeInspectionDate(metadata.inspectionDate)) {
+    throw new TemplateInvalidError(
+      `Inspection date is invalid or unreadable (got ${JSON.stringify(metadata.inspectionDate)}).`,
+    );
+  }
+  if (!isWholePositiveInteger(metadata.inspectionNumber)) {
+    throw new TemplateInvalidError(
+      `Inspection number must be a whole positive integer (got ${JSON.stringify(metadata.inspectionNumber)}).`,
+    );
+  }
+
+  if (markers.markersPresent) {
+    const weekStart = normalizeInspectionDate(
+      readParserMetaFieldString(view, PARSER_META_FIELDS.reportingWeekStart) ??
+      readNamedRangeString(view, PARSER_NAMED_RANGES.parserReportingWeekStart),
+    );
+    const weekEnd = normalizeInspectionDate(
+      readParserMetaFieldString(view, PARSER_META_FIELDS.reportingWeekEnd) ??
+      readNamedRangeString(view, PARSER_NAMED_RANGES.parserReportingWeekEnd),
+    );
+    const periodLabel =
+      readParserMetaFieldString(view, PARSER_META_FIELDS.reportingPeriodLabel) ??
+      readNamedRangeString(view, PARSER_NAMED_RANGES.parserReportingPeriodLabel);
+
+    const periodFieldsProvided = Boolean(weekStart || weekEnd || periodLabel);
+    if (periodFieldsProvided && (!weekStart || !weekEnd || !periodLabel)) {
+      throw new TemplateInvalidError(
+        'Reporting period derivation markers are incomplete: require week start, week end, and period label together.',
+      );
+    }
+  }
+
+  const keyFindingsSeamAvailable =
+    view.hasNamedRange(PARSER_NAMED_RANGES.keyFindingsLines) ||
+    readParserMetaFieldString(view, PARSER_META_FIELDS.keyFindingsNormalized) !== null ||
+    readNamedRangeString(view, PARSER_NAMED_RANGES.parserKeyFindingsNormalized) !== null;
+  if (markers.markersPresent && !keyFindingsSeamAvailable) {
+    throw new TemplateInvalidError(
+      'Key findings seam is missing: expected ParserMeta normalization or KeyFindingsLines named range.',
+    );
+  }
+
+  return { templateVersion: markers.templateVersion ?? 'v1', warnings };
+}
+
+function isWholePositiveInteger(value: string): boolean {
+  const n = Number(value.trim());
+  return Number.isFinite(n) && Number.isInteger(n) && n > 0;
 }

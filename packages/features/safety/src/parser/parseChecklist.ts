@@ -2,14 +2,15 @@ import {
   RESPONSE_MARK_LITERAL,
   SECTIONS,
   SHEET_SCORECARD,
-  TEMPLATE_VERSION,
   PARSER_VERSION,
 } from '../domain/templateContract.js';
 import type { ChecklistResponse, ChecklistRow, ParsedInspection } from '../domain/types.js';
+import { resolveContractMarkers } from './contractWorkbookAccess.js';
 import { extractMetadata } from './extractMetadata.js';
 import type { WorkbookView } from './workbookView.js';
 
 export function parseChecklist(view: WorkbookView): ParsedInspection {
+  const markers = resolveContractMarkers(view);
   const rows: ChecklistRow[] = [];
 
   for (const section of SECTIONS) {
@@ -40,8 +41,8 @@ export function parseChecklist(view: WorkbookView): ParsedInspection {
   }
 
   return {
-    templateVersion: TEMPLATE_VERSION,
-    parserVersion: PARSER_VERSION,
+    templateVersion: markers.templateVersion ?? 'v1',
+    parserVersion: markers.parserContractVersion ?? PARSER_VERSION,
     metadata: extractMetadata(view),
     rows,
   };

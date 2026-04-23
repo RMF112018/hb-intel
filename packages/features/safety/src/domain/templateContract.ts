@@ -7,6 +7,46 @@
 
 export const TEMPLATE_VERSION = 'v1' as const;
 export const PARSER_VERSION = 'parser-v1' as const;
+export const PARSER_META_SHEET = 'ParserMeta' as const;
+export const PARSER_TEMPLATE_MARKER_ACCEPTED = ['SafetyChecklist_v1'] as const;
+export const PARSER_CONTRACT_VERSION_ACCEPTED = ['parse-first-2026-04'] as const;
+
+export const PARSER_NAMED_RANGES = {
+  inspectionDate: 'InspectionDateCell',
+  inspectionNumber: 'InspectionNumberCell',
+  projectSite: 'ProjectSiteCell',
+  totalYes: 'TotalYesCell',
+  totalNo: 'TotalNoCell',
+  totalNa: 'TotalNACell',
+  safetyScore: 'SafetyScoreCell',
+  keyFindingsLines: 'KeyFindingsLines',
+  keyFindingsVisualBlock: 'KeyFindingsVisualBlock',
+  parserTemplateVersion: 'ParserTemplateVersion',
+  parserContractVersion: 'ParserContractVersion',
+  parserInspectionDateRaw: 'ParserInspectionDateRaw',
+  parserInspectionNumberRaw: 'ParserInspectionNumberRaw',
+  parserProjectSiteRaw: 'ParserProjectSiteRaw',
+  parserReportingWeekStart: 'ParserReportingWeekStart',
+  parserReportingWeekEnd: 'ParserReportingWeekEnd',
+  parserReportingPeriodLabel: 'ParserReportingPeriodLabel',
+  parserKeyFindingsNormalized: 'ParserKeyFindingsNormalized',
+} as const;
+
+export const PARSER_META_FIELDS = {
+  templateVersion: 'TemplateVersion',
+  parserContractVersion: 'ParserContractVersion',
+  inspectionDateRaw: 'InspectionDateRaw',
+  inspectionNumberRaw: 'InspectionNumberRaw',
+  projectSiteRaw: 'ProjectSiteRaw',
+  totalYes: 'TotalYes',
+  totalNo: 'TotalNo',
+  totalNa: 'TotalNA',
+  safetyScore: 'SafetyScore',
+  reportingWeekStart: 'ReportingWeekStart',
+  reportingWeekEnd: 'ReportingWeekEnd',
+  reportingPeriodLabel: 'ReportingPeriodLabel',
+  keyFindingsNormalized: 'KeyFindingsNormalized',
+} as const;
 
 export const SHEET_SCORECARD = 'ScoreCard' as const;
 export const SHEET_SCORING_WEIGHTS = 'ScoringWeights' as const;
@@ -303,6 +343,7 @@ export const SECTIONS: ReadonlyArray<SectionDefinition> = [
 export const HIGH_SEVERITY_WEIGHT_FLOOR = 0.12;
 
 export const KEY_FINDINGS_FREE_TEXT_CELL = 'A142' as const;
+export const KEY_FINDINGS_FALLBACK_RANGE = 'A143:A148' as const;
 
 /** Helper — find a section containing the given checklist row. */
 export function findSectionForRow(rowNumber: number): SectionDefinition | undefined {

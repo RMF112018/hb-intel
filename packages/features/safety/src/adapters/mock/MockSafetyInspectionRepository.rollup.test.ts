@@ -37,7 +37,7 @@ describe('D3 HighestRiskFindingLevel correctness on commit', () => {
       buildXlsxFile({
         projectSiteText: '2024-202 Coastal',
         inspectionDate: '2026-04-24',
-        inspectionNumber: 'R1',
+        inspectionNumber: '1',
         noRows: [44], // row 44 is section 4 (weight 0.18) → `high` severity
       }),
       context,
@@ -53,7 +53,7 @@ describe('D3 HighestRiskFindingLevel correctness on commit', () => {
       buildXlsxFile({
         projectSiteText: '2024-202 Coastal',
         inspectionDate: '2026-04-24',
-        inspectionNumber: 'R1',
+        inspectionNumber: '1',
         noRows: [44],
       }),
       context,
@@ -62,7 +62,7 @@ describe('D3 HighestRiskFindingLevel correctness on commit', () => {
       buildXlsxFile({
         projectSiteText: '2024-202 Coastal',
         inspectionDate: '2026-04-25',
-        inspectionNumber: 'R2',
+        inspectionNumber: '2',
       }),
       { ...context, fileName: 'followup.xlsx' },
     );
@@ -79,7 +79,7 @@ describe('D3 HighestRiskFindingLevel correctness on commit', () => {
       buildXlsxFile({
         projectSiteText: '2024-202 Coastal',
         inspectionDate: '2026-04-24',
-        inspectionNumber: 'R3',
+        inspectionNumber: '3',
         noRows: [44],
       }),
       context,

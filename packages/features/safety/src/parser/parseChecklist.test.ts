@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PARSER_META_FIELDS } from '../domain/templateContract.js';
 import { parseChecklist } from './parseChecklist.js';
 import { buildCleanAllYesWorkbook } from '../test/fixtures.js';
 
@@ -29,5 +30,32 @@ describe('parseChecklist', () => {
     expect(byRow.get(11)?.response).toBe('incomplete');
     expect(byRow.get(33)?.response).toBe('multi');
     expect(byRow.get(12)?.response).toBe('yes');
+  });
+
+  it('emits template/parser version from authoritative markers when present', () => {
+    const view = buildCleanAllYesWorkbook({
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+          A4: PARSER_META_FIELDS.inspectionDateRaw,
+          B4: '2026-04-22',
+          A5: PARSER_META_FIELDS.inspectionNumberRaw,
+          B5: '2',
+          A6: PARSER_META_FIELDS.projectSiteRaw,
+          B6: '2026-002 Marker Project',
+          A14: PARSER_META_FIELDS.keyFindingsNormalized,
+          B14: '',
+        },
+      },
+    });
+
+    const parsed = parseChecklist(view);
+    expect(parsed.templateVersion).toBe('SafetyChecklist_v1');
+    expect(parsed.parserVersion).toBe('parse-first-2026-04');
   });
 });
