@@ -71,6 +71,17 @@
 - Candidate index fields: `ProjectWeekRecordId`, `ReportingPeriodId`, `ProjectNumber`, `InspectionDate`, `InspectionNumber`, `Checksum`, `IngestionStatus`, `RequiresReview`.
 - `ScoringMode` and `IngestionStatus` choice vocabularies are strict integration contracts and should not drift silently.
 
+## 6.1 Required Indexed Columns (Safety Graph queries)
+
+The Safety ingestion Graph repository emits a compound `$filter` against this list for duplicate detection during preview. For the query to remain O(filtered rows) instead of O(period rows), BOTH of the following columns MUST be indexed at the tenant. See `SAFETY_GRAPH_QUERY_CONTRACTS['duplicate-detection-inspections']` in `backend/functions/src/services/safety-ingestion-graph-repository.ts`.
+
+| Column                      | Why indexed is required                                                    |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `ReportingPeriodIdLookupId` | Primary filter clause; unindexed access risks list-view threshold blocks.  |
+| `ProjectNumber`             | Secondary filter clause; compound `$filter` depends on server-side narrow. |
+
+If either index is missing, the ingestion preview and duplicate-detection path degrades from a bounded Graph query to a tenant-wide scan and MAY trip the 5k item list-view threshold.
+
 ## 7. Open Questions / Follow-Up Checks
 
 - Confirm tenant GUID and item count during next extraction refresh.

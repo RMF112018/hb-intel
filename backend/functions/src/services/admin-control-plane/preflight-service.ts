@@ -20,6 +20,7 @@ import type {
 import { InstallPreflightCheckId } from '@hbc/models/admin-control-plane';
 import type { IAdminPreflightService } from './types.js';
 import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
+import { deriveSafetyRolloutReadiness } from '../../utils/safety-rollout-readiness.js';
 import {
   getPnpActionDescriptor,
   normalizeFilterList,
@@ -259,27 +260,32 @@ function checkInstallCompatibility(): IAdminPreflightCheck[] {
 
 function checkSafetyPermissionPosture(): IAdminPreflightCheck[] {
   const validation = validateSafetyPermissionPosture();
+  const readiness = deriveSafetyRolloutReadiness(validation);
   const issuesText = validation.issues
     .map((issue) => `${issue.code}: ${issue.message}`)
     .join(' | ');
   const isStagingBroad = validation.posture === 'staging-broad';
-  const tightenedProofConfirmed =
-    process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED === 'true' &&
-    process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED === 'true';
+  const tightenedProofConfirmed = validation.proof.passed;
+  const proofIssuesText = validation.proof.issues
+    .map((issue) => `${issue.code}: ${issue.message}`)
+    .join(' | ');
+  const gateIssuesText = readiness.gate.issues
+    .map((issue) => `${issue.code}: ${issue.message}`)
+    .join(' | ');
 
   return [
     check(
       'safety-permission-posture',
       'Safety permission posture',
-      validation.passed,
-      validation.passed
+      readiness.postureReady,
+      readiness.postureReady
         ? `Safety posture "${validation.posture}" is valid with model "${validation.permissionModel}".`
         : `Safety permission posture is invalid: ${issuesText}`,
       {
         category: 'auth-identity',
         severity: 'critical',
         blocking: true,
-        recommendedAction: validation.passed
+        recommendedAction: readiness.postureReady
           ? undefined
           : validation.issues.map((issue) => issue.remediation).join(' | '),
       },
@@ -305,15 +311,33 @@ function checkSafetyPermissionPosture(): IAdminPreflightCheck[] {
       'Safety tightened posture proof',
       isStagingBroad || tightenedProofConfirmed,
       isStagingBroad || tightenedProofConfirmed
-        ? 'Tightened posture proof flags are satisfied for current posture.'
-        : 'Tightened posture proof flags are not fully confirmed.',
+        ? 'Tightened posture proof bundle is satisfied for current posture.'
+        : `Tightened posture proof bundle is invalid: ${proofIssuesText}`,
       {
         category: 'auth-identity',
         severity: isStagingBroad ? 'info' : 'critical',
         blocking: !isStagingBroad,
         recommendedAction: isStagingBroad
           ? 'Move to pre-rollout-tightened by enabling Safety tightened proof flags before production rollout.'
-          : 'Set SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED=true and SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED=true.',
+          : validation.proof.issues.map((issue) => issue.remediation).join(' | '),
+      },
+    ),
+    check(
+      'safety-rollout-gate',
+      'Safety tightened rollout gate',
+      isStagingBroad || readiness.gateReady,
+      isStagingBroad
+        ? 'Rollout gate is not enforced for staging-broad posture.'
+        : readiness.gateReady
+        ? `Rollout gate is enabled with checkpoint ${readiness.gate.checkpointId ?? ''}.`
+        : `Safety rollout gate is not satisfied: ${gateIssuesText}`,
+      {
+        category: 'auth-identity',
+        severity: isStagingBroad ? 'info' : 'critical',
+        blocking: !isStagingBroad,
+        recommendedAction: isStagingBroad
+          ? undefined
+          : readiness.gate.issues.map((issue) => issue.remediation).join(' | '),
       },
     ),
   ];

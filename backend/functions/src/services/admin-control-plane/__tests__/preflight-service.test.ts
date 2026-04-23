@@ -39,6 +39,10 @@ describe('P6-04 AdminPreflightService', () => {
     vi.stubEnv('SAFETY_PERMISSION_POSTURE', '');
     vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', '');
     vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', '');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', '');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', '');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_MAX_AGE_DAYS', '');
     vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED', '');
     vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_REASON', '');
   });
@@ -94,6 +98,11 @@ describe('P6-04 AdminPreflightService', () => {
       vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'steady-state');
       vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
       vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', 'safety-proof-run-001');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '2026-04-22T13:00:00Z');
+      vi.stubEnv('SAFETY_ROLLOUT_GATE_ENABLED', 'true');
+      vi.stubEnv('SAFETY_ROLLOUT_CHECKPOINT_ID', 'safety-rollout-2026-04-23');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', 'sites-selected');
     });
 
     it('returns ready when all config is present', async () => {
@@ -136,6 +145,11 @@ describe('P6-04 AdminPreflightService', () => {
       vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'steady-state');
       vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
       vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', 'safety-proof-run-001');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '2026-04-22T13:00:00Z');
+      vi.stubEnv('SAFETY_ROLLOUT_GATE_ENABLED', 'true');
+      vi.stubEnv('SAFETY_ROLLOUT_CHECKPOINT_ID', 'safety-rollout-2026-04-23');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', 'sites-selected');
     });
 
     it('SPFx app ID missing is a warning, not a blocker', async () => {
@@ -223,18 +237,83 @@ describe('P6-04 AdminPreflightService', () => {
       const postureCheck = findCheck(result.checks, 'safety-permission-posture');
       expect(postureCheck?.passed).toBe(true);
     });
+
+    it('fails tightened proof check when proof bundle metadata is missing', async () => {
+      vi.stubEnv('AZURE_TENANT_ID', 'tenant-123');
+      vi.stubEnv('AZURE_CLIENT_ID', 'client-123');
+      vi.stubEnv('API_AUDIENCE', 'api://test');
+      vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://storage.table.core.windows.net');
+      vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'InstrumentationKey=test');
+      vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
+      vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+      vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://contoso.sharepoint.com/sites/appcatalog');
+      vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-guid-123');
+      vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+      vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+      vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+      vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+      delete process.env.SAFETY_TIGHTENED_PROOF_EVIDENCE_ID;
+      delete process.env.SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC;
+      delete process.env.SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL;
+
+      const result = await service.validate(makeRequest());
+      const tightenedProofCheck = findCheck(result.checks, 'safety-tightened-proof');
+      expect(tightenedProofCheck?.passed).toBe(false);
+      expect(result.ready).toBe(false);
+    });
   });
 
   describe('check count stability', () => {
-    it('produces exactly 12 checks matching InstallPreflightCheckId plus Safety posture checks', async () => {
+    it('produces the expected checks matching InstallPreflightCheckId plus Safety posture + rollout-gate checks', async () => {
       const result = await service.validate(makeRequest());
-      expect(result.checks.length).toBe(12);
+      // Install-lane checks (see InstallPreflightCheckId) + safety-permission-posture,
+      // safety-broad-posture-exception, safety-tightened-proof, safety-rollout-gate.
+      const safetyCheckIds = [
+        'safety-permission-posture',
+        'safety-broad-posture-exception',
+        'safety-tightened-proof',
+        'safety-rollout-gate',
+      ];
+      const installCheckIds = Object.values(InstallPreflightCheckId);
+      expect(result.checks.length).toBe(installCheckIds.length + safetyCheckIds.length);
 
-      const expectedIds = Object.values(InstallPreflightCheckId);
       const actualIds = result.checks.map((c) => c.checkId);
-      for (const id of expectedIds) {
+      for (const id of installCheckIds) {
         expect(actualIds).toContain(id);
       }
+      for (const id of safetyCheckIds) {
+        expect(actualIds).toContain(id);
+      }
+    });
+
+    it('safety-rollout-gate is critical and blocking when posture is not staging-broad', async () => {
+      vi.stubEnv('AZURE_TENANT_ID', 'tenant-123');
+      vi.stubEnv('AZURE_CLIENT_ID', 'client-123');
+      vi.stubEnv('API_AUDIENCE', 'api://test');
+      vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://storage.table.core.windows.net');
+      vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'InstrumentationKey=test');
+      vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
+      vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+      vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://contoso.sharepoint.com/sites/appcatalog');
+      vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-guid-123');
+      vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+      vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+      vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+      vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', 'safety-proof-run-001');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '2026-04-22T13:00:00Z');
+      vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', 'sites-selected');
+      // Rollout gate NOT enabled — preflight must block.
+      const result = await service.validate(makeRequest());
+      const gate = findCheck(result.checks, 'safety-rollout-gate');
+      expect(gate?.passed).toBe(false);
+      expect(gate?.blocking).toBe(true);
+      expect(gate?.severity).toBe('critical');
+      expect(result.ready).toBe(false);
     });
   });
 

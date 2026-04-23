@@ -27,10 +27,25 @@ import {
 import { resolveUploadLibraryDescriptor } from '../../../../packages/features/safety/src/lists/safetyUploadLibrary.js';
 import type { IManagedIdentityTokenService } from './managed-identity-token-service.js';
 import {
+  GraphConcurrencyError,
   SafetyIngestionGraphDataPlane,
+  assertSafetyGraphEtag,
   type IGraphListItem,
 } from './safety-ingestion-graph-data-plane.js';
 import { emitSafetyIngestionEvent, emitSafetyIngestionMetric } from './safety-ingestion-telemetry.js';
+
+/**
+ * Upper bound for concurrency-conflict retries on Safety Graph mutations.
+ * Each retry refreshes the item + ETag before re-attempting the PATCH.
+ */
+const SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS = 3;
+const SAFETY_GRAPH_CONCURRENCY_BASE_DELAY_MS = 100;
+
+async function backoffDelay(attempt: number): Promise<void> {
+  const jitter = Math.floor(Math.random() * SAFETY_GRAPH_CONCURRENCY_BASE_DELAY_MS);
+  const wait = SAFETY_GRAPH_CONCURRENCY_BASE_DELAY_MS * Math.pow(2, attempt - 1) + jitter;
+  await new Promise((resolve) => setTimeout(resolve, wait));
+}
 
 const PROJECTS_FIELD = {
   NUMBER: 'field_2',
@@ -370,10 +385,15 @@ export class SafetyIngestionGraphRepository {
     reportingPeriodId: string,
   ): Promise<ReadonlyArray<SafetyInspectionEvent>> {
     const descriptor = this.list('SafetyInspectionEvents');
+    const reportingPeriodSpItemId = spItemIdFromString(reportingPeriodId);
+    // Compound filter (see SAFETY_GRAPH_QUERY_CONTRACTS['duplicate-detection-inspections']).
+    // Requires ReportingPeriodIdLookupId AND ProjectNumber to be indexed columns on
+    // SafetyInspectionEvents — drops in-memory project-number narrowing that was
+    // fragile under multi-project reporting periods.
     const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
       filter:
-        `fields/ReportingPeriodIdLookupId eq ${spItemIdFromString(reportingPeriodId)} and ` +
-        `fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
+        `fields/ReportingPeriodIdLookupId eq ${reportingPeriodSpItemId} ` +
+        `and fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
       top: 500,
       select: INSPECTION_SELECT,
     });
@@ -450,14 +470,20 @@ export class SafetyIngestionGraphRepository {
     projectNumber: string,
   ): Promise<SafetyProjectWeekRecord | null> {
     const descriptor = this.list('SafetyProjectWeekRecords');
+    const reportingPeriodSpItemId = spItemIdFromString(reportingPeriodId);
+    // Compound filter (see SAFETY_GRAPH_QUERY_CONTRACTS['project-week-lookup']).
+    // Requires ReportingPeriodIdLookupId AND ProjectNumber to be indexed columns
+    // on SafetyProjectWeekRecords. top:1 is sufficient because the (period,project)
+    // pair is a logical natural key for the rollup list.
     const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
       filter:
-        `fields/ReportingPeriodIdLookupId eq ${spItemIdFromString(reportingPeriodId)} and ` +
-        `fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
+        `fields/ReportingPeriodIdLookupId eq ${reportingPeriodSpItemId} ` +
+        `and fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
       top: 1,
       select: PROJECT_WEEK_SELECT,
     });
-    return rows[0] ? mapProjectWeek(rows[0]) : null;
+    const exact = rows[0];
+    return exact ? mapProjectWeek(exact) : null;
   }
 
   private async createProjectWeekRecord(
@@ -574,12 +600,71 @@ export class SafetyIngestionGraphRepository {
 
   private async updateProjectWeekRollup(record: SafetyProjectWeekRecord): Promise<void> {
     const descriptor = this.list('SafetyProjectWeekRecords');
-    await this.graph.updateItem(descriptor.siteUrl, descriptor.id, record.spItemId, {
+    const payload = {
       InspectionCount: record.inspectionCount,
       AverageInspectionScore: record.averageInspectionScore,
       HighestRiskFindingLevel: record.highestRiskFindingLevel,
       PublishStatus: record.publishStatus,
-    });
+    };
+    const selectFields = ['InspectionCount', 'AverageInspectionScore', 'HighestRiskFindingLevel', 'PublishStatus'];
+
+    for (let attempt = 1; attempt <= SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS; attempt++) {
+      const current = await this.graph.getItemById(
+        descriptor.siteUrl,
+        descriptor.id,
+        record.spItemId,
+        selectFields,
+      );
+      assertSafetyGraphEtag(
+        current?.etag,
+        `SafetyProjectWeekRecords/${record.spItemId}`,
+      );
+
+      try {
+        await this.graph.updateItemWithConcurrency(
+          descriptor.siteUrl,
+          descriptor.id,
+          record.spItemId,
+          payload,
+          current.etag,
+        );
+        if (attempt > 1) {
+          emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.recovered', {
+            operation: 'ingest',
+          }, {
+            list: 'SafetyProjectWeekRecords',
+            itemId: record.spItemId,
+            mutation: 'project-week-rollup',
+            attempt,
+          });
+        }
+        return;
+      } catch (error) {
+        if (!(error instanceof GraphConcurrencyError)) {
+          throw error;
+        }
+        emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.conflict', {
+          operation: 'ingest',
+        }, {
+          list: 'SafetyProjectWeekRecords',
+          itemId: record.spItemId,
+          mutation: 'project-week-rollup',
+          attempt,
+        });
+        if (attempt === SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS) {
+          emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.retry-exhausted', {
+            operation: 'ingest',
+          }, {
+            list: 'SafetyProjectWeekRecords',
+            itemId: record.spItemId,
+            mutation: 'project-week-rollup',
+            attempts: attempt,
+          });
+          throw error;
+        }
+        await backoffDelay(attempt);
+      }
+    }
   }
 
   private async markInspectionSuperseded(
@@ -587,15 +672,94 @@ export class SafetyIngestionGraphRepository {
     replacementInspectionEventId: string,
   ): Promise<void> {
     const descriptor = this.list('SafetyInspectionEvents');
-    await this.graph.updateItem(
-      descriptor.siteUrl,
-      descriptor.id,
-      spItemIdFromString(priorInspectionEventId),
-      {
-        IngestionStatus: 'superseded',
-        SupersededByInspectionEventIdLookupId: spItemIdFromString(replacementInspectionEventId),
-      },
-    );
+    const priorItemId = spItemIdFromString(priorInspectionEventId);
+    const replacementItemId = spItemIdFromString(replacementInspectionEventId);
+    const payload = {
+      IngestionStatus: 'superseded',
+      SupersededByInspectionEventIdLookupId: replacementItemId,
+    };
+
+    const apply = async (): Promise<'updated' | 'already-same'> => {
+      const current = await this.graph.getItemById(
+        descriptor.siteUrl,
+        descriptor.id,
+        priorItemId,
+        ['IngestionStatus', 'SupersededByInspectionEventIdLookupId'],
+      );
+      if (!current) {
+        throw new Error(`Inspection event not found for supersede: ${priorInspectionEventId}`);
+      }
+      const status = String(current.fields.IngestionStatus ?? '');
+      const existingSupersededBy = toOptionalNumber(
+        current.fields.SupersededByInspectionEventIdLookupId,
+      );
+      if (status === 'superseded') {
+        if (existingSupersededBy === replacementItemId) {
+          return 'already-same';
+        }
+        throw new Error(
+          `Inspection ${priorInspectionEventId} already superseded by ie-${existingSupersededBy ?? 0}.`,
+        );
+      }
+      assertSafetyGraphEtag(current.etag, `SafetyInspectionEvents/${priorItemId}`);
+      await this.graph.updateItemWithConcurrency(
+        descriptor.siteUrl,
+        descriptor.id,
+        priorItemId,
+        payload,
+        current.etag,
+      );
+      return 'updated';
+    };
+
+    for (let attempt = 1; attempt <= SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS; attempt++) {
+      try {
+        const outcome = await apply();
+        if (outcome === 'already-same') {
+          emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.idempotent', {
+            operation: 'replay',
+          }, {
+            list: 'SafetyInspectionEvents',
+            itemId: priorItemId,
+            mutation: 'supersede-inspection',
+          });
+        } else if (attempt > 1) {
+          emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.recovered', {
+            operation: 'replay',
+          }, {
+            list: 'SafetyInspectionEvents',
+            itemId: priorItemId,
+            mutation: 'supersede-inspection',
+            attempt,
+          });
+        }
+        return;
+      } catch (error) {
+        if (!(error instanceof GraphConcurrencyError)) {
+          throw error;
+        }
+        emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.conflict', {
+          operation: 'replay',
+        }, {
+          list: 'SafetyInspectionEvents',
+          itemId: priorItemId,
+          mutation: 'supersede-inspection',
+          attempt,
+        });
+        if (attempt === SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS) {
+          emitSafetyIngestionEvent('safety.ingestion.graph.concurrency.retry-exhausted', {
+            operation: 'replay',
+          }, {
+            list: 'SafetyInspectionEvents',
+            itemId: priorItemId,
+            mutation: 'supersede-inspection',
+            attempts: attempt,
+          });
+          throw error;
+        }
+        await backoffDelay(attempt);
+      }
+    }
   }
 
   private async insertIngestionRun(draft: SafetyIngestionRunDraft): Promise<SafetyIngestionRun> {
@@ -670,6 +834,68 @@ const PROJECT_WEEK_SELECT = [
   'WeeklySummary',
   'ManagerReviewStatus',
   'PublishStatus',
+] as const;
+
+export interface ISafetyGraphQueryContract {
+  readonly id: string;
+  readonly list: string;
+  readonly purpose: string;
+  readonly strategy: string;
+  readonly requiredIndexedFields: readonly string[];
+}
+
+export const SAFETY_GRAPH_QUERY_CONTRACTS: readonly ISafetyGraphQueryContract[] = [
+  {
+    id: 'reporting-period-resolution',
+    list: 'SafetyReportingPeriods',
+    purpose: 'Resolve selected reporting period by ID for ingestion validation.',
+    strategy: 'Direct lookup by list item ID.',
+    requiredIndexedFields: [],
+  },
+  {
+    id: 'project-resolution-primary',
+    list: 'Projects',
+    purpose: 'Resolve project snapshot by project number.',
+    strategy: 'Single-field filter by canonical project number.',
+    requiredIndexedFields: [PROJECTS_FIELD.NUMBER],
+  },
+  {
+    id: 'project-resolution-legacy',
+    list: 'LegacyProjectFallbackRegistry',
+    purpose: 'Resolve legacy fallback registry match by project number.',
+    strategy: 'Single-field filter by ProjectNumber.',
+    requiredIndexedFields: ['ProjectNumber'],
+  },
+  {
+    id: 'duplicate-detection-inspections',
+    list: 'SafetyInspectionEvents',
+    purpose: 'Fetch candidate inspections for duplicate detection.',
+    strategy:
+      'Compound $filter (ReportingPeriodIdLookupId eq N and ProjectNumber eq \'X\'). No in-memory narrowing.',
+    requiredIndexedFields: ['ReportingPeriodIdLookupId', 'ProjectNumber'],
+  },
+  {
+    id: 'project-week-lookup',
+    list: 'SafetyProjectWeekRecords',
+    purpose: 'Lookup project-week rollup record for current reporting period/project.',
+    strategy:
+      'Compound $filter (ReportingPeriodIdLookupId eq N and ProjectNumber eq \'X\') with top:1. (period,project) is the logical natural key.',
+    requiredIndexedFields: ['ReportingPeriodIdLookupId', 'ProjectNumber'],
+  },
+  {
+    id: 'findings-lookup',
+    list: 'SafetyFindings',
+    purpose: 'Fetch prior findings for project-week rollup severity computation.',
+    strategy: 'Single-field filter by ProjectWeekRecordIdLookupId.',
+    requiredIndexedFields: ['ProjectWeekRecordIdLookupId'],
+  },
+  {
+    id: 'upload-fallback-item-resolution',
+    list: 'SafetyChecklistUploads',
+    purpose: 'Resolve upload list item ID when drive response does not include sharepointIds.listItemId.',
+    strategy: 'Single-field filter by FileLeafRef with newest-first ordering.',
+    requiredIndexedFields: ['FileLeafRef'],
+  },
 ] as const;
 
 const INSPECTION_SELECT = [

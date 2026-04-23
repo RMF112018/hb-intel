@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { validateSafetyPermissionPosture } from '../../../utils/safety-permission-posture.js';
 
 /**
  * Health endpoint verification.
@@ -134,13 +135,46 @@ describe('/api/health diagnostic behavior', () => {
     expect(Object.values(prereqs).every(Boolean)).toBe(true);
   });
 
-  it('surfaces tightened Safety posture proof requirements', () => {
+  it('surfaces tightened Safety posture proof bundle requirements', () => {
     vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+    delete process.env.SAFETY_TIGHTENED_PROOF_EVIDENCE_ID;
+    delete process.env.SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC;
+    delete process.env.SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL;
+    const result = validateSafetyPermissionPosture();
+    expect(result.passed).toBe(false);
+    expect(result.proof.passed).toBe(false);
+    expect(result.issues.map((issue) => issue.code)).toContain('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID_MISSING');
+  });
+
+  it('marks steady-state proof stale when evidence is too old', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-30T00:00:00Z'));
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'steady-state');
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', 'safety-proof-run-123');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '2026-05-01T00:00:00Z');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_MAX_AGE_DAYS', '30');
+    const result = validateSafetyPermissionPosture();
+    expect(result.proof.stale).toBe(true);
+    expect(result.issues.map((issue) => issue.code)).toContain('SAFETY_TIGHTENED_PROOF_STALE');
+    vi.useRealTimers();
+  });
+
+  it('legacy boolean-only proof check no longer passes tightened posture', () => {
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
     delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
     delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
-    const proofReady =
-      process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED === 'true' &&
-      process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED === 'true';
-    expect(proofReady).toBe(false);
+    const result = validateSafetyPermissionPosture();
+    expect(result.passed).toBe(false);
   });
 });

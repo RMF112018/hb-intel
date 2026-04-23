@@ -62,6 +62,17 @@
 - Candidate index fields: `ReportingPeriodId`, `ProjectNumber`, `PublishStatus`, `ProjectSourceClassification`.
 - Provisioning/seed logic must preserve `ProjectSourceClassification` choice vocabulary exactly.
 
+## 6.1 Required Indexed Columns (Safety Graph queries)
+
+The project-week rollup lookup (`SAFETY_GRAPH_QUERY_CONTRACTS['project-week-lookup']`) emits a compound `$filter` against this list. `(ReportingPeriodIdLookupId, ProjectNumber)` is the logical natural key for the rollup list and MUST be indexed at the tenant.
+
+| Column                      | Why indexed is required                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `ReportingPeriodIdLookupId` | Primary filter clause for rollup discovery; unindexed access trips 5k threshold at scale. |
+| `ProjectNumber`             | Narrowing filter clause that replaces the prior in-memory page scan.                     |
+
+The project-week PATCH flow is concurrency-protected: the repository reads the current item, passes `@odata.etag` to `updateItemWithConcurrency`, and performs bounded exponential-backoff retries on 409/412. Blind PATCH is forbidden here (see `assertSafetyGraphEtag` in `safety-ingestion-graph-data-plane.ts`).
+
 ## 7. Open Questions / Follow-Up Checks
 
 - Confirm tenant GUID and item count during next extraction refresh.

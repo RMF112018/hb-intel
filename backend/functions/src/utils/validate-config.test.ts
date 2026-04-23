@@ -159,7 +159,12 @@ describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
     vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
     vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
     vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', 'safety-proof-run-001');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '2026-04-22T13:00:00Z');
+    vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', 'sites-selected');
     vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_ROLLOUT_GATE_ENABLED', 'true');
+    vi.stubEnv('SAFETY_ROLLOUT_CHECKPOINT_ID', 'safety-rollout-2026-04-23');
   });
 
   afterEach(() => {
@@ -193,6 +198,15 @@ describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
     delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
     delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
     expect(() => validateProvisioningPrerequisites()).toThrow('SAFETY_TIGHTENED_POSTURE_PROOF_NOT_CONFIRMED');
+  });
+
+  it('throws when tightened Safety proof bundle metadata is missing', () => {
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+    delete process.env.SAFETY_TIGHTENED_PROOF_EVIDENCE_ID;
+    delete process.env.SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC;
+    delete process.env.SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL;
+    expect(() => validateProvisioningPrerequisites()).toThrow('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID_MISSING');
   });
 
   it('skips validation in mock mode', () => {

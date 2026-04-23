@@ -6,7 +6,11 @@ import type {
   SafetyIngestionRunDraft,
 } from '../../../../../packages/features/safety/src/domain/types.js';
 import { configureSafetyListGuids } from '../../../../../packages/features/safety/src/lists/guidConfig.js';
-import { SafetyIngestionGraphRepository } from '../safety-ingestion-graph-repository.js';
+import { GraphConcurrencyError } from '../safety-ingestion-graph-data-plane.js';
+import {
+  SAFETY_GRAPH_QUERY_CONTRACTS,
+  SafetyIngestionGraphRepository,
+} from '../safety-ingestion-graph-repository.js';
 
 describe('SafetyIngestionGraphRepository', () => {
   function makeRepository() {
@@ -31,12 +35,17 @@ describe('SafetyIngestionGraphRepository', () => {
       listItems: vi.fn(),
       createItem: vi.fn(),
       updateItem: vi.fn(),
+      updateItemWithConcurrency: vi.fn(),
       uploadFileToLibrary: vi.fn(),
       downloadFileByListItemId: vi.fn(),
     };
 
     (repo as unknown as { graph: typeof fakeGraph }).graph = fakeGraph;
     return { repo, fakeGraph };
+  }
+
+  function makeFakeResponse(status: number): Response {
+    return new Response('', { status });
   }
 
   it('maps reporting period reads from Graph list items', async () => {
@@ -91,6 +100,13 @@ describe('SafetyIngestionGraphRepository', () => {
     fakeGraph.createItem
       .mockResolvedValueOnce({ id: '101', fields: {} })
       .mockResolvedValueOnce({ id: '201', fields: {} });
+    // Rollup performs read-before-write and sends If-Match via updateItemWithConcurrency
+    fakeGraph.getItemById.mockResolvedValueOnce({
+      id: '55',
+      fields: {},
+      etag: '"rollup-etag-1"',
+    });
+    fakeGraph.updateItemWithConcurrency.mockResolvedValueOnce(undefined);
 
     const inspectionEventDraft: SafetyInspectionEventDraft = {
       title: 'Inspection #1',
@@ -174,7 +190,12 @@ describe('SafetyIngestionGraphRepository', () => {
 
     expect(committed).toBeTruthy();
     expect(fakeGraph.createItem).toHaveBeenCalledTimes(2);
-    expect(fakeGraph.updateItem).toHaveBeenCalledOnce();
+    // Rollup must flow through the concurrency-protected path, not the blind
+    // updateItem() which is deprecated for Safety.
+    expect(fakeGraph.updateItem).not.toHaveBeenCalled();
+    expect(fakeGraph.updateItemWithConcurrency).toHaveBeenCalledOnce();
+    const concurrencyCall = fakeGraph.updateItemWithConcurrency.mock.calls[0];
+    expect(concurrencyCall?.[4]).toBe('"rollup-etag-1"');
   });
 
   it('uploads workbook to Graph library and resolves listItem id', async () => {
@@ -346,5 +367,231 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(inspections).toHaveLength(1);
     expect(inspections[0]?.id).toBe('ie-91');
     expect(fakeGraph.listItems).toHaveBeenCalledOnce();
+    const [, , query] = fakeGraph.listItems.mock.calls[0]!;
+    // Compound filter on (reportingPeriodId, projectNumber) — both indexed.
+    expect(query.filter).toBe(
+      "fields/ReportingPeriodIdLookupId eq 14 and fields/ProjectNumber eq '2026-100'",
+    );
+  });
+
+  // --- Concurrency behavior proof ---
+
+  it('retries project-week rollup with refreshed ETag on a 412 concurrency conflict', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.createItem
+      .mockResolvedValueOnce({ id: '102', fields: {} })
+      .mockResolvedValueOnce({ id: '202', fields: {} });
+    fakeGraph.getItemById
+      .mockResolvedValueOnce({ id: '55', fields: {}, etag: '"etag-1"' })
+      .mockResolvedValueOnce({ id: '55', fields: {}, etag: '"etag-2"' });
+    fakeGraph.updateItemWithConcurrency
+      .mockRejectedValueOnce(
+        new GraphConcurrencyError(
+          'update-item-with-concurrency',
+          '/items/55/fields',
+          makeFakeResponse(412),
+          'precondition failed',
+        ),
+      )
+      .mockResolvedValueOnce(undefined);
+
+    const inspectionEventDraft: SafetyInspectionEventDraft = {
+      title: 'Inspection #2',
+      projectWeekRecordId: 'pw-55',
+      projectWeekRecordSpItemId: 55,
+      reportingPeriodId: 'period-14',
+      reportingPeriodSpItemId: 14,
+      sourceUploadItemId: 302,
+      sourceUploadWebUrl: 'https://example/upload.xlsx',
+      checksum: 'abc123',
+      templateVersion: 'v1',
+      parserVersion: 'v2',
+      scoringMode: 'normalized-vNext',
+      inspectionDate: '2026-04-22',
+      inspectionNumber: '2',
+      inspectorName: 'Inspector',
+      inspectorUpn: 'inspector@hbc.test',
+      projectNumber: '2026-100',
+      projectNameSnapshot: 'Project Name',
+      inspectionScore: 92,
+      totalYes: 10,
+      totalNo: 1,
+      totalNa: 2,
+      rawChecklistJson: '{}',
+      ingestionStatus: 'accepted',
+      duplicateStatus: 'none',
+      requiresReview: false,
+      submittedAt: '2026-04-23T12:00:00Z',
+      committedAt: '2026-04-23T12:01:00Z',
+    };
+
+    const projectWeekRecordUpdate: SafetyProjectWeekRecord = {
+      id: 'pw-55',
+      spItemId: 55,
+      title: '2026-100 - week',
+      reportingPeriodId: 'period-14',
+      reportingPeriodSpItemId: 14,
+      projectNumber: '2026-100',
+      projectNameSnapshot: 'Project Name',
+      projectLocationSnapshot: 'Site A',
+      projectStageSnapshot: 'Construction',
+      projectSourceClassification: 'project',
+      expectedInspectionThisWeek: true,
+      inspectionCount: 2,
+      averageInspectionScore: 91,
+      highestRiskFindingLevel: 'medium',
+      weeklySummary: '',
+      managerReviewStatus: 'not-required',
+      publishStatus: 'in-progress',
+    };
+
+    await (repo as unknown as {
+      commit: (drafts: {
+        inspectionEventDraft: SafetyInspectionEventDraft;
+        findingDrafts: ReadonlyArray<SafetyFindingDraft>;
+        projectWeekRecordUpdate: SafetyProjectWeekRecord;
+      }) => Promise<unknown>;
+    }).commit({
+      inspectionEventDraft,
+      findingDrafts: [
+        {
+          title: 'Finding',
+          projectWeekRecordId: 'pw-55',
+          projectWeekRecordSpItemId: 55,
+          sectionNumber: 1,
+          sectionName: 'Section A',
+          checklistRowNumber: 8,
+          checklistItemLabel: 'Wear PPE',
+          findingType: 'no-response',
+          severity: 'medium',
+          findingSummary: 'Missing PPE',
+          originalNoteText: '',
+          requiresCorrectiveAction: true,
+          isOpen: true,
+        },
+      ],
+      projectWeekRecordUpdate,
+    });
+
+    // Two reads (first + refresh) and two concurrency-protected writes; no blind updates.
+    expect(fakeGraph.getItemById).toHaveBeenCalledTimes(2);
+    expect(fakeGraph.updateItemWithConcurrency).toHaveBeenCalledTimes(2);
+    expect(fakeGraph.updateItem).not.toHaveBeenCalled();
+    // Second attempt must have used the refreshed ETag from the second read.
+    expect(fakeGraph.updateItemWithConcurrency.mock.calls[1]?.[4]).toBe('"etag-2"');
+  });
+
+  it('throws GraphConcurrencyError after the bounded rollup retry budget is exhausted', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.createItem
+      .mockResolvedValueOnce({ id: '103', fields: {} })
+      .mockResolvedValueOnce({ id: '203', fields: {} });
+    fakeGraph.getItemById.mockResolvedValue({ id: '55', fields: {}, etag: '"etag-n"' });
+    fakeGraph.updateItemWithConcurrency.mockRejectedValue(
+      new GraphConcurrencyError(
+        'update-item-with-concurrency',
+        '/items/55/fields',
+        makeFakeResponse(409),
+        'conflict',
+      ),
+    );
+
+    const draft: SafetyInspectionEventDraft = {
+      title: 'Inspection #3',
+      projectWeekRecordId: 'pw-55',
+      projectWeekRecordSpItemId: 55,
+      reportingPeriodId: 'period-14',
+      reportingPeriodSpItemId: 14,
+      sourceUploadItemId: 303,
+      sourceUploadWebUrl: 'https://example/upload.xlsx',
+      checksum: 'abc',
+      templateVersion: 'v1',
+      parserVersion: 'v2',
+      scoringMode: 'normalized-vNext',
+      inspectionDate: '2026-04-22',
+      inspectionNumber: '3',
+      inspectorUpn: 'inspector@hbc.test',
+      projectNumber: '2026-100',
+      projectNameSnapshot: 'Project Name',
+      inspectionScore: 92,
+      totalYes: 10,
+      totalNo: 1,
+      totalNa: 2,
+      rawChecklistJson: '{}',
+      ingestionStatus: 'accepted',
+      duplicateStatus: 'none',
+      requiresReview: false,
+      submittedAt: '2026-04-23T12:00:00Z',
+      committedAt: '2026-04-23T12:01:00Z',
+    };
+
+    const record: SafetyProjectWeekRecord = {
+      id: 'pw-55',
+      spItemId: 55,
+      title: '',
+      reportingPeriodId: 'period-14',
+      reportingPeriodSpItemId: 14,
+      projectNumber: '2026-100',
+      projectNameSnapshot: 'Project Name',
+      projectLocationSnapshot: '',
+      projectStageSnapshot: '',
+      projectSourceClassification: 'project',
+      expectedInspectionThisWeek: true,
+      inspectionCount: 0,
+      averageInspectionScore: null,
+      highestRiskFindingLevel: null,
+      weeklySummary: '',
+      managerReviewStatus: 'not-required',
+      publishStatus: 'in-progress',
+    };
+
+    await expect(
+      (repo as unknown as {
+        commit: (drafts: {
+          inspectionEventDraft: SafetyInspectionEventDraft;
+          findingDrafts: ReadonlyArray<SafetyFindingDraft>;
+          projectWeekRecordUpdate: SafetyProjectWeekRecord;
+        }) => Promise<unknown>;
+      }).commit({
+        inspectionEventDraft: draft,
+        findingDrafts: [],
+        projectWeekRecordUpdate: record,
+      }),
+    ).rejects.toBeInstanceOf(GraphConcurrencyError);
+
+    expect(fakeGraph.updateItemWithConcurrency).toHaveBeenCalledTimes(3);
+  });
+
+  it('project-week lookup emits a compound $filter with both indexed columns', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.listItems.mockResolvedValue([]);
+
+    await (repo as unknown as {
+      getProjectWeek: (reportingPeriodId: string, projectNumber: string) => Promise<unknown>;
+    }).getProjectWeek('period-14', "O'Brien-100");
+
+    const [, , query] = fakeGraph.listItems.mock.calls[0]!;
+    expect(query.filter).toBe(
+      "fields/ReportingPeriodIdLookupId eq 14 and fields/ProjectNumber eq 'O''Brien-100'",
+    );
+    expect(query.top).toBe(1);
+  });
+
+  it('exposes a Safety Graph query contract documenting indexed-column assumptions', () => {
+    const inspections = SAFETY_GRAPH_QUERY_CONTRACTS.find(
+      (c) => c.id === 'duplicate-detection-inspections',
+    );
+    const projectWeek = SAFETY_GRAPH_QUERY_CONTRACTS.find((c) => c.id === 'project-week-lookup');
+    expect(inspections?.requiredIndexedFields).toEqual([
+      'ReportingPeriodIdLookupId',
+      'ProjectNumber',
+    ]);
+    expect(projectWeek?.requiredIndexedFields).toEqual([
+      'ReportingPeriodIdLookupId',
+      'ProjectNumber',
+    ]);
+    // Compound strategy must be documented (not an in-memory narrowing fallback).
+    expect(inspections?.strategy.toLowerCase()).toContain('compound');
+    expect(projectWeek?.strategy.toLowerCase()).toContain('compound');
   });
 });

@@ -272,7 +272,7 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
     name: 'SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED',
     bucket: 'infrastructure',
     description:
-      'Must be "true" after operators confirm Safety permission matrix and rollout gates under tightened posture.',
+      'Must be "true" after operators verify Safety tightened rollout gates and machine-checkable proof evidence.',
     requiredInProd: false,
   },
   {
@@ -280,6 +280,34 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
     bucket: 'infrastructure',
     description:
       'Must be "true" after successful ingest + replay verification under tightened Safety permission posture.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_TIGHTENED_PROOF_EVIDENCE_ID',
+    bucket: 'infrastructure',
+    description:
+      'Immutable evidence artifact/run identifier for tightened Safety rollout proof.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC',
+    bucket: 'infrastructure',
+    description:
+      'ISO-8601 UTC timestamp when tightened Safety proof was executed.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL',
+    bucket: 'infrastructure',
+    description:
+      'Permission model used to execute tightened Safety proof; must be sites-selected.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_TIGHTENED_PROOF_MAX_AGE_DAYS',
+    bucket: 'infrastructure',
+    description:
+      'Optional max age window (days) for tightened Safety proof freshness checks; defaults to 30.',
     requiredInProd: false,
   },
   {
@@ -294,6 +322,27 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
     bucket: 'business',
     description:
       'Time-boxed rationale and expiry for temporary staging-broad Safety posture exceptions.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_ROLLOUT_GATE_ENABLED',
+    bucket: 'infrastructure',
+    description:
+      'Must be "true" to enforce the Safety rollout boundary when posture is not staging-broad. Blocks preflight, config validation, and prelaunch until rollout approval is recorded.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_ROLLOUT_CHECKPOINT_ID',
+    bucket: 'infrastructure',
+    description:
+      'Immutable rollout checkpoint identifier tying this deployment to an approval/audit trail. Required alongside SAFETY_ROLLOUT_GATE_ENABLED for non-staging-broad postures. Format: alphanumerics, ".", "_", ":", "-"; 8–128 chars.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_ROLLOUT_GATE_EXPIRES_AT_UTC',
+    bucket: 'infrastructure',
+    description:
+      'Optional ISO-8601 UTC timestamp bounding the current Safety rollout checkpoint. If set and elapsed, rollout is blocked until the checkpoint is rotated.',
     requiredInProd: false,
   },
 

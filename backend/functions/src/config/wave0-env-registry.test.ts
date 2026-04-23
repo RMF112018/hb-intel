@@ -115,8 +115,18 @@ describe('WAVE0_OPTIONAL_CONFIG', () => {
     expect(names).toContain('SAFETY_PERMISSION_POSTURE');
     expect(names).toContain('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED');
     expect(names).toContain('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED');
+    expect(names).toContain('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID');
+    expect(names).toContain('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC');
+    expect(names).toContain('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL');
     expect(names).toContain('SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED');
     expect(names).toContain('SAFETY_STAGING_BROAD_EXCEPTION_REASON');
+  });
+
+  it('includes Safety rollout gate enforcement settings', () => {
+    const names = WAVE0_OPTIONAL_CONFIG.map((e) => e.name);
+    expect(names).toContain('SAFETY_ROLLOUT_GATE_ENABLED');
+    expect(names).toContain('SAFETY_ROLLOUT_CHECKPOINT_ID');
+    expect(names).toContain('SAFETY_ROLLOUT_GATE_EXPIRES_AT_UTC');
   });
 
   it('P3-03: API_AUDIENCE is no longer in optional config (promoted to required)', () => {

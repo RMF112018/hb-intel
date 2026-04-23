@@ -8,6 +8,7 @@ const GRAPH_SCOPE = 'https://graph.microsoft.com/.default';
 export interface IGraphListItem {
   readonly id: string;
   readonly fields: Record<string, unknown>;
+  readonly etag?: string;
 }
 
 export interface IGraphListQuery {
@@ -25,7 +26,7 @@ interface IGraphDriveUploadResponse {
   };
 }
 
-class GraphRequestError extends Error {
+export class GraphRequestError extends Error {
   readonly status: number;
   readonly response: Response;
 
@@ -37,10 +38,17 @@ class GraphRequestError extends Error {
   }
 }
 
-class GraphTransientError extends GraphRequestError {
+export class GraphTransientError extends GraphRequestError {
   constructor(operation: string, path: string, response: Response, bodySnippet: string) {
     super(operation, path, response, bodySnippet);
     this.name = 'GraphTransientError';
+  }
+}
+
+export class GraphConcurrencyError extends GraphRequestError {
+  constructor(operation: string, path: string, response: Response, bodySnippet: string) {
+    super(operation, path, response, bodySnippet);
+    this.name = 'GraphConcurrencyError';
   }
 }
 
@@ -83,10 +91,15 @@ export class SafetyIngestionGraphDataPlane {
     const path = `/sites/${siteId}/lists/${listId}/items/${itemId}?$expand=${encodeURIComponent(expand)}`;
     const response = await this.graphFetchAllow404('get-item', path);
     if (!response) return null;
-    const body = (await response.json()) as { id?: string; fields?: Record<string, unknown> };
+    const body = (await response.json()) as {
+      id?: string;
+      fields?: Record<string, unknown>;
+      ['@odata.etag']?: string;
+    };
     return {
       id: body.id ? String(body.id) : String(itemId),
       fields: body.fields ?? {},
+      etag: body['@odata.etag'],
     };
   }
 
@@ -108,19 +121,16 @@ export class SafetyIngestionGraphDataPlane {
     const all: IGraphListItem[] = [];
     let nextPath: string | null = `/sites/${siteId}/lists/${listId}/items?${params.toString()}`;
     while (nextPath) {
-      const response = await this.graphFetch('list-items', nextPath, {
-        headers: query.filter
-          ? { Prefer: 'HonorNonIndexedQueriesWarningMayFailRandomly' }
-          : undefined,
-      });
+      const response = await this.graphFetch('list-items', nextPath);
       const body = (await response.json()) as {
-        value?: Array<{ id?: string; fields?: Record<string, unknown> }>;
+        value?: Array<{ id?: string; fields?: Record<string, unknown>; ['@odata.etag']?: string }>;
         '@odata.nextLink'?: string;
       };
       for (const row of body.value ?? []) {
         all.push({
           id: row.id ? String(row.id) : '',
           fields: row.fields ?? {},
+          etag: row['@odata.etag'],
         });
       }
       if (query.top && all.length >= query.top) {
@@ -171,6 +181,15 @@ export class SafetyIngestionGraphDataPlane {
     };
   }
 
+  /**
+   * Blind PATCH — does not send `If-Match` and cannot detect lost updates.
+   *
+   * @deprecated FORBIDDEN for Safety ingestion mutations. Safety callers must
+   * use `updateItemWithConcurrency()`; the Safety repository enforces this via
+   * the `assertSafetyGraphEtag` invariant and a guard test. This method exists
+   * only to support historical non-Safety call sites and must not be wired
+   * into any new Safety code path.
+   */
   async updateItem(
     siteUrl: string,
     listId: string,
@@ -189,6 +208,58 @@ export class SafetyIngestionGraphDataPlane {
       listId,
       itemId,
       fieldCount: Object.keys(fields).length,
+      concurrencyProtected: false,
+    });
+  }
+
+  /**
+   * Concurrency-safe PATCH: sends `If-Match: <etag>` and surfaces 409/412 as a
+   * typed `GraphConcurrencyError`. Callers must pass a non-empty etag (enforced
+   * by `assertSafetyGraphEtag`) and pair this with a read-before-write step.
+   */
+  async updateItemWithConcurrency(
+    siteUrl: string,
+    listId: string,
+    itemId: number,
+    fields: Record<string, unknown>,
+    etag: string,
+  ): Promise<void> {
+    assertSafetyGraphEtag(etag, `${listId}/${itemId}`);
+    const siteId = await this.resolveSiteId(siteUrl);
+    const path = `/sites/${siteId}/lists/${listId}/items/${itemId}/fields`;
+    const token = await this.tokenService.acquireAppToken([GRAPH_SCOPE]);
+    const response = await fetch(toAbsoluteGraphUrl(path), {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'If-Match': etag,
+      },
+      body: JSON.stringify(fields),
+    });
+    if (response.status === 409 || response.status === 412) {
+      throw new GraphConcurrencyError(
+        'update-item-with-concurrency',
+        path,
+        response,
+        await readBodySnippet(response),
+      );
+    }
+    if (!response.ok) {
+      throw new GraphRequestError(
+        'update-item-with-concurrency',
+        path,
+        response,
+        await readBodySnippet(response),
+      );
+    }
+    this.log('safety.ingestion.graph.item.updated', {
+      siteId,
+      listId,
+      itemId,
+      fieldCount: Object.keys(fields).length,
+      concurrencyProtected: true,
     });
   }
 
@@ -362,4 +433,18 @@ function normalizeSiteUrl(siteUrl: string): string {
 
 function escapeODataLiteral(value: string): string {
   return value.replace(/'/g, "''");
+}
+
+/**
+ * Safety ETag invariant: blind PATCH is forbidden for Safety mutations. All
+ * Safety update paths must read-before-write and pass the returned `@odata.etag`
+ * through to `updateItemWithConcurrency()`. This guard catches accidental
+ * regression (for example if a future refactor drops the read step).
+ */
+export function assertSafetyGraphEtag(etag: unknown, context: string): asserts etag is string {
+  if (typeof etag !== 'string' || etag.length === 0) {
+    throw new Error(
+      `Safety Graph update blocked: missing or empty ETag for ${context}. Read the item before writing and pass @odata.etag to updateItemWithConcurrency.`,
+    );
+  }
 }

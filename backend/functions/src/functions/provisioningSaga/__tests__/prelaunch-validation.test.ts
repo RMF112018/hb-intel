@@ -37,6 +37,11 @@ function setAllEnvPrereqs(): void {
   vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
   vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
   vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+  vi.stubEnv('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID', 'safety-proof-run-001');
+  vi.stubEnv('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC', '2026-04-22T13:00:00Z');
+  vi.stubEnv('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL', 'sites-selected');
+  vi.stubEnv('SAFETY_ROLLOUT_GATE_ENABLED', 'true');
+  vi.stubEnv('SAFETY_ROLLOUT_CHECKPOINT_ID', 'safety-rollout-2026-04-23');
   // P7-07: Bootstrap prerequisites
   vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://example.table.core.windows.net');
   vi.stubEnv('AZURE_CLIENT_ID', 'client-id');
@@ -126,6 +131,17 @@ describe('validatePrelaunchReadiness', () => {
     const codes = result.failures.map((f) => f.code);
     expect(codes).toContain('SAFETY_TIGHTENED_POSTURE_PROOF_NOT_CONFIRMED');
     expect(codes).toContain('SAFETY_TIGHTENED_E2E_PROOF_NOT_CONFIRMED');
+  });
+
+  it('detects missing tightened proof bundle metadata', () => {
+    delete process.env.SAFETY_TIGHTENED_PROOF_EVIDENCE_ID;
+    delete process.env.SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC;
+    delete process.env.SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL;
+    const result = validatePrelaunchReadiness(validRequest());
+    const codes = result.failures.map((f) => f.code);
+    expect(codes).toContain('SAFETY_TIGHTENED_PROOF_EVIDENCE_ID_MISSING');
+    expect(codes).toContain('SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC_MISSING');
+    expect(codes).toContain('SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL_MISSING');
   });
 
   it('skips environment checks in mock mode', () => {

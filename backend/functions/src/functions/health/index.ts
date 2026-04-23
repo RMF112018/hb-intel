@@ -11,6 +11,7 @@
  */
 
 import { app, type HttpResponseInit } from '@azure/functions';
+import { deriveSafetyRolloutReadiness } from '../../utils/safety-rollout-readiness.js';
 import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
 
 /** Check if a setting is present and non-empty. */
@@ -66,6 +67,7 @@ app.http('health', {
     };
     const provisioningReady = Object.values(provisioningPrereqs).every(Boolean);
     const safetyPermissionPosture = validateSafetyPermissionPosture();
+    const safetyRolloutReadiness = deriveSafetyRolloutReadiness(safetyPermissionPosture);
 
     // Optional integrations
     const integrations: Record<string, 'ready' | 'not-configured'> = {
@@ -87,10 +89,11 @@ app.http('health', {
     const operationalReadiness = computeReadiness(
       coreAuthPresent,
       sharePointPresent,
-      provisioningReady && safetyPermissionPosture.passed,
+      provisioningReady && safetyRolloutReadiness.ready,
       integrations.signalR === 'ready',
     );
 
+    // /health remains HTTP 200 by contract — readiness is expressed in the body.
     return {
       status: 200,
       jsonBody: {
@@ -103,10 +106,22 @@ app.http('health', {
           core: coreAuthPresent ? 'ready' : 'missing',
           sharepoint: sharePointPresent ? 'ready' : 'missing',
           provisioning: provisioningReady ? 'ready' : 'incomplete',
-          safetyPermissionPosture: safetyPermissionPosture.passed ? 'ready' : 'blocked',
+          safetyPermissionPosture: safetyRolloutReadiness.ready ? 'ready' : 'blocked',
+          safetyRolloutGate: safetyRolloutReadiness.gateReady ? 'ready' : 'blocked',
         },
         provisioningPrereqs,
         safetyPermissionPosture,
+        safetyRolloutReadiness: {
+          ready: safetyRolloutReadiness.ready,
+          surfaceState: safetyRolloutReadiness.surfaceState,
+          posture: safetyRolloutReadiness.posture,
+          permissionModel: safetyRolloutReadiness.permissionModel,
+          postureReady: safetyRolloutReadiness.postureReady,
+          proofReady: safetyRolloutReadiness.proofReady,
+          gateReady: safetyRolloutReadiness.gateReady,
+          gate: safetyRolloutReadiness.gate,
+          issueCodes: safetyRolloutReadiness.issues.map((i) => i.code),
+        },
         integrations,
         notificationRecipients,
         timestamp: new Date().toISOString(),
