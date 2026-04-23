@@ -28,13 +28,9 @@ import {
 } from '../config/safety-record-keeping-list-definitions.js';
 import { configureSafetyListGuids } from '../../../../packages/features/safety/src/lists/guidConfig.js';
 import type { SafetyGuidOverlay } from '../../../../packages/features/safety/src/lists/guidConfig.js';
-import { SharePointSafetyInspectionRepository } from '../../../../packages/features/safety/src/adapters/sharepoint/SharePointSafetyInspectionRepository.js';
 import type { IngestionRunResult, UploadContext } from '../../../../packages/features/safety/src/domain/types.js';
-
-interface IBackendSpHttpClient {
-  get(url: string, init?: { headers?: Record<string, string> }): Promise<Response>;
-  post(url: string, body: string | Blob | ArrayBuffer | null, init?: { headers?: Record<string, string> }): Promise<Response>;
-}
+import { GraphListClient } from './legacy-fallback/graph-list-client.js';
+import { SafetyIngestionGraphRepository } from './safety-ingestion-graph-repository.js';
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -212,6 +208,7 @@ export interface ISafetyIngestionOperationResult {
 export class SharePointService implements ISharePointService {
   private readonly tenantUrl: string;
   private readonly tokenService: IManagedIdentityTokenService;
+  private readonly graphListClients = new Map<string, GraphListClient>();
 
   constructor(tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService()) {
     this.tenantUrl = process.env.SHAREPOINT_TENANT_URL!;
@@ -440,6 +437,22 @@ export class SharePointService implements ISharePointService {
       (a, b) => a.provisioningOrder - b.provisioningOrder
     );
 
+    if (dryRun) {
+      const dryRunContainers = await this.dryRunSafetyContainersViaApi(definitions, diagnostics);
+      containers.push(...dryRunContainers);
+      this.bumpCounts(containers.map((container) => container.outcome), counts);
+      const success = counts.failed === 0 && diagnostics.length === 0;
+      return {
+        dryRun,
+        success,
+        siteTargets: targets,
+        counts,
+        referenceLists,
+        containers,
+        diagnostics,
+      };
+    }
+
     for (const definition of definitions) {
       const result = await this.provisionSafetyContainer(definition, dryRun, diagnostics);
       containers.push(result);
@@ -627,9 +640,7 @@ export class SharePointService implements ISharePointService {
     configureSafetyListGuids(overlay);
 
     try {
-      const repo = new SharePointSafetyInspectionRepository({
-        client: this.createSafetyAppOnlySpHttpClient(),
-      });
+      const repo = new SafetyIngestionGraphRepository(this.tokenService);
 
       const period = await repo.getReportingPeriod(input.context.reportingPeriodId);
       if (!period) {
@@ -661,11 +672,15 @@ export class SharePointService implements ISharePointService {
         };
       }
 
-      const result = await repo.ingestWorkbook(new Blob([bytes]), {
-        ...input.context,
+      const result = await repo.ingestWorkbook({
         fileName: input.fileName,
-        reportingPeriodId: period.id,
-        reportingPeriodSpItemId: period.spItemId,
+        fileBytes: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+        context: {
+          ...input.context,
+          fileName: input.fileName,
+          reportingPeriodId: period.id,
+          reportingPeriodSpItemId: period.spItemId,
+        },
       });
 
       console.log(JSON.stringify({
@@ -719,81 +734,7 @@ export class SharePointService implements ISharePointService {
     }
   }
 
-  private createSafetyAppOnlySpHttpClient(): IBackendSpHttpClient {
-    const digestCache = new Map<string, string>();
-    const ensureHeaders = async (url: string, headers?: Record<string, string>, includeDigest?: boolean): Promise<Record<string, string>> => {
-      const siteUrl = this.extractSiteUrl(url);
-      const token = await this.tokenService.getSharePointToken(siteUrl);
-      const merged: Record<string, string> = {
-        Accept: 'application/json;odata=nometadata',
-        Authorization: `Bearer ${token}`,
-        ...(headers ?? {}),
-      };
-      if (includeDigest) {
-        merged['X-RequestDigest'] = await this.getRequestDigest(siteUrl, digestCache);
-      }
-      return merged;
-    };
-
-    return {
-      get: async (url, init) => fetch(url, {
-        method: 'GET',
-        headers: await ensureHeaders(url, init?.headers, false),
-      }),
-      post: async (url, body, init) => {
-        const hasMergeMethod = Boolean(init?.headers?.['X-HTTP-Method']);
-        const includeDigest = this.isSharePointApiWrite(url) || hasMergeMethod;
-        return fetch(url, {
-          method: 'POST',
-          body,
-          headers: await ensureHeaders(url, init?.headers, includeDigest),
-        });
-      },
-    };
-  }
-
-  private async getRequestDigest(siteUrl: string, cache: Map<string, string>): Promise<string> {
-    const cached = cache.get(siteUrl);
-    if (cached) return cached;
-    const token = await this.tokenService.getSharePointToken(siteUrl);
-    const response = await fetch(`${siteUrl}/_api/contextinfo`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json;odata=verbose',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to acquire request digest (${response.status}) for ${siteUrl}`);
-    }
-    const body = (await response.json()) as {
-      d?: { GetContextWebInformation?: { FormDigestValue?: string } };
-    };
-    const digest = body?.d?.GetContextWebInformation?.FormDigestValue;
-    if (!digest) {
-      throw new Error(`SharePoint contextinfo digest missing for ${siteUrl}`);
-    }
-    cache.set(siteUrl, digest);
-    return digest;
-  }
-
-  private isSharePointApiWrite(url: string): boolean {
-    return /\/_api\/web\/lists/i.test(url);
-  }
-
-  private extractSiteUrl(url: string): string {
-    const parsed = new URL(url);
-    const marker = parsed.pathname.toLowerCase().indexOf('/_api/');
-    if (marker > 0) {
-      return `${parsed.origin}${parsed.pathname.slice(0, marker)}`;
-    }
-    return `${parsed.origin}${parsed.pathname}`;
-  }
-
   private async resolveSafetyGuidOverlay(): Promise<SafetyGuidOverlay> {
-    const uploadSp: any = await this.getSP(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.safetySiteUrl);
-    const hbCentralSp: any = await this.getSP(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl);
-
     const [
       uploads,
       periods,
@@ -804,25 +745,25 @@ export class SharePointService implements ISharePointService {
       projects,
       legacy,
     ] = await Promise.all([
-      uploadSp.web.lists.getByTitle('Safety Checklist Uploads').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Safety Reporting Periods').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Safety Project Week Records').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Safety Inspection Events').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Safety Findings').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Safety Ingestion Runs').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Projects').select('Id')(),
-      hbCentralSp.web.lists.getByTitle('Legacy Project Fallback Registry').select('Id')(),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.safetySiteUrl, 'Safety Checklist Uploads'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Reporting Periods'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Project Week Records'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Inspection Events'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Findings'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Ingestion Runs'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Projects'),
+      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Legacy Project Fallback Registry'),
     ]);
 
     return {
-      SafetyChecklistUploads: String(uploads.Id),
-      SafetyReportingPeriods: String(periods.Id),
-      SafetyProjectWeekRecords: String(weeks.Id),
-      SafetyInspectionEvents: String(inspections.Id),
-      SafetyFindings: String(findings.Id),
-      SafetyIngestionRuns: String(runs.Id),
-      Projects: String(projects.Id),
-      LegacyProjectFallbackRegistry: String(legacy.Id),
+      SafetyChecklistUploads: uploads,
+      SafetyReportingPeriods: periods,
+      SafetyProjectWeekRecords: weeks,
+      SafetyInspectionEvents: inspections,
+      SafetyFindings: findings,
+      SafetyIngestionRuns: runs,
+      Projects: projects,
+      LegacyProjectFallbackRegistry: legacy,
     };
   }
 
@@ -831,11 +772,7 @@ export class SharePointService implements ISharePointService {
     for (const definition of SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS) {
       if (definition.fields.length === 0 || definition.kind !== 'list') continue;
       try {
-        const sp: any = await this.getSP(definition.siteUrl);
-        const fields: Array<{ InternalName: string }> = await sp.web.lists
-          .getByTitle(definition.title)
-          .fields.select('InternalName')();
-        const present = new Set(fields.map((f) => String(f.InternalName)));
+        const present = await this.fetchListFieldInternalNamesViaApi(definition.siteUrl, definition.title);
         const missing = definition.fields
           .map((field) => field.internalName)
           .filter((name) => name !== 'Title' && !present.has(name));
@@ -931,7 +868,7 @@ export class SharePointService implements ISharePointService {
     for (const title of SAFETY_RECORD_KEEPING_REFERENCE_LIST_TITLES) {
       let exists = false;
       try {
-        exists = await this.ensureListExistsDetailed(siteUrl, title);
+        exists = await this.fetchListExistsViaApi(siteUrl, title);
       } catch (err) {
         failed = true;
         const errorMessage = formatSharePointTokenAcquisitionDiagnostic(err);
@@ -1311,6 +1248,108 @@ export class SharePointService implements ISharePointService {
       if (this.isNotFoundError(err)) return false;
       throw err;
     }
+  }
+
+  private async dryRunSafetyContainersViaApi(
+    definitions: ISafetyProvisionContainerDefinition[],
+    diagnostics: ISafetyProvisionDiagnostic[],
+  ): Promise<ISafetyContainerProvisionResult[]> {
+    const results: ISafetyContainerProvisionResult[] = [];
+    for (const definition of definitions) {
+      try {
+        const exists = await this.fetchListExistsViaApi(definition.siteUrl, definition.title);
+        if (!exists) {
+          const fields = definition.fields
+            .filter((field) => !(field.internalName === 'Title' && definition.kind === 'list'))
+            .map((field) => ({
+              internalName: field.internalName,
+              outcome: 'created' as const,
+              message: 'Dry-run: field would be created.',
+            }));
+          results.push({
+            key: definition.key,
+            title: definition.title,
+            kind: definition.kind,
+            siteUrl: definition.siteUrl,
+            outcome: 'created',
+            fields,
+            message: 'Dry-run: container would be created.',
+          });
+          continue;
+        }
+
+        const fieldsPresent = definition.kind === 'list'
+          ? await this.fetchListFieldInternalNamesViaApi(definition.siteUrl, definition.title)
+          : new Set<string>();
+        const fieldOutcomes: ISafetyFieldProvisionResult[] = [];
+        let outcome: SafetyProvisionOutcome = 'alreadyExisted';
+        for (const field of definition.fields) {
+          if (field.internalName === 'Title' && definition.kind === 'list') continue;
+          if (definition.kind === 'library') {
+            fieldOutcomes.push({ internalName: field.internalName, outcome: 'alreadyExisted' });
+            continue;
+          }
+          if (!fieldsPresent.has(field.internalName)) {
+            fieldOutcomes.push({
+              internalName: field.internalName,
+              outcome: 'updatedOrRepaired',
+              message: 'Dry-run: field would be created.',
+            });
+            outcome = 'updatedOrRepaired';
+          } else {
+            fieldOutcomes.push({ internalName: field.internalName, outcome: 'alreadyExisted' });
+          }
+        }
+        results.push({
+          key: definition.key,
+          title: definition.title,
+          kind: definition.kind,
+          siteUrl: definition.siteUrl,
+          outcome,
+          fields: fieldOutcomes,
+        });
+      } catch (err) {
+        const errorMessage = formatSharePointTokenAcquisitionDiagnostic(err);
+        diagnostics.push({
+          code: this.toProvisioningErrorCode(err, 'CONTAINER_ACCESS_ERROR'),
+          message: `${definition.title} on ${definition.siteUrl}: ${errorMessage}`,
+        });
+        results.push({
+          key: definition.key,
+          title: definition.title,
+          kind: definition.kind,
+          siteUrl: definition.siteUrl,
+          outcome: 'failed',
+          fields: [],
+          message: errorMessage,
+        });
+      }
+    }
+    return results;
+  }
+
+  private async fetchListExistsViaApi(siteUrl: string, listTitle: string): Promise<boolean> {
+    const client = this.getGraphListClient(siteUrl);
+    return client.listExists(listTitle);
+  }
+
+  private async fetchListIdViaApi(siteUrl: string, listTitle: string): Promise<string> {
+    const client = this.getGraphListClient(siteUrl);
+    return client.resolveListId(listTitle);
+  }
+
+  private async fetchListFieldInternalNamesViaApi(siteUrl: string, listTitle: string): Promise<Set<string>> {
+    const client = this.getGraphListClient(siteUrl);
+    return client.getWritableColumnNames(listTitle);
+  }
+
+  private getGraphListClient(siteUrl: string): GraphListClient {
+    const normalized = siteUrl.replace(/\/+$/, '');
+    const cached = this.graphListClients.get(normalized);
+    if (cached) return cached;
+    const client = new GraphListClient(normalized);
+    this.graphListClients.set(normalized, client);
+    return client;
   }
 
   private async ensureLibraryExistsDetailed(siteUrl: string, libraryName: string): Promise<boolean> {

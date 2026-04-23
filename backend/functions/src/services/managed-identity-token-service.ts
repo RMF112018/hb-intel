@@ -107,14 +107,29 @@ function emitTelemetry(name: string, properties: Record<string, unknown>): void 
  */
 export class ManagedIdentityTokenService implements IManagedIdentityTokenService {
   private readonly credential = new DefaultAzureCredential();
+  private readonly tokenCache = new Map<string, { token: string; expiresOnTimestamp: number }>();
 
   async getSharePointToken(siteUrl: string): Promise<string> {
     const tenantHost = new URL(siteUrl).hostname;
     const resource = `https://${tenantHost}/.default`;
+    const cached = this.tokenCache.get(resource);
+    const now = Date.now();
+    if (cached && cached.expiresOnTimestamp - 60_000 > now) {
+      return cached.token;
+    }
+
     const tokenResponse = await this.credential.getToken(resource);
     if (!tokenResponse?.token) {
       throw new Error('Failed to acquire Managed Identity token for SharePoint');
     }
+    const expiresOnTimestamp =
+      typeof tokenResponse.expiresOnTimestamp === 'number'
+        ? tokenResponse.expiresOnTimestamp
+        : now + 5 * 60_000;
+    this.tokenCache.set(resource, {
+      token: tokenResponse.token,
+      expiresOnTimestamp,
+    });
     return tokenResponse.token;
   }
 
@@ -124,21 +139,38 @@ export class ManagedIdentityTokenService implements IManagedIdentityTokenService
       throw new Error('At least one scope is required for token acquisition');
     }
 
+    const cached = this.tokenCache.get(scope);
+    const now = Date.now();
+    if (cached && cached.expiresOnTimestamp - 60_000 > now) {
+      return cached.token;
+    }
+
     // P3-04: Telemetry renamed from auth.obo.* to auth.mi.* to reflect actual behavior
     emitTelemetry('auth.mi.start', { scope });
 
     const startMs = Date.now();
-    const siteUrl = scope.endsWith('/.default') ? scope.replace('/.default', '') : scope;
 
     try {
-      const token = await this.getSharePointToken(siteUrl);
+      const tokenResponse = await this.credential.getToken(scope);
+      if (!tokenResponse?.token) {
+        throw new Error(`Failed to acquire Managed Identity token for scope ${scope}`);
+      }
+
+      const expiresOnTimestamp =
+        typeof tokenResponse.expiresOnTimestamp === 'number'
+          ? tokenResponse.expiresOnTimestamp
+          : now + 5 * 60_000;
+      this.tokenCache.set(scope, {
+        token: tokenResponse.token,
+        expiresOnTimestamp,
+      });
 
       emitTelemetry('auth.mi.success', {
         scope,
         durationMs: Date.now() - startMs,
       });
 
-      return token;
+      return tokenResponse.token;
     } catch (err) {
       emitTelemetry('auth.mi.error', {
         scope,

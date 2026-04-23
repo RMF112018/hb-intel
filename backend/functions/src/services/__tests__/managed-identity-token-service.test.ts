@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const getTokenSpy = vi.fn().mockResolvedValue({ token: 'azure-token' });
@@ -23,6 +23,12 @@ vi.mock('@pnp/queryable', () => ({
 }));
 
 describe('managed-identity-token-service', () => {
+  beforeEach(() => {
+    mocks.getTokenSpy.mockReset();
+    mocks.getTokenSpy.mockResolvedValue({ token: 'azure-token' });
+    mocks.bearerTokenSpy.mockClear();
+  });
+
   it('ManagedIdentityTokenService scopes SharePoint token to tenant origin', async () => {
     const mod = await import('../managed-identity-token-service.js');
     const service = new mod.ManagedIdentityTokenService();
@@ -31,6 +37,31 @@ describe('managed-identity-token-service', () => {
 
     expect(token).toBe('azure-token');
     expect(mocks.getTokenSpy).toHaveBeenCalledWith('https://hedrickbrotherscom.sharepoint.com/.default');
+  });
+
+  it('ManagedIdentityTokenService caches app-only tokens per scope until near expiry', async () => {
+    const mod = await import('../managed-identity-token-service.js');
+    const service = new mod.ManagedIdentityTokenService();
+
+    const first = await service.acquireAppToken(['https://graph.microsoft.com/.default']);
+    const second = await service.acquireAppToken(['https://graph.microsoft.com/.default']);
+
+    expect(first).toBe('azure-token');
+    expect(second).toBe('azure-token');
+    expect(mocks.getTokenSpy).toHaveBeenCalledTimes(1);
+    expect(mocks.getTokenSpy).toHaveBeenCalledWith('https://graph.microsoft.com/.default');
+  });
+
+  it('acquireAppToken caches tokens independently per resource scope', async () => {
+    const mod = await import('../managed-identity-token-service.js');
+    const service = new mod.ManagedIdentityTokenService();
+
+    await service.acquireAppToken(['https://graph.microsoft.com/.default']);
+    await service.acquireAppToken(['https://hedrickbrotherscom.sharepoint.com/.default']);
+
+    expect(mocks.getTokenSpy).toHaveBeenCalledTimes(2);
+    expect(mocks.getTokenSpy).toHaveBeenNthCalledWith(1, 'https://graph.microsoft.com/.default');
+    expect(mocks.getTokenSpy).toHaveBeenNthCalledWith(2, 'https://hedrickbrotherscom.sharepoint.com/.default');
   });
 
   it('createSharePointBearerTokenBehavior returns BearerToken behavior', async () => {
