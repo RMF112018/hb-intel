@@ -199,6 +199,20 @@ describe('derivePreviewDiagnosticSummary', () => {
     expect(summary.checks.parseSucceeded).toBe(false);
   });
 
+  it('classifies parser-authority-violation when parser seam authority is broken', () => {
+    const summary = derivePreviewDiagnosticSummary({
+      commitReadiness: false,
+      blockingErrors: [{ code: 'PARSER_AUTHORITY_VIOLATION' }],
+      warnings: [],
+      template: baseTemplate,
+      metadata: {},
+      reportingPeriod: { resolved: true, dateInRange: true },
+      projectResolution: { resolved: true },
+      duplicateRisk: { confidence: 'none' },
+    });
+    expect(summary.failureClass).toBe('parser-authority-violation');
+  });
+
   it('classifies duplicate-supersession-risk as its own class', () => {
     const summary = derivePreviewDiagnosticSummary({
       commitReadiness: false,

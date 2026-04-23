@@ -39,6 +39,7 @@ export async function evaluateSafetyIngestionPreview(
 ): Promise<SafetyIngestionPreviewResult> {
   const warnings: PreviewDiagnostic[] = [];
   const blockingErrors: PreviewDiagnostic[] = [];
+  let markersPresent = false;
 
   let parsed: ParsedInspection | undefined;
   let templateWarnings: ReadonlyArray<string> = [];
@@ -52,6 +53,7 @@ export async function evaluateSafetyIngestionPreview(
   try {
     const view = readWorkbookFromArrayBuffer(input.fileBytes);
     const markers = resolveContractMarkers(view);
+    markersPresent = markers.markersPresent;
     templateStatus = buildTemplateStatus(markers);
 
     try {
@@ -147,11 +149,13 @@ export async function evaluateSafetyIngestionPreview(
     parsedValue: parsed.metadata.inspectionDate,
     parserSource: parsed.metadata.sources.inspectionDate,
     contextValue: input.context.inspectionDate,
+    markersPresent,
   });
   const inspectionNumberAuthority = resolveFieldAuthority({
     parsedValue: parsed.metadata.inspectionNumber,
     parserSource: parsed.metadata.sources.inspectionNumber,
     contextValue: input.context.inspectionNumber,
+    markersPresent,
   });
   const authoritativeInspectionDate = dateAuthority.value;
   const authoritativeInspectionNumber = inspectionNumberAuthority.value;
@@ -182,6 +186,9 @@ export async function evaluateSafetyIngestionPreview(
     dateAuthority.usedContext,
     inspectionNumberAuthority.usedContext,
   );
+  for (const violation of buildParserAuthorityViolations(parsed, markersPresent)) {
+    blockingErrors.push(violation);
+  }
 
   const checksum = await computeChecksum(input.fileBytes);
 
@@ -324,6 +331,7 @@ interface FieldAuthorityInput {
   readonly parsedValue: string;
   readonly parserSource: ParserValueSource;
   readonly contextValue: string | undefined;
+  readonly markersPresent: boolean;
 }
 
 interface FieldAuthorityResult {
@@ -352,6 +360,13 @@ function resolveFieldAuthority(input: FieldAuthorityInput): FieldAuthorityResult
   const trimmedContext = (input.contextValue ?? '').trim();
   const hasContext = trimmedContext.length > 0;
 
+  if (input.markersPresent) {
+    const parserAuthoritative =
+      input.parserSource === 'parser-meta' || input.parserSource === 'named-range';
+    const mismatch = parserAuthoritative && hasContext && trimmedContext !== input.parsedValue;
+    return { value: input.parsedValue, usedContext: false, contextMismatch: mismatch };
+  }
+
   if (input.parserSource === 'parser-meta' || input.parserSource === 'named-range') {
     const mismatch = hasContext && trimmedContext !== input.parsedValue;
     return { value: input.parsedValue, usedContext: false, contextMismatch: mismatch };
@@ -361,6 +376,31 @@ function resolveFieldAuthority(input: FieldAuthorityInput): FieldAuthorityResult
     return { value: trimmedContext, usedContext: true, contextMismatch: false };
   }
   return { value: input.parsedValue, usedContext: false, contextMismatch: false };
+}
+
+function buildParserAuthorityViolations(
+  parsed: ParsedInspection,
+  markersPresent: boolean,
+): ReadonlyArray<PreviewDiagnostic> {
+  if (!markersPresent) return [];
+  const violations: PreviewDiagnostic[] = [];
+  const fields: ReadonlyArray<{ label: string; source: ParserValueSource }> = [
+    { label: 'inspectionDate', source: parsed.metadata.sources.inspectionDate },
+    { label: 'inspectionNumber', source: parsed.metadata.sources.inspectionNumber },
+    { label: 'projectSite', source: parsed.metadata.sources.projectSite },
+    { label: 'keyFindings', source: parsed.metadata.sources.keyFindings },
+  ];
+  for (const field of fields) {
+    if (field.source === 'parser-meta' || field.source === 'named-range') continue;
+    violations.push({
+      code: 'PARSER_AUTHORITY_VIOLATION',
+      message:
+        `Markered template requires parser-authoritative ${field.label}; ` +
+        `resolved source was "${field.source}". Repair ParserMeta/named ranges.`,
+      severity: 'error',
+    });
+  }
+  return violations;
 }
 
 function buildMetadataAuthority(

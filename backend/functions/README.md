@@ -494,4 +494,11 @@ Supporting modules:
 
 The Safety ingestion Graph repository and data plane (`safety-ingestion-graph-repository.ts`, `safety-ingestion-graph-data-plane.ts`) were already well-separated and are unchanged.
 
+### Safety preview parser-authority gate (Prompt-03)
+
+- Preview is the canonical pre-commit authority surface for Safety uploads.
+- Markered templates (`ParserMeta`/parser markers present) must resolve parser-critical fields from parser-authoritative seams (`parser-meta` or named ranges). Legacy/context fallback is rejected with `PARSER_AUTHORITY_VIOLATION`.
+- Markerless templates retain bounded legacy fallback behavior for backward compatibility.
+- In ingest flows, a parser-authority violation is surfaced as a discriminating failure class (`parser-authority-violation`) instead of a generic preview block.
+
 Behavior-first boundary invariants are locked in `services/__tests__/service-boundaries.test.ts`.

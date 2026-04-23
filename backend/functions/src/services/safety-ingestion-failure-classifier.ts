@@ -34,6 +34,8 @@ import { ReportingPeriodContractError } from './safety-reporting-period-contract
  * - `payload-error`: Input payload was structurally unusable (empty bytes, etc.).
  * - `preview-gate-blocked`: Preview readiness gate rejected the upload — the
  *   preview response carries the per-class discrimination.
+ * - `parser-authority-violation`: Markered workbook lacked parser-authoritative
+ *   metadata seam(s); commit rejected by preview gate.
  * - `reference-validation-error`: Required reference lists are missing/inaccessible.
  * - `target-resolution-error`: Site-target constants conflict with env.
  * - `field-contract-missing`: List-field contract check detected drift.
@@ -53,6 +55,7 @@ export type SafetyIngestionFailureClass =
   | 'token-acquisition-error'
   | 'payload-error'
   | 'preview-gate-blocked'
+  | 'parser-authority-violation'
   | 'reference-validation-error'
   | 'target-resolution-error'
   | 'field-contract-missing'
@@ -325,6 +328,7 @@ export type PreviewFailureClass =
   | 'none'
   | 'workbook-read-failed'
   | 'template-incompatible'
+  | 'parser-authority-violation'
   | 'parse-failure'
   | 'reporting-period-not-found'
   | 'reporting-period-mismatch'
@@ -394,6 +398,9 @@ function deriveFailureClass(
     codes.includes('TEMPLATE_INCOMPATIBLE')
   ) {
     return 'template-incompatible';
+  }
+  if (codes.includes('PARSER_AUTHORITY_VIOLATION')) {
+    return 'parser-authority-violation';
   }
   if (codes.includes('PARSE_FAILED')) return 'parse-failure';
   if (codes.includes('REPORTING_PERIOD_NOT_FOUND')) return 'reporting-period-not-found';

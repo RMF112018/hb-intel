@@ -106,6 +106,33 @@ describe('extractMetadata parse-first precedence', () => {
     expect(metadata.sources.projectSite).toBe('legacy');
   });
 
+  it('does not use visible-cell legacy fallback when parser markers are present', () => {
+    const view = buildCleanAllYesWorkbook({
+      inspectionDate: '2026-05-06',
+      inspectionNumber: '17',
+      projectSiteText: '2026-517 Visible Project',
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+        },
+      },
+    });
+
+    const metadata = extractMetadata(view);
+
+    expect(metadata.inspectionDate).toBe('');
+    expect(metadata.inspectionNumber).toBe('');
+    expect(metadata.projectSiteText).toBe('');
+    expect(metadata.sources.inspectionDate).toBe('none');
+    expect(metadata.sources.inspectionNumber).toBe('none');
+    expect(metadata.sources.projectSite).toBe('none');
+  });
+
   it('exposes reporting-period markers with source when parserMeta populates them', () => {
     const view = buildCleanAllYesWorkbook({
       inspectionDate: '2026-01-01',

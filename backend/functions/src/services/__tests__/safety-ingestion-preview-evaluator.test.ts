@@ -150,6 +150,12 @@ describe('evaluateSafetyIngestionPreview', () => {
   });
 
   it('uses intake context for markerless/legacy templates where parser source is none', async () => {
+    mockResolveContractMarkers.mockReturnValue({
+      markersPresent: false,
+      templateVersion: null,
+      parserContractVersion: null,
+    });
+    mockValidateTemplate.mockReturnValue({ templateVersion: 'v1', warnings: [] });
     mockParseChecklist.mockReturnValue(
       makeParsed({
         inspectionDate: '',
@@ -166,6 +172,29 @@ describe('evaluateSafetyIngestionPreview', () => {
     expect(result.metadataAuthority?.inspectionNumber.usedContext).toBe(true);
     expect(result.warnings.some((w) => w.code === 'INSPECTION_DATE_CONTEXT_MISMATCH')).toBe(false);
     expect(result.warnings.some((w) => w.code === 'INSPECTION_NUMBER_CONTEXT_MISMATCH')).toBe(false);
+  });
+
+  it('blocks markered templates when parser-critical fields resolve from non-parser seams', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        inspectionDate: '',
+        inspectionNumber: '',
+        sources: {
+          inspectionDate: 'none',
+          inspectionNumber: 'none',
+          projectSite: 'legacy',
+          keyFindings: 'legacy',
+        },
+      }),
+    );
+    const repo = makeRepository();
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.commitReadiness).toBe(false);
+    expect(result.blockingErrors.filter((e) => e.code === 'PARSER_AUTHORITY_VIOLATION')).toHaveLength(4);
+    expect(result.diagnosticSummary.failureClass).toBe('parser-authority-violation');
+    expect(result.metadataAuthority?.inspectionDate.usedContext).toBe(false);
+    expect(result.metadataAuthority?.inspectionNumber.usedContext).toBe(false);
   });
 
   it('emits a stable diagnosticSummary for commit-ready evaluations', async () => {

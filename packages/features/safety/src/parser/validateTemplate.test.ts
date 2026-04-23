@@ -108,4 +108,26 @@ describe('validateTemplate', () => {
     });
     expect(() => validateTemplate(view)).not.toThrow();
   });
+
+  it('rejects markered workbook when parser-critical fields are missing and only legacy cells are populated', () => {
+    const view = buildCleanAllYesWorkbook({
+      inspectionDate: '2026-04-22',
+      inspectionNumber: '5',
+      projectSiteText: '2026-005 Legacy Project',
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+          A14: PARSER_META_FIELDS.keyFindingsNormalized,
+          B14: 'One finding',
+        },
+      },
+    });
+
+    expect(() => validateTemplate(view)).toThrow(/Inspection date is invalid or unreadable/i);
+  });
 });

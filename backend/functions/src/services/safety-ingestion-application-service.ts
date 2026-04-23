@@ -208,7 +208,10 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
             {
               code: 'SAFETY_INGESTION_COMMIT_NOT_READY',
               message: 'Commit blocked by preview readiness gate.',
-              failureClass: 'preview-gate-blocked',
+              failureClass:
+                preview.diagnosticSummary.failureClass === 'parser-authority-violation'
+                  ? 'parser-authority-violation'
+                  : 'preview-gate-blocked',
             },
           ]),
         };

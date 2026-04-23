@@ -184,24 +184,16 @@ export interface UploadContext {
   readonly reportingPeriodSpItemId: number;
 
   /**
-   * G-03 structured intake authority (Wave 2 revision).
+   * Operator-entered upload context fields.
    *
-   * These fields are operator-entered on the Upload panel and are
-   * **authoritative** for the corresponding Safety list-field writes.
-   * Workbook-parsed equivalents (`parsed.metadata.inspectionDate`,
-   * `parsed.metadata.inspectionNumber`, `parsed.metadata.projectSiteText`,
-   * `parsed.metadata.projectNumberHint`) are secondary: used only for
-   * provenance, mismatch advisory, and duplicate signaling.
+   * Parser authority policy:
+   * - Markered templates (`ParserMeta`/contract markers present): parser
+   *   fields are authoritative; these context values are advisory only.
+   * - Markerless templates: context values may be used as legacy fallback.
    *
    * Calendar-date semantics: `inspectionDate` is a plain `YYYY-MM-DD`
    * string. Do not construct a `Date` from it, do not convert through UTC,
-   * do not timezone-shift it at any boundary.
-   *
-   * Migration tolerance: these fields are optional for back-compat during
-   * the Upload-redesign rollout window. Older callers that do not supply
-   * them fall back to workbook-parsed values. This is a temporary shim,
-   * not a supported alternative input mode — the new Upload path always
-   * supplies all three.
+   * and do not timezone-shift it at any boundary.
    */
   readonly projectNumber?: string;
   readonly projectNameSnapshot?: string;
@@ -508,6 +500,7 @@ export type PreviewFailureClass =
   | 'none'
   | 'workbook-read-failed'
   | 'template-incompatible'
+  | 'parser-authority-violation'
   | 'parse-failure'
   | 'reporting-period-not-found'
   | 'reporting-period-mismatch'

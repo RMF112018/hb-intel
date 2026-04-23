@@ -116,6 +116,15 @@ Use when triaging Safety ingest/preview failures around reporting-period lookup.
 - `pnpm --filter @hbc/functions test -- src/services/__tests__/safety-ingestion-graph-data-plane.test.ts`
   Verifies Graph failure classification/telemetry for 401/403/404 on item reads.
 
+## Safety parser-authority preview seam
+
+Use when triaging preview/ingest readiness failures for markered templates.
+
+- `pnpm --filter @hbc/functions test -- src/services/__tests__/safety-ingestion-preview-evaluator.test.ts src/services/__tests__/safety-ingestion-failure-classifier.test.ts src/services/__tests__/safety-ingestion-application-service.test.ts`
+  Verifies parser-authority enforcement (`PARSER_AUTHORITY_VIOLATION`), failure-class mapping (`parser-authority-violation`), and ingest commit-gate blocking behavior.
+- `pnpm --filter @hbc/features-safety test -- src/parser/validateTemplate.test.ts src/parser/extractMetadata.test.ts`
+  Verifies parser-meta/named-range precedence and that legacy fallback is allowed only for markerless templates.
+
 ## How to choose the right level
 
 Use the smallest level below that matches the risk:
