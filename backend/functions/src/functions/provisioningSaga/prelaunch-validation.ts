@@ -15,6 +15,7 @@ import type { IProvisionSiteRequest } from '@hbc/models';
 import { shouldValidateConfig } from '../../utils/validate-config.js';
 import { diagnosePermissionModel } from '../../utils/diagnose-permissions.js';
 import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
+import { deriveSafetyRolloutReadiness } from '../../utils/safety-rollout-readiness.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -220,14 +221,21 @@ export function validatePrelaunchReadiness(
       }
     }
 
+    // Safety readiness flows through the shared evaluator so prelaunch,
+    // preflight, health, and config validation all derive the same
+    // gate/proof/posture verdict. Prelaunch maps evaluator issues to its
+    // saga-facing failure shape without re-deriving rollout readiness.
     const safetyPosture = validateSafetyPermissionPosture();
-    for (const issue of safetyPosture.issues) {
-      failures.push({
-        code: issue.code,
-        category: 'permission',
-        message: issue.message,
-        remediation: issue.remediation,
-      });
+    const safetyReadiness = deriveSafetyRolloutReadiness(safetyPosture);
+    if (!safetyReadiness.ready) {
+      for (const issue of safetyReadiness.issues) {
+        failures.push({
+          code: issue.code,
+          category: 'permission',
+          message: issue.message,
+          remediation: issue.remediation,
+        });
+      }
     }
   }
 

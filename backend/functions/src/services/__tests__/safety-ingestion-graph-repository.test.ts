@@ -6,7 +6,10 @@ import type {
   SafetyIngestionRunDraft,
 } from '../../../../../packages/features/safety/src/domain/types.js';
 import { configureSafetyListGuids } from '../../../../../packages/features/safety/src/lists/guidConfig.js';
-import { GraphConcurrencyError } from '../safety-ingestion-graph-data-plane.js';
+import {
+  GraphBoundedQueryTruncatedError,
+  GraphConcurrencyError,
+} from '../safety-ingestion-graph-data-plane.js';
 import {
   SAFETY_GRAPH_QUERY_CONTRACTS,
   SafetyIngestionGraphRepository,
@@ -33,6 +36,7 @@ describe('SafetyIngestionGraphRepository', () => {
     const fakeGraph = {
       getItemById: vi.fn(),
       listItems: vi.fn(),
+      listItemsBounded: vi.fn(),
       createItem: vi.fn(),
       updateItem: vi.fn(),
       updateItemWithConcurrency: vi.fn(),
@@ -329,7 +333,7 @@ describe('SafetyIngestionGraphRepository', () => {
 
   it('lists prior inspections for duplicate preview checks', async () => {
     const { repo, fakeGraph } = makeRepository();
-    fakeGraph.listItems.mockResolvedValue([
+    fakeGraph.listItemsBounded.mockResolvedValue([
       {
         id: '91',
         fields: {
@@ -366,12 +370,15 @@ describe('SafetyIngestionGraphRepository', () => {
 
     expect(inspections).toHaveLength(1);
     expect(inspections[0]?.id).toBe('ie-91');
-    expect(fakeGraph.listItems).toHaveBeenCalledOnce();
-    const [, , query] = fakeGraph.listItems.mock.calls[0]!;
+    expect(fakeGraph.listItemsBounded).toHaveBeenCalledOnce();
+    expect(fakeGraph.listItems).not.toHaveBeenCalled();
+    const [, , query, contractId] = fakeGraph.listItemsBounded.mock.calls[0]!;
     // Compound filter on (reportingPeriodId, projectNumber) — both indexed.
     expect(query.filter).toBe(
       "fields/ReportingPeriodIdLookupId eq 14 and fields/ProjectNumber eq '2026-100'",
     );
+    expect(query.top).toBe(500);
+    expect(contractId).toBe('duplicate-detection-inspections');
   });
 
   // --- Concurrency behavior proof ---
@@ -562,19 +569,52 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(fakeGraph.updateItemWithConcurrency).toHaveBeenCalledTimes(3);
   });
 
-  it('project-week lookup emits a compound $filter with both indexed columns', async () => {
+  it('project-week lookup emits a bounded compound $filter with both indexed columns', async () => {
     const { repo, fakeGraph } = makeRepository();
-    fakeGraph.listItems.mockResolvedValue([]);
+    fakeGraph.listItemsBounded.mockResolvedValue([]);
 
     await (repo as unknown as {
       getProjectWeek: (reportingPeriodId: string, projectNumber: string) => Promise<unknown>;
     }).getProjectWeek('period-14', "O'Brien-100");
 
-    const [, , query] = fakeGraph.listItems.mock.calls[0]!;
+    expect(fakeGraph.listItemsBounded).toHaveBeenCalledOnce();
+    expect(fakeGraph.listItems).not.toHaveBeenCalled();
+    const [, , query, contractId] = fakeGraph.listItemsBounded.mock.calls[0]!;
     expect(query.filter).toBe(
       "fields/ReportingPeriodIdLookupId eq 14 and fields/ProjectNumber eq 'O''Brien-100'",
     );
-    expect(query.top).toBe(1);
+    // top:2 so that a natural-key violation (>1 match) is detectable rather
+    // than silently returning one of several duplicate rollups.
+    expect(query.top).toBe(2);
+    expect(contractId).toBe('project-week-lookup');
+  });
+
+  it('project-week lookup throws a natural-key violation when two rollups share (period, project)', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.listItemsBounded.mockResolvedValue([
+      { id: '55', fields: { ReportingPeriodIdLookupId: 14, ProjectNumber: '2026-100' } },
+      { id: '56', fields: { ReportingPeriodIdLookupId: 14, ProjectNumber: '2026-100' } },
+    ]);
+
+    await expect(
+      (repo as unknown as {
+        getProjectWeek: (reportingPeriodId: string, projectNumber: string) => Promise<unknown>;
+      }).getProjectWeek('period-14', '2026-100'),
+    ).rejects.toThrow(/natural-key violation/i);
+  });
+
+  it('compound-filter safety queries propagate bounded-query truncation loudly', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.listItemsBounded.mockRejectedValue(
+      new GraphBoundedQueryTruncatedError('duplicate-detection-inspections', 'list-1', 500, 500),
+    );
+
+    await expect(
+      repo.findInspectionsForProjectWeek({
+        projectNumber: '2026-100',
+        reportingPeriodId: 'period-14',
+      }),
+    ).rejects.toBeInstanceOf(GraphBoundedQueryTruncatedError);
   });
 
   it('exposes a Safety Graph query contract documenting indexed-column assumptions', () => {

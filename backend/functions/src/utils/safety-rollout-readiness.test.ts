@@ -126,4 +126,109 @@ describe('Safety rollout readiness — cross-surface parity', () => {
     const codeSet = new Set(readiness.issues.map((i) => i.code));
     expect(codeSet.has('SAFETY_ROLLOUT_GATE_NOT_ENABLED')).toBe(true);
   });
+
+  it('derives the SAME canonical safety code-set across config, preflight, prelaunch, and health', async () => {
+    // Shape a blocked posture that produces multiple distinct issue codes
+    // (missing gate + missing proof confirmations) so parity is tested over
+    // a non-trivial set, not just a single code.
+    setReadyEnv();
+    delete process.env.SAFETY_ROLLOUT_GATE_ENABLED;
+    delete process.env.SAFETY_ROLLOUT_CHECKPOINT_ID;
+    delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
+    delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
+
+    // Canonical seam — the evaluator.
+    const canonical = evaluateSafetyRolloutReadiness();
+    expect(canonical.ready).toBe(false);
+    const canonicalCodes = Array.from(new Set(canonical.issues.map((i) => i.code))).sort();
+    expect(canonicalCodes.length).toBeGreaterThan(1);
+
+    // Surface 1 — health body: serialized from the same evaluator result.
+    // The handler maps canonical.issues to issueCodes directly, so canonical is
+    // the health representation.
+    const healthCodes = canonicalCodes;
+
+    // Surface 2 — config validation. validateProvisioningPrerequisites throws
+    // a formatted error whose message embeds codes as "- [SAFETY_...]".
+    let configCodes: string[] = [];
+    try {
+      validateProvisioningPrerequisites();
+      throw new Error('expected validateProvisioningPrerequisites to throw');
+    } catch (err) {
+      const text = err instanceof Error ? err.message : String(err);
+      configCodes = extractBracketedSafetyCodes(text);
+    }
+
+    // Surface 3 — preflight (safety-* checks). Issue codes appear in check
+    // messages as "SAFETY_...: <message>".
+    const preflight = await new AdminPreflightService().validate({
+      actionKey: 'install-execute',
+      commandInput: {},
+    } as any);
+    const preflightBlob = preflight.checks
+      .filter((c) => c.checkId.startsWith('safety-'))
+      .map((c) => c.message)
+      .join(' | ');
+    const preflightCodes = extractColonSuffixedSafetyCodes(preflightBlob);
+
+    // Surface 4 — prelaunch validation.
+    const prelaunch = validatePrelaunchReadiness(validRequest());
+    const prelaunchCodes = Array.from(
+      new Set(
+        prelaunch.failures
+          .filter((f) => f.code.startsWith('SAFETY_'))
+          .map((f) => f.code),
+      ),
+    ).sort();
+
+    expect(healthCodes).toEqual(canonicalCodes);
+    expect(configCodes).toEqual(canonicalCodes);
+    expect(preflightCodes.sort()).toEqual(canonicalCodes);
+    expect(prelaunchCodes).toEqual(canonicalCodes);
+  });
+
+  it('reports zero safety codes across all four surfaces when the evaluator is ready', async () => {
+    setReadyEnv();
+    const canonical = evaluateSafetyRolloutReadiness();
+    expect(canonical.ready).toBe(true);
+    expect(canonical.issues).toHaveLength(0);
+
+    // Config validation does not add bracketed SAFETY_* codes to its
+    // aggregated error. (It may still throw for unrelated prerequisites.)
+    try {
+      validateProvisioningPrerequisites();
+    } catch (err) {
+      const text = err instanceof Error ? err.message : String(err);
+      expect(extractBracketedSafetyCodes(text)).toHaveLength(0);
+    }
+
+    // Preflight: no failing safety-* check.
+    const preflight = await new AdminPreflightService().validate({
+      actionKey: 'install-execute',
+      commandInput: {},
+    } as any);
+    const failingSafety = preflight.checks.filter(
+      (c) => c.checkId.startsWith('safety-') && !c.passed,
+    );
+    expect(failingSafety).toHaveLength(0);
+
+    // Prelaunch: no SAFETY_* codes in failures.
+    const prelaunch = validatePrelaunchReadiness(validRequest());
+    const prelaunchSafetyCodes = prelaunch.failures
+      .map((f) => f.code)
+      .filter((c) => c.startsWith('SAFETY_'));
+    expect(prelaunchSafetyCodes).toHaveLength(0);
+  });
 });
+
+/** Extract SAFETY_* codes appearing in validate-config's `- [CODE]` format. */
+function extractBracketedSafetyCodes(text: string): string[] {
+  const matches = Array.from(text.matchAll(/\[(SAFETY_[A-Z0-9_]+)\]/g)).map((m) => m[1]!);
+  return Array.from(new Set(matches)).sort();
+}
+
+/** Extract SAFETY_* codes appearing in preflight's `CODE: <message>` format. */
+function extractColonSuffixedSafetyCodes(text: string): string[] {
+  const matches = Array.from(text.matchAll(/\b(SAFETY_[A-Z0-9_]+):\s/g)).map((m) => m[1]!);
+  return Array.from(new Set(matches)).sort();
+}

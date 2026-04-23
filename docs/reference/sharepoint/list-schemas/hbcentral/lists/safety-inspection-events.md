@@ -73,14 +73,19 @@
 
 ## 6.1 Required Indexed Columns (Safety Graph queries)
 
-The Safety ingestion Graph repository emits a compound `$filter` against this list for duplicate detection during preview. For the query to remain O(filtered rows) instead of O(period rows), BOTH of the following columns MUST be indexed at the tenant. See `SAFETY_GRAPH_QUERY_CONTRACTS['duplicate-detection-inspections']` in `backend/functions/src/services/safety-ingestion-graph-repository.ts`.
+The Safety ingestion Graph repository issues a bounded single-page compound `$filter` against this list for duplicate detection during preview. For the query to remain O(filtered rows) instead of O(period rows), BOTH of the following columns MUST be indexed at the tenant. See `SAFETY_GRAPH_QUERY_CONTRACTS['duplicate-detection-inspections']` in `backend/functions/src/services/safety-ingestion-graph-repository.ts`.
 
 | Column                      | Why indexed is required                                                    |
 | --------------------------- | -------------------------------------------------------------------------- |
 | `ReportingPeriodIdLookupId` | Primary filter clause; unindexed access risks list-view threshold blocks.  |
 | `ProjectNumber`             | Secondary filter clause; compound `$filter` depends on server-side narrow. |
 
-If either index is missing, the ingestion preview and duplicate-detection path degrades from a bounded Graph query to a tenant-wide scan and MAY trip the 5k item list-view threshold.
+The query is issued through `listItemsBounded` (see `backend/functions/src/services/safety-ingestion-graph-data-plane.ts`): it emits exactly one page with `$top=500` and throws `GraphBoundedQueryTruncatedError` if the response contains `@odata.nextLink`. The repository never silently paginates. Symptoms:
+
+- If either index is missing, the bounded request fails loudly (HTTP 4xx from Graph) rather than degrading into a tenant-wide scan.
+- If the filtered result set exceeds 500 rows for a single `(reportingPeriod, projectNumber)` tuple, the bounded query throws — investigate data shape before relaxing the cap.
+
+Any change to the required indexed columns, the `$top` cap, or the bounded-query semantics for this contract MUST be reflected in `docs/architecture/plans/MASTER/spfx/safety-records/Safety_Record_Keeping_SharePoint_Schema_Reference.md §5.1` in the same change set.
 
 ## 7. Open Questions / Follow-Up Checks
 

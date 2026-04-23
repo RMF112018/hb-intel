@@ -294,6 +294,17 @@ These are **not safety-owned lists**, but they are required for full project res
 - `MatchedProjectListItemId`
 - `IsActive`
 
+## 5.1 Safety Graph query contract (bounded single-page lookups)
+
+The Safety ingestion backend (`backend/functions/src/services/safety-ingestion-graph-repository.ts`) issues two compound-`$filter` Microsoft Graph list queries via the `listItemsBounded` variant. Bounded queries issue exactly one page and throw `GraphBoundedQueryTruncatedError` if the response contains `@odata.nextLink` — there is no silent paging and no in-memory narrowing fallback. Both queries depend on the listed columns being indexed at the tenant; if either index is missing, Graph's list-view-threshold behavior may reject the request or require the `Prefer` escape hatch (which is deliberately not used for these paths).
+
+| Contract ID                       | List                          | `$top` | Required indexed columns                          | Failure semantics                                                                                                                                   |
+| --------------------------------- | ----------------------------- | -----: | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `duplicate-detection-inspections` | Safety Inspection Events      | 500    | `ReportingPeriodIdLookupId`, `ProjectNumber`      | `GraphBoundedQueryTruncatedError` if `@odata.nextLink` is present — signals >500 inspections for one (period, project) or a weakened index contract. |
+| `project-week-lookup`             | Safety Project Week Records   | 2      | `ReportingPeriodIdLookupId`, `ProjectNumber`      | `>1` match throws a natural-key violation; `@odata.nextLink` throws `GraphBoundedQueryTruncatedError`. `(period, project)` is the logical natural key. |
+
+Index reconciliation: any change to the query strategy, the required indexed columns, or the top/paging posture on these contracts MUST be reflected in both the per-list authoritative documents under `docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-inspection-events.md` and `safety-project-week-records.md`, and in this reference. Both doc surfaces move together.
+
 ## 6. Recommended verification checklist
 
 Use this after comparing against the tenant-created lists:

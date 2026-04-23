@@ -386,17 +386,23 @@ export class SafetyIngestionGraphRepository {
   ): Promise<ReadonlyArray<SafetyInspectionEvent>> {
     const descriptor = this.list('SafetyInspectionEvents');
     const reportingPeriodSpItemId = spItemIdFromString(reportingPeriodId);
-    // Compound filter (see SAFETY_GRAPH_QUERY_CONTRACTS['duplicate-detection-inspections']).
-    // Requires ReportingPeriodIdLookupId AND ProjectNumber to be indexed columns on
-    // SafetyInspectionEvents — drops in-memory project-number narrowing that was
-    // fragile under multi-project reporting periods.
-    const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
-      filter:
-        `fields/ReportingPeriodIdLookupId eq ${reportingPeriodSpItemId} ` +
-        `and fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
-      top: 500,
-      select: INSPECTION_SELECT,
-    });
+    // Bounded single-page compound $filter (SAFETY_GRAPH_QUERY_CONTRACTS
+    // ['duplicate-detection-inspections']). Requires ReportingPeriodIdLookupId
+    // AND ProjectNumber to be indexed columns on SafetyInspectionEvents.
+    // listItemsBounded throws GraphBoundedQueryTruncatedError if the server
+    // returns @odata.nextLink — we never silently widen into tenant paging.
+    const rows = await this.graph.listItemsBounded(
+      descriptor.siteUrl,
+      descriptor.id,
+      {
+        filter:
+          `fields/ReportingPeriodIdLookupId eq ${reportingPeriodSpItemId} ` +
+          `and fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
+        top: 500,
+        select: INSPECTION_SELECT,
+      },
+      'duplicate-detection-inspections',
+    );
     return rows.map(mapInspectionEvent);
   }
 
@@ -471,17 +477,29 @@ export class SafetyIngestionGraphRepository {
   ): Promise<SafetyProjectWeekRecord | null> {
     const descriptor = this.list('SafetyProjectWeekRecords');
     const reportingPeriodSpItemId = spItemIdFromString(reportingPeriodId);
-    // Compound filter (see SAFETY_GRAPH_QUERY_CONTRACTS['project-week-lookup']).
-    // Requires ReportingPeriodIdLookupId AND ProjectNumber to be indexed columns
-    // on SafetyProjectWeekRecords. top:1 is sufficient because the (period,project)
-    // pair is a logical natural key for the rollup list.
-    const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
-      filter:
-        `fields/ReportingPeriodIdLookupId eq ${reportingPeriodSpItemId} ` +
-        `and fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
-      top: 1,
-      select: PROJECT_WEEK_SELECT,
-    });
+    // Bounded single-page compound $filter (SAFETY_GRAPH_QUERY_CONTRACTS
+    // ['project-week-lookup']). (ReportingPeriodIdLookupId, ProjectNumber) is
+    // the logical natural key — top:2 lets us detect a duplicate-record
+    // violation instead of silently returning one of several matches.
+    const rows = await this.graph.listItemsBounded(
+      descriptor.siteUrl,
+      descriptor.id,
+      {
+        filter:
+          `fields/ReportingPeriodIdLookupId eq ${reportingPeriodSpItemId} ` +
+          `and fields/ProjectNumber eq '${escapeGraphString(projectNumber)}'`,
+        top: 2,
+        select: PROJECT_WEEK_SELECT,
+      },
+      'project-week-lookup',
+    );
+    if (rows.length > 1) {
+      throw new Error(
+        `Safety project-week natural-key violation: ` +
+        `(reportingPeriod=${reportingPeriodId}, projectNumber=${projectNumber}) ` +
+        `returned ${rows.length} records; expected 0 or 1. Investigate duplicate rollups in SafetyProjectWeekRecords.`,
+      );
+    }
     const exact = rows[0];
     return exact ? mapProjectWeek(exact) : null;
   }
@@ -871,7 +889,8 @@ export const SAFETY_GRAPH_QUERY_CONTRACTS: readonly ISafetyGraphQueryContract[] 
     list: 'SafetyInspectionEvents',
     purpose: 'Fetch candidate inspections for duplicate detection.',
     strategy:
-      'Compound $filter (ReportingPeriodIdLookupId eq N and ProjectNumber eq \'X\'). No in-memory narrowing.',
+      'Bounded single-page compound $filter (ReportingPeriodIdLookupId eq N and ProjectNumber eq \'X\') with top:500. ' +
+      'listItemsBounded throws GraphBoundedQueryTruncatedError if @odata.nextLink is present — no silent paging, no in-memory narrowing.',
     requiredIndexedFields: ['ReportingPeriodIdLookupId', 'ProjectNumber'],
   },
   {
@@ -879,7 +898,9 @@ export const SAFETY_GRAPH_QUERY_CONTRACTS: readonly ISafetyGraphQueryContract[] 
     list: 'SafetyProjectWeekRecords',
     purpose: 'Lookup project-week rollup record for current reporting period/project.',
     strategy:
-      'Compound $filter (ReportingPeriodIdLookupId eq N and ProjectNumber eq \'X\') with top:1. (period,project) is the logical natural key.',
+      'Bounded single-page compound $filter (ReportingPeriodIdLookupId eq N and ProjectNumber eq \'X\') with top:2. ' +
+      '(period,project) is the logical natural key; >1 match throws a natural-key violation. ' +
+      'listItemsBounded throws GraphBoundedQueryTruncatedError if @odata.nextLink is present.',
     requiredIndexedFields: ['ReportingPeriodIdLookupId', 'ProjectNumber'],
   },
   {

@@ -12,6 +12,7 @@
 import { WAVE0_REQUIRED_CONFIG, type ConfigTier } from '../config/wave0-env-registry.js';
 import { diagnosePermissionModel } from './diagnose-permissions.js';
 import { validateSafetyPermissionPosture } from './safety-permission-posture.js';
+import { deriveSafetyRolloutReadiness } from './safety-rollout-readiness.js';
 
 /**
  * Returns true if startup config validation should run.
@@ -75,9 +76,16 @@ export function validateProvisioningPrerequisites(): void {
     );
   }
 
+  // Safety readiness is interpreted via the shared evaluator so config
+  // validation, preflight, prelaunch, and health all derive the same gate/
+  // proof/posture verdict. Config validation adapts the result to its
+  // aggregated-error shape; it does not re-derive rollout boundary readiness.
   const safetyPosture = validateSafetyPermissionPosture();
-  for (const issue of safetyPosture.issues) {
-    issues.push(`  - [${issue.code}] ${issue.message} (${issue.remediation})`);
+  const safetyReadiness = deriveSafetyRolloutReadiness(safetyPosture);
+  if (!safetyReadiness.ready) {
+    for (const issue of safetyReadiness.issues) {
+      issues.push(`  - [${issue.code}] ${issue.message} (${issue.remediation})`);
+    }
   }
 
   if (issues.length > 0) {

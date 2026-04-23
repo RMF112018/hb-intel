@@ -64,14 +64,21 @@
 
 ## 6.1 Required Indexed Columns (Safety Graph queries)
 
-The project-week rollup lookup (`SAFETY_GRAPH_QUERY_CONTRACTS['project-week-lookup']`) emits a compound `$filter` against this list. `(ReportingPeriodIdLookupId, ProjectNumber)` is the logical natural key for the rollup list and MUST be indexed at the tenant.
+The project-week rollup lookup (`SAFETY_GRAPH_QUERY_CONTRACTS['project-week-lookup']`) issues a bounded single-page compound `$filter` against this list. `(ReportingPeriodIdLookupId, ProjectNumber)` is the logical natural key for the rollup list and MUST be indexed at the tenant.
 
 | Column                      | Why indexed is required                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------- |
 | `ReportingPeriodIdLookupId` | Primary filter clause for rollup discovery; unindexed access trips 5k threshold at scale. |
 | `ProjectNumber`             | Narrowing filter clause that replaces the prior in-memory page scan.                     |
 
+The query is issued through `listItemsBounded` (`backend/functions/src/services/safety-ingestion-graph-data-plane.ts`) with `$top=2`. The bounded variant:
+
+- throws `GraphBoundedQueryTruncatedError` if the response contains `@odata.nextLink` (no silent paging),
+- lets the repository detect a natural-key violation: if two rollup records share `(reportingPeriod, projectNumber)`, `getProjectWeek` throws a loud error rather than silently returning one of several matches.
+
 The project-week PATCH flow is concurrency-protected: the repository reads the current item, passes `@odata.etag` to `updateItemWithConcurrency`, and performs bounded exponential-backoff retries on 409/412. Blind PATCH is forbidden here (see `assertSafetyGraphEtag` in `safety-ingestion-graph-data-plane.ts`).
+
+Any change to the required indexed columns, the `$top` cap, or the natural-key-violation semantics for this contract MUST be reflected in `docs/architecture/plans/MASTER/spfx/safety-records/Safety_Record_Keeping_SharePoint_Schema_Reference.md §5.1` in the same change set.
 
 ## 7. Open Questions / Follow-Up Checks
 

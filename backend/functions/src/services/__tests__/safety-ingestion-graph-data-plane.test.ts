@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  GraphBoundedQueryTruncatedError,
   GraphConcurrencyError,
   GraphRequestError,
   SafetyIngestionGraphDataPlane,
@@ -163,6 +164,85 @@ describe('SafetyIngestionGraphDataPlane concurrency semantics', () => {
         '' as string,
       ),
     ).rejects.toThrow(/missing or empty ETag/i);
+  });
+});
+
+describe('SafetyIngestionGraphDataPlane bounded single-page queries', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function makePlane() {
+    return new SafetyIngestionGraphDataPlane({
+      acquireAppToken: vi.fn().mockResolvedValue('token'),
+      getSharePointToken: vi.fn(),
+    });
+  }
+
+  it('returns rows from a single bounded page without following @odata.nextLink', async () => {
+    const plane = makePlane();
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    fetchSpy
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: 'site-1' }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            value: [
+              { id: '1', fields: { ProjectNumber: '2026-100' } },
+              { id: '2', fields: { ProjectNumber: '2026-100' } },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+
+    const rows = await plane.listItemsBounded(
+      'https://contoso.sharepoint.com/sites/Safety',
+      'list-1',
+      {
+        filter: `fields/ReportingPeriodIdLookupId eq 14 and fields/ProjectNumber eq '2026-100'`,
+        top: 500,
+      },
+      'duplicate-detection-inspections',
+    );
+
+    expect(rows).toHaveLength(2);
+    // Exactly 2 graph calls: resolve-site + the single bounded page.
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('throws GraphBoundedQueryTruncatedError when Graph returns @odata.nextLink', async () => {
+    const plane = makePlane();
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    fetchSpy
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: 'site-1' }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            value: [{ id: '1', fields: {} }],
+            '@odata.nextLink': 'https://graph.microsoft.com/v1.0/sites/site-1/lists/list-1/items?$skiptoken=x',
+          }),
+          { status: 200 },
+        ),
+      );
+
+    const error = await plane
+      .listItemsBounded(
+        'https://contoso.sharepoint.com/sites/Safety',
+        'list-1',
+        { filter: `fields/ProjectNumber eq 'X'`, top: 500 },
+        'duplicate-detection-inspections',
+      )
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(GraphBoundedQueryTruncatedError);
+    expect((error as GraphBoundedQueryTruncatedError).contractId).toBe('duplicate-detection-inspections');
+    // Bounded query must not follow nextLink — one page request only.
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 });
 

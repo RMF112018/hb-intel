@@ -52,6 +52,32 @@ export class GraphConcurrencyError extends GraphRequestError {
   }
 }
 
+/**
+ * Raised when a bounded single-page Graph list query returns `@odata.nextLink`.
+ *
+ * Safety's compound `$filter` call sites (duplicate-detection-inspections,
+ * project-week-lookup) are contractually single-page: the filter narrows to a
+ * natural-key tuple that must fit in one page of matches. If Graph paginates,
+ * it signals either (a) a lost/weakened index, (b) unexpected data volume, or
+ * (c) a natural-key violation — all of which must surface loudly rather than
+ * silently widen into tenant-paging territory.
+ */
+export class GraphBoundedQueryTruncatedError extends Error {
+  readonly contractId: string;
+  readonly listId: string;
+
+  constructor(contractId: string, listId: string, returned: number, top: number | undefined) {
+    super(
+      `graph.list-items-bounded truncated: contract "${contractId}" on list ${listId} returned @odata.nextLink ` +
+      `after ${returned} row(s) (top=${top ?? 'unset'}). Bounded queries cannot silently follow nextLink — ` +
+      `verify the indexed-column contract and natural-key assumptions.`,
+    );
+    this.name = 'GraphBoundedQueryTruncatedError';
+    this.contractId = contractId;
+    this.listId = listId;
+  }
+}
+
 export class SafetyIngestionGraphDataPlane {
   private readonly tokenService: IManagedIdentityTokenService;
   private readonly siteIdCache = new Map<string, string>();
@@ -101,6 +127,65 @@ export class SafetyIngestionGraphDataPlane {
       fields: body.fields ?? {},
       etag: body['@odata.etag'],
     };
+  }
+
+  /**
+   * Bounded single-page variant of {@link listItems} used by Safety's compound
+   * `$filter` call sites. Issues exactly one page against Graph and throws
+   * {@link GraphBoundedQueryTruncatedError} if the response contains
+   * `@odata.nextLink`. Callers are expected to size `$top` to encompass the
+   * full legitimate result set — truncation means the contract is violated,
+   * not that the caller should paginate.
+   */
+  async listItemsBounded(
+    siteUrl: string,
+    listId: string,
+    query: IGraphListQuery,
+    contractId: string,
+  ): Promise<ReadonlyArray<IGraphListItem>> {
+    const siteId = await this.resolveSiteId(siteUrl);
+    const params = new URLSearchParams();
+    const expand = query.select && query.select.length > 0
+      ? `fields($select=${query.select.join(',')})`
+      : 'fields';
+    params.set('$expand', expand);
+    if (query.filter) params.set('$filter', query.filter);
+    if (query.orderBy) params.set('$orderby', query.orderBy);
+    if (query.top) params.set('$top', String(query.top));
+
+    const path = `/sites/${siteId}/lists/${listId}/items?${params.toString()}`;
+    const response = await this.graphFetch('list-items-bounded', path);
+    const body = (await response.json()) as {
+      value?: Array<{ id?: string; fields?: Record<string, unknown>; ['@odata.etag']?: string }>;
+      '@odata.nextLink'?: string;
+    };
+    const rows: IGraphListItem[] = (body.value ?? []).map((row) => ({
+      id: row.id ? String(row.id) : '',
+      fields: row.fields ?? {},
+      etag: row['@odata.etag'],
+    }));
+
+    if (body['@odata.nextLink']) {
+      this.log('safety.ingestion.graph.query.bounded.truncated', {
+        siteId,
+        listId,
+        contractId,
+        returned: rows.length,
+        top: query.top,
+        filter: query.filter,
+      });
+      throw new GraphBoundedQueryTruncatedError(contractId, listId, rows.length, query.top);
+    }
+
+    this.log('safety.ingestion.graph.query.bounded', {
+      siteId,
+      listId,
+      contractId,
+      returned: rows.length,
+      top: query.top,
+      filter: query.filter,
+    });
+    return rows;
   }
 
   async listItems(
