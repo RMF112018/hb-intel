@@ -105,6 +105,17 @@ Interpretation quick table:
 | Missing `HBC_FUNCTIONS_BUILD_*` app settings | Runtime identity stamp missing/incomplete | Fail |
 | Identity + routes + stamp checks all pass | Live runtime parity proven for deployed artifact | Pass |
 
+## Safety reporting-period seam
+
+Use when triaging Safety ingest/preview failures around reporting-period lookup.
+
+- `pnpm --filter @hbc/functions test -- src/services/__tests__/safety-reporting-period-contract.test.ts`
+  Verifies canonical contract enforcement: `reportingPeriodId=period-{id}` and companion-ID mismatch rejection.
+- `pnpm --filter @hbc/functions test -- src/services/__tests__/safety-ingestion-graph-repository.test.ts`
+  Verifies reporting-period Graph read uses normalized numeric item ID and emits seam diagnostics.
+- `pnpm --filter @hbc/functions test -- src/services/__tests__/safety-ingestion-graph-data-plane.test.ts`
+  Verifies Graph failure classification/telemetry for 401/403/404 on item reads.
+
 ## How to choose the right level
 
 Use the smallest level below that matches the risk:

@@ -234,18 +234,40 @@ export class SafetyIngestionGraphDataPlane {
     const siteId = await this.resolveSiteId(siteUrl);
     const expand = select.length > 0 ? `fields($select=${select.join(',')})` : 'fields';
     const path = `/sites/${siteId}/lists/${listId}/items/${itemId}?$expand=${encodeURIComponent(expand)}`;
-    const response = await this.graphFetchAllow404('get-item', path);
-    if (!response) return null;
-    const body = (await response.json()) as {
-      id?: string;
-      fields?: Record<string, unknown>;
-      ['@odata.etag']?: string;
-    };
-    return {
-      id: body.id ? String(body.id) : String(itemId),
-      fields: body.fields ?? {},
-      etag: body['@odata.etag'],
-    };
+    try {
+      const response = await this.graphFetchAllow404('get-item', path);
+      if (!response) return null;
+      const body = (await response.json()) as {
+        id?: string;
+        fields?: Record<string, unknown>;
+        ['@odata.etag']?: string;
+      };
+      return {
+        id: body.id ? String(body.id) : String(itemId),
+        fields: body.fields ?? {},
+        etag: body['@odata.etag'],
+      };
+    } catch (err) {
+      const failureClass = classifyGraphThrown(err);
+      const statusCode = err instanceof GraphRequestError ? err.status : undefined;
+      const graphErrorCode = err instanceof GraphRequestError
+        ? safeExtractGraphErrorCode(err.bodySnippet)
+        : undefined;
+      this.log('safety.ingestion.graph.get-item.failed', {
+        identityLane: 'managed-identity-app-only',
+        operation: 'get-item',
+        siteUrl: normalizeSiteUrl(siteUrl),
+        siteId,
+        listId,
+        itemId,
+        pathSummary: `/sites/${siteId}/lists/${listId}/items/${itemId}`,
+        statusCode,
+        graphErrorCode,
+        failureClass,
+        authLane: authLaneFromGraphFailureClass(failureClass),
+      });
+      throw err;
+    }
   }
 
   /**
@@ -656,6 +678,19 @@ function safeExtractGraphErrorCode(bodySnippet: string | undefined): string | un
   } catch {
     return undefined;
   }
+}
+
+function authLaneFromGraphFailureClass(
+  failureClass: GraphFailureClass,
+): 'identity' | 'permission' | 'binding' | 'throttle' | 'transport' | 'none' {
+  if (failureClass === 'identity-not-acquired') return 'identity';
+  if (failureClass === 'permission-denied-401' || failureClass === 'permission-denied-403') return 'permission';
+  if (failureClass === 'site-not-found' || failureClass === 'list-not-found' || failureClass === 'item-not-found') {
+    return 'binding';
+  }
+  if (failureClass === 'rate-limited') return 'throttle';
+  if (failureClass === 'transport-error') return 'transport';
+  return 'none';
 }
 
 async function readBodySnippet(response: Response): Promise<string> {

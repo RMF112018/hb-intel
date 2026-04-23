@@ -13,6 +13,10 @@ import {
   type ISafetyProvisionDiagnostic,
 } from '../../services/sharepoint-service.js';
 import { classifyIngestionFailure } from '../../services/safety-ingestion-failure-classifier.js';
+import {
+  ReportingPeriodContractError,
+  normalizeReportingPeriodContract,
+} from '../../services/safety-reporting-period-contract.js';
 import type { ProjectSourceClassification, UploadContext } from '../../../../../packages/features/safety/src/domain/types.js';
 
 /**
@@ -117,18 +121,49 @@ function parseDryRun(body: Record<string, unknown>): boolean {
   return body.dryRun === true;
 }
 
-function parseIngestionBody(body: Record<string, unknown>): {
-  fileName: string;
-  fileContentBase64: string;
-  context: UploadContext;
-} | null {
+type ParsedIngestionBody =
+  | {
+    ok: true;
+    value: {
+      fileName: string;
+      fileContentBase64: string;
+      context: UploadContext;
+    };
+  }
+  | {
+    ok: false;
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+
+function parseIngestionBody(body: Record<string, unknown>): ParsedIngestionBody {
+  const invalid = (
+    code: string,
+    message: string,
+    details?: Record<string, unknown>,
+  ): ParsedIngestionBody => ({
+    ok: false,
+    code,
+    message,
+    details,
+  });
+
   const fileName = typeof body.fileName === 'string' ? body.fileName.trim() : '';
   const fileContentBase64 = typeof body.fileContentBase64 === 'string'
     ? body.fileContentBase64.trim()
     : '';
   const rawContext = body.context as Record<string, unknown> | undefined;
-  if (!fileName || !fileContentBase64 || !rawContext) return null;
+  if (!fileName || !fileContentBase64 || !rawContext) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'fileName, fileContentBase64, and context.{uploadedByUpn, uploadedAt, reportingPeriodId} are required.',
+    );
+  }
 
+  const reportingPeriodSpItemIdCompanion = typeof rawContext.reportingPeriodSpItemId === 'number'
+    ? rawContext.reportingPeriodSpItemId
+    : undefined;
   const context: UploadContext = {
     uploadedByUpn:
       typeof rawContext.uploadedByUpn === 'string' ? rawContext.uploadedByUpn : '',
@@ -140,9 +175,7 @@ function parseIngestionBody(body: Record<string, unknown>): {
     reportingPeriodId:
       typeof rawContext.reportingPeriodId === 'string' ? rawContext.reportingPeriodId : '',
     reportingPeriodSpItemId:
-      typeof rawContext.reportingPeriodSpItemId === 'number'
-        ? rawContext.reportingPeriodSpItemId
-        : 0,
+      reportingPeriodSpItemIdCompanion ?? 0,
     // G-03 structured intake authority (Wave 2 revision): operator-entered
     // intake metadata flows through the backend as-is. Calendar-date
     // semantics are preserved (`inspectionDate` stays as `YYYY-MM-DD`;
@@ -160,8 +193,33 @@ function parseIngestionBody(body: Record<string, unknown>): {
     inspectionDate: parseOptionalString(rawContext.inspectionDate),
   };
 
-  if (!context.reportingPeriodId || !context.uploadedByUpn || !context.uploadedAt) return null;
-  return { fileName, fileContentBase64, context };
+  if (!context.reportingPeriodId || !context.uploadedByUpn || !context.uploadedAt) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'fileName, fileContentBase64, and context.{uploadedByUpn, uploadedAt, reportingPeriodId} are required.',
+    );
+  }
+
+  try {
+    const normalized = normalizeReportingPeriodContract({
+      reportingPeriodId: context.reportingPeriodId,
+      reportingPeriodSpItemId: reportingPeriodSpItemIdCompanion,
+    });
+    const normalizedContext: UploadContext = {
+      ...context,
+      reportingPeriodId: normalized.reportingPeriodId,
+      reportingPeriodSpItemId: normalized.reportingPeriodSpItemId,
+    };
+    return {
+      ok: true,
+      value: { fileName, fileContentBase64, context: normalizedContext },
+    };
+  } catch (err) {
+    if (err instanceof ReportingPeriodContractError) {
+      return invalid(err.code, err.message, err.details);
+    }
+    throw err;
+  }
 }
 
 function parseReplayBody(body: Record<string, unknown>): {
@@ -245,13 +303,8 @@ app.http('safetyIngestWorkbook', {
       }
 
       const parsed = parseIngestionBody(body);
-      if (!parsed) {
-        return errorResponse(
-          400,
-          'VALIDATION_ERROR',
-          'fileName, fileContentBase64, and context.{uploadedByUpn, uploadedAt, reportingPeriodId} are required.',
-          requestId,
-        );
+      if (!parsed.ok) {
+        return errorResponse(400, parsed.code, parsed.message, requestId, parsed.details);
       }
 
       try {
@@ -260,7 +313,7 @@ app.http('safetyIngestWorkbook', {
           ? new MockSharePointService()
           : new SharePointService();
 
-        const operation = await sharePoint.ingestSafetyWorkbook(parsed, requestId);
+        const operation = await sharePoint.ingestSafetyWorkbook(parsed.value, requestId);
         if (!operation.success || !operation.result) {
           return buildIngestFailureEnvelope(
             operation,
@@ -304,13 +357,8 @@ app.http('safetyPreviewWorkbook', {
       }
 
       const parsed = parseIngestionBody(body);
-      if (!parsed) {
-        return errorResponse(
-          400,
-          'VALIDATION_ERROR',
-          'fileName, fileContentBase64, and context.{uploadedByUpn, uploadedAt, reportingPeriodId} are required.',
-          requestId,
-        );
+      if (!parsed.ok) {
+        return errorResponse(400, parsed.code, parsed.message, requestId, parsed.details);
       }
 
       try {
@@ -319,7 +367,7 @@ app.http('safetyPreviewWorkbook', {
           ? new MockSharePointService()
           : new SharePointService();
 
-        const operation = await sharePoint.previewSafetyWorkbook(parsed, requestId);
+        const operation = await sharePoint.previewSafetyWorkbook(parsed.value, requestId);
         if (!operation.success || !operation.preview) {
           return buildPreviewFailureEnvelope(
             operation,

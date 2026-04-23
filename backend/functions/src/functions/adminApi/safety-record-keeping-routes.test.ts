@@ -52,6 +52,13 @@ describe('admin safety record-keeping provisioning route wiring', () => {
     expect(source).toContain('graphContext');
   });
 
+  it('enforces canonical reporting period identifier contract at ingest/preview ingress', () => {
+    expect(source).toContain('normalizeReportingPeriodContract');
+    expect(source).toContain('ReportingPeriodContractError');
+    expect(source).toContain('SAFETY_REPORTING_PERIOD_ID_INVALID');
+    expect(source).toContain('SAFETY_REPORTING_PERIOD_ID_MISMATCH');
+  });
+
   it('preserves request correlation on failure envelopes', () => {
     // Every non-success envelope (422 and 500) must include X-Request-Id and
     // requestId so live log correlation stays intact.

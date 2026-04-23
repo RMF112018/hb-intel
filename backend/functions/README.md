@@ -124,6 +124,17 @@ The GitHub Actions workflow `.github/workflows/main_hb-intel-function-app.yml` d
 - **Post-deploy parity proof (hard gate).** CI runs `scripts/verify-functions-live-parity.ts` after deploy. The verifier resolves the live host from Azure metadata and then requires all of the following to pass: expected identity from the manifest, `/api/health` `artifact` identity (`version`, `commitSha`, `buildTimestamp`), hosted Safety route truth (`ingest`, `ingest/preview`, `replay` must be non-404), `/api/health/ready` route presence (non-404), and deploy-stamped app settings (`HBC_FUNCTIONS_BUILD_VERSION`, `HBC_FUNCTIONS_BUILD_SHA`, `HBC_FUNCTIONS_BUILD_TIMESTAMP`).
 - **Telemetry stamp.** `SAFETY_INGESTION_BACKEND_VERSION` delegates to the same resolver, so every Safety ingestion event/metric in App Insights carries the running artifact's version.
 
+### Safety Reporting-Period ID Contract (Ingest/Preview)
+
+- Canonical identity: `context.reportingPeriodId = period-{spItemId}`.
+- Optional companion: `context.reportingPeriodSpItemId` may be supplied, but when present it must exactly match the numeric tail of `reportingPeriodId`.
+- Invalid/mismatched values fail fast at route ingress with explicit contract errors:
+  - `SAFETY_REPORTING_PERIOD_ID_INVALID`
+  - `SAFETY_REPORTING_PERIOD_SP_ITEM_ID_INVALID`
+  - `SAFETY_REPORTING_PERIOD_ID_MISMATCH`
+- Reporting-period Graph reads emit seam diagnostics with non-secret context:
+  - `requestedReportingPeriodId`, `parsedItemId`, `siteUrl`, `siteId`, `listId`, `graphOperation`, `graphPathSummary`, `statusCode`, `graphErrorCode`, `causeBucket`.
+
 Parity proof priority for incident triage:
 1. expected identity from local `artifact-manifest.json`,
 2. live `/api/health` `artifact` identity,

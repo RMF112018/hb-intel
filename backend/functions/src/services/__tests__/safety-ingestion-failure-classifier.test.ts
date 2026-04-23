@@ -9,6 +9,7 @@ import {
   classifyIngestionFailure,
   derivePreviewDiagnosticSummary,
 } from '../safety-ingestion-failure-classifier.js';
+import { ReportingPeriodContractError } from '../safety-reporting-period-contract.js';
 
 function makeGraphError(
   operation: string,
@@ -114,6 +115,18 @@ describe('classifyIngestionFailure', () => {
     expect(result.failureClass).toBe('token-acquisition-error');
     expect(result.errorCode).toBe('SHAREPOINT_TOKEN_ACQUISITION_FAILED');
     expect(result.graphContext?.authLane).toBe('identity');
+  });
+
+  it('maps ReportingPeriodContractError to item-binding-error with explicit code', () => {
+    const err = new ReportingPeriodContractError(
+      'SAFETY_REPORTING_PERIOD_ID_MISMATCH',
+      'Mismatch.',
+      { requestedId: 'period-8', reportingPeriodSpItemId: 9 },
+    );
+    const result = classifyIngestionFailure(err, 'SAFETY_INGESTION_FAILED');
+    expect(result.failureClass).toBe('item-binding-error');
+    expect(result.errorCode).toBe('SAFETY_REPORTING_PERIOD_ID_MISMATCH');
+    expect(result.graphContext?.authLane).toBe('binding');
   });
 
   it('maps unknown errors to unknown with fallback code', () => {

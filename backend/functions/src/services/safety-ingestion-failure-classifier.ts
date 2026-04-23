@@ -5,6 +5,7 @@ import {
   type GraphFailureClass,
 } from './safety-ingestion-graph-data-plane.js';
 import { SharePointTokenAcquisitionError } from './managed-identity-token-service.js';
+import { ReportingPeriodContractError } from './safety-reporting-period-contract.js';
 
 /**
  * Canonical ingestion-layer failure classes exposed to Safety operators.
@@ -101,6 +102,13 @@ export function classifyIngestionFailure(
       failureClass: 'token-acquisition-error',
       errorCode: err.code,
       graphContext: { authLane: 'identity' },
+    };
+  }
+  if (err instanceof ReportingPeriodContractError) {
+    return {
+      failureClass: 'item-binding-error',
+      errorCode: err.code,
+      graphContext: { authLane: 'binding' },
     };
   }
   const name = (err as { name?: string } | undefined)?.name;

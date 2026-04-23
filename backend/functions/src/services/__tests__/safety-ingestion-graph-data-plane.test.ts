@@ -333,6 +333,21 @@ describe('SafetyIngestionGraphDataPlane classified failure telemetry', () => {
     expect(classified).toBeDefined();
     expect(classified?.failureClass).toBe('permission-denied-401');
     expect(classified?.statusCode).toBe(401);
+
+    const seamFailure = logSpy.mock.calls
+      .map((call) => {
+        try {
+          return JSON.parse(String(call[0])) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      })
+      .find((p) => p && p.name === 'safety.ingestion.graph.get-item.failed');
+
+    expect(seamFailure).toBeDefined();
+    expect(seamFailure?.statusCode).toBe(401);
+    expect(seamFailure?.authLane).toBe('permission');
+    expect(seamFailure?.identityLane).toBe('managed-identity-app-only');
   });
 
   it('emits classified failure when Graph returns 404 on list resolution', async () => {

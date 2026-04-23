@@ -28,11 +28,17 @@ import { resolveUploadLibraryDescriptor } from '../../../../packages/features/sa
 import type { IManagedIdentityTokenService } from './managed-identity-token-service.js';
 import {
   GraphConcurrencyError,
+  GraphRequestError,
   SafetyIngestionGraphDataPlane,
   assertSafetyGraphEtag,
+  classifyGraphThrown,
   type IGraphListItem,
 } from './safety-ingestion-graph-data-plane.js';
 import { emitSafetyIngestionEvent, emitSafetyIngestionMetric } from './safety-ingestion-telemetry.js';
+import {
+  ReportingPeriodContractError,
+  normalizeReportingPeriodContract,
+} from './safety-reporting-period-contract.js';
 
 /**
  * Upper bound for concurrency-conflict retries on Safety Graph mutations.
@@ -232,15 +238,97 @@ export class SafetyIngestionGraphRepository {
     };
   }
 
-  async getReportingPeriod(id: string): Promise<SafetyReportingPeriod | null> {
+  async getReportingPeriod(
+    id: string,
+    reportingPeriodSpItemId?: number,
+  ): Promise<SafetyReportingPeriod | null> {
     const descriptor = this.list('SafetyReportingPeriods');
-    const item = await this.graph.getItemById(
-      descriptor.siteUrl,
-      descriptor.id,
-      spItemIdFromString(id),
-      ['Title', 'WeekStartDate', 'WeekEndDate', 'PeriodLabel', 'Status', 'PublishedAt', 'Notes'],
-    );
-    return item ? mapReportingPeriod(item) : null;
+    let normalizedId: number;
+    try {
+      const normalized = normalizeReportingPeriodContract({
+        reportingPeriodId: id,
+        reportingPeriodSpItemId,
+      });
+      normalizedId = normalized.reportingPeriodSpItemId;
+    } catch (err) {
+      if (err instanceof ReportingPeriodContractError) {
+        emitSafetyIngestionEvent('safety.ingestion.reporting-period.read.failed', {
+          operation: 'ingest',
+        }, {
+          identityLane: 'managed-identity-app-only',
+          requestedReportingPeriodId: id,
+          requestedReportingPeriodSpItemId: reportingPeriodSpItemId,
+          graphOperation: 'get-item',
+          causeBucket: 'item-contract',
+          code: err.code,
+          message: err.message,
+          details: err.details,
+        });
+      }
+      throw err;
+    }
+
+    const pathSummary = `/sites/<siteId>/lists/${descriptor.id}/items/${normalizedId}`;
+    emitSafetyIngestionEvent('safety.ingestion.reporting-period.read.start', {
+      operation: 'ingest',
+    }, {
+      identityLane: 'managed-identity-app-only',
+      siteUrl: descriptor.siteUrl,
+      listId: descriptor.id,
+      requestedReportingPeriodId: id,
+      requestedReportingPeriodSpItemId: reportingPeriodSpItemId,
+      parsedItemId: normalizedId,
+      graphOperation: 'get-item',
+      graphPathSummary: pathSummary,
+    });
+
+    try {
+      const siteId = await this.graph.resolveSiteId(descriptor.siteUrl);
+      const item = await this.graph.getItemById(
+        descriptor.siteUrl,
+        descriptor.id,
+        normalizedId,
+        ['Title', 'WeekStartDate', 'WeekEndDate', 'PeriodLabel', 'Status', 'PublishedAt', 'Notes'],
+      );
+      emitSafetyIngestionEvent('safety.ingestion.reporting-period.read.result', {
+        operation: 'ingest',
+      }, {
+        identityLane: 'managed-identity-app-only',
+        siteUrl: descriptor.siteUrl,
+        siteId,
+        listId: descriptor.id,
+        requestedReportingPeriodId: id,
+        requestedReportingPeriodSpItemId: reportingPeriodSpItemId,
+        parsedItemId: normalizedId,
+        graphOperation: 'get-item',
+        graphPathSummary: pathSummary,
+        found: Boolean(item),
+      });
+      return item ? mapReportingPeriod(item) : null;
+    } catch (err) {
+      const failureClass = classifyGraphThrown(err);
+      const statusCode = err instanceof GraphRequestError ? err.status : undefined;
+      const graphErrorCode = err instanceof GraphRequestError
+        ? safeExtractGraphErrorCode(err.bodySnippet)
+        : undefined;
+      emitSafetyIngestionEvent('safety.ingestion.reporting-period.read.failed', {
+        operation: 'ingest',
+      }, {
+        identityLane: 'managed-identity-app-only',
+        siteUrl: descriptor.siteUrl,
+        listId: descriptor.id,
+        requestedReportingPeriodId: id,
+        requestedReportingPeriodSpItemId: reportingPeriodSpItemId,
+        parsedItemId: normalizedId,
+        graphOperation: 'get-item',
+        graphPathSummary: pathSummary,
+        statusCode,
+        graphErrorCode,
+        failureClass,
+        causeBucket: reportingPeriodCauseBucketFromFailureClass(failureClass),
+      });
+      throw err;
+    }
   }
 
   async createReportingPeriod(
@@ -1124,6 +1212,41 @@ function toOptionalNumber(value: unknown): number | null {
 
 function toOptionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+function safeExtractGraphErrorCode(bodySnippet: string | undefined): string | undefined {
+  if (!bodySnippet) return undefined;
+  try {
+    const parsed = JSON.parse(bodySnippet) as { error?: { code?: string } };
+    return parsed.error?.code;
+  } catch {
+    return undefined;
+  }
+}
+
+function reportingPeriodCauseBucketFromFailureClass(
+  failureClass:
+    | 'identity-not-acquired'
+    | 'permission-denied-401'
+    | 'permission-denied-403'
+    | 'site-not-found'
+    | 'list-not-found'
+    | 'item-not-found'
+    | 'transport-error'
+    | 'rate-limited'
+    | 'unknown',
+): 'identity/grant' | 'site-binding' | 'list-binding' | 'item-contract' | 'item-missing' | 'unknown' {
+  if (
+    failureClass === 'identity-not-acquired' ||
+    failureClass === 'permission-denied-401' ||
+    failureClass === 'permission-denied-403'
+  ) {
+    return 'identity/grant';
+  }
+  if (failureClass === 'site-not-found') return 'site-binding';
+  if (failureClass === 'list-not-found') return 'list-binding';
+  if (failureClass === 'item-not-found') return 'item-missing';
+  return 'unknown';
 }
 
 function optionalString(value: unknown): string | undefined {

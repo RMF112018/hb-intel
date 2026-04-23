@@ -186,7 +186,10 @@ export async function evaluateSafetyIngestionPreview(
   const checksum = await computeChecksum(input.fileBytes);
 
   let reportingPeriod: ReportingPeriodPreview | undefined;
-  const period = await repository.getReportingPeriod(input.context.reportingPeriodId);
+  const period = await repository.getReportingPeriod(
+    input.context.reportingPeriodId,
+    input.context.reportingPeriodSpItemId,
+  );
   if (!period) {
     blockingErrors.push({
       code: 'REPORTING_PERIOD_NOT_FOUND',

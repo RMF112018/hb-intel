@@ -9,6 +9,7 @@ import { configureSafetyListGuids } from '../../../../../packages/features/safet
 import {
   GraphBoundedQueryTruncatedError,
   GraphConcurrencyError,
+  GraphRequestError,
 } from '../safety-ingestion-graph-data-plane.js';
 import {
   SAFETY_GRAPH_QUERY_CONTRACTS,
@@ -34,6 +35,7 @@ describe('SafetyIngestionGraphRepository', () => {
     });
 
     const fakeGraph = {
+      resolveSiteId: vi.fn().mockResolvedValue('site-1'),
       getItemById: vi.fn(),
       listItems: vi.fn(),
       listItemsBounded: vi.fn(),
@@ -70,7 +72,55 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(period?.id).toBe('period-14');
     expect(period?.spItemId).toBe(14);
     expect(period?.weekStartDate).toBe('2026-04-20');
+    expect(fakeGraph.getItemById).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      14,
+      expect.any(Array),
+    );
     expect(fakeGraph.getItemById).toHaveBeenCalledOnce();
+  });
+
+  it('rejects mismatched canonical and numeric reporting period identifiers', async () => {
+    const { repo, fakeGraph } = makeRepository();
+
+    await expect(
+      repo.getReportingPeriod('period-14', 15),
+    ).rejects.toThrow(/must reference the same item/i);
+
+    expect(fakeGraph.getItemById).not.toHaveBeenCalled();
+  });
+
+  it('emits self-classifying seam diagnostics for reporting-period 401 failures', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    fakeGraph.getItemById.mockRejectedValue(
+      new GraphRequestError(
+        'get-item',
+        '/sites/site-1/lists/list-1/items/14',
+        new Response('unauthorized', { status: 401 }),
+        'unauthorized',
+      ),
+    );
+
+    await expect(repo.getReportingPeriod('period-14')).rejects.toBeInstanceOf(GraphRequestError);
+
+    const payload = logSpy.mock.calls
+      .map((call) => {
+        try {
+          return JSON.parse(String(call[0])) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      })
+      .find((entry) => entry && entry.name === 'safety.ingestion.reporting-period.read.failed');
+
+    expect(payload).toBeDefined();
+    expect(payload?.requestedReportingPeriodId).toBe('period-14');
+    expect(payload?.parsedItemId).toBe(14);
+    expect(payload?.statusCode).toBe(401);
+    expect(payload?.causeBucket).toBe('identity/grant');
+    expect(payload?.identityLane).toBe('managed-identity-app-only');
   });
 
   it('creates reporting periods through Graph list item create', async () => {

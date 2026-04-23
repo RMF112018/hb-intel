@@ -223,7 +223,10 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
         duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
       });
 
-      const period = await repo.getReportingPeriod(input.context.reportingPeriodId);
+      const period = await repo.getReportingPeriod(
+        input.context.reportingPeriodId,
+        input.context.reportingPeriodSpItemId,
+      );
       if (!period) {
         return {
           success: false,
