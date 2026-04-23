@@ -13,6 +13,10 @@
     "./project-sites": {
       "types": "./dist/webparts/projectSites/index.d.ts",
       "import": "./dist/webparts/projectSites/index.js"
+    },
+    "./project-sites/search-seam": {
+      "types": "./dist/webparts/projectSites/searchSeam.d.ts",
+      "import": "./dist/webparts/projectSites/searchSeam.js"
     }
   },
   "scripts": {

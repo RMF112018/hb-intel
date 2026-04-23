@@ -16,7 +16,7 @@ import {
   useProjectSites,
   type IProjectSiteEntry,
   type ProjectSiteSourceClassification,
-} from '@hbc/spfx/project-sites';
+} from '@hbc/spfx/project-sites/search-seam';
 import type { ProjectSourceClassification } from '@hbc/features-safety';
 
 /**
