@@ -59,14 +59,14 @@ describe('SharePoint adapter auth behavior wiring', () => {
     process.env = originalEnv;
   });
 
-  it('SharePointService uses BearerToken behavior for PnP requests', async () => {
+  it('SharePoint provisioning service uses BearerToken behavior for PnP requests', async () => {
     process.env.SHAREPOINT_TENANT_URL = 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
 
-    const mod = await import('../sharepoint-service.js');
-    const service = new mod.SharePointService();
+    const mod = await import('../sharepoint-provisioning-service.js');
+    const service = new mod.SharePointProvisioningService();
 
     const targetSite = 'https://hedrickbrotherscom.sharepoint.com/sites/Safety';
-    await (service as any).getSP(targetSite);
+    await service.openPnPContext(targetSite);
 
     expect(mocks.getTokenSpy).toHaveBeenCalledWith('https://hedrickbrotherscom.sharepoint.com/.default');
     expect(mocks.spfiSpy).toHaveBeenCalledWith(targetSite);

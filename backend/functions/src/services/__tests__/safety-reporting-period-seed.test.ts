@@ -1,13 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SharePointService } from '../sharepoint-service.js';
+import { SafetyProvisioningService } from '../safety-provisioning-service.js';
+import type { ISharePointProvisioningService } from '../sharepoint-provisioning-service.js';
 import { resolveSeedTokenService } from '../../../../../scripts/seed-safety-reporting-period.js';
 
 function buildServiceWithRows(rows: ReadonlyArray<Record<string, unknown>>) {
   process.env.SHAREPOINT_TENANT_URL = 'https://hedrickbrotherscom.sharepoint.com';
-
-  const service = new SharePointService({
-    getToken: vi.fn(),
-  } as any);
 
   const selectInvoker = vi.fn(async () => rows);
   const itemsAdd = vi.fn(async (item: Record<string, unknown>) => ({ data: { Id: 321, ...item } }));
@@ -18,17 +15,47 @@ function buildServiceWithRows(rows: ReadonlyArray<Record<string, unknown>>) {
     },
   };
 
-  (service as any).resolveSafetyProvisioningTargets = vi.fn(() => ({
-    safetySiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/Safety',
-    hbCentralSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
-  }));
-  (service as any).getSP = vi.fn(async () => ({
-    web: {
-      lists: {
-        getByTitle: vi.fn(() => list),
+  const sharePoint = {
+    openPnPContext: vi.fn(async () => ({
+      web: {
+        lists: {
+          getByTitle: vi.fn(() => list),
+        },
       },
-    },
-  }));
+    })),
+    ensureListExistsDetailed: vi.fn(),
+    ensureLibraryExistsDetailed: vi.fn(),
+    addListField: vi.fn(),
+    createSite: vi.fn(),
+    siteExists: vi.fn(),
+    deleteSite: vi.fn(),
+    createDocumentLibrary: vi.fn(),
+    documentLibraryExists: vi.fn(),
+    listExists: vi.fn(),
+    createDataLists: vi.fn(),
+    uploadTemplateFiles: vi.fn(),
+    uploadTemplateFile: vi.fn(),
+    createFolderIfNotExists: vi.fn(),
+    fileExists: vi.fn(),
+    installWebParts: vi.fn(),
+    setGroupPermissions: vi.fn(),
+    assignGroupToPermissionLevel: vi.fn(),
+    associateHubSite: vi.fn(),
+    isHubAssociated: vi.fn(),
+    disassociateHubSite: vi.fn(),
+    writeAuditRecord: vi.fn(),
+  } as unknown as ISharePointProvisioningService;
+
+  const graphDiscovery = {
+    listExists: vi.fn(),
+    resolveListId: vi.fn(),
+    getWritableColumnNames: vi.fn(),
+    getClient: vi.fn(),
+  };
+
+  const tokenService = { getSharePointToken: vi.fn(), acquireAppToken: vi.fn() };
+
+  const service = new SafetyProvisioningService(tokenService, sharePoint, graphDiscovery);
 
   return { service, itemsAdd };
 }

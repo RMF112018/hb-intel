@@ -456,3 +456,24 @@ Detailed references in `docs/architecture/plans/MASTER/spfx/admin/phase-07/`:
 - `provisioning-prelaunch-validation-model.md`
 - `provisioning-diagnostics-and-evidence-guide.md`
 - `provisioning-readiness-dependency-integration.md`
+
+## Backend service boundaries (Prompt 03 decomposition)
+
+The previous `SharePointService` god-class has been decomposed into four clear seams. `SharePointService` is preserved as a thin facade so existing consumers (provisioning saga steps, admin safety-record-keeping routes, `timerFullSpec`, and the two service factories) keep their zero-argument construction and public surface. New code should target the seam that best matches its concern.
+
+| Seam | File | Responsibility |
+|------|------|----------------|
+| SharePoint / PnP provisioning | `services/sharepoint-provisioning-service.ts` | Site/library/list lifecycle, fields, files/folders, permissions, hub association, web-part install, audit log writes, readiness checks. Pure PnPjs. |
+| Graph list discovery | `services/graph-list-discovery-service.ts` | `listExists` / `resolveListId` / `getWritableColumnNames` via Microsoft Graph. Owns the per-site `GraphListClient` cache. |
+| Safety provisioning / control plane | `services/safety-provisioning-service.ts` | `provisionSafetyRecordKeepingSharePoint`, `ensureCurrentWeekSafetyReportingPeriod`, container/field schema reconciliation. Composes the SharePoint provisioning seam + Graph discovery seam. |
+| Safety ingestion application | `services/safety-ingestion-application-service.ts` | `ingestSafetyWorkbook` / `previewSafetyWorkbook` / `replaySafetyWorkbook`. Readiness gates, GUID overlay resolution, preview gating, repository orchestration, telemetry, and failure classification. |
+
+Supporting modules:
+
+- `services/sharepoint-common.ts` — `getPnPContext`, `waitForSite`, URL/GUID/date normalizers, error-code mapping.
+- `services/safety-readiness.ts` — `resolveSafetyProvisioningTargets`, `validateReferenceLists`, `validateSafetyIngestionContracts`.
+- `services/safety-provisioning-types.ts` — shared Safety provisioning/ingestion result types re-exported by the facade.
+
+The Safety ingestion Graph repository and data plane (`safety-ingestion-graph-repository.ts`, `safety-ingestion-graph-data-plane.ts`) were already well-separated and are unchanged.
+
+Behavior-first boundary invariants are locked in `services/__tests__/service-boundaries.test.ts`.
