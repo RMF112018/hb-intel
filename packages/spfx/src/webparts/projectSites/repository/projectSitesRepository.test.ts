@@ -9,6 +9,7 @@ import {
   __drainAllItemsForTests,
   buildLegacyFallbackLookup,
   pickBestLegacyFallbackCandidate,
+  resolveHbCentralWebUrl,
   toLegacyFallbackCandidate,
 } from './projectSitesRepository.js';
 
@@ -179,6 +180,26 @@ describe('projectSitesRepository fallback selection', () => {
     expect(url).toContain('$filter=Year%20eq%202025');
     expect(url).toContain('$orderby=Year%20desc');
     expect(url).toContain('$top=5000');
+  });
+
+  it('pins repository reads to /sites/HBCentral regardless of the current page web', () => {
+    expect(resolveHbCentralWebUrl('https://tenant.sharepoint.com/sites/Safety')).toBe(
+      'https://tenant.sharepoint.com/sites/HBCentral',
+    );
+    expect(
+      resolveHbCentralWebUrl('https://tenant.sharepoint.com/sites/HBCentral/SitePages/Safety.aspx'),
+    ).toBe('https://tenant.sharepoint.com/sites/HBCentral');
+    expect(resolveHbCentralWebUrl('https://other.sharepoint.com/')).toBe(
+      'https://other.sharepoint.com/sites/HBCentral',
+    );
+  });
+
+  it('rejects a missing or non-http current web URL (bootstrap failure, not empty list)', () => {
+    expect(() => resolveHbCentralWebUrl('')).toThrow(/cannot resolve HBCentral web URL/);
+    expect(() => resolveHbCentralWebUrl('not-a-url')).toThrow(/cannot resolve HBCentral web URL/);
+    expect(() => resolveHbCentralWebUrl('ftp://tenant.sharepoint.com/')).toThrow(
+      /cannot resolve HBCentral web URL/,
+    );
   });
 
   it('escapes single-quotes in list titles to survive SharePoint REST', () => {

@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { HbcTypography } from '@hbc/ui-kit';
 import {
   applyProjectSitesPipeline,
@@ -18,6 +19,7 @@ import {
   type ProjectSiteSourceClassification,
 } from '@hbc/spfx/project-sites/search-seam';
 import type { ProjectSourceClassification } from '@hbc/features-safety';
+import { SafetyStatusPanel } from './SafetyStatusPanel.js';
 
 /**
  * SafetyProjectPicker — Phase-04 audit G-03 Wave 2 revision.
@@ -98,6 +100,10 @@ export function SafetyProjectPicker({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const projectSitesResult = useProjectSites(SCOPE_ALL);
+  const queryClient = useQueryClient();
+  const handleRetry = useCallback((): void => {
+    void queryClient.invalidateQueries({ queryKey: ['project-sites'] });
+  }, [queryClient]);
 
   const matches = useMemo<IProjectSiteEntry[]>(() => {
     if (!projectSitesResult || projectSitesResult.status !== 'success') return [];
@@ -170,9 +176,13 @@ export function SafetyProjectPicker({
     [disabled, matches, highlightedIndex, isOpen, handleSelect],
   );
 
-  const describedBy = [helpId, errorId].filter(Boolean).join(' ') || undefined;
   const isLoading = projectSitesResult?.status === 'loading';
   const isError = projectSitesResult?.status === 'error';
+  const registryErrorId = `${rootId}-registry-error`;
+  const describedBy =
+    [helpId, errorId, isError ? registryErrorId : undefined]
+      .filter(Boolean)
+      .join(' ') || undefined;
 
   return (
     <div
@@ -183,6 +193,22 @@ export function SafetyProjectPicker({
       <label htmlFor={inputId} className="safety-project-picker__label">
         <HbcTypography intent="label">{label}</HbcTypography>
       </label>
+
+      {isError && (
+        <div id={registryErrorId}>
+          <SafetyStatusPanel
+            intent="blocked"
+            data-safety-ui="project-picker-registry-error"
+            description="The project registry is unavailable. Selection is blocked until the HBCentral-hosted Projects + Legacy Project Fallback Registry are reachable."
+            detail={projectSitesResult?.errorMessage ?? undefined}
+            action={{
+              label: 'Retry loading projects',
+              variant: 'secondary',
+              onClick: handleRetry,
+            }}
+          />
+        </div>
+      )}
 
       {selected && (
         <div

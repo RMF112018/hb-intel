@@ -101,6 +101,41 @@ interface ISpfxRequester {
 }
 
 /**
+ * Canonical source web for the project registries the repository reads.
+ *
+ * Both `Projects` and `Legacy Project Fallback Registry` live on the
+ * HBCentral site, regardless of where the consuming webpart is hosted.
+ * Safety webpart hosts under `/sites/Safety`; deriving the web URL from
+ * the current page context led to 404s against
+ * `/sites/Safety/_api/web/lists/getByTitle('Projects')`. Binding the
+ * repository to the HBCentral web directly ensures one grounded
+ * source-of-truth for every consumer.
+ *
+ * We preserve the tenant host from the current SPFx context so the
+ * repository survives tenant moves (dev/test/prod) and only hardcodes
+ * the site-collection segment.
+ */
+const HBCENTRAL_SITE_PATH = '/sites/HBCentral';
+
+export function resolveHbCentralWebUrl(currentAbsoluteUrl: string): string {
+  // Accept any `https://host/...` — keep protocol + host, force
+  // HBCentral path. Reject missing/non-http inputs as a bootstrap issue.
+  try {
+    const parsed = new URL(currentAbsoluteUrl);
+    if (!parsed.protocol.startsWith('http')) {
+      throw new Error(`unexpected protocol: ${parsed.protocol}`);
+    }
+    return `${parsed.protocol}//${parsed.host}${HBCENTRAL_SITE_PATH}`;
+  } catch (err) {
+    throw new Error(
+      `Project Sites repository: cannot resolve HBCentral web URL from "${currentAbsoluteUrl}": ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+}
+
+/**
  * Read the SPFx context once and return everything the drain needs.
  *
  * We deliberately avoid importing `@microsoft/sp-http` as a value: that
@@ -111,15 +146,21 @@ interface ISpfxRequester {
  * use the browser `fetch` with same-origin credentials — valid for
  * SharePoint REST GETs inside an authenticated SPFx webpart.
  *
- * Fail loudly if the webUrl is missing — that is a bootstrap problem,
- * not an empty-list problem.
+ * The requester is pinned to the HBCentral web (see
+ * `resolveHbCentralWebUrl`) so consumers hosted on other site
+ * collections (e.g. Safety on `/sites/Safety`) still read from the
+ * canonical registry source.
+ *
+ * Fail loudly if the current page web URL is missing — that is a
+ * bootstrap problem, not an empty-list problem.
  */
 function getSpfxRequester(): ISpfxRequester {
   const context = getSpfxContext();
-  const webUrl = context.pageContext?.web?.absoluteUrl;
-  if (typeof webUrl !== 'string' || webUrl.length === 0) {
+  const currentAbsoluteUrl = context.pageContext?.web?.absoluteUrl;
+  if (typeof currentAbsoluteUrl !== 'string' || currentAbsoluteUrl.length === 0) {
     throw new Error('Project Sites repository: SPFx pageContext.web.absoluteUrl is missing.');
   }
+  const webUrl = resolveHbCentralWebUrl(currentAbsoluteUrl);
   const fetchImpl: ItemsFetch = (url: string) =>
     fetch(url, {
       // Matches the canonical SharePoint REST pattern in
