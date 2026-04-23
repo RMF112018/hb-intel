@@ -26,15 +26,134 @@ interface IGraphDriveUploadResponse {
   };
 }
 
+/**
+ * Canonical failure classes for Safety Graph calls. Emitted via classified
+ * telemetry so live 401/403/404 responses can be triaged without a code
+ * round-trip. Operators map the live class directly to the remediation lane:
+ * identity, per-site grant, wrong site/list binding, upstream rate limiting,
+ * or transport.
+ */
+export type GraphFailureClass =
+  | 'identity-not-acquired'
+  | 'permission-denied-401'
+  | 'permission-denied-403'
+  | 'site-not-found'
+  | 'list-not-found'
+  | 'item-not-found'
+  | 'transport-error'
+  | 'rate-limited'
+  | 'unknown';
+
+/**
+ * Best-effort shape check for the Graph error code embedded in response bodies.
+ * Used by `classifyGraphFailure` to distinguish site/list/item "not found"
+ * cases from generic 404s.
+ */
+interface IGraphErrorBody {
+  error?: {
+    code?: string;
+    message?: string;
+    innerError?: { 'request-id'?: string; requestId?: string; 'client-request-id'?: string };
+  };
+}
+
+/**
+ * Classify a Graph HTTP response + request path into a canonical failure
+ * class. Pure: never throws, never reads the response body twice.
+ *
+ * Inputs:
+ * - `status`: HTTP status from the Graph response
+ * - `path`: request path (e.g. `/sites/<siteId>/lists/<listId>/items/<itemId>`)
+ *   used to disambiguate 404s into site/list/item lanes.
+ * - `bodySnippet`: best-effort truncated response body text. Optional — if
+ *   absent, classification falls back to status-only heuristics.
+ */
+export function classifyGraphFailure(
+  status: number,
+  path: string,
+  bodySnippet?: string,
+): GraphFailureClass {
+  if (status === 401) return 'permission-denied-401';
+  if (status === 403) return 'permission-denied-403';
+  if (status === 429) return 'rate-limited';
+
+  if (status === 404) {
+    const errorCode = extractGraphErrorCode(bodySnippet);
+    const lane = pathLane(path);
+    // Distinguish site/list/item by the deepest present segment in the path.
+    // A 404 on a /sites/ resolution path (no /lists/ or /items/ segment)
+    // is definitionally a site-binding miss.
+    if (lane === 'site') return 'site-not-found';
+    if (lane === 'list') return 'list-not-found';
+    if (lane === 'item') return 'item-not-found';
+    // Graph itemNotFound on an unrecognized path still lands in the
+    // deepest-lane classification via the switch above; default to unknown.
+    if (errorCode === 'itemNotFound') return 'item-not-found';
+    return 'unknown';
+  }
+
+  if (status >= 500 && status <= 599) return 'transport-error';
+
+  return 'unknown';
+}
+
+/**
+ * Coerce an arbitrary thrown value into a canonical failure class. Used in
+ * catch sites where we don't know whether the throw came from a Graph
+ * response (classified via status) or from an earlier stage (token
+ * acquisition, network error).
+ */
+export function classifyGraphThrown(err: unknown): GraphFailureClass {
+  if (err instanceof GraphRequestError) return err.failureClass;
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase();
+    if (msg.includes('failed to acquire') || msg.includes('managed identity token')) {
+      return 'identity-not-acquired';
+    }
+    if (msg.includes('fetch failed') || msg.includes('network') || msg.includes('econnrefused')) {
+      return 'transport-error';
+    }
+  }
+  return 'unknown';
+}
+
+function pathLane(path: string): 'site' | 'list' | 'item' | 'other' {
+  // Ordered deepest-first so `/items/` wins over `/lists/` wins over `/sites/`.
+  if (/\/items\/[^/]+(?:\/|\?|$)/.test(path) || /\/items\?/.test(path) || /\/items$/.test(path)) {
+    return 'item';
+  }
+  if (/\/lists\/[^/]+(?:\/|\?|$)/.test(path) || /\/lists\?/.test(path) || /\/lists$/.test(path)) {
+    return 'list';
+  }
+  if (/\/sites\//.test(path)) return 'site';
+  return 'other';
+}
+
+function extractGraphErrorCode(bodySnippet: string | undefined): string | undefined {
+  if (!bodySnippet) return undefined;
+  try {
+    const parsed = JSON.parse(bodySnippet) as IGraphErrorBody;
+    return parsed.error?.code;
+  } catch {
+    return undefined;
+  }
+}
+
 export class GraphRequestError extends Error {
   readonly status: number;
   readonly response: Response;
+  readonly failureClass: GraphFailureClass;
+  readonly path: string;
+  readonly bodySnippet: string;
 
   constructor(operation: string, path: string, response: Response, bodySnippet: string) {
     super(`graph.${operation} ${path} failed (${response.status}): ${bodySnippet}`);
     this.name = 'GraphRequestError';
     this.status = response.status;
     this.response = response;
+    this.path = path;
+    this.bodySnippet = bodySnippet;
+    this.failureClass = classifyGraphFailure(response.status, path, bodySnippet);
   }
 }
 
@@ -312,7 +431,10 @@ export class SafetyIngestionGraphDataPlane {
     assertSafetyGraphEtag(etag, `${listId}/${itemId}`);
     const siteId = await this.resolveSiteId(siteUrl);
     const path = `/sites/${siteId}/lists/${listId}/items/${itemId}/fields`;
-    const token = await this.tokenService.acquireAppToken([GRAPH_SCOPE]);
+    const token = await this.tokenService.acquireAppToken([GRAPH_SCOPE]).catch((err) => {
+      this.emitClassifiedFailure('update-item-with-concurrency', path, err);
+      throw err;
+    });
     const response = await fetch(toAbsoluteGraphUrl(path), {
       method: 'PATCH',
       headers: {
@@ -324,20 +446,24 @@ export class SafetyIngestionGraphDataPlane {
       body: JSON.stringify(fields),
     });
     if (response.status === 409 || response.status === 412) {
-      throw new GraphConcurrencyError(
+      const err = new GraphConcurrencyError(
         'update-item-with-concurrency',
         path,
         response,
         await readBodySnippet(response),
       );
+      this.emitClassifiedFailure('update-item-with-concurrency', path, err);
+      throw err;
     }
     if (!response.ok) {
-      throw new GraphRequestError(
+      const err = new GraphRequestError(
         'update-item-with-concurrency',
         path,
         response,
         await readBodySnippet(response),
       );
+      this.emitClassifiedFailure('update-item-with-concurrency', path, err);
+      throw err;
     }
     this.log('safety.ingestion.graph.item.updated', {
       siteId,
@@ -425,56 +551,81 @@ export class SafetyIngestionGraphDataPlane {
     path: string,
     init?: RequestInit,
   ): Promise<Response> {
-    return withRetry(
-      async () => {
-        const token = await this.tokenService.acquireAppToken([GRAPH_SCOPE]);
-        const response = await fetch(toAbsoluteGraphUrl(path), {
-          ...init,
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-            ...(init?.headers ?? {}),
-          },
-        });
-
-        if (response.status === 429 || response.status >= 500) {
-          throw new GraphTransientError(
-            operation,
-            path,
-            response,
-            await readBodySnippet(response),
-          );
-        }
-        if (!response.ok) {
-          throw new GraphRequestError(
-            operation,
-            path,
-            response,
-            await readBodySnippet(response),
-          );
-        }
-        return response;
-      },
-      {
-        maxAttempts: 4,
-        baseDelayMs: 1000,
-        isTransient: (error) => error instanceof GraphTransientError,
-        onRetry: (error, attempt, delayMs, metadata) => {
-          this.log('safety.ingestion.graph.retry', {
-            operation,
-            path,
-            attempt,
-            delayMs,
-            delaySource: metadata.source,
-            statusCode: metadata.statusCode,
-            retryAfterMs: metadata.retryAfterMs,
-            baseBackoffMs: metadata.baseBackoffMs,
-            jitterMs: metadata.jitterMs,
-            message: error instanceof Error ? error.message : String(error),
+    try {
+      return await withRetry(
+        async () => {
+          const token = await this.tokenService.acquireAppToken([GRAPH_SCOPE]);
+          const response = await fetch(toAbsoluteGraphUrl(path), {
+            ...init,
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${token}`,
+              ...(init?.headers ?? {}),
+            },
           });
+
+          if (response.status === 429 || response.status >= 500) {
+            throw new GraphTransientError(
+              operation,
+              path,
+              response,
+              await readBodySnippet(response),
+            );
+          }
+          if (!response.ok) {
+            throw new GraphRequestError(
+              operation,
+              path,
+              response,
+              await readBodySnippet(response),
+            );
+          }
+          return response;
         },
-      },
-    );
+        {
+          maxAttempts: 4,
+          baseDelayMs: 1000,
+          isTransient: (error) => error instanceof GraphTransientError,
+          onRetry: (error, attempt, delayMs, metadata) => {
+            this.log('safety.ingestion.graph.retry', {
+              operation,
+              path,
+              attempt,
+              delayMs,
+              delaySource: metadata.source,
+              statusCode: metadata.statusCode,
+              retryAfterMs: metadata.retryAfterMs,
+              baseBackoffMs: metadata.baseBackoffMs,
+              jitterMs: metadata.jitterMs,
+              message: error instanceof Error ? error.message : String(error),
+            });
+          },
+        },
+      );
+    } catch (err) {
+      // Classify and emit final failure telemetry BEFORE rethrowing. This is
+      // the single seam every Safety Graph call flows through, so every live
+      // 4xx/5xx / network / identity failure is reported with its canonical
+      // class — directly enabling operator triage of reporting-period 401s.
+      this.emitClassifiedFailure(operation, path, err);
+      throw err;
+    }
+  }
+
+  private emitClassifiedFailure(operation: string, path: string, err: unknown): void {
+    const failureClass = classifyGraphThrown(err);
+    const status = err instanceof GraphRequestError ? err.status : undefined;
+    const graphErrorCode = err instanceof GraphRequestError
+      ? safeExtractGraphErrorCode(err.bodySnippet)
+      : undefined;
+    this.log('safety.ingestion.graph.failure.classified', {
+      operation,
+      path,
+      failureClass,
+      statusCode: status,
+      graphErrorCode,
+      message: err instanceof Error ? err.message : String(err),
+    });
   }
 
   private async graphFetchAllow404(
@@ -494,6 +645,16 @@ export class SafetyIngestionGraphDataPlane {
 
   private log(event: string, properties: Record<string, unknown>): void {
     emitSafetyIngestionEvent(event, { operation: 'ingest' }, properties);
+  }
+}
+
+function safeExtractGraphErrorCode(bodySnippet: string | undefined): string | undefined {
+  if (!bodySnippet) return undefined;
+  try {
+    const parsed = JSON.parse(bodySnippet) as { error?: { code?: string } };
+    return parsed.error?.code;
+  } catch {
+    return undefined;
   }
 }
 

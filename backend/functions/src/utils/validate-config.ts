@@ -15,6 +15,23 @@ import { validateSafetyPermissionPosture } from './safety-permission-posture.js'
 import { deriveSafetyRolloutReadiness } from './safety-rollout-readiness.js';
 
 /**
+ * Canonical classes for Safety-backend binding preflight failures. Mirror
+ * the runtime Graph failure classes so operators can triage live logs
+ * against startup logs using the same vocabulary.
+ */
+export type SafetyBindingFailureClass =
+  | 'site-binding-missing'
+  | 'site-binding-malformed'
+  | 'identity-binding-missing';
+
+export interface ISafetyBindingIssue {
+  code: string;
+  failureClass: SafetyBindingFailureClass;
+  message: string;
+  remediation: string;
+}
+
+/**
  * Returns true if startup config validation should run.
  * Skips in mock mode or test mode since mock services don't need real config.
  */
@@ -86,6 +103,15 @@ export function validateProvisioningPrerequisites(): void {
     for (const issue of safetyReadiness.issues) {
       issues.push(`  - [${issue.code}] ${issue.message} (${issue.remediation})`);
     }
+  }
+
+  // Safety backend bindings: fail loudly at startup if the site/identity
+  // bindings Safety ingestion depends on are missing or malformed. This
+  // prevents the "generic 401 at first ingest call" class of live incidents
+  // — operators see the canonical class at startup, not mid-request.
+  const bindingIssues = validateSafetyBackendBindings();
+  for (const issue of bindingIssues) {
+    issues.push(`  - [${issue.code}] ${issue.message} (${issue.remediation})`);
   }
 
   if (issues.length > 0) {
@@ -224,4 +250,82 @@ export function validateRequiredConfig(): void {
       ].join('\n'),
     );
   }
+}
+
+/**
+ * Validate Safety-backend bindings (site URLs, managed identity) and return
+ * a structured list of issues. Used by `validateProvisioningPrerequisites()`
+ * to fail loudly at startup when a Safety ingestion request would
+ * inevitably 401 for a binding reason. Returns `[]` when bindings pass.
+ *
+ * Does not perform a live Graph probe — cold-start safe. Live reachability
+ * surfaces via the data-plane classified-failure telemetry on first call.
+ */
+export function validateSafetyBackendBindings(): ReadonlyArray<ISafetyBindingIssue> {
+  if (!shouldValidateConfig()) return [];
+
+  const issues: ISafetyBindingIssue[] = [];
+
+  const tenantUrlRaw = process.env.SHAREPOINT_TENANT_URL?.trim();
+  if (!tenantUrlRaw) {
+    issues.push({
+      code: 'SAFETY_BINDING_TENANT_URL_MISSING',
+      failureClass: 'site-binding-missing',
+      message: 'SHAREPOINT_TENANT_URL is not set.',
+      remediation: 'Set SHAREPOINT_TENANT_URL to the root SharePoint tenant URL (e.g., https://contoso.sharepoint.com).',
+    });
+  } else {
+    let tenantUrl: URL;
+    try {
+      tenantUrl = new URL(tenantUrlRaw);
+    } catch {
+      issues.push({
+        code: 'SAFETY_BINDING_TENANT_URL_MALFORMED',
+        failureClass: 'site-binding-malformed',
+        message: `SHAREPOINT_TENANT_URL is not a valid URL: "${tenantUrlRaw}".`,
+        remediation: 'Set SHAREPOINT_TENANT_URL to a valid https:// SharePoint tenant URL.',
+      });
+      tenantUrl = new URL('https://invalid.invalid'); // placeholder to continue checks harmlessly
+    }
+    if (tenantUrl.protocol !== 'https:') {
+      issues.push({
+        code: 'SAFETY_BINDING_TENANT_URL_MALFORMED',
+        failureClass: 'site-binding-malformed',
+        message: `SHAREPOINT_TENANT_URL must use https://, got "${tenantUrlRaw}".`,
+        remediation: 'Set SHAREPOINT_TENANT_URL to an https:// URL.',
+      });
+    }
+    if (!tenantUrl.hostname.endsWith('.sharepoint.com') && tenantUrl.hostname !== 'invalid.invalid') {
+      issues.push({
+        code: 'SAFETY_BINDING_TENANT_URL_MALFORMED',
+        failureClass: 'site-binding-malformed',
+        message: `SHAREPOINT_TENANT_URL host is not *.sharepoint.com: "${tenantUrl.hostname}".`,
+        remediation: 'Set SHAREPOINT_TENANT_URL to a *.sharepoint.com URL.',
+      });
+    }
+
+  }
+
+  // Managed-identity bindings: DefaultAzureCredential needs AZURE_CLIENT_ID
+  // to resolve the user-assigned MI; without it, token acquisition falls
+  // back to system MI or environment creds and the resulting token may
+  // lack the Graph grants the Safety lists expect.
+  if (!process.env.AZURE_CLIENT_ID?.trim()) {
+    issues.push({
+      code: 'SAFETY_BINDING_AZURE_CLIENT_ID_MISSING',
+      failureClass: 'identity-binding-missing',
+      message: 'AZURE_CLIENT_ID is not set; Managed Identity cannot select the user-assigned identity for Safety Graph calls.',
+      remediation: 'Set AZURE_CLIENT_ID to the user-assigned Managed Identity client ID configured for Safety Graph access.',
+    });
+  }
+  if (!process.env.AZURE_TENANT_ID?.trim()) {
+    issues.push({
+      code: 'SAFETY_BINDING_AZURE_TENANT_ID_MISSING',
+      failureClass: 'identity-binding-missing',
+      message: 'AZURE_TENANT_ID is not set; Managed Identity token requests cannot target the correct Entra tenant.',
+      remediation: 'Set AZURE_TENANT_ID to the Entra tenant identifier.',
+    });
+  }
+
+  return issues;
 }

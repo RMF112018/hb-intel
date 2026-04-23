@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  SAFETY_INGESTION_BACKEND_VERSION,
   emitSafetyIngestionEvent,
   emitSafetyIngestionMetric,
 } from '../safety-ingestion-telemetry.js';
@@ -51,5 +52,29 @@ describe('safety-ingestion-telemetry', () => {
     expect(payload._telemetryType).toBe('customMetric');
     expect(payload.name).toBe('safety.ingestion.duration.ms');
     expect(payload.value).toBe(1234);
+  });
+
+  it('stamps every event and metric with the backend version so live logs prove artifact identity', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    emitSafetyIngestionEvent(
+      'safety.ingestion.entry',
+      { operation: 'ingest', requestId: 'req-v1' },
+      { codePath: 'graph-only' },
+    );
+    emitSafetyIngestionMetric('safety.ingestion.duration.ms', 42, {
+      operation: 'ingest',
+      requestId: 'req-v1',
+    });
+
+    const payloads = logSpy.mock.calls.map((call) => JSON.parse(String(call[0])) as Record<string, unknown>);
+    for (const payload of payloads) {
+      expect(payload.backendVersion).toBe(SAFETY_INGESTION_BACKEND_VERSION);
+    }
+    // Resolver read @hbc/functions/package.json at module load and found a version.
+    expect(typeof SAFETY_INGESTION_BACKEND_VERSION).toBe('string');
+    expect(SAFETY_INGESTION_BACKEND_VERSION.length).toBeGreaterThan(0);
+    // Under test runtime the resolver must not fall back to 'unknown' —
+    // that would indicate the artifact-version seam is broken.
+    expect(SAFETY_INGESTION_BACKEND_VERSION).not.toBe('unknown');
   });
 });

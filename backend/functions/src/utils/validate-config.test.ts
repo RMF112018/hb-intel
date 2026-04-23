@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WAVE0_REQUIRED_CONFIG } from '../config/wave0-env-registry.js';
-import { validateRequiredConfig, shouldValidateConfig, validateProvisioningPrerequisites } from './validate-config.js';
+import {
+  shouldValidateConfig,
+  validateProvisioningPrerequisites,
+  validateRequiredConfig,
+  validateSafetyBackendBindings,
+} from './validate-config.js';
 
 vi.mock('../config/wave0-env-registry.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../config/wave0-env-registry.js')>();
@@ -151,6 +156,7 @@ describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
     // Set all existing prerequisites to valid values
     vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
     vi.stubEnv('AZURE_TENANT_ID', 'tenant-id');
+    vi.stubEnv('AZURE_CLIENT_ID', 'client-id');
     vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://example.sharepoint.com');
     vi.stubEnv('SHAREPOINT_HUB_SITE_ID', 'hub-id');
     vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://example.sharepoint.com/sites/appcatalog');
@@ -227,5 +233,76 @@ describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
       expect(message).toContain('sites-selected-validation.md');
       expect(message).toContain('grant-site-access.sh');
     }
+  });
+});
+
+describe('validateSafetyBackendBindings preflight', () => {
+  beforeEach(() => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://example.sharepoint.com');
+    vi.stubEnv('AZURE_CLIENT_ID', 'client-id');
+    vi.stubEnv('AZURE_TENANT_ID', 'tenant-id');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('passes cleanly when all Safety bindings are present and well-formed', () => {
+    expect(validateSafetyBackendBindings()).toEqual([]);
+  });
+
+  it('skips validation in mock/test mode', () => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'mock');
+    delete process.env.SHAREPOINT_TENANT_URL;
+    delete process.env.AZURE_CLIENT_ID;
+    expect(validateSafetyBackendBindings()).toEqual([]);
+  });
+
+  it('reports site-binding-missing when SHAREPOINT_TENANT_URL is absent', () => {
+    delete process.env.SHAREPOINT_TENANT_URL;
+    const issues = validateSafetyBackendBindings();
+    const codes = issues.map((i) => i.code);
+    expect(codes).toContain('SAFETY_BINDING_TENANT_URL_MISSING');
+    expect(issues.find((i) => i.code === 'SAFETY_BINDING_TENANT_URL_MISSING')?.failureClass).toBe('site-binding-missing');
+  });
+
+  it('reports site-binding-malformed when SHAREPOINT_TENANT_URL is not https sharepoint.com', () => {
+    vi.stubEnv('SHAREPOINT_TENANT_URL', 'http://example.com');
+    const issues = validateSafetyBackendBindings();
+    const classes = issues.map((i) => i.failureClass);
+    expect(classes).toContain('site-binding-malformed');
+  });
+
+  it('reports site-binding-malformed for an unparseable URL', () => {
+    vi.stubEnv('SHAREPOINT_TENANT_URL', 'not-a-url');
+    const issues = validateSafetyBackendBindings();
+    expect(issues.map((i) => i.code)).toContain('SAFETY_BINDING_TENANT_URL_MALFORMED');
+  });
+
+  it('reports identity-binding-missing when AZURE_CLIENT_ID is absent', () => {
+    delete process.env.AZURE_CLIENT_ID;
+    const issues = validateSafetyBackendBindings();
+    const missingClientId = issues.find((i) => i.code === 'SAFETY_BINDING_AZURE_CLIENT_ID_MISSING');
+    expect(missingClientId).toBeDefined();
+    expect(missingClientId?.failureClass).toBe('identity-binding-missing');
+  });
+
+  it('reports identity-binding-missing when AZURE_TENANT_ID is absent', () => {
+    delete process.env.AZURE_TENANT_ID;
+    const issues = validateSafetyBackendBindings();
+    const missingTenantId = issues.find((i) => i.code === 'SAFETY_BINDING_AZURE_TENANT_ID_MISSING');
+    expect(missingTenantId).toBeDefined();
+    expect(missingTenantId?.failureClass).toBe('identity-binding-missing');
+  });
+
+  it('aggregates all classes when multiple bindings are missing/malformed', () => {
+    delete process.env.SHAREPOINT_TENANT_URL;
+    delete process.env.AZURE_CLIENT_ID;
+    const issues = validateSafetyBackendBindings();
+    const classes = new Set(issues.map((i) => i.failureClass));
+    expect(classes.has('site-binding-missing')).toBe(true);
+    expect(classes.has('identity-binding-missing')).toBe(true);
   });
 });

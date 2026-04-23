@@ -39,7 +39,12 @@ import {
   evaluateSafetyIngestionPreview,
   type ISafetyIngestionPreviewRequest,
 } from './safety-ingestion-preview-evaluator.js';
-import { emitSafetyIngestionEvent, emitSafetyIngestionMetric } from './safety-ingestion-telemetry.js';
+import {
+  SAFETY_INGESTION_BACKEND_VERSION,
+  emitSafetyIngestionEvent,
+  emitSafetyIngestionMetric,
+} from './safety-ingestion-telemetry.js';
+import { classifyGraphThrown } from './safety-ingestion-graph-data-plane.js';
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -616,6 +621,13 @@ export class SharePointService implements ISharePointService {
   ): Promise<ISafetyIngestionOperationResult> {
     const diagnostics: ISafetyProvisionDiagnostic[] = [];
     const startedAtMs = Date.now();
+    emitSafetyIngestionEvent('safety.ingestion.entry', {
+      operation: 'ingest',
+      requestId,
+    }, {
+      codePath: 'graph-only',
+      backendVersion: SAFETY_INGESTION_BACKEND_VERSION,
+    });
     emitSafetyIngestionEvent('safety.ingestion.request.received', {
       operation: 'ingest',
       requestId,
@@ -817,6 +829,14 @@ export class SharePointService implements ISharePointService {
   ): Promise<ISafetyIngestionOperationResult> {
     const diagnostics: ISafetyProvisionDiagnostic[] = [];
     const startedAtMs = Date.now();
+    emitSafetyIngestionEvent('safety.ingestion.entry', {
+      operation: 'replay',
+      requestId,
+      parentRunId: input.parentRunId,
+    }, {
+      codePath: 'graph-only',
+      backendVersion: SAFETY_INGESTION_BACKEND_VERSION,
+    });
     emitSafetyIngestionEvent('safety.ingestion.replay.request.received', {
       operation: 'replay',
       requestId,
@@ -941,6 +961,13 @@ export class SharePointService implements ISharePointService {
   ): Promise<ISafetyIngestionPreviewOperationResult> {
     const diagnostics: ISafetyProvisionDiagnostic[] = [];
     const startedAtMs = Date.now();
+    emitSafetyIngestionEvent('safety.ingestion.entry', {
+      operation: 'preview',
+      requestId,
+    }, {
+      codePath: 'graph-only',
+      backendVersion: SAFETY_INGESTION_BACKEND_VERSION,
+    });
     emitSafetyIngestionEvent('safety.ingestion.preview.request.received', {
       operation: 'preview',
       requestId,
@@ -1138,36 +1165,53 @@ export class SharePointService implements ISharePointService {
   }
 
   private async resolveSafetyGuidOverlay(): Promise<SafetyGuidOverlay> {
-    const [
-      uploads,
-      periods,
-      weeks,
-      inspections,
-      findings,
-      runs,
-      projects,
-      legacy,
-    ] = await Promise.all([
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.safetySiteUrl, 'Safety Checklist Uploads'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Reporting Periods'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Project Week Records'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Inspection Events'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Findings'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Ingestion Runs'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Projects'),
-      this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Legacy Project Fallback Registry'),
-    ]);
+    // Classify overlay-stage Graph failures separately from later reporting-
+    // period / duplicate-detection reads. A 401 from GUID discovery looks
+    // identical to a 401 from getReportingPeriod to the operator unless this
+    // seam tags its failure class first.
+    try {
+      const [
+        uploads,
+        periods,
+        weeks,
+        inspections,
+        findings,
+        runs,
+        projects,
+        legacy,
+      ] = await Promise.all([
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.safetySiteUrl, 'Safety Checklist Uploads'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Reporting Periods'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Project Week Records'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Inspection Events'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Findings'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Safety Ingestion Runs'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Projects'),
+        this.fetchListIdViaApi(SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl, 'Legacy Project Fallback Registry'),
+      ]);
 
-    return {
-      SafetyChecklistUploads: uploads,
-      SafetyReportingPeriods: periods,
-      SafetyProjectWeekRecords: weeks,
-      SafetyInspectionEvents: inspections,
-      SafetyFindings: findings,
-      SafetyIngestionRuns: runs,
-      Projects: projects,
-      LegacyProjectFallbackRegistry: legacy,
-    };
+      return {
+        SafetyChecklistUploads: uploads,
+        SafetyReportingPeriods: periods,
+        SafetyProjectWeekRecords: weeks,
+        SafetyInspectionEvents: inspections,
+        SafetyFindings: findings,
+        SafetyIngestionRuns: runs,
+        Projects: projects,
+        LegacyProjectFallbackRegistry: legacy,
+      };
+    } catch (err) {
+      const failureClass = classifyGraphThrown(err);
+      emitSafetyIngestionEvent('safety.ingestion.graph.overlay.failed', {
+        operation: 'ingest',
+      }, {
+        failureClass,
+        hbCentralSiteUrl: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl,
+        safetySiteUrl: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.safetySiteUrl,
+        message: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
   }
 
   private async validateSafetyIngestionContracts(): Promise<ISafetyProvisionDiagnostic[]> {

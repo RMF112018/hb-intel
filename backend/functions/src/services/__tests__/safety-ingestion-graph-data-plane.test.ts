@@ -5,6 +5,8 @@ import {
   GraphRequestError,
   SafetyIngestionGraphDataPlane,
   assertSafetyGraphEtag,
+  classifyGraphFailure,
+  classifyGraphThrown,
 } from '../safety-ingestion-graph-data-plane.js';
 
 describe('SafetyIngestionGraphDataPlane retry telemetry', () => {
@@ -243,6 +245,127 @@ describe('SafetyIngestionGraphDataPlane bounded single-page queries', () => {
     expect((error as GraphBoundedQueryTruncatedError).contractId).toBe('duplicate-detection-inspections');
     // Bounded query must not follow nextLink — one page request only.
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('classifyGraphFailure taxonomy', () => {
+  it('classifies 401 as permission-denied-401 regardless of path lane', () => {
+    expect(classifyGraphFailure(401, '/sites/abc/lists/xyz/items/5', '')).toBe('permission-denied-401');
+    expect(classifyGraphFailure(401, '/sites/abc', '')).toBe('permission-denied-401');
+  });
+
+  it('classifies 403 as permission-denied-403', () => {
+    expect(classifyGraphFailure(403, '/sites/abc/lists/xyz/items/5', '')).toBe('permission-denied-403');
+  });
+
+  it('classifies 429 as rate-limited', () => {
+    expect(classifyGraphFailure(429, '/sites/abc/lists/xyz/items/5', '')).toBe('rate-limited');
+  });
+
+  it('classifies 404 on an item path as item-not-found', () => {
+    expect(classifyGraphFailure(404, '/sites/abc/lists/xyz/items/5', JSON.stringify({ error: { code: 'itemNotFound' } }))).toBe('item-not-found');
+  });
+
+  it('classifies 404 on a list-resolution path as list-not-found', () => {
+    expect(classifyGraphFailure(404, '/sites/abc/lists/xyz', '')).toBe('list-not-found');
+    expect(classifyGraphFailure(404, '/sites/abc/lists?$filter=displayName eq \'x\'', '')).toBe('list-not-found');
+  });
+
+  it('classifies 404 on a site-resolution path as site-not-found', () => {
+    expect(classifyGraphFailure(404, '/sites/contoso.sharepoint.com:/sites/Missing', '')).toBe('site-not-found');
+  });
+
+  it('classifies 5xx as transport-error', () => {
+    expect(classifyGraphFailure(502, '/sites/abc/lists/xyz/items/5', '')).toBe('transport-error');
+    expect(classifyGraphFailure(503, '/sites/abc', '')).toBe('transport-error');
+  });
+
+  it('classifies thrown identity-acquisition errors as identity-not-acquired', () => {
+    const err = new Error('Failed to acquire Managed Identity token for scope https://graph.microsoft.com/.default');
+    expect(classifyGraphThrown(err)).toBe('identity-not-acquired');
+  });
+
+  it('classifies network errors as transport-error', () => {
+    expect(classifyGraphThrown(new Error('fetch failed: ECONNREFUSED'))).toBe('transport-error');
+  });
+
+  it('preserves the failureClass on GraphRequestError instances', () => {
+    const err = new GraphRequestError('get-item', '/sites/abc/lists/xyz/items/5', new Response('', { status: 401 }), 'unauthorized');
+    expect(err.failureClass).toBe('permission-denied-401');
+    expect(classifyGraphThrown(err)).toBe('permission-denied-401');
+  });
+});
+
+describe('SafetyIngestionGraphDataPlane classified failure telemetry', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function makePlane() {
+    return new SafetyIngestionGraphDataPlane({
+      acquireAppToken: vi.fn().mockResolvedValue('token'),
+      getSharePointToken: vi.fn(),
+    });
+  }
+
+  it('emits safety.ingestion.graph.failure.classified with failureClass when Graph returns 401', async () => {
+    const plane = makePlane();
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    fetchSpy
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'site-1' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response('unauthorized', { status: 401 }));
+
+    await expect(
+      plane.getItemById('https://contoso.sharepoint.com/sites/HBCentral', 'list-1', 7),
+    ).rejects.toBeInstanceOf(GraphRequestError);
+
+    const classified = logSpy.mock.calls
+      .map((call) => {
+        try {
+          return JSON.parse(String(call[0])) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      })
+      .find((p) => p && p.name === 'safety.ingestion.graph.failure.classified');
+
+    expect(classified).toBeDefined();
+    expect(classified?.failureClass).toBe('permission-denied-401');
+    expect(classified?.statusCode).toBe(401);
+  });
+
+  it('emits classified failure when Graph returns 404 on list resolution', async () => {
+    const plane = makePlane();
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    fetchSpy
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'site-1' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: 'itemNotFound' } }), { status: 404 }));
+
+    await expect(
+      plane.listItemsBounded(
+        'https://contoso.sharepoint.com/sites/HBCentral',
+        'list-1',
+        { filter: `fields/X eq 'y'`, top: 1 },
+        'duplicate-detection-inspections',
+      ),
+    ).rejects.toBeInstanceOf(GraphRequestError);
+
+    const classified = logSpy.mock.calls
+      .map((call) => {
+        try {
+          return JSON.parse(String(call[0])) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      })
+      .find((p) => p && p.name === 'safety.ingestion.graph.failure.classified');
+
+    // The bounded-list path is `/sites/<siteId>/lists/<listId>/items?...` — an
+    // item-lane 404 because the deepest segment is `/items?...`.
+    expect(classified).toBeDefined();
+    expect(classified?.failureClass).toBe('item-not-found');
   });
 });
 
