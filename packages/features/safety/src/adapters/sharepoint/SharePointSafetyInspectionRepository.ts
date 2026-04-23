@@ -26,7 +26,6 @@ import type {
   SafetyReportingPeriod,
   UploadContext,
 } from '../../domain/types.js';
-import { SAFETY_SITE_URL } from '../../lists/descriptors.js';
 import {
   REVIEW_QUEUE_TERMINAL_STATUSES,
   type ISafetyInspectionRepository,
@@ -42,10 +41,6 @@ import {
   type SafetyListName,
   type SiteScopedListDescriptor,
 } from '../../lists/descriptors.js';
-import { readWorkbookFromArrayBuffer } from '../../parser/xlsxWorkbookView.js';
-import { runIngestionPipeline } from '../../ingestion/runIngestionPipeline.js';
-import { uploadToSafetyChecklistUploads } from './uploadToSafetyChecklistUploads.js';
-import { downloadUploadedWorkbook } from './downloadUploadedWorkbook.js';
 import { JSON_HEADERS, type SpHttpClient } from './spHttp.js';
 import { SafetyAdapterFetchError } from './errors.js';
 
@@ -216,81 +211,14 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
   }
 
   async ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult> {
-    if (this.backendIngestion) {
-      return this.ingestWorkbookViaBackend(file, context);
-    }
-    const buffer = await file.arrayBuffer();
-    const uploadedRef = await uploadToSafetyChecklistUploads(this.client, buffer, {
-      fileName: context.fileName,
-    });
-    const view = readWorkbookFromArrayBuffer(buffer);
-
-    return runIngestionPipeline({
-      view,
-      context,
-      uploadedRef,
-      adapter: this.buildIngestionAdapter(),
-    });
+    return this.ingestWorkbookViaBackend(file, context);
   }
 
   async replayIngestion(
     parentRunId: string,
     options: ReplayOptions = {},
   ): Promise<IngestionRunResult> {
-    const parent = await this.fetchIngestionRunById(parentRunId);
-    if (!parent) {
-      throw new Error(`Ingestion run not found: ${parentRunId}`);
-    }
-    try {
-      const { bytes } = await downloadUploadedWorkbook(this.client, parent.sourceUploadItemId);
-      const view = readWorkbookFromArrayBuffer(bytes);
-      return runIngestionPipeline({
-        view,
-        context: {
-          uploadedByUpn: parent.attemptedProjectSiteText ? 'replay@hbc' : 'replay@hbc',
-          uploadedAt: new Date().toISOString(),
-          fileName: parent.uploadFileName,
-          reportingPeriodId: parent.reportingPeriodId ?? '',
-          reportingPeriodSpItemId: parent.reportingPeriodSpItemId ?? 0,
-        },
-        uploadedRef: {
-          sourceUploadItemId: parent.sourceUploadItemId,
-          sourceUploadWebUrl: `${SAFETY_SITE_URL}/SafetyChecklistUploads/${parent.uploadFileName}`,
-          checksum: parent.checksum ?? '',
-        },
-        adapter: this.buildIngestionAdapter(),
-        attemptNumber: parent.attemptNumber + 1,
-        parentRunId: parent.id,
-        parentRunSpItemId: parent.spItemId,
-        supersedePrior: options.supersedePrior ?? false,
-      });
-    } catch (err) {
-      const adapter = this.buildIngestionAdapter();
-      const run = await adapter.recordIngestionRun({
-        title: `Replay ${parent.uploadFileName} — attempt ${parent.attemptNumber + 1}`,
-        sourceUploadItemId: parent.sourceUploadItemId,
-        uploadFileName: parent.uploadFileName,
-        templateVersionDetected: undefined,
-        checksum: parent.checksum,
-        validationStatus: 'failed',
-        parseStatus: 'skipped',
-        projectResolutionStatus: 'skipped',
-        terminalStatus: 'commit-failed',
-        committedEntityIdsJson: '{}',
-        errorClass: 'replay-source-missing',
-        errorSummary: err instanceof Error ? err.message : 'Unknown replay failure',
-        runStartedAt: new Date().toISOString(),
-        runCompletedAt: new Date().toISOString(),
-        attemptNumber: parent.attemptNumber + 1,
-        reportingPeriodId: parent.reportingPeriodId,
-        reportingPeriodSpItemId: parent.reportingPeriodSpItemId,
-        attemptedProjectSiteText: parent.attemptedProjectSiteText,
-        reviewStatus: 'replayed-failed',
-        parentRunId: parent.id,
-        parentRunSpItemId: parent.spItemId,
-      });
-      return { run, state: 'commit-failed' };
-    }
+    return this.replayIngestionViaBackend(parentRunId, options);
   }
 
   async retryIngestion(ingestionRunId: string): Promise<IngestionRunResult> {
@@ -301,6 +229,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     file: File | Blob,
     context: UploadContext,
   ): Promise<IngestionRunResult> {
+    const backend = this.requireBackendIngestion();
     const fileName = file instanceof File ? file.name : context.fileName;
     const body = {
       fileName,
@@ -310,18 +239,8 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
         fileName,
       },
     };
-    const endpoint = `${trimTrailingSlash(this.backendIngestion?.baseUrl ?? '')}/api/admin/safety-records/ingest`;
-    const token = this.backendIngestion?.getApiToken
-      ? await this.backendIngestion.getApiToken()
-      : undefined;
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(body),
-    });
+    const endpoint = `${trimTrailingSlash(backend.baseUrl ?? '')}/api/safety-records/ingest`;
+    const response = await this.invokeBackend(endpoint, body);
     const payload = (await response.json()) as {
       data?: {
         result?: IngestionRunResult;
@@ -342,6 +261,66 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
       });
     }
     return payload.data.result;
+  }
+
+  private async replayIngestionViaBackend(
+    parentRunId: string,
+    options: ReplayOptions,
+  ): Promise<IngestionRunResult> {
+    const backend = this.requireBackendIngestion();
+    const endpoint = `${trimTrailingSlash(backend.baseUrl ?? '')}/api/safety-records/replay`;
+    const response = await this.invokeBackend(endpoint, {
+      parentRunId,
+      supersedePrior: options.supersedePrior ?? false,
+    });
+    const payload = (await response.json()) as {
+      data?: {
+        result?: IngestionRunResult;
+        diagnostics?: Array<{ code?: string; message?: string }>;
+      };
+      code?: string;
+      message?: string;
+    };
+    if (!response.ok || !payload.data?.result) {
+      const diagnosticMessage = payload.data?.diagnostics?.map((entry) => entry.message).filter(Boolean).join(' | ');
+      throw new SafetyAdapterFetchError({
+        listName: 'Safety Replay API',
+        siteUrl: endpoint,
+        endpoint,
+        httpStatus: response.status,
+        bodySnippet: diagnosticMessage || payload.message,
+        operation: 'Invoke',
+      });
+    }
+    return payload.data.result;
+  }
+
+  private requireBackendIngestion(): NonNullable<SharePointAdapterOptions['backendIngestion']> {
+    if (!this.backendIngestion?.baseUrl) {
+      throw new SafetyAdapterFetchError({
+        listName: 'Safety Ingestion API',
+        siteUrl: '',
+        endpoint: 'missing-backend-ingestion',
+        httpStatus: 500,
+        bodySnippet: 'Safety sharepoint mode requires backend ingestion configuration.',
+        operation: 'Invoke',
+      });
+    }
+    return this.backendIngestion;
+  }
+
+  private async invokeBackend(endpoint: string, body: unknown): Promise<Response> {
+    const token = this.backendIngestion?.getApiToken
+      ? await this.backendIngestion.getApiToken()
+      : undefined;
+    return fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
   }
 
   private buildIngestionAdapter() {

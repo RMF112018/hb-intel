@@ -243,6 +243,26 @@ export class SafetyIngestionGraphDataPlane {
     };
   }
 
+  async downloadFileByListItemId(input: {
+    siteUrl: string;
+    listId: string;
+    itemId: number;
+  }): Promise<ArrayBuffer> {
+    const siteId = await this.resolveSiteId(input.siteUrl);
+    const path = `/sites/${siteId}/lists/${input.listId}/items/${input.itemId}/driveItem/content`;
+    const response = await this.graphFetch('download-file', path, {
+      headers: {
+        Accept: '*/*',
+      },
+    });
+    this.log('safety.ingestion.graph.file.downloaded', {
+      siteId,
+      listId: input.listId,
+      itemId: input.itemId,
+    });
+    return response.arrayBuffer();
+  }
+
   private async graphFetch(
     operation: string,
     path: string,

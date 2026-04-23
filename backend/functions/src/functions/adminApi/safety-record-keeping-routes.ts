@@ -81,6 +81,16 @@ function parseIngestionBody(body: Record<string, unknown>): {
   return { fileName, fileContentBase64, context };
 }
 
+function parseReplayBody(body: Record<string, unknown>): {
+  parentRunId: string;
+  supersedePrior?: boolean;
+} | null {
+  const parentRunId = typeof body.parentRunId === 'string' ? body.parentRunId.trim() : '';
+  if (!parentRunId) return null;
+  const supersedePrior = body.supersedePrior === true;
+  return { parentRunId, supersedePrior };
+}
+
 app.http('adminProvisionSafetyRecordKeepingSharePoint', {
   methods: ['POST'],
   authLevel: 'anonymous',
@@ -247,5 +257,63 @@ app.http('safetyPreviewWorkbook', {
         return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
       }
     }, { domain: 'adminControlPlane', operation: 'safetyPreviewWorkbook' }),
+  ),
+});
+
+app.http('safetyReplayWorkbook', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'safety-records/replay',
+  handler: withAuth(
+    withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+      const requestId = extractOrGenerateRequestId(request);
+      const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+      if (scopeDenied) return scopeDenied;
+
+      let body: Record<string, unknown> = {};
+      try {
+        body = (await request.json()) as Record<string, unknown>;
+      } catch {
+        return errorResponse(400, 'VALIDATION_ERROR', 'Request body must be valid JSON.', requestId);
+      }
+
+      const parsed = parseReplayBody(body);
+      if (!parsed) {
+        return errorResponse(
+          400,
+          'VALIDATION_ERROR',
+          'parentRunId is required.',
+          requestId,
+        );
+      }
+
+      try {
+        const mode = assertAdapterModeValid();
+        const sharePoint = mode === 'mock' || process.env.NODE_ENV === 'test'
+          ? new MockSharePointService()
+          : new SharePointService();
+
+        const operation = await sharePoint.replaySafetyWorkbook(parsed, requestId);
+        if (!operation.success || !operation.result) {
+          return {
+            status: 422,
+            jsonBody: {
+              message: 'Safety replay failed before commit.',
+              code: 'SAFETY_INGESTION_REPLAY_FAILED',
+              requestId,
+              data: operation,
+            },
+            headers: {
+              'X-Request-Id': requestId,
+            },
+          };
+        }
+
+        return successResponse(operation);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
+      }
+    }, { domain: 'adminControlPlane', operation: 'safetyReplayWorkbook' }),
   ),
 });

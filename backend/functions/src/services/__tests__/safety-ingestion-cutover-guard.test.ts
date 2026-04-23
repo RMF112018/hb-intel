@@ -36,6 +36,21 @@ describe('Safety ingestion cutover guard', () => {
     expect(block).toContain('if (!preview.commitReadiness)');
   });
 
+  it('routes SharePointService replay through Graph repository seam', () => {
+    const source = readFileSync(
+      resolve(import.meta.dirname, '../sharepoint-service.ts'),
+      'utf8',
+    );
+    const start = source.indexOf('async replaySafetyWorkbook(');
+    const end = source.indexOf('async previewSafetyWorkbook(', start);
+    const block = source.slice(start, end);
+
+    expect(block).toContain('new SafetyIngestionGraphRepository');
+    expect(block).toContain('repo.replayIngestion');
+    expect(block).not.toContain('SharePointSafetyInspectionRepository');
+    expect(block).not.toContain('createSafetyAppOnlySpHttpClient');
+  });
+
   it('Graph ingestion repository does not use REST _api/web/lists endpoints', () => {
     const source = readFileSync(
       resolve(import.meta.dirname, '../safety-ingestion-graph-repository.ts'),

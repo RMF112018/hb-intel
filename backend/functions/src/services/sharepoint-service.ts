@@ -88,6 +88,11 @@ export interface ISharePointService {
     requestId?: string,
   ): Promise<ISafetyIngestionOperationResult>;
 
+  replaySafetyWorkbook(
+    input: ISafetyReplayRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionOperationResult>;
+
   previewSafetyWorkbook(
     input: ISafetyIngestionRequest,
     requestId?: string,
@@ -204,6 +209,11 @@ export interface ISafetyIngestionRequest {
   fileName: string;
   fileContentBase64: string;
   context: UploadContext;
+}
+
+export interface ISafetyReplayRequest {
+  parentRunId: string;
+  supersedePrior?: boolean;
 }
 
 export interface ISafetyIngestionOperationResult {
@@ -790,6 +800,119 @@ export class SharePointService implements ISharePointService {
         diagnostics: diagnostics.concat([
           {
             code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_FAILED'),
+            message,
+          },
+        ]),
+      };
+    }
+  }
+
+  async replaySafetyWorkbook(
+    input: ISafetyReplayRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionOperationResult> {
+    const diagnostics: ISafetyProvisionDiagnostic[] = [];
+    console.log(JSON.stringify({
+      level: 'info',
+      event: 'safety.ingestion.replay.request.received',
+      requestId,
+      parentRunId: input.parentRunId,
+      supersedePrior: input.supersedePrior === true,
+      timestamp: new Date().toISOString(),
+    }));
+
+    const targets = this.resolveSafetyProvisioningTargets(diagnostics);
+    if (!targets) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_TARGET_RESOLUTION_FAILED',
+            message: 'Safety/HBCentral site targets could not be resolved safely.',
+          },
+        ]),
+      };
+    }
+
+    const referenceValidation: ISafetyReferenceListValidationResult[] = [];
+    const referenceFailed = await this.validateReferenceLists(
+      targets.hbCentralSiteUrl,
+      referenceValidation,
+      diagnostics,
+    );
+    if (referenceFailed) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat([
+          {
+            code: 'SAFETY_INGESTION_REFERENCE_VALIDATION_FAILED',
+            message: 'Required Safety reference lists are missing or inaccessible.',
+          },
+        ]),
+      };
+    }
+
+    const contractErrors = await this.validateSafetyIngestionContracts();
+    if (contractErrors.length > 0) {
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        diagnostics: diagnostics.concat(contractErrors),
+      };
+    }
+
+    const overlay = await this.resolveSafetyGuidOverlay();
+    configureSafetyListGuids(overlay);
+
+    try {
+      const repo = new SafetyIngestionGraphRepository(this.tokenService);
+      const result = await repo.replayIngestion({
+        parentRunId: input.parentRunId,
+        supersedePrior: input.supersedePrior ?? false,
+      });
+
+      console.log(JSON.stringify({
+        level: 'info',
+        event: 'safety.ingestion.replay.request.completed',
+        requestId,
+        parentRunId: input.parentRunId,
+        state: result.state,
+        runId: result.run.id,
+        runSpItemId: result.run.spItemId,
+        timestamp: new Date().toISOString(),
+      }));
+
+      return {
+        success: true,
+        requestAccepted: true,
+        requestId,
+        result,
+        previewPassed: true,
+        diagnostics,
+      };
+    } catch (err) {
+      const message = formatSharePointTokenAcquisitionDiagnostic(err);
+      console.error(JSON.stringify({
+        level: 'error',
+        event: 'safety.ingestion.replay.request.failed',
+        requestId,
+        parentRunId: input.parentRunId,
+        message,
+        timestamp: new Date().toISOString(),
+      }));
+      return {
+        success: false,
+        requestAccepted: false,
+        requestId,
+        previewPassed: false,
+        diagnostics: diagnostics.concat([
+          {
+            code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_REPLAY_FAILED'),
             message,
           },
         ]),
@@ -1921,6 +2044,19 @@ export class MockSharePointService implements ISharePointService {
 
   async ingestSafetyWorkbook(
     _input: ISafetyIngestionRequest,
+    requestId?: string,
+  ): Promise<ISafetyIngestionOperationResult> {
+    return {
+      success: true,
+      requestAccepted: true,
+      requestId,
+      previewPassed: true,
+      diagnostics: [],
+    };
+  }
+
+  async replaySafetyWorkbook(
+    _input: ISafetyReplayRequest,
     requestId?: string,
   ): Promise<ISafetyIngestionOperationResult> {
     return {

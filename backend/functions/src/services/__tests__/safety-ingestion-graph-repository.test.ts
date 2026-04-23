@@ -32,6 +32,7 @@ describe('SafetyIngestionGraphRepository', () => {
       createItem: vi.fn(),
       updateItem: vi.fn(),
       uploadFileToLibrary: vi.fn(),
+      downloadFileByListItemId: vi.fn(),
     };
 
     (repo as unknown as { graph: typeof fakeGraph }).graph = fakeGraph;
@@ -191,6 +192,40 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(result.sourceUploadWebUrl).toContain('test.xlsx');
     expect(result.checksum).toMatch(/^[a-f0-9]{64}$/);
     expect(fakeGraph.uploadFileToLibrary).toHaveBeenCalledOnce();
+  });
+
+  it('replays an ingestion run by downloading retained workbook bytes from Graph', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.getItemById.mockResolvedValue({
+      id: '501',
+      fields: {
+        Title: 'Ingestion test.xlsx — attempt 1',
+        SourceUploadItemId: 88,
+        UploadFileName: 'test.xlsx',
+        Checksum: 'abc123',
+        ValidationStatus: 'passed',
+        ParseStatus: 'passed',
+        ProjectResolutionStatus: 'resolved',
+        TerminalStatus: 'committed',
+        CommittedEntityIdsJson: '{}',
+        RunStartedAt: '2026-04-23T10:00:00Z',
+        RunCompletedAt: '2026-04-23T10:01:00Z',
+        AttemptNumber: 1,
+        ReportingPeriodIdLookupId: 14,
+        ReviewStatus: 'none',
+      },
+    });
+    fakeGraph.downloadFileByListItemId = vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]).buffer);
+    fakeGraph.createItem.mockResolvedValue({ id: '777', fields: {} });
+
+    const result = await repo.replayIngestion({
+      parentRunId: 'run-501',
+      supersedePrior: true,
+    });
+
+    expect(result.state).toBe('invalid-template');
+    expect(fakeGraph.getItemById).toHaveBeenCalledOnce();
+    expect(fakeGraph.downloadFileByListItemId).toHaveBeenCalledOnce();
   });
 
   it('persists ingestion runs with lookup parents in Graph field payload', async () => {

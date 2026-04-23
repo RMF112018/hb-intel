@@ -42,6 +42,11 @@ export interface IBackendSafetyIngestionRequest {
   readonly context: UploadContext;
 }
 
+export interface IBackendSafetyReplayRequest {
+  readonly parentRunId: string;
+  readonly supersedePrior?: boolean;
+}
+
 export class SafetyIngestionGraphRepository {
   private readonly graph: SafetyIngestionGraphDataPlane;
 
@@ -59,6 +64,69 @@ export class SafetyIngestionGraphRepository {
       uploadedRef,
       adapter: this.buildIngestionAdapter(),
     });
+  }
+
+  async replayIngestion(input: IBackendSafetyReplayRequest): Promise<IngestionRunResult> {
+    const parent = await this.getIngestionRunById(input.parentRunId);
+    if (!parent) {
+      throw new Error(`Ingestion run not found: ${input.parentRunId}`);
+    }
+
+    try {
+      const uploadLibrary = resolveUploadLibraryDescriptor();
+      const bytes = await this.graph.downloadFileByListItemId({
+        siteUrl: uploadLibrary.siteUrl,
+        listId: uploadLibrary.id,
+        itemId: parent.sourceUploadItemId,
+      });
+      const view = readWorkbookFromArrayBuffer(bytes);
+
+      return runIngestionPipeline({
+        view,
+        context: {
+          uploadedByUpn: 'replay@hbc',
+          uploadedAt: new Date().toISOString(),
+          fileName: parent.uploadFileName,
+          reportingPeriodId: parent.reportingPeriodId ?? '',
+          reportingPeriodSpItemId: parent.reportingPeriodSpItemId ?? 0,
+        },
+        uploadedRef: {
+          sourceUploadItemId: parent.sourceUploadItemId,
+          sourceUploadWebUrl: `${uploadLibrary.siteUrl}/SafetyChecklistUploads/${parent.uploadFileName}`,
+          checksum: parent.checksum ?? '',
+        },
+        adapter: this.buildIngestionAdapter(),
+        attemptNumber: parent.attemptNumber + 1,
+        parentRunId: parent.id,
+        parentRunSpItemId: parent.spItemId,
+        supersedePrior: input.supersedePrior ?? false,
+      });
+    } catch (err) {
+      const run = await this.insertIngestionRun({
+        title: `Replay ${parent.uploadFileName} — attempt ${parent.attemptNumber + 1}`,
+        sourceUploadItemId: parent.sourceUploadItemId,
+        uploadFileName: parent.uploadFileName,
+        templateVersionDetected: undefined,
+        checksum: parent.checksum,
+        validationStatus: 'failed',
+        parseStatus: 'skipped',
+        projectResolutionStatus: 'skipped',
+        terminalStatus: 'commit-failed',
+        committedEntityIdsJson: '{}',
+        errorClass: 'replay-source-missing',
+        errorSummary: err instanceof Error ? err.message : 'Unknown replay failure',
+        runStartedAt: new Date().toISOString(),
+        runCompletedAt: new Date().toISOString(),
+        attemptNumber: parent.attemptNumber + 1,
+        reportingPeriodId: parent.reportingPeriodId,
+        reportingPeriodSpItemId: parent.reportingPeriodSpItemId,
+        attemptedProjectSiteText: parent.attemptedProjectSiteText,
+        reviewStatus: 'replayed-failed',
+        parentRunId: parent.id,
+        parentRunSpItemId: parent.spItemId,
+      });
+      return { run, state: 'commit-failed' };
+    }
   }
 
   async getReportingPeriod(id: string): Promise<SafetyReportingPeriod | null> {
@@ -481,6 +549,17 @@ export class SafetyIngestionGraphRepository {
     };
   }
 
+  private async getIngestionRunById(runId: string): Promise<SafetyIngestionRun | null> {
+    const descriptor = this.list('SafetyIngestionRuns');
+    const row = await this.graph.getItemById(
+      descriptor.siteUrl,
+      descriptor.id,
+      spItemIdFromString(runId),
+      INGESTION_RUN_SELECT,
+    );
+    return row ? mapIngestionRun(row) : null;
+  }
+
   private list(name: Parameters<typeof resolveDescriptor>[0]): SiteScopedListDescriptor {
     return resolveDescriptor(name);
   }
@@ -532,6 +611,30 @@ const INSPECTION_SELECT = [
   'SubmittedAt',
   'CommittedAt',
   'SupersededByInspectionEventIdLookupId',
+] as const;
+
+const INGESTION_RUN_SELECT = [
+  'Title',
+  'SourceUploadItemId',
+  'UploadFileName',
+  'TemplateVersionDetected',
+  'Checksum',
+  'ValidationStatus',
+  'ParseStatus',
+  'ProjectResolutionStatus',
+  'TerminalStatus',
+  'CommittedEntityIdsJson',
+  'ErrorClass',
+  'ErrorSummary',
+  'RunStartedAt',
+  'RunCompletedAt',
+  'AttemptNumber',
+  'ReportingPeriodIdLookupId',
+  'AttemptedProjectSiteText',
+  'ResolvedProjectNumber',
+  'ProjectSourceClassification',
+  'ReviewStatus',
+  'ParentRunIdLookupId',
 ] as const;
 
 function mapReportingPeriod(row: IGraphListItem): SafetyReportingPeriod {
@@ -615,6 +718,39 @@ function mapInspectionEvent(row: IGraphListItem): SafetyInspectionEvent {
     supersededByInspectionEventId: toOptionalNumber(row.fields.SupersededByInspectionEventIdLookupId)
       ? `ie-${toNumber(row.fields.SupersededByInspectionEventIdLookupId)}`
       : undefined,
+  };
+}
+
+function mapIngestionRun(row: IGraphListItem): SafetyIngestionRun {
+  const id = Number(row.id);
+  const reportingPeriodSpItemId = toOptionalNumber(row.fields.ReportingPeriodIdLookupId) ?? undefined;
+  const parentRunSpItemId = toOptionalNumber(row.fields.ParentRunIdLookupId) ?? undefined;
+  return {
+    id: `run-${id}`,
+    spItemId: id,
+    title: String(row.fields.Title ?? ''),
+    sourceUploadItemId: toNumber(row.fields.SourceUploadItemId),
+    uploadFileName: String(row.fields.UploadFileName ?? ''),
+    templateVersionDetected: optionalString(row.fields.TemplateVersionDetected),
+    checksum: optionalString(row.fields.Checksum),
+    validationStatus: toValidationStatus(row.fields.ValidationStatus),
+    parseStatus: toParseStatus(row.fields.ParseStatus),
+    projectResolutionStatus: toProjectResolutionStatus(row.fields.ProjectResolutionStatus),
+    terminalStatus: toTerminalStatus(row.fields.TerminalStatus),
+    committedEntityIdsJson: String(row.fields.CommittedEntityIdsJson ?? '{}'),
+    errorClass: toOptionalErrorClass(row.fields.ErrorClass),
+    errorSummary: optionalString(row.fields.ErrorSummary),
+    runStartedAt: toIsoString(row.fields.RunStartedAt),
+    runCompletedAt: toIsoString(row.fields.RunCompletedAt),
+    attemptNumber: toNumber(row.fields.AttemptNumber),
+    reportingPeriodId: reportingPeriodSpItemId ? `period-${reportingPeriodSpItemId}` : undefined,
+    reportingPeriodSpItemId,
+    attemptedProjectSiteText: optionalString(row.fields.AttemptedProjectSiteText),
+    resolvedProjectNumber: optionalString(row.fields.ResolvedProjectNumber),
+    projectSourceClassification: toOptionalProjectSource(row.fields.ProjectSourceClassification),
+    reviewStatus: toReviewStatus(row.fields.ReviewStatus),
+    parentRunId: parentRunSpItemId ? `run-${parentRunSpItemId}` : undefined,
+    parentRunSpItemId,
   };
 }
 
@@ -720,4 +856,78 @@ function toDuplicateStatus(value: unknown): SafetyInspectionEvent['duplicateStat
   const text = String(value ?? 'none');
   if (text === 'near-duplicate' || text === 'high-confidence-duplicate') return text;
   return 'none';
+}
+
+function toValidationStatus(value: unknown): SafetyIngestionRun['validationStatus'] {
+  const text = String(value ?? 'pending');
+  if (text === 'passed' || text === 'failed') return text;
+  return 'pending';
+}
+
+function toParseStatus(value: unknown): SafetyIngestionRun['parseStatus'] {
+  const text = String(value ?? 'pending');
+  if (text === 'passed' || text === 'failed' || text === 'skipped') return text;
+  return 'pending';
+}
+
+function toProjectResolutionStatus(value: unknown): SafetyIngestionRun['projectResolutionStatus'] {
+  const text = String(value ?? 'pending');
+  if (text === 'resolved' || text === 'unresolved' || text === 'skipped') return text;
+  return 'pending';
+}
+
+function toTerminalStatus(value: unknown): SafetyIngestionRun['terminalStatus'] {
+  const text = String(value ?? 'commit-failed');
+  if (
+    text === 'invalid-template' ||
+    text === 'parse-error' ||
+    text === 'reporting-period-mismatch' ||
+    text === 'unresolved-project' ||
+    text === 'commit-failed' ||
+    text === 'review-required' ||
+    text === 'committed'
+  ) {
+    return text;
+  }
+  return 'commit-failed';
+}
+
+function toReviewStatus(value: unknown): SafetyIngestionRun['reviewStatus'] {
+  const text = String(value ?? 'none');
+  if (
+    text === 'none' ||
+    text === 'pending-review' ||
+    text === 'in-review' ||
+    text === 'resolved' ||
+    text === 'replayed-success' ||
+    text === 'replayed-failed'
+  ) {
+    return text;
+  }
+  return 'none';
+}
+
+function toOptionalProjectSource(value: unknown): SafetyIngestionRun['projectSourceClassification'] | undefined {
+  const text = String(value ?? '');
+  if (text === 'project' || text === 'legacy-only' || text === 'project+legacy' || text === 'unresolved') {
+    return text;
+  }
+  return undefined;
+}
+
+function toOptionalErrorClass(value: unknown): SafetyIngestionRun['errorClass'] | undefined {
+  const text = String(value ?? '');
+  if (
+    text === 'template-invalid' ||
+    text === 'template-unsupported-version' ||
+    text === 'project-unresolved' ||
+    text === 'duplicate-suspected' ||
+    text === 'parse-error' ||
+    text === 'commit-error' ||
+    text === 'reporting-period-mismatch' ||
+    text === 'replay-source-missing'
+  ) {
+    return text;
+  }
+  return undefined;
 }

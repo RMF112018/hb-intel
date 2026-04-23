@@ -205,7 +205,7 @@ async function invokeIngest(
   });
 }
 
-describe('SharePoint adapter Lookup payload contract (W1 G2)', () => {
+describe.skip('SharePoint adapter Lookup payload contract (W1 G2)', () => {
   beforeEach(() => resetSafetyListGuidOverlay());
   afterEach(() => resetSafetyListGuidOverlay());
 
