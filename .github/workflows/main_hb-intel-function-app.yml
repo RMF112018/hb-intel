@@ -6,8 +6,9 @@
 # which stages backend/functions in isolation (clean `pnpm deploy --prod --legacy`)
 # and emits artifact-manifest.json with sha256 + commit + version stamps.
 # Runtime identity is stamped into app settings as a hard gate before deploy,
-# and the live /api/health `artifact` block must match BOTH commitSha and version
-# before the workflow is allowed to succeed.
+# and post-deploy parity checks must prove the live host identity + route surface.
+# This app is Flex-hosted (One Deploy via Functions Action), so parity proof is
+# based on live host/runtime behavior rather than SCM/Kudu deployment history.
 
 name: Build and deploy Node.js project to Azure Function App - hb-intel-function-app
 
@@ -113,10 +114,23 @@ jobs:
       contents: read
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: functions-artifact
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -207,53 +221,25 @@ jobs:
           slot-name: 'Production'
           package: functions-artifact.zip
 
-      - name: Post-deploy artifact identity proof (hard gate)
+      - name: Post-deploy live artifact parity proof (hard gate)
         env:
           EXPECTED_VERSION: ${{ needs.build.outputs.package-version }}
           EXPECTED_SHA: ${{ needs.build.outputs.commit-sha }}
-          BUILD_SHA256: ${{ needs.build.outputs.sha256 }}
         run: |
           set -euo pipefail
-
-          HEALTH_URL="https://${AZURE_FUNCTIONAPP_NAME}.azurewebsites.net/api/health"
-          BODY=""
-          for attempt in 1 2 3 4 5 6; do
-            if BODY=$(curl -fsSL --max-time 20 "$HEALTH_URL"); then
-              break
-            fi
-            echo "attempt $attempt: /api/health not ready yet, retrying in 10s"
-            sleep 10
-          done
-
-          if [ -z "$BODY" ]; then
-            echo "::error::/api/health never returned a successful response"
-            exit 1
-          fi
-
-          LIVE_VERSION=$(echo "$BODY" | jq -r '.artifact.version // "missing"')
-          LIVE_SHA=$(echo "$BODY" | jq -r '.artifact.commitSha // "missing"')
-          LIVE_TS=$(echo "$BODY" | jq -r '.artifact.buildTimestamp // "missing"')
-
-          COMMIT_MATCH=false
-          VERSION_MATCH=false
-          [ "$LIVE_SHA" = "$EXPECTED_SHA" ] && COMMIT_MATCH=true
-          [ "$LIVE_VERSION" = "$EXPECTED_VERSION" ] && VERSION_MATCH=true
+          pnpm exec tsx scripts/verify-functions-live-parity.ts \
+            --app-name "$AZURE_FUNCTIONAPP_NAME" \
+            --resource-group "${{ steps.stamp.outputs.resourceGroup }}" \
+            --expected-version "$EXPECTED_VERSION" \
+            --expected-sha "$EXPECTED_SHA" \
+            --output "$RUNNER_TEMP/live-parity-evidence.json"
 
           {
-            echo "### Post-deploy artifact identity proof"
+            echo "### Post-deploy live parity proof"
             echo ""
-            echo "| field | expected | live | match |"
-            echo "| --- | --- | --- | --- |"
-            echo "| commitSha | \`$EXPECTED_SHA\` | \`$LIVE_SHA\` | $([ "$COMMIT_MATCH" = true ] && echo '✅' || echo '❌') |"
-            echo "| version | \`$EXPECTED_VERSION\` | \`$LIVE_VERSION\` | $([ "$VERSION_MATCH" = true ] && echo '✅' || echo '❌') |"
-            echo "| buildTimestamp | _(stamped)_ | \`$LIVE_TS\` | — |"
-            echo "| build sha256 | \`$BUILD_SHA256\` | _(zip, build-time)_ | — |"
+            echo "Verifier output:"
+            echo ""
+            echo '```json'
+            cat "$RUNNER_TEMP/live-parity-evidence.json"
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-          echo "commitSha: expected=$EXPECTED_SHA  live=$LIVE_SHA  match=$COMMIT_MATCH"
-          echo "version:   expected=$EXPECTED_VERSION  live=$LIVE_VERSION  match=$VERSION_MATCH"
-
-          if [ "$COMMIT_MATCH" != true ] || [ "$VERSION_MATCH" != true ]; then
-            echo "::error::live /api/health artifact identity does not match the intended deploy"
-            exit 1
-          fi

@@ -89,10 +89,21 @@ These commands prove the `@hbc/functions` deploy artifact and its runtime identi
   Local zip checksum — must equal `.sha256` in `artifact-manifest.json`.
 - `jq . artifact-manifest.json`
   Inspect the deterministic stamp that drives CI's runtime identity setting and post-deploy proof.
-- `curl -s https://hb-intel-function-app.azurewebsites.net/api/health | jq .artifact`
-  Live artifact identity. After a successful deploy, `artifact.version` must equal `manifest.packageVersion` and `artifact.commitSha` must equal the deployed git SHA.
+- `HOST=$(az functionapp list --query "[?name=='hb-intel-function-app'].defaultHostName | [0]" -o tsv); curl -s "https://$HOST/api/health" | jq .artifact`
+  Live artifact identity from the resolved Flex host. After a successful deploy, `artifact.version` must equal `manifest.packageVersion` and `artifact.commitSha` must equal the deployed git SHA.
+- `pnpm exec tsx scripts/verify-functions-live-parity.ts --app-name hb-intel-function-app --resource-group hb-intel --output /tmp/live-parity-evidence.json`
+  Canonical live parity check. Fails fast unless identity parity, route truth (`ingest`, `ingest/preview`, `replay`), `/api/health/ready` route presence, and deploy-stamp app settings all pass.
 - `pnpm --filter @hbc/functions test` / `pnpm --filter @hbc/functions check-types`
   Gate both the telemetry version stamp and the `/api/health` artifact block.
+
+Interpretation quick table:
+
+| Signature | Meaning | Verdict |
+| --- | --- | --- |
+| `/api/health` missing `artifact.*` | Deployed host does not expose current artifact-identity contract | Fail |
+| `POST /api/safety-records/ingest/preview` or `/replay` returns `404` | Expected Safety route not registered on host | Fail (stale/divergent runtime) |
+| Missing `HBC_FUNCTIONS_BUILD_*` app settings | Runtime identity stamp missing/incomplete | Fail |
+| Identity + routes + stamp checks all pass | Live runtime parity proven for deployed artifact | Pass |
 
 ## How to choose the right level
 

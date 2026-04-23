@@ -119,9 +119,16 @@ The GitHub Actions workflow `.github/workflows/main_hb-intel-function-app.yml` d
 
 - **Single zip producer.** `scripts/package-functions-artifact.ts` is the sole source of the deploy zip. It stages `backend/functions` via a clean `pnpm deploy --prod --legacy`, copies `host.json`, rewrites `package.json.main` to the resolved entrypoint, asserts required route/runtime files are present, self-imports the entrypoint in a child Node process, and zips the result. The repo root is never packaged.
 - **Deterministic manifest.** The helper emits `artifact-manifest.json` **next to** the zip with `packageName`, `packageVersion`, `commitSha`, `buildTimestamp`, `zipBytes`, `sha256`, `entrypoint`, `hostJson`, and `stagedWorkspacePackages`. CI uploads the zip + manifest together as a single artifact.
+- **Flex host resolution.** The runtime host can include a generated suffix (for example `hb-intel-function-app-<stamp>.eastus2-01.azurewebsites.net`) under Flex hosting. Do not hardcode `hb-intel-function-app.azurewebsites.net` for parity checks; resolve the live host from Azure metadata.
 - **Runtime identity stamp (hard gate).** Before the deploy step, the workflow runs `az functionapp config appsettings set` to write `HBC_FUNCTIONS_BUILD_VERSION`, `HBC_FUNCTIONS_BUILD_SHA`, and `HBC_FUNCTIONS_BUILD_TIMESTAMP` from the manifest. It then re-queries those three settings and fails the job if any value does not match, guarding against Azure's partial-success case.
-- **Post-deploy identity proof (hard gate).** The anonymous `/api/health` endpoint returns an `artifact` block sourced from `resolveBackendArtifactIdentity()` (env vars above, with `@hbc/functions/package.json` as the version fallback). CI polls `/api/health` after deploy and fails unless BOTH `artifact.commitSha === github.sha` AND `artifact.version === manifest.packageVersion`. Both comparisons are written to the job summary. The anonymous surface is intentionally minimal — `status`, `artifact`, `timestamp` — so the public body discloses only the deployment-identity proof required by the gate, not readiness/config detail.
+- **Post-deploy parity proof (hard gate).** CI runs `scripts/verify-functions-live-parity.ts` after deploy. The verifier resolves the live host from Azure metadata and then requires all of the following to pass: expected identity from the manifest, `/api/health` `artifact` identity (`version`, `commitSha`, `buildTimestamp`), hosted Safety route truth (`ingest`, `ingest/preview`, `replay` must be non-404), `/api/health/ready` route presence (non-404), and deploy-stamped app settings (`HBC_FUNCTIONS_BUILD_VERSION`, `HBC_FUNCTIONS_BUILD_SHA`, `HBC_FUNCTIONS_BUILD_TIMESTAMP`).
 - **Telemetry stamp.** `SAFETY_INGESTION_BACKEND_VERSION` delegates to the same resolver, so every Safety ingestion event/metric in App Insights carries the running artifact's version.
+
+Parity proof priority for incident triage:
+1. expected identity from local `artifact-manifest.json`,
+2. live `/api/health` `artifact` identity,
+3. hosted route-truth probes,
+4. deploy-stamped app settings.
 
 Manual verification commands live in `docs/reference/developer/verification-commands.md` under "Backend deploy artifact". Full rationale and proof-of-closure requirements are in `docs/architecture/plans/MASTER/backend/phase-02/wave-02/Prompt-01-Harden-Deployment-Pipeline-And-Artifact-Truth.md`.
 
