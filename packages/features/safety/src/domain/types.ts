@@ -497,6 +497,51 @@ export interface DuplicateSupersessionPreview {
   readonly supersessionRisk: boolean;
 }
 
+/**
+ * Stable machine-readable discriminator for the top blocking-failure class
+ * observed by a preview evaluation. Derived from `blockingErrors` codes in
+ * the evaluator so adding the summary does not destabilize the underlying
+ * diagnostic list. Precedence is upstream-first: template → parse → period
+ * → project → duplicate. `none` means the preview was commit-ready.
+ */
+export type PreviewFailureClass =
+  | 'none'
+  | 'workbook-read-failed'
+  | 'template-incompatible'
+  | 'parse-failure'
+  | 'reporting-period-not-found'
+  | 'reporting-period-mismatch'
+  | 'project-unresolved'
+  | 'duplicate-supersession-risk'
+  | 'unknown-blocking';
+
+/**
+ * Stable summary of preview checks and the headline blocking-failure class.
+ * Lets operators / the Upload UI / live telemetry inspect the preview outcome
+ * without string-matching over `blockingErrors[].code`.
+ */
+export interface PreviewDiagnosticSummary {
+  readonly commitReady: boolean;
+  readonly failureClass: PreviewFailureClass;
+  readonly blockingCodes: ReadonlyArray<string>;
+  readonly warningCodes: ReadonlyArray<string>;
+  readonly checks: {
+    readonly templateValid: boolean;
+    readonly parserContractMarkerState:
+      | 'markered-valid'
+      | 'markered-invalid'
+      | 'markerless';
+    readonly parseSucceeded: boolean;
+    readonly reportingPeriodResolved: boolean;
+    readonly reportingPeriodDateInRange: boolean;
+    readonly projectResolved: boolean;
+    readonly duplicateConfidence:
+      | 'none'
+      | 'near-duplicate'
+      | 'high-confidence-duplicate';
+  };
+}
+
 export interface SafetyIngestionPreviewResult {
   readonly commitReadiness: boolean;
   readonly template: TemplateCompatibilityStatus;
@@ -513,6 +558,12 @@ export interface SafetyIngestionPreviewResult {
    * short-circuits before authority can be established).
    */
   readonly metadataAuthority?: MetadataAuthority;
+  /**
+   * Prompt 03 closure: stable diagnostic summary for live support triage.
+   * Always present. Derived from the other fields in the same evaluation so
+   * it is guaranteed to be consistent with `blockingErrors` / `commitReadiness`.
+   */
+  readonly diagnosticSummary: PreviewDiagnosticSummary;
 }
 
 export class TemplateInvalidError extends Error {

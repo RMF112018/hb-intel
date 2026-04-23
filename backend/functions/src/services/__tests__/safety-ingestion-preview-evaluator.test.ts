@@ -168,6 +168,61 @@ describe('evaluateSafetyIngestionPreview', () => {
     expect(result.warnings.some((w) => w.code === 'INSPECTION_NUMBER_CONTEXT_MISMATCH')).toBe(false);
   });
 
+  it('emits a stable diagnosticSummary for commit-ready evaluations', async () => {
+    const repo = makeRepository();
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.diagnosticSummary).toBeDefined();
+    expect(result.diagnosticSummary.commitReady).toBe(true);
+    expect(result.diagnosticSummary.failureClass).toBe('none');
+    expect(result.diagnosticSummary.checks.templateValid).toBe(true);
+    expect(result.diagnosticSummary.checks.parseSucceeded).toBe(true);
+    expect(result.diagnosticSummary.checks.reportingPeriodResolved).toBe(true);
+    expect(result.diagnosticSummary.checks.reportingPeriodDateInRange).toBe(true);
+    expect(result.diagnosticSummary.checks.projectResolved).toBe(true);
+    expect(result.diagnosticSummary.checks.duplicateConfidence).toBe('none');
+    expect(result.diagnosticSummary.checks.parserContractMarkerState).toBe('markered-valid');
+  });
+
+  it('diagnosticSummary.failureClass reflects template-incompatible when markers fail', async () => {
+    const repo = makeRepository();
+    mockResolveContractMarkers.mockReturnValue({
+      markersPresent: true,
+      templateVersion: 'SafetyChecklist_v2',
+      parserContractVersion: 'future-contract',
+    });
+    mockValidateTemplate.mockImplementation(() => {
+      throw new Error('Unsupported ParserContractVersion marker.');
+    });
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.diagnosticSummary.commitReady).toBe(false);
+    expect(result.diagnosticSummary.failureClass).toBe('template-incompatible');
+    expect(result.diagnosticSummary.checks.parserContractMarkerState).toBe('markered-invalid');
+    expect(result.diagnosticSummary.blockingCodes).toContain('TEMPLATE_INCOMPATIBLE');
+  });
+
+  it('diagnosticSummary.failureClass reflects reporting-period-mismatch when date is out of range', async () => {
+    const repo = makeRepository({
+      period: {
+        id: 'period-12',
+        spItemId: 12,
+        title: 'Week of 2026-04-06',
+        weekStartDate: '2026-04-06',
+        weekEndDate: '2026-04-10',
+        periodLabel: 'Apr 6 - Apr 10, 2026',
+        status: 'open',
+      },
+    });
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.diagnosticSummary.failureClass).toBe('reporting-period-mismatch');
+    expect(result.diagnosticSummary.checks.reportingPeriodResolved).toBe(true);
+    expect(result.diagnosticSummary.checks.reportingPeriodDateInRange).toBe(false);
+  });
+
   it('flags high-confidence duplicate supersession risk as blocking', async () => {
     const existing: SafetyInspectionEvent = {
       id: 'ie-55',

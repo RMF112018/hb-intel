@@ -3,12 +3,18 @@ import type { HttpResponseInit } from '@azure/functions';
 /**
  * P1-C2 Task 6: Standardized error response.
  * Per D3 lock: `message` is the primary error field, not `error`.
+ *
+ * Prompt 03: accepts an optional `details` object for discriminating
+ * diagnostics (e.g. `failureClass`, Graph context). Details are merged into
+ * the JSON body under a top-level `details` key so operators can triage
+ * without inspecting a nested `data` envelope.
  */
 export function errorResponse(
   status: number,
   code: string,
   message: string,
   requestId?: string,
+  details?: Record<string, unknown>,
 ): HttpResponseInit {
   const jsonBody: Record<string, unknown> = { message, code };
   const headers: Record<string, string> = {};
@@ -16,6 +22,9 @@ export function errorResponse(
   if (requestId) {
     jsonBody.requestId = requestId;
     headers['X-Request-Id'] = requestId;
+  }
+  if (details && Object.keys(details).length > 0) {
+    jsonBody.details = details;
   }
 
   return { status, jsonBody, ...(requestId ? { headers } : {}) };

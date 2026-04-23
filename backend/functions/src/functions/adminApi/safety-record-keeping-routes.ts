@@ -5,8 +5,91 @@ import { requireAdmin, requireDelegatedScope } from '../../middleware/authorizat
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
-import { MockSharePointService, SharePointService } from '../../services/sharepoint-service.js';
+import {
+  MockSharePointService,
+  SharePointService,
+  type ISafetyIngestionOperationResult,
+  type ISafetyIngestionPreviewOperationResult,
+  type ISafetyProvisionDiagnostic,
+} from '../../services/sharepoint-service.js';
+import { classifyIngestionFailure } from '../../services/safety-ingestion-failure-classifier.js';
 import type { ProjectSourceClassification, UploadContext } from '../../../../../packages/features/safety/src/domain/types.js';
+
+/**
+ * Prompt 03: Prefer a discriminating failure-class from the underlying
+ * diagnostics list when shaping 422 responses. Falls back to the preview
+ * summary when no diagnostic carries a class, and finally to `unknown`.
+ */
+function deriveRouteFailureClass(
+  diagnostics: ReadonlyArray<ISafetyProvisionDiagnostic>,
+  previewFailureClass?: string,
+): string {
+  const classed = diagnostics.find((d) => typeof d.failureClass === 'string' && d.failureClass);
+  if (classed?.failureClass) return classed.failureClass;
+  if (previewFailureClass && previewFailureClass !== 'none') return previewFailureClass;
+  return 'unknown';
+}
+
+function buildIngestFailureEnvelope(
+  operation: ISafetyIngestionOperationResult,
+  requestId: string,
+  defaultCode: string,
+  defaultMessage: string,
+): HttpResponseInit {
+  const primaryDiagnostic = operation.diagnostics.find((d) => d.failureClass);
+  const previewClass = operation.preview?.diagnosticSummary?.failureClass;
+  const failureClass = deriveRouteFailureClass(operation.diagnostics, previewClass);
+  return {
+    status: 422,
+    jsonBody: {
+      message: defaultMessage,
+      code: primaryDiagnostic?.code ?? defaultCode,
+      requestId,
+      failureClass,
+      previewFailureClass: previewClass ?? 'none',
+      graphContext: primaryDiagnostic?.graphContext,
+      data: operation,
+    },
+    headers: {
+      'X-Request-Id': requestId,
+    },
+  };
+}
+
+function buildPreviewFailureEnvelope(
+  operation: ISafetyIngestionPreviewOperationResult,
+  requestId: string,
+  defaultCode: string,
+  defaultMessage: string,
+): HttpResponseInit {
+  const primaryDiagnostic = operation.diagnostics.find((d) => d.failureClass);
+  const previewClass = operation.preview?.diagnosticSummary?.failureClass;
+  const failureClass = deriveRouteFailureClass(operation.diagnostics, previewClass);
+  return {
+    status: 422,
+    jsonBody: {
+      message: defaultMessage,
+      code: primaryDiagnostic?.code ?? defaultCode,
+      requestId,
+      failureClass,
+      previewFailureClass: previewClass ?? 'none',
+      graphContext: primaryDiagnostic?.graphContext,
+      data: operation,
+    },
+    headers: {
+      'X-Request-Id': requestId,
+    },
+  };
+}
+
+function buildRouteFailureDetails(err: unknown): Record<string, unknown> {
+  const classification = classifyIngestionFailure(err, 'INTERNAL_ERROR');
+  return {
+    failureClass: classification.failureClass,
+    errorCode: classification.errorCode,
+    ...(classification.graphContext ? { graphContext: classification.graphContext } : {}),
+  };
+}
 
 const VALID_PROJECT_SOURCE_CLASSIFICATIONS: ReadonlyArray<ProjectSourceClassification> = [
   'project',
@@ -179,24 +262,25 @@ app.http('safetyIngestWorkbook', {
 
         const operation = await sharePoint.ingestSafetyWorkbook(parsed, requestId);
         if (!operation.success || !operation.result) {
-          return {
-            status: 422,
-            jsonBody: {
-              message: 'Safety ingestion failed before commit.',
-              code: 'SAFETY_INGESTION_FAILED',
-              requestId,
-              data: operation,
-            },
-            headers: {
-              'X-Request-Id': requestId,
-            },
-          };
+          return buildIngestFailureEnvelope(
+            operation,
+            requestId,
+            'SAFETY_INGESTION_FAILED',
+            'Safety ingestion failed before commit.',
+          );
         }
 
         return successResponse(operation);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
+        const details = buildRouteFailureDetails(err);
+        return errorResponse(
+          500,
+          typeof details.errorCode === 'string' ? details.errorCode : 'INTERNAL_ERROR',
+          message,
+          requestId,
+          details,
+        );
       }
     }, { domain: 'adminControlPlane', operation: 'safetyIngestWorkbook' }),
   ),
@@ -237,24 +321,25 @@ app.http('safetyPreviewWorkbook', {
 
         const operation = await sharePoint.previewSafetyWorkbook(parsed, requestId);
         if (!operation.success || !operation.preview) {
-          return {
-            status: 422,
-            jsonBody: {
-              message: 'Safety ingestion preview failed.',
-              code: 'SAFETY_INGESTION_PREVIEW_FAILED',
-              requestId,
-              data: operation,
-            },
-            headers: {
-              'X-Request-Id': requestId,
-            },
-          };
+          return buildPreviewFailureEnvelope(
+            operation,
+            requestId,
+            'SAFETY_INGESTION_PREVIEW_FAILED',
+            'Safety ingestion preview failed.',
+          );
         }
 
         return successResponse(operation);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
+        const details = buildRouteFailureDetails(err);
+        return errorResponse(
+          500,
+          typeof details.errorCode === 'string' ? details.errorCode : 'INTERNAL_ERROR',
+          message,
+          requestId,
+          details,
+        );
       }
     }, { domain: 'adminControlPlane', operation: 'safetyPreviewWorkbook' }),
   ),
@@ -295,24 +380,25 @@ app.http('safetyReplayWorkbook', {
 
         const operation = await sharePoint.replaySafetyWorkbook(parsed, requestId);
         if (!operation.success || !operation.result) {
-          return {
-            status: 422,
-            jsonBody: {
-              message: 'Safety replay failed before commit.',
-              code: 'SAFETY_INGESTION_REPLAY_FAILED',
-              requestId,
-              data: operation,
-            },
-            headers: {
-              'X-Request-Id': requestId,
-            },
-          };
+          return buildIngestFailureEnvelope(
+            operation,
+            requestId,
+            'SAFETY_INGESTION_REPLAY_FAILED',
+            'Safety replay failed before commit.',
+          );
         }
 
         return successResponse(operation);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        return errorResponse(500, 'INTERNAL_ERROR', message, requestId);
+        const details = buildRouteFailureDetails(err);
+        return errorResponse(
+          500,
+          typeof details.errorCode === 'string' ? details.errorCode : 'INTERNAL_ERROR',
+          message,
+          requestId,
+          details,
+        );
       }
     }, { domain: 'adminControlPlane', operation: 'safetyReplayWorkbook' }),
   ),

@@ -45,6 +45,12 @@ import {
   emitSafetyIngestionMetric,
 } from './safety-ingestion-telemetry.js';
 import { classifyGraphThrown } from './safety-ingestion-graph-data-plane.js';
+import {
+  classifyIngestionFailure,
+  derivePreviewDiagnosticSummary,
+  type IGraphFailureContext,
+  type SafetyIngestionFailureClass,
+} from './safety-ingestion-failure-classifier.js';
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -143,6 +149,19 @@ export type SafetyProvisionOutcome =
 export interface ISafetyProvisionDiagnostic {
   code: string;
   message: string;
+  /**
+   * Discriminating failure-class label for Safety ingestion diagnostics.
+   * Optional for back-compat (provisioning diagnostics omit it); ingest/
+   * preview/replay catch sites attach it so operators can triage identity
+   * vs permission vs binding vs transport without parsing message text.
+   */
+  failureClass?: SafetyIngestionFailureClass;
+  /**
+   * Non-secret Graph-call context surfaced when the diagnostic was produced
+   * by a Graph failure. Tokens and raw headers are never included; the
+   * `pathSummary` is trimmed and strips OData query strings.
+   */
+  graphContext?: IGraphFailureContext;
 }
 
 export interface ISafetyFieldProvisionResult {
@@ -647,6 +666,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_TARGET_RESOLUTION_FAILED',
             message: 'Safety/HBCentral site targets could not be resolved safely.',
+            failureClass: 'target-resolution-error',
           },
         ]),
       };
@@ -667,6 +687,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_REFERENCE_VALIDATION_FAILED',
             message: 'Required Safety reference lists are missing or inaccessible.',
+            failureClass: 'reference-validation-error',
           },
         ]),
       };
@@ -698,6 +719,7 @@ export class SharePointService implements ISharePointService {
             {
               code: 'SAFETY_INGESTION_EMPTY_PAYLOAD',
               message: 'Workbook payload is empty after base64 decoding.',
+              failureClass: 'payload-error',
             },
           ]),
         };
@@ -732,6 +754,7 @@ export class SharePointService implements ISharePointService {
             {
               code: 'SAFETY_INGESTION_COMMIT_NOT_READY',
               message: 'Commit blocked by preview readiness gate.',
+              failureClass: 'preview-gate-blocked',
             },
           ]),
         };
@@ -758,6 +781,7 @@ export class SharePointService implements ISharePointService {
             {
               code: 'SAFETY_INGESTION_REPORTING_PERIOD_NOT_FOUND',
               message: `Reporting period ${input.context.reportingPeriodId} was not found.`,
+              failureClass: 'item-binding-error',
             },
           ]),
         };
@@ -802,11 +826,19 @@ export class SharePointService implements ISharePointService {
       };
     } catch (err) {
       const message = formatSharePointTokenAcquisitionDiagnostic(err);
+      const classification = classifyIngestionFailure(err, 'SAFETY_INGESTION_FAILED');
       emitSafetyIngestionEvent('safety.ingestion.request.failed', {
         operation: 'ingest',
         requestId,
       }, {
         message,
+        failureClass: classification.failureClass,
+        errorCode: classification.errorCode,
+        graphOperation: classification.graphContext?.operation,
+        graphPath: classification.graphContext?.pathSummary,
+        graphStatus: classification.graphContext?.statusCode,
+        graphErrorCode: classification.graphContext?.graphErrorCode,
+        authLane: classification.graphContext?.authLane,
       });
       return {
         success: false,
@@ -815,8 +847,10 @@ export class SharePointService implements ISharePointService {
         previewPassed: false,
         diagnostics: diagnostics.concat([
           {
-            code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_FAILED'),
+            code: this.toProvisioningErrorCode(err, classification.errorCode),
             message,
+            failureClass: classification.failureClass,
+            graphContext: classification.graphContext,
           },
         ]),
       };
@@ -855,6 +889,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_TARGET_RESOLUTION_FAILED',
             message: 'Safety/HBCentral site targets could not be resolved safely.',
+            failureClass: 'target-resolution-error',
           },
         ]),
       };
@@ -875,6 +910,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_REFERENCE_VALIDATION_FAILED',
             message: 'Required Safety reference lists are missing or inaccessible.',
+            failureClass: 'reference-validation-error',
           },
         ]),
       };
@@ -933,12 +969,20 @@ export class SharePointService implements ISharePointService {
       };
     } catch (err) {
       const message = formatSharePointTokenAcquisitionDiagnostic(err);
+      const classification = classifyIngestionFailure(err, 'SAFETY_INGESTION_REPLAY_FAILED');
       emitSafetyIngestionEvent('safety.ingestion.replay.request.failed', {
         operation: 'replay',
         requestId,
         parentRunId: input.parentRunId,
       }, {
         message,
+        failureClass: classification.failureClass,
+        errorCode: classification.errorCode,
+        graphOperation: classification.graphContext?.operation,
+        graphPath: classification.graphContext?.pathSummary,
+        graphStatus: classification.graphContext?.statusCode,
+        graphErrorCode: classification.graphContext?.graphErrorCode,
+        authLane: classification.graphContext?.authLane,
       });
       return {
         success: false,
@@ -947,8 +991,10 @@ export class SharePointService implements ISharePointService {
         previewPassed: false,
         diagnostics: diagnostics.concat([
           {
-            code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_REPLAY_FAILED'),
+            code: this.toProvisioningErrorCode(err, classification.errorCode),
             message,
+            failureClass: classification.failureClass,
+            graphContext: classification.graphContext,
           },
         ]),
       };
@@ -987,6 +1033,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_TARGET_RESOLUTION_FAILED',
             message: 'Safety/HBCentral site targets could not be resolved safely.',
+            failureClass: 'target-resolution-error',
           },
         ]),
       };
@@ -1007,6 +1054,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_REFERENCE_VALIDATION_FAILED',
             message: 'Required Safety reference lists are missing or inaccessible.',
+            failureClass: 'reference-validation-error',
           },
         ]),
       };
@@ -1035,6 +1083,7 @@ export class SharePointService implements ISharePointService {
           {
             code: 'SAFETY_INGESTION_EMPTY_PAYLOAD',
             message: 'Workbook payload is empty after base64 decoding.',
+            failureClass: 'payload-error',
           },
         ]),
       };
@@ -1076,11 +1125,19 @@ export class SharePointService implements ISharePointService {
       };
     } catch (err) {
       const message = formatSharePointTokenAcquisitionDiagnostic(err);
+      const classification = classifyIngestionFailure(err, 'SAFETY_INGESTION_PREVIEW_FAILED');
       emitSafetyIngestionEvent('safety.ingestion.preview.request.failed', {
         operation: 'preview',
         requestId,
       }, {
         message,
+        failureClass: classification.failureClass,
+        errorCode: classification.errorCode,
+        graphOperation: classification.graphContext?.operation,
+        graphPath: classification.graphContext?.pathSummary,
+        graphStatus: classification.graphContext?.statusCode,
+        graphErrorCode: classification.graphContext?.graphErrorCode,
+        authLane: classification.graphContext?.authLane,
       });
       return {
         success: false,
@@ -1088,8 +1145,10 @@ export class SharePointService implements ISharePointService {
         requestId,
         diagnostics: diagnostics.concat([
           {
-            code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_PREVIEW_FAILED'),
+            code: this.toProvisioningErrorCode(err, classification.errorCode),
             message,
+            failureClass: classification.failureClass,
+            graphContext: classification.graphContext,
           },
         ]),
       };
@@ -1227,12 +1286,16 @@ export class SharePointService implements ISharePointService {
           diagnostics.push({
             code: 'SAFETY_INGESTION_FIELD_CONTRACT_MISSING',
             message: `${definition.title} missing fields: ${missing.join(', ')}`,
+            failureClass: 'field-contract-missing',
           });
         }
       } catch (err) {
+        const classification = classifyIngestionFailure(err, 'SAFETY_INGESTION_FIELD_CONTRACT_FAILED');
         diagnostics.push({
-          code: this.toProvisioningErrorCode(err, 'SAFETY_INGESTION_FIELD_CONTRACT_FAILED'),
+          code: this.toProvisioningErrorCode(err, classification.errorCode),
           message: `${definition.title} contract check failed: ${formatSharePointTokenAcquisitionDiagnostic(err)}`,
+          failureClass: classification.failureClass,
+          graphContext: classification.graphContext,
         });
       }
     }
@@ -2195,6 +2258,21 @@ export class MockSharePointService implements ISharePointService {
         },
         warnings: [],
         blockingErrors: [],
+        diagnosticSummary: {
+          commitReady: true,
+          failureClass: 'none',
+          blockingCodes: [],
+          warningCodes: [],
+          checks: {
+            templateValid: true,
+            parserContractMarkerState: 'markered-valid',
+            parseSucceeded: true,
+            reportingPeriodResolved: true,
+            reportingPeriodDateInRange: true,
+            projectResolved: true,
+            duplicateConfidence: 'none',
+          },
+        },
       },
       diagnostics: [],
     };

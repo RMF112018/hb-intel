@@ -24,6 +24,7 @@ import {
   computeChecksum,
   readWorkbookFromArrayBuffer,
 } from '../../../../packages/features/safety/src/parser/xlsxWorkbookView.js';
+import { derivePreviewDiagnosticSummary } from './safety-ingestion-failure-classifier.js';
 import { SafetyIngestionGraphRepository } from './safety-ingestion-graph-repository.js';
 
 export interface ISafetyIngestionPreviewRequest {
@@ -83,21 +84,25 @@ export async function evaluateSafetyIngestionPreview(
       });
     }
   } catch (error) {
-    return {
+    const readFailure = {
       commitReadiness: false,
       template: templateStatus,
       projectResolution: {
         resolved: false,
-        classification: 'unresolved',
+        classification: 'unresolved' as const,
       },
       warnings,
       blockingErrors: blockingErrors.concat([
         {
           code: 'WORKBOOK_READ_FAILED',
           message: error instanceof Error ? error.message : 'Workbook could not be read.',
-          severity: 'error',
+          severity: 'error' as const,
         },
       ]),
+    };
+    return {
+      ...readFailure,
+      diagnosticSummary: derivePreviewDiagnosticSummary(readFailure),
     };
   }
 
@@ -115,15 +120,19 @@ export async function evaluateSafetyIngestionPreview(
   }
 
   if (!parsed) {
-    return {
+    const parseFailure = {
       commitReadiness: false,
       template: templateStatus,
       projectResolution: {
         resolved: false,
-        classification: 'unresolved',
+        classification: 'unresolved' as const,
       },
       warnings,
       blockingErrors,
+    };
+    return {
+      ...parseFailure,
+      diagnosticSummary: derivePreviewDiagnosticSummary(parseFailure),
     };
   }
 
@@ -290,7 +299,7 @@ export async function evaluateSafetyIngestionPreview(
     }
   }
 
-  return {
+  const finalResult = {
     commitReadiness: blockingErrors.length === 0,
     template: templateStatus,
     metadata: parsed.metadata,
@@ -301,6 +310,10 @@ export async function evaluateSafetyIngestionPreview(
     warnings,
     blockingErrors,
     metadataAuthority,
+  };
+  return {
+    ...finalResult,
+    diagnosticSummary: derivePreviewDiagnosticSummary(finalResult),
   };
 }
 

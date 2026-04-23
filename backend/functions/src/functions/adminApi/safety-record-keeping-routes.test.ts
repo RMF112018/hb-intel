@@ -37,4 +37,25 @@ describe('admin safety record-keeping provisioning route wiring', () => {
   it('supports dryRun request body input', () => {
     expect(source).toContain('dryRun');
   });
+
+  it('surfaces discriminating failure-class at route 422/500 envelope', () => {
+    // Prompt 03: route must forward failure-class + graph context from the
+    // underlying diagnostics so operators can triage without parsing message
+    // text. Guarded by source-pattern assertions so a future refactor cannot
+    // silently flatten the envelope back to generic failure text.
+    expect(source).toContain('buildIngestFailureEnvelope');
+    expect(source).toContain('buildPreviewFailureEnvelope');
+    expect(source).toContain('buildRouteFailureDetails');
+    expect(source).toContain('classifyIngestionFailure');
+    expect(source).toContain('failureClass');
+    expect(source).toContain('previewFailureClass');
+    expect(source).toContain('graphContext');
+  });
+
+  it('preserves request correlation on failure envelopes', () => {
+    // Every non-success envelope (422 and 500) must include X-Request-Id and
+    // requestId so live log correlation stays intact.
+    expect(source).toContain("'X-Request-Id': requestId");
+    expect(source).toContain('requestId,');
+  });
 });
