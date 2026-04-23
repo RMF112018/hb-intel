@@ -120,10 +120,47 @@ The GitHub Actions workflow `.github/workflows/main_hb-intel-function-app.yml` d
 - **Single zip producer.** `scripts/package-functions-artifact.ts` is the sole source of the deploy zip. It stages `backend/functions` via a clean `pnpm deploy --prod --legacy`, copies `host.json`, rewrites `package.json.main` to the resolved entrypoint, asserts required route/runtime files are present, self-imports the entrypoint in a child Node process, and zips the result. The repo root is never packaged.
 - **Deterministic manifest.** The helper emits `artifact-manifest.json` **next to** the zip with `packageName`, `packageVersion`, `commitSha`, `buildTimestamp`, `zipBytes`, `sha256`, `entrypoint`, `hostJson`, and `stagedWorkspacePackages`. CI uploads the zip + manifest together as a single artifact.
 - **Runtime identity stamp (hard gate).** Before the deploy step, the workflow runs `az functionapp config appsettings set` to write `HBC_FUNCTIONS_BUILD_VERSION`, `HBC_FUNCTIONS_BUILD_SHA`, and `HBC_FUNCTIONS_BUILD_TIMESTAMP` from the manifest. It then re-queries those three settings and fails the job if any value does not match, guarding against Azure's partial-success case.
-- **Post-deploy identity proof (hard gate).** The anonymous `/api/health` endpoint returns an `artifact` block sourced from `resolveBackendArtifactIdentity()` (env vars above, with `@hbc/functions/package.json` as the version fallback). CI polls `/api/health` after deploy and fails unless BOTH `artifact.commitSha === github.sha` AND `artifact.version === manifest.packageVersion`. Both comparisons are written to the job summary.
+- **Post-deploy identity proof (hard gate).** The anonymous `/api/health` endpoint returns an `artifact` block sourced from `resolveBackendArtifactIdentity()` (env vars above, with `@hbc/functions/package.json` as the version fallback). CI polls `/api/health` after deploy and fails unless BOTH `artifact.commitSha === github.sha` AND `artifact.version === manifest.packageVersion`. Both comparisons are written to the job summary. The anonymous surface is intentionally minimal — `status`, `artifact`, `timestamp` — so the public body discloses only the deployment-identity proof required by the gate, not readiness/config detail.
 - **Telemetry stamp.** `SAFETY_INGESTION_BACKEND_VERSION` delegates to the same resolver, so every Safety ingestion event/metric in App Insights carries the running artifact's version.
 
 Manual verification commands live in `docs/reference/developer/verification-commands.md` under "Backend deploy artifact". Full rationale and proof-of-closure requirements are in `docs/architecture/plans/MASTER/backend/phase-02/wave-02/Prompt-01-Harden-Deployment-Pipeline-And-Artifact-Truth.md`.
+
+## Rollout posture: health surface, CORS, and permissions
+
+The backend is designed to run under an app-only Managed Identity in Azure. There is no client secret at runtime. Rollout posture (`ENVIRONMENT_POSTURE=rollout`) tightens the operator-facing contract around three surfaces:
+
+### Health routes
+
+| Route | Auth | Body |
+|-------|------|------|
+| `GET /api/health` | anonymous | `status`, `artifact.{version, commitSha, buildTimestamp}`, `timestamp`. Minimal public surface that preserves deploy proof for the post-deploy CI gate. |
+| `GET /api/health/ready` | Bearer token + admin app-role (`HBIntelAdmin` / `Admin`) | Full readiness: `operationalReadiness`, `configTiers`, `provisioningPrereqs`, `safetyPermissionPosture`, `safetyRolloutReadiness`, `rolloutPermissionInventory`, `integrations`, `notificationRecipients`. |
+
+There is one privileged-surface auth model: bearer token validated by `withAuth` plus `requireAdmin`. No function keys are introduced.
+
+### CORS — single enforcement seam
+
+The Azure Function App CORS configuration (App Service level), managed by the deploy pipeline, is the **authoritative** enforcement seam for browser traffic. `host.json` does not declare CORS — shadowing App Service CORS in `host.json` creates silent drift between declared origins and the list actually enforced in Azure.
+
+`CORS_ALLOWED_ORIGINS` (comma-separated exact origins, no wildcards) is the operator-facing declared inventory that mirrors the App Service CORS list. Under rollout posture, `validateRolloutPostureConfig()` refuses to boot unless `CORS_ALLOWED_ORIGINS` is present and free of wildcards. This is a supportability check on the declared inventory; the runtime reject is performed by App Service.
+
+### Declared permission inventory
+
+`src/utils/rollout-permission-inventory.ts` exports the declared app-only Graph/SharePoint permission inventory for rollout. It is derived from the Safety permission matrix and the provisioning control-plane confirmation gates. The declared inventory is surfaced on `/api/health/ready` so operators can compare it against the Entra grants held by the Managed Identity.
+
+No live Graph probe is issued at startup. Posture verdicts on `/health/ready` (`safetyPermissionPosture`, `safetyRolloutReadiness`) are computed from configuration and existing proof stamps — not from a runtime grant check.
+
+### Rollout-posture configuration inventory
+
+When `ENVIRONMENT_POSTURE=rollout`, startup asserts the following inventory (in addition to the normal core/SharePoint tiers). Missing values or wildcards fail the process fast:
+
+- `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` — Managed Identity + JWT issuer binding.
+- `API_AUDIENCE` — inbound JWT audience for `/health/ready` and the rest of the admin control plane.
+- `AZURE_TABLE_ENDPOINT`, `APPLICATIONINSIGHTS_CONNECTION_STRING`.
+- `SHAREPOINT_TENANT_URL`, `SHAREPOINT_PROJECTS_SITE_URL`.
+- `CORS_ALLOWED_ORIGINS` — exact-origin allow-list mirroring App Service CORS.
+- `HBC_FUNCTIONS_BUILD_SHA`, `HBC_FUNCTIONS_BUILD_VERSION` — deploy-stamped artifact identity for `/health`.
+- `ADMIN_READINESS_APP_ROLE` — name of the Entra app-role that grants `/health/ready` access.
 
 ## Local Development Setup
 

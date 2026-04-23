@@ -13,25 +13,44 @@ import { resolve } from 'path';
 const FUNCTIONS_ROOT = resolve(import.meta.dirname, '../..');
 
 describe('P4-05 Infrastructure readiness', () => {
-  it('host.json contains CORS configuration', () => {
+  it('host.json does not declare CORS (App Service CORS is the single enforcement seam)', () => {
     const hostJson = JSON.parse(readFileSync(resolve(FUNCTIONS_ROOT, 'host.json'), 'utf-8'));
-    expect(hostJson.extensions?.http?.cors).toBeDefined();
-    expect(hostJson.extensions.http.cors.allowedOrigins).toBeInstanceOf(Array);
-    expect(hostJson.extensions.http.cors.allowedOrigins.length).toBeGreaterThan(0);
-    expect(hostJson.extensions.http.cors.supportCredentials).toBe(true);
+    // In Azure, App Service CORS overrides host.json CORS. Declaring CORS in
+    // both places creates a silent dual-seam drift risk. The authoritative
+    // enforcement seam is the Azure Function App CORS configuration managed
+    // by the deploy pipeline; host.json must not shadow it.
+    expect(hostJson.extensions?.http?.cors).toBeUndefined();
   });
 
-  it('CORS allows SharePoint origins', () => {
-    const hostJson = JSON.parse(readFileSync(resolve(FUNCTIONS_ROOT, 'host.json'), 'utf-8'));
-    const origins: string[] = hostJson.extensions.http.cors.allowedOrigins;
-    const hasSharePoint = origins.some((o) => o.includes('sharepoint.com'));
-    expect(hasSharePoint).toBe(true);
+  it('validate-config exposes rollout-posture validation', async () => {
+    const mod = await import('../utils/validate-config.js');
+    expect(typeof mod.validateRolloutPostureConfig).toBe('function');
+    expect(typeof mod.isRolloutPostureActive).toBe('function');
   });
 
-  it('CORS does not allow wildcard (*) origin', () => {
-    const hostJson = JSON.parse(readFileSync(resolve(FUNCTIONS_ROOT, 'host.json'), 'utf-8'));
-    const origins: string[] = hostJson.extensions.http.cors.allowedOrigins;
-    expect(origins).not.toContain('*');
+  it('rollout-posture CORS validation rejects wildcard origins', async () => {
+    const mod = await import('../utils/validate-config.js');
+    const prev = { ...process.env };
+    try {
+      process.env.NODE_ENV = 'production';
+      process.env.HBC_ADAPTER_MODE = 'proxy';
+      process.env.ENVIRONMENT_POSTURE = 'rollout';
+      process.env.AZURE_TENANT_ID = 'tid';
+      process.env.AZURE_CLIENT_ID = 'cid';
+      process.env.API_AUDIENCE = 'api://cid';
+      process.env.AZURE_TABLE_ENDPOINT = 'https://tbl';
+      process.env.APPLICATIONINSIGHTS_CONNECTION_STRING = 'ic=1';
+      process.env.SHAREPOINT_TENANT_URL = 'https://x.sharepoint.com';
+      process.env.SHAREPOINT_PROJECTS_SITE_URL = 'https://x.sharepoint.com/sites/a';
+      process.env.HBC_FUNCTIONS_BUILD_SHA = 'abc';
+      process.env.HBC_FUNCTIONS_BUILD_VERSION = '0.0.0';
+      process.env.ADMIN_READINESS_APP_ROLE = 'HBIntelAdmin';
+      process.env.CORS_ALLOWED_ORIGINS = '*';
+      expect(() => mod.validateRolloutPostureConfig()).toThrow(/CORS_ALLOWED_ORIGINS.*wildcard/);
+    } finally {
+      Object.assign(process.env, prev);
+      for (const k of Object.keys(process.env)) if (!(k in prev)) delete process.env[k];
+    }
   });
 
   it('host.json has 10-minute function timeout for provisioning saga', () => {

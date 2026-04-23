@@ -128,6 +128,133 @@ export function validateProvisioningPrerequisites(): void {
 }
 
 /**
+ * Rollout-posture operator configuration.
+ *
+ * When `ENVIRONMENT_POSTURE=rollout`, the backend asserts the declared
+ * inventory required to run production browser traffic under least-
+ * privilege app-only auth (Managed Identity). This mode is about
+ * supportability: it confirms the shape of the operational contract
+ * (identity bindings, CORS inventory, admin readiness role, deploy
+ * proof stamps). It does NOT introduce client-secret auth — the
+ * runtime remains Managed Identity app-only.
+ */
+export function isRolloutPostureActive(): boolean {
+  return (process.env.ENVIRONMENT_POSTURE ?? '').toLowerCase().trim() === 'rollout';
+}
+
+/**
+ * Required operational inventory when ENVIRONMENT_POSTURE=rollout.
+ * Each entry is validated at startup; missing or invalid values fail
+ * the process fast rather than leaking staging-shaped behavior into
+ * production browser traffic.
+ */
+interface IRolloutPostureCheck {
+  name: string;
+  description: string;
+  /** Optional extra validator; returns issue message, or null if OK. */
+  validate?: (value: string) => string | null;
+}
+
+/**
+ * Exact-origin allow-list validator for CORS_ALLOWED_ORIGINS. Wildcards
+ * are rejected: the list must be a comma-separated set of explicit
+ * https:// origins (one `http://localhost[:port]` entry is permitted
+ * to support admin tooling originating from ops workstations).
+ */
+function validateRolloutCorsOrigins(value: string): string | null {
+  const tokens = value.split(',').map((t) => t.trim()).filter((t) => t.length > 0);
+  if (tokens.length === 0) {
+    return 'CORS_ALLOWED_ORIGINS must list at least one exact origin (no wildcards).';
+  }
+  for (const token of tokens) {
+    if (token === '*' || token.includes('*')) {
+      return `CORS_ALLOWED_ORIGINS must not contain wildcards; received "${token}".`;
+    }
+    let url: URL;
+    try {
+      url = new URL(token);
+    } catch {
+      return `CORS_ALLOWED_ORIGINS entry "${token}" is not a valid URL.`;
+    }
+    if (url.protocol !== 'https:' && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+      return `CORS_ALLOWED_ORIGINS entry "${token}" must use https:// (localhost exempt).`;
+    }
+    if (url.pathname !== '/' && url.pathname !== '') {
+      return `CORS_ALLOWED_ORIGINS entry "${token}" must be an origin (no path).`;
+    }
+  }
+  return null;
+}
+
+const ROLLOUT_POSTURE_REQUIRED: readonly IRolloutPostureCheck[] = [
+  { name: 'AZURE_TENANT_ID', description: 'Entra tenant used by MI token acquisition and JWT issuer validation.' },
+  { name: 'AZURE_CLIENT_ID', description: 'User-assigned Managed Identity client ID (DefaultAzureCredential target).' },
+  { name: 'API_AUDIENCE', description: 'Inbound JWT audience; required for admin-gated readiness.' },
+  { name: 'AZURE_TABLE_ENDPOINT', description: 'App-data Table Storage endpoint used by core services.' },
+  { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', description: 'Telemetry ingestion for operational visibility.' },
+  { name: 'SHAREPOINT_TENANT_URL', description: 'Root SharePoint tenant URL.' },
+  { name: 'SHAREPOINT_PROJECTS_SITE_URL', description: 'Projects site host for SharePoint data-plane operations.' },
+  {
+    name: 'CORS_ALLOWED_ORIGINS',
+    description:
+      'Declared exact-origin allow-list mirroring the Azure Function App CORS configuration. ' +
+      'The runtime enforcement seam is App Service CORS; this value is the operator-facing inventory.',
+    validate: validateRolloutCorsOrigins,
+  },
+  {
+    name: 'HBC_FUNCTIONS_BUILD_SHA',
+    description: 'Deploy-stamped commit SHA used by the anonymous /health artifact proof.',
+  },
+  {
+    name: 'HBC_FUNCTIONS_BUILD_VERSION',
+    description: 'Deploy-stamped artifact version used by the anonymous /health artifact proof.',
+  },
+  {
+    name: 'ADMIN_READINESS_APP_ROLE',
+    description:
+      'Entra app-role name that grants access to the admin-gated /api/health/ready route. ' +
+      'Must map to a role already granted to the admin operator app registration.',
+  },
+];
+
+/**
+ * Validates rollout-posture inventory. Throws an aggregated error when
+ * any required entry is missing or fails its validator.
+ *
+ * Skips when rollout posture is not active or when config validation
+ * is suppressed (mock/test).
+ */
+export function validateRolloutPostureConfig(): void {
+  if (!shouldValidateConfig()) return;
+  if (!isRolloutPostureActive()) return;
+
+  const issues: string[] = [];
+  for (const check of ROLLOUT_POSTURE_REQUIRED) {
+    const raw = process.env[check.name];
+    if (raw === undefined || raw.trim() === '') {
+      issues.push(`  - ${check.name}: ${check.description}`);
+      continue;
+    }
+    if (check.validate) {
+      const problem = check.validate(raw);
+      if (problem) issues.push(`  - ${check.name}: ${problem}`);
+    }
+  }
+
+  if (issues.length > 0) {
+    throw new Error(
+      [
+        `[RolloutPosture] ${issues.length} rollout-posture requirement(s) not satisfied:`,
+        ...issues,
+        '',
+        'ENVIRONMENT_POSTURE=rollout requires the full app-only operational inventory.',
+        'Managed Identity remains the runtime auth model; no client secret is introduced.',
+      ].join('\n'),
+    );
+  }
+}
+
+/**
  * P4-02: Validate only settings in the specified config tier.
  * Core tier validates at startup; SharePoint tier validates on first SP operation.
  *
@@ -166,6 +293,10 @@ export function validateConfigTier(tier: ConfigTier): void {
  */
 export function validateCoreConfig(): void {
   validateConfigTier('core');
+  // Rollout posture adds additional required inventory on top of core
+  // config when the operator has opted in via ENVIRONMENT_POSTURE=rollout.
+  // No-ops in staging/dev (and in mock/test mode).
+  validateRolloutPostureConfig();
 }
 
 /**

@@ -43,21 +43,27 @@ describe('P5-03 Release gates', () => {
     expect(spCount).toBeGreaterThanOrEqual(2);
   });
 
-  // --- Gate 2: CORS is locked ---
+  // --- Gate 2: CORS is locked at a single seam ---
 
-  it('host.json CORS allowedOrigins does not include wildcard', () => {
+  it('host.json does NOT declare CORS — App Service CORS is authoritative', () => {
+    // The deploy-time seam is Azure Function App CORS (App Service level),
+    // managed by the deploy pipeline. host.json must not shadow it.
     const hostJson = JSON.parse(
       readFileSync(resolve(FUNCTIONS_ROOT, 'host.json'), 'utf-8'),
     );
-    const origins: string[] = hostJson.extensions?.http?.cors?.allowedOrigins ?? [];
-    expect(origins).not.toContain('*');
+    expect(hostJson.extensions?.http?.cors).toBeUndefined();
   });
 
-  it('host.json CORS supports credentials for Bearer tokens', () => {
-    const hostJson = JSON.parse(
-      readFileSync(resolve(FUNCTIONS_ROOT, 'host.json'), 'utf-8'),
+  it('validate-config asserts the CORS inventory under rollout posture', () => {
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, 'src/utils/validate-config.ts'),
+      'utf-8',
     );
-    expect(hostJson.extensions?.http?.cors?.supportCredentials).toBe(true);
+    // Rollout posture must require CORS_ALLOWED_ORIGINS as the declared
+    // inventory mirroring App Service CORS, with wildcards rejected.
+    expect(source).toContain('CORS_ALLOWED_ORIGINS');
+    expect(source).toContain('validateRolloutCorsOrigins');
+    expect(source).toContain('must not contain wildcards');
   });
 
   // --- Gate 3: Auth enforcement ---
@@ -92,17 +98,38 @@ describe('P5-03 Release gates', () => {
     expect(typeof mod.validateProjectSetupStartupConfig).toBe('function');
   });
 
-  // --- Gate 5: Health endpoint is diagnostic ---
+  // --- Gate 5: Health surface — public liveness + admin-gated readiness ---
 
-  it('health endpoint source includes operationalReadiness', () => {
+  it('anonymous /health exposes liveness + artifact identity only', () => {
+    // Anonymous /health must remain minimal so it does not leak
+    // readiness/config/permission posture to unauthenticated callers.
+    // Deploy proof (artifact.version + artifact.commitSha) is preserved
+    // so the post-deploy CI gate still has an unauthenticated signal.
     const source = readFileSync(
       resolve(FUNCTIONS_ROOT, 'src/functions/health/index.ts'),
       'utf-8',
     );
+    expect(source).toContain("authLevel: 'anonymous'");
+    expect(source).toContain('artifactIdentity');
+    expect(source).not.toContain('operationalReadiness');
+    expect(source).not.toContain('configTiers');
+    expect(source).not.toContain('provisioningPrereqs');
+    expect(source).not.toContain('safetyPermissionPosture');
+  });
+
+  it('admin-gated /health/ready exposes readiness behind bearer + admin role', () => {
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, 'src/functions/health/ready.ts'),
+      'utf-8',
+    );
+    expect(source).toContain("route: 'health/ready'");
+    expect(source).toContain('withAuth');
+    expect(source).toContain('requireAdmin');
     expect(source).toContain('operationalReadiness');
     expect(source).toContain('configTiers');
     expect(source).toContain('provisioningPrereqs');
     expect(source).toContain('safetyPermissionPosture');
+    expect(source).toContain('rolloutPermissionInventory');
   });
 
   // --- Gate 6: No unsafe secrets in config registry ---

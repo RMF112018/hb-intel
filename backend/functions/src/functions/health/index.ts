@@ -1,142 +1,43 @@
 /**
- * P1-C3 §2.2.1: Health probe endpoint.
- * Unauthenticated — used by Azure App Service health checks and deployment smoke tests.
+ * Public liveness + deployment-identity probe.
  *
- * Returns HTTP 200 always (health probes must not fail on missing config).
- * The response body includes tiered config diagnostics and operational readiness
- * summary for operators.
+ * This route is intentionally anonymous and intentionally minimal. Its only
+ * responsibilities are:
+ *   1. prove the process is alive (200 with a small, stable body),
+ *   2. expose the running artifact identity so the post-deploy CI gate can
+ *      assert BOTH `artifact.commitSha` and `artifact.version` match the
+ *      intended release (see backend/functions/README.md "Deployment and
+ *      artifact truth").
  *
- * P4-02: Added tiered config status (core/sharepoint).
- * P4-05: Added operationalReadiness summary and provisioning readiness.
+ * All readiness/config/permission posture disclosure lives behind the
+ * admin-gated `/api/health/ready` route. Do not add new fields here —
+ * every field on this route is public, unauthenticated surface.
  */
 
 import { app, type HttpResponseInit } from '@azure/functions';
 import { resolveBackendArtifactIdentity } from '../../utils/backend-version.js';
-import { deriveSafetyRolloutReadiness } from '../../utils/safety-rollout-readiness.js';
-import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
-
-/** Check if a setting is present and non-empty. */
-function hasEnv(name: string): boolean {
-  const v = process.env[name];
-  return v !== undefined && v !== '';
-}
-
-/**
- * P4-05: Compute overall operational readiness from config tiers and integrations.
- *
- * - `ready` — all core + SharePoint + provisioning prerequisites configured
- * - `degraded` — core operational but some optional integrations missing
- * - `blocked` — core config missing; no authenticated requests can succeed
- */
-function computeReadiness(
-  coreReady: boolean,
-  sharePointReady: boolean,
-  provisioningReady: boolean,
-  signalRReady: boolean,
-): 'ready' | 'degraded' | 'blocked' {
-  if (!coreReady) return 'blocked';
-  if (!sharePointReady) return 'degraded';
-  if (!provisioningReady || !signalRReady) return 'degraded';
-  return 'ready';
-}
 
 app.http('health', {
   route: 'health',
   methods: ['GET'],
   authLevel: 'anonymous',
   handler: async (): Promise<HttpResponseInit> => {
-    const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'not-set';
-
-    // P4-02: Core settings split into tiers matching validate-config.ts
-    const coreAuthPresent = [
-      'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'API_AUDIENCE',
-      'AZURE_TABLE_ENDPOINT', 'APPLICATIONINSIGHTS_CONNECTION_STRING',
-      'HBC_ADAPTER_MODE',
-    ].every(hasEnv);
-    const sharePointPresent = [
-      'SHAREPOINT_TENANT_URL', 'SHAREPOINT_PROJECTS_SITE_URL',
-    ].every(hasEnv);
-    const corePresent = coreAuthPresent && sharePointPresent;
-
-    // P4-05: Provisioning-specific readiness
-    const provisioningPrereqs = {
-      graphPermission: process.env.GRAPH_GROUP_PERMISSION_CONFIRMED === 'true',
-      hubSite: hasEnv('SHAREPOINT_HUB_SITE_ID'),
-      appCatalog: hasEnv('SHAREPOINT_APP_CATALOG_URL'),
-      spfxAppId: hasEnv('HB_INTEL_SPFX_APP_ID'),
-      opexManager: hasEnv('OPEX_MANAGER_UPN'),
-    };
-    const provisioningReady = Object.values(provisioningPrereqs).every(Boolean);
-    const safetyPermissionPosture = validateSafetyPermissionPosture();
-    const safetyRolloutReadiness = deriveSafetyRolloutReadiness(safetyPermissionPosture);
-
-    // Optional integrations
-    const integrations: Record<string, 'ready' | 'not-configured'> = {
-      signalR: hasEnv('AzureSignalRConnectionString') ? 'ready' : 'not-configured',
-      email: hasEnv('EMAIL_DELIVERY_API_KEY') && hasEnv('EMAIL_FROM_ADDRESS') ? 'ready' : 'not-configured',
-      notifications: hasEnv('NOTIFICATION_API_BASE_URL') ? 'ready' : 'not-configured',
-    };
-
-    // P9-G5: CONTROLLER_UPNS and ADMIN_UPNS are notification-targeting config
-    // only — they do NOT govern authorization (JWT app-role claims do).
-    // Missing values mean provisioning failure/escalation notifications will
-    // not reach those recipients, but authorization is unaffected.
-    const notificationRecipients: Record<string, 'configured' | 'not-configured'> = {
-      controllerNotifications: hasEnv('CONTROLLER_UPNS') ? 'configured' : 'not-configured',
-      adminNotifications: hasEnv('ADMIN_UPNS') ? 'configured' : 'not-configured',
-    };
-
-    // P4-05: Compute overall operational readiness
-    const operationalReadiness = computeReadiness(
-      coreAuthPresent,
-      sharePointPresent,
-      provisioningReady && safetyRolloutReadiness.ready,
-      integrations.signalR === 'ready',
-    );
-
-    // Artifact identity block (G-01 / G-10). Cheap, zero-auth proof of
-    // which build is actually running — consumed by the post-deploy CI
-    // gate to assert both commitSha and version match the intended release.
     const artifactIdentity = resolveBackendArtifactIdentity();
-
-    // /health remains HTTP 200 by contract — readiness is expressed in the body.
     return {
       status: 200,
       jsonBody: {
         status: 'healthy',
-        operationalReadiness,
         artifact: {
           version: artifactIdentity.version,
           commitSha: artifactIdentity.commitSha,
           buildTimestamp: artifactIdentity.buildTimestamp,
         },
-        environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT ?? 'unknown',
-        adapterMode,
-        coreConfigReady: corePresent,
-        configTiers: {
-          core: coreAuthPresent ? 'ready' : 'missing',
-          sharepoint: sharePointPresent ? 'ready' : 'missing',
-          provisioning: provisioningReady ? 'ready' : 'incomplete',
-          safetyPermissionPosture: safetyRolloutReadiness.ready ? 'ready' : 'blocked',
-          safetyRolloutGate: safetyRolloutReadiness.gateReady ? 'ready' : 'blocked',
-        },
-        provisioningPrereqs,
-        safetyPermissionPosture,
-        safetyRolloutReadiness: {
-          ready: safetyRolloutReadiness.ready,
-          surfaceState: safetyRolloutReadiness.surfaceState,
-          posture: safetyRolloutReadiness.posture,
-          permissionModel: safetyRolloutReadiness.permissionModel,
-          postureReady: safetyRolloutReadiness.postureReady,
-          proofReady: safetyRolloutReadiness.proofReady,
-          gateReady: safetyRolloutReadiness.gateReady,
-          gate: safetyRolloutReadiness.gate,
-          issueCodes: safetyRolloutReadiness.issues.map((i) => i.code),
-        },
-        integrations,
-        notificationRecipients,
         timestamp: new Date().toISOString(),
       },
     };
   },
 });
+
+// Register the admin-gated readiness route as a side-effect of importing
+// this module; both live under the same `health` function family.
+import './ready.js';

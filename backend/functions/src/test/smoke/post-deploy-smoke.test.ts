@@ -42,38 +42,31 @@ function apiUrl(path: string): string {
 }
 
 describe.runIf(!!BASE_URL)('P5-03 Post-deploy smoke checks', () => {
-  // --- Health probe (unauthenticated) ---
+  // --- Health liveness (unauthenticated, minimal public surface) ---
 
-  it('health endpoint returns 200 with operational readiness', async () => {
+  it('anonymous /health returns liveness + artifact identity only', async () => {
     const res = await fetch(apiUrl('/health'));
     expect(res.status).toBe(200);
 
     const body = await res.json();
     expect(body).toHaveProperty('status', 'healthy');
-    expect(body).toHaveProperty('operationalReadiness');
-    expect(['ready', 'degraded', 'blocked']).toContain(body.operationalReadiness);
+    // Deploy proof: version + commitSha remain public so CI can verify
+    // the live build matches the manifest.
+    expect(body).toHaveProperty('artifact');
+    expect(body.artifact).toHaveProperty('version');
+    expect(body.artifact).toHaveProperty('commitSha');
+    // Readiness/posture/config detail must NOT be public.
+    expect(body).not.toHaveProperty('operationalReadiness');
+    expect(body).not.toHaveProperty('configTiers');
+    expect(body).not.toHaveProperty('provisioningPrereqs');
+    expect(body).not.toHaveProperty('safetyPermissionPosture');
   });
 
-  it('health endpoint reports tiered config status', async () => {
-    const res = await fetch(apiUrl('/health'));
-    const body = await res.json();
+  // --- Readiness (admin-gated) ---
 
-    expect(body).toHaveProperty('configTiers');
-    expect(body.configTiers).toHaveProperty('core');
-    expect(body.configTiers).toHaveProperty('sharepoint');
-    expect(body.configTiers).toHaveProperty('provisioning');
-  });
-
-  it('health endpoint reports provisioning prerequisites', async () => {
-    const res = await fetch(apiUrl('/health'));
-    const body = await res.json();
-
-    expect(body).toHaveProperty('provisioningPrereqs');
-    expect(body.provisioningPrereqs).toHaveProperty('graphPermission');
-    expect(body.provisioningPrereqs).toHaveProperty('hubSite');
-    expect(body.provisioningPrereqs).toHaveProperty('appCatalog');
-    expect(body.provisioningPrereqs).toHaveProperty('spfxAppId');
-    expect(body.provisioningPrereqs).toHaveProperty('opexManager');
+  it('/health/ready rejects unauthenticated requests', async () => {
+    const res = await fetch(apiUrl('/health/ready'));
+    expect(res.status).toBe(401);
   });
 
   // --- Auth enforcement (unauthenticated rejection) ---
@@ -94,6 +87,22 @@ describe.runIf(!!BASE_URL)('P5-03 Post-deploy smoke checks', () => {
     const authHeaders = (): Record<string, string> => ({
       Authorization: `Bearer ${AUTH_TOKEN}`,
       'Content-Type': 'application/json',
+    });
+
+    it('/health/ready returns readiness detail when admin-authenticated', async () => {
+      const res = await fetch(apiUrl('/health/ready'), { headers: authHeaders() });
+      // 200 when the caller holds the admin app-role; 403 is acceptable for
+      // non-admin tokens but must not leak body on denial.
+      expect([200, 403]).toContain(res.status);
+      if (res.status === 200) {
+        const body = await res.json();
+        expect(body).toHaveProperty('operationalReadiness');
+        expect(['ready', 'degraded', 'blocked']).toContain(body.operationalReadiness);
+        expect(body).toHaveProperty('configTiers');
+        expect(body).toHaveProperty('provisioningPrereqs');
+        expect(body).toHaveProperty('safetyPermissionPosture');
+        expect(body).toHaveProperty('rolloutPermissionInventory');
+      }
     });
 
     it('project-setup-requests returns list with valid token', async () => {
