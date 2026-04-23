@@ -85,6 +85,29 @@ export interface ChecklistRow {
   readonly workbookFlagCell: string | null;
 }
 
+/**
+ * Per-field provenance indicator describing which parser seam produced a
+ * given `InspectionMetadata` value. Values carry these through the preview
+ * and ingestion paths so parser authority decisions can be audited.
+ *
+ *   - `parser-meta`  — resolved from the `ParserMeta` sheet
+ *   - `named-range`  — resolved from a workbook-named range
+ *   - `legacy`       — resolved from a legacy visible cell (only when no
+ *                      parser markers were present on the workbook)
+ *   - `none`         — the field could not be resolved from any source
+ */
+export type ParserValueSource = 'parser-meta' | 'named-range' | 'legacy' | 'none';
+
+export interface InspectionMetadataSources {
+  readonly inspectionDate: ParserValueSource;
+  readonly inspectionNumber: ParserValueSource;
+  readonly projectSite: ParserValueSource;
+  readonly keyFindings: ParserValueSource;
+  readonly reportingWeekStart: ParserValueSource;
+  readonly reportingWeekEnd: ParserValueSource;
+  readonly reportingPeriodLabel: ParserValueSource;
+}
+
 export interface InspectionMetadata {
   readonly inspectionDate: string;
   readonly projectSiteText: string;
@@ -96,6 +119,12 @@ export interface InspectionMetadata {
   readonly workbookTotalNa: number | null;
   readonly workbookSafetyScorePct: number | null;
   readonly keyFindingsFreeText: string;
+  /** Reporting-period derivation markers when the workbook supplied them. */
+  readonly reportingWeekStart: string | null;
+  readonly reportingWeekEnd: string | null;
+  readonly reportingPeriodLabel: string | null;
+  /** Per-field provenance of parser-critical values. */
+  readonly sources: InspectionMetadataSources;
 }
 
 export interface SectionScore {
@@ -183,6 +212,34 @@ export interface UploadContext {
   readonly legacyRegistryItemId?: number;
   readonly inspectionNumber?: string;
   readonly inspectionDate?: string;
+}
+
+/**
+ * Per-field provenance summary surfaced by preview + ingestion paths.
+ * Records which parser seam produced each parser-critical value, and
+ * whether the operator-entered intake context was used as the authority
+ * (only when the parser could not resolve the field).
+ *
+ * Parser authority rule (Prompt 02 closure): when a field has a parser
+ * source of `parser-meta` or `named-range`, the parser value is
+ * authoritative. The intake context is compared for mismatch diagnostics
+ * but does not displace the parser value. When the parser source is
+ * `legacy` or `none`, the intake context may be used as the authority.
+ */
+export interface MetadataAuthority {
+  readonly inspectionDate: {
+    readonly source: ParserValueSource;
+    readonly usedContext: boolean;
+  };
+  readonly inspectionNumber: {
+    readonly source: ParserValueSource;
+    readonly usedContext: boolean;
+  };
+  readonly projectSite: ParserValueSource;
+  readonly keyFindings: ParserValueSource;
+  readonly reportingWeekStart: ParserValueSource;
+  readonly reportingWeekEnd: ParserValueSource;
+  readonly reportingPeriodLabel: ParserValueSource;
 }
 
 /**
@@ -390,6 +447,14 @@ export interface IngestionRunResult {
    * or when authoritative metadata was not provided (legacy path).
    */
   readonly metadataMismatch?: IngestionMetadataMismatch;
+  /**
+   * Prompt 02 closure: per-field source-of-value telemetry for parser
+   * authority. Absent for terminals that short-circuit before parse
+   * completes (invalid-template, parse-error). Present for every
+   * parse-successful terminal so the audit trail records which parser
+   * seam produced each authoritative value.
+   */
+  readonly metadataAuthority?: MetadataAuthority;
 }
 
 export type PreviewSeverity = 'warning' | 'error';
@@ -442,6 +507,12 @@ export interface SafetyIngestionPreviewResult {
   readonly normalizedKeyFindingsPreview?: string;
   readonly warnings: ReadonlyArray<PreviewDiagnostic>;
   readonly blockingErrors: ReadonlyArray<PreviewDiagnostic>;
+  /**
+   * Prompt 02 closure: per-field source-of-value telemetry for parser
+   * authority. Absent when the workbook could not be parsed (parse failure
+   * short-circuits before authority can be established).
+   */
+  readonly metadataAuthority?: MetadataAuthority;
 }
 
 export class TemplateInvalidError extends Error {

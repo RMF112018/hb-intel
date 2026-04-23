@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ParsedInspection, SafetyInspectionEvent, SafetyReportingPeriod } from '../../../../../packages/features/safety/src/domain/types.js';
+import type {
+  InspectionMetadataSources,
+  ParsedInspection,
+  ParserValueSource,
+  SafetyInspectionEvent,
+  SafetyReportingPeriod,
+} from '../../../../../packages/features/safety/src/domain/types.js';
 import { evaluateSafetyIngestionPreview } from '../safety-ingestion-preview-evaluator.js';
 
 const {
@@ -94,6 +100,74 @@ describe('evaluateSafetyIngestionPreview', () => {
     expect(result.blockingErrors.some((e) => e.code === 'TEMPLATE_INCOMPATIBLE')).toBe(true);
   });
 
+  it('retains parser-meta inspection date over diverging context and emits mismatch warning', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        inspectionDate: '2026-04-22',
+        inspectionNumber: '3',
+        sources: { inspectionDate: 'parser-meta', inspectionNumber: 'parser-meta' },
+      }),
+    );
+    const repo = makeRepository();
+
+    const request = makeRequest();
+    request.context.inspectionDate = '2026-04-21'; // diverges from parser-meta
+    request.context.inspectionNumber = '9'; // diverges from parser-meta
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, request);
+
+    expect(result.metadata?.inspectionDate).toBe('2026-04-22');
+    expect(result.metadataAuthority?.inspectionDate.source).toBe('parser-meta');
+    expect(result.metadataAuthority?.inspectionDate.usedContext).toBe(false);
+    expect(result.metadataAuthority?.inspectionNumber.source).toBe('parser-meta');
+    expect(result.metadataAuthority?.inspectionNumber.usedContext).toBe(false);
+    expect(result.warnings.some((w) => w.code === 'INSPECTION_DATE_CONTEXT_MISMATCH')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'INSPECTION_NUMBER_CONTEXT_MISMATCH')).toBe(true);
+    // The parser date falls inside the mocked reporting period, so this is
+    // commit-ready — proving that parser authority drove the in-range check.
+    expect(result.reportingPeriod?.dateInRange).toBe(true);
+    expect(result.blockingErrors.some((e) => e.code === 'REPORTING_PERIOD_MISMATCH')).toBe(false);
+  });
+
+  it('retains named-range inspection values over context and records the source', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        inspectionDate: '2026-04-22',
+        inspectionNumber: '3',
+        sources: { inspectionDate: 'named-range', inspectionNumber: 'named-range' },
+      }),
+    );
+    const repo = makeRepository();
+
+    const request = makeRequest();
+    request.context.inspectionDate = '2026-04-21';
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, request);
+
+    expect(result.metadataAuthority?.inspectionDate.source).toBe('named-range');
+    expect(result.metadataAuthority?.inspectionDate.usedContext).toBe(false);
+    expect(result.warnings.some((w) => w.code === 'INSPECTION_DATE_CONTEXT_MISMATCH')).toBe(true);
+  });
+
+  it('uses intake context for markerless/legacy templates where parser source is none', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        inspectionDate: '',
+        inspectionNumber: '',
+        sources: { inspectionDate: 'none', inspectionNumber: 'none' },
+      }),
+    );
+    const repo = makeRepository();
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.metadataAuthority?.inspectionDate.source).toBe('none');
+    expect(result.metadataAuthority?.inspectionDate.usedContext).toBe(true);
+    expect(result.metadataAuthority?.inspectionNumber.source).toBe('none');
+    expect(result.metadataAuthority?.inspectionNumber.usedContext).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'INSPECTION_DATE_CONTEXT_MISMATCH')).toBe(false);
+    expect(result.warnings.some((w) => w.code === 'INSPECTION_NUMBER_CONTEXT_MISMATCH')).toBe(false);
+  });
+
   it('flags high-confidence duplicate supersession risk as blocking', async () => {
     const existing: SafetyInspectionEvent = {
       id: 'ie-55',
@@ -134,20 +208,46 @@ describe('evaluateSafetyIngestionPreview', () => {
   });
 });
 
-function makeParsed(): ParsedInspection {
+function defaultSources(
+  overrides: Partial<InspectionMetadataSources> = {},
+): InspectionMetadataSources {
+  const parserMeta: ParserValueSource = 'parser-meta';
+  return {
+    inspectionDate: parserMeta,
+    inspectionNumber: parserMeta,
+    projectSite: parserMeta,
+    keyFindings: parserMeta,
+    reportingWeekStart: 'none',
+    reportingWeekEnd: 'none',
+    reportingPeriodLabel: 'none',
+    ...overrides,
+  };
+}
+
+function makeParsed(
+  overrides: {
+    inspectionDate?: string;
+    inspectionNumber?: string;
+    sources?: Partial<InspectionMetadataSources>;
+  } = {},
+): ParsedInspection {
   return {
     templateVersion: 'SafetyChecklist_v1',
     parserVersion: 'parse-first-2026-04',
     metadata: {
-      inspectionDate: '2026-04-22',
+      inspectionDate: overrides.inspectionDate ?? '2026-04-22',
       projectSiteText: '2026-100 Demo Site',
-      inspectionNumber: '3',
+      inspectionNumber: overrides.inspectionNumber ?? '3',
       projectNumberHint: '2026-100',
       workbookTotalYes: 9,
       workbookTotalNo: 1,
       workbookTotalNa: 2,
       workbookSafetyScorePct: 90,
       keyFindingsFreeText: 'Missing guardrail\nLoose extension cord',
+      reportingWeekStart: null,
+      reportingWeekEnd: null,
+      reportingPeriodLabel: null,
+      sources: defaultSources(overrides.sources),
     },
     rows: [],
   };

@@ -4,7 +4,10 @@ import {
 } from '../../../../packages/features/safety/src/domain/templateContract.js';
 import type {
   DuplicateSupersessionPreview,
+  InspectionMetadata,
+  MetadataAuthority,
   ParsedInspection,
+  ParserValueSource,
   PreviewDiagnostic,
   ProjectResolutionPreview,
   ReportingPeriodPreview,
@@ -124,14 +127,52 @@ export async function evaluateSafetyIngestionPreview(
     };
   }
 
-  const authoritativeInspectionDate =
-    input.context.inspectionDate && input.context.inspectionDate.length > 0
-      ? input.context.inspectionDate
-      : parsed.metadata.inspectionDate;
-  const authoritativeInspectionNumber =
-    input.context.inspectionNumber && input.context.inspectionNumber.length > 0
-      ? input.context.inspectionNumber
-      : parsed.metadata.inspectionNumber;
+  // Prompt 02 closure: parser-derived values are authoritative when the
+  // parser resolved them from ParserMeta or a named range. Operator-entered
+  // context values are compared against the parser value and surfaced as
+  // advisory warnings when they disagree, but they do not displace parser
+  // authority. When the parser source is `legacy` or `none` (markerless
+  // template or unparseable field), the intake context may be used as the
+  // authority — this preserves support for genuinely legacy workbooks.
+  const dateAuthority = resolveFieldAuthority({
+    parsedValue: parsed.metadata.inspectionDate,
+    parserSource: parsed.metadata.sources.inspectionDate,
+    contextValue: input.context.inspectionDate,
+  });
+  const inspectionNumberAuthority = resolveFieldAuthority({
+    parsedValue: parsed.metadata.inspectionNumber,
+    parserSource: parsed.metadata.sources.inspectionNumber,
+    contextValue: input.context.inspectionNumber,
+  });
+  const authoritativeInspectionDate = dateAuthority.value;
+  const authoritativeInspectionNumber = inspectionNumberAuthority.value;
+
+  if (dateAuthority.contextMismatch) {
+    warnings.push({
+      code: 'INSPECTION_DATE_CONTEXT_MISMATCH',
+      message:
+        `Operator-entered inspection date ${JSON.stringify(input.context.inspectionDate ?? '')}` +
+        ` differs from workbook-parsed value ${JSON.stringify(parsed.metadata.inspectionDate)}` +
+        ` (source: ${parsed.metadata.sources.inspectionDate}); parser value retained.`,
+      severity: 'warning',
+    });
+  }
+  if (inspectionNumberAuthority.contextMismatch) {
+    warnings.push({
+      code: 'INSPECTION_NUMBER_CONTEXT_MISMATCH',
+      message:
+        `Operator-entered inspection number ${JSON.stringify(input.context.inspectionNumber ?? '')}` +
+        ` differs from workbook-parsed value ${JSON.stringify(parsed.metadata.inspectionNumber)}` +
+        ` (source: ${parsed.metadata.sources.inspectionNumber}); parser value retained.`,
+      severity: 'warning',
+    });
+  }
+
+  const metadataAuthority: MetadataAuthority = buildMetadataAuthority(
+    parsed.metadata,
+    dateAuthority.usedContext,
+    inspectionNumberAuthority.usedContext,
+  );
 
   const checksum = await computeChecksum(input.fileBytes);
 
@@ -259,6 +300,72 @@ export async function evaluateSafetyIngestionPreview(
     normalizedKeyFindingsPreview: parsed.metadata.keyFindingsFreeText,
     warnings,
     blockingErrors,
+    metadataAuthority,
+  };
+}
+
+interface FieldAuthorityInput {
+  readonly parsedValue: string;
+  readonly parserSource: ParserValueSource;
+  readonly contextValue: string | undefined;
+}
+
+interface FieldAuthorityResult {
+  readonly value: string;
+  readonly usedContext: boolean;
+  readonly contextMismatch: boolean;
+}
+
+/**
+ * Prompt 02 closure: decides the authoritative value for a parser-critical
+ * field and reports whether the operator-entered context diverged from the
+ * parser value.
+ *
+ * Governed authority rule:
+ *   - `parser-meta` | `named-range` (markered template): parser wins. The
+ *     context is advisory; a mismatch warning is emitted when it was
+ *     supplied and differs from the parser value. Context cannot displace
+ *     parser authority on markered templates.
+ *   - `legacy` | `none` (markerless / no-marker template): no parser
+ *     authority exists to protect. Preserves the pre-existing G-03 rule
+ *     that operator-entered intake values authoritatively drive list-field
+ *     writes when supplied. No mismatch warning — the G-03 mismatch
+ *     advisory (`metadataMismatch`) carries any divergence separately.
+ */
+function resolveFieldAuthority(input: FieldAuthorityInput): FieldAuthorityResult {
+  const trimmedContext = (input.contextValue ?? '').trim();
+  const hasContext = trimmedContext.length > 0;
+
+  if (input.parserSource === 'parser-meta' || input.parserSource === 'named-range') {
+    const mismatch = hasContext && trimmedContext !== input.parsedValue;
+    return { value: input.parsedValue, usedContext: false, contextMismatch: mismatch };
+  }
+
+  if (hasContext) {
+    return { value: trimmedContext, usedContext: true, contextMismatch: false };
+  }
+  return { value: input.parsedValue, usedContext: false, contextMismatch: false };
+}
+
+function buildMetadataAuthority(
+  metadata: InspectionMetadata,
+  dateUsedContext: boolean,
+  inspectionNumberUsedContext: boolean,
+): MetadataAuthority {
+  return {
+    inspectionDate: {
+      source: metadata.sources.inspectionDate,
+      usedContext: dateUsedContext,
+    },
+    inspectionNumber: {
+      source: metadata.sources.inspectionNumber,
+      usedContext: inspectionNumberUsedContext,
+    },
+    projectSite: metadata.sources.projectSite,
+    keyFindings: metadata.sources.keyFindings,
+    reportingWeekStart: metadata.sources.reportingWeekStart,
+    reportingWeekEnd: metadata.sources.reportingWeekEnd,
+    reportingPeriodLabel: metadata.sources.reportingPeriodLabel,
   };
 }
 

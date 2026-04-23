@@ -23,7 +23,10 @@ import {
   type IngestionCommittedIds,
   type IngestionMetadataMismatch,
   type IngestionRunResult,
+  type InspectionMetadata,
+  type MetadataAuthority,
   type ParsedInspection,
+  type ParserValueSource,
   type ProjectResolutionResult,
   type ProjectSourceClassification,
   type SafetyFinding,
@@ -314,19 +317,34 @@ export async function runIngestionPipeline(
   }
   const parsed = parsedCache;
 
-  // G-03 (Wave 2 revision): operator-entered intake metadata is authoritative
-  // for inspectionDate / inspectionNumber / projectNumber writes. When
-  // absent (legacy migration shim), fall back to workbook-parsed values so
-  // older callers keep working during rollout. The new Upload path always
-  // provides these fields.
-  const authoritativeInspectionDate =
-    context.inspectionDate && context.inspectionDate.length > 0
-      ? context.inspectionDate
-      : parsed.metadata.inspectionDate;
-  const authoritativeInspectionNumber =
-    context.inspectionNumber && context.inspectionNumber.length > 0
-      ? context.inspectionNumber
-      : parsed.metadata.inspectionNumber;
+  // Prompt 02 closure: parser-derived values are authoritative whenever the
+  // parser resolved a field from `ParserMeta` or a named range. The
+  // operator-entered intake context is retained for comparison / mismatch
+  // advisory via `buildMetadataMismatch`, but it does not displace parser
+  // authority for committed inspection metadata.
+  //
+  // For fields with parser source `legacy` (markerless workbook) or `none`
+  // (parser could not resolve the value), the intake context is allowed to
+  // step in — this keeps genuinely legacy workbooks ingestible during
+  // rollout while eliminating the silent override on marker-bearing
+  // workbooks.
+  const dateAuthority = resolveFieldAuthority({
+    parsedValue: parsed.metadata.inspectionDate,
+    parserSource: parsed.metadata.sources.inspectionDate,
+    contextValue: context.inspectionDate,
+  });
+  const inspectionNumberAuthority = resolveFieldAuthority({
+    parsedValue: parsed.metadata.inspectionNumber,
+    parserSource: parsed.metadata.sources.inspectionNumber,
+    contextValue: context.inspectionNumber,
+  });
+  const authoritativeInspectionDate = dateAuthority.value;
+  const authoritativeInspectionNumber = inspectionNumberAuthority.value;
+  const metadataAuthority: MetadataAuthority = buildMetadataAuthority(
+    parsed.metadata,
+    dateAuthority.usedContext,
+    inspectionNumberAuthority.usedContext,
+  );
 
   // Stage 5: validate authoritative date against the selected reporting period.
   emit({ stage: 'reporting-period-resolution', status: 'start' });
@@ -363,7 +381,7 @@ export async function runIngestionPipeline(
           attemptNumber,
         },
       });
-      return { run, state: 'reporting-period-mismatch' };
+      return { run, state: 'reporting-period-mismatch', metadataAuthority };
     }
   }
   emit({
@@ -434,7 +452,7 @@ export async function runIngestionPipeline(
         attemptNumber,
       },
     });
-    return { run, state: 'unresolved-project' };
+    return { run, state: 'unresolved-project', metadataAuthority };
   }
   emit({
     stage: 'project-resolution',
@@ -502,7 +520,7 @@ export async function runIngestionPipeline(
           matchedInspectionEventId: matched.id,
         },
       });
-      return { run, state: 'committed', metadataMismatch };
+      return { run, state: 'committed', metadataMismatch, metadataAuthority };
     }
     // Duplicate exists but previously superseded — fall through as review-required.
     const run = await finalize(
@@ -530,7 +548,7 @@ export async function runIngestionPipeline(
         matchedInspectionEventId: duplicate.matchedId,
       },
     });
-    return { run, state: 'review-required', metadataMismatch };
+    return { run, state: 'review-required', metadataMismatch, metadataAuthority };
   }
 
   // Stage 7: scoring + stage 8: finding extraction
@@ -734,6 +752,7 @@ export async function runIngestionPipeline(
       committed,
       state: 'committed',
       metadataMismatch,
+      metadataAuthority,
     };
   } catch (err) {
     const partialIds =
@@ -765,8 +784,68 @@ export async function runIngestionPipeline(
         message: err instanceof Error ? err.message : 'Unknown commit error',
       },
     });
-    return { run, state: 'commit-failed', metadataMismatch };
+    return { run, state: 'commit-failed', metadataMismatch, metadataAuthority };
   }
+}
+
+interface FieldAuthorityInput {
+  readonly parsedValue: string;
+  readonly parserSource: ParserValueSource;
+  readonly contextValue: string | undefined;
+}
+
+interface FieldAuthorityResult {
+  readonly value: string;
+  readonly usedContext: boolean;
+}
+
+/**
+ * Prompt 02 closure: decide the authoritative value for a parser-critical
+ * field given the parser's resolved value, its source seam, and the
+ * operator-entered intake context.
+ *
+ * Governed authority rule:
+ *   - `parser-meta` | `named-range` (markered template): parser wins; the
+ *     committed event uses the parsed value. Divergence from the intake
+ *     context flows through the existing `metadataMismatch` advisory.
+ *   - `legacy` | `none` (markerless / no-marker template): no parser
+ *     authority to protect — preserves the pre-existing G-03 rule that
+ *     operator-entered intake values drive the committed list fields when
+ *     supplied; the parser value fills in only when the intake context is
+ *     absent (migration shim).
+ */
+function resolveFieldAuthority(input: FieldAuthorityInput): FieldAuthorityResult {
+  const trimmedContext = (input.contextValue ?? '').trim();
+  const hasContext = trimmedContext.length > 0;
+
+  if (input.parserSource === 'parser-meta' || input.parserSource === 'named-range') {
+    return { value: input.parsedValue, usedContext: false };
+  }
+
+  if (hasContext) return { value: trimmedContext, usedContext: true };
+  return { value: input.parsedValue, usedContext: false };
+}
+
+function buildMetadataAuthority(
+  metadata: InspectionMetadata,
+  dateUsedContext: boolean,
+  inspectionNumberUsedContext: boolean,
+): MetadataAuthority {
+  return {
+    inspectionDate: {
+      source: metadata.sources.inspectionDate,
+      usedContext: dateUsedContext,
+    },
+    inspectionNumber: {
+      source: metadata.sources.inspectionNumber,
+      usedContext: inspectionNumberUsedContext,
+    },
+    projectSite: metadata.sources.projectSite,
+    keyFindings: metadata.sources.keyFindings,
+    reportingWeekStart: metadata.sources.reportingWeekStart,
+    reportingWeekEnd: metadata.sources.reportingWeekEnd,
+    reportingPeriodLabel: metadata.sources.reportingPeriodLabel,
+  };
 }
 
 export function classifyDuplicateRisk(

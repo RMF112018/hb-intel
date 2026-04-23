@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { runIngestionPipeline, type IngestionAdapter } from './runIngestionPipeline.js';
 import { buildCleanAllYesWorkbook } from '../test/fixtures.js';
 import { createSyntheticWorkbookView } from '../parser/workbookView.js';
+import { PARSER_META_FIELDS } from '../domain/templateContract.js';
 import type {
   CommittedArtifacts,
   ProjectResolutionResult,
@@ -479,6 +480,73 @@ describe('runIngestionPipeline', () => {
         if (originalTZ === undefined) delete process.env.TZ;
         else process.env.TZ = originalTZ;
       }
+    });
+
+    it('parser-meta authority overrides operator-entered values on markered templates', async () => {
+      // Markered template: ParserMeta supplies inspectionDate + inspectionNumber.
+      // Operator-entered context values diverge. Parser must win on the
+      // committed draft; the mismatch still surfaces as an advisory.
+      const resolveByNumber = vi.fn(
+        async (projectNumber: string, classification): Promise<ProjectResolutionResult> => ({
+          classification,
+          projectNumber,
+          projectNameSnapshot: 'Markered Project',
+          projectLocationSnapshot: '',
+          projectStageSnapshot: '',
+        }),
+      );
+      const { adapter, captured } = makeAdapter({
+        resolveProjectByNumber: resolveByNumber,
+      });
+
+      const view = buildCleanAllYesWorkbook({
+        inspectionDate: '2026-04-22',
+        inspectionNumber: '1',
+        projectSiteText: '2024-999 Markered Project',
+        extraSheets: {
+          ParserMeta: {
+            A1: 'Field',
+            B1: 'Value',
+            A2: PARSER_META_FIELDS.templateVersion,
+            B2: 'SafetyChecklist_v1',
+            A3: PARSER_META_FIELDS.parserContractVersion,
+            B3: 'parse-first-2026-04',
+            A4: PARSER_META_FIELDS.inspectionDateRaw,
+            B4: '2026-04-22',
+            A5: PARSER_META_FIELDS.inspectionNumberRaw,
+            B5: 1,
+            A6: PARSER_META_FIELDS.projectSiteRaw,
+            B6: '2024-999 Markered Project',
+            A14: PARSER_META_FIELDS.keyFindingsNormalized,
+            B14: 'One finding',
+          },
+        },
+      });
+
+      const result = await runIngestionPipeline({
+        view,
+        context: operatorContext({
+          inspectionDate: '2026-04-20',
+          inspectionNumber: '7',
+        }),
+        uploadedRef: baseRef(),
+        adapter,
+      });
+
+      expect(result.state).toBe('committed');
+      // Parser-meta authority drove the committed event.
+      expect(captured.inspection?.inspectionDate).toBe('2026-04-22');
+      expect(captured.inspection?.inspectionNumber).toBe('1');
+      // Authority telemetry records the source.
+      expect(result.metadataAuthority?.inspectionDate.source).toBe('parser-meta');
+      expect(result.metadataAuthority?.inspectionDate.usedContext).toBe(false);
+      expect(result.metadataAuthority?.inspectionNumber.source).toBe('parser-meta');
+      expect(result.metadataAuthority?.inspectionNumber.usedContext).toBe(false);
+      // Advisory mismatch still surfaces the divergence for the outcome zone.
+      expect(result.metadataMismatch?.inspectionDateMismatch).toEqual({
+        entered: '2026-04-20',
+        parsed: '2026-04-22',
+      });
     });
 
     it('legacy path (no operator fields) falls back to workbook-parsed values', async () => {

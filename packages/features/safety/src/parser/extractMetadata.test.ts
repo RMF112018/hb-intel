@@ -48,6 +48,10 @@ describe('extractMetadata parse-first precedence', () => {
     expect(metadata.inspectionNumber).toBe('7');
     expect(metadata.projectSiteText).toBe('2026-777 ParserMeta Project');
     expect(metadata.keyFindingsFreeText).toBe('First finding\nSecond finding');
+    expect(metadata.sources.inspectionDate).toBe('parser-meta');
+    expect(metadata.sources.inspectionNumber).toBe('parser-meta');
+    expect(metadata.sources.projectSite).toBe('parser-meta');
+    expect(metadata.sources.keyFindings).toBe('parser-meta');
   });
 
   it('prefers named ranges over visible cells when ParserMeta is absent', () => {
@@ -78,6 +82,10 @@ describe('extractMetadata parse-first precedence', () => {
     expect(metadata.inspectionNumber).toBe('13');
     expect(metadata.projectSiteText).toBe('2026-313 NamedRange Project');
     expect(metadata.keyFindingsFreeText).toBe('Line A\nLine B');
+    expect(metadata.sources.inspectionDate).toBe('named-range');
+    expect(metadata.sources.inspectionNumber).toBe('named-range');
+    expect(metadata.sources.projectSite).toBe('named-range');
+    expect(metadata.sources.keyFindings).toBe('named-range');
   });
 
   it('falls back to visible-cell legacy seam only when richer sources are absent', () => {
@@ -93,6 +101,48 @@ describe('extractMetadata parse-first precedence', () => {
     expect(metadata.inspectionDate).toBe('2026-05-06');
     expect(metadata.inspectionNumber).toBe('17');
     expect(metadata.projectSiteText).toBe('2026-517 Legacy Project');
+    expect(metadata.sources.inspectionDate).toBe('legacy');
+    expect(metadata.sources.inspectionNumber).toBe('legacy');
+    expect(metadata.sources.projectSite).toBe('legacy');
+  });
+
+  it('exposes reporting-period markers with source when parserMeta populates them', () => {
+    const view = buildCleanAllYesWorkbook({
+      inspectionDate: '2026-01-01',
+      inspectionNumber: '1',
+      projectSiteText: '2026-001 Visible Project',
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+          A4: PARSER_META_FIELDS.inspectionDateRaw,
+          B4: '2026-04-22',
+          A5: PARSER_META_FIELDS.inspectionNumberRaw,
+          B5: 3,
+          A6: PARSER_META_FIELDS.reportingWeekStart,
+          B6: '2026-04-20',
+          A7: PARSER_META_FIELDS.reportingWeekEnd,
+          B7: '2026-04-24',
+          A8: PARSER_META_FIELDS.reportingPeriodLabel,
+          B8: 'Apr 20 - Apr 24, 2026',
+          A14: PARSER_META_FIELDS.keyFindingsNormalized,
+          B14: 'One finding',
+        },
+      },
+    });
+
+    const metadata = extractMetadata(view);
+
+    expect(metadata.reportingWeekStart).toBe('2026-04-20');
+    expect(metadata.reportingWeekEnd).toBe('2026-04-24');
+    expect(metadata.reportingPeriodLabel).toBe('Apr 20 - Apr 24, 2026');
+    expect(metadata.sources.reportingWeekStart).toBe('parser-meta');
+    expect(metadata.sources.reportingWeekEnd).toBe('parser-meta');
+    expect(metadata.sources.reportingPeriodLabel).toBe('parser-meta');
   });
 
   it('skips invalid ParserMeta field values and falls through to named-range values', () => {
