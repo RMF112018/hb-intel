@@ -47,6 +47,7 @@ describe('Safety ingestion cutover guard', () => {
 
     expect(block).toContain('new SafetyIngestionGraphRepository');
     expect(block).toContain('repo.replayIngestion');
+    expect(block).toContain('emitSafetyIngestionEvent');
     expect(block).not.toContain('SharePointSafetyInspectionRepository');
     expect(block).not.toContain('createSafetyAppOnlySpHttpClient');
   });
@@ -57,5 +58,14 @@ describe('Safety ingestion cutover guard', () => {
       'utf8',
     );
     expect(source).not.toContain('/_api/web/lists');
+  });
+
+  it('Graph ingestion repository passes telemetry observer into runIngestionPipeline', () => {
+    const source = readFileSync(
+      resolve(import.meta.dirname, '../safety-ingestion-graph-repository.ts'),
+      'utf8',
+    );
+    expect(source).toContain('telemetryObserver: observer');
+    expect(source).toContain('safety.ingestion.pipeline.stage');
   });
 });

@@ -16,6 +16,8 @@ import type {
 import {
   runIngestionPipeline,
   type IngestionAdapter,
+  type IIngestionTelemetryEvent,
+  type IIngestionTelemetryObserver,
 } from '../../../../packages/features/safety/src/ingestion/runIngestionPipeline.js';
 import { readWorkbookFromArrayBuffer, computeChecksum } from '../../../../packages/features/safety/src/parser/xlsxWorkbookView.js';
 import {
@@ -28,6 +30,7 @@ import {
   SafetyIngestionGraphDataPlane,
   type IGraphListItem,
 } from './safety-ingestion-graph-data-plane.js';
+import { emitSafetyIngestionEvent, emitSafetyIngestionMetric } from './safety-ingestion-telemetry.js';
 
 const PROJECTS_FIELD = {
   NUMBER: 'field_2',
@@ -40,11 +43,13 @@ export interface IBackendSafetyIngestionRequest {
   readonly fileName: string;
   readonly fileBytes: ArrayBuffer;
   readonly context: UploadContext;
+  readonly requestId?: string;
 }
 
 export interface IBackendSafetyReplayRequest {
   readonly parentRunId: string;
   readonly supersedePrior?: boolean;
+  readonly requestId?: string;
 }
 
 export class SafetyIngestionGraphRepository {
@@ -55,6 +60,10 @@ export class SafetyIngestionGraphRepository {
   }
 
   async ingestWorkbook(input: IBackendSafetyIngestionRequest): Promise<IngestionRunResult> {
+    const observer = this.buildPipelineTelemetryObserver({
+      operation: 'ingest',
+      requestId: input.requestId,
+    });
     const uploadedRef = await this.uploadWorkbook(input.fileName, input.fileBytes);
     const view = readWorkbookFromArrayBuffer(input.fileBytes);
 
@@ -63,10 +72,16 @@ export class SafetyIngestionGraphRepository {
       context: input.context,
       uploadedRef,
       adapter: this.buildIngestionAdapter(),
+      telemetryObserver: observer,
     });
   }
 
   async replayIngestion(input: IBackendSafetyReplayRequest): Promise<IngestionRunResult> {
+    const observer = this.buildPipelineTelemetryObserver({
+      operation: 'replay',
+      requestId: input.requestId,
+      parentRunId: input.parentRunId,
+    });
     const parent = await this.getIngestionRunById(input.parentRunId);
     if (!parent) {
       throw new Error(`Ingestion run not found: ${input.parentRunId}`);
@@ -100,6 +115,7 @@ export class SafetyIngestionGraphRepository {
         parentRunId: parent.id,
         parentRunSpItemId: parent.spItemId,
         supersedePrior: input.supersedePrior ?? false,
+        telemetryObserver: observer,
       });
     } catch (err) {
       const run = await this.insertIngestionRun({
@@ -127,6 +143,78 @@ export class SafetyIngestionGraphRepository {
       });
       return { run, state: 'commit-failed' };
     }
+  }
+
+  private buildPipelineTelemetryObserver(context: {
+    operation: 'ingest' | 'replay';
+    requestId?: string;
+    parentRunId?: string;
+  }): IIngestionTelemetryObserver {
+    return {
+      onEvent: (event: IIngestionTelemetryEvent) => {
+        const details = event.details ?? {};
+        emitSafetyIngestionEvent('safety.ingestion.pipeline.stage', {
+          operation: context.operation,
+          requestId: context.requestId,
+          parentRunId: context.parentRunId,
+          runId: toOptionalString(details.runId),
+          attemptNumber: toOptionalNumber(details.attemptNumber) ?? undefined,
+        }, {
+          stage: event.stage,
+          status: event.status,
+          state: event.state,
+          ...details,
+        });
+
+        if (event.stage === 'write-group.findings-batch' && event.status === 'success') {
+          const count = toOptionalNumber(details.findingCount) ?? 0;
+          emitSafetyIngestionMetric('safety.ingestion.findings.count', count, {
+            operation: context.operation,
+            requestId: context.requestId,
+            parentRunId: context.parentRunId,
+          });
+        }
+
+        if (
+          event.stage === 'terminal' &&
+          event.status === 'success' &&
+          details.idempotentShortCircuit === true
+        ) {
+          emitSafetyIngestionEvent('safety.ingestion.idempotency.short-circuit', {
+            operation: context.operation,
+            requestId: context.requestId,
+            parentRunId: context.parentRunId,
+          }, {
+            matchedInspectionEventId: details.matchedInspectionEventId,
+          });
+        }
+
+        if (event.stage === 'terminal' && event.state === 'review-required') {
+          emitSafetyIngestionEvent('safety.ingestion.duplicate.review-required', {
+            operation: context.operation,
+            requestId: context.requestId,
+            parentRunId: context.parentRunId,
+          }, {
+            duplicateConfidence: details.duplicateConfidence,
+            matchedInspectionEventId: details.matchedInspectionEventId,
+          });
+        }
+
+        if (
+          event.stage === 'terminal' &&
+          event.status === 'success' &&
+          toOptionalString(details.supersededPriorId)
+        ) {
+          emitSafetyIngestionEvent('safety.ingestion.duplicate.supersession', {
+            operation: context.operation,
+            requestId: context.requestId,
+            parentRunId: context.parentRunId,
+          }, {
+            supersededPriorId: details.supersededPriorId,
+          });
+        }
+      },
+    };
   }
 
   async getReportingPeriod(id: string): Promise<SafetyReportingPeriod | null> {
@@ -785,6 +873,10 @@ function toNumber(value: unknown): number {
 function toOptionalNumber(value: unknown): number | null {
   const n = Number(value ?? NaN);
   return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function toOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 function optionalString(value: unknown): string | undefined {

@@ -1,5 +1,6 @@
 import { withRetry } from '../utils/retry.js';
 import type { IManagedIdentityTokenService } from './managed-identity-token-service.js';
+import { emitSafetyIngestionEvent } from './safety-ingestion-telemetry.js';
 
 const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0';
 const GRAPH_SCOPE = 'https://graph.microsoft.com/.default';
@@ -302,12 +303,17 @@ export class SafetyIngestionGraphDataPlane {
         maxAttempts: 4,
         baseDelayMs: 1000,
         isTransient: (error) => error instanceof GraphTransientError,
-        onRetry: (error, attempt, delayMs) => {
+        onRetry: (error, attempt, delayMs, metadata) => {
           this.log('safety.ingestion.graph.retry', {
             operation,
             path,
             attempt,
             delayMs,
+            delaySource: metadata.source,
+            statusCode: metadata.statusCode,
+            retryAfterMs: metadata.retryAfterMs,
+            baseBackoffMs: metadata.baseBackoffMs,
+            jitterMs: metadata.jitterMs,
             message: error instanceof Error ? error.message : String(error),
           });
         },
@@ -331,13 +337,7 @@ export class SafetyIngestionGraphDataPlane {
   }
 
   private log(event: string, properties: Record<string, unknown>): void {
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify({
-      level: 'info',
-      event,
-      timestamp: new Date().toISOString(),
-      ...properties,
-    }));
+    emitSafetyIngestionEvent(event, { operation: 'ingest' }, properties);
   }
 }
 

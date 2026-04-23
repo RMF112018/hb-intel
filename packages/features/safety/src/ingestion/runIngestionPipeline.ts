@@ -108,6 +108,29 @@ export interface IngestionAdapter {
   recordIngestionRun(runDraft: SafetyIngestionRunDraft): Promise<SafetyIngestionRun>;
 }
 
+export type IngestionTelemetryStage =
+  | 'preview-parse'
+  | 'contract-validation'
+  | 'reporting-period-resolution'
+  | 'project-resolution'
+  | 'duplicate-classification'
+  | 'write-group.inspection-event'
+  | 'write-group.findings-batch'
+  | 'write-group.project-week-rollup'
+  | 'write-group.ingestion-run'
+  | 'terminal';
+
+export interface IIngestionTelemetryEvent {
+  readonly stage: IngestionTelemetryStage;
+  readonly status: 'start' | 'success' | 'failure';
+  readonly state?: IngestionRunResult['state'];
+  readonly details?: Record<string, unknown>;
+}
+
+export interface IIngestionTelemetryObserver {
+  onEvent(event: IIngestionTelemetryEvent): void;
+}
+
 export interface IngestionPipelineInput {
   readonly view: WorkbookView;
   readonly context: UploadContext;
@@ -121,16 +144,33 @@ export interface IngestionPipelineInput {
    * inspection event is flipped to `superseded` and a fresh commit proceeds.
    */
   readonly supersedePrior?: boolean;
+  readonly telemetryObserver?: IIngestionTelemetryObserver;
 }
 
 export async function runIngestionPipeline(
   input: IngestionPipelineInput,
 ): Promise<IngestionRunResult> {
-  const { view, context, uploadedRef, adapter, parentRunId, parentRunSpItemId, supersedePrior } = input;
+  const {
+    view,
+    context,
+    uploadedRef,
+    adapter,
+    parentRunId,
+    parentRunSpItemId,
+    supersedePrior,
+    telemetryObserver,
+  } = input;
   const attemptNumber = input.attemptNumber ?? 1;
   const runStartedAt = new Date().toISOString();
   const committedIds: IngestionCommittedIds = {};
   let parsedCache: ParsedInspection | null = null;
+  const emit = (event: IIngestionTelemetryEvent): void => {
+    try {
+      telemetryObserver?.onEvent(event);
+    } catch {
+      // Best-effort telemetry: never break ingestion flow on observer failure.
+    }
+  };
 
   const buildRunDraft = (
     overrides: Partial<SafetyIngestionRunDraft> &
@@ -160,21 +200,52 @@ export async function runIngestionPipeline(
   const finalize = async (
     draft: SafetyIngestionRunDraft,
   ): Promise<SafetyIngestionRun> => {
+    emit({
+      stage: 'write-group.ingestion-run',
+      status: 'start',
+      details: {
+        terminalStatus: draft.terminalStatus,
+      },
+    });
     const finalized = await adapter.recordIngestionRun({
       ...draft,
       committedEntityIdsJson: JSON.stringify(committedIds),
       attemptedProjectSiteText:
         draft.attemptedProjectSiteText ?? parsedCache?.metadata.projectSiteText,
     });
+    emit({
+      stage: 'write-group.ingestion-run',
+      status: 'success',
+      details: {
+        terminalStatus: draft.terminalStatus,
+        runId: finalized.id,
+        runSpItemId: finalized.spItemId,
+      },
+    });
     committedIds.ingestionRunId = finalized.id;
     return finalized;
   };
 
   // Stage 1/2: validate
+  emit({
+    stage: 'preview-parse',
+    status: 'start',
+    details: {
+      attemptNumber,
+      reportingPeriodId: context.reportingPeriodId,
+    },
+  });
+  emit({ stage: 'contract-validation', status: 'start' });
   try {
     validateTemplate(view);
+    emit({ stage: 'contract-validation', status: 'success' });
   } catch (err) {
     if (err instanceof TemplateInvalidError) {
+      emit({
+        stage: 'contract-validation',
+        status: 'failure',
+        details: { errorClass: 'template-invalid', message: err.message },
+      });
       const run = await finalize(
         buildRunDraft({
           validationStatus: 'failed',
@@ -186,6 +257,15 @@ export async function runIngestionPipeline(
           reviewStatus: 'pending-review',
         }),
       );
+      emit({
+        stage: 'terminal',
+        status: 'failure',
+        state: 'invalid-template',
+        details: {
+          runId: run.id,
+          attemptNumber,
+        },
+      });
       return { run, state: 'invalid-template' };
     }
     throw err;
@@ -194,7 +274,22 @@ export async function runIngestionPipeline(
   // Stage 3/4: extract + parse
   try {
     parsedCache = parseChecklist(view);
+    emit({
+      stage: 'preview-parse',
+      status: 'success',
+      details: {
+        templateVersion: parsedCache.templateVersion,
+        parserVersion: parsedCache.parserVersion,
+      },
+    });
   } catch (err) {
+    emit({
+      stage: 'preview-parse',
+      status: 'failure',
+      details: {
+        message: err instanceof Error ? err.message : 'Unknown parser error',
+      },
+    });
     const run = await finalize(
       buildRunDraft({
         validationStatus: 'passed',
@@ -206,6 +301,15 @@ export async function runIngestionPipeline(
         reviewStatus: 'pending-review',
       }),
     );
+    emit({
+      stage: 'terminal',
+      status: 'failure',
+      state: 'parse-error',
+      details: {
+        runId: run.id,
+        attemptNumber,
+      },
+    });
     return { run, state: 'parse-error' };
   }
   const parsed = parsedCache;
@@ -225,10 +329,19 @@ export async function runIngestionPipeline(
       : parsed.metadata.inspectionNumber;
 
   // Stage 5: validate authoritative date against the selected reporting period.
+  emit({ stage: 'reporting-period-resolution', status: 'start' });
   const period = await adapter.resolveReportingPeriod(context.reportingPeriodId);
   if (period && period.weekStartDate && period.weekEndDate) {
     const range = { weekStartDate: period.weekStartDate, weekEndDate: period.weekEndDate };
     if (authoritativeInspectionDate && !isDateInRange(authoritativeInspectionDate, range)) {
+      emit({
+        stage: 'reporting-period-resolution',
+        status: 'failure',
+        details: {
+          reportingPeriodId: period.id,
+          inspectionDate: authoritativeInspectionDate,
+        },
+      });
       const run = await finalize(
         buildRunDraft({
           validationStatus: 'passed',
@@ -241,13 +354,31 @@ export async function runIngestionPipeline(
           reviewStatus: 'pending-review',
         }),
       );
+      emit({
+        stage: 'terminal',
+        status: 'failure',
+        state: 'reporting-period-mismatch',
+        details: {
+          runId: run.id,
+          attemptNumber,
+        },
+      });
       return { run, state: 'reporting-period-mismatch' };
     }
   }
+  emit({
+    stage: 'reporting-period-resolution',
+    status: 'success',
+    details: {
+      reportingPeriodResolved: Boolean(period),
+      reportingPeriodId: period?.id,
+    },
+  });
 
   // Stage 6: resolve project. When the operator selected a project on the
   // Upload panel, honor that selection directly (resolveProjectByNumber).
   // Otherwise (legacy shim), fall back to workbook-text-led resolution.
+  emit({ stage: 'project-resolution', status: 'start' });
   let resolution: ProjectResolutionResult | null = null;
   if (
     context.projectNumber &&
@@ -274,6 +405,13 @@ export async function runIngestionPipeline(
     );
   }
   if (!resolution) {
+    emit({
+      stage: 'project-resolution',
+      status: 'failure',
+      details: {
+        projectSiteText: parsed.metadata.projectSiteText,
+      },
+    });
     const run = await finalize(
       buildRunDraft({
         validationStatus: 'passed',
@@ -287,8 +425,25 @@ export async function runIngestionPipeline(
         reviewStatus: 'pending-review',
       }),
     );
+    emit({
+      stage: 'terminal',
+      status: 'failure',
+      state: 'unresolved-project',
+      details: {
+        runId: run.id,
+        attemptNumber,
+      },
+    });
     return { run, state: 'unresolved-project' };
   }
+  emit({
+    stage: 'project-resolution',
+    status: 'success',
+    details: {
+      classification: resolution.classification,
+      projectNumber: resolution.projectNumber,
+    },
+  });
 
   // G-03 (Wave 2 revision): compute advisory metadata mismatch between
   // workbook-parsed values and operator-entered authoritative values.
@@ -307,6 +462,15 @@ export async function runIngestionPipeline(
     authoritativeInspectionNumber,
     uploadedRef.checksum,
   );
+  emit({
+    stage: 'duplicate-classification',
+    status: 'success',
+    details: {
+      confidence: duplicate.confidence,
+      matchedId: duplicate.matchedId,
+      supersedePrior: supersedePrior === true,
+    },
+  });
 
   if (duplicate.confidence === 'high-confidence-duplicate' && !supersedePrior) {
     // Idempotent retry: short-circuit to the existing committed event when
@@ -327,6 +491,17 @@ export async function runIngestionPipeline(
           reviewStatus: 'replayed-success',
         }),
       );
+      emit({
+        stage: 'terminal',
+        status: 'success',
+        state: 'committed',
+        details: {
+          runId: run.id,
+          attemptNumber,
+          idempotentShortCircuit: true,
+          matchedInspectionEventId: matched.id,
+        },
+      });
       return { run, state: 'committed', metadataMismatch };
     }
     // Duplicate exists but previously superseded — fall through as review-required.
@@ -344,6 +519,17 @@ export async function runIngestionPipeline(
         reviewStatus: 'pending-review',
       }),
     );
+    emit({
+      stage: 'terminal',
+      status: 'failure',
+      state: 'review-required',
+      details: {
+        runId: run.id,
+        attemptNumber,
+        duplicateConfidence: duplicate.confidence,
+        matchedInspectionEventId: duplicate.matchedId,
+      },
+    });
     return { run, state: 'review-required', metadataMismatch };
   }
 
@@ -460,10 +646,54 @@ export async function runIngestionPipeline(
             : projectWeek.publishStatus,
     };
 
+    emit({
+      stage: 'write-group.project-week-rollup',
+      status: 'start',
+      details: {
+        attemptNumber,
+      },
+    });
+    emit({
+      stage: 'write-group.inspection-event',
+      status: 'start',
+      details: {
+        duplicateStatus: inspectionEventDraft.duplicateStatus,
+      },
+    });
+    emit({
+      stage: 'write-group.findings-batch',
+      status: 'start',
+      details: {
+        findingCount: findingDrafts.length,
+      },
+    });
+
     const committed = await adapter.persistCommit({
       inspectionEventDraft,
       findingDrafts,
       projectWeekRecordUpdate: updatedProjectWeek,
+    });
+    emit({
+      stage: 'write-group.project-week-rollup',
+      status: 'success',
+      details: {
+        inspectionCount: updatedProjectWeek.inspectionCount,
+        highestRiskFindingLevel: updatedProjectWeek.highestRiskFindingLevel,
+      },
+    });
+    emit({
+      stage: 'write-group.inspection-event',
+      status: 'success',
+      details: {
+        inspectionEventId: committed.inspectionEvent.id,
+      },
+    });
+    emit({
+      stage: 'write-group.findings-batch',
+      status: 'success',
+      details: {
+        findingCount: committed.findings.length,
+      },
     });
 
     if (supersedePrior && duplicate.matchedId) {
@@ -487,6 +717,17 @@ export async function runIngestionPipeline(
         reviewStatus: parentRunId ? 'replayed-success' : 'none',
       }),
     );
+    emit({
+      stage: 'terminal',
+      status: 'success',
+      state: 'committed',
+      details: {
+        runId: run.id,
+        attemptNumber,
+        inspectionEventId: committed.inspectionEvent.id,
+        supersededPriorId: supersedePrior ? duplicate.matchedId : undefined,
+      },
+    });
 
     return {
       run,
@@ -514,6 +755,16 @@ export async function runIngestionPipeline(
         reviewStatus: parentRunId ? 'replayed-failed' : 'pending-review',
       }),
     );
+    emit({
+      stage: 'terminal',
+      status: 'failure',
+      state: 'commit-failed',
+      details: {
+        runId: run.id,
+        attemptNumber,
+        message: err instanceof Error ? err.message : 'Unknown commit error',
+      },
+    });
     return { run, state: 'commit-failed', metadataMismatch };
   }
 }

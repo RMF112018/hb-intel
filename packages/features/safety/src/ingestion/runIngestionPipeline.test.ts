@@ -224,6 +224,74 @@ describe('runIngestionPipeline', () => {
     expect(calls.runs).toBe(1);
   });
 
+  it('emits duplicate short-circuit telemetry without write-group commit events', async () => {
+    const existing: SafetyInspectionEvent = {
+      id: 'ie-existing-2',
+      spItemId: 3002,
+      title: 'existing',
+      projectWeekRecordId: 'pw-2001',
+      projectWeekRecordSpItemId: 2001,
+      reportingPeriodId: 'period-1001',
+      reportingPeriodSpItemId: 1001,
+      sourceUploadItemId: 1,
+      sourceUploadWebUrl: '',
+      checksum: 'chk-42',
+      templateVersion: 'v1',
+      parserVersion: 'parser-v1',
+      scoringMode: 'template-compat-v1',
+      inspectionDate: '2026-04-22',
+      inspectionNumber: '1',
+      projectNumber: '2024-118',
+      projectNameSnapshot: 'Riverside',
+      inspectionScore: 1.0,
+      totalYes: 80,
+      totalNo: 0,
+      totalNa: 4,
+      rawChecklistJson: '{}',
+      ingestionStatus: 'accepted',
+      duplicateStatus: 'none',
+      requiresReview: false,
+      submittedAt: '2026-04-20T00:00:00Z',
+    };
+    const events: Array<{ stage: string; status: string; details?: Record<string, unknown> }> = [];
+    const { adapter } = makeAdapter({
+      findInspectionsForProjectWeek: vi.fn(async () => [existing]),
+    });
+
+    const result = await runIngestionPipeline({
+      view: buildCleanAllYesWorkbook(),
+      context: baseContext(),
+      uploadedRef: baseRef(),
+      adapter,
+      telemetryObserver: {
+        onEvent: (event) => {
+          events.push({
+            stage: event.stage,
+            status: event.status,
+            details: event.details,
+          });
+        },
+      },
+    });
+
+    expect(result.state).toBe('committed');
+    expect(
+      events.some(
+        (event) =>
+          event.stage === 'terminal' &&
+          event.status === 'success' &&
+          event.details?.idempotentShortCircuit === true,
+      ),
+    ).toBe(true);
+    expect(
+      events.some(
+        (event) =>
+          event.stage === 'write-group.inspection-event' &&
+          event.status === 'start',
+      ),
+    ).toBe(false);
+  });
+
   it('records commit-failed when persistCommit throws', async () => {
     const { adapter, calls } = makeAdapter({
       persistCommit: vi.fn(async () => {

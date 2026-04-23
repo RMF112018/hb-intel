@@ -39,6 +39,7 @@ import {
   evaluateSafetyIngestionPreview,
   type ISafetyIngestionPreviewRequest,
 } from './safety-ingestion-preview-evaluator.js';
+import { emitSafetyIngestionEvent, emitSafetyIngestionMetric } from './safety-ingestion-telemetry.js';
 
 export interface ISharePointService {
   createSite(projectId: string, projectNumber: string, projectName: string): Promise<string>;
@@ -614,15 +615,15 @@ export class SharePointService implements ISharePointService {
     requestId?: string,
   ): Promise<ISafetyIngestionOperationResult> {
     const diagnostics: ISafetyProvisionDiagnostic[] = [];
-    console.log(JSON.stringify({
-      level: 'info',
-      event: 'safety.ingestion.request.received',
+    const startedAtMs = Date.now();
+    emitSafetyIngestionEvent('safety.ingestion.request.received', {
+      operation: 'ingest',
       requestId,
+    }, {
       fileName: input.fileName,
       reportingPeriodId: input.context.reportingPeriodId,
       uploadedByUpn: input.context.uploadedByUpn,
-      timestamp: new Date().toISOString(),
-    }));
+    });
 
     const targets = this.resolveSafetyProvisioningTargets(diagnostics);
     if (!targets) {
@@ -700,16 +701,15 @@ export class SharePointService implements ISharePointService {
         requestId,
       );
       if (!preview.commitReadiness) {
-        console.log(JSON.stringify({
-          level: 'warn',
-          event: 'safety.ingestion.commit.gate.blocked',
+        emitSafetyIngestionEvent('safety.ingestion.commit.gate.blocked', {
+          operation: 'ingest',
           requestId,
+        }, {
           fileName: input.fileName,
           readiness: preview.commitReadiness,
           blockingCodes: preview.blockingErrors.map((item) => item.code),
           duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
-          timestamp: new Date().toISOString(),
-        }));
+        });
         return {
           success: false,
           requestAccepted: false,
@@ -725,15 +725,14 @@ export class SharePointService implements ISharePointService {
         };
       }
 
-      console.log(JSON.stringify({
-        level: 'info',
-        event: 'safety.ingestion.commit.gate.allowed',
+      emitSafetyIngestionEvent('safety.ingestion.commit.gate.allowed', {
+        operation: 'ingest',
         requestId,
+      }, {
         fileName: input.fileName,
         readiness: preview.commitReadiness,
         duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
-        timestamp: new Date().toISOString(),
-      }));
+      });
 
       const period = await repo.getReportingPeriod(input.context.reportingPeriodId);
       if (!period) {
@@ -761,18 +760,24 @@ export class SharePointService implements ISharePointService {
           reportingPeriodId: period.id,
           reportingPeriodSpItemId: period.spItemId,
         },
+        requestId,
       });
 
-      console.log(JSON.stringify({
-        level: 'info',
-        event: 'safety.ingestion.request.completed',
+      emitSafetyIngestionEvent('safety.ingestion.request.completed', {
+        operation: 'ingest',
         requestId,
-        state: result.state,
         runId: result.run.id,
+        attemptNumber: result.run.attemptNumber,
+      }, {
+        state: result.state,
         runSpItemId: result.run.spItemId,
         reportingPeriodId: period.id,
-        timestamp: new Date().toISOString(),
-      }));
+      });
+      emitSafetyIngestionMetric(
+        'safety.ingestion.duration.ms',
+        Date.now() - startedAtMs,
+        { operation: 'ingest', requestId, runId: result.run.id, attemptNumber: result.run.attemptNumber },
+      );
 
       return {
         success: true,
@@ -785,13 +790,12 @@ export class SharePointService implements ISharePointService {
       };
     } catch (err) {
       const message = formatSharePointTokenAcquisitionDiagnostic(err);
-      console.error(JSON.stringify({
-        level: 'error',
-        event: 'safety.ingestion.request.failed',
+      emitSafetyIngestionEvent('safety.ingestion.request.failed', {
+        operation: 'ingest',
         requestId,
+      }, {
         message,
-        timestamp: new Date().toISOString(),
-      }));
+      });
       return {
         success: false,
         requestAccepted: false,
@@ -812,14 +816,14 @@ export class SharePointService implements ISharePointService {
     requestId?: string,
   ): Promise<ISafetyIngestionOperationResult> {
     const diagnostics: ISafetyProvisionDiagnostic[] = [];
-    console.log(JSON.stringify({
-      level: 'info',
-      event: 'safety.ingestion.replay.request.received',
+    const startedAtMs = Date.now();
+    emitSafetyIngestionEvent('safety.ingestion.replay.request.received', {
+      operation: 'replay',
       requestId,
       parentRunId: input.parentRunId,
+    }, {
       supersedePrior: input.supersedePrior === true,
-      timestamp: new Date().toISOString(),
-    }));
+    });
 
     const targets = this.resolveSafetyProvisioningTargets(diagnostics);
     if (!targets) {
@@ -874,18 +878,30 @@ export class SharePointService implements ISharePointService {
       const result = await repo.replayIngestion({
         parentRunId: input.parentRunId,
         supersedePrior: input.supersedePrior ?? false,
+        requestId,
       });
 
-      console.log(JSON.stringify({
-        level: 'info',
-        event: 'safety.ingestion.replay.request.completed',
+      emitSafetyIngestionEvent('safety.ingestion.replay.request.completed', {
+        operation: 'replay',
         requestId,
         parentRunId: input.parentRunId,
-        state: result.state,
         runId: result.run.id,
+        attemptNumber: result.run.attemptNumber,
+      }, {
+        state: result.state,
         runSpItemId: result.run.spItemId,
-        timestamp: new Date().toISOString(),
-      }));
+      });
+      emitSafetyIngestionMetric(
+        'safety.ingestion.duration.ms',
+        Date.now() - startedAtMs,
+        {
+          operation: 'replay',
+          requestId,
+          parentRunId: input.parentRunId,
+          runId: result.run.id,
+          attemptNumber: result.run.attemptNumber,
+        },
+      );
 
       return {
         success: true,
@@ -897,14 +913,13 @@ export class SharePointService implements ISharePointService {
       };
     } catch (err) {
       const message = formatSharePointTokenAcquisitionDiagnostic(err);
-      console.error(JSON.stringify({
-        level: 'error',
-        event: 'safety.ingestion.replay.request.failed',
+      emitSafetyIngestionEvent('safety.ingestion.replay.request.failed', {
+        operation: 'replay',
         requestId,
         parentRunId: input.parentRunId,
+      }, {
         message,
-        timestamp: new Date().toISOString(),
-      }));
+      });
       return {
         success: false,
         requestAccepted: false,
@@ -925,15 +940,15 @@ export class SharePointService implements ISharePointService {
     requestId?: string,
   ): Promise<ISafetyIngestionPreviewOperationResult> {
     const diagnostics: ISafetyProvisionDiagnostic[] = [];
-    console.log(JSON.stringify({
-      level: 'info',
-      event: 'safety.ingestion.preview.request.received',
+    const startedAtMs = Date.now();
+    emitSafetyIngestionEvent('safety.ingestion.preview.request.received', {
+      operation: 'preview',
       requestId,
+    }, {
       fileName: input.fileName,
       reportingPeriodId: input.context.reportingPeriodId,
       uploadedByUpn: input.context.uploadedByUpn,
-      timestamp: new Date().toISOString(),
-    }));
+    });
 
     const targets = this.resolveSafetyProvisioningTargets(diagnostics);
     if (!targets) {
@@ -1010,16 +1025,20 @@ export class SharePointService implements ISharePointService {
         requestId,
       );
 
-      console.log(JSON.stringify({
-        level: 'info',
-        event: 'safety.ingestion.preview.request.completed',
+      emitSafetyIngestionEvent('safety.ingestion.preview.request.completed', {
+        operation: 'preview',
         requestId,
+      }, {
         fileName: input.fileName,
         commitReadiness: preview.commitReadiness,
         blockingCodes: preview.blockingErrors.map((item) => item.code),
         duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
-        timestamp: new Date().toISOString(),
-      }));
+      });
+      emitSafetyIngestionMetric(
+        'safety.ingestion.duration.ms',
+        Date.now() - startedAtMs,
+        { operation: 'preview', requestId },
+      );
 
       return {
         success: true,
@@ -1030,13 +1049,12 @@ export class SharePointService implements ISharePointService {
       };
     } catch (err) {
       const message = formatSharePointTokenAcquisitionDiagnostic(err);
-      console.error(JSON.stringify({
-        level: 'error',
-        event: 'safety.ingestion.preview.request.failed',
+      emitSafetyIngestionEvent('safety.ingestion.preview.request.failed', {
+        operation: 'preview',
         requestId,
+      }, {
         message,
-        timestamp: new Date().toISOString(),
-      }));
+      });
       return {
         success: false,
         requestAccepted: false,
@@ -1056,18 +1074,56 @@ export class SharePointService implements ISharePointService {
     input: ISafetyIngestionPreviewRequest,
     requestId?: string,
   ): Promise<SafetyIngestionPreviewResult> {
-    const preview = await evaluateSafetyIngestionPreview(repository, input);
-    console.log(JSON.stringify({
-      level: 'info',
-      event: 'safety.ingestion.preview.evaluated',
+    emitSafetyIngestionEvent('safety.ingestion.preview.parse.start', {
+      operation: 'preview',
       requestId,
+    }, {
+      fileName: input.fileName,
+      reportingPeriodId: input.context.reportingPeriodId,
+    });
+    const preview = await evaluateSafetyIngestionPreview(repository, input);
+    emitSafetyIngestionEvent('safety.ingestion.preview.evaluated', {
+      operation: 'preview',
+      requestId,
+    }, {
       fileName: input.fileName,
       commitReadiness: preview.commitReadiness,
       blockingCodes: preview.blockingErrors.map((item) => item.code),
       warningCodes: preview.warnings.map((item) => item.code),
       duplicateRisk: preview.duplicateRisk?.confidence ?? 'none',
-      timestamp: new Date().toISOString(),
-    }));
+    });
+    emitSafetyIngestionEvent('safety.ingestion.contract.validation.result', {
+      operation: 'preview',
+      requestId,
+    }, {
+      valid: preview.template.valid,
+      templateVersion: preview.template.templateVersion,
+      parserContractVersion: preview.template.parserContractVersion,
+    });
+    emitSafetyIngestionEvent('safety.ingestion.reporting-period.resolution.result', {
+      operation: 'preview',
+      requestId,
+    }, {
+      resolved: preview.reportingPeriod?.resolved ?? false,
+      dateInRange: preview.reportingPeriod?.dateInRange ?? false,
+      reportingPeriodId: preview.reportingPeriod?.id,
+    });
+    emitSafetyIngestionEvent('safety.ingestion.project-resolution.result', {
+      operation: 'preview',
+      requestId,
+    }, {
+      resolved: preview.projectResolution.resolved,
+      classification: preview.projectResolution.classification,
+      projectNumber: preview.projectResolution.projectNumber,
+    });
+    emitSafetyIngestionEvent('safety.ingestion.duplicate.classification', {
+      operation: 'preview',
+      requestId,
+    }, {
+      confidence: preview.duplicateRisk?.confidence ?? 'none',
+      matchedInspectionEventId: preview.duplicateRisk?.matchedInspectionEventId,
+      supersessionRisk: preview.duplicateRisk?.supersessionRisk ?? false,
+    });
     return preview;
   }
 

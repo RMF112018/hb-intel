@@ -65,33 +65,73 @@ function runOrThrow(command: string, args: readonly string[], cwd: string): void
 const LEGACY_FALLBACK_REQUIRED_PATHS: readonly IRequiredPath[] = [
   { path: 'host.json', reason: 'Functions runtime host metadata' },
   { path: 'package.json', reason: 'Functions runtime package metadata (main entrypoint pointer)' },
-  { path: 'dist/index.js', reason: 'authoritative host entrypoint (Prompt 03)' },
-  { path: 'dist/functions/legacyFallbackDiscovery/index.js', reason: 'legacy fallback discovery HTTP + timer registrations' },
-  { path: 'dist/functions/adminApi/legacy-fallback-routes.js', reason: 'legacy fallback review/admin route registrations' },
-  { path: 'dist/services/legacy-fallback/discovery-repository.js', reason: 'SharePoint persistence boundary for sync-run and registry writes' },
-  { path: 'dist/services/legacy-fallback/discovery-service.js', reason: 'discovery orchestration (drives the registered functions)' },
-  { path: 'dist/services/legacy-fallback/project-index-provider.js', reason: 'project-index seam feeding the matching engine' },
-  { path: 'dist/services/legacy-fallback/review-service.js', reason: 'review/override business logic behind admin routes' },
-  { path: 'dist/services/legacy-fallback/review-repository.js', reason: 'SharePoint persistence boundary for review/override state' },
+  { path: 'ENTRYPOINT', reason: 'authoritative host entrypoint (Prompt 03)' },
+  { path: 'functions/legacyFallbackDiscovery/index.js', reason: 'legacy fallback discovery HTTP + timer registrations' },
+  { path: 'functions/adminApi/legacy-fallback-routes.js', reason: 'legacy fallback review/admin route registrations' },
+  { path: 'services/legacy-fallback/discovery-repository.js', reason: 'SharePoint persistence boundary for sync-run and registry writes' },
+  { path: 'services/legacy-fallback/discovery-service.js', reason: 'discovery orchestration (drives the registered functions)' },
+  { path: 'services/legacy-fallback/project-index-provider.js', reason: 'project-index seam feeding the matching engine' },
+  { path: 'services/legacy-fallback/review-service.js', reason: 'review/override business logic behind admin routes' },
+  { path: 'services/legacy-fallback/review-repository.js', reason: 'SharePoint persistence boundary for review/override state' },
   { path: 'node_modules/@hbc/models', reason: '@hbc/models/provisioning models used by the lane' },
   { path: 'node_modules/@azure/functions/package.json', reason: 'Azure Functions Node v4 runtime' },
 ];
 
-function assertArtifactShape(stagingDir: string): void {
+const ADMIN_CONTROL_PLANE_REQUIRED_PATHS: readonly IRequiredPath[] = [
+  { path: 'hosts/admin-control-plane/index.js', reason: 'admin control-plane host entrypoint composition' },
+  { path: 'hosts/admin-control-plane/service-factory.js', reason: 'admin control-plane host service composition' },
+  { path: 'functions/adminApi/index.js', reason: 'admin API route root registration' },
+  { path: 'functions/adminApi/safety-record-keeping-routes.js', reason: 'safety ingest/replay route registrations' },
+];
+
+function resolveEntrypoint(stagingDir: string): string {
+  const nested = './dist/backend/functions/src/index.js';
+  if (existsSync(path.join(stagingDir, nested))) {
+    return nested;
+  }
+
+  const canonical = './dist/index.js';
+  if (existsSync(path.join(stagingDir, canonical))) {
+    return canonical;
+  }
+
+  throw new Error(
+    'Artifact validation failed: missing both ./dist/index.js and ./dist/backend/functions/src/index.js',
+  );
+}
+
+function rewriteMainEntrypoint(stagingDir: string, mainEntrypoint: string): void {
+  const packageJsonPath = path.join(stagingDir, 'package.json');
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { main?: string };
+  if (packageJson.main === mainEntrypoint) {
+    return;
+  }
+  packageJson.main = mainEntrypoint;
+  writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+}
+
+function assertArtifactShape(stagingDir: string, mainEntrypoint: string): void {
+  const runtimeRoot = path.dirname(mainEntrypoint);
   for (const entry of LEGACY_FALLBACK_REQUIRED_PATHS) {
-    const absolutePath = path.join(stagingDir, entry.path);
+    const resolvedPath = entry.path === 'ENTRYPOINT'
+      ? mainEntrypoint
+      : (entry.path.startsWith('node_modules/') || entry.path === 'host.json' || entry.path === 'package.json')
+        ? `./${entry.path}`
+        : path.posix.join(runtimeRoot, entry.path);
+    const normalized = resolvedPath.startsWith('./') ? resolvedPath.slice(2) : resolvedPath;
+    const absolutePath = path.join(stagingDir, normalized);
     if (!existsSync(absolutePath)) {
-      throw new Error(`Artifact validation failed: missing ${entry.path} (${entry.reason})`);
+      throw new Error(`Artifact validation failed: missing ${normalized} (${entry.reason})`);
     }
   }
 
-  const packageJson = JSON.parse(
-    readFileSync(path.join(stagingDir, 'package.json'), 'utf8'),
-  ) as { main?: string };
-  if (packageJson.main !== './dist/index.js') {
-    throw new Error(
-      `Artifact validation failed: package.json main must be ./dist/index.js but found ${String(packageJson.main)}`,
-    );
+  for (const entry of ADMIN_CONTROL_PLANE_REQUIRED_PATHS) {
+    const resolvedPath = path.posix.join(runtimeRoot, entry.path);
+    const normalized = resolvedPath.startsWith('./') ? resolvedPath.slice(2) : resolvedPath;
+    const absolutePath = path.join(stagingDir, normalized);
+    if (!existsSync(absolutePath)) {
+      throw new Error(`Artifact validation failed: missing ${normalized} (${entry.reason})`);
+    }
   }
 }
 
@@ -120,29 +160,77 @@ function collectStagedWorkspacePackages(stagingDir: string): Array<{ name: strin
   return results;
 }
 
-function writeArtifactInventory(stagingDir: string): string {
+function writeArtifactInventory(stagingDir: string, mainEntrypoint: string): string {
   const inventoryPath = path.join(stagingDir, 'artifact-inventory.json');
   const pkg = JSON.parse(readFileSync(path.join(stagingDir, 'package.json'), 'utf8')) as {
     name?: string;
     version?: string;
     main?: string;
   };
+  const runtimeRoot = path.dirname(mainEntrypoint);
+  const adminHostPath = path.posix.join(runtimeRoot, 'hosts/admin-control-plane/index.js');
+  const safetyRoutesPath = path.posix.join(runtimeRoot, 'functions/adminApi/safety-record-keeping-routes.js');
   const inventory = {
     objective: 'legacy-fallback',
-    entrypoint: pkg.main ?? './dist/index.js',
+    entrypoint: pkg.main ?? mainEntrypoint,
     hostJson: 'host.json',
     functionsRuntimePackage: { name: pkg.name ?? '@hbc/functions', version: pkg.version ?? '0.0.0' },
     legacyFallbackRequiredPaths: [...LEGACY_FALLBACK_REQUIRED_PATHS]
       .map((entry) => ({ path: entry.path, reason: entry.reason }))
       .sort((a, b) => a.path.localeCompare(b.path)),
+    adminControlPlaneRequiredPaths: [...ADMIN_CONTROL_PLANE_REQUIRED_PATHS]
+      .map((entry) => ({ path: entry.path, reason: entry.reason }))
+      .sort((a, b) => a.path.localeCompare(b.path)),
+    adminControlPlaneReleaseProof: {
+      hostEntrypoint: adminHostPath,
+      hostCompositionImports: [
+        '../../functions/adminApi/index.js',
+        '../../functions/adminApi/hybrid-identity-routes.js',
+        '../../functions/health/index.js',
+      ],
+      safetyRouteSignatures: [
+        'safety-records/ingest',
+        'safety-records/ingest/preview',
+        'safety-records/replay',
+      ],
+      safetyRoutesModule: safetyRoutesPath,
+    },
     stagedWorkspacePackages: collectStagedWorkspacePackages(stagingDir),
   };
   writeFileSync(inventoryPath, `${JSON.stringify(inventory, null, 2)}\n`);
   return inventoryPath;
 }
 
-function assertStagedEntrypointResolves(stagingDir: string, root: string): void {
-  const entrypoint = path.join(stagingDir, 'dist', 'index.js');
+function assertAdminControlPlaneReleaseProof(stagingDir: string, mainEntrypoint: string): void {
+  const runtimeRoot = path.dirname(mainEntrypoint);
+  const adminHostPath = path.join(stagingDir, path.posix.join(runtimeRoot, 'hosts/admin-control-plane/index.js').replace(/^\.\//, ''));
+  const safetyRoutesPath = path.join(stagingDir, path.posix.join(runtimeRoot, 'functions/adminApi/safety-record-keeping-routes.js').replace(/^\.\//, ''));
+
+  const hostContent = readFileSync(adminHostPath, 'utf8');
+  for (const expectedImport of [
+    '../../functions/adminApi/index.js',
+    '../../functions/adminApi/hybrid-identity-routes.js',
+    '../../functions/health/index.js',
+  ]) {
+    if (!hostContent.includes(expectedImport)) {
+      throw new Error(`Artifact validation failed: admin host composition missing import ${expectedImport}`);
+    }
+  }
+
+  const routeContent = readFileSync(safetyRoutesPath, 'utf8');
+  for (const signature of [
+    'safety-records/ingest',
+    'safety-records/ingest/preview',
+    'safety-records/replay',
+  ]) {
+    if (!routeContent.includes(signature)) {
+      throw new Error(`Artifact validation failed: safety route signature missing ${signature}`);
+    }
+  }
+}
+
+function assertStagedEntrypointResolves(stagingDir: string, root: string, mainEntrypoint: string): void {
+  const entrypoint = path.join(stagingDir, mainEntrypoint.startsWith('./') ? mainEntrypoint.slice(2) : mainEntrypoint);
   const entryUrl = pathToFileURL(entrypoint).href;
   const checkScript = [
     `import(${JSON.stringify(entryUrl)})`,
@@ -189,9 +277,12 @@ function main(): void {
   ], root);
 
   cpSync(path.join(functionsDir, 'host.json'), path.join(options.stagingDir, 'host.json'));
-  assertArtifactShape(options.stagingDir);
-  const inventoryPath = writeArtifactInventory(options.stagingDir);
-  assertStagedEntrypointResolves(options.stagingDir, root);
+  const mainEntrypoint = resolveEntrypoint(options.stagingDir);
+  rewriteMainEntrypoint(options.stagingDir, mainEntrypoint);
+  assertArtifactShape(options.stagingDir, mainEntrypoint);
+  assertAdminControlPlaneReleaseProof(options.stagingDir, mainEntrypoint);
+  const inventoryPath = writeArtifactInventory(options.stagingDir, mainEntrypoint);
+  assertStagedEntrypointResolves(options.stagingDir, root, mainEntrypoint);
 
   const outputDir = path.dirname(options.outputZipPath);
   mkdirSync(outputDir, { recursive: true });

@@ -15,7 +15,7 @@ describe('W0-G2-T09: withRetry', () => {
   });
 
   it('TC-FAIL-01: respects Retry-After header on 429 response', async () => {
-    const delays: number[] = [];
+    const delays: Array<{ delayMs: number; source: string }> = [];
     const error429 = Object.assign(new Error('429 Too Many Requests'), {
       response: {
         headers: {
@@ -34,8 +34,9 @@ describe('W0-G2-T09: withRetry', () => {
     const promise = withRetry(fn, {
       maxAttempts: 3,
       baseDelayMs: 500,
-      onRetry: (_err, _attempt, delayMs) => {
-        delays.push(delayMs);
+      jitterRatio: 0,
+      onRetry: (_err, _attempt, delayMs, metadata) => {
+        delays.push({ delayMs, source: metadata.source });
       },
     });
 
@@ -46,7 +47,8 @@ describe('W0-G2-T09: withRetry', () => {
     expect(result).toBe('ok');
     expect(fn).toHaveBeenCalledTimes(2);
     // Retry-After: 2 → 2000ms, which is > baseDelayMs * 2^0 = 500ms
-    expect(delays[0]).toBeGreaterThanOrEqual(2000);
+    expect(delays[0]?.delayMs).toBeGreaterThanOrEqual(2000);
+    expect(delays[0]?.source).toBe('retry-after-seconds');
   });
 
   it('TC-FAIL-02: exponential backoff without Retry-After', async () => {
@@ -63,6 +65,7 @@ describe('W0-G2-T09: withRetry', () => {
     const promise = withRetry(fn, {
       maxAttempts: 4,
       baseDelayMs,
+      jitterRatio: 0,
       onRetry: (_err, _attempt, delayMs) => {
         delays.push(delayMs);
       },
@@ -90,7 +93,7 @@ describe('W0-G2-T09: withRetry', () => {
     });
 
     await expect(
-      withRetry(fn, { maxAttempts: 3, baseDelayMs: 10 })
+      withRetry(fn, { maxAttempts: 3, baseDelayMs: 10, jitterRatio: 0 })
     ).rejects.toThrow('429 persistent failure');
     expect(fn).toHaveBeenCalledTimes(3);
 
@@ -106,7 +109,7 @@ describe('W0-G2-T09: withRetry', () => {
       return 42;
     });
 
-    const promise = withRetry(fn, { maxAttempts: 3, baseDelayMs: 50 });
+    const promise = withRetry(fn, { maxAttempts: 3, baseDelayMs: 50, jitterRatio: 0 });
     await vi.advanceTimersByTimeAsync(50);
     const result = await promise;
 
@@ -119,9 +122,76 @@ describe('W0-G2-T09: withRetry', () => {
       throw new Error('non-transient validation error');
     });
 
-    const promise = withRetry(fn, { maxAttempts: 3, baseDelayMs: 50 });
+    const promise = withRetry(fn, { maxAttempts: 3, baseDelayMs: 50, jitterRatio: 0 });
 
     await expect(promise).rejects.toThrow('non-transient validation error');
     expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('honors Retry-After HTTP-date value', async () => {
+    const now = Date.parse('2026-04-23T10:00:00.000Z');
+    vi.setSystemTime(now);
+    const retryAt = new Date(now + 1500).toUTCString();
+    const delays: Array<{ delayMs: number; source: string }> = [];
+    const error429 = Object.assign(new Error('429 Too Many Requests'), {
+      response: {
+        status: 429,
+        headers: {
+          get: (name: string) => (name === 'Retry-After' ? retryAt : null),
+        },
+      },
+    });
+
+    let callCount = 0;
+    const fn = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) throw error429;
+      return 'ok';
+    });
+
+    const promise = withRetry(fn, {
+      maxAttempts: 2,
+      baseDelayMs: 100,
+      jitterRatio: 0,
+      onRetry: (_err, _attempt, delayMs, metadata) => {
+        delays.push({ delayMs, source: metadata.source });
+      },
+    });
+
+    await vi.advanceTimersByTimeAsync(10);
+    await vi.advanceTimersByTimeAsync(delays[0]?.delayMs ?? 1500);
+    await expect(promise).resolves.toBe('ok');
+    expect(delays[0]?.source).toBe('retry-after-date');
+    expect(delays[0]?.delayMs).toBeGreaterThanOrEqual(500);
+  });
+
+  it('honors x-ms-retry-after-ms header when larger than backoff', async () => {
+    const delays: Array<{ delayMs: number; source: string }> = [];
+    const error = Object.assign(new Error('throttled'), {
+      response: {
+        status: 429,
+        headers: {
+          get: (name: string) => (name === 'x-ms-retry-after-ms' ? '1800' : null),
+        },
+      },
+    });
+    let attempts = 0;
+    const fn = vi.fn(async () => {
+      attempts += 1;
+      if (attempts === 1) throw error;
+      return 'ok';
+    });
+    const promise = withRetry(fn, {
+      maxAttempts: 2,
+      baseDelayMs: 500,
+      jitterRatio: 0,
+      onRetry: (_err, _attempt, delayMs, metadata) => {
+        delays.push({ delayMs, source: metadata.source });
+      },
+    });
+
+    await vi.advanceTimersByTimeAsync(1800);
+    await expect(promise).resolves.toBe('ok');
+    expect(delays[0]).toEqual({ delayMs: 1800, source: 'x-ms-retry-after-ms' });
   });
 });

@@ -170,4 +170,21 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('function resolveTenantId()');
     expect(source).toContain('function resolveApiAudience()');
   });
+
+  // --- Gate 12: Prompt 03 artifact proof contract remains enforced ---
+
+  it('artifact packaging script encodes admin host composition and safety route signatures', () => {
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, '../../scripts/package-functions-artifact.ts'),
+      'utf-8',
+    );
+
+    expect(source).toContain('assertAdminControlPlaneReleaseProof');
+    expect(source).toContain('adminControlPlaneReleaseProof');
+    expect(source).toContain('hosts/admin-control-plane/index.js');
+    expect(source).toContain('safety-records/ingest');
+    expect(source).toContain('safety-records/ingest/preview');
+    expect(source).toContain('safety-records/replay');
+    expect(source).toContain('assertAdminControlPlaneReleaseProof(options.stagingDir, mainEntrypoint)');
+  });
 });

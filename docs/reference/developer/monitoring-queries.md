@@ -2,7 +2,7 @@
 
 **Classification:** Reference
 **Audience:** Platform engineering, DevOps, on-call responders
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-04-23
 **Usage:** Paste into Application Insights > Logs. All queries target the `traces` table where custom events land via Azure Functions host forwarding.
 
 ---
@@ -123,4 +123,65 @@ traces
 | where name startswith "notification."
 | summarize count() by name, bin(timestamp, 1h)
 | order by timestamp desc, name asc
+```
+
+---
+
+## Safety Ingestion Stage Timeline
+
+```kql
+traces
+| where customDimensions._telemetryType == "customEvent"
+| where name == "safety.ingestion.pipeline.stage"
+| extend
+    operation = tostring(customDimensions.operation),
+    stage = tostring(customDimensions.stage),
+    status = tostring(customDimensions.status),
+    state = tostring(customDimensions.state),
+    requestId = tostring(customDimensions.requestId),
+    runId = tostring(customDimensions.runId),
+    parentRunId = tostring(customDimensions.parentRunId),
+    attemptNumber = tostring(customDimensions.attemptNumber)
+| project timestamp, operation, stage, status, state, requestId, runId, parentRunId, attemptNumber
+| order by timestamp desc
+```
+
+---
+
+## Safety Graph Throttle/Retry Evidence
+
+```kql
+traces
+| where customDimensions._telemetryType == "customEvent"
+| where name == "safety.ingestion.graph.retry"
+| extend
+    operation = tostring(customDimensions.operation),
+    graphOperation = tostring(customDimensions.graphOperation),
+    statusCode = tostring(customDimensions.statusCode),
+    delaySource = tostring(customDimensions.delaySource),
+    delayMs = todouble(customDimensions.delayMs),
+    attempt = tostring(customDimensions.attempt)
+| summarize retries=count(), avgDelayMs=round(avg(delayMs), 2), maxDelayMs=max(delayMs) by operation, graphOperation, statusCode, delaySource, bin(timestamp, 30m)
+| order by timestamp desc
+```
+
+---
+
+## Safety Idempotency And Duplicate Outcomes
+
+```kql
+traces
+| where customDimensions._telemetryType == "customEvent"
+| where name in (
+  "safety.ingestion.idempotency.short-circuit",
+  "safety.ingestion.duplicate.review-required",
+  "safety.ingestion.duplicate.supersession"
+)
+| extend
+    operation = tostring(customDimensions.operation),
+    requestId = tostring(customDimensions.requestId),
+    runId = tostring(customDimensions.runId),
+    parentRunId = tostring(customDimensions.parentRunId)
+| summarize count() by name, operation, bin(timestamp, 1h)
+| order by timestamp desc
 ```

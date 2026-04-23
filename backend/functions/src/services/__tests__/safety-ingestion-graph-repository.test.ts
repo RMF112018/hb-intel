@@ -196,6 +196,7 @@ describe('SafetyIngestionGraphRepository', () => {
 
   it('replays an ingestion run by downloading retained workbook bytes from Graph', async () => {
     const { repo, fakeGraph } = makeRepository();
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     fakeGraph.getItemById.mockResolvedValue({
       id: '501',
       fields: {
@@ -226,6 +227,18 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(result.state).toBe('invalid-template');
     expect(fakeGraph.getItemById).toHaveBeenCalledOnce();
     expect(fakeGraph.downloadFileByListItemId).toHaveBeenCalledOnce();
+
+    const telemetryNames = logSpy.mock.calls
+      .map((call) => {
+        try {
+          return (JSON.parse(String(call[0])) as { name?: string }).name ?? '';
+        } catch {
+          return '';
+        }
+      })
+      .filter((name) => name.length > 0);
+    expect(telemetryNames).toContain('safety.ingestion.pipeline.stage');
+    logSpy.mockRestore();
   });
 
   it('persists ingestion runs with lookup parents in Graph field payload', async () => {
