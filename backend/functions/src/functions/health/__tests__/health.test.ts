@@ -133,4 +133,14 @@ describe('/api/health diagnostic behavior', () => {
     };
     expect(Object.values(prereqs).every(Boolean)).toBe(true);
   });
+
+  it('surfaces tightened Safety posture proof requirements', () => {
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+    delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
+    delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
+    const proofReady =
+      process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED === 'true' &&
+      process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED === 'true';
+    expect(proofReady).toBe(false);
+  });
 });

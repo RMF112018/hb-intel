@@ -80,6 +80,13 @@ describe('P5-03 Release gates', () => {
     expect(typeof mod.validateProvisioningPrerequisites).toBe('function');
   });
 
+  it('safety permission posture utility exports validation contract', async () => {
+    const mod = await import('../utils/safety-permission-posture.js');
+    expect(typeof mod.resolveSafetyPermissionPosture).toBe('function');
+    expect(typeof mod.validateSafetyPermissionPosture).toBe('function');
+    expect(Array.isArray(mod.SAFETY_PERMISSION_MATRIX)).toBe(true);
+  });
+
   it('validate-config exports domain-scoped Project Setup validation (P1-09)', async () => {
     const mod = await import('../utils/validate-config.js');
     expect(typeof mod.validateProjectSetupStartupConfig).toBe('function');
@@ -95,6 +102,7 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('operationalReadiness');
     expect(source).toContain('configTiers');
     expect(source).toContain('provisioningPrereqs');
+    expect(source).toContain('safetyPermissionPosture');
   });
 
   // --- Gate 6: No unsafe secrets in config registry ---

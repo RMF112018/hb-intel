@@ -14,6 +14,7 @@
 import type { IProvisionSiteRequest } from '@hbc/models';
 import { shouldValidateConfig } from '../../utils/validate-config.js';
 import { diagnosePermissionModel } from '../../utils/diagnose-permissions.js';
+import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -217,6 +218,16 @@ export function validatePrelaunchReadiness(
           remediation: prereq.remediation,
         });
       }
+    }
+
+    const safetyPosture = validateSafetyPermissionPosture();
+    for (const issue of safetyPosture.issues) {
+      failures.push({
+        code: issue.code,
+        category: 'permission',
+        message: issue.message,
+        remediation: issue.remediation,
+      });
     }
   }
 

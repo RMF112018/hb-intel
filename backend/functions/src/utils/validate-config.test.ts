@@ -156,6 +156,10 @@ describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
     vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://example.sharepoint.com/sites/appcatalog');
     vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-id');
     vi.stubEnv('OPEX_MANAGER_UPN', 'opex@hb.com');
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+    vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
+    vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
   });
 
   afterEach(() => {
@@ -176,8 +180,19 @@ describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
 
   it('does not throw when fullcontrol is active even without SITES_SELECTED_GRANT_CONFIRMED', () => {
     vi.stubEnv('SITES_PERMISSION_MODEL', 'fullcontrol');
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'staging-broad');
+    vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_REASON', 'Temporary staging exception until 2026-05-15');
     delete process.env.SITES_SELECTED_GRANT_CONFIRMED;
     expect(() => validateProvisioningPrerequisites()).not.toThrow();
+  });
+
+  it('throws when tightened Safety posture proof flags are missing', () => {
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+    delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
+    delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
+    expect(() => validateProvisioningPrerequisites()).toThrow('SAFETY_TIGHTENED_POSTURE_PROOF_NOT_CONFIRMED');
   });
 
   it('skips validation in mock mode', () => {

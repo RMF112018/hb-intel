@@ -32,7 +32,11 @@ function setAllEnvPrereqs(): void {
   vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://example.sharepoint.com/sites/appcatalog');
   vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-id');
   vi.stubEnv('OPEX_MANAGER_UPN', 'opex@hb.com');
-  vi.stubEnv('SITES_PERMISSION_MODEL', 'fullcontrol');
+  vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+  vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+  vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+  vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+  vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
   // P7-07: Bootstrap prerequisites
   vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://example.table.core.windows.net');
   vi.stubEnv('AZURE_CLIENT_ID', 'client-id');
@@ -106,10 +110,22 @@ describe('validatePrelaunchReadiness', () => {
 
   it('skips Sites.Selected gate when fullcontrol is active', () => {
     vi.stubEnv('SITES_PERMISSION_MODEL', 'fullcontrol');
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'staging-broad');
+    vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED', 'true');
+    vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_REASON', 'Temporary staging exception until 2026-05-15');
     delete process.env.SITES_SELECTED_GRANT_CONFIRMED;
     const result = validatePrelaunchReadiness(validRequest());
     const codes = result.failures.map((f) => f.code);
     expect(codes).not.toContain('ENV_SITES_SELECTED_GRANT_NOT_CONFIRMED');
+  });
+
+  it('detects missing tightened posture proof flags', () => {
+    delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
+    delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
+    const result = validatePrelaunchReadiness(validRequest());
+    const codes = result.failures.map((f) => f.code);
+    expect(codes).toContain('SAFETY_TIGHTENED_POSTURE_PROOF_NOT_CONFIRMED');
+    expect(codes).toContain('SAFETY_TIGHTENED_E2E_PROOF_NOT_CONFIRMED');
   });
 
   it('skips environment checks in mock mode', () => {

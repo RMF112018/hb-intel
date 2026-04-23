@@ -34,6 +34,13 @@ describe('P6-04 AdminPreflightService', () => {
     vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', '');
     vi.stubEnv('HB_INTEL_SPFX_APP_ID', '');
     vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', '');
+    vi.stubEnv('SITES_PERMISSION_MODEL', '');
+    vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', '');
+    vi.stubEnv('SAFETY_PERMISSION_POSTURE', '');
+    vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', '');
+    vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', '');
+    vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED', '');
+    vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_REASON', '');
   });
 
   afterEach(() => {
@@ -82,6 +89,11 @@ describe('P6-04 AdminPreflightService', () => {
       vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://contoso.sharepoint.com/sites/appcatalog');
       vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-guid-123');
       vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+      vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+      vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'steady-state');
+      vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
     });
 
     it('returns ready when all config is present', async () => {
@@ -119,6 +131,11 @@ describe('P6-04 AdminPreflightService', () => {
       vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
       vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://contoso.sharepoint.com/sites/appcatalog');
       vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+      vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+      vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'steady-state');
+      vi.stubEnv('SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED', 'true');
     });
 
     it('SPFx app ID missing is a warning, not a blocker', async () => {
@@ -164,10 +181,54 @@ describe('P6-04 AdminPreflightService', () => {
     });
   });
 
-  describe('check count stability', () => {
-    it('produces exactly 9 checks matching InstallPreflightCheckId', async () => {
+  describe('safety permission posture checks', () => {
+    it('fails preflight when tightened posture proof flags are missing', async () => {
+      vi.stubEnv('AZURE_TENANT_ID', 'tenant-123');
+      vi.stubEnv('AZURE_CLIENT_ID', 'client-123');
+      vi.stubEnv('API_AUDIENCE', 'api://test');
+      vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://storage.table.core.windows.net');
+      vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'InstrumentationKey=test');
+      vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
+      vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+      vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://contoso.sharepoint.com/sites/appcatalog');
+      vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-guid-123');
+      vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+      vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+      vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'pre-rollout-tightened');
+      delete process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED;
+      delete process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED;
       const result = await service.validate(makeRequest());
-      expect(result.checks.length).toBe(9);
+      const postureCheck = findCheck(result.checks, 'safety-permission-posture');
+      expect(postureCheck?.passed).toBe(false);
+      expect(result.ready).toBe(false);
+    });
+
+    it('allows staging-broad posture only with explicit exception metadata', async () => {
+      vi.stubEnv('AZURE_TENANT_ID', 'tenant-123');
+      vi.stubEnv('AZURE_CLIENT_ID', 'client-123');
+      vi.stubEnv('API_AUDIENCE', 'api://test');
+      vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://storage.table.core.windows.net');
+      vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'InstrumentationKey=test');
+      vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
+      vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+      vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://contoso.sharepoint.com/sites/appcatalog');
+      vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-guid-123');
+      vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+      vi.stubEnv('SITES_PERMISSION_MODEL', 'fullcontrol');
+      vi.stubEnv('SAFETY_PERMISSION_POSTURE', 'staging-broad');
+      vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED', 'true');
+      vi.stubEnv('SAFETY_STAGING_BROAD_EXCEPTION_REASON', 'Temporary staging exception until 2026-05-15');
+      const result = await service.validate(makeRequest());
+      const postureCheck = findCheck(result.checks, 'safety-permission-posture');
+      expect(postureCheck?.passed).toBe(true);
+    });
+  });
+
+  describe('check count stability', () => {
+    it('produces exactly 12 checks matching InstallPreflightCheckId plus Safety posture checks', async () => {
+      const result = await service.validate(makeRequest());
+      expect(result.checks.length).toBe(12);
 
       const expectedIds = Object.values(InstallPreflightCheckId);
       const actualIds = result.checks.map((c) => c.checkId);

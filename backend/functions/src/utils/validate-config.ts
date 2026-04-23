@@ -11,6 +11,7 @@
 
 import { WAVE0_REQUIRED_CONFIG, type ConfigTier } from '../config/wave0-env-registry.js';
 import { diagnosePermissionModel } from './diagnose-permissions.js';
+import { validateSafetyPermissionPosture } from './safety-permission-posture.js';
 
 /**
  * Returns true if startup config validation should run.
@@ -72,6 +73,11 @@ export function validateProvisioningPrerequisites(): void {
       'Sites.Selected (Path A) is active. IT must confirm the per-site grant workflow (Option A2) is operational. ' +
       'See sites-selected-validation.md §3 and tools/grant-site-access.sh.',
     );
+  }
+
+  const safetyPosture = validateSafetyPermissionPosture();
+  for (const issue of safetyPosture.issues) {
+    issues.push(`  - [${issue.code}] ${issue.message} (${issue.remediation})`);
   }
 
   if (issues.length > 0) {

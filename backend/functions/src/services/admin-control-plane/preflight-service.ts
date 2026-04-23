@@ -19,6 +19,7 @@ import type {
 } from '@hbc/models/admin-control-plane';
 import { InstallPreflightCheckId } from '@hbc/models/admin-control-plane';
 import type { IAdminPreflightService } from './types.js';
+import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
 import {
   getPnpActionDescriptor,
   normalizeFilterList,
@@ -256,6 +257,68 @@ function checkInstallCompatibility(): IAdminPreflightCheck[] {
   return results;
 }
 
+function checkSafetyPermissionPosture(): IAdminPreflightCheck[] {
+  const validation = validateSafetyPermissionPosture();
+  const issuesText = validation.issues
+    .map((issue) => `${issue.code}: ${issue.message}`)
+    .join(' | ');
+  const isStagingBroad = validation.posture === 'staging-broad';
+  const tightenedProofConfirmed =
+    process.env.SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED === 'true' &&
+    process.env.SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED === 'true';
+
+  return [
+    check(
+      'safety-permission-posture',
+      'Safety permission posture',
+      validation.passed,
+      validation.passed
+        ? `Safety posture "${validation.posture}" is valid with model "${validation.permissionModel}".`
+        : `Safety permission posture is invalid: ${issuesText}`,
+      {
+        category: 'auth-identity',
+        severity: 'critical',
+        blocking: true,
+        recommendedAction: validation.passed
+          ? undefined
+          : validation.issues.map((issue) => issue.remediation).join(' | '),
+      },
+    ),
+    check(
+      'safety-broad-posture-exception',
+      'Safety broad-posture exception metadata',
+      !isStagingBroad || process.env.SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED === 'true',
+      !isStagingBroad || process.env.SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED === 'true'
+        ? 'Broad posture exception metadata is acceptable for current posture.'
+        : 'staging-broad posture is active without SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED=true.',
+      {
+        category: 'auth-identity',
+        severity: isStagingBroad ? 'critical' : 'info',
+        blocking: isStagingBroad,
+        recommendedAction: isStagingBroad
+          ? 'Set SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED=true only for approved temporary staging use.'
+          : undefined,
+      },
+    ),
+    check(
+      'safety-tightened-proof',
+      'Safety tightened posture proof',
+      isStagingBroad || tightenedProofConfirmed,
+      isStagingBroad || tightenedProofConfirmed
+        ? 'Tightened posture proof flags are satisfied for current posture.'
+        : 'Tightened posture proof flags are not fully confirmed.',
+      {
+        category: 'auth-identity',
+        severity: isStagingBroad ? 'info' : 'critical',
+        blocking: !isStagingBroad,
+        recommendedAction: isStagingBroad
+          ? 'Move to pre-rollout-tightened by enabling Safety tightened proof flags before production rollout.'
+          : 'Set SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED=true and SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED=true.',
+      },
+    ),
+  ];
+}
+
 function checkPnpActionInput(request: IAdminPreflightRequest): IAdminPreflightCheck[] {
   const checks: IAdminPreflightCheck[] = [];
   const commandInput = (request.commandInput ?? {}) as Record<string, unknown>;
@@ -380,6 +443,7 @@ export class AdminPreflightService implements IAdminPreflightService {
       : [
       ...checkBackendConfig(),
       ...checkAuthIdentity(),
+      ...checkSafetyPermissionPosture(),
       ...checkSharePoint(),
       ...checkGraphEntra(),
       ...checkPersistence(),

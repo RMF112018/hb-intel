@@ -11,6 +11,7 @@
  */
 
 import { app, type HttpResponseInit } from '@azure/functions';
+import { validateSafetyPermissionPosture } from '../../utils/safety-permission-posture.js';
 
 /** Check if a setting is present and non-empty. */
 function hasEnv(name: string): boolean {
@@ -64,6 +65,7 @@ app.http('health', {
       opexManager: hasEnv('OPEX_MANAGER_UPN'),
     };
     const provisioningReady = Object.values(provisioningPrereqs).every(Boolean);
+    const safetyPermissionPosture = validateSafetyPermissionPosture();
 
     // Optional integrations
     const integrations: Record<string, 'ready' | 'not-configured'> = {
@@ -85,7 +87,7 @@ app.http('health', {
     const operationalReadiness = computeReadiness(
       coreAuthPresent,
       sharePointPresent,
-      provisioningReady,
+      provisioningReady && safetyPermissionPosture.passed,
       integrations.signalR === 'ready',
     );
 
@@ -101,8 +103,10 @@ app.http('health', {
           core: coreAuthPresent ? 'ready' : 'missing',
           sharepoint: sharePointPresent ? 'ready' : 'missing',
           provisioning: provisioningReady ? 'ready' : 'incomplete',
+          safetyPermissionPosture: safetyPermissionPosture.passed ? 'ready' : 'blocked',
         },
         provisioningPrereqs,
+        safetyPermissionPosture,
         integrations,
         notificationRecipients,
         timestamp: new Date().toISOString(),

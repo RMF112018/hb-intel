@@ -260,5 +260,41 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
       'See sites-selected-validation.md §3 and tools/grant-site-access.sh.',
     requiredInProd: false,
   },
+  {
+    name: 'SAFETY_PERMISSION_POSTURE',
+    bucket: 'infrastructure',
+    description:
+      'Safety rollout posture: staging-broad, pre-rollout-tightened, or steady-state. ' +
+      'Defaults to pre-rollout-tightened outside production and steady-state in production.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED',
+    bucket: 'infrastructure',
+    description:
+      'Must be "true" after operators confirm Safety permission matrix and rollout gates under tightened posture.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED',
+    bucket: 'infrastructure',
+    description:
+      'Must be "true" after successful ingest + replay verification under tightened Safety permission posture.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_STAGING_BROAD_EXCEPTION_CONFIRMED',
+    bucket: 'infrastructure',
+    description:
+      'Must be "true" only when staging-broad posture is intentionally approved as a temporary exception.',
+    requiredInProd: false,
+  },
+  {
+    name: 'SAFETY_STAGING_BROAD_EXCEPTION_REASON',
+    bucket: 'business',
+    description:
+      'Time-boxed rationale and expiry for temporary staging-broad Safety posture exceptions.',
+    requiredInProd: false,
+  },
 
 ] as const;
