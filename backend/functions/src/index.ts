@@ -13,6 +13,9 @@ import './functions/legacyFallbackDiscovery/index.js';
 // /admin/legacy-fallback/review/* registrations and is also imported by the
 // admin-control-plane host so both composition paths stay in sync.
 import './functions/adminApi/legacy-fallback-routes.js';
+// Safety record-keeping admin API routes are co-hosted with the monolithic
+// host to support production ingestion and provisioning operations.
+import './functions/adminApi/safety-record-keeping-routes.js';
 
 // Health probe (P1-C3 §2.2.1)
 import './functions/health/index.js';

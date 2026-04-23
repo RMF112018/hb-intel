@@ -77,6 +77,25 @@ export class GraphListClient {
     return match.id;
   }
 
+  async listExists(title: string): Promise<boolean> {
+    try {
+      await this.resolveListId(title);
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes("list '") && message.includes("' not found")) {
+        return false;
+      }
+      throw err;
+    }
+  }
+
+  async getWritableColumnNames(listTitle: string): Promise<Set<string>> {
+    const listId = await this.resolveListId(listTitle);
+    const names = await this.getColumnNames(listId);
+    return new Set(names);
+  }
+
   async listItems(listTitle: string, query: IGraphListItemsQuery = {}): Promise<readonly IGraphListItem[]> {
     const siteId = await this.resolveSiteId();
     const listId = await this.resolveListId(listTitle);
