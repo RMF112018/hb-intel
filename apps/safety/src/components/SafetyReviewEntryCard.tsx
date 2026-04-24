@@ -219,6 +219,16 @@ export function SafetyReviewEntryCard({
             entryErrorClass={run.errorClass}
             disabledByCapability={disabledByCapability}
             capabilityReason={capabilityReason}
+            previewContext={{
+              uploadFileName: run.uploadFileName,
+              attemptNumber: run.attemptNumber,
+              projectNumber: entry.projectNumber,
+              projectNameSnapshot: entry.projectNameSnapshot,
+              terminalStatus: run.terminalStatus,
+              errorClass: run.errorClass,
+              errorSummary: run.errorSummary,
+              templateVersionDetected: run.templateVersionDetected,
+            }}
           />
         </footer>
       </article>

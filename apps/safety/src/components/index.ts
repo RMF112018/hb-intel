@@ -13,6 +13,11 @@ export { SafetyScoreStrip } from './SafetyScoreStrip.js';
 export type { SafetyScoreStripItem, SafetyScoreStripProps } from './SafetyScoreStrip.js';
 export { SafetyReviewActions } from './SafetyReviewActions.js';
 export type { SafetyReviewActionsProps } from './SafetyReviewActions.js';
+export { SafetyReplayPreviewDialog } from './SafetyReplayPreviewDialog.js';
+export type {
+  SafetyReplayPreviewContext,
+  SafetyReplayPreviewDialogProps,
+} from './SafetyReplayPreviewDialog.js';
 export { SafetyFileInput } from './SafetyFileInput.js';
 export type { SafetyFileInputProps } from './SafetyFileInput.js';
 export { SafetyStatusPanel } from './SafetyStatusPanel.js';

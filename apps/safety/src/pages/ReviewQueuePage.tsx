@@ -194,6 +194,16 @@ export function ReviewQueuePage(): ReactNode {
             entryErrorClass={row.original.run.errorClass}
             disabledByCapability={replayDisabledByCapability}
             capabilityReason={replayCapabilityReason}
+            previewContext={{
+              uploadFileName: row.original.run.uploadFileName,
+              attemptNumber: row.original.run.attemptNumber,
+              projectNumber: row.original.projectNumber,
+              projectNameSnapshot: row.original.projectNameSnapshot,
+              terminalStatus: row.original.run.terminalStatus,
+              errorClass: row.original.run.errorClass,
+              errorSummary: row.original.run.errorSummary,
+              templateVersionDetected: row.original.run.templateVersionDetected,
+            }}
           />
         ),
       },

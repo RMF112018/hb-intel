@@ -1,6 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
-import { HbcButton, HbcConfirmDialog, HbcTypography } from '@hbc/ui-kit';
+import { HbcButton, HbcTypography } from '@hbc/ui-kit';
+import {
+  SafetyReplayPreviewDialog,
+  type SafetyReplayPreviewContext,
+} from './SafetyReplayPreviewDialog.js';
 
 export interface SafetyReviewActionsProps {
   runId: string;
@@ -24,6 +28,13 @@ export interface SafetyReviewActionsProps {
    */
   disabledByCapability?: boolean;
   capabilityReason?: string;
+  /**
+   * Optional preview context surfaced inside the governed supersede dialog
+   * (parent run, retained workbook, project, prior terminal, etc.). All
+   * fields are row-data already fetched by the review queue; the component
+   * remains callable with just core props when preview context is absent.
+   */
+  previewContext?: SafetyReplayPreviewContext;
 }
 
 type RetryPosture = 'retryable' | 'needs-workbook-fix' | 'needs-period-fix' | 'needs-project-fix' | 'replay-source-missing';
@@ -81,6 +92,7 @@ export function SafetyReviewActions({
   entryErrorClass,
   disabledByCapability = false,
   capabilityReason,
+  previewContext,
 }: SafetyReviewActionsProps): ReactNode {
   const [showSupersedeConfirm, setShowSupersedeConfirm] = useState(false);
   const posture = retryPostureFor(entryErrorClass);
@@ -90,6 +102,11 @@ export function SafetyReviewActions({
     if (disabledByCapability) return;
     setShowSupersedeConfirm(false);
     onRetry(runId, true);
+  };
+
+  const dialogContext: SafetyReplayPreviewContext = {
+    ...previewContext,
+    errorClass: previewContext?.errorClass ?? entryErrorClass,
   };
 
   return (
@@ -133,16 +150,14 @@ export function SafetyReviewActions({
           >
             Supersede & commit
           </HbcButton>
-          <HbcConfirmDialog
+          <SafetyReplayPreviewDialog
             open={showSupersedeConfirm}
-            onClose={() => setShowSupersedeConfirm(false)}
+            runId={runId}
+            inspectionEventId={inspectionEventId}
+            isPending={isPending}
+            context={dialogContext}
+            onCancel={() => setShowSupersedeConfirm(false)}
             onConfirm={handleSupersedeConfirm}
-            variant="danger"
-            title="Supersede prior inspection?"
-            description="This will replay the retained workbook, commit a new inspection, and mark the prior inspection as superseded. The prior record stays in audit history but will no longer count toward the project-week rollup. This cannot be reversed from the UI."
-            confirmLabel="Supersede & commit"
-            cancelLabel="Cancel"
-            loading={isPending}
           />
         </>
       )}

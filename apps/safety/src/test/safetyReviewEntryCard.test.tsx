@@ -168,8 +168,10 @@ describe('SafetyReviewEntryCard — triage framing + preserved supersede discipl
     // Mutation must NOT fire until the governed confirm.
     expect(onRetry).not.toHaveBeenCalled();
 
-    // Confirm via the dialog's confirm button.
-    await user.click(within(dialog).getByRole('button', { name: /supersede & commit/i }));
+    // Governed preview-before-commit: tick the acknowledgment checkbox
+    // before the destructive confirm is enabled.
+    await user.click(within(dialog).getByRole('checkbox'));
+    await user.click(within(dialog).getByRole('button', { name: /^supersede & commit$/i }));
     expect(onRetry).toHaveBeenCalledWith('run-42', true);
   });
 

@@ -7,6 +7,9 @@
  * with advisory next-step guidance. Duplicate suspects continue to flow
  * through the governed supersede dialog.
  */
+/* eslint-disable @hb-intel/hbc/no-raw-form-elements -- test-scoped
+   ui-kit mock: simulates HbcCheckbox with a raw input purely to satisfy
+   the testing-library role query; production callers use HbcCheckbox. */
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SafetyReviewActions } from '../components/SafetyReviewActions.js';
@@ -31,11 +34,24 @@ vi.mock('@hbc/ui-kit', () => ({
     </button>
   ),
   HbcTypography: ({ children }: any) => <span>{children}</span>,
-  HbcConfirmDialog: ({ open, title, confirmLabel, onConfirm }: any) =>
+  HbcStatusBadge: ({ label }: any) => <span>{label}</span>,
+  HbcCheckbox: ({ label, checked, onChange, disabled }: any) => (
+    <label>
+      <input
+        type="checkbox"
+        checked={!!checked}
+        disabled={!!disabled}
+        onChange={(e) => onChange?.(e.target.checked)}
+      />
+      {label}
+    </label>
+  ),
+  HbcModal: ({ open, title, children, footer, role = 'dialog' }: any) =>
     open ? (
-      <div role="dialog">
+      <div role={role}>
         <div>{title}</div>
-        <button onClick={onConfirm}>{confirmLabel}</button>
+        {children}
+        {footer}
       </div>
     ) : null,
 }));
