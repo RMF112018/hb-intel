@@ -182,7 +182,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'leadership', camel: 'leadership', pascal: 'Leadership' },
   { dir: 'business-development', camel: 'businessDevelopment', pascal: 'BusinessDevelopment' },
   { dir: 'admin', camel: 'admin', pascal: 'Admin' },
-  { dir: 'safety', camel: 'safety', pascal: 'Safety' },
+  { dir: 'safety', camel: 'safety', pascal: 'Safety', freshBuildRequired: true },
   { dir: 'quality-control-warranty', camel: 'qualityControlWarranty', pascal: 'QualityControlWarranty' },
   { dir: 'risk-management', camel: 'riskManagement', pascal: 'RiskManagement' },
   { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
@@ -213,6 +213,7 @@ const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3
 const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 const HB_PUBLISHER_ARTICLE_WEBPART_ID = '1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10';
 const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
+const SAFETY_WEBPART_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
 const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
 
 // Critical runtime source files whose SHA-256 fingerprints anchor the
@@ -274,8 +275,18 @@ const HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   'packages/ui-kit/src/HbcPriorityRail/HbcPriorityRailSurface.tsx',
   'packages/ui-kit/src/HbcPriorityRail/priority-rail.module.css',
 ];
+const SAFETY_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/safety/src/mount.tsx',
+  'apps/safety/src/App.tsx',
+  'apps/safety/src/runtime/safetyRuntimeContract.ts',
+  'apps/safety/src/pages/UploadPage.tsx',
+  'apps/safety/src/webparts/safety/SafetyWebPart.tsx',
+  'packages/features/safety/src/adapters/sharepoint/SafetyBackendCommandClient.ts',
+  'packages/features/safety/src/hooks/queries.ts',
+];
 
 const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
+  safety: SAFETY_CRITICAL_RUNTIME_PATHS,
   'hb-webparts': HB_WEBPARTS_CRITICAL_RUNTIME_PATHS,
   'hb-publisher': HB_PUBLISHER_CRITICAL_RUNTIME_PATHS,
   'hb-homepage': HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
@@ -294,6 +305,7 @@ interface PackageRuntimeMarker {
   label: string;
 }
 const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
+  safety: { id: SAFETY_WEBPART_ID, label: 'Safety webpart' },
   'hb-webparts': { id: HB_PNP_OPS_WEBPART_ID, label: 'PnP Ops webpart' },
   'hb-publisher': { id: HB_PUBLISHER_ARTICLE_WEBPART_ID, label: 'Article Publisher webpart' },
   'hb-homepage': { id: HB_HOMEPAGE_WEBPART_ID, label: 'HB Homepage webpart' },

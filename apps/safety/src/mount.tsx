@@ -28,6 +28,7 @@ import {
 
 /** Shell-injected runtime configuration. Reserved for future wiring. */
 export type IMountConfig = ISafetyMountConfig;
+const SAFETY_WEBPART_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
 
 let root: Root | undefined;
 
@@ -63,6 +64,10 @@ export function unmount(): void {
 
 const api = { mount, unmount };
 (globalThis as unknown as { __hbIntel_safety: unknown }).__hbIntel_safety = api;
+(globalThis as unknown as { __hbIntel_safetyManifestId?: string }).__hbIntel_safetyManifestId =
+  SAFETY_WEBPART_MANIFEST_ID;
 if (typeof window !== 'undefined' && globalThis !== window) {
   (window as unknown as { __hbIntel_safety: unknown }).__hbIntel_safety = api;
+  (window as unknown as { __hbIntel_safetyManifestId?: string }).__hbIntel_safetyManifestId =
+    SAFETY_WEBPART_MANIFEST_ID;
 }

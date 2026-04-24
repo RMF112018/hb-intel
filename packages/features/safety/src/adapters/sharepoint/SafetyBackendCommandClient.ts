@@ -87,7 +87,7 @@ export class SafetyBackendCommandClient {
     while (attempt < this.maxAttempts) {
       attempt += 1;
       try {
-        const response = await this.executeAttempt({
+        const response = await this.executeAttempt<TData>({
           endpoint,
           body,
           token,
@@ -203,7 +203,7 @@ export class SafetyBackendCommandClient {
       if (error instanceof SafetyBackendCommandError) {
         throw error;
       }
-      if (attemptSignal.aborted) {
+      if (attemptSignal?.aborted) {
         throw new SafetyBackendCommandError({
           endpoint,
           httpStatus: 0,

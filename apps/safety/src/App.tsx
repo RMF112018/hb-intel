@@ -97,8 +97,8 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
     !resolvedRuntimeContract.canInitializeCommands;
 
   useEffect(() => {
-    const apiAudience = resolvedRuntimeContract.backend.apiAudience ?? undefined;
-    const functionAppUrl = resolvedRuntimeContract.backend.baseUrl ?? undefined;
+    const apiAudience = resolvedRuntimeContract.backend.apiAudience ?? '';
+    const functionAppUrl = resolvedRuntimeContract.backend.baseUrl ?? '';
     if (proofRanRef.current) return;
     if (!typed || blockedInSharePointMode) return;
     if (!shouldRunHealthReadyNonAdminProof(typed, apiAudience, functionAppUrl, window.location.search)) {
