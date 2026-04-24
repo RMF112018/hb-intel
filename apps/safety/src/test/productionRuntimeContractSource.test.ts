@@ -24,4 +24,12 @@ describe('Safety production runtime contract source-of-truth', () => {
     expect(webpartSource).toContain("PropertyPaneTextField('functionAppUrl'");
     expect(webpartSource).toContain("PropertyPaneTextField('apiAudience'");
   });
+
+  it('App wires delegated SPFx token provider into backend command client seam', () => {
+    const appSource = readRepo('apps/safety/src/App.tsx');
+    expect(appSource).toContain('backendIngestion: {');
+    expect(appSource).toContain('getApiToken: async (): Promise<string> => {');
+    expect(appSource).toContain('typed.aadTokenProviderFactory?.getTokenProvider()');
+    expect(appSource).toContain('provider.getToken(apiAudience)');
+  });
 });

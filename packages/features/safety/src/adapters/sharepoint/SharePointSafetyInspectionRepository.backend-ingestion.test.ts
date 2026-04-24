@@ -74,6 +74,18 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
       Authorization: 'Bearer token-1',
       'Content-Type': 'application/json',
     });
+    expect((init.headers as Record<string, string>)['X-Request-Id']).toMatch(/^[A-Za-z0-9-]{8,}$/);
+    expect(JSON.parse(String(init.body))).toEqual({
+      fileName: 'test.xlsx',
+      fileContentBase64: 'aGVsbG8=',
+      context: {
+        uploadedByUpn: 'user@hb.com',
+        uploadedAt: '2026-04-22T10:00:00.000Z',
+        fileName: 'test.xlsx',
+        reportingPeriodId: 'period-1',
+        reportingPeriodSpItemId: 1,
+      },
+    });
     expect(getSpy).not.toHaveBeenCalled();
     expect(postSpy).not.toHaveBeenCalled();
   });
@@ -201,6 +213,22 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
 
     expect(result.commitReadiness).toBe(true);
     expect(fetchSpy.mock.calls[0]?.[0]).toBe('https://functions.example.com/api/safety-records/ingest/preview');
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    expect(init.headers).toMatchObject({
+      Authorization: 'Bearer token-preview',
+      'Content-Type': 'application/json',
+    });
+    expect(JSON.parse(String(init.body))).toEqual({
+      fileName: 'test.xlsx',
+      fileContentBase64: 'aGVsbG8=',
+      context: {
+        uploadedByUpn: 'user@hb.com',
+        uploadedAt: '2026-04-22T10:00:00.000Z',
+        fileName: 'test.xlsx',
+        reportingPeriodId: 'period-1',
+        reportingPeriodSpItemId: 1,
+      },
+    });
   });
 
   it('preserves requestId and classified 422 failure envelope details', async () => {
