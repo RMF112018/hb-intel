@@ -14,8 +14,10 @@ import {
   isSafetyAdapterFetchError,
   isSafetyBackendCommandError,
   isSafetyConfigurationError,
+  useSafetyIngestionPreview,
   useReportingPeriods,
   useSafetyIngestion,
+  type SafetyIngestionPreviewResult,
   type SafetyReportingPeriod,
 } from '@hbc/features-safety';
 import {
@@ -76,6 +78,7 @@ function isValidInspectionNumber(value: string): boolean {
 export function UploadPage(): ReactNode {
   const periodsQuery = useReportingPeriods();
   const periods = periodsQuery.data ?? [];
+  const preview = useSafetyIngestionPreview();
   const ingestion = useSafetyIngestion();
 
   const [file, setFile] = useState<File | null>(null);
@@ -84,12 +87,19 @@ export function UploadPage(): ReactNode {
     useState<SafetyProjectPickerValue | null>(null);
   const [inspectionNumber, setInspectionNumber] = useState<string>('');
   const [inspectionDate, setInspectionDate] = useState<string>('');
+  const [previewConfirmed, setPreviewConfirmed] = useState(false);
+  const [lastPreviewSignature, setLastPreviewSignature] = useState<string | null>(null);
+  const [hasPreviewRun, setHasPreviewRun] = useState(false);
   const submitAbortRef = useRef<AbortController | null>(null);
+  const previewAbortRef = useRef<AbortController | null>(null);
+  const previousSignatureRef = useRef<string | null>(null);
 
   useEffect(() => {
     return () => {
       submitAbortRef.current?.abort();
+      previewAbortRef.current?.abort();
       submitAbortRef.current = null;
+      previewAbortRef.current = null;
     };
   }, []);
 
@@ -100,30 +110,58 @@ export function UploadPage(): ReactNode {
 
   const inspectionNumberValid = isValidInspectionNumber(inspectionNumber);
   const inspectionDateValid = isValidCalendarDate(inspectionDate);
+  const intakeReady =
+    !!file &&
+    !!activePeriod &&
+    !!selectedProject &&
+    inspectionNumberValid &&
+    inspectionDateValid &&
+    !periodsQuery.isPending &&
+    !periodsQuery.isError;
+  const intakeSignature = useMemo(() => {
+    if (!file || !activePeriod || !selectedProject) return '';
+    return [
+      file.name,
+      file.size,
+      file.lastModified,
+      activePeriod.id,
+      activePeriod.spItemId,
+      selectedProject.id,
+      selectedProject.projectNumber,
+      selectedProject.sourceClassification,
+      inspectionNumber,
+      inspectionDate,
+    ].join('|');
+  }, [file, activePeriod, selectedProject, inspectionNumber, inspectionDate]);
 
-  const handleSubmit = (): void => {
-    if (!file || !activePeriod) return;
-    if (!selectedProject) return;
-    if (!inspectionNumberValid || !inspectionDateValid) return;
-    submitAbortRef.current?.abort();
-    const controller = new AbortController();
-    submitAbortRef.current = controller;
-    ingestion.mutate({
+  const buildMutationInput = (): {
+    readonly file: File;
+    readonly context: {
+      uploadedByUpn: string;
+      uploadedAt: string;
+      fileName: string;
+      reportingPeriodId: string;
+      reportingPeriodSpItemId: number;
+      projectNumber: string;
+      projectNameSnapshot: string;
+      projectLocationSnapshot: string;
+      projectStageSnapshot: string;
+      projectSourceClassification: ReturnType<typeof toSafetyProjectSourceClassification>;
+      projectLookupId?: number;
+      legacyRegistryItemId?: number;
+      inspectionNumber: string;
+      inspectionDate: string;
+    };
+  } | null => {
+    if (!file || !activePeriod || !selectedProject) return null;
+    return {
       file,
-      commandOptions: {
-        signal: controller.signal,
-      },
       context: {
         uploadedByUpn: currentUserUpn(),
         uploadedAt: new Date().toISOString(),
         fileName: file.name,
         reportingPeriodId: activePeriod.id,
         reportingPeriodSpItemId: activePeriod.spItemId,
-        // G-03 structured intake authority (Wave 2 revision). These
-        // operator-entered values are authoritative for ProjectNumber,
-        // InspectionNumber, and InspectionDate writes. `inspectionDate`
-        // travels as the operator-selected calendar day verbatim — no
-        // Date construction, no UTC conversion.
         projectNumber: selectedProject.projectNumber,
         projectNameSnapshot: selectedProject.projectName,
         projectLocationSnapshot: selectedProject.projectLocation,
@@ -140,8 +178,66 @@ export function UploadPage(): ReactNode {
         inspectionNumber,
         inspectionDate,
       },
+    };
+  };
+
+  const runPreview = (isAuto: boolean): void => {
+    const mutationInput = buildMutationInput();
+    if (!mutationInput) return;
+    previewAbortRef.current?.abort();
+    const controller = new AbortController();
+    previewAbortRef.current = controller;
+    if (!isAuto) {
+      setHasPreviewRun(true);
+    }
+    setPreviewConfirmed(false);
+    preview.mutate({
+      ...mutationInput,
+      commandOptions: {
+        signal: controller.signal,
+      },
     });
   };
+
+  const handlePreview = (): void => {
+    if (!intakeReady) return;
+    runPreview(false);
+  };
+
+  const handleCommit = (): void => {
+    if (!intakeReady) return;
+    if (!preview.data?.commitReadiness) return;
+    if (!previewConfirmed) return;
+    if (lastPreviewSignature !== intakeSignature) return;
+    const mutationInput = buildMutationInput();
+    if (!mutationInput) return;
+    submitAbortRef.current?.abort();
+    const controller = new AbortController();
+    submitAbortRef.current = controller;
+    ingestion.mutate({
+      ...mutationInput,
+      commandOptions: {
+        signal: controller.signal,
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!hasPreviewRun) return;
+    if (!intakeReady) return;
+    if (preview.isPending) return;
+    const previous = previousSignatureRef.current;
+    if (previous && previous !== intakeSignature) {
+      runPreview(true);
+    }
+    previousSignatureRef.current = intakeSignature;
+  }, [hasPreviewRun, intakeReady, intakeSignature, preview.isPending]);
+
+  useEffect(() => {
+    if (preview.isSuccess && preview.data && intakeSignature) {
+      setLastPreviewSignature(intakeSignature);
+    }
+  }, [preview.isSuccess, preview.data, intakeSignature]);
 
   // ── Readiness model ──────────────────────────────────────────────────
   const projectStatus: SafetyIntakeStepStatus = selectedProject ? 'ready' : 'pending';
@@ -156,22 +252,37 @@ export function UploadPage(): ReactNode {
         : 'blocked';
   const workbookStatus: SafetyIntakeStepStatus = file ? 'ready' : 'pending';
 
-  const submitBlockedReason = computeSubmitBlockedReason({
+  const previewBlockedReason = computeSubmitBlockedReason({
     periodsLoading: periodsQuery.isPending,
     periodsErrored: periodsQuery.isError,
     activePeriod,
     file,
-    ingestionPending: ingestion.isPending,
+    ingestionPending: ingestion.isPending || preview.isPending,
     projectSelected: selectedProject !== null,
     inspectionNumberValid,
     inspectionDateValid,
   });
 
-  const submitStatus: SafetyIntakeStepStatus = ingestion.isPending
+  const previewStatus: SafetyIntakeStepStatus = preview.isPending
     ? 'active'
-    : submitBlockedReason
+    : previewBlockedReason
       ? 'blocked'
-      : 'ready';
+      : preview.data?.commitReadiness
+        ? 'ready'
+        : preview.data
+          ? 'blocked'
+          : 'pending';
+  const commitReady =
+    !!preview.data?.commitReadiness &&
+    previewConfirmed &&
+    lastPreviewSignature === intakeSignature &&
+    !preview.isPending &&
+    !ingestion.isPending;
+  const commitStatus: SafetyIntakeStepStatus = ingestion.isPending
+    ? 'active'
+    : commitReady
+      ? 'ready'
+      : 'blocked';
 
   const readinessRows: SafetyIntakeReadinessRow[] = [
     {
@@ -218,32 +329,36 @@ export function UploadPage(): ReactNode {
           : 'No workbook selected yet.',
     },
     {
-      id: 'submission',
-      label: 'Submission ready',
+      id: 'preview',
+      label: 'Preview result',
       status:
-        submitStatus === 'ready'
+        previewStatus === 'ready'
           ? 'ready'
-          : submitStatus === 'blocked'
+          : previewStatus === 'blocked'
             ? 'blocked'
             : 'pending',
       detail:
-        submitStatus === 'ready'
-          ? 'All preconditions satisfied. Submit when ready.'
-          : submitStatus === 'active'
-            ? 'Ingestion in progress.'
-            : (submitBlockedReason ?? 'Pending earlier steps.'),
+        preview.isPending
+          ? 'Preview is running against the current intake context.'
+          : preview.data?.commitReadiness
+            ? `Preview passed with ${preview.data.warnings.length} warning(s).`
+            : preview.data
+              ? `Preview blocked by ${preview.data.blockingErrors.length} blocker(s).`
+              : (previewBlockedReason ?? 'Run preview once intake is ready.'),
+    },
+    {
+      id: 'commit',
+      label: 'Commit confirmation',
+      status: commitStatus === 'ready' ? 'ready' : 'blocked',
+      detail:
+        commitReady
+          ? 'Commit is enabled for the current previewed context.'
+          : 'Commit stays disabled until preview is commit-ready and confirmed.',
     },
   ];
 
-  const submitDisabled =
-    !file ||
-    !activePeriod ||
-    !selectedProject ||
-    !inspectionNumberValid ||
-    !inspectionDateValid ||
-    ingestion.isPending ||
-    periodsQuery.isPending ||
-    periodsQuery.isError;
+  const previewDisabled = !intakeReady || preview.isPending || ingestion.isPending;
+  const commitDisabled = !commitReady || ingestion.isPending;
 
   const mismatch = ingestion.data?.metadataMismatch;
 
@@ -410,7 +525,7 @@ export function UploadPage(): ReactNode {
             stepNumber={5}
             title="Readiness"
             description="Each precondition must be ready before submission."
-            status={submitStatus === 'ready' ? 'ready' : submitStatus}
+            status={previewStatus === 'ready' ? 'ready' : previewStatus}
           >
             <SafetyIntakeReadiness
               rows={readinessRows}
@@ -420,37 +535,64 @@ export function UploadPage(): ReactNode {
 
           <SafetyIntakeStep
             stepNumber={6}
-            title="Submit"
-            description="Submission commits against the selected reporting period. The pipeline validates the template, parses responses, scores, and writes the authoritative inspection record."
-            status={submitStatus}
+            title="Preview and commit"
+            description="Run preview first. Commit is enabled only when the latest preview says this context is commit-ready."
+            status={commitStatus}
             statusLabel={
               ingestion.isPending
                 ? 'Processing'
-                : submitStatus === 'ready'
-                  ? 'Ready to submit'
+                : commitStatus === 'ready'
+                  ? 'Ready to commit'
                   : undefined
             }
           >
             <div className="safety-intake-submit">
               <HbcButton
                 variant="primary"
-                onClick={handleSubmit}
-                disabled={submitDisabled}
+                onClick={handlePreview}
+                disabled={previewDisabled}
+                loading={preview.isPending}
+              >
+                {preview.isPending ? 'Previewing…' : 'Preview checklist'}
+              </HbcButton>
+              <HbcButton
+                variant="primary"
+                onClick={handleCommit}
+                disabled={commitDisabled}
                 loading={ingestion.isPending}
               >
-                {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
+                {ingestion.isPending ? 'Committing…' : 'Commit inspection'}
               </HbcButton>
               {ingestion.isPending && (
                 <HbcButton
                   variant="secondary"
                   onClick={() => submitAbortRef.current?.abort()}
                 >
-                  Cancel upload
+                  Cancel commit
                 </HbcButton>
               )}
-              {submitBlockedReason && !ingestion.isPending && (
+              {preview.isPending && (
+                <HbcButton
+                  variant="secondary"
+                  onClick={() => previewAbortRef.current?.abort()}
+                >
+                  Cancel preview
+                </HbcButton>
+              )}
+              <label className="safety-intake-confirm">
+                <input
+                  type="checkbox"
+                  checked={previewConfirmed}
+                  disabled={!preview.data?.commitReadiness || preview.isPending}
+                  onChange={(event) => setPreviewConfirmed(event.target.checked)}
+                />
                 <HbcTypography intent="bodySmall">
-                  {submitBlockedReason}
+                  I confirm this commit uses the latest previewed checklist and intake context.
+                </HbcTypography>
+              </label>
+              {previewBlockedReason && !ingestion.isPending && !preview.data && (
+                <HbcTypography intent="bodySmall">
+                  {previewBlockedReason}
                 </HbcTypography>
               )}
             </div>
@@ -465,20 +607,17 @@ export function UploadPage(): ReactNode {
               <ol className="safety-upload__next-step">
                 <li>
                   <HbcTypography intent="body">
-                    Template + version are validated.
+                    Preview validates template compatibility, parser output, reporting period, project resolution, and duplicate risk.
                   </HbcTypography>
                 </li>
                 <li>
                   <HbcTypography intent="body">
-                    The operator-selected project is honored (workbook values are
-                    kept for provenance only).
+                    Preview warnings and blockers are shown before commit. Blockers must be resolved before commit is enabled.
                   </HbcTypography>
                 </li>
                 <li>
                   <HbcTypography intent="body">
-                    Responses are parsed, scored, and written as an authoritative
-                    inspection — with your inspection number and date as the
-                    authoritative source.
+                    Commit runs only after a commit-ready preview and your explicit confirmation of the previewed context.
                   </HbcTypography>
                 </li>
                 <li>
@@ -493,7 +632,7 @@ export function UploadPage(): ReactNode {
             </HbcCard>
           </SafetyIntakeStep>
 
-          {(ingestion.data || ingestion.error) && (
+          {(ingestion.data || ingestion.error || preview.data || preview.error) && (
             <section
               className="safety-intake-outcome-zone"
               data-safety-ui="intake-outcome-zone"
@@ -553,8 +692,19 @@ export function UploadPage(): ReactNode {
                 <SafetyStatusPanel
                   intent="partial-failure"
                   data-safety-ui="upload-ingestion-error"
-                  description="Upload transport failed before the pipeline could terminate."
+                  description="Commit transport failed before the pipeline could terminate."
                   detail={uploadErrorMessage(ingestion.error)}
+                />
+              )}
+              {preview.data && (
+                <PreviewSummary preview={preview.data} />
+              )}
+              {preview.error && (
+                <SafetyStatusPanel
+                  intent="partial-failure"
+                  data-safety-ui="upload-preview-error"
+                  description="Preview failed before commit eligibility could be determined."
+                  detail={uploadErrorMessage(preview.error)}
                 />
               )}
             </section>
@@ -562,6 +712,85 @@ export function UploadPage(): ReactNode {
         </div>
       </div>
     </WorkspacePageShell>
+  );
+}
+
+function PreviewSummary({
+  preview,
+}: {
+  readonly preview: SafetyIngestionPreviewResult;
+}): ReactNode {
+  return (
+    <div className="safety-preview-summary" data-safety-ui="preview-summary">
+      <HbcTypography intent="label">Preview diagnostics</HbcTypography>
+      <HbcTypography intent="bodySmall">
+        Commit readiness: {preview.commitReadiness ? 'ready' : 'blocked'} · failure class:{' '}
+        {preview.diagnosticSummary.failureClass}
+      </HbcTypography>
+      <ul>
+        <li>
+          <HbcTypography intent="bodySmall">
+            Template: {preview.template.valid ? 'compatible' : 'incompatible'} (
+            {preview.template.templateVersion ?? 'unknown'})
+          </HbcTypography>
+        </li>
+        <li>
+          <HbcTypography intent="bodySmall">
+            Parse/metadata: {preview.metadata ? 'parsed' : 'not parsed'}
+          </HbcTypography>
+        </li>
+        <li>
+          <HbcTypography intent="bodySmall">
+            Reporting period: {preview.reportingPeriod?.resolved ? 'resolved' : 'unresolved'} / date in range:{' '}
+            {preview.reportingPeriod?.dateInRange ? 'yes' : 'no'}
+          </HbcTypography>
+        </li>
+        <li>
+          <HbcTypography intent="bodySmall">
+            Project: {preview.projectResolution.resolved ? 'resolved' : 'unresolved'} (
+            {preview.projectResolution.classification})
+          </HbcTypography>
+        </li>
+        <li>
+          <HbcTypography intent="bodySmall">
+            Duplicate risk: {preview.duplicateRisk?.confidence ?? 'none'} / supersession risk:{' '}
+            {preview.duplicateRisk?.supersessionRisk ? 'yes' : 'no'}
+          </HbcTypography>
+        </li>
+      </ul>
+      <HbcTypography intent="label">Blocking errors ({preview.blockingErrors.length})</HbcTypography>
+      <ul>
+        {preview.blockingErrors.length === 0 ? (
+          <li>
+            <HbcTypography intent="bodySmall">No blockers.</HbcTypography>
+          </li>
+        ) : (
+          preview.blockingErrors.map((item) => (
+            <li key={`block-${item.code}`}>
+              <HbcTypography intent="bodySmall">
+                {item.code}: {item.message}
+              </HbcTypography>
+            </li>
+          ))
+        )}
+      </ul>
+      <HbcTypography intent="label">Warnings ({preview.warnings.length})</HbcTypography>
+      <ul>
+        {preview.warnings.length === 0 ? (
+          <li>
+            <HbcTypography intent="bodySmall">No warnings.</HbcTypography>
+          </li>
+        ) : (
+          preview.warnings.map((item) => (
+            <li key={`warn-${item.code}`}>
+              <HbcTypography intent="bodySmall">
+                {item.code}: {item.message}
+              </HbcTypography>
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
   );
 }
 
