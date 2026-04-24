@@ -1,5 +1,6 @@
 import type {
   CommittedArtifacts,
+  IngestionUploadContext,
   IngestionRunResult,
   SafetyFinding,
   SafetyIngestionPreviewResult,
@@ -8,7 +9,6 @@ import type {
   SafetyInspectionEvent,
   SafetyProjectWeekRecord,
   SafetyReportingPeriod,
-  UploadContext,
   UploadedWorkbookRef,
 } from '../../domain/types.js';
 import {
@@ -192,7 +192,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
 
   async ingestWorkbook(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
     _options?: BackendCommandOptions,
   ): Promise<IngestionRunResult> {
     const buffer = await file.arrayBuffer();
@@ -225,7 +225,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
 
   async previewWorkbook(
     _file: File | Blob,
-    _context: UploadContext,
+    _context: IngestionUploadContext,
     _options?: BackendCommandOptions,
   ): Promise<SafetyIngestionPreviewResult> {
     return {

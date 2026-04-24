@@ -7,6 +7,7 @@ import type {
   ReviewQueueEntry,
 } from '../ports/ISafetyInspectionRepository.js';
 import type {
+  IngestionUploadContext,
   IngestionRunResult,
   SafetyIngestionPreviewResult,
   SafetyFinding,
@@ -14,7 +15,6 @@ import type {
   SafetyInspectionEvent,
   SafetyProjectWeekRecord,
   SafetyReportingPeriod,
-  UploadContext,
 } from '../domain/types.js';
 import type { SafetyBackendCommandError } from '../adapters/sharepoint/errors.js';
 import { useSafetyRepository } from './repositoryContext.js';
@@ -101,7 +101,7 @@ export function useReviewQueue(reportingPeriodId?: string) {
 
 export interface IngestionMutationInput {
   readonly file: File;
-  readonly context: UploadContext;
+  readonly context: IngestionUploadContext;
   readonly commandOptions?: BackendCommandOptions;
 }
 
@@ -136,7 +136,7 @@ export function useReplayIngestion() {
 
 export interface PreviewIngestionInput {
   readonly file: File;
-  readonly context: UploadContext;
+  readonly context: IngestionUploadContext;
   readonly commandOptions?: BackendCommandOptions;
 }
 

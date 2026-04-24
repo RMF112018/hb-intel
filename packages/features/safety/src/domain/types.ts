@@ -225,6 +225,18 @@ export interface UploadContext {
 }
 
 /**
+ * Strict upload context required for preview/ingest command boundaries.
+ * This preserves `UploadContext` for broader ingestion pipeline internals
+ * while enforcing Prompt 02 metadata requirements at command ingress.
+ */
+export interface IngestionUploadContext extends UploadContext {
+  readonly projectNumber: string;
+  readonly projectSourceClassification: ProjectSourceClassification;
+  readonly inspectionNumber: string;
+  readonly inspectionDate: string;
+}
+
+/**
  * Per-field provenance summary surfaced by preview + ingestion paths.
  * Records which parser seam produced each parser-critical value, and
  * whether the operator-entered intake context was used as the authority

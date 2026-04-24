@@ -101,13 +101,14 @@ const VALID_PROJECT_SOURCE_CLASSIFICATIONS: ReadonlyArray<ProjectSourceClassific
   'project+legacy',
   'unresolved',
 ];
+const PLAIN_CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function parseOptionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
-function parseOptionalNumber(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+function parseOptionalPositiveIntegerField(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
 function parseProjectSourceClassification(
@@ -115,6 +116,18 @@ function parseProjectSourceClassification(
 ): ProjectSourceClassification | undefined {
   if (typeof value !== 'string') return undefined;
   return VALID_PROJECT_SOURCE_CLASSIFICATIONS.find((c) => c === value);
+}
+
+function isValidPlainCalendarDate(value: string): boolean {
+  if (!PLAIN_CALENDAR_DATE_PATTERN.test(value)) return false;
+  const [yearRaw, monthRaw, dayRaw] = value.split('-');
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return false;
+  if (month < 1 || month > 12) return false;
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return day >= 1 && day <= lastDay;
 }
 
 function parseDryRun(body: Record<string, unknown>): boolean {
@@ -161,9 +174,15 @@ function parseIngestionBody(body: Record<string, unknown>): ParsedIngestionBody 
     );
   }
 
-  const reportingPeriodSpItemIdCompanion = typeof rawContext.reportingPeriodSpItemId === 'number'
-    ? rawContext.reportingPeriodSpItemId
-    : undefined;
+  const reportingPeriodSpItemIdCompanion = parseOptionalPositiveIntegerField(rawContext.reportingPeriodSpItemId);
+  const projectLookupId = parseOptionalPositiveIntegerField(rawContext.projectLookupId);
+  const legacyRegistryItemId = parseOptionalPositiveIntegerField(rawContext.legacyRegistryItemId);
+  const projectNumber = parseOptionalString(rawContext.projectNumber);
+  const inspectionNumber = parseOptionalString(rawContext.inspectionNumber);
+  const inspectionDate = parseOptionalString(rawContext.inspectionDate);
+  const projectSourceClassification = parseProjectSourceClassification(
+    rawContext.projectSourceClassification,
+  );
   const context: UploadContext = {
     uploadedByUpn:
       typeof rawContext.uploadedByUpn === 'string' ? rawContext.uploadedByUpn : '',
@@ -180,23 +199,60 @@ function parseIngestionBody(body: Record<string, unknown>): ParsedIngestionBody 
     // intake metadata flows through the backend as-is. Calendar-date
     // semantics are preserved (`inspectionDate` stays as `YYYY-MM-DD`;
     // no timezone conversion here).
-    projectNumber: parseOptionalString(rawContext.projectNumber),
+    projectNumber,
     projectNameSnapshot: parseOptionalString(rawContext.projectNameSnapshot),
     projectLocationSnapshot: parseOptionalString(rawContext.projectLocationSnapshot),
     projectStageSnapshot: parseOptionalString(rawContext.projectStageSnapshot),
-    projectSourceClassification: parseProjectSourceClassification(
-      rawContext.projectSourceClassification,
-    ),
-    projectLookupId: parseOptionalNumber(rawContext.projectLookupId),
-    legacyRegistryItemId: parseOptionalNumber(rawContext.legacyRegistryItemId),
-    inspectionNumber: parseOptionalString(rawContext.inspectionNumber),
-    inspectionDate: parseOptionalString(rawContext.inspectionDate),
+    projectSourceClassification,
+    projectLookupId,
+    legacyRegistryItemId,
+    inspectionNumber,
+    inspectionDate,
   };
 
   if (!context.reportingPeriodId || !context.uploadedByUpn || !context.uploadedAt) {
     return invalid(
       'VALIDATION_ERROR',
       'fileName, fileContentBase64, and context.{uploadedByUpn, uploadedAt, reportingPeriodId} are required.',
+    );
+  }
+  if (!reportingPeriodSpItemIdCompanion) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'context.reportingPeriodSpItemId is required and must be a positive integer.',
+    );
+  }
+  if (!projectNumber || !projectSourceClassification) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'context.projectNumber and context.projectSourceClassification are required.',
+    );
+  }
+  if (!inspectionNumber) {
+    return invalid('VALIDATION_ERROR', 'context.inspectionNumber is required.');
+  }
+  if (!inspectionDate || !isValidPlainCalendarDate(inspectionDate)) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'context.inspectionDate is required and must use plain YYYY-MM-DD format.',
+    );
+  }
+  if (projectSourceClassification === 'project' && !projectLookupId) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'context.projectLookupId is required when context.projectSourceClassification is "project".',
+    );
+  }
+  if (projectSourceClassification === 'legacy-only' && !legacyRegistryItemId) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'context.legacyRegistryItemId is required when context.projectSourceClassification is "legacy-only".',
+    );
+  }
+  if (projectSourceClassification === 'project+legacy' && !projectLookupId && !legacyRegistryItemId) {
+    return invalid(
+      'VALIDATION_ERROR',
+      'context.projectLookupId or context.legacyRegistryItemId is required when context.projectSourceClassification is "project+legacy".',
     );
   }
 
@@ -231,6 +287,10 @@ function parseReplayBody(body: Record<string, unknown>): {
   const supersedePrior = body.supersedePrior === true;
   return { parentRunId, supersedePrior };
 }
+
+export const __testOnlySafetyIngestionParsing = {
+  parseIngestionBody,
+};
 
 function parseOptionalPositiveInteger(value: string | undefined): number | undefined {
   if (!value) return undefined;

@@ -64,6 +64,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
       fileName: 'test.xlsx',
       reportingPeriodId: 'period-1',
       reportingPeriodSpItemId: 1,
+      projectNumber: 'P-1234',
+      projectSourceClassification: 'project',
+      projectLookupId: 101,
+      inspectionNumber: '9',
+      inspectionDate: '2026-04-22',
     });
 
     expect(result.state).toBe('committed');
@@ -84,6 +89,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
         fileName: 'test.xlsx',
         reportingPeriodId: 'period-1',
         reportingPeriodSpItemId: 1,
+        projectNumber: 'P-1234',
+        projectSourceClassification: 'project',
+        projectLookupId: 101,
+        inspectionNumber: '9',
+        inspectionDate: '2026-04-22',
       },
     });
     expect(getSpy).not.toHaveBeenCalled();
@@ -209,6 +219,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
       fileName: 'test.xlsx',
       reportingPeriodId: 'period-1',
       reportingPeriodSpItemId: 1,
+      projectNumber: 'P-1234',
+      projectSourceClassification: 'project',
+      projectLookupId: 101,
+      inspectionNumber: '9',
+      inspectionDate: '2026-04-22',
     });
 
     expect(result.commitReadiness).toBe(true);
@@ -227,6 +242,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
         fileName: 'test.xlsx',
         reportingPeriodId: 'period-1',
         reportingPeriodSpItemId: 1,
+        projectNumber: 'P-1234',
+        projectSourceClassification: 'project',
+        projectLookupId: 101,
+        inspectionNumber: '9',
+        inspectionDate: '2026-04-22',
       },
     });
   });
@@ -278,6 +298,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
         fileName: 'test.xlsx',
         reportingPeriodId: 'period-1',
         reportingPeriodSpItemId: 1,
+        projectNumber: 'P-1234',
+        projectSourceClassification: 'project',
+        projectLookupId: 101,
+        inspectionNumber: '9',
+        inspectionDate: '2026-04-22',
       }),
     ).rejects.toMatchObject({
       name: 'SafetyBackendCommandError',
@@ -313,6 +338,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
         fileName: 'test.xlsx',
         reportingPeriodId: 'period-1',
         reportingPeriodSpItemId: 1,
+        projectNumber: 'P-1234',
+        projectSourceClassification: 'project',
+        projectLookupId: 101,
+        inspectionNumber: '9',
+        inspectionDate: '2026-04-22',
       }),
     ).rejects.toMatchObject({
       name: 'SafetyBackendCommandError',
@@ -350,6 +380,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
           fileName: 'test.xlsx',
           reportingPeriodId: 'period-1',
           reportingPeriodSpItemId: 1,
+          projectNumber: 'P-1234',
+          projectSourceClassification: 'project',
+          projectLookupId: 101,
+          inspectionNumber: '9',
+          inspectionDate: '2026-04-22',
         },
         { timeoutMs: 1 },
       ),
@@ -447,6 +482,11 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
         fileName: 'test.xlsx',
         reportingPeriodId: 'period-1',
         reportingPeriodSpItemId: 1,
+        projectNumber: 'P-1234',
+        projectSourceClassification: 'project',
+        projectLookupId: 101,
+        inspectionNumber: '9',
+        inspectionDate: '2026-04-22',
       },
       { requestId: 'frontend-request-1' },
     );

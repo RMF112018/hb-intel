@@ -62,6 +62,16 @@ describe('admin safety record-keeping provisioning route wiring', () => {
     expect(source).toContain('SAFETY_REPORTING_PERIOD_ID_MISMATCH');
   });
 
+  it('enforces Prompt 02 full intake metadata contract at ingest/preview ingress', () => {
+    expect(source).toContain('context.projectNumber and context.projectSourceClassification are required.');
+    expect(source).toContain('context.inspectionNumber is required.');
+    expect(source).toContain('context.inspectionDate is required and must use plain YYYY-MM-DD format.');
+    expect(source).toContain('context.reportingPeriodSpItemId is required and must be a positive integer.');
+    expect(source).toContain('projectSourceClassification === \'project\'');
+    expect(source).toContain('projectSourceClassification === \'legacy-only\'');
+    expect(source).toContain('projectSourceClassification === \'project+legacy\'');
+  });
+
   it('enforces canonical reporting-period contract for Graph probe route and keeps admin gate', () => {
     expect(source).toContain('probeSafetyReportingPeriodRead');
     expect(source).toContain('parseOptionalPositiveInteger');

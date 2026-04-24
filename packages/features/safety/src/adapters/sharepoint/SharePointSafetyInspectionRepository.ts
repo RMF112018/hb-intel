@@ -12,6 +12,7 @@
 
 import type {
   CommittedArtifacts,
+  IngestionUploadContext,
   IngestionRunResult,
   ProjectResolutionResult,
   ProjectSourceClassification,
@@ -25,7 +26,6 @@ import type {
   SafetyInspectionEventDraft,
   SafetyProjectWeekRecord,
   SafetyReportingPeriod,
-  UploadContext,
 } from '../../domain/types.js';
 import {
   REVIEW_QUEUE_TERMINAL_STATUSES,
@@ -227,7 +227,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
 
   async previewWorkbook(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
     options?: BackendCommandOptions,
   ): Promise<SafetyIngestionPreviewResult> {
     const request = await this.buildIngestionRequest(file, context);
@@ -241,7 +241,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
 
   async ingestWorkbook(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
     options?: BackendCommandOptions,
   ): Promise<IngestionRunResult> {
     return this.ingestWorkbookViaBackend(file, context, options);
@@ -260,7 +260,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
 
   private async ingestWorkbookViaBackend(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
     options?: BackendCommandOptions,
   ): Promise<IngestionRunResult> {
     const commandResult = await this.requireBackendCommandClient().ingest(
@@ -317,7 +317,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
 
   private async buildIngestionRequest(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
   ): Promise<SafetyBackendIngestionRequest> {
     const fileName = file instanceof File ? file.name : context.fileName;
     return {

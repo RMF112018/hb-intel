@@ -1,4 +1,5 @@
 import type {
+  IngestionUploadContext,
   IngestionRunResult,
   IngestionTerminalStatus,
   SafetyFinding,
@@ -7,7 +8,6 @@ import type {
   SafetyInspectionEvent,
   SafetyProjectWeekRecord,
   SafetyReportingPeriod,
-  UploadContext,
 } from '../domain/types.js';
 
 /**
@@ -96,12 +96,12 @@ export interface ISafetyInspectionRepository {
 
   previewWorkbook(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
     options?: BackendCommandOptions,
   ): Promise<SafetyIngestionPreviewResult>;
   ingestWorkbook(
     file: File | Blob,
-    context: UploadContext,
+    context: IngestionUploadContext,
     options?: BackendCommandOptions,
   ): Promise<IngestionRunResult>;
   /** Re-read the retained upload and re-run the pipeline with an incremented attempt chain. */

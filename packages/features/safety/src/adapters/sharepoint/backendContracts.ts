@@ -1,13 +1,13 @@
 import type {
+  IngestionUploadContext,
   IngestionRunResult,
   SafetyIngestionPreviewResult,
-  UploadContext,
 } from '../../domain/types.js';
 
 export interface SafetyBackendIngestionRequest {
   readonly fileName: string;
   readonly fileContentBase64: string;
-  readonly context: UploadContext;
+  readonly context: IngestionUploadContext;
 }
 
 export interface SafetyBackendReplayRequest {

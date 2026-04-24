@@ -45,6 +45,11 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
       fileName: 'contract.xlsx',
       reportingPeriodId: 'period-1001',
       reportingPeriodSpItemId: 1001,
+      projectNumber: 'P-1001',
+      projectSourceClassification: 'project',
+      projectLookupId: 2001,
+      inspectionNumber: '3',
+      inspectionDate: '2026-04-24',
     });
 
     expect(fetchSpy.mock.calls[0]?.[0]).toBe('https://functions.example.com/api/safety-records/ingest');
@@ -59,6 +64,11 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
         fileName: 'contract.xlsx',
         reportingPeriodId: 'period-1001',
         reportingPeriodSpItemId: 1001,
+        projectNumber: 'P-1001',
+        projectSourceClassification: 'project',
+        projectLookupId: 2001,
+        inspectionNumber: '3',
+        inspectionDate: '2026-04-24',
       },
     });
     expect(client.get).not.toHaveBeenCalled();
@@ -86,6 +96,11 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
       fileName: 'contract.xlsx',
       reportingPeriodId: 'period-1001',
       reportingPeriodSpItemId: 1001,
+      projectNumber: 'P-1001',
+      projectSourceClassification: 'project',
+      projectLookupId: 2001,
+      inspectionNumber: '3',
+      inspectionDate: '2026-04-24',
     });
 
     expect(fetchSpy.mock.calls[0]?.[0]).toBe('https://functions.example.com/api/safety-records/ingest/preview');
@@ -151,6 +166,11 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
           fileName: 'contract.xlsx',
           reportingPeriodId: 'period-1001',
           reportingPeriodSpItemId: 1001,
+          projectNumber: 'P-1001',
+          projectSourceClassification: 'project',
+          projectLookupId: 2001,
+          inspectionNumber: '3',
+          inspectionDate: '2026-04-24',
         },
         { requestId: 'frontend-422' },
       ),
