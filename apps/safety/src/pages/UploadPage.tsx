@@ -33,6 +33,7 @@ import {
   type SafetyProjectPickerValue,
 } from '../components/index.js';
 import {
+  supportDetailLines,
   uploadFailureMessage,
   type SupportDetails,
 } from './supportTruth.js';
@@ -782,11 +783,7 @@ function SupportDetailsDisclosure({
 }: {
   readonly details: SupportDetails;
 }): ReactNode {
-  const bounded = [
-    details.requestId ? `requestId: ${details.requestId}` : null,
-    details.failureClass ? `failureClass: ${details.failureClass}` : null,
-    details.previewFailureClass ? `previewFailureClass: ${details.previewFailureClass}` : null,
-  ].filter(Boolean) as string[];
+  const bounded = supportDetailLines(details);
   if (bounded.length === 0) return null;
   return (
     <details data-safety-ui="support-details">

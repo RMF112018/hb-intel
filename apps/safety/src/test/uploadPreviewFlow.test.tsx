@@ -292,6 +292,9 @@ describe('UploadPage preview-before-commit flow', () => {
       httpStatus: 422,
       message: 'blocked',
       requestId: 'req-upload-1',
+      frontendRequestId: 'front-upload-1',
+      backendRequestId: 'back-upload-1',
+      attempts: 2,
       failureClass: 'project-unresolved',
       previewFailureClass: 'project-unresolved',
     };
@@ -304,11 +307,16 @@ describe('UploadPage preview-before-commit flow', () => {
     await user.type(screen.getByLabelText(/inspection date/i), '2026-04-24');
     await user.click(screen.getByRole('button', { name: /preview checklist/i }));
 
-    expect(screen.getAllByText(/preview blocked commit readiness/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/project resolution failed for this intake context/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/support details/i)).toBeInTheDocument();
     expect(screen.getByText(/requestId: req-upload-1/i)).toBeInTheDocument();
+    expect(screen.getByText(/frontendRequestId: front-upload-1/i)).toBeInTheDocument();
+    expect(screen.getByText(/backendRequestId: back-upload-1/i)).toBeInTheDocument();
     expect(screen.getByText(/^failureClass: project-unresolved$/i)).toBeInTheDocument();
     expect(screen.getByText(/^previewFailureClass: project-unresolved$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^route: \/preview$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^status: 422$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^attempts: 2$/i)).toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 

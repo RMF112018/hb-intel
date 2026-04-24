@@ -61,12 +61,13 @@ export interface SafetyStatusPanelProps {
 
 function bannerVariantFor(intent: SafetyStatusIntent): 'info' | 'success' | 'warning' | 'error' {
   switch (intent) {
+    case 'partial-failure':
+      return 'error';
     case 'success':
       return 'success';
     case 'advisory':
       return 'info';
     case 'blocked':
-    case 'partial-failure':
     default:
       return 'warning';
   }

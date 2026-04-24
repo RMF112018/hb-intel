@@ -102,12 +102,20 @@ describe('ReviewQueue async accessibility semantics', () => {
       message: 'failed',
       errorKind: 'auth',
       requestId: 'req-r1',
+      frontendRequestId: 'front-r1',
+      backendRequestId: 'back-r1',
+      endpoint: '/api/safety-records/replay',
+      httpStatus: 401,
+      attempts: 1,
       failureClass: 'auth',
     };
     const user = userEvent.setup();
     render(<ReviewQueuePage />);
     expect(screen.getAllByText(/replay authentication failed/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/support details/i)).toBeInTheDocument();
+    expect(screen.getByText(/frontendRequestId: front-r1/i)).toBeInTheDocument();
+    expect(screen.getByText(/backendRequestId: back-r1/i)).toBeInTheDocument();
+    expect(screen.getByText(/route: \/api\/safety-records\/replay/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(replayReset).toHaveBeenCalledTimes(1);
   });

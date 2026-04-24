@@ -19,6 +19,7 @@ import {
 } from '../components/index.js';
 import {
   replayFailureMessage,
+  supportDetailLines,
   type SupportDetails,
 } from './supportTruth.js';
 import {
@@ -335,11 +336,7 @@ function ReplaySupportDetails({
 }: {
   readonly details: SupportDetails;
 }): ReactNode {
-  const bounded = [
-    details.requestId ? `requestId: ${details.requestId}` : null,
-    details.failureClass ? `failureClass: ${details.failureClass}` : null,
-    details.previewFailureClass ? `previewFailureClass: ${details.previewFailureClass}` : null,
-  ].filter(Boolean) as string[];
+  const bounded = supportDetailLines(details);
   if (bounded.length === 0) return null;
   return (
     <details data-safety-ui="replay-support-details">

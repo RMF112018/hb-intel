@@ -27,6 +27,11 @@ import {
   classifyPeriodHealth,
   rankProjectWeeks,
 } from './reportingPeriodDashboardDerivation.js';
+import {
+  readFailureMessage,
+  supportDetailLines,
+  type SupportDetails,
+} from './supportTruth.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -231,11 +236,13 @@ export function ReportingPeriodDashboardPage(): ReactNode {
   );
 
   const isFatal = state.variant === 'fatal-periods' || state.variant === 'fatal-both';
+  const periodsFailure = readFailureMessage(periodsQuery.error, 'reporting-periods');
+  const projectWeeksFailure = readFailureMessage(projectWeeksQuery.error, 'project-weeks');
   const errorMessage =
     state.variant === 'fatal-periods'
-      ? state.message
+      ? `${periodsFailure.headline} ${periodsFailure.detail}`
       : state.variant === 'fatal-both'
-        ? state.message
+        ? `${periodsFailure.headline} ${projectWeeksFailure.headline}`
         : undefined;
 
   const isReady = state.variant === 'ready';
@@ -298,19 +305,25 @@ export function ReportingPeriodDashboardPage(): ReactNode {
           </div>
 
           {state.variant === 'subordinate-project-weeks' && (
-            <SafetyStatusPanel
-              intent="partial-failure"
-              data-safety-ui="project-weeks-subordinate-error"
-              description={state.message}
-              detail={state.detail}
-              action={{
-                label: 'Retry project-week records',
-                pendingLabel: 'Retrying…',
-                isPending: projectWeeksQuery.isPending,
-                variant: 'secondary',
-                onClick: retryProjectWeeks,
-              }}
-            />
+            <>
+              <SafetyStatusPanel
+                intent="partial-failure"
+                data-safety-ui="project-weeks-subordinate-error"
+                description={projectWeeksFailure.headline}
+                detail={projectWeeksFailure.detail}
+                role="alert"
+                ariaLive="assertive"
+                ariaAtomic={true}
+                action={{
+                  label: 'Retry project-week records',
+                  pendingLabel: 'Retrying…',
+                  isPending: projectWeeksQuery.isPending,
+                  variant: 'secondary',
+                  onClick: retryProjectWeeks,
+                }}
+              />
+              <DashboardSupportDetails details={projectWeeksFailure.support} />
+            </>
           )}
 
           {isEmpty && (
@@ -365,5 +378,26 @@ export function ReportingPeriodDashboardPage(): ReactNode {
         </section>
       </div>
     </WorkspacePageShell>
+  );
+}
+
+function DashboardSupportDetails({
+  details,
+}: {
+  readonly details: SupportDetails;
+}): ReactNode {
+  const bounded = supportDetailLines(details);
+  if (bounded.length === 0) return null;
+  return (
+    <details data-safety-ui="dashboard-support-details">
+      <summary>Support details</summary>
+      <ul>
+        {bounded.map((item) => (
+          <li key={item}>
+            <HbcTypography intent="bodySmall">{item}</HbcTypography>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
