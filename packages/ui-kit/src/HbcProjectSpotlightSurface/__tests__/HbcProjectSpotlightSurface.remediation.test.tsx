@@ -263,7 +263,7 @@ describe('HbcProjectSpotlightSurface — Progress Ring signal anchor (Pass 2)', 
 
   it('retains the featured details disclosure in compact (depth content still has meaningful additional surface)', () => {
     const { container } = render(
-      <HbcProjectSpotlightSurface model={withMilestones('compact')} forceMode="compact" />,
+      <HbcProjectSpotlightSurface model={withMilestones()} forceMode="compact" />,
     );
     const disclosure = Array.from(
       container.querySelectorAll<HTMLButtonElement>('button'),
