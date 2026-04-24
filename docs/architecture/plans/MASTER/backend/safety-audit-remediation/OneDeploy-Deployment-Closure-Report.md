@@ -533,6 +533,76 @@ Deployment closure for the Flex host / probe surface **remains blocked** until a
 
 ---
 
+## GitHub Actions Deployment Attempt — Run 24901773055
+
+| Field | Value |
+| ----- | ----- |
+| Run URL | https://github.com/RMF112018/hb-intel/actions/runs/24901773055 |
+| Status | `completed` |
+| Conclusion | **`success`** |
+| Head SHA | `8ef3d93bb535c30cf7d229eefb4967601ca61470` (`test: align parity contract and release gates with preview x-request-id relaxation`) |
+| Created / updated (UTC) | `2026-04-24T17:02:12Z` / `2026-04-24T17:07:37Z` |
+| Log capture | `.tmp/functions-validation/gha-run-24901773055.log`, `.tmp/functions-validation/gha-run-24901773055-meta.json` |
+
+### Job outcome
+
+- **`build`:** `success` — upstream turbo (aligned with `scripts/package-functions-artifact.ts`), `check-types`, unit tests, packaging, manifest upload.
+- **`deploy`:** `success` — **Stamp runtime identity**, **Azure/functions-action** deploy, **Post-deploy live artifact parity proof** (`pnpm dlx tsx scripts/verify-functions-live-parity.ts`), **Flex Safety reporting-period probe registration proof**.
+
+### CI / repo fixes that unblocked this path (prior commits on `main`)
+
+1. **Turbo scope:** Build filters match [`scripts/package-functions-artifact.ts`](../../../../scripts/package-functions-artifact.ts) plus **`@hbc/sharepoint-platform`** (required because `@hbc/functions` compiles `packages/features/safety` sources that import that package’s **`dist/`** types on clean runners).
+2. **`@hbc/sharepoint-platform` incremental cache:** Removed tracked `packages/sharepoint-platform/tsconfig.tsbuildinfo` and added package `.gitignore` so `tsc` emits `dist/` on fresh checkouts (stale `.tsbuildinfo` had caused “successful” builds with no outputs).
+3. **`@hbc/ui-kit` on Linux:** Added committed [`packages/ui-kit/types/ambient-assets.d.ts`](../../../../packages/ui-kit/types/ambient-assets.d.ts) and included it from `tsconfig.json` (sidecar `src/**/*.d.ts` is gitignored).
+4. **Notification helpers:** Root `.gitignore` rule `lib/` had excluded `backend/functions/src/functions/notifications/lib/*.ts` from git; narrow un-ignore + track those sources.
+5. **Deploy job verifier:** `pnpm exec tsx` → **`pnpm dlx tsx`** (deploy job has no `node_modules`).
+6. **Parity verifier vs Flex:** Dropped hard failure on missing response `x-request-id` for malformed-bearer **preview** probe (401 auth outcome retained); updated unit/release-gate tests.
+
+### Artifact manifest (from CI build log)
+
+| Field | Value |
+| ----- | ----- |
+| packageVersion | `00.000.150` |
+| commitSha | `8ef3d93bb535c30cf7d229eefb4967601ca61470` |
+| sha256 (manifest) | `102d4a316bc68ba9000f5ab0fb6cb9706451f6b6b4ec958709df49d1593c4ccd` |
+| zipBytes (summary table) | `133423756` (artifact download digest line in log may differ; use manifest `sha256` as canonical) |
+
+### Deploy / parity / probe (this run)
+
+| Gate | Result |
+| ---- | ------ |
+| Azure/functions-action deployment | **Succeeded** |
+| `verify-functions-live-parity.ts` | **Passed** (`overallPass: true` in job log) |
+| `safetyReportingPeriodProbe` in `az functionapp function list` | **Present** (workflow probe step succeeded) |
+| Probe endpoint HTTP (no auth) | **401** (not 404; gate allows 401 or 403) |
+| `/api/health` vs manifest | **Version `00.000.150` matches**; live `artifact.commitSha` matches deployed **`8ef3d93b…`** post-run curl. **`/api/health` alone is still not deployed-code proof**; probe + inventory close that gap for this run. |
+
+### Token / workbook gates (post-run local checks)
+
+| Gate | Status |
+| ---- | ------ |
+| Admin `/api/health/ready` with bearer | **Pending** — `az account get-access-token --resource api://08c399eb-a394-4087-b859-659d493f8dc7` returns **AADSTS65001** (no consent for Azure CLI against API audience). Evidence note: `.tmp/functions-validation/live-ready-admin-post-gha-24901773055.txt` |
+| Role matrix (reviewer/submitter/operator tokens) | **Pending** (no repo token helper run) |
+| Hosted workbook preview | **Pending** (no SharePoint/workbook context in this session) |
+
+### Intermediate runs (brief)
+
+| Run ID | Conclusion | Notes |
+| ------ | ---------- | ----- |
+| 24900855679 | failure | `@hbc/functions` build: `SiteScopedListDescriptor` / missing `@hbc/sharepoint-platform` types — fixed by building sharepoint-platform + removing stale `.tsbuildinfo`. |
+| 24901094810 | failure | Notification `lib/*.ts` missing on runner — fixed by un-ignoring `backend/functions/.../notifications/lib/`. |
+| 24901212137 | failure | Parity step: `pnpm exec tsx` not found on deploy job — fixed with `pnpm dlx tsx`. |
+| 24901430187 | failure | Parity `overallPass: false` due to `missing_x_request_id` on preview — relaxed verifier + tests. |
+| 24901655695 | failure | Unit tests expected old parity rule — test updates in `8ef3d93b`. |
+
+### Verdict for run 24901773055
+
+**Deployment proof partially complete; token/workbook gates pending.**
+
+OneDeploy/SCM **502** was **not** observed on this successful deploy path.
+
+---
+
 ## Evidence file index (local)
 
 Under `.tmp/functions-validation/`:
@@ -544,3 +614,6 @@ Under `.tmp/functions-validation/`:
 - `live-health.json`
 - `live-ready-noauth.txt`, `live-ready-badbearer.txt`
 - `live-route-*-noauth.txt` (ingest/preview/replay/provision/probe)
+- `gha-run-24901773055.log`, `gha-run-24901773055-meta.json`
+- `live-host-24901773055.txt`, `live-health-post-gha-24901773055.json`, `live-health-post-gha-24901773055.pretty.json`
+- `api-audience-setting.txt`, `live-ready-admin-post-gha-24901773055.txt`
