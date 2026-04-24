@@ -23,6 +23,8 @@ export interface SafetyReviewEntryCardProps {
   readonly entry: ReviewQueueEntry;
   readonly isPending: boolean;
   readonly onRetry: (runId: string, supersedePrior: boolean) => void;
+  readonly disabledByCapability?: boolean;
+  readonly capabilityReason?: string;
 }
 
 function terminalBadgeVariant(status: string): StatusVariant {
@@ -122,6 +124,8 @@ export function SafetyReviewEntryCard({
   entry,
   isPending,
   onRetry,
+  disabledByCapability,
+  capabilityReason,
 }: SafetyReviewEntryCardProps): ReactNode {
   const { run } = entry;
   const framing = framingFor(entry);
@@ -213,6 +217,8 @@ export function SafetyReviewEntryCard({
             isPending={isPending}
             onRetry={onRetry}
             entryErrorClass={run.errorClass}
+            disabledByCapability={disabledByCapability}
+            capabilityReason={capabilityReason}
           />
         </footer>
       </article>

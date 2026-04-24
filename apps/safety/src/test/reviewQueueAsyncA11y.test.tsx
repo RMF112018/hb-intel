@@ -46,6 +46,12 @@ vi.mock('@hbc/features-safety', () => ({
   isSafetyBackendCommandError: (error: any) => Boolean(error?.errorKind || error?.requestId),
   isSafetyConfigurationError: () => false,
   isSafetyAdapterFetchError: () => false,
+  useSafetyCapabilities: () => ({
+    canPreview: true,
+    canIngest: true,
+    canReplay: true,
+  }),
+  safetyCapabilityReason: () => 'Not authorized.',
 }));
 
 vi.mock('@hbc/ui-kit', () => ({

@@ -171,3 +171,20 @@ export type {
   PreviewIngestionInput,
   ReplayIngestionInput,
 } from './hooks/queries.js';
+
+// -- Auth / Capabilities -------------------------------------------------
+export {
+  SAFETY_ACTION_ROLES,
+  SAFETY_ADMIN_ROLE,
+  SAFETY_GLOBAL_OVERRIDE_ROLES,
+  SAFETY_OPERATOR_ROLE,
+  SAFETY_REVIEWER_ROLE,
+  SAFETY_SUBMITTER_ROLE,
+  resolveSafetyCapabilities,
+  safetyCapabilityReason,
+} from './auth/safetyCapabilities.js';
+export type {
+  SafetyAction,
+  SafetyCapabilities,
+} from './auth/safetyCapabilities.js';
+export { useSafetyCapabilities } from './auth/useSafetyCapabilities.js';

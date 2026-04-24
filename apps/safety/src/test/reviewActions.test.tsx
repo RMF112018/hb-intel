@@ -122,3 +122,64 @@ describe('SafetyReviewActions — governed confirmation UX', () => {
     expect(onRetry).toHaveBeenCalledWith('run-42', true);
   });
 });
+
+describe('SafetyReviewActions — replay capability gate', () => {
+  it('hides plain Retry and renders the capability reason when disabledByCapability is true', () => {
+    const onRetry = vi.fn();
+    render(
+      <SafetyReviewActions
+        runId="run-1"
+        isDuplicate={false}
+        isPending={false}
+        onRetry={onRetry}
+        disabledByCapability={true}
+        capabilityReason="You lack the Replay capability."
+      />,
+    );
+    expect(screen.queryByRole('button', { name: /retry/i })).toBeNull();
+    expect(screen.getByText(/you lack the replay capability/i)).toBeInTheDocument();
+  });
+
+  it('hides Supersede & commit for duplicates when disabledByCapability is true', () => {
+    const onRetry = vi.fn();
+    render(
+      <SafetyReviewActions
+        runId="run-dup"
+        isDuplicate={true}
+        isPending={false}
+        onRetry={onRetry}
+        disabledByCapability={true}
+        capabilityReason="Not authorized."
+      />,
+    );
+    expect(screen.queryByRole('button', { name: /supersede & commit/i })).toBeNull();
+    expect(screen.getByText(/not authorized/i)).toBeInTheDocument();
+  });
+
+  it('falls back to a generic reason when capabilityReason is omitted', () => {
+    const onRetry = vi.fn();
+    render(
+      <SafetyReviewActions
+        runId="run-1"
+        isDuplicate={false}
+        isPending={false}
+        onRetry={onRetry}
+        disabledByCapability={true}
+      />,
+    );
+    expect(screen.getByText(/not authorized to replay/i)).toBeInTheDocument();
+  });
+
+  it('renders the normal Retry when disabledByCapability is false (default)', () => {
+    const onRetry = vi.fn();
+    render(
+      <SafetyReviewActions
+        runId="run-1"
+        isDuplicate={false}
+        isPending={false}
+        onRetry={onRetry}
+      />,
+    );
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+  });
+});

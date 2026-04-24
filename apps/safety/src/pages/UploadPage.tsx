@@ -13,6 +13,8 @@ import type { StatusVariant } from '@hbc/ui-kit';
 import {
   isSafetyAdapterFetchError,
   isSafetyConfigurationError,
+  safetyCapabilityReason,
+  useSafetyCapabilities,
   useSafetyIngestionPreview,
   useReportingPeriods,
   useSafetyIngestion,
@@ -94,6 +96,7 @@ export function UploadPage(): ReactNode {
   const periods = periodsQuery.data ?? [];
   const preview = useSafetyIngestionPreview();
   const ingestion = useSafetyIngestion();
+  const capabilities = useSafetyCapabilities();
 
   const [file, setFile] = useState<File | null>(null);
   const [fileErrorText, setFileErrorText] = useState<string | null>(null);
@@ -244,11 +247,13 @@ export function UploadPage(): ReactNode {
 
   const handlePreview = (): void => {
     if (!intakeReady) return;
+    if (!capabilities.canPreview) return;
     runPreview(false);
   };
 
   const handleCommit = (): void => {
     if (!intakeReady) return;
+    if (!capabilities.canIngest) return;
     if (!preview.data?.commitReadiness) return;
     if (!previewConfirmed) return;
     if (lastPreviewSignature !== intakeSignature) return;
@@ -416,8 +421,20 @@ export function UploadPage(): ReactNode {
     },
   ];
 
-  const previewDisabled = !intakeReady || preview.isPending || ingestion.isPending;
-  const commitDisabled = !commitReady || ingestion.isPending;
+  const previewDisabled =
+    !intakeReady ||
+    preview.isPending ||
+    ingestion.isPending ||
+    !capabilities.canPreview;
+  const commitDisabled =
+    !commitReady || ingestion.isPending || !capabilities.canIngest;
+  const previewCapabilityReason = !capabilities.canPreview
+    ? safetyCapabilityReason('canPreview')
+    : null;
+  const commitCapabilityReason =
+    capabilities.canPreview && !capabilities.canIngest
+      ? safetyCapabilityReason('canIngest')
+      : null;
 
   const mismatch = ingestion.data?.metadataMismatch;
   const previewFailure = uploadFailureMessage(
@@ -689,6 +706,20 @@ export function UploadPage(): ReactNode {
                   onChange={(checked) => setPreviewConfirmed(checked)}
                 />
               </div>
+              {previewCapabilityReason && (
+                <HbcTypography intent="bodySmall">
+                  <span data-safety-ui="upload-preview-capability-blocked">
+                    {previewCapabilityReason}
+                  </span>
+                </HbcTypography>
+              )}
+              {commitCapabilityReason && (
+                <HbcTypography intent="bodySmall">
+                  <span data-safety-ui="upload-commit-capability-blocked">
+                    {commitCapabilityReason}
+                  </span>
+                </HbcTypography>
+              )}
               {previewBlockedReason && !ingestion.isPending && !preview.data && (
                 <HbcTypography intent="bodySmall">
                   {previewBlockedReason}

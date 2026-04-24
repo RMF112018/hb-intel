@@ -16,6 +16,14 @@ export interface SafetyReviewActionsProps {
    * to flow through the governed supersede dialog.
    */
   entryErrorClass?: string;
+  /**
+   * Frontend capability gate. When true, the current user is not authorized
+   * to replay review-queue runs per the backend SAFETY_ACTION_ROLES matrix;
+   * retry and supersede are suppressed and the accompanying reason text is
+   * surfaced in place. Backend remains the final authority for 403 denial.
+   */
+  disabledByCapability?: boolean;
+  capabilityReason?: string;
 }
 
 type RetryPosture = 'retryable' | 'needs-workbook-fix' | 'needs-period-fix' | 'needs-project-fix' | 'replay-source-missing';
@@ -71,18 +79,32 @@ export function SafetyReviewActions({
   isPending,
   onRetry,
   entryErrorClass,
+  disabledByCapability = false,
+  capabilityReason,
 }: SafetyReviewActionsProps): ReactNode {
   const [showSupersedeConfirm, setShowSupersedeConfirm] = useState(false);
   const posture = retryPostureFor(entryErrorClass);
-  const canPlainRetry = posture === 'retryable' && !isDuplicate;
+  const canPlainRetry = posture === 'retryable' && !isDuplicate && !disabledByCapability;
 
   const handleSupersedeConfirm = (): void => {
+    if (disabledByCapability) return;
     setShowSupersedeConfirm(false);
     onRetry(runId, true);
   };
 
   return (
     <div className="safety-review-actions" data-safety-ui="review-actions">
+      {disabledByCapability && (
+        <div
+          className="safety-review-actions__guidance"
+          data-safety-ui="review-capability-blocked"
+        >
+          <HbcTypography intent="bodySmall">
+            {capabilityReason ??
+              'Your account is not authorized to replay review-queue runs.'}
+          </HbcTypography>
+        </div>
+      )}
       {canPlainRetry && (
         <HbcButton
           variant="secondary"
@@ -92,7 +114,7 @@ export function SafetyReviewActions({
           {isPending ? 'Replaying…' : 'Retry'}
         </HbcButton>
       )}
-      {!canPlainRetry && !isDuplicate && (
+      {!canPlainRetry && !isDuplicate && !disabledByCapability && (
         <div
           className="safety-review-actions__guidance"
           data-safety-ui="review-retry-guidance"
@@ -101,7 +123,7 @@ export function SafetyReviewActions({
           <HbcTypography intent="bodySmall">{guidanceFor(posture)}</HbcTypography>
         </div>
       )}
-      {isDuplicate && (
+      {isDuplicate && !disabledByCapability && (
         <>
           <HbcButton
             variant="secondary"

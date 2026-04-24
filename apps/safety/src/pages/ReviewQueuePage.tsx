@@ -6,7 +6,12 @@ import {
   WorkspacePageShell,
 } from '@hbc/ui-kit';
 import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
-import { useReplayIngestion, useReviewQueue } from '@hbc/features-safety';
+import {
+  safetyCapabilityReason,
+  useReplayIngestion,
+  useReviewQueue,
+  useSafetyCapabilities,
+} from '@hbc/features-safety';
 import type { ReviewQueueEntry } from '@hbc/features-safety';
 import {
   SafetyMasthead,
@@ -68,6 +73,11 @@ export function ReviewQueuePage(): ReactNode {
   const reviewQueue = useReviewQueue();
   const entries = (reviewQueue.data ?? []) as ReviewQueueEntry[];
   const replay = useReplayIngestion();
+  const capabilities = useSafetyCapabilities();
+  const replayDisabledByCapability = !capabilities.canReplay;
+  const replayCapabilityReason = replayDisabledByCapability
+    ? safetyCapabilityReason('canReplay')
+    : undefined;
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [lastReplaySummary, setLastReplaySummary] = useState<string | null>(null);
   const [replayErrorObservedAt, setReplayErrorObservedAt] = useState<Date | null>(null);
@@ -89,6 +99,7 @@ export function ReviewQueuePage(): ReactNode {
   }, [replay.error, replayErrorObservedAt]);
 
   const handleRetry = (runId: string, supersedePrior: boolean): void => {
+    if (replayDisabledByCapability) return;
     replayAbortRef.current?.abort();
     const controller = new AbortController();
     replayAbortRef.current = controller;
@@ -181,11 +192,13 @@ export function ReviewQueuePage(): ReactNode {
             isPending={pendingRunId === row.original.run.id && replay.isPending}
             onRetry={handleRetry}
             entryErrorClass={row.original.run.errorClass}
+            disabledByCapability={replayDisabledByCapability}
+            capabilityReason={replayCapabilityReason}
           />
         ),
       },
     ],
-    [pendingRunId, replay.isPending],
+    [pendingRunId, replay.isPending, replayDisabledByCapability, replayCapabilityReason],
   );
 
   const isClean = queueState === 'clean';
@@ -315,6 +328,8 @@ export function ReviewQueuePage(): ReactNode {
                           pendingRunId === entry.run.id && replay.isPending
                         }
                         onRetry={handleRetry}
+                        disabledByCapability={replayDisabledByCapability}
+                        capabilityReason={replayCapabilityReason}
                       />
                     </div>
                   ))}
