@@ -1,31 +1,25 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-safety",
-    "id": "e78a16be-7853-40a4-be18-3b01b3ca405d",
-    "version": "1.2.33.0",
+    "name": "hb-intel-foleon",
+    "id": "c23635f5-ab4d-44c2-96b5-2a2c90f4afc0",
+    "version": "1.0.8.0",
     "includeClientSideAssets": true,
-    "skipFeatureDeployment": true,
+    "skipFeatureDeployment": false,
     "isDomainIsolated": false,
-    "webApiPermissionRequests": [
-      {
-        "resource": "hb-intel-api-production",
-        "scope": "access_as_user"
-      }
-    ],
     "developer": {
-      "name": "HB Caldwell",
-      "websiteUrl": "https://hbcaldwell.com",
+      "name": "Hedrick Brothers",
+      "websiteUrl": "https://hedrickbrothers.com",
       "privacyUrl": "",
       "termsOfUseUrl": "",
       "mpnId": ""
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Safety Record Keeping"
+        "default": "HB Intel Foleon Publications"
       },
       "longDescription": {
-        "default": "HB Intel Safety Record Keeping — governed checklist upload, parsing, scoring, and structured safety records."
+        "default": "HB Intel Foleon Publications — governed discovery, reader, and archive surface for Marketing's Foleon project highlights and newsletters inside SharePoint. Provisions the four governed Foleon lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs) when installed on the target site."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -33,17 +27,28 @@
     },
     "features": [
       {
-        "title": "hb-intel-safety Feature",
-        "description": "Deploys HB Intel Safety Record Keeping webpart assets.",
-        "id": "2673ffd9-9581-4cdb-9261-7b8bfb604baa",
-        "version": "1.2.33.0",
+        "title": "hb-intel-foleon Feature",
+        "description": "Deploys HB Intel Foleon Publications webpart assets and provisions the four governed Foleon SharePoint lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs).",
+        "id": "ae66c036-8036-4f10-bb63-0d75107e7ce9",
+        "version": "1.0.8.0",
+        "assets": {
+          "elementManifests": [
+            "elements.xml"
+          ],
+          "elementFiles": [
+            "schema-content-registry.xml",
+            "schema-homepage-placements.xml",
+            "schema-interaction-events.xml",
+            "schema-sync-runs.xml"
+          ]
+        },
         "componentIds": [
-          "ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e"
+          "2160edb3-675e-4451-92bb-8345f9d1c71e"
         ]
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-safety.sppkg"
+    "zippedPackage": "solution/hb-intel-foleon.sppkg"
   }
 }
