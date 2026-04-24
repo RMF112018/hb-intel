@@ -20,6 +20,16 @@ import type {
   FoleonValidationResult,
 } from './foleon-types.js';
 
+/** Normalized row produced from heterogeneous Foleon catalog payloads (docs/projects APIs). */
+export interface NormalizedFoleonApiDocument {
+  readonly foleonDocId: number;
+  readonly title: string;
+  readonly publishedUrl?: string;
+  readonly embedUrl?: string;
+  readonly foleonUid?: string;
+  readonly identifier?: string;
+}
+
 export class FoleonServiceError extends Error {
   readonly status: number;
   readonly code: string;
@@ -320,19 +330,43 @@ export class FoleonService implements IFoleonService {
         headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
       });
       if (!response.ok) {
+        const errText = await response.text();
         throw new FoleonServiceError({
           status: 502,
           code: 'FOLEON_SYNC_FAILED',
           message: `Foleon ${runType} API returned ${response.status}.`,
           retryable: response.status >= 500,
+          details: { body: errText.slice(0, 800) },
         });
       }
       const body = await response.json() as { data?: unknown[]; items?: unknown[] };
       const items = Array.isArray(body.data) ? body.data : Array.isArray(body.items) ? body.items : [];
+      const normalized = items
+        .map((raw) => normalizeFoleonApiDocument(raw))
+        .filter((doc): doc is NormalizedFoleonApiDocument => doc !== null);
+      const upsert =
+        normalized.length > 0
+          ? await this.upsertRegistryRowsFromNormalized(normalized, correlationId)
+          : { created: 0, updated: 0, failed: 0, errors: [] as ReadonlyArray<{ readonly key: string; readonly message: string }> };
+      const unrecognized = items.length - normalized.length;
+      const partial =
+        upsert.failed > 0 || (items.length > 0 && normalized.length === 0);
       const run = makeRun(runType, correlationId, requestedBy, {
-        status: 'Succeeded',
-        message: `Synced ${items.length} Foleon ${runType.toLowerCase()} through backend OAuth.`,
+        status: partial && upsert.created + upsert.updated === 0 ? 'Failed' : partial ? 'Partial' : 'Succeeded',
+        message:
+          normalized.length === 0 && items.length > 0
+            ? `Foleon ${runType} payload contained ${items.length} entries but none matched the governed document shape.`
+            : `Synced ${items.length} Foleon ${runType.toLowerCase()} through backend OAuth (${upsert.created} created, ${upsert.updated} updated, ${upsert.failed} failed${unrecognized ? `, ${unrecognized} unrecognized` : ''}).`,
         itemsScanned: items.length,
+        itemsCreated: upsert.created,
+        itemsUpdated: upsert.updated,
+        itemsFailed: upsert.failed + unrecognized,
+        failedItems: [
+          ...upsert.errors,
+          ...(unrecognized > 0
+            ? [{ key: 'unrecognized', message: `${unrecognized} payload rows could not be mapped to Foleon Doc ID + title.` }]
+            : []),
+        ],
       });
       await this.writeSyncRun(run);
       return run;
@@ -362,15 +396,33 @@ export class FoleonService implements IFoleonService {
       },
       body,
     });
+    const raw = await response.text();
     if (!response.ok) {
+      let oauthHint = raw.slice(0, 400);
+      try {
+        const errJson = JSON.parse(raw) as { error?: string; error_description?: string };
+        oauthHint = errJson.error_description ?? errJson.error ?? oauthHint;
+      } catch {
+        // keep text slice
+      }
       throw new FoleonServiceError({
         status: 502,
         code: 'FOLEON_SYNC_FAILED',
-        message: `Foleon OAuth token request returned ${response.status}.`,
+        message: `Foleon OAuth token request returned ${response.status}: ${oauthHint}`,
         retryable: response.status >= 500,
+        details: { oauthStatus: response.status },
       });
     }
-    const json = await response.json() as { access_token?: string };
+    let json: { access_token?: string };
+    try {
+      json = JSON.parse(raw) as { access_token?: string };
+    } catch {
+      throw new FoleonServiceError({
+        status: 502,
+        code: 'FOLEON_SYNC_FAILED',
+        message: 'Foleon OAuth response was not valid JSON.',
+      });
+    }
     if (!json.access_token) {
       throw new FoleonServiceError({
         status: 502,
@@ -446,13 +498,14 @@ export class FoleonService implements IFoleonService {
       body: init?.body,
     });
     if (!response.ok) {
+      const graphBody = await response.text();
+      const isConflict = response.status === 412 || response.status === 409;
       throw new FoleonServiceError({
-        status: response.status === 412 || response.status === 409 ? 409 : 502,
-        code: response.status === 412 || response.status === 409
-          ? 'FOLEON_GRAPH_CONFLICT'
-          : 'FOLEON_GRAPH_WRITE_FAILED',
+        status: isConflict ? 409 : response.status >= 400 && response.status < 500 ? response.status : 502,
+        code: isConflict ? 'FOLEON_GRAPH_CONFLICT' : 'FOLEON_GRAPH_WRITE_FAILED',
         message: `Microsoft Graph returned ${response.status} for Foleon list operation.`,
         retryable: response.status >= 500,
+        details: { graphStatus: response.status, graphBody: graphBody.slice(0, 800) },
       });
     }
     return response;
@@ -504,6 +557,81 @@ export class FoleonService implements IFoleonService {
   private requireSyncRunsListId(): string {
     if (!this.config.syncRunsListId) throw missingConfig('HB_FOLEON_SYNC_RUNS_LIST_ID');
     return this.config.syncRunsListId;
+  }
+
+  private async upsertRegistryRowsFromNormalized(
+    docs: ReadonlyArray<NormalizedFoleonApiDocument>,
+    correlationId: string,
+  ): Promise<{
+    created: number;
+    updated: number;
+    failed: number;
+    errors: ReadonlyArray<{ readonly key: string; readonly message: string }>;
+  }> {
+    const listId = this.requireContentListId();
+    const existing = await this.readList(listId, 'fields');
+    const byDocId = new Map<number, GraphListItem>();
+    for (const row of existing) {
+      const docId = readNumber(row.fields?.FoleonDocId);
+      if (docId) byDocId.set(docId, row);
+    }
+    let created = 0;
+    let updated = 0;
+    let failed = 0;
+    const errors: Array<{ key: string; message: string }> = [];
+    for (const doc of docs) {
+      try {
+        const current = byDocId.get(doc.foleonDocId);
+        const mutationRequest: FoleonContentMutationRequest = {
+          title: doc.title,
+          foleonDocId: doc.foleonDocId,
+          contentTypeKey: 'Other',
+          publishStatus: 'Draft',
+          isVisible: false,
+          isHomepageEligible: false,
+          publishedUrl: doc.publishedUrl,
+          embedUrl: doc.embedUrl ?? doc.publishedUrl,
+          summary: `Imported from Foleon API sync (${correlationId}).`,
+          openMode: 'Inline Reader',
+          allowEmbed: true,
+          requiresExternalOpen: false,
+        };
+        const validation = validateContentMutation(mutationRequest, correlationId);
+        if (!current) {
+          const fields = {
+            ...contentFields(mutationRequest, validation),
+            SyncSource: 'Foleon API',
+            LastSynced: new Date().toISOString(),
+            ...(doc.foleonUid ? { FoleonDocUid: doc.foleonUid } : {}),
+            ...(doc.identifier ? { FoleonIdentifier: doc.identifier } : {}),
+          };
+          const item = await this.createItem(listId, fields);
+          byDocId.set(doc.foleonDocId, item);
+          created += 1;
+        } else {
+          const detail = toContentDetail(current);
+          const patch: Record<string, unknown> = {
+            Title: doc.title,
+            LastSynced: new Date().toISOString(),
+            SyncSource: 'Foleon API',
+            ...(doc.publishedUrl ? { PublishedUrl: doc.publishedUrl } : {}),
+            ...(doc.embedUrl ? { EmbedUrl: doc.embedUrl } : {}),
+            ...(doc.foleonUid ? { FoleonDocUid: doc.foleonUid } : {}),
+            ...(doc.identifier ? { FoleonIdentifier: doc.identifier } : {}),
+          };
+          const item = await this.updateItem(listId, current.id, patch, detail.etag);
+          byDocId.set(doc.foleonDocId, item);
+          updated += 1;
+        }
+      } catch (err) {
+        failed += 1;
+        errors.push({
+          key: `doc:${doc.foleonDocId}`,
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+    return { created, updated, failed, errors };
   }
 }
 
@@ -585,7 +713,7 @@ export class MockFoleonService implements IFoleonService {
     return { ...next, publishedOn: new Date().toISOString() };
   }
 
-  async suppressContent(id: string): Promise<FoleonContentDetailDto> {
+  async suppressContent(id: string, _correlationId: string): Promise<FoleonContentDetailDto> {
     const record = await this.getContent(id);
     const next = { ...record, publishStatus: 'Suppressed', isVisible: false, isHomepageEligible: false };
     this.content.set(id, next);
@@ -621,7 +749,7 @@ export class MockFoleonService implements IFoleonService {
     return placement;
   }
 
-  async deletePlacement(id: string): Promise<FoleonPlacementDto> {
+  async deletePlacement(id: string, _correlationId: string): Promise<FoleonPlacementDto> {
     const placement = this.placements.get(id);
     if (!placement) throw notFound('placement', id);
     const next = { ...placement, isActive: false };
@@ -1046,7 +1174,12 @@ function readString(value: unknown): string | undefined {
 }
 
 function readNumber(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() && /^-?\d+(\.\d+)?$/.test(value.trim())) {
+    const n = Number.parseFloat(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
 }
 
 function readBoolean(value: unknown): boolean {
@@ -1116,4 +1249,58 @@ function parseFailedItems(value: string): FoleonSyncRunDto['failedItems'] {
   } catch {
     return [];
   }
+}
+
+function pickNumber(...inputs: ReadonlyArray<unknown>): number | undefined {
+  for (const raw of inputs) {
+    if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) return Math.trunc(raw);
+    if (typeof raw === 'string' && /^\d+$/.test(raw.trim())) return Number.parseInt(raw, 10);
+  }
+  return undefined;
+}
+
+function pickString(...inputs: ReadonlyArray<unknown>): string | undefined {
+  for (const raw of inputs) {
+    if (typeof raw === 'string' && raw.trim()) return raw.trim();
+  }
+  return undefined;
+}
+
+function firstHttpsUrl(...inputs: ReadonlyArray<unknown>): string | undefined {
+  for (const raw of inputs) {
+    const s = pickString(raw);
+    if (s?.startsWith('https://')) return s;
+  }
+  return undefined;
+}
+
+/**
+ * Maps heterogeneous Foleon API rows to governed registry identifiers.
+ * Exported for unit tests — production sync calls this internally.
+ */
+export function normalizeFoleonApiDocument(raw: unknown): NormalizedFoleonApiDocument | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const nestedDoc =
+    typeof o.document === 'object' && o.document !== null ? (o.document as Record<string, unknown>) : undefined;
+  const docId = pickNumber(
+    o.id,
+    o.document_id,
+    o.documentId,
+    o.doc_id,
+    o.docId,
+    nestedDoc ? pickNumber(nestedDoc.id) : undefined,
+  );
+  const title =
+    pickString(o.title, o.name, o.display_name, o.displayName, o.label, o.slug)
+    ?? (docId ? `Foleon document ${docId}` : undefined);
+  if (!docId || !title) return null;
+  return {
+    foleonDocId: docId,
+    title,
+    publishedUrl: firstHttpsUrl(o.url, o.public_url, o.published_url, o.share_url, o.canonical_url),
+    embedUrl: firstHttpsUrl(o.embed_url, o.embedUrl, o.viewer_url),
+    foleonUid: pickString(o.uid, o.uuid, o.document_uid, o.documentUid),
+    identifier: pickString(o.identifier, o.slug),
+  };
 }

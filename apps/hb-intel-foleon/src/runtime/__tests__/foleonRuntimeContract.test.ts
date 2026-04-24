@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resolveFoleonRuntimeContract } from '../foleonRuntimeContract.js';
+import { FOLEON_PACKAGE_VERSION } from '../../webparts/foleon/runtimeContract.js';
 
 describe('resolveFoleonRuntimeContract', () => {
   it('returns a mock-mode contract without SPFx context', () => {
@@ -82,7 +83,7 @@ describe('resolveFoleonRuntimeContract', () => {
         contentRegistryListId: '11111111-1111-1111-1111-111111111111',
         placementsListId: '22222222-2222-2222-2222-222222222222',
         expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-        expectedPackageVersion: '1.0.9.0',
+        expectedPackageVersion: FOLEON_PACKAGE_VERSION,
       },
     });
     expect(contract.governed.manifestIdMatchesExpected).toBe(true);

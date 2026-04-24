@@ -3,7 +3,7 @@
   "id": "2160edb3-675e-4451-92bb-8345f9d1c71e",
   "alias": "FoleonWebPart",
   "componentType": "WebPart",
-  "version": "1.0.9.0",
+  "version": "1.0.10.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [

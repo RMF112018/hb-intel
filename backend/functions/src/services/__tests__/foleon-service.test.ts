@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { MockFoleonService, validateContentMutation } from '../foleon-service.js';
+import { MockFoleonService, normalizeFoleonApiDocument, validateContentMutation } from '../foleon-service.js';
+
+describe('normalizeFoleonApiDocument', () => {
+  it('maps common Foleon doc shapes', () => {
+    expect(
+      normalizeFoleonApiDocument({
+        id: 4242,
+        title: 'Quarterly update',
+        url: 'https://viewer.us.foleon.com/acme/q1',
+      }),
+    ).toMatchObject({ foleonDocId: 4242, title: 'Quarterly update', publishedUrl: expect.stringContaining('https://') });
+  });
+
+  it('returns null when doc id cannot be resolved', () => {
+    expect(normalizeFoleonApiDocument({ title: 'No id' })).toBeNull();
+  });
+});
 
 describe('Foleon service validation', () => {
   it('blocks publish-ready content without a display URL', () => {

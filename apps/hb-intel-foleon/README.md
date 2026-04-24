@@ -45,7 +45,7 @@ npx tsx tools/build-spfx-package.ts --domain hb-intel-foleon
 
 ### Site-installed provisioning (required)
 
-Since 1.0.9.0 the package ships **Feature Framework provisioning
+Since 1.0.10.0 the package ships **Feature Framework provisioning
 assets** that create four SharePoint lists when installed:
 
 - `HB_FoleonContentRegistry`

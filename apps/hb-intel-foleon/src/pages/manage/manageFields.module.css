@@ -1,0 +1,174 @@
+.fieldLabel {
+  display: block;
+  font-weight: 700;
+}
+
+.fieldInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid hsl(205 18% 18% / 0.16);
+  border-radius: var(--foleon-manage-radius-sm, 12px);
+  padding: 10px 12px;
+  background: hsl(0 0% 100%);
+  color: inherit;
+  font: inherit;
+}
+
+.fieldInput:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent, hsl(186 94% 22%));
+  outline-offset: 1px;
+}
+
+.inlineHelp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--foleon-manage-space-xs, 8px);
+  font-weight: 700;
+}
+
+.sectionTitle {
+  margin-top: 0;
+}
+
+.flexToolbar {
+  display: flex;
+  gap: var(--foleon-manage-space-xs, 8px);
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.gridFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--foleon-manage-space-sm, 12px);
+}
+
+.gridPlacement {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--foleon-manage-space-sm, 12px);
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--foleon-manage-space-sm, 12px);
+}
+
+.metricCard {
+  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
+  border-radius: var(--foleon-manage-radius-lg, 22px);
+  background: var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
+  box-shadow: 0 24px 70px var(--foleon-manage-shadow, hsl(200 45% 20% / 0.12));
+  padding: var(--foleon-manage-space-md, 16px);
+}
+
+.metricToneGreen {
+  border-top: 5px solid var(--foleon-manage-success, hsl(152 48% 32%));
+}
+
+.metricToneRed {
+  border-top: 5px solid var(--foleon-manage-danger, hsl(8 58% 40%));
+}
+
+.metricToneBlue {
+  border-top: 5px solid var(--foleon-manage-accent, hsl(186 94% 22%));
+}
+
+.metricToneGold {
+  border-top: 5px solid var(--foleon-manage-warning, hsl(40 72% 48%));
+}
+
+.metricKicker {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--foleon-manage-fg-muted, hsl(205 12% 38%));
+}
+
+.metricValue {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.placementCard {
+  padding: var(--foleon-manage-space-sm, 12px);
+  border-radius: var(--foleon-manage-radius-md, 16px);
+  background: var(--foleon-manage-bg-accent, hsl(168 45% 94%));
+}
+
+.statusPill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.pillValid {
+  background: var(--foleon-manage-success, hsl(152 48% 32%));
+  color: hsl(0 0% 100%);
+}
+
+.pillBlocked {
+  background: var(--foleon-manage-danger, hsl(8 58% 40%));
+  color: hsl(0 0% 100%);
+}
+
+.pillWarning {
+  background: var(--foleon-manage-warning, hsl(40 72% 48%));
+  color: var(--foleon-manage-fg, hsl(205 32% 14%));
+}
+
+.pillUnknown {
+  background: hsl(205 12% 38%);
+  color: hsl(0 0% 100%);
+}
+
+.dirtyBanner {
+  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
+  border-radius: var(--foleon-manage-radius-lg, 22px);
+  background: var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
+  box-shadow: 0 24px 70px var(--foleon-manage-shadow, hsl(200 45% 20% / 0.12));
+  padding: var(--foleon-manage-space-sm, 12px) var(--foleon-manage-space-md, 16px);
+  margin-bottom: var(--foleon-manage-space-sm, 12px);
+  border-left: 4px solid var(--foleon-manage-warning, hsl(40 72% 48%));
+  font-size: 14px;
+}
+
+.validationOk {
+  margin: 8px 0;
+  color: var(--foleon-manage-success, hsl(152 48% 32%));
+}
+
+.validationBad {
+  margin: 8px 0;
+  color: var(--foleon-manage-danger, hsl(8 58% 40%));
+}
+
+.editorSection {
+  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
+  border-radius: var(--foleon-manage-radius-lg, 22px);
+  background: var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
+  box-shadow: 0 24px 70px var(--foleon-manage-shadow, hsl(200 45% 20% / 0.12));
+  padding: 18px;
+}
+
+.syncRunRow {
+  padding: 10px 0;
+  border-top: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
+}
+
+.syncRunRow:first-of-type {
+  border-top: none;
+}
+
+.metaMuted {
+  font-size: 13px;
+  color: var(--foleon-manage-fg-muted, hsl(205 12% 38%));
+}

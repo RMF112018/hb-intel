@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buildApiUrl, createFoleonManagementApi } from '../FoleonManagementApi.js';
+import {
+  buildApiUrl,
+  createFoleonManagementApi,
+  FoleonManagementApiError,
+} from '../FoleonManagementApi.js';
 import { createFoleonOriginPolicy } from '../FoleonOriginPolicy.js';
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from '../../webparts/foleon/runtimeContract.js';
@@ -55,7 +59,7 @@ describe('FoleonManagementApi', () => {
     expect(headers.get('Authorization')).toBe('Bearer token-123');
   });
 
-  it('surfaces backend correlation IDs on API errors', async () => {
+  it('surfaces backend correlation IDs on Graph conflicts', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 409,
@@ -67,10 +71,13 @@ describe('FoleonManagementApi', () => {
     } as Response);
     const api = createFoleonManagementApi(contract());
 
-    await expect(api.listContent()).rejects.toMatchObject({
-      code: 'FOLEON_GRAPH_CONFLICT',
-      requestId: 'corr-409',
-      status: 409,
-    });
+    try {
+      await api.listContent();
+      expect.fail('expected throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(FoleonManagementApiError);
+      expect((err as FoleonManagementApiError).isGraphConflict).toBe(true);
+      expect((err as FoleonManagementApiError).requestId).toBe('corr-409');
+    }
   });
 });

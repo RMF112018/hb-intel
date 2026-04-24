@@ -24,6 +24,11 @@ export class FoleonManagementApiError extends Error {
     this.requestId = error.requestId;
     this.details = error.details;
   }
+
+  /** Microsoft Graph eTag / concurrency conflict surfaced by Functions routes. */
+  get isGraphConflict(): boolean {
+    return this.status === 409 || this.code === 'FOLEON_GRAPH_CONFLICT';
+  }
 }
 
 export interface FoleonManagementApi {

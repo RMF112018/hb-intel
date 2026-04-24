@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mount, unmount, type IFoleonRuntimeBindingProof } from '../mount.js';
+import { FOLEON_PACKAGE_VERSION } from '../webparts/foleon/runtimeContract.js';
 
 const TEST_CONTENT_REGISTRY = '11111111-1111-1111-1111-111111111111';
 const TEST_PLACEMENTS = '22222222-2222-2222-2222-222222222222';
@@ -56,12 +57,12 @@ describe('runtime binding proof (redacted)', () => {
       foleonReaderRoutePath: TEST_READER_ROUTE,
       foleonDocId: TEST_DOC_ID,
       expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-      expectedPackageVersion: '1.0.9.0',
+      expectedPackageVersion: FOLEON_PACKAGE_VERSION,
     });
     const proof = readProof();
     expect(proof).toBeDefined();
     expect(proof?.manifestId).toBe('2160edb3-675e-4451-92bb-8345f9d1c71e');
-    expect(proof?.packageVersion).toBe('1.0.9.0');
+    expect(proof?.packageVersion).toBe(FOLEON_PACKAGE_VERSION);
     expect(proof?.bundleMarker).toBe('__hbIntel_foleon');
   });
 
