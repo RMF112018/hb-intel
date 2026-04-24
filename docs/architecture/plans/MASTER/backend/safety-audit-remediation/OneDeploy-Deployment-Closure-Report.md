@@ -472,6 +472,67 @@ Function App `hb-intel-function-app` → **Diagnose and solve problems** → sea
 
 ---
 
+## GitHub Actions Deployment Attempt — Run 24899925568
+
+| Field | Value |
+| ----- | ----- |
+| Workflow | Build and deploy Node.js project to Azure Function App - hb-intel-function-app |
+| Run URL | https://github.com/RMF112018/hb-intel/actions/runs/24899925568 |
+| Status | `completed` |
+| Conclusion | **`failure`** |
+| Head SHA | `a124a8de926867baade246bffe15092c70f32a8d` (`ci: add safety probe gate to function deployment`) |
+| Created / updated (UTC) | `2026-04-24T16:19:47Z` / `2026-04-24T16:20:23Z` |
+| Log capture | `.tmp/functions-validation/gha-run-24899925568.log`, `.tmp/functions-validation/gha-run-24899925568-meta.json` |
+
+### Job outcome
+
+- **`build`:** `failure` — failed at step **Type-check @hbc/functions** (`pnpm --filter @hbc/functions check-types`). Subsequent build steps (unit test, package artifact, manifest read, upload artifact) were **skipped**.
+- **`deploy`:** **`skipped`** — never started. **Azure/functions-action** did not run; no OneDeploy/SCM path was exercised for this run.
+
+### Root cause (classification **D** — failed before deployment)
+
+`tsc --noEmit` on a clean Linux runner reported widespread **`TS2307` Cannot find module** for workspace packages (`@hbc/models`, `@hbc/models/admin-control-plane`, `@hbc/acknowledgment/server`, `@hbc/notification-intelligence`, etc.) plus one **`TS2339`** in `safety-record-keeping-list-definitions.ts`. The same `check-types` at the same commit **passes locally** after a normal dev install, which indicates **CI lacked built `dist/` outputs for upstream workspace packages** (Linux clean workspace), not a missing commit of the probe gate.
+
+**Step 4 template (filled):**
+
+```text
+Workflow failed before deployment.
+Failing step: Type-check @hbc/functions
+Root cause: Clean GHA workspace had not built upstream workspace packages; tsc could not resolve workspace package entrypoints/types from source alone.
+Required fix: Run a turbo (or equivalent) build of @hbc/functions dependency graph before check-types in the build job.
+Files likely affected: .github/workflows/main_hb-intel-function-app.yml
+Can fix safely now? yes
+```
+
+**Remediation applied (narrow CI fix):** insert **Build upstream packages for @hbc/functions** — `pnpm turbo run build --filter="...@hbc/functions"` — between `pnpm install --frozen-lockfile` and `pnpm --filter @hbc/functions check-types` in [`.github/workflows/main_hb-intel-function-app.yml`](../../.github/workflows/main_hb-intel-function-app.yml). Landed on `main` with subject **`ci: build workspace deps before functions typecheck on GHA`** (search `git log` on `main` for that title; SHA varies if amended).
+
+### Deploy / parity / probe (this run)
+
+| Gate | Result |
+| ---- | ------ |
+| Azure/functions-action deployment | **N/A** (job skipped) |
+| Artifact manifest / zip from CI | **N/A** (packaging skipped) |
+| `verify-functions-live-parity.ts` | **N/A** (not run) |
+| `safetyReportingPeriodProbe` in `az functionapp function list` | **N/A** |
+| Probe endpoint HTTP | **N/A** |
+| `/api/health` identity vs CI artifact | **N/A** — and would **not** close deployed-code proof by itself anyway |
+
+### Token / workbook gates (this run)
+
+| Gate | Status |
+| ---- | ------ |
+| Admin `/api/health/ready` with bearer | **Pending** (no deploy; no token run) |
+| Role matrix | **Pending** |
+| Hosted workbook preview | **Pending** (probe not proven live) |
+
+### Verdict for this GitHub Actions run
+
+**Deployment failed before deploy due to workflow/package issue.**
+
+Deployment closure for the Flex host / probe surface **remains blocked** until a **green** Actions run completes **deploy** and the **probe gate** passes.
+
+---
+
 ## Evidence file index (local)
 
 Under `.tmp/functions-validation/`:

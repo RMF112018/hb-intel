@@ -52,6 +52,11 @@ jobs:
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
 
+      # Linux CI starts without pre-built workspace `dist/` outputs. `@hbc/functions`
+      # typecheck resolves peer packages via their build artifacts; build deps first.
+      - name: Build upstream packages for @hbc/functions
+        run: pnpm turbo run build --filter="...@hbc/functions"
+
       - name: Type-check @hbc/functions
         run: pnpm --filter @hbc/functions check-types
 
