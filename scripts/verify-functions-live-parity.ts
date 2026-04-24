@@ -21,6 +21,7 @@ export interface IRouteProbeResult {
   method: 'POST' | 'GET';
   status: number;
   exists: boolean;
+  responseRequestIdPresent: boolean;
 }
 
 export interface IParityEvidence {
@@ -117,6 +118,7 @@ export interface IBuildParityEvidenceInput {
   healthBody: unknown;
   routeStatuses: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
   malformedRouteStatuses: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
+  malformedRouteProbes?: ReadonlyArray<IRouteProbeResult>;
   adminRouteStatuses?: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
   nonAdminRouteStatuses?: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
   healthReadyNoAuthStatus: number;
@@ -277,6 +279,32 @@ async function fetchStatus(url: string, init?: RequestInit): Promise<number> {
   }
 }
 
+async function fetchProbe(
+  url: string,
+  route: string,
+  method: 'POST' | 'GET',
+  init?: RequestInit,
+): Promise<IRouteProbeResult> {
+  try {
+    const response = await fetch(url, init);
+    return {
+      route,
+      method,
+      status: response.status,
+      exists: response.status !== 404 && response.status > 0,
+      responseRequestIdPresent: Boolean(response.headers.get('x-request-id')),
+    };
+  } catch {
+    return {
+      route,
+      method,
+      status: -1,
+      exists: false,
+      responseRequestIdPresent: false,
+    };
+  }
+}
+
 function resolveHostName(cwd: string, appName: string, resourceGroup: string): string {
   const listQuery = `[?name=='${appName}' && resourceGroup=='${resourceGroup}'] | [0].defaultHostName`;
   const fromList = runAz(['functionapp', 'list', '--query', listQuery, '-o', 'tsv'], cwd);
@@ -344,16 +372,20 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     method: item.method,
     status: item.status,
     exists: item.status !== 404 && item.status > 0,
+    responseRequestIdPresent: false,
   }));
   const routeIssues = routes
     .filter((r) => !r.exists)
     .map((r) => `route.missing(${r.method} ${r.route} status=${r.status})`);
-  const malformedRoutes = input.malformedRouteStatuses.map((item) => ({
-    route: item.route,
-    method: item.method,
-    status: item.status,
-    exists: item.status !== 404 && item.status > 0,
-  }));
+  const malformedRoutes = input.malformedRouteProbes
+    ? [...input.malformedRouteProbes]
+    : input.malformedRouteStatuses.map((item) => ({
+      route: item.route,
+      method: item.method,
+      status: item.status,
+      exists: item.status !== 404 && item.status > 0,
+      responseRequestIdPresent: false,
+    }));
   const malformedRouteIssues = malformedRoutes
     .filter((r) => r.status !== 401)
     .map((r) => `command_auth.malformed_bearer.unexpected_status(${r.route} expected=401,live=${r.status})`);
@@ -362,6 +394,7 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     method: item.method,
     status: item.status,
     exists: item.status !== 404 && item.status > 0,
+    responseRequestIdPresent: false,
   }));
   const adminRouteIssues = adminRoutes
     .filter((r) => [401, 403, 404, -1].includes(r.status))
@@ -371,10 +404,30 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     method: item.method,
     status: item.status,
     exists: item.status !== 404 && item.status > 0,
+    responseRequestIdPresent: false,
   }));
+  const previewNoAuth = routes.find((r) => r.route === '/api/safety-records/ingest/preview');
+  const noAuthRouteIssues = routeIssues.slice();
+  if (previewNoAuth && previewNoAuth.status !== 401) {
+    noAuthRouteIssues.push(
+      `command_auth.no_auth.preview.unexpected_status(expected=401,live=${previewNoAuth.status})`,
+    );
+  }
+
+  const previewMalformed = malformedRoutes.find((r) => r.route === '/api/safety-records/ingest/preview');
+  if (input.malformedRouteProbes && previewMalformed && !previewMalformed.responseRequestIdPresent) {
+    malformedRouteIssues.push('command_auth.malformed_bearer.preview.missing_x_request_id');
+  }
+
   const nonAdminRouteIssues = nonAdminRoutes
     .filter((r) => [401, 404, -1].includes(r.status))
     .map((r) => `command_auth.non_admin_bearer.unexpected_status(${r.route} expected!=401|404,live=${r.status})`);
+  const provisioningNonAdmin = nonAdminRoutes.find((r) => r.route === '/api/safety-records/provision-sharepoint');
+  if (provisioningNonAdmin && provisioningNonAdmin.status !== 403) {
+    nonAdminRouteIssues.push(
+      `command_auth.non_admin_bearer.provisioning.unexpected_status(expected=403,live=${provisioningNonAdmin.status})`,
+    );
+  }
 
   const readyExists = input.healthReadyNoAuthStatus !== 404 && input.healthReadyNoAuthStatus > 0;
   const readyIssues = readyExists
@@ -465,6 +518,7 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
   const overallPass =
     identityIssues.length === 0 &&
     routeIssues.length === 0 &&
+    noAuthRouteIssues.length === 0 &&
     readyIssues.length === 0 &&
     readinessNoAuthIssues.length === 0 &&
     readinessMalformedIssues.length === 0 &&
@@ -497,7 +551,7 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     commandAuthTruth: {
       noAuth: {
         routes,
-        issues: routeIssues,
+        issues: noAuthRouteIssues,
       },
       malformedBearer: {
         routes: malformedRoutes,
@@ -597,36 +651,63 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
         body: '{}',
       }),
     },
-  ];
-  const malformedRouteStatuses = [
     {
-      route: '/api/safety-records/ingest',
+      route: '/api/safety-records/provision-sharepoint',
       method: 'POST' as const,
-      status: await fetchStatus(`${baseUrl}/api/safety-records/ingest`, {
+      status: await fetchStatus(`${baseUrl}/api/safety-records/provision-sharepoint`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
-        body: '{}',
-      }),
-    },
-    {
-      route: '/api/safety-records/ingest/preview',
-      method: 'POST' as const,
-      status: await fetchStatus(`${baseUrl}/api/safety-records/ingest/preview`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
-        body: '{}',
-      }),
-    },
-    {
-      route: '/api/safety-records/replay',
-      method: 'POST' as const,
-      status: await fetchStatus(`${baseUrl}/api/safety-records/replay`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        headers: { 'Content-Type': 'application/json' },
         body: '{}',
       }),
     },
   ];
+  const malformedRouteProbes = await Promise.all([
+    fetchProbe(
+      `${baseUrl}/api/safety-records/ingest`,
+      '/api/safety-records/ingest',
+      'POST',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      },
+    ),
+    fetchProbe(
+      `${baseUrl}/api/safety-records/ingest/preview`,
+      '/api/safety-records/ingest/preview',
+      'POST',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      },
+    ),
+    fetchProbe(
+      `${baseUrl}/api/safety-records/replay`,
+      '/api/safety-records/replay',
+      'POST',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      },
+    ),
+    fetchProbe(
+      `${baseUrl}/api/safety-records/provision-sharepoint`,
+      '/api/safety-records/provision-sharepoint',
+      'POST',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      },
+    ),
+  ]);
+  const malformedRouteStatuses = malformedRouteProbes.map((probe) => ({
+    route: probe.route,
+    method: probe.method,
+    status: probe.status,
+  }));
 
   const healthReadyNoAuthStatus = await fetchStatus(`${baseUrl}/api/health/ready`);
   const healthReadyMalformedAuthStatus = await fetchStatus(`${baseUrl}/api/health/ready`, {
@@ -686,6 +767,15 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
           body: '{}',
         }),
       },
+      {
+        route: '/api/safety-records/provision-sharepoint',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/provision-sharepoint`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.adminToken}` },
+          body: '{}',
+        }),
+      },
     ];
   }
   let healthReadyNonAdminStatus: number | undefined;
@@ -726,6 +816,15 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
           body: '{}',
         }),
       },
+      {
+        route: '/api/safety-records/provision-sharepoint',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/provision-sharepoint`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.nonAdminToken}` },
+          body: '{}',
+        }),
+      },
     ];
   }
 
@@ -755,6 +854,7 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
     healthBody,
     routeStatuses,
     malformedRouteStatuses,
+    malformedRouteProbes,
     adminRouteStatuses,
     nonAdminRouteStatuses,
     healthReadyNoAuthStatus,

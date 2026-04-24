@@ -165,6 +165,21 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('SMOKE_TEST_BASE_URL');
     expect(source).toContain('operationalReadiness');
     expect(source).toContain('401');
+    expect(source).toContain('NON_ADMIN_AUTH_TOKEN');
+    expect(source).toContain('/safety-records/provision-sharepoint');
+    expect(source).toContain('x-request-id');
+  });
+
+  it('live parity verifier enforces safety preview auth and provisioning denial', () => {
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, '../../scripts/verify-functions-live-parity.ts'),
+      'utf-8',
+    );
+    expect(source).toContain('/api/safety-records/ingest/preview');
+    expect(source).toContain('command_auth.no_auth.preview.unexpected_status');
+    expect(source).toContain('/api/safety-records/provision-sharepoint');
+    expect(source).toContain('command_auth.non_admin_bearer.provisioning.unexpected_status');
+    expect(source).toContain('missing_x_request_id');
   });
 
   // --- Gate 10: P8-07 Token validation defers config resolution (lazy init) ---

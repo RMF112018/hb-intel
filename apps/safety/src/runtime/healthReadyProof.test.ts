@@ -39,8 +39,9 @@ describe('healthReadyProof', () => {
       scp: 'access_as_user',
       ver: '1.0',
     });
+    const getToken = vi.fn().mockResolvedValue(token);
     const getTokenProvider = vi.fn().mockResolvedValue({
-      getToken: vi.fn().mockResolvedValue(token),
+      getToken,
     });
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ error: 'Forbidden' }), {
@@ -64,6 +65,9 @@ describe('healthReadyProof', () => {
     expect(result.tokenClassification?.isNonAdmin).toBe(true);
     expect(result.probe?.status).toBe(403);
     expect(result.probe?.statusMatchesExpected).toBe(true);
+    expect(result.probe?.requestId).toBe('req-123');
+    expect(getTokenProvider).toHaveBeenCalledTimes(1);
+    expect(getToken).toHaveBeenCalledWith('api://aud');
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://functions.example.com/api/health/ready',
       expect.objectContaining({

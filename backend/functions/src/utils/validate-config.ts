@@ -186,6 +186,17 @@ function validateRolloutCorsOrigins(value: string): string | null {
   return null;
 }
 
+function parseCorsOrigins(value: string): string[] {
+  return value
+    .split(',')
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0)
+    .map((token) => {
+      const url = new URL(token);
+      return url.origin.toLowerCase();
+    });
+}
+
 const ROLLOUT_POSTURE_REQUIRED: readonly IRolloutPostureCheck[] = [
   { name: 'AZURE_TENANT_ID', description: 'Entra tenant used by MI token acquisition and JWT issuer validation.' },
   { name: 'AZURE_CLIENT_ID', description: 'User-assigned Managed Identity client ID (DefaultAzureCredential target).' },
@@ -251,6 +262,27 @@ export function validateRolloutPostureConfig(): void {
         'Managed Identity remains the runtime auth model; no client secret is introduced.',
       ].join('\n'),
     );
+  }
+
+  const tenantUrl = process.env.SHAREPOINT_TENANT_URL?.trim();
+  const corsRaw = process.env.CORS_ALLOWED_ORIGINS?.trim();
+  if (tenantUrl && corsRaw) {
+    try {
+      const tenantOrigin = new URL(tenantUrl).origin.toLowerCase();
+      const corsOrigins = parseCorsOrigins(corsRaw);
+      if (!corsOrigins.includes(tenantOrigin)) {
+        throw new Error(
+          `[RolloutPosture] CORS_ALLOWED_ORIGINS must include SHAREPOINT_TENANT_URL origin (${tenantOrigin}) for hosted Safety traffic.`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('[RolloutPosture]')) {
+        throw error;
+      }
+      throw new Error(
+        '[RolloutPosture] Unable to validate tenant CORS origin alignment. Verify SHAREPOINT_TENANT_URL and CORS_ALLOWED_ORIGINS are valid origin URLs.',
+      );
+    }
   }
 }
 

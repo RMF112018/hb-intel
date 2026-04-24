@@ -130,6 +130,41 @@ Use when triaging preview/ingest readiness failures for markered templates.
 - `pnpm --filter @hbc/features-safety test -- src/parser/validateTemplate.test.ts src/parser/extractMetadata.test.ts`
   Verifies parser-meta/named-range precedence and that legacy fallback is allowed only for markerless templates.
 
+## Safety Prompt 05 release-proof checks
+
+Use when proving Safety is backend-wired (not just visually rendered) before release.
+
+### Deterministic repo checks (CI/local executable)
+
+- `pnpm --filter @hbc/functions test -- src/test/release-gates.test.ts src/test/infra-readiness.test.ts scripts/verify-functions-live-parity.test.ts`
+  Verifies release gates for route/auth/request-id posture, tenant-origin CORS config assumptions, and parity evidence contract checks.
+- `pnpm --filter @hbc/functions test -- src/test/smoke/post-deploy-smoke.test.ts`
+  Verifies smoke-check definitions for unauthenticated preview `401`, non-admin provisioning denial `403`, and `X-Request-Id` response proof seams.
+- `pnpm --filter @hbc/spfx-safety test -- src/runtime/healthReadyProof.test.ts src/test/safetyWebPartBackendBinding.test.ts src/test/appRuntimeContractGate.test.tsx`
+  Verifies SharePoint fail-closed contract, delegated token acquisition proof seam, and webpart backend property plumbing.
+- `pnpm --filter @hbc/features-safety test -- src/adapters/sharepoint/SafetyBackendCommandClient.test.ts src/hooks/queries.test.tsx`
+  Verifies command-client auth classification + hook wiring to preview/ingest/replay command routes.
+- `npx tsx tools/build-spfx-package.ts --domain safety`
+  Verifies clean package build + artifact freshness (`safety-package-truth-proof.json`).
+
+### Hosted-environment proof required (tenant + Entra context)
+
+These checks are required for release sign-off and are not considered complete by assumption.
+
+- `pnpm exec tsx scripts/verify-functions-live-parity.ts --app-name <function-app> --resource-group <rg> --non-admin-token \"$NON_ADMIN_TOKEN\" --output /tmp/safety-live-parity.json`
+  Required hosted proof:
+  - unauthenticated preview path returns `401`
+  - non-admin delegated preview/ingest are not auth-rejected
+  - non-admin provisioning route is denied (`403`)
+  - malformed preview bearer returns `401` with `X-Request-Id`
+  - health/ready and deploy identity parity remain valid
+- `SMOKE_TEST_BASE_URL=https://<host> NON_ADMIN_AUTH_TOKEN=\"$NON_ADMIN_TOKEN\" pnpm --filter @hbc/functions test -- src/test/smoke/post-deploy-smoke.test.ts`
+  Required hosted proof:
+  - preview unauthenticated rejection (`401`)
+  - delegated non-admin preview/ingest route access posture
+  - provisioning denial for non-admin (`403`)
+  - response `X-Request-Id` presence on safety command routes
+
 ## How to choose the right level
 
 Use the smallest level below that matches the risk:

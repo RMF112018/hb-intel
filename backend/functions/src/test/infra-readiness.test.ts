@@ -53,6 +53,59 @@ describe('P4-05 Infrastructure readiness', () => {
     }
   });
 
+  it('rollout-posture CORS validation rejects missing tenant origin', async () => {
+    const mod = await import('../utils/validate-config.js');
+    const prev = { ...process.env };
+    try {
+      process.env.NODE_ENV = 'production';
+      process.env.HBC_ADAPTER_MODE = 'proxy';
+      process.env.ENVIRONMENT_POSTURE = 'rollout';
+      process.env.AZURE_TENANT_ID = 'tid';
+      process.env.AZURE_CLIENT_ID = 'cid';
+      process.env.API_AUDIENCE = 'api://cid';
+      process.env.AZURE_TABLE_ENDPOINT = 'https://tbl';
+      process.env.APPLICATIONINSIGHTS_CONNECTION_STRING = 'ic=1';
+      process.env.SHAREPOINT_TENANT_URL = 'https://contoso.sharepoint.com';
+      process.env.SHAREPOINT_PROJECTS_SITE_URL = 'https://contoso.sharepoint.com/sites/a';
+      process.env.HBC_FUNCTIONS_BUILD_SHA = 'abc';
+      process.env.HBC_FUNCTIONS_BUILD_VERSION = '0.0.0';
+      process.env.ADMIN_READINESS_APP_ROLE = 'HBIntelAdmin';
+      process.env.CORS_ALLOWED_ORIGINS = 'https://other.sharepoint.com,https://localhost:4321';
+      expect(() => mod.validateRolloutPostureConfig()).toThrow(
+        /must include SHAREPOINT_TENANT_URL origin/i,
+      );
+    } finally {
+      Object.assign(process.env, prev);
+      for (const k of Object.keys(process.env)) if (!(k in prev)) delete process.env[k];
+    }
+  });
+
+  it('rollout-posture CORS validation accepts explicit tenant origin', async () => {
+    const mod = await import('../utils/validate-config.js');
+    const prev = { ...process.env };
+    try {
+      process.env.NODE_ENV = 'production';
+      process.env.HBC_ADAPTER_MODE = 'proxy';
+      process.env.ENVIRONMENT_POSTURE = 'rollout';
+      process.env.AZURE_TENANT_ID = 'tid';
+      process.env.AZURE_CLIENT_ID = 'cid';
+      process.env.API_AUDIENCE = 'api://cid';
+      process.env.AZURE_TABLE_ENDPOINT = 'https://tbl';
+      process.env.APPLICATIONINSIGHTS_CONNECTION_STRING = 'ic=1';
+      process.env.SHAREPOINT_TENANT_URL = 'https://contoso.sharepoint.com';
+      process.env.SHAREPOINT_PROJECTS_SITE_URL = 'https://contoso.sharepoint.com/sites/a';
+      process.env.HBC_FUNCTIONS_BUILD_SHA = 'abc';
+      process.env.HBC_FUNCTIONS_BUILD_VERSION = '0.0.0';
+      process.env.ADMIN_READINESS_APP_ROLE = 'HBIntelAdmin';
+      process.env.CORS_ALLOWED_ORIGINS =
+        'https://contoso.sharepoint.com,https://localhost:4321';
+      expect(() => mod.validateRolloutPostureConfig()).not.toThrow();
+    } finally {
+      Object.assign(process.env, prev);
+      for (const k of Object.keys(process.env)) if (!(k in prev)) delete process.env[k];
+    }
+  });
+
   it('host.json has 10-minute function timeout for provisioning saga', () => {
     const hostJson = JSON.parse(readFileSync(resolve(FUNCTIONS_ROOT, 'host.json'), 'utf-8'));
     expect(hostJson.functionTimeout).toBe('00:10:00');

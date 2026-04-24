@@ -29,6 +29,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
+const NON_ADMIN_AUTH_TOKEN = process.env.NON_ADMIN_AUTH_TOKEN;
 const IS_CI = process.env.CI === 'true';
 
 if (IS_CI && !BASE_URL) {
@@ -67,6 +68,16 @@ describe.runIf(!!BASE_URL)('P5-03 Post-deploy smoke checks', () => {
   it('/health/ready rejects unauthenticated requests', async () => {
     const res = await fetch(apiUrl('/health/ready'));
     expect(res.status).toBe(401);
+  });
+
+  it('safety preview rejects unauthenticated requests and returns X-Request-Id', async () => {
+    const res = await fetch(apiUrl('/safety-records/ingest/preview'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    expect(res.status).toBe(401);
+    expect(res.headers.get('x-request-id')).toBeTruthy();
   });
 
   // --- Auth enforcement (unauthenticated rejection) ---
@@ -121,6 +132,52 @@ describe.runIf(!!BASE_URL)('P5-03 Post-deploy smoke checks', () => {
       });
       // Should return 400 (missing projectId) not 401 (auth passes)
       expect(res.status).toBe(400);
+    });
+  });
+
+  describe.runIf(!!NON_ADMIN_AUTH_TOKEN)('Safety delegated non-admin smoke checks', () => {
+    const nonAdminHeaders = (): Record<string, string> => ({
+      Authorization: `Bearer ${NON_ADMIN_AUTH_TOKEN}`,
+      'Content-Type': 'application/json',
+    });
+    const ingestionPayload = {
+      fileName: 'smoke-check.xlsx',
+      fileContentBase64: 'YWJj',
+      context: {
+        uploadedByUpn: 'smoke.user@example.com',
+        uploadedAt: '2026-04-24T00:00:00.000Z',
+        fileName: 'smoke-check.xlsx',
+        reportingPeriodId: 'period-1',
+        reportingPeriodSpItemId: 1,
+      },
+    };
+
+    it('non-admin delegated token reaches preview/ingest without auth rejection', async () => {
+      const preview = await fetch(apiUrl('/safety-records/ingest/preview'), {
+        method: 'POST',
+        headers: nonAdminHeaders(),
+        body: JSON.stringify(ingestionPayload),
+      });
+      expect([200, 400, 422]).toContain(preview.status);
+      expect(preview.headers.get('x-request-id')).toBeTruthy();
+
+      const ingest = await fetch(apiUrl('/safety-records/ingest'), {
+        method: 'POST',
+        headers: nonAdminHeaders(),
+        body: JSON.stringify(ingestionPayload),
+      });
+      expect([200, 400, 422]).toContain(ingest.status);
+      expect(ingest.headers.get('x-request-id')).toBeTruthy();
+    });
+
+    it('non-admin delegated token is denied for provisioning route', async () => {
+      const res = await fetch(apiUrl('/safety-records/provision-sharepoint'), {
+        method: 'POST',
+        headers: nonAdminHeaders(),
+        body: JSON.stringify({ dryRun: true }),
+      });
+      expect(res.status).toBe(403);
+      expect(res.headers.get('x-request-id')).toBeTruthy();
     });
   });
 });
