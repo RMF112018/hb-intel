@@ -603,6 +603,73 @@ OneDeploy/SCM **502** was **not** observed on this successful deploy path.
 
 ---
 
+## Post-Deployment Proof Gates
+
+| Field | Value |
+| ----- | ----- |
+| Live host | `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net` |
+| API audience | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
+| Expected proof baseline | Run `24901773055`, artifact `@hbc/functions` `00.000.150`, commit `8ef3d93bb535c30cf7d229eefb4967601ca61470` |
+| Current live `/api/health` stamp | `00.000.150`, commit `d74d36158dda5084f3ad440a5db6b1193466a7fb`, timestamp `2026-04-24T17:11:32.396Z` |
+| Current live-host note | The later docs-only commit `d74d3615` also triggered the Functions workflow and restamped `/api/health`; no redeploy was initiated during this post-deployment proof pass. |
+
+### Live host and runtime identity
+
+Post-deployment proof pass captured:
+
+- `.tmp/functions-validation/live-host-final-proof.txt`
+- `.tmp/functions-validation/live-health-final-proof.json`
+- `.tmp/functions-validation/api-audience-final-proof.txt`
+
+`/api/health` remains healthy and reports package version **`00.000.150`**. Its current commit stamp is **`d74d3615…`**, not the earlier **`8ef3d93b…`** requested baseline, because the closure-report documentation commit subsequently triggered the same Functions deployment workflow. This does **not** replace route/probe proof: route registration and probe non-404 had already been proven by the successful workflow gate.
+
+### Admin readiness proof
+
+| Gate | Status |
+| ---- | ------ |
+| Fresh admin token acquisition | **Blocked** — Azure CLI token acquisition against `API_AUDIENCE` returned **AADSTS65001** (Microsoft Azure CLI/user consent missing for `api://08c399eb-a394-4087-b859-659d493f8dc7`). |
+| `/api/health/ready` with admin bearer | **Pending** — not run because no fresh admin token was acquired. |
+
+Evidence:
+
+- `.tmp/functions-validation/admin-token-status-final-proof.txt`
+- `.tmp/functions-validation/admin-token-error-final-proof.raw.txt` (no bearer token; contains Entra consent error)
+
+### Role-matrix proof
+
+| Gate | Status |
+| ---- | ------ |
+| Reviewer ingest → expected `403` | **Pending** |
+| Submitter replay → expected `403` | **Pending** |
+| Operator preview empty payload → expected validation failure such as `400` | **Pending** |
+
+Reason: no fresh role-specific `REVIEWER_TOKEN`, `SUBMITTER_TOKEN`, or `OPERATOR_TOKEN` was acquired through an approved workflow. No stale token variables were used.
+
+Evidence: `.tmp/functions-validation/role-matrix-status-final-proof.txt`
+
+### Hosted workbook preview proof
+
+| Gate | Status |
+| ---- | ------ |
+| Corrected workbook preview | **Pending** |
+| Workbook ingest | **Not attempted** |
+
+Reason: no valid authorized preview token plus real SharePoint reporting-period/project context was available. The workbook preview was not fabricated, and live ingest was not attempted.
+
+Evidence: `.tmp/functions-validation/workbook-preview-status-final-proof.txt`
+
+### Remaining gates
+
+- Obtain admin-capable API token after Entra consent is granted for Azure CLI/user token acquisition, then run `/api/health/ready`.
+- Acquire approved role-specific reviewer/submitter/operator tokens and run the role-matrix proof.
+- Use real SharePoint reporting-period/project context plus an authorized preview token to run hosted workbook preview. Proceed to ingest only if preview is clean.
+
+### Verdict after post-deployment proof pass
+
+**Deployment and route proof closed; admin/role/workbook gates pending.**
+
+---
+
 ## Evidence file index (local)
 
 Under `.tmp/functions-validation/`:
