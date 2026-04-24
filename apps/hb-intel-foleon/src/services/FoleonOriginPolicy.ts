@@ -17,18 +17,21 @@ export const DEFAULT_FOLEON_ORIGINS: ReadonlyArray<string> = [
 export interface FoleonOriginPolicy {
   readonly allowedOrigins: ReadonlyArray<string>;
   readonly allowPreview: boolean;
+  readonly requireHttps: boolean;
 }
 
 export function createFoleonOriginPolicy(
   acceptedFoleonOrigins?: ReadonlyArray<string>,
   allowPreview?: boolean,
+  requireHttps: boolean = true,
 ): FoleonOriginPolicy {
   const normalized = (acceptedFoleonOrigins ?? DEFAULT_FOLEON_ORIGINS)
-    .map((origin) => tryNormalizeOrigin(origin))
+    .map((origin) => tryNormalizeOrigin(origin, requireHttps))
     .filter((origin): origin is string => origin !== null);
   return {
     allowedOrigins: Array.from(new Set(normalized)),
     allowPreview: !!allowPreview,
+    requireHttps,
   };
 }
 
@@ -59,6 +62,9 @@ export function isAllowedFoleonUrl(
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     return { allowed: false, reason: 'wrong-scheme' };
   }
+  if (policy.requireHttps && parsed.protocol !== 'https:') {
+    return { allowed: false, reason: 'wrong-scheme' };
+  }
   if (!policy.allowPreview && parsed.pathname.includes('/preview/')) {
     return { allowed: false, reason: 'preview-url-blocked', normalizedOrigin: parsed.origin };
   }
@@ -68,13 +74,14 @@ export function isAllowedFoleonUrl(
   return { allowed: true, reason: 'ok', normalizedOrigin: parsed.origin };
 }
 
-function tryNormalizeOrigin(raw: string): string | null {
+function tryNormalizeOrigin(raw: string, requireHttps: boolean): string | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
   if (trimmed.includes('*')) return null;
   try {
     const parsed = new URL(trimmed);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    if (requireHttps && parsed.protocol !== 'https:') return null;
     return parsed.origin;
   } catch {
     return null;

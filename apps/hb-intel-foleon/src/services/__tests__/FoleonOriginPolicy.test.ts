@@ -34,6 +34,18 @@ describe('FoleonOriginPolicy', () => {
       expect(policy.allowedOrigins).toEqual(['https://viewer.us.foleon.com']);
     });
 
+    it('rejects http origins under the default https-required policy', () => {
+      const policy = createFoleonOriginPolicy(['http://viewer.us.foleon.com', 'https://viewer.us.foleon.com']);
+      expect(policy.requireHttps).toBe(true);
+      expect(policy.allowedOrigins).toEqual(['https://viewer.us.foleon.com']);
+    });
+
+    it('accepts http origins only when requireHttps is explicitly false', () => {
+      const policy = createFoleonOriginPolicy(['http://localhost:3000'], false, false);
+      expect(policy.requireHttps).toBe(false);
+      expect(policy.allowedOrigins).toEqual(['http://localhost:3000']);
+    });
+
     it('deduplicates entries', () => {
       const policy = createFoleonOriginPolicy([
         'https://viewer.us.foleon.com',
@@ -74,18 +86,34 @@ describe('FoleonOriginPolicy', () => {
     });
 
     it('rejects http schemes when only https is allowlisted', () => {
-      expect(
-        isAllowedFoleonUrl(policy, 'http://viewer.us.foleon.com/published/abc/').allowed,
-      ).toBe(false);
+      const result = isAllowedFoleonUrl(policy, 'http://viewer.us.foleon.com/published/abc/');
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toBe('wrong-scheme');
+    });
+
+    it('accepts http schemes only when requireHttps is explicitly false', () => {
+      const permissive = createFoleonOriginPolicy(['http://localhost:3000'], false, false);
+      const result = isAllowedFoleonUrl(permissive, 'http://localhost:3000/preview/abc/');
+      // origin allowed; preview still blocked
+      expect(result.reason).toBe('preview-url-blocked');
+      const okResult = isAllowedFoleonUrl(permissive, 'http://localhost:3000/published/abc/');
+      expect(okResult.allowed).toBe(true);
     });
 
     it('rejects malformed URLs', () => {
       expect(isAllowedFoleonUrl(policy, 'not-a-url').reason).toBe('invalid-url');
+      expect(isAllowedFoleonUrl(policy, '   ').reason).toBe('invalid-url');
     });
 
     it('rejects empty / undefined input', () => {
       expect(isAllowedFoleonUrl(policy, undefined).reason).toBe('invalid-url');
       expect(isAllowedFoleonUrl(policy, '').reason).toBe('invalid-url');
+    });
+
+    it('rejects javascript: URLs as wrong-scheme', () => {
+      const result = isAllowedFoleonUrl(policy, 'javascript:alert(1)');
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toBe('wrong-scheme');
     });
   });
 });

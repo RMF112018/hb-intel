@@ -17,6 +17,10 @@ interface FoleonIframeHostProps {
 const MIN_HEIGHT_PX = 600;
 const MAX_HEIGHT_PX = 50000;
 
+const IFRAME_SANDBOX =
+  'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation-by-user-activation';
+const IFRAME_ALLOW = 'fullscreen; clipboard-write';
+
 export function FoleonIframeHost(props: FoleonIframeHostProps): React.ReactNode {
   const { src, title, policy, onLoaded, onError } = props;
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -35,9 +39,11 @@ export function FoleonIframeHost(props: FoleonIframeHostProps): React.ReactNode 
 
     const handleMessage = (event: MessageEvent): void => {
       if (event.origin !== expectedOrigin) return;
-      if (!event.data || typeof event.data !== 'object') return;
+      // Reject spoofed messages: only the iframe's own contentWindow may post.
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      if (!event.data || typeof event.data !== 'object' || Array.isArray(event.data)) return;
       const data = event.data as { type?: unknown; height?: unknown };
-      if (data.type === 'set-height' && typeof data.height === 'number') {
+      if (data.type === 'set-height' && typeof data.height === 'number' && Number.isFinite(data.height)) {
         if (data.height > MIN_HEIGHT_PX && data.height < MAX_HEIGHT_PX) {
           setHeight(Math.floor(data.height));
         }
@@ -57,7 +63,10 @@ export function FoleonIframeHost(props: FoleonIframeHostProps): React.ReactNode 
       ref={iframeRef}
       src={src}
       title={title}
-      allowFullScreen
+      sandbox={IFRAME_SANDBOX}
+      allow={IFRAME_ALLOW}
+      referrerPolicy="strict-origin-when-cross-origin"
+      loading="lazy"
       onLoad={onLoaded}
       onError={onError}
       style={{
