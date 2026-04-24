@@ -89,7 +89,7 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
         },
       }),
     } as Response);
-    const { repo } = makeClientWithBackend(fetchSpy);
+    const { repo, client } = makeClientWithBackend(fetchSpy);
     await repo.previewWorkbook(new Blob(['hello']), {
       uploadedByUpn: 'coordinator@example.com',
       uploadedAt: '2026-04-24T00:00:00.000Z',
@@ -109,6 +109,9 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
       Authorization: 'Bearer token-contract',
       'Content-Type': 'application/json',
     });
+    // Bypass guarantee: preview must not invoke any direct SharePoint REST.
+    expect(client.get).not.toHaveBeenCalled();
+    expect(client.post).not.toHaveBeenCalled();
   });
 
   it('replay sends exact command route/body and supersede flag', async () => {
@@ -125,7 +128,7 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
         },
       }),
     } as Response);
-    const { repo } = makeClientWithBackend(fetchSpy);
+    const { repo, client } = makeClientWithBackend(fetchSpy);
     await repo.replayIngestion('run-123', { supersedePrior: true });
 
     expect(fetchSpy.mock.calls[0]?.[0]).toBe('https://functions.example.com/api/safety-records/replay');
@@ -133,6 +136,9 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
       parentRunId: 'run-123',
       supersedePrior: true,
     });
+    // Bypass guarantee: replay must not invoke any direct SharePoint REST.
+    expect(client.get).not.toHaveBeenCalled();
+    expect(client.post).not.toHaveBeenCalled();
   });
 
   it('preserves request IDs and failure envelope fields for typed errors', async () => {
@@ -181,5 +187,64 @@ describe('SharePoint adapter backend command contract (W1 G2)', () => {
       failureClass: 'graph-permission',
       previewFailureClass: 'project-unresolved',
     });
+  });
+
+  it('bypass guardrail: preview, ingest, and replay never reach the SharePoint REST client', async () => {
+    // Backend remains the sole authority for ingestion commands. This test
+    // exercises all three command paths in sequence and asserts the SharePoint
+    // REST client is never invoked — no list reads, no item POSTs, no MERGEs.
+    // If a future regression reintroduces a frontend REST commit seam, this
+    // assertion fires before the change can land.
+    const fetchSpy = vi.fn().mockImplementation(async (url: string) => ({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: async () =>
+        url.endsWith('/preview')
+          ? {
+              data: {
+                success: true,
+                requestAccepted: true,
+                diagnostics: [],
+                preview: { commitReadiness: true },
+              },
+            }
+          : {
+              data: {
+                success: true,
+                requestAccepted: true,
+                diagnostics: [],
+                result: { state: 'committed' },
+              },
+            },
+    } as Response));
+    const { repo, client } = makeClientWithBackend(fetchSpy);
+    const context = {
+      uploadedByUpn: 'coordinator@example.com',
+      uploadedAt: '2026-04-24T00:00:00.000Z',
+      fileName: 'contract.xlsx',
+      reportingPeriodId: 'period-1001',
+      reportingPeriodSpItemId: 1001,
+      projectNumber: 'P-1001',
+      projectSourceClassification: 'project' as const,
+      projectLookupId: 2001,
+      inspectionNumber: '3',
+      inspectionDate: '2026-04-24',
+    };
+
+    await repo.previewWorkbook(new Blob(['hello']), context);
+    await repo.ingestWorkbook(new Blob(['hello']), context);
+    await repo.replayIngestion('run-7', { supersedePrior: false });
+
+    expect(client.get).not.toHaveBeenCalled();
+    expect(client.post).not.toHaveBeenCalled();
+    // Each command produced exactly one backend round-trip.
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
+    const urls = fetchSpy.mock.calls.map((call) => call[0]);
+    expect(urls).toEqual([
+      'https://functions.example.com/api/safety-records/ingest/preview',
+      'https://functions.example.com/api/safety-records/ingest',
+      'https://functions.example.com/api/safety-records/replay',
+    ]);
   });
 });

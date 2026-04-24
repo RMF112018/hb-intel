@@ -11,19 +11,13 @@
  */
 
 import type {
-  CommittedArtifacts,
   IngestionUploadContext,
   IngestionRunResult,
-  ProjectResolutionResult,
-  ProjectSourceClassification,
   ReviewStatus,
   SafetyIngestionPreviewResult,
   SafetyFinding,
-  SafetyFindingDraft,
   SafetyIngestionRun,
-  SafetyIngestionRunDraft,
   SafetyInspectionEvent,
-  SafetyInspectionEventDraft,
   SafetyProjectWeekRecord,
   SafetyReportingPeriod,
 } from '../../domain/types.js';
@@ -55,13 +49,6 @@ import type {
 const VERBOSE_HEADERS = {
   Accept: 'application/json;odata=verbose',
   'Content-Type': 'application/json;odata=verbose',
-} as const;
-
-const PROJECTS_FIELD = {
-  NUMBER: 'field_2',
-  NAME: 'field_3',
-  LOCATION: 'field_4',
-  STAGE: 'field_6',
 } as const;
 
 export interface SharePointAdapterOptions {
@@ -355,353 +342,19 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     });
   }
 
-  private buildIngestionAdapter() {
-    return {
-      resolveProject: async (projectSiteText: string, projectNumberHint: string | null) =>
-        this.resolveProject(projectSiteText, projectNumberHint ?? undefined),
-      // G-03 structured intake authority: honor the operator-entered
-      // project selection. Enrich missing snapshot fields from the live
-      // Projects list or Legacy Fallback Registry when hints are absent.
-      resolveProjectByNumber: async (
-        projectNumber: string,
-        classification: ProjectSourceClassification,
-        hints?: {
-          readonly projectNameSnapshot?: string;
-          readonly projectLocationSnapshot?: string;
-          readonly projectStageSnapshot?: string;
-          readonly projectLookupId?: number;
-          readonly legacyRegistryItemId?: number;
-        },
-      ): Promise<ProjectResolutionResult | null> => {
-        if (!projectNumber) return null;
-        // When hints carry a full snapshot set, trust them and avoid the
-        // network round-trip. Otherwise enrich from the existing resolver.
-        const hasFullSnapshot =
-          hints?.projectNameSnapshot &&
-          hints.projectNameSnapshot.length > 0;
-        if (hasFullSnapshot) {
-          return {
-            classification,
-            projectNumber,
-            projectNameSnapshot: hints!.projectNameSnapshot!,
-            projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
-            projectStageSnapshot: hints?.projectStageSnapshot ?? '',
-            projectLookupId: hints?.projectLookupId,
-            legacyRegistryItemId: hints?.legacyRegistryItemId,
-          };
-        }
-        const enriched = await this.resolveProject('', projectNumber);
-        if (enriched) {
-          return {
-            ...enriched,
-            // Operator-selected classification is authoritative when provided.
-            classification,
-            projectNumber,
-          };
-        }
-        // No live row available — trust the operator and return a
-        // minimally-populated resolution so the commit can proceed.
-        return {
-          classification,
-          projectNumber,
-          projectNameSnapshot: hints?.projectNameSnapshot ?? '',
-          projectLocationSnapshot: hints?.projectLocationSnapshot ?? '',
-          projectStageSnapshot: hints?.projectStageSnapshot ?? '',
-          projectLookupId: hints?.projectLookupId,
-          legacyRegistryItemId: hints?.legacyRegistryItemId,
-        };
-      },
-      findInspectionsForProjectWeek: async (filter: ProjectWeekInspectionFilter) =>
-        this.findInspectionsForProjectWeek(filter),
-      findFindingsForProjectWeek: async (filter: { projectWeekRecordSpItemId: number }) => {
-        const desc = this.boundDescriptor('SafetyFindings');
-        const query = `?$top=500&$select=Id,InspectionEventId,Severity&$filter=ProjectWeekRecordId eq ${filter.projectWeekRecordSpItemId}`;
-        const items = await this.fetchItems<{
-          Id: number;
-          InspectionEventId: number;
-          Severity: SafetyFinding['severity'];
-        }>(desc, query);
-        return items.map((raw) => ({
-          severity: raw.Severity,
-          inspectionEventId: `ie-${raw.InspectionEventId}`,
-        }));
-      },
-      resolveReportingPeriod: async (reportingPeriodId: string) =>
-        this.getReportingPeriod(reportingPeriodId),
-      ensureProjectWeekRecord: async (
-        resolution: ProjectResolutionResult,
-        reportingPeriodId: string,
-        reportingPeriodSpItemId: number,
-        weekStartDate: string,
-      ) => {
-        const existing = await this.getProjectWeek(reportingPeriodId, resolution.projectNumber);
-        if (existing) return existing;
-        return this.createProjectWeekRecord(
-          resolution,
-          reportingPeriodId,
-          reportingPeriodSpItemId,
-          weekStartDate,
-        );
-      },
-      persistCommit: async (drafts: Parameters<typeof this.commit>[0]) => this.commit(drafts),
-      markInspectionSuperseded: async (priorId: string, replacementId: string) =>
-        this.markInspectionSuperseded(priorId, replacementId),
-      recordIngestionRun: async (runDraft: SafetyIngestionRunDraft) =>
-        this.insertIngestionRun(runDraft),
-    };
-  }
-
-  private async fetchIngestionRunById(id: string): Promise<SafetyIngestionRun | null> {
-    const desc = this.boundDescriptor('SafetyIngestionRuns');
-    const item = await this.fetchItem<RawIngestionRun>(desc, spItemIdFromString(id));
-    return item ? mapIngestionRun(item) : null;
-  }
-
-  private async markInspectionSuperseded(
-    priorInspectionEventId: string,
-    replacementInspectionEventId: string,
-  ): Promise<void> {
-    const desc = this.boundDescriptor('SafetyInspectionEvents');
-    const endpoint = `${desc.siteUrl}/_api/web/lists(guid'${desc.id}')/items(${spItemIdFromString(priorInspectionEventId)})`;
-    const body = {
-      __metadata: { type: `SP.Data.${desc.urlSegment}ListItem` },
-      IngestionStatus: 'superseded',
-      SupersededByInspectionEventId: spItemIdFromString(replacementInspectionEventId),
-    };
-    const response = await this.client.post(endpoint, JSON.stringify(body), {
-      headers: { ...VERBOSE_HEADERS, 'X-HTTP-Method': 'MERGE', 'IF-MATCH': '*' },
-    });
-    if (!response.ok) {
-      throw new Error(`Supersede update failed (${response.status}) for ${priorInspectionEventId}.`);
-    }
-  }
-
   // -- private REST helpers -----------------------------------------------
+  //
+  // Production preview, ingest, and replay command paths route exclusively
+  // through `SafetyBackendCommandClient` (see previewWorkbook, ingestWorkbook,
+  // replayIngestion above). The legacy direct-REST commit pipeline that
+  // formerly lived here (project resolution, project-week creation, inspection
+  // commit, finding writes, supersede mark, rollup update, ingestion-run
+  // insertion) is owned end-to-end by the backend graph repository now.
+  // Do not reintroduce write-side seams in this adapter — any new ingestion
+  // command belongs in the backend.
 
   private boundDescriptor(key: SafetyListName): SiteScopedListDescriptor {
     return resolveDescriptor(key);
-  }
-
-  private async resolveProject(
-    projectSiteText: string,
-    projectNumberHint?: string,
-  ): Promise<ProjectResolutionResult | null> {
-    const projectNumber = projectNumberHint ?? extractProjectNumber(projectSiteText);
-    if (!projectNumber) return null;
-
-    const projectsDesc = resolveDescriptor('Projects');
-    const projectsEndpoint =
-      `${projectsDesc.siteUrl}/_api/web/lists(guid'${projectsDesc.id}')/items` +
-      `?$select=Id,${PROJECTS_FIELD.NUMBER},${PROJECTS_FIELD.NAME},` +
-      `${PROJECTS_FIELD.LOCATION},${PROJECTS_FIELD.STAGE}` +
-      `&$top=1&$filter=${PROJECTS_FIELD.NUMBER} eq '${escapeODataString(projectNumber)}'`;
-    const projectsResp = await this.client.get(projectsEndpoint, { headers: JSON_HEADERS });
-    if (projectsResp.ok) {
-      const body = (await projectsResp.json()) as { value?: RawProjectRef[] };
-      const match = body.value?.[0];
-      if (match) {
-        return {
-          classification: 'project',
-          projectNumber: match.field_2 ?? projectNumber,
-          projectNameSnapshot: match.field_3 ?? '',
-          projectLocationSnapshot: match.field_4 ?? '',
-          projectStageSnapshot: match.field_6 ?? '',
-          projectLookupId: match.Id,
-        };
-      }
-    }
-
-    const legacyDesc = resolveDescriptor('LegacyProjectFallbackRegistry');
-    const legacyEndpoint = `${legacyDesc.siteUrl}/_api/web/lists(guid'${legacyDesc.id}')/items?$select=Id,ProjectNumber,ProjectNameRaw,MatchedProjectListItemId&$top=1&$filter=ProjectNumber eq '${escapeODataString(projectNumber)}'`;
-    const legacyResp = await this.client.get(legacyEndpoint, { headers: JSON_HEADERS });
-    if (legacyResp.ok) {
-      const body = (await legacyResp.json()) as { value?: RawLegacyRef[] };
-      const match = body.value?.[0];
-      if (match) {
-        return {
-          classification: match.MatchedProjectListItemId ? 'project+legacy' : 'legacy-only',
-          projectNumber: match.ProjectNumber ?? projectNumber,
-          projectNameSnapshot: match.ProjectNameRaw ?? '',
-          projectLocationSnapshot: '',
-          projectStageSnapshot: '',
-          legacyRegistryItemId: match.Id,
-          projectLookupId: match.MatchedProjectListItemId ?? undefined,
-        };
-      }
-    }
-
-    return null;
-  }
-
-  private async createProjectWeekRecord(
-    resolution: ProjectResolutionResult,
-    reportingPeriodId: string,
-    reportingPeriodSpItemId: number,
-    weekStartDate: string,
-  ): Promise<SafetyProjectWeekRecord> {
-    const desc = this.boundDescriptor('SafetyProjectWeekRecords');
-    const body = {
-      __metadata: { type: `SP.Data.${desc.urlSegment}ListItem` },
-      Title: `${resolution.projectNumber} — ${weekStartDate}`,
-      ReportingPeriodId: reportingPeriodSpItemId,
-      ProjectNumber: resolution.projectNumber,
-      ProjectNameSnapshot: resolution.projectNameSnapshot,
-      ProjectLocationSnapshot: resolution.projectLocationSnapshot,
-      ProjectStageSnapshot: resolution.projectStageSnapshot,
-      ProjectSourceClassification: resolution.classification,
-      ExpectedInspectionThisWeek: true,
-      InspectionCount: 0,
-      PublishStatus: 'in-progress',
-      ManagerReviewStatus: 'not-required',
-      ...(resolution.projectLookupId !== undefined
-        ? { ProjectLookupId: resolution.projectLookupId }
-        : {}),
-      ...(resolution.legacyRegistryItemId !== undefined
-        ? { LegacyRegistryItemId: resolution.legacyRegistryItemId }
-        : {}),
-    };
-    const created = await this.postItem<RawProjectWeek>(desc, body);
-    const mapped = mapProjectWeek(created);
-    // Ensure the reporting-period lookup parent survives a REST response that
-    // echoes only the numeric field without nested Lookup expansion.
-    return { ...mapped, reportingPeriodId, reportingPeriodSpItemId };
-  }
-
-  private async commit(drafts: {
-    inspectionEventDraft: SafetyInspectionEventDraft;
-    findingDrafts: ReadonlyArray<SafetyFindingDraft>;
-    projectWeekRecordUpdate: SafetyProjectWeekRecord;
-  }): Promise<CommittedArtifacts> {
-    const ieDesc = this.boundDescriptor('SafetyInspectionEvents');
-    const iePayload = {
-      __metadata: { type: `SP.Data.${ieDesc.urlSegment}ListItem` },
-      Title: drafts.inspectionEventDraft.title,
-      ProjectWeekRecordId: drafts.inspectionEventDraft.projectWeekRecordSpItemId,
-      ReportingPeriodId: drafts.inspectionEventDraft.reportingPeriodSpItemId,
-      SourceUploadItemId: drafts.inspectionEventDraft.sourceUploadItemId,
-      SourceUploadWebUrl: drafts.inspectionEventDraft.sourceUploadWebUrl,
-      Checksum: drafts.inspectionEventDraft.checksum,
-      TemplateVersion: drafts.inspectionEventDraft.templateVersion,
-      ParserVersion: drafts.inspectionEventDraft.parserVersion,
-      ScoringMode: drafts.inspectionEventDraft.scoringMode,
-      InspectionDate: drafts.inspectionEventDraft.inspectionDate,
-      InspectionNumber: drafts.inspectionEventDraft.inspectionNumber,
-      InspectorName: drafts.inspectionEventDraft.inspectorName,
-      InspectorUpn: drafts.inspectionEventDraft.inspectorUpn,
-      ProjectNumber: drafts.inspectionEventDraft.projectNumber,
-      ProjectNameSnapshot: drafts.inspectionEventDraft.projectNameSnapshot,
-      InspectionScore: drafts.inspectionEventDraft.inspectionScore,
-      TotalYes: drafts.inspectionEventDraft.totalYes,
-      TotalNo: drafts.inspectionEventDraft.totalNo,
-      TotalNA: drafts.inspectionEventDraft.totalNa,
-      RawChecklistJson: drafts.inspectionEventDraft.rawChecklistJson,
-      IngestionStatus: drafts.inspectionEventDraft.ingestionStatus,
-      DuplicateStatus: drafts.inspectionEventDraft.duplicateStatus,
-      RequiresReview: drafts.inspectionEventDraft.requiresReview,
-      SubmittedAt: drafts.inspectionEventDraft.submittedAt,
-      CommittedAt: drafts.inspectionEventDraft.committedAt,
-    };
-    const createdEvent = await this.postItem<RawInspectionEvent>(ieDesc, iePayload);
-    const inspectionEvent: SafetyInspectionEvent = {
-      id: `ie-${createdEvent.Id}`,
-      spItemId: createdEvent.Id,
-      ...drafts.inspectionEventDraft,
-    };
-
-    const fdDesc = this.boundDescriptor('SafetyFindings');
-    const findings: SafetyFinding[] = [];
-    for (const draft of drafts.findingDrafts) {
-      const payload = {
-        __metadata: { type: `SP.Data.${fdDesc.urlSegment}ListItem` },
-        Title: draft.title,
-        InspectionEventId: inspectionEvent.spItemId,
-        ProjectWeekRecordId: draft.projectWeekRecordSpItemId,
-        SectionNumber: draft.sectionNumber,
-        SectionName: draft.sectionName,
-        ChecklistRowNumber: draft.checklistRowNumber,
-        ChecklistItemLabel: draft.checklistItemLabel,
-        FindingType: draft.findingType,
-        Severity: draft.severity,
-        FindingSummary: draft.findingSummary,
-        OriginalNoteText: draft.originalNoteText,
-        RequiresCorrectiveAction: draft.requiresCorrectiveAction,
-        IsOpen: draft.isOpen,
-      };
-      const createdFinding = await this.postItem<RawFinding>(fdDesc, payload);
-      findings.push({
-        id: `fd-${createdFinding.Id}`,
-        spItemId: createdFinding.Id,
-        inspectionEventId: inspectionEvent.id,
-        inspectionEventSpItemId: inspectionEvent.spItemId,
-        ...draft,
-      });
-    }
-
-    await this.updateProjectWeekRollup(drafts.projectWeekRecordUpdate);
-
-    return {
-      inspectionEvent,
-      findings,
-      projectWeekRecord: drafts.projectWeekRecordUpdate,
-    };
-  }
-
-  private async updateProjectWeekRollup(record: SafetyProjectWeekRecord): Promise<void> {
-    const desc = this.boundDescriptor('SafetyProjectWeekRecords');
-    const endpoint = `${desc.siteUrl}/_api/web/lists(guid'${desc.id}')/items(${record.spItemId})`;
-    const body = {
-      __metadata: { type: `SP.Data.${desc.urlSegment}ListItem` },
-      InspectionCount: record.inspectionCount,
-      AverageInspectionScore: record.averageInspectionScore,
-      HighestRiskFindingLevel: record.highestRiskFindingLevel,
-      PublishStatus: record.publishStatus,
-    };
-    const response = await this.client.post(endpoint, JSON.stringify(body), {
-      headers: { ...VERBOSE_HEADERS, 'X-HTTP-Method': 'MERGE', 'IF-MATCH': '*' },
-    });
-    if (!response.ok) {
-      throw new Error(`Project-Week rollup update failed (${response.status}).`);
-    }
-  }
-
-  private async insertIngestionRun(
-    draft: SafetyIngestionRunDraft,
-  ): Promise<SafetyIngestionRun> {
-    const desc = this.boundDescriptor('SafetyIngestionRuns');
-    const body: Record<string, unknown> = {
-      __metadata: { type: `SP.Data.${desc.urlSegment}ListItem` },
-      Title: draft.title,
-      SourceUploadItemId: draft.sourceUploadItemId,
-      UploadFileName: draft.uploadFileName,
-      TemplateVersionDetected: draft.templateVersionDetected,
-      Checksum: draft.checksum,
-      ValidationStatus: draft.validationStatus,
-      ParseStatus: draft.parseStatus,
-      ProjectResolutionStatus: draft.projectResolutionStatus,
-      TerminalStatus: draft.terminalStatus,
-      CommittedEntityIdsJson: draft.committedEntityIdsJson,
-      ErrorClass: draft.errorClass,
-      ErrorSummary: draft.errorSummary,
-      RunStartedAt: draft.runStartedAt,
-      RunCompletedAt: draft.runCompletedAt,
-      AttemptNumber: draft.attemptNumber,
-      AttemptedProjectSiteText: draft.attemptedProjectSiteText,
-      ResolvedProjectNumber: draft.resolvedProjectNumber,
-      ProjectSourceClassification: draft.projectSourceClassification,
-      ReviewStatus: draft.reviewStatus,
-    };
-    if (draft.reportingPeriodSpItemId !== undefined) {
-      body.ReportingPeriodId = draft.reportingPeriodSpItemId;
-    }
-    if (draft.parentRunSpItemId !== undefined) {
-      body.ParentRunId = draft.parentRunSpItemId;
-    }
-    const created = await this.postItem<{ Id: number; Title?: string }>(desc, body);
-    return {
-      id: `run-${created.Id}`,
-      spItemId: created.Id,
-      ...draft,
-    };
   }
 
   private async fetchItems<T>(
@@ -795,11 +448,6 @@ function spItemIdFromString(businessId: string): number {
 
 function escapeODataString(value: string): string {
   return value.replace(/'/g, "''");
-}
-
-function extractProjectNumber(projectSiteText: string): string | null {
-  const match = projectSiteText.match(/\d{4}-\d{2,4}/);
-  return match ? match[0] : null;
 }
 
 function safeParse(value: string): Record<string, unknown> | null {
@@ -1075,17 +723,3 @@ function mapIngestionRun(raw: RawIngestionRun): SafetyIngestionRun {
   };
 }
 
-interface RawProjectRef {
-  Id: number;
-  field_2?: string;
-  field_3?: string;
-  field_4?: string;
-  field_6?: string;
-}
-
-interface RawLegacyRef {
-  Id: number;
-  ProjectNumber?: string;
-  ProjectNameRaw?: string;
-  MatchedProjectListItemId?: number | null;
-}
