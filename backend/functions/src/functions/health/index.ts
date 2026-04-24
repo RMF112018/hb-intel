@@ -25,6 +25,10 @@ app.http('health', {
     const artifactIdentity = resolveBackendArtifactIdentity();
     return {
       status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, max-age=0',
+      },
       jsonBody: {
         status: 'healthy',
         artifact: {

@@ -38,6 +38,33 @@ function nonEmpty(value: string | undefined): string | undefined {
 }
 
 /**
+ * Normalizes a commit-SHA input so the artifact identity surface is
+ * impossible to misread. Any value that is not a 40-character hexadecimal
+ * string collapses to `undefined` so the caller falls back to `'unknown'`.
+ * Upper-case hex is lower-cased before validation.
+ */
+function normalizeCommitSha(value: string | undefined): string | undefined {
+  const trimmed = nonEmpty(value);
+  if (trimmed === undefined) return undefined;
+  const lower = trimmed.toLowerCase();
+  return /^[0-9a-f]{40}$/.test(lower) ? lower : undefined;
+}
+
+/**
+ * Normalizes a build-timestamp input to a canonical ISO-8601 UTC string
+ * (`YYYY-MM-DDTHH:MM:SS.sssZ`). Any value that `Date.parse` rejects — or
+ * that yields a non-finite date — collapses to `undefined` so the caller
+ * falls back to `'unknown'`.
+ */
+function normalizeBuildTimestamp(value: string | undefined): string | undefined {
+  const trimmed = nonEmpty(value);
+  if (trimmed === undefined) return undefined;
+  const ms = Date.parse(trimmed);
+  if (!Number.isFinite(ms)) return undefined;
+  return new Date(ms).toISOString();
+}
+
+/**
  * Resolves backend artifact identity for telemetry stamping and HTTP proof.
  *
  * Precedence:
@@ -54,7 +81,8 @@ export function resolveBackendArtifactIdentity(): IBackendArtifactIdentity {
     nonEmpty(process.env.HBC_FUNCTIONS_BUILD_VERSION) ??
     readPackageVersion() ??
     UNKNOWN;
-  const commitSha = nonEmpty(process.env.HBC_FUNCTIONS_BUILD_SHA) ?? UNKNOWN;
-  const buildTimestamp = nonEmpty(process.env.HBC_FUNCTIONS_BUILD_TIMESTAMP) ?? UNKNOWN;
+  const commitSha = normalizeCommitSha(process.env.HBC_FUNCTIONS_BUILD_SHA) ?? UNKNOWN;
+  const buildTimestamp =
+    normalizeBuildTimestamp(process.env.HBC_FUNCTIONS_BUILD_TIMESTAMP) ?? UNKNOWN;
   return { version, commitSha, buildTimestamp };
 }

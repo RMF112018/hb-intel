@@ -35,12 +35,13 @@ describe('resolveBackendArtifactIdentity', () => {
   });
 
   it('prefers env overrides over package.json for every field', () => {
+    const VALID_SHA = 'c621aee82bc9ec0dc0434225726b83a632ace5c7';
     process.env.HBC_FUNCTIONS_BUILD_VERSION = '99.999.999';
-    process.env.HBC_FUNCTIONS_BUILD_SHA = 'deadbeef';
+    process.env.HBC_FUNCTIONS_BUILD_SHA = VALID_SHA;
     process.env.HBC_FUNCTIONS_BUILD_TIMESTAMP = '2026-04-23T12:00:00.000Z';
     const identity = resolveBackendArtifactIdentity();
     expect(identity.version).toBe('99.999.999');
-    expect(identity.commitSha).toBe('deadbeef');
+    expect(identity.commitSha).toBe(VALID_SHA);
     expect(identity.buildTimestamp).toBe('2026-04-23T12:00:00.000Z');
   });
 
