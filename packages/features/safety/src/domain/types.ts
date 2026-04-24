@@ -415,6 +415,12 @@ export interface SafetyIngestionRun {
   readonly reviewedAt?: string;
   readonly reviewedBy?: string;
   readonly resolutionNote?: string;
+  /** Optional backend correlation id surfaced for support triage. */
+  readonly requestId?: string;
+  /** Optional backend-derived failure seam classification for support triage. */
+  readonly failureClass?: string;
+  /** Optional preview headline failure class when preview blocked commit. */
+  readonly previewFailureClass?: string;
 }
 
 export interface IngestionCommittedIds {
