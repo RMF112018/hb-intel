@@ -21,14 +21,13 @@ import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { App } from './App.js';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
 import { bindHostedSafetyGuidOverlay } from './runtime/hostedSafetyGuidBinding.js';
+import {
+  resolveSafetyRuntimeContract,
+  type ISafetyMountConfig,
+} from './runtime/safetyRuntimeContract.js';
 
 /** Shell-injected runtime configuration. Reserved for future wiring. */
-export interface IMountConfig {
-  functionAppUrl?: string;
-  backendMode?: 'production' | 'ui-review';
-  allowBackendModeSwitch?: boolean;
-  apiAudience?: string;
-}
+export type IMountConfig = ISafetyMountConfig;
 
 let root: Root | undefined;
 
@@ -43,12 +42,16 @@ export async function mount(
     await bootstrapSpfxAuth(spfxContext, permissionKeys);
   }
 
+  const runtimeContract = resolveSafetyRuntimeContract({
+    hasSpfxContext: !!spfxContext,
+    config,
+  });
+
   root = createRoot(el);
   root.render(
     <App
       spfxContext={spfxContext}
-      functionAppUrl={config?.functionAppUrl}
-      apiAudience={config?.apiAudience}
+      runtimeContract={runtimeContract}
     />,
   );
 }

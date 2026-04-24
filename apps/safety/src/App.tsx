@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
@@ -14,17 +14,25 @@ import { createWebpartRouter } from './router/index.js';
 import { useSafetyLayoutMode } from './responsive/safetyBreakpoints.js';
 import { findMissingHostedSafetyGuidBindings } from './runtime/hostedSafetyGuidBinding.js';
 import { adaptSpfxHttpClient, type SpfxLikeContext } from './spfxHttpAdapter.js';
+import {
+  runHealthReadyNonAdminProof,
+  shouldRunHealthReadyNonAdminProof,
+} from './runtime/healthReadyProof.js';
+import {
+  resolveSafetyRuntimeContract,
+  type ISafetyRuntimeContract,
+} from './runtime/safetyRuntimeContract.js';
+import { SafetyStatusPanel } from './components/SafetyStatusPanel.js';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: defaultQueryOptions } });
 const router = createWebpartRouter();
 
 interface AppProps {
   spfxContext?: unknown;
-  functionAppUrl?: string;
-  apiAudience?: string;
+  runtimeContract?: ISafetyRuntimeContract;
 }
 
-export function App({ spfxContext, functionAppUrl, apiAudience }: AppProps): React.ReactNode {
+export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode {
   const typed = spfxContext as SpfxLikeContext | undefined;
   // Phase-04 audit G-02 foundation: derive a mode-aware layout contract from
   // the actual Safety app content container width, not raw viewport. The ref
@@ -32,10 +40,25 @@ export function App({ spfxContext, functionAppUrl, apiAudience }: AppProps): Rea
   // page body under SPFx/SharePoint hosting.
   const contentRef = useRef<HTMLDivElement | null>(null);
   const layoutMode = useSafetyLayoutMode(contentRef);
+  const proofRanRef = useRef(false);
+  const resolvedRuntimeContract = useMemo(
+    () =>
+      runtimeContract ??
+      resolveSafetyRuntimeContract({
+        hasSpfxContext: !!typed,
+      }),
+    [runtimeContract, typed],
+  );
   const repository = useMemo(() => {
     if (import.meta.env?.DEV) {
       // Surface hosted-binding gaps in local/dev without polluting production.
       logSafetyOverlayDiagnostic();
+    }
+    if (
+      resolvedRuntimeContract.hostMode === 'sharepoint' &&
+      !resolvedRuntimeContract.canInitializeCommands
+    ) {
+      return null;
     }
     const client = adaptSpfxHttpClient(typed);
     if (client) {
@@ -44,8 +67,9 @@ export function App({ spfxContext, functionAppUrl, apiAudience }: AppProps): Rea
         sharepoint: {
           client,
           backendIngestion: {
-            baseUrl: functionAppUrl,
+            baseUrl: resolvedRuntimeContract.backend.baseUrl ?? undefined,
             getApiToken: async (): Promise<string> => {
+              const apiAudience = resolvedRuntimeContract.backend.apiAudience;
               if (!typed || !apiAudience) {
                 throw new Error(
                   'Safety backend ingestion requires apiAudience and SPFx context token provider configuration.',
@@ -62,7 +86,33 @@ export function App({ spfxContext, functionAppUrl, apiAudience }: AppProps): Rea
       });
     }
     return createSafetyInspectionRepository({ mode: 'mock' });
-  }, [typed, functionAppUrl, apiAudience]);
+  }, [typed, resolvedRuntimeContract]);
+
+  const blockedInSharePointMode =
+    resolvedRuntimeContract.hostMode === 'sharepoint' &&
+    !resolvedRuntimeContract.canInitializeCommands;
+
+  useEffect(() => {
+    const apiAudience = resolvedRuntimeContract.backend.apiAudience ?? undefined;
+    const functionAppUrl = resolvedRuntimeContract.backend.baseUrl ?? undefined;
+    if (proofRanRef.current) return;
+    if (!typed || blockedInSharePointMode) return;
+    if (!shouldRunHealthReadyNonAdminProof(typed, apiAudience, functionAppUrl, window.location.search)) {
+      return;
+    }
+    proofRanRef.current = true;
+
+    void runHealthReadyNonAdminProof(typed, apiAudience, functionAppUrl).then((result) => {
+      (
+        window as unknown as {
+          __hbIntel_safetyProof?: unknown;
+        }
+      ).__hbIntel_safetyProof = result;
+
+      // eslint-disable-next-line no-console -- explicit proof-mode diagnostics gated by query param
+      console.info('[safety-proof] healthReadyNonAdmin', result);
+    });
+  }, [typed, blockedInSharePointMode, resolvedRuntimeContract]);
 
   // Safety is office-only (Phase-2 G-01): lock the theme to light AND
   // force isFieldMode=false on the ambient theme context so ui-kit
@@ -82,15 +132,34 @@ export function App({ spfxContext, functionAppUrl, apiAudience }: AppProps): Rea
                 : undefined
             }
           >
-            <SafetyRepositoryProvider repository={repository}>
-              <div
-                ref={contentRef}
-                data-safety-mode={layoutMode}
-                className="safety-app-root"
-              >
-                <RouterProvider router={router} />
+            {blockedInSharePointMode || !repository ? (
+              <div className="safety-app-root">
+                <SafetyStatusPanel
+                  intent="blocked"
+                  title="Safety configuration is incomplete."
+                  description="SharePoint host mode is active, but required backend binding is missing or invalid."
+                  detail={`Host mode: ${resolvedRuntimeContract.hostMode}. Overlay known: ${
+                    resolvedRuntimeContract.hostedGuidOverlay.known ? 'yes' : 'no'
+                  }.`}
+                >
+                  <ul>
+                    {resolvedRuntimeContract.blockingReasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                </SafetyStatusPanel>
               </div>
-            </SafetyRepositoryProvider>
+            ) : (
+              <SafetyRepositoryProvider repository={repository}>
+                <div
+                  ref={contentRef}
+                  data-safety-mode={layoutMode}
+                  className="safety-app-root"
+                >
+                  <RouterProvider router={router} />
+                </div>
+              </SafetyRepositoryProvider>
+            )}
           </ComplexityProvider>
         </HbcErrorBoundary>
       </QueryClientProvider>

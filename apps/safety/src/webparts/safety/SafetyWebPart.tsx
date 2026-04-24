@@ -12,13 +12,12 @@ import {
   PropertyPaneTextField,
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { createRoot, type Root } from 'react-dom/client';
-import { App } from '../../App.js';
-import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-import { bindHostedSafetyGuidOverlay } from '../../runtime/hostedSafetyGuidBinding.js';
+import { mount, unmount } from '../../mount.js';
 
 export interface ISafetyWebPartProps {
   description: string;
+  functionAppUrl: string;
+  apiAudience: string;
 }
 
 /**
@@ -30,8 +29,6 @@ export interface ISafetyWebPartProps {
  * - onDispose(): unmounts React tree to prevent memory leaks
  */
 export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartProps> {
-  private _root: Root | undefined;
-
   /**
    * Called by SharePoint before render(). Resolves SP group membership
    * into HB Intel permission keys, then bootstraps the auth store.
@@ -40,9 +37,6 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
    */
   public async onInit(): Promise<void> {
     await super.onInit();
-    bindHostedSafetyGuidOverlay();
-    const permissionKeys = await resolveSpfxPermissions(this.context);
-    await bootstrapSpfxAuth(this.context, permissionKeys);
   }
 
   /**
@@ -50,10 +44,15 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
    * Uses React 18 createRoot for concurrent mode support.
    */
   public render(): void {
-    if (!this._root) {
-      this._root = createRoot(this.domElement);
-    }
-    this._root.render(<App spfxContext={this.context} />);
+    void mount(this.domElement, this.context, {
+      functionAppUrl: this.properties.functionAppUrl,
+      apiAudience: this.properties.apiAudience,
+    }).catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      this.domElement.innerHTML =
+        `<div role="alert" style="padding:12px;border:1px solid #d13438;">` +
+        `Safety failed to mount: ${message}</div>`;
+    });
   }
 
   /**
@@ -61,8 +60,7 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
    * Prevents memory leaks from orphaned React trees.
    */
   protected onDispose(): void {
-    this._root?.unmount();
-    this._root = undefined;
+    unmount();
     super.onDispose();
   }
 
@@ -76,6 +74,12 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: 'Description',
+                }),
+                PropertyPaneTextField('functionAppUrl', {
+                  label: 'Function App URL',
+                }),
+                PropertyPaneTextField('apiAudience', {
+                  label: 'API Audience',
                 }),
               ],
             },
