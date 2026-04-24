@@ -152,4 +152,6 @@ docs/architecture/plans/MASTER/phase-1-deliverables/Deployment-*
 .tmp/functions-deploy/host.json
 .tmp/functions-deploy/package.json
 .tmp/functions-deploy/README.md
+# Local operator evidence (health/ready, role-matrix, probes); not for version control
+.tmp/functions-validation/
 functions-artifact.zip

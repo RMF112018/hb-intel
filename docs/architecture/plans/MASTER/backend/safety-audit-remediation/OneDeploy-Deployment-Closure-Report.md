@@ -15,8 +15,9 @@ Current authoritative status:
 - **Deployment / route proof:** **Closed** — GitHub Actions run `24901773055` completed deployment, live parity verification, Azure function inventory proof, and `safetyReportingPeriodProbe` non-404 proof.
 - **Entra consent:** **Resolved** — delegated token acquisition for `api://08c399eb-a394-4087-b859-659d493f8dc7` succeeded after consent.
 - **Admin readiness call:** **Closed** — `GET /api/health/ready` returned HTTP **200** with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** using a token whose safe claims included `scp=access_as_user` and the **`Admin`** app role.
-- **Current blocker:** **Rollout / posture readiness** — `/api/health/ready` reports `operationalReadiness` **`degraded`** and Safety rollout readiness blocked by missing rollout/proof app settings and incomplete provisioning prerequisites.
-- **Still pending:** role-matrix proof and hosted workbook preview.
+- **Current blocker:** **Rollout / posture readiness** — `/api/health/ready` reports `operationalReadiness` **`degraded`** and Safety rollout readiness blocked by missing rollout/proof app settings and incomplete provisioning prerequisites. **Update (after tenant app catalog URL applied in Azure):** `provisioningPrereqs.appCatalog` is now **`true`**; hub id, SPFx product id, Graph/Sites.Selected confirmations, and Safety tightened proof env vars remain open (see **Latest `/api/health/ready` capture**).
+- **Role matrix proof:** **Blocked** (2026-04-24 UTC re-run) — Hedrick CLI principal token still `roles: Admin` only (no Safety app roles in JWT); evidence `.tmp/functions-validation/role-matrix-20260424T211708Z/` (prior attempt: `role-matrix-20260424T204926Z/`).
+- **Still pending:** hosted workbook preview.
 - **Not authorized:** live ingest / commit-path proof.
 
 Historical note: the earlier local OneDeploy/SCM `502` and missing `safetyReportingPeriodProbe` route were valid historical deployment blockers during the local CLI path. They are preserved below as diagnostic history, but they are **superseded** by the successful GitHub Actions deployment path and are **not** the current closure blocker.
@@ -345,12 +346,6 @@ This aligns with the live **404** on the probe URL pattern.
 
 ---
 
-## Role Matrix Proof
-
-**Pending** — no role tokens acquired in this session.
-
----
-
 ## Workbook Preview Proof
 
 **Repo workbook located (valid template path, not fabricated):**
@@ -588,7 +583,7 @@ Deployment closure for the Flex host / probe surface **remains blocked** until a
 | Gate | Status |
 | ---- | ------ |
 | Admin `/api/health/ready` with bearer | **At run 24901773055 follow-up:** **Pending** — `az account get-access-token --resource api://08c399eb-a394-4087-b859-659d493f8dc7` returned **AADSTS65001** (evidence: `.tmp/functions-validation/live-ready-admin-post-gha-24901773055.txt`). **Superseded:** post-consent operator proof — **HTTP 200** admin `/api/health/ready` with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** (see **Post-Deployment Proof Gates** and `proof-pass-admin-ready-20260424-*`). |
-| Role matrix (reviewer/submitter/operator tokens) | **Pending** (no repo token helper run) |
+| Role matrix (reviewer/submitter/operator tokens) | **Blocked** — latest evidence `.tmp/functions-validation/role-matrix-20260424T211708Z/` (earlier attempt: `role-matrix-20260424T204926Z/`) |
 | Hosted workbook preview | **Pending** (no SharePoint/workbook context in this session) |
 
 ### Intermediate runs (brief)
@@ -619,7 +614,7 @@ OneDeploy/SCM **502** was **not** observed on this successful deploy path.
 | Entra consent (delegated token to `API_AUDIENCE`, e.g. Azure CLI) | **Resolved** |
 | Admin readiness (`GET /api/health/ready` with admin bearer) | **Closed** — HTTP **200**; `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** |
 | Rollout readiness (operational + Safety rollout gates in readiness payload) | **Blocked** — `operationalReadiness` **`degraded`**; Safety rollout readiness **blocked** (missing rollout/proof app settings; incomplete provisioning prerequisites); **not** an authentication or admin-role failure |
-| Role matrix | **Pending** |
+| Role matrix | **Blocked** — post–Entra assignment re-run: sole Hedrick `az account` identity still issues API token with `roles: Admin` only (no `HBIntelSafetyReviewer` / `HBIntelSafetySubmitter` / `HBIntelSafetyOperator` in JWT); evidence `.tmp/functions-validation/role-matrix-20260424T211708Z/` |
 | Hosted workbook preview | **Pending** |
 | Live ingest | **Not authorized** |
 
@@ -690,17 +685,54 @@ az account get-access-token \
 
 Then call `GET /api/health/ready` with the bearer token and capture HTTP status, `operationalReadiness`, `safetyPermissionPosture`, `safetyRolloutReadiness`, `rolloutPermissionInventory`, and issue codes.
 
-### Role-matrix proof
+## Role Matrix Proof
 
-| Gate | Status |
-| ---- | ------ |
-| Reviewer ingest → expected `403` | **Pending** |
-| Submitter replay → expected `403` | **Pending** |
-| Operator preview empty payload → expected validation failure such as `400` | **Pending** |
+**Timestamp (UTC):** `2026-04-24T21:17:08Z` (evidence folder suffix `20260424T211708Z`) — **re-run after Enterprise Application app-role assignment** (per operator).
 
-Reason: no fresh role-specific `REVIEWER_TOKEN`, `SUBMITTER_TOKEN`, or `OPERATOR_TOKEN` was acquired through an approved workflow. No stale token variables were used.
+| Field | Value |
+| ----- | ----- |
+| Live host | `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net` |
+| API audience | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
+| Token source type | **Azure CLI** delegated `az account get-access-token --resource <API_AUDIENCE>` (JWT never written to evidence files) |
 
-Evidence: `.tmp/functions-validation/role-matrix-status-final-proof.txt`
+**CLI identity inventory (`az account list`):** two subscriptions — `bfetting@hedrickbrothers.com` (tenant `0e834bd7-628b-42c8-b9ec-ecebc9719be4`, default) and `bfetting@kmeholding.com` (separate tenant; cannot request this API audience).
+
+**Safe claim summary (Hedrick default principal — diagnostic only, not used for Safety POST proof):**
+
+| Claim | Value |
+| ----- | ----- |
+| `aud` | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
+| `iss` | `https://sts.windows.net/0e834bd7-628b-42c8-b9ec-ecebc9719be4/` |
+| `tid` | `0e834bd7-628b-42c8-b9ec-ecebc9719be4` |
+| `oid_present` | **true** |
+| `upn` | `bfetting@hedrickbrothers.com` |
+| `preferred_username` | *(absent)* |
+| `scp` | `access_as_user` |
+| `roles` | **`["Admin"]` only** — **does not** contain `HBIntelSafetyReviewer`, `HBIntelSafetySubmitter`, or `HBIntelSafetyOperator` |
+| `ver` | `1.0` |
+
+**Per–proof-principal tokens:** **not acquired** — `reviewer-claims.safe.json`, `submitter-claims.safe.json`, and `operator-claims.safe.json` each set `token_acquired_for_proof: false` with the same CLI probe embedded. **Admin token was not substituted** for the three POSTs.
+
+| Gate | Route | Expected | Actual | Verdict |
+| ---- | ----- | -------- | ------ | ------- |
+| Reviewer | `POST /api/safety-records/ingest` (`{}`) | `403` | **Not run** | **Blocked** — no `HBIntelSafetyReviewer` bearer |
+| Submitter | `POST /api/safety-records/replay` (`{}`) | `403` | **Not run** | **Blocked** — no `HBIntelSafetySubmitter` bearer |
+| Operator | `POST /api/safety-records/ingest/preview` (`{}`) | `400`/`422` (not `401`/`403`) | **Not run** | **Blocked** — no `HBIntelSafetyOperator` bearer |
+
+**Secret scan:** `secret-scan.txt` in the evidence folder — **PASS** (no `Bearer ` / `eyJ` substrings).
+
+**Mutation-capable actions avoided:** no live ingest, no replay with `parentRunId`, no hosted workbook preview, no deploy, no app settings change, no `HBC_FUNCTIONS_BUILD_*` restamp.
+
+**Evidence folder (local, not committed):** `.tmp/functions-validation/role-matrix-20260424T211708Z/`
+
+- `role-matrix-summary.md`, `secret-scan.txt`
+- `reviewer-claims.safe.json`, `reviewer-ingest-status.txt`, `reviewer-ingest-response.sanitized.json`
+- `submitter-claims.safe.json`, `submitter-replay-status.txt`, `submitter-replay-response.sanitized.json`
+- `operator-claims.safe.json`, `operator-preview-status.txt`, `operator-preview-response.sanitized.json`
+
+**Interpretation / unblocker:** Entra **Enterprise Application** assignments do not affect this proof until **the signed-in user’s access token** includes the new app roles. Either (a) assignments were not applied to `bfetting@hedrickbrothers.com`, (b) propagation delay / need new sign-in, or (c) assignments are on **other users** who must run `az login` on this workstation so they appear in `az account list`. Then re-acquire tokens and re-run the three POSTs.
+
+**Remaining gates:** role matrix (still); **hosted workbook preview** pending; **live ingest** not authorized; **rollout readiness** still blocked per `/api/health/ready` posture.
 
 ### Hosted workbook preview proof
 
@@ -716,16 +748,16 @@ Evidence: `.tmp/functions-validation/workbook-preview-status-final-proof.txt`
 ### Remaining gates
 
 - **Rollout readiness:** remediate missing rollout/proof app settings and provisioning prerequisites until `operationalReadiness` and Safety rollout gates in `/api/health/ready` align with release policy (full JSON captured: `.tmp/functions-validation/health-ready-full-20260424T203332Z.json`; see **Full readiness JSON capture — remediation checklist**).
-- **Role matrix:** acquire approved role-specific reviewer/submitter/operator tokens and run the role-matrix proof.
+- **Role matrix:** **blocked** — JWT for default CLI user still lacks Safety app roles after Entra assignment work; `az login` as each assigned test UPN (or wait for propagation on this user), then re-run POST proof (evidence: `.tmp/functions-validation/role-matrix-20260424T211708Z/`).
 - **Hosted workbook preview:** use real SharePoint reporting-period/project context plus an authorized preview token. Proceed to ingest only if preview is clean and the operator authorizes commit-path proof.
 
 ### Verdict after post-deployment proof pass
 
-**Deployment and route proof closed; Entra consent resolved; admin /api/health/ready call closed; rollout/posture readiness blocked; role matrix and hosted workbook preview pending; live ingest not authorized.**
+**Deployment and route proof closed; Entra consent resolved; admin /api/health/ready call closed; rollout/posture readiness blocked; role matrix blocked (missing role-specific tokens; 2026-04-24 UTC evidence); hosted workbook preview pending; live ingest not authorized.**
 
 **Re-check (2026-04-24 UTC — Safety Proof Gates plan execution):** Entra consent **still blocks** Azure CLI delegated token acquisition against `api://08c399eb-a394-4087-b859-659d493f8dc7` (**`AADSTS65001` / `consent_required`** for Microsoft Azure CLI `04b07795-8ddb-461a-bbee-02f9e1bf7b46`). **`GET /api/health/ready` with admin bearer was not run**; **role-matrix** and **hosted workbook preview** were **not run** (no fabricated token, role, preview, or ingest proof). **No deployment** and **no `HBC_FUNCTIONS_BUILD_*` app-settings restamp** were performed during this pass. Baseline **`/api/health`** (HTTP **200**) was captured **only** as runtime identity context, not as deployed-code proof. Evidence: `.tmp/functions-validation/proof-pass-20260424-*` (see section **Proof pass — 2026-04-24 UTC** below).
 
-**Supersession (post-consent operator proof):** Entra consent for delegated acquisition to `api://08c399eb-a394-4087-b859-659d493f8dc7` is **resolved**. **`GET /api/health/ready`** returned **HTTP 200** with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** using a token whose safe claims include `scp=access_as_user` and **`Admin`** app role. **Rollout readiness remains blocked** by configured gates (`operationalReadiness` **`degraded`**; Safety rollout readiness blocked for missing rollout/proof app settings and incomplete provisioning prerequisites). **Role matrix** and **hosted workbook preview** remain **pending**; **live ingest** is **not authorized**. Evidence: `.tmp/functions-validation/proof-pass-admin-ready-20260424-*` and section **Post-consent admin readiness — operator proof** under **Proof pass — 2026-04-24 UTC** below.
+**Supersession (post-consent operator proof):** Entra consent for delegated acquisition to `api://08c399eb-a394-4087-b859-659d493f8dc7` is **resolved**. **`GET /api/health/ready`** returned **HTTP 200** with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** using a token whose safe claims include `scp=access_as_user` and **`Admin`** app role. **Rollout readiness remains blocked** by configured gates (`operationalReadiness` **`degraded`**; Safety rollout readiness blocked for missing rollout/proof app settings and incomplete provisioning prerequisites). **Role matrix** is **blocked** until Reviewer/Submitter/Operator delegated tokens exist on CLI (see `.tmp/functions-validation/role-matrix-20260424T211708Z/`). **Hosted workbook preview** remains **pending**; **live ingest** is **not authorized**. Evidence: `.tmp/functions-validation/proof-pass-admin-ready-20260424-*` and section **Post-consent admin readiness — operator proof** under **Proof pass — 2026-04-24 UTC** below.
 
 ### Issue #74 — Functions Workflow Trigger Restriction
 
@@ -772,7 +804,7 @@ The workflow file itself remains in `push.paths` by design so deployment workflo
 
 **Verdict (historical — pre-consent):** Automated token acquisition previously failed with **`AADSTS65001`**; see evidence files and **Proof pass — 2026-04-24 UTC** below.
 
-**Overall classification:** Deployment and route proof **closed**; admin **HTTP call** to `/api/health/ready` **closed**; **rollout/posture readiness blocked**; role matrix and hosted workbook preview **pending**; live ingest **not authorized**.
+**Overall classification:** Deployment and route proof **closed**; admin **HTTP call** to `/api/health/ready` **closed**; **rollout/posture readiness blocked**; role matrix **blocked** (token/assignment gap); hosted workbook preview **pending**; live ingest **not authorized**.
 
 ### Live target and API audience
 
@@ -978,15 +1010,43 @@ rm -f "$TOKEN_TMP"
 
 Evidence: `.tmp/functions-validation/proof-pass-admin-ready-20260424-operator-summary.txt`, `.tmp/functions-validation/proof-pass-admin-ready-20260424-ready-sanitized.json`.
 
+### Latest `/api/health/ready` capture — after `SHAREPOINT_APP_CATALOG_URL` apply (2026-04-24 UTC)
+
+| Item | Value |
+| ----- | ----- |
+| Azure change | `az functionapp config appsettings set -g hb-intel -n hb-intel-function-app --settings SHAREPOINT_APP_CATALOG_URL=https://hedrickbrotherscom.sharepoint.com/sites/appcatalog` — **no** `HBC_FUNCTIONS_BUILD_*` restamp. |
+| Catalog URL source | Microsoft Graph `GET https://graph.microsoft.com/v1.0/sites/hedrickbrotherscom.sharepoint.com:/sites/appcatalog` → `webUrl` **`https://hedrickbrotherscom.sharepoint.com/sites/appcatalog`** (pre-apply verification). |
+| `GET /api/health/ready` | HTTP **200**; `requestId` **`e335cda7-693f-480c-9435-ebd66dbae234`** (delegated token audience `api://08c399eb-a394-4087-b859-659d493f8dc7`; token material **not** stored in evidence files). |
+| `provisioningPrereqs.appCatalog` | **`true`** (was **`false`** in `.tmp/functions-validation/health-ready-full-20260424T203332Z.json`). |
+| `provisioningPrereqs` still **`false`** | `graphPermission`, `hubSite`, `spfxAppId` — see **Hub / SPFx determination** below. |
+| `safetyRolloutReadiness.ready` | **`false`** — same eight `issueCodes` as prior capture (tightened proof, Sites.Selected confirmation, rollout gate/checkpoint still absent). |
+| `configTiers.provisioning` | **`incomplete`** (hub + SPFx + Graph confirmation still open). |
+
+Artifacts: `.tmp/functions-validation/health-ready-full-20260424T213921Z.json` (full body), `health-ready-full-20260424T213921Z-http.txt`, `health-ready-full-20260424T213921Z-readiness-extract.json`.
+
+#### Hub site id (`SHAREPOINT_HUB_SITE_ID`) — determination status
+
+- **Not set on the Function App** in this pass (no fabricated hub proof).
+- **PnP contract:** Step 7 calls `joinHubSiteById` with the configured GUID ([`sharepoint-provisioning-service.ts`](../../../../../../backend/functions/src/services/sharepoint-provisioning-service.ts)); the value must match a **SharePoint-registered hub site** id, not merely “a site we use for projects.”
+- **Graph fact (site addressing, not hub registration proof):** `GET /v1.0/sites/hedrickbrotherscom.sharepoint.com:/sites/HBCentral` returns composite `id` **`hedrickbrotherscom.sharepoint.com,a40963f8-7702-4f7a-a65b-27e6bf96a09e,b0421fa9-8885-4449-b281-95a5f4512102`** — middle segment **`a40963f8-7702-4f7a-a65b-27e6bf96a09e`** is the usual **site collection id** encoding for that URL; it is a **candidate** hub join id **only if** HB Central is the designated tenant hub. Aligns with live **`SHAREPOINT_PROJECTS_SITE_URL`** pointing at `/sites/HBCentral`, but **does not** prove hub registration.
+- **Blocked automation:** SharePoint REST `GET https://hedrickbrotherscom.sharepoint.com/_api/HubSites` with Azure CLI–issued SharePoint resource token returned **`401`** body **`{"error":"invalid_request"}`** (no hub enumeration in this session). Microsoft Graph site search / catalog list APIs were not usable here without **`Sites.Read.All`** (search returned **403**) or returned **empty** catalog lists under the current token.
+- **Operator / portal next step:** SharePoint admin center or `Get-SPOHubSite` / support ticket — confirm which hub **`SiteId`** must receive new project-site associations; set **`SHAREPOINT_HUB_SITE_ID`** to that confirmed id.
+
+#### SPFx product id (`HB_INTEL_SPFX_APP_ID`) — determination status
+
+- **Not set on the Function App** in this pass (no tenant catalog package enumeration succeeded).
+- **Graph:** `GET /v1.0/sites/{appcatalogGraphId}/lists?$top=100` returned **`value: []`** for the app catalog site id resolved above (insufficient visibility or API shape for “Apps for SharePoint” in this token context).
+- **Repo build ids (candidates only — must match deployed catalog `ProductId`):** e.g. Safety solution id **`e78a16be-7853-40a4-be18-3b01b3ca405d`** ([`apps/safety/config/package-solution.json`](../../../../../../apps/safety/config/package-solution.json)); Admin **`a77a1dbc-7ba3-42e1-b8f1-3524550dd136`** ([`apps/admin/config/package-solution.json`](../../../../../../apps/admin/config/package-solution.json)); Foleon shell **`c23635f5-ab4d-44c2-96b5-2a2c90f4afc0`** ([`tools/spfx-shell/config/package-solution.json`](../../../../../../tools/spfx-shell/config/package-solution.json)); other packages under `apps/*/config/package-solution.json`. **Pick the id of the package Step 5 actually installs** (tenant App Catalog UI or ALM `AvailableApps` with appropriate SharePoint app-only rights).
+
 ### Full readiness JSON capture — remediation checklist (2026-04-24 UTC)
 
-Apply in order appropriate to your change window; each item maps to live `issueCodes` and/or `provisioningPrereqs` / `configTiers` from `.tmp/functions-validation/health-ready-full-20260424T203332Z.json`.
+Apply in order appropriate to your change window; each item maps to live `issueCodes` and/or `provisioningPrereqs` / `configTiers` from `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` **superseded for `appCatalog` status by** `.tmp/functions-validation/health-ready-full-20260424T213921Z.json`.
 
 **Provisioning prerequisites (`configTiers.provisioning` = `incomplete`):**
 
 1. Set **`GRAPH_GROUP_PERMISSION_CONFIRMED=true`** after Entra **`Group.ReadWrite.All`** consent is confirmed for provisioning control-plane (currently `provisioningPrereqs.graphPermission` = `false`).
 2. Set **`SHAREPOINT_HUB_SITE_ID`** to the hub site id (`provisioningPrereqs.hubSite` = `false`).
-3. Set **`SHAREPOINT_APP_CATALOG_URL`** to the tenant app catalog URL (`provisioningPrereqs.appCatalog` = `false`).
+3. ~~Set **`SHAREPOINT_APP_CATALOG_URL`** to the tenant app catalog URL (`provisioningPrereqs.appCatalog` = `false`).~~ **Done** — see **Latest `/api/health/ready` capture — after `SHAREPOINT_APP_CATALOG_URL` apply** (`provisioningPrereqs.appCatalog` = **`true`** in `health-ready-full-20260424T213921Z.json`).
 4. Set **`HB_INTEL_SPFX_APP_ID`** to the deployed SPFx solution app id (`provisioningPrereqs.spfxAppId` = `false`).
 5. **`OPEX_MANAGER_UPN`** is already satisfied (`opexManager` = `true` in capture).
 
@@ -1008,17 +1068,17 @@ Apply in order appropriate to your change window; each item maps to live `issueC
 
 **Not in this pass:** role matrix, hosted workbook preview, live ingest (see **Remaining gates (current)**).
 
-### Rollout remediation — repo findings (no fabricated proof; no live app changes in this commit)
+### Rollout remediation — repo findings and live actions (no fabricated proof booleans)
 
-**SharePoint URLs / IDs (repo truth, not live-inferred):**
+**SharePoint URLs / IDs:**
 
-- **`SHAREPOINT_APP_CATALOG_URL`:** Canonical pattern documented in [backend/functions/README.md](../../../../../backend/functions/README.md) is **`{SHAREPOINT_TENANT_URL host}/sites/appcatalog`** (example reference tenant: `https://hbconstruction.sharepoint.com/sites/appcatalog`). **Action:** set to the **actual** tenant app catalog site URL for the environment that owns `SHAREPOINT_TENANT_URL` (confirm in SharePoint Admin Center if the catalog lives on a non-default path).
-- **`SHAREPOINT_HUB_SITE_ID`:** **Not** present in repo as a live GUID — obtain from SharePoint (hub site **Site Id** / Graph `id`) and set in app configuration.
-- **`HB_INTEL_SPFX_APP_ID`:** **Not** present in repo as a live product id — obtain from **Tenant App Catalog** (solution package **Product Id**) for the deployed HB Intel SPFx package.
+- **`SHAREPOINT_APP_CATALOG_URL`:** **Applied** on live **`hb-intel-function-app`** (rg **`hb-intel`**) to **`https://hedrickbrotherscom.sharepoint.com/sites/appcatalog`**, matching Graph-resolved `webUrl` for `…:/sites/appcatalog`. Canonical pattern remains documented in [backend/functions/README.md](../../../../../../backend/functions/README.md).
+- **`SHAREPOINT_HUB_SITE_ID`:** **Still unset** in Azure — see **Hub site id** subsection under **Latest `/api/health/ready` capture** for candidate vs proof requirements.
+- **`HB_INTEL_SPFX_APP_ID`:** **Still unset** in Azure — see **SPFx product id** subsection for repo candidate GUIDs vs tenant catalog proof.
 
 **Confirmation booleans (do not set `true` without real evidence):**
 
-- **`GRAPH_GROUP_PERMISSION_CONFIRMED=true`:** Justified only after IT confirms **application permission `Group.ReadWrite.All`** for the Functions app identity per [backend/functions/src/utils/validate-config.ts](../../../../../backend/functions/src/utils/validate-config.ts) and provisioning docs (README **Provisioning Staging Gates**). **Action:** Entra portal → App registration → API permissions → verify granted admin consent; export evidence; then set the flag.
+- **`GRAPH_GROUP_PERMISSION_CONFIRMED=true`:** Justified only after IT confirms **application permission `Group.ReadWrite.All`** for the Functions app identity per [backend/functions/src/utils/validate-config.ts](../../../../../../backend/functions/src/utils/validate-config.ts) and provisioning docs (README **Provisioning Staging Gates**). **Action:** Entra portal → App registration → API permissions → verify granted admin consent; export evidence; then set the flag.
 - **`SITES_SELECTED_GRANT_CONFIRMED=true`:** Justified only after **per-site `Sites.Selected` admin consent** for the Safety resource sites is verified (Option A2 workflow). **Action:** SharePoint / Graph grant audit; do **not** set from repo inspection alone.
 
 **Safety tightened / rollout proof flags (remain blocked in this session per policy):**
@@ -1046,7 +1106,7 @@ Apply in order appropriate to your change window; each item maps to live `issueC
 
 ### Remaining gates (current)
 
-1. **Rollout readiness:** remediate app settings / provisioning until Safety rollout gates clear (see **Remediation checklist** under **Full readiness JSON capture**). Full `/api/health/ready` JSON is archived locally at `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` (not committed).
+1. **Rollout readiness:** remediate app settings / provisioning until Safety rollout gates clear (see **Remediation checklist** under **Full readiness JSON capture**). Full `/api/health/ready` JSON is archived locally at `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` and **post–app-catalog apply** at `.tmp/functions-validation/health-ready-full-20260424T213921Z.json` (not committed).
 2. **Role matrix** with approved reviewer/submitter/operator tokens.
 3. **Hosted workbook preview** with real SharePoint + project context.
 4. **Live ingest** only after clean preview and explicit operator authorization.
@@ -1070,3 +1130,7 @@ Apply in order appropriate to your change window; each item maps to live `issueC
 | `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` | Full `/api/health/ready` JSON (no bearer/JWT material) |
 | `.tmp/functions-validation/health-ready-full-20260424T203332Z-http.txt` | HTTP status line output (`200`) |
 | `.tmp/functions-validation/health-ready-full-20260424T203332Z-readiness-extract.json` | Non-secret subset for quick diffing |
+| `.tmp/functions-validation/health-ready-full-20260424T213921Z.json` | Full `/api/health/ready` after **`SHAREPOINT_APP_CATALOG_URL`** apply (`provisioningPrereqs.appCatalog` **true**) |
+| `.tmp/functions-validation/health-ready-full-20260424T213921Z-http.txt` | HTTP status (`200`) for post-catalog capture |
+| `.tmp/functions-validation/health-ready-full-20260424T213921Z-readiness-extract.json` | Non-secret subset for post-catalog capture |
+| `.tmp/functions-validation/hub-sites-rest-probe-20260424T213800Z.txt` | SharePoint `/_api/HubSites` probe outcome (**401** `invalid_request` with CLI-issued SPO token — hub list not machine-readable in this pass) |
