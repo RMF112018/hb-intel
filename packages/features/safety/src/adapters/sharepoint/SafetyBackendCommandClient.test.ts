@@ -191,6 +191,44 @@ describe('SafetyBackendCommandClient', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('classifies 403 as auth and does not retry', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(errorResponse(403, { message: 'forbidden', code: 'FORBIDDEN' }));
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      getApiToken: async () => 'token-403',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+      maxAttempts: 3,
+    });
+
+    await expect(client.ingest(ingestionRequest)).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'auth',
+      retryable: false,
+      attempts: 1,
+      code: 'FORBIDDEN',
+    } satisfies Partial<SafetyBackendCommandError>);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('classifies 400 as contract and does not retry', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(errorResponse(400, { message: 'invalid body', code: 'VALIDATION_ERROR' }));
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      getApiToken: async () => 'token-400',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+      maxAttempts: 3,
+    });
+
+    await expect(client.preview(ingestionRequest)).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'contract',
+      retryable: false,
+      attempts: 1,
+      code: 'VALIDATION_ERROR',
+    } satisfies Partial<SafetyBackendCommandError>);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('surfaces token acquisition errors before transport', async () => {
     const fetchSpy = vi.fn();
     const client = new SafetyBackendCommandClient({

@@ -122,6 +122,18 @@ export {
   downloadUploadedWorkbook,
   type DownloadedWorkbook,
 } from './adapters/sharepoint/downloadUploadedWorkbook.js';
+export type {
+  SafetyBackendCommandOptions,
+  SafetyBackendCommandResult,
+  SafetyBackendDiagnostic,
+  SafetyBackendErrorEnvelope,
+  SafetyBackendFailureEnvelope,
+  SafetyBackendIngestionRequest,
+  SafetyBackendOperationResult,
+  SafetyBackendPreviewOperationResult,
+  SafetyBackendReplayRequest,
+  SafetyBackendSuccessEnvelope,
+} from './adapters/sharepoint/backendContracts.js';
 
 // -- Ingestion -----------------------------------------------------------
 export { runIngestionPipeline } from './ingestion/runIngestionPipeline.js';
