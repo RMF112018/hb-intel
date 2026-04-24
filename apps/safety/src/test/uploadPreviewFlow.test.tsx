@@ -1,3 +1,4 @@
+/* eslint-disable @hb-intel/hbc/no-raw-form-elements */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -89,6 +90,18 @@ vi.mock('@hbc/ui-kit', () => ({
       />
     </label>
   ),
+  HbcCheckbox: ({ label, checked, onChange, disabled }: any) => (
+    <label>
+      <input
+        type="checkbox"
+        aria-label={label}
+        checked={checked}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      {label}
+    </label>
+  ),
   HbcTypography: ({ children }: any) => <span>{children}</span>,
 }));
 
@@ -143,12 +156,22 @@ function configurePreview(
     commitReadiness: boolean;
     blockers?: Array<{ code: string; message: string; severity: 'error' }>;
     warnings?: Array<{ code: string; message: string; severity: 'warning' }>;
+    markerState?: 'markered-valid' | 'markered-invalid' | 'markerless';
   },
 ): void {
   previewState.data = {
     commitReadiness: options.commitReadiness,
     template: { valid: true, templateVersion: 'v1', parserContractVersion: 'p1' },
     metadata: {},
+    metadataAuthority: {
+      inspectionDate: { source: 'parser-meta', usedContext: false },
+      inspectionNumber: { source: 'named-range', usedContext: false },
+      projectSite: 'parser-meta',
+      keyFindings: 'named-range',
+      reportingWeekStart: 'parser-meta',
+      reportingWeekEnd: 'parser-meta',
+      reportingPeriodLabel: 'named-range',
+    },
     reportingPeriod: { resolved: true, dateInRange: true },
     projectResolution: { resolved: true, classification: 'project' },
     duplicateRisk: { confidence: 'none', supersessionRisk: false },
@@ -161,7 +184,7 @@ function configurePreview(
       warningCodes: (options.warnings ?? []).map((item) => item.code),
       checks: {
         templateValid: true,
-        parserContractMarkerState: 'markered-valid',
+        parserContractMarkerState: options.markerState ?? 'markered-valid',
         parseSucceeded: true,
         reportingPeriodResolved: true,
         reportingPeriodDateInRange: true,
@@ -308,5 +331,23 @@ describe('UploadPage preview-before-commit flow', () => {
     rerender(<UploadPage />);
     expect(screen.getByRole('button', { name: /committing/i })).toBeDisabled();
     expect(screen.getByRole('button', { name: /cancel commit/i })).toBeInTheDocument();
+  });
+
+  it('renders parser-authority diagnostics and marker-state copy', async () => {
+    configurePreview({ commitReadiness: true, markerState: 'markered-valid' });
+    const user = userEvent.setup();
+    render(<UploadPage />);
+
+    await user.click(screen.getByRole('button', { name: /pick project/i }));
+    await user.click(screen.getByRole('button', { name: /select file/i }));
+    await user.type(screen.getByLabelText(/inspection number/i), '11');
+    await user.type(screen.getByLabelText(/inspection date/i), '2026-04-24');
+    await user.click(screen.getByRole('button', { name: /preview checklist/i }));
+
+    expect(screen.getByText(/authority rule: for markered templates/i)).toBeInTheDocument();
+    expect(screen.getByText(/parser contract: p1 \/ marker state: markered-valid/i)).toBeInTheDocument();
+    expect(screen.getByText(/metadata authority/i)).toBeInTheDocument();
+    expect(screen.getByText(/inspection date: parser-meta/i)).toBeInTheDocument();
+    expect(screen.getByText(/inspection number: named-range/i)).toBeInTheDocument();
   });
 });

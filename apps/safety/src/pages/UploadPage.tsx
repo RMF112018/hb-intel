@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   HbcButton,
   HbcCard,
+  HbcCheckbox,
   HbcSelect,
   HbcStatusBadge,
   HbcTextField,
@@ -35,6 +36,7 @@ import {
   uploadFailureMessage,
   type SupportDetails,
 } from './supportTruth.js';
+import { formatAuthoritySource, formatMarkerState } from './previewDiagnostics.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 const VISUALLY_HIDDEN_STYLE = {
@@ -71,10 +73,9 @@ function isValidInspectionNumber(value: string): boolean {
  * UploadPage — Phase-04 audit G-03 Wave 2 revision.
  *
  * Structured intake + workbook submission. Operators confirm project and
- * inspection metadata BEFORE uploading; those operator-entered values are
- * authoritative for SafetyInspectionEvents.ProjectNumber, InspectionNumber,
- * and InspectionDate writes. Workbook-parsed equivalents become secondary
- * (provenance + advisory mismatch).
+ * inspection metadata BEFORE uploading. Preview then applies parser-authority
+ * rules: markered parser-meta/named-range values win; operator-entered
+ * metadata remains context/provenance and may be used for legacy fallback.
  *
  * Runway:
  *   1. Masthead
@@ -403,7 +404,7 @@ export function UploadPage(): ReactNode {
         <SafetyMasthead
           eyebrow="Safety · Upload"
           title="Submit a completed checklist"
-          description="Confirm the project and inspection details, then upload the completed v1 Safety Checklist workbook. Your selections populate the authoritative Safety record; the workbook provides provenance and scoring."
+          description="Confirm project and inspection details, then upload the completed v1 Safety Checklist workbook. Preview shows parser authority, compatibility, and commit blockers before commit."
           meta={
             activePeriod
               ? [
@@ -421,7 +422,7 @@ export function UploadPage(): ReactNode {
           <SafetyIntakeStep
             stepNumber={1}
             title="Project"
-            description="Search by project name or number. Operator-selected project populates the authoritative Safety inspection record."
+            description="Search by project name or number. Selection provides intake context for preview, project resolution, and commit."
             status={projectStatus}
             statusLabel={projectStatus === 'ready' ? 'Selected' : undefined}
           >
@@ -458,8 +459,8 @@ export function UploadPage(): ReactNode {
                   }
                 />
                 <HbcTypography intent="bodySmall">
-                  Integer inspection number from the source workbook. This is
-                  the authoritative value for the safety record.
+                  Integer inspection number used as intake context. For markered
+                  templates, parser-meta/named-range values remain authoritative.
                 </HbcTypography>
               </div>
               <div className="safety-project-picker-field">
@@ -627,17 +628,14 @@ export function UploadPage(): ReactNode {
                   Cancel preview
                 </HbcButton>
               )}
-              <label className="safety-intake-confirm">
-                <input
-                  type="checkbox"
+              <div className="safety-intake-confirm">
+                <HbcCheckbox
+                  label="I confirm this commit uses the latest previewed checklist and intake context."
                   checked={previewConfirmed}
                   disabled={!preview.data?.commitReadiness || preview.isPending}
-                  onChange={(event) => setPreviewConfirmed(event.target.checked)}
+                  onChange={(checked) => setPreviewConfirmed(checked)}
                 />
-                <HbcTypography intent="bodySmall">
-                  I confirm this commit uses the latest previewed checklist and intake context.
-                </HbcTypography>
-              </label>
+              </div>
               {previewBlockedReason && !ingestion.isPending && !preview.data && (
                 <HbcTypography intent="bodySmall">
                   {previewBlockedReason}
@@ -809,6 +807,8 @@ function PreviewSummary({
 }: {
   readonly preview: SafetyIngestionPreviewResult;
 }): ReactNode {
+  const authority = preview.metadataAuthority;
+  const markerState = formatMarkerState(preview.diagnosticSummary.checks.parserContractMarkerState);
   return (
     <div className="safety-preview-summary" data-safety-ui="preview-summary">
       <HbcTypography intent="label">Preview diagnostics</HbcTypography>
@@ -816,11 +816,21 @@ function PreviewSummary({
         Commit readiness: {preview.commitReadiness ? 'ready' : 'blocked'} · failure class:{' '}
         {preview.diagnosticSummary.failureClass}
       </HbcTypography>
+      <HbcTypography intent="bodySmall">
+        Authority rule: for markered templates, parser-meta and named-range values are authoritative;
+        intake context is advisory unless legacy fallback is used.
+      </HbcTypography>
       <ul>
         <li>
           <HbcTypography intent="bodySmall">
             Template: {preview.template.valid ? 'compatible' : 'incompatible'} (
             {preview.template.templateVersion ?? 'unknown'})
+          </HbcTypography>
+        </li>
+        <li>
+          <HbcTypography intent="bodySmall">
+            Parser contract: {preview.template.parserContractVersion ?? 'unknown'} / marker state:{' '}
+            {markerState}
           </HbcTypography>
         </li>
         <li>
@@ -847,6 +857,42 @@ function PreviewSummary({
           </HbcTypography>
         </li>
       </ul>
+      {authority && (
+        <>
+          <HbcTypography intent="label">Metadata authority</HbcTypography>
+          <ul>
+            <li>
+              <HbcTypography intent="bodySmall">
+                Inspection date: {authority.inspectionDate.source}
+                {authority.inspectionDate.usedContext ? ' (context fallback used)' : ''}
+              </HbcTypography>
+            </li>
+            <li>
+              <HbcTypography intent="bodySmall">
+                Inspection number: {authority.inspectionNumber.source}
+                {authority.inspectionNumber.usedContext ? ' (context fallback used)' : ''}
+              </HbcTypography>
+            </li>
+            <li>
+              <HbcTypography intent="bodySmall">
+                Project site: {formatAuthoritySource(authority.projectSite)} · key findings:{' '}
+                {formatAuthoritySource(authority.keyFindings)}
+              </HbcTypography>
+            </li>
+            <li>
+              <HbcTypography intent="bodySmall">
+                Reporting week start/end: {formatAuthoritySource(authority.reportingWeekStart)} /{' '}
+                {formatAuthoritySource(authority.reportingWeekEnd)}
+              </HbcTypography>
+            </li>
+            <li>
+              <HbcTypography intent="bodySmall">
+                Reporting period label: {formatAuthoritySource(authority.reportingPeriodLabel)}
+              </HbcTypography>
+            </li>
+          </ul>
+        </>
+      )}
       <HbcTypography intent="label">Blocking errors ({preview.blockingErrors.length})</HbcTypography>
       <ul>
         {preview.blockingErrors.length === 0 ? (
