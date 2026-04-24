@@ -522,30 +522,65 @@ export class SafetyIngestionGraphDataPlane {
       return { listItemId: directListItemId, webUrl: uploadBody.webUrl };
     }
 
-    const escaped = escapeODataLiteral(input.fileName);
-    const rows = await this.listItems(input.siteUrl, input.listId, {
-      filter: `fields/FileLeafRef eq '${escaped}'`,
-      select: ['FileLeafRef'],
-      orderBy: 'lastModifiedDateTime desc',
-      top: 1,
+    const fallback = await this.resolveUploadedListItemId({
+      siteId,
+      listId: input.listId,
+      safeFileName: safeName,
+      uploadDriveItemId: uploadBody.id,
     });
-    const fallbackId = Number(rows[0]?.id ?? '0');
-    if (!Number.isFinite(fallbackId) || fallbackId <= 0) {
-      throw new Error(`graph.upload-file could not resolve list item id for ${input.fileName}`);
+    if (!fallback) {
+      throw new Error(
+        `graph.upload-file could not resolve list item id for ${input.fileName} without non-indexed list queries`,
+      );
     }
 
     this.log('safety.ingestion.graph.file.uploaded', {
       siteId,
       listId: input.listId,
       fileName: input.fileName,
-      listItemId: fallbackId,
+      listItemId: fallback.listItemId,
       usedFallbackLookup: true,
+      fallbackSource: fallback.source,
     });
 
     return {
-      listItemId: fallbackId,
-      webUrl: uploadBody.webUrl ?? `${normalizeSiteUrl(input.siteUrl)}/${encodeURIComponent(input.fileName)}`,
+      listItemId: fallback.listItemId,
+      webUrl:
+        uploadBody.webUrl ??
+        fallback.webUrl ??
+        `${normalizeSiteUrl(input.siteUrl)}/${encodeURIComponent(input.fileName)}`,
     };
+  }
+
+  private async resolveUploadedListItemId(input: {
+    siteId: string;
+    listId: string;
+    safeFileName: string;
+    uploadDriveItemId?: string;
+  }): Promise<{ listItemId: number; webUrl?: string; source: 'drive-item-id' | 'drive-item-path' } | null> {
+    const fromPayloadId = (input.uploadDriveItemId ?? '').trim();
+    if (fromPayloadId.length > 0) {
+      const byIdPath =
+        `/sites/${input.siteId}/lists/${input.listId}/drive/items/${encodeURIComponent(fromPayloadId)}` +
+        '?$select=id,webUrl,sharepointIds';
+      const byIdResponse = await this.graphFetch('get-drive-item', byIdPath);
+      const byIdBody = (await byIdResponse.json()) as IGraphDriveUploadResponse;
+      const byIdListItemId = Number(byIdBody.sharepointIds?.listItemId ?? '0');
+      if (Number.isFinite(byIdListItemId) && byIdListItemId > 0) {
+        return { listItemId: byIdListItemId, webUrl: byIdBody.webUrl, source: 'drive-item-id' };
+      }
+    }
+
+    const byPath =
+      `/sites/${input.siteId}/lists/${input.listId}/drive/root:/${input.safeFileName}` +
+      '?$select=id,webUrl,sharepointIds';
+    const byPathResponse = await this.graphFetch('get-drive-item-by-path', byPath);
+    const byPathBody = (await byPathResponse.json()) as IGraphDriveUploadResponse;
+    const byPathListItemId = Number(byPathBody.sharepointIds?.listItemId ?? '0');
+    if (Number.isFinite(byPathListItemId) && byPathListItemId > 0) {
+      return { listItemId: byPathListItemId, webUrl: byPathBody.webUrl, source: 'drive-item-path' };
+    }
+    return null;
   }
 
   async downloadFileByListItemId(input: {
