@@ -36,6 +36,7 @@ describe('resolveSafetyRuntimeContract', () => {
         'Accepted backend origin is missing.',
         'Expected manifest ID is missing.',
         'Expected package version is missing.',
+        'Expected API audience is missing.',
         'Expected hosted GUID overlay fingerprint is missing.',
       ]),
     );
@@ -51,7 +52,8 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.35.0',
+        expectedPackageVersion: '1.2.37.0',
+        expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -77,7 +79,8 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.35.0',
+        expectedPackageVersion: '1.2.37.0',
+        expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -97,7 +100,8 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://other-functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.35.0',
+        expectedPackageVersion: '1.2.37.0',
+        expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -126,6 +130,52 @@ describe('resolveSafetyRuntimeContract', () => {
         'Expected manifest ID does not match Safety webpart authority.',
         'Expected package version does not match governed Safety package version.',
       ]),
+    );
+  });
+
+  it('fails closed when property-pane API audience drifts from governed expected audience', () => {
+    configureSafetyListGuids(COMPLETE_HOSTED_OVERLAY);
+    const contract = resolveSafetyRuntimeContract({
+      hasSpfxContext: true,
+      config: {
+        functionAppUrl: 'https://functions.example.com',
+        apiAudience: 'api://operator-typo',
+        acceptedBackendOrigin: 'https://functions.example.com',
+        expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+        expectedPackageVersion: '1.2.37.0',
+        expectedApiAudience: 'api://safety-functions',
+        expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+      },
+    });
+
+    expect(contract.canInitializeCommands).toBe(false);
+    expect(contract.governed.apiAudienceMatchesExpected).toBe(false);
+    expect(contract.blockingReasons).toContain(
+      'API audience does not match governed expected audience.',
+    );
+  });
+
+  it('fails closed when acceptedBackendOrigin is governed separately from functionAppUrl', () => {
+    configureSafetyListGuids(COMPLETE_HOSTED_OVERLAY);
+    // Operator pastes a typo; governed accepted origin is the real allowlist
+    // and does NOT track the property-pane value.
+    const contract = resolveSafetyRuntimeContract({
+      hasSpfxContext: true,
+      config: {
+        functionAppUrl: 'https://attacker.example.com',
+        apiAudience: 'api://safety-functions',
+        acceptedBackendOrigin: 'https://functions.example.com',
+        expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+        expectedPackageVersion: '1.2.37.0',
+        expectedApiAudience: 'api://safety-functions',
+        expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+      },
+    });
+
+    expect(contract.canInitializeCommands).toBe(false);
+    expect(contract.governed.backendOriginMatchesAccepted).toBe(false);
+    expect(contract.blockingReasons).toContain(
+      'Backend base URL origin does not match accepted backend origin.',
     );
   });
 

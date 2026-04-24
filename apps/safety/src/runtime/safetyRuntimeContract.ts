@@ -3,6 +3,10 @@ import {
   findMissingHostedSafetyGuidBindings,
   hostedSafetyGuidOverlayFingerprint,
 } from './hostedSafetyGuidBinding.js';
+import {
+  SAFETY_PACKAGE_VERSION,
+  SAFETY_WEBPART_MANIFEST_ID,
+} from './governedRuntimeBinding.js';
 
 export interface ISafetyMountConfig {
   functionAppUrl?: string;
@@ -12,6 +16,7 @@ export interface ISafetyMountConfig {
   acceptedBackendOrigin?: string;
   expectedManifestId?: string;
   expectedPackageVersion?: string;
+  expectedApiAudience?: string;
   expectedHostedGuidOverlayFingerprint?: string;
 }
 
@@ -39,17 +44,16 @@ export interface ISafetyRuntimeContract {
     readonly acceptedBackendOrigin: string | null;
     readonly expectedManifestId: string | null;
     readonly expectedPackageVersion: string | null;
+    readonly expectedApiAudience: string | null;
     readonly expectedHostedGuidOverlayFingerprint: string | null;
     readonly backendOriginMatchesAccepted: boolean;
     readonly manifestIdMatchesExpected: boolean;
     readonly packageVersionMatchesExpected: boolean;
+    readonly apiAudienceMatchesExpected: boolean;
   };
   readonly canInitializeCommands: boolean;
   readonly blockingReasons: ReadonlyArray<string>;
 }
-
-const SAFETY_WEBPART_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
-const SAFETY_PACKAGE_VERSION = '1.2.35.0';
 
 export function resolveSafetyRuntimeContract(params: {
   readonly hasSpfxContext: boolean;
@@ -70,6 +74,7 @@ export function resolveSafetyRuntimeContract(params: {
   const acceptedBackendOrigin = normalizeOrigin(params.config?.acceptedBackendOrigin);
   const expectedManifestId = normalizeText(params.config?.expectedManifestId);
   const expectedPackageVersion = normalizeText(params.config?.expectedPackageVersion);
+  const expectedApiAudience = normalizeText(params.config?.expectedApiAudience);
   const expectedHostedGuidOverlayFingerprint = normalizeText(params.config?.expectedHostedGuidOverlayFingerprint);
   const actualHostedGuidOverlayFingerprint = hostedSafetyGuidOverlayFingerprint();
   const backendOrigin = baseUrlValid && baseUrl ? new URL(baseUrl).origin : null;
@@ -78,6 +83,7 @@ export function resolveSafetyRuntimeContract(params: {
     : backendOrigin === acceptedBackendOrigin;
   const manifestIdMatchesExpected = expectedManifestId === SAFETY_WEBPART_MANIFEST_ID;
   const packageVersionMatchesExpected = expectedPackageVersion === SAFETY_PACKAGE_VERSION;
+  const apiAudienceMatchesExpected = !!expectedApiAudience && apiAudience === expectedApiAudience;
   const fingerprintMatchesExpected =
     expectedHostedGuidOverlayFingerprint === actualHostedGuidOverlayFingerprint;
 
@@ -110,6 +116,11 @@ export function resolveSafetyRuntimeContract(params: {
       blockingReasons.push('Expected package version is missing.');
     } else if (!packageVersionMatchesExpected) {
       blockingReasons.push('Expected package version does not match governed Safety package version.');
+    }
+    if (!expectedApiAudience) {
+      blockingReasons.push('Expected API audience is missing.');
+    } else if (apiAudiencePresent && !apiAudienceMatchesExpected) {
+      blockingReasons.push('API audience does not match governed expected audience.');
     }
     if (!expectedHostedGuidOverlayFingerprint) {
       blockingReasons.push('Expected hosted GUID overlay fingerprint is missing.');
@@ -144,10 +155,12 @@ export function resolveSafetyRuntimeContract(params: {
       acceptedBackendOrigin,
       expectedManifestId,
       expectedPackageVersion,
+      expectedApiAudience,
       expectedHostedGuidOverlayFingerprint,
       backendOriginMatchesAccepted: backendOriginMatchesAccepted || hostMode === 'mock',
       manifestIdMatchesExpected: manifestIdMatchesExpected || hostMode === 'mock',
       packageVersionMatchesExpected: packageVersionMatchesExpected || hostMode === 'mock',
+      apiAudienceMatchesExpected: apiAudienceMatchesExpected || hostMode === 'mock',
     },
     canInitializeCommands: hostMode === 'mock' || blockingReasons.length === 0,
     blockingReasons,

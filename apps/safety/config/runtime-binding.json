@@ -1,0 +1,7 @@
+{
+  "$schema": "./runtime-binding.schema.json",
+  "acceptedBackendOrigin": "https://hb-intel-api-production.azurewebsites.net",
+  "expectedApiAudience": "api://hb-intel-api-production",
+  "defaultFunctionAppUrl": "https://hb-intel-api-production.azurewebsites.net",
+  "defaultApiAudience": "api://hb-intel-api-production"
+}

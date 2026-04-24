@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import cssInjectedByJs from 'vite-plugin-css-injected-by-js';
 import path from 'node:path';
 import { resolve } from 'path';
+import { readGovernedSafetyDefines } from './config/runtimeDefines.js';
 
 export default defineConfig(({ command, mode }) => {
   const isProduction = command === 'build';
@@ -106,6 +107,7 @@ export default defineConfig(({ command, mode }) => {
       'process.env.HBC_ADAPTER_MODE': mode === 'development' ? '"mock"' : '"proxy"',
       'process.env.HBC_AUTH_MODE': mode === 'development' ? '"mock"' : '"spfx"',
       'process.env.NODE_ENV': JSON.stringify(command === 'serve' ? 'development' : 'production'),
+      ...readGovernedSafetyDefines(),
     },
   };
 });

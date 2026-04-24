@@ -4,7 +4,15 @@
  * SharePoint calls onInit() → render() on this class.
  * This is the bridge between SharePoint page context and the React app.
  *
- * @see docs/architecture/plans/PH7-BW-1-SPFx-Entry-Points.md
+ * Runtime binding is **governed**: the accepted backend origin and expected
+ * API audience come from `governedRuntimeBinding.ts` (baked in at build
+ * time from `config/runtime-binding.json` and `config/package-solution.json`),
+ * NOT from property-pane input. The property pane still accepts the
+ * `functionAppUrl` and `apiAudience` operators configure per site, but the
+ * runtime contract validates those against the governed values and fails
+ * closed on drift — no operator edit can loosen the allowlist.
+ *
+ * @see docs/how-to/safety-runtime-binding.md
  * @decision D-PH7-BW-7 — RBAC permission mapping wired
  */
 import {
@@ -14,6 +22,14 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { mount, unmount } from '../../mount.js';
 import { hostedSafetyGuidOverlayFingerprint } from '../../runtime/hostedSafetyGuidBinding.js';
+import {
+  SAFETY_ACCEPTED_BACKEND_ORIGIN,
+  SAFETY_DEFAULT_API_AUDIENCE,
+  SAFETY_DEFAULT_FUNCTION_APP_URL,
+  SAFETY_EXPECTED_API_AUDIENCE,
+  SAFETY_PACKAGE_VERSION,
+  SAFETY_WEBPART_MANIFEST_ID,
+} from '../../runtime/governedRuntimeBinding.js';
 
 export interface ISafetyWebPartProps {
   description: string;
@@ -23,37 +39,24 @@ export interface ISafetyWebPartProps {
 
 /**
  * Safety SPFx webpart.
- *
- * Lifecycle:
- * - onInit(): async bootstrap (auth bridge wired in BW-2)
- * - render(): mounts <App /> into this.domElement via React 18 createRoot
- * - onDispose(): unmounts React tree to prevent memory leaks
  */
 export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartProps> {
-  private static readonly SAFETY_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
-  private static readonly SAFETY_PACKAGE_VERSION = '1.2.35.0';
-  /**
-   * Called by SharePoint before render(). Resolves SP group membership
-   * into HB Intel permission keys, then bootstraps the auth store.
-   *
-   * @decision D-PH7-BW-7 — RBAC permission mapping
-   */
   public async onInit(): Promise<void> {
     await super.onInit();
   }
 
-  /**
-   * Mounts the React application into the SharePoint-provided DOM element.
-   * Uses React 18 createRoot for concurrent mode support.
-   */
   public render(): void {
-    const acceptedBackendOrigin = this.tryResolveOrigin(this.properties.functionAppUrl);
+    const functionAppUrl =
+      this.properties.functionAppUrl?.trim() || SAFETY_DEFAULT_FUNCTION_APP_URL;
+    const apiAudience =
+      this.properties.apiAudience?.trim() || SAFETY_DEFAULT_API_AUDIENCE;
     void mount(this.domElement, this.context, {
-      functionAppUrl: this.properties.functionAppUrl,
-      apiAudience: this.properties.apiAudience,
-      acceptedBackendOrigin,
-      expectedManifestId: SafetyWebPart.SAFETY_MANIFEST_ID,
-      expectedPackageVersion: SafetyWebPart.SAFETY_PACKAGE_VERSION,
+      functionAppUrl,
+      apiAudience,
+      acceptedBackendOrigin: SAFETY_ACCEPTED_BACKEND_ORIGIN,
+      expectedManifestId: SAFETY_WEBPART_MANIFEST_ID,
+      expectedPackageVersion: SAFETY_PACKAGE_VERSION,
+      expectedApiAudience: SAFETY_EXPECTED_API_AUDIENCE,
       expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
     }).catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
@@ -63,20 +66,6 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
     });
   }
 
-  private tryResolveOrigin(value: string | undefined): string | undefined {
-    const normalized = value?.trim();
-    if (!normalized) return undefined;
-    try {
-      return new URL(normalized).origin;
-    } catch {
-      return undefined;
-    }
-  }
-
-  /**
-   * Cleans up the React root when SharePoint removes the webpart.
-   * Prevents memory leaks from orphaned React trees.
-   */
   protected onDispose(): void {
     unmount();
     super.onDispose();
@@ -95,9 +84,13 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
                 }),
                 PropertyPaneTextField('functionAppUrl', {
                   label: 'Function App URL',
+                  description:
+                    'Operator override. Origin must match the governed accepted backend origin; otherwise the app fails closed.',
                 }),
                 PropertyPaneTextField('apiAudience', {
                   label: 'API Audience',
+                  description:
+                    'Operator override. Must match the governed expected API audience; otherwise the app fails closed.',
                 }),
               ],
             },

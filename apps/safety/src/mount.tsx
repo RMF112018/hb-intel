@@ -28,11 +28,17 @@ import {
   resolveSafetyRuntimeContract,
   type ISafetyMountConfig,
 } from './runtime/safetyRuntimeContract.js';
+import {
+  SAFETY_ACCEPTED_BACKEND_ORIGIN,
+  SAFETY_BUILD_SHA,
+  SAFETY_BUILD_TIMESTAMP,
+  SAFETY_EXPECTED_API_AUDIENCE,
+  SAFETY_PACKAGE_VERSION,
+  SAFETY_WEBPART_MANIFEST_ID,
+} from './runtime/governedRuntimeBinding.js';
 
 /** Shell-injected runtime configuration. Reserved for future wiring. */
 export type IMountConfig = ISafetyMountConfig;
-const SAFETY_WEBPART_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
-const SAFETY_PACKAGE_VERSION = '1.2.35.0';
 
 let root: Root | undefined;
 
@@ -98,12 +104,17 @@ function publishRuntimeBindingProof(
       acceptedBackendOrigin: config?.acceptedBackendOrigin ?? null,
       expectedManifestId: config?.expectedManifestId ?? null,
       expectedPackageVersion: config?.expectedPackageVersion ?? null,
+      expectedApiAudience: config?.expectedApiAudience ?? null,
       expectedHostedGuidOverlayFingerprint: config?.expectedHostedGuidOverlayFingerprint ?? null,
     },
     governedAuthority: {
       expectedManifestId: SAFETY_WEBPART_MANIFEST_ID,
       expectedPackageVersion: SAFETY_PACKAGE_VERSION,
+      expectedAcceptedBackendOrigin: SAFETY_ACCEPTED_BACKEND_ORIGIN,
+      expectedApiAudience: SAFETY_EXPECTED_API_AUDIENCE,
       expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+      buildSha: SAFETY_BUILD_SHA,
+      buildTimestamp: SAFETY_BUILD_TIMESTAMP,
     },
     runtimeContract: {
       canInitializeCommands: runtimeContract.canInitializeCommands,

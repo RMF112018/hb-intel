@@ -17,16 +17,33 @@ describe('Safety production runtime contract source-of-truth', () => {
     expect(mountSource).toContain('__hbIntel_safetyRuntimeBindingProof');
   });
 
-  it('SafetyWebPart delegates render to mount with backend config fields', () => {
+  it('SafetyWebPart delegates render to mount with governed backend config fields', () => {
     const webpartSource = readRepo('apps/safety/src/webparts/safety/SafetyWebPart.tsx');
     expect(webpartSource).toContain('void mount(this.domElement, this.context, {');
-    expect(webpartSource).toContain('functionAppUrl: this.properties.functionAppUrl');
-    expect(webpartSource).toContain('apiAudience: this.properties.apiAudience');
-    expect(webpartSource).toContain('acceptedBackendOrigin');
-    expect(webpartSource).toContain('expectedManifestId: SafetyWebPart.SAFETY_MANIFEST_ID');
-    expect(webpartSource).toContain('expectedPackageVersion: SafetyWebPart.SAFETY_PACKAGE_VERSION');
+    expect(webpartSource).toContain('this.properties.functionAppUrl');
+    expect(webpartSource).toContain('this.properties.apiAudience');
+    expect(webpartSource).toContain(
+      'acceptedBackendOrigin: SAFETY_ACCEPTED_BACKEND_ORIGIN',
+    );
+    expect(webpartSource).toContain('expectedManifestId: SAFETY_WEBPART_MANIFEST_ID');
+    expect(webpartSource).toContain('expectedPackageVersion: SAFETY_PACKAGE_VERSION');
+    expect(webpartSource).toContain('expectedApiAudience: SAFETY_EXPECTED_API_AUDIENCE');
     expect(webpartSource).toContain("PropertyPaneTextField('functionAppUrl'");
     expect(webpartSource).toContain("PropertyPaneTextField('apiAudience'");
+  });
+
+  it('governed binding module is the sole home for manifest/version/origin/audience constants', () => {
+    const binding = readRepo('apps/safety/src/runtime/governedRuntimeBinding.ts');
+    expect(binding).toContain('export const SAFETY_WEBPART_MANIFEST_ID');
+    expect(binding).toContain('export const SAFETY_PACKAGE_VERSION');
+    expect(binding).toContain('export const SAFETY_ACCEPTED_BACKEND_ORIGIN');
+    expect(binding).toContain('export const SAFETY_EXPECTED_API_AUDIENCE');
+
+    // Runtime contract should import — not redeclare.
+    const contract = readRepo('apps/safety/src/runtime/safetyRuntimeContract.ts');
+    expect(contract).toContain("from './governedRuntimeBinding.js'");
+    expect(contract).not.toMatch(/^const SAFETY_WEBPART_MANIFEST_ID\s*=/m);
+    expect(contract).not.toMatch(/^const SAFETY_PACKAGE_VERSION\s*=/m);
   });
 
   it('App wires delegated SPFx token provider into backend command client seam', () => {
