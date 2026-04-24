@@ -6,6 +6,7 @@ import {
 } from './safety-ingestion-graph-data-plane.js';
 import { SharePointTokenAcquisitionError } from './managed-identity-token-service.js';
 import { ReportingPeriodContractError } from './safety-reporting-period-contract.js';
+import { SafetyIngestionCodePathViolationError } from './safety-ingestion-code-path.js';
 
 /**
  * Canonical ingestion-layer failure classes exposed to Safety operators.
@@ -39,6 +40,8 @@ import { ReportingPeriodContractError } from './safety-reporting-period-contract
  * - `reference-validation-error`: Required reference lists are missing/inaccessible.
  * - `target-resolution-error`: Site-target constants conflict with env.
  * - `field-contract-missing`: List-field contract check detected drift.
+ * - `code-path-violation`: Backend ingestion attempted to run via a non-Graph
+ *   repository code path (fail-closed safeguard).
  * - `unknown`: Anything else. Treat as a new class candidate when observed.
  */
 export type SafetyIngestionFailureClass =
@@ -59,6 +62,7 @@ export type SafetyIngestionFailureClass =
   | 'reference-validation-error'
   | 'target-resolution-error'
   | 'field-contract-missing'
+  | 'code-path-violation'
   | 'unknown';
 
 /**
@@ -112,6 +116,15 @@ export function classifyIngestionFailure(
       failureClass: 'item-binding-error',
       errorCode: err.code,
       graphContext: { authLane: 'binding' },
+    };
+  }
+  if (err instanceof SafetyIngestionCodePathViolationError) {
+    return {
+      failureClass: 'code-path-violation',
+      errorCode: err.code,
+      graphContext: {
+        authLane: 'none',
+      },
     };
   }
   const name = (err as { name?: string } | undefined)?.name;

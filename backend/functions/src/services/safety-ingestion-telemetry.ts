@@ -1,6 +1,10 @@
 import { resolveBackendArtifactIdentity } from '../utils/backend-version.js';
 
-export type SafetyIngestionTelemetryOperation = 'ingest' | 'preview' | 'replay';
+export type SafetyIngestionTelemetryOperation =
+  | 'ingest'
+  | 'preview'
+  | 'replay'
+  | 'reporting-period-probe';
 
 export interface ISafetyIngestionTelemetryContext {
   requestId?: string;

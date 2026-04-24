@@ -27,6 +27,8 @@ describe('SafetyIngestionApplicationService preview gate behavior', () => {
 
   it('blocks ingest commit and returns parser-authority-violation when preview detects parser seam drift', async () => {
     const repo = {
+      codePath: 'graph-only',
+      getCodePath: vi.fn(() => 'graph-only'),
       getReportingPeriod: vi.fn(),
       ingestWorkbook: vi.fn(),
       replayIngestion: vi.fn(),
@@ -75,6 +77,70 @@ describe('SafetyIngestionApplicationService preview gate behavior', () => {
     expect(result.diagnostics.some((d) => d.failureClass === 'parser-authority-violation')).toBe(true);
     expect(repo.getReportingPeriod).not.toHaveBeenCalled();
     expect(repo.ingestWorkbook).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when repository codePath is not graph-only', async () => {
+    const repo = {
+      codePath: 'legacy-rest',
+      getCodePath: vi.fn(() => 'legacy-rest'),
+      getReportingPeriod: vi.fn(),
+      ingestWorkbook: vi.fn(),
+      replayIngestion: vi.fn(),
+    };
+    const graphDiscovery = {
+      resolveListId: vi.fn(async (_siteUrl: string, title: string) => `${title}-id`),
+    };
+    const service = new SafetyIngestionApplicationService(
+      {} as never,
+      graphDiscovery as never,
+      () => repo as never,
+    );
+
+    const result = await service.ingestSafetyWorkbook(makeRequest(), 'req-code-path');
+
+    expect(result.success).toBe(false);
+    expect(result.requestAccepted).toBe(false);
+    expect(result.diagnostics[0]?.code).toBe('SAFETY_INGESTION_CODE_PATH_VIOLATION');
+    expect(result.diagnostics[0]?.failureClass).toBe('code-path-violation');
+    expect(repo.getReportingPeriod).not.toHaveBeenCalled();
+    expect(repo.ingestWorkbook).not.toHaveBeenCalled();
+  });
+
+  it('allows non-graph test repository only when explicit override flag is set', async () => {
+    const repo = {
+      codePath: 'test-double',
+      getCodePath: vi.fn(() => 'test-double'),
+      getReportingPeriod: vi.fn(async () => ({
+        id: 'period-14',
+        spItemId: 14,
+        title: 'Week',
+        weekStartDate: '2026-04-20',
+        weekEndDate: '2026-04-24',
+        periodLabel: 'Week',
+        status: 'open',
+      })),
+      ingestWorkbook: vi.fn(async () => ({
+        run: { id: 'run-1', spItemId: 1, attemptNumber: 1 },
+        state: 'committed',
+      })),
+      replayIngestion: vi.fn(),
+    };
+    const graphDiscovery = {
+      resolveListId: vi.fn(async (_siteUrl: string, title: string) => `${title}-id`),
+    };
+    mockEvaluateSafetyIngestionPreview.mockResolvedValue(makePreview({ commitReadiness: true }));
+    const service = new SafetyIngestionApplicationService(
+      {} as never,
+      graphDiscovery as never,
+      () => repo as never,
+      { allowNonGraphCodePathForTests: true },
+    );
+
+    const result = await service.ingestSafetyWorkbook(makeRequest(), 'req-override');
+
+    expect(result.success).toBe(true);
+    expect(repo.getReportingPeriod).toHaveBeenCalledOnce();
+    expect(repo.ingestWorkbook).toHaveBeenCalledOnce();
   });
 });
 

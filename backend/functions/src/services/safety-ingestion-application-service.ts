@@ -35,12 +35,17 @@ import { classifyGraphThrown } from './safety-ingestion-graph-data-plane.js';
 import {
   classifyIngestionFailure,
 } from './safety-ingestion-failure-classifier.js';
+import {
+  SAFETY_INGESTION_REQUIRED_CODE_PATH,
+  SafetyIngestionCodePathViolationError,
+} from './safety-ingestion-code-path.js';
 import type {
   ISafetyIngestionOperationResult,
   ISafetyIngestionPreviewOperationResult,
   ISafetyIngestionRequest,
   ISafetyProvisionDiagnostic,
   ISafetyReferenceListValidationResult,
+  ISafetyReportingPeriodProbeResult,
   ISafetyReplayRequest,
 } from './safety-provisioning-types.js';
 
@@ -70,21 +75,30 @@ export interface ISafetyIngestionApplicationService {
     input: ISafetyIngestionRequest,
     requestId?: string,
   ): Promise<ISafetyIngestionPreviewOperationResult>;
+  probeSafetyReportingPeriodRead(
+    input: { reportingPeriodId: string; reportingPeriodSpItemId?: number },
+    requestId?: string,
+  ): Promise<ISafetyReportingPeriodProbeResult>;
 }
 
 export class SafetyIngestionApplicationService implements ISafetyIngestionApplicationService {
   private readonly tokenService: IManagedIdentityTokenService;
   private readonly graphDiscovery: IGraphListDiscoveryService;
   private readonly repositoryFactory: RepositoryFactory;
+  private readonly allowNonGraphCodePathForTests: boolean;
 
   constructor(
     tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService(),
     graphDiscovery: IGraphListDiscoveryService = new GraphListDiscoveryService(),
     repositoryFactory: RepositoryFactory = (ts) => new SafetyIngestionGraphRepository(ts),
+    options?: {
+      allowNonGraphCodePathForTests?: boolean;
+    },
   ) {
     this.tokenService = tokenService;
     this.graphDiscovery = graphDiscovery;
     this.repositoryFactory = repositoryFactory;
+    this.allowNonGraphCodePathForTests = options?.allowNonGraphCodePathForTests === true;
   }
 
   async ingestSafetyWorkbook(
@@ -162,6 +176,7 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
 
     try {
       const repo = this.repositoryFactory(this.tokenService);
+      this.assertGraphOnlyRepository(repo, 'ingest', requestId);
 
       const bytes = Buffer.from(input.fileContentBase64, 'base64');
       if (bytes.length === 0) {
@@ -392,6 +407,7 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
 
     try {
       const repo = this.repositoryFactory(this.tokenService);
+      this.assertGraphOnlyRepository(repo, 'replay', requestId);
       const result = await repo.replayIngestion({
         parentRunId: input.parentRunId,
         supersedePrior: input.supersedePrior ?? false,
@@ -553,6 +569,7 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
 
     try {
       const repo = this.repositoryFactory(this.tokenService);
+      this.assertGraphOnlyRepository(repo, 'preview', requestId);
       const preview = await this.evaluatePreviewAndLog(
         repo,
         {
@@ -615,6 +632,22 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
         ]),
       };
     }
+  }
+
+  async probeSafetyReportingPeriodRead(
+    input: { reportingPeriodId: string; reportingPeriodSpItemId?: number },
+    requestId?: string,
+  ): Promise<ISafetyReportingPeriodProbeResult> {
+    const repo = this.repositoryFactory(this.tokenService);
+    this.assertGraphOnlyRepository(repo, 'reporting-period-probe', requestId);
+    const result = await repo.probeReportingPeriodRead(
+      input.reportingPeriodId,
+      input.reportingPeriodSpItemId,
+    );
+    return {
+      ...result,
+      requestId,
+    };
   }
 
   private async evaluatePreviewAndLog(
@@ -719,5 +752,40 @@ export class SafetyIngestionApplicationService implements ISafetyIngestionApplic
       });
       throw err;
     }
+  }
+
+  private assertGraphOnlyRepository(
+    repository: SafetyIngestionGraphRepository,
+    operation: 'ingest' | 'preview' | 'replay' | 'reporting-period-probe',
+    requestId?: string,
+  ): void {
+    const observedCodePath = typeof repository.getCodePath === 'function'
+      ? repository.getCodePath()
+      : (repository as { codePath?: string }).codePath ?? 'unknown';
+    if (
+      observedCodePath !== SAFETY_INGESTION_REQUIRED_CODE_PATH
+      && !this.allowNonGraphCodePathForTests
+    ) {
+      emitSafetyIngestionEvent('safety.ingestion.code-path.violation', {
+        operation,
+        requestId,
+      }, {
+        codePathObserved: observedCodePath,
+        codePathExpected: SAFETY_INGESTION_REQUIRED_CODE_PATH,
+        backendVersion: SAFETY_INGESTION_BACKEND_VERSION,
+      });
+      throw new SafetyIngestionCodePathViolationError({
+        observedCodePath,
+        operation,
+      });
+    }
+    emitSafetyIngestionEvent('safety.ingestion.code-path.validated', {
+      operation,
+      requestId,
+    }, {
+      codePathObserved: observedCodePath,
+      codePathExpected: SAFETY_INGESTION_REQUIRED_CODE_PATH,
+      backendVersion: SAFETY_INGESTION_BACKEND_VERSION,
+    });
   }
 }

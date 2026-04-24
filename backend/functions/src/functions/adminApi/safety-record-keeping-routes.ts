@@ -232,6 +232,13 @@ function parseReplayBody(body: Record<string, unknown>): {
   return { parentRunId, supersedePrior };
 }
 
+function parseOptionalPositiveInteger(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) return undefined;
+  return parsed;
+}
+
 app.http('adminProvisionSafetyRecordKeepingSharePoint', {
   methods: ['POST'],
   authLevel: 'anonymous',
@@ -449,5 +456,53 @@ app.http('safetyReplayWorkbook', {
         );
       }
     }, { domain: 'adminControlPlane', operation: 'safetyReplayWorkbook' }),
+  ),
+});
+
+app.http('safetyReportingPeriodProbe', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'safety-records/reporting-periods/{reportingPeriodId}/probe',
+  handler: withAuth(
+    withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+      const requestId = extractOrGenerateRequestId(request);
+      const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+      if (scopeDenied) return scopeDenied;
+      const adminDenied = requireAdmin(auth.claims, requestId);
+      if (adminDenied) return adminDenied;
+
+      const routeReportingPeriodId = String(request.params.reportingPeriodId ?? '').trim();
+      const queryCompanion = parseOptionalPositiveInteger(request.query.get('reportingPeriodSpItemId') ?? undefined);
+      try {
+        const normalized = normalizeReportingPeriodContract({
+          reportingPeriodId: routeReportingPeriodId,
+          reportingPeriodSpItemId: queryCompanion,
+        });
+
+        const mode = assertAdapterModeValid();
+        const sharePoint = mode === 'mock' || process.env.NODE_ENV === 'test'
+          ? new MockSharePointService()
+          : new SharePointService();
+
+        const operation = await sharePoint.probeSafetyReportingPeriodRead({
+          reportingPeriodId: normalized.reportingPeriodId,
+          reportingPeriodSpItemId: normalized.reportingPeriodSpItemId,
+        }, requestId);
+        return successResponse(operation);
+      } catch (err) {
+        if (err instanceof ReportingPeriodContractError) {
+          return errorResponse(400, err.code, err.message, requestId, err.details);
+        }
+        const message = err instanceof Error ? err.message : String(err);
+        const details = buildRouteFailureDetails(err);
+        return errorResponse(
+          500,
+          typeof details.errorCode === 'string' ? details.errorCode : 'INTERNAL_ERROR',
+          message,
+          requestId,
+          details,
+        );
+      }
+    }, { domain: 'adminControlPlane', operation: 'safetyReportingPeriodProbe' }),
   ),
 });

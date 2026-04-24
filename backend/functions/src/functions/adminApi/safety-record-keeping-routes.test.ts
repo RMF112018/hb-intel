@@ -17,6 +17,9 @@ describe('admin safety record-keeping provisioning route wiring', () => {
     expect(source).toContain("route: 'safety-records/ingest/preview'");
     expect(source).toContain("'safetyReplayWorkbook'");
     expect(source).toContain("route: 'safety-records/replay'");
+    expect(source).toContain("'safetyReportingPeriodProbe'");
+    expect(source).toContain("route: 'safety-records/reporting-periods/{reportingPeriodId}/probe'");
+    expect(source).toContain("methods: ['GET']");
   });
 
   it('uses standard auth posture (delegated scope + admin)', () => {
@@ -57,6 +60,13 @@ describe('admin safety record-keeping provisioning route wiring', () => {
     expect(source).toContain('ReportingPeriodContractError');
     expect(source).toContain('SAFETY_REPORTING_PERIOD_ID_INVALID');
     expect(source).toContain('SAFETY_REPORTING_PERIOD_ID_MISMATCH');
+  });
+
+  it('enforces canonical reporting-period contract for Graph probe route and keeps admin gate', () => {
+    expect(source).toContain('probeSafetyReportingPeriodRead');
+    expect(source).toContain('parseOptionalPositiveInteger');
+    expect(source).toContain("operation: 'safetyReportingPeriodProbe'");
+    expect(source).toContain('requireAdmin');
   });
 
   it('preserves request correlation on failure envelopes', () => {

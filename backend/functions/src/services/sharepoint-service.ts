@@ -29,6 +29,7 @@ import type {
   ISafetyRecordKeepingProvisionResult,
   ISafetyReplayRequest,
   ISafetyReportingPeriodSeedResult,
+  ISafetyReportingPeriodProbeResult,
 } from './safety-provisioning-types.js';
 
 export type {
@@ -100,6 +101,10 @@ export interface ISharePointService {
     input: ISafetyIngestionRequest,
     requestId?: string,
   ): Promise<ISafetyIngestionPreviewOperationResult>;
+  probeSafetyReportingPeriodRead(
+    input: { reportingPeriodId: string; reportingPeriodSpItemId?: number },
+    requestId?: string,
+  ): Promise<ISafetyReportingPeriodProbeResult>;
 
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
@@ -142,7 +147,12 @@ export class SharePointService implements ISharePointService {
       ?? new SafetyProvisioningService(tokenService, sharePoint, graphDiscovery);
     this.ingestion =
       collaborators?.ingestion
-      ?? new SafetyIngestionApplicationService(tokenService, graphDiscovery);
+      ?? new SafetyIngestionApplicationService(
+        tokenService,
+        graphDiscovery,
+        undefined,
+        { allowNonGraphCodePathForTests: false },
+      );
   }
 
   // --- SharePoint provisioning delegation ---
@@ -263,6 +273,13 @@ export class SharePointService implements ISharePointService {
     requestId?: string,
   ): Promise<ISafetyIngestionPreviewOperationResult> {
     return this.ingestion.previewSafetyWorkbook(input, requestId);
+  }
+
+  probeSafetyReportingPeriodRead(
+    input: { reportingPeriodId: string; reportingPeriodSpItemId?: number },
+    requestId?: string,
+  ): Promise<ISafetyReportingPeriodProbeResult> {
+    return this.ingestion.probeSafetyReportingPeriodRead(input, requestId);
   }
 
   // --- Backward-compatible wrappers ---
@@ -479,6 +496,37 @@ export class MockSharePointService implements ISharePointService {
         },
       },
       diagnostics: [],
+    };
+  }
+
+  async probeSafetyReportingPeriodRead(
+    input: { reportingPeriodId: string; reportingPeriodSpItemId?: number },
+    requestId?: string,
+  ): Promise<ISafetyReportingPeriodProbeResult> {
+    return {
+      success: true,
+      requestId,
+      codePath: 'graph-only',
+      identityLane: 'managed-identity-app-only',
+      requestedId: input.reportingPeriodId,
+      requestedSpItemId: input.reportingPeriodSpItemId,
+      parsedItemId: input.reportingPeriodSpItemId,
+      siteUrl: SAFETY_RECORD_KEEPING_EXPECTED_SITE_TARGETS.hbCentralSiteUrl,
+      siteId: 'mock-site-id',
+      listId: 'mock-list-id',
+      graphOperation: 'get-item',
+      graphPathSummary: '/sites/mock-site/lists/mock-list/items/mock-item',
+      status: 'ok',
+      causeBucket: 'unknown',
+      period: {
+        id: input.reportingPeriodId,
+        spItemId: input.reportingPeriodSpItemId ?? 1,
+        title: 'Mock Reporting Period',
+        weekStartDate: '2026-01-01',
+        weekEndDate: '2026-01-07',
+        periodLabel: 'Mock Week',
+        status: 'open',
+      },
     };
   }
 }

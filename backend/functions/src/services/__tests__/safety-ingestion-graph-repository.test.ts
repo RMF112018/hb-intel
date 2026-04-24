@@ -123,6 +123,39 @@ describe('SafetyIngestionGraphRepository', () => {
     expect(payload?.identityLane).toBe('managed-identity-app-only');
   });
 
+  it('returns deterministic reporting-period probe diagnostics for 401 classification', async () => {
+    const { repo, fakeGraph } = makeRepository();
+    fakeGraph.getItemById.mockRejectedValue(
+      new GraphRequestError(
+        'get-item',
+        '/sites/site-1/lists/list-1/items/14',
+        new Response('unauthorized', { status: 401 }),
+        'unauthorized',
+      ),
+    );
+
+    const probe = await repo.probeReportingPeriodRead('period-14');
+
+    expect(probe.success).toBe(false);
+    expect(probe.status).toBe('error');
+    expect(probe.causeBucket).toBe('identity/grant');
+    expect(probe.statusCode).toBe(401);
+    expect(probe.codePath).toBe('graph-only');
+    expect(probe.graphPathSummary).toContain('/sites/<siteId>/lists/');
+  });
+
+  it('returns invalid-contract diagnostics from reporting-period probe for mismatched companion ID', async () => {
+    const { repo, fakeGraph } = makeRepository();
+
+    const probe = await repo.probeReportingPeriodRead('period-14', 15);
+
+    expect(probe.success).toBe(false);
+    expect(probe.status).toBe('invalid-contract');
+    expect(probe.causeBucket).toBe('item-contract');
+    expect(probe.diagnosticCode).toBe('SAFETY_REPORTING_PERIOD_ID_MISMATCH');
+    expect(fakeGraph.getItemById).not.toHaveBeenCalled();
+  });
+
   it('creates reporting periods through Graph list item create', async () => {
     const { repo, fakeGraph } = makeRepository();
     fakeGraph.createItem.mockResolvedValue({

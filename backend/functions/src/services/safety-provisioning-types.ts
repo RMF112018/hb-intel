@@ -119,6 +119,45 @@ export interface ISafetyReplayRequest {
   supersedePrior?: boolean;
 }
 
+export type SafetyReportingPeriodProbeCauseBucket =
+  | 'identity/grant'
+  | 'site-binding'
+  | 'list-binding'
+  | 'item-contract'
+  | 'item-missing'
+  | 'unknown';
+
+export interface ISafetyReportingPeriodProbeResult {
+  success: boolean;
+  requestId?: string;
+  codePath: 'graph-only';
+  identityLane: 'managed-identity-app-only';
+  requestedId: string;
+  requestedSpItemId?: number;
+  parsedItemId?: number;
+  siteUrl: string;
+  siteId?: string;
+  listId: string;
+  graphOperation: 'get-item';
+  graphPathSummary: string;
+  status: 'ok' | 'not-found' | 'error' | 'invalid-contract';
+  causeBucket: SafetyReportingPeriodProbeCauseBucket;
+  statusCode?: number;
+  graphErrorCode?: string;
+  failureClass?: string;
+  period?: {
+    id: string;
+    spItemId: number;
+    title: string;
+    weekStartDate: string;
+    weekEndDate: string;
+    periodLabel: string;
+    status: string;
+  };
+  diagnosticCode?: string;
+  diagnosticMessage?: string;
+}
+
 export interface ISafetyIngestionOperationResult {
   success: boolean;
   requestAccepted: boolean;

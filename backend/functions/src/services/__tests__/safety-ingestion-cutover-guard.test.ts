@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { resolve, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -163,6 +163,23 @@ describe('Safety ingestion cutover guard — static import/seam invariants (lock
     return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
+  function collectSourceFiles(root: string): string[] {
+    const entries = readdirSync(root);
+    const files: string[] = [];
+    for (const entry of entries) {
+      const full = join(root, entry);
+      const stat = statSync(full);
+      if (stat.isDirectory()) {
+        files.push(...collectSourceFiles(full));
+        continue;
+      }
+      if (full.endsWith('.ts') && !full.endsWith('.test.ts')) {
+        files.push(full);
+      }
+    }
+    return files;
+  }
+
   function readServiceFile(relative: string): string {
     return readFileSync(resolve(import.meta.dirname, SERVICES_DIR, relative), 'utf8');
   }
@@ -285,6 +302,18 @@ describe('Safety ingestion cutover guard — static import/seam invariants (lock
     expect(source, 'routes must not contain any /_api/ URL').not.toMatch(/\/_api\//);
   });
 
+  // A6.2 — backend Safety ingestion runtime files must never import or
+  // instantiate the legacy SharePointSafetyInspectionRepository.
+  it('A6.2: backend runtime tree contains no legacy SharePointSafetyInspectionRepository ingestion seam', () => {
+    const backendRoot = resolve(import.meta.dirname, '../..');
+    const sources = collectSourceFiles(backendRoot);
+    const violations = sources.filter((file) => {
+      const source = readFileSync(file, 'utf8');
+      return source.includes('SharePointSafetyInspectionRepository');
+    });
+    expect(violations, `legacy repository seam referenced in: ${violations.join(', ')}`).toEqual([]);
+  });
+
   // A6.2 — the SharePointService facade's ingest/preview/replay methods must
   // delegate to SafetyIngestionApplicationService so the route → facade →
   // application-service chain cannot be quietly severed. Scoped to the real
@@ -320,4 +349,3 @@ describe('Safety ingestion cutover guard — static import/seam invariants (lock
     }
   });
 });
-
