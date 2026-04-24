@@ -194,6 +194,7 @@ When `ENVIRONMENT_POSTURE=rollout`, startup asserts the following inventory (in 
     "AZURE_CLIENT_ID": "<app-registration-client-id>",
     "AZURE_CLIENT_SECRET": "<dev-service-principal-secret>",
     "AzureSignalRConnectionString": "<signalr-connection-string>",
+    "OPERATIONAL_READINESS_SIGNALR_MODE": "required",
     "AZURE_TABLE_ENDPOINT": "UseDevelopmentStorage=true",
     "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",
     "SHAREPOINT_APP_CATALOG_URL": "https://hbconstruction.sharepoint.com/sites/appcatalog",
@@ -401,6 +402,7 @@ The saga orchestrator validates all provisioning prerequisites at execution time
 | SPFx App Package ID | `HB_INTEL_SPFX_APP_ID` | **Required** — Step 5 SPFx install | DevOps |
 | OpEx Manager UPN | `OPEX_MANAGER_UPN` | **Required** — Step 6 Leaders group membership | Business |
 | Sites.Selected Grant Workflow | `SITES_SELECTED_GRANT_CONFIRMED=true` | **Required** (when Sites.Selected active) — per-site grant workflow (Option A2) confirmed | IT Admin |
+| SignalR vs operational label | `OPERATIONAL_READINESS_SIGNALR_MODE` (`required` default, or `optional`) | **Optional** — when `optional`, missing `AzureSignalRConnectionString` does not downgrade `operationalReadiness` for the SignalR dimension; `integrations.signalR` still shows `not-configured`. **Does not** change Safety rollout gates. | DevOps |
 
 **Staging workflow:**
 1. Deploy the function app with `HBC_ADAPTER_MODE=proxy`.

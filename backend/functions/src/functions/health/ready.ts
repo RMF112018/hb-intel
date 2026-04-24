@@ -26,6 +26,7 @@ import {
   validateSafetyPermissionPosture,
 } from '../../utils/safety-permission-posture.js';
 import { summarizeRolloutPermissionInventory } from '../../utils/rollout-permission-inventory.js';
+import { isSignalRAcceptableForOperationalTier } from '../../utils/signalr-operational-readiness.js';
 
 function hasEnv(name: string): boolean {
   const v = process.env[name];
@@ -96,7 +97,7 @@ app.http('healthReady', {
       coreAuthPresent,
       sharePointPresent,
       provisioningReady && safetyRolloutReadiness.ready,
-      integrations.signalR === 'ready',
+      isSignalRAcceptableForOperationalTier(),
     );
 
     const artifactIdentity = resolveBackendArtifactIdentity();

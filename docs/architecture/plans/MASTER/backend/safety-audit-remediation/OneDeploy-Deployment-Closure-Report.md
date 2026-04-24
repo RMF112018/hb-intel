@@ -8,12 +8,18 @@
 
 ## Executive Verdict
 
-**Deployment failed due to OneDeploy/SCM 502; staged artifact contains the probe route, but live host does not register it. Deployment closure remains blocked.**
+**Deployment and route proof are closed. Entra consent is resolved. Admin-gated readiness is proven, but rollout/posture readiness remains blocked.**
 
-Supporting detail (not a second verdict):
+Current authoritative status:
 
-- OneDeploy-compatible `az functionapp deploy` continues to hit **`POST ...scm.../api/publish?type=zip` → HTTP 502** (HTML gateway error). **`/api/health` app-setting identity must not be treated as proof of deployed code** — `HBC_FUNCTIONS_BUILD_*` can match the manifest independently of package application.
-- **Route truth gap:** Live Azure registration list **does not include** `safetyReportingPeriodProbe`; `GET /api/safety-records/reporting-periods/period-1/probe` returns **404**. The packaged artifact **does** contain the probe registration in `safety-record-keeping-routes.js` / inventory signatures.
+- **Deployment / route proof:** **Closed** — GitHub Actions run `24901773055` completed deployment, live parity verification, Azure function inventory proof, and `safetyReportingPeriodProbe` non-404 proof.
+- **Entra consent:** **Resolved** — delegated token acquisition for `api://08c399eb-a394-4087-b859-659d493f8dc7` succeeded after consent.
+- **Admin readiness call:** **Closed** — `GET /api/health/ready` returned HTTP **200** with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** using a token whose safe claims included `scp=access_as_user` and the **`Admin`** app role.
+- **Current blocker:** **Rollout / posture readiness** — `/api/health/ready` reports `operationalReadiness` **`degraded`** and Safety rollout readiness blocked by missing rollout/proof app settings and incomplete provisioning prerequisites.
+- **Still pending:** role-matrix proof and hosted workbook preview.
+- **Not authorized:** live ingest / commit-path proof.
+
+Historical note: the earlier local OneDeploy/SCM `502` and missing `safetyReportingPeriodProbe` route were valid historical deployment blockers during the local CLI path. They are preserved below as diagnostic history, but they are **superseded** by the successful GitHub Actions deployment path and are **not** the current closure blocker.
 
 ---
 
@@ -581,7 +587,7 @@ Deployment closure for the Flex host / probe surface **remains blocked** until a
 
 | Gate | Status |
 | ---- | ------ |
-| Admin `/api/health/ready` with bearer | **Pending** — `az account get-access-token --resource api://08c399eb-a394-4087-b859-659d493f8dc7` returns **AADSTS65001** (no consent for Azure CLI against API audience). Evidence note: `.tmp/functions-validation/live-ready-admin-post-gha-24901773055.txt` |
+| Admin `/api/health/ready` with bearer | **At run 24901773055 follow-up:** **Pending** — `az account get-access-token --resource api://08c399eb-a394-4087-b859-659d493f8dc7` returned **AADSTS65001** (evidence: `.tmp/functions-validation/live-ready-admin-post-gha-24901773055.txt`). **Superseded:** post-consent operator proof — **HTTP 200** admin `/api/health/ready` with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** (see **Post-Deployment Proof Gates** and `proof-pass-admin-ready-20260424-*`). |
 | Role matrix (reviewer/submitter/operator tokens) | **Pending** (no repo token helper run) |
 | Hosted workbook preview | **Pending** (no SharePoint/workbook context in this session) |
 
@@ -605,6 +611,20 @@ OneDeploy/SCM **502** was **not** observed on this successful deploy path.
 
 ## Post-Deployment Proof Gates
 
+### Authoritative gate status (post-consent admin readiness update)
+
+| Gate | Status |
+| ---- | ------ |
+| Deployment / route proof | **Closed** |
+| Entra consent (delegated token to `API_AUDIENCE`, e.g. Azure CLI) | **Resolved** |
+| Admin readiness (`GET /api/health/ready` with admin bearer) | **Closed** — HTTP **200**; `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** |
+| Rollout readiness (operational + Safety rollout gates in readiness payload) | **Blocked** — `operationalReadiness` **`degraded`**; Safety rollout readiness **blocked** (missing rollout/proof app settings; incomplete provisioning prerequisites); **not** an authentication or admin-role failure |
+| Role matrix | **Pending** |
+| Hosted workbook preview | **Pending** |
+| Live ingest | **Not authorized** |
+
+Historical note: the 2026-04-24 automated re-check recorded **`AADSTS65001`** before consent; that material remains **historical** under **Proof pass — 2026-04-24 UTC** and prior evidence files. It does **not** describe the current Entra posture after consent.
+
 | Field | Value |
 | ----- | ----- |
 | Live host | `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net` |
@@ -627,14 +647,17 @@ Post-deployment proof pass captured:
 
 | Gate | Status |
 | ---- | ------ |
-| Fresh admin token acquisition | **Blocked** — Azure CLI token acquisition against `API_AUDIENCE` returned **AADSTS65001** (Microsoft Azure CLI/user consent missing for `api://08c399eb-a394-4087-b859-659d493f8dc7`). |
-| `/api/health/ready` with admin bearer | **Pending** — not run because no fresh admin token was acquired. |
+| Fresh admin token acquisition | **Resolved** — delegated token acquired for `api://08c399eb-a394-4087-b859-659d493f8dc7` (historical **`AADSTS65001`** evidence retained below). |
+| `/api/health/ready` with admin bearer | **Closed** — HTTP **200**; `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`**. Safe token claims (decoded only): `scp=access_as_user`; `roles` includes **`Admin`**. |
+| Rollout / posture gates inside readiness payload | **Blocked** — `operationalReadiness` **`degraded`**; Safety rollout readiness **blocked** (missing rollout/proof app settings; incomplete provisioning prerequisites). |
 
 Evidence:
 
 - `.tmp/functions-validation/admin-token-status-final-proof.txt`
 - `.tmp/functions-validation/admin-token-error-final-proof.raw.txt` (no bearer token; contains Entra consent error)
 - `.tmp/functions-validation/admin-token-consent-check-error.txt` (repeat consent check, still `AADSTS65001`)
+- `.tmp/functions-validation/proof-pass-admin-ready-20260424-operator-summary.txt` (post-consent operator proof, no secrets)
+- `.tmp/functions-validation/proof-pass-admin-ready-20260424-ready-sanitized.json` (sanitized excerpt; not a full response body)
 
 ### Entra consent request
 
@@ -645,8 +668,9 @@ Request consent for the Azure CLI / user token flow to acquire an access token f
 | API audience / resource | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
 | Tenant | `0e834bd7-628b-42c8-b9ec-ecebc9719be4` |
 | Client requiring consent | Microsoft Azure CLI (`04b07795-8ddb-461a-bbee-02f9e1bf7b46`) |
-| Blocking error | `AADSTS65001` |
+| Blocking error (historical, pre-consent) | `AADSTS65001` |
 | Purpose | Acquire a fresh admin-capable bearer token to run `GET /api/health/ready` for post-deployment admin readiness proof. |
+| **Current status** | **Resolved** — consent granted; delegated acquisition succeeds for operator proof (see post-consent evidence files). |
 
 Interactive consent/auth command supplied by Entra:
 
@@ -691,13 +715,17 @@ Evidence: `.tmp/functions-validation/workbook-preview-status-final-proof.txt`
 
 ### Remaining gates
 
-- Obtain admin-capable API token after Entra consent is granted for Azure CLI/user token acquisition, then run `/api/health/ready`.
-- Acquire approved role-specific reviewer/submitter/operator tokens and run the role-matrix proof.
-- Use real SharePoint reporting-period/project context plus an authorized preview token to run hosted workbook preview. Proceed to ingest only if preview is clean.
+- **Rollout readiness:** remediate missing rollout/proof app settings and provisioning prerequisites until `operationalReadiness` and Safety rollout gates in `/api/health/ready` align with release policy (full JSON captured: `.tmp/functions-validation/health-ready-full-20260424T203332Z.json`; see **Full readiness JSON capture — remediation checklist**).
+- **Role matrix:** acquire approved role-specific reviewer/submitter/operator tokens and run the role-matrix proof.
+- **Hosted workbook preview:** use real SharePoint reporting-period/project context plus an authorized preview token. Proceed to ingest only if preview is clean and the operator authorizes commit-path proof.
 
 ### Verdict after post-deployment proof pass
 
-**Deployment and route proof closed; admin/role/workbook gates pending due to Entra consent and missing role-specific test tokens/context.**
+**Deployment and route proof closed; Entra consent resolved; admin /api/health/ready call closed; rollout/posture readiness blocked; role matrix and hosted workbook preview pending; live ingest not authorized.**
+
+**Re-check (2026-04-24 UTC — Safety Proof Gates plan execution):** Entra consent **still blocks** Azure CLI delegated token acquisition against `api://08c399eb-a394-4087-b859-659d493f8dc7` (**`AADSTS65001` / `consent_required`** for Microsoft Azure CLI `04b07795-8ddb-461a-bbee-02f9e1bf7b46`). **`GET /api/health/ready` with admin bearer was not run**; **role-matrix** and **hosted workbook preview** were **not run** (no fabricated token, role, preview, or ingest proof). **No deployment** and **no `HBC_FUNCTIONS_BUILD_*` app-settings restamp** were performed during this pass. Baseline **`/api/health`** (HTTP **200**) was captured **only** as runtime identity context, not as deployed-code proof. Evidence: `.tmp/functions-validation/proof-pass-20260424-*` (see section **Proof pass — 2026-04-24 UTC** below).
+
+**Supersession (post-consent operator proof):** Entra consent for delegated acquisition to `api://08c399eb-a394-4087-b859-659d493f8dc7` is **resolved**. **`GET /api/health/ready`** returned **HTTP 200** with `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** using a token whose safe claims include `scp=access_as_user` and **`Admin`** app role. **Rollout readiness remains blocked** by configured gates (`operationalReadiness` **`degraded`**; Safety rollout readiness blocked for missing rollout/proof app settings and incomplete provisioning prerequisites). **Role matrix** and **hosted workbook preview** remain **pending**; **live ingest** is **not authorized**. Evidence: `.tmp/functions-validation/proof-pass-admin-ready-20260424-*` and section **Post-consent admin readiness — operator proof** under **Proof pass — 2026-04-24 UTC** below.
 
 ### Issue #74 — Functions Workflow Trigger Restriction
 
@@ -740,9 +768,11 @@ The workflow file itself remains in `push.paths` by design so deployment workflo
 
 ## Admin Readiness Proof
 
-**Verdict:** **Admin readiness proof blocked by Entra consent.**
+**Verdict (current):** **Entra consent resolved.** **Admin-gated `GET /api/health/ready` is proven** (HTTP **200**; `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`**; safe token claims: `scp=access_as_user`, `roles` includes **`Admin`**). **Rollout readiness remains blocked** by configured gates: `operationalReadiness` **`degraded`**; Safety rollout readiness **blocked** (missing rollout/proof app settings; incomplete provisioning prerequisites) — **not** an auth failure.
 
-**Overall classification:** Deployment and route proof closed; admin readiness proof **blocked**; role/workbook gates pending.
+**Verdict (historical — pre-consent):** Automated token acquisition previously failed with **`AADSTS65001`**; see evidence files and **Proof pass — 2026-04-24 UTC** below.
+
+**Overall classification:** Deployment and route proof **closed**; admin **HTTP call** to `/api/health/ready` **closed**; **rollout/posture readiness blocked**; role matrix and hosted workbook preview **pending**; live ingest **not authorized**.
 
 ### Live target and API audience
 
@@ -774,14 +804,14 @@ Read-only source inspection confirmed:
 
 | Field | Value |
 | ----- | ----- |
-| Method | Azure CLI delegated token acquisition (`az account get-access-token --resource "$API_AUDIENCE"`) |
-| Raw token printed? | No |
-| Token acquired? | No |
-| Safe claim summary | N/A — no token acquired |
-| Blocking error | `AADSTS65001` / `consent_required` |
-| `/api/health/ready` called with admin bearer? | No |
+| Method | Azure CLI delegated token acquisition (`az account get-access-token --resource "$API_AUDIENCE"`) and/or approved interactive login |
+| Raw token printed? | No (repo policy) |
+| Token acquired? | **Yes** (post-consent operator proof) |
+| Safe claim summary | `scp=access_as_user`; `roles` includes **`Admin`** |
+| Blocking error (historical) | Previously `AADSTS65001` / `consent_required` — **superseded** |
+| `/api/health/ready` called with admin bearer? | **Yes** — HTTP **200**; `requestId` **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** |
 
-No repo-specific helper superseding Azure CLI token acquisition was found. The Azure CLI token request failed before any JWT was issued:
+**Historical (pre-consent):** The Azure CLI token request failed before any JWT was issued:
 
 ```text
 AADSTS65001: The user or administrator has not consented to use the application with ID '04b07795-8ddb-461a-bbee-02f9e1bf7b46' named 'Microsoft Azure CLI'.
@@ -793,6 +823,8 @@ Evidence files:
 - `.tmp/functions-validation/admin-token-acquisition-status.txt`
 - `.tmp/functions-validation/aadsts65001-admin-readiness-debug.log`
 - `.tmp/functions-validation/aadsts65001-admin-readiness-extract.txt`
+- `.tmp/functions-validation/proof-pass-admin-ready-20260424-operator-summary.txt`
+- `.tmp/functions-validation/proof-pass-admin-ready-20260424-ready-sanitized.json`
 
 ### Consent request package
 
@@ -803,7 +835,8 @@ Evidence files:
 | Client requiring delegated consent | Microsoft Azure CLI (`04b07795-8ddb-461a-bbee-02f9e1bf7b46`) |
 | Required app role for readiness | `Admin` or `HBIntelAdmin` |
 | Purpose | Allow authorized admin users to acquire delegated tokens for the HB Intel backend API so `GET /api/health/ready` and future admin-gated backend proof checks can be run. |
-| Current blocker | `AADSTS65001` — consent required before Azure CLI/user token acquisition can succeed. |
+| Prior blocker (historical) | `AADSTS65001` — consent required before Azure CLI/user token acquisition could succeed. |
+| **Current status** | **Resolved** — operator proof shows successful delegated acquisition and admin-gated readiness HTTP **200**. |
 
 Interactive consent/auth command supplied by Azure CLI:
 
@@ -812,11 +845,13 @@ az login --tenant "0e834bd7-628b-42c8-b9ec-ecebc9719be4" \
   --scope "api://08c399eb-a394-4087-b859-659d493f8dc7/.default"
 ```
 
-No random app-registration edits were attempted. This environment did not provide an established tenant-admin consent workflow, so the proof lane stops here.
+No random app-registration edits were attempted in the documented passes.
 
 ### Next required action
 
-After tenant/admin consent is granted, acquire a fresh token without printing it, validate safe claims (`aud`, `iss`, `tid`, `oid` presence, UPN/preferred username, roles), require `Admin` or `HBIntelAdmin`, and then call:
+**Rollout / posture closure:** full `/api/health/ready` JSON is captured at `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` (verified no bearer/JWT substrings). Re-run after each settings change and compare extracts. Remediate using **Full readiness JSON capture — remediation checklist** until Safety rollout gates match policy.
+
+**Downstream proofs:** role matrix (approved tokens), hosted workbook preview (real SharePoint context), then live ingest only when preview is clean and explicitly authorized.
 
 ```bash
 GET https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/health/ready
@@ -843,3 +878,195 @@ Under `.tmp/functions-validation/`:
 - `live-host-admin-readiness.txt`, `api-audience-admin-readiness.txt`, `live-health-admin-readiness.json`
 - `admin-token-acquisition-error.txt`, `admin-token-acquisition-status.txt`
 - `aadsts65001-admin-readiness-debug.log`, `aadsts65001-admin-readiness-extract.txt`
+- `proof-pass-20260424-baseline.txt`, `proof-pass-20260424-health.json`, `proof-pass-20260424-az-account.json`
+- `proof-pass-20260424-token-acquisition-stderr.txt`, `proof-pass-20260424-token-acquisition-status.txt`
+- `proof-pass-admin-ready-20260424-operator-summary.txt`, `proof-pass-admin-ready-20260424-ready-sanitized.json` (post-consent admin `/api/health/ready` proof; no bearer material)
+- `health-ready-latest-path.txt` (pointer to latest full capture basename)
+- `health-ready-full-20260424T203332Z.json`, `health-ready-full-20260424T203332Z-http.txt`, `health-ready-full-20260424T203332Z-readiness-extract.json` (full `/api/health/ready` body + HTTP code + non-secret extract; verified no `eyJ` / `Bearer`)
+
+---
+
+## Proof pass — 2026-04-24 UTC (Safety Proof Gates plan execution)
+
+**Timestamp (UTC):** `2026-04-24T19:54:16Z` (baseline) / `2026-04-24T19:54:26Z` (token attempt, per Azure error line in stderr evidence)
+
+**Repo state (local):** branch `main`, HEAD `190fc85362033e4221281be18c486e3be45d0b9a` (`docs: record admin readiness consent blocker`).
+
+### Constraints honored
+
+- **No** Functions deployment or redeploy (`azure/functions-action`, `az functionapp deploy`, etc.).
+- **No** `HBC_FUNCTIONS_BUILD_*` app-settings restamp.
+- **`/api/health`** used **only** as optional runtime identity context (HTTP status + public JSON fields), **not** as sole proof of deployed package contents.
+
+### Commands executed (cwd: repo root)
+
+**Baseline + `/api/health` (no bearer):**
+
+```bash
+mkdir -p .tmp/functions-validation
+TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+echo "timestamp_utc=$TS" > .tmp/functions-validation/proof-pass-20260424-baseline.txt
+git rev-parse --abbrev-ref HEAD >> .tmp/functions-validation/proof-pass-20260424-baseline.txt
+git rev-parse HEAD >> .tmp/functions-validation/proof-pass-20260424-baseline.txt
+git log -1 --oneline >> .tmp/functions-validation/proof-pass-20260424-baseline.txt
+echo "LIVE_HOST=https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net" \
+  >> .tmp/functions-validation/proof-pass-20260424-baseline.txt
+curl -sS -o .tmp/functions-validation/proof-pass-20260424-health.json -w "http_code=%{http_code}\n" \
+  "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/health" \
+  >> .tmp/functions-validation/proof-pass-20260424-baseline.txt
+```
+
+**Azure CLI account context (read-only):**
+
+```bash
+az account show -o json > .tmp/functions-validation/proof-pass-20260424-az-account.json
+```
+
+**Delegated token acquisition (no token printed; stdout directed to temp path only):**
+
+```bash
+API="api://08c399eb-a394-4087-b859-659d493f8dc7"
+OUT_ERR=".tmp/functions-validation/proof-pass-20260424-token-acquisition-stderr.txt"
+OUT_STATUS=".tmp/functions-validation/proof-pass-20260424-token-acquisition-status.txt"
+TOKEN_TMP=".tmp/functions-validation/proof-pass-20260424-admin-token.tmp"
+rm -f "$TOKEN_TMP"
+if az account get-access-token --resource "$API" --query accessToken -o tsv > "$TOKEN_TMP" 2> "$OUT_ERR"; then
+  echo "exit=0 acquired=yes" > "$OUT_STATUS"
+else
+  echo "exit=$? acquired=no" > "$OUT_STATUS"
+fi
+rm -f "$TOKEN_TMP"
+```
+
+### Entra consent — 2026-04-24 agent pass (historical)
+
+**At the time of the automated 2026-04-24 re-check, consent was still blocking:** `az account get-access-token --resource api://08c399eb-a394-4087-b859-659d493f8dc7` failed with **`AADSTS65001`** (user/administrator had not consented for **Microsoft Azure CLI** `04b07795-8ddb-461a-bbee-02f9e1bf7b46` to the API resource). Full stderr preserved in `.tmp/functions-validation/proof-pass-20260424-token-acquisition-stderr.txt` (no bearer token material).
+
+**Superseded for the admin-call gate:** post-consent operator proof shows delegated acquisition and **`GET /api/health/ready` HTTP 200** (see **Post-consent admin readiness — operator proof** below). This historical subsection documents the **2026-04-24 agent** state only.
+
+### Gate outcomes (2026-04-24 agent pass only)
+
+| Gate | Verdict |
+| ---- | ------- |
+| Admin readiness (`GET /api/health/ready` + admin roles) | **Not run** — no access token issued in that automated pass |
+| Role matrix (reviewer ingest / submitter replay / operator preview validation) | **Not run** — blocked by token acquisition in that pass |
+| Hosted workbook preview | **Not run** — blocked by token acquisition in that pass |
+
+### Post-consent admin readiness — operator proof (supersedes admin-call gate only)
+
+| Field | Value |
+| ----- | ----- |
+| Endpoint | `GET https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/health/ready` |
+| HTTP status | **200** (admin bearer; first operator-attested call) |
+| `requestId` (first operator-attested call) | **`518c085d-6ed2-47c0-87eb-9cd92d2c393d`** |
+| Token safe claims (decoded only) | `scp=access_as_user`; `roles` includes **`Admin`** |
+| `operationalReadiness` | **`degraded`** |
+| Safety rollout readiness | **Blocked** — missing rollout/proof app settings; incomplete provisioning prerequisites (**not** auth failure) |
+
+**Full JSON capture (subsequent automated call, same endpoint):** HTTP **200**; `requestId` **`658325d8-6b27-429a-a324-b15a73157be5`**; files `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` (full body), `.tmp/functions-validation/health-ready-full-20260424T203332Z-http.txt` (status code), `.tmp/functions-validation/health-ready-full-20260424T203332Z-readiness-extract.json` (non-secret field extract). Confirmed **no** `eyJ` / `Bearer` material in the saved JSON.
+
+| Field (from full capture) | Value |
+| ----- | ----- |
+| `operationalReadiness` | **`degraded`** |
+| `environmentPosture` | **`staging`** |
+| `safetyPermissionPosture` | **`pre-rollout-tightened`** / `permissionModel` **`sites-selected`** / `passed` **`false`** |
+| `safetyRolloutReadiness.ready` | **`false`** |
+| `safetyRolloutReadiness.issueCodes` | **`SAFETY_TIGHTENED_POSTURE_REQUIRES_SITES_SELECTED_CONFIRMATION`**, **`SAFETY_TIGHTENED_POSTURE_PROOF_NOT_CONFIRMED`**, **`SAFETY_TIGHTENED_E2E_PROOF_NOT_CONFIRMED`**, **`SAFETY_TIGHTENED_PROOF_EVIDENCE_ID_MISSING`**, **`SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC_MISSING`**, **`SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL_MISSING`**, **`SAFETY_ROLLOUT_GATE_NOT_ENABLED`**, **`SAFETY_ROLLOUT_CHECKPOINT_ID_MISSING`** |
+| `provisioningPrereqs` | `graphPermission` **`false`**; `hubSite` **`false`**; `appCatalog` **`false`**; `spfxAppId` **`false`**; `opexManager` **`true`** |
+| `configTiers` | `core` **`ready`**; `sharepoint` **`ready`**; `provisioning` **`incomplete`**; `safetyPermissionPosture` **`blocked`**; `safetyRolloutGate` **`blocked`** |
+| `rolloutPermissionInventory` | `posture` **`pre-rollout-tightened`**; `required` includes **`Sites.Selected`**, **`Group.ReadWrite.All`**; `forbidden` includes **`Sites.FullControl.All`** |
+
+Evidence: `.tmp/functions-validation/proof-pass-admin-ready-20260424-operator-summary.txt`, `.tmp/functions-validation/proof-pass-admin-ready-20260424-ready-sanitized.json`.
+
+### Full readiness JSON capture — remediation checklist (2026-04-24 UTC)
+
+Apply in order appropriate to your change window; each item maps to live `issueCodes` and/or `provisioningPrereqs` / `configTiers` from `.tmp/functions-validation/health-ready-full-20260424T203332Z.json`.
+
+**Provisioning prerequisites (`configTiers.provisioning` = `incomplete`):**
+
+1. Set **`GRAPH_GROUP_PERMISSION_CONFIRMED=true`** after Entra **`Group.ReadWrite.All`** consent is confirmed for provisioning control-plane (currently `provisioningPrereqs.graphPermission` = `false`).
+2. Set **`SHAREPOINT_HUB_SITE_ID`** to the hub site id (`provisioningPrereqs.hubSite` = `false`).
+3. Set **`SHAREPOINT_APP_CATALOG_URL`** to the tenant app catalog URL (`provisioningPrereqs.appCatalog` = `false`).
+4. Set **`HB_INTEL_SPFX_APP_ID`** to the deployed SPFx solution app id (`provisioningPrereqs.spfxAppId` = `false`).
+5. **`OPEX_MANAGER_UPN`** is already satisfied (`opexManager` = `true` in capture).
+
+**Safety tightened proof + posture confirmations (`safetyRolloutReadiness.issueCodes`):**
+
+6. Set **`SITES_SELECTED_GRANT_CONFIRMED=true`** after Sites.Selected per-site grant workflow is verified (`SAFETY_TIGHTENED_POSTURE_REQUIRES_SITES_SELECTED_CONFIRMATION`).
+7. Set **`SAFETY_TIGHTENED_PROOF_EVIDENCE_ID`** to the immutable proof artifact / run identifier (`SAFETY_TIGHTENED_PROOF_EVIDENCE_ID_MISSING`).
+8. Set **`SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC`** to ISO-8601 UTC when tightened proof was executed (`SAFETY_TIGHTENED_PROOF_EXECUTED_AT_UTC_MISSING`).
+9. Set **`SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL=sites-selected`** after proof ran under the tightened model (`SAFETY_TIGHTENED_PROOF_PERMISSION_MODEL_MISSING`).
+10. Set **`SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED=true`** after validating the final Safety permission matrix and rollout gates (`SAFETY_TIGHTENED_POSTURE_PROOF_NOT_CONFIRMED`).
+11. Set **`SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED=true`** after successful ingest + replay under tightened posture (`SAFETY_TIGHTENED_E2E_PROOF_NOT_CONFIRMED`).
+12. Set **`SAFETY_ROLLOUT_CHECKPOINT_ID`** to the immutable approval identifier (pattern per backend: 8–128 chars, alphanumerics plus `._:-`) (`SAFETY_ROLLOUT_CHECKPOINT_ID_MISSING`).
+13. Set **`SAFETY_ROLLOUT_GATE_ENABLED=true`** only after rollout approval is recorded **with** checkpoint id (`SAFETY_ROLLOUT_GATE_NOT_ENABLED`).
+
+**Integrations (contribute to `operationalReadiness` = `degraded` when not ready):**
+
+14. Configure **`AzureSignalRConnectionString`** so `integrations.signalR` moves from `not-configured` to `ready`, **or** set **`OPERATIONAL_READINESS_SIGNALR_MODE=optional`** on the Function App only if operators explicitly accept that Safety closure work may proceed while SignalR remains absent — `operationalReadiness` then ignores the SignalR dimension, but **`integrations.signalR` still reports `not-configured`** until the connection string exists (see `backend/functions/src/utils/signalr-operational-readiness.ts`, package **`@hbc/functions` `00.000.151`**).
+15. Optionally configure email (`EMAIL_DELIVERY_API_KEY`, `EMAIL_FROM_ADDRESS`) and other integrations as required by policy.
+
+**Not in this pass:** role matrix, hosted workbook preview, live ingest (see **Remaining gates (current)**).
+
+### Rollout remediation — repo findings (no fabricated proof; no live app changes in this commit)
+
+**SharePoint URLs / IDs (repo truth, not live-inferred):**
+
+- **`SHAREPOINT_APP_CATALOG_URL`:** Canonical pattern documented in [backend/functions/README.md](../../../../../backend/functions/README.md) is **`{SHAREPOINT_TENANT_URL host}/sites/appcatalog`** (example reference tenant: `https://hbconstruction.sharepoint.com/sites/appcatalog`). **Action:** set to the **actual** tenant app catalog site URL for the environment that owns `SHAREPOINT_TENANT_URL` (confirm in SharePoint Admin Center if the catalog lives on a non-default path).
+- **`SHAREPOINT_HUB_SITE_ID`:** **Not** present in repo as a live GUID — obtain from SharePoint (hub site **Site Id** / Graph `id`) and set in app configuration.
+- **`HB_INTEL_SPFX_APP_ID`:** **Not** present in repo as a live product id — obtain from **Tenant App Catalog** (solution package **Product Id**) for the deployed HB Intel SPFx package.
+
+**Confirmation booleans (do not set `true` without real evidence):**
+
+- **`GRAPH_GROUP_PERMISSION_CONFIRMED=true`:** Justified only after IT confirms **application permission `Group.ReadWrite.All`** for the Functions app identity per [backend/functions/src/utils/validate-config.ts](../../../../../backend/functions/src/utils/validate-config.ts) and provisioning docs (README **Provisioning Staging Gates**). **Action:** Entra portal → App registration → API permissions → verify granted admin consent; export evidence; then set the flag.
+- **`SITES_SELECTED_GRANT_CONFIRMED=true`:** Justified only after **per-site `Sites.Selected` admin consent** for the Safety resource sites is verified (Option A2 workflow). **Action:** SharePoint / Graph grant audit; do **not** set from repo inspection alone.
+
+**Safety tightened / rollout proof flags (remain blocked in this session per policy):**
+
+- Do **not** set **`SAFETY_E2E_TIGHTENED_INGEST_REPLAY_CONFIRMED`**, **`SAFETY_TIGHTENED_POSTURE_PROOF_CONFIRMED`**, or **`SAFETY_ROLLOUT_GATE_ENABLED`** until the corresponding ingest/replay proof and approval artifacts exist (`SAFETY_TIGHTENED_PROOF_*`, **`SAFETY_ROLLOUT_CHECKPOINT_ID`**, etc., per live `issueCodes` in the archived readiness JSON).
+
+**SignalR vs Safety closure:**
+
+- **`safetyRolloutReadiness`** does **not** read SignalR — SignalR only influenced **`operationalReadiness`** via `computeReadiness`.
+- **Default:** SignalR connection string **still required** for a fully **ready** operational tier unless **`OPERATIONAL_READINESS_SIGNALR_MODE=optional`** is set as documented above.
+
+**Azure / manual actions:** set the SharePoint + provisioning env vars in the Function App; complete Entra and Sites.Selected verification; wire SignalR or opt in to optional operational mode; then re-capture `/api/health/ready` to `.tmp/functions-validation/` (not committed).
+
+### Baseline `/api/health` (identity context only)
+
+- **HTTP status:** `200` (recorded in `proof-pass-20260424-baseline.txt`).
+- **Response body (public):** `proof-pass-20260424-health.json` — `artifact.version` **`00.000.150`**, `artifact.commitSha` **`51be63a10df49098a974a1312ef7395575638a69`**, `artifact.buildTimestamp` **`2026-04-24T19:41:33.834Z`**.
+
+### Remaining gates (2026-04-24 agent pass — historical list)
+
+1. Tenant/admin **Entra consent** so Azure CLI (or another approved client) can obtain delegated tokens for `api://08c399eb-a394-4087-b859-659d493f8dc7`. (**Done** as of post-consent proof — kept for audit trail.)
+2. Acquire a **fresh** admin-capable token (claims include **`Admin`** or **`HBIntelAdmin`**), decode **safe claims only**, then **`GET /api/health/ready`** and record required readiness fields + `requestId`. (**Done** — full redacted JSON captured under `.tmp/functions-validation/health-ready-full-20260424T203332Z.json`; see **Full readiness JSON capture** below.)
+3. With **approved** role-specific tokens, run **role-matrix** proof (reviewer ingest denied, submitter replay denied, operator empty preview → validation failure not auth). (**Still pending.**)
+4. **Hosted workbook preview** with real SharePoint reporting-period + `reportingPeriodSpItemId` + project context + governed workbook; **no live ingest** until preview is clean and operator authorizes commit-path proof. (**Preview pending; ingest not authorized.**)
+
+### Remaining gates (current)
+
+1. **Rollout readiness:** remediate app settings / provisioning until Safety rollout gates clear (see **Remediation checklist** under **Full readiness JSON capture**). Full `/api/health/ready` JSON is archived locally at `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` (not committed).
+2. **Role matrix** with approved reviewer/submitter/operator tokens.
+3. **Hosted workbook preview** with real SharePoint + project context.
+4. **Live ingest** only after clean preview and explicit operator authorization.
+
+### Evidence files (2026-04-24 agent pass)
+
+| File | Purpose |
+| ---- | ------- |
+| `.tmp/functions-validation/proof-pass-20260424-baseline.txt` | UTC timestamp, git ref, live host line, `/api/health` HTTP code |
+| `.tmp/functions-validation/proof-pass-20260424-health.json` | `/api/health` JSON (no secrets) |
+| `.tmp/functions-validation/proof-pass-20260424-az-account.json` | `az account show` (tenant/subscription/user type) |
+| `.tmp/functions-validation/proof-pass-20260424-token-acquisition-stderr.txt` | Entra error text (`AADSTS65001`) |
+| `.tmp/functions-validation/proof-pass-20260424-token-acquisition-status.txt` | Acquisition outcome summary |
+
+### Evidence files (post-consent operator proof)
+
+| File | Purpose |
+| ---- | ------- |
+| `.tmp/functions-validation/proof-pass-admin-ready-20260424-operator-summary.txt` | Operator-attested HTTP **200**, `requestId`, safe claims, posture summary (no secrets) |
+| `.tmp/functions-validation/proof-pass-admin-ready-20260424-ready-sanitized.json` | Sanitized excerpt; superseded for field detail by full capture below |
+| `.tmp/functions-validation/health-ready-full-20260424T203332Z.json` | Full `/api/health/ready` JSON (no bearer/JWT material) |
+| `.tmp/functions-validation/health-ready-full-20260424T203332Z-http.txt` | HTTP status line output (`200`) |
+| `.tmp/functions-validation/health-ready-full-20260424T203332Z-readiness-extract.json` | Non-secret subset for quick diffing |
