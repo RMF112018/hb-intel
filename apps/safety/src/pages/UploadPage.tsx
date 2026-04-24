@@ -40,6 +40,9 @@ import {
 import { formatAuthoritySource, formatMarkerState } from './previewDiagnostics.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
+const MAX_CHECKLIST_WORKBOOK_BYTES = 10 * 1024 * 1024;
+const CHECKLIST_EXTENSION = '.xlsx';
+const CHECKLIST_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const VISUALLY_HIDDEN_STYLE = {
   border: 0,
   clip: 'rect(0 0 0 0)',
@@ -96,6 +99,33 @@ export function UploadPage(): ReactNode {
   const ingestion = useSafetyIngestion();
 
   const [file, setFile] = useState<File | null>(null);
+  const [fileErrorText, setFileErrorText] = useState<string | null>(null);
+  const handleFileSelected = (selected: File | null): void => {
+    if (!selected) {
+      setFile(null);
+      setFileErrorText(null);
+      return;
+    }
+    const hasValidExtension = selected.name.toLowerCase().endsWith(CHECKLIST_EXTENSION);
+    if (!hasValidExtension) {
+      setFile(null);
+      setFileErrorText('Checklist workbook must use the .xlsx extension.');
+      return;
+    }
+    if (selected.type && selected.type !== CHECKLIST_MIME) {
+      setFile(null);
+      setFileErrorText('Checklist workbook must be an Excel .xlsx file.');
+      return;
+    }
+    if (selected.size > MAX_CHECKLIST_WORKBOOK_BYTES) {
+      setFile(null);
+      setFileErrorText('Checklist workbook must be 10 MB or smaller.');
+      return;
+    }
+    setFile(selected);
+    setFileErrorText(null);
+  };
+
   const [reportingPeriodId, setReportingPeriodId] = useState<string>('');
   const [selectedProject, setSelectedProject] =
     useState<SafetyProjectPickerValue | null>(null);
@@ -545,11 +575,12 @@ export function UploadPage(): ReactNode {
           >
             <SafetyFileInput
               label="Checklist workbook (.xlsx)"
-              helpText="Use the current v1 Safety Checklist template. The parser expects the canonical template structure."
+              helpText="Use the current v1 Safety Checklist template. File must be .xlsx and 10 MB or smaller."
+              errorText={fileErrorText ?? undefined}
               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               selectedFile={file}
-              onFileSelected={setFile}
-              onClear={() => setFile(null)}
+              onFileSelected={handleFileSelected}
+              onClear={() => handleFileSelected(null)}
               disabled={periodsQuery.isError}
             />
           </SafetyIntakeStep>

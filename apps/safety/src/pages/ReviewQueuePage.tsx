@@ -72,6 +72,7 @@ export function ReviewQueuePage(): ReactNode {
   const entries = (reviewQueue.data ?? []) as ReviewQueueEntry[];
   const replay = useReplayIngestion();
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
+  const [lastReplaySummary, setLastReplaySummary] = useState<string | null>(null);
   const replayAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export function ReviewQueuePage(): ReactNode {
     const controller = new AbortController();
     replayAbortRef.current = controller;
     setPendingRunId(runId);
+    setLastReplaySummary(null);
     replay.mutate(
       {
         parentRunId: runId,
@@ -94,7 +96,16 @@ export function ReviewQueuePage(): ReactNode {
           signal: controller.signal,
         },
       },
-      { onSettled: () => setPendingRunId(null) },
+      {
+        onSuccess: () => {
+          setLastReplaySummary(
+            supersedePrior
+              ? `Replay supersede completed for run ${runId}.`
+              : `Replay completed for run ${runId}.`,
+          );
+        },
+        onSettled: () => setPendingRunId(null),
+      },
     );
   };
 
@@ -177,7 +188,7 @@ export function ReviewQueuePage(): ReactNode {
       ? `Replay in progress for run ${pendingRunId}.`
       : 'Replay in progress.'
     : replay.data
-      ? 'Replay finished. Review queue will refresh with latest state.'
+      ? `${lastReplaySummary ?? 'Replay finished.'} Review queue will refresh with latest state.`
       : '';
   const alertAnnouncement = replay.error
     ? `${replayFailure.headline} ${replayFailure.detail}`

@@ -135,18 +135,32 @@ vi.mock('../components/index.js', () => ({
       Pick project
     </button>
   ),
-  SafetyFileInput: ({ onFileSelected }: any) => (
-    <button
-      onClick={() =>
-        onFileSelected(
-          new File(['test'], 'test.xlsx', {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          }),
-        )
-      }
-    >
-      Select file
-    </button>
+  SafetyFileInput: ({ onFileSelected, errorText }: any) => (
+    <div>
+      <button
+        onClick={() =>
+          onFileSelected(
+            new File(['test'], 'test.xlsx', {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            }),
+          )
+        }
+      >
+        Select file
+      </button>
+      <button
+        onClick={() =>
+          onFileSelected(
+            new File(['test'], 'bad.csv', {
+              type: 'text/csv',
+            }),
+          )
+        }
+      >
+        Select invalid file
+      </button>
+      {errorText ? <div>{errorText}</div> : null}
+    </div>
   ),
   toSafetyProjectSourceClassification: () => 'project',
 }));
@@ -357,5 +371,20 @@ describe('UploadPage preview-before-commit flow', () => {
     expect(screen.getByText(/metadata authority/i)).toBeInTheDocument();
     expect(screen.getByText(/inspection date: parser-meta/i)).toBeInTheDocument();
     expect(screen.getByText(/inspection number: named-range/i)).toBeInTheDocument();
+  });
+
+  it('blocks preview when selected file fails extension/type validation', async () => {
+    configurePreview({ commitReadiness: true });
+    const user = userEvent.setup();
+    render(<UploadPage />);
+
+    await user.click(screen.getByRole('button', { name: /pick project/i }));
+    await user.click(screen.getByRole('button', { name: /select invalid file/i }));
+    await user.type(screen.getByLabelText(/inspection number/i), '12');
+    await user.type(screen.getByLabelText(/inspection date/i), '2026-04-24');
+
+    expect(screen.getByText(/must use the \.xlsx extension/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /preview checklist/i }));
+    expect(previewMutate).toHaveBeenCalledTimes(0);
   });
 });

@@ -97,6 +97,14 @@ describe('ReviewQueue async accessibility semantics', () => {
     expect(screen.getByRole('button', { name: /cancel replay/i })).toBeInTheDocument();
   });
 
+  it('announces replay completion in polite live region', () => {
+    replayState.data = { state: 'committed' };
+    render(<ReviewQueuePage />);
+    expect(
+      document.querySelector('[data-safety-ui="review-live-status"]'),
+    ).toHaveTextContent(/review queue will refresh with latest state/i);
+  });
+
   it('uses alert path for replay failures only', async () => {
     replayState.error = {
       message: 'failed',
