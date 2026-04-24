@@ -39,6 +39,9 @@ yarn-error.log*
 
 # SPFx
 lib/
+# Azure Functions notification helpers live under a `lib/` directory (not SPFx output).
+!backend/functions/src/functions/notifications/lib/
+!backend/functions/src/functions/notifications/lib/**
 temp/
 sharepoint/
 # Safety Record Keeping SharePoint adapter source — not an SPFx build artifact.
