@@ -308,6 +308,11 @@ const SAFETY_PACKAGED_CONFIG_MARKERS = [
   { key: 'token audience property key', needle: 'apiAudience' },
   { key: 'token acquisition failure code', needle: 'TOKEN_ACQUISITION_FAILED' },
   { key: 'backend bearer wiring seam', needle: 'Authorization' },
+  { key: 'runtime accepted backend origin key', needle: 'acceptedBackendOrigin' },
+  { key: 'runtime binding proof global marker', needle: '__hbIntel_safetyRuntimeBindingProof' },
+  { key: 'governed manifest authority marker', needle: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e' },
+  { key: 'governed package version marker', needle: '1.2.34.0' },
+  { key: 'hosted GUID fingerprint contract key', needle: 'expectedHostedGuidOverlayFingerprint' },
 ] as const;
 
 interface PackageRuntimeMarker {
@@ -3076,9 +3081,25 @@ for (const domain of domains) {
           },
         },
       };
+      const runtimeConfigProof = {
+        domain: 'safety',
+        generatedAt: routeAuthProof.generatedAt,
+        packagingRunId: freshnessEvidence.runId,
+        governedAuthority: {
+          expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+          expectedPackageVersion: '1.2.34.0',
+          expectedHostedGuidOverlayFingerprint: 'fnv1a32:36b2f764',
+        },
+        checks: {
+          packagedBindingMarkersPresent: routeAuthProof.checks.configContractMarkersPresent,
+        },
+      };
       const routeAuthProofPath = path.join(OUTPUT_DIR, 'safety-route-auth-proof.json');
+      const runtimeConfigProofPath = path.join(OUTPUT_DIR, 'safety-runtime-config-proof.json');
       fs.writeFileSync(routeAuthProofPath, `${JSON.stringify(routeAuthProof, null, 2)}\n`);
+      fs.writeFileSync(runtimeConfigProofPath, `${JSON.stringify(runtimeConfigProof, null, 2)}\n`);
       console.log(`  ✓ Safety route/auth proof written: ${routeAuthProofPath}`);
+      console.log(`  ✓ Safety runtime config proof written: ${runtimeConfigProofPath}`);
       if (!hasAccessAsUserPermission || missingRouteMarkers.length > 0 || missingConfigMarkers.length > 0) {
         console.error(`  ❌ safety: route/auth proof failed; see ${routeAuthProofPath}`);
         allPassed = false;

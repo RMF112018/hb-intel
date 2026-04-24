@@ -14,6 +14,7 @@ const REQUIRED_HOSTED_KEYS = [
   'Projects',
   'LegacyProjectFallbackRegistry',
 ] as const;
+export const HOSTED_SAFETY_GUID_REQUIRED_KEYS = REQUIRED_HOSTED_KEYS;
 
 type HostedRequiredKey = (typeof REQUIRED_HOSTED_KEYS)[number];
 
@@ -27,9 +28,14 @@ const HBCENTRAL_HOSTED_GUID_OVERLAY: Readonly<Record<HostedRequiredKey, string>>
   Projects: '1ac57cbb-9f0a-457f-9c97-081a29f45b12',
   LegacyProjectFallbackRegistry: '2c24aa84-38f4-4793-9576-2ee23bedd74a',
 };
+export const HBCENTRAL_HOSTED_GUID_OVERLAY_FINGERPRINT = fingerprintOverlay(HBCENTRAL_HOSTED_GUID_OVERLAY);
 
 export function hostedSafetyGuidOverlay(): SafetyGuidOverlay {
   return { ...HBCENTRAL_HOSTED_GUID_OVERLAY };
+}
+
+export function hostedSafetyGuidOverlayFingerprint(): string {
+  return HBCENTRAL_HOSTED_GUID_OVERLAY_FINGERPRINT;
 }
 
 export function bindHostedSafetyGuidOverlay(): void {
@@ -40,4 +46,14 @@ export function findMissingHostedSafetyGuidBindings(
   overlay: SafetyGuidOverlay = currentSafetyGuidOverlay(),
 ): HostedRequiredKey[] {
   return REQUIRED_HOSTED_KEYS.filter((key) => !overlay[key]);
+}
+
+function fingerprintOverlay(overlay: Readonly<Record<HostedRequiredKey, string>>): string {
+  const canonical = REQUIRED_HOSTED_KEYS.map((key) => `${key}:${overlay[key]}`).join('|');
+  let hash = 2166136261;
+  for (let i = 0; i < canonical.length; i += 1) {
+    hash ^= canonical.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `fnv1a32:${(hash >>> 0).toString(16).padStart(8, '0')}`;
 }

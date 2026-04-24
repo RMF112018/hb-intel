@@ -8,6 +8,7 @@ import {
 import {
   bindHostedSafetyGuidOverlay,
   findMissingHostedSafetyGuidBindings,
+  hostedSafetyGuidOverlayFingerprint,
   hostedSafetyGuidOverlay,
 } from '../runtime/hostedSafetyGuidBinding.js';
 
@@ -34,6 +35,10 @@ describe('hostedSafetyGuidBinding', () => {
     bindHostedSafetyGuidOverlay();
     const overlay = currentSafetyGuidOverlay();
     expect(findMissingHostedSafetyGuidBindings(overlay)).toEqual([]);
+  });
+
+  it('publishes a deterministic hosted overlay fingerprint', () => {
+    expect(hostedSafetyGuidOverlayFingerprint()).toBe('fnv1a32:36b2f764');
   });
 
   it('reports exactly which hosted keys are missing', () => {

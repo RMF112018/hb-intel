@@ -14,6 +14,7 @@ describe('Safety production runtime contract source-of-truth', () => {
     expect(mountSource).toContain('resolveSafetyRuntimeContract');
     expect(mountSource).toContain('runtimeContract={runtimeContract}');
     expect(mountSource).toContain("? 'shell-webpart'");
+    expect(mountSource).toContain('__hbIntel_safetyRuntimeBindingProof');
   });
 
   it('SafetyWebPart delegates render to mount with backend config fields', () => {
@@ -21,6 +22,9 @@ describe('Safety production runtime contract source-of-truth', () => {
     expect(webpartSource).toContain('void mount(this.domElement, this.context, {');
     expect(webpartSource).toContain('functionAppUrl: this.properties.functionAppUrl');
     expect(webpartSource).toContain('apiAudience: this.properties.apiAudience');
+    expect(webpartSource).toContain('acceptedBackendOrigin');
+    expect(webpartSource).toContain('expectedManifestId: SafetyWebPart.SAFETY_MANIFEST_ID');
+    expect(webpartSource).toContain('expectedPackageVersion: SafetyWebPart.SAFETY_PACKAGE_VERSION');
     expect(webpartSource).toContain("PropertyPaneTextField('functionAppUrl'");
     expect(webpartSource).toContain("PropertyPaneTextField('apiAudience'");
   });

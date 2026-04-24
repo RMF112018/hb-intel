@@ -20,7 +20,10 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { App } from './App.js';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-import { bindHostedSafetyGuidOverlay } from './runtime/hostedSafetyGuidBinding.js';
+import {
+  bindHostedSafetyGuidOverlay,
+  hostedSafetyGuidOverlayFingerprint,
+} from './runtime/hostedSafetyGuidBinding.js';
 import {
   resolveSafetyRuntimeContract,
   type ISafetyMountConfig,
@@ -29,6 +32,7 @@ import {
 /** Shell-injected runtime configuration. Reserved for future wiring. */
 export type IMountConfig = ISafetyMountConfig;
 const SAFETY_WEBPART_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
+const SAFETY_PACKAGE_VERSION = '1.2.34.0';
 
 let root: Root | undefined;
 
@@ -54,6 +58,7 @@ export async function mount(
     config,
     hostSource,
   });
+  publishRuntimeBindingProof(config, hostSource, runtimeContract);
 
   root = createRoot(el);
   root.render(
@@ -77,6 +82,49 @@ if (typeof window !== 'undefined' && globalThis !== window) {
   (window as unknown as { __hbIntel_safety: unknown }).__hbIntel_safety = api;
   (window as unknown as { __hbIntel_safetyManifestId?: string }).__hbIntel_safetyManifestId =
     SAFETY_WEBPART_MANIFEST_ID;
+}
+
+function publishRuntimeBindingProof(
+  config: IMountConfig | undefined,
+  hostSource: 'shell-webpart' | 'safety-webpart' | 'local-dev',
+  runtimeContract: ReturnType<typeof resolveSafetyRuntimeContract>,
+): void {
+  const proof = {
+    generatedAt: new Date().toISOString(),
+    hostSource,
+    configured: {
+      functionAppUrl: config?.functionAppUrl ?? null,
+      apiAudience: config?.apiAudience ?? null,
+      acceptedBackendOrigin: config?.acceptedBackendOrigin ?? null,
+      expectedManifestId: config?.expectedManifestId ?? null,
+      expectedPackageVersion: config?.expectedPackageVersion ?? null,
+      expectedHostedGuidOverlayFingerprint: config?.expectedHostedGuidOverlayFingerprint ?? null,
+    },
+    governedAuthority: {
+      expectedManifestId: SAFETY_WEBPART_MANIFEST_ID,
+      expectedPackageVersion: SAFETY_PACKAGE_VERSION,
+      expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+    },
+    runtimeContract: {
+      canInitializeCommands: runtimeContract.canInitializeCommands,
+      blockingReasons: runtimeContract.blockingReasons,
+      backend: runtimeContract.backend,
+      governed: runtimeContract.governed,
+      hostedGuidOverlay: runtimeContract.hostedGuidOverlay,
+    },
+  };
+  (
+    globalThis as unknown as {
+      __hbIntel_safetyRuntimeBindingProof?: unknown;
+    }
+  ).__hbIntel_safetyRuntimeBindingProof = proof;
+  if (typeof window !== 'undefined' && globalThis !== window) {
+    (
+      window as unknown as {
+        __hbIntel_safetyRuntimeBindingProof?: unknown;
+      }
+    ).__hbIntel_safetyRuntimeBindingProof = proof;
+  }
 }
 
 function isShellHostedMountConfig(config: IMountConfig | undefined): boolean {

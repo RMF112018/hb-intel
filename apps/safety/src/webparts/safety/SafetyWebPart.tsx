@@ -13,6 +13,7 @@ import {
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { mount, unmount } from '../../mount.js';
+import { hostedSafetyGuidOverlayFingerprint } from '../../runtime/hostedSafetyGuidBinding.js';
 
 export interface ISafetyWebPartProps {
   description: string;
@@ -29,6 +30,8 @@ export interface ISafetyWebPartProps {
  * - onDispose(): unmounts React tree to prevent memory leaks
  */
 export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartProps> {
+  private static readonly SAFETY_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
+  private static readonly SAFETY_PACKAGE_VERSION = '1.2.34.0';
   /**
    * Called by SharePoint before render(). Resolves SP group membership
    * into HB Intel permission keys, then bootstraps the auth store.
@@ -44,15 +47,30 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
    * Uses React 18 createRoot for concurrent mode support.
    */
   public render(): void {
+    const acceptedBackendOrigin = this.tryResolveOrigin(this.properties.functionAppUrl);
     void mount(this.domElement, this.context, {
       functionAppUrl: this.properties.functionAppUrl,
       apiAudience: this.properties.apiAudience,
+      acceptedBackendOrigin,
+      expectedManifestId: SafetyWebPart.SAFETY_MANIFEST_ID,
+      expectedPackageVersion: SafetyWebPart.SAFETY_PACKAGE_VERSION,
+      expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
     }).catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
       this.domElement.innerHTML =
         `<div role="alert" style="padding:12px;border:1px solid #d13438;">` +
         `Safety failed to mount: ${message}</div>`;
     });
+  }
+
+  private tryResolveOrigin(value: string | undefined): string | undefined {
+    const normalized = value?.trim();
+    if (!normalized) return undefined;
+    try {
+      return new URL(normalized).origin;
+    } catch {
+      return undefined;
+    }
   }
 
   /**
