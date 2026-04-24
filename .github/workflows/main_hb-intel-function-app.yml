@@ -241,7 +241,8 @@ jobs:
           EXPECTED_SHA: ${{ needs.build.outputs.commit-sha }}
         run: |
           set -euo pipefail
-          pnpm exec tsx scripts/verify-functions-live-parity.ts \
+          # Deploy job does not run pnpm install; use dlx so tsx is fetched without workspace devDependencies.
+          pnpm dlx tsx scripts/verify-functions-live-parity.ts \
             --app-name "$AZURE_FUNCTIONAPP_NAME" \
             --resource-group "${{ steps.stamp.outputs.resourceGroup }}" \
             --expected-version "$EXPECTED_VERSION" \
