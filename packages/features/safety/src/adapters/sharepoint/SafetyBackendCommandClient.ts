@@ -155,12 +155,14 @@ export class SafetyBackendCommandClient {
 
       if (response.ok) {
         const envelope = payload as SafetyBackendSuccessEnvelope<TData> | null;
+        const backendRequestIdFromData = readOperationRequestId(envelope?.data);
+        const effectiveBackendRequestId = requestIdFromHeader ?? backendRequestIdFromData;
         if (!envelope?.data) {
           throw new SafetyBackendCommandError({
             endpoint,
             httpStatus: response.status,
-            requestId: requestIdFromHeader,
-            backendRequestId: requestIdFromHeader,
+            requestId: effectiveBackendRequestId,
+            backendRequestId: effectiveBackendRequestId,
             message: 'Backend success envelope missing data payload.',
             errorKind: 'contract',
             retryable: false,
@@ -170,7 +172,7 @@ export class SafetyBackendCommandClient {
         }
         return {
           data: envelope.data,
-          requestId: requestIdFromHeader,
+          requestId: effectiveBackendRequestId,
           frontendRequestId,
           attempts: input.attempt,
         };
@@ -181,6 +183,8 @@ export class SafetyBackendCommandClient {
       const requestId = requestIdFromHeader ?? failure?.requestId ?? errorEnvelope?.requestId;
       const httpStatus = response.status;
       const errorKind = classifyStatus(httpStatus);
+      const nestedFailureClass = readDetailString(errorEnvelope?.details, 'failureClass');
+      const nestedPreviewFailureClass = readDetailString(errorEnvelope?.details, 'previewFailureClass');
       throw new SafetyBackendCommandError({
         endpoint,
         httpStatus,
@@ -189,8 +193,8 @@ export class SafetyBackendCommandClient {
         frontendRequestId,
         message: failure?.message ?? errorEnvelope?.message ?? `Backend command failed (${httpStatus}).`,
         code: failure?.code ?? errorEnvelope?.code,
-        failureClass: failure?.failureClass,
-        previewFailureClass: failure?.previewFailureClass,
+        failureClass: failure?.failureClass ?? nestedFailureClass,
+        previewFailureClass: failure?.previewFailureClass ?? nestedPreviewFailureClass,
         graphContext: failure?.graphContext,
         details: errorEnvelope?.details,
         operationData: failure?.data,
@@ -323,4 +327,18 @@ async function safeJson(response: Response): Promise<unknown | null> {
 
 function trimTrailingSlash(value: string): string {
   return value.endsWith('/') ? value.slice(0, -1) : value;
+}
+
+function readOperationRequestId(data: unknown): string | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const maybe = (data as { requestId?: unknown }).requestId;
+  return typeof maybe === 'string' && maybe.length > 0 ? maybe : undefined;
+}
+
+function readDetailString(
+  details: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined {
+  const value = details?.[key];
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }

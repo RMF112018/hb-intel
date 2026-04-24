@@ -211,7 +211,7 @@ export function uploadFailureMessage(error: unknown, at?: Date): TruthfulMessage
     };
     if (seam === 'parser-authority-violation') return {
       headline: 'Parser authority rules blocked commit readiness.',
-      detail: 'Parser-authoritative values or marker requirements were violated. Fix workbook authority fields before retry.',
+      detail: 'For markered templates, parser values are authoritative and define committed values; this command was blocked because parser authority requirements were violated.',
       ...base,
     };
     if (seam === 'reporting-period-mismatch') return {
@@ -289,9 +289,49 @@ export function replayFailureMessage(error: unknown, at?: Date): TruthfulMessage
       detail: 'The backend replay endpoint is unavailable in this runtime deployment.',
       ...base,
     };
+    if (seam === 'validation-contract') return {
+      headline: 'Replay payload failed backend validation contract.',
+      detail: 'Replay input or replay-state contract was rejected by the backend validator before commit.',
+      ...base,
+    };
+    if (seam === 'template-incompatibility') return {
+      headline: 'Replay blocked by template incompatibility.',
+      detail: 'The retained workbook does not satisfy the active parser/template compatibility contract for replay.',
+      ...base,
+    };
+    if (seam === 'parser-authority-violation') return {
+      headline: 'Replay blocked by parser authority contract.',
+      detail: 'For markered templates, parser values are authoritative and define committed values; replay cannot proceed when parser authority constraints are violated.',
+      ...base,
+    };
+    if (seam === 'reporting-period-mismatch') return {
+      headline: 'Replay blocked by reporting period mismatch.',
+      detail: 'The replay context conflicts with the reporting period contract for the inspection date and selected period.',
+      ...base,
+    };
+    if (seam === 'project-unresolved') return {
+      headline: 'Replay blocked because project resolution is unresolved.',
+      detail: 'Replay could not resolve a safe project identity for commit. Correct project mapping before retry.',
+      ...base,
+    };
+    if (seam === 'duplicate-supersession-risk') return {
+      headline: 'Replay requires governed duplicate/supersession decision.',
+      detail: 'Replay detected duplicate or supersession risk and stopped until an explicit governed supersede decision is made.',
+      ...base,
+    };
+    if (seam === 'commit-failed') return {
+      headline: 'Replay commit failed before terminal write completion.',
+      detail: 'Replay reached backend execution but failed before the commit path produced a successful terminal write.',
+      ...base,
+    };
+    if (seam === 'replay-failed') return {
+      headline: 'Replay failed before terminal transition.',
+      detail: 'Replay execution did not reach a successful terminal transition; inspect support details and retry intentionally.',
+      ...base,
+    };
     return {
-      headline: 'Replay command failed.',
-      detail: 'Replay failed in the backend command seam before a successful terminal transition.',
+      headline: 'Replay failed at an unclassified backend seam.',
+      detail: 'Replay reached backend execution, but the returned failure did not map to a classified seam.',
       ...base,
     };
   }
@@ -315,8 +355,8 @@ export function replayFailureMessage(error: unknown, at?: Date): TruthfulMessage
     };
   }
   return {
-    headline: 'Replay failed at an unknown seam.',
-    detail: error instanceof Error ? error.message : 'Unexpected failure.',
+    headline: 'Replay failed at an unclassified seam.',
+    detail: error instanceof Error ? error.message : 'No classified replay failure details were returned.',
     support: emptySupport,
     failureClass: seam,
     suggestedAction,
@@ -394,9 +434,65 @@ export function readFailureMessage(
         ...base,
       };
     }
+    if (seam === 'validation-contract') {
+      return {
+        headline: `Read contract validation failed for ${subject}.`,
+        detail: 'Backend read-input contract validation failed before list data could be returned.',
+        ...base,
+      };
+    }
+    if (seam === 'template-incompatibility') {
+      return {
+        headline: `Template compatibility prevented loading ${subject}.`,
+        detail: 'The read path depends on template/contract state that is incompatible with the current parser contract.',
+        ...base,
+      };
+    }
+    if (seam === 'parser-authority-violation') {
+      return {
+        headline: `Parser authority contract blocked loading ${subject}.`,
+        detail: 'For markered templates, parser values are authoritative and define committed values; read-side projection is blocked until parser authority constraints are satisfied.',
+        ...base,
+      };
+    }
+    if (seam === 'reporting-period-mismatch') {
+      return {
+        headline: `Reporting period contract blocked loading ${subject}.`,
+        detail: 'Read-side query context does not satisfy reporting period/date contract requirements.',
+        ...base,
+      };
+    }
+    if (seam === 'project-unresolved') {
+      return {
+        headline: `Project resolution blocked loading ${subject}.`,
+        detail: 'Read-side projection could not safely resolve project identity for this query scope.',
+        ...base,
+      };
+    }
+    if (seam === 'duplicate-supersession-risk') {
+      return {
+        headline: `Duplicate or supersession risk blocked loading ${subject}.`,
+        detail: 'Read-side query is blocked behind governed duplicate/supersession safeguards.',
+        ...base,
+      };
+    }
+    if (seam === 'commit-failed') {
+      return {
+        headline: `Prior commit failure is blocking ${subject} read-state.`,
+        detail: 'A known commit failure seam is preventing trustworthy read-side state for this view.',
+        ...base,
+      };
+    }
+    if (seam === 'replay-failed') {
+      return {
+        headline: `Replay failure is blocking ${subject} read-state.`,
+        detail: 'A known replay failure seam is preventing trustworthy read-side state for this view.',
+        ...base,
+      };
+    }
     return {
-      headline: `Loading ${subject} failed at backend command seam.`,
-      detail: 'Retry after reviewing support details and runtime configuration.',
+      headline: `Loading ${subject} failed at an unclassified backend seam.`,
+      detail: 'The backend returned a failure that did not map to a classified read-side seam.',
       ...base,
     };
   }
@@ -420,8 +516,8 @@ export function readFailureMessage(
     };
   }
   return {
-    headline: `Loading ${subject} failed.`,
-    detail: error instanceof Error ? error.message : 'Unexpected read-side error.',
+    headline: `Loading ${subject} failed at an unclassified seam.`,
+    detail: error instanceof Error ? error.message : 'No classified read-side failure details were returned.',
     support: emptySupport,
     failureClass: seam,
     suggestedAction,

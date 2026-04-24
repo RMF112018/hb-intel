@@ -95,7 +95,7 @@ describe('supportTruth seam classifier', () => {
       failureClass: 'graph-transient',
     });
     const message = replayFailureMessage(replayError);
-    expect(message.headline).toMatch(/replay command failed/i);
+    expect(message.headline).toMatch(/replay failed before terminal transition/i);
     expect(message.detail).toMatch(/replay/i);
     expect(message.support.requestId).toBe('req-r1');
   });

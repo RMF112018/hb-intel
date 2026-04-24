@@ -49,7 +49,7 @@ export interface ISafetyRuntimeContract {
 }
 
 const SAFETY_WEBPART_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
-const SAFETY_PACKAGE_VERSION = '1.2.34.0';
+const SAFETY_PACKAGE_VERSION = '1.2.35.0';
 
 export function resolveSafetyRuntimeContract(params: {
   readonly hasSpfxContext: boolean;

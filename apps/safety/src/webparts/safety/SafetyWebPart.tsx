@@ -31,7 +31,7 @@ export interface ISafetyWebPartProps {
  */
 export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartProps> {
   private static readonly SAFETY_MANIFEST_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
-  private static readonly SAFETY_PACKAGE_VERSION = '1.2.34.0';
+  private static readonly SAFETY_PACKAGE_VERSION = '1.2.35.0';
   /**
    * Called by SharePoint before render(). Resolves SP group membership
    * into HB Intel permission keys, then bootstraps the auth store.

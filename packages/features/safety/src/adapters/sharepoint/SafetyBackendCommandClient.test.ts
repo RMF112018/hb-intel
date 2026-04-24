@@ -320,4 +320,57 @@ describe('SafetyBackendCommandClient', () => {
       },
     } satisfies Partial<SafetyBackendCommandError>);
   });
+
+  it('promotes nested failure classification from backend error details', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      errorResponse(
+        500,
+        {
+          message: 'internal error',
+          code: 'INTERNAL_ERROR',
+          details: {
+            failureClass: 'commit-failed',
+            previewFailureClass: 'project-unresolved',
+          },
+        },
+        'backend-500',
+      ),
+    );
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      getApiToken: async () => 'token-replay',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+    });
+
+    await expect(client.replay({ parentRunId: 'run-500' })).rejects.toMatchObject({
+      errorKind: 'non-transient',
+      failureClass: 'commit-failed',
+      previewFailureClass: 'project-unresolved',
+      requestId: 'backend-500',
+      backendRequestId: 'backend-500',
+    } satisfies Partial<SafetyBackendCommandError>);
+  });
+
+  it('uses operation data requestId when success header omits requestId', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      okResponse({
+        data: {
+          success: true,
+          requestAccepted: true,
+          requestId: 'backend-success-body-id',
+          diagnostics: [],
+          result: { state: 'committed' },
+        } satisfies SafetyBackendOperationResult,
+      }),
+    );
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      getApiToken: async () => 'token-ingest',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+    });
+
+    const result = await client.ingest(ingestionRequest, { requestId: 'frontend-success-id' });
+    expect(result.requestId).toBe('backend-success-body-id');
+    expect(result.frontendRequestId).toBe('frontend-success-id');
+  });
 });

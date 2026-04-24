@@ -753,8 +753,9 @@ export function UploadPage(): ReactNode {
                     Workbook metadata did not match your intake entries
                   </HbcTypography>
                   <HbcTypography intent="bodySmall">
-                    The committed record uses your entered values. Workbook values
-                    are kept as provenance.
+                    For markered templates, parser-derived workbook values are
+                    authoritative and are what gets committed. Entered intake
+                    values are advisory unless legacy fallback is explicitly used.
                   </HbcTypography>
                   <ul>
                     {mismatch.projectNumberMismatch && (

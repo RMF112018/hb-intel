@@ -18,7 +18,7 @@ import {
   SafetyTriageSummary,
   SupportDetailsPanel,
 } from '../components/index.js';
-import { replayFailureMessage } from './supportTruth.js';
+import { readFailureMessage, replayFailureMessage } from './supportTruth.js';
 import {
   bucketEntries,
   classifyQueueState,
@@ -189,6 +189,7 @@ export function ReviewQueuePage(): ReactNode {
   );
 
   const isClean = queueState === 'clean';
+  const reviewLoadFailure = readFailureMessage(reviewQueue.error, 'project-weeks');
   const replayFailure = replayFailureMessage(
     replay.error,
     replayErrorObservedAt ?? undefined,
@@ -211,7 +212,7 @@ export function ReviewQueuePage(): ReactNode {
       supportedModes={OFFICE_ONLY}
       isLoading={reviewQueue.isPending}
       isError={reviewQueue.isError}
-      errorMessage="Failed to load the review queue."
+      errorMessage={reviewLoadFailure.headline}
       onRetry={() => reviewQueue.refetch()}
       isEmpty={!reviewQueue.isPending && !reviewQueue.isError && entries.length === 0}
       emptyMessage="Nothing awaiting review — weekly ingestion is clean."

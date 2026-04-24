@@ -51,7 +51,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.34.0',
+        expectedPackageVersion: '1.2.35.0',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -77,7 +77,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.34.0',
+        expectedPackageVersion: '1.2.35.0',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -97,7 +97,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://other-functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.34.0',
+        expectedPackageVersion: '1.2.35.0',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -138,7 +138,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.34.0',
+        expectedPackageVersion: '1.2.35.0',
         expectedHostedGuidOverlayFingerprint: 'fnv1a32:deadbeef',
       },
     });
