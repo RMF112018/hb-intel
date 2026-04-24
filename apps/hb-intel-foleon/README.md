@@ -33,14 +33,50 @@ package-truth convention enforced by `tools/build-spfx-package.ts`.
 Domain is registered in `tools/build-spfx-package.ts`:
 
 ```text
-{ dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single' }
+{ dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single', freshBuildRequired: true }
 ```
 
 Produce the `.sppkg`:
 
 ```bash
-pnpm tsx tools/build-spfx-package.ts --domain foleon
+npx tsx tools/build-spfx-package.ts --domain hb-intel-foleon
 ```
+
+### Site-installed provisioning (required)
+
+Since 1.0.8.0 the package ships **Feature Framework provisioning
+assets** that create four SharePoint lists when installed:
+
+- `HB_FoleonContentRegistry`
+- `HB_FoleonHomepagePlacements`
+- `HB_FoleonInteractionEvents`
+- `HB_FoleonSyncRuns`
+
+Per Microsoft guidance, a `.sppkg` that carries SharePoint assets
+**cannot be tenant-wide deployed**. `skipFeatureDeployment` is
+therefore `false` in `config/package-solution.json`, and the package
+is installed per site.
+
+Install target: `/sites/HBCentral`. Full procedure is documented in
+`docs/provisioning.md`; the short path is:
+
+1. Upload `dist/sppkg/hb-intel-foleon.sppkg` to the tenant App
+   Catalog. Answer **No** when asked to make it available across
+   the tenant.
+2. Go to `/sites/HBCentral` → Site Contents → New → App → add
+   **HB Intel Foleon Publications**.
+3. SharePoint feature activation provisions the four lists in
+   install order (Content Registry → Homepage Placements → Interaction
+   Events → Sync Runs).
+4. Capture each list GUID from
+   `_api/web/lists/getbytitle('<list-title>')?$select=Id` and set
+   `contentRegistryListId`, `placementsListId`, `eventsListId` on
+   the webpart property pane. Runtime continues to bind by list GUID.
+
+The `sharepoint/assets/` source folder contains `elements.xml` plus
+one `schema-<list>.xml` file per governed list. Alignment with
+`src/schema/foleonListSchemas.ts` is enforced by
+`src/schema/__tests__/featureAssets.test.ts`.
 
 ## Mount config contract
 

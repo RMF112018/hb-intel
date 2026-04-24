@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HB Intel Foleon — HB_FoleonInteractionEvents list schema.
+  Authority: docs/reference/sharepoint/list-schemas/hbcentral/lists/hb-foleon-interaction-events.md
+  Code mirror: apps/hb-intel-foleon/src/schema/foleonListSchemas.ts (FOLEON_INTERACTION_EVENTS_SCHEMA)
+  Versioning: DISABLED (high-volume events). Attachments: disabled.
+
+  Privacy: SearchQuery field is provisioned but the telemetry sink
+  never writes raw text into it (see apps/hb-intel-foleon/docs/telemetry.md).
+-->
+<List xmlns:ows="Microsoft SharePoint"
+      Title="Foleon Interaction Events"
+      FolderCreation="FALSE"
+      Direction="$Resources:Direction;"
+      Url="Lists/HB_FoleonInteractionEvents"
+      BaseType="0"
+      EnableContentTypes="FALSE"
+      VersioningEnabled="FALSE"
+      DisableAttachments="TRUE"
+      xmlns="http://schemas.microsoft.com/sharepoint/">
+  <MetaData>
+    <ContentTypes>
+      <ContentTypeRef ID="0x01" />
+    </ContentTypes>
+    <Fields>
+      <Field ID="{B9F50201-F01E-4A10-8010-C0F0E0D20001}" Name="EventId" DisplayName="Event ID" Type="Text" Required="TRUE" Indexed="TRUE" AllowDuplicateValues="FALSE" MaxLength="64" />
+      <Field ID="{B9F50202-F01E-4A10-8010-C0F0E0D20002}" Name="EventType" DisplayName="Event Type" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Card Impression</CHOICE>
+          <CHOICE>Card Click</CHOICE>
+          <CHOICE>Reader Open</CHOICE>
+          <CHOICE>Reader Close</CHOICE>
+          <CHOICE>External Open</CHOICE>
+          <CHOICE>Embed Error</CHOICE>
+          <CHOICE>Search</CHOICE>
+          <CHOICE>Filter</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50203-F01E-4A10-8010-C0F0E0D20003}" Name="FoleonDocId" DisplayName="Foleon Doc ID" Type="Number" Required="FALSE" Indexed="TRUE" Decimals="0" />
+      <Field ID="{B9F50204-F01E-4A10-8010-C0F0E0D20004}" Name="ContentRegistryItemId" DisplayName="Content Registry Item ID" Type="Number" Required="FALSE" Indexed="TRUE" Decimals="0" />
+      <Field ID="{B9F50205-F01E-4A10-8010-C0F0E0D20005}" Name="UserEmailHash" DisplayName="User Email Hash" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="128" />
+      <Field ID="{B9F50206-F01E-4A10-8010-C0F0E0D20006}" Name="UserDepartment" DisplayName="User Department" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="128" />
+      <Field ID="{B9F50207-F01E-4A10-8010-C0F0E0D20007}" Name="PageContext" DisplayName="Page Context" Type="Choice" Required="FALSE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Homepage</CHOICE>
+          <CHOICE>Content Hub</CHOICE>
+          <CHOICE>Reader</CHOICE>
+          <CHOICE>Project Site</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50208-F01E-4A10-8010-C0F0E0D20008}" Name="SearchQuery" DisplayName="Search Query" Type="Text" Required="FALSE" MaxLength="255" />
+      <Field ID="{B9F50209-F01E-4A10-8010-C0F0E0D20009}" Name="FilterStateJson" DisplayName="Filter State JSON" Type="Note" Required="FALSE" NumLines="4" RichText="FALSE" />
+      <Field ID="{B9F5020A-F01E-4A10-8010-C0F0E0D2000A}" Name="ReferrerPath" DisplayName="Referrer Path" Type="Text" Required="FALSE" MaxLength="255" />
+      <Field ID="{B9F5020B-F01E-4A10-8010-C0F0E0D2000B}" Name="EventTimestamp" DisplayName="Event Timestamp" Type="DateTime" Format="DateTime" Required="TRUE" Indexed="TRUE" />
+      <Field ID="{B9F5020C-F01E-4A10-8010-C0F0E0D2000C}" Name="SessionId" DisplayName="Session ID" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="64" />
+      <Field ID="{B9F5020D-F01E-4A10-8010-C0F0E0D2000D}" Name="ClientInfoJson" DisplayName="Client Info JSON" Type="Note" Required="FALSE" NumLines="8" RichText="FALSE" />
+    </Fields>
+    <Views>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Recent Events" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">100</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="EventType" />
+          <FieldRef Name="FoleonDocId" />
+          <FieldRef Name="PageContext" />
+          <FieldRef Name="EventTimestamp" />
+          <FieldRef Name="SessionId" />
+        </ViewFields>
+        <Query>
+          <OrderBy><FieldRef Name="EventTimestamp" Ascending="FALSE" /></OrderBy>
+        </Query>
+      </View>
+    </Views>
+    <Forms>
+      <Form Type="DisplayForm" Url="DispForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="EditForm" Url="EditForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="NewForm" Url="NewForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+    </Forms>
+  </MetaData>
+</List>

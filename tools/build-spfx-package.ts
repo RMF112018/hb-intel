@@ -2381,11 +2381,26 @@ for (const domain of domains) {
     JSON.stringify(shellPkgSolution, null, 2),
   );
 
+  // ── Step 2c: Stage SharePoint assets (Feature Framework) ────────────
+  // Clean the shell's sharepoint/assets directory before every domain
+  // build so a prior domain's staged XMLs never leak into this
+  // domain's .sppkg. Then populate the directory from either:
+  //   (a) the extension-domain auto-generated ClientSideInstance.xml, or
+  //   (b) the source package-solution.json `features[].assets`
+  //       declarations, which reference files under
+  //       apps/<domain>/sharepoint/assets/.
+  const spAssetsDir = path.join(SHELL_DIR, 'sharepoint', 'assets');
+  if (fs.existsSync(spAssetsDir)) {
+    for (const existing of fs.readdirSync(spAssetsDir)) {
+      fs.rmSync(path.join(spAssetsDir, existing), { recursive: true, force: true });
+    }
+  } else {
+    fs.mkdirSync(spAssetsDir, { recursive: true });
+  }
+
   // For extension domains, generate ClientSideInstance.xml for automatic
   // Tenant Wide Extensions registration.
   if (isExtension) {
-    const spAssetsDir = path.join(SHELL_DIR, 'sharepoint', 'assets');
-    fs.mkdirSync(spAssetsDir, { recursive: true });
     const clientSideInstanceXml = [
       '<?xml version="1.0" encoding="utf-8"?>',
       '<Elements xmlns="http://schemas.microsoft.com/sharepoint/">',
@@ -2399,6 +2414,45 @@ for (const domain of domains) {
     ].join('\n');
     fs.writeFileSync(path.join(spAssetsDir, 'ClientSideInstance.xml'), clientSideInstanceXml);
     console.log(`  ✓ ClientSideInstance.xml generated (ComponentId=${primarySourceManifest.id})`);
+  }
+
+  // Stage Feature Framework provisioning assets declared in the source
+  // package-solution.json. Used by domains that provision SharePoint
+  // lists or site columns — e.g. hb-intel-foleon provisions the four
+  // governed Foleon lists. The orchestrator fails loudly if any
+  // declared file is missing from the source apps/<domain>/sharepoint/assets.
+  const sourceFeatureAssets = domainPkgSolution.solution?.features?.[0]?.assets;
+  if (sourceFeatureAssets && typeof sourceFeatureAssets === 'object') {
+    const declaredFiles = [
+      ...(Array.isArray(sourceFeatureAssets.elementManifests) ? sourceFeatureAssets.elementManifests : []),
+      ...(Array.isArray(sourceFeatureAssets.elementFiles) ? sourceFeatureAssets.elementFiles : []),
+      ...(Array.isArray(sourceFeatureAssets.upgradeActions) ? sourceFeatureAssets.upgradeActions : []),
+    ] as string[];
+    const sourceAssetsDir = path.join(ROOT, 'apps', domain.dir, 'sharepoint', 'assets');
+    if (declaredFiles.length > 0 && !fs.existsSync(sourceAssetsDir)) {
+      throw new Error(
+        `[build-spfx-package] ${domain.dir} declares feature assets ${JSON.stringify(declaredFiles)} but ${sourceAssetsDir} does not exist.`,
+      );
+    }
+    const missing: string[] = [];
+    for (const file of declaredFiles) {
+      const src = path.join(sourceAssetsDir, file);
+      if (!fs.existsSync(src)) {
+        missing.push(file);
+        continue;
+      }
+      fs.copyFileSync(src, path.join(spAssetsDir, file));
+    }
+    if (missing.length > 0) {
+      throw new Error(
+        `[build-spfx-package] ${domain.dir}: missing feature-asset source files in ${sourceAssetsDir}: ${missing.join(', ')}`,
+      );
+    }
+    if (declaredFiles.length > 0) {
+      console.log(
+        `  ✓ Staged ${declaredFiles.length} Feature Framework asset(s) for ${domain.dir}: ${declaredFiles.join(', ')}`,
+      );
+    }
   }
 
   // Write primary domain manifest into the shell (additional manifests for multi-mode

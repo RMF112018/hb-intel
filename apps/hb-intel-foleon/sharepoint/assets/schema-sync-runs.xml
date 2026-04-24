@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HB Intel Foleon — HB_FoleonSyncRuns list schema.
+  Authority: docs/reference/sharepoint/list-schemas/hbcentral/lists/hb-foleon-sync-runs.md
+  Code mirror: apps/hb-intel-foleon/src/schema/foleonListSchemas.ts (FOLEON_SYNC_RUNS_SCHEMA)
+  Versioning: enabled. Attachments: disabled.
+
+  Provisioned at launch even though no writer exists in Wave 01 —
+  the contract must be stable before Wave 02 backend sync ships.
+-->
+<List xmlns:ows="Microsoft SharePoint"
+      Title="Foleon Sync Runs"
+      FolderCreation="FALSE"
+      Direction="$Resources:Direction;"
+      Url="Lists/HB_FoleonSyncRuns"
+      BaseType="0"
+      EnableContentTypes="FALSE"
+      VersioningEnabled="TRUE"
+      DisableAttachments="TRUE"
+      xmlns="http://schemas.microsoft.com/sharepoint/">
+  <MetaData>
+    <ContentTypes>
+      <ContentTypeRef ID="0x01" />
+    </ContentTypes>
+    <Fields>
+      <Field ID="{B9F50301-F01E-4A10-8010-C0F0E0D30001}" Name="RunId" DisplayName="Run ID" Type="Text" Required="TRUE" Indexed="TRUE" AllowDuplicateValues="FALSE" MaxLength="64" />
+      <Field ID="{B9F50302-F01E-4A10-8010-C0F0E0D30002}" Name="RunKind" DisplayName="Run Kind" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Docs</CHOICE>
+          <CHOICE>Projects</CHOICE>
+          <CHOICE>Analytics</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50303-F01E-4A10-8010-C0F0E0D30003}" Name="Status" DisplayName="Status" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Running</CHOICE>
+          <CHOICE>Succeeded</CHOICE>
+          <CHOICE>Failed</CHOICE>
+          <CHOICE>Cancelled</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50304-F01E-4A10-8010-C0F0E0D30004}" Name="StartedUtc" DisplayName="Started (UTC)" Type="DateTime" Format="DateTime" Required="TRUE" Indexed="TRUE" />
+      <Field ID="{B9F50305-F01E-4A10-8010-C0F0E0D30005}" Name="EndedUtc" DisplayName="Ended (UTC)" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50306-F01E-4A10-8010-C0F0E0D30006}" Name="TriggerSource" DisplayName="Trigger Source" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Timer</CHOICE>
+          <CHOICE>Manual</CHOICE>
+          <CHOICE>AdminApi</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50307-F01E-4A10-8010-C0F0E0D30007}" Name="ItemsFetched" DisplayName="Items Fetched" Type="Number" Required="FALSE" Decimals="0" />
+      <Field ID="{B9F50308-F01E-4A10-8010-C0F0E0D30008}" Name="ItemsWritten" DisplayName="Items Written" Type="Number" Required="FALSE" Decimals="0" />
+      <Field ID="{B9F50309-F01E-4A10-8010-C0F0E0D30009}" Name="ErrorCount" DisplayName="Error Count" Type="Number" Required="FALSE" Indexed="TRUE" Decimals="0" />
+      <Field ID="{B9F5030A-F01E-4A10-8010-C0F0E0D3000A}" Name="ErrorsJson" DisplayName="Errors JSON" Type="Note" Required="FALSE" NumLines="10" RichText="FALSE" />
+      <Field ID="{B9F5030B-F01E-4A10-8010-C0F0E0D3000B}" Name="CorrelationId" DisplayName="Correlation ID" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="64" />
+      <Field ID="{B9F5030C-F01E-4A10-8010-C0F0E0D3000C}" Name="BackendVersion" DisplayName="Backend Version" Type="Text" Required="FALSE" MaxLength="32" />
+    </Fields>
+    <Views>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Recent Runs" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">50</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="RunKind" />
+          <FieldRef Name="Status" />
+          <FieldRef Name="StartedUtc" />
+          <FieldRef Name="EndedUtc" />
+          <FieldRef Name="TriggerSource" />
+          <FieldRef Name="ErrorCount" />
+          <FieldRef Name="CorrelationId" />
+        </ViewFields>
+        <Query>
+          <OrderBy><FieldRef Name="StartedUtc" Ascending="FALSE" /></OrderBy>
+        </Query>
+      </View>
+      <View BaseViewID="2" Type="HTML" DisplayName="Failed Runs" SetupPath="pages\viewpage.aspx" Url="Failed.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">50</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="RunKind" />
+          <FieldRef Name="StartedUtc" />
+          <FieldRef Name="EndedUtc" />
+          <FieldRef Name="ErrorCount" />
+          <FieldRef Name="CorrelationId" />
+        </ViewFields>
+        <Query>
+          <Where>
+            <Eq><FieldRef Name="Status" /><Value Type="Choice">Failed</Value></Eq>
+          </Where>
+          <OrderBy><FieldRef Name="StartedUtc" Ascending="FALSE" /></OrderBy>
+        </Query>
+      </View>
+    </Views>
+    <Forms>
+      <Form Type="DisplayForm" Url="DispForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="EditForm" Url="EditForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="NewForm" Url="NewForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+    </Forms>
+  </MetaData>
+</List>

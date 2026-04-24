@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HB Intel Foleon — Feature Framework list provisioning.
+
+  Four ListInstance entries in install order. Homepage Placements
+  declares a cross-list Lookup to Content Registry; Content Registry
+  is declared FIRST so SharePoint can resolve the URL-form lookup at
+  provisioning time (per MS-Learn Field element guidance).
+
+  All four lists use the built-in Custom List template
+  (FeatureId=00bfea71-de22-43b2-a848-c05709900100, TemplateType=100).
+
+  CustomSchema points at per-list schema-*.xml files packaged under
+  features[0].assets.elementFiles.
+-->
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+
+  <ListInstance
+    FeatureId="00bfea71-de22-43b2-a848-c05709900100"
+    TemplateType="100"
+    Title="Foleon Content Registry"
+    Description="Governed registry of Foleon publications surfaced by the Foleon SPFx webpart. Runtime binds by list GUID; this provisioning feature creates the list, its fields, indexes, and recommended views."
+    Url="Lists/HB_FoleonContentRegistry"
+    OnQuickLaunch="FALSE"
+    CustomSchema="schema-content-registry.xml" />
+
+  <ListInstance
+    FeatureId="00bfea71-de22-43b2-a848-c05709900100"
+    TemplateType="100"
+    Title="Foleon Homepage Placements"
+    Description="Curated homepage placements for Foleon publications. Lookup binds to the Foleon Content Registry via the ContentLookup field; admins also populate ContentIdCache with the target record's FoleonDocId so the Highlights query can resolve without expanding the lookup."
+    Url="Lists/HB_FoleonHomepagePlacements"
+    OnQuickLaunch="FALSE"
+    CustomSchema="schema-homepage-placements.xml" />
+
+  <ListInstance
+    FeatureId="00bfea71-de22-43b2-a848-c05709900100"
+    TemplateType="100"
+    Title="Foleon Interaction Events"
+    Description="High-volume telemetry sink for the Foleon SPFx webpart. Versioning is disabled on this list. Raw search text is never written; callers use the ClientInfoJson field for the governed envelope."
+    Url="Lists/HB_FoleonInteractionEvents"
+    OnQuickLaunch="FALSE"
+    CustomSchema="schema-interaction-events.xml" />
+
+  <ListInstance
+    FeatureId="00bfea71-de22-43b2-a848-c05709900100"
+    TemplateType="100"
+    Title="Foleon Sync Runs"
+    Description="Operational log of Foleon sync jobs. Provisioned ahead of Wave 02 backend writers so the contract and indexes are stable before any writer ships. Expected to be empty at launch."
+    Url="Lists/HB_FoleonSyncRuns"
+    OnQuickLaunch="FALSE"
+    CustomSchema="schema-sync-runs.xml" />
+
+</Elements>

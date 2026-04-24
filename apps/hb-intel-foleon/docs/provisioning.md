@@ -1,40 +1,51 @@
 # Foleon SharePoint provisioning runbook
 
-Provision the three MVP SharePoint lists the Foleon SPFx webpart
-queries at runtime. This runbook is read-only with respect to tenant
-state until the final step — every upstream step is inspection or
-dry-run.
+Install the Foleon SPFx package on `/sites/HBCentral` to provision the
+four governed SharePoint lists via the SPFx Feature Framework. This
+replaces the prior manual-creation workflow — no one hand-builds the
+lists from the markdown schema documents anymore.
 
-The canonical field tables live under
+Canonical field tables live under
 `docs/reference/sharepoint/list-schemas/hbcentral/lists/`:
 
 - `hb-foleon-content-registry.md`
 - `hb-foleon-homepage-placements.md`
 - `hb-foleon-interaction-events.md`
+- `hb-foleon-sync-runs.md`
 
 These markdown files mirror the code-level schemas in
-`apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`. Both are the
-source of truth; drift is caught by
-`src/schema/__tests__/foleonListSchemas.test.ts`.
+`apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`, and the
+Feature Framework XML in
+`apps/hb-intel-foleon/sharepoint/assets/` mirrors both. Drift is
+caught by:
 
-## 1. Pre-flight
+- `src/schema/__tests__/foleonListSchemas.test.ts` — code vs. docs.
+- `src/schema/__tests__/featureAssets.test.ts` — XML vs. code.
+
+## 1. Packaging posture
+
+This `.sppkg` contains SharePoint assets. Per Microsoft guidance:
+
+- `skipFeatureDeployment` is **false** — the package is **site-installed**.
+- Tenant-wide deployment is **not supported** for packages containing
+  SharePoint assets.
+- The package must be installed on each target site that should host
+  the webpart + the four lists.
+
+Launch target: `/sites/HBCentral`. Additional sites are a Wave 02
+decision (no business need at launch per ADR-0125).
+
+## 2. Pre-flight
 
 - Tenant: `https://hedrickbrotherscom.sharepoint.com`
 - Target site: `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`
 - Required role: SharePoint admin OR site owner on HBCentral
-- Required toolchain: `tools/pnp-runner-local/` (same runner already
-  used for `priority-actions-band-*` lists)
+- Required artifact: `dist/sppkg/hb-intel-foleon.sppkg` (produced by
+  `npx tsx tools/build-spfx-package.ts --domain hb-intel-foleon`).
 
-## 2. Dry-run — print the provisioning plan
+## 3. Dry-run — print the provisioning plan
 
-Run from repo root:
-
-```bash
-pnpm --filter @hbc/spfx-hb-intel-foleon provision:print
-```
-
-The CLI writes a deterministic JSON plan to stdout. Capture it for
-review:
+Run from repo root before uploading:
 
 ```bash
 pnpm --filter @hbc/spfx-hb-intel-foleon provision:print \
@@ -42,82 +53,141 @@ pnpm --filter @hbc/spfx-hb-intel-foleon provision:print \
 ```
 
 The plan is never written to tenant. Review it against the canonical
-markdown reports before proceeding.
+markdown reports before proceeding. It should list all four governed
+lists in install order.
 
-## 3. List creation order
+## 4. Upload to the tenant App Catalog
 
-Order matters because placements carries a Lookup into the content
-registry.
+1. Sign in as SharePoint admin.
+2. Open the tenant App Catalog.
+3. Upload `dist/sppkg/hb-intel-foleon.sppkg`.
+4. When SharePoint prompts **"Do you want to make this solution
+   available to all sites in the organization?"** — answer **No**.
+   This package cannot be tenant-wide-deployed. Tenant-wide
+   deployment of a `.sppkg` containing SharePoint assets is
+   unsupported and the feature framework will be silently ignored.
+5. Confirm the App Catalog lists the package with version `1.0.8.0`.
 
-1. `HB_FoleonContentRegistry` — create list, add all fields in the
-   plan, mark indexes per `indexes[]`, do NOT populate `MarketingOwner`
-   defaults (per-record only).
-2. `HB_FoleonHomepagePlacements` — create list, add fields. When
-   adding `ContentLookup`, point it at `HB_FoleonContentRegistry`
-   created in step 1. Mark all indexes.
-3. `HB_FoleonInteractionEvents` — create list, add fields, mark
-   indexes. Leave versioning **disabled** for this list (events are
-   high-volume).
+## 5. Install on `/sites/HBCentral`
 
-## 4. Index discipline
+1. Navigate to
+   `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`.
+2. **Site Contents → New → App**.
+3. Select **HB Intel Foleon Publications** from "From your
+   organization".
+4. Click **Add**. SharePoint runs feature activation, which executes
+   `elements.xml` in order:
+   1. Creates `Lists/HB_FoleonContentRegistry` from
+      `schema-content-registry.xml`.
+   2. Creates `Lists/HB_FoleonHomepagePlacements` from
+      `schema-homepage-placements.xml` (its `ContentLookup` lookup
+      binds to the list created in step 1).
+   3. Creates `Lists/HB_FoleonInteractionEvents` from
+      `schema-interaction-events.xml` (versioning disabled).
+   4. Creates `Lists/HB_FoleonSyncRuns` from
+      `schema-sync-runs.xml`.
 
-Every filter the SPFx runtime pushes hits an indexed column. The app
-refuses to build a non-indexed filter at module-init time (see
-`assertFiltersAreIndexed` in `foleonListSchemas.ts`). The tenant
-indexes you add below mirror that contract:
+## 6. Capture list GUIDs
 
-### `HB_FoleonContentRegistry`
+The webpart still binds by list GUID at runtime. After install,
+capture each GUID via browser DevTools or SharePoint REST:
 
-`FoleonDocId`, `FoleonProjectId`, `ContentTypeKey`, `PublishStatus`,
-`IsVisible`, `IsFeatured`, `IsHomepageEligible`, `PublishedOn`,
-`DisplayFrom`, `DisplayThrough`, `SortRank`, `AllowEmbed`,
-`RequiresExternalOpen`, `SyncSource`.
+```bash
+# Replace {list-title} with each Foleon list title.
+https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists/getbytitle('HB_FoleonContentRegistry')?$select=Id
+https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists/getbytitle('HB_FoleonHomepagePlacements')?$select=Id
+https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists/getbytitle('HB_FoleonInteractionEvents')?$select=Id
+https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists/getbytitle('HB_FoleonSyncRuns')?$select=Id
+```
 
-### `HB_FoleonHomepagePlacements`
+Record the four GUIDs. They are required for webpart configuration.
 
-`PlacementKey`, `ContentIdCache`, `IsActive`, `DisplayFrom`,
-`DisplayThrough`, `SortRank`, `LayoutVariant`.
+## 7. Wire GUIDs into the webpart mount config
 
-### `HB_FoleonInteractionEvents`
+Add the Foleon webpart to a page on HBCentral and open the property
+pane. Set:
 
-`EventId` (unique), `EventType`, `FoleonDocId`,
-`ContentRegistryItemId`, `PageContext`, `EventTimestamp`, `SessionId`.
+- `contentRegistryListId` → GUID from `HB_FoleonContentRegistry`.
+- `placementsListId` → GUID from `HB_FoleonHomepagePlacements`.
+- `eventsListId` → GUID from `HB_FoleonInteractionEvents`.
+- `acceptedFoleonOrigins` → at minimum `https://viewer.us.foleon.com`
+  plus any custom publisher subdomain.
+- `allowPreview` → leave `false` for production.
+- `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
+- `expectedPackageVersion` → `1.0.8.0`.
 
-## 5. Audience groups
+`HB_FoleonSyncRuns` has no webpart binding today — no writer ships
+in Wave 01, per ADR-0125. The list is provisioned so the contract
+is ready for Wave 02 backend writers.
+
+Save the page. The webpart should render.
+
+## 8. Verify indexes, views, and lookup binding
+
+1. **Indexes** — open each list → **Settings → Indexed columns** and
+   confirm the required-indexed set declared in the markdown docs is
+   marked indexed. SharePoint creates these as part of the schema
+   provisioning; if any are missing, re-install or add manually.
+2. **Views** — each list shows the recommended views:
+   - Content Registry: Active Published Content, Homepage Eligible,
+     Newsletters, Project Highlights.
+   - Homepage Placements: Active Placements.
+   - Interaction Events: Recent Events.
+   - Sync Runs: Recent Runs, Failed Runs.
+3. **Lookup binding** — on Homepage Placements → **Settings** →
+   `ContentLookup` column → confirm it targets
+   `Foleon Content Registry`. If SharePoint failed to resolve the
+   URL-form lookup binding at feature activation time (rare; occurs
+   when the Content Registry list was not yet fully committed), the
+   lookup will show as unresolved — re-bind it manually via list
+   settings.
+
+## 9. Runtime binding proof
+
+Open the page hosting the Foleon webpart. In browser DevTools:
+
+```js
+window.__hbIntel_foleonRuntimeBindingProof
+```
+
+Expected:
+
+- `packageVersion === '1.0.8.0'`.
+- `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
+- `hostMode === 'sharepoint'`.
+- `canInitialize === true`.
+- `presence.{siteUrl, contentRegistryListId, placementsListId,
+  eventsListId}` all `true`.
+- `fingerprints.{contentRegistryListSha, placementsListSha,
+  eventsListSha}` non-zero.
+- `issueCodes` is `[]`.
+
+Add `?foleon-diagnostics=1` to the page URL to surface admin-scope
+issues if any remain.
+
+## 10. Audience groups
 
 `AudienceGroups` on the Content Registry and Placements uses
-Person/Group multi-value fields. Point them at the HB Central
-Entra/M365 groups — do NOT attempt to bake audience rules into
-SharePoint group ACLs. Audience evaluation happens client-side in
-the SPFx webpart.
+Person/Group multi-value fields. Point them at HB Central Entra/M365
+groups. Audience evaluation happens client-side in the SPFx webpart;
+SharePoint group ACLs are not the audience gate.
 
-## 6. Preview URL policy
+## 11. Preview URL policy
 
 `PreviewUrl` is captured for admin review only. Production readers
 reject URLs containing `/preview/` unless the webpart's mount config
 carries `allowPreview=true` — a setting reserved for admin-review
-builds.
+builds on non-production pages.
 
-## 7. Wiring into the webpart
+## 12. Known limitations
 
-After provisioning, record the new list GUIDs and pass them into
-`IFoleonMountConfig`:
-
-- `contentRegistryListId`
-- `placementsListId`
-- `eventsListId`
-
-See the top-level app README "Mount config contract" section for the
-full field table.
-
-## 8. Verification
-
-After provisioning, one quick verification round:
-
-- Webpart config carries real list GUIDs → mount publishes a
-  runtime binding proof at
-  `window.__hbIntel_foleonRuntimeBindingProof` with
-  `presence.contentRegistryListId === true` and
-  fingerprints populated.
-- Add `?foleon-diagnostics=1` to the page URL; admin issue list
-  should be empty.
+- **Lookup URL-form resolution is provisioning-time-sensitive.** If
+  the `ContentLookup` binding fails to resolve during feature
+  activation, re-bind manually via list settings (step 8). This is
+  a Microsoft documented behavior, not a repo bug.
+- **Wave 02 deferrals** — `HB_FoleonProjectsRegistry` and
+  `HB_FoleonAnalyticsSnapshots` schemas are not in this package (see
+  ADR-0125). They require business-side field design.
+- **Tenant-wide deployment is unavailable** for any package that
+  provisions SharePoint assets. Installing on additional sites
+  requires re-running steps 5–7 per site.

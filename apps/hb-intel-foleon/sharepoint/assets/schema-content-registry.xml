@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HB Intel Foleon — HB_FoleonContentRegistry list schema.
+  Authority: docs/reference/sharepoint/list-schemas/hbcentral/lists/hb-foleon-content-registry.md
+  Code mirror: apps/hb-intel-foleon/src/schema/foleonListSchemas.ts (FOLEON_CONTENT_REGISTRY_SCHEMA)
+  Versioning: enabled (major-only). Attachments: disabled.
+-->
+<List xmlns:ows="Microsoft SharePoint"
+      Title="Foleon Content Registry"
+      FolderCreation="FALSE"
+      Direction="$Resources:Direction;"
+      Url="Lists/HB_FoleonContentRegistry"
+      BaseType="0"
+      EnableContentTypes="FALSE"
+      VersioningEnabled="TRUE"
+      DisableAttachments="TRUE"
+      xmlns="http://schemas.microsoft.com/sharepoint/">
+  <MetaData>
+    <ContentTypes>
+      <ContentTypeRef ID="0x01" />
+    </ContentTypes>
+    <Fields>
+      <Field ID="{B9F50001-F01E-4A10-8010-C0F0E0D00001}" Name="FoleonDocId" DisplayName="Foleon Doc ID" Type="Number" Required="TRUE" Indexed="TRUE" AllowDuplicateValues="FALSE" Decimals="0" />
+      <Field ID="{B9F50002-F01E-4A10-8010-C0F0E0D00002}" Name="FoleonDocUid" DisplayName="Foleon Doc UID" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="128" />
+      <Field ID="{B9F50003-F01E-4A10-8010-C0F0E0D00003}" Name="FoleonIdentifier" DisplayName="Foleon Identifier" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="128" />
+      <Field ID="{B9F50004-F01E-4A10-8010-C0F0E0D00004}" Name="FoleonProjectId" DisplayName="Foleon Project ID" Type="Number" Required="FALSE" Indexed="TRUE" Decimals="0" />
+      <Field ID="{B9F50005-F01E-4A10-8010-C0F0E0D00005}" Name="FoleonProjectName" DisplayName="Foleon Project Name" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="255" />
+      <Field ID="{B9F50006-F01E-4A10-8010-C0F0E0D00006}" Name="ContentTypeKey" DisplayName="Content Type" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Project Highlight</CHOICE>
+          <CHOICE>Newsletter</CHOICE>
+          <CHOICE>Company News</CHOICE>
+          <CHOICE>Market Update</CHOICE>
+          <CHOICE>Leadership</CHOICE>
+          <CHOICE>Other</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50007-F01E-4A10-8010-C0F0E0D00007}" Name="PublishStatus" DisplayName="Status" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Draft</CHOICE>
+          <CHOICE>Preview</CHOICE>
+          <CHOICE>Published</CHOICE>
+          <CHOICE>Archived</CHOICE>
+          <CHOICE>Offline</CHOICE>
+          <CHOICE>Suppressed</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50008-F01E-4A10-8010-C0F0E0D00008}" Name="IsVisible" DisplayName="Is Visible" Type="Boolean" Required="TRUE" Indexed="TRUE">
+        <Default>1</Default>
+      </Field>
+      <Field ID="{B9F50009-F01E-4A10-8010-C0F0E0D00009}" Name="IsFeatured" DisplayName="Is Featured" Type="Boolean" Required="FALSE" Indexed="TRUE">
+        <Default>0</Default>
+      </Field>
+      <Field ID="{B9F5000A-F01E-4A10-8010-C0F0E0D0000A}" Name="IsHomepageEligible" DisplayName="Is Homepage Eligible" Type="Boolean" Required="FALSE" Indexed="TRUE">
+        <Default>0</Default>
+      </Field>
+      <Field ID="{B9F5000B-F01E-4A10-8010-C0F0E0D0000B}" Name="PublishedUrl" DisplayName="Published URL" Type="URL" Required="FALSE" Format="Hyperlink" />
+      <Field ID="{B9F5000C-F01E-4A10-8010-C0F0E0D0000C}" Name="PreviewUrl" DisplayName="Preview URL" Type="URL" Required="FALSE" Format="Hyperlink" />
+      <Field ID="{B9F5000D-F01E-4A10-8010-C0F0E0D0000D}" Name="EmbedUrl" DisplayName="Embed URL" Type="URL" Required="FALSE" Format="Hyperlink" />
+      <Field ID="{B9F5000E-F01E-4A10-8010-C0F0E0D0000E}" Name="ThumbnailUrl" DisplayName="Thumbnail URL" Type="URL" Required="FALSE" Format="Hyperlink" />
+      <Field ID="{B9F5000F-F01E-4A10-8010-C0F0E0D0000F}" Name="HeroImageUrl" DisplayName="Hero Image URL" Type="URL" Required="FALSE" Format="Hyperlink" />
+      <Field ID="{B9F50010-F01E-4A10-8010-C0F0E0D00010}" Name="Summary" DisplayName="Summary" Type="Note" Required="FALSE" NumLines="6" RichText="FALSE" />
+      <Field ID="{B9F50011-F01E-4A10-8010-C0F0E0D00011}" Name="MarketingOwner" DisplayName="Marketing Owner" Type="User" List="UserInfo" Required="FALSE" Indexed="TRUE" UserSelectionMode="0" ShowField="ImnName" />
+      <Field ID="{B9F50012-F01E-4A10-8010-C0F0E0D00012}" Name="IssueDate" DisplayName="Issue Date" Type="DateTime" Format="DateOnly" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50013-F01E-4A10-8010-C0F0E0D00013}" Name="FirstPublishedOn" DisplayName="First Published On" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50014-F01E-4A10-8010-C0F0E0D00014}" Name="PublishedOn" DisplayName="Published On" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50015-F01E-4A10-8010-C0F0E0D00015}" Name="FoleonModifiedOn" DisplayName="Foleon Modified On" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50016-F01E-4A10-8010-C0F0E0D00016}" Name="DisplayFrom" DisplayName="Display From" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50017-F01E-4A10-8010-C0F0E0D00017}" Name="DisplayThrough" DisplayName="Display Through" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50018-F01E-4A10-8010-C0F0E0D00018}" Name="SortRank" DisplayName="Sort Rank" Type="Number" Required="FALSE" Indexed="TRUE" Decimals="0" />
+      <Field ID="{B9F50019-F01E-4A10-8010-C0F0E0D00019}" Name="AudienceGroups" DisplayName="Audience Groups" Type="UserMulti" List="UserInfo" Required="FALSE" Mult="TRUE" UserSelectionMode="1" ShowField="ImnName" />
+      <Field ID="{B9F5001A-F01E-4A10-8010-C0F0E0D0001A}" Name="RelatedProjectNumber" DisplayName="Related Project Number" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="64" />
+      <Field ID="{B9F5001B-F01E-4A10-8010-C0F0E0D0001B}" Name="RelatedProjectName" DisplayName="Related Project Name" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="255" />
+      <Field ID="{B9F5001C-F01E-4A10-8010-C0F0E0D0001C}" Name="RelatedProjectSiteUrl" DisplayName="Related Project Site URL" Type="URL" Required="FALSE" Format="Hyperlink" />
+      <Field ID="{B9F5001D-F01E-4A10-8010-C0F0E0D0001D}" Name="Region" DisplayName="Region" Type="Choice" Required="FALSE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>North Florida</CHOICE>
+          <CHOICE>Central Florida</CHOICE>
+          <CHOICE>Southeast Florida</CHOICE>
+          <CHOICE>Southwest Florida</CHOICE>
+          <CHOICE>Companywide</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F5001E-F01E-4A10-8010-C0F0E0D0001E}" Name="Sector" DisplayName="Sector" Type="Choice" Required="FALSE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Luxury Residential</CHOICE>
+          <CHOICE>Commercial</CHOICE>
+          <CHOICE>Multifamily</CHOICE>
+          <CHOICE>Environmental</CHOICE>
+          <CHOICE>Internal</CHOICE>
+          <CHOICE>Other</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F5001F-F01E-4A10-8010-C0F0E0D0001F}" Name="Tags" DisplayName="Tags" Type="MultiChoice" Required="FALSE" FillInChoice="TRUE">
+        <CHOICES>
+          <CHOICE>Case Study</CHOICE>
+          <CHOICE>Award</CHOICE>
+          <CHOICE>Safety</CHOICE>
+          <CHOICE>Sustainability</CHOICE>
+          <CHOICE>Innovation</CHOICE>
+          <CHOICE>Community</CHOICE>
+          <CHOICE>Leadership</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50020-F01E-4A10-8010-C0F0E0D00020}" Name="OpenMode" DisplayName="Open Mode" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <Default>Inline Reader</Default>
+        <CHOICES>
+          <CHOICE>Inline Reader</CHOICE>
+          <CHOICE>Fullscreen Reader</CHOICE>
+          <CHOICE>New Tab Only</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50021-F01E-4A10-8010-C0F0E0D00021}" Name="AllowEmbed" DisplayName="Allow Embed" Type="Boolean" Required="TRUE" Indexed="TRUE">
+        <Default>1</Default>
+      </Field>
+      <Field ID="{B9F50022-F01E-4A10-8010-C0F0E0D00022}" Name="RequiresExternalOpen" DisplayName="Requires External Open" Type="Boolean" Required="FALSE" Indexed="TRUE">
+        <Default>0</Default>
+      </Field>
+      <Field ID="{B9F50023-F01E-4A10-8010-C0F0E0D00023}" Name="LastSynced" DisplayName="Last Synced" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
+      <Field ID="{B9F50024-F01E-4A10-8010-C0F0E0D00024}" Name="SyncSource" DisplayName="Sync Source" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
+        <Default>Manual</Default>
+        <CHOICES>
+          <CHOICE>Manual</CHOICE>
+          <CHOICE>Foleon API</CHOICE>
+          <CHOICE>Hybrid</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50025-F01E-4A10-8010-C0F0E0D00025}" Name="SyncHash" DisplayName="Sync Hash" Type="Text" Required="FALSE" MaxLength="128" />
+      <Field ID="{B9F50026-F01E-4A10-8010-C0F0E0D00026}" Name="RawFoleonJson" DisplayName="Raw Foleon JSON" Type="Note" Required="FALSE" NumLines="10" RichText="FALSE" />
+      <Field ID="{B9F50027-F01E-4A10-8010-C0F0E0D00027}" Name="AdminNotes" DisplayName="Admin Notes" Type="Note" Required="FALSE" NumLines="6" RichText="FALSE" />
+    </Fields>
+    <Views>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Active Published Content" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">50</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="ContentTypeKey" />
+          <FieldRef Name="PublishStatus" />
+          <FieldRef Name="PublishedOn" />
+          <FieldRef Name="IsHomepageEligible" />
+          <FieldRef Name="AllowEmbed" />
+          <FieldRef Name="MarketingOwner" />
+        </ViewFields>
+        <Query>
+          <Where>
+            <And>
+              <Eq><FieldRef Name="IsVisible" /><Value Type="Boolean">1</Value></Eq>
+              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
+            </And>
+          </Where>
+          <OrderBy><FieldRef Name="PublishedOn" Ascending="FALSE" /></OrderBy>
+        </Query>
+      </View>
+      <View BaseViewID="2" Type="HTML" DisplayName="Homepage Eligible" SetupPath="pages\viewpage.aspx" Url="Homepage.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">50</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="ContentTypeKey" />
+          <FieldRef Name="SortRank" />
+          <FieldRef Name="PublishedOn" />
+          <FieldRef Name="DisplayFrom" />
+          <FieldRef Name="DisplayThrough" />
+        </ViewFields>
+        <Query>
+          <Where>
+            <And>
+              <And>
+                <Eq><FieldRef Name="IsHomepageEligible" /><Value Type="Boolean">1</Value></Eq>
+                <Eq><FieldRef Name="IsVisible" /><Value Type="Boolean">1</Value></Eq>
+              </And>
+              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
+            </And>
+          </Where>
+          <OrderBy>
+            <FieldRef Name="SortRank" Ascending="TRUE" />
+            <FieldRef Name="PublishedOn" Ascending="FALSE" />
+          </OrderBy>
+        </Query>
+      </View>
+      <View BaseViewID="3" Type="HTML" DisplayName="Newsletters" SetupPath="pages\viewpage.aspx" Url="Newsletters.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">50</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="IssueDate" />
+          <FieldRef Name="PublishStatus" />
+          <FieldRef Name="PublishedOn" />
+        </ViewFields>
+        <Query>
+          <Where>
+            <And>
+              <Eq><FieldRef Name="ContentTypeKey" /><Value Type="Choice">Newsletter</Value></Eq>
+              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
+            </And>
+          </Where>
+          <OrderBy><FieldRef Name="IssueDate" Ascending="FALSE" /></OrderBy>
+        </Query>
+      </View>
+      <View BaseViewID="4" Type="HTML" DisplayName="Project Highlights" SetupPath="pages\viewpage.aspx" Url="ProjectHighlights.aspx">
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <JSLink>clienttemplates.js</JSLink>
+        <RowLimit Paged="TRUE">50</RowLimit>
+        <Toolbar Type="Standard" />
+        <ViewFields>
+          <FieldRef Name="LinkTitle" />
+          <FieldRef Name="RelatedProjectNumber" />
+          <FieldRef Name="RelatedProjectName" />
+          <FieldRef Name="IssueDate" />
+          <FieldRef Name="PublishStatus" />
+        </ViewFields>
+        <Query>
+          <Where>
+            <And>
+              <Eq><FieldRef Name="ContentTypeKey" /><Value Type="Choice">Project Highlight</Value></Eq>
+              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
+            </And>
+          </Where>
+          <OrderBy><FieldRef Name="IssueDate" Ascending="FALSE" /></OrderBy>
+        </Query>
+      </View>
+    </Views>
+    <Forms>
+      <Form Type="DisplayForm" Url="DispForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="EditForm" Url="EditForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="NewForm" Url="NewForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+    </Forms>
+  </MetaData>
+</List>

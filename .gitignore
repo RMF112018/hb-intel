@@ -57,6 +57,10 @@ sharepoint/
 !docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-inspection-events.md
 !docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-findings.md
 !docs/reference/sharepoint/list-schemas/hbcentral/lists/safety-ingestion-runs.md
+# Foleon SPFx Feature Framework provisioning assets are source-of-truth XML.
+# (Build output under tools/spfx-shell/sharepoint/solution/ stays ignored via the `solution/` rule below.)
+!apps/hb-intel-foleon/sharepoint/
+!apps/hb-intel-foleon/sharepoint/**
 solution/
 *.sppkg
 
