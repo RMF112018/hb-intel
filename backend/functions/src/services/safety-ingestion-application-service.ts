@@ -11,7 +11,7 @@ import {
   ManagedIdentityTokenService,
   type IManagedIdentityTokenService,
 } from './managed-identity-token-service.js';
-import { toProvisioningErrorCode } from './sharepoint-common.js';
+import { toProvisioningErrorCode } from './sharepoint-identity-utils.js';
 import {
   resolveSafetyProvisioningTargets,
   validateReferenceLists,
