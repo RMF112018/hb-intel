@@ -191,6 +191,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage', freshBuildRequired: true },
   { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi', freshBuildRequired: true },
   { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
+  { dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single' },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
 ];
 
@@ -311,7 +312,7 @@ const SAFETY_PACKAGED_CONFIG_MARKERS = [
   { key: 'runtime accepted backend origin key', needle: 'acceptedBackendOrigin' },
   { key: 'runtime binding proof global marker', needle: '__hbIntel_safetyRuntimeBindingProof' },
   { key: 'governed manifest authority marker', needle: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e' },
-  { key: 'governed package version marker', needle: '1.2.35.0' },
+  { key: 'governed package version marker', needle: '1.2.36.0' },
   { key: 'hosted GUID fingerprint contract key', needle: 'expectedHostedGuidOverlayFingerprint' },
 ] as const;
 
@@ -3087,7 +3088,7 @@ for (const domain of domains) {
         packagingRunId: freshnessEvidence.runId,
         governedAuthority: {
           expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-          expectedPackageVersion: '1.2.35.0',
+          expectedPackageVersion: '1.2.36.0',
           expectedHostedGuidOverlayFingerprint: 'fnv1a32:36b2f764',
         },
         checks: {

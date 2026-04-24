@@ -1,0 +1,33 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+  "alias": "FoleonWebPart",
+  "componentType": "WebPart",
+  "version": "1.0.0.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Intel Foleon"
+      },
+      "description": {
+        "default": "Governed discovery, reader, and archive surface for Marketing's Foleon publications inside SharePoint."
+      },
+      "officeFabricIconFontName": "ReadingMode",
+      "hiddenFromToolbox": false,
+      "properties": {
+        "foleonRoute": "highlights"
+      }
+    }
+  ]
+}

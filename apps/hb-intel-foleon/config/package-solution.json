@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-foleon",
+    "id": "c23635f5-ab4d-44c2-96b5-2a2c90f4afc0",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "Hedrick Brothers",
+      "websiteUrl": "https://hedrickbrothers.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel Foleon Publications"
+      },
+      "longDescription": {
+        "default": "HB Intel Foleon Publications — governed discovery, reader, and archive surface for Marketing's Foleon project highlights and newsletters inside SharePoint."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-foleon Feature",
+        "description": "Deploys HB Intel Foleon Publications webpart assets.",
+        "id": "ae66c036-8036-4f10-bb63-0d75107e7ce9",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-foleon.sppkg"
+  }
+}
