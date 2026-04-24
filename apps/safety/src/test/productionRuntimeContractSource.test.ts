@@ -13,6 +13,7 @@ describe('Safety production runtime contract source-of-truth', () => {
     const mountSource = readRepo('apps/safety/src/mount.tsx');
     expect(mountSource).toContain('resolveSafetyRuntimeContract');
     expect(mountSource).toContain('runtimeContract={runtimeContract}');
+    expect(mountSource).toContain("? 'shell-webpart'");
   });
 
   it('SafetyWebPart delegates render to mount with backend config fields', () => {

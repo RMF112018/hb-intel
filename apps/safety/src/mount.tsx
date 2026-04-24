@@ -43,9 +43,16 @@ export async function mount(
     await bootstrapSpfxAuth(spfxContext, permissionKeys);
   }
 
+  const hostSource =
+    spfxContext && isShellHostedMountConfig(config)
+      ? 'shell-webpart'
+      : spfxContext
+        ? 'safety-webpart'
+        : 'local-dev';
   const runtimeContract = resolveSafetyRuntimeContract({
     hasSpfxContext: !!spfxContext,
     config,
+    hostSource,
   });
 
   root = createRoot(el);
@@ -70,4 +77,9 @@ if (typeof window !== 'undefined' && globalThis !== window) {
   (window as unknown as { __hbIntel_safety: unknown }).__hbIntel_safety = api;
   (window as unknown as { __hbIntel_safetyManifestId?: string }).__hbIntel_safetyManifestId =
     SAFETY_WEBPART_MANIFEST_ID;
+}
+
+function isShellHostedMountConfig(config: IMountConfig | undefined): boolean {
+  if (!config) return false;
+  return typeof (config as Record<string, unknown>).webPartId === 'string';
 }

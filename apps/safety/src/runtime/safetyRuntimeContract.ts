@@ -9,9 +9,11 @@ export interface ISafetyMountConfig {
 }
 
 export type SafetyHostMode = 'sharepoint' | 'mock';
+export type SafetyHostSource = 'safety-webpart' | 'shell-webpart' | 'local-dev';
 
 export interface ISafetyRuntimeContract {
   readonly hostMode: SafetyHostMode;
+  readonly hostSource: SafetyHostSource;
   readonly backend: {
     readonly baseUrl: string | null;
     readonly apiAudience: string | null;
@@ -30,8 +32,10 @@ export interface ISafetyRuntimeContract {
 export function resolveSafetyRuntimeContract(params: {
   readonly hasSpfxContext: boolean;
   readonly config?: ISafetyMountConfig;
+  readonly hostSource?: SafetyHostSource;
 }): ISafetyRuntimeContract {
   const hostMode: SafetyHostMode = params.hasSpfxContext ? 'sharepoint' : 'mock';
+  const hostSource: SafetyHostSource = params.hostSource ?? (params.hasSpfxContext ? 'safety-webpart' : 'local-dev');
   const baseUrl = normalizeFunctionAppUrl(params.config?.functionAppUrl);
   const apiAudience = normalizeText(params.config?.apiAudience);
   const missingKeys =
@@ -44,6 +48,11 @@ export function resolveSafetyRuntimeContract(params: {
 
   const blockingReasons: string[] = [];
   if (hostMode === 'sharepoint') {
+    if (hostSource === 'shell-webpart') {
+      blockingReasons.push(
+        'Shell-hosted Safety runtime is disabled until equivalent backend binding and approval guarantees are established.',
+      );
+    }
     if (!baseUrlPresent) {
       blockingReasons.push('Backend base URL is missing.');
     } else if (!baseUrlValid) {
@@ -61,6 +70,7 @@ export function resolveSafetyRuntimeContract(params: {
 
   return {
     hostMode,
+    hostSource,
     backend: {
       baseUrl,
       apiAudience,

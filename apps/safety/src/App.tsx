@@ -49,23 +49,31 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
       }),
     [runtimeContract, typed],
   );
+  const sharePointClient = useMemo(() => adaptSpfxHttpClient(typed), [typed]);
+  const sharePointBlockingReason =
+    resolvedRuntimeContract.hostMode === 'sharepoint' && !sharePointClient
+      ? 'SPFx HTTP client is unavailable in this host context.'
+      : null;
+  const effectiveBlockingReasons = useMemo(
+    () => [
+      ...resolvedRuntimeContract.blockingReasons,
+      ...(sharePointBlockingReason ? [sharePointBlockingReason] : []),
+    ],
+    [resolvedRuntimeContract.blockingReasons, sharePointBlockingReason],
+  );
   const repository = useMemo(() => {
     if (import.meta.env?.DEV) {
       // Surface hosted-binding gaps in local/dev without polluting production.
       logSafetyOverlayDiagnostic();
     }
-    if (
-      resolvedRuntimeContract.hostMode === 'sharepoint' &&
-      !resolvedRuntimeContract.canInitializeCommands
-    ) {
-      return null;
-    }
-    const client = adaptSpfxHttpClient(typed);
-    if (client) {
+    if (resolvedRuntimeContract.hostMode === 'sharepoint') {
+      if (!resolvedRuntimeContract.canInitializeCommands || !sharePointClient) {
+        return null;
+      }
       return createSafetyInspectionRepository({
         mode: 'sharepoint',
         sharepoint: {
-          client,
+          client: sharePointClient,
           backendIngestion: {
             baseUrl: resolvedRuntimeContract.backend.baseUrl ?? undefined,
             getApiToken: async (): Promise<string> => {
@@ -90,11 +98,11 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
       });
     }
     return createSafetyInspectionRepository({ mode: 'mock' });
-  }, [typed, resolvedRuntimeContract]);
+  }, [typed, resolvedRuntimeContract, sharePointClient]);
 
   const blockedInSharePointMode =
     resolvedRuntimeContract.hostMode === 'sharepoint' &&
-    !resolvedRuntimeContract.canInitializeCommands;
+    (!resolvedRuntimeContract.canInitializeCommands || !!sharePointBlockingReason);
 
   useEffect(() => {
     const apiAudience = resolvedRuntimeContract.backend.apiAudience ?? '';
@@ -147,7 +155,7 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
                   }.`}
                 >
                   <ul>
-                    {resolvedRuntimeContract.blockingReasons.map((reason) => (
+                    {effectiveBlockingReasons.map((reason) => (
                       <li key={reason}>{reason}</li>
                     ))}
                   </ul>
