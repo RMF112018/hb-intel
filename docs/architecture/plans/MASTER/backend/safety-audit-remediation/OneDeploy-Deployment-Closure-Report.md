@@ -634,6 +634,37 @@ Evidence:
 
 - `.tmp/functions-validation/admin-token-status-final-proof.txt`
 - `.tmp/functions-validation/admin-token-error-final-proof.raw.txt` (no bearer token; contains Entra consent error)
+- `.tmp/functions-validation/admin-token-consent-check-error.txt` (repeat consent check, still `AADSTS65001`)
+
+### Entra consent request
+
+Request consent for the Azure CLI / user token flow to acquire an access token for the Functions API audience:
+
+| Field | Value |
+| ----- | ----- |
+| API audience / resource | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
+| Tenant | `0e834bd7-628b-42c8-b9ec-ecebc9719be4` |
+| Client requiring consent | Microsoft Azure CLI (`04b07795-8ddb-461a-bbee-02f9e1bf7b46`) |
+| Blocking error | `AADSTS65001` |
+| Purpose | Acquire a fresh admin-capable bearer token to run `GET /api/health/ready` for post-deployment admin readiness proof. |
+
+Interactive consent/auth command supplied by Entra:
+
+```bash
+az login --tenant "0e834bd7-628b-42c8-b9ec-ecebc9719be4" \
+  --scope "api://08c399eb-a394-4087-b859-659d493f8dc7/.default"
+```
+
+After consent is granted, acquire a fresh token without printing it and run:
+
+```bash
+az account get-access-token \
+  --resource "api://08c399eb-a394-4087-b859-659d493f8dc7" \
+  --query accessToken \
+  --output tsv > .tmp/functions-validation/admin-token.tmp
+```
+
+Then call `GET /api/health/ready` with the bearer token and capture HTTP status, `operationalReadiness`, `safetyPermissionPosture`, `safetyRolloutReadiness`, `rolloutPermissionInventory`, and issue codes.
 
 ### Role-matrix proof
 
@@ -666,7 +697,44 @@ Evidence: `.tmp/functions-validation/workbook-preview-status-final-proof.txt`
 
 ### Verdict after post-deployment proof pass
 
-**Deployment and route proof closed; admin/role/workbook gates pending.**
+**Deployment and route proof closed; admin/role/workbook gates pending due to Entra consent and missing role-specific test tokens/context.**
+
+### Issue #74 — Functions Workflow Trigger Restriction
+
+Issue: https://github.com/RMF112018/hb-intel/issues/74
+
+The Functions deployment workflow now limits automatic `push` deployments on `main` to backend/runtime/deployment inputs only. This prevents docs-only commits from restamping or redeploying `hb-intel-function-app` while keeping explicit operator deployments available through `workflow_dispatch`.
+
+Automatic deployments are triggered only by changes under:
+
+- `backend/functions/**`
+- `packages/acknowledgment/**`
+- `packages/auth/**`
+- `packages/bic-next-move/**`
+- `packages/complexity/**`
+- `packages/features/safety/**`
+- `packages/field-annotations/**`
+- `packages/models/**`
+- `packages/notification-intelligence/**`
+- `packages/provisioning/**`
+- `packages/session-state/**`
+- `packages/sharepoint-platform/**`
+- `packages/shell/**`
+- `packages/ui-kit/**`
+- `packages/versioned-record/**`
+- `packages/workflow-handoff/**`
+- `scripts/package-functions-artifact.ts`
+- `scripts/verify-functions-live-parity.ts`
+- `.github/workflows/main_hb-intel-function-app.yml`
+- `package.json`
+- `pnpm-lock.yaml`
+- `pnpm-workspace.yaml`
+- `turbo.json`
+- `tsconfig.base.json`
+
+Docs-only changes under `docs/**` no longer trigger this workflow automatically. `workflow_dispatch` remains available for intentional manual deployments from `main`.
+
+The workflow file itself remains in `push.paths` by design so deployment workflow edits validate automatically. This resolution commit may therefore trigger the workflow once; the existing deployment/probe proof remains closed and no manual redeploy was requested.
 
 ---
 

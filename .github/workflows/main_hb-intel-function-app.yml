@@ -16,6 +16,33 @@ on:
   push:
     branches:
       - main
+    # Limit automatic Function App deployments to backend/runtime/deployment inputs.
+    # Docs-only commits must not restamp or redeploy hb-intel-function-app.
+    paths:
+      - "backend/functions/**"
+      - "packages/acknowledgment/**"
+      - "packages/auth/**"
+      - "packages/bic-next-move/**"
+      - "packages/complexity/**"
+      - "packages/features/safety/**"
+      - "packages/field-annotations/**"
+      - "packages/models/**"
+      - "packages/notification-intelligence/**"
+      - "packages/provisioning/**"
+      - "packages/session-state/**"
+      - "packages/sharepoint-platform/**"
+      - "packages/shell/**"
+      - "packages/ui-kit/**"
+      - "packages/versioned-record/**"
+      - "packages/workflow-handoff/**"
+      - "scripts/package-functions-artifact.ts"
+      - "scripts/verify-functions-live-parity.ts"
+      - ".github/workflows/main_hb-intel-function-app.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "tsconfig.base.json"
   workflow_dispatch:
 
 env:
