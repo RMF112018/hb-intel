@@ -64,10 +64,53 @@ export class SafetyAdapterFetchError extends Error {
   }
 }
 
+export class SafetyBackendCommandError extends Error {
+  readonly endpoint: string;
+  readonly httpStatus: number;
+  readonly requestId?: string;
+  readonly code?: string;
+  readonly failureClass?: string;
+  readonly previewFailureClass?: string;
+  readonly graphContext?: Record<string, unknown>;
+  readonly details?: Record<string, unknown>;
+  readonly operationData?: unknown;
+
+  constructor(params: {
+    endpoint: string;
+    httpStatus: number;
+    message: string;
+    requestId?: string;
+    code?: string;
+    failureClass?: string;
+    previewFailureClass?: string;
+    graphContext?: Record<string, unknown>;
+    details?: Record<string, unknown>;
+    operationData?: unknown;
+  }) {
+    const codeSuffix = params.code ? ` [${params.code}]` : '';
+    const requestSuffix = params.requestId ? ` requestId=${params.requestId}` : '';
+    super(`${params.message}${codeSuffix} (${params.httpStatus})${requestSuffix}`);
+    this.name = 'SafetyBackendCommandError';
+    this.endpoint = params.endpoint;
+    this.httpStatus = params.httpStatus;
+    this.requestId = params.requestId;
+    this.code = params.code;
+    this.failureClass = params.failureClass;
+    this.previewFailureClass = params.previewFailureClass;
+    this.graphContext = params.graphContext;
+    this.details = params.details;
+    this.operationData = params.operationData;
+  }
+}
+
 export function isSafetyAdapterFetchError(err: unknown): err is SafetyAdapterFetchError {
   return err instanceof SafetyAdapterFetchError;
 }
 
 export function isSafetyConfigurationError(err: unknown): err is SafetyConfigurationError {
   return err instanceof SafetyConfigurationError;
+}
+
+export function isSafetyBackendCommandError(err: unknown): err is SafetyBackendCommandError {
+  return err instanceof SafetyBackendCommandError;
 }

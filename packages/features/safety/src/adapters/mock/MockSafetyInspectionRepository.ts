@@ -2,6 +2,7 @@ import type {
   CommittedArtifacts,
   IngestionRunResult,
   SafetyFinding,
+  SafetyIngestionPreviewResult,
   SafetyIngestionRun,
   SafetyIngestionRunDraft,
   SafetyInspectionEvent,
@@ -215,6 +216,47 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
       uploadedRef,
       adapter: this.buildIngestionAdapter(),
     });
+  }
+
+  async previewWorkbook(
+    _file: File | Blob,
+    _context: UploadContext,
+  ): Promise<SafetyIngestionPreviewResult> {
+    return {
+      commitReadiness: true,
+      template: {
+        templateVersion: 'SafetyChecklist_v1',
+        parserContractVersion: 'parse-first-2026-04',
+        valid: true,
+      },
+      projectResolution: {
+        resolved: true,
+        classification: 'project',
+        projectNumber: '2026-001',
+        projectNameSnapshot: 'Mock Project',
+      },
+      duplicateRisk: {
+        confidence: 'none',
+        supersessionRisk: false,
+      },
+      warnings: [],
+      blockingErrors: [],
+      diagnosticSummary: {
+        commitReady: true,
+        failureClass: 'none',
+        blockingCodes: [],
+        warningCodes: [],
+        checks: {
+          templateValid: true,
+          parserContractMarkerState: 'markered-valid',
+          parseSucceeded: true,
+          reportingPeriodResolved: true,
+          reportingPeriodDateInRange: true,
+          projectResolved: true,
+          duplicateConfidence: 'none',
+        },
+      },
+    };
   }
 
   async replayIngestion(

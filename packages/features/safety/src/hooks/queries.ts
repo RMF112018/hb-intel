@@ -7,6 +7,7 @@ import type {
 } from '../ports/ISafetyInspectionRepository.js';
 import type {
   IngestionRunResult,
+  SafetyIngestionPreviewResult,
   SafetyFinding,
   SafetyIngestionRun,
   SafetyInspectionEvent,
@@ -14,6 +15,7 @@ import type {
   SafetyReportingPeriod,
   UploadContext,
 } from '../domain/types.js';
+import type { SafetyBackendCommandError } from '../adapters/sharepoint/errors.js';
 import { useSafetyRepository } from './repositoryContext.js';
 
 export const safetyQueryKeys = {
@@ -26,6 +28,7 @@ export const safetyQueryKeys = {
   findings: (inspectionEventId: string) => ['safety', 'findings', inspectionEventId] as const,
   ingestionRuns: (filter: IngestionRunFilter) => ['safety', 'ingestion-runs', filter] as const,
   reviewQueue: (reportingPeriodId?: string) => ['safety', 'review-queue', reportingPeriodId] as const,
+  preview: () => ['safety', 'ingestion-preview'] as const,
 };
 
 export function useReportingPeriods() {
@@ -103,7 +106,7 @@ export interface IngestionMutationInput {
 export function useSafetyIngestion() {
   const repo = useSafetyRepository();
   const queryClient = useQueryClient();
-  return useMutation<IngestionRunResult, Error, IngestionMutationInput>({
+  return useMutation<IngestionRunResult, SafetyBackendCommandError | Error, IngestionMutationInput>({
     mutationFn: ({ file, context }) => repo.ingestWorkbook(file, context),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['safety'] });
@@ -119,11 +122,23 @@ export interface ReplayIngestionInput {
 export function useReplayIngestion() {
   const repo = useSafetyRepository();
   const queryClient = useQueryClient();
-  return useMutation<IngestionRunResult, Error, ReplayIngestionInput>({
+  return useMutation<IngestionRunResult, SafetyBackendCommandError | Error, ReplayIngestionInput>({
     mutationFn: ({ parentRunId, supersedePrior }) =>
       repo.replayIngestion(parentRunId, { supersedePrior }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['safety'] });
     },
+  });
+}
+
+export interface PreviewIngestionInput {
+  readonly file: File;
+  readonly context: UploadContext;
+}
+
+export function useSafetyIngestionPreview() {
+  const repo = useSafetyRepository();
+  return useMutation<SafetyIngestionPreviewResult, SafetyBackendCommandError | Error, PreviewIngestionInput>({
+    mutationFn: ({ file, context }) => repo.previewWorkbook(file, context),
   });
 }

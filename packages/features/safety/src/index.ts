@@ -106,8 +106,10 @@ export { SharePointSafetyInspectionRepository } from './adapters/sharepoint/Shar
 export type { SharePointAdapterOptions } from './adapters/sharepoint/SharePointSafetyInspectionRepository.js';
 export {
   SafetyAdapterFetchError,
+  SafetyBackendCommandError,
   SafetyConfigurationError,
   isSafetyAdapterFetchError,
+  isSafetyBackendCommandError,
   isSafetyConfigurationError,
 } from './adapters/sharepoint/errors.js';
 export type { SpHttpClient } from './adapters/sharepoint/spHttp.js';
@@ -150,8 +152,10 @@ export {
   useReportingPeriods,
   useReviewQueue,
   useSafetyIngestion,
+  useSafetyIngestionPreview,
 } from './hooks/queries.js';
 export type {
   IngestionMutationInput,
+  PreviewIngestionInput,
   ReplayIngestionInput,
 } from './hooks/queries.js';

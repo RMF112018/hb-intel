@@ -2,6 +2,7 @@ import type {
   IngestionRunResult,
   IngestionTerminalStatus,
   SafetyFinding,
+  SafetyIngestionPreviewResult,
   SafetyIngestionRun,
   SafetyInspectionEvent,
   SafetyProjectWeekRecord,
@@ -84,6 +85,7 @@ export interface ISafetyInspectionRepository {
   listIngestionRuns(filter: IngestionRunFilter): Promise<ReadonlyArray<SafetyIngestionRun>>;
   listReviewQueue(reportingPeriodId?: string): Promise<ReadonlyArray<ReviewQueueEntry>>;
 
+  previewWorkbook(file: File | Blob, context: UploadContext): Promise<SafetyIngestionPreviewResult>;
   ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult>;
   /** Re-read the retained upload and re-run the pipeline with an incremented attempt chain. */
   replayIngestion(

@@ -69,6 +69,10 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
           backendIngestion: {
             baseUrl: resolvedRuntimeContract.backend.baseUrl ?? undefined,
             getApiToken: async (): Promise<string> => {
+              // Auth contract decision for Safety backend commands:
+              // keep explicit SPFx AADTokenProvider token acquisition in this seam.
+              // We intentionally do not switch this command transport to AadHttpClient
+              // in the same change that hardens typed request/response envelopes.
               const apiAudience = resolvedRuntimeContract.backend.apiAudience;
               if (!typed || !apiAudience) {
                 throw new Error(

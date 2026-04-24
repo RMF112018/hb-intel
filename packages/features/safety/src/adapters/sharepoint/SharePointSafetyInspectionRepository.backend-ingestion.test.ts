@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SharePointSafetyInspectionRepository } from './SharePointSafetyInspectionRepository.js';
+import { SafetyBackendCommandError } from './errors.js';
 
 describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
   afterEach(() => {
@@ -13,8 +14,12 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
     const fetchSpy = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
+      headers: { get: () => null },
       json: async () => ({
         data: {
+          success: true,
+          requestAccepted: true,
+          diagnostics: [],
           result: {
             state: 'committed',
             run: {
@@ -79,8 +84,12 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
     const fetchSpy = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
+      headers: { get: () => null },
       json: async () => ({
         data: {
+          success: true,
+          requestAccepted: true,
+          diagnostics: [],
           result: {
             state: 'committed',
             run: {
@@ -135,5 +144,153 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
     expect(String(init.body)).toContain('"supersedePrior":true');
     expect(getSpy).not.toHaveBeenCalled();
     expect(postSpy).not.toHaveBeenCalled();
+  });
+
+  it('routes preview through backend endpoint when configured', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: async () => ({
+        data: {
+          success: true,
+          requestAccepted: true,
+          preview: {
+            commitReadiness: true,
+            template: { templateVersion: 'v1', parserContractVersion: 'p1', valid: true },
+            projectResolution: { resolved: true, classification: 'project' },
+            warnings: [],
+            blockingErrors: [],
+            diagnosticSummary: {
+              commitReady: true,
+              failureClass: 'none',
+              blockingCodes: [],
+              warningCodes: [],
+              checks: {
+                templateValid: true,
+                parserContractMarkerState: 'markered-valid',
+                parseSucceeded: true,
+                reportingPeriodResolved: true,
+                reportingPeriodDateInRange: true,
+                projectResolved: true,
+                duplicateConfidence: 'none',
+              },
+            },
+          },
+          diagnostics: [],
+        },
+      }),
+    } as Response);
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const repo = new SharePointSafetyInspectionRepository({
+      client: { get: vi.fn(), post: vi.fn() },
+      backendIngestion: {
+        baseUrl: 'https://functions.example.com/',
+        getApiToken: async () => 'token-preview',
+      },
+    });
+
+    const result = await repo.previewWorkbook(new Blob(['hello']), {
+      uploadedByUpn: 'user@hb.com',
+      uploadedAt: '2026-04-22T10:00:00.000Z',
+      fileName: 'test.xlsx',
+      reportingPeriodId: 'period-1',
+      reportingPeriodSpItemId: 1,
+    });
+
+    expect(result.commitReadiness).toBe(true);
+    expect(fetchSpy.mock.calls[0]?.[0]).toBe('https://functions.example.com/api/safety-records/ingest/preview');
+  });
+
+  it('preserves requestId and classified 422 failure envelope details', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      headers: { get: (key: string) => (key === 'X-Request-Id' ? 'req-422' : null) },
+      json: async () => ({
+        message: 'Safety ingestion failed before commit.',
+        code: 'GRAPH_PERMISSION_DENIED',
+        requestId: 'req-422',
+        failureClass: 'graph-permission',
+        previewFailureClass: 'project-unresolved',
+        graphContext: {
+          pathSummary: '/sites/HBCentral/_api/web/lists',
+          statusCode: 403,
+        },
+        data: {
+          success: false,
+          requestAccepted: true,
+          requestId: 'req-422',
+          diagnostics: [
+            {
+              code: 'GRAPH_PERMISSION_DENIED',
+              message: 'Graph call denied',
+              failureClass: 'graph-permission',
+              graphContext: { pathSummary: '/sites/HBCentral/_api/web/lists', statusCode: 403 },
+            },
+          ],
+        },
+      }),
+    } as Response);
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const repo = new SharePointSafetyInspectionRepository({
+      client: { get: vi.fn(), post: vi.fn() },
+      backendIngestion: {
+        baseUrl: 'https://functions.example.com/',
+        getApiToken: async () => 'token-422',
+      },
+    });
+
+    await expect(
+      repo.ingestWorkbook(new Blob(['hello']), {
+        uploadedByUpn: 'user@hb.com',
+        uploadedAt: '2026-04-22T10:00:00.000Z',
+        fileName: 'test.xlsx',
+        reportingPeriodId: 'period-1',
+        reportingPeriodSpItemId: 1,
+      }),
+    ).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      httpStatus: 422,
+      requestId: 'req-422',
+      code: 'GRAPH_PERMISSION_DENIED',
+      failureClass: 'graph-permission',
+      previewFailureClass: 'project-unresolved',
+      graphContext: {
+        pathSummary: '/sites/HBCentral/_api/web/lists',
+        statusCode: 403,
+      },
+    } satisfies Partial<SafetyBackendCommandError>);
+  });
+
+  it('returns typed token acquisition failures for auth propagation contract', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const repo = new SharePointSafetyInspectionRepository({
+      client: { get: vi.fn(), post: vi.fn() },
+      backendIngestion: {
+        baseUrl: 'https://functions.example.com/',
+        getApiToken: async () => {
+          throw new Error('SPFx token provider unavailable');
+        },
+      },
+    });
+
+    await expect(
+      repo.ingestWorkbook(new Blob(['hello']), {
+        uploadedByUpn: 'user@hb.com',
+        uploadedAt: '2026-04-22T10:00:00.000Z',
+        fileName: 'test.xlsx',
+        reportingPeriodId: 'period-1',
+        reportingPeriodSpItemId: 1,
+      }),
+    ).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      code: 'TOKEN_ACQUISITION_FAILED',
+      httpStatus: 0,
+    } satisfies Partial<SafetyBackendCommandError>);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

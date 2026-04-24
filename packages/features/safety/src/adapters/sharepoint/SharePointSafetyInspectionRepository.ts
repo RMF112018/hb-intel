@@ -16,6 +16,7 @@ import type {
   ProjectResolutionResult,
   ProjectSourceClassification,
   ReviewStatus,
+  SafetyIngestionPreviewResult,
   SafetyFinding,
   SafetyFindingDraft,
   SafetyIngestionRun,
@@ -42,7 +43,13 @@ import {
   type SiteScopedListDescriptor,
 } from '../../lists/descriptors.js';
 import { JSON_HEADERS, type SpHttpClient } from './spHttp.js';
-import { SafetyAdapterFetchError } from './errors.js';
+import { SafetyAdapterFetchError, SafetyBackendCommandError } from './errors.js';
+import { SafetyBackendCommandClient } from './SafetyBackendCommandClient.js';
+import type {
+  SafetyBackendIngestionRequest,
+  SafetyBackendOperationResult,
+  SafetyBackendPreviewOperationResult,
+} from './backendContracts.js';
 
 const VERBOSE_HEADERS = {
   Accept: 'application/json;odata=verbose',
@@ -67,10 +74,17 @@ export interface SharePointAdapterOptions {
 export class SharePointSafetyInspectionRepository implements ISafetyInspectionRepository {
   private readonly client: SpHttpClient;
   private readonly backendIngestion?: SharePointAdapterOptions['backendIngestion'];
+  private readonly backendCommandClient?: SafetyBackendCommandClient;
 
   constructor(options: SharePointAdapterOptions) {
     this.client = options.client;
     this.backendIngestion = options.backendIngestion;
+    this.backendCommandClient = options.backendIngestion?.baseUrl
+      ? new SafetyBackendCommandClient({
+          baseUrl: options.backendIngestion.baseUrl,
+          getApiToken: options.backendIngestion.getApiToken,
+        })
+      : undefined;
   }
 
   async listReportingPeriods(): Promise<ReadonlyArray<SafetyReportingPeriod>> {
@@ -210,6 +224,18 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     });
   }
 
+  async previewWorkbook(
+    file: File | Blob,
+    context: UploadContext,
+  ): Promise<SafetyIngestionPreviewResult> {
+    const request = await this.buildIngestionRequest(file, context);
+    const operation = await this.requireBackendCommandClient().preview(request);
+    if (!operation.success || !operation.preview) {
+      throw this.buildBackendOperationError('/api/safety-records/ingest/preview', operation, 422);
+    }
+    return operation.preview;
+  }
+
   async ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult> {
     return this.ingestWorkbookViaBackend(file, context);
   }
@@ -229,70 +255,27 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     file: File | Blob,
     context: UploadContext,
   ): Promise<IngestionRunResult> {
-    const backend = this.requireBackendIngestion();
-    const fileName = file instanceof File ? file.name : context.fileName;
-    const body = {
-      fileName,
-      fileContentBase64: await toBase64(file),
-      context: {
-        ...context,
-        fileName,
-      },
-    };
-    const endpoint = `${trimTrailingSlash(backend.baseUrl ?? '')}/api/safety-records/ingest`;
-    const response = await this.invokeBackend(endpoint, body);
-    const payload = (await response.json()) as {
-      data?: {
-        result?: IngestionRunResult;
-        diagnostics?: Array<{ code?: string; message?: string }>;
-      };
-      code?: string;
-      message?: string;
-    };
-    if (!response.ok || !payload.data?.result) {
-      const diagnosticMessage = payload.data?.diagnostics?.map((entry) => entry.message).filter(Boolean).join(' | ');
-      throw new SafetyAdapterFetchError({
-        listName: 'Safety Ingestion API',
-        siteUrl: endpoint,
-        endpoint,
-        httpStatus: response.status,
-        bodySnippet: diagnosticMessage || payload.message,
-        operation: 'Invoke',
-      });
+    const operation = await this.requireBackendCommandClient().ingest(
+      await this.buildIngestionRequest(file, context),
+    );
+    if (!operation.success || !operation.result) {
+      throw this.buildBackendOperationError('/api/safety-records/ingest', operation, 422);
     }
-    return payload.data.result;
+    return operation.result;
   }
 
   private async replayIngestionViaBackend(
     parentRunId: string,
     options: ReplayOptions,
   ): Promise<IngestionRunResult> {
-    const backend = this.requireBackendIngestion();
-    const endpoint = `${trimTrailingSlash(backend.baseUrl ?? '')}/api/safety-records/replay`;
-    const response = await this.invokeBackend(endpoint, {
+    const operation = await this.requireBackendCommandClient().replay({
       parentRunId,
       supersedePrior: options.supersedePrior ?? false,
     });
-    const payload = (await response.json()) as {
-      data?: {
-        result?: IngestionRunResult;
-        diagnostics?: Array<{ code?: string; message?: string }>;
-      };
-      code?: string;
-      message?: string;
-    };
-    if (!response.ok || !payload.data?.result) {
-      const diagnosticMessage = payload.data?.diagnostics?.map((entry) => entry.message).filter(Boolean).join(' | ');
-      throw new SafetyAdapterFetchError({
-        listName: 'Safety Replay API',
-        siteUrl: endpoint,
-        endpoint,
-        httpStatus: response.status,
-        bodySnippet: diagnosticMessage || payload.message,
-        operation: 'Invoke',
-      });
+    if (!operation.success || !operation.result) {
+      throw this.buildBackendOperationError('/api/safety-records/replay', operation, 422);
     }
-    return payload.data.result;
+    return operation.result;
   }
 
   private requireBackendIngestion(): NonNullable<SharePointAdapterOptions['backendIngestion']> {
@@ -309,17 +292,50 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     return this.backendIngestion;
   }
 
-  private async invokeBackend(endpoint: string, body: unknown): Promise<Response> {
-    const token = this.backendIngestion?.getApiToken
-      ? await this.backendIngestion.getApiToken()
-      : undefined;
-    return fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  private requireBackendCommandClient(): SafetyBackendCommandClient {
+    this.requireBackendIngestion();
+    if (!this.backendCommandClient) {
+      throw new SafetyBackendCommandError({
+        endpoint: 'missing-backend-command-client',
+        httpStatus: 500,
+        message: 'Safety sharepoint mode requires backend ingestion configuration.',
+      });
+    }
+    return this.backendCommandClient;
+  }
+
+  private async buildIngestionRequest(
+    file: File | Blob,
+    context: UploadContext,
+  ): Promise<SafetyBackendIngestionRequest> {
+    const fileName = file instanceof File ? file.name : context.fileName;
+    return {
+      fileName,
+      fileContentBase64: await toBase64(file),
+      context: {
+        ...context,
+        fileName,
       },
-      body: JSON.stringify(body),
+    };
+  }
+
+  private buildBackendOperationError(
+    endpointPath: string,
+    operation: SafetyBackendOperationResult | SafetyBackendPreviewOperationResult,
+    httpStatus: number,
+  ): SafetyBackendCommandError {
+    const primaryDiagnostic = operation.diagnostics.find((d) => d.failureClass);
+    const previewFailureClass = operation.preview?.diagnosticSummary?.failureClass;
+    return new SafetyBackendCommandError({
+      endpoint: `${trimTrailingSlash(this.requireBackendIngestion().baseUrl ?? '')}${endpointPath}`,
+      httpStatus,
+      requestId: operation.requestId,
+      code: primaryDiagnostic?.code,
+      message: primaryDiagnostic?.message ?? 'Safety backend command failed.',
+      failureClass: primaryDiagnostic?.failureClass,
+      previewFailureClass,
+      graphContext: primaryDiagnostic?.graphContext,
+      operationData: operation,
     });
   }
 
