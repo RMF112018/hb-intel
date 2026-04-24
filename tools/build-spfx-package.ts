@@ -299,6 +299,16 @@ const HB_HOMEPAGE_CANONICAL_BANNER_FILES = [
   'banner_home_7_night.png',
 ] as const;
 const HB_HOMEPAGE_BANNER_SOURCE_RELATIVE_DIR = 'apps/hb-homepage/assets/hero-banners';
+const SAFETY_PACKAGED_ROUTE_MARKERS = [
+  { key: 'preview command route', needle: '/api/safety-records/ingest/preview' },
+  { key: 'ingest command route', needle: '/api/safety-records/ingest' },
+  { key: 'replay command route', needle: '/api/safety-records/replay' },
+] as const;
+const SAFETY_PACKAGED_CONFIG_MARKERS = [
+  { key: 'token audience property key', needle: 'apiAudience' },
+  { key: 'token acquisition failure code', needle: 'TOKEN_ACQUISITION_FAILED' },
+  { key: 'backend bearer wiring seam', needle: 'Authorization' },
+] as const;
 
 interface PackageRuntimeMarker {
   id: string;
@@ -2993,6 +3003,84 @@ for (const domain of domains) {
         console.error(
           `  ❌ hb-intel-homepage effectiveness proof failed; see ${effectivenessProofPath}`,
         );
+        allPassed = false;
+        continue;
+      }
+    }
+
+    if (domain.dir === 'safety') {
+      const appBundleFingerprint = packageTruth.proof.packagedAssets.appBundle;
+      const bundleArchivePathForMarkers = appBundleFingerprint.archivePath;
+      const bundleText = bundleArchivePathForMarkers
+        ? readArchiveBytes(sppkgDest, bundleArchivePathForMarkers).toString('utf8')
+        : '';
+      const routeMarkerChecks = SAFETY_PACKAGED_ROUTE_MARKERS.map((marker) => ({
+        marker: marker.key,
+        needle: marker.needle,
+        present: bundleText.includes(marker.needle),
+      }));
+      const configMarkerChecks = SAFETY_PACKAGED_CONFIG_MARKERS.map((marker) => ({
+        marker: marker.key,
+        needle: marker.needle,
+        present: bundleText.includes(marker.needle),
+      }));
+      const missingRouteMarkers = routeMarkerChecks.filter((marker) => !marker.present);
+      const missingConfigMarkers = configMarkerChecks.filter((marker) => !marker.present);
+      const permissionRequests = Array.isArray(domainPkgSolution?.solution?.webApiPermissionRequests)
+        ? domainPkgSolution.solution.webApiPermissionRequests
+        : [];
+      const hasAccessAsUserPermission = permissionRequests.some(
+        (request: { resource?: unknown; scope?: unknown }) =>
+          typeof request.resource === 'string' &&
+          request.resource.length > 0 &&
+          request.scope === 'access_as_user',
+      );
+      const routeAuthProof = {
+        domain: 'safety',
+        generatedAt: new Date().toISOString(),
+        packagingRunId: freshnessEvidence.runId,
+        sppkgFile: path.basename(sppkgDest),
+        solutionId: String(domainPkgSolution?.solution?.id ?? ''),
+        featureId: String(domainPkgSolution?.solution?.features?.[0]?.id ?? ''),
+        webpartId: String(primarySourceManifest.id ?? ''),
+        packagedAppBundle: appBundleFingerprint,
+        routeMarkerChecks,
+        configMarkerChecks,
+        apiPermissionRequests: permissionRequests,
+        checks: {
+          commandRouteMarkersPresent: {
+            pass: missingRouteMarkers.length === 0,
+            details:
+              missingRouteMarkers.length === 0
+                ? ['All Safety command route markers are present in packaged bundle']
+                : missingRouteMarkers.map(
+                    (marker) =>
+                      `Missing route marker "${marker.marker}" (needle="${marker.needle}") in packaged bundle`,
+                  ),
+          },
+          configContractMarkersPresent: {
+            pass: missingConfigMarkers.length === 0,
+            details:
+              missingConfigMarkers.length === 0
+                ? ['All Safety runtime auth/config markers are present in packaged bundle']
+                : missingConfigMarkers.map(
+                    (marker) =>
+                      `Missing config marker "${marker.marker}" (needle="${marker.needle}") in packaged bundle`,
+                  ),
+          },
+          accessAsUserPermissionDeclared: {
+            pass: hasAccessAsUserPermission,
+            details: hasAccessAsUserPermission
+              ? ['Safety package declares webApiPermissionRequests scope access_as_user']
+              : ['Safety package must declare delegated access_as_user in package-solution.json'],
+          },
+        },
+      };
+      const routeAuthProofPath = path.join(OUTPUT_DIR, 'safety-route-auth-proof.json');
+      fs.writeFileSync(routeAuthProofPath, `${JSON.stringify(routeAuthProof, null, 2)}\n`);
+      console.log(`  ✓ Safety route/auth proof written: ${routeAuthProofPath}`);
+      if (!hasAccessAsUserPermission || missingRouteMarkers.length > 0 || missingConfigMarkers.length > 0) {
+        console.error(`  ❌ safety: route/auth proof failed; see ${routeAuthProofPath}`);
         allPassed = false;
         continue;
       }

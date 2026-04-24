@@ -191,6 +191,27 @@ describe('SafetyBackendCommandClient', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('classifies missing bearer token responses as auth instead of network', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(errorResponse(401, { message: 'missing bearer', code: 'MISSING_BEARER' }));
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+      maxAttempts: 2,
+    });
+
+    await expect(client.preview(ingestionRequest)).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'auth',
+      code: 'MISSING_BEARER',
+      retryable: false,
+      attempts: 1,
+      httpStatus: 401,
+    } satisfies Partial<SafetyBackendCommandError>);
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    expect(init.headers).not.toHaveProperty('Authorization');
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('classifies 403 as auth and does not retry', async () => {
     const fetchSpy = vi.fn().mockResolvedValue(errorResponse(403, { message: 'forbidden', code: 'FORBIDDEN' }));
     const client = new SafetyBackendCommandClient({
@@ -246,5 +267,57 @@ describe('SafetyBackendCommandClient', () => {
       httpStatus: 0,
     } satisfies Partial<SafetyBackendCommandError>);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when success envelope is missing data payload', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(okResponse({ success: true }));
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      getApiToken: async () => 'token-ingest',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+    });
+
+    await expect(client.ingest(ingestionRequest, { requestId: 'frontend-success-missing-data' })).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'contract',
+      frontendRequestId: 'frontend-success-missing-data',
+      retryable: false,
+    } satisfies Partial<SafetyBackendCommandError>);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves failure classes and body request id on 422 while honoring response request header', async () => {
+    const failureEnvelope: SafetyBackendFailureEnvelope = {
+      message: 'Preview failed due to unresolved project scope.',
+      code: 'PREVIEW_VALIDATION_FAILED',
+      requestId: 'backend-422-body',
+      failureClass: 'preview-validation',
+      previewFailureClass: 'project-unresolved',
+      data: {
+        success: false,
+        requestAccepted: true,
+        requestId: 'backend-422-body',
+        diagnostics: [],
+      },
+    };
+    const fetchSpy = vi.fn().mockResolvedValue(errorResponse(422, failureEnvelope, 'backend-422-header'));
+    const client = new SafetyBackendCommandClient({
+      baseUrl: 'https://functions.example.com',
+      getApiToken: async () => 'token-preview',
+      fetchImpl: fetchSpy as unknown as typeof fetch,
+    });
+
+    await expect(client.preview(ingestionRequest, { requestId: 'frontend-422-proof' })).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'contract',
+      requestId: 'backend-422-header',
+      backendRequestId: 'backend-422-header',
+      frontendRequestId: 'frontend-422-proof',
+      failureClass: 'preview-validation',
+      previewFailureClass: 'project-unresolved',
+      operationData: {
+        requestId: 'backend-422-body',
+      },
+    } satisfies Partial<SafetyBackendCommandError>);
   });
 });
