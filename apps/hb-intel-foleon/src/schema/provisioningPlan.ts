@@ -9,6 +9,7 @@ import {
   FOLEON_CONTENT_REGISTRY_SCHEMA,
   FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA,
   FOLEON_INTERACTION_EVENTS_SCHEMA,
+  FOLEON_SYNC_RUNS_SCHEMA,
   type FoleonListSchema,
 } from './foleonListSchemas.js';
 
@@ -89,6 +90,7 @@ export function buildFoleonProvisioningPlan(options?: {
       buildFoleonProvisioningListPlan(FOLEON_CONTENT_REGISTRY_SCHEMA),
       buildFoleonProvisioningListPlan(FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA),
       buildFoleonProvisioningListPlan(FOLEON_INTERACTION_EVENTS_SCHEMA),
+      buildFoleonProvisioningListPlan(FOLEON_SYNC_RUNS_SCHEMA),
     ],
   };
 }

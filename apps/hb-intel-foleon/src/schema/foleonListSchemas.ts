@@ -46,7 +46,8 @@ export interface FoleonFieldSchema {
 export type FoleonListInternalName =
   | 'HB_FoleonContentRegistry'
   | 'HB_FoleonHomepagePlacements'
-  | 'HB_FoleonInteractionEvents';
+  | 'HB_FoleonInteractionEvents'
+  | 'HB_FoleonSyncRuns';
 
 export interface FoleonViewSpec {
   readonly name: string;
@@ -266,10 +267,49 @@ export const FOLEON_INTERACTION_EVENTS_SCHEMA: FoleonListSchema = {
   ],
 };
 
+const SYNC_RUN_KIND_CHOICES = ['Docs', 'Projects', 'Analytics'] as const;
+const SYNC_RUN_STATUS_CHOICES = ['Running', 'Succeeded', 'Failed', 'Cancelled'] as const;
+const SYNC_RUN_TRIGGER_CHOICES = ['Timer', 'Manual', 'AdminApi'] as const;
+
+export const FOLEON_SYNC_RUNS_SCHEMA: FoleonListSchema = {
+  displayName: 'Foleon Sync Runs',
+  internalName: 'HB_FoleonSyncRuns',
+  fields: [
+    { internalName: 'Title', displayName: 'Title', type: 'Text', required: true, indexed: false },
+    { internalName: 'RunId', displayName: 'Run ID', type: 'Text', required: true, indexed: true, unique: true },
+    { internalName: 'RunKind', displayName: 'Run Kind', type: 'Choice', required: true, indexed: true, choices: SYNC_RUN_KIND_CHOICES },
+    { internalName: 'Status', displayName: 'Status', type: 'Choice', required: true, indexed: true, choices: SYNC_RUN_STATUS_CHOICES },
+    { internalName: 'StartedUtc', displayName: 'Started (UTC)', type: 'DateTime', required: true, indexed: true },
+    { internalName: 'EndedUtc', displayName: 'Ended (UTC)', type: 'DateTime', required: false, indexed: true },
+    { internalName: 'TriggerSource', displayName: 'Trigger Source', type: 'Choice', required: true, indexed: true, choices: SYNC_RUN_TRIGGER_CHOICES },
+    { internalName: 'ItemsFetched', displayName: 'Items Fetched', type: 'Number', required: false, indexed: false },
+    { internalName: 'ItemsWritten', displayName: 'Items Written', type: 'Number', required: false, indexed: false },
+    { internalName: 'ErrorCount', displayName: 'Error Count', type: 'Number', required: false, indexed: true },
+    { internalName: 'ErrorsJson', displayName: 'Errors JSON', type: 'Note', required: false, indexed: false },
+    { internalName: 'CorrelationId', displayName: 'Correlation ID', type: 'Text', required: false, indexed: true },
+    { internalName: 'BackendVersion', displayName: 'Backend Version', type: 'Text', required: false, indexed: false },
+  ],
+  requiredIndexedFields: [
+    'RunId',
+    'RunKind',
+    'Status',
+    'StartedUtc',
+    'EndedUtc',
+    'TriggerSource',
+    'ErrorCount',
+    'CorrelationId',
+  ],
+  views: [
+    { name: 'Recent Runs', filter: '', sort: 'StartedUtc desc' },
+    { name: 'Failed Runs', filter: "Status eq 'Failed'", sort: 'StartedUtc desc' },
+  ],
+};
+
 export const FOLEON_LIST_SCHEMAS: ReadonlyArray<FoleonListSchema> = [
   FOLEON_CONTENT_REGISTRY_SCHEMA,
   FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA,
   FOLEON_INTERACTION_EVENTS_SCHEMA,
+  FOLEON_SYNC_RUNS_SCHEMA,
 ];
 
 export function selectFieldsFor(schema: FoleonListSchema): string {

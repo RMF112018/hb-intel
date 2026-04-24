@@ -12,19 +12,21 @@ describe('buildFoleonProvisioningPlan', () => {
     expect(plan.generatedAt).toBe('2026-04-24T00:00:00.000Z');
   });
 
-  it('emits plans for all three MVP lists in provisioning order', () => {
+  it('emits plans for all four governed lists in provisioning order', () => {
     expect(plan.lists.map((l) => l.internalName)).toEqual([
       'HB_FoleonContentRegistry',
       'HB_FoleonHomepagePlacements',
       'HB_FoleonInteractionEvents',
+      'HB_FoleonSyncRuns',
     ]);
   });
 
-  it('enables versioning on business lists and disables on the events list', () => {
+  it('enables versioning on business + operational lists and disables on the events list', () => {
     const byName = new Map(plan.lists.map((l) => [l.internalName, l]));
     expect(byName.get('HB_FoleonContentRegistry')?.versioning).toBe(true);
     expect(byName.get('HB_FoleonHomepagePlacements')?.versioning).toBe(true);
     expect(byName.get('HB_FoleonInteractionEvents')?.versioning).toBe(false);
+    expect(byName.get('HB_FoleonSyncRuns')?.versioning).toBe(true);
   });
 
   it('emits the indexed-field count consistent with the fields array', () => {

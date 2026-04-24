@@ -4,6 +4,7 @@ import {
   FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA,
   FOLEON_INTERACTION_EVENTS_SCHEMA,
   FOLEON_LIST_SCHEMAS,
+  FOLEON_SYNC_RUNS_SCHEMA,
   assertFiltersAreIndexed,
   assertSelectFieldsInSchema,
   isFieldIndexed,
@@ -11,11 +12,12 @@ import {
 } from '../foleonListSchemas.js';
 
 describe('Foleon list schemas', () => {
-  it('FOLEON_LIST_SCHEMAS exposes the three MVP lists', () => {
+  it('FOLEON_LIST_SCHEMAS exposes the four governed lists', () => {
     expect(FOLEON_LIST_SCHEMAS.map((s) => s.internalName)).toEqual([
       'HB_FoleonContentRegistry',
       'HB_FoleonHomepagePlacements',
       'HB_FoleonInteractionEvents',
+      'HB_FoleonSyncRuns',
     ]);
   });
 
@@ -65,6 +67,24 @@ describe('Foleon list schemas', () => {
     );
     expect(eventId?.unique).toBe(true);
     expect(eventId?.indexed).toBe(true);
+  });
+
+  it('Sync Runs enforces RunId unique + indexed and covers the run lifecycle choices', () => {
+    const runId = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'RunId');
+    expect(runId?.unique).toBe(true);
+    expect(runId?.indexed).toBe(true);
+    const status = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'Status');
+    expect(status?.choices).toEqual(['Running', 'Succeeded', 'Failed', 'Cancelled']);
+    const kind = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'RunKind');
+    expect(kind?.choices).toEqual(['Docs', 'Projects', 'Analytics']);
+    const trigger = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'TriggerSource');
+    expect(trigger?.choices).toEqual(['Timer', 'Manual', 'AdminApi']);
+  });
+
+  it('Sync Runs exposes Recent Runs and Failed Runs views', () => {
+    const names = FOLEON_SYNC_RUNS_SCHEMA.views.map((v) => v.name);
+    expect(names).toContain('Recent Runs');
+    expect(names).toContain('Failed Runs');
   });
 });
 
