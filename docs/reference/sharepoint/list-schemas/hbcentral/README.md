@@ -48,6 +48,9 @@
 | HB Article Template Registry | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Article Workflow History | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Articles | business/custom | false | 0 | Yes | Implementation-relevant |
+| HB Foleon Content Registry | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
+| HB Foleon Homepage Placements | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
+| HB Foleon Interaction Events | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
 | Hero Banner Config | business/custom | false | 0 | Yes | Implementation-relevant |
 | Priority Actions Band Config | business/custom | false | 3 | Yes | Phase-05 curated seed validated (run `f671390c-bc35-46b0-9937-da9b77b1ac94`, 2026-04-18) |
 | Priority Actions Band Items | business/custom | false | 10 | Yes | Phase-05 curated seed validated (run `f671390c-bc35-46b0-9937-da9b77b1ac94`, 2026-04-18) |

@@ -16,8 +16,17 @@ import type {
   FoleonPlacementKey,
   FoleonPlacementRecord,
 } from '../types/foleon-placement.types.js';
+import {
+  FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA,
+  assertFiltersAreIndexed,
+  assertSelectFieldsInSchema,
+} from '../schema/foleonListSchemas.js';
+import { assertValidListGuid } from '../schema/validateListGuid.js';
 
 export const FOLEON_PLACEMENTS_TITLE = 'HB_FoleonHomepagePlacements' as const;
+
+const PLACEMENT_FILTER_FIELDS = ['IsActive'] as const;
+assertFiltersAreIndexed(FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA, PLACEMENT_FILTER_FIELDS);
 
 interface FoleonPlacementRawRow {
   Id?: number;
@@ -32,7 +41,10 @@ interface FoleonPlacementRawRow {
   LayoutVariant?: string;
 }
 
-const PLACEMENT_SELECT_FIELDS = [
+// Explicit select list (not `selectFieldsFor(...)` because we need the
+// SharePoint `<Lookup>Id` projection instead of the full lookup
+// field). Verified against the schema at module-init time.
+const PLACEMENT_SELECT_FIELDS_ARRAY = [
   'Id',
   'Title',
   'PlacementKey',
@@ -43,7 +55,9 @@ const PLACEMENT_SELECT_FIELDS = [
   'DisplayThrough',
   'SortRank',
   'LayoutVariant',
-].join(',');
+] as const;
+assertSelectFieldsInSchema(FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA, PLACEMENT_SELECT_FIELDS_ARRAY);
+const PLACEMENT_SELECT_FIELDS = PLACEMENT_SELECT_FIELDS_ARRAY.join(',');
 
 export interface FoleonPlacementQueryParams {
   readonly siteUrl: string;
@@ -56,6 +70,7 @@ export interface FoleonPlacementQueryParams {
 export async function fetchFoleonPlacements(
   params: FoleonPlacementQueryParams,
 ): Promise<ReadonlyArray<FoleonPlacementRecord>> {
+  assertValidListGuid(params.placementsListId, 'HB_FoleonHomepagePlacements');
   const descriptor: SharePointListDescriptor = {
     id: params.placementsListId,
     title: FOLEON_PLACEMENTS_TITLE,

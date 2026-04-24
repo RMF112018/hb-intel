@@ -19,8 +19,25 @@ import type {
   FoleonPublishStatus,
   FoleonSyncSource,
 } from '../types/foleon-content.types.js';
+import {
+  FOLEON_CONTENT_REGISTRY_SCHEMA,
+  assertFiltersAreIndexed,
+  selectFieldsFor,
+} from '../schema/foleonListSchemas.js';
+import { assertValidListGuid } from '../schema/validateListGuid.js';
 
 export const FOLEON_CONTENT_REGISTRY_TITLE = 'HB_FoleonContentRegistry' as const;
+
+// Every filter column the service is allowed to push. Verified at
+// module-init time so a non-indexed field cannot be pushed into the
+// live query surface by accident.
+const CONTENT_FILTER_FIELDS = [
+  'FoleonDocId',
+  'IsVisible',
+  'PublishStatus',
+  'IsHomepageEligible',
+] as const;
+assertFiltersAreIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, CONTENT_FILTER_FIELDS);
 
 interface FoleonContentRawRow {
   Id?: number;
@@ -56,39 +73,10 @@ interface FoleonContentRawRow {
   SyncSource?: string;
 }
 
-const CONTENT_SELECT_FIELDS = [
-  'Id',
-  'Title',
-  'FoleonDocId',
-  'FoleonDocUid',
-  'FoleonIdentifier',
-  'FoleonProjectId',
-  'FoleonProjectName',
-  'ContentTypeKey',
-  'PublishStatus',
-  'IsVisible',
-  'IsFeatured',
-  'IsHomepageEligible',
-  'PublishedUrl',
-  'PreviewUrl',
-  'EmbedUrl',
-  'ThumbnailUrl',
-  'HeroImageUrl',
-  'Summary',
-  'IssueDate',
-  'PublishedOn',
-  'DisplayFrom',
-  'DisplayThrough',
-  'SortRank',
-  'RelatedProjectNumber',
-  'RelatedProjectName',
-  'Region',
-  'Sector',
-  'OpenMode',
-  'AllowEmbed',
-  'RequiresExternalOpen',
-  'SyncSource',
-].join(',');
+// $select is derived from the canonical schema so a schema change is
+// the only place that widens / narrows the projection. `Id` is always
+// returned by SharePoint list-items endpoints so it is implicit.
+const CONTENT_SELECT_FIELDS = `Id,${selectFieldsFor(FOLEON_CONTENT_REGISTRY_SCHEMA)}`;
 
 export interface FoleonContentQueryParams {
   readonly siteUrl: string;
@@ -103,6 +91,7 @@ export interface FoleonContentQueryParams {
 export async function fetchFoleonContent(
   params: FoleonContentQueryParams,
 ): Promise<ReadonlyArray<FoleonContentRecord>> {
+  assertValidListGuid(params.contentRegistryListId, 'HB_FoleonContentRegistry');
   const descriptor: SharePointListDescriptor = {
     id: params.contentRegistryListId,
     title: FOLEON_CONTENT_REGISTRY_TITLE,

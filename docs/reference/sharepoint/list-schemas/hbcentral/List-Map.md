@@ -13,6 +13,7 @@
 - error/audit: HB Article Publishing Errors, Kudos Audit Events
 - legacy-fallback: Legacy Project Fallback Registry, Legacy Project Fallback Sync Runs
 - safety-record-keeping: Safety Reporting Periods, Safety Project Week Records, Safety Inspection Events, Safety Findings, Safety Ingestion Runs
+- foleon-publications (target schema — not yet provisioned): HB Foleon Content Registry, HB Foleon Homepage Placements, HB Foleon Interaction Events
 - people-culture: People Culture Announcements, People Culture Celebrations, People Culture Kudos
 - other business: Bids, HB Article Media, HB Article Promotion Rules, HB Article Team Members, HB Articles, Tool Launcher Contents
 - Implementation-relevant system lists: TaxonomyHiddenList, User Information List
@@ -71,6 +72,27 @@
 - Outbound lookup dependencies: AppPrincipals, User Information List.
 - Critical key-like fields: ArticleId, ComplianceAssetId, Destination, ID, ManualSortOverride, PageId, ProjectId, TemplateKey, TemplateOverrideAllowed, WorkflowState, _ComplianceTagUserId.
 - Likely downstream consumers: webparts/services that query this list by internal-name contracts (verify in app code for exact consumers).
+
+### HB Foleon Content Registry (target schema — not yet provisioned)
+- Role: canonical registry of Foleon Docs eligible for HB Central discovery/reader/content-hub.
+- Outbound lookups: `MarketingOwner` → User Information List; `AudienceGroups` → User Information List (multi).
+- Reconciliation key: `FoleonDocId` (unique).
+- Downstream consumers: `apps/hb-intel-foleon/src/services/FoleonContentService.ts`.
+- Full field table: `lists/hb-foleon-content-registry.md`.
+
+### HB Foleon Homepage Placements (target schema — not yet provisioned)
+- Role: controls homepage discovery surface without code deploy.
+- Outbound lookup: `ContentLookup` → `HB_FoleonContentRegistry` (required).
+- Denormalized cache: `ContentIdCache` mirrors `FoleonDocId` on the linked registry row; the SPFx Highlights query uses it to resolve placements without expanding the lookup.
+- Downstream consumers: `apps/hb-intel-foleon/src/services/FoleonPlacementService.ts`.
+- Full field table: `lists/hb-foleon-homepage-placements.md`.
+
+### HB Foleon Interaction Events (target schema — not yet provisioned)
+- Role: SharePoint-side interaction analytics for Foleon publications.
+- Reconciliation key: `EventId` (unique).
+- Versioning intentionally disabled (event volume).
+- Downstream consumers: `apps/hb-intel-foleon/src/services/FoleonTelemetryService.ts`.
+- Full field table: `lists/hb-foleon-interaction-events.md`.
 
 ### Hero Banner Config
 - Likely role: homepage configuration data.

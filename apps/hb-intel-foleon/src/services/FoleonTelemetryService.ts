@@ -10,6 +10,7 @@ import {
   type SharePointListDescriptor,
 } from '@hbc/sharepoint-platform';
 import type { FoleonInteractionEvent } from '../types/foleon-event.types.js';
+import { assertValidListGuid } from '../schema/validateListGuid.js';
 
 export const FOLEON_EVENTS_TITLE = 'HB_FoleonInteractionEvents' as const;
 
@@ -22,6 +23,7 @@ export async function logFoleonEvent(
   params: FoleonTelemetryParams,
   event: FoleonInteractionEvent,
 ): Promise<void> {
+  assertValidListGuid(params.eventsListId, 'HB_FoleonInteractionEvents');
   const descriptor: SharePointListDescriptor = {
     id: params.eventsListId,
     title: FOLEON_EVENTS_TITLE,

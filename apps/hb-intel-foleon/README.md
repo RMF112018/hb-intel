@@ -130,8 +130,26 @@ implemented in this ship; they do not block MVP:
 
 ## Provisioning checklist (tenant side)
 
-The canonical schemas live in
-`docs/architecture/plans/MASTER/spfx/foleon/integration-plan/02_sharepoint_data_model.md`.
+Full runbook: `docs/provisioning.md` (step-by-step, with dry-run command).
+
+Canonical tenant-facing field tables live under
+`docs/reference/sharepoint/list-schemas/hbcentral/lists/`:
+
+- `hb-foleon-content-registry.md`
+- `hb-foleon-homepage-placements.md`
+- `hb-foleon-interaction-events.md`
+
+The code-level schema source of truth is
+`apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`. Drift between
+the two is caught by
+`src/schema/__tests__/foleonListSchemas.test.ts`.
+
+Print the deterministic provisioning plan:
+
+```bash
+pnpm --filter @hbc/spfx-hb-intel-foleon provision:print
+```
+
 For MVP, provision in `/sites/HBCentral`:
 
 1. `HB_FoleonContentRegistry` — all columns per §List 1, indexes on the
