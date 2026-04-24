@@ -9,6 +9,7 @@ import {
   SafetyRepositoryProvider,
   createSafetyInspectionRepository,
   currentSafetyGuidOverlay,
+  emitSafetyFrontendEvent,
 } from '@hbc/features-safety';
 import { createWebpartRouter } from './router/index.js';
 import { useSafetyLayoutMode } from './responsive/safetyBreakpoints.js';
@@ -103,6 +104,42 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
   const blockedInSharePointMode =
     resolvedRuntimeContract.hostMode === 'sharepoint' &&
     (!resolvedRuntimeContract.canInitializeCommands || !!sharePointBlockingReason);
+
+  // Emit a single governed event per runtime-contract resolution so support
+  // can observe whether the binding gate passed or blocked the surface, and
+  // for what reasons. The event mirrors the backend's event-shape conventions
+  // so requestId-style joins remain possible at the surface boundary even
+  // though there is no command requestId at this lifecycle stage.
+  const runtimeBindingEmittedRef = useRef<string | null>(null);
+  useEffect(() => {
+    const fingerprint = `${resolvedRuntimeContract.hostMode}|${
+      resolvedRuntimeContract.canInitializeCommands ? 'ok' : 'blocked'
+    }|${effectiveBlockingReasons.join(',')}`;
+    if (runtimeBindingEmittedRef.current === fingerprint) return;
+    runtimeBindingEmittedRef.current = fingerprint;
+    if (resolvedRuntimeContract.canInitializeCommands && effectiveBlockingReasons.length === 0) {
+      emitSafetyFrontendEvent({
+        name: 'safety.frontend.runtime-binding.validated',
+        operation: 'runtime-binding',
+        lifecycle: 'gate-validated',
+        properties: {
+          hostMode: resolvedRuntimeContract.hostMode,
+          hostedGuidOverlayKnown: resolvedRuntimeContract.hostedGuidOverlay.known,
+        },
+      });
+    } else {
+      emitSafetyFrontendEvent({
+        name: 'safety.frontend.runtime-binding.blocked',
+        operation: 'runtime-binding',
+        lifecycle: 'gate-blocked',
+        properties: {
+          hostMode: resolvedRuntimeContract.hostMode,
+          hostedGuidOverlayKnown: resolvedRuntimeContract.hostedGuidOverlay.known,
+          blockingReasons: effectiveBlockingReasons,
+        },
+      });
+    }
+  }, [resolvedRuntimeContract, effectiveBlockingReasons]);
 
   useEffect(() => {
     const apiAudience = resolvedRuntimeContract.backend.apiAudience ?? '';

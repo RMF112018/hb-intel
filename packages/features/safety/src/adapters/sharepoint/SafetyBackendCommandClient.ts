@@ -10,6 +10,10 @@ import type {
   SafetyBackendSuccessEnvelope,
 } from './backendContracts.js';
 import { SafetyBackendCommandError } from './errors.js';
+import {
+  emitSafetyFrontendEvent,
+  type SafetyFrontendOperation,
+} from '../../telemetry/safetyFrontendTelemetry.js';
 
 export interface SafetyBackendCommandClientOptions {
   readonly baseUrl: string;
@@ -67,11 +71,22 @@ export class SafetyBackendCommandClient {
     const endpoint = `${this.baseUrl}${path}`;
     const frontendRequestId = options?.requestId ?? createRequestId();
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
+    const operation = operationFromPath(path);
+    const startedAt = nowMs();
+
+    emitSafetyFrontendEvent({
+      name: 'safety.frontend.command.start',
+      operation,
+      lifecycle: 'start',
+      frontendRequestId,
+      properties: { route: path, attempt: 1, maxAttempts: this.maxAttempts },
+    });
+
     let token: string | undefined;
     try {
       token = this.getApiToken ? await this.getApiToken() : undefined;
     } catch (error) {
-      throw new SafetyBackendCommandError({
+      const tokenError = new SafetyBackendCommandError({
         endpoint,
         httpStatus: 0,
         message: error instanceof Error ? error.message : 'Failed to acquire API token.',
@@ -79,6 +94,8 @@ export class SafetyBackendCommandClient {
         errorKind: 'auth',
         frontendRequestId,
       });
+      emitCommandTerminalEvent(operation, tokenError, frontendRequestId, path, startedAt, 0);
+      throw tokenError;
     }
 
     let attempt = 0;
@@ -96,6 +113,19 @@ export class SafetyBackendCommandClient {
           signal: options?.signal,
           attempt,
         });
+        emitSafetyFrontendEvent({
+          name: 'safety.frontend.command.complete',
+          operation,
+          lifecycle: 'complete',
+          frontendRequestId,
+          requestId: response.requestId,
+          properties: {
+            route: path,
+            attempts: response.attempts,
+            durationMs: Math.round(nowMs() - startedAt),
+            httpStatus: 200,
+          },
+        });
         return response;
       } catch (error) {
         const commandError = toCommandError(
@@ -107,8 +137,23 @@ export class SafetyBackendCommandClient {
         );
         lastError = commandError;
         if (!commandError.retryable || attempt >= this.maxAttempts) {
+          emitCommandTerminalEvent(operation, commandError, frontendRequestId, path, startedAt, attempt);
           throw commandError;
         }
+        emitSafetyFrontendEvent({
+          name: 'safety.frontend.command.attempt',
+          operation,
+          lifecycle: 'attempt',
+          frontendRequestId,
+          properties: {
+            route: path,
+            attempt,
+            nextDelayMs: 150 * attempt,
+            errorKind: commandError.errorKind,
+            httpStatus: commandError.httpStatus,
+            code: commandError.code,
+          },
+        });
         await delay(150 * attempt);
       }
     }
@@ -116,13 +161,15 @@ export class SafetyBackendCommandClient {
     if (lastError) {
       throw lastError;
     }
-    throw new SafetyBackendCommandError({
+    const fallback = new SafetyBackendCommandError({
       endpoint,
       httpStatus: 0,
       message: 'Backend command failed before an attempt was executed.',
       errorKind: 'non-transient',
       frontendRequestId,
     });
+    emitCommandTerminalEvent(operation, fallback, frontendRequestId, path, startedAt, attempt);
+    throw fallback;
   }
 
   private async executeAttempt<TData>(input: {
@@ -341,4 +388,47 @@ function readDetailString(
 ): string | undefined {
   const value = details?.[key];
   return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+function operationFromPath(path: string): SafetyFrontendOperation {
+  if (path.endsWith('/ingest/preview')) return 'preview';
+  if (path.endsWith('/replay')) return 'replay';
+  return 'ingest';
+}
+
+function nowMs(): number {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function emitCommandTerminalEvent(
+  operation: SafetyFrontendOperation,
+  error: SafetyBackendCommandError,
+  frontendRequestId: string,
+  route: string,
+  startedAt: number,
+  attempts: number,
+): void {
+  const isCancellation = error.errorKind === 'aborted';
+  emitSafetyFrontendEvent({
+    name: isCancellation
+      ? 'safety.frontend.command.cancelled'
+      : 'safety.frontend.command.failed',
+    operation,
+    lifecycle: isCancellation ? 'cancelled' : 'failed',
+    frontendRequestId,
+    requestId: error.backendRequestId ?? error.requestId,
+    properties: {
+      route,
+      attempts,
+      durationMs: Math.round(nowMs() - startedAt),
+      httpStatus: error.httpStatus,
+      code: error.code,
+      errorKind: error.errorKind,
+      failureClass: error.failureClass,
+      previewFailureClass: error.previewFailureClass,
+    },
+  });
 }

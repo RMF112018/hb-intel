@@ -135,6 +135,20 @@ export type {
   SafetyBackendSuccessEnvelope,
 } from './adapters/sharepoint/backendContracts.js';
 
+// -- Frontend telemetry --------------------------------------------------
+export {
+  emitSafetyFrontendEvent,
+  resetSafetyFrontendTelemetrySink,
+  setSafetyFrontendTelemetrySink,
+} from './telemetry/safetyFrontendTelemetry.js';
+export type {
+  EmitSafetyFrontendEventInput,
+  SafetyFrontendLifecycle,
+  SafetyFrontendOperation,
+  SafetyFrontendTelemetryEvent,
+  SafetyFrontendTelemetrySink,
+} from './telemetry/safetyFrontendTelemetry.js';
+
 // -- Ingestion -----------------------------------------------------------
 export { runIngestionPipeline } from './ingestion/runIngestionPipeline.js';
 export type {
