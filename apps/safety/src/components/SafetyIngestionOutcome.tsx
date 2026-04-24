@@ -193,6 +193,18 @@ export function SafetyIngestionOutcome({
     result.state === 'committed'
       ? result.committed?.inspectionEvent.id
       : undefined;
+  const supportRequestId = (run as unknown as { requestId?: string }).requestId;
+  const supportFailureClass =
+    (run as unknown as { failureClass?: string }).failureClass ??
+    run.errorClass ??
+    undefined;
+  const supportPreviewFailureClass = (run as unknown as { previewFailureClass?: string }).previewFailureClass;
+  const hasSupportDetails =
+    !!supportRequestId || !!supportFailureClass || !!supportPreviewFailureClass;
+  const isUrgentFailure =
+    result.state === 'commit-failed' ||
+    result.state === 'parse-error' ||
+    result.state === 'invalid-template';
 
   return (
     <HbcCard weight="primary">
@@ -202,6 +214,9 @@ export function SafetyIngestionOutcome({
         data-outcome-state={result.state}
         data-outcome-tone={copy.tone}
         aria-labelledby="safety-ingestion-outcome-title"
+        role={isUrgentFailure ? 'alert' : 'status'}
+        aria-live={isUrgentFailure ? 'assertive' : 'polite'}
+        aria-atomic={true}
       >
         <header className="safety-ingestion-outcome__header">
           <div className="safety-ingestion-outcome__badge">
@@ -301,6 +316,34 @@ export function SafetyIngestionOutcome({
             </Link>
           )}
         </nav>
+        {hasSupportDetails && (
+          <details data-safety-ui="outcome-support-details">
+            <summary>Support details</summary>
+            <ul>
+              {supportRequestId && (
+                <li>
+                  <HbcTypography intent="bodySmall">
+                    requestId: {supportRequestId}
+                  </HbcTypography>
+                </li>
+              )}
+              {supportFailureClass && (
+                <li>
+                  <HbcTypography intent="bodySmall">
+                    failureClass: {supportFailureClass}
+                  </HbcTypography>
+                </li>
+              )}
+              {supportPreviewFailureClass && (
+                <li>
+                  <HbcTypography intent="bodySmall">
+                    previewFailureClass: {supportPreviewFailureClass}
+                  </HbcTypography>
+                </li>
+              )}
+            </ul>
+          </details>
+        )}
       </section>
     </HbcCard>
   );

@@ -73,6 +73,7 @@ describe('SafetyFileInput — governed primitive contract (audit G-09)', () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /replace file/i })).toBeInTheDocument();
     expect(screen.getByText(/first\.xlsx/)).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(/first\.xlsx/);
   });
 
   it('keyboard activation (Enter) on the trigger opens the picker', async () => {

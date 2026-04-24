@@ -171,6 +171,14 @@ export function SafetyProjectPicker({
       } else if (event.key === 'Escape') {
         event.preventDefault();
         setIsOpen(false);
+      } else if (event.key === 'Home') {
+        if (!isOpen || matches.length === 0) return;
+        event.preventDefault();
+        setHighlightedIndex(0);
+      } else if (event.key === 'End') {
+        if (!isOpen || matches.length === 0) return;
+        event.preventDefault();
+        setHighlightedIndex(matches.length - 1);
       }
     },
     [disabled, matches, highlightedIndex, isOpen, handleSelect],
@@ -183,6 +191,18 @@ export function SafetyProjectPicker({
     [helpId, errorId, isError ? registryErrorId : undefined]
       .filter(Boolean)
       .join(' ') || undefined;
+  const highlighted = matches[highlightedIndex];
+  const liveSelectionText = selected
+    ? `Selected project ${selected.projectName || 'unnamed project'}${selected.projectNumber ? ` ${selected.projectNumber}` : ''}.`
+    : isLoading
+      ? 'Loading project search results.'
+      : isError
+        ? 'Project search unavailable.'
+        : isOpen && highlighted
+          ? `${matches.length} result(s). Highlighted ${highlighted.projectName || 'unnamed project'}${highlighted.projectNumber ? ` ${highlighted.projectNumber}` : ''}.`
+          : query.length > 0 && matches.length === 0
+            ? 'No matching projects.'
+            : '';
 
   return (
     <div
@@ -190,6 +210,15 @@ export function SafetyProjectPicker({
       className="safety-project-picker"
       data-safety-ui="project-picker"
     >
+      <div
+        style={VISUALLY_HIDDEN_STYLE}
+        role="status"
+        aria-live="polite"
+        aria-atomic={true}
+        data-safety-ui="project-picker-live-status"
+      >
+        {liveSelectionText}
+      </div>
       <label htmlFor={inputId} className="safety-project-picker__label">
         <HbcTypography intent="label">{label}</HbcTypography>
       </label>
@@ -246,6 +275,7 @@ export function SafetyProjectPicker({
           role="combobox"
           aria-expanded={isOpen}
           aria-owns={listboxId}
+          aria-controls={listboxId}
           aria-haspopup="listbox"
           className="safety-project-picker__combobox"
         >
@@ -362,6 +392,17 @@ export function SafetyProjectPicker({
     </div>
   );
 }
+
+const VISUALLY_HIDDEN_STYLE = {
+  border: 0,
+  clip: 'rect(0 0 0 0)',
+  height: '1px',
+  margin: '-1px',
+  overflow: 'hidden',
+  padding: 0,
+  position: 'absolute' as const,
+  width: '1px',
+};
 
 function buildSecondaryLine(entry: IProjectSiteEntry): string {
   const parts: string[] = [];

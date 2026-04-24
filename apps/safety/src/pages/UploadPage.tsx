@@ -10,9 +10,7 @@ import {
 } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 import {
-  SafetyUploadError,
   isSafetyAdapterFetchError,
-  isSafetyBackendCommandError,
   isSafetyConfigurationError,
   useSafetyIngestionPreview,
   useReportingPeriods,
@@ -33,8 +31,22 @@ import {
   type SafetyIntakeStepStatus,
   type SafetyProjectPickerValue,
 } from '../components/index.js';
+import {
+  uploadFailureMessage,
+  type SupportDetails,
+} from './supportTruth.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
+const VISUALLY_HIDDEN_STYLE = {
+  border: 0,
+  clip: 'rect(0 0 0 0)',
+  height: '1px',
+  margin: '-1px',
+  overflow: 'hidden',
+  padding: 0,
+  position: 'absolute' as const,
+  width: '1px',
+};
 
 function currentUserUpn(): string {
   if (typeof window === 'undefined') return 'coordinator@hedrickbrothers.com';
@@ -361,6 +373,25 @@ export function UploadPage(): ReactNode {
   const commitDisabled = !commitReady || ingestion.isPending;
 
   const mismatch = ingestion.data?.metadataMismatch;
+  const previewFailure = uploadFailureMessage(preview.error);
+  const commitFailure = uploadFailureMessage(ingestion.error);
+  const politeAnnouncement = useMemo(() => {
+    if (preview.isPending) return 'Preview in progress for current intake context.';
+    if (ingestion.isPending) return 'Commit in progress for current previewed context.';
+    if (ingestion.data) return 'Commit finished. Submission outcome is available.';
+    if (preview.data?.commitReadiness) {
+      return 'Preview completed. Commit is ready after confirmation.';
+    }
+    if (preview.data) {
+      return `Preview completed with ${preview.data.blockingErrors.length} blocker(s).`;
+    }
+    return '';
+  }, [preview.isPending, ingestion.isPending, ingestion.data, preview.data]);
+  const alertAnnouncement = useMemo(() => {
+    if (ingestion.error) return `${commitFailure.headline} ${commitFailure.detail}`;
+    if (preview.error) return `${previewFailure.headline} ${previewFailure.detail}`;
+    return '';
+  }, [ingestion.error, preview.error, commitFailure.headline, commitFailure.detail, previewFailure.headline, previewFailure.detail]);
 
   return (
     <WorkspacePageShell
@@ -546,6 +577,23 @@ export function UploadPage(): ReactNode {
                   : undefined
             }
           >
+            <div
+              style={VISUALLY_HIDDEN_STYLE}
+              role="status"
+              aria-live="polite"
+              aria-atomic={true}
+              data-safety-ui="upload-live-status"
+            >
+              {politeAnnouncement}
+            </div>
+            <div
+              style={VISUALLY_HIDDEN_STYLE}
+              role="alert"
+              aria-atomic={true}
+              data-safety-ui="upload-live-alert"
+            >
+              {alertAnnouncement}
+            </div>
             <div className="safety-intake-submit">
               <HbcButton
                 variant="primary"
@@ -692,8 +740,16 @@ export function UploadPage(): ReactNode {
                 <SafetyStatusPanel
                   intent="partial-failure"
                   data-safety-ui="upload-ingestion-error"
-                  description="Commit transport failed before the pipeline could terminate."
-                  detail={uploadErrorMessage(ingestion.error)}
+                  description={commitFailure.headline}
+                  detail={commitFailure.detail}
+                  role="alert"
+                  ariaLive="assertive"
+                  ariaAtomic={true}
+                />
+              )}
+              {ingestion.error && (
+                <SupportDetailsDisclosure
+                  details={commitFailure.support}
                 />
               )}
               {preview.data && (
@@ -703,8 +759,16 @@ export function UploadPage(): ReactNode {
                 <SafetyStatusPanel
                   intent="partial-failure"
                   data-safety-ui="upload-preview-error"
-                  description="Preview failed before commit eligibility could be determined."
-                  detail={uploadErrorMessage(preview.error)}
+                  description={previewFailure.headline}
+                  detail={previewFailure.detail}
+                  role="alert"
+                  ariaLive="assertive"
+                  ariaAtomic={true}
+                />
+              )}
+              {preview.error && (
+                <SupportDetailsDisclosure
+                  details={previewFailure.support}
                 />
               )}
             </section>
@@ -712,6 +776,31 @@ export function UploadPage(): ReactNode {
         </div>
       </div>
     </WorkspacePageShell>
+  );
+}
+
+function SupportDetailsDisclosure({
+  details,
+}: {
+  readonly details: SupportDetails;
+}): ReactNode {
+  const bounded = [
+    details.requestId ? `requestId: ${details.requestId}` : null,
+    details.failureClass ? `failureClass: ${details.failureClass}` : null,
+    details.previewFailureClass ? `previewFailureClass: ${details.previewFailureClass}` : null,
+  ].filter(Boolean) as string[];
+  if (bounded.length === 0) return null;
+  return (
+    <details data-safety-ui="support-details">
+      <summary>Support details</summary>
+      <ul>
+        {bounded.map((item) => (
+          <li key={item}>
+            <HbcTypography intent="bodySmall">{item}</HbcTypography>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 
@@ -850,51 +939,3 @@ function reportingPeriodLoadMessage(error: unknown): string {
   return 'Could not load reporting periods. Submission is disabled until the period list is available.';
 }
 
-function uploadErrorMessage(error: unknown): string {
-  if (isSafetyBackendCommandError(error)) {
-    if (error.errorKind === 'timeout') {
-      return 'Safety backend timed out before the command completed. Retry the upload when connectivity stabilizes.';
-    }
-    if (error.errorKind === 'aborted') {
-      return 'Upload was cancelled before completion. Submit again when ready.';
-    }
-    if (error.requestId) {
-      return `${error.message} (requestId: ${error.requestId})`;
-    }
-    return error.message;
-  }
-  if (error instanceof SafetyUploadError) {
-    if (error.kind === 'security-validation') {
-      return (
-        'SharePoint rejected the upload request due to security validation. ' +
-        'Retry the upload; if this continues, contact support with this error.'
-      );
-    }
-    if (error.kind === 'permission' && error.stage === 'upload-post') {
-      return (
-        'You do not have permission to upload to Safety Checklist Uploads. ' +
-        'Contact the Safety site owner if upload access should be available.'
-      );
-    }
-    if (error.kind === 'not-found') {
-      return (
-        'Safety Checklist Uploads could not be found at the configured location. ' +
-        'Verify upload-library binding and path configuration.'
-      );
-    }
-    if (error.kind === 'binding') {
-      return (
-        'Upload library identity is not configured in this runtime. ' +
-        'SafetyChecklistUploads GUID binding is required before submission.'
-      );
-    }
-    if (error.kind === 'metadata-lookup') {
-      return (
-        'The file was uploaded but metadata lookup failed, so the run could not continue. ' +
-        'Retry or contact support with this failure.'
-      );
-    }
-  }
-  if (error instanceof Error && error.message) return error.message;
-  return 'Upload failed due to an unexpected error.';
-}

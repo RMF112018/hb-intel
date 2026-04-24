@@ -8,7 +8,6 @@ import {
 import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import { useReplayIngestion, useReviewQueue } from '@hbc/features-safety';
 import type { ReviewQueueEntry } from '@hbc/features-safety';
-import { isSafetyBackendCommandError } from '@hbc/features-safety';
 import {
   SafetyMasthead,
   SafetyReviewActions,
@@ -18,6 +17,10 @@ import {
   SafetyTriageGroup,
   SafetyTriageSummary,
 } from '../components/index.js';
+import {
+  replayFailureMessage,
+  type SupportDetails,
+} from './supportTruth.js';
 import {
   bucketEntries,
   classifyQueueState,
@@ -167,6 +170,17 @@ export function ReviewQueuePage(): ReactNode {
   );
 
   const isClean = queueState === 'clean';
+  const replayFailure = replayFailureMessage(replay.error);
+  const politeAnnouncement = replay.isPending
+    ? pendingRunId
+      ? `Replay in progress for run ${pendingRunId}.`
+      : 'Replay in progress.'
+    : replay.data
+      ? 'Replay finished. Review queue will refresh with latest state.'
+      : '';
+  const alertAnnouncement = replay.error
+    ? `${replayFailure.headline} ${replayFailure.detail}`
+    : '';
 
   return (
     <WorkspacePageShell
@@ -202,15 +216,53 @@ export function ReviewQueuePage(): ReactNode {
           categories={categories}
           totalEntries={entries.length}
         />
+        <div
+          style={VISUALLY_HIDDEN_STYLE}
+          role="status"
+          aria-live="polite"
+          aria-atomic={true}
+          data-safety-ui="review-live-status"
+        >
+          {politeAnnouncement}
+        </div>
+        <div
+          style={VISUALLY_HIDDEN_STYLE}
+          role="alert"
+          aria-atomic={true}
+          data-safety-ui="review-live-alert"
+        >
+          {alertAnnouncement}
+        </div>
         {replay.error && (
+          <>
+            <SafetyStatusPanel
+              intent="partial-failure"
+              description={replayFailure.headline}
+              detail={replayFailure.detail}
+              role="alert"
+              ariaLive="assertive"
+              ariaAtomic={true}
+              action={{
+                label: 'Dismiss',
+                variant: 'secondary',
+                onClick: () => replay.reset(),
+              }}
+            />
+            <ReplaySupportDetails details={replayFailure.support} />
+          </>
+        )}
+        {replay.isPending && (
           <SafetyStatusPanel
-            intent="partial-failure"
-            description="Replay command failed before completion."
-            detail={replayErrorMessage(replay.error)}
+            intent="advisory"
+            description={pendingRunId ? `Replay running for ${pendingRunId}.` : 'Replay running.'}
+            detail="Wait for this replay to settle before retrying the same run."
+            role="status"
+            ariaLive="polite"
+            ariaAtomic={true}
             action={{
-              label: 'Dismiss',
+              label: 'Cancel replay',
               variant: 'secondary',
-              onClick: () => replay.reset(),
+              onClick: () => replayAbortRef.current?.abort(),
             }}
           />
         )}
@@ -267,17 +319,38 @@ export function ReviewQueuePage(): ReactNode {
   );
 }
 
-function replayErrorMessage(error: unknown): string {
-  if (isSafetyBackendCommandError(error)) {
-    if (error.errorKind === 'timeout') {
-      return 'Replay timed out before the backend could finish. Retry when service responsiveness improves.';
-    }
-    if (error.errorKind === 'aborted') {
-      return 'Replay was cancelled before completion.';
-    }
-    if (error.requestId) {
-      return `${error.message} (requestId: ${error.requestId})`;
-    }
-  }
-  return error instanceof Error ? error.message : 'Replay failed due to an unexpected error.';
+const VISUALLY_HIDDEN_STYLE = {
+  border: 0,
+  clip: 'rect(0 0 0 0)',
+  height: '1px',
+  margin: '-1px',
+  overflow: 'hidden',
+  padding: 0,
+  position: 'absolute' as const,
+  width: '1px',
+};
+
+function ReplaySupportDetails({
+  details,
+}: {
+  readonly details: SupportDetails;
+}): ReactNode {
+  const bounded = [
+    details.requestId ? `requestId: ${details.requestId}` : null,
+    details.failureClass ? `failureClass: ${details.failureClass}` : null,
+    details.previewFailureClass ? `previewFailureClass: ${details.previewFailureClass}` : null,
+  ].filter(Boolean) as string[];
+  if (bounded.length === 0) return null;
+  return (
+    <details data-safety-ui="replay-support-details">
+      <summary>Support details</summary>
+      <ul>
+        {bounded.map((item) => (
+          <li key={item}>
+            <HbcTypography intent="bodySmall">{item}</HbcTypography>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
 }

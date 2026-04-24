@@ -17,6 +17,15 @@ const previewState: {
   isSuccess: false,
   error: null,
 };
+const ingestState: {
+  isPending: boolean;
+  data: any;
+  error: unknown;
+} = {
+  isPending: false,
+  data: undefined,
+  error: null,
+};
 
 vi.mock('@hbc/features-safety', () => ({
   useReportingPeriods: () => ({
@@ -39,14 +48,12 @@ vi.mock('@hbc/features-safety', () => ({
   }),
   useSafetyIngestion: () => ({
     mutate: ingestMutate,
-    isPending: false,
-    data: undefined,
-    error: null,
+    ...ingestState,
   }),
   toSafetyProjectSourceClassification: () => 'project',
   isSafetyConfigurationError: () => false,
   isSafetyAdapterFetchError: () => false,
-  isSafetyBackendCommandError: () => false,
+  isSafetyBackendCommandError: (error: any) => Boolean(error?.requestId || error?.errorKind || error?.failureClass),
   SafetyUploadError: class extends Error {},
 }));
 
@@ -175,6 +182,9 @@ describe('UploadPage preview-before-commit flow', () => {
     previewState.isPending = false;
     previewState.isSuccess = false;
     previewState.error = null;
+    ingestState.isPending = false;
+    ingestState.data = undefined;
+    ingestState.error = null;
   });
 
   it('runs preview before commit and exercises preview mutation route', async () => {
@@ -190,6 +200,8 @@ describe('UploadPage preview-before-commit flow', () => {
     await user.click(screen.getByRole('button', { name: /preview checklist/i }));
     expect(previewMutate).toHaveBeenCalledTimes(1);
     expect(ingestMutate).toHaveBeenCalledTimes(0);
+    expect(document.querySelector('[data-safety-ui="upload-live-status"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-safety-ui="upload-live-alert"]')).toBeInTheDocument();
   });
 
   it('prevents commit when preview has blockers and renders warning/blocker separation', async () => {
@@ -249,5 +261,52 @@ describe('UploadPage preview-before-commit flow', () => {
     await waitFor(() => {
       expect(previewMutate.mock.calls.length).toBeGreaterThanOrEqual(2);
     });
+  });
+
+  it('renders seam-specific support details in collapsed disclosure for preview failure', async () => {
+    previewState.error = {
+      endpoint: '/preview',
+      httpStatus: 422,
+      message: 'blocked',
+      requestId: 'req-upload-1',
+      failureClass: 'project-unresolved',
+      previewFailureClass: 'project-unresolved',
+    };
+    const user = userEvent.setup();
+    render(<UploadPage />);
+
+    await user.click(screen.getByRole('button', { name: /pick project/i }));
+    await user.click(screen.getByRole('button', { name: /select file/i }));
+    await user.type(screen.getByLabelText(/inspection number/i), '4');
+    await user.type(screen.getByLabelText(/inspection date/i), '2026-04-24');
+    await user.click(screen.getByRole('button', { name: /preview checklist/i }));
+
+    expect(screen.getAllByText(/preview blocked commit readiness/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/support details/i)).toBeInTheDocument();
+    expect(screen.getByText(/requestId: req-upload-1/i)).toBeInTheDocument();
+    expect(screen.getByText(/^failureClass: project-unresolved$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^previewFailureClass: project-unresolved$/i)).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('disables async controls during pending preview and pending commit', async () => {
+    previewState.isPending = true;
+    const user = userEvent.setup();
+    const { rerender } = render(<UploadPage />);
+
+    await user.click(screen.getByRole('button', { name: /pick project/i }));
+    await user.click(screen.getByRole('button', { name: /select file/i }));
+    await user.type(screen.getByLabelText(/inspection number/i), '4');
+    await user.type(screen.getByLabelText(/inspection date/i), '2026-04-24');
+
+    expect(screen.getByRole('button', { name: /previewing/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /cancel preview/i })).toBeInTheDocument();
+
+    previewState.isPending = false;
+    configurePreview({ commitReadiness: true });
+    ingestState.isPending = true;
+    rerender(<UploadPage />);
+    expect(screen.getByRole('button', { name: /committing/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /cancel commit/i })).toBeInTheDocument();
   });
 });

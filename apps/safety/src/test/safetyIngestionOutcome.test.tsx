@@ -263,4 +263,35 @@ describe('SafetyIngestionOutcome — per-state outcomes + honest routes', () => 
     render(<SafetyIngestionOutcome result={result} />);
     expect(screen.getByText(/attempt 3/i)).toBeInTheDocument();
   });
+
+  it('renders bounded support details in collapsed disclosure for terminal failures', () => {
+    const result: IngestionRunResult = {
+      run: run({
+        terminalStatus: 'commit-failed',
+        errorClass: 'commit-error',
+        requestId: 'req-55',
+        failureClass: 'graph-permission',
+        previewFailureClass: 'project-unresolved',
+      } as unknown as SafetyIngestionRun),
+      state: 'commit-failed',
+    };
+    render(<SafetyIngestionOutcome result={result} />);
+    const support = screen.getByText(/support details/i);
+    expect(support).toBeInTheDocument();
+    expect(screen.getByText(/requestId: req-55/i)).toBeInTheDocument();
+    expect(screen.getByText(/failureClass: graph-permission/i)).toBeInTheDocument();
+    expect(screen.getByText(/previewFailureClass: project-unresolved/i)).toBeInTheDocument();
+  });
+
+  it('uses alert live region only for urgent failure states', () => {
+    const failed: IngestionRunResult = {
+      run: run({ terminalStatus: 'commit-failed', errorClass: 'commit-error' }),
+      state: 'commit-failed',
+    };
+    const committed = committedResult();
+    const { rerender } = render(<SafetyIngestionOutcome result={failed} />);
+    expect(document.querySelector('[data-safety-ui="ingestion-outcome"]')).toHaveAttribute('role', 'alert');
+    rerender(<SafetyIngestionOutcome result={committed} />);
+    expect(document.querySelector('[data-safety-ui="ingestion-outcome"]')).toHaveAttribute('role', 'status');
+  });
 });

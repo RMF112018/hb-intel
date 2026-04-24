@@ -54,6 +54,9 @@ export interface SafetyStatusPanelProps {
   /** Optional extra content (chips, inline lists) composed below detail. */
   readonly children?: ReactNode;
   readonly 'data-safety-ui'?: string;
+  readonly role?: 'status' | 'alert';
+  readonly ariaLive?: 'polite' | 'assertive' | 'off';
+  readonly ariaAtomic?: boolean;
 }
 
 function bannerVariantFor(intent: SafetyStatusIntent): 'info' | 'success' | 'warning' | 'error' {
@@ -78,6 +81,9 @@ export function SafetyStatusPanel({
   onDismiss,
   children,
   'data-safety-ui': dataSafetyUi,
+  role,
+  ariaLive,
+  ariaAtomic,
 }: SafetyStatusPanelProps): ReactNode {
   if (intent === 'empty') {
     const emptyTitle = typeof title === 'string' ? title : 'No records available';
@@ -101,7 +107,12 @@ export function SafetyStatusPanel({
       onDismiss={onDismiss}
       data-safety-ui={dataSafetyUi ?? `status-panel-${intent}`}
     >
-      <div className="safety-section">
+      <div
+        className="safety-section"
+        role={role}
+        aria-live={ariaLive}
+        aria-atomic={ariaAtomic}
+      >
         {title && <HbcTypography intent="body">{title}</HbcTypography>}
         {description && <HbcTypography intent="body">{description}</HbcTypography>}
         {detail && (
