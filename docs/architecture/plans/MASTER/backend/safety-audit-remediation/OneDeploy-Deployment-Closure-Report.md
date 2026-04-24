@@ -738,6 +738,94 @@ The workflow file itself remains in `push.paths` by design so deployment workflo
 
 ---
 
+## Admin Readiness Proof
+
+**Verdict:** **Admin readiness proof blocked by Entra consent.**
+
+**Overall classification:** Deployment and route proof closed; admin readiness proof **blocked**; role/workbook gates pending.
+
+### Live target and API audience
+
+| Field | Value |
+| ----- | ----- |
+| Function App | `hb-intel-function-app` |
+| Resource group | `hb-intel` |
+| Live host | `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net` |
+| API audience | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
+| `/api/health` reachability | healthy |
+| Current `/api/health` artifact stamp | version `00.000.150`, commit `51be63a10df49098a974a1312ef7395575638a69`, timestamp `2026-04-24T19:41:33.834Z` |
+
+Evidence files:
+
+- `.tmp/functions-validation/live-host-admin-readiness.txt`
+- `.tmp/functions-validation/api-audience-admin-readiness.txt`
+- `.tmp/functions-validation/live-health-admin-readiness.json`
+
+### Source auth contract confirmed
+
+Read-only source inspection confirmed:
+
+- `backend/functions/src/functions/health/ready.ts` registers route `health/ready` with Functions `authLevel: 'anonymous'`, then wraps the handler with `withAuth(...)`.
+- The handler calls `requireAdmin(auth.claims, requestId)` before returning the privileged readiness payload.
+- `backend/functions/src/middleware/authorization.ts` accepts admin app roles: `Admin`, `HBIntelAdmin`.
+- `backend/functions/src/middleware/validateToken.ts` validates Entra issuer against tenant `AZURE_TENANT_ID`, validates audience against `API_AUDIENCE`, and requires `oid` plus user identity claims for delegated tokens.
+
+### Token acquisition attempt
+
+| Field | Value |
+| ----- | ----- |
+| Method | Azure CLI delegated token acquisition (`az account get-access-token --resource "$API_AUDIENCE"`) |
+| Raw token printed? | No |
+| Token acquired? | No |
+| Safe claim summary | N/A — no token acquired |
+| Blocking error | `AADSTS65001` / `consent_required` |
+| `/api/health/ready` called with admin bearer? | No |
+
+No repo-specific helper superseding Azure CLI token acquisition was found. The Azure CLI token request failed before any JWT was issued:
+
+```text
+AADSTS65001: The user or administrator has not consented to use the application with ID '04b07795-8ddb-461a-bbee-02f9e1bf7b46' named 'Microsoft Azure CLI'.
+```
+
+Evidence files:
+
+- `.tmp/functions-validation/admin-token-acquisition-error.txt`
+- `.tmp/functions-validation/admin-token-acquisition-status.txt`
+- `.tmp/functions-validation/aadsts65001-admin-readiness-debug.log`
+- `.tmp/functions-validation/aadsts65001-admin-readiness-extract.txt`
+
+### Consent request package
+
+| Field | Value |
+| ----- | ----- |
+| Tenant ID | `0e834bd7-628b-42c8-b9ec-ecebc9719be4` |
+| API audience / resource | `api://08c399eb-a394-4087-b859-659d493f8dc7` |
+| Client requiring delegated consent | Microsoft Azure CLI (`04b07795-8ddb-461a-bbee-02f9e1bf7b46`) |
+| Required app role for readiness | `Admin` or `HBIntelAdmin` |
+| Purpose | Allow authorized admin users to acquire delegated tokens for the HB Intel backend API so `GET /api/health/ready` and future admin-gated backend proof checks can be run. |
+| Current blocker | `AADSTS65001` — consent required before Azure CLI/user token acquisition can succeed. |
+
+Interactive consent/auth command supplied by Azure CLI:
+
+```bash
+az login --tenant "0e834bd7-628b-42c8-b9ec-ecebc9719be4" \
+  --scope "api://08c399eb-a394-4087-b859-659d493f8dc7/.default"
+```
+
+No random app-registration edits were attempted. This environment did not provide an established tenant-admin consent workflow, so the proof lane stops here.
+
+### Next required action
+
+After tenant/admin consent is granted, acquire a fresh token without printing it, validate safe claims (`aud`, `iss`, `tid`, `oid` presence, UPN/preferred username, roles), require `Admin` or `HBIntelAdmin`, and then call:
+
+```bash
+GET https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/health/ready
+```
+
+Record HTTP status, `operationalReadiness`, `environmentPosture`, `safetyPermissionPosture`, `safetyRolloutReadiness.ready`, `safetyRolloutReadiness.issueCodes`, `rolloutPermissionInventory`, and `requestId`.
+
+---
+
 ## Evidence file index (local)
 
 Under `.tmp/functions-validation/`:
@@ -752,3 +840,6 @@ Under `.tmp/functions-validation/`:
 - `gha-run-24901773055.log`, `gha-run-24901773055-meta.json`
 - `live-host-24901773055.txt`, `live-health-post-gha-24901773055.json`, `live-health-post-gha-24901773055.pretty.json`
 - `api-audience-setting.txt`, `live-ready-admin-post-gha-24901773055.txt`
+- `live-host-admin-readiness.txt`, `api-audience-admin-readiness.txt`, `live-health-admin-readiness.json`
+- `admin-token-acquisition-error.txt`, `admin-token-acquisition-status.txt`
+- `aadsts65001-admin-readiness-debug.log`, `aadsts65001-admin-readiness-extract.txt`
