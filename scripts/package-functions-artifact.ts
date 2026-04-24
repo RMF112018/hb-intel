@@ -393,6 +393,7 @@ function main(): void {
       'run',
       'build',
       '--filter=@hbc/models',
+      '--filter=@hbc/sharepoint-platform',
       '--filter=@hbc/provisioning',
       '--filter=@hbc/notification-intelligence',
       '--filter=@hbc/acknowledgment',
