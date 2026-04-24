@@ -35,6 +35,10 @@ import {
   adminIssueDetails,
   type FoleonConfigErrorCode,
 } from './runtime/foleonConfigIssues.js';
+import {
+  createFoleonEventId,
+  resolveFoleonSessionId,
+} from './services/FoleonTelemetryEmitter.js';
 
 let root: Root | undefined;
 
@@ -49,10 +53,15 @@ export async function mount(
 ): Promise<void> {
   storeSiteUrl(spfxContext?.pageContext?.web?.absoluteUrl);
   const siteUrl = spfxContext?.pageContext?.web?.absoluteUrl;
+  const telemetryIdentity = {
+    correlationId: createFoleonEventId(),
+    sessionId: resolveFoleonSessionId(),
+  };
   const contract = resolveFoleonRuntimeContract({
     hasSpfxContext: !!spfxContext,
     siteUrl,
     config,
+    telemetryIdentity,
   });
   publishRuntimeBindingProof(contract, config);
 

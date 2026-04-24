@@ -1,13 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import type { FoleonContentRecord } from './types/foleon-content.types.js';
-import type {
-  FoleonEventType,
-  FoleonInteractionEvent,
-  FoleonPageContext,
-} from './types/foleon-event.types.js';
+import type { FoleonTelemetryEmitInput } from './types/foleon-event.types.js';
 import type { IFoleonRuntimeContract, FoleonRoute } from './runtime/foleonRuntimeContract.js';
-import { createFoleonEventId, logFoleonEvent } from './services/FoleonTelemetryService.js';
+import {
+  createFoleonTelemetryEmitter,
+  type FoleonTelemetryEmitter,
+} from './services/FoleonTelemetryEmitter.js';
+import {
+  createNoopEventSink,
+  createSharePointEventSink,
+  type FoleonEventSink,
+} from './services/FoleonEventSink.js';
+import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from './webparts/foleon/runtimeContract.js';
 import { HighlightsPage } from './pages/HighlightsPage.js';
 import { ReaderPage } from './pages/ReaderPage.js';
 import { ContentHubPage } from './pages/ContentHubPage.js';
@@ -15,6 +20,12 @@ import { FoleonError } from './components/FoleonStates.js';
 
 interface FoleonAppProps {
   readonly contract: IFoleonRuntimeContract;
+  /**
+   * Optional emitter override — primarily used by tests to inject a
+   * captured sink. Production callers let the app build its own
+   * emitter from the contract.
+   */
+  readonly emitter?: FoleonTelemetryEmitter;
 }
 
 interface AppNavState {
@@ -29,40 +40,29 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
     [contract],
   );
   const [nav, setNav] = useState<AppNavState>(initialNav);
+  const navRef = useRef(nav);
+  useEffect(() => {
+    navRef.current = nav;
+  }, [nav]);
+
+  const emitter = useMemo<FoleonTelemetryEmitter>(() => {
+    if (props.emitter) return props.emitter;
+    const sink = selectSink(contract);
+    return createFoleonTelemetryEmitter({
+      sink,
+      correlationId: contract.telemetry.correlationId,
+      sessionId: contract.telemetry.sessionId,
+      packageVersion: FOLEON_PACKAGE_VERSION,
+      manifestId: FOLEON_WEBPART_ID,
+      getRoute: () => navRef.current.route,
+    });
+  }, [contract, props.emitter]);
 
   useEffect(() => {
     const handlePopState = (): void => setNav(readNavFromLocation(contract));
     window.addEventListener('popstate', handlePopState);
     return (): void => window.removeEventListener('popstate', handlePopState);
   }, [contract]);
-
-  const logEvent = useCallback(
-    (
-      eventType: FoleonEventType,
-      partial?: Partial<FoleonInteractionEvent>,
-    ): void => {
-      if (contract.hostMode !== 'sharepoint' || !contract.siteUrl || !contract.listIds.events) {
-        return;
-      }
-      const event: FoleonInteractionEvent = {
-        eventId: createFoleonEventId(),
-        eventType,
-        eventTimestamp: new Date().toISOString(),
-        pageContext: partial?.pageContext ?? pageContextFromRoute(nav.route),
-        ...partial,
-      };
-      void logFoleonEvent(
-        {
-          siteUrl: contract.siteUrl!,
-          eventsListId: contract.listIds.events!,
-        },
-        event,
-      ).catch(() => {
-        // Telemetry is best-effort; never surface to the user.
-      });
-    },
-    [contract, nav.route],
-  );
 
   const goto = useCallback((next: AppNavState): void => {
     setNav(next);
@@ -78,7 +78,10 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
 
   const openReader = useCallback(
     (record: FoleonContentRecord): void => {
-      logEvent('Card Click', { foleonDocId: record.foleonDocId, contentRegistryItemId: record.id });
+      emitter.emit('Card Click', {
+        foleonDocId: record.foleonDocId,
+        contentRegistryItemId: record.id,
+      });
       if (contract.readerRoutePath) {
         const target = new URL(contract.readerRoutePath, window.location.origin);
         target.searchParams.set('docId', String(record.foleonDocId));
@@ -87,12 +90,12 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
       }
       goto({ route: 'reader', docId: record.foleonDocId });
     },
-    [contract.readerRoutePath, goto, logEvent],
+    [contract.readerRoutePath, goto, emitter],
   );
 
   const openExternal = useCallback(
     (record: FoleonContentRecord): void => {
-      logEvent('External Open', {
+      emitter.emit('External Open', {
         foleonDocId: record.foleonDocId,
         contentRegistryItemId: record.id,
       });
@@ -100,19 +103,19 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
         window.open(record.publishedUrl, '_blank', 'noopener,noreferrer');
       }
     },
-    [logEvent],
+    [emitter],
   );
 
   const onCardImpression = useCallback(
     (records: ReadonlyArray<FoleonContentRecord>): void => {
       for (const record of records) {
-        logEvent('Card Impression', {
+        emitter.emit('Card Impression', {
           foleonDocId: record.foleonDocId,
           contentRegistryItemId: record.id,
         });
       }
     },
-    [logEvent],
+    [emitter],
   );
 
   if (!contract.canInitialize) {
@@ -144,7 +147,7 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
     openReader,
     openExternal,
     onCardImpression,
-    logEvent,
+    emit: (name, partial): void => emitter.emit(name, partial),
     goto,
   });
 
@@ -161,12 +164,15 @@ interface RenderPageArgs {
   readonly openReader: (record: FoleonContentRecord) => void;
   readonly openExternal: (record: FoleonContentRecord) => void;
   readonly onCardImpression: (records: ReadonlyArray<FoleonContentRecord>) => void;
-  readonly logEvent: (eventType: FoleonEventType, partial?: Partial<FoleonInteractionEvent>) => void;
+  readonly emit: (
+    eventName: Parameters<FoleonTelemetryEmitter['emit']>[0],
+    partial?: FoleonTelemetryEmitInput,
+  ) => void;
   readonly goto: (next: AppNavState) => void;
 }
 
 function renderPage(args: RenderPageArgs): React.ReactNode {
-  const { contract, nav, openReader, openExternal, onCardImpression, logEvent, goto } = args;
+  const { contract, nav, openReader, openExternal, onCardImpression, emit, goto } = args;
   if (nav.route === 'reader') {
     if (nav.docId === null) {
       return (
@@ -182,25 +188,36 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
         contract={contract}
         docId={nav.docId}
         onBack={(): void => goto({ route: 'highlights', docId: null })}
-        onReaderOpen={(record): void =>
-          logEvent('Reader Open', {
+        onReaderOpen={(record, gateResult): void =>
+          emit('Reader Open', {
             foleonDocId: record.foleonDocId,
             contentRegistryItemId: record.id,
             pageContext: 'Reader',
+            gateResult,
           })
         }
-        onReaderClose={(record): void =>
-          logEvent('Reader Close', {
+        onReaderClose={(record, gateResult): void =>
+          emit('Reader Close', {
             foleonDocId: record.foleonDocId,
             contentRegistryItemId: record.id,
             pageContext: 'Reader',
+            gateResult,
           })
         }
-        onEmbedError={(record): void =>
-          logEvent('Embed Error', {
+        onEmbedError={(record, gateResult): void =>
+          emit('Embed Error', {
             foleonDocId: record.foleonDocId,
             contentRegistryItemId: record.id,
             pageContext: 'Reader',
+            gateResult,
+            errorCode: 'reader.embed_error',
+          })
+        }
+        onGateBlocked={(gateResult): void =>
+          emit('Embed Error', {
+            pageContext: 'Reader',
+            gateResult,
+            errorCode: 'reader.gate_blocked',
           })
         }
         onExternalOpen={openExternal}
@@ -214,7 +231,10 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
         onOpenReader={openReader}
         onOpenExternal={openExternal}
         onSearch={(query: string): void => {
-          if (query.trim()) logEvent('Search', { searchQuery: query, pageContext: 'Content Hub' });
+          const trimmed = query.trim();
+          if (trimmed.length > 0) {
+            emit('Search', { searchQueryLength: trimmed.length, pageContext: 'Content Hub' });
+          }
         }}
         onBack={(): void => goto({ route: 'highlights', docId: null })}
       />
@@ -252,8 +272,16 @@ function readNavFromLocation(contract: IFoleonRuntimeContract): AppNavState {
   return { route, docId };
 }
 
-function pageContextFromRoute(route: FoleonRoute): FoleonPageContext {
-  if (route === 'reader') return 'Reader';
-  if (route === 'hub') return 'Content Hub';
-  return 'Homepage';
+function selectSink(contract: IFoleonRuntimeContract): FoleonEventSink {
+  if (
+    contract.hostMode !== 'sharepoint' ||
+    !contract.siteUrl ||
+    !contract.listIds.events
+  ) {
+    return createNoopEventSink();
+  }
+  return createSharePointEventSink({
+    siteUrl: contract.siteUrl,
+    eventsListId: contract.listIds.events,
+  });
 }

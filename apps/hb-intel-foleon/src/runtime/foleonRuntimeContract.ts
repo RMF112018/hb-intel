@@ -40,6 +40,14 @@ export interface IFoleonRuntimeContract {
     readonly packageVersionMatchesExpected: boolean;
   };
   readonly readerRoutePath: string | null;
+  /**
+   * Identity carried on every outbound telemetry envelope.
+   * `correlationId` is per-mount; `sessionId` is per-browser-session.
+   */
+  readonly telemetry: {
+    readonly correlationId: string;
+    readonly sessionId: string;
+  };
   readonly canInitialize: boolean;
   readonly issues: ReadonlyArray<FoleonConfigIssue>;
   /**
@@ -50,10 +58,16 @@ export interface IFoleonRuntimeContract {
   readonly blockingReasons: ReadonlyArray<string>;
 }
 
+export interface FoleonTelemetryIdentity {
+  readonly correlationId: string;
+  readonly sessionId: string;
+}
+
 export function resolveFoleonRuntimeContract(params: {
   readonly hasSpfxContext: boolean;
   readonly siteUrl?: string;
   readonly config?: IFoleonMountConfig;
+  readonly telemetryIdentity?: FoleonTelemetryIdentity;
 }): IFoleonRuntimeContract {
   const hostMode: FoleonHostMode = params.hasSpfxContext ? 'sharepoint' : 'mock';
   const route = normalizeRoute(params.config?.foleonRoute);
@@ -105,6 +119,10 @@ export function resolveFoleonRuntimeContract(params: {
       packageVersionMatchesExpected,
     },
     readerRoutePath,
+    telemetry: {
+      correlationId: params.telemetryIdentity?.correlationId ?? '',
+      sessionId: params.telemetryIdentity?.sessionId ?? '',
+    },
     canInitialize: hostMode === 'mock' || issues.length === 0,
     issues,
     blockingReasons,

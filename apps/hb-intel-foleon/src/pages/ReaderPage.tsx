@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { HbcButton } from '@hbc/ui-kit/homepage';
 import type { FoleonContentRecord } from '../types/foleon-content.types.js';
-import type { FoleonGateResult } from '../types/foleon-runtime.types.js';
+import type { FoleonGateReason, FoleonGateResult } from '../types/foleon-runtime.types.js';
 import type { IFoleonRuntimeContract } from '../runtime/foleonRuntimeContract.js';
 import { fetchFoleonContent } from '../services/FoleonContentService.js';
 import { evaluateFoleonReaderGate } from '../services/FoleonReaderGate.js';
@@ -12,16 +12,27 @@ interface ReaderPageProps {
   readonly contract: IFoleonRuntimeContract;
   readonly docId: number;
   readonly onBack: () => void;
-  readonly onReaderOpen: (record: FoleonContentRecord) => void;
-  readonly onReaderClose: (record: FoleonContentRecord) => void;
-  readonly onEmbedError: (record: FoleonContentRecord) => void;
+  readonly onReaderOpen: (record: FoleonContentRecord, gateResult: FoleonGateReason) => void;
+  readonly onReaderClose: (record: FoleonContentRecord, gateResult: FoleonGateReason) => void;
+  readonly onEmbedError: (record: FoleonContentRecord, gateResult: FoleonGateReason) => void;
+  /** Fires once per gate-blocked resolution for telemetry. */
+  readonly onGateBlocked: (gateResult: FoleonGateReason) => void;
   readonly onExternalOpen: (record: FoleonContentRecord) => void;
 }
 
 export function ReaderPage(props: ReaderPageProps): React.ReactNode {
-  const { contract, docId, onBack, onReaderOpen, onReaderClose, onEmbedError, onExternalOpen } =
-    props;
+  const {
+    contract,
+    docId,
+    onBack,
+    onReaderOpen,
+    onReaderClose,
+    onEmbedError,
+    onGateBlocked,
+    onExternalOpen,
+  } = props;
   const [state, setState] = useState<ReaderState>({ kind: 'loading' });
+  const gateBlockedReportedRef = useRef<FoleonGateReason | null>(null);
 
   useEffect(() => {
     if (!contract.siteUrl || !contract.listIds.contentRegistry) {
@@ -52,9 +63,18 @@ export function ReaderPage(props: ReaderPageProps): React.ReactNode {
   useEffect(() => {
     if (state.kind !== 'resolved' || !state.gate.allowed || !state.gate.record) return;
     const record = state.gate.record;
-    onReaderOpen(record);
-    return (): void => onReaderClose(record);
+    const reason = state.gate.reason;
+    onReaderOpen(record, reason);
+    return (): void => onReaderClose(record, reason);
   }, [state, onReaderOpen, onReaderClose]);
+
+  useEffect(() => {
+    if (state.kind !== 'resolved' || state.gate.allowed) return;
+    const reason = state.gate.reason;
+    if (gateBlockedReportedRef.current === reason) return;
+    gateBlockedReportedRef.current = reason;
+    onGateBlocked(reason);
+  }, [state, onGateBlocked]);
 
   const body = useMemo(() => {
     if (state.kind === 'loading') return <FoleonLoadingState label="Loading publication…" />;
@@ -109,7 +129,7 @@ export function ReaderPage(props: ReaderPageProps): React.ReactNode {
           src={gate.embedUrl}
           title={record.title}
           policy={contract.originPolicy}
-          onError={(): void => onEmbedError(record)}
+          onError={(): void => onEmbedError(record, gate.reason)}
         />
       </>
     );
