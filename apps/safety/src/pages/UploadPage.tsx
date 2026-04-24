@@ -27,16 +27,13 @@ import {
   SafetyMasthead,
   SafetyProjectPicker,
   SafetyStatusPanel,
+  SupportDetailsPanel,
   toSafetyProjectSourceClassification,
   type SafetyIntakeReadinessRow,
   type SafetyIntakeStepStatus,
   type SafetyProjectPickerValue,
 } from '../components/index.js';
-import {
-  supportDetailLines,
-  uploadFailureMessage,
-  type SupportDetails,
-} from './supportTruth.js';
+import { uploadFailureMessage } from './supportTruth.js';
 import { formatAuthoritySource, formatMarkerState } from './previewDiagnostics.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
@@ -134,6 +131,8 @@ export function UploadPage(): ReactNode {
   const [previewConfirmed, setPreviewConfirmed] = useState(false);
   const [lastPreviewSignature, setLastPreviewSignature] = useState<string | null>(null);
   const [hasPreviewRun, setHasPreviewRun] = useState(false);
+  const [previewErrorObservedAt, setPreviewErrorObservedAt] = useState<Date | null>(null);
+  const [ingestErrorObservedAt, setIngestErrorObservedAt] = useState<Date | null>(null);
   const submitAbortRef = useRef<AbortController | null>(null);
   const previewAbortRef = useRef<AbortController | null>(null);
   const previousSignatureRef = useRef<string | null>(null);
@@ -283,6 +282,22 @@ export function UploadPage(): ReactNode {
     }
   }, [preview.isSuccess, preview.data, intakeSignature]);
 
+  useEffect(() => {
+    if (preview.error && !previewErrorObservedAt) {
+      setPreviewErrorObservedAt(new Date());
+    } else if (!preview.error && previewErrorObservedAt) {
+      setPreviewErrorObservedAt(null);
+    }
+  }, [preview.error, previewErrorObservedAt]);
+
+  useEffect(() => {
+    if (ingestion.error && !ingestErrorObservedAt) {
+      setIngestErrorObservedAt(new Date());
+    } else if (!ingestion.error && ingestErrorObservedAt) {
+      setIngestErrorObservedAt(null);
+    }
+  }, [ingestion.error, ingestErrorObservedAt]);
+
   // ── Readiness model ──────────────────────────────────────────────────
   const projectStatus: SafetyIntakeStepStatus = selectedProject ? 'ready' : 'pending';
   const inspectionDetailsStatus: SafetyIntakeStepStatus =
@@ -405,8 +420,14 @@ export function UploadPage(): ReactNode {
   const commitDisabled = !commitReady || ingestion.isPending;
 
   const mismatch = ingestion.data?.metadataMismatch;
-  const previewFailure = uploadFailureMessage(preview.error);
-  const commitFailure = uploadFailureMessage(ingestion.error);
+  const previewFailure = uploadFailureMessage(
+    preview.error,
+    previewErrorObservedAt ?? undefined,
+  );
+  const commitFailure = uploadFailureMessage(
+    ingestion.error,
+    ingestErrorObservedAt ?? undefined,
+  );
   const politeAnnouncement = useMemo(() => {
     if (preview.isPending) return 'Preview in progress for current intake context.';
     if (ingestion.isPending) return 'Commit in progress for current previewed context.';
@@ -778,8 +799,10 @@ export function UploadPage(): ReactNode {
                 />
               )}
               {ingestion.error && (
-                <SupportDetailsDisclosure
+                <SupportDetailsPanel
                   details={commitFailure.support}
+                  suggestedAction={commitFailure.suggestedAction}
+                  data-safety-ui="upload-ingestion-support-details"
                 />
               )}
               {preview.data && (
@@ -797,8 +820,10 @@ export function UploadPage(): ReactNode {
                 />
               )}
               {preview.error && (
-                <SupportDetailsDisclosure
+                <SupportDetailsPanel
                   details={previewFailure.support}
+                  suggestedAction={previewFailure.suggestedAction}
+                  data-safety-ui="upload-preview-support-details"
                 />
               )}
             </section>
@@ -806,27 +831,6 @@ export function UploadPage(): ReactNode {
         </div>
       </div>
     </WorkspacePageShell>
-  );
-}
-
-function SupportDetailsDisclosure({
-  details,
-}: {
-  readonly details: SupportDetails;
-}): ReactNode {
-  const bounded = supportDetailLines(details);
-  if (bounded.length === 0) return null;
-  return (
-    <details data-safety-ui="support-details">
-      <summary>Support details</summary>
-      <ul>
-        {bounded.map((item) => (
-          <li key={item}>
-            <HbcTypography intent="bodySmall">{item}</HbcTypography>
-          </li>
-        ))}
-      </ul>
-    </details>
   );
 }
 

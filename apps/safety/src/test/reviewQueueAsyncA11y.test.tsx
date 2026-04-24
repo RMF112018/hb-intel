@@ -73,6 +73,23 @@ vi.mock('../components/index.js', () => ({
       {action ? <button onClick={action.onClick}>{action.label}</button> : null}
     </div>
   ),
+  SupportDetailsPanel: ({ details, suggestedAction }: any) => (
+    <details>
+      <summary>Support details</summary>
+      {suggestedAction ? <div>{suggestedAction}</div> : null}
+      <ul>
+        {details?.requestId && <li>requestId: {details.requestId}</li>}
+        {details?.frontendRequestId && <li>frontendRequestId: {details.frontendRequestId}</li>}
+        {details?.backendRequestId && <li>backendRequestId: {details.backendRequestId}</li>}
+        {details?.failureClass && <li>failureClass: {details.failureClass}</li>}
+        {details?.previewFailureClass && <li>previewFailureClass: {details.previewFailureClass}</li>}
+        {details?.route && <li>route: {details.route}</li>}
+        {details?.status !== undefined && <li>status: {details.status}</li>}
+        {details?.attempts !== undefined && <li>attempts: {details.attempts}</li>}
+        {details?.timestamp && <li>timestamp: {details.timestamp}</li>}
+      </ul>
+    </details>
+  ),
 }));
 
 describe('ReviewQueue async accessibility semantics', () => {

@@ -21,6 +21,8 @@ export type {
   SafetyStatusPanelAction,
   SafetyStatusPanelProps,
 } from './SafetyStatusPanel.js';
+export { SupportDetailsPanel } from './SupportDetailsPanel.js';
+export type { SupportDetailsPanelProps } from './SupportDetailsPanel.js';
 export { SafetyIntakeStep } from './SafetyIntakeStep.js';
 export type {
   SafetyIntakeStepProps,

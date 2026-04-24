@@ -16,12 +16,9 @@ import {
   SafetyStatusPanel,
   SafetyTriageGroup,
   SafetyTriageSummary,
+  SupportDetailsPanel,
 } from '../components/index.js';
-import {
-  replayFailureMessage,
-  supportDetailLines,
-  type SupportDetails,
-} from './supportTruth.js';
+import { replayFailureMessage } from './supportTruth.js';
 import {
   bucketEntries,
   classifyQueueState,
@@ -73,6 +70,7 @@ export function ReviewQueuePage(): ReactNode {
   const replay = useReplayIngestion();
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [lastReplaySummary, setLastReplaySummary] = useState<string | null>(null);
+  const [replayErrorObservedAt, setReplayErrorObservedAt] = useState<Date | null>(null);
   const replayAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -81,6 +79,14 @@ export function ReviewQueuePage(): ReactNode {
       replayAbortRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (replay.error && !replayErrorObservedAt) {
+      setReplayErrorObservedAt(new Date());
+    } else if (!replay.error && replayErrorObservedAt) {
+      setReplayErrorObservedAt(null);
+    }
+  }, [replay.error, replayErrorObservedAt]);
 
   const handleRetry = (runId: string, supersedePrior: boolean): void => {
     replayAbortRef.current?.abort();
@@ -174,6 +180,7 @@ export function ReviewQueuePage(): ReactNode {
             isDuplicate={row.original.run.errorClass === 'duplicate-suspected'}
             isPending={pendingRunId === row.original.run.id && replay.isPending}
             onRetry={handleRetry}
+            entryErrorClass={row.original.run.errorClass}
           />
         ),
       },
@@ -182,7 +189,10 @@ export function ReviewQueuePage(): ReactNode {
   );
 
   const isClean = queueState === 'clean';
-  const replayFailure = replayFailureMessage(replay.error);
+  const replayFailure = replayFailureMessage(
+    replay.error,
+    replayErrorObservedAt ?? undefined,
+  );
   const politeAnnouncement = replay.isPending
     ? pendingRunId
       ? `Replay in progress for run ${pendingRunId}.`
@@ -260,7 +270,11 @@ export function ReviewQueuePage(): ReactNode {
                 onClick: () => replay.reset(),
               }}
             />
-            <ReplaySupportDetails details={replayFailure.support} />
+            <SupportDetailsPanel
+              details={replayFailure.support}
+              suggestedAction={replayFailure.suggestedAction}
+              data-safety-ui="replay-support-details"
+            />
           </>
         )}
         {replay.isPending && (
@@ -342,23 +356,3 @@ const VISUALLY_HIDDEN_STYLE = {
   width: '1px',
 };
 
-function ReplaySupportDetails({
-  details,
-}: {
-  readonly details: SupportDetails;
-}): ReactNode {
-  const bounded = supportDetailLines(details);
-  if (bounded.length === 0) return null;
-  return (
-    <details data-safety-ui="replay-support-details">
-      <summary>Support details</summary>
-      <ul>
-        {bounded.map((item) => (
-          <li key={item}>
-            <HbcTypography intent="bodySmall">{item}</HbcTypography>
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}

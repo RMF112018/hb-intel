@@ -212,6 +212,7 @@ export function SafetyReviewEntryCard({
             isDuplicate={isDuplicate}
             isPending={isPending}
             onRetry={onRetry}
+            entryErrorClass={run.errorClass}
           />
         </footer>
       </article>

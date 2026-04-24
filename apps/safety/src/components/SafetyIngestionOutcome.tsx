@@ -7,6 +7,12 @@ import {
 } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 import type { IngestionRunResult } from '@hbc/features-safety';
+import {
+  suggestedActionForClass,
+  type SafetyFailureClass,
+  type SupportDetails,
+} from '../pages/supportTruth.js';
+import { SupportDetailsPanel } from './SupportDetailsPanel.js';
 
 /**
  * SafetyIngestionOutcome — Phase-04 audit G-03 Upload redesign.
@@ -48,10 +54,25 @@ function buildCopy(result: IngestionRunResult): OutcomeCopy {
   switch (result.state) {
     case 'committed': {
       const committed = result.committed;
-      const score = committed
-        ? Math.round(committed.inspectionEvent.inspectionScore * 100)
-        : null;
-      const findingCount = committed?.findings.length ?? 0;
+      if (!committed) {
+        // Truthfulness guard: the backend said "committed" but the
+        // committed payload is missing, so we cannot assert success
+        // without fabricating detail. Render the ambiguous-terminal
+        // fallback rather than a false committed outcome.
+        return {
+          title: 'Ingestion reported committed without a committed payload',
+          statusLabel: 'Ambiguous',
+          statusVariant: 'warning',
+          tone: 'warning',
+          happened:
+            'The backend reported a committed terminal state but the committed payload was not returned with the response.',
+          meaning:
+            'We cannot confirm the inspection was written as the authoritative record. Operations must verify in the Review queue before trusting this run.',
+          nextStep: 'Open the Review queue to verify this run before acting on it.',
+        };
+      }
+      const score = Math.round(committed.inspectionEvent.inspectionScore * 100);
+      const findingCount = committed.findings.length;
       return {
         title: 'Inspection committed',
         statusLabel: 'Committed',
@@ -64,10 +85,7 @@ function buildCopy(result: IngestionRunResult): OutcomeCopy {
             reporting period.
           </>
         ),
-        meaning:
-          score !== null
-            ? `The inspection scored ${score}% with ${findingCount} finding${findingCount === 1 ? '' : 's'} extracted and retained against the source workbook.`
-            : 'The inspection is now visible to downstream Safety surfaces.',
+        meaning: `The inspection scored ${score}% with ${findingCount} finding${findingCount === 1 ? '' : 's'} extracted and retained against the source workbook.`,
         nextStep:
           'Open the committed inspection to review findings, or jump to the reporting-period dashboard for the project rollup.',
       };
@@ -193,14 +211,15 @@ export function SafetyIngestionOutcome({
     result.state === 'committed'
       ? result.committed?.inspectionEvent.id
       : undefined;
-  const supportRequestId = (run as unknown as { requestId?: string }).requestId;
-  const supportFailureClass =
-    (run as unknown as { failureClass?: string }).failureClass ??
-    run.errorClass ??
-    undefined;
-  const supportPreviewFailureClass = (run as unknown as { previewFailureClass?: string }).previewFailureClass;
+  const supportDetails = supportDetailsForRun(run);
   const hasSupportDetails =
-    !!supportRequestId || !!supportFailureClass || !!supportPreviewFailureClass;
+    !!supportDetails.requestId ||
+    !!supportDetails.failureClass ||
+    !!supportDetails.previewFailureClass;
+  const outcomeFailureClass = failureClassForOutcomeState(result.state);
+  const outcomeSuggestedAction = outcomeFailureClass
+    ? suggestedActionForClass(outcomeFailureClass)
+    : undefined;
   const isUrgentFailure =
     result.state === 'commit-failed' ||
     result.state === 'parse-error' ||
@@ -278,7 +297,7 @@ export function SafetyIngestionOutcome({
           className="safety-ingestion-outcome__actions"
           aria-label="Next steps"
         >
-          {result.state === 'committed' && inspectionId && (
+          {result.state === 'committed' && result.committed && inspectionId && (
             <Link
               className="safety-link safety-ingestion-outcome__cta safety-ingestion-outcome__cta--primary"
               to="/inspections/$inspectionEventId"
@@ -290,6 +309,7 @@ export function SafetyIngestionOutcome({
             </Link>
           )}
           {result.state === 'committed' &&
+            result.committed &&
             canDrillInPeriod &&
             committedPw && (
               <Link
@@ -305,7 +325,8 @@ export function SafetyIngestionOutcome({
                 Open reporting-period rollup
               </Link>
             )}
-          {result.state !== 'committed' && (
+          {(result.state !== 'committed' ||
+            !result.committed) && (
             <Link
               className="safety-link safety-ingestion-outcome__cta safety-ingestion-outcome__cta--primary"
               to="/review"
@@ -317,34 +338,54 @@ export function SafetyIngestionOutcome({
           )}
         </nav>
         {hasSupportDetails && (
-          <details data-safety-ui="outcome-support-details">
-            <summary>Support details</summary>
-            <ul>
-              {supportRequestId && (
-                <li>
-                  <HbcTypography intent="bodySmall">
-                    requestId: {supportRequestId}
-                  </HbcTypography>
-                </li>
-              )}
-              {supportFailureClass && (
-                <li>
-                  <HbcTypography intent="bodySmall">
-                    failureClass: {supportFailureClass}
-                  </HbcTypography>
-                </li>
-              )}
-              {supportPreviewFailureClass && (
-                <li>
-                  <HbcTypography intent="bodySmall">
-                    previewFailureClass: {supportPreviewFailureClass}
-                  </HbcTypography>
-                </li>
-              )}
-            </ul>
-          </details>
+          <SupportDetailsPanel
+            details={supportDetails}
+            suggestedAction={outcomeSuggestedAction}
+            data-safety-ui="outcome-support-details"
+          />
         )}
       </section>
     </HbcCard>
   );
+}
+
+function supportDetailsForRun(run: IngestionRunResult['run']): SupportDetails {
+  const loose = run as unknown as {
+    requestId?: string;
+    frontendRequestId?: string;
+    backendRequestId?: string;
+    failureClass?: string;
+    previewFailureClass?: string;
+  };
+  const derivedFailureClass =
+    loose.failureClass ?? run.errorClass ?? undefined;
+  return {
+    requestId: loose.requestId,
+    frontendRequestId: loose.frontendRequestId,
+    backendRequestId: loose.backendRequestId,
+    failureClass: derivedFailureClass,
+    previewFailureClass: loose.previewFailureClass,
+    timestamp: run.runCompletedAt ?? undefined,
+  };
+}
+
+function failureClassForOutcomeState(
+  state: IngestionRunResult['state'],
+): SafetyFailureClass | undefined {
+  switch (state) {
+    case 'commit-failed':
+      return 'commit-failed';
+    case 'parse-error':
+      return 'parser-authority-violation';
+    case 'invalid-template':
+      return 'template-incompatibility';
+    case 'reporting-period-mismatch':
+      return 'reporting-period-mismatch';
+    case 'unresolved-project':
+      return 'project-unresolved';
+    case 'review-required':
+      return 'duplicate-supersession-risk';
+    default:
+      return undefined;
+  }
 }

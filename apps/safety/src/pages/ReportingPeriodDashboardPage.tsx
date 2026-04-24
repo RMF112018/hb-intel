@@ -18,6 +18,7 @@ import {
   SafetySectionHeader,
   SafetyStatStrip,
   SafetyStatusPanel,
+  SupportDetailsPanel,
 } from '../components/index.js';
 import {
   derivePeriodsDashboardState,
@@ -27,11 +28,7 @@ import {
   classifyPeriodHealth,
   rankProjectWeeks,
 } from './reportingPeriodDashboardDerivation.js';
-import {
-  readFailureMessage,
-  supportDetailLines,
-  type SupportDetails,
-} from './supportTruth.js';
+import { readFailureMessage } from './supportTruth.js';
 
 const OFFICE_ONLY: Array<'office'> = ['office'];
 
@@ -322,7 +319,11 @@ export function ReportingPeriodDashboardPage(): ReactNode {
                   onClick: retryProjectWeeks,
                 }}
               />
-              <DashboardSupportDetails details={projectWeeksFailure.support} />
+              <SupportDetailsPanel
+                details={projectWeeksFailure.support}
+                suggestedAction={projectWeeksFailure.suggestedAction}
+                data-safety-ui="dashboard-support-details"
+              />
             </>
           )}
 
@@ -381,23 +382,3 @@ export function ReportingPeriodDashboardPage(): ReactNode {
   );
 }
 
-function DashboardSupportDetails({
-  details,
-}: {
-  readonly details: SupportDetails;
-}): ReactNode {
-  const bounded = supportDetailLines(details);
-  if (bounded.length === 0) return null;
-  return (
-    <details data-safety-ui="dashboard-support-details">
-      <summary>Support details</summary>
-      <ul>
-        {bounded.map((item) => (
-          <li key={item}>
-            <HbcTypography intent="bodySmall">{item}</HbcTypography>
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
