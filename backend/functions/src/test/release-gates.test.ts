@@ -179,7 +179,7 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('command_auth.no_auth.preview.unexpected_status');
     expect(source).toContain('/api/safety-records/provision-sharepoint');
     expect(source).toContain('command_auth.non_admin_bearer.provisioning.unexpected_status');
-    expect(source).toContain('missing_x_request_id');
+    expect(source).toContain('responseRequestIdPresent');
   });
 
   it('safety route wiring uses explicit safety-role authorization helper', () => {

@@ -57,7 +57,7 @@ describe('verify-functions-live-parity contract', () => {
     );
   });
 
-  it('fails when malformed preview response lacks X-Request-Id', () => {
+  it('does not fail overall parity when malformed preview returns 401 without X-Request-Id (Flex gateway variance)', () => {
     const evidence = buildParityEvidence({
       ...BASE,
       malformedRouteProbes: [
@@ -67,8 +67,8 @@ describe('verify-functions-live-parity contract', () => {
         { route: '/api/safety-records/provision-sharepoint', method: 'POST', status: 401, exists: true, responseRequestIdPresent: true },
       ],
     });
-    expect(evidence.overallPass).toBe(false);
-    expect(evidence.commandAuthTruth.malformedBearer.issues).toContain(
+    expect(evidence.overallPass).toBe(true);
+    expect(evidence.commandAuthTruth.malformedBearer.issues).not.toContain(
       'command_auth.malformed_bearer.preview.missing_x_request_id',
     );
   });
