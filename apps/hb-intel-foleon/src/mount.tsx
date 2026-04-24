@@ -4,22 +4,43 @@
  * Vite compiles this into an IIFE (`hb-intel-foleon-app.js`) exposed
  * at `window.__hbIntel_foleon`. The SPFx shell webpart loads the
  * bundle and calls `mount(domElement, spfxContext, config)`.
+ *
+ * Runtime binding proof (1.0.2.0) is published at
+ * `window.__hbIntel_foleonRuntimeBindingProof` in a redacted shape:
+ * list GUIDs, origin allowlist entries, reader route path, docId,
+ * and caller-supplied expected manifest/version values are replaced
+ * with presence booleans plus deterministic fingerprints so operators
+ * can correlate deploys without the proof carrying sensitive config
+ * values. Admin-scope issue detail is additionally exposed via
+ * `diagnostics` only when the page URL carries
+ * `?foleon-diagnostics=1`; a standard audit-scope proof is always
+ * published.
  */
 import { createElement, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { storeSiteUrl } from '@hbc/sharepoint-platform';
 import { FoleonApp } from './FoleonApp.js';
-import { FOLEON_WEBPART_ID, FOLEON_PACKAGE_VERSION } from './webparts/foleon/runtimeContract.js';
+import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from './webparts/foleon/runtimeContract.js';
 import {
   resolveFoleonRuntimeContract,
   type IFoleonRuntimeContract,
 } from './runtime/foleonRuntimeContract.js';
 import type { IFoleonMountConfig } from './types/foleon-runtime.types.js';
+import {
+  fingerprintString,
+  fingerprintStringSet,
+} from './runtime/foleonFingerprint.js';
+import {
+  adminIssueDetails,
+  type FoleonConfigErrorCode,
+} from './runtime/foleonConfigIssues.js';
 
 let root: Root | undefined;
 
 export type { IFoleonMountConfig };
+
+export const FOLEON_DIAGNOSTICS_QUERY_FLAG = 'foleon-diagnostics';
 
 export async function mount(
   el: HTMLElement,
@@ -54,47 +75,128 @@ if (typeof window !== 'undefined' && globalThis !== window) {
     FOLEON_WEBPART_ID;
 }
 
+export interface IFoleonRuntimeBindingProof {
+  readonly generatedAt: string;
+  readonly bundleMarker: '__hbIntel_foleon';
+  readonly manifestId: string;
+  readonly packageVersion: string;
+  readonly hostMode: 'sharepoint' | 'mock';
+  readonly route: 'highlights' | 'reader' | 'hub';
+  readonly canInitialize: boolean;
+  readonly presence: {
+    readonly spfxContext: boolean;
+    readonly siteUrl: boolean;
+    readonly contentRegistryListId: boolean;
+    readonly placementsListId: boolean;
+    readonly eventsListId: boolean;
+    readonly readerRoutePath: boolean;
+    readonly docId: boolean;
+    readonly callerSuppliedExpectedManifestId: boolean;
+    readonly callerSuppliedExpectedPackageVersion: boolean;
+  };
+  readonly fingerprints: {
+    readonly contentRegistryListSha: string;
+    readonly placementsListSha: string;
+    readonly eventsListSha: string;
+    readonly readerRoutePathSha: string;
+    readonly originAllowlistSha: string;
+    readonly originAllowlistCount: number;
+  };
+  readonly originPolicy: {
+    readonly allowPreview: boolean;
+    readonly hasAllowlist: boolean;
+  };
+  readonly governance: {
+    readonly manifestIdMatchesExpected: boolean;
+    readonly packageVersionMatchesExpected: boolean;
+  };
+  readonly issueCodes: ReadonlyArray<FoleonConfigErrorCode>;
+  /**
+   * Present only when the page URL carried `?foleon-diagnostics=1`
+   * at mount time. Standard tenant pages never emit this field.
+   */
+  readonly diagnostics?: {
+    readonly adminIssues: ReadonlyArray<{
+      readonly code: FoleonConfigErrorCode;
+      readonly adminLabel: string;
+    }>;
+  };
+}
+
 function publishRuntimeBindingProof(
   contract: IFoleonRuntimeContract,
   config: IFoleonMountConfig | undefined,
 ): void {
-  const proof = {
+  const diagnosticsEnabled = shouldEnableDiagnostics();
+  const proof: IFoleonRuntimeBindingProof = {
     generatedAt: new Date().toISOString(),
-    governedAuthority: {
-      expectedManifestId: FOLEON_WEBPART_ID,
-      expectedPackageVersion: FOLEON_PACKAGE_VERSION,
+    bundleMarker: '__hbIntel_foleon',
+    manifestId: FOLEON_WEBPART_ID,
+    packageVersion: FOLEON_PACKAGE_VERSION,
+    hostMode: contract.hostMode,
+    route: contract.route,
+    canInitialize: contract.canInitialize,
+    presence: {
+      spfxContext: contract.hostMode === 'sharepoint',
+      siteUrl: !!contract.siteUrl,
+      contentRegistryListId: !!contract.listIds.contentRegistry,
+      placementsListId: !!contract.listIds.placements,
+      eventsListId: !!contract.listIds.events,
+      readerRoutePath: !!contract.readerRoutePath,
+      docId: contract.docId !== null,
+      callerSuppliedExpectedManifestId: !!config?.expectedManifestId,
+      callerSuppliedExpectedPackageVersion: !!config?.expectedPackageVersion,
     },
-    configured: {
-      contentRegistryListId: config?.contentRegistryListId ?? null,
-      placementsListId: config?.placementsListId ?? null,
-      eventsListId: config?.eventsListId ?? null,
-      acceptedFoleonOrigins: config?.acceptedFoleonOrigins ?? null,
-      allowPreview: config?.allowPreview ?? null,
-      foleonReaderRoutePath: config?.foleonReaderRoutePath ?? null,
-      foleonRoute: config?.foleonRoute ?? null,
-      foleonDocId: config?.foleonDocId ?? null,
-      expectedManifestId: config?.expectedManifestId ?? null,
-      expectedPackageVersion: config?.expectedPackageVersion ?? null,
+    fingerprints: {
+      contentRegistryListSha: contract.listIds.contentRegistry
+        ? fingerprintString(contract.listIds.contentRegistry)
+        : '00000000',
+      placementsListSha: contract.listIds.placements
+        ? fingerprintString(contract.listIds.placements)
+        : '00000000',
+      eventsListSha: contract.listIds.events
+        ? fingerprintString(contract.listIds.events)
+        : '00000000',
+      readerRoutePathSha: contract.readerRoutePath
+        ? fingerprintString(contract.readerRoutePath)
+        : '00000000',
+      originAllowlistSha: fingerprintStringSet(contract.originPolicy.allowedOrigins),
+      originAllowlistCount: contract.originPolicy.allowedOrigins.length,
     },
-    contract: {
-      hostMode: contract.hostMode,
-      route: contract.route,
-      docId: contract.docId,
-      siteUrl: contract.siteUrl,
-      listIds: contract.listIds,
-      originAllowlist: contract.originPolicy.allowedOrigins,
+    originPolicy: {
       allowPreview: contract.originPolicy.allowPreview,
-      canInitialize: contract.canInitialize,
-      blockingReasons: contract.blockingReasons,
+      hasAllowlist: contract.originPolicy.allowedOrigins.length > 0,
+    },
+    governance: {
       manifestIdMatchesExpected: contract.governed.manifestIdMatchesExpected,
       packageVersionMatchesExpected: contract.governed.packageVersionMatchesExpected,
     },
+    issueCodes: contract.issues.map((issue) => issue.code),
+    ...(diagnosticsEnabled
+      ? {
+          diagnostics: {
+            adminIssues: adminIssueDetails(contract.issues),
+          },
+        }
+      : {}),
   };
-  (globalThis as { __hbIntel_foleonRuntimeBindingProof?: unknown }).__hbIntel_foleonRuntimeBindingProof =
-    proof;
+  (globalThis as { __hbIntel_foleonRuntimeBindingProof?: IFoleonRuntimeBindingProof })
+    .__hbIntel_foleonRuntimeBindingProof = proof;
   if (typeof window !== 'undefined' && globalThis !== window) {
     (
-      window as unknown as { __hbIntel_foleonRuntimeBindingProof?: unknown }
+      window as unknown as {
+        __hbIntel_foleonRuntimeBindingProof?: IFoleonRuntimeBindingProof;
+      }
     ).__hbIntel_foleonRuntimeBindingProof = proof;
+  }
+}
+
+function shouldEnableDiagnostics(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(FOLEON_DIAGNOSTICS_QUERY_FLAG) === '1';
+  } catch {
+    return false;
   }
 }

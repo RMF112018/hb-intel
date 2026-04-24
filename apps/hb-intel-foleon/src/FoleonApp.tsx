@@ -116,11 +116,23 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
   );
 
   if (!contract.canInitialize) {
+    const diagnosticsOn =
+      typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('foleon-diagnostics') === '1';
+    const adminDetail = diagnosticsOn
+      ? contract.issues
+          .filter((issue) => issue.scope === 'admin')
+          .map((issue) => `${issue.code}: ${issue.adminLabel}`)
+          .join(' ')
+      : undefined;
     return (
       <HbcThemeProvider forceTheme="light">
         <FoleonError
-          title="Foleon integration is not fully configured."
-          description={contract.blockingReasons.join(' ')}
+          title="Foleon integration is not available right now."
+          description={
+            adminDetail ??
+            'Foleon integration is not fully configured. Contact an HB Central admin.'
+          }
         />
       </HbcThemeProvider>
     );

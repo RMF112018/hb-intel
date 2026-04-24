@@ -82,7 +82,7 @@ describe('resolveFoleonRuntimeContract', () => {
         contentRegistryListId: '11111111-1111-1111-1111-111111111111',
         placementsListId: '22222222-2222-2222-2222-222222222222',
         expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-        expectedPackageVersion: '1.0.1.0',
+        expectedPackageVersion: '1.0.2.0',
       },
     });
     expect(contract.governed.manifestIdMatchesExpected).toBe(true);
@@ -96,5 +96,44 @@ describe('resolveFoleonRuntimeContract', () => {
       config: { foleonDocId: '987654' },
     });
     expect(contract.docId).toBe(987654);
+  });
+
+  it('emits typed issue codes covering every blocking condition', () => {
+    const contract = resolveFoleonRuntimeContract({
+      hasSpfxContext: true,
+      config: {
+        acceptedFoleonOrigins: [],
+        expectedManifestId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+        expectedPackageVersion: '99.99.99.99',
+      },
+    });
+    const codes = contract.issues.map((issue) => issue.code).sort();
+    expect(codes).toEqual(
+      [
+        'manifest-id-mismatch',
+        'missing-content-registry-list-id',
+        'missing-placements-list-id',
+        'missing-site-url',
+        'no-origins-allowlisted',
+        'package-version-mismatch',
+      ].sort(),
+    );
+    for (const issue of contract.issues) {
+      expect(issue.scope).toBe('admin');
+    }
+  });
+
+  it('emits zero issues for a fully configured hosted contract', () => {
+    const contract = resolveFoleonRuntimeContract({
+      hasSpfxContext: true,
+      siteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+      config: {
+        contentRegistryListId: '11111111-1111-1111-1111-111111111111',
+        placementsListId: '22222222-2222-2222-2222-222222222222',
+      },
+    });
+    expect(contract.issues).toEqual([]);
+    expect(contract.blockingReasons).toEqual([]);
+    expect(contract.canInitialize).toBe(true);
   });
 });

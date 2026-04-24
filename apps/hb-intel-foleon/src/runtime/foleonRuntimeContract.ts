@@ -1,10 +1,11 @@
 /**
  * Resolves the Foleon mount config into an immutable runtime contract.
  *
- * Mirrors the governed-authority proof pattern used by the Safety and
- * HB Publisher apps: consumers (tests, mount surface) get a single
- * object to inspect host/config readiness without poking at mount
- * params imperatively.
+ * Governance tightening (1.0.2.0): every blocking condition now
+ * produces a typed `FoleonConfigIssue` with a stable error code. The
+ * legacy `blockingReasons: string[]` is derived from the issue set
+ * for back-compat with earlier tests and in-app admin diagnostics;
+ * new consumers should inspect `issues` directly.
  */
 import type { IFoleonMountConfig } from '../types/foleon-runtime.types.js';
 import {
@@ -13,6 +14,10 @@ import {
   type FoleonOriginPolicy,
 } from '../services/FoleonOriginPolicy.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from '../webparts/foleon/runtimeContract.js';
+import {
+  makeIssue,
+  type FoleonConfigIssue,
+} from './foleonConfigIssues.js';
 
 export type FoleonHostMode = 'sharepoint' | 'mock';
 export type FoleonRoute = 'highlights' | 'reader' | 'hub';
@@ -36,6 +41,12 @@ export interface IFoleonRuntimeContract {
   };
   readonly readerRoutePath: string | null;
   readonly canInitialize: boolean;
+  readonly issues: ReadonlyArray<FoleonConfigIssue>;
+  /**
+   * Derived from `issues` (admin-scope labels). Retained for existing
+   * admin diagnostics surfaces and the runtime-contract test. New code
+   * should inspect `issues` directly.
+   */
   readonly blockingReasons: ReadonlyArray<string>;
 }
 
@@ -60,29 +71,25 @@ export function resolveFoleonRuntimeContract(params: {
   };
   const readerRoutePath = normalizeText(params.config?.foleonReaderRoutePath);
 
-  const blockingReasons: string[] = [];
-  if (hostMode === 'sharepoint') {
-    if (!params.siteUrl) blockingReasons.push('SharePoint site URL is missing.');
-    if (!listIds.contentRegistry && route !== 'reader')
-      blockingReasons.push('HB_FoleonContentRegistry list GUID is missing.');
-    if (!listIds.contentRegistry && route === 'reader')
-      blockingReasons.push('HB_FoleonContentRegistry list GUID is missing.');
-    if (route === 'highlights' && !listIds.placements)
-      blockingReasons.push('HB_FoleonHomepagePlacements list GUID is missing.');
-    if (originPolicy.allowedOrigins.length === 0)
-      blockingReasons.push('No Foleon origins are allowlisted.');
-  }
-
   const manifestIdMatchesExpected =
     !expectedManifestId || expectedManifestId === FOLEON_WEBPART_ID;
   const packageVersionMatchesExpected =
     !expectedPackageVersion || expectedPackageVersion === FOLEON_PACKAGE_VERSION;
-  if (hostMode === 'sharepoint' && expectedManifestId && !manifestIdMatchesExpected) {
-    blockingReasons.push('Expected manifest ID does not match Foleon webpart authority.');
+
+  const issues: FoleonConfigIssue[] = [];
+  if (hostMode === 'sharepoint') {
+    if (!params.siteUrl) issues.push(makeIssue('missing-site-url'));
+    if (!listIds.contentRegistry) issues.push(makeIssue('missing-content-registry-list-id'));
+    if (route === 'highlights' && !listIds.placements)
+      issues.push(makeIssue('missing-placements-list-id'));
+    if (originPolicy.allowedOrigins.length === 0)
+      issues.push(makeIssue('no-origins-allowlisted'));
+    if (expectedManifestId && !manifestIdMatchesExpected)
+      issues.push(makeIssue('manifest-id-mismatch'));
+    if (expectedPackageVersion && !packageVersionMatchesExpected)
+      issues.push(makeIssue('package-version-mismatch'));
   }
-  if (hostMode === 'sharepoint' && expectedPackageVersion && !packageVersionMatchesExpected) {
-    blockingReasons.push('Expected package version does not match governed Foleon package version.');
-  }
+  const blockingReasons = issues.map((issue) => issue.adminLabel);
 
   return {
     hostMode,
@@ -98,7 +105,8 @@ export function resolveFoleonRuntimeContract(params: {
       packageVersionMatchesExpected,
     },
     readerRoutePath,
-    canInitialize: hostMode === 'mock' || blockingReasons.length === 0,
+    canInitialize: hostMode === 'mock' || issues.length === 0,
+    issues,
     blockingReasons,
   };
 }

@@ -60,6 +60,54 @@ No Foleon API credentials are accepted or used. Direct API access and
 OAuth client-credentials flows are owned exclusively by the Azure
 Functions backend; the SPFx bundle must not ship secrets.
 
+## Runtime config validation and binding proof
+
+`mount()` resolves `IFoleonMountConfig` into an immutable
+`IFoleonRuntimeContract` via `resolveFoleonRuntimeContract`. The
+contract is fail-closed: if any required field is missing under the
+hosted host mode, `canInitialize` is `false` and the app renders a
+safe banner instead of any route.
+
+Typed failure codes (`FoleonConfigErrorCode`) — every blocking
+condition maps to one of:
+
+| Code | Condition | Scope |
+| --- | --- | --- |
+| `missing-site-url` | `pageContext.web.absoluteUrl` was not supplied | admin |
+| `missing-content-registry-list-id` | `contentRegistryListId` missing | admin |
+| `missing-placements-list-id` | `placementsListId` missing on the Highlights route | admin |
+| `no-origins-allowlisted` | Normalized origin allowlist is empty | admin |
+| `manifest-id-mismatch` | Caller-supplied `expectedManifestId` does not match the governed webpart ID | admin |
+| `package-version-mismatch` | Caller-supplied `expectedPackageVersion` does not match `FOLEON_PACKAGE_VERSION` | admin |
+
+All failure codes are admin-scope. End users always see a single
+generic "contact an HB Central admin" sentence; admin-scope labels
+are surfaced in-app only when `?foleon-diagnostics=1` is appended to
+the page URL.
+
+### Binding proof — `window.__hbIntel_foleonRuntimeBindingProof`
+
+The proof is always published at mount time and is intentionally
+**redacted**: raw list GUIDs, origin allowlist entries, reader route
+path, caller-supplied docId, and caller-supplied expected manifest /
+version values are never emitted. Operators get:
+
+- `manifestId`, `packageVersion`, `bundleMarker` — governed identity.
+- `hostMode`, `route`, `canInitialize` — runtime state.
+- `presence.*` — booleans for every sensitive config field.
+- `fingerprints.*` — 8-char FNV-1a fingerprints for the list GUIDs,
+  reader route path, and origin allowlist set (sorted + deduped).
+  Non-cryptographic; suitable only for deploy-correlation.
+- `governance.*` — booleans: manifest / version identity match.
+- `issueCodes` — array of `FoleonConfigErrorCode` values.
+- `diagnostics.adminIssues` — present only when
+  `?foleon-diagnostics=1` was in the URL; carries
+  `{ code, adminLabel }` pairs. Standard tenant loads never emit
+  this field.
+
+No preview URL paths, credentials, or caller-supplied strings are
+interpolated into the proof.
+
 ## Deferred scope
 
 The following items from the integration plan are intentionally not
