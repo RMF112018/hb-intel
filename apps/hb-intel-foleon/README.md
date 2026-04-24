@@ -23,8 +23,10 @@ pnpm --filter @hbc/spfx-foleon test
 pnpm --filter @hbc/spfx-foleon lint
 ```
 
-The IIFE entry is `src/mount.tsx`; Vite emits `dist/foleon-app.js`
-and exposes `window.__hbIntel_foleon` with `mount` / `unmount`.
+The IIFE entry is `src/mount.tsx`; Vite emits
+`dist/hb-intel-foleon-app.js` and exposes `window.__hbIntel_foleon`
+with `mount` / `unmount`. The `${dir}-app.js` filename matches the
+package-truth convention enforced by `tools/build-spfx-package.ts`.
 
 ## SPFx packaging
 

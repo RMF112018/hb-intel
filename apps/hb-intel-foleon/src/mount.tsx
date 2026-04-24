@@ -1,9 +1,9 @@
 /**
  * Foleon SPFx mount entry.
  *
- * Vite compiles this into an IIFE (`foleon-app.js`) exposed at
- * `window.__hbIntel_foleon`. The SPFx shell webpart loads the bundle
- * and calls `mount(domElement, spfxContext, config)`.
+ * Vite compiles this into an IIFE (`hb-intel-foleon-app.js`) exposed
+ * at `window.__hbIntel_foleon`. The SPFx shell webpart loads the
+ * bundle and calls `mount(domElement, spfxContext, config)`.
  */
 import { createElement, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';

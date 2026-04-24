@@ -26,7 +26,7 @@ export default defineConfig(({ command }) => ({
             entry: resolve(__dirname, entryFile),
             name: '__hbIntel_foleon',
             formats: ['iife'],
-            fileName: () => 'foleon-app.js',
+            fileName: () => 'hb-intel-foleon-app.js',
           },
         }
       : {}),

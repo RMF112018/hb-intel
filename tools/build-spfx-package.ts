@@ -191,7 +191,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage', freshBuildRequired: true },
   { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi', freshBuildRequired: true },
   { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
-  { dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single' },
+  { dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single', freshBuildRequired: true },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
 ];
 
@@ -215,6 +215,7 @@ const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 const HB_PUBLISHER_ARTICLE_WEBPART_ID = '1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10';
 const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
 const SAFETY_WEBPART_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
+const HB_INTEL_FOLEON_WEBPART_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
 const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
 
 // Critical runtime source files whose SHA-256 fingerprints anchor the
@@ -286,11 +287,30 @@ const SAFETY_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   'packages/features/safety/src/hooks/queries.ts',
 ];
 
+// hb-intel-foleon package-truth: the disputed seam is the governed reader
+// gate + origin allowlist. The critical runtime paths below cover mount,
+// manifest, the gating primitives, the iframe host, and the SharePoint
+// list descriptors — every file that changes whether/how the reader
+// renders a Foleon iframe inside SharePoint.
+const HB_INTEL_FOLEON_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/hb-intel-foleon/src/mount.tsx',
+  'apps/hb-intel-foleon/src/FoleonApp.tsx',
+  'apps/hb-intel-foleon/src/runtime/foleonRuntimeContract.ts',
+  'apps/hb-intel-foleon/src/webparts/foleon/FoleonWebPart.manifest.json',
+  'apps/hb-intel-foleon/src/webparts/foleon/runtimeContract.ts',
+  'apps/hb-intel-foleon/src/services/FoleonOriginPolicy.ts',
+  'apps/hb-intel-foleon/src/services/FoleonReaderGate.ts',
+  'apps/hb-intel-foleon/src/services/FoleonContentService.ts',
+  'apps/hb-intel-foleon/src/components/FoleonIframeHost.tsx',
+  'apps/hb-intel-foleon/src/pages/ReaderPage.tsx',
+];
+
 const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   safety: SAFETY_CRITICAL_RUNTIME_PATHS,
   'hb-webparts': HB_WEBPARTS_CRITICAL_RUNTIME_PATHS,
   'hb-publisher': HB_PUBLISHER_CRITICAL_RUNTIME_PATHS,
   'hb-homepage': HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
+  'hb-intel-foleon': HB_INTEL_FOLEON_CRITICAL_RUNTIME_PATHS,
 };
 
 const HB_HOMEPAGE_CANONICAL_BANNER_FILES = [
@@ -325,6 +345,7 @@ const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
   'hb-webparts': { id: HB_PNP_OPS_WEBPART_ID, label: 'PnP Ops webpart' },
   'hb-publisher': { id: HB_PUBLISHER_ARTICLE_WEBPART_ID, label: 'Article Publisher webpart' },
   'hb-homepage': { id: HB_HOMEPAGE_WEBPART_ID, label: 'HB Homepage webpart' },
+  'hb-intel-foleon': { id: HB_INTEL_FOLEON_WEBPART_ID, label: 'Foleon webpart' },
 };
 // ── SPFx version baselines (governed, see docs/reference/developer/spfx-baseline.md) ──
 //
