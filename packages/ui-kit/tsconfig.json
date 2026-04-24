@@ -6,6 +6,6 @@
     "baseUrl": ".",
     "paths": {}
   },
-  "include": ["src"],
+  "include": ["src", "types/**/*.d.ts"],
   "exclude": ["node_modules", "dist", ".storybook", "src/**/*.stories.tsx", "src/lint/**"]
 }
