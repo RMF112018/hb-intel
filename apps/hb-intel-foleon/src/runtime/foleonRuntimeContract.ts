@@ -20,7 +20,7 @@ import {
 } from './foleonConfigIssues.js';
 
 export type FoleonHostMode = 'sharepoint' | 'mock';
-export type FoleonRoute = 'highlights' | 'reader' | 'hub';
+export type FoleonRoute = 'highlights' | 'reader' | 'hub' | 'manage';
 
 export interface IFoleonRuntimeContract {
   readonly hostMode: FoleonHostMode;
@@ -40,6 +40,9 @@ export interface IFoleonRuntimeContract {
     readonly packageVersionMatchesExpected: boolean;
   };
   readonly readerRoutePath: string | null;
+  readonly apiBaseUrl: string | null;
+  readonly apiResource: string | null;
+  readonly getAccessToken?: () => Promise<string>;
   /**
    * Identity carried on every outbound telemetry envelope.
    * `correlationId` is per-mount; `sessionId` is per-browser-session.
@@ -84,6 +87,8 @@ export function resolveFoleonRuntimeContract(params: {
     events: normalizeText(params.config?.eventsListId),
   };
   const readerRoutePath = normalizeText(params.config?.foleonReaderRoutePath);
+  const apiBaseUrl = normalizeText(params.config?.foleonApiBaseUrl);
+  const apiResource = normalizeText(params.config?.foleonApiResource);
 
   const manifestIdMatchesExpected =
     !expectedManifestId || expectedManifestId === FOLEON_WEBPART_ID;
@@ -119,6 +124,8 @@ export function resolveFoleonRuntimeContract(params: {
       packageVersionMatchesExpected,
     },
     readerRoutePath,
+    apiBaseUrl,
+    apiResource,
     telemetry: {
       correlationId: params.telemetryIdentity?.correlationId ?? '',
       sessionId: params.telemetryIdentity?.sessionId ?? '',
@@ -132,7 +139,9 @@ export function resolveFoleonRuntimeContract(params: {
 export { DEFAULT_FOLEON_ORIGINS };
 
 function normalizeRoute(value: unknown): FoleonRoute {
-  if (value === 'reader' || value === 'hub' || value === 'highlights') return value;
+  if (value === 'reader' || value === 'hub' || value === 'highlights' || value === 'manage') {
+    return value;
+  }
   return 'highlights';
 }
 

@@ -63,10 +63,17 @@ export async function mount(
     config,
     telemetryIdentity,
   });
-  publishRuntimeBindingProof(contract, config);
+  const tokenProvider =
+    spfxContext && config?.foleonApiResource
+      ? await createBackendTokenProvider(spfxContext, config.foleonApiResource)
+      : undefined;
+  const mountedContract: IFoleonRuntimeContract = tokenProvider
+    ? { ...contract, getAccessToken: tokenProvider }
+    : contract;
+  publishRuntimeBindingProof(mountedContract, config);
 
   root = createRoot(el);
-  root.render(createElement(FoleonApp, { contract }) as ReactNode);
+  root.render(createElement(FoleonApp, { contract: mountedContract }) as ReactNode);
 }
 
 export function unmount(): void {
@@ -90,7 +97,7 @@ export interface IFoleonRuntimeBindingProof {
   readonly manifestId: string;
   readonly packageVersion: string;
   readonly hostMode: 'sharepoint' | 'mock';
-  readonly route: 'highlights' | 'reader' | 'hub';
+  readonly route: 'highlights' | 'reader' | 'hub' | 'manage';
   readonly canInitialize: boolean;
   readonly presence: {
     readonly spfxContext: boolean;
@@ -99,6 +106,8 @@ export interface IFoleonRuntimeBindingProof {
     readonly placementsListId: boolean;
     readonly eventsListId: boolean;
     readonly readerRoutePath: boolean;
+    readonly apiBaseUrl: boolean;
+    readonly apiResource: boolean;
     readonly docId: boolean;
     readonly callerSuppliedExpectedManifestId: boolean;
     readonly callerSuppliedExpectedPackageVersion: boolean;
@@ -152,6 +161,8 @@ function publishRuntimeBindingProof(
       placementsListId: !!contract.listIds.placements,
       eventsListId: !!contract.listIds.events,
       readerRoutePath: !!contract.readerRoutePath,
+      apiBaseUrl: !!contract.apiBaseUrl,
+      apiResource: !!contract.apiResource,
       docId: contract.docId !== null,
       callerSuppliedExpectedManifestId: !!config?.expectedManifestId,
       callerSuppliedExpectedPackageVersion: !!config?.expectedPackageVersion,
@@ -197,6 +208,18 @@ function publishRuntimeBindingProof(
         __hbIntel_foleonRuntimeBindingProof?: IFoleonRuntimeBindingProof;
       }
     ).__hbIntel_foleonRuntimeBindingProof = proof;
+  }
+}
+
+async function createBackendTokenProvider(
+  spfxContext: WebPartContext,
+  resource: string,
+): Promise<(() => Promise<string>) | undefined> {
+  try {
+    const provider = await spfxContext.aadTokenProviderFactory.getTokenProvider();
+    return () => provider.getToken(resource);
+  } catch {
+    return undefined;
   }
 }
 

@@ -22,6 +22,8 @@ function baseContract(
       packageVersionMatchesExpected: true,
     },
     readerRoutePath: null,
+    apiBaseUrl: null,
+    apiResource: null,
     telemetry: { correlationId: 'corr-test', sessionId: 'sess-test' },
     canInitialize: true,
     issues: [],
@@ -64,6 +66,14 @@ describe('readNavFromLocation', () => {
     withLocation('foleonRoute=highlights', () => {
       const nav = readNavFromLocation(baseContract());
       expect(nav.route).toBe('highlights');
+      expect(nav.docId).toBe(null);
+    });
+  });
+
+  it('reads foleonRoute=manage', () => {
+    withLocation('foleonRoute=manage', () => {
+      const nav = readNavFromLocation(baseContract());
+      expect(nav.route).toBe('manage');
       expect(nav.docId).toBe(null);
     });
   });
@@ -124,6 +134,16 @@ describe('FoleonApp — route-level no-iframe invariants (DOM proof)', () => {
     withLocation('foleonRoute=hub', () => {
       const { container } = render(<FoleonApp contract={baseContract({ route: 'hub' })} />);
       expect(container.querySelectorAll('iframe')).toHaveLength(0);
+    });
+  });
+
+  it('Management route renders zero iframes (mock host mode)', () => {
+    withLocation('foleonRoute=manage', () => {
+      const { container } = render(<FoleonApp contract={baseContract({ route: 'manage' })} />);
+      expect(container.querySelectorAll('iframe')).toHaveLength(0);
+      expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
+        'data-hbc-foleon-route',
+      )).toBe('manage');
     });
   });
 

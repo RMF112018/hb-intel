@@ -66,14 +66,14 @@ lists in install order.
    This package cannot be tenant-wide-deployed. Tenant-wide
    deployment of a `.sppkg` containing SharePoint assets is
    unsupported and the feature framework will be silently ignored.
-5. Confirm the App Catalog lists the package with version `1.0.8.0`.
+5. Confirm the App Catalog lists the package with version `1.0.9.0`.
 
 ## 5. Install on `/sites/HBCentral`
 
 1. Navigate to
    `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`.
 2. **Site Contents → New → App**.
-3. Select **HB Intel Foleon Publications** from "From your
+3. Select **HB Intel Foleon Connector** from "From your
    organization".
 4. Click **Add**. SharePoint runs feature activation, which executes
    `elements.xml` in order:
@@ -113,12 +113,16 @@ pane. Set:
 - `acceptedFoleonOrigins` → at minimum `https://viewer.us.foleon.com`
   plus any custom publisher subdomain.
 - `allowPreview` → leave `false` for production.
+- `foleonApiBaseUrl` → existing HB Intel Functions app base URL, or
+  omit only when the page is served from the same origin as `/api`.
+- `foleonApiResource` → Entra resource/application ID URI used by SPFx
+  to acquire backend access tokens.
 - `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
-- `expectedPackageVersion` → `1.0.8.0`.
+- `expectedPackageVersion` → `1.0.9.0`.
 
-`HB_FoleonSyncRuns` has no webpart binding today — no writer ships
-in Wave 01, per ADR-0125. The list is provisioned so the contract
-is ready for Wave 02 backend writers.
+`HB_FoleonSyncRuns` is written by the backend sync and validation
+routes. Operators review the newest run proof in the connector's
+`manage` route.
 
 Save the page. The webpart should render.
 
@@ -152,7 +156,7 @@ window.__hbIntel_foleonRuntimeBindingProof
 
 Expected:
 
-- `packageVersion === '1.0.8.0'`.
+- `packageVersion === '1.0.9.0'`.
 - `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
 - `hostMode === 'sharepoint'`.
 - `canInitialize === true`.

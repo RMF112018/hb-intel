@@ -118,21 +118,31 @@ export function HighlightsPage(props: HighlightsPageProps): React.ReactNode {
         }}
       >
         <h2 style={{ margin: 0 }}>Marketing highlights</h2>
-        <HbcButton
-          variant="secondary"
-          onClick={(): void => {
-            const url = new URL(window.location.href);
-            url.searchParams.set('foleonRoute', 'hub');
-            window.history.pushState({}, '', url.toString());
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          }}
-        >
-          View all
-        </HbcButton>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <HbcButton
+            variant="secondary"
+            onClick={(): void => navigateToRoute('manage')}
+          >
+            Manage
+          </HbcButton>
+          <HbcButton
+            variant="secondary"
+            onClick={(): void => navigateToRoute('hub')}
+          >
+            View all
+          </HbcButton>
+        </div>
       </header>
       {body}
     </section>
   );
+}
+
+function navigateToRoute(route: 'hub' | 'manage'): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set('foleonRoute', route);
+  window.history.pushState({}, '', url.toString());
+  window.dispatchEvent(new PopStateEvent('popstate'));
 }
 
 type HighlightsLoadState =

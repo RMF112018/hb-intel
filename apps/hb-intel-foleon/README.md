@@ -1,7 +1,7 @@
 # hb-intel-foleon
 
-Governed SPFx surface for Marketing's Foleon publications on HB Central.
-One webpart (`FoleonWebPart`) drives three internal routes selected by
+Governed SPFx connector for Marketing's Foleon publications on HB Central.
+One webpart (`FoleonWebPart`) drives four internal routes selected by
 URL search params:
 
 | Route | `?foleonRoute=` | Purpose |
@@ -9,6 +9,7 @@ URL search params:
 | Highlights | `highlights` (default) | Homepage card surface backed by `HB_FoleonHomepagePlacements` |
 | Reader | `reader` | SharePoint-hosted iframe reader with hard gating |
 | Content Hub | `hub` | Archive / search over `HB_FoleonContentRegistry` |
+| Connector | `manage` | Backend-governed content, placement, validation, publish/suppress, and sync proof workflow |
 
 The reader web part never renders an iframe until every gate passes:
 `IsVisible`, `PublishStatus=Published`, `AllowEmbed`, not
@@ -44,7 +45,7 @@ npx tsx tools/build-spfx-package.ts --domain hb-intel-foleon
 
 ### Site-installed provisioning (required)
 
-Since 1.0.8.0 the package ships **Feature Framework provisioning
+Since 1.0.9.0 the package ships **Feature Framework provisioning
 assets** that create four SharePoint lists when installed:
 
 - `HB_FoleonContentRegistry`
@@ -64,7 +65,7 @@ Install target: `/sites/HBCentral`. Full procedure is documented in
    Catalog. Answer **No** when asked to make it available across
    the tenant.
 2. Go to `/sites/HBCentral` → Site Contents → New → App → add
-   **HB Intel Foleon Publications**.
+   **HB Intel Foleon Connector**.
 3. SharePoint feature activation provisions the four lists in
    install order (Content Registry → Homepage Placements → Interaction
    Events → Sync Runs).
@@ -90,6 +91,8 @@ The shell passes `IFoleonMountConfig` into `mount()`:
 | `acceptedFoleonOrigins` | Exact-origin allowlist; defaults to `['https://viewer.us.foleon.com']` |
 | `allowPreview` | Admin-review only; permits `/preview/` URLs |
 | `foleonReaderRoutePath` | Optional SitePage URL (e.g. `/sites/HBCentral/SitePages/Foleon-Reader.aspx`) pinned to the reader webpart |
+| `foleonApiBaseUrl` | Optional existing Functions app base URL; same-origin `/api` is used when omitted |
+| `foleonApiResource` | Optional Entra resource/application ID URI for SPFx token acquisition |
 | `expectedManifestId` / `expectedPackageVersion` | Governance proof values |
 
 No Foleon API credentials are accepted or used. Direct API access and
@@ -144,25 +147,13 @@ version values are never emitted. Operators get:
 No preview URL paths, credentials, or caller-supplied strings are
 interpolated into the proof.
 
-## Deferred scope
+## Backend connector workflow
 
-The following items from the integration plan are intentionally not
-implemented in this ship; they do not block MVP:
-
-- **Backend sync** — Azure Functions Foleon OAuth/sync/analytics routes
-  (`docs/architecture/plans/MASTER/spfx/foleon/integration-plan/04_…`).
-  The telemetry service will flip from direct list POST to
-  `POST /api/foleon/events` when the backend lands, with no consumer
-  change.
-- **Additional SharePoint lists** — `HB_FoleonProjectsRegistry`,
-  `HB_FoleonAnalyticsSnapshots`, `HB_FoleonSyncRuns`. Only the three
-  MVP lists are queried: content registry, homepage placements,
-  interaction events.
-- **Admin Panel webpart** — admins use SharePoint list default forms
-  to edit overrides for the MVP.
-- **Homepage launcher card registration** — Highlights currently ships
-  as its own webpart. A follow-up will register it inside
-  `@hbc/homepage-launcher` once the surface is verified in tenant.
+The `manage` route calls `/api/foleon/*` only. It does not write lists
+directly and it never carries Foleon API credentials. The existing
+Functions backend owns app-role enforcement, Foleon OAuth, Graph writes,
+placement `ContentIdCache` normalization, validation results, and
+`HB_FoleonSyncRuns` proof.
 
 ## Provisioning checklist (tenant side)
 

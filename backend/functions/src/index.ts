@@ -16,6 +16,9 @@ import './functions/adminApi/legacy-fallback-routes.js';
 // Safety record-keeping admin API routes are co-hosted with the monolithic
 // host to support production ingestion and provisioning operations.
 import './functions/adminApi/safety-record-keeping-routes.js';
+// Foleon connector routes keep content management, placement, and sync writes
+// behind the backend app-role and Graph control plane.
+import './functions/adminApi/foleon-routes.js';
 
 // Health probe (P1-C3 §2.2.1)
 import './functions/health/index.js';

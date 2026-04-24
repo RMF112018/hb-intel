@@ -17,11 +17,15 @@ export interface IFoleonMountConfig {
   readonly expectedManifestId?: string;
   readonly expectedPackageVersion?: string;
   /** Internal route selector from manifest properties / URL. */
-  readonly foleonRoute?: 'highlights' | 'reader' | 'hub';
+  readonly foleonRoute?: 'highlights' | 'reader' | 'hub' | 'manage';
   /** Target docId when the SPFx page is pinned to the reader route. */
   readonly foleonDocId?: number | string;
   /** Target SitePage that hosts the reader webpart. Used for card navigation. */
   readonly foleonReaderRoutePath?: string;
+  /** Existing HB Intel Functions app base URL. Defaults to same-origin `/api`. */
+  readonly foleonApiBaseUrl?: string;
+  /** Entra resource/application ID URI for acquiring backend API tokens in SPFx. */
+  readonly foleonApiResource?: string;
 }
 
 export type FoleonGateReason =

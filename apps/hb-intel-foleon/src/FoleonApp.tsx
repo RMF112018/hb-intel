@@ -19,6 +19,7 @@ const SR_ONLY_STYLE: React.CSSProperties = {
 function routeAnnouncement(route: FoleonRoute): string {
   if (route === 'reader') return 'Showing Foleon publication.';
   if (route === 'hub') return 'Showing Foleon content archive.';
+  if (route === 'manage') return 'Showing Foleon Connector management.';
   return 'Showing Foleon highlights.';
 }
 import {
@@ -34,6 +35,7 @@ import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from './webparts/foleon/run
 import { HighlightsPage } from './pages/HighlightsPage.js';
 import { ReaderPage } from './pages/ReaderPage.js';
 import { ContentHubPage } from './pages/ContentHubPage.js';
+import { ManagePage } from './pages/ManagePage.js';
 import { FoleonError } from './components/FoleonStates.js';
 
 interface FoleonAppProps {
@@ -312,6 +314,14 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
       />
     );
   }
+  if (nav.route === 'manage') {
+    return (
+      <ManagePage
+        contract={contract}
+        onBack={(): void => goto({ route: 'highlights', docId: null })}
+      />
+    );
+  }
   return (
     <HighlightsPage
       contract={contract}
@@ -329,7 +339,7 @@ export function readNavFromLocation(contract: IFoleonRuntimeContract): AppNavSta
   const search = new URLSearchParams(window.location.search);
   const routeParam = search.get('foleonRoute');
   const route: FoleonRoute =
-    routeParam === 'reader' || routeParam === 'hub'
+    routeParam === 'reader' || routeParam === 'hub' || routeParam === 'manage'
       ? routeParam
       : routeParam === 'highlights'
         ? 'highlights'

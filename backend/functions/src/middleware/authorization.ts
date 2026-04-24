@@ -20,6 +20,13 @@ export const SAFETY_OPERATOR_ROLES = ['HBIntelSafetyOperator'] as const;
 export const SAFETY_REVIEWER_ROLES = ['HBIntelSafetyReviewer'] as const;
 export const SAFETY_ADMIN_ROLES = ['HBIntelSafetyAdmin'] as const;
 export const SAFETY_GLOBAL_OVERRIDE_ROLES = [...ADMIN_ROLES, ...BREAK_GLASS_ROLES] as const;
+export const FOLEON_VIEWER_ROLES = ['HBIntelFoleonViewer'] as const;
+export const FOLEON_EDITOR_ROLES = ['HBIntelFoleonEditor'] as const;
+export const FOLEON_PUBLISHER_ROLES = ['HBIntelFoleonPublisher'] as const;
+export const FOLEON_ADMIN_ROLES = ['HBIntelFoleonAdmin'] as const;
+export const FOLEON_OPERATOR_ROLES = ['HBIntelFoleonOperator'] as const;
+export const FOLEON_HOMEPAGE_MANAGER_ROLES = ['HBIntelFoleonHomepageManager'] as const;
+export const FOLEON_GLOBAL_OVERRIDE_ROLES = [...ADMIN_ROLES, ...BREAK_GLASS_ROLES] as const;
 
 /** All privileged user roles (admin + controller). */
 export const PRIVILEGED_ROLES = [...ADMIN_ROLES, ...CONTROLLER_ROLES] as const;
@@ -236,12 +243,31 @@ export type SafetyRouteRoleFamily =
   | 'global-override'
   | 'workload-automation'
   | 'denied';
+export type FoleonRouteAction =
+  | 'view'
+  | 'edit'
+  | 'publish'
+  | 'place'
+  | 'sync'
+  | 'admin';
+export type FoleonRouteRoleFamily =
+  | 'foleon-specific'
+  | 'global-override'
+  | 'workload-automation'
+  | 'denied';
 
 export interface ISafetyRouteAuthorizationDecision {
   readonly allowed: boolean;
   readonly deniedResponse: HttpResponseInit | null;
   readonly matchedRole: string | null;
   readonly matchedRoleFamily: SafetyRouteRoleFamily;
+}
+
+export interface IFoleonRouteAuthorizationDecision {
+  readonly allowed: boolean;
+  readonly deniedResponse: HttpResponseInit | null;
+  readonly matchedRole: string | null;
+  readonly matchedRoleFamily: FoleonRouteRoleFamily;
 }
 
 /**
@@ -284,6 +310,38 @@ const SAFETY_ACTION_ROLES: Readonly<Record<SafetyRouteAction, ReadonlyArray<stri
     ...SAFETY_OPERATOR_ROLES,
     ...SAFETY_REVIEWER_ROLES,
     ...SAFETY_ADMIN_ROLES,
+  ],
+} as const;
+
+const FOLEON_ACTION_ROLES: Readonly<Record<FoleonRouteAction, ReadonlyArray<string>>> = {
+  view: [
+    ...FOLEON_VIEWER_ROLES,
+    ...FOLEON_EDITOR_ROLES,
+    ...FOLEON_PUBLISHER_ROLES,
+    ...FOLEON_OPERATOR_ROLES,
+    ...FOLEON_ADMIN_ROLES,
+    ...FOLEON_HOMEPAGE_MANAGER_ROLES,
+  ],
+  edit: [
+    ...FOLEON_EDITOR_ROLES,
+    ...FOLEON_PUBLISHER_ROLES,
+    ...FOLEON_ADMIN_ROLES,
+  ],
+  publish: [
+    ...FOLEON_PUBLISHER_ROLES,
+    ...FOLEON_ADMIN_ROLES,
+  ],
+  place: [
+    ...FOLEON_PUBLISHER_ROLES,
+    ...FOLEON_HOMEPAGE_MANAGER_ROLES,
+    ...FOLEON_ADMIN_ROLES,
+  ],
+  sync: [
+    ...FOLEON_OPERATOR_ROLES,
+    ...FOLEON_ADMIN_ROLES,
+  ],
+  admin: [
+    ...FOLEON_ADMIN_ROLES,
   ],
 } as const;
 
@@ -338,6 +396,67 @@ export function authorizeSafetyRoute(
   }
 
   const globalOverrideRole = firstMatchedRole(claims, SAFETY_GLOBAL_OVERRIDE_ROLES);
+  if (globalOverrideRole) {
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: globalOverrideRole,
+      matchedRoleFamily: 'global-override',
+    };
+  }
+
+  return {
+    allowed: false,
+    deniedResponse: forbiddenResponse('Insufficient role', requestId),
+    matchedRole: null,
+    matchedRoleFamily: 'denied',
+  };
+}
+
+export function authorizeFoleonRoute(
+  claims: IValidatedClaims,
+  action: FoleonRouteAction,
+  requestId?: string,
+): IFoleonRouteAuthorizationDecision {
+  if (isAppOnlyToken(claims)) {
+    const workloadDenied = requireWorkloadRole(claims, requestId);
+    if (workloadDenied) {
+      return {
+        allowed: false,
+        deniedResponse: workloadDenied,
+        matchedRole: null,
+        matchedRoleFamily: 'denied',
+      };
+    }
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: firstMatchedRole(claims, AUTOMATION_ROLES),
+      matchedRoleFamily: 'workload-automation',
+    };
+  }
+
+  const scopeDenied = requireDelegatedScope(claims, requestId);
+  if (scopeDenied) {
+    return {
+      allowed: false,
+      deniedResponse: scopeDenied,
+      matchedRole: null,
+      matchedRoleFamily: 'denied',
+    };
+  }
+
+  const foleonRole = firstMatchedRole(claims, FOLEON_ACTION_ROLES[action]);
+  if (foleonRole) {
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: foleonRole,
+      matchedRoleFamily: 'foleon-specific',
+    };
+  }
+
+  const globalOverrideRole = firstMatchedRole(claims, FOLEON_GLOBAL_OVERRIDE_ROLES);
   if (globalOverrideRole) {
     return {
       allowed: true,
