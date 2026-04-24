@@ -182,6 +182,19 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('missing_x_request_id');
   });
 
+  it('safety route wiring uses explicit safety-role authorization helper', () => {
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, 'src/functions/adminApi/safety-record-keeping-routes.ts'),
+      'utf-8',
+    );
+    expect(source).toContain('authorizeSafetyRoute');
+    expect(source).toContain("authorizeSafetyCommandRoute('ingest'");
+    expect(source).toContain("authorizeSafetyCommandRoute('preview'");
+    expect(source).toContain("authorizeSafetyCommandRoute('replay'");
+    expect(source).toContain('emitAuthorizationTelemetry');
+    expect(source).toContain("safety-route-${action}");
+  });
+
   // --- Gate 10: P8-07 Token validation defers config resolution (lazy init) ---
 
   it('validateToken module loads without throwing when identity config is missing', async () => {

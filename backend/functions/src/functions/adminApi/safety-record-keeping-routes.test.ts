@@ -28,6 +28,16 @@ describe('admin safety record-keeping provisioning route wiring', () => {
     expect(source).toContain('requireAdmin');
   });
 
+  it('uses shared Safety route authorization policy for ingest/preview/replay', () => {
+    expect(source).toContain('authorizeSafetyRoute');
+    expect(source).toContain('authorizeSafetyCommandRoute');
+    expect(source).toContain("authorizeSafetyCommandRoute('ingest'");
+    expect(source).toContain("authorizeSafetyCommandRoute('preview'");
+    expect(source).toContain("authorizeSafetyCommandRoute('replay'");
+    expect(source).toContain('emitAuthorizationTelemetry');
+    expect(source).toContain('safety-route-');
+  });
+
   it('routes through the existing app-only sharepoint service lane', () => {
     expect(source).toContain('SharePointService');
     expect(source).toContain('MockSharePointService');

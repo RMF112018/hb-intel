@@ -98,6 +98,17 @@ describe('G5-Gate-3: authorization decisions use shared policy engine', () => {
     expect(content).toContain('authz.break_glass');
   });
 
+  it('authorization.ts exports Safety route policy contract', () => {
+    const content = readSrc('middleware/authorization.ts');
+    expect(content).toContain('SAFETY_SUBMITTER_ROLES');
+    expect(content).toContain('SAFETY_OPERATOR_ROLES');
+    expect(content).toContain('SAFETY_REVIEWER_ROLES');
+    expect(content).toContain('SAFETY_ADMIN_ROLES');
+    expect(content).toContain('SAFETY_GLOBAL_OVERRIDE_ROLES');
+    expect(content).toContain('authorizeSafetyRoute');
+    expect(content).toContain('workload-automation');
+  });
+
   it('signalr/index.ts uses shared ADMIN_ROLES, not local constant', () => {
     const content = readSrc('functions/signalr/index.ts');
     expect(content).toContain("from '../../middleware/authorization.js'");

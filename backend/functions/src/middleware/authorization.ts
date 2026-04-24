@@ -15,6 +15,11 @@ export const ADMIN_ROLES = ['Admin', 'HBIntelAdmin'] as const;
 export const CONTROLLER_ROLES = ['Controller', 'HBIntelController'] as const;
 export const BREAK_GLASS_ROLES = ['BreakGlass'] as const;
 export const AUTOMATION_ROLES = ['Automation'] as const;
+export const SAFETY_SUBMITTER_ROLES = ['HBIntelSafetySubmitter'] as const;
+export const SAFETY_OPERATOR_ROLES = ['HBIntelSafetyOperator'] as const;
+export const SAFETY_REVIEWER_ROLES = ['HBIntelSafetyReviewer'] as const;
+export const SAFETY_ADMIN_ROLES = ['HBIntelSafetyAdmin'] as const;
+export const SAFETY_GLOBAL_OVERRIDE_ROLES = [...ADMIN_ROLES, ...BREAK_GLASS_ROLES] as const;
 
 /** All privileged user roles (admin + controller). */
 export const PRIVILEGED_ROLES = [...ADMIN_ROLES, ...CONTROLLER_ROLES] as const;
@@ -225,6 +230,20 @@ export interface AuthzTelemetryEvent {
   callerUpn?: string;
 }
 
+export type SafetyRouteAction = 'preview' | 'ingest' | 'replay';
+export type SafetyRouteRoleFamily =
+  | 'safety-specific'
+  | 'global-override'
+  | 'workload-automation'
+  | 'denied';
+
+export interface ISafetyRouteAuthorizationDecision {
+  readonly allowed: boolean;
+  readonly deniedResponse: HttpResponseInit | null;
+  readonly matchedRole: string | null;
+  readonly matchedRoleFamily: SafetyRouteRoleFamily;
+}
+
 /**
  * P9-G5-10: Emit a structured authorization telemetry event.
  *
@@ -247,4 +266,91 @@ export function emitAuthorizationTelemetry(
     ...(event.callerOid !== undefined && { callerOid: event.callerOid }),
     ...(event.callerUpn !== undefined && { callerUpn: event.callerUpn }),
   });
+}
+
+const SAFETY_ACTION_ROLES: Readonly<Record<SafetyRouteAction, ReadonlyArray<string>>> = {
+  preview: [
+    ...SAFETY_SUBMITTER_ROLES,
+    ...SAFETY_OPERATOR_ROLES,
+    ...SAFETY_REVIEWER_ROLES,
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  ingest: [
+    ...SAFETY_SUBMITTER_ROLES,
+    ...SAFETY_OPERATOR_ROLES,
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  replay: [
+    ...SAFETY_OPERATOR_ROLES,
+    ...SAFETY_REVIEWER_ROLES,
+    ...SAFETY_ADMIN_ROLES,
+  ],
+} as const;
+
+function firstMatchedRole(claims: IValidatedClaims, candidates: ReadonlyArray<string>): string | null {
+  for (const role of candidates) {
+    if (claims.roles.includes(role)) return role;
+  }
+  return null;
+}
+
+export function authorizeSafetyRoute(
+  claims: IValidatedClaims,
+  action: SafetyRouteAction,
+  requestId?: string,
+): ISafetyRouteAuthorizationDecision {
+  if (isAppOnlyToken(claims)) {
+    const workloadDenied = requireWorkloadRole(claims, requestId);
+    if (workloadDenied) {
+      return {
+        allowed: false,
+        deniedResponse: workloadDenied,
+        matchedRole: null,
+        matchedRoleFamily: 'denied',
+      };
+    }
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: firstMatchedRole(claims, AUTOMATION_ROLES),
+      matchedRoleFamily: 'workload-automation',
+    };
+  }
+
+  const scopeDenied = requireDelegatedScope(claims, requestId);
+  if (scopeDenied) {
+    return {
+      allowed: false,
+      deniedResponse: scopeDenied,
+      matchedRole: null,
+      matchedRoleFamily: 'denied',
+    };
+  }
+
+  const safetyRole = firstMatchedRole(claims, SAFETY_ACTION_ROLES[action]);
+  if (safetyRole) {
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: safetyRole,
+      matchedRoleFamily: 'safety-specific',
+    };
+  }
+
+  const globalOverrideRole = firstMatchedRole(claims, SAFETY_GLOBAL_OVERRIDE_ROLES);
+  if (globalOverrideRole) {
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: globalOverrideRole,
+      matchedRoleFamily: 'global-override',
+    };
+  }
+
+  return {
+    allowed: false,
+    deniedResponse: forbiddenResponse('Insufficient role', requestId),
+    matchedRole: null,
+    matchedRoleFamily: 'denied',
+  };
 }

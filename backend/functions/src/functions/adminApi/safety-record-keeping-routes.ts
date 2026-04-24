@@ -1,10 +1,17 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import { withAuth } from '../../middleware/auth.js';
+import { withAuth, type AuthContext } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
-import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
+import {
+  authorizeSafetyRoute,
+  emitAuthorizationTelemetry,
+  requireAdmin,
+  requireDelegatedScope,
+  type SafetyRouteAction,
+} from '../../middleware/authorization.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
+import { createLogger } from '../../utils/logger.js';
 import {
   MockSharePointService,
   SharePointService,
@@ -299,6 +306,27 @@ function parseOptionalPositiveInteger(value: string | undefined): number | undef
   return parsed;
 }
 
+function authorizeSafetyCommandRoute(
+  action: SafetyRouteAction,
+  context: InvocationContext,
+  auth: AuthContext,
+  requestId: string,
+): HttpResponseInit | null {
+  const decision = authorizeSafetyRoute(auth.claims, action, requestId);
+  const logger = createLogger(context);
+  emitAuthorizationTelemetry(logger, {
+    action: `safety-route-${action}`,
+    outcome: decision.allowed ? 'allowed' : 'denied',
+    role: decision.matchedRole ?? undefined,
+    method: decision.matchedRoleFamily,
+    correlationId: requestId,
+    callerOid: auth.claims.oid,
+    callerUpn: auth.claims.upn,
+  });
+  if (!decision.allowed) return decision.deniedResponse;
+  return null;
+}
+
 app.http('adminProvisionSafetyRecordKeepingSharePoint', {
   methods: ['POST'],
   authLevel: 'anonymous',
@@ -357,10 +385,10 @@ app.http('safetyIngestWorkbook', {
   authLevel: 'anonymous',
   route: 'safety-records/ingest',
   handler: withAuth(
-    withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
       const requestId = extractOrGenerateRequestId(request);
-      const scopeDenied = requireDelegatedScope(auth.claims, requestId);
-      if (scopeDenied) return scopeDenied;
+      const denied = authorizeSafetyCommandRoute('ingest', context, auth, requestId);
+      if (denied) return denied;
 
       let body: Record<string, unknown> = {};
       try {
@@ -411,10 +439,10 @@ app.http('safetyPreviewWorkbook', {
   authLevel: 'anonymous',
   route: 'safety-records/ingest/preview',
   handler: withAuth(
-    withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
       const requestId = extractOrGenerateRequestId(request);
-      const scopeDenied = requireDelegatedScope(auth.claims, requestId);
-      if (scopeDenied) return scopeDenied;
+      const denied = authorizeSafetyCommandRoute('preview', context, auth, requestId);
+      if (denied) return denied;
 
       let body: Record<string, unknown> = {};
       try {
@@ -465,10 +493,10 @@ app.http('safetyReplayWorkbook', {
   authLevel: 'anonymous',
   route: 'safety-records/replay',
   handler: withAuth(
-    withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
       const requestId = extractOrGenerateRequestId(request);
-      const scopeDenied = requireDelegatedScope(auth.claims, requestId);
-      if (scopeDenied) return scopeDenied;
+      const denied = authorizeSafetyCommandRoute('replay', context, auth, requestId);
+      if (denied) return denied;
 
       let body: Record<string, unknown> = {};
       try {

@@ -6,8 +6,14 @@ import {
   CONTROLLER_ROLES,
   BREAK_GLASS_ROLES,
   AUTOMATION_ROLES,
+  SAFETY_ADMIN_ROLES,
+  SAFETY_GLOBAL_OVERRIDE_ROLES,
+  SAFETY_OPERATOR_ROLES,
+  SAFETY_REVIEWER_ROLES,
+  SAFETY_SUBMITTER_ROLES,
   PRIVILEGED_ROLES,
   REQUIRED_DELEGATED_SCOPE,
+  authorizeSafetyRoute,
   isAppOnlyToken,
   hasAnyRole,
   isAdmin,
@@ -68,6 +74,14 @@ describe('P9-G5-04 role constants', () => {
 
   it('AUTOMATION_ROLES contains Automation', () => {
     expect(AUTOMATION_ROLES).toEqual(['Automation']);
+  });
+
+  it('Safety delegated role constants are canonical and scoped', () => {
+    expect(SAFETY_SUBMITTER_ROLES).toEqual(['HBIntelSafetySubmitter']);
+    expect(SAFETY_OPERATOR_ROLES).toEqual(['HBIntelSafetyOperator']);
+    expect(SAFETY_REVIEWER_ROLES).toEqual(['HBIntelSafetyReviewer']);
+    expect(SAFETY_ADMIN_ROLES).toEqual(['HBIntelSafetyAdmin']);
+    expect(SAFETY_GLOBAL_OVERRIDE_ROLES).toEqual(['Admin', 'HBIntelAdmin', 'BreakGlass']);
   });
 
   it('REQUIRED_DELEGATED_SCOPE is access_as_user', () => {
@@ -374,6 +388,98 @@ describe('P9-G5-04 requireWorkloadRole', () => {
     const result = requireWorkloadRole(makeClaims({ roles: ['Automation'], scp: 'access_as_user' }));
     expect(result).not.toBeNull();
     expect(result!.status).toBe(403);
+  });
+});
+
+describe('P9-G5-12 authorizeSafetyRoute', () => {
+  it('denies delegated caller missing scope before role checks', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ roles: ['HBIntelSafetySubmitter'], scp: undefined }),
+      'preview',
+      'req-1',
+    );
+    expect(decision.allowed).toBe(false);
+    expect(decision.matchedRoleFamily).toBe('denied');
+    expect(decision.deniedResponse?.status).toBe(403);
+  });
+
+  it('denies delegated caller with scope but without allowed role', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ scp: 'access_as_user', roles: ['Reader'] }),
+      'ingest',
+      'req-2',
+    );
+    expect(decision.allowed).toBe(false);
+    expect(decision.matchedRole).toBeNull();
+    expect(decision.matchedRoleFamily).toBe('denied');
+    expect(decision.deniedResponse?.status).toBe(403);
+  });
+
+  it('allows delegated preview for Safety reviewer role', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ scp: 'access_as_user', roles: ['HBIntelSafetyReviewer'] }),
+      'preview',
+    );
+    expect(decision.allowed).toBe(true);
+    expect(decision.matchedRole).toBe('HBIntelSafetyReviewer');
+    expect(decision.matchedRoleFamily).toBe('safety-specific');
+  });
+
+  it('denies delegated ingest for Safety reviewer role', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ scp: 'access_as_user', roles: ['HBIntelSafetyReviewer'] }),
+      'ingest',
+      'req-3',
+    );
+    expect(decision.allowed).toBe(false);
+    expect(decision.matchedRoleFamily).toBe('denied');
+    expect(decision.deniedResponse?.status).toBe(403);
+  });
+
+  it('allows delegated replay for Safety reviewer role', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ scp: 'access_as_user', roles: ['HBIntelSafetyReviewer'] }),
+      'replay',
+    );
+    expect(decision.allowed).toBe(true);
+    expect(decision.matchedRole).toBe('HBIntelSafetyReviewer');
+    expect(decision.matchedRoleFamily).toBe('safety-specific');
+  });
+
+  it('denies delegated replay for Safety submitter role', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ scp: 'access_as_user', roles: ['HBIntelSafetySubmitter'] }),
+      'replay',
+      'req-4',
+    );
+    expect(decision.allowed).toBe(false);
+    expect(decision.matchedRole).toBeNull();
+    expect(decision.matchedRoleFamily).toBe('denied');
+    expect(decision.deniedResponse?.status).toBe(403);
+  });
+
+  it('allows delegated global override role', () => {
+    const decision = authorizeSafetyRoute(
+      makeClaims({ scp: 'access_as_user', roles: ['HBIntelAdmin'] }),
+      'ingest',
+    );
+    expect(decision.allowed).toBe(true);
+    expect(decision.matchedRole).toBe('HBIntelAdmin');
+    expect(decision.matchedRoleFamily).toBe('global-override');
+  });
+
+  it('allows app-only Automation callers for command routes', () => {
+    const decision = authorizeSafetyRoute(makeAppOnlyClaims(['Automation']), 'replay');
+    expect(decision.allowed).toBe(true);
+    expect(decision.matchedRole).toBe('Automation');
+    expect(decision.matchedRoleFamily).toBe('workload-automation');
+  });
+
+  it('denies app-only caller missing Automation role', () => {
+    const decision = authorizeSafetyRoute(makeAppOnlyClaims(['Admin']), 'preview', 'req-5');
+    expect(decision.allowed).toBe(false);
+    expect(decision.matchedRoleFamily).toBe('denied');
+    expect(decision.deniedResponse?.status).toBe(403);
   });
 });
 
