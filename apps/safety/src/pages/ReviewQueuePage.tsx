@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   HbcDataTable,
   HbcStatusBadge,
@@ -8,11 +8,13 @@ import {
 import type { ColumnDef, StatusVariant } from '@hbc/ui-kit';
 import { useReplayIngestion, useReviewQueue } from '@hbc/features-safety';
 import type { ReviewQueueEntry } from '@hbc/features-safety';
+import { isSafetyBackendCommandError } from '@hbc/features-safety';
 import {
   SafetyMasthead,
   SafetyReviewActions,
   SafetyReviewEntryCard,
   SafetySectionHeader,
+  SafetyStatusPanel,
   SafetyTriageGroup,
   SafetyTriageSummary,
 } from '../components/index.js';
@@ -66,11 +68,28 @@ export function ReviewQueuePage(): ReactNode {
   const entries = (reviewQueue.data ?? []) as ReviewQueueEntry[];
   const replay = useReplayIngestion();
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
+  const replayAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      replayAbortRef.current?.abort();
+      replayAbortRef.current = null;
+    };
+  }, []);
 
   const handleRetry = (runId: string, supersedePrior: boolean): void => {
+    replayAbortRef.current?.abort();
+    const controller = new AbortController();
+    replayAbortRef.current = controller;
     setPendingRunId(runId);
     replay.mutate(
-      { parentRunId: runId, supersedePrior },
+      {
+        parentRunId: runId,
+        supersedePrior,
+        commandOptions: {
+          signal: controller.signal,
+        },
+      },
       { onSettled: () => setPendingRunId(null) },
     );
   };
@@ -183,6 +202,18 @@ export function ReviewQueuePage(): ReactNode {
           categories={categories}
           totalEntries={entries.length}
         />
+        {replay.error && (
+          <SafetyStatusPanel
+            intent="partial-failure"
+            description="Replay command failed before completion."
+            detail={replayErrorMessage(replay.error)}
+            action={{
+              label: 'Dismiss',
+              variant: 'secondary',
+              onClick: () => replay.reset(),
+            }}
+          />
+        )}
 
         {!isClean && (
           <div className="safety-triage-groups" data-safety-ui="triage-groups">
@@ -234,4 +265,19 @@ export function ReviewQueuePage(): ReactNode {
       </div>
     </WorkspacePageShell>
   );
+}
+
+function replayErrorMessage(error: unknown): string {
+  if (isSafetyBackendCommandError(error)) {
+    if (error.errorKind === 'timeout') {
+      return 'Replay timed out before the backend could finish. Retry when service responsiveness improves.';
+    }
+    if (error.errorKind === 'aborted') {
+      return 'Replay was cancelled before completion.';
+    }
+    if (error.requestId) {
+      return `${error.message} (requestId: ${error.requestId})`;
+    }
+  }
+  return error instanceof Error ? error.message : 'Replay failed due to an unexpected error.';
 }

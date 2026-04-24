@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
+  BackendCommandOptions,
   IngestionRunFilter,
   InspectionFilter,
   ProjectWeekFilter,
@@ -101,13 +102,14 @@ export function useReviewQueue(reportingPeriodId?: string) {
 export interface IngestionMutationInput {
   readonly file: File;
   readonly context: UploadContext;
+  readonly commandOptions?: BackendCommandOptions;
 }
 
 export function useSafetyIngestion() {
   const repo = useSafetyRepository();
   const queryClient = useQueryClient();
   return useMutation<IngestionRunResult, SafetyBackendCommandError | Error, IngestionMutationInput>({
-    mutationFn: ({ file, context }) => repo.ingestWorkbook(file, context),
+    mutationFn: ({ file, context, commandOptions }) => repo.ingestWorkbook(file, context, commandOptions),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['safety'] });
     },
@@ -117,14 +119,15 @@ export function useSafetyIngestion() {
 export interface ReplayIngestionInput {
   readonly parentRunId: string;
   readonly supersedePrior?: boolean;
+  readonly commandOptions?: BackendCommandOptions;
 }
 
 export function useReplayIngestion() {
   const repo = useSafetyRepository();
   const queryClient = useQueryClient();
   return useMutation<IngestionRunResult, SafetyBackendCommandError | Error, ReplayIngestionInput>({
-    mutationFn: ({ parentRunId, supersedePrior }) =>
-      repo.replayIngestion(parentRunId, { supersedePrior }),
+    mutationFn: ({ parentRunId, supersedePrior, commandOptions }) =>
+      repo.replayIngestion(parentRunId, { supersedePrior, ...commandOptions }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['safety'] });
     },
@@ -134,11 +137,12 @@ export function useReplayIngestion() {
 export interface PreviewIngestionInput {
   readonly file: File;
   readonly context: UploadContext;
+  readonly commandOptions?: BackendCommandOptions;
 }
 
 export function useSafetyIngestionPreview() {
   const repo = useSafetyRepository();
   return useMutation<SafetyIngestionPreviewResult, SafetyBackendCommandError | Error, PreviewIngestionInput>({
-    mutationFn: ({ file, context }) => repo.previewWorkbook(file, context),
+    mutationFn: ({ file, context, commandOptions }) => repo.previewWorkbook(file, context, commandOptions),
   });
 }

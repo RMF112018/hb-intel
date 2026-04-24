@@ -30,6 +30,7 @@ import type {
 import {
   REVIEW_QUEUE_TERMINAL_STATUSES,
   type ISafetyInspectionRepository,
+  type BackendCommandOptions,
   type IngestionRunFilter,
   type InspectionFilter,
   type ProjectWeekFilter,
@@ -227,17 +228,23 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
   async previewWorkbook(
     file: File | Blob,
     context: UploadContext,
+    options?: BackendCommandOptions,
   ): Promise<SafetyIngestionPreviewResult> {
     const request = await this.buildIngestionRequest(file, context);
-    const operation = await this.requireBackendCommandClient().preview(request);
+    const commandResult = await this.requireBackendCommandClient().preview(request, options);
+    const operation = commandResult.data;
     if (!operation.success || !operation.preview) {
-      throw this.buildBackendOperationError('/api/safety-records/ingest/preview', operation, 422);
+      throw this.buildBackendOperationError('/api/safety-records/ingest/preview', operation, 422, commandResult.frontendRequestId);
     }
     return operation.preview;
   }
 
-  async ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult> {
-    return this.ingestWorkbookViaBackend(file, context);
+  async ingestWorkbook(
+    file: File | Blob,
+    context: UploadContext,
+    options?: BackendCommandOptions,
+  ): Promise<IngestionRunResult> {
+    return this.ingestWorkbookViaBackend(file, context, options);
   }
 
   async replayIngestion(
@@ -254,12 +261,15 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
   private async ingestWorkbookViaBackend(
     file: File | Blob,
     context: UploadContext,
+    options?: BackendCommandOptions,
   ): Promise<IngestionRunResult> {
-    const operation = await this.requireBackendCommandClient().ingest(
+    const commandResult = await this.requireBackendCommandClient().ingest(
       await this.buildIngestionRequest(file, context),
+      options,
     );
+    const operation = commandResult.data;
     if (!operation.success || !operation.result) {
-      throw this.buildBackendOperationError('/api/safety-records/ingest', operation, 422);
+      throw this.buildBackendOperationError('/api/safety-records/ingest', operation, 422, commandResult.frontendRequestId);
     }
     return operation.result;
   }
@@ -268,12 +278,13 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     parentRunId: string,
     options: ReplayOptions,
   ): Promise<IngestionRunResult> {
-    const operation = await this.requireBackendCommandClient().replay({
+    const commandResult = await this.requireBackendCommandClient().replay({
       parentRunId,
       supersedePrior: options.supersedePrior ?? false,
-    });
+    }, options);
+    const operation = commandResult.data;
     if (!operation.success || !operation.result) {
-      throw this.buildBackendOperationError('/api/safety-records/replay', operation, 422);
+      throw this.buildBackendOperationError('/api/safety-records/replay', operation, 422, commandResult.frontendRequestId);
     }
     return operation.result;
   }
@@ -323,6 +334,7 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
     endpointPath: string,
     operation: SafetyBackendOperationResult | SafetyBackendPreviewOperationResult,
     httpStatus: number,
+    frontendRequestId?: string,
   ): SafetyBackendCommandError {
     const primaryDiagnostic = operation.diagnostics.find((d) => d.failureClass);
     const previewFailureClass = operation.preview?.diagnosticSummary?.failureClass;
@@ -336,6 +348,10 @@ export class SharePointSafetyInspectionRepository implements ISafetyInspectionRe
       previewFailureClass,
       graphContext: primaryDiagnostic?.graphContext,
       operationData: operation,
+      errorKind: httpStatus === 422 ? 'contract' : 'non-transient',
+      retryable: false,
+      frontendRequestId,
+      backendRequestId: operation.requestId,
     });
   }
 

@@ -293,4 +293,141 @@ describe('SharePointSafetyInspectionRepository backend ingestion path', () => {
     } satisfies Partial<SafetyBackendCommandError>);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it('classifies timeout failures without retry loops', async () => {
+    const fetchSpy = vi.fn().mockImplementation(
+      (_url: string, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          const signal = init?.signal;
+          if (signal) {
+            signal.addEventListener('abort', () => reject(new Error('aborted by timeout')), { once: true });
+          }
+        }),
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    const repo = new SharePointSafetyInspectionRepository({
+      client: { get: vi.fn(), post: vi.fn() },
+      backendIngestion: {
+        baseUrl: 'https://functions.example.com/',
+        getApiToken: async () => 'token-timeout',
+      },
+    });
+
+    await expect(
+      repo.ingestWorkbook(
+        new Blob(['hello']),
+        {
+          uploadedByUpn: 'user@hb.com',
+          uploadedAt: '2026-04-22T10:00:00.000Z',
+          fileName: 'test.xlsx',
+          reportingPeriodId: 'period-1',
+          reportingPeriodSpItemId: 1,
+        },
+        { timeoutMs: 1 },
+      ),
+    ).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'timeout',
+      code: 'BACKEND_TIMEOUT',
+      retryable: false,
+    } satisfies Partial<SafetyBackendCommandError>);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('classifies explicit abort failures', async () => {
+    const fetchSpy = vi.fn().mockImplementation(
+      (_url: string, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(new Error('aborted by user')), { once: true });
+        }),
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    const repo = new SharePointSafetyInspectionRepository({
+      client: { get: vi.fn(), post: vi.fn() },
+      backendIngestion: {
+        baseUrl: 'https://functions.example.com/',
+        getApiToken: async () => 'token-abort',
+      },
+    });
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 0);
+
+    await expect(
+      repo.replayIngestion('run-123', { supersedePrior: false, signal: controller.signal }),
+    ).rejects.toMatchObject({
+      name: 'SafetyBackendCommandError',
+      errorKind: 'aborted',
+      code: 'BACKEND_ABORTED',
+      retryable: false,
+    } satisfies Partial<SafetyBackendCommandError>);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries one transient transport failure and preserves request correlation headers', async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: { get: (key: string) => (key === 'X-Request-Id' ? 'backend-req-200' : null) },
+        json: async () => ({
+          data: {
+            success: true,
+            requestAccepted: true,
+            requestId: 'backend-req-200',
+            diagnostics: [],
+            result: {
+              state: 'committed',
+              run: {
+                id: 'run-200',
+                spItemId: 200,
+                title: 'Ingestion test.xlsx — attempt 1',
+                sourceUploadItemId: 99,
+                uploadFileName: 'test.xlsx',
+                checksum: 'abc',
+                validationStatus: 'passed',
+                parseStatus: 'passed',
+                projectResolutionStatus: 'resolved',
+                terminalStatus: 'committed',
+                committedEntityIdsJson: '{}',
+                runStartedAt: new Date().toISOString(),
+                runCompletedAt: new Date().toISOString(),
+                attemptNumber: 1,
+                reportingPeriodId: 'period-1',
+                reportingPeriodSpItemId: 1,
+                reviewStatus: 'none',
+              },
+            },
+          },
+        }),
+      } as Response);
+    vi.stubGlobal('fetch', fetchSpy);
+    const repo = new SharePointSafetyInspectionRepository({
+      client: { get: vi.fn(), post: vi.fn() },
+      backendIngestion: {
+        baseUrl: 'https://functions.example.com/',
+        getApiToken: async () => 'token-retry',
+      },
+    });
+
+    const result = await repo.ingestWorkbook(
+      new Blob(['hello']),
+      {
+        uploadedByUpn: 'user@hb.com',
+        uploadedAt: '2026-04-22T10:00:00.000Z',
+        fileName: 'test.xlsx',
+        reportingPeriodId: 'period-1',
+        reportingPeriodSpItemId: 1,
+      },
+      { requestId: 'frontend-request-1' },
+    );
+
+    expect(result.state).toBe('committed');
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    const firstHeaders = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    const secondHeaders = fetchSpy.mock.calls[1]?.[1] as RequestInit;
+    expect(firstHeaders.headers).toMatchObject({ 'X-Request-Id': 'frontend-request-1' });
+    expect(secondHeaders.headers).toMatchObject({ 'X-Request-Id': 'frontend-request-1' });
+  });
 });

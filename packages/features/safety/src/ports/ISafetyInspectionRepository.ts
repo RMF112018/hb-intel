@@ -59,6 +59,15 @@ export interface ProjectWeekInspectionFilter {
 
 export interface ReplayOptions {
   readonly supersedePrior?: boolean;
+  readonly signal?: AbortSignal;
+  readonly timeoutMs?: number;
+  readonly requestId?: string;
+}
+
+export interface BackendCommandOptions {
+  readonly signal?: AbortSignal;
+  readonly timeoutMs?: number;
+  readonly requestId?: string;
 }
 
 export interface ISafetyInspectionRepository {
@@ -85,8 +94,16 @@ export interface ISafetyInspectionRepository {
   listIngestionRuns(filter: IngestionRunFilter): Promise<ReadonlyArray<SafetyIngestionRun>>;
   listReviewQueue(reportingPeriodId?: string): Promise<ReadonlyArray<ReviewQueueEntry>>;
 
-  previewWorkbook(file: File | Blob, context: UploadContext): Promise<SafetyIngestionPreviewResult>;
-  ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult>;
+  previewWorkbook(
+    file: File | Blob,
+    context: UploadContext,
+    options?: BackendCommandOptions,
+  ): Promise<SafetyIngestionPreviewResult>;
+  ingestWorkbook(
+    file: File | Blob,
+    context: UploadContext,
+    options?: BackendCommandOptions,
+  ): Promise<IngestionRunResult>;
   /** Re-read the retained upload and re-run the pipeline with an incremented attempt chain. */
   replayIngestion(
     parentRunId: string,

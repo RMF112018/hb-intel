@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   HbcButton,
   HbcCard,
@@ -12,6 +12,7 @@ import type { StatusVariant } from '@hbc/ui-kit';
 import {
   SafetyUploadError,
   isSafetyAdapterFetchError,
+  isSafetyBackendCommandError,
   isSafetyConfigurationError,
   useReportingPeriods,
   useSafetyIngestion,
@@ -83,6 +84,14 @@ export function UploadPage(): ReactNode {
     useState<SafetyProjectPickerValue | null>(null);
   const [inspectionNumber, setInspectionNumber] = useState<string>('');
   const [inspectionDate, setInspectionDate] = useState<string>('');
+  const submitAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      submitAbortRef.current?.abort();
+      submitAbortRef.current = null;
+    };
+  }, []);
 
   const activePeriod = useMemo(
     () => periods.find((p) => p.id === reportingPeriodId) ?? periods[0],
@@ -96,8 +105,14 @@ export function UploadPage(): ReactNode {
     if (!file || !activePeriod) return;
     if (!selectedProject) return;
     if (!inspectionNumberValid || !inspectionDateValid) return;
+    submitAbortRef.current?.abort();
+    const controller = new AbortController();
+    submitAbortRef.current = controller;
     ingestion.mutate({
       file,
+      commandOptions: {
+        signal: controller.signal,
+      },
       context: {
         uploadedByUpn: currentUserUpn(),
         uploadedAt: new Date().toISOString(),
@@ -425,6 +440,14 @@ export function UploadPage(): ReactNode {
               >
                 {ingestion.isPending ? 'Processing…' : 'Submit checklist'}
               </HbcButton>
+              {ingestion.isPending && (
+                <HbcButton
+                  variant="secondary"
+                  onClick={() => submitAbortRef.current?.abort()}
+                >
+                  Cancel upload
+                </HbcButton>
+              )}
               {submitBlockedReason && !ingestion.isPending && (
                 <HbcTypography intent="bodySmall">
                   {submitBlockedReason}
@@ -599,6 +622,18 @@ function reportingPeriodLoadMessage(error: unknown): string {
 }
 
 function uploadErrorMessage(error: unknown): string {
+  if (isSafetyBackendCommandError(error)) {
+    if (error.errorKind === 'timeout') {
+      return 'Safety backend timed out before the command completed. Retry the upload when connectivity stabilizes.';
+    }
+    if (error.errorKind === 'aborted') {
+      return 'Upload was cancelled before completion. Submit again when ready.';
+    }
+    if (error.requestId) {
+      return `${error.message} (requestId: ${error.requestId})`;
+    }
+    return error.message;
+  }
   if (error instanceof SafetyUploadError) {
     if (error.kind === 'security-validation') {
       return (

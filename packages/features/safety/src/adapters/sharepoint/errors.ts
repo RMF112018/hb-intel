@@ -1,3 +1,5 @@
+import type { SafetyBackendCommandErrorKind } from './backendContracts.js';
+
 /**
  * Safety SharePoint adapter error taxonomy.
  *
@@ -74,6 +76,11 @@ export class SafetyBackendCommandError extends Error {
   readonly graphContext?: Record<string, unknown>;
   readonly details?: Record<string, unknown>;
   readonly operationData?: unknown;
+  readonly errorKind: SafetyBackendCommandErrorKind;
+  readonly frontendRequestId?: string;
+  readonly backendRequestId?: string;
+  readonly attempts: number;
+  readonly retryable: boolean;
 
   constructor(params: {
     endpoint: string;
@@ -86,6 +93,11 @@ export class SafetyBackendCommandError extends Error {
     graphContext?: Record<string, unknown>;
     details?: Record<string, unknown>;
     operationData?: unknown;
+    errorKind?: SafetyBackendCommandErrorKind;
+    frontendRequestId?: string;
+    backendRequestId?: string;
+    attempts?: number;
+    retryable?: boolean;
   }) {
     const codeSuffix = params.code ? ` [${params.code}]` : '';
     const requestSuffix = params.requestId ? ` requestId=${params.requestId}` : '';
@@ -100,6 +112,11 @@ export class SafetyBackendCommandError extends Error {
     this.graphContext = params.graphContext;
     this.details = params.details;
     this.operationData = params.operationData;
+    this.errorKind = params.errorKind ?? 'non-transient';
+    this.frontendRequestId = params.frontendRequestId;
+    this.backendRequestId = params.backendRequestId;
+    this.attempts = params.attempts ?? 1;
+    this.retryable = params.retryable ?? false;
   }
 }
 

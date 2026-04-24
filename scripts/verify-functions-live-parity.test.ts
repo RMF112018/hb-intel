@@ -15,6 +15,11 @@ const BASE = {
     { route: '/api/safety-records/ingest/preview', method: 'POST' as const, status: 401 },
     { route: '/api/safety-records/replay', method: 'POST' as const, status: 401 },
   ],
+  malformedRouteStatuses: [
+    { route: '/api/safety-records/ingest', method: 'POST' as const, status: 401 },
+    { route: '/api/safety-records/ingest/preview', method: 'POST' as const, status: 401 },
+    { route: '/api/safety-records/replay', method: 'POST' as const, status: 401 },
+  ],
   healthReadyNoAuthStatus: 401,
   healthReadyMalformedAuthStatus: 401,
   appSettings: {
@@ -116,9 +121,11 @@ describe('verify-functions-live-parity', () => {
     expect(evidence.overallPass).toBe(true);
     expect(evidence.identityParity.issues).toHaveLength(0);
     expect(evidence.routeTruth.issues).toHaveLength(0);
+    expect(evidence.commandAuthTruth.malformedBearer.issues).toHaveLength(0);
     expect(evidence.healthReadyTruth.issues).toHaveLength(0);
     expect(evidence.readinessAuthTruth.noAuth.issues).toHaveLength(0);
     expect(evidence.readinessAuthTruth.malformedBearer.issues).toHaveLength(0);
+    expect(evidence.readinessAuthTruth.nonAdminBearer.attempted).toBe(false);
     expect(evidence.healthPublicContract.issues).toHaveLength(0);
     expect(evidence.deployStampTruth.issues).toHaveLength(0);
   });
@@ -165,6 +172,54 @@ describe('verify-functions-live-parity', () => {
     expect(evidence.readinessAuthTruth.adminBearer.passed).toBe(false);
     expect(evidence.readinessAuthTruth.adminBearer.issues).toContain(
       'readiness.admin_bearer.contract_missing(operationalReadiness)',
+    );
+  });
+
+  it('fails non-admin probe when status is not 403', () => {
+    const evidence = buildParityEvidence({
+      ...BASE,
+      healthBody: {
+        status: 'healthy',
+        artifact: {
+          version: BASE.expectedIdentity.version,
+          commitSha: BASE.expectedIdentity.commitSha,
+          buildTimestamp: '2026-04-23T20:29:59.604Z',
+        },
+        timestamp: '2026-04-23T20:30:31.704Z',
+      },
+      healthReadyNonAdminStatus: 401,
+    });
+
+    expect(evidence.overallPass).toBe(false);
+    expect(evidence.readinessAuthTruth.nonAdminBearer.attempted).toBe(true);
+    expect(evidence.readinessAuthTruth.nonAdminBearer.passed).toBe(false);
+    expect(evidence.readinessAuthTruth.nonAdminBearer.issues).toContain(
+      'readiness.non_admin_bearer.unexpected_status(expected=403,live=401)',
+    );
+  });
+
+  it('fails when malformed command bearer auth is not denied', () => {
+    const evidence = buildParityEvidence({
+      ...BASE,
+      healthBody: {
+        status: 'healthy',
+        artifact: {
+          version: BASE.expectedIdentity.version,
+          commitSha: BASE.expectedIdentity.commitSha,
+          buildTimestamp: '2026-04-23T20:29:59.604Z',
+        },
+        timestamp: '2026-04-23T20:30:31.704Z',
+      },
+      malformedRouteStatuses: [
+        { route: '/api/safety-records/ingest', method: 'POST', status: 400 },
+        { route: '/api/safety-records/ingest/preview', method: 'POST', status: 401 },
+        { route: '/api/safety-records/replay', method: 'POST', status: 401 },
+      ],
+    });
+
+    expect(evidence.overallPass).toBe(false);
+    expect(evidence.commandAuthTruth.malformedBearer.issues).toContain(
+      'command_auth.malformed_bearer.unexpected_status(/api/safety-records/ingest expected=401,live=400)',
     );
   });
 });

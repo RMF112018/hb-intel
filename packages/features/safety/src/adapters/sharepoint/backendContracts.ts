@@ -15,6 +15,19 @@ export interface SafetyBackendReplayRequest {
   readonly supersedePrior?: boolean;
 }
 
+export interface SafetyBackendCommandOptions {
+  readonly signal?: AbortSignal;
+  readonly timeoutMs?: number;
+  readonly requestId?: string;
+}
+
+export interface SafetyBackendCommandResult<TData> {
+  readonly data: TData;
+  readonly requestId?: string;
+  readonly frontendRequestId: string;
+  readonly attempts: number;
+}
+
 export interface SafetyBackendDiagnostic {
   readonly code: string;
   readonly message: string;
@@ -60,3 +73,11 @@ export interface SafetyBackendFailureEnvelope {
   readonly graphContext?: Record<string, unknown>;
   readonly data: SafetyBackendOperationResult | SafetyBackendPreviewOperationResult;
 }
+
+export type SafetyBackendCommandErrorKind =
+  | 'aborted'
+  | 'timeout'
+  | 'transient'
+  | 'non-transient'
+  | 'auth'
+  | 'contract';

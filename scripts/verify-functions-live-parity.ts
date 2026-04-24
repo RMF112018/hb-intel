@@ -41,6 +41,26 @@ export interface IParityEvidence {
     allPresent: boolean;
     issues: string[];
   };
+  commandAuthTruth: {
+    noAuth: {
+      routes: IRouteProbeResult[];
+      issues: string[];
+    };
+    malformedBearer: {
+      routes: IRouteProbeResult[];
+      issues: string[];
+    };
+    adminBearer: {
+      attempted: boolean;
+      routes: IRouteProbeResult[];
+      issues: string[];
+    };
+    nonAdminBearer: {
+      attempted: boolean;
+      routes: IRouteProbeResult[];
+      issues: string[];
+    };
+  };
   healthReadyTruth: {
     status: number;
     exists: boolean;
@@ -58,6 +78,12 @@ export interface IParityEvidence {
       issues: string[];
     };
     adminBearer: {
+      attempted: boolean;
+      status: number;
+      passed: boolean;
+      issues: string[];
+    };
+    nonAdminBearer: {
       attempted: boolean;
       status: number;
       passed: boolean;
@@ -90,10 +116,14 @@ export interface IBuildParityEvidenceInput {
   expectedIdentity: IExpectedIdentity;
   healthBody: unknown;
   routeStatuses: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
+  malformedRouteStatuses: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
+  adminRouteStatuses?: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
+  nonAdminRouteStatuses?: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
   healthReadyNoAuthStatus: number;
   healthReadyMalformedAuthStatus: number;
   healthReadyAdminStatus?: number;
   healthReadyAdminBody?: unknown;
+  healthReadyNonAdminStatus?: number;
   appSettings: Record<string, string>;
 }
 
@@ -103,6 +133,7 @@ interface IOptions {
   expectedSha?: string;
   expectedVersion?: string;
   adminToken?: string;
+  nonAdminToken?: string;
   outputPath?: string;
 }
 
@@ -141,6 +172,11 @@ function parseArgs(argv: string[]): IOptions {
     }
     if (arg === '--output' && argv[i + 1]) {
       parsed.outputPath = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg === '--non-admin-token' && argv[i + 1]) {
+      parsed.nonAdminToken = argv[i + 1];
       i += 1;
       continue;
     }
@@ -312,6 +348,33 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
   const routeIssues = routes
     .filter((r) => !r.exists)
     .map((r) => `route.missing(${r.method} ${r.route} status=${r.status})`);
+  const malformedRoutes = input.malformedRouteStatuses.map((item) => ({
+    route: item.route,
+    method: item.method,
+    status: item.status,
+    exists: item.status !== 404 && item.status > 0,
+  }));
+  const malformedRouteIssues = malformedRoutes
+    .filter((r) => r.status !== 401)
+    .map((r) => `command_auth.malformed_bearer.unexpected_status(${r.route} expected=401,live=${r.status})`);
+  const adminRoutes = (input.adminRouteStatuses ?? []).map((item) => ({
+    route: item.route,
+    method: item.method,
+    status: item.status,
+    exists: item.status !== 404 && item.status > 0,
+  }));
+  const adminRouteIssues = adminRoutes
+    .filter((r) => [401, 403, 404, -1].includes(r.status))
+    .map((r) => `command_auth.admin_bearer.unexpected_status(${r.route} expected!=401|403|404,live=${r.status})`);
+  const nonAdminRoutes = (input.nonAdminRouteStatuses ?? []).map((item) => ({
+    route: item.route,
+    method: item.method,
+    status: item.status,
+    exists: item.status !== 404 && item.status > 0,
+  }));
+  const nonAdminRouteIssues = nonAdminRoutes
+    .filter((r) => [401, 404, -1].includes(r.status))
+    .map((r) => `command_auth.non_admin_bearer.unexpected_status(${r.route} expected!=401|404,live=${r.status})`);
 
   const readyExists = input.healthReadyNoAuthStatus !== 404 && input.healthReadyNoAuthStatus > 0;
   const readyIssues = readyExists
@@ -349,6 +412,13 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
         }
       }
     }
+  }
+  const readinessNonAdminAttempted = typeof input.healthReadyNonAdminStatus === 'number';
+  const readinessNonAdminIssues: string[] = [];
+  if (readinessNonAdminAttempted && input.healthReadyNonAdminStatus !== 403) {
+    readinessNonAdminIssues.push(
+      `readiness.non_admin_bearer.unexpected_status(expected=403,live=${input.healthReadyNonAdminStatus})`,
+    );
   }
 
   const healthPublicIssues: string[] = [];
@@ -399,6 +469,10 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     readinessNoAuthIssues.length === 0 &&
     readinessMalformedIssues.length === 0 &&
     readinessAdminIssues.length === 0 &&
+    readinessNonAdminIssues.length === 0 &&
+    malformedRouteIssues.length === 0 &&
+    adminRouteIssues.length === 0 &&
+    nonAdminRouteIssues.length === 0 &&
     healthPublicIssues.length === 0 &&
     deployIssues.length === 0;
 
@@ -419,6 +493,26 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
       routes,
       allPresent: routeIssues.length === 0,
       issues: routeIssues,
+    },
+    commandAuthTruth: {
+      noAuth: {
+        routes,
+        issues: routeIssues,
+      },
+      malformedBearer: {
+        routes: malformedRoutes,
+        issues: malformedRouteIssues,
+      },
+      adminBearer: {
+        attempted: adminRoutes.length > 0,
+        routes: adminRoutes,
+        issues: adminRouteIssues,
+      },
+      nonAdminBearer: {
+        attempted: nonAdminRoutes.length > 0,
+        routes: nonAdminRoutes,
+        issues: nonAdminRouteIssues,
+      },
     },
     healthReadyTruth: {
       status: input.healthReadyNoAuthStatus,
@@ -441,6 +535,12 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
         status: input.healthReadyAdminStatus ?? -1,
         passed: readinessAdminAttempted ? readinessAdminIssues.length === 0 : false,
         issues: readinessAdminIssues,
+      },
+      nonAdminBearer: {
+        attempted: readinessNonAdminAttempted,
+        status: input.healthReadyNonAdminStatus ?? -1,
+        passed: readinessNonAdminAttempted ? readinessNonAdminIssues.length === 0 : false,
+        issues: readinessNonAdminIssues,
       },
     },
     healthPublicContract: {
@@ -498,6 +598,35 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
       }),
     },
   ];
+  const malformedRouteStatuses = [
+    {
+      route: '/api/safety-records/ingest',
+      method: 'POST' as const,
+      status: await fetchStatus(`${baseUrl}/api/safety-records/ingest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      }),
+    },
+    {
+      route: '/api/safety-records/ingest/preview',
+      method: 'POST' as const,
+      status: await fetchStatus(`${baseUrl}/api/safety-records/ingest/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      }),
+    },
+    {
+      route: '/api/safety-records/replay',
+      method: 'POST' as const,
+      status: await fetchStatus(`${baseUrl}/api/safety-records/replay`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer malformed-token' },
+        body: '{}',
+      }),
+    },
+  ];
 
   const healthReadyNoAuthStatus = await fetchStatus(`${baseUrl}/api/health/ready`);
   const healthReadyMalformedAuthStatus = await fetchStatus(`${baseUrl}/api/health/ready`, {
@@ -507,6 +636,9 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
   });
   let healthReadyAdminStatus: number | undefined;
   let healthReadyAdminBody: unknown;
+  let adminRouteStatuses:
+    | ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>
+    | undefined;
   if (options.adminToken && options.adminToken.trim().length > 0) {
     healthReadyAdminStatus = await fetchStatus(`${baseUrl}/api/health/ready`, {
       headers: {
@@ -526,6 +658,75 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
         healthReadyAdminBody = undefined;
       }
     }
+    adminRouteStatuses = [
+      {
+        route: '/api/safety-records/ingest',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/ingest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.adminToken}` },
+          body: '{}',
+        }),
+      },
+      {
+        route: '/api/safety-records/ingest/preview',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/ingest/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.adminToken}` },
+          body: '{}',
+        }),
+      },
+      {
+        route: '/api/safety-records/replay',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/replay`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.adminToken}` },
+          body: '{}',
+        }),
+      },
+    ];
+  }
+  let healthReadyNonAdminStatus: number | undefined;
+  let nonAdminRouteStatuses:
+    | ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>
+    | undefined;
+  if (options.nonAdminToken && options.nonAdminToken.trim().length > 0) {
+    healthReadyNonAdminStatus = await fetchStatus(`${baseUrl}/api/health/ready`, {
+      headers: {
+        Authorization: `Bearer ${options.nonAdminToken}`,
+      },
+    });
+    nonAdminRouteStatuses = [
+      {
+        route: '/api/safety-records/ingest',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/ingest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.nonAdminToken}` },
+          body: '{}',
+        }),
+      },
+      {
+        route: '/api/safety-records/ingest/preview',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/ingest/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.nonAdminToken}` },
+          body: '{}',
+        }),
+      },
+      {
+        route: '/api/safety-records/replay',
+        method: 'POST',
+        status: await fetchStatus(`${baseUrl}/api/safety-records/replay`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${options.nonAdminToken}` },
+          body: '{}',
+        }),
+      },
+    ];
   }
 
   const appSettingsRaw = runAz(
@@ -553,10 +754,14 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
     expectedIdentity,
     healthBody,
     routeStatuses,
+    malformedRouteStatuses,
+    adminRouteStatuses,
+    nonAdminRouteStatuses,
     healthReadyNoAuthStatus,
     healthReadyMalformedAuthStatus,
     healthReadyAdminStatus,
     healthReadyAdminBody,
+    healthReadyNonAdminStatus,
     appSettings,
   });
 }

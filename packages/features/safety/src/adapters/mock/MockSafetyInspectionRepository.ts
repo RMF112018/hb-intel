@@ -13,6 +13,7 @@ import type {
 } from '../../domain/types.js';
 import {
   REVIEW_QUEUE_TERMINAL_STATUSES,
+  type BackendCommandOptions,
   type ISafetyInspectionRepository,
   type IngestionRunFilter,
   type InspectionFilter,
@@ -189,7 +190,11 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
     });
   }
 
-  async ingestWorkbook(file: File | Blob, context: UploadContext): Promise<IngestionRunResult> {
+  async ingestWorkbook(
+    file: File | Blob,
+    context: UploadContext,
+    _options?: BackendCommandOptions,
+  ): Promise<IngestionRunResult> {
     const buffer = await file.arrayBuffer();
     const checksum = await computeChecksum(buffer);
     const sourceUploadItemId = ++this.uploadIdSeq;
@@ -221,6 +226,7 @@ export class MockSafetyInspectionRepository implements ISafetyInspectionReposito
   async previewWorkbook(
     _file: File | Blob,
     _context: UploadContext,
+    _options?: BackendCommandOptions,
   ): Promise<SafetyIngestionPreviewResult> {
     return {
       commitReadiness: true,
