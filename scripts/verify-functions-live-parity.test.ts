@@ -7,7 +7,7 @@ const BASE = {
   hostName: 'hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net',
   checkedAtUtc: '2026-04-23T20:30:31.704Z',
   expectedIdentity: {
-    version: '00.000.146',
+    version: '00.000.147',
     commitSha: 'c621aee82bc9ec0dc0434225726b83a632ace5c7',
   },
   routeStatuses: [
@@ -23,7 +23,7 @@ const BASE = {
   healthReadyNoAuthStatus: 401,
   healthReadyMalformedAuthStatus: 401,
   appSettings: {
-    HBC_FUNCTIONS_BUILD_VERSION: '00.000.146',
+    HBC_FUNCTIONS_BUILD_VERSION: '00.000.147',
     HBC_FUNCTIONS_BUILD_SHA: 'c621aee82bc9ec0dc0434225726b83a632ace5c7',
     HBC_FUNCTIONS_BUILD_TIMESTAMP: '2026-04-23T20:29:59.604Z',
   },
