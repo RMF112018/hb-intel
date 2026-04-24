@@ -3,6 +3,24 @@ import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import type { FoleonContentRecord } from './types/foleon-content.types.js';
 import type { FoleonTelemetryEmitInput } from './types/foleon-event.types.js';
 import type { IFoleonRuntimeContract, FoleonRoute } from './runtime/foleonRuntimeContract.js';
+
+const SR_ONLY_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+};
+
+function routeAnnouncement(route: FoleonRoute): string {
+  if (route === 'reader') return 'Showing Foleon publication.';
+  if (route === 'hub') return 'Showing Foleon content archive.';
+  return 'Showing Foleon highlights.';
+}
 import {
   createFoleonTelemetryEmitter,
   type FoleonTelemetryEmitter,
@@ -28,10 +46,12 @@ interface FoleonAppProps {
   readonly emitter?: FoleonTelemetryEmitter;
 }
 
-interface AppNavState {
+export interface FoleonAppNavState {
   readonly route: FoleonRoute;
   readonly docId: number | null;
 }
+
+type AppNavState = FoleonAppNavState;
 
 export function FoleonApp(props: FoleonAppProps): React.ReactNode {
   const { contract } = props;
@@ -44,6 +64,20 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
   useEffect(() => {
     navRef.current = nav;
   }, [nav]);
+  const mainRef = useRef<HTMLElement | null>(null);
+  const [skipLinkFocused, setSkipLinkFocused] = useState(false);
+  const [routeMessage, setRouteMessage] = useState<string>(routeAnnouncement(initialNav.route));
+  // Track the first render so we don't steal focus on mount — focus
+  // restore only runs on subsequent route changes.
+  const isFirstRouteRef = useRef(true);
+  useEffect(() => {
+    if (isFirstRouteRef.current) {
+      isFirstRouteRef.current = false;
+      return;
+    }
+    setRouteMessage(routeAnnouncement(nav.route));
+    mainRef.current?.focus();
+  }, [nav.route]);
 
   const emitter = useMemo<FoleonTelemetryEmitter>(() => {
     if (props.emitter) return props.emitter;
@@ -130,13 +164,20 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
       : undefined;
     return (
       <HbcThemeProvider forceTheme="light">
-        <FoleonError
-          title="Foleon integration is not available right now."
-          description={
-            adminDetail ??
-            'Foleon integration is not fully configured. Contact an HB Central admin.'
-          }
-        />
+        <main
+          id="foleon-main"
+          aria-label="Foleon"
+          data-hbc-foleon-route="config-error"
+          tabIndex={-1}
+        >
+          <FoleonError
+            title="Foleon integration is not available right now."
+            description={
+              adminDetail ??
+              'Foleon integration is not fully configured. Contact an HB Central admin.'
+            }
+          />
+        </main>
       </HbcThemeProvider>
     );
   }
@@ -153,7 +194,38 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
 
   return (
     <HbcThemeProvider forceTheme="light">
-      <div data-hbc-foleon-route={nav.route}>{page}</div>
+      <a
+        href="#foleon-main"
+        onFocus={(): void => setSkipLinkFocused(true)}
+        onBlur={(): void => setSkipLinkFocused(false)}
+        style={{
+          position: 'absolute',
+          left: 8,
+          top: skipLinkFocused ? 8 : -40,
+          padding: '8px 12px',
+          background: 'var(--hbc-surface-inverse, #202124)',
+          color: 'var(--hbc-surface-inverse-text, #ffffff)',
+          borderRadius: 4,
+          zIndex: 100,
+          transition: 'top 120ms ease',
+          textDecoration: 'none',
+        }}
+      >
+        Skip to main content
+      </a>
+      <div role="status" aria-live="polite" style={SR_ONLY_STYLE}>
+        {routeMessage}
+      </div>
+      <main
+        id="foleon-main"
+        aria-label="Foleon"
+        data-hbc-foleon-route={nav.route}
+        tabIndex={-1}
+        ref={mainRef}
+        style={{ outline: 'none' }}
+      >
+        {page}
+      </main>
     </HbcThemeProvider>
   );
 }
@@ -250,7 +322,7 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
   );
 }
 
-function readNavFromLocation(contract: IFoleonRuntimeContract): AppNavState {
+export function readNavFromLocation(contract: IFoleonRuntimeContract): AppNavState {
   if (typeof window === 'undefined') {
     return { route: contract.route, docId: contract.docId };
   }

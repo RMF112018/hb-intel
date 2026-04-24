@@ -56,12 +56,12 @@ describe('runtime binding proof (redacted)', () => {
       foleonReaderRoutePath: TEST_READER_ROUTE,
       foleonDocId: TEST_DOC_ID,
       expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-      expectedPackageVersion: '1.0.6.0',
+      expectedPackageVersion: '1.0.7.0',
     });
     const proof = readProof();
     expect(proof).toBeDefined();
     expect(proof?.manifestId).toBe('2160edb3-675e-4451-92bb-8345f9d1c71e');
-    expect(proof?.packageVersion).toBe('1.0.6.0');
+    expect(proof?.packageVersion).toBe('1.0.7.0');
     expect(proof?.bundleMarker).toBe('__hbIntel_foleon');
   });
 

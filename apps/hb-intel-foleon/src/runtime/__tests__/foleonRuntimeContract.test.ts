@@ -82,7 +82,7 @@ describe('resolveFoleonRuntimeContract', () => {
         contentRegistryListId: '11111111-1111-1111-1111-111111111111',
         placementsListId: '22222222-2222-2222-2222-222222222222',
         expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-        expectedPackageVersion: '1.0.6.0',
+        expectedPackageVersion: '1.0.7.0',
       },
     });
     expect(contract.governed.manifestIdMatchesExpected).toBe(true);
