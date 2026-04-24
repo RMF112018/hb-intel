@@ -112,6 +112,13 @@ export function validateTemplate(view: WorkbookView): ValidateTemplateResult {
   }
 
   const metadata = extractMetadata(view);
+  if (markers.markersPresent && (metadata.parserCriticalCellErrors?.length ?? 0) > 0) {
+    const first = metadata.parserCriticalCellErrors?.[0];
+    throw new TemplateInvalidError(
+      `Parser-critical cell error at ${first?.field ?? 'unknown'} (${first?.source ?? 'unknown'}): ` +
+      `${first?.value ?? '#ERROR'}.`,
+    );
+  }
   if (!normalizeInspectionDate(metadata.inspectionDate)) {
     throw new TemplateInvalidError(
       `Inspection date is invalid or unreadable (got ${JSON.stringify(metadata.inspectionDate)}).`,

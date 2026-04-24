@@ -415,9 +415,15 @@ function deriveFailureClass(
   if (codes.includes('PARSER_AUTHORITY_VIOLATION')) {
     return 'parser-authority-violation';
   }
+  if (codes.includes('PARSER_CRITICAL_CELL_ERROR')) {
+    return 'parser-authority-violation';
+  }
   if (codes.includes('PARSE_FAILED')) return 'parse-failure';
   if (codes.includes('REPORTING_PERIOD_NOT_FOUND')) return 'reporting-period-not-found';
   if (codes.includes('REPORTING_PERIOD_MISMATCH')) return 'reporting-period-mismatch';
+  if (codes.includes('REPORTING_WEEK_MISMATCH') || codes.includes('REPORTING_WEEK_INCOMPLETE')) {
+    return 'reporting-period-mismatch';
+  }
   if (codes.includes('PROJECT_UNRESOLVED')) return 'project-unresolved';
   if (codes.includes('DUPLICATE_SUPERSESSION_RISK')) return 'duplicate-supersession-risk';
   return 'unknown-blocking';

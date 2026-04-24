@@ -16,7 +16,7 @@ import type {
   UploadContext,
 } from '../../../../packages/features/safety/src/domain/types.js';
 import { classifyDuplicateRisk } from '../../../../packages/features/safety/src/ingestion/runIngestionPipeline.js';
-import { isDateInRange } from '../../../../packages/features/safety/src/ingestion/weekRangeForDate.js';
+import { isDateInRange, weekRangeForDate } from '../../../../packages/features/safety/src/ingestion/weekRangeForDate.js';
 import { resolveContractMarkers } from '../../../../packages/features/safety/src/parser/contractWorkbookAccess.js';
 import { parseChecklist } from '../../../../packages/features/safety/src/parser/parseChecklist.js';
 import { validateTemplate } from '../../../../packages/features/safety/src/parser/validateTemplate.js';
@@ -186,8 +186,26 @@ export async function evaluateSafetyIngestionPreview(
     dateAuthority.usedContext,
     inspectionNumberAuthority.usedContext,
   );
+  for (const cellError of parsed.metadata.parserCriticalCellErrors ?? []) {
+    if (!markersPresent) continue;
+    blockingErrors.push({
+      code: 'PARSER_CRITICAL_CELL_ERROR',
+      message:
+        `Parser-critical ${cellError.field} from ${cellError.source} evaluated to ` +
+        `${JSON.stringify(cellError.value)}. Repair ParserMeta/named range formulas.`,
+      severity: 'error',
+    });
+  }
   for (const violation of buildParserAuthorityViolations(parsed, markersPresent)) {
     blockingErrors.push(violation);
+  }
+
+  if (markersPresent && authoritativeInspectionDate) {
+    const weekDiagnostics = buildReportingWeekDiagnosticsForMarkeredTemplate({
+      metadata: parsed.metadata,
+      authoritativeInspectionDate,
+    });
+    blockingErrors.push(...weekDiagnostics);
   }
 
   const checksum = await computeChecksum(input.fileBytes);
@@ -384,12 +402,24 @@ function buildParserAuthorityViolations(
 ): ReadonlyArray<PreviewDiagnostic> {
   if (!markersPresent) return [];
   const violations: PreviewDiagnostic[] = [];
-  const fields: ReadonlyArray<{ label: string; source: ParserValueSource }> = [
+  const fields: Array<{ label: string; source: ParserValueSource }> = [
     { label: 'inspectionDate', source: parsed.metadata.sources.inspectionDate },
     { label: 'inspectionNumber', source: parsed.metadata.sources.inspectionNumber },
     { label: 'projectSite', source: parsed.metadata.sources.projectSite },
     { label: 'keyFindings', source: parsed.metadata.sources.keyFindings },
   ];
+  const hasReportingMarkers = Boolean(
+    parsed.metadata.reportingWeekStart ||
+    parsed.metadata.reportingWeekEnd ||
+    parsed.metadata.reportingPeriodLabel,
+  );
+  if (hasReportingMarkers) {
+    fields.push(
+      { label: 'reportingWeekStart', source: parsed.metadata.sources.reportingWeekStart },
+      { label: 'reportingWeekEnd', source: parsed.metadata.sources.reportingWeekEnd },
+      { label: 'reportingPeriodLabel', source: parsed.metadata.sources.reportingPeriodLabel },
+    );
+  }
   for (const field of fields) {
     if (field.source === 'parser-meta' || field.source === 'named-range') continue;
     violations.push({
@@ -401,6 +431,48 @@ function buildParserAuthorityViolations(
     });
   }
   return violations;
+}
+
+function buildReportingWeekDiagnosticsForMarkeredTemplate(input: {
+  metadata: InspectionMetadata;
+  authoritativeInspectionDate: string;
+}): ReadonlyArray<PreviewDiagnostic> {
+  const hasWorkbookPeriodFields = Boolean(
+    input.metadata.reportingWeekStart ||
+    input.metadata.reportingWeekEnd ||
+    input.metadata.reportingPeriodLabel,
+  );
+  if (!hasWorkbookPeriodFields) return [];
+
+  const diagnostics: PreviewDiagnostic[] = [];
+  if (
+    !input.metadata.reportingWeekStart ||
+    !input.metadata.reportingWeekEnd ||
+    !input.metadata.reportingPeriodLabel
+  ) {
+    diagnostics.push({
+      code: 'REPORTING_WEEK_INCOMPLETE',
+      message:
+        'Markered template exposed reporting-week markers but week start/end/label were not all populated.',
+      severity: 'error',
+    });
+    return diagnostics;
+  }
+
+  const derived = weekRangeForDate(input.authoritativeInspectionDate);
+  if (
+    input.metadata.reportingWeekStart !== derived.weekStartDate ||
+    input.metadata.reportingWeekEnd !== derived.weekEndDate
+  ) {
+    diagnostics.push({
+      code: 'REPORTING_WEEK_MISMATCH',
+      message:
+        `Workbook reporting week ${input.metadata.reportingWeekStart}..${input.metadata.reportingWeekEnd} ` +
+        `does not match backend-derived Monday-Friday week ${derived.weekStartDate}..${derived.weekEndDate}.`,
+      severity: 'error',
+    });
+  }
+  return diagnostics;
 }
 
 function buildMetadataAuthority(

@@ -108,6 +108,19 @@ export interface InspectionMetadataSources {
   readonly reportingPeriodLabel: ParserValueSource;
 }
 
+export interface ParserCriticalCellError {
+  readonly field:
+    | 'inspectionDate'
+    | 'inspectionNumber'
+    | 'projectSite'
+    | 'keyFindings'
+    | 'reportingWeekStart'
+    | 'reportingWeekEnd'
+    | 'reportingPeriodLabel';
+  readonly source: 'parser-meta' | 'named-range';
+  readonly value: string;
+}
+
 export interface InspectionMetadata {
   readonly inspectionDate: string;
   readonly projectSiteText: string;
@@ -125,6 +138,11 @@ export interface InspectionMetadata {
   readonly reportingPeriodLabel: string | null;
   /** Per-field provenance of parser-critical values. */
   readonly sources: InspectionMetadataSources;
+  /**
+   * Parser-seam cell errors (for example #NAME?, #VALUE!, #REF!) observed in
+   * parser-critical fields while extracting metadata.
+   */
+  readonly parserCriticalCellErrors?: ReadonlyArray<ParserCriticalCellError>;
 }
 
 export interface SectionScore {

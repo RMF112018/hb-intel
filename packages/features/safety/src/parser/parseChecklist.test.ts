@@ -58,4 +58,32 @@ describe('parseChecklist', () => {
     expect(parsed.templateVersion).toBe('SafetyChecklist_v1');
     expect(parsed.parserVersion).toBe('parse-first-2026-04');
   });
+
+  it('surfaces parser-critical cell errors from extracted metadata', () => {
+    const view = buildCleanAllYesWorkbook({
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+          A4: PARSER_META_FIELDS.inspectionDateRaw,
+          B4: '#VALUE!',
+          A5: PARSER_META_FIELDS.inspectionNumberRaw,
+          B5: '2',
+          A6: PARSER_META_FIELDS.projectSiteRaw,
+          B6: '2026-002 Marker Project',
+          A14: PARSER_META_FIELDS.keyFindingsNormalized,
+          B14: '#NAME?',
+        },
+      },
+    });
+
+    const parsed = parseChecklist(view);
+    expect(parsed.metadata.parserCriticalCellErrors?.length).toBeGreaterThanOrEqual(2);
+    expect(parsed.metadata.parserCriticalCellErrors?.some((e) => e.field === 'inspectionDate')).toBe(true);
+    expect(parsed.metadata.parserCriticalCellErrors?.some((e) => e.field === 'keyFindings')).toBe(true);
+  });
 });

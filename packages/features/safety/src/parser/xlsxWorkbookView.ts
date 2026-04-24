@@ -46,6 +46,10 @@ export function wrapWorkbook(workbook: XLSX.WorkBook): WorkbookView {
       if (!sheet) continue;
       const raw = sheet[cell.a1];
       if (!raw || raw.v === null || raw.v === undefined || raw.v === '') continue;
+      if (raw.t === 'e') {
+        values.push(toExcelErrorString(raw));
+        continue;
+      }
       if (raw.v instanceof Date) {
         values.push(normalizeInspectionDate(raw.v) ?? raw.v.toISOString().slice(0, 10));
       } else if (typeof raw.v === 'string' || typeof raw.v === 'number') {
@@ -66,6 +70,9 @@ export function wrapWorkbook(workbook: XLSX.WorkBook): WorkbookView {
       const cell = sheet[a1];
       if (!cell) return null;
       if (cell.v === null || cell.v === undefined) return null;
+      if (cell.t === 'e') {
+        return toExcelErrorString(cell);
+      }
       if (cell.v instanceof Date) {
         return normalizeInspectionDate(cell.v) ?? cell.v.toISOString().slice(0, 10);
       }
@@ -77,6 +84,7 @@ export function wrapWorkbook(workbook: XLSX.WorkBook): WorkbookView {
       const cell = sheet[a1];
       if (!cell) return null;
       if (cell.v === null || cell.v === undefined || cell.v === '') return null;
+      if (cell.t === 'e') return null;
       const n = typeof cell.v === 'number' ? cell.v : Number(cell.v);
       return Number.isFinite(n) ? n : null;
     },
@@ -129,4 +137,28 @@ function resolveNamedRangeCells(ref: string): ReadonlyArray<{ sheetName: string;
     }
   }
   return out;
+}
+
+function toExcelErrorString(cell: XLSX.CellObject): string {
+  if (typeof cell.w === 'string' && cell.w.trim().length > 0) {
+    return cell.w.trim();
+  }
+  if (typeof cell.v === 'number') {
+    // SheetJS numeric error codes from the XLSX spec.
+    const codeMap: Record<number, string> = {
+      0x00: '#NULL!',
+      0x07: '#DIV/0!',
+      0x0F: '#VALUE!',
+      0x17: '#REF!',
+      0x1D: '#NAME?',
+      0x24: '#NUM!',
+      0x2A: '#N/A',
+      0x2B: '#GETTING_DATA',
+    };
+    return codeMap[cell.v] ?? `#ERROR_${cell.v}`;
+  }
+  if (typeof cell.v === 'string' && cell.v.trim().length > 0) {
+    return cell.v.trim();
+  }
+  return '#ERROR';
 }

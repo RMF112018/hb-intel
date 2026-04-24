@@ -10,10 +10,12 @@ import {
 import type {
   InspectionMetadata,
   InspectionMetadataSources,
+  ParserCriticalCellError,
   ParserValueSource,
 } from '../domain/types.js';
 import type { WorkbookView } from './workbookView.js';
 import {
+  isExcelErrorLiteral,
   readNamedRangeLines,
   readNamedRangeNumber,
   readNamedRangeString,
@@ -28,31 +30,45 @@ interface Resolved<T> {
   readonly source: ParserValueSource;
 }
 
+type ParserCriticalField = ParserCriticalCellError['field'];
+type ParserCriticalSource = ParserCriticalCellError['source'];
+
 export function extractMetadata(view: WorkbookView): InspectionMetadata {
   const markers = resolveContractMarkers(view);
   const allowLegacyFallback = !markers.markersPresent;
+  const parserCriticalCellErrors: ParserCriticalCellError[] = [];
 
-  const dateResolution = resolveDate(view, allowLegacyFallback);
-  const inspectionNumberResolution = resolveInspectionNumber(view, allowLegacyFallback);
-  const projectSiteResolution = resolveProjectSite(view, allowLegacyFallback);
-  const keyFindingsResolution = resolveKeyFindings(view, allowLegacyFallback);
+  const dateResolution = resolveDate(view, allowLegacyFallback, parserCriticalCellErrors);
+  const inspectionNumberResolution = resolveInspectionNumber(
+    view,
+    allowLegacyFallback,
+    parserCriticalCellErrors,
+  );
+  const projectSiteResolution = resolveProjectSite(view, allowLegacyFallback, parserCriticalCellErrors);
+  const keyFindingsResolution = resolveKeyFindings(view, allowLegacyFallback, parserCriticalCellErrors);
   const reportingWeekStartResolution = resolveReportingField(
     view,
     PARSER_META_FIELDS.reportingWeekStart,
     PARSER_NAMED_RANGES.parserReportingWeekStart,
+    'reportingWeekStart',
     normalizeDateOrNull,
+    parserCriticalCellErrors,
   );
   const reportingWeekEndResolution = resolveReportingField(
     view,
     PARSER_META_FIELDS.reportingWeekEnd,
     PARSER_NAMED_RANGES.parserReportingWeekEnd,
+    'reportingWeekEnd',
     normalizeDateOrNull,
+    parserCriticalCellErrors,
   );
   const reportingPeriodLabelResolution = resolveReportingField(
     view,
     PARSER_META_FIELDS.reportingPeriodLabel,
     PARSER_NAMED_RANGES.parserReportingPeriodLabel,
+    'reportingPeriodLabel',
     (raw) => (raw === null ? null : raw.trim() || null),
+    parserCriticalCellErrors,
   );
 
   const projectSiteText = projectSiteResolution.value;
@@ -97,6 +113,7 @@ export function extractMetadata(view: WorkbookView): InspectionMetadata {
     reportingWeekEnd: reportingWeekEndResolution.value,
     reportingPeriodLabel: reportingPeriodLabelResolution.value,
     sources,
+    parserCriticalCellErrors,
   };
 }
 
@@ -107,19 +124,37 @@ export function extractProjectNumberHint(projectSiteText: string): string | null
   return match ? match[0] : null;
 }
 
-function resolveDate(view: WorkbookView, allowLegacyFallback: boolean): Resolved<string> {
-  const parserMeta = normalizeDateOrNull(
+function resolveDate(
+  view: WorkbookView,
+  allowLegacyFallback: boolean,
+  errors: ParserCriticalCellError[],
+): Resolved<string> {
+  const parserMetaRaw = sanitizeParserCriticalString(
     readParserMetaFieldString(view, PARSER_META_FIELDS.inspectionDateRaw),
+    'inspectionDate',
+    'parser-meta',
+    errors,
   );
+  const parserMeta = normalizeDateOrNull(parserMetaRaw);
   if (parserMeta !== null) return { value: parserMeta, source: 'parser-meta' };
 
   const namedRaw = normalizeDateOrNull(
-    readNamedRangeString(view, PARSER_NAMED_RANGES.parserInspectionDateRaw),
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, PARSER_NAMED_RANGES.parserInspectionDateRaw),
+      'inspectionDate',
+      'named-range',
+      errors,
+    ),
   );
   if (namedRaw !== null) return { value: namedRaw, source: 'named-range' };
 
   const namedLegacy = normalizeDateOrNull(
-    readNamedRangeString(view, PARSER_NAMED_RANGES.inspectionDate),
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, PARSER_NAMED_RANGES.inspectionDate),
+      'inspectionDate',
+      'named-range',
+      errors,
+    ),
   );
   if (namedLegacy !== null) return { value: namedLegacy, source: 'named-range' };
 
@@ -136,19 +171,35 @@ function resolveDate(view: WorkbookView, allowLegacyFallback: boolean): Resolved
 function resolveInspectionNumber(
   view: WorkbookView,
   allowLegacyFallback: boolean,
+  errors: ParserCriticalCellError[],
 ): Resolved<string> {
   const parserMeta = normalizeInspectionNumber(
-    readParserMetaFieldString(view, PARSER_META_FIELDS.inspectionNumberRaw),
+    sanitizeParserCriticalString(
+      readParserMetaFieldString(view, PARSER_META_FIELDS.inspectionNumberRaw),
+      'inspectionNumber',
+      'parser-meta',
+      errors,
+    ),
   );
   if (parserMeta !== null) return { value: parserMeta, source: 'parser-meta' };
 
   const namedRaw = normalizeInspectionNumber(
-    readNamedRangeString(view, PARSER_NAMED_RANGES.parserInspectionNumberRaw),
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, PARSER_NAMED_RANGES.parserInspectionNumberRaw),
+      'inspectionNumber',
+      'named-range',
+      errors,
+    ),
   );
   if (namedRaw !== null) return { value: namedRaw, source: 'named-range' };
 
   const namedLegacy = normalizeInspectionNumber(
-    readNamedRangeString(view, PARSER_NAMED_RANGES.inspectionNumber),
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, PARSER_NAMED_RANGES.inspectionNumber),
+      'inspectionNumber',
+      'named-range',
+      errors,
+    ),
   );
   if (namedLegacy !== null) return { value: namedLegacy, source: 'named-range' };
 
@@ -162,19 +213,38 @@ function resolveInspectionNumber(
   return { value: '', source: 'none' };
 }
 
-function resolveProjectSite(view: WorkbookView, allowLegacyFallback: boolean): Resolved<string> {
+function resolveProjectSite(
+  view: WorkbookView,
+  allowLegacyFallback: boolean,
+  errors: ParserCriticalCellError[],
+): Resolved<string> {
   const parserMeta = sanitizeProjectSite(
-    readParserMetaFieldString(view, PARSER_META_FIELDS.projectSiteRaw),
+    sanitizeParserCriticalString(
+      readParserMetaFieldString(view, PARSER_META_FIELDS.projectSiteRaw),
+      'projectSite',
+      'parser-meta',
+      errors,
+    ),
   );
   if (parserMeta !== null) return { value: parserMeta, source: 'parser-meta' };
 
   const namedRaw = sanitizeProjectSite(
-    readNamedRangeString(view, PARSER_NAMED_RANGES.parserProjectSiteRaw),
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, PARSER_NAMED_RANGES.parserProjectSiteRaw),
+      'projectSite',
+      'named-range',
+      errors,
+    ),
   );
   if (namedRaw !== null) return { value: namedRaw, source: 'named-range' };
 
   const namedLegacy = sanitizeProjectSite(
-    readNamedRangeString(view, PARSER_NAMED_RANGES.projectSite),
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, PARSER_NAMED_RANGES.projectSite),
+      'projectSite',
+      'named-range',
+      errors,
+    ),
   );
   if (namedLegacy !== null) return { value: namedLegacy, source: 'named-range' };
 
@@ -186,8 +256,17 @@ function resolveProjectSite(view: WorkbookView, allowLegacyFallback: boolean): R
   return { value: '', source: 'none' };
 }
 
-function resolveKeyFindings(view: WorkbookView, allowLegacyFallback: boolean): Resolved<string> {
-  const parserMeta = readParserMetaFieldString(view, PARSER_META_FIELDS.keyFindingsNormalized);
+function resolveKeyFindings(
+  view: WorkbookView,
+  allowLegacyFallback: boolean,
+  errors: ParserCriticalCellError[],
+): Resolved<string> {
+  const parserMeta = sanitizeParserCriticalString(
+    readParserMetaFieldString(view, PARSER_META_FIELDS.keyFindingsNormalized),
+    'keyFindings',
+    'parser-meta',
+    errors,
+  );
   const parserMetaAsNumber = readParserMetaFieldNumber(view, PARSER_META_FIELDS.keyFindingsNormalized);
   if (
     parserMeta &&
@@ -196,6 +275,16 @@ function resolveKeyFindings(view: WorkbookView, allowLegacyFallback: boolean): R
     return { value: normalizeMultiline(parserMeta), source: 'parser-meta' };
   }
 
+  const rawNamedLines = view.namedRangeStrings(PARSER_NAMED_RANGES.keyFindingsLines)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  if (rawNamedLines.some((line) => isExcelErrorLiteral(line))) {
+    errors.push({
+      field: 'keyFindings',
+      source: 'named-range',
+      value: rawNamedLines.find((line) => isExcelErrorLiteral(line)) ?? '#ERROR',
+    });
+  }
   const namedLines = readNamedRangeLines(view, PARSER_NAMED_RANGES.keyFindingsLines);
   if (namedLines.length > 0) {
     return { value: normalizeMultiline(namedLines.join('\n')), source: 'named-range' };
@@ -219,12 +308,28 @@ function resolveReportingField(
   view: WorkbookView,
   parserMetaField: string,
   namedRange: string,
+  field: ParserCriticalField,
   normalize: (raw: string | null) => string | null,
+  errors: ParserCriticalCellError[],
 ): Resolved<string | null> {
-  const parserMeta = normalize(readParserMetaFieldString(view, parserMetaField));
+  const parserMeta = normalize(
+    sanitizeParserCriticalString(
+      readParserMetaFieldString(view, parserMetaField),
+      field,
+      'parser-meta',
+      errors,
+    ),
+  );
   if (parserMeta !== null) return { value: parserMeta, source: 'parser-meta' };
 
-  const named = normalize(readNamedRangeString(view, namedRange));
+  const named = normalize(
+    sanitizeParserCriticalString(
+      readNamedRangeString(view, namedRange),
+      field,
+      'named-range',
+      errors,
+    ),
+  );
   if (named !== null) return { value: named, source: 'named-range' };
 
   return { value: null, source: 'none' };
@@ -287,4 +392,18 @@ function normalizeMultiline(raw: string): string {
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .join('\n');
+}
+
+function sanitizeParserCriticalString(
+  raw: string | null,
+  field: ParserCriticalField,
+  source: ParserCriticalSource,
+  errors: ParserCriticalCellError[],
+): string | null {
+  if (raw === null) return null;
+  if (isExcelErrorLiteral(raw)) {
+    errors.push({ field, source, value: raw.trim() });
+    return null;
+  }
+  return raw;
 }

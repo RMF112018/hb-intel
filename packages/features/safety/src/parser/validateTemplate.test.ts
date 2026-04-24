@@ -130,4 +130,29 @@ describe('validateTemplate', () => {
 
     expect(() => validateTemplate(view)).toThrow(/Inspection date is invalid or unreadable/i);
   });
+
+  it('rejects markered workbook when parser-critical cells evaluate to Excel error literals', () => {
+    const view = buildCleanAllYesWorkbook({
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+          A4: PARSER_META_FIELDS.inspectionDateRaw,
+          B4: '#VALUE!',
+          A5: PARSER_META_FIELDS.inspectionNumberRaw,
+          B5: '#NAME?',
+          A6: PARSER_META_FIELDS.projectSiteRaw,
+          B6: '2026-100 Demo Project',
+          A14: PARSER_META_FIELDS.keyFindingsNormalized,
+          B14: '#NAME?',
+        },
+      },
+    });
+
+    expect(() => validateTemplate(view)).toThrow(/Parser-critical cell error/i);
+  });
 });

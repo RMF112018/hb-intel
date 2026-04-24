@@ -207,4 +207,56 @@ describe('extractMetadata parse-first precedence', () => {
     expect(metadata.projectSiteText).toBe('2026-400 NamedRange Project');
     expect(metadata.keyFindingsFreeText).toBe('Line 1\nLine 2');
   });
+
+  it('treats parser error literals as invalid parser-critical values and records critical errors', () => {
+    const view = buildCleanAllYesWorkbook({
+      inspectionDate: '2026-05-06',
+      inspectionNumber: '17',
+      projectSiteText: '2026-517 Visible Project',
+      extraSheets: {
+        ParserMeta: {
+          A1: 'Field',
+          B1: 'Value',
+          A2: PARSER_META_FIELDS.templateVersion,
+          B2: 'SafetyChecklist_v1',
+          A3: PARSER_META_FIELDS.parserContractVersion,
+          B3: 'parse-first-2026-04',
+          A4: PARSER_META_FIELDS.inspectionDateRaw,
+          B4: '#VALUE!',
+          A5: PARSER_META_FIELDS.inspectionNumberRaw,
+          B5: '#NAME?',
+          A6: PARSER_META_FIELDS.projectSiteRaw,
+          B6: '#REF!',
+          A14: PARSER_META_FIELDS.keyFindingsNormalized,
+          B14: '#NAME?',
+        },
+        MetaNamed: {
+          A1: '2026-04-22',
+          A2: '3',
+          A3: '2026-300 Named Project',
+          A4: '#NAME?',
+          A5: 'Finding from named line',
+        },
+      },
+      namedRanges: {
+        [PARSER_NAMED_RANGES.parserInspectionDateRaw]: { sheetName: 'MetaNamed', ref: 'A1' },
+        [PARSER_NAMED_RANGES.parserInspectionNumberRaw]: { sheetName: 'MetaNamed', ref: 'A2' },
+        [PARSER_NAMED_RANGES.parserProjectSiteRaw]: { sheetName: 'MetaNamed', ref: 'A3' },
+        [PARSER_NAMED_RANGES.keyFindingsLines]: { sheetName: 'MetaNamed', ref: 'A4:A5' },
+      },
+    });
+
+    const metadata = extractMetadata(view);
+
+    expect(metadata.inspectionDate).toBe('2026-04-22');
+    expect(metadata.inspectionNumber).toBe('3');
+    expect(metadata.projectSiteText).toBe('2026-300 Named Project');
+    expect(metadata.keyFindingsFreeText).toBe('Finding from named line');
+    expect(metadata.sources.inspectionDate).toBe('named-range');
+    expect(metadata.sources.inspectionNumber).toBe('named-range');
+    expect(metadata.sources.projectSite).toBe('named-range');
+    expect(metadata.sources.keyFindings).toBe('named-range');
+    expect(metadata.parserCriticalCellErrors?.length).toBeGreaterThanOrEqual(4);
+    expect(metadata.parserCriticalCellErrors?.some((e) => e.field === 'keyFindings')).toBe(true);
+  });
 });

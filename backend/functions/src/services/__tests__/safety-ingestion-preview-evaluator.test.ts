@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   InspectionMetadataSources,
+  ParserCriticalCellError,
   ParsedInspection,
   ParserValueSource,
   SafetyInspectionEvent,
@@ -197,6 +198,66 @@ describe('evaluateSafetyIngestionPreview', () => {
     expect(result.metadataAuthority?.inspectionNumber.usedContext).toBe(false);
   });
 
+  it('blocks markered templates when parser-critical cells are Excel formula errors', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        parserCriticalCellErrors: [
+          { field: 'keyFindings', source: 'parser-meta', value: '#NAME?' },
+        ],
+      }),
+    );
+    const repo = makeRepository();
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.commitReadiness).toBe(false);
+    expect(result.blockingErrors.some((e) => e.code === 'PARSER_CRITICAL_CELL_ERROR')).toBe(true);
+    expect(result.diagnosticSummary.failureClass).toBe('parser-authority-violation');
+  });
+
+  it('blocks markered templates when workbook-reported week does not match backend-derived Monday-Friday week', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        reportingWeekStart: '2026-04-20',
+        reportingWeekEnd: '2026-04-26',
+        reportingPeriodLabel: 'Apr 20 - Apr 26, 2026',
+        sources: {
+          reportingWeekStart: 'parser-meta',
+          reportingWeekEnd: 'parser-meta',
+          reportingPeriodLabel: 'parser-meta',
+        },
+      }),
+    );
+    const repo = makeRepository();
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.commitReadiness).toBe(false);
+    expect(result.blockingErrors.some((e) => e.code === 'REPORTING_WEEK_MISMATCH')).toBe(true);
+    expect(result.diagnosticSummary.failureClass).toBe('reporting-period-mismatch');
+  });
+
+  it('blocks markered templates when workbook reporting-week markers are incomplete', async () => {
+    mockParseChecklist.mockReturnValue(
+      makeParsed({
+        reportingWeekStart: '2026-04-20',
+        reportingWeekEnd: null,
+        reportingPeriodLabel: 'Apr 20 - Apr 24, 2026',
+        sources: {
+          reportingWeekStart: 'parser-meta',
+          reportingWeekEnd: 'none',
+          reportingPeriodLabel: 'parser-meta',
+        },
+      }),
+    );
+    const repo = makeRepository();
+
+    const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
+
+    expect(result.commitReadiness).toBe(false);
+    expect(result.blockingErrors.some((e) => e.code === 'REPORTING_WEEK_INCOMPLETE')).toBe(true);
+  });
+
   it('emits a stable diagnosticSummary for commit-ready evaluations', async () => {
     const repo = makeRepository();
     const result = await evaluateSafetyIngestionPreview(repo as never, makeRequest());
@@ -312,6 +373,10 @@ function makeParsed(
   overrides: {
     inspectionDate?: string;
     inspectionNumber?: string;
+    reportingWeekStart?: string | null;
+    reportingWeekEnd?: string | null;
+    reportingPeriodLabel?: string | null;
+    parserCriticalCellErrors?: ReadonlyArray<ParserCriticalCellError>;
     sources?: Partial<InspectionMetadataSources>;
   } = {},
 ): ParsedInspection {
@@ -328,10 +393,11 @@ function makeParsed(
       workbookTotalNa: 2,
       workbookSafetyScorePct: 90,
       keyFindingsFreeText: 'Missing guardrail\nLoose extension cord',
-      reportingWeekStart: null,
-      reportingWeekEnd: null,
-      reportingPeriodLabel: null,
+      reportingWeekStart: overrides.reportingWeekStart ?? null,
+      reportingWeekEnd: overrides.reportingWeekEnd ?? null,
+      reportingPeriodLabel: overrides.reportingPeriodLabel ?? null,
       sources: defaultSources(overrides.sources),
+      parserCriticalCellErrors: overrides.parserCriticalCellErrors,
     },
     rows: [],
   };

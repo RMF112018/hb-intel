@@ -213,6 +213,45 @@ describe('derivePreviewDiagnosticSummary', () => {
     expect(summary.failureClass).toBe('parser-authority-violation');
   });
 
+  it('classifies parser-critical-cell-error as parser-authority-violation', () => {
+    const summary = derivePreviewDiagnosticSummary({
+      commitReadiness: false,
+      blockingErrors: [{ code: 'PARSER_CRITICAL_CELL_ERROR' }],
+      warnings: [],
+      template: baseTemplate,
+      metadata: {},
+      reportingPeriod: { resolved: true, dateInRange: true },
+      projectResolution: { resolved: true },
+      duplicateRisk: { confidence: 'none' },
+    });
+    expect(summary.failureClass).toBe('parser-authority-violation');
+  });
+
+  it('classifies reporting-week mismatch/incomplete as reporting-period-mismatch', () => {
+    const mismatch = derivePreviewDiagnosticSummary({
+      commitReadiness: false,
+      blockingErrors: [{ code: 'REPORTING_WEEK_MISMATCH' }],
+      warnings: [],
+      template: baseTemplate,
+      metadata: {},
+      reportingPeriod: { resolved: true, dateInRange: true },
+      projectResolution: { resolved: true },
+      duplicateRisk: { confidence: 'none' },
+    });
+    const incomplete = derivePreviewDiagnosticSummary({
+      commitReadiness: false,
+      blockingErrors: [{ code: 'REPORTING_WEEK_INCOMPLETE' }],
+      warnings: [],
+      template: baseTemplate,
+      metadata: {},
+      reportingPeriod: { resolved: true, dateInRange: true },
+      projectResolution: { resolved: true },
+      duplicateRisk: { confidence: 'none' },
+    });
+    expect(mismatch.failureClass).toBe('reporting-period-mismatch');
+    expect(incomplete.failureClass).toBe('reporting-period-mismatch');
+  });
+
   it('classifies duplicate-supersession-risk as its own class', () => {
     const summary = derivePreviewDiagnosticSummary({
       commitReadiness: false,

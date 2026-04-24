@@ -1,0 +1,149 @@
+{
+  "commitReadiness": false,
+  "template": {
+    "templateVersion": "SafetyChecklist_v1",
+    "parserContractVersion": "parse-first-2026-04",
+    "valid": false
+  },
+  "metadata": {
+    "inspectionDate": "2026-02-15",
+    "projectSiteText": "",
+    "inspectionNumber": "5",
+    "projectNumberHint": null,
+    "workbookTotalYes": 77,
+    "workbookTotalNo": 15,
+    "workbookTotalNa": 1,
+    "workbookSafetyScorePct": 0.8567142857142858,
+    "keyFindingsFreeText": "",
+    "reportingWeekStart": "2026-02-15",
+    "reportingWeekEnd": "2026-02-19",
+    "reportingPeriodLabel": "February 15 - February 19, 2026",
+    "sources": {
+      "inspectionDate": "parser-meta",
+      "inspectionNumber": "parser-meta",
+      "projectSite": "none",
+      "keyFindings": "none",
+      "reportingWeekStart": "parser-meta",
+      "reportingWeekEnd": "parser-meta",
+      "reportingPeriodLabel": "parser-meta"
+    },
+    "parserCriticalCellErrors": [
+      {
+        "field": "keyFindings",
+        "source": "parser-meta",
+        "value": "#NAME?"
+      }
+    ]
+  },
+  "reportingPeriod": {
+    "id": "period-1",
+    "spItemId": 1,
+    "title": "2026-04-20 to 2026-04-24",
+    "weekStartDate": "2026-04-20",
+    "weekEndDate": "2026-04-24",
+    "resolved": true,
+    "dateInRange": false
+  },
+  "projectResolution": {
+    "resolved": true,
+    "classification": "project-number",
+    "projectNumber": "99999",
+    "projectNameSnapshot": "Prompt 02 Fixture Project",
+    "projectLookupId": 42
+  },
+  "duplicateRisk": {
+    "confidence": "none",
+    "supersessionRisk": false
+  },
+  "normalizedKeyFindingsPreview": "",
+  "warnings": [
+    {
+      "code": "INSPECTION_DATE_CONTEXT_MISMATCH",
+      "message": "Operator-entered inspection date \"2026-04-20\" differs from workbook-parsed value \"2026-02-15\" (source: parser-meta); parser value retained.",
+      "severity": "warning"
+    },
+    {
+      "code": "INSPECTION_NUMBER_CONTEXT_MISMATCH",
+      "message": "Operator-entered inspection number \"1001\" differs from workbook-parsed value \"5\" (source: parser-meta); parser value retained.",
+      "severity": "warning"
+    }
+  ],
+  "blockingErrors": [
+    {
+      "code": "TEMPLATE_VALIDATION_FAILED",
+      "message": "Parser-critical cell error at keyFindings (parser-meta): #NAME?.",
+      "severity": "error"
+    },
+    {
+      "code": "TEMPLATE_INCOMPATIBLE",
+      "message": "Template identity or parser contract compatibility check failed.",
+      "severity": "error"
+    },
+    {
+      "code": "PARSER_CRITICAL_CELL_ERROR",
+      "message": "Parser-critical keyFindings from parser-meta evaluated to \"#NAME?\". Repair ParserMeta/named range formulas.",
+      "severity": "error"
+    },
+    {
+      "code": "PARSER_AUTHORITY_VIOLATION",
+      "message": "Markered template requires parser-authoritative projectSite; resolved source was \"none\". Repair ParserMeta/named ranges.",
+      "severity": "error"
+    },
+    {
+      "code": "PARSER_AUTHORITY_VIOLATION",
+      "message": "Markered template requires parser-authoritative keyFindings; resolved source was \"none\". Repair ParserMeta/named ranges.",
+      "severity": "error"
+    },
+    {
+      "code": "REPORTING_WEEK_MISMATCH",
+      "message": "Workbook reporting week 2026-02-15..2026-02-19 does not match backend-derived Monday-Friday week 2026-02-09..2026-02-13.",
+      "severity": "error"
+    },
+    {
+      "code": "REPORTING_PERIOD_MISMATCH",
+      "message": "Inspection date 2026-02-15 is outside selected reporting period 2026-04-20 to 2026-04-24.",
+      "severity": "error"
+    }
+  ],
+  "metadataAuthority": {
+    "inspectionDate": {
+      "source": "parser-meta",
+      "usedContext": false
+    },
+    "inspectionNumber": {
+      "source": "parser-meta",
+      "usedContext": false
+    },
+    "projectSite": "none",
+    "keyFindings": "none",
+    "reportingWeekStart": "parser-meta",
+    "reportingWeekEnd": "parser-meta",
+    "reportingPeriodLabel": "parser-meta"
+  },
+  "diagnosticSummary": {
+    "commitReady": false,
+    "failureClass": "template-incompatible",
+    "blockingCodes": [
+      "TEMPLATE_VALIDATION_FAILED",
+      "TEMPLATE_INCOMPATIBLE",
+      "PARSER_CRITICAL_CELL_ERROR",
+      "PARSER_AUTHORITY_VIOLATION",
+      "PARSER_AUTHORITY_VIOLATION",
+      "REPORTING_WEEK_MISMATCH",
+      "REPORTING_PERIOD_MISMATCH"
+    ],
+    "warningCodes": [
+      "INSPECTION_DATE_CONTEXT_MISMATCH",
+      "INSPECTION_NUMBER_CONTEXT_MISMATCH"
+    ],
+    "checks": {
+      "templateValid": false,
+      "parserContractMarkerState": "markered-invalid",
+      "parseSucceeded": true,
+      "reportingPeriodResolved": true,
+      "reportingPeriodDateInRange": false,
+      "projectResolved": true,
+      "duplicateConfidence": "none"
+    }
+  }
+}

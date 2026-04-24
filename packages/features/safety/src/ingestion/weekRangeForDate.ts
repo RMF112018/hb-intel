@@ -20,7 +20,8 @@ export function weekRangeForDate(dateYmd: string): WeekRange {
   const start = new Date(d);
   start.setUTCDate(start.getUTCDate() + offsetToMonday);
   const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 6);
+  // Safety reporting-week governance is Monday-Friday.
+  end.setUTCDate(end.getUTCDate() + 4);
   return {
     weekStartDate: toYmd(start),
     weekEndDate: toYmd(end),

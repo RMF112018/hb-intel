@@ -79,7 +79,13 @@ export function readNamedRangeNumber(view: WorkbookView, name: string): number |
 export function readNamedRangeLines(view: WorkbookView, name: string): ReadonlyArray<string> {
   return view.namedRangeStrings(name)
     .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+    .filter((line) => line.length > 0 && !isExcelErrorLiteral(line));
+}
+
+export function isExcelErrorLiteral(value: string | null | undefined): boolean {
+  if (!value) return false;
+  const trimmed = value.trim().toUpperCase();
+  return /^#(?:NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|SPILL!|CALC!|FIELD!|DATA!|GETTING_DATA)$/.test(trimmed);
 }
 
 function findParserMetaRow(view: WorkbookView, fieldName: string): number | null {
