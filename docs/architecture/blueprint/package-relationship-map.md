@@ -1126,7 +1126,7 @@ All 11 SPFx webpart apps follow the same stack: complexity, models, data-access,
 
 #### `backend/functions` · [Partial]
 
-Azure Functions backend. Depends on `@hbc/models`, `@hbc/acknowledgment`, `@hbc/notification-intelligence` (for notification delivery), `@pnp/sp`, `@pnp/graph`, `@azure/data-tables`, `@azure/identity`, `jose`. Does not depend on React, UI kit, or shell — correctly isolated. Provisioning saga is architecturally complete but SharePoint integration needs production hardening.
+Azure Functions backend. Depends on `@hbc/models`, `@hbc/acknowledgment`, `@hbc/notification-intelligence` (for notification delivery), `@pnp/sp` (provisioning/control-plane seam only), `@azure/data-tables`, `@azure/identity`, `jose`. Safety ingestion data-plane uses direct `fetch` against Microsoft Graph and does not depend on `@pnp/graph`. Does not depend on React, UI kit, or shell — correctly isolated. Provisioning saga is architecturally complete but SharePoint integration needs production hardening.
 
 ---
 

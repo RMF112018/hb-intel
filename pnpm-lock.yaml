@@ -1572,9 +1572,6 @@ importers:
       '@hbc/provisioning':
         specifier: workspace:*
         version: link:../../packages/provisioning
-      '@pnp/graph':
-        specifier: ^4.18.0
-        version: 4.18.0
       '@pnp/logging':
         specifier: ^4.18.0
         version: 4.18.0
@@ -5715,9 +5712,6 @@ packages:
       stream-browserify:
         optional: true
 
-  '@microsoft/microsoft-graph-types@2.43.0':
-    resolution: {integrity: sha512-sB9TZugdGH2SnN2mcV5rfKhhfDLPSAvF5VQ+94wtbKAqRpVLFKl9IfqZ+q2/264adkb8iBmgiUEbyrVmOmE2/g==}
-
   '@microsoft/signalr@8.0.17':
     resolution: {integrity: sha512-5pM6xPtKZNJLO0Tq5nQasVyPFwi/WBY3QB5uc/v3dIPTpS1JXQbaXAQAPxFoQ5rTBFE094w8bbqkp17F9ReQvA==}
 
@@ -5928,10 +5922,6 @@ packages:
 
   '@pnp/core@4.18.0':
     resolution: {integrity: sha512-dqJ+O2uNhQ+H3qVULXOXf8rYObaJB4a32RZjvD1bwCSwFk6dpOLijzCQ9EylfivpkSIL4+/YiZxXV2IJBjCp3Q==}
-    engines: {node: '>=18.12.0'}
-
-  '@pnp/graph@4.18.0':
-    resolution: {integrity: sha512-68Hu7Ip0otHsKpCR//DLk7NZPBtSdT5NgrBzTMNChphUtECa9tjIRcaAC74K5WovxEU7dT1+acXGOMvF/L1ydA==}
     engines: {node: '>=18.12.0'}
 
   '@pnp/logging-commonjs@2.15.0':
@@ -15104,8 +15094,6 @@ snapshots:
       '@babel/runtime': 7.28.6
       tslib: 2.8.1
 
-  '@microsoft/microsoft-graph-types@2.43.0': {}
-
   '@microsoft/signalr@8.0.17':
     dependencies:
       abort-controller: 3.0.0
@@ -15747,13 +15735,6 @@ snapshots:
 
   '@pnp/core@4.18.0':
     dependencies:
-      tslib: 2.8.1
-
-  '@pnp/graph@4.18.0':
-    dependencies:
-      '@microsoft/microsoft-graph-types': 2.43.0
-      '@pnp/core': 4.18.0
-      '@pnp/queryable': 4.18.0
       tslib: 2.8.1
 
   '@pnp/logging-commonjs@2.15.0':

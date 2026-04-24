@@ -105,9 +105,21 @@ const ADMIN_CONTROL_PLANE_REQUIRED_PATHS: readonly IRequiredPath[] = [
   { path: 'hosts/admin-control-plane/index.js', reason: 'admin control-plane host entrypoint composition' },
   { path: 'hosts/admin-control-plane/service-factory.js', reason: 'admin control-plane host service composition' },
   { path: 'functions/adminApi/index.js', reason: 'admin API route root registration' },
-  { path: 'functions/adminApi/safety-record-keeping-routes.js', reason: 'safety ingest/replay route registrations' },
+  { path: 'functions/adminApi/safety-record-keeping-routes.js', reason: 'safety ingest/preview/replay/provision/probe route registrations' },
   { path: 'functions/health/index.js', reason: 'health route root registration' },
   { path: 'functions/health/ready.js', reason: 'admin-gated readiness route registration' },
+  { path: 'services/safety-ingestion-code-path.js', reason: 'Safety ingestion Graph-only code-path constant + violation error' },
+  { path: 'services/safety-ingestion-application-service.js', reason: 'Safety ingestion application service enforcing assertGraphOnlyRepository' },
+  { path: 'services/safety-ingestion-graph-repository.js', reason: 'Safety ingestion Graph-only repository (data-plane commit path)' },
+  { path: 'services/safety-ingestion-graph-data-plane.js', reason: 'Safety ingestion Graph HTTP seam (fetch-based, no PnP/REST)' },
+];
+
+const SAFETY_ROUTE_SIGNATURES: readonly string[] = [
+  'safety-records/ingest',
+  'safety-records/ingest/preview',
+  'safety-records/replay',
+  'safety-records/provision-sharepoint',
+  'safety-records/reporting-periods/{reportingPeriodId}/probe',
 ];
 
 function resolveEntrypoint(stagingDir: string): string {
@@ -216,12 +228,18 @@ function writeArtifactInventory(stagingDir: string, mainEntrypoint: string): str
         '../../functions/adminApi/hybrid-identity-routes.js',
         '../../functions/health/index.js',
       ],
-      safetyRouteSignatures: [
-        'safety-records/ingest',
-        'safety-records/ingest/preview',
-        'safety-records/replay',
-      ],
+      safetyRouteSignatures: [...SAFETY_ROUTE_SIGNATURES],
       safetyRoutesModule: safetyRoutesPath,
+    },
+    safetyGraphCommitPathProof: {
+      codePathModule: path.posix.join(runtimeRoot, 'services/safety-ingestion-code-path.js'),
+      applicationServiceModule: path.posix.join(runtimeRoot, 'services/safety-ingestion-application-service.js'),
+      graphRepositoryModule: path.posix.join(runtimeRoot, 'services/safety-ingestion-graph-repository.js'),
+      graphDataPlaneModule: path.posix.join(runtimeRoot, 'services/safety-ingestion-graph-data-plane.js'),
+      codePathLiteral: 'graph-only',
+      codePathConstant: 'SAFETY_INGESTION_REQUIRED_CODE_PATH',
+      violationError: 'SafetyIngestionCodePathViolationError',
+      applicationServiceGuard: 'assertGraphOnlyRepository',
     },
     healthRouteReleaseProof: {
       activeEntrypoint: pkg.main ?? mainEntrypoint,
@@ -255,14 +273,65 @@ function assertAdminControlPlaneReleaseProof(stagingDir: string, mainEntrypoint:
   }
 
   const routeContent = readFileSync(safetyRoutesPath, 'utf8');
-  for (const signature of [
-    'safety-records/ingest',
-    'safety-records/ingest/preview',
-    'safety-records/replay',
-  ]) {
+  for (const signature of SAFETY_ROUTE_SIGNATURES) {
     if (!routeContent.includes(signature)) {
       throw new Error(`Artifact validation failed: safety route signature missing ${signature}`);
     }
+  }
+}
+
+function assertSafetyGraphCommitPathReleaseProof(stagingDir: string, mainEntrypoint: string): void {
+  const runtimeRoot = path.dirname(mainEntrypoint);
+  const stagedPath = (relative: string): string =>
+    path.join(stagingDir, path.posix.join(runtimeRoot, relative).replace(/^\.\//, ''));
+
+  const codePathPath = stagedPath('services/safety-ingestion-code-path.js');
+  const applicationServicePath = stagedPath('services/safety-ingestion-application-service.js');
+  const graphRepositoryPath = stagedPath('services/safety-ingestion-graph-repository.js');
+  const graphDataPlanePath = stagedPath('services/safety-ingestion-graph-data-plane.js');
+
+  const codePathContent = readFileSync(codePathPath, 'utf8');
+  if (!codePathContent.includes("SAFETY_INGESTION_REQUIRED_CODE_PATH = 'graph-only'")) {
+    throw new Error(
+      'Artifact validation failed: safety-ingestion-code-path.js missing graph-only code-path constant',
+    );
+  }
+  if (!codePathContent.includes('SafetyIngestionCodePathViolationError')) {
+    throw new Error(
+      'Artifact validation failed: safety-ingestion-code-path.js missing SafetyIngestionCodePathViolationError',
+    );
+  }
+
+  const appServiceContent = readFileSync(applicationServicePath, 'utf8');
+  if (!appServiceContent.includes('SafetyIngestionCodePathViolationError')) {
+    throw new Error(
+      'Artifact validation failed: safety-ingestion-application-service.js not wired to SafetyIngestionCodePathViolationError',
+    );
+  }
+  if (!appServiceContent.includes('assertGraphOnlyRepository')) {
+    throw new Error(
+      'Artifact validation failed: safety-ingestion-application-service.js missing assertGraphOnlyRepository guard',
+    );
+  }
+  for (const operation of ['ingest', 'preview', 'replay', 'reporting-period-probe']) {
+    if (!appServiceContent.includes(`assertGraphOnlyRepository(repo, '${operation}'`)) {
+      throw new Error(
+        `Artifact validation failed: assertGraphOnlyRepository not invoked for operation=${operation}`,
+      );
+    }
+  }
+
+  const graphRepoContent = readFileSync(graphRepositoryPath, 'utf8');
+  if (!graphRepoContent.includes('SAFETY_INGESTION_REQUIRED_CODE_PATH')) {
+    throw new Error(
+      'Artifact validation failed: safety-ingestion-graph-repository.js does not bind the required code-path constant',
+    );
+  }
+
+  if (!existsSync(graphDataPlanePath)) {
+    throw new Error(
+      'Artifact validation failed: missing safety-ingestion-graph-data-plane.js (Graph HTTP seam)',
+    );
   }
 }
 
@@ -347,6 +416,7 @@ function main(): void {
   assertArtifactShape(options.stagingDir, mainEntrypoint);
   assertAdminControlPlaneReleaseProof(options.stagingDir, mainEntrypoint);
   assertHealthRouteReleaseProof(options.stagingDir, mainEntrypoint);
+  assertSafetyGraphCommitPathReleaseProof(options.stagingDir, mainEntrypoint);
   const inventoryPath = writeArtifactInventory(options.stagingDir, mainEntrypoint);
   assertStagedEntrypointResolves(options.stagingDir, root, mainEntrypoint);
 

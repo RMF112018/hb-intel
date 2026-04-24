@@ -494,7 +494,7 @@ Repo-truth note: `apps/project-hub` now resolves the SharePoint `siteUrl` throug
 |-----------|------|---------|------|
 | `backend/functions` | @hbc/functions | Azure Functions v4 | Serverless HTTP/async triggers for data, auth, provisioning |
 
-Key dependencies: `@azure/functions`, `@azure/data-tables`, `@azure/identity`, `@pnp/sp`, `@pnp/graph`, `jose`, `@hbc/models`.
+Key dependencies: `@azure/functions`, `@azure/data-tables`, `@azure/identity`, `@pnp/sp` (provisioning/control-plane only), `jose`, `@hbc/models`. Safety ingestion data-plane uses direct `fetch` against Microsoft Graph — no `@pnp/graph` dependency.
 
 **Per-domain host architecture (ADR-0124, 2026-03-31):** The package contains three composition roots:
 
