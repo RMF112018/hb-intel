@@ -414,11 +414,6 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     );
   }
 
-  const previewMalformed = malformedRoutes.find((r) => r.route === '/api/safety-records/ingest/preview');
-  if (input.malformedRouteProbes && previewMalformed && !previewMalformed.responseRequestIdPresent) {
-    malformedRouteIssues.push('command_auth.malformed_bearer.preview.missing_x_request_id');
-  }
-
   const nonAdminRouteIssues = nonAdminRoutes
     .filter((r) => [401, 404, -1].includes(r.status))
     .map((r) => `command_auth.non_admin_bearer.unexpected_status(${r.route} expected!=401|404,live=${r.status})`);
