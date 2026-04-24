@@ -91,8 +91,8 @@ These commands prove the `@hbc/functions` deploy artifact and its runtime identi
   Inspect the deterministic stamp that drives CI's runtime identity setting and post-deploy proof.
 - `HOST=$(az functionapp list --query "[?name=='hb-intel-function-app'].defaultHostName | [0]" -o tsv); curl -s "https://$HOST/api/health" | jq .artifact`
   Live artifact identity from the resolved Flex host. After a successful deploy, `artifact.version` must equal `manifest.packageVersion` and `artifact.commitSha` must equal the deployed git SHA.
-- `pnpm exec tsx scripts/verify-functions-live-parity.ts --app-name hb-intel-function-app --resource-group hb-intel --output /tmp/live-parity-evidence.json`
-  Canonical live parity check. Fails fast unless identity parity, route truth (`ingest`, `ingest/preview`, `replay`), `/api/health/ready` route presence, and deploy-stamp app settings all pass.
+- `pnpm exec tsx scripts/verify-functions-live-parity.ts --app-name hb-intel-function-app --resource-group hb-intel --admin-token "$API_TOKEN" --output /tmp/live-parity-evidence.json`
+  Canonical live parity check. Fails fast unless identity parity, route truth (`ingest`, `ingest/preview`, `replay`), `/api/health` public contract, readiness auth behavior (`no auth => 200|401|403`, malformed bearer => `401`), optional admin readiness contract (`200` + required keys when `--admin-token` is supplied), and deploy-stamp app settings all pass.
 - `pnpm --filter @hbc/functions test` / `pnpm --filter @hbc/functions check-types`
   Gate both the telemetry version stamp and the `/api/health` artifact block.
 
@@ -101,7 +101,12 @@ Interpretation quick table:
 | Signature | Meaning | Verdict |
 | --- | --- | --- |
 | `/api/health` missing `artifact.*` | Deployed host does not expose current artifact-identity contract | Fail |
+| `/api/health` contains readiness-only fields (for example `configTiers`) | Public health surface leaked privileged readiness detail | Fail |
 | `POST /api/safety-records/ingest/preview` or `/replay` returns `404` | Expected Safety route not registered on host | Fail (stale/divergent runtime) |
+| `GET /api/health/ready` returns `404` | Protected readiness route not registered | Fail |
+| `GET /api/health/ready` no auth returns `401` or `403` | Route exists and remains protected | Pass |
+| `GET /api/health/ready` malformed bearer returns non-`401` | Auth handling drift on protected readiness route | Fail |
+| `GET /api/health/ready` with admin token returns `200` + readiness keys | Privileged readiness surface healthy | Pass |
 | Missing `HBC_FUNCTIONS_BUILD_*` app settings | Runtime identity stamp missing/incomplete | Fail |
 | Identity + routes + stamp checks all pass | Live runtime parity proven for deployed artifact | Pass |
 

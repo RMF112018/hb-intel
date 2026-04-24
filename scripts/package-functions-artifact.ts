@@ -106,6 +106,8 @@ const ADMIN_CONTROL_PLANE_REQUIRED_PATHS: readonly IRequiredPath[] = [
   { path: 'hosts/admin-control-plane/service-factory.js', reason: 'admin control-plane host service composition' },
   { path: 'functions/adminApi/index.js', reason: 'admin API route root registration' },
   { path: 'functions/adminApi/safety-record-keeping-routes.js', reason: 'safety ingest/replay route registrations' },
+  { path: 'functions/health/index.js', reason: 'health route root registration' },
+  { path: 'functions/health/ready.js', reason: 'admin-gated readiness route registration' },
 ];
 
 function resolveEntrypoint(stagingDir: string): string {
@@ -194,6 +196,8 @@ function writeArtifactInventory(stagingDir: string, mainEntrypoint: string): str
   const runtimeRoot = path.dirname(mainEntrypoint);
   const adminHostPath = path.posix.join(runtimeRoot, 'hosts/admin-control-plane/index.js');
   const safetyRoutesPath = path.posix.join(runtimeRoot, 'functions/adminApi/safety-record-keeping-routes.js');
+  const healthIndexPath = path.posix.join(runtimeRoot, 'functions/health/index.js');
+  const healthReadyPath = path.posix.join(runtimeRoot, 'functions/health/ready.js');
   const inventory = {
     objective: 'legacy-fallback',
     entrypoint: pkg.main ?? mainEntrypoint,
@@ -218,6 +222,15 @@ function writeArtifactInventory(stagingDir: string, mainEntrypoint: string): str
         'safety-records/replay',
       ],
       safetyRoutesModule: safetyRoutesPath,
+    },
+    healthRouteReleaseProof: {
+      activeEntrypoint: pkg.main ?? mainEntrypoint,
+      healthIndexModule: healthIndexPath,
+      healthReadyModule: healthReadyPath,
+      requiredImportChain: {
+        entrypointImportsHealthIndex: 'functions/health/index.js',
+        healthIndexImportsReady: './ready.js',
+      },
     },
     stagedWorkspacePackages: collectStagedWorkspacePackages(stagingDir),
   };
@@ -250,6 +263,34 @@ function assertAdminControlPlaneReleaseProof(stagingDir: string, mainEntrypoint:
     if (!routeContent.includes(signature)) {
       throw new Error(`Artifact validation failed: safety route signature missing ${signature}`);
     }
+  }
+}
+
+export function assertHealthRouteReleaseProof(stagingDir: string, mainEntrypoint: string): void {
+  const normalizedEntrypoint = mainEntrypoint.startsWith('./') ? mainEntrypoint.slice(2) : mainEntrypoint;
+  const runtimeRoot = path.dirname(mainEntrypoint);
+  const healthIndexRelative = path.posix.join(runtimeRoot, 'functions/health/index.js').replace(/^\.\//, '');
+  const healthReadyRelative = path.posix.join(runtimeRoot, 'functions/health/ready.js').replace(/^\.\//, '');
+  const entrypointPath = path.join(stagingDir, normalizedEntrypoint);
+  const healthIndexPath = path.join(stagingDir, healthIndexRelative);
+  const healthReadyPath = path.join(stagingDir, healthReadyRelative);
+
+  if (!existsSync(healthIndexPath)) {
+    throw new Error(`Artifact validation failed: missing ${healthIndexRelative} (health route root registration)`);
+  }
+  if (!existsSync(healthReadyPath)) {
+    throw new Error(`Artifact validation failed: missing ${healthReadyRelative} (admin-gated readiness route registration)`);
+  }
+
+  const entrypointContent = readFileSync(entrypointPath, 'utf8');
+  const expectedEntrypointImport = 'functions/health/index.js';
+  if (!entrypointContent.includes(expectedEntrypointImport)) {
+    throw new Error(`Artifact validation failed: active entrypoint missing import ${expectedEntrypointImport}`);
+  }
+
+  const healthIndexContent = readFileSync(healthIndexPath, 'utf8');
+  if (!healthIndexContent.includes('./ready.js')) {
+    throw new Error('Artifact validation failed: health index missing side-effect import ./ready.js');
   }
 }
 
@@ -305,6 +346,7 @@ function main(): void {
   rewriteMainEntrypoint(options.stagingDir, mainEntrypoint);
   assertArtifactShape(options.stagingDir, mainEntrypoint);
   assertAdminControlPlaneReleaseProof(options.stagingDir, mainEntrypoint);
+  assertHealthRouteReleaseProof(options.stagingDir, mainEntrypoint);
   const inventoryPath = writeArtifactInventory(options.stagingDir, mainEntrypoint);
   assertStagedEntrypointResolves(options.stagingDir, root, mainEntrypoint);
 
@@ -356,4 +398,6 @@ function main(): void {
   console.log(JSON.stringify(summary, null, 2));
 }
 
-main();
+if (process.env.VITEST !== 'true') {
+  main();
+}

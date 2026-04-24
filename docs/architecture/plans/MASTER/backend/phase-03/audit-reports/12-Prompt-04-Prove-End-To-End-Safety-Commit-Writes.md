@@ -63,7 +63,7 @@ Date: 2026-04-24
 
 - Live host reports expected `artifact.version` and `artifact.commitSha` for current deployment target.
 - Safety route signatures are present and non-404.
-- `GET /api/health/ready` remains `404` and still causes parity script `overallPass=false`; this does **not** block Prompt-04 commit-write proof itself but remains a separate parity-gate defect.
+- `GET /api/health/ready` parity defect is closed separately in `13-Health-Ready-Live-Parity-Closure.md` (route now present and auth-gated).
 
 ## Commands Executed (Final Unblock Sequence)
 
@@ -80,7 +80,7 @@ Date: 2026-04-24
 
 ## Residual Gaps
 
-1. `GET /api/health/ready` route remains missing (`404`) and should be remediated in parity gate scope.
+1. See `13-Health-Ready-Live-Parity-Closure.md` for resolved `/api/health/ready` parity closure and hardening.
 2. Replay supersession behavior was not exercised in this proof sample because replay resolved to `unresolved-project`; separate targeted replay-supersession proof remains advisable.
 
 ## Evidence Paths

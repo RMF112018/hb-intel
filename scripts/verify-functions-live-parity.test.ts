@@ -15,7 +15,8 @@ const BASE = {
     { route: '/api/safety-records/ingest/preview', method: 'POST' as const, status: 401 },
     { route: '/api/safety-records/replay', method: 'POST' as const, status: 401 },
   ],
-  healthReadyStatus: 401,
+  healthReadyNoAuthStatus: 401,
+  healthReadyMalformedAuthStatus: 401,
   appSettings: {
     HBC_FUNCTIONS_BUILD_VERSION: '00.000.145',
     HBC_FUNCTIONS_BUILD_SHA: 'c621aee82bc9ec0dc0434225726b83a632ace5c7',
@@ -108,6 +109,7 @@ describe('verify-functions-live-parity', () => {
           commitSha: BASE.expectedIdentity.commitSha,
           buildTimestamp: '2026-04-23T20:29:59.604Z',
         },
+        timestamp: '2026-04-23T20:30:31.704Z',
       },
     });
 
@@ -115,6 +117,54 @@ describe('verify-functions-live-parity', () => {
     expect(evidence.identityParity.issues).toHaveLength(0);
     expect(evidence.routeTruth.issues).toHaveLength(0);
     expect(evidence.healthReadyTruth.issues).toHaveLength(0);
+    expect(evidence.readinessAuthTruth.noAuth.issues).toHaveLength(0);
+    expect(evidence.readinessAuthTruth.malformedBearer.issues).toHaveLength(0);
+    expect(evidence.healthPublicContract.issues).toHaveLength(0);
     expect(evidence.deployStampTruth.issues).toHaveLength(0);
+  });
+
+  it('fails when malformed bearer does not return 401', () => {
+    const evidence = buildParityEvidence({
+      ...BASE,
+      healthBody: {
+        status: 'healthy',
+        artifact: {
+          version: BASE.expectedIdentity.version,
+          commitSha: BASE.expectedIdentity.commitSha,
+          buildTimestamp: '2026-04-23T20:29:59.604Z',
+        },
+        timestamp: '2026-04-23T20:30:31.704Z',
+      },
+      healthReadyMalformedAuthStatus: 404,
+    });
+
+    expect(evidence.overallPass).toBe(false);
+    expect(evidence.readinessAuthTruth.malformedBearer.issues).toContain(
+      'readiness.malformed_bearer.unexpected_status(expected=401,live=404)',
+    );
+  });
+
+  it('fails admin probe when status is 200 but readiness contract keys are missing', () => {
+    const evidence = buildParityEvidence({
+      ...BASE,
+      healthBody: {
+        status: 'healthy',
+        artifact: {
+          version: BASE.expectedIdentity.version,
+          commitSha: BASE.expectedIdentity.commitSha,
+          buildTimestamp: '2026-04-23T20:29:59.604Z',
+        },
+        timestamp: '2026-04-23T20:30:31.704Z',
+      },
+      healthReadyAdminStatus: 200,
+      healthReadyAdminBody: { status: 'healthy' },
+    });
+
+    expect(evidence.overallPass).toBe(false);
+    expect(evidence.readinessAuthTruth.adminBearer.attempted).toBe(true);
+    expect(evidence.readinessAuthTruth.adminBearer.passed).toBe(false);
+    expect(evidence.readinessAuthTruth.adminBearer.issues).toContain(
+      'readiness.admin_bearer.contract_missing(operationalReadiness)',
+    );
   });
 });

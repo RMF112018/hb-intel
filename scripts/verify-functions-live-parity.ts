@@ -46,6 +46,28 @@ export interface IParityEvidence {
     exists: boolean;
     issues: string[];
   };
+  readinessAuthTruth: {
+    noAuth: {
+      status: number;
+      routeExists: boolean;
+      issues: string[];
+    };
+    malformedBearer: {
+      status: number;
+      authDenied: boolean;
+      issues: string[];
+    };
+    adminBearer: {
+      attempted: boolean;
+      status: number;
+      passed: boolean;
+      issues: string[];
+    };
+  };
+  healthPublicContract: {
+    passed: boolean;
+    issues: string[];
+  };
   deployStampTruth: {
     present: boolean;
     settings: {
@@ -68,7 +90,10 @@ export interface IBuildParityEvidenceInput {
   expectedIdentity: IExpectedIdentity;
   healthBody: unknown;
   routeStatuses: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
-  healthReadyStatus: number;
+  healthReadyNoAuthStatus: number;
+  healthReadyMalformedAuthStatus: number;
+  healthReadyAdminStatus?: number;
+  healthReadyAdminBody?: unknown;
   appSettings: Record<string, string>;
 }
 
@@ -77,6 +102,7 @@ interface IOptions {
   resourceGroup: string;
   expectedSha?: string;
   expectedVersion?: string;
+  adminToken?: string;
   outputPath?: string;
 }
 
@@ -105,6 +131,11 @@ function parseArgs(argv: string[]): IOptions {
     }
     if (arg === '--expected-version' && argv[i + 1]) {
       parsed.expectedVersion = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg === '--admin-token' && argv[i + 1]) {
+      parsed.adminToken = argv[i + 1];
       i += 1;
       continue;
     }
@@ -282,10 +313,67 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     .filter((r) => !r.exists)
     .map((r) => `route.missing(${r.method} ${r.route} status=${r.status})`);
 
-  const readyExists = input.healthReadyStatus !== 404 && input.healthReadyStatus > 0;
+  const readyExists = input.healthReadyNoAuthStatus !== 404 && input.healthReadyNoAuthStatus > 0;
   const readyIssues = readyExists
     ? []
-    : [`route.missing(GET /api/health/ready status=${input.healthReadyStatus})`];
+    : [`route.missing(GET /api/health/ready status=${input.healthReadyNoAuthStatus})`];
+
+  const readinessNoAuthAllowed = new Set([200, 401, 403]);
+  const readinessNoAuthIssues = readinessNoAuthAllowed.has(input.healthReadyNoAuthStatus)
+    ? []
+    : [`readiness.no_auth.unexpected_status(expected=200|401|403,live=${input.healthReadyNoAuthStatus})`];
+
+  const readinessMalformedIssues = input.healthReadyMalformedAuthStatus === 401
+    ? []
+    : [`readiness.malformed_bearer.unexpected_status(expected=401,live=${input.healthReadyMalformedAuthStatus})`];
+
+  const readinessAdminAttempted = typeof input.healthReadyAdminStatus === 'number';
+  const readinessAdminIssues: string[] = [];
+  if (readinessAdminAttempted) {
+    if (input.healthReadyAdminStatus !== 200) {
+      readinessAdminIssues.push(`readiness.admin_bearer.unexpected_status(expected=200,live=${input.healthReadyAdminStatus})`);
+    } else {
+      const readyBody = (input.healthReadyAdminBody && typeof input.healthReadyAdminBody === 'object')
+        ? (input.healthReadyAdminBody as Record<string, unknown>)
+        : {};
+      for (const key of [
+        'status',
+        'operationalReadiness',
+        'configTiers',
+        'safetyPermissionPosture',
+        'safetyRolloutReadiness',
+        'rolloutPermissionInventory',
+      ]) {
+        if (!(key in readyBody)) {
+          readinessAdminIssues.push(`readiness.admin_bearer.contract_missing(${key})`);
+        }
+      }
+    }
+  }
+
+  const healthPublicIssues: string[] = [];
+  for (const key of ['status', 'artifact', 'timestamp']) {
+    if (!(key in health)) {
+      healthPublicIssues.push(`health.public.contract_missing(${key})`);
+    }
+  }
+  const readinessOnlyKeys = [
+    'operationalReadiness',
+    'configTiers',
+    'provisioningPrereqs',
+    'safetyPermissionPosture',
+    'safetyRolloutReadiness',
+    'rolloutPermissionInventory',
+    'integrations',
+    'notificationRecipients',
+    'environmentPosture',
+    'requestId',
+  ];
+  for (const key of readinessOnlyKeys) {
+    if (key in health) {
+      healthPublicIssues.push(`health.public.unexpected_readiness_field(${key})`);
+    }
+  }
 
   const buildVersion = input.appSettings.HBC_FUNCTIONS_BUILD_VERSION ?? '';
   const buildSha = input.appSettings.HBC_FUNCTIONS_BUILD_SHA ?? '';
@@ -308,6 +396,10 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     identityIssues.length === 0 &&
     routeIssues.length === 0 &&
     readyIssues.length === 0 &&
+    readinessNoAuthIssues.length === 0 &&
+    readinessMalformedIssues.length === 0 &&
+    readinessAdminIssues.length === 0 &&
+    healthPublicIssues.length === 0 &&
     deployIssues.length === 0;
 
   return {
@@ -329,9 +421,31 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
       issues: routeIssues,
     },
     healthReadyTruth: {
-      status: input.healthReadyStatus,
+      status: input.healthReadyNoAuthStatus,
       exists: readyExists,
       issues: readyIssues,
+    },
+    readinessAuthTruth: {
+      noAuth: {
+        status: input.healthReadyNoAuthStatus,
+        routeExists: readyExists,
+        issues: readinessNoAuthIssues,
+      },
+      malformedBearer: {
+        status: input.healthReadyMalformedAuthStatus,
+        authDenied: input.healthReadyMalformedAuthStatus === 401,
+        issues: readinessMalformedIssues,
+      },
+      adminBearer: {
+        attempted: readinessAdminAttempted,
+        status: input.healthReadyAdminStatus ?? -1,
+        passed: readinessAdminAttempted ? readinessAdminIssues.length === 0 : false,
+        issues: readinessAdminIssues,
+      },
+    },
+    healthPublicContract: {
+      passed: healthPublicIssues.length === 0,
+      issues: healthPublicIssues,
     },
     deployStampTruth: {
       present: Boolean(buildVersion && buildSha && buildTimestamp),
@@ -385,7 +499,34 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
     },
   ];
 
-  const healthReadyStatus = await fetchStatus(`${baseUrl}/api/health/ready`);
+  const healthReadyNoAuthStatus = await fetchStatus(`${baseUrl}/api/health/ready`);
+  const healthReadyMalformedAuthStatus = await fetchStatus(`${baseUrl}/api/health/ready`, {
+    headers: {
+      Authorization: 'Bearer malformed-token',
+    },
+  });
+  let healthReadyAdminStatus: number | undefined;
+  let healthReadyAdminBody: unknown;
+  if (options.adminToken && options.adminToken.trim().length > 0) {
+    healthReadyAdminStatus = await fetchStatus(`${baseUrl}/api/health/ready`, {
+      headers: {
+        Authorization: `Bearer ${options.adminToken}`,
+      },
+    });
+    if (healthReadyAdminStatus === 200) {
+      try {
+        const response = await fetch(`${baseUrl}/api/health/ready`, {
+          headers: {
+            Authorization: `Bearer ${options.adminToken}`,
+          },
+        });
+        const text = await response.text();
+        healthReadyAdminBody = JSON.parse(text) as unknown;
+      } catch {
+        healthReadyAdminBody = undefined;
+      }
+    }
+  }
 
   const appSettingsRaw = runAz(
     [
@@ -412,7 +553,10 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
     expectedIdentity,
     healthBody,
     routeStatuses,
-    healthReadyStatus,
+    healthReadyNoAuthStatus,
+    healthReadyMalformedAuthStatus,
+    healthReadyAdminStatus,
+    healthReadyAdminBody,
     appSettings,
   });
 }

@@ -213,5 +213,9 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('safety-records/ingest/preview');
     expect(source).toContain('safety-records/replay');
     expect(source).toContain('assertAdminControlPlaneReleaseProof(options.stagingDir, mainEntrypoint)');
+    expect(source).toContain('assertHealthRouteReleaseProof');
+    expect(source).toContain("functions/health/index.js");
+    expect(source).toContain("functions/health/ready.js");
+    expect(source).toContain("health index missing side-effect import ./ready.js");
   });
 });
