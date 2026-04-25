@@ -1,13 +1,14 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+  "id": "ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart"
+    "SharePointWebPart",
+    "TeamsPersonalApp"
   ],
   "supportsThemeVariants": true,
   "supportsFullBleed": true,
@@ -18,32 +19,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Foleon Highlights"
+        "default": "HB Intel Safety"
       },
       "description": {
-        "default": "Show governed Foleon highlights and route readers into SharePoint-hosted publication experiences."
+        "default": "HB Intel Safety workspace."
       },
-      "officeFabricIconFontName": "ReadingMode",
-      "hiddenFromToolbox": false,
+      "officeFabricIconFontName": "BuildDefinition",
       "properties": {
-        "foleonRoute": "highlights"
-      }
-    },
-    {
-      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": {
-        "default": "HB Intel"
-      },
-      "title": {
-        "default": "HB Intel Foleon Manager"
-      },
-      "description": {
-        "default": "Manage Foleon content registry, placements, validation, and sync proof."
-      },
-      "officeFabricIconFontName": "Settings",
-      "hiddenFromToolbox": false,
-      "properties": {
-        "foleonRoute": "manage"
+        "description": "Safety"
       }
     }
   ]
