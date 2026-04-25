@@ -9,7 +9,7 @@
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
       {
-        "resource": "hb-intel-api-production",
+        "resource": "HB SharePoint Creator",
         "scope": "access_as_user"
       }
     ],
