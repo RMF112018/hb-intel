@@ -200,10 +200,13 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
                   </ul>
                 </SafetyStatusPanel>
               </div>
-            ) : (
+            ) : resolvedRuntimeContract.hostMode === 'sharepoint' ? (
+              // SharePoint-hosted: token-authoritative capability gating. The
+              // provider is required so a missing token provider correctly
+              // surfaces token-unavailable instead of silently falling back
+              // to session roles.
               <SafetyCapabilityProvider
                 host={
-                  resolvedRuntimeContract.hostMode === 'sharepoint' &&
                   typed?.aadTokenProviderFactory
                     ? (typed as unknown as AadTokenProviderHost)
                     : undefined
@@ -220,6 +223,19 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
                   </div>
                 </SafetyRepositoryProvider>
               </SafetyCapabilityProvider>
+            ) : (
+              // Mock / local / non-SPFx: no token provider exists. Render
+              // without SafetyCapabilityProvider so useSafetyCapabilities()
+              // falls back to session.resolvedRoles via the persona path.
+              <SafetyRepositoryProvider repository={repository}>
+                <div
+                  ref={contentRef}
+                  data-safety-mode={layoutMode}
+                  className="safety-app-root"
+                >
+                  <RouterProvider router={router} />
+                </div>
+              </SafetyRepositoryProvider>
             )}
           </ComplexityProvider>
         </HbcErrorBoundary>

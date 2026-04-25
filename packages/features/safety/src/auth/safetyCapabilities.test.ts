@@ -112,12 +112,23 @@ describe('resolveSafetyCapabilities', () => {
     });
   });
 
-  it('unknown role → all denied (state=authorized — qualifying matrix yielded zero matches but token authority was present)', () => {
+  it('unknown role → all denied AND state=unauthorized (no Safety capability granted)', () => {
     expect(resolveSafetyCapabilities(['SomeOtherRole'])).toEqual({
       canPreview: false,
       canIngest: false,
       canReplay: false,
-      state: 'authorized',
+      state: 'unauthorized',
+    });
+  });
+
+  it('multiple unrelated roles → state=unauthorized', () => {
+    expect(
+      resolveSafetyCapabilities(['QualityControlReviewer', 'AccountingClerk']),
+    ).toEqual({
+      canPreview: false,
+      canIngest: false,
+      canReplay: false,
+      state: 'unauthorized',
     });
   });
 
@@ -240,6 +251,15 @@ describe('safetyCapabilitiesFromTokenRoles', () => {
 
   it('empty token roles → unauthorized', () => {
     expect(safetyCapabilitiesFromTokenRoles([])).toEqual({
+      canPreview: false,
+      canIngest: false,
+      canReplay: false,
+      state: 'unauthorized',
+    });
+  });
+
+  it('unrelated token role → state=unauthorized (no Safety capability)', () => {
+    expect(safetyCapabilitiesFromTokenRoles(['SomeUnrelatedRole'])).toEqual({
       canPreview: false,
       canIngest: false,
       canReplay: false,

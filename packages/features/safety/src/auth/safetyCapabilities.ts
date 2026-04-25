@@ -112,11 +112,18 @@ export function resolveSafetyCapabilities(
   roles: readonly string[] | null | undefined,
 ): SafetyCapabilities {
   if (!roles || roles.length === 0) return UNAUTHORIZED;
+  const canPreview = hasAny(roles, SAFETY_ACTION_ROLES.preview);
+  const canIngest = hasAny(roles, SAFETY_ACTION_ROLES.ingest);
+  const canReplay = hasAny(roles, SAFETY_ACTION_ROLES.replay);
+  // 'authorized' iff at least one capability is granted. A non-empty role
+  // array whose entries are all unrelated to Safety must NOT be reported as
+  // authorized — that would lie about the source path in the proof object
+  // and confuse hosted triage.
   return {
-    canPreview: hasAny(roles, SAFETY_ACTION_ROLES.preview),
-    canIngest: hasAny(roles, SAFETY_ACTION_ROLES.ingest),
-    canReplay: hasAny(roles, SAFETY_ACTION_ROLES.replay),
-    state: 'authorized',
+    canPreview,
+    canIngest,
+    canReplay,
+    state: canPreview || canIngest || canReplay ? 'authorized' : 'unauthorized',
   };
 }
 

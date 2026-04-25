@@ -52,7 +52,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -79,7 +79,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -104,7 +104,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
         webPartId: '00000000-0000-0000-0000-000000000000',
@@ -132,7 +132,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: audience,
         acceptedBackendOrigin: fnUrl,
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: audience,
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
         webPartId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
@@ -155,7 +155,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://other-functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -197,7 +197,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://operator-typo',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -221,7 +221,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -243,7 +243,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedHostedGuidOverlayFingerprint: 'fnv1a32:deadbeef',
       },
     });
@@ -265,7 +265,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: audience,
         acceptedBackendOrigin: fnUrl,
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.43.0',
+        expectedPackageVersion: '1.2.44.0',
         expectedApiAudience: audience,
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -277,7 +277,7 @@ describe('resolveSafetyRuntimeContract', () => {
     expect(contract.backend.apiAudience).toBe(audience);
     expect(contract.governed.acceptedBackendOrigin).toBe(fnUrl);
     expect(contract.governed.expectedManifestId).toBe('ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e');
-    expect(contract.governed.expectedPackageVersion).toBe('1.2.43.0');
+    expect(contract.governed.expectedPackageVersion).toBe('1.2.44.0');
     expect(contract.governed.expectedApiAudience).toBe(audience);
     expect(contract.hostedGuidOverlay.expectedFingerprint).toBe('fnv1a32:36b2f764');
   });
