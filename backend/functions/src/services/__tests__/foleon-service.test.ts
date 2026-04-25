@@ -61,6 +61,39 @@ describe('Foleon service validation', () => {
     });
   });
 
+  it('round-trips two-lane content fields through mock backend DTOs', async () => {
+    const service = new MockFoleonService();
+    const record = await service.createContent({
+      title: 'Company Pulse',
+      foleonDocId: 4001,
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      cadence: 'Frequent',
+      homepageSlot: 'Company Pulse Reader',
+      archiveGroup: '2026-Q2',
+      activeEdition: true,
+      primaryAudience: 'Companywide',
+      lastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+      publishStatus: 'Draft',
+      isVisible: false,
+      isHomepageEligible: false,
+      openMode: 'Inline Reader',
+      allowEmbed: true,
+      publishedUrl: 'https://viewer.us.foleon.com/company/pulse',
+    }, 'corr-test');
+
+    await expect(service.getContent(record.id)).resolves.toMatchObject({
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      cadence: 'Frequent',
+      homepageSlot: 'Company Pulse Reader',
+      archiveGroup: '2026-Q2',
+      activeEdition: true,
+      primaryAudience: 'Companywide',
+      lastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+    });
+  });
+
   it('writes ContentIdCache from the selected content FoleonDocId', async () => {
     const service = new MockFoleonService();
     const placement = await service.createPlacement({
@@ -75,6 +108,20 @@ describe('Foleon service validation', () => {
     expect(placement.contentItemId).toBe(1);
     expect(placement.foleonDocId).toBe(1001);
     expect(placement.validationStatus).toBe('valid');
+  });
+
+  it('accepts two-lane placement keys in backend contracts', async () => {
+    const service = new MockFoleonService();
+    const placement = await service.createPlacement({
+      title: 'Project Spotlight active reader',
+      placementKey: 'Project Spotlight Active',
+      contentItemId: 1,
+      isActive: true,
+      sortRank: 1,
+      layoutVariant: 'Large Feature',
+    }, 'corr-test');
+
+    expect(placement.placementKey).toBe('Project Spotlight Active');
   });
 
   it('records mock SyncRuns proof for operator actions', async () => {

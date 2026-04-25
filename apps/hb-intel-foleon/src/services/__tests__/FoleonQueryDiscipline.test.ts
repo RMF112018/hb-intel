@@ -63,6 +63,8 @@ describe('FoleonContentService query discipline', () => {
     expect(url).toMatch(/\$top=42/);
     const decoded = decodeURIComponent(url);
     expect(decoded).toContain('Id,Title,FoleonDocId');
+    expect(decoded).toContain('ReaderKey');
+    expect(decoded).toContain('LastEditorialUpdate');
     expect(decoded).not.toContain('MarketingOwner');
     expect(decoded).not.toContain('AudienceGroups');
   });
@@ -81,6 +83,9 @@ describe('FoleonContentService query discipline', () => {
     const filterText = filterMatch![1];
     for (const indexed of ['FoleonDocId', 'IsVisible', 'PublishStatus', 'IsHomepageEligible']) {
       expect(filterText).toContain(indexed);
+    }
+    for (const promptTwoField of ['ReaderKey', 'ActiveEdition', 'ContentTypeKey', 'HomepageSlot']) {
+      expect(filterText).not.toContain(promptTwoField);
     }
   });
 

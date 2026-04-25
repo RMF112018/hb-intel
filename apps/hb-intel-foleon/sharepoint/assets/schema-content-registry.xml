@@ -27,6 +27,8 @@
       <Field ID="{B9F50005-F01E-4A10-8010-C0F0E0D00005}" Name="FoleonProjectName" DisplayName="Foleon Project Name" Type="Text" Required="FALSE" MaxLength="255" />
       <Field ID="{B9F50006-F01E-4A10-8010-C0F0E0D00006}" Name="ContentTypeKey" DisplayName="Content Type" Type="Choice" Required="TRUE" Format="Dropdown">
         <CHOICES>
+          <CHOICE>Project Spotlight</CHOICE>
+          <CHOICE>Company Pulse</CHOICE>
           <CHOICE>Project Highlight</CHOICE>
           <CHOICE>Newsletter</CHOICE>
           <CHOICE>Company News</CHOICE>
@@ -35,6 +37,42 @@
           <CHOICE>Other</CHOICE>
         </CHOICES>
       </Field>
+      <Field ID="{B9F50028-F01E-4A10-8010-C0F0E0D00028}" Name="ReaderKey" DisplayName="Reader Key" Type="Choice" Required="FALSE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>project-spotlight</CHOICE>
+          <CHOICE>company-pulse</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F50029-F01E-4A10-8010-C0F0E0D00029}" Name="Cadence" DisplayName="Cadence" Type="Choice" Required="FALSE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Monthly</CHOICE>
+          <CHOICE>Weekly</CHOICE>
+          <CHOICE>Frequent</CHOICE>
+          <CHOICE>Ad Hoc</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F5002A-F01E-4A10-8010-C0F0E0D0002A}" Name="HomepageSlot" DisplayName="Homepage Slot" Type="Choice" Required="FALSE" Indexed="TRUE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Project Spotlight Reader</CHOICE>
+          <CHOICE>Company Pulse Reader</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F5002B-F01E-4A10-8010-C0F0E0D0002B}" Name="ArchiveGroup" DisplayName="Archive Group" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="64" />
+      <Field ID="{B9F5002C-F01E-4A10-8010-C0F0E0D0002C}" Name="ActiveEdition" DisplayName="Active Edition" Type="Boolean" Required="FALSE" Indexed="TRUE">
+        <Default>0</Default>
+      </Field>
+      <Field ID="{B9F5002D-F01E-4A10-8010-C0F0E0D0002D}" Name="PrimaryAudience" DisplayName="Primary Audience" Type="Choice" Required="FALSE" Format="Dropdown">
+        <CHOICES>
+          <CHOICE>Companywide</CHOICE>
+          <CHOICE>Operations</CHOICE>
+          <CHOICE>Field</CHOICE>
+          <CHOICE>Leadership</CHOICE>
+          <CHOICE>Marketing</CHOICE>
+          <CHOICE>Safety</CHOICE>
+          <CHOICE>IT</CHOICE>
+        </CHOICES>
+      </Field>
+      <Field ID="{B9F5002E-F01E-4A10-8010-C0F0E0D0002E}" Name="LastEditorialUpdate" DisplayName="Last Editorial Update" Type="DateTime" Format="DateTime" Required="FALSE" Indexed="TRUE" />
       <Field ID="{B9F50007-F01E-4A10-8010-C0F0E0D00007}" Name="PublishStatus" DisplayName="Status" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
         <CHOICES>
           <CHOICE>Draft</CHOICE>

@@ -115,6 +115,8 @@ function normalizePlacementKey(value: string | undefined): FoleonPlacementKey {
     'Secondary Card',
     'Carousel',
     'Archive Rail',
+    'Project Spotlight Active',
+    'Company Pulse Active',
   ];
   return allowed.includes(value as FoleonPlacementKey)
     ? (value as FoleonPlacementKey)

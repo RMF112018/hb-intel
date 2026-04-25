@@ -2,15 +2,18 @@
 
 ## 1. Objective
 - Target-state schema for `HB_FoleonContentRegistry` at `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`.
-- **Status: not yet provisioned on tenant.** Provision per `apps/hb-intel-foleon/docs/provisioning.md`.
+- **Status: provisioned and tenant-validated (2026-04-25).**
 - Code-level source of truth: `apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`
   (`FOLEON_CONTENT_REGISTRY_SCHEMA`).
 
 ## 2. List-Level Metadata
-- List ID: _assigned at provision time_
+- List ID: `2e57615d-457e-49b8-aef3-038e85cbe068`
 - Display Name: `Foleon Content Registry`
 - Internal Name: `HB_FoleonContentRegistry`
+- Root URL: `/sites/HBCentral/Lists/HB_FoleonContentRegistry`
 - Template: Generic List (base template 100)
+- Hidden: `false`
+- Item count at audit: `0`
 - Versioning: enabled (major only)
 - Attachments: disabled unless tenant admin enables for authoring
 - Classification: business/custom
@@ -26,7 +29,14 @@
 | Foleon Identifier | FoleonIdentifier | Text | No | No | No | |
 | Foleon Project ID | FoleonProjectId | Number | No | No | No | recommended future index only |
 | Foleon Project Name | FoleonProjectName | Text | No | No | No | |
-| Content Type | ContentTypeKey | Choice | Yes | No | No | recommended future index only; choices: Project Highlight, Newsletter, Company News, Market Update, Leadership, Other |
+| Content Type | ContentTypeKey | Choice | Yes | No | No | recommended future index only; choices: Project Spotlight, Company Pulse, Project Highlight, Newsletter, Company News, Market Update, Leadership, Other |
+| Reader Key | ReaderKey | Choice | No | Yes | No | scalar lane key; choices: project-spotlight, company-pulse |
+| Cadence | Cadence | Choice | No | No | No | choices: Monthly, Weekly, Frequent, Ad Hoc |
+| Homepage Slot | HomepageSlot | Choice | No | Yes | No | choices: Project Spotlight Reader, Company Pulse Reader |
+| Archive Group | ArchiveGroup | Text | No | Yes | No | scalar archive grouping key |
+| Active Edition | ActiveEdition | Boolean | No | Yes | No | lane active marker; one-active enforcement deferred |
+| Primary Audience | PrimaryAudience | Choice | No | No | No | choices: Companywide, Operations, Field, Leadership, Marketing, Safety, IT |
+| Last Editorial Update | LastEditorialUpdate | DateTime | No | Yes | No | scalar recency timestamp |
 | Status | PublishStatus | Choice | Yes | Yes | No | choices: Draft, Preview, Published, Archived, Offline, Suppressed |
 | Is Visible | IsVisible | Boolean | Yes | Yes | No | |
 | Is Featured | IsFeatured | Boolean | No | No | No | recommended future index only |
@@ -69,6 +79,11 @@ and validated before service code treats them as filter-safe.
 
 ```
 FoleonDocId
+ReaderKey
+HomepageSlot
+ArchiveGroup
+ActiveEdition
+LastEditorialUpdate
 PublishStatus
 IsVisible
 IsHomepageEligible
@@ -91,6 +106,12 @@ ContentTypeKey
 IsFeatured
 ```
 
+## 6.1 Deferred Package Versioning
+
+Prompt 01 adds schema and contract support only. The SPFx package/runtime
+version bump is deferred to the final package-proof wave so runtime proof,
+Feature Framework proof, and manifest truth move together.
+
 ## 6. Feature Framework Views
 
 Initial Feature Framework provisioning creates only the minimal default
@@ -110,13 +131,22 @@ rendering is proven.
 ## 8. Service consumers
 
 - `apps/hb-intel-foleon/src/services/FoleonContentService.ts`
-  - `$select` mirrors every non-computed field.
+  - Runtime currently derives `$select` from `FOLEON_CONTENT_REGISTRY_SCHEMA`.
   - `$filter` only uses `FoleonDocId`, `IsVisible`, `PublishStatus`, `IsHomepageEligible` — all indexed.
   - `$top` defaults to 100.
 
-## 8. Uniqueness Posture
+## 9. Runtime Query Constraint (Tenant-Proven)
+
+- The public filter path is valid on tenant:
+  - `IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1`
+- The hosted `400` root cause is invalid person-field projection in the full schema-derived `$select`:
+  - `MarketingOwner` is `Type="User"` and cannot be selected as a scalar without `$expand`.
+  - `AudienceGroups` is `Type="UserMulti"` and has the same constraint.
+- Current remediation direction: narrow public `$select` to scalar-safe fields unless a route explicitly uses `$expand` for person targets.
+
+## 10. Uniqueness Posture
 
 `FoleonDocId` is provisioned with `Indexed="TRUE"` and
 `EnforceUniqueValues="TRUE"` per Microsoft field schema guidance. Tenant
-closure still requires clean-site proof that SharePoint created the
-unique constraint.
+audit confirms the uniqueness flag is present in live `SchemaXml` and
+matches provisioning assets.

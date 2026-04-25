@@ -73,6 +73,48 @@ describe('Foleon list schemas', () => {
     }
   });
 
+  it('Content Registry accepts the governed two-lane content choices and scalar fields', () => {
+    const contentType = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === 'ContentTypeKey');
+    expect(contentType?.choices).toEqual([
+      'Project Spotlight',
+      'Company Pulse',
+      'Project Highlight',
+      'Newsletter',
+      'Company News',
+      'Market Update',
+      'Leadership',
+      'Other',
+    ]);
+
+    const expectedFields = new Map([
+      ['ReaderKey', 'Choice'],
+      ['Cadence', 'Choice'],
+      ['HomepageSlot', 'Choice'],
+      ['ArchiveGroup', 'Text'],
+      ['ActiveEdition', 'Boolean'],
+      ['PrimaryAudience', 'Choice'],
+      ['LastEditorialUpdate', 'DateTime'],
+    ]);
+    for (const [internalName, type] of expectedFields) {
+      const field = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === internalName);
+      expect(field?.type, internalName).toBe(type);
+      expect(field?.type, internalName).not.toMatch(/Person|Lookup/);
+    }
+  });
+
+  it('Placement schema accepts two-lane active placement keys', () => {
+    const placementKey = FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA.fields.find((f) => f.internalName === 'PlacementKey');
+    expect(placementKey?.choices).toEqual([
+      'Hero',
+      'Primary Card',
+      'Secondary Card',
+      'Carousel',
+      'Archive Rail',
+      'Project Spotlight Active',
+      'Company Pulse Active',
+    ]);
+  });
+
   it('Interaction Events preserves EventId unique constraint', () => {
     const eventId = FOLEON_INTERACTION_EVENTS_SCHEMA.fields.find(
       (f) => f.internalName === 'EventId',

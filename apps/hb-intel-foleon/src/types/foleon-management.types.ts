@@ -1,11 +1,24 @@
 export type FoleonValidationStatus = 'valid' | 'warning' | 'blocked' | 'unknown';
 export type FoleonOpenMode = 'Inline Reader' | 'Fullscreen Reader' | 'New Tab Only';
+export type FoleonReaderKey = 'project-spotlight' | 'company-pulse';
+export type FoleonCadence = 'Monthly' | 'Weekly' | 'Frequent' | 'Ad Hoc';
+export type FoleonHomepageSlot = 'Project Spotlight Reader' | 'Company Pulse Reader';
+export type FoleonPrimaryAudience =
+  | 'Companywide'
+  | 'Operations'
+  | 'Field'
+  | 'Leadership'
+  | 'Marketing'
+  | 'Safety'
+  | 'IT';
 export type FoleonPlacementKey =
   | 'Hero'
   | 'Primary Card'
   | 'Secondary Card'
   | 'Carousel'
-  | 'Archive Rail';
+  | 'Archive Rail'
+  | 'Project Spotlight Active'
+  | 'Company Pulse Active';
 export type FoleonLayoutVariant =
   | 'Large Feature'
   | 'Compact Card'
@@ -19,6 +32,13 @@ export interface FoleonManagedContent {
   readonly title: string;
   readonly foleonDocId: number;
   readonly contentTypeKey: string;
+  readonly readerKey?: FoleonReaderKey;
+  readonly cadence?: FoleonCadence;
+  readonly homepageSlot?: FoleonHomepageSlot;
+  readonly archiveGroup?: string;
+  readonly activeEdition?: boolean;
+  readonly primaryAudience?: FoleonPrimaryAudience;
+  readonly lastEditorialUpdate?: string;
   readonly publishStatus: string;
   readonly isVisible: boolean;
   readonly isHomepageEligible: boolean;
@@ -42,6 +62,13 @@ export interface FoleonContentMutation {
   readonly title: string;
   readonly foleonDocId: number;
   readonly contentTypeKey: string;
+  readonly readerKey?: FoleonReaderKey;
+  readonly cadence?: FoleonCadence;
+  readonly homepageSlot?: FoleonHomepageSlot;
+  readonly archiveGroup?: string;
+  readonly activeEdition?: boolean;
+  readonly primaryAudience?: FoleonPrimaryAudience;
+  readonly lastEditorialUpdate?: string;
   readonly publishStatus: string;
   readonly isVisible: boolean;
   readonly isHomepageEligible: boolean;

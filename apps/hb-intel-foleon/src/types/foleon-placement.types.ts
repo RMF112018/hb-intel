@@ -3,7 +3,9 @@ export type FoleonPlacementKey =
   | 'Primary Card'
   | 'Secondary Card'
   | 'Carousel'
-  | 'Archive Rail';
+  | 'Archive Rail'
+  | 'Project Spotlight Active'
+  | 'Company Pulse Active';
 
 export type FoleonLayoutVariant =
   | 'Large Feature'

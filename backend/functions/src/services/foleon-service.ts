@@ -648,6 +648,13 @@ export class MockFoleonService implements IFoleonService {
       title: 'Mock Project Highlight',
       foleonDocId: 1001,
       contentTypeKey: 'Project Highlight',
+      readerKey: 'project-spotlight',
+      cadence: 'Monthly',
+      homepageSlot: 'Project Spotlight Reader',
+      archiveGroup: '2026-04',
+      activeEdition: true,
+      primaryAudience: 'Companywide',
+      lastEditorialUpdate: new Date(0).toISOString(),
       publishStatus: 'Published',
       isVisible: true,
       isHomepageEligible: true,
@@ -912,6 +919,13 @@ function contentFields(
     Title: input.title,
     FoleonDocId: input.foleonDocId,
     ContentTypeKey: input.contentTypeKey,
+    ReaderKey: input.readerKey,
+    Cadence: input.cadence,
+    HomepageSlot: input.homepageSlot,
+    ArchiveGroup: input.archiveGroup,
+    ActiveEdition: input.activeEdition === true,
+    PrimaryAudience: input.primaryAudience,
+    LastEditorialUpdate: input.lastEditorialUpdate,
     PublishStatus: input.publishStatus,
     IsVisible: input.isVisible,
     IsHomepageEligible: input.isHomepageEligible === true,
@@ -968,6 +982,13 @@ function toContentDetail(item: GraphListItem): FoleonContentDetailDto {
     title: readString(fields.Title) ?? '',
     foleonDocId: readNumber(fields.FoleonDocId) ?? 0,
     contentTypeKey: readString(fields.ContentTypeKey) ?? 'Other',
+    readerKey: readReaderKey(fields.ReaderKey),
+    cadence: readCadence(fields.Cadence),
+    homepageSlot: readHomepageSlot(fields.HomepageSlot),
+    archiveGroup: readString(fields.ArchiveGroup),
+    activeEdition: readOptionalBoolean(fields.ActiveEdition),
+    primaryAudience: readString(fields.PrimaryAudience),
+    lastEditorialUpdate: readString(fields.LastEditorialUpdate),
     publishStatus: readString(fields.PublishStatus) ?? 'Draft',
     isVisible: readBoolean(fields.IsVisible),
     isHomepageEligible: readBoolean(fields.IsHomepageEligible),
@@ -1050,6 +1071,13 @@ function contentToMutation(record: FoleonContentDetailDto): FoleonContentMutatio
     title: record.title,
     foleonDocId: record.foleonDocId,
     contentTypeKey: record.contentTypeKey,
+    readerKey: record.readerKey,
+    cadence: record.cadence,
+    homepageSlot: record.homepageSlot,
+    archiveGroup: record.archiveGroup,
+    activeEdition: record.activeEdition,
+    primaryAudience: record.primaryAudience,
+    lastEditorialUpdate: record.lastEditorialUpdate,
     publishStatus: record.publishStatus,
     isVisible: record.isVisible,
     isHomepageEligible: record.isHomepageEligible,
@@ -1082,6 +1110,13 @@ function mutationToContent(
     title: input.title,
     foleonDocId: input.foleonDocId,
     contentTypeKey: input.contentTypeKey,
+    readerKey: input.readerKey,
+    cadence: input.cadence,
+    homepageSlot: input.homepageSlot,
+    archiveGroup: input.archiveGroup,
+    activeEdition: input.activeEdition === true,
+    primaryAudience: input.primaryAudience,
+    lastEditorialUpdate: input.lastEditorialUpdate,
     publishStatus: input.publishStatus,
     isVisible: input.isVisible,
     isHomepageEligible: input.isHomepageEligible === true,
@@ -1186,6 +1221,11 @@ function readBoolean(value: unknown): boolean {
   return value === true || value === 1 || value === 'true';
 }
 
+function readOptionalBoolean(value: unknown): boolean | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  return readBoolean(value);
+}
+
 function splitReasons(value: unknown): ReadonlyArray<string> {
   const text = readString(value);
   return text ? text.split(/[;,]/).map((part) => part.trim()).filter(Boolean) : [];
@@ -1203,13 +1243,32 @@ function readSyncSource(value: unknown): FoleonContentDetailDto['syncSource'] {
   return value === 'Foleon API' || value === 'Hybrid' ? value : 'Manual';
 }
 
+function readReaderKey(value: unknown): FoleonContentDetailDto['readerKey'] {
+  if (value === 'project-spotlight' || value === 'company-pulse') return value;
+  return undefined;
+}
+
+function readCadence(value: unknown): FoleonContentDetailDto['cadence'] {
+  if (value === 'Monthly' || value === 'Weekly' || value === 'Frequent' || value === 'Ad Hoc') {
+    return value;
+  }
+  return undefined;
+}
+
+function readHomepageSlot(value: unknown): FoleonContentDetailDto['homepageSlot'] {
+  if (value === 'Project Spotlight Reader' || value === 'Company Pulse Reader') return value;
+  return undefined;
+}
+
 function readPlacementKey(value: unknown): FoleonPlacementDto['placementKey'] {
   if (
     value === 'Hero' ||
     value === 'Primary Card' ||
     value === 'Secondary Card' ||
     value === 'Carousel' ||
-    value === 'Archive Rail'
+    value === 'Archive Rail' ||
+    value === 'Project Spotlight Active' ||
+    value === 'Company Pulse Active'
   ) {
     return value;
   }

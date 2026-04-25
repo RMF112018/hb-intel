@@ -119,6 +119,10 @@ describe('Feature Framework parser-backed validation', () => {
         checkPassed(`${schema.internalName}.${field.internalName} required metadata matches XML`);
         checkPassed(`${schema.internalName}.${field.internalName} launch-index metadata matches XML`);
         checkPassed(`${schema.internalName}.${field.internalName} uniqueness metadata matches XML`);
+        const codeField = codeSchema.fields.find((entry) => entry.internalName === field.internalName);
+        if (codeField?.choices) {
+          checkPassed(`${schema.internalName}.${field.internalName} choices match code schema metadata`);
+        }
       }
     }
   });

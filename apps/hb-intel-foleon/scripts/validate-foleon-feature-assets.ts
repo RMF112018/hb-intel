@@ -71,6 +71,11 @@ export const EXPECTED_LISTS: ReadonlyArray<{
 export const LAUNCH_INDEXES: Record<FoleonListInternalName, ReadonlyArray<string>> = {
   HB_FoleonContentRegistry: [
     'FoleonDocId',
+    'ReaderKey',
+    'HomepageSlot',
+    'ArchiveGroup',
+    'ActiveEdition',
+    'LastEditorialUpdate',
     'PublishStatus',
     'IsVisible',
     'IsHomepageEligible',
@@ -154,6 +159,7 @@ export interface ParsedField {
   readonly required: boolean;
   readonly indexed: boolean;
   readonly unique: boolean;
+  readonly choices: ReadonlyArray<string>;
   readonly lookupList?: string;
   readonly showField?: string;
 }
@@ -249,6 +255,14 @@ function collectFieldRefs(node: unknown): string[] {
   return [...direct, ...nested];
 }
 
+function choiceValuesFrom(field: Record<string, unknown>): ReadonlyArray<string> {
+  const choicesNode = field.CHOICES;
+  if (!choicesNode || typeof choicesNode !== 'object') return [];
+  const rawChoices = (choicesNode as { CHOICE?: unknown }).CHOICE;
+  return asArray(rawChoices as string | ReadonlyArray<string>)
+    .filter((choice): choice is string => typeof choice === 'string' && choice.length > 0);
+}
+
 function listInternalNameFromUrl(url: string): FoleonListInternalName {
   const match = EXPECTED_LISTS.find((list) => list.url === url);
   if (!match) throw new Error(`Unknown Foleon list URL in schema: ${url}`);
@@ -293,6 +307,7 @@ export function parseSchemaXml(fileName: string, xml: string): ParsedListSchema 
       required: field.Required === 'TRUE',
       indexed: field.Indexed === 'TRUE',
       unique: field.EnforceUniqueValues === 'TRUE',
+      choices: choiceValuesFrom(field),
       lookupList: typeof field.List === 'string' ? field.List : undefined,
       showField: typeof field.ShowField === 'string' ? field.ShowField : undefined,
     }));
@@ -457,6 +472,13 @@ function validateSchemas(model: FoleonFeatureAssetModel): ValidationCheck[] {
         checks.push(check(`${expected.internalName}.${field.internalName} required metadata matches XML`, field.required === fieldSchema.required));
         checks.push(check(`${expected.internalName}.${field.internalName} launch-index metadata matches XML`, field.indexed === fieldSchema.indexedAtProvisioning));
         checks.push(check(`${expected.internalName}.${field.internalName} uniqueness metadata matches XML`, field.unique === !!fieldSchema.unique));
+        if (fieldSchema.choices) {
+          checks.push(check(
+            `${expected.internalName}.${field.internalName} choices match code schema metadata`,
+            JSON.stringify(field.choices) === JSON.stringify([...fieldSchema.choices]),
+            JSON.stringify(field.choices),
+          ));
+        }
       }
 
       if (field.type === 'Lookup') {

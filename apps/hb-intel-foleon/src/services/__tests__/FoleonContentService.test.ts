@@ -63,6 +63,36 @@ describe('toFoleonContentRecord', () => {
     expect(record?.isFeatured).toBe(false);
     expect(record?.requiresExternalOpen).toBe(false);
   });
+
+  it('maps two-lane scalar fields without person-field expansion', () => {
+    const record = toFoleonContentRecord({
+      Id: 1,
+      Title: 'Project Spotlight',
+      FoleonDocId: 2,
+      ContentTypeKey: 'Project Spotlight',
+      ReaderKey: 'project-spotlight',
+      Cadence: 'Monthly',
+      HomepageSlot: 'Project Spotlight Reader',
+      ArchiveGroup: '2026-04',
+      ActiveEdition: true,
+      PrimaryAudience: 'Companywide',
+      LastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+      PublishStatus: 'Published',
+      AllowEmbed: true,
+      IsVisible: true,
+    });
+
+    expect(record).toMatchObject({
+      contentTypeKey: 'Project Spotlight',
+      readerKey: 'project-spotlight',
+      cadence: 'Monthly',
+      homepageSlot: 'Project Spotlight Reader',
+      archiveGroup: '2026-04',
+      activeEdition: true,
+      primaryAudience: 'Companywide',
+      lastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+    });
+  });
 });
 
 describe('FOLEON_CONTENT_SELECT_FIELDS', () => {
@@ -76,6 +106,21 @@ describe('FOLEON_CONTENT_SELECT_FIELDS', () => {
   it('does not include person-field projections requiring $expand', () => {
     expect(FOLEON_CONTENT_SELECT_FIELDS).not.toContain('MarketingOwner');
     expect(FOLEON_CONTENT_SELECT_FIELDS).not.toContain('AudienceGroups');
+  });
+
+  it('includes only the new scalar-safe lane fields', () => {
+    const selected = FOLEON_CONTENT_SELECT_FIELDS.split(',');
+    expect(selected).toEqual(expect.arrayContaining([
+      'ReaderKey',
+      'Cadence',
+      'HomepageSlot',
+      'ArchiveGroup',
+      'ActiveEdition',
+      'PrimaryAudience',
+      'LastEditorialUpdate',
+    ]));
+    expect(selected).not.toContain('MarketingOwner');
+    expect(selected).not.toContain('AudienceGroups');
   });
 
   it('does not include excluded governance/admin fields', () => {

@@ -66,6 +66,8 @@ export interface FoleonListSchema {
 }
 
 const CONTENT_TYPE_KEY_CHOICES = [
+  'Project Spotlight',
+  'Company Pulse',
   'Project Highlight',
   'Newsletter',
   'Company News',
@@ -86,6 +88,22 @@ const PUBLISH_STATUS_CHOICES = [
 const OPEN_MODE_CHOICES = ['Inline Reader', 'Fullscreen Reader', 'New Tab Only'] as const;
 
 const SYNC_SOURCE_CHOICES = ['Manual', 'Foleon API', 'Hybrid'] as const;
+
+const READER_KEY_CHOICES = ['project-spotlight', 'company-pulse'] as const;
+
+const CADENCE_CHOICES = ['Monthly', 'Weekly', 'Frequent', 'Ad Hoc'] as const;
+
+const HOMEPAGE_SLOT_CHOICES = ['Project Spotlight Reader', 'Company Pulse Reader'] as const;
+
+const PRIMARY_AUDIENCE_CHOICES = [
+  'Companywide',
+  'Operations',
+  'Field',
+  'Leadership',
+  'Marketing',
+  'Safety',
+  'IT',
+] as const;
 
 const REGION_CHOICES = [
   'North Florida',
@@ -115,6 +133,13 @@ export const FOLEON_CONTENT_REGISTRY_SCHEMA: FoleonListSchema = {
     { internalName: 'FoleonProjectId', displayName: 'Foleon Project ID', type: 'Number', required: false, indexedAtProvisioning: false, recommendedIndex: true },
     { internalName: 'FoleonProjectName', displayName: 'Foleon Project Name', type: 'Text', required: false, indexedAtProvisioning: false },
     { internalName: 'ContentTypeKey', displayName: 'Content Type', type: 'Choice', required: true, indexedAtProvisioning: false, recommendedIndex: true, choices: CONTENT_TYPE_KEY_CHOICES },
+    { internalName: 'ReaderKey', displayName: 'Reader Key', type: 'Choice', required: false, indexedAtProvisioning: true, filterSafe: true, choices: READER_KEY_CHOICES },
+    { internalName: 'Cadence', displayName: 'Cadence', type: 'Choice', required: false, indexedAtProvisioning: false, choices: CADENCE_CHOICES },
+    { internalName: 'HomepageSlot', displayName: 'Homepage Slot', type: 'Choice', required: false, indexedAtProvisioning: true, choices: HOMEPAGE_SLOT_CHOICES },
+    { internalName: 'ArchiveGroup', displayName: 'Archive Group', type: 'Text', required: false, indexedAtProvisioning: true },
+    { internalName: 'ActiveEdition', displayName: 'Active Edition', type: 'Boolean', required: false, indexedAtProvisioning: true, filterSafe: true },
+    { internalName: 'PrimaryAudience', displayName: 'Primary Audience', type: 'Choice', required: false, indexedAtProvisioning: false, choices: PRIMARY_AUDIENCE_CHOICES },
+    { internalName: 'LastEditorialUpdate', displayName: 'Last Editorial Update', type: 'DateTime', required: false, indexedAtProvisioning: true },
     { internalName: 'PublishStatus', displayName: 'Status', type: 'Choice', required: true, indexedAtProvisioning: true, filterSafe: true, choices: PUBLISH_STATUS_CHOICES },
     { internalName: 'IsVisible', displayName: 'Is Visible', type: 'Boolean', required: true, indexedAtProvisioning: true, filterSafe: true },
     { internalName: 'IsFeatured', displayName: 'Is Featured', type: 'Boolean', required: false, indexedAtProvisioning: false, recommendedIndex: true },
@@ -151,6 +176,11 @@ export const FOLEON_CONTENT_REGISTRY_SCHEMA: FoleonListSchema = {
   ],
   requiredIndexedFields: [
     'FoleonDocId',
+    'ReaderKey',
+    'HomepageSlot',
+    'ArchiveGroup',
+    'ActiveEdition',
+    'LastEditorialUpdate',
     'PublishStatus',
     'IsVisible',
     'IsHomepageEligible',
@@ -172,6 +202,8 @@ const PLACEMENT_KEY_CHOICES = [
   'Secondary Card',
   'Carousel',
   'Archive Rail',
+  'Project Spotlight Active',
+  'Company Pulse Active',
 ] as const;
 
 const LAYOUT_VARIANT_CHOICES = [

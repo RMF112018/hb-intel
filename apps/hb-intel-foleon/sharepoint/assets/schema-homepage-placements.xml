@@ -32,6 +32,8 @@
           <CHOICE>Secondary Card</CHOICE>
           <CHOICE>Carousel</CHOICE>
           <CHOICE>Archive Rail</CHOICE>
+          <CHOICE>Project Spotlight Active</CHOICE>
+          <CHOICE>Company Pulse Active</CHOICE>
         </CHOICES>
       </Field>
       <Field ID="{B9F50102-F01E-4A10-8010-C0F0E0D10002}"

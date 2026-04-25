@@ -5,6 +5,8 @@
  */
 
 export type FoleonContentType =
+  | 'Project Spotlight'
+  | 'Company Pulse'
   | 'Project Highlight'
   | 'Newsletter'
   | 'Company News'
@@ -24,6 +26,21 @@ export type FoleonOpenMode = 'Inline Reader' | 'Fullscreen Reader' | 'New Tab On
 
 export type FoleonSyncSource = 'Manual' | 'Foleon API' | 'Hybrid';
 
+export type FoleonReaderKey = 'project-spotlight' | 'company-pulse';
+
+export type FoleonCadence = 'Monthly' | 'Weekly' | 'Frequent' | 'Ad Hoc';
+
+export type FoleonHomepageSlot = 'Project Spotlight Reader' | 'Company Pulse Reader';
+
+export type FoleonPrimaryAudience =
+  | 'Companywide'
+  | 'Operations'
+  | 'Field'
+  | 'Leadership'
+  | 'Marketing'
+  | 'Safety'
+  | 'IT';
+
 export interface FoleonContentRecord {
   readonly id: number;
   readonly title: string;
@@ -33,6 +50,13 @@ export interface FoleonContentRecord {
   readonly foleonProjectId?: number;
   readonly foleonProjectName?: string;
   readonly contentTypeKey: FoleonContentType;
+  readonly readerKey?: FoleonReaderKey;
+  readonly cadence?: FoleonCadence;
+  readonly homepageSlot?: FoleonHomepageSlot;
+  readonly archiveGroup?: string;
+  readonly activeEdition?: boolean;
+  readonly primaryAudience?: FoleonPrimaryAudience;
+  readonly lastEditorialUpdate?: string;
   readonly publishStatus: FoleonPublishStatus;
   readonly isVisible: boolean;
   readonly isFeatured: boolean;

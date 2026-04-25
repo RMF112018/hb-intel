@@ -14,9 +14,13 @@ import {
 } from '@hbc/sharepoint-platform';
 import type {
   FoleonContentRecord,
+  FoleonCadence,
   FoleonContentType,
+  FoleonHomepageSlot,
   FoleonOpenMode,
+  FoleonPrimaryAudience,
   FoleonPublishStatus,
+  FoleonReaderKey,
   FoleonSyncSource,
 } from '../types/foleon-content.types.js';
 import {
@@ -48,6 +52,13 @@ interface FoleonContentRawRow {
   FoleonProjectId?: number;
   FoleonProjectName?: string;
   ContentTypeKey?: string;
+  ReaderKey?: string;
+  Cadence?: string;
+  HomepageSlot?: string;
+  ArchiveGroup?: string;
+  ActiveEdition?: boolean;
+  PrimaryAudience?: string;
+  LastEditorialUpdate?: string;
   PublishStatus?: string;
   IsVisible?: boolean;
   IsFeatured?: boolean;
@@ -84,6 +95,13 @@ const CONTENT_SELECT_FIELDS_ARRAY = [
   'FoleonProjectId',
   'FoleonProjectName',
   'ContentTypeKey',
+  'ReaderKey',
+  'Cadence',
+  'HomepageSlot',
+  'ArchiveGroup',
+  'ActiveEdition',
+  'PrimaryAudience',
+  'LastEditorialUpdate',
   'PublishStatus',
   'IsVisible',
   'IsFeatured',
@@ -165,6 +183,13 @@ export function toFoleonContentRecord(row: FoleonContentRawRow): FoleonContentRe
     foleonProjectId: row.FoleonProjectId,
     foleonProjectName: row.FoleonProjectName,
     contentTypeKey: normalizeContentType(row.ContentTypeKey),
+    readerKey: normalizeReaderKey(row.ReaderKey),
+    cadence: normalizeCadence(row.Cadence),
+    homepageSlot: normalizeHomepageSlot(row.HomepageSlot),
+    archiveGroup: row.ArchiveGroup,
+    activeEdition: typeof row.ActiveEdition === 'boolean' ? row.ActiveEdition : undefined,
+    primaryAudience: normalizePrimaryAudience(row.PrimaryAudience),
+    lastEditorialUpdate: row.LastEditorialUpdate,
     publishStatus: normalizePublishStatus(row.PublishStatus),
     isVisible: !!row.IsVisible,
     isFeatured: !!row.IsFeatured,
@@ -199,6 +224,8 @@ function readHyperlink(value: FoleonContentRawRow['PublishedUrl']): string | und
 
 function normalizeContentType(value: string | undefined): FoleonContentType {
   const allowed: ReadonlyArray<FoleonContentType> = [
+    'Project Spotlight',
+    'Company Pulse',
     'Project Highlight',
     'Newsletter',
     'Company News',
@@ -207,6 +234,37 @@ function normalizeContentType(value: string | undefined): FoleonContentType {
     'Other',
   ];
   return allowed.includes(value as FoleonContentType) ? (value as FoleonContentType) : 'Other';
+}
+
+function normalizeReaderKey(value: string | undefined): FoleonReaderKey | undefined {
+  const allowed: ReadonlyArray<FoleonReaderKey> = ['project-spotlight', 'company-pulse'];
+  return allowed.includes(value as FoleonReaderKey) ? (value as FoleonReaderKey) : undefined;
+}
+
+function normalizeCadence(value: string | undefined): FoleonCadence | undefined {
+  const allowed: ReadonlyArray<FoleonCadence> = ['Monthly', 'Weekly', 'Frequent', 'Ad Hoc'];
+  return allowed.includes(value as FoleonCadence) ? (value as FoleonCadence) : undefined;
+}
+
+function normalizeHomepageSlot(value: string | undefined): FoleonHomepageSlot | undefined {
+  const allowed: ReadonlyArray<FoleonHomepageSlot> = [
+    'Project Spotlight Reader',
+    'Company Pulse Reader',
+  ];
+  return allowed.includes(value as FoleonHomepageSlot) ? (value as FoleonHomepageSlot) : undefined;
+}
+
+function normalizePrimaryAudience(value: string | undefined): FoleonPrimaryAudience | undefined {
+  const allowed: ReadonlyArray<FoleonPrimaryAudience> = [
+    'Companywide',
+    'Operations',
+    'Field',
+    'Leadership',
+    'Marketing',
+    'Safety',
+    'IT',
+  ];
+  return allowed.includes(value as FoleonPrimaryAudience) ? (value as FoleonPrimaryAudience) : undefined;
 }
 
 function normalizePublishStatus(value: string | undefined): FoleonPublishStatus {
