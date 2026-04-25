@@ -25,6 +25,7 @@ import {
 } from '@hb-homepage/data/spContext';
 import type { HomepageIdentityInput } from '@hb-homepage/helpers/identity';
 import { resolveSafetyFunctionAppWiring } from '@hb-homepage/runtime/wiring/safetyFunctionAppWiring';
+import { bridgeSafetyFieldExcellenceDynamicConfig } from '@hb-homepage/runtime/wiring/safetyFieldExcellenceDynamicConfigBridge';
 import { readHomepageFoleonApiResource } from '@hb-homepage/runtime/wiring/foleonHomepageConfig';
 
 let root: Root | undefined;
@@ -43,10 +44,11 @@ export async function mount(
   const siteUrl = spfxContext?.pageContext?.web?.absoluteUrl;
   storeSiteUrl(siteUrl);
 
-  const webPartProperties =
+  const rawWebPartProperties =
     typeof config?.webPartProperties === 'object' && config.webPartProperties !== null
       ? (config.webPartProperties as Record<string, unknown>)
       : undefined;
+  const webPartProperties = bridgeSafetyFieldExcellenceDynamicConfig(rawWebPartProperties);
 
   if (typeof webPartProperties?.kudosListHostUrl === 'string' && webPartProperties.kudosListHostUrl.trim()) {
     const candidate = webPartProperties.kudosListHostUrl.trim();

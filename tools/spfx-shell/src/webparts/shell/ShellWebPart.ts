@@ -129,6 +129,36 @@ interface IShellWebPartProperties extends IShellFoleonRuntimeConfigProperties {
   foleonApiBaseUrl?: string;
   /** Homepage-embedded Foleon API resource for optional SPFx token acquisition. */
   foleonApiResource?: string;
+  /**
+   * Safety Field Excellence dynamic activation — flat property-pane fields.
+   * The runtime-side `safetyFieldExcellenceDynamicConfigBridge` normalizes
+   * these into the nested `safetyFieldExcellenceDynamic` block consumed by
+   * `SafetyFieldExcellenceZone`. Operators may instead author the nested
+   * block directly via raw JSON; nested explicit values win when both
+   * shapes are present.
+   */
+  safetyFieldExcellenceSourceMode?:
+    | ''
+    | 'curated-only'
+    | 'dynamic-preview'
+    | 'dynamic-with-curated-fallback'
+    | 'dynamic-only';
+  /** Safety Function App base URL (preferred top-level field). */
+  safetyFieldExcellenceFunctionAppBaseUrl?: string;
+  /** Safety Function App audience for delegated SPFx token acquisition (preferred over backendAudience). */
+  safetyFieldExcellenceFunctionAppAudience?: string;
+  /** Optional Safety Hub deep-link surfaced in the curated/preview fallback CTAs. */
+  safetyFieldExcellenceSafetyHubUrl?: string;
+  /** When true, request stale homepage payloads from the Function App. */
+  safetyFieldExcellenceIncludeStale?: boolean;
+  /** When true, expose verbose runtime-proof diagnostics. */
+  safetyFieldExcellenceDiagnosticsEnabled?: boolean;
+  /** Operator emergency switch — fall back to curated copy on dynamic failure. */
+  safetyFieldExcellenceEmergencyUseCuratedFallback?: boolean;
+  /** Top-level Function App URL. May also be derived from the flat Safety field above. */
+  functionAppBaseUrl?: string;
+  /** Top-level preferred Function App audience. May also be derived from the flat Safety field above. */
+  functionAppAudience?: string;
 }
 
 export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
@@ -760,6 +790,59 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                     label: 'Foleon API resource',
                     description: 'Optional Entra resource/application ID URI for SPFx token acquisition.',
                     placeholder: 'api://<application-id-or-uri>',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Safety Field Excellence — dynamic activation',
+                groupFields: [
+                  PropertyPaneLabel('safetyFieldExcellenceActivationGuidance', {
+                    text:
+                      'Leave Source mode blank to keep curated-only (the safe default). Choose a dynamic mode and supply the Function App URL and audience to activate live Safety Field Excellence content.',
+                  }),
+                  PropertyPaneDropdown('safetyFieldExcellenceSourceMode', {
+                    label: 'Source mode',
+                    options: [
+                      { key: '', text: '(curated-only — default)' },
+                      { key: 'curated-only', text: 'curated-only' },
+                      { key: 'dynamic-preview', text: 'dynamic-preview' },
+                      { key: 'dynamic-with-curated-fallback', text: 'dynamic-with-curated-fallback' },
+                      { key: 'dynamic-only', text: 'dynamic-only' },
+                    ],
+                    selectedKey: this.properties.safetyFieldExcellenceSourceMode ?? '',
+                  }),
+                  PropertyPaneTextField('safetyFieldExcellenceFunctionAppBaseUrl', {
+                    label: 'Function App base URL',
+                    description:
+                      'HTTPS base URL of the Safety Function App (no trailing path). Required for any dynamic mode.',
+                    placeholder: 'https://<safety-function-app>.azurewebsites.net',
+                  }),
+                  PropertyPaneTextField('safetyFieldExcellenceFunctionAppAudience', {
+                    label: 'Function App audience',
+                    description:
+                      'Preferred Entra resource / application ID URI used to acquire a delegated Function App token. Falls back to legacy backendAudience if blank.',
+                    placeholder: 'api://<safety-function-app-id-or-uri>',
+                  }),
+                  PropertyPaneTextField('safetyFieldExcellenceSafetyHubUrl', {
+                    label: 'Safety Hub URL',
+                    description:
+                      'Optional deep-link surfaced in the preview / curated fallback. Leave blank for the default Safety hub link.',
+                    placeholder: '/sites/<tenant-safety-site>',
+                  }),
+                  PropertyPaneToggle('safetyFieldExcellenceIncludeStale', {
+                    label: 'Include stale homepage payloads',
+                    onText: 'Include stale payloads',
+                    offText: 'Fresh payloads only',
+                  }),
+                  PropertyPaneToggle('safetyFieldExcellenceDiagnosticsEnabled', {
+                    label: 'Verbose runtime-proof diagnostics',
+                    onText: 'Verbose diagnostics on',
+                    offText: 'Standard diagnostics',
+                  }),
+                  PropertyPaneToggle('safetyFieldExcellenceEmergencyUseCuratedFallback', {
+                    label: 'Emergency curated fallback',
+                    onText: 'Fall back to curated on failure',
+                    offText: 'Use preview fallback on failure',
                   }),
                 ],
               },
