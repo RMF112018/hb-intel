@@ -43,6 +43,26 @@ Outputs:
   hero-banner shipping contract (this runbook's
   primary artifact)**
 
+For the Foleon communications-lane cutover, the expected closure
+artifact is:
+
+- `dist/sppkg/hb-intel-homepage.sppkg`
+- homepage package version `1.1.78.0`
+- embedded Foleon expected package version `1.0.23.0`
+- generated proof JSONs:
+  - `dist/sppkg/hb-intel-homepage-effectiveness-proof.json`
+  - `dist/sppkg/hb-homepage-package-truth-proof.json`
+
+Generated `dist/` artifacts are ignored by repo policy and must not be
+staged for this documentation/evidence closure.
+
+If the current proof JSON reports any homepage version other than
+`1.1.78.0`, do not use that artifact to close the three-lane Foleon
+communications cutover. The Prompt 05 evidence record documents one
+such local mismatch: the ignored artifact on disk was fresh relative to
+dirty local source, but reported `1.1.79.0` and therefore did not satisfy
+the accepted `1.1.78.0` closure target.
+
 Canonical homepage banner ownership seam:
 - `apps/hb-homepage/assets/hero-banners/`
   - `banner_home_7_morning.png`
@@ -181,6 +201,33 @@ If all markers are present but the visual still reads as "generic
 sparse card row," the `PriorityActionsConfig` list under
 `bandKey = 'homepage-primary'` is unseeded or disabled. Seed at
 least one enabled config row and 3+ items.
+
+### Foleon communications lanes
+
+For the three-lane Foleon cutover, also confirm:
+
+- Project Spotlight renders in the former Project Portfolio Spotlight location.
+- Company Pulse renders in the former Newsroom / Company Pulse location.
+- Leadership Message renders in the former Message from Leadership location.
+- With no active registry/placement record, each lane shows its preview/empty state.
+- With valid active records and placements, live content replaces the preview state.
+- The runtime proof has no package-version mismatch.
+- Homepage embedded lanes do not depend on `window.__hbIntel_foleon`.
+
+Existing homepage webpart instances must have these persisted
+properties reviewed after package deployment:
+
+```text
+foleonContentRegistryListId
+foleonPlacementsListId
+foleonEventsListId
+foleonAcceptedOrigins
+foleonAllowPreview
+foleonExpectedManifestId
+foleonExpectedPackageVersion = 1.0.23.0
+foleonApiBaseUrl
+foleonApiResource
+```
 
 ## Screenshot evidence for closure
 Capture:

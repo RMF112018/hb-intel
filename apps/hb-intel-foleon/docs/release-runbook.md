@@ -42,6 +42,12 @@ surfaces.
 - [ ] `grep -R "X.Y.Z.0" apps/hb-intel-foleon` returns ≥ 3 hits and
       no stale previous version string remains.
 
+For the three-lane homepage communications cutover, Foleon package
+truth remains `1.0.23.0`. The homepage package embeds that expected
+version through its persisted/configured `foleonExpectedPackageVersion`
+contract; do not bump or rebuild Foleon during the final documentation
+closure unless source/package truth changes.
+
 ## 3. Runtime truth
 
 After deploying the web part to a tenant page, open DevTools and
@@ -99,6 +105,13 @@ All four governed lists must exist on the HBCentral site before launch.
       rejected by the origin policy by default.
 - [ ] `allowPreview` is `false` for production. `true` only on
       admin-review pages.
+- [ ] HBCentral Foleon schema choices include the three homepage
+      reader lanes: `project-spotlight`, `company-pulse`, and
+      `leadership-message`.
+- [ ] Homepage placement choices include `Project Spotlight Active`,
+      `Company Pulse Active`, and `Leadership Message Active`.
+- [ ] Telemetry `PageContext` choices include `Project Spotlight`,
+      `Company Pulse`, and `Leadership Message`.
 
 ## 6. Telemetry truth
 
