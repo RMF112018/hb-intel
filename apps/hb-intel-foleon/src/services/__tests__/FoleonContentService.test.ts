@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { toFoleonContentRecord } from '../FoleonContentService.js';
+import {
+  FOLEON_CONTENT_SELECT_FIELDS,
+  toFoleonContentRecord,
+} from '../FoleonContentService.js';
+import {
+  FOLEON_CONTENT_REGISTRY_SCHEMA,
+  assertSelectFieldsInSchema,
+} from '../../schema/foleonListSchemas.js';
 
 describe('toFoleonContentRecord', () => {
   it('returns null when Id or FoleonDocId is missing', () => {
@@ -55,5 +62,34 @@ describe('toFoleonContentRecord', () => {
     expect(record?.isVisible).toBe(true);
     expect(record?.isFeatured).toBe(false);
     expect(record?.requiresExternalOpen).toBe(false);
+  });
+});
+
+describe('FOLEON_CONTENT_SELECT_FIELDS', () => {
+  it('uses a schema-valid public projection with Id exception', () => {
+    const selected = FOLEON_CONTENT_SELECT_FIELDS.split(',');
+    expect(() =>
+      assertSelectFieldsInSchema(FOLEON_CONTENT_REGISTRY_SCHEMA, selected),
+    ).not.toThrow();
+  });
+
+  it('does not include person-field projections requiring $expand', () => {
+    expect(FOLEON_CONTENT_SELECT_FIELDS).not.toContain('MarketingOwner');
+    expect(FOLEON_CONTENT_SELECT_FIELDS).not.toContain('AudienceGroups');
+  });
+
+  it('does not include excluded governance/admin fields', () => {
+    for (const excluded of [
+      'Tags',
+      'FirstPublishedOn',
+      'FoleonModifiedOn',
+      'RelatedProjectSiteUrl',
+      'LastSynced',
+      'SyncHash',
+      'RawFoleonJson',
+      'AdminNotes',
+    ]) {
+      expect(FOLEON_CONTENT_SELECT_FIELDS).not.toContain(excluded);
+    }
   });
 });

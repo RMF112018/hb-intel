@@ -21,8 +21,8 @@ import type {
 } from '../types/foleon-content.types.js';
 import {
   FOLEON_CONTENT_REGISTRY_SCHEMA,
+  assertSelectFieldsInSchema,
   assertFiltersAreIndexed,
-  selectFieldsFor,
 } from '../schema/foleonListSchemas.js';
 import { assertValidListGuid } from '../schema/validateListGuid.js';
 
@@ -73,10 +73,43 @@ interface FoleonContentRawRow {
   SyncSource?: string;
 }
 
-// $select is derived from the canonical schema so a schema change is
-// the only place that widens / narrows the projection. `Id` is always
-// returned by SharePoint list-items endpoints so it is implicit.
-const CONTENT_SELECT_FIELDS = `Id,${selectFieldsFor(FOLEON_CONTENT_REGISTRY_SCHEMA)}`;
+// Public routes intentionally use a scalar-safe projection to avoid
+// SharePoint REST person/lookup expansion requirements.
+const CONTENT_SELECT_FIELDS_ARRAY = [
+  'Id',
+  'Title',
+  'FoleonDocId',
+  'FoleonDocUid',
+  'FoleonIdentifier',
+  'FoleonProjectId',
+  'FoleonProjectName',
+  'ContentTypeKey',
+  'PublishStatus',
+  'IsVisible',
+  'IsFeatured',
+  'IsHomepageEligible',
+  'PublishedUrl',
+  'PreviewUrl',
+  'EmbedUrl',
+  'ThumbnailUrl',
+  'HeroImageUrl',
+  'Summary',
+  'IssueDate',
+  'PublishedOn',
+  'DisplayFrom',
+  'DisplayThrough',
+  'SortRank',
+  'RelatedProjectNumber',
+  'RelatedProjectName',
+  'Region',
+  'Sector',
+  'OpenMode',
+  'AllowEmbed',
+  'RequiresExternalOpen',
+  'SyncSource',
+] as const;
+assertSelectFieldsInSchema(FOLEON_CONTENT_REGISTRY_SCHEMA, CONTENT_SELECT_FIELDS_ARRAY);
+const CONTENT_SELECT_FIELDS = CONTENT_SELECT_FIELDS_ARRAY.join(',');
 
 export interface FoleonContentQueryParams {
   readonly siteUrl: string;

@@ -61,6 +61,10 @@ describe('FoleonContentService query discipline', () => {
     const url = spy.calls[0];
     expect(url).toContain('$select=');
     expect(url).toMatch(/\$top=42/);
+    const decoded = decodeURIComponent(url);
+    expect(decoded).toContain('Id,Title,FoleonDocId');
+    expect(decoded).not.toContain('MarketingOwner');
+    expect(decoded).not.toContain('AudienceGroups');
   });
 
   it('only filters on indexed columns', async () => {
