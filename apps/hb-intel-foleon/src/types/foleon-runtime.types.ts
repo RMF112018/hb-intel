@@ -17,7 +17,13 @@ export interface IFoleonMountConfig {
   readonly expectedManifestId?: string;
   readonly expectedPackageVersion?: string;
   /** Internal route selector from manifest properties / URL. */
-  readonly foleonRoute?: 'highlights' | 'reader' | 'hub' | 'manage';
+  readonly foleonRoute?:
+    | 'highlights'
+    | 'reader'
+    | 'hub'
+    | 'manage'
+    | 'projectSpotlight'
+    | 'companyPulse';
   /** Target docId when the SPFx page is pinned to the reader route. */
   readonly foleonDocId?: number | string;
   /** Target SitePage that hosts the reader webpart. Used for card navigation. */

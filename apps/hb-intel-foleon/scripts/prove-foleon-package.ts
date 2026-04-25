@@ -299,6 +299,16 @@ function main(): void {
         byTitle.get('HB Intel Foleon Highlights')?.hiddenFromToolbox === false,
     ),
     check(
+      'Project Spotlight toolbox entry routes to projectSpotlight and is visible',
+      byTitle.get('HB Intel Project Spotlight Reader')?.foleonRoute === 'projectSpotlight' &&
+        byTitle.get('HB Intel Project Spotlight Reader')?.hiddenFromToolbox === false,
+    ),
+    check(
+      'Company Pulse toolbox entry routes to companyPulse and is visible',
+      byTitle.get('HB Intel Company Pulse Reader')?.foleonRoute === 'companyPulse' &&
+        byTitle.get('HB Intel Company Pulse Reader')?.hiddenFromToolbox === false,
+    ),
+    check(
       'Manager toolbox entry routes to manage and is visible',
       byTitle.get('HB Intel Foleon Manager')?.foleonRoute === 'manage' &&
         byTitle.get('HB Intel Foleon Manager')?.hiddenFromToolbox === false,

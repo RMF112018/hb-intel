@@ -6,7 +6,7 @@ export interface IShellFoleonRuntimeConfigProperties {
   allowPreview?: boolean;
   expectedManifestId?: string;
   expectedPackageVersion?: string;
-  foleonRoute?: 'highlights' | 'reader' | 'hub' | 'manage';
+  foleonRoute?: 'highlights' | 'reader' | 'hub' | 'manage' | 'projectSpotlight' | 'companyPulse';
   foleonDocId?: string | number;
   foleonReaderRoutePath?: string;
   foleonApiBaseUrl?: string;

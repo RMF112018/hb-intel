@@ -11,7 +11,13 @@ export type FoleonEventType =
   | 'Search'
   | 'Filter';
 
-export type FoleonPageContext = 'Homepage' | 'Content Hub' | 'Reader' | 'Project Site';
+export type FoleonPageContext =
+  | 'Homepage'
+  | 'Content Hub'
+  | 'Reader'
+  | 'Project Site'
+  | 'Project Spotlight'
+  | 'Company Pulse';
 
 /**
  * Bounded enum of error codes reported via telemetry. Callsites may only

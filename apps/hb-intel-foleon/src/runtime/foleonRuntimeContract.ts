@@ -20,7 +20,13 @@ import {
 } from './foleonConfigIssues.js';
 
 export type FoleonHostMode = 'sharepoint' | 'mock';
-export type FoleonRoute = 'highlights' | 'reader' | 'hub' | 'manage';
+export type FoleonRoute =
+  | 'highlights'
+  | 'reader'
+  | 'hub'
+  | 'manage'
+  | 'projectSpotlight'
+  | 'companyPulse';
 
 export interface IFoleonRuntimeContract {
   readonly hostMode: FoleonHostMode;
@@ -139,7 +145,14 @@ export function resolveFoleonRuntimeContract(params: {
 export { DEFAULT_FOLEON_ORIGINS };
 
 function normalizeRoute(value: unknown): FoleonRoute {
-  if (value === 'reader' || value === 'hub' || value === 'highlights' || value === 'manage') {
+  if (
+    value === 'reader' ||
+    value === 'hub' ||
+    value === 'highlights' ||
+    value === 'manage' ||
+    value === 'projectSpotlight' ||
+    value === 'companyPulse'
+  ) {
     return value;
   }
   return 'highlights';

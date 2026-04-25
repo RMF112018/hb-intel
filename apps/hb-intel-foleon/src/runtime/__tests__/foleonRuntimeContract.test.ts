@@ -61,6 +61,32 @@ describe('resolveFoleonRuntimeContract', () => {
     expect(contract.docId).toBe(123456);
   });
 
+  it('accepts Project Spotlight route without a placements GUID', () => {
+    const contract = resolveFoleonRuntimeContract({
+      hasSpfxContext: true,
+      siteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+      config: {
+        contentRegistryListId: '11111111-1111-1111-1111-111111111111',
+        foleonRoute: 'projectSpotlight',
+      },
+    });
+    expect(contract.canInitialize).toBe(true);
+    expect(contract.route).toBe('projectSpotlight');
+  });
+
+  it('accepts Company Pulse route without a placements GUID', () => {
+    const contract = resolveFoleonRuntimeContract({
+      hasSpfxContext: true,
+      siteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+      config: {
+        contentRegistryListId: '11111111-1111-1111-1111-111111111111',
+        foleonRoute: 'companyPulse',
+      },
+    });
+    expect(contract.canInitialize).toBe(true);
+    expect(contract.route).toBe('companyPulse');
+  });
+
   it('blocks when expected manifest ID mismatches', () => {
     const contract = resolveFoleonRuntimeContract({
       hasSpfxContext: true,

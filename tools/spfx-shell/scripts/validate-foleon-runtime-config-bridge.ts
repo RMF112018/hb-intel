@@ -57,6 +57,14 @@ function assertBlankStringsAreIgnored(): void {
   assert.equal(bridge.foleonRoute, 'highlights');
 }
 
+function assertDedicatedReaderRoutesBridge(): void {
+  const bridge = buildFoleonRuntimeConfigBridge({
+    foleonRoute: 'projectSpotlight',
+  });
+
+  assert.equal(bridge.foleonRoute, 'projectSpotlight');
+}
+
 function assertAcceptedOriginsStringNormalizesToArray(): void {
   const bridge = buildFoleonRuntimeConfigBridge({
     acceptedFoleonOrigins: ' https://viewer.us.foleon.com,\nhttps://preview.foleon.com ,, ',
@@ -90,6 +98,7 @@ function assertNonFoleonWebpartDoesNotReceiveBridgeFields(): void {
 
 assertFoleonPropertiesCopyToTopLevel();
 assertBlankStringsAreIgnored();
+assertDedicatedReaderRoutesBridge();
 assertAcceptedOriginsStringNormalizesToArray();
 assertNonFoleonWebpartDoesNotReceiveBridgeFields();
 

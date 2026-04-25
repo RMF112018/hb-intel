@@ -259,6 +259,8 @@ const PAGE_CONTEXT_CHOICES = [
   'Content Hub',
   'Reader',
   'Project Site',
+  'Project Spotlight',
+  'Company Pulse',
 ] as const;
 
 export const FOLEON_INTERACTION_EVENTS_SCHEMA: FoleonListSchema = {

@@ -3,7 +3,7 @@
   "id": "2160edb3-675e-4451-92bb-8345f9d1c71e",
   "alias": "FoleonWebPart",
   "componentType": "WebPart",
-  "version": "1.0.17.0",
+  "version": "1.0.18.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
@@ -29,8 +29,50 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.17.0",
+        "expectedPackageVersion": "1.0.18.0",
         "foleonRoute": "highlights"
+      }
+    },
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Intel Project Spotlight Reader"
+      },
+      "description": {
+        "default": "Show the active Project Spotlight Foleon reader for a monthly project profile."
+      },
+      "officeFabricIconFontName": "ReadingMode",
+      "hiddenFromToolbox": false,
+      "properties": {
+        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
+        "allowPreview": false,
+        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+        "expectedPackageVersion": "1.0.18.0",
+        "foleonRoute": "projectSpotlight"
+      }
+    },
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Intel Company Pulse Reader"
+      },
+      "description": {
+        "default": "Show the active Company Pulse Foleon reader for company updates and recognition."
+      },
+      "officeFabricIconFontName": "News",
+      "hiddenFromToolbox": false,
+      "properties": {
+        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
+        "allowPreview": false,
+        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+        "expectedPackageVersion": "1.0.18.0",
+        "foleonRoute": "companyPulse"
       }
     },
     {
@@ -50,7 +92,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.17.0",
+        "expectedPackageVersion": "1.0.18.0",
         "foleonRoute": "manage"
       }
     }

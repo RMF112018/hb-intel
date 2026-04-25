@@ -159,6 +159,21 @@ describe('runtime binding proof (redacted)', () => {
     expect(serialized).not.toContain(TEST_PLACEMENTS);
   });
 
+  it('allows dedicated reader routes in redacted runtime proof', async () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    await mount(el, undefined, {
+      contentRegistryListId: TEST_CONTENT_REGISTRY,
+      foleonRoute: 'projectSpotlight',
+      acceptedFoleonOrigins: [TEST_ORIGIN],
+    });
+
+    const proof = readProof();
+    expect(proof?.route).toBe('projectSpotlight');
+    expect(JSON.stringify(proof)).not.toContain('Project Spotlight Active');
+    expect(JSON.stringify(proof)).not.toContain('project-spotlight');
+  });
+
   it('marks bridge application false when nested Foleon properties do not reach top-level config', async () => {
     const el = document.createElement('div');
     document.body.appendChild(el);

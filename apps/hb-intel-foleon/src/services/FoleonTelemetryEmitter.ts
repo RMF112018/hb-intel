@@ -133,6 +133,8 @@ export function createFoleonTelemetryEmitter(
 function pageContextFromRoute(route: FoleonRoute): FoleonPageContext {
   if (route === 'reader') return 'Reader';
   if (route === 'hub') return 'Content Hub';
+  if (route === 'projectSpotlight') return 'Project Spotlight';
+  if (route === 'companyPulse') return 'Company Pulse';
   return 'Homepage';
 }
 

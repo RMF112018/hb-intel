@@ -47,13 +47,15 @@ describe('Foleon web part manifest toolbox entries', () => {
     expect(manifest.supportedHosts).toEqual(['SharePointWebPart']);
   });
 
-  it('exposes dedicated Highlights and Manager toolbox entries', () => {
-    expect(manifest.preconfiguredEntries).toHaveLength(2);
+  it('exposes dedicated public reader and Manager toolbox entries', () => {
+    expect(manifest.preconfiguredEntries).toHaveLength(4);
 
     const byTitle = new Map(
       manifest.preconfiguredEntries.map((entry) => [entry.title.default, entry]),
     );
     const highlights = byTitle.get('HB Intel Foleon Highlights');
+    const projectSpotlight = byTitle.get('HB Intel Project Spotlight Reader');
+    const companyPulse = byTitle.get('HB Intel Company Pulse Reader');
     const manager = byTitle.get('HB Intel Foleon Manager');
 
     expect(highlights).toBeDefined();
@@ -62,6 +64,20 @@ describe('Foleon web part manifest toolbox entries', () => {
     );
     expect(highlights?.hiddenFromToolbox).toBe(false);
     expect(highlights?.properties?.foleonRoute).toBe('highlights');
+
+    expect(projectSpotlight).toBeDefined();
+    expect(projectSpotlight?.description.default).toBe(
+      'Show the active Project Spotlight Foleon reader for a monthly project profile.',
+    );
+    expect(projectSpotlight?.hiddenFromToolbox).toBe(false);
+    expect(projectSpotlight?.properties?.foleonRoute).toBe('projectSpotlight');
+
+    expect(companyPulse).toBeDefined();
+    expect(companyPulse?.description.default).toBe(
+      'Show the active Company Pulse Foleon reader for company updates and recognition.',
+    );
+    expect(companyPulse?.hiddenFromToolbox).toBe(false);
+    expect(companyPulse?.properties?.foleonRoute).toBe('companyPulse');
 
     expect(manager).toBeDefined();
     expect(manager?.description.default).toBe(

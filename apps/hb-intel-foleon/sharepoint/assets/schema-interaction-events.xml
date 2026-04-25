@@ -46,6 +46,8 @@
           <CHOICE>Content Hub</CHOICE>
           <CHOICE>Reader</CHOICE>
           <CHOICE>Project Site</CHOICE>
+          <CHOICE>Project Spotlight</CHOICE>
+          <CHOICE>Company Pulse</CHOICE>
         </CHOICES>
       </Field>
       <Field ID="{B9F50208-F01E-4A10-8010-C0F0E0D20008}" Name="SearchQuery" DisplayName="Search Query" Type="Text" Required="FALSE" MaxLength="255" />

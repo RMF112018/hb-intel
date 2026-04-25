@@ -79,6 +79,22 @@ describe('readNavFromLocation', () => {
     });
   });
 
+  it('reads foleonRoute=projectSpotlight', () => {
+    withLocation('foleonRoute=projectSpotlight&docId=999', () => {
+      const nav = readNavFromLocation(baseContract());
+      expect(nav.route).toBe('projectSpotlight');
+      expect(nav.docId).toBe(null);
+    });
+  });
+
+  it('reads foleonRoute=companyPulse', () => {
+    withLocation('foleonRoute=companyPulse', () => {
+      const nav = readNavFromLocation(baseContract());
+      expect(nav.route).toBe('companyPulse');
+      expect(nav.docId).toBe(null);
+    });
+  });
+
   it('falls back to contract.route when foleonRoute is unknown', () => {
     withLocation('foleonRoute=garbage', () => {
       const nav = readNavFromLocation(baseContract({ route: 'hub' }));
@@ -159,6 +175,30 @@ describe('FoleonApp — route-level no-iframe invariants (DOM proof)', () => {
       expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
         'data-hbc-foleon-route',
       )).toBe('reader');
+    });
+  });
+
+  it('Project Spotlight route renders the dedicated route marker', () => {
+    withLocation('foleonRoute=projectSpotlight', () => {
+      const { container } = render(
+        <FoleonApp contract={baseContract({ route: 'projectSpotlight' })} />,
+      );
+      expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
+        'data-hbc-foleon-route',
+      )).toBe('projectSpotlight');
+      expect(container.querySelectorAll('iframe')).toHaveLength(0);
+    });
+  });
+
+  it('Company Pulse route renders the dedicated route marker', () => {
+    withLocation('foleonRoute=companyPulse', () => {
+      const { container } = render(
+        <FoleonApp contract={baseContract({ route: 'companyPulse' })} />,
+      );
+      expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
+        'data-hbc-foleon-route',
+      )).toBe('companyPulse');
+      expect(container.querySelectorAll('iframe')).toHaveLength(0);
     });
   });
 

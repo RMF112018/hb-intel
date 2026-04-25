@@ -85,6 +85,11 @@ describe('FoleonTelemetryEmitter — envelope build', () => {
     expect(emitter.buildEnvelope('Card Click').route).toBe('hub');
   });
 
+  it('maps dedicated reader routes to bounded page contexts', () => {
+    expect(makeEmitter({ getRoute: () => 'projectSpotlight' }).buildEnvelope('Reader Open').pageContext).toBe('Project Spotlight');
+    expect(makeEmitter({ getRoute: () => 'companyPulse' }).buildEnvelope('Reader Open').pageContext).toBe('Company Pulse');
+  });
+
   it('respects an explicit pageContext override', () => {
     const emitter = makeEmitter();
     const env = emitter.buildEnvelope('Search', {

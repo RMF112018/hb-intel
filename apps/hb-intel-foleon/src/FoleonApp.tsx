@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import type { FoleonContentRecord } from './types/foleon-content.types.js';
-import type { FoleonTelemetryEmitInput } from './types/foleon-event.types.js';
+import type { FoleonPageContext, FoleonTelemetryEmitInput } from './types/foleon-event.types.js';
+import type { FoleonGateReason } from './types/foleon-runtime.types.js';
 import type { IFoleonRuntimeContract, FoleonRoute } from './runtime/foleonRuntimeContract.js';
 
 const SR_ONLY_STYLE: React.CSSProperties = {
@@ -20,6 +21,8 @@ function routeAnnouncement(route: FoleonRoute): string {
   if (route === 'reader') return 'Showing Foleon publication.';
   if (route === 'hub') return 'Showing Foleon content archive.';
   if (route === 'manage') return 'Showing Foleon Connector management.';
+  if (route === 'projectSpotlight') return 'Showing Project Spotlight reader.';
+  if (route === 'companyPulse') return 'Showing Company Pulse reader.';
   return 'Showing Foleon highlights.';
 }
 import {
@@ -36,6 +39,8 @@ import { HighlightsPage } from './pages/HighlightsPage.js';
 import { ReaderPage } from './pages/ReaderPage.js';
 import { ContentHubPage } from './pages/ContentHubPage.js';
 import { ManagePage } from './pages/ManagePage.js';
+import { ProjectSpotlightReader } from './readers/ProjectSpotlightReader.js';
+import { CompanyPulseReader } from './readers/CompanyPulseReader.js';
 import { FoleonError } from './components/FoleonStates.js';
 import { adminIssueDetails } from './runtime/foleonConfigIssues.js';
 
@@ -322,6 +327,43 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
       />
     );
   }
+  if (nav.route === 'projectSpotlight' || nav.route === 'companyPulse') {
+    const readerProps = {
+      contract,
+      onOpenArchive: (): void => goto({ route: 'hub', docId: null }),
+      onReaderOpen: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext): void =>
+        emit('Reader Open', {
+          foleonDocId: record.foleonDocId,
+          contentRegistryItemId: record.id,
+          pageContext,
+          gateResult,
+        }),
+      onReaderClose: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext): void =>
+        emit('Reader Close', {
+          foleonDocId: record.foleonDocId,
+          contentRegistryItemId: record.id,
+          pageContext,
+          gateResult,
+        }),
+      onEmbedError: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext): void =>
+        emit('Embed Error', {
+          foleonDocId: record.foleonDocId,
+          contentRegistryItemId: record.id,
+          pageContext,
+          gateResult,
+          errorCode: 'reader.embed_error',
+        }),
+      onGateBlocked: (gateResult: FoleonGateReason, pageContext: FoleonPageContext): void =>
+        emit('Embed Error', {
+          pageContext,
+          gateResult,
+          errorCode: 'reader.gate_blocked',
+        }),
+    };
+    return nav.route === 'projectSpotlight'
+      ? <ProjectSpotlightReader {...readerProps} />
+      : <CompanyPulseReader {...readerProps} />;
+  }
   return (
     <HighlightsPage
       contract={contract}
@@ -339,7 +381,11 @@ export function readNavFromLocation(contract: IFoleonRuntimeContract): AppNavSta
   const search = new URLSearchParams(window.location.search);
   const routeParam = search.get('foleonRoute');
   const route: FoleonRoute =
-    routeParam === 'reader' || routeParam === 'hub' || routeParam === 'manage'
+    routeParam === 'reader' ||
+    routeParam === 'hub' ||
+    routeParam === 'manage' ||
+    routeParam === 'projectSpotlight' ||
+    routeParam === 'companyPulse'
       ? routeParam
       : routeParam === 'highlights'
         ? 'highlights'
