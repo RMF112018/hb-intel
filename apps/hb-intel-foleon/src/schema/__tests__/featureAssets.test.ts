@@ -1,293 +1,125 @@
-/**
- * Feature Framework provisioning assets — static verification.
- *
- * Authority:
- *   - docs/reference/sharepoint/list-schemas/hbcentral/lists/hb-foleon-*.md
- *   - apps/hb-intel-foleon/src/schema/foleonListSchemas.ts
- *   - MS-Learn Field / List / ListInstance element references
- *
- * These tests do NOT install SharePoint lists; they verify that the
- * hand-authored XML under apps/hb-intel-foleon/sharepoint/assets/:
- *   1. exists alongside every entry declared in package-solution.json
- *      features[0].assets,
- *   2. is well-formed XML,
- *   3. declares one <ListInstance> per governed schema, in install
- *      order, with <List> Urls that match the schema files' Url
- *      attributes,
- *   4. preserves the cross-list Lookup binding from Homepage
- *      Placements' ContentLookup to Content Registry's ListInstance
- *      Url character-for-character,
- *   5. declares each field the code-level schema marks
- *      required/indexed-at-provisioning/unique,
- *   6. honors versioning posture (Interaction Events = disabled,
- *      other three = enabled),
- *   7. keeps skipFeatureDeployment === false on the site-installed
- *      package.
- */
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  FOLEON_CONTENT_REGISTRY_SCHEMA,
-  FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA,
-  FOLEON_INTERACTION_EVENTS_SCHEMA,
-  FOLEON_SYNC_RUNS_SCHEMA,
-  type FoleonFieldSchema,
-  type FoleonListInternalName,
-  type FoleonListSchema,
-} from '../foleonListSchemas.js';
+  EXPECTED_ELEMENT_MANIFESTS,
+  EXPECTED_SCHEMA_FILES,
+  EXPECTED_LISTS,
+  LAUNCH_INDEXES,
+  UNIQUE_FIELDS,
+  MAX_CUSTOM_INDEXED_FIELDS,
+  buildFoleonFeatureAssetModel,
+  validateFoleonFeatureAssets,
+} from '../../../scripts/validate-foleon-feature-assets.js';
+import { FOLEON_LIST_SCHEMAS } from '../foleonListSchemas.js';
 
-const PACKAGE_ROOT = resolve(__dirname, '..', '..', '..');
-const ASSETS_DIR = resolve(PACKAGE_ROOT, 'sharepoint', 'assets');
-const CONFIG_PATH = resolve(PACKAGE_ROOT, 'config', 'package-solution.json');
+const model = buildFoleonFeatureAssetModel();
+const checks = validateFoleonFeatureAssets(model);
 
-interface PackageSolution {
-  readonly solution: {
-    readonly skipFeatureDeployment?: boolean;
-    readonly features: ReadonlyArray<{
-      readonly id: string;
-      readonly version: string;
-      readonly assets?: {
-        readonly elementManifests?: ReadonlyArray<string>;
-        readonly elementFiles?: ReadonlyArray<string>;
-      };
-    }>;
-  };
+function checkPassed(name: string): void {
+  const check = checks.find((entry) => entry.name === name);
+  expect(check, `Missing validation check: ${name}`).toBeDefined();
+  expect(check?.pass, check?.details).toBe(true);
 }
 
-function loadPackageSolution(): PackageSolution {
-  return JSON.parse(readFileSync(CONFIG_PATH, 'utf8')) as PackageSolution;
-}
-
-function loadAsset(fileName: string): string {
-  return readFileSync(resolve(ASSETS_DIR, fileName), 'utf8');
-}
-
-const EXPECTED_SCHEMA_FILES: ReadonlyArray<{
-  readonly file: string;
-  readonly internalName: FoleonListInternalName;
-  readonly listUrl: string;
-  readonly schema: FoleonListSchema;
-  readonly versioning: 'enabled' | 'disabled';
-}> = [
-  {
-    file: 'schema-content-registry.xml',
-    internalName: 'HB_FoleonContentRegistry',
-    listUrl: 'Lists/HB_FoleonContentRegistry',
-    schema: FOLEON_CONTENT_REGISTRY_SCHEMA,
-    versioning: 'enabled',
-  },
-  {
-    file: 'schema-homepage-placements.xml',
-    internalName: 'HB_FoleonHomepagePlacements',
-    listUrl: 'Lists/HB_FoleonHomepagePlacements',
-    schema: FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA,
-    versioning: 'enabled',
-  },
-  {
-    file: 'schema-interaction-events.xml',
-    internalName: 'HB_FoleonInteractionEvents',
-    listUrl: 'Lists/HB_FoleonInteractionEvents',
-    schema: FOLEON_INTERACTION_EVENTS_SCHEMA,
-    versioning: 'disabled',
-  },
-  {
-    file: 'schema-sync-runs.xml',
-    internalName: 'HB_FoleonSyncRuns',
-    listUrl: 'Lists/HB_FoleonSyncRuns',
-    schema: FOLEON_SYNC_RUNS_SCHEMA,
-    versioning: 'enabled',
-  },
-];
-
-describe('package-solution.json — site-installed provisioning posture', () => {
-  const pkg = loadPackageSolution();
-
-  it('sets skipFeatureDeployment=false (site-installed required for SharePoint assets)', () => {
-    expect(pkg.solution.skipFeatureDeployment).toBe(false);
+describe('Feature Framework parser-backed validation', () => {
+  it('passes the full shared CLI validation suite', () => {
+    const failed = checks.filter((entry) => !entry.pass);
+    expect(failed, failed.map((entry) => `${entry.name}: ${entry.details ?? ''}`).join('\n')).toEqual([]);
   });
 
-  it('declares exactly one feature with the expected assets block', () => {
-    expect(pkg.solution.features).toHaveLength(1);
-    const feature = pkg.solution.features[0]!;
-    expect(feature.assets?.elementManifests).toEqual(['elements.xml']);
-    expect(feature.assets?.elementFiles).toEqual([
-      'schema-content-registry.xml',
-      'schema-homepage-placements.xml',
-      'schema-interaction-events.xml',
-      'schema-sync-runs.xml',
-    ]);
-  });
-});
-
-describe('elements.xml — list instance declarations', () => {
-  const elements = loadAsset('elements.xml');
-
-  it('uses the SharePoint feature-framework root namespace', () => {
-    expect(elements).toMatch(/<Elements\s+xmlns="http:\/\/schemas\.microsoft\.com\/sharepoint\/">/);
+  it('parses elements.xml and every expected schema XML file', () => {
+    checkPassed('elements.xml exists and parses');
+    checkPassed('all expected schema files exist and parse');
+    expect(model.schemas.map((schema) => schema.fileName)).toEqual([...EXPECTED_SCHEMA_FILES]);
   });
 
-  it.each(EXPECTED_SCHEMA_FILES)(
-    'declares a <ListInstance> for $internalName with matching Url + CustomSchema',
-    ({ listUrl, file }) => {
-      // The ListInstance Url must appear verbatim; the CustomSchema must
-      // reference the matching schema-*.xml file. Both are asserted with
-      // character-exact string containment so whitespace or casing
-      // differences are caught at test time (the Feature Framework is
-      // byte-sensitive on these strings).
-      expect(elements).toContain(`Url="${listUrl}"`);
-      expect(elements).toContain(`CustomSchema="${file}"`);
-    },
-  );
-
-  it('declares Content Registry BEFORE Homepage Placements (lookup ordering)', () => {
-    const contentIdx = elements.indexOf('Url="Lists/HB_FoleonContentRegistry"');
-    const placementsIdx = elements.indexOf('Url="Lists/HB_FoleonHomepagePlacements"');
-    expect(contentIdx).toBeGreaterThan(-1);
-    expect(placementsIdx).toBeGreaterThan(-1);
-    expect(contentIdx).toBeLessThan(placementsIdx);
+  it('declares exactly the intended package-solution feature assets', () => {
+    checkPassed('package-solution declares exactly the expected element manifests');
+    checkPassed('package-solution declares exactly the expected schema element files');
+    const feature = model.packageSolution.solution.features[0]!;
+    expect(feature.assets?.elementManifests).toEqual([...EXPECTED_ELEMENT_MANIFESTS]);
+    expect(feature.assets?.elementFiles).toEqual([...EXPECTED_SCHEMA_FILES]);
   });
 
-  it('uses the Custom List template (FeatureId + TemplateType) on every ListInstance', () => {
-    const featureIdMatches = elements.match(
-      /FeatureId="00bfea71-de22-43b2-a848-c05709900100"/g,
+  it('resolves every CustomSchema and rejects stale schema files', () => {
+    checkPassed('every CustomSchema reference resolves to an expected schema file');
+    checkPassed('every expected schema file is referenced by one ListInstance');
+    checkPassed('no stale schema XML files exist under sharepoint/assets');
+  });
+
+  it('declares ListInstances in dependency-safe provisioning order', () => {
+    expect(model.listInstances.map((instance) => instance.url)).toEqual(
+      EXPECTED_LISTS.map((entry) => entry.url),
     );
-    const templateTypeMatches = elements.match(/TemplateType="100"/g);
-    expect(featureIdMatches).toHaveLength(EXPECTED_SCHEMA_FILES.length);
-    expect(templateTypeMatches).toHaveLength(EXPECTED_SCHEMA_FILES.length);
+    checkPassed('HB_FoleonHomepagePlacements.ContentLookup lookup target is declared before lookup list');
   });
-});
 
-describe.each(EXPECTED_SCHEMA_FILES)(
-  '$file — schema alignment with code authority',
-  ({ file, listUrl, schema, versioning }) => {
-    const xml = loadAsset(file);
-
-    it('root <List> declares the expected Url + SharePoint namespace', () => {
-      expect(xml).toMatch(/<List[\s\S]*?xmlns="http:\/\/schemas\.microsoft\.com\/sharepoint\/"/);
-      expect(xml).toContain(`Url="${listUrl}"`);
-    });
-
-    it(`VersioningEnabled is ${versioning === 'enabled' ? 'TRUE' : 'FALSE'}`, () => {
-      const expected = versioning === 'enabled' ? 'TRUE' : 'FALSE';
-      expect(xml).toContain(`VersioningEnabled="${expected}"`);
-    });
-
-    it('disables attachments', () => {
-      expect(xml).toContain('DisableAttachments="TRUE"');
-    });
-
-    const nonTitleFields = schema.fields.filter(
-      (field) => field.internalName !== 'Title',
-    );
-    for (const field of nonTitleFields) {
-      it(`declares field ${field.internalName} with required/indexed flags`, () => {
-        expect(xml).toContain(`Name="${field.internalName}"`);
-        if (field.required) {
-          expectFieldAttr(xml, field, 'Required="TRUE"');
-        }
-        if (field.indexedAtProvisioning) {
-          expectFieldAttr(xml, field, 'Indexed="TRUE"');
-        }
-        if (field.unique) {
-          expectFieldAttr(xml, field, 'EnforceUniqueValues="TRUE"');
-        }
-      });
+  it('has no duplicate field IDs or field names', () => {
+    for (const list of EXPECTED_LISTS) {
+      checkPassed(`${list.internalName} has no duplicate field internal names`);
     }
+    const duplicateFieldIdChecks = checks.filter((entry) => entry.name.startsWith('custom field ID '));
+    expect(duplicateFieldIdChecks.length).toBeGreaterThan(0);
+    expect(duplicateFieldIdChecks.every((entry) => entry.pass)).toBe(true);
+  });
 
-    it('every view FieldRef references a field declared in the schema', () => {
-      // Extract every FieldRef Name within any <View> block. They must
-      // resolve to either a <Field Name=...> declared above or the
-      // SharePoint built-ins LinkTitle / Title / ID.
-      const builtins = new Set(['LinkTitle', 'Title', 'ID']);
-      const declaredFields = new Set(
-        schema.fields
-          .map((f) => f.internalName)
-          .filter((name) => name !== 'Title')
-          .concat(['Title']),
-      );
-      const viewsMatch = xml.match(/<Views>[\s\S]*<\/Views>/);
-      expect(viewsMatch).not.toBeNull();
-      const viewsXml = viewsMatch![0]!;
-      const fieldRefNames = Array.from(
-        viewsXml.matchAll(/<FieldRef\s+Name="([^"]+)"/g),
-      ).map((m) => m[1]!);
-      expect(fieldRefNames.length).toBeGreaterThan(0);
-      for (const name of fieldRefNames) {
-        expect(
-          builtins.has(name) || declaredFields.has(name),
-          `View FieldRef "${name}" is not declared in the schema and is not a built-in`,
-        ).toBe(true);
+  it('keeps index counts within the configured budget', () => {
+    for (const schema of model.schemas) {
+      expect(schema.indexedFieldCount).toBeLessThanOrEqual(MAX_CUSTOM_INDEXED_FIELDS);
+      checkPassed(`${schema.internalName} indexed custom field count is within threshold`);
+    }
+  });
+
+  it('requires launch indexes and rejects non-launch indexes', () => {
+    for (const list of EXPECTED_LISTS) {
+      const schema = model.schemas.find((entry) => entry.internalName === list.internalName)!;
+      const indexed = schema.fields
+        .filter((field) => field.indexed)
+        .map((field) => field.internalName);
+      expect(indexed).toEqual([...LAUNCH_INDEXES[list.internalName]]);
+      checkPassed(`${list.internalName} required launch indexes are present`);
+      checkPassed(`${list.internalName} has no unexpected launch indexes`);
+    }
+  });
+
+  it('validates view field references against known fields and built-ins', () => {
+    for (const schema of model.schemas) {
+      for (const view of schema.views) {
+        checkPassed(`${schema.internalName} view ${view.displayName} references known fields`);
       }
-    });
-  },
-);
-
-describe('Homepage Placements ContentLookup — cross-list binding', () => {
-  it('Lookup List attribute matches the Content Registry ListInstance Url', () => {
-    const placements = loadAsset('schema-homepage-placements.xml');
-    const elements = loadAsset('elements.xml');
-
-    const contentRegistryUrl = 'Lists/HB_FoleonContentRegistry';
-    expect(elements).toContain(`Url="${contentRegistryUrl}"`);
-
-    const lookupMatch = placements.match(
-      /<Field\s+[\s\S]*?Name="ContentLookup"[\s\S]*?\/>/,
-    );
-    expect(lookupMatch, 'ContentLookup field must be present').not.toBeNull();
-    const lookupXml = lookupMatch![0]!;
-    expect(lookupXml).toContain('Type="Lookup"');
-    expect(lookupXml).toContain(`List="${contentRegistryUrl}"`);
-    expect(lookupXml).toContain('ShowField="Title"');
-    expect(lookupXml).toContain('Required="FALSE"');
-    expect(lookupXml).toContain('Indexed="TRUE"');
+    }
   });
 
-  it('ContentIdCache remains a Number (denormalized FoleonDocId, not SP Id)', () => {
-    const placements = loadAsset('schema-homepage-placements.xml');
-    const fieldMatch = placements.match(
-      /<Field\s+[\s\S]*?Name="ContentIdCache"[\s\S]*?\/>/,
-    );
-    expect(fieldMatch).not.toBeNull();
-    expect(fieldMatch![0]!).toContain('Type="Number"');
-    expect(fieldMatch![0]!).toContain('Indexed="TRUE"');
-  });
-});
-
-describe('Uniqueness invariants', () => {
-  it('Content Registry FoleonDocId is indexed + EnforceUniqueValues=TRUE', () => {
-    const xml = loadAsset('schema-content-registry.xml');
-    const match = xml.match(/<Field\s+[\s\S]*?Name="FoleonDocId"[\s\S]*?\/>/);
-    expect(match).not.toBeNull();
-    expect(match![0]!).toContain('Indexed="TRUE"');
-    expect(match![0]!).toContain('EnforceUniqueValues="TRUE"');
-    expect(match![0]!).not.toContain('AllowDuplicateValues="FALSE"');
+  it('validates lookup target URL and ShowField posture', () => {
+    checkPassed('HB_FoleonHomepagePlacements.ContentLookup lookup target matches a ListInstance URL');
+    checkPassed('HB_FoleonHomepagePlacements.ContentLookup lookup target is declared before lookup list');
+    checkPassed('HB_FoleonHomepagePlacements.ContentLookup lookup ShowField is Title');
   });
 
-  it('Interaction Events EventId is indexed + EnforceUniqueValues=TRUE', () => {
-    const xml = loadAsset('schema-interaction-events.xml');
-    const match = xml.match(/<Field\s+[\s\S]*?Name="EventId"[\s\S]*?\/>/);
-    expect(match).not.toBeNull();
-    expect(match![0]!).toContain('Indexed="TRUE"');
-    expect(match![0]!).toContain('EnforceUniqueValues="TRUE"');
-    expect(match![0]!).not.toContain('AllowDuplicateValues="FALSE"');
+  it('validates uniqueness posture for unique-intent fields', () => {
+    for (const list of EXPECTED_LISTS) {
+      for (const fieldName of UNIQUE_FIELDS[list.internalName]) {
+        checkPassed(`${list.internalName}.${fieldName} is indexed for uniqueness`);
+        checkPassed(`${list.internalName}.${fieldName} uses EnforceUniqueValues`);
+      }
+    }
   });
 
-  it('Sync Runs RunId is indexed + EnforceUniqueValues=TRUE', () => {
-    const xml = loadAsset('schema-sync-runs.xml');
-    const match = xml.match(/<Field\s+[\s\S]*?Name="RunId"[\s\S]*?\/>/);
-    expect(match).not.toBeNull();
-    expect(match![0]!).toContain('Indexed="TRUE"');
-    expect(match![0]!).toContain('EnforceUniqueValues="TRUE"');
-    expect(match![0]!).not.toContain('AllowDuplicateValues="FALSE"');
+  it('validates versioning and attachment posture', () => {
+    for (const list of EXPECTED_LISTS) {
+      checkPassed(`${list.internalName} versioning posture is correct`);
+      checkPassed(`${list.internalName} attachments are disabled`);
+    }
+  });
+
+  it('keeps XML and code-level schema metadata aligned', () => {
+    for (const schema of model.schemas) {
+      const codeSchema = FOLEON_LIST_SCHEMAS.find((entry) => entry.internalName === schema.internalName)!;
+      for (const field of schema.fields) {
+        expect(codeSchema.fields.some((entry) => entry.internalName === field.internalName)).toBe(true);
+        checkPassed(`${schema.internalName}.${field.internalName} required metadata matches XML`);
+        checkPassed(`${schema.internalName}.${field.internalName} launch-index metadata matches XML`);
+        checkPassed(`${schema.internalName}.${field.internalName} uniqueness metadata matches XML`);
+      }
+    }
   });
 });
-
-function expectFieldAttr(xml: string, field: FoleonFieldSchema, attr: string): void {
-  const fieldRegex = new RegExp(
-    `<Field\\s+[\\s\\S]*?Name="${field.internalName}"[\\s\\S]*?\\/>`,
-  );
-  const match = xml.match(fieldRegex);
-  expect(match, `Field ${field.internalName} must be declared`).not.toBeNull();
-  expect(match![0]!, `Field ${field.internalName} must carry ${attr}`).toContain(attr);
-}

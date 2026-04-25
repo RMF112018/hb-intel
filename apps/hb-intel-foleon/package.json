@@ -9,7 +9,7 @@
     "lint": "eslint src/ --ext .ts,.tsx",
     "test": "vitest run --config vitest.config.ts",
     "package:proof": "tsx scripts/prove-foleon-package.ts",
-    "schema:validate": "vitest run --config vitest.config.ts src/schema/__tests__/featureAssets.test.ts src/schema/__tests__/foleonListSchemas.test.ts",
+    "schema:validate": "tsx scripts/validate-foleon-feature-assets.ts",
     "provision:print": "tsx scripts/print-foleon-provisioning.ts"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.4.0",
     "eslint": "^8.57.1",
+    "fast-xml-parser": "^5.7.2",
     "tsx": "^4.0.0",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
