@@ -73,7 +73,7 @@ describe('Foleon list schemas', () => {
     }
   });
 
-  it('Content Registry accepts the governed two-lane content choices and scalar fields', () => {
+  it('Content Registry accepts governed three-lane content choices and scalar fields', () => {
     const contentType = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === 'ContentTypeKey');
     expect(contentType?.choices).toEqual([
       'Project Spotlight',
@@ -84,6 +84,20 @@ describe('Foleon list schemas', () => {
       'Market Update',
       'Leadership',
       'Other',
+    ]);
+
+    const readerKey = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === 'ReaderKey');
+    expect(readerKey?.choices).toEqual([
+      'project-spotlight',
+      'company-pulse',
+      'leadership-message',
+    ]);
+
+    const homepageSlot = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === 'HomepageSlot');
+    expect(homepageSlot?.choices).toEqual([
+      'Project Spotlight Reader',
+      'Company Pulse Reader',
+      'Leadership Message Reader',
     ]);
 
     const expectedFields = new Map([
@@ -102,7 +116,7 @@ describe('Foleon list schemas', () => {
     }
   });
 
-  it('Placement schema accepts two-lane active placement keys', () => {
+  it('Placement schema accepts governed active placement keys', () => {
     const placementKey = FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA.fields.find((f) => f.internalName === 'PlacementKey');
     expect(placementKey?.choices).toEqual([
       'Hero',
@@ -112,6 +126,20 @@ describe('Foleon list schemas', () => {
       'Archive Rail',
       'Project Spotlight Active',
       'Company Pulse Active',
+      'Leadership Message Active',
+    ]);
+  });
+
+  it('Interaction Events accepts governed reader page contexts', () => {
+    const pageContext = FOLEON_INTERACTION_EVENTS_SCHEMA.fields.find((f) => f.internalName === 'PageContext');
+    expect(pageContext?.choices).toEqual([
+      'Homepage',
+      'Content Hub',
+      'Reader',
+      'Project Site',
+      'Project Spotlight',
+      'Company Pulse',
+      'Leadership Message',
     ]);
   });
 

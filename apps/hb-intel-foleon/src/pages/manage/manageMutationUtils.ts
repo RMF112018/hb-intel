@@ -1,6 +1,6 @@
 import type { FoleonContentMutation, FoleonManagedContent } from '../../types/foleon-management.types.js';
 
-export type FoleonReaderLane = 'project-spotlight' | 'company-pulse';
+export type FoleonReaderLane = 'project-spotlight' | 'company-pulse' | 'leadership-message';
 
 const PUBLIC_READY_STATUS = 'Published';
 
@@ -80,12 +80,26 @@ export function applyReaderLanePreset(
       isHomepageEligible: true,
     };
   }
+  if (lane === 'company-pulse') {
+    return {
+      ...draft,
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      cadence: 'Frequent',
+      homepageSlot: 'Company Pulse Reader',
+      primaryAudience: draft.primaryAudience ?? 'Companywide',
+      openMode: 'Inline Reader',
+      allowEmbed: true,
+      requiresExternalOpen: false,
+      isHomepageEligible: true,
+    };
+  }
   return {
     ...draft,
-    contentTypeKey: 'Company Pulse',
-    readerKey: 'company-pulse',
+    contentTypeKey: 'Leadership',
+    readerKey: 'leadership-message',
     cadence: 'Frequent',
-    homepageSlot: 'Company Pulse Reader',
+    homepageSlot: 'Leadership Message Reader',
     primaryAudience: draft.primaryAudience ?? 'Companywide',
     openMode: 'Inline Reader',
     allowEmbed: true,
@@ -95,12 +109,15 @@ export function applyReaderLanePreset(
 }
 
 export function readerLaneLabel(lane: FoleonReaderLane): string {
-  return lane === 'project-spotlight' ? 'Project Spotlight' : 'Company Pulse';
+  if (lane === 'project-spotlight') return 'Project Spotlight';
+  if (lane === 'company-pulse') return 'Company Pulse';
+  return 'Leadership Message';
 }
 
 export function readerLaneForPlacementKey(placementKey: string | undefined): FoleonReaderLane | null {
   if (placementKey === 'Project Spotlight Active') return 'project-spotlight';
   if (placementKey === 'Company Pulse Active') return 'company-pulse';
+  if (placementKey === 'Leadership Message Active') return 'leadership-message';
   return null;
 }
 
@@ -110,6 +127,9 @@ export function readerLaneForContent(record: Pick<FoleonManagedContent, 'readerK
   }
   if (record.readerKey === 'company-pulse' || record.contentTypeKey === 'Company Pulse') {
     return 'company-pulse';
+  }
+  if (record.readerKey === 'leadership-message' || record.contentTypeKey === 'Leadership') {
+    return 'leadership-message';
   }
   return null;
 }
@@ -134,7 +154,7 @@ export function buildReaderLaneWarnings(args: {
 }): ReadonlyArray<string> {
   const warnings: string[] = [];
   const lane = args.draft.readerKey;
-  if (lane === 'project-spotlight' || lane === 'company-pulse') {
+  if (lane === 'project-spotlight' || lane === 'company-pulse' || lane === 'leadership-message') {
     const activeCount = args.allContent.filter((record) =>
       record.sharePointItemId !== args.record.sharePointItemId &&
       record.readerKey === lane &&

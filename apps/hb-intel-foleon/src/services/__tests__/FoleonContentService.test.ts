@@ -64,15 +64,15 @@ describe('toFoleonContentRecord', () => {
     expect(record?.requiresExternalOpen).toBe(false);
   });
 
-  it('maps two-lane scalar fields without person-field expansion', () => {
+  it('maps governed lane scalar fields without person-field expansion', () => {
     const record = toFoleonContentRecord({
       Id: 1,
-      Title: 'Project Spotlight',
+      Title: 'Leadership Message',
       FoleonDocId: 2,
-      ContentTypeKey: 'Project Spotlight',
-      ReaderKey: 'project-spotlight',
-      Cadence: 'Monthly',
-      HomepageSlot: 'Project Spotlight Reader',
+      ContentTypeKey: 'Leadership',
+      ReaderKey: 'leadership-message',
+      Cadence: 'Frequent',
+      HomepageSlot: 'Leadership Message Reader',
       ArchiveGroup: '2026-04',
       ActiveEdition: true,
       PrimaryAudience: 'Companywide',
@@ -83,10 +83,10 @@ describe('toFoleonContentRecord', () => {
     });
 
     expect(record).toMatchObject({
-      contentTypeKey: 'Project Spotlight',
-      readerKey: 'project-spotlight',
-      cadence: 'Monthly',
-      homepageSlot: 'Project Spotlight Reader',
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      cadence: 'Frequent',
+      homepageSlot: 'Leadership Message Reader',
       archiveGroup: '2026-04',
       activeEdition: true,
       primaryAudience: 'Companywide',

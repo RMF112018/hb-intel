@@ -61,15 +61,15 @@ describe('Foleon service validation', () => {
     });
   });
 
-  it('round-trips two-lane content fields through mock backend DTOs', async () => {
+  it('round-trips governed lane content fields through mock backend DTOs', async () => {
     const service = new MockFoleonService();
     const record = await service.createContent({
-      title: 'Company Pulse',
+      title: 'Leadership Message',
       foleonDocId: 4001,
-      contentTypeKey: 'Company Pulse',
-      readerKey: 'company-pulse',
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
       cadence: 'Frequent',
-      homepageSlot: 'Company Pulse Reader',
+      homepageSlot: 'Leadership Message Reader',
       archiveGroup: '2026-Q2',
       activeEdition: true,
       primaryAudience: 'Companywide',
@@ -83,10 +83,10 @@ describe('Foleon service validation', () => {
     }, 'corr-test');
 
     await expect(service.getContent(record.id)).resolves.toMatchObject({
-      contentTypeKey: 'Company Pulse',
-      readerKey: 'company-pulse',
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
       cadence: 'Frequent',
-      homepageSlot: 'Company Pulse Reader',
+      homepageSlot: 'Leadership Message Reader',
       archiveGroup: '2026-Q2',
       activeEdition: true,
       primaryAudience: 'Companywide',
@@ -146,6 +146,35 @@ describe('Foleon service validation', () => {
     expect(placement.blockingReasons).toEqual([]);
   });
 
+  it('accepts Leadership Message placement alignment through the existing Leadership content type', async () => {
+    const service = new MockFoleonService();
+    const content = await service.createContent({
+      title: 'Leadership Message',
+      foleonDocId: 5003,
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      homepageSlot: 'Leadership Message Reader',
+      publishStatus: 'Published',
+      isVisible: true,
+      isHomepageEligible: true,
+      openMode: 'Inline Reader',
+      allowEmbed: true,
+      publishedUrl: 'https://viewer.us.foleon.com/leadership/message',
+    }, 'corr-test');
+
+    const placement = await service.createPlacement({
+      title: 'Leadership Message active reader',
+      placementKey: 'Leadership Message Active',
+      contentItemId: Number(content.id),
+      isActive: true,
+      sortRank: 1,
+      layoutVariant: 'Large Feature',
+    }, 'corr-test');
+
+    expect(placement.validationStatus).toBe('valid');
+    expect(placement.placementKey).toBe('Leadership Message Active');
+  });
+
   it('writes ContentIdCache from the selected content FoleonDocId', async () => {
     const service = new MockFoleonService();
     const placement = await service.createPlacement({
@@ -162,7 +191,7 @@ describe('Foleon service validation', () => {
     expect(placement.validationStatus).toBe('valid');
   });
 
-  it('accepts two-lane placement keys in backend contracts', async () => {
+  it('accepts governed placement keys in backend contracts', async () => {
     const service = new MockFoleonService();
     const placement = await service.createPlacement({
       title: 'Project Spotlight active reader',

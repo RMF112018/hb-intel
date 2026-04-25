@@ -84,6 +84,7 @@ export function ManagePlacementPanel(props: {
             'Archive Rail',
             'Project Spotlight Active',
             'Company Pulse Active',
+            'Leadership Message Active',
           ]}
           onChange={(placementKey): void =>
             setDraft({ ...draft, placementKey: placementKey as FoleonPlacementMutation['placementKey'] })

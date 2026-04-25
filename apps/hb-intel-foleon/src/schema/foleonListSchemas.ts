@@ -89,11 +89,15 @@ const OPEN_MODE_CHOICES = ['Inline Reader', 'Fullscreen Reader', 'New Tab Only']
 
 const SYNC_SOURCE_CHOICES = ['Manual', 'Foleon API', 'Hybrid'] as const;
 
-const READER_KEY_CHOICES = ['project-spotlight', 'company-pulse'] as const;
+const READER_KEY_CHOICES = ['project-spotlight', 'company-pulse', 'leadership-message'] as const;
 
 const CADENCE_CHOICES = ['Monthly', 'Weekly', 'Frequent', 'Ad Hoc'] as const;
 
-const HOMEPAGE_SLOT_CHOICES = ['Project Spotlight Reader', 'Company Pulse Reader'] as const;
+const HOMEPAGE_SLOT_CHOICES = [
+  'Project Spotlight Reader',
+  'Company Pulse Reader',
+  'Leadership Message Reader',
+] as const;
 
 const PRIMARY_AUDIENCE_CHOICES = [
   'Companywide',
@@ -204,6 +208,7 @@ const PLACEMENT_KEY_CHOICES = [
   'Archive Rail',
   'Project Spotlight Active',
   'Company Pulse Active',
+  'Leadership Message Active',
 ] as const;
 
 const LAYOUT_VARIANT_CHOICES = [
@@ -261,6 +266,7 @@ const PAGE_CONTEXT_CHOICES = [
   'Project Site',
   'Project Spotlight',
   'Company Pulse',
+  'Leadership Message',
 ] as const;
 
 export const FOLEON_INTERACTION_EVENTS_SCHEMA: FoleonListSchema = {

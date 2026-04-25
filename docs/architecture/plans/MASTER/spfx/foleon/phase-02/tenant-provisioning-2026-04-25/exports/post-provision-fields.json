@@ -1,5 +1,5 @@
 {
-  "generatedUtc": "2026-04-25T20:05:15.6003710Z",
+  "generatedUtc": "2026-04-25T22:59:03.7653670Z",
   "phase": "post-provision",
   "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
   "clientId": "08c399eb-a394-4087-b859-659d493f8dc7",
@@ -13,17 +13,17 @@
     "HB_FoleonSyncRuns"
   ],
   "resolvedLists": {
-    "HB_FoleonContentRegistry": {
-      "approvedName": "HB_FoleonContentRegistry",
-      "title": "Foleon Content Registry",
-      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
-      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
-    },
     "HB_FoleonInteractionEvents": {
       "approvedName": "HB_FoleonInteractionEvents",
       "title": "Foleon Interaction Events",
       "id": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
       "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonInteractionEvents"
+    },
+    "HB_FoleonContentRegistry": {
+      "approvedName": "HB_FoleonContentRegistry",
+      "title": "Foleon Content Registry",
+      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
     },
     "HB_FoleonHomepagePlacements": {
       "approvedName": "HB_FoleonHomepagePlacements",
@@ -880,7 +880,8 @@
           "enforceUniqueValues": false,
           "choices": [
             "Project Spotlight Reader",
-            "Company Pulse Reader"
+            "Company Pulse Reader",
+            "Leadership Message Reader"
           ]
         },
         {
@@ -1346,7 +1347,8 @@
           "enforceUniqueValues": false,
           "choices": [
             "project-spotlight",
-            "company-pulse"
+            "company-pulse",
+            "leadership-message"
           ]
         },
         {
@@ -2637,7 +2639,8 @@
             "Carousel",
             "Archive Rail",
             "Project Spotlight Active",
-            "Company Pulse Active"
+            "Company Pulse Active",
+            "Leadership Message Active"
           ]
         },
         {
@@ -3770,7 +3773,8 @@
             "Reader",
             "Project Site",
             "Project Spotlight",
-            "Company Pulse"
+            "Company Pulse",
+            "Leadership Message"
           ]
         },
         {

@@ -300,9 +300,9 @@ function Invoke-Probe {
 }
 
 $ContentFields = @(
-  @{ InternalName = "ReaderKey"; DisplayName = "Reader Key"; Type = "Choice"; Required = $false; Choices = @("project-spotlight", "company-pulse") },
+  @{ InternalName = "ReaderKey"; DisplayName = "Reader Key"; Type = "Choice"; Required = $false; Choices = @("project-spotlight", "company-pulse", "leadership-message") },
   @{ InternalName = "Cadence"; DisplayName = "Cadence"; Type = "Choice"; Required = $false; Choices = @("Monthly", "Weekly", "Frequent", "Ad Hoc") },
-  @{ InternalName = "HomepageSlot"; DisplayName = "Homepage Slot"; Type = "Choice"; Required = $false; Choices = @("Project Spotlight Reader", "Company Pulse Reader") },
+  @{ InternalName = "HomepageSlot"; DisplayName = "Homepage Slot"; Type = "Choice"; Required = $false; Choices = @("Project Spotlight Reader", "Company Pulse Reader", "Leadership Message Reader") },
   @{ InternalName = "ArchiveGroup"; DisplayName = "Archive Group"; Type = "Text"; Required = $false },
   @{ InternalName = "ActiveEdition"; DisplayName = "Active Edition"; Type = "Boolean"; Required = $false },
   @{ InternalName = "PrimaryAudience"; DisplayName = "Primary Audience"; Type = "Choice"; Required = $false; Choices = @("Companywide", "Operations", "Field", "Leadership", "Marketing", "Safety", "IT") },
@@ -339,8 +339,8 @@ try {
     Ensure-Field -ListTitle $ContentRegistryList -Def $fieldDef
   }
   Ensure-Choices -ListTitle $ContentRegistryList -FieldName "ContentTypeKey" -RequiredChoices @("Project Spotlight", "Company Pulse")
-  Ensure-Choices -ListTitle $HomepagePlacementsList -FieldName "PlacementKey" -RequiredChoices @("Project Spotlight Active", "Company Pulse Active")
-  Ensure-Choices -ListTitle $InteractionEventsList -FieldName "PageContext" -RequiredChoices @("Project Spotlight", "Company Pulse")
+  Ensure-Choices -ListTitle $HomepagePlacementsList -FieldName "PlacementKey" -RequiredChoices @("Project Spotlight Active", "Company Pulse Active", "Leadership Message Active")
+  Ensure-Choices -ListTitle $InteractionEventsList -FieldName "PageContext" -RequiredChoices @("Project Spotlight", "Company Pulse", "Leadership Message")
 
   foreach ($fieldName in $ContentIndexes) { Ensure-Index -ListTitle $ContentRegistryList -FieldName $fieldName }
   foreach ($fieldName in $PlacementIndexes) { Ensure-Index -ListTitle $HomepagePlacementsList -FieldName $fieldName }
@@ -374,7 +374,7 @@ try {
     probes = @($ProbeResults)
   } | ConvertTo-Json -Depth 16 | Set-Content -Path (Join-Path $OutputDir "provisioning-run-summary.json") -Encoding UTF8
 
-  Write-Host "PASS Foleon two-lane tenant schema provisioning"
+  Write-Host "PASS Foleon tenant schema provisioning"
 } finally {
   Disconnect-PnPOnline -ErrorAction SilentlyContinue
 }

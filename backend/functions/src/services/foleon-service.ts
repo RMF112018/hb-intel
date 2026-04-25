@@ -925,6 +925,7 @@ function isPublicReadyContentInput(input: FoleonContentMutationRequest): boolean
 function readerLaneForPlacementKey(placementKey: FoleonPlacementDto['placementKey']): FoleonReaderKey | null {
   if (placementKey === 'Project Spotlight Active') return 'project-spotlight';
   if (placementKey === 'Company Pulse Active') return 'company-pulse';
+  if (placementKey === 'Leadership Message Active') return 'leadership-message';
   return null;
 }
 
@@ -935,11 +936,16 @@ function readerLaneForContent(content: FoleonContentDetailDto): FoleonReaderKey 
   if (content.readerKey === 'company-pulse' || content.contentTypeKey === 'Company Pulse') {
     return 'company-pulse';
   }
+  if (content.readerKey === 'leadership-message' || content.contentTypeKey === 'Leadership') {
+    return 'leadership-message';
+  }
   return null;
 }
 
 function readerLaneLabel(lane: FoleonReaderKey): string {
-  return lane === 'project-spotlight' ? 'Project Spotlight' : 'Company Pulse';
+  if (lane === 'project-spotlight') return 'Project Spotlight';
+  if (lane === 'company-pulse') return 'Company Pulse';
+  return 'Leadership Message';
 }
 
 function validateHttpsUrl(value: string | undefined, label: string, blockingReasons: string[]): void {
@@ -1288,7 +1294,7 @@ function readSyncSource(value: unknown): FoleonContentDetailDto['syncSource'] {
 }
 
 function readReaderKey(value: unknown): FoleonContentDetailDto['readerKey'] {
-  if (value === 'project-spotlight' || value === 'company-pulse') return value;
+  if (value === 'project-spotlight' || value === 'company-pulse' || value === 'leadership-message') return value;
   return undefined;
 }
 
@@ -1300,7 +1306,13 @@ function readCadence(value: unknown): FoleonContentDetailDto['cadence'] {
 }
 
 function readHomepageSlot(value: unknown): FoleonContentDetailDto['homepageSlot'] {
-  if (value === 'Project Spotlight Reader' || value === 'Company Pulse Reader') return value;
+  if (
+    value === 'Project Spotlight Reader' ||
+    value === 'Company Pulse Reader' ||
+    value === 'Leadership Message Reader'
+  ) {
+    return value;
+  }
   return undefined;
 }
 
@@ -1312,7 +1324,8 @@ function readPlacementKey(value: unknown): FoleonPlacementDto['placementKey'] {
     value === 'Carousel' ||
     value === 'Archive Rail' ||
     value === 'Project Spotlight Active' ||
-    value === 'Company Pulse Active'
+    value === 'Company Pulse Active' ||
+    value === 'Leadership Message Active'
   ) {
     return value;
   }

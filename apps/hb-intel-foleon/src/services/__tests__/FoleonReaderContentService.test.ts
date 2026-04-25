@@ -110,6 +110,22 @@ describe('resolveFoleonReaderContent', () => {
     });
   });
 
+  it('accepts Leadership Message lane records from content contracts', async () => {
+    const record = makeContent({
+      id: 3,
+      title: 'Leadership Message',
+      foleonDocId: 3003,
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      homepageSlot: 'Leadership Message Reader',
+      publishedUrl: 'https://viewer.us.foleon.com/published/leadership-message',
+    });
+
+    expect(record.readerKey).toBe('leadership-message');
+    expect(record.homepageSlot).toBe('Leadership Message Reader');
+    expect(record.contentTypeKey).toBe('Leadership');
+  });
+
   it('warns and falls back to active edition when placement is stale', async () => {
     const record = makeContent();
     fetchContentMock.mockResolvedValue([record]);

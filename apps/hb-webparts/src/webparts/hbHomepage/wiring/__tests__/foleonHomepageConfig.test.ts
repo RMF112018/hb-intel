@@ -16,7 +16,7 @@ describe('homepage embedded Foleon config', () => {
       foleonAcceptedOrigins: 'https://viewer.us.foleon.com, https://example.foleon.test',
       foleonAllowPreview: true,
       foleonExpectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-      foleonExpectedPackageVersion: '1.0.21.0',
+      foleonExpectedPackageVersion: '1.0.22.0',
       foleonApiBaseUrl: 'https://functions.example/api',
       foleonApiResource: 'api://foleon-api',
     });
@@ -37,7 +37,7 @@ describe('homepage embedded Foleon config', () => {
       ],
       allowPreview: true,
       expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
-      expectedPackageVersion: '1.0.21.0',
+      expectedPackageVersion: '1.0.22.0',
       foleonRoute: 'projectSpotlight',
       foleonApiBaseUrl: 'https://functions.example/api',
       foleonApiResource: 'api://foleon-api',
@@ -49,7 +49,7 @@ describe('homepage embedded Foleon config', () => {
 
     expect(config.foleonExpectedManifestId).toBe(HOMEPAGE_EMBEDDED_FOLEON_MANIFEST_ID);
     expect(config.foleonExpectedPackageVersion).toBe(HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION);
-    expect(config.foleonExpectedPackageVersion).toBe('1.0.21.0');
+    expect(config.foleonExpectedPackageVersion).toBe('1.0.22.0');
   });
 
   it('also accepts a nested foleon config bag without hardcoding tenant list IDs', () => {

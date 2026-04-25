@@ -251,7 +251,11 @@ function normalizeContentType(value: string | undefined): FoleonContentType {
 }
 
 function normalizeReaderKey(value: string | undefined): FoleonReaderKey | undefined {
-  const allowed: ReadonlyArray<FoleonReaderKey> = ['project-spotlight', 'company-pulse'];
+  const allowed: ReadonlyArray<FoleonReaderKey> = [
+    'project-spotlight',
+    'company-pulse',
+    'leadership-message',
+  ];
   return allowed.includes(value as FoleonReaderKey) ? (value as FoleonReaderKey) : undefined;
 }
 
@@ -264,6 +268,7 @@ function normalizeHomepageSlot(value: string | undefined): FoleonHomepageSlot | 
   const allowed: ReadonlyArray<FoleonHomepageSlot> = [
     'Project Spotlight Reader',
     'Company Pulse Reader',
+    'Leadership Message Reader',
   ];
   return allowed.includes(value as FoleonHomepageSlot) ? (value as FoleonHomepageSlot) : undefined;
 }

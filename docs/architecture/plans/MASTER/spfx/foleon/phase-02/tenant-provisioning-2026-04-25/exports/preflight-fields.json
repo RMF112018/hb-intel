@@ -1,5 +1,5 @@
 {
-  "generatedUtc": "2026-04-25T20:04:21.2248570Z",
+  "generatedUtc": "2026-04-25T22:58:30.8702790Z",
   "phase": "preflight",
   "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
   "clientId": "08c399eb-a394-4087-b859-659d493f8dc7",
@@ -13,17 +13,17 @@
     "HB_FoleonSyncRuns"
   ],
   "resolvedLists": {
-    "HB_FoleonContentRegistry": {
-      "approvedName": "HB_FoleonContentRegistry",
-      "title": "Foleon Content Registry",
-      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
-      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
-    },
     "HB_FoleonInteractionEvents": {
       "approvedName": "HB_FoleonInteractionEvents",
       "title": "Foleon Interaction Events",
       "id": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
       "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonInteractionEvents"
+    },
+    "HB_FoleonContentRegistry": {
+      "approvedName": "HB_FoleonContentRegistry",
+      "title": "Foleon Content Registry",
+      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
     },
     "HB_FoleonHomepagePlacements": {
       "approvedName": "HB_FoleonHomepagePlacements",
@@ -375,6 +375,18 @@
           "choices": null
         },
         {
+          "internalName": "ActiveEdition",
+          "title": "Active Edition",
+          "typeAsString": "Boolean",
+          "required": false,
+          "indexed": true,
+          "hidden": false,
+          "readOnlyField": false,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": null
+        },
+        {
           "internalName": "AdminNotes",
           "title": "Admin Notes",
           "typeAsString": "Note",
@@ -418,6 +430,18 @@
           "indexed": false,
           "hidden": false,
           "readOnlyField": true,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": null
+        },
+        {
+          "internalName": "ArchiveGroup",
+          "title": "Archive Group",
+          "typeAsString": "Text",
+          "required": false,
+          "indexed": true,
+          "hidden": false,
+          "readOnlyField": false,
           "sealed": false,
           "enforceUniqueValues": false,
           "choices": null
@@ -471,6 +495,23 @@
           "choices": null
         },
         {
+          "internalName": "Cadence",
+          "title": "Cadence",
+          "typeAsString": "Choice",
+          "required": false,
+          "indexed": false,
+          "hidden": false,
+          "readOnlyField": false,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": [
+            "Monthly",
+            "Weekly",
+            "Frequent",
+            "Ad Hoc"
+          ]
+        },
+        {
           "internalName": "ComplianceAssetId",
           "title": "Compliance Asset Id",
           "typeAsString": "Text",
@@ -522,7 +563,9 @@
             "Company News",
             "Market Update",
             "Leadership",
-            "Other"
+            "Other",
+            "Project Spotlight",
+            "Company Pulse"
           ]
         },
         {
@@ -826,6 +869,21 @@
           "choices": null
         },
         {
+          "internalName": "HomepageSlot",
+          "title": "Homepage Slot",
+          "typeAsString": "Choice",
+          "required": false,
+          "indexed": true,
+          "hidden": false,
+          "readOnlyField": false,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": [
+            "Project Spotlight Reader",
+            "Company Pulse Reader"
+          ]
+        },
+        {
           "internalName": "HTML_x0020_File_x0020_Type",
           "title": "HTML File Type",
           "typeAsString": "Computed",
@@ -929,6 +987,18 @@
           "indexed": false,
           "hidden": true,
           "readOnlyField": true,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": null
+        },
+        {
+          "internalName": "LastEditorialUpdate",
+          "title": "Last Editorial Update",
+          "typeAsString": "DateTime",
+          "required": false,
+          "indexed": true,
+          "hidden": false,
+          "readOnlyField": false,
           "sealed": false,
           "enforceUniqueValues": false,
           "choices": null
@@ -1166,6 +1236,26 @@
           "choices": null
         },
         {
+          "internalName": "PrimaryAudience",
+          "title": "Primary Audience",
+          "typeAsString": "Choice",
+          "required": false,
+          "indexed": false,
+          "hidden": false,
+          "readOnlyField": false,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": [
+            "Companywide",
+            "Operations",
+            "Field",
+            "Leadership",
+            "Marketing",
+            "Safety",
+            "IT"
+          ]
+        },
+        {
           "internalName": "PrincipalCount",
           "title": "Principal Count",
           "typeAsString": "Computed",
@@ -1243,6 +1333,21 @@
           "sealed": false,
           "enforceUniqueValues": false,
           "choices": null
+        },
+        {
+          "internalName": "ReaderKey",
+          "title": "Reader Key",
+          "typeAsString": "Choice",
+          "required": false,
+          "indexed": true,
+          "hidden": false,
+          "readOnlyField": false,
+          "sealed": false,
+          "enforceUniqueValues": false,
+          "choices": [
+            "project-spotlight",
+            "company-pulse"
+          ]
         },
         {
           "internalName": "Region",
@@ -2530,7 +2635,9 @@
             "Primary Card",
             "Secondary Card",
             "Carousel",
-            "Archive Rail"
+            "Archive Rail",
+            "Project Spotlight Active",
+            "Company Pulse Active"
           ]
         },
         {
@@ -3661,7 +3768,9 @@
             "Homepage",
             "Content Hub",
             "Reader",
-            "Project Site"
+            "Project Site",
+            "Project Spotlight",
+            "Company Pulse"
           ]
         },
         {

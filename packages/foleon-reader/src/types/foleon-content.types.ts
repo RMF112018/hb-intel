@@ -26,11 +26,14 @@ export type FoleonOpenMode = 'Inline Reader' | 'Fullscreen Reader' | 'New Tab On
 
 export type FoleonSyncSource = 'Manual' | 'Foleon API' | 'Hybrid';
 
-export type FoleonReaderKey = 'project-spotlight' | 'company-pulse';
+export type FoleonReaderKey = 'project-spotlight' | 'company-pulse' | 'leadership-message';
 
 export type FoleonCadence = 'Monthly' | 'Weekly' | 'Frequent' | 'Ad Hoc';
 
-export type FoleonHomepageSlot = 'Project Spotlight Reader' | 'Company Pulse Reader';
+export type FoleonHomepageSlot =
+  | 'Project Spotlight Reader'
+  | 'Company Pulse Reader'
+  | 'Leadership Message Reader';
 
 export type FoleonPrimaryAudience =
   | 'Companywide'

@@ -17,7 +17,8 @@ export type FoleonPageContext =
   | 'Reader'
   | 'Project Site'
   | 'Project Spotlight'
-  | 'Company Pulse';
+  | 'Company Pulse'
+  | 'Leadership Message';
 
 /**
  * Bounded enum of error codes reported via telemetry. Callsites may only

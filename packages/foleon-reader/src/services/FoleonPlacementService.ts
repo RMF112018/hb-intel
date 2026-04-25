@@ -117,6 +117,7 @@ function normalizePlacementKey(value: string | undefined): FoleonPlacementKey {
     'Archive Rail',
     'Project Spotlight Active',
     'Company Pulse Active',
+    'Leadership Message Active',
   ];
   return allowed.includes(value as FoleonPlacementKey)
     ? (value as FoleonPlacementKey)

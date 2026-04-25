@@ -5,7 +5,8 @@ export type FoleonPlacementKey =
   | 'Carousel'
   | 'Archive Rail'
   | 'Project Spotlight Active'
-  | 'Company Pulse Active';
+  | 'Company Pulse Active'
+  | 'Leadership Message Active';
 
 export type FoleonLayoutVariant =
   | 'Large Feature'

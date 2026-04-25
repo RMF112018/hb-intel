@@ -1,6 +1,6 @@
 {
-  "generatedUtc": "2026-04-25T20:05:16.5298280Z",
-  "startedUtc": "2026-04-25T20:03:56.0081440Z",
+  "generatedUtc": "2026-04-25T22:59:04.6182620Z",
+  "startedUtc": "2026-04-25T22:58:11.9064100Z",
   "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
   "clientId": "08c399eb-a394-4087-b859-659d493f8dc7",
   "authCommand": "Connect-PnPOnline -Url \"https://hedrickbrotherscom.sharepoint.com/sites/HBCentral\" -ClientId \"08c399eb-a394-4087-b859-659d493f8dc7\" -Interactive",
@@ -13,17 +13,17 @@
     "HB_FoleonSyncRuns"
   ],
   "resolvedLists": {
-    "HB_FoleonContentRegistry": {
-      "approvedName": "HB_FoleonContentRegistry",
-      "title": "Foleon Content Registry",
-      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
-      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
-    },
     "HB_FoleonInteractionEvents": {
       "approvedName": "HB_FoleonInteractionEvents",
       "title": "Foleon Interaction Events",
       "id": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
       "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonInteractionEvents"
+    },
+    "HB_FoleonContentRegistry": {
+      "approvedName": "HB_FoleonContentRegistry",
+      "title": "Foleon Content Registry",
+      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
     },
     "HB_FoleonHomepagePlacements": {
       "approvedName": "HB_FoleonHomepagePlacements",
@@ -45,7 +45,7 @@
       "action": "connect",
       "result": "reachable",
       "detail": "HB Central",
-      "timestampUtc": "2026-04-25T20:04:01.9371320Z"
+      "timestampUtc": "2026-04-25T22:58:15.9599440Z"
     },
     {
       "list": "HB_FoleonContentRegistry",
@@ -53,7 +53,7 @@
       "action": "resolve-list",
       "result": "resolved",
       "detail": "mutation-target title='Foleon Content Registry' root='/sites/HBCentral/Lists/HB_FoleonContentRegistry'",
-      "timestampUtc": "2026-04-25T20:04:05.1567120Z"
+      "timestampUtc": "2026-04-25T22:58:18.3516450Z"
     },
     {
       "list": "HB_FoleonHomepagePlacements",
@@ -61,7 +61,7 @@
       "action": "resolve-list",
       "result": "resolved",
       "detail": "mutation-target title='Foleon Homepage Placements' root='/sites/HBCentral/Lists/HB_FoleonHomepagePlacements'",
-      "timestampUtc": "2026-04-25T20:04:08.1517330Z"
+      "timestampUtc": "2026-04-25T22:58:20.2951790Z"
     },
     {
       "list": "HB_FoleonInteractionEvents",
@@ -69,7 +69,7 @@
       "action": "resolve-list",
       "result": "resolved",
       "detail": "mutation-target title='Foleon Interaction Events' root='/sites/HBCentral/Lists/HB_FoleonInteractionEvents'",
-      "timestampUtc": "2026-04-25T20:04:10.4289210Z"
+      "timestampUtc": "2026-04-25T22:58:22.1876810Z"
     },
     {
       "list": "HB_FoleonSyncRuns",
@@ -77,31 +77,31 @@
       "action": "resolve-list",
       "result": "resolved",
       "detail": "inspect-only title='Foleon Sync Runs' root='/sites/HBCentral/Lists/HB_FoleonSyncRuns'",
-      "timestampUtc": "2026-04-25T20:04:12.7127170Z"
+      "timestampUtc": "2026-04-25T22:58:24.1883530Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ReaderKey",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=Choice",
-      "timestampUtc": "2026-04-25T20:04:23.9246260Z"
+      "timestampUtc": "2026-04-25T22:58:31.7013640Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ReaderKey",
-      "action": "verify-choices",
-      "result": "unchanged",
-      "detail": "all required choices present",
-      "timestampUtc": "2026-04-25T20:04:25.3562820Z"
+      "action": "append-choices",
+      "result": "updated",
+      "detail": "leadership-message",
+      "timestampUtc": "2026-04-25T22:58:32.7416880Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "Cadence",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=Choice",
-      "timestampUtc": "2026-04-25T20:04:27.4290980Z"
+      "timestampUtc": "2026-04-25T22:58:33.4690450Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -109,47 +109,47 @@
       "action": "verify-choices",
       "result": "unchanged",
       "detail": "all required choices present",
-      "timestampUtc": "2026-04-25T20:04:28.8091240Z"
+      "timestampUtc": "2026-04-25T22:58:34.1611100Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "HomepageSlot",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=Choice",
-      "timestampUtc": "2026-04-25T20:04:30.7169530Z"
+      "timestampUtc": "2026-04-25T22:58:34.8718570Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "HomepageSlot",
-      "action": "verify-choices",
-      "result": "unchanged",
-      "detail": "all required choices present",
-      "timestampUtc": "2026-04-25T20:04:32.1830810Z"
+      "action": "append-choices",
+      "result": "updated",
+      "detail": "Leadership Message Reader",
+      "timestampUtc": "2026-04-25T22:58:35.7329650Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ArchiveGroup",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=Text",
-      "timestampUtc": "2026-04-25T20:04:33.8018290Z"
+      "timestampUtc": "2026-04-25T22:58:36.4058280Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ActiveEdition",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=Boolean",
-      "timestampUtc": "2026-04-25T20:04:36.2712060Z"
+      "timestampUtc": "2026-04-25T22:58:37.0896160Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "PrimaryAudience",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=Choice",
-      "timestampUtc": "2026-04-25T20:04:38.7788700Z"
+      "timestampUtc": "2026-04-25T22:58:37.7379050Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -157,79 +157,79 @@
       "action": "verify-choices",
       "result": "unchanged",
       "detail": "all required choices present",
-      "timestampUtc": "2026-04-25T20:04:40.1723600Z"
+      "timestampUtc": "2026-04-25T22:58:38.4123090Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "LastEditorialUpdate",
-      "action": "create-field",
-      "result": "created",
+      "action": "verify-field",
+      "result": "exists",
       "detail": "type=DateTime",
-      "timestampUtc": "2026-04-25T20:04:41.9026420Z"
+      "timestampUtc": "2026-04-25T22:58:39.0644630Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ContentTypeKey",
-      "action": "append-choices",
-      "result": "updated",
-      "detail": "Project Spotlight, Company Pulse",
-      "timestampUtc": "2026-04-25T20:04:43.4395410Z"
+      "action": "verify-choices",
+      "result": "unchanged",
+      "detail": "all required choices present",
+      "timestampUtc": "2026-04-25T22:58:39.7297330Z"
     },
     {
       "list": "Foleon Homepage Placements",
       "target": "PlacementKey",
       "action": "append-choices",
       "result": "updated",
-      "detail": "Project Spotlight Active, Company Pulse Active",
-      "timestampUtc": "2026-04-25T20:04:44.2746090Z"
+      "detail": "Leadership Message Active",
+      "timestampUtc": "2026-04-25T22:58:40.5690650Z"
     },
     {
       "list": "Foleon Interaction Events",
       "target": "PageContext",
       "action": "append-choices",
       "result": "updated",
-      "detail": "Project Spotlight, Company Pulse",
-      "timestampUtc": "2026-04-25T20:04:45.1562700Z"
+      "detail": "Leadership Message",
+      "timestampUtc": "2026-04-25T22:58:41.4391540Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ReaderKey",
-      "action": "create-index",
-      "result": "created",
+      "action": "verify-index",
+      "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:47.5146210Z"
+      "timestampUtc": "2026-04-25T22:58:42.1601810Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "HomepageSlot",
-      "action": "create-index",
-      "result": "created",
+      "action": "verify-index",
+      "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:49.7574990Z"
+      "timestampUtc": "2026-04-25T22:58:42.8285200Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ArchiveGroup",
-      "action": "create-index",
-      "result": "created",
+      "action": "verify-index",
+      "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:51.9845430Z"
+      "timestampUtc": "2026-04-25T22:58:43.5624020Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "ActiveEdition",
-      "action": "create-index",
-      "result": "created",
+      "action": "verify-index",
+      "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:54.2482850Z"
+      "timestampUtc": "2026-04-25T22:58:44.2210210Z"
     },
     {
       "list": "Foleon Content Registry",
       "target": "LastEditorialUpdate",
-      "action": "create-index",
-      "result": "created",
+      "action": "verify-index",
+      "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:56.5792300Z"
+      "timestampUtc": "2026-04-25T22:58:44.8927040Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -237,7 +237,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:57.2665410Z"
+      "timestampUtc": "2026-04-25T22:58:45.6005890Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -245,7 +245,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:58.0185950Z"
+      "timestampUtc": "2026-04-25T22:58:46.2962670Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -253,7 +253,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:58.7495500Z"
+      "timestampUtc": "2026-04-25T22:58:46.9985050Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -261,7 +261,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:04:59.4321100Z"
+      "timestampUtc": "2026-04-25T22:58:47.6853680Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -269,7 +269,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:00.1663260Z"
+      "timestampUtc": "2026-04-25T22:58:48.4082600Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -277,7 +277,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:00.8837040Z"
+      "timestampUtc": "2026-04-25T22:58:49.0832530Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -285,7 +285,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:01.5878590Z"
+      "timestampUtc": "2026-04-25T22:58:49.7612130Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -293,7 +293,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:02.2652200Z"
+      "timestampUtc": "2026-04-25T22:58:50.4359990Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -301,7 +301,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:02.9850000Z"
+      "timestampUtc": "2026-04-25T22:58:51.1485760Z"
     },
     {
       "list": "Foleon Content Registry",
@@ -309,7 +309,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:03.6106870Z"
+      "timestampUtc": "2026-04-25T22:58:51.8383560Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -317,7 +317,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:04.3520910Z"
+      "timestampUtc": "2026-04-25T22:58:52.5143040Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -325,7 +325,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:05.0949230Z"
+      "timestampUtc": "2026-04-25T22:58:53.2657240Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -333,7 +333,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:05.7770390Z"
+      "timestampUtc": "2026-04-25T22:58:53.9070140Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -341,7 +341,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:06.4542050Z"
+      "timestampUtc": "2026-04-25T22:58:54.6359900Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -349,7 +349,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:07.1315710Z"
+      "timestampUtc": "2026-04-25T22:58:55.2987900Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -357,7 +357,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:07.8196660Z"
+      "timestampUtc": "2026-04-25T22:58:55.9775780Z"
     },
     {
       "list": "Foleon Homepage Placements",
@@ -365,7 +365,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:08.4950490Z"
+      "timestampUtc": "2026-04-25T22:58:56.6230440Z"
     },
     {
       "list": "Foleon Interaction Events",
@@ -373,7 +373,7 @@
       "action": "verify-index",
       "result": "present",
       "detail": "",
-      "timestampUtc": "2026-04-25T20:05:09.1933200Z"
+      "timestampUtc": "2026-04-25T22:58:57.3028860Z"
     }
   ],
   "probes": [
@@ -384,7 +384,7 @@
       "returnedItemCount": 0,
       "ok": true,
       "error": null,
-      "timestampUtc": "2026-04-25T20:05:16.0022060Z"
+      "timestampUtc": "2026-04-25T22:59:04.1104880Z"
     },
     {
       "name": "project-spotlight-active-reader-filter",
@@ -393,7 +393,7 @@
       "returnedItemCount": 0,
       "ok": true,
       "error": null,
-      "timestampUtc": "2026-04-25T20:05:16.1667450Z"
+      "timestampUtc": "2026-04-25T22:59:04.2831850Z"
     },
     {
       "name": "company-pulse-active-reader-filter",
@@ -402,7 +402,7 @@
       "returnedItemCount": 0,
       "ok": true,
       "error": null,
-      "timestampUtc": "2026-04-25T20:05:16.3269550Z"
+      "timestampUtc": "2026-04-25T22:59:04.4338520Z"
     },
     {
       "name": "active-placements",
@@ -411,7 +411,7 @@
       "returnedItemCount": 0,
       "ok": true,
       "error": null,
-      "timestampUtc": "2026-04-25T20:05:16.5286640Z"
+      "timestampUtc": "2026-04-25T22:59:04.6166580Z"
     }
   ]
 }

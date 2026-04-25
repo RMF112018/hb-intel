@@ -1,9 +1,12 @@
 export type FoleonValidationStatus = 'valid' | 'warning' | 'blocked' | 'unknown';
 export type FoleonOpenMode = 'Inline Reader' | 'Fullscreen Reader' | 'New Tab Only';
 export type FoleonSyncSource = 'Manual' | 'Foleon API' | 'Hybrid';
-export type FoleonReaderKey = 'project-spotlight' | 'company-pulse';
+export type FoleonReaderKey = 'project-spotlight' | 'company-pulse' | 'leadership-message';
 export type FoleonCadence = 'Monthly' | 'Weekly' | 'Frequent' | 'Ad Hoc';
-export type FoleonHomepageSlot = 'Project Spotlight Reader' | 'Company Pulse Reader';
+export type FoleonHomepageSlot =
+  | 'Project Spotlight Reader'
+  | 'Company Pulse Reader'
+  | 'Leadership Message Reader';
 export type FoleonPlacementKey =
   | 'Hero'
   | 'Primary Card'
@@ -11,7 +14,8 @@ export type FoleonPlacementKey =
   | 'Carousel'
   | 'Archive Rail'
   | 'Project Spotlight Active'
-  | 'Company Pulse Active';
+  | 'Company Pulse Active'
+  | 'Leadership Message Active';
 export type FoleonLayoutVariant =
   | 'Large Feature'
   | 'Compact Card'

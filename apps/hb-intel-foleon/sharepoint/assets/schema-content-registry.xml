@@ -41,6 +41,7 @@
         <CHOICES>
           <CHOICE>project-spotlight</CHOICE>
           <CHOICE>company-pulse</CHOICE>
+          <CHOICE>leadership-message</CHOICE>
         </CHOICES>
       </Field>
       <Field ID="{B9F50029-F01E-4A10-8010-C0F0E0D00029}" Name="Cadence" DisplayName="Cadence" Type="Choice" Required="FALSE" Format="Dropdown">
@@ -55,6 +56,7 @@
         <CHOICES>
           <CHOICE>Project Spotlight Reader</CHOICE>
           <CHOICE>Company Pulse Reader</CHOICE>
+          <CHOICE>Leadership Message Reader</CHOICE>
         </CHOICES>
       </Field>
       <Field ID="{B9F5002B-F01E-4A10-8010-C0F0E0D0002B}" Name="ArchiveGroup" DisplayName="Archive Group" Type="Text" Required="FALSE" Indexed="TRUE" MaxLength="64" />

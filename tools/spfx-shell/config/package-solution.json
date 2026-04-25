@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-foleon",
     "id": "c23635f5-ab4d-44c2-96b5-2a2c90f4afc0",
-    "version": "1.0.21.0",
+    "version": "1.0.22.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": false,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "HB Intel Foleon Connector Feature",
         "description": "Deploys HB Intel Foleon Connector webpart assets and provisions the four governed Foleon SharePoint lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs).",
         "id": "ae66c036-8036-4f10-bb63-0d75107e7ce9",
-        "version": "1.0.21.0",
+        "version": "1.0.22.0",
         "assets": {
           "elementManifests": [
             "elements.xml"

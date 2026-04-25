@@ -144,9 +144,9 @@ export function ManageContentEditorPanel(props: {
         <ManageSelectField
           id="foleon-reader-key"
           label="Reader key"
-          helpText="Lane key used by the Project Spotlight and Company Pulse public reader resolvers."
+          helpText="Lane key used by the governed public reader resolvers."
           value={draft.readerKey ?? ''}
-          options={['', 'project-spotlight', 'company-pulse']}
+          options={['', 'project-spotlight', 'company-pulse', 'leadership-message']}
           onChange={(readerKey): void =>
             setDraft({ ...draft, readerKey: readerKey ? readerKey as FoleonReaderKey : undefined })
           }
@@ -164,7 +164,7 @@ export function ManageContentEditorPanel(props: {
           id="foleon-homepage-slot"
           label="Homepage slot"
           value={draft.homepageSlot ?? ''}
-          options={['', 'Project Spotlight Reader', 'Company Pulse Reader']}
+          options={['', 'Project Spotlight Reader', 'Company Pulse Reader', 'Leadership Message Reader']}
           onChange={(homepageSlot): void =>
             setDraft({ ...draft, homepageSlot: homepageSlot ? homepageSlot as FoleonHomepageSlot : undefined })
           }
@@ -289,6 +289,12 @@ export function ManageContentEditorPanel(props: {
           onClick={(): void => setDraft((current) => applyReaderLanePreset(current, 'company-pulse'))}
         >
           Configure as Company Pulse
+        </HbcButton>
+        <HbcButton
+          variant="secondary"
+          onClick={(): void => setDraft((current) => applyReaderLanePreset(current, 'leadership-message'))}
+        >
+          Configure as Leadership Message
         </HbcButton>
       </div>
       {laneWarnings.length > 0 ? (
