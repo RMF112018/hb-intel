@@ -159,6 +159,43 @@
   padding: 18px;
 }
 
+.previewGuidance {
+  composes: editorSection;
+  border-left: 6px solid var(--foleon-manage-accent, hsl(186 94% 22%));
+  background:
+    radial-gradient(circle at 8% 12%, hsl(168 45% 94% / 0.9), transparent 34%),
+    var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
+}
+
+.guidanceKicker {
+  margin: 0 0 var(--foleon-manage-space-xs, 8px);
+  color: var(--foleon-manage-accent, hsl(186 94% 22%));
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.guidanceCopy {
+  margin: 0 0 var(--foleon-manage-space-sm, 12px);
+  color: var(--foleon-manage-fg-muted, hsl(205 12% 38%));
+  line-height: 1.55;
+}
+
+.guidanceList {
+  display: grid;
+  gap: var(--foleon-manage-space-xs, 8px);
+  margin: 0;
+  padding-left: 20px;
+}
+
+.guidanceMeta {
+  margin: var(--foleon-manage-space-sm, 12px) 0 0;
+  color: var(--foleon-manage-fg-muted, hsl(205 12% 38%));
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .syncRunRow {
   padding: 10px 0;
   border-top: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));

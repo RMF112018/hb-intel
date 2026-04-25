@@ -12,6 +12,7 @@ import { FoleonEmpty, FoleonError, FoleonLoadingState } from '../../components/F
 import { ManageContentEditorPanel } from './ManageContentEditorPanel.js';
 import { ManageMetricCards } from './ManageMetricCards.js';
 import { ManagePlacementPanel } from './ManagePlacementPanel.js';
+import { ManagePreviewGuidancePanel } from './ManagePreviewGuidancePanel.js';
 import { ManageRegistryPanel } from './ManageRegistryPanel.js';
 import { ManageShellHeader } from './ManageShellHeader.js';
 import { ManageSyncPanel } from './ManageSyncPanel.js';
@@ -119,8 +120,12 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   }
 
   const published = state.content.filter((record) => record.publishStatus === 'Published' && record.isVisible).length;
+  const homepageReady = state.content.filter(
+    (record) => record.publishStatus === 'Published' && record.isVisible && record.isHomepageEligible,
+  ).length;
   const blocked = state.content.filter((record) => record.validationStatus === 'blocked').length;
   const activePlacements = state.placements.filter((placement) => placement.isActive).length;
+  const shouldShowPreviewGuidance = state.content.length === 0 || published === 0 || homepageReady === 0;
 
   return (
     <Tooltip.Provider delayDuration={280}>
@@ -160,6 +165,12 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
               activePlacements={activePlacements}
               syncHealth={state.syncStatus?.health ?? 'unknown'}
             />
+            {shouldShowPreviewGuidance ? (
+              <ManagePreviewGuidancePanel
+                publicReadyContentCount={published}
+                homepageReadyContentCount={homepageReady}
+              />
+            ) : null}
             {selected ? (
               <ManageContentEditorPanel record={selected} api={api} onRefresh={load} setMessage={setMessage} />
             ) : (
