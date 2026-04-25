@@ -518,5 +518,9 @@ export class SharePointProvisioningService implements ISharePointProvisioningSer
         });
         break;
     }
+
+    if (field.indexed === true) {
+      await list.fields.getByInternalNameOrTitle(field.internalName).update({ Indexed: true });
+    }
   }
 }

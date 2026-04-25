@@ -302,7 +302,7 @@ export class SafetyProvisioningService implements ISafetyProvisioningService {
     let existingFieldsByInternalName = new Map<string, any>();
     if (exists || (!dryRun && definition.fields.length > 0)) {
       const existingFields: any[] = await list.fields
-        .select('InternalName', 'TypeAsString', 'Required', 'LookupField', 'LookupList')();
+        .select('InternalName', 'TypeAsString', 'Required', 'LookupField', 'LookupList', 'Indexed')();
       existingFieldsByInternalName = new Map(
         existingFields.map((field) => [String(field.InternalName), field]),
       );
@@ -380,6 +380,41 @@ export class SafetyProvisioningService implements ISafetyProvisioningService {
           await list.fields
             .getByInternalNameOrTitle(field.internalName)
             .update({ Required: field.required });
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'updatedOrRepaired',
+          });
+          if (outcome === 'alreadyExisted') outcome = 'updatedOrRepaired';
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'failed',
+            message: errorMessage,
+          });
+          diagnostics.push({
+            code: 'FIELD_UPDATE_FAILED',
+            message: `${definition.title}.${field.internalName}: ${errorMessage}`,
+          });
+          outcome = 'failed';
+        }
+        continue;
+      }
+
+      if (field.indexed === true && Boolean(existing.Indexed) !== true) {
+        if (dryRun) {
+          fieldOutcomes.push({
+            internalName: field.internalName,
+            outcome: 'updatedOrRepaired',
+            message: 'Dry-run: Indexed would be set to true.',
+          });
+          if (outcome === 'alreadyExisted') outcome = 'updatedOrRepaired';
+          continue;
+        }
+        try {
+          await list.fields
+            .getByInternalNameOrTitle(field.internalName)
+            .update({ Indexed: true });
           fieldOutcomes.push({
             internalName: field.internalName,
             outcome: 'updatedOrRepaired',

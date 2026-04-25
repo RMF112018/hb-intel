@@ -22,6 +22,7 @@ export interface SpFieldDefinition {
   readonly required?: boolean;
   readonly choices?: ReadonlyArray<string>;
   readonly lookupList?: string;
+  readonly indexed?: boolean;
 }
 
 export const SAFETY_REPORTING_PERIODS_FIELDS: ReadonlyArray<SpFieldDefinition> = [
@@ -283,10 +284,178 @@ export const SAFETY_INGESTION_RUNS_FIELDS: ReadonlyArray<SpFieldDefinition> = [
   { internalName: 'ResolutionNote', displayName: 'Resolution Note', type: 'Note' },
 ];
 
+export const SAFETY_FIELD_EXCELLENCE_CANDIDATE_SCORES_FIELDS: ReadonlyArray<SpFieldDefinition> = [
+  { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+  {
+    internalName: 'ReportingPeriodId',
+    displayName: 'Reporting Period',
+    type: 'Lookup',
+    lookupList: 'Safety Reporting Periods',
+    required: true,
+    indexed: true,
+  },
+  {
+    internalName: 'ProjectWeekRecordId',
+    displayName: 'Project-Week Record',
+    type: 'Lookup',
+    lookupList: 'Safety Project Week Records',
+    required: true,
+    indexed: true,
+  },
+  {
+    internalName: 'ProjectLookupId',
+    displayName: 'Project',
+    type: 'Lookup',
+    lookupList: 'Projects',
+  },
+  {
+    internalName: 'ProjectNumber',
+    displayName: 'Project Number',
+    type: 'Text',
+    required: true,
+    indexed: true,
+  },
+  { internalName: 'ProjectNameSnapshot', displayName: 'Project Name', type: 'Text' },
+  { internalName: 'ProjectStageSnapshot', displayName: 'Project Stage', type: 'Text' },
+  { internalName: 'ProjectLocationSnapshot', displayName: 'Project Location', type: 'Text' },
+  {
+    internalName: 'EligibilityStatus',
+    displayName: 'Eligibility Status',
+    type: 'Choice',
+    required: true,
+    choices: ['eligible', 'ineligible', 'low-confidence', 'needs-review'],
+  },
+  { internalName: 'ExclusionReasonsJson', displayName: 'Exclusion Reasons (JSON)', type: 'Note' },
+  { internalName: 'CompositeScore', displayName: 'Composite Score', type: 'Number' },
+  { internalName: 'SafetyPerformanceScore', displayName: 'Safety Performance Score', type: 'Number' },
+  { internalName: 'ConsistencyTrendScore', displayName: 'Consistency Trend Score', type: 'Number' },
+  { internalName: 'ActivityExposureScore', displayName: 'Activity Exposure Score', type: 'Number' },
+  { internalName: 'CorrectiveActionScore', displayName: 'Corrective Action Score', type: 'Number' },
+  { internalName: 'DataQualityScore', displayName: 'Data Quality Score', type: 'Number' },
+  { internalName: 'InspectionCountWindow', displayName: 'Inspection Count (Window)', type: 'Number' },
+  { internalName: 'InspectionCountRolling', displayName: 'Inspection Count (Rolling)', type: 'Number' },
+  { internalName: 'AverageInspectionScoreWindow', displayName: 'Average Score (Window)', type: 'Number' },
+  { internalName: 'AverageInspectionScoreRolling', displayName: 'Average Score (Rolling)', type: 'Number' },
+  { internalName: 'InspectionTrendPct', displayName: 'Inspection Trend %', type: 'Number' },
+  {
+    internalName: 'HighestRiskFindingLevel',
+    displayName: 'Highest Risk Level',
+    type: 'Choice',
+    choices: ['info', 'medium', 'high'],
+  },
+  { internalName: 'HighSeverityFindingCount', displayName: 'High Severity Count', type: 'Number' },
+  { internalName: 'MediumSeverityFindingCount', displayName: 'Medium Severity Count', type: 'Number' },
+  { internalName: 'OpenFindingCount', displayName: 'Open Finding Count', type: 'Number' },
+  { internalName: 'AgedOpenFindingCount', displayName: 'Aged Open Finding Count', type: 'Number' },
+  { internalName: 'RepeatFindingCount', displayName: 'Repeat Finding Count', type: 'Number' },
+  {
+    internalName: 'ActivityEvidenceStatus',
+    displayName: 'Activity Evidence Status',
+    type: 'Choice',
+    choices: ['proven', 'inferred', 'missing'],
+  },
+  { internalName: 'ActivityEvidenceJson', displayName: 'Activity Evidence (JSON)', type: 'Note' },
+  { internalName: 'ReasonSummary', displayName: 'Reason Summary', type: 'Note' },
+  { internalName: 'SourceInspectionIdsJson', displayName: 'Source Inspection IDs (JSON)', type: 'Note' },
+  { internalName: 'SourceFindingIdsJson', displayName: 'Source Finding IDs (JSON)', type: 'Note' },
+  {
+    internalName: 'GeneratedAt',
+    displayName: 'Generated At',
+    type: 'DateTime',
+    required: true,
+    indexed: true,
+  },
+  { internalName: 'GeneratorVersion', displayName: 'Generator Version', type: 'Text', required: true },
+  {
+    internalName: 'PublishRecommendation',
+    displayName: 'Publish Recommendation',
+    type: 'Choice',
+    choices: ['primary', 'secondary', 'monitor', 'do-not-publish'],
+  },
+];
+
+export const SAFETY_FIELD_EXCELLENCE_WEEKLY_HIGHLIGHTS_FIELDS: ReadonlyArray<SpFieldDefinition> = [
+  { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+  {
+    internalName: 'ReportingPeriodId',
+    displayName: 'Reporting Period',
+    type: 'Lookup',
+    lookupList: 'Safety Reporting Periods',
+    required: true,
+    indexed: true,
+  },
+  {
+    internalName: 'WeekStartDate',
+    displayName: 'Week Start Date',
+    type: 'DateTime',
+    required: true,
+    indexed: true,
+  },
+  {
+    internalName: 'WeekEndDate',
+    displayName: 'Week End Date',
+    type: 'DateTime',
+    required: true,
+    indexed: true,
+  },
+  { internalName: 'PeriodLabel', displayName: 'Period Label', type: 'Text' },
+  {
+    internalName: 'PublishStatus',
+    displayName: 'Publish Status',
+    type: 'Choice',
+    required: true,
+    choices: ['draft', 'pending-review', 'approved', 'published', 'archived', 'suppressed'],
+    indexed: true,
+  },
+  {
+    internalName: 'PrimaryCandidateId',
+    displayName: 'Primary Candidate',
+    type: 'Lookup',
+    lookupList: 'Safety Field Excellence Candidate Scores',
+  },
+  {
+    internalName: 'SecondaryCandidateIdsJson',
+    displayName: 'Secondary Candidate IDs (JSON)',
+    type: 'Note',
+  },
+  { internalName: 'HomepagePayloadJson', displayName: 'Homepage Payload (JSON)', type: 'Note' },
+  { internalName: 'SourceCandidateIdsJson', displayName: 'Source Candidate IDs (JSON)', type: 'Note' },
+  { internalName: 'SelectionMethodVersion', displayName: 'Selection Method Version', type: 'Text' },
+  {
+    internalName: 'DataConfidence',
+    displayName: 'Data Confidence',
+    type: 'Choice',
+    choices: ['high', 'medium', 'low'],
+  },
+  { internalName: 'DataQualityNotes', displayName: 'Data Quality Notes', type: 'Note' },
+  {
+    internalName: 'EditorialOverrideApplied',
+    displayName: 'Editorial Override Applied',
+    type: 'Boolean',
+  },
+  { internalName: 'OverrideReason', displayName: 'Override Reason', type: 'Note' },
+  { internalName: 'ApprovedBy', displayName: 'Approved By', type: 'User' },
+  { internalName: 'ApprovedAt', displayName: 'Approved At', type: 'DateTime' },
+  { internalName: 'PublishedAt', displayName: 'Published At', type: 'DateTime' },
+  {
+    internalName: 'FreshUntil',
+    displayName: 'Fresh Until',
+    type: 'DateTime',
+    indexed: true,
+  },
+  {
+    internalName: 'RollbackFromItemId',
+    displayName: 'Rollback From Item ID',
+    type: 'Number',
+  },
+];
+
 export const FIELD_SCHEMA_BY_LIST = {
   SafetyReportingPeriods: SAFETY_REPORTING_PERIODS_FIELDS,
   SafetyProjectWeekRecords: SAFETY_PROJECT_WEEK_RECORDS_FIELDS,
   SafetyInspectionEvents: SAFETY_INSPECTION_EVENTS_FIELDS,
   SafetyFindings: SAFETY_FINDINGS_FIELDS,
   SafetyIngestionRuns: SAFETY_INGESTION_RUNS_FIELDS,
+  SafetyFieldExcellenceCandidateScores: SAFETY_FIELD_EXCELLENCE_CANDIDATE_SCORES_FIELDS,
+  SafetyFieldExcellenceWeeklyHighlights: SAFETY_FIELD_EXCELLENCE_WEEKLY_HIGHLIGHTS_FIELDS,
 } as const;

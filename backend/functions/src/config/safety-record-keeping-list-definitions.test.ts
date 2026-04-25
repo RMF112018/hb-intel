@@ -6,6 +6,8 @@ import {
 import {
   HBCENTRAL_SITE_URL,
   SAFETY_SITE_URL,
+  SafetyFieldExcellenceCandidateScoresList,
+  SafetyFieldExcellenceWeeklyHighlightsList,
   SafetyFindingsList,
   SafetyIngestionRunsList,
   SafetyInspectionEventsList,
@@ -34,6 +36,8 @@ describe('SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS drift guard', () => {
     const titles = SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS.map((d) => d.title).sort();
     expect(titles).toEqual([
       'Safety Checklist Uploads',
+      'Safety Field Excellence Candidate Scores',
+      'Safety Field Excellence Weekly Highlights',
       'Safety Findings',
       'Safety Ingestion Runs',
       'Safety Inspection Events',
@@ -66,6 +70,8 @@ describe('SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS drift guard', () => {
       SafetyInspectionEvents: SafetyInspectionEventsList.title,
       SafetyFindings: SafetyFindingsList.title,
       SafetyIngestionRuns: SafetyIngestionRunsList.title,
+      SafetyFieldExcellenceCandidateScores: SafetyFieldExcellenceCandidateScoresList.title,
+      SafetyFieldExcellenceWeeklyHighlights: SafetyFieldExcellenceWeeklyHighlightsList.title,
     } as const;
 
     for (const [key, title] of Object.entries(descriptorTitleByKey)) {
@@ -82,6 +88,8 @@ describe('SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS drift guard', () => {
       SafetyInspectionEvents: FIELD_SCHEMA_BY_LIST.SafetyInspectionEvents,
       SafetyFindings: FIELD_SCHEMA_BY_LIST.SafetyFindings,
       SafetyIngestionRuns: FIELD_SCHEMA_BY_LIST.SafetyIngestionRuns,
+      SafetyFieldExcellenceCandidateScores: FIELD_SCHEMA_BY_LIST.SafetyFieldExcellenceCandidateScores,
+      SafetyFieldExcellenceWeeklyHighlights: FIELD_SCHEMA_BY_LIST.SafetyFieldExcellenceWeeklyHighlights,
     } as const;
 
     for (const [key, sourceFields] of Object.entries(schemaByKey)) {

@@ -121,6 +121,38 @@ export const SafetyIngestionRunsList = descriptor(
   ],
 );
 
+export const SafetyFieldExcellenceCandidateScoresList = descriptor(
+  HBCENTRAL_SITE_URL,
+  'Safety Field Excellence Candidate Scores',
+  'SafetyFieldExcellenceCandidateScores',
+  'Backend-generated weekly safety excellence candidate score records.',
+  [
+    'ReportingPeriodId',
+    'ProjectWeekRecordId',
+    'ProjectNumber',
+    'EligibilityStatus',
+    'CompositeScore',
+    'GeneratedAt',
+    'PublishRecommendation',
+  ],
+);
+
+export const SafetyFieldExcellenceWeeklyHighlightsList = descriptor(
+  HBCENTRAL_SITE_URL,
+  'Safety Field Excellence Weekly Highlights',
+  'SafetyFieldExcellenceWeeklyHighlights',
+  'Approved/published weekly safety field excellence homepage artifact.',
+  [
+    'ReportingPeriodId',
+    'WeekStartDate',
+    'WeekEndDate',
+    'PublishStatus',
+    'PrimaryCandidateId',
+    'PublishedAt',
+    'FreshUntil',
+  ],
+);
+
 // -- Reference source lists (HBCentral) ---------------------------------
 
 export const ProjectsReferenceList = descriptor(
@@ -161,6 +193,8 @@ const DESCRIPTORS_BY_KEY: Readonly<Record<SafetyOverlayKey, SiteScopedListDescri
   SafetyInspectionEvents: SafetyInspectionEventsList,
   SafetyFindings: SafetyFindingsList,
   SafetyIngestionRuns: SafetyIngestionRunsList,
+  SafetyFieldExcellenceCandidateScores: SafetyFieldExcellenceCandidateScoresList,
+  SafetyFieldExcellenceWeeklyHighlights: SafetyFieldExcellenceWeeklyHighlightsList,
   Projects: ProjectsReferenceList,
   LegacyProjectFallbackRegistry: LegacyProjectFallbackRegistryList,
   // SafetyChecklistUploads lives in safetyUploadLibrary.ts; resolved via

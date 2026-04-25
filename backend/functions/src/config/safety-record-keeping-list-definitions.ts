@@ -12,7 +12,9 @@ export interface ISafetyProvisionContainerDefinition {
     | 'SafetyProjectWeekRecords'
     | 'SafetyInspectionEvents'
     | 'SafetyFindings'
-    | 'SafetyIngestionRuns';
+    | 'SafetyIngestionRuns'
+    | 'SafetyFieldExcellenceCandidateScores'
+    | 'SafetyFieldExcellenceWeeklyHighlights';
   readonly title: string;
   readonly siteUrl: string;
   readonly kind: SafetyProvisionContainerKind;
@@ -44,6 +46,7 @@ function toFieldDefinition(field: SpFieldDefinition): IFieldDefinition {
     type: LIST_FIELD_TYPE_MAP[field.type],
     required: field.required,
     choices: field.choices ? [...field.choices] : undefined,
+    indexed: field.indexed,
     lookupListTitle: field.lookupList,
     lookupFieldName: field.lookupList ? 'ID' : undefined,
   };
@@ -111,6 +114,24 @@ export const SAFETY_RECORD_KEEPING_CONTAINER_DEFINITIONS: readonly ISafetyProvis
     template: 100,
     provisioningOrder: 50,
     fields: FIELD_SCHEMA_BY_LIST.SafetyIngestionRuns.map(toFieldDefinition),
+  },
+  {
+    key: 'SafetyFieldExcellenceCandidateScores',
+    title: 'Safety Field Excellence Candidate Scores',
+    siteUrl: HBCENTRAL_SITE_URL,
+    kind: 'list',
+    template: 100,
+    provisioningOrder: 60,
+    fields: FIELD_SCHEMA_BY_LIST.SafetyFieldExcellenceCandidateScores.map(toFieldDefinition),
+  },
+  {
+    key: 'SafetyFieldExcellenceWeeklyHighlights',
+    title: 'Safety Field Excellence Weekly Highlights',
+    siteUrl: HBCENTRAL_SITE_URL,
+    kind: 'list',
+    template: 100,
+    provisioningOrder: 70,
+    fields: FIELD_SCHEMA_BY_LIST.SafetyFieldExcellenceWeeklyHighlights.map(toFieldDefinition),
   },
 ] as const;
 

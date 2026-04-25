@@ -18,6 +18,8 @@ export type SafetyOverlayKey =
   | 'SafetyInspectionEvents'
   | 'SafetyFindings'
   | 'SafetyIngestionRuns'
+  | 'SafetyFieldExcellenceCandidateScores'
+  | 'SafetyFieldExcellenceWeeklyHighlights'
   | 'SafetyChecklistUploads'
   | 'Projects'
   | 'LegacyProjectFallbackRegistry';
