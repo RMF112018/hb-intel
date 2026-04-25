@@ -89,6 +89,26 @@ describe('FoleonContentService query discipline', () => {
     }
   });
 
+  it('adds reader resolution filters only for approved indexed fields', async () => {
+    await fetchFoleonContent({
+      siteUrl: SITE_URL,
+      contentRegistryListId: VALID_CONTENT_GUID,
+      readerKey: 'project-spotlight',
+      activeEditionOnly: true,
+      publishedOnly: true,
+      homepageEligibleOnly: true,
+    });
+    const url = decodeURIComponent(spy.calls[0]);
+    const filterText = url.match(/\$filter=([^&]+)/)?.[1] ?? '';
+    for (const allowed of ['ReaderKey', 'ActiveEdition', 'IsVisible', 'PublishStatus', 'IsHomepageEligible']) {
+      expect(filterText).toContain(allowed);
+    }
+    for (const deferred of ['ContentTypeKey', 'HomepageSlot', 'ArchiveGroup', 'LastEditorialUpdate', 'PublishedOn', 'IssueDate']) {
+      expect(filterText).not.toContain(deferred);
+    }
+    expect(url).not.toContain('$expand=');
+  });
+
   it('rejects a missing GUID before any fetch is issued', async () => {
     await expect(
       fetchFoleonContent({ siteUrl: SITE_URL, contentRegistryListId: '' }),

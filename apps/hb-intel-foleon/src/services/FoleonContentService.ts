@@ -37,6 +37,8 @@ export const FOLEON_CONTENT_REGISTRY_TITLE = 'HB_FoleonContentRegistry' as const
 // live query surface by accident.
 const CONTENT_FILTER_FIELDS = [
   'FoleonDocId',
+  'ReaderKey',
+  'ActiveEdition',
   'IsVisible',
   'PublishStatus',
   'IsHomepageEligible',
@@ -133,6 +135,8 @@ export interface FoleonContentQueryParams {
   readonly siteUrl: string;
   readonly contentRegistryListId: string;
   readonly foleonDocId?: number;
+  readonly readerKey?: FoleonReaderKey;
+  readonly activeEditionOnly?: boolean;
   readonly homepageEligibleOnly?: boolean;
   readonly publishedOnly?: boolean;
   readonly top?: number;
@@ -151,6 +155,12 @@ export async function fetchFoleonContent(
   const filterClauses: string[] = [];
   if (typeof params.foleonDocId === 'number') {
     filterClauses.push(`FoleonDocId eq ${params.foleonDocId}`);
+  }
+  if (params.readerKey) {
+    filterClauses.push(`ReaderKey eq '${escapeODataString(params.readerKey)}'`);
+  }
+  if (params.activeEditionOnly) {
+    filterClauses.push('ActiveEdition eq 1');
   }
   if (params.publishedOnly) {
     filterClauses.push(`IsVisible eq 1`);
@@ -220,6 +230,10 @@ function readHyperlink(value: FoleonContentRawRow['PublishedUrl']): string | und
   if (!value) return undefined;
   if (typeof value === 'string') return value;
   return value.Url ?? undefined;
+}
+
+function escapeODataString(value: string): string {
+  return value.replace(/'/g, "''");
 }
 
 function normalizeContentType(value: string | undefined): FoleonContentType {
