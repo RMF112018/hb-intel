@@ -5,6 +5,8 @@ import type { IFoleonRuntimeContract } from '../runtime/foleonRuntimeContract.js
 import { fetchFoleonContent } from '../services/FoleonContentService.js';
 import { FoleonCard } from '../components/FoleonCard.js';
 import { FoleonEmpty, FoleonError, FoleonLoadingState } from '../components/FoleonStates.js';
+import { FoleonPreviewFallback } from '../components/FoleonPreviewFallback.js';
+import { getFoleonHubPreviewRecords } from '../preview/FoleonPreviewData.js';
 
 interface ContentHubPageProps {
   readonly contract: IFoleonRuntimeContract;
@@ -79,6 +81,8 @@ export function ContentHubPage(props: ContentHubPageProps): React.ReactNode {
       <FoleonLoadingState />
     ) : state.kind === 'error' ? (
       <FoleonError title="Unable to load Foleon archive" description={state.message} />
+    ) : state.records.length === 0 ? (
+      <FoleonPreviewFallback route="hub" records={getFoleonHubPreviewRecords()} />
     ) : filtered.length === 0 ? (
       <FoleonEmpty
         title="No publications match your filters."
@@ -117,7 +121,9 @@ export function ContentHubPage(props: ContentHubPageProps): React.ReactNode {
             value={query}
             onSearch={(next: string): void => {
               setQuery(next);
-              onSearch(next);
+              if (state.kind === 'ready' && state.records.length > 0) {
+                onSearch(next);
+              }
             }}
             placeholder="Search title, summary, project"
           />

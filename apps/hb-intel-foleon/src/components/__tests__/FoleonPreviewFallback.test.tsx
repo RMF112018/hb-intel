@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { FoleonPreviewFallback } from '../FoleonPreviewFallback.js';
-import { getFoleonHighlightsPreviewRecords } from '../../preview/FoleonPreviewData.js';
+import {
+  getFoleonHighlightsPreviewRecords,
+  getFoleonHubPreviewRecords,
+} from '../../preview/FoleonPreviewData.js';
 
 afterEach(() => cleanup());
 
@@ -30,6 +33,32 @@ describe('FoleonPreviewFallback', () => {
   it('does not render live-reader affordances for preview placeholders', () => {
     const { container } = render(
       <FoleonPreviewFallback route="highlights" records={getFoleonHighlightsPreviewRecords()} />,
+    );
+
+    expect(container.querySelector('a')).toBeNull();
+    expect(container.querySelector('iframe')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.queryByText(/^Read$/i)).toBeNull();
+    expect(screen.queryByText(/Open externally/i)).toBeNull();
+  });
+
+  it('renders an archive-specific Hub preview layout', () => {
+    render(<FoleonPreviewFallback route="hub" records={getFoleonHubPreviewRecords()} />);
+
+    expect(screen.getByRole('region', { name: /Preview: All publications/i })).toBeTruthy();
+    expect(screen.getByText(/Preview archive layout/i)).toBeTruthy();
+    expect(screen.getByText(/Filters and search will apply to live publications when connected/i)).toBeTruthy();
+    expect(screen.getByLabelText('Preview archive search and filter cues')).toBeTruthy();
+    expect(screen.getByLabelText('Archive preview publication placeholders')).toBeTruthy();
+    expect(screen.getAllByTestId('foleon-preview-compact-card').length).toBeGreaterThanOrEqual(4);
+    expect(screen.getAllByTestId('foleon-preview-media').length).toBeGreaterThanOrEqual(4);
+    expect(screen.getAllByLabelText('Preview metadata').length).toBeGreaterThanOrEqual(4);
+    expect(screen.getAllByLabelText('Future reader action location').length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('does not render live-reader affordances for Hub archive placeholders', () => {
+    const { container } = render(
+      <FoleonPreviewFallback route="hub" records={getFoleonHubPreviewRecords()} />,
     );
 
     expect(container.querySelector('a')).toBeNull();

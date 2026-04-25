@@ -3,11 +3,15 @@ import { FoleonPreviewCard } from './FoleonPreviewCard.js';
 import styles from './FoleonPreviewFallback.module.css';
 
 interface FoleonPreviewFallbackProps {
-  readonly route: 'highlights';
+  readonly route: 'highlights' | 'hub';
   readonly records: ReadonlyArray<FoleonPreviewRecord>;
 }
 
 export function FoleonPreviewFallback(props: FoleonPreviewFallbackProps): React.ReactNode {
+  if (props.route === 'hub') {
+    return <FoleonHubPreviewFallback records={props.records} />;
+  }
+
   const feature = props.records.find((record) => record.isFeature) ?? props.records[0];
   const compactRecords = props.records.filter((record) => record.id !== feature?.id).slice(0, 3);
 
@@ -36,6 +40,42 @@ export function FoleonPreviewFallback(props: FoleonPreviewFallbackProps): React.
             ))}
           </div>
         ) : null}
+      </div>
+    </section>
+  );
+}
+
+function FoleonHubPreviewFallback(props: { readonly records: ReadonlyArray<FoleonPreviewRecord> }): React.ReactNode {
+  const archiveRecords = props.records.slice(0, 6);
+
+  return (
+    <section className={styles.fallback} aria-labelledby="foleon-preview-hub-title" data-foleon-preview-route="hub">
+      <header className={styles.banner}>
+        <div>
+          <p className={styles.eyebrow}>Preview archive layout</p>
+          <h3 className={styles.title} id="foleon-preview-hub-title">
+            Preview: All publications
+          </h3>
+          <p className={styles.description}>
+            This sample content structure shows how the Foleon archive will organize searchable publications once the
+            registry is populated with live content. Filters and search will apply to live publications when connected.
+          </p>
+        </div>
+        <span className={styles.statusPill}>Content coming soon</span>
+      </header>
+
+      <div className={styles.archiveCues} aria-label="Preview archive search and filter cues">
+        <span className={styles.cueLine}>Search archive</span>
+        <span className={styles.cueChip}>All</span>
+        <span className={styles.cueChip}>Project Highlight</span>
+        <span className={styles.cueChip}>Newsletter</span>
+        <span className={styles.cueChip}>Market Update</span>
+      </div>
+
+      <div className={styles.archiveGrid} aria-label="Archive preview publication placeholders">
+        {archiveRecords.map((record) => (
+          <FoleonPreviewCard key={record.id} record={record} variant="compact" />
+        ))}
       </div>
     </section>
   );
