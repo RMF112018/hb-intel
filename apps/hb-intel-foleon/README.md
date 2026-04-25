@@ -72,7 +72,8 @@ Install target: `/sites/HBCentral`. Full procedure is documented in
 4. Capture each list GUID from
    `_api/web/lists/getbytitle('<list-title>')?$select=Id` and set
    `contentRegistryListId`, `placementsListId`, `eventsListId` on
-   the webpart property pane. Runtime continues to bind by list GUID.
+   the Foleon webpart property pane. Runtime continues to bind by list
+   GUID.
 
 The `sharepoint/assets/` source folder contains `elements.xml` plus
 one `schema-<list>.xml` file per governed list. Alignment with
@@ -94,6 +95,11 @@ The shell passes `IFoleonMountConfig` into `mount()`:
 | `foleonApiBaseUrl` | Optional existing Functions app base URL; same-origin `/api` is used when omitted |
 | `foleonApiResource` | Optional Entra resource/application ID URI for SPFx token acquisition |
 | `expectedManifestId` / `expectedPackageVersion` | Governance proof values |
+
+The package supplies safe non-tenant defaults for origin, preview, and
+governance proof values. Tenant list GUIDs are never hard-coded in the
+manifest; HB Central admins enter them through the property pane after
+installing the package and capturing the provisioned list IDs.
 
 No Foleon API credentials are accepted or used. Direct API access and
 OAuth client-credentials flows are owned exclusively by the Azure

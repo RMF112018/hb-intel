@@ -21,6 +21,13 @@ const OUTPUT_PATH = resolve(REPO_ROOT, 'dist', 'sppkg', 'hb-intel-foleon-package
 
 const EXPECTED_PRODUCT_ID = 'c23635f5-ab4d-44c2-96b5-2a2c90f4afc0';
 const EXPECTED_COMPONENT_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
+const EXPECTED_FOLEON_ORIGINS = 'https://viewer.us.foleon.com';
+const TENANT_LIST_ID_KEYS = [
+  'contentRegistryListId',
+  'placementsListId',
+  'eventsListId',
+  'syncRunsListId',
+] as const;
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -36,6 +43,11 @@ interface ToolboxEntryProof {
   readonly description: string;
   readonly hiddenFromToolbox: boolean | null;
   readonly foleonRoute: string | null;
+  readonly acceptedFoleonOrigins: string | null;
+  readonly allowPreview: boolean | null;
+  readonly expectedManifestId: string | null;
+  readonly expectedPackageVersion: string | null;
+  readonly tenantListIdDefaultKeys: ReadonlyArray<string>;
 }
 
 interface AssetProof {
@@ -125,16 +137,41 @@ function collectToolboxEntries(manifest: any): ToolboxEntryProof[] {
   const entries = Array.isArray(manifest.preconfiguredEntries)
     ? manifest.preconfiguredEntries
     : [];
-  return entries.map((entry: any) => ({
-    title: String(entry?.title?.default ?? ''),
-    description: String(entry?.description?.default ?? ''),
-    hiddenFromToolbox:
-      typeof entry?.hiddenFromToolbox === 'boolean' ? entry.hiddenFromToolbox : null,
-    foleonRoute:
-      typeof entry?.properties?.foleonRoute === 'string'
-        ? entry.properties.foleonRoute
-        : null,
-  }));
+  return entries.map((entry: any) => {
+    const properties =
+      entry?.properties && typeof entry.properties === 'object'
+        ? entry.properties as Record<string, unknown>
+        : {};
+    return {
+      title: String(entry?.title?.default ?? ''),
+      description: String(entry?.description?.default ?? ''),
+      hiddenFromToolbox:
+        typeof entry?.hiddenFromToolbox === 'boolean' ? entry.hiddenFromToolbox : null,
+      foleonRoute:
+        typeof properties.foleonRoute === 'string'
+          ? properties.foleonRoute
+          : null,
+      acceptedFoleonOrigins:
+        typeof properties.acceptedFoleonOrigins === 'string'
+          ? properties.acceptedFoleonOrigins
+          : null,
+      allowPreview:
+        typeof properties.allowPreview === 'boolean'
+          ? properties.allowPreview
+          : null,
+      expectedManifestId:
+        typeof properties.expectedManifestId === 'string'
+          ? properties.expectedManifestId
+          : null,
+      expectedPackageVersion:
+        typeof properties.expectedPackageVersion === 'string'
+          ? properties.expectedPackageVersion
+          : null,
+      tenantListIdDefaultKeys: Object.keys(properties).filter((key) =>
+        TENANT_LIST_ID_KEYS.includes(key as (typeof TENANT_LIST_ID_KEYS)[number]),
+      ),
+    };
+  });
 }
 
 function asArray<T>(value: T | ReadonlyArray<T> | undefined): ReadonlyArray<T> {
@@ -236,6 +273,15 @@ function main(): void {
     : [];
   const customSchemaReferences = packagedListInstances.map((instance) => instance.customSchema).filter(Boolean);
   const byTitle = new Map(entries.map((entry) => [entry.title, entry]));
+  const allEntriesHaveSafeDefaults = entries.every((entry) =>
+    entry.acceptedFoleonOrigins === EXPECTED_FOLEON_ORIGINS &&
+    entry.allowPreview === false &&
+    entry.expectedManifestId === EXPECTED_COMPONENT_ID &&
+    entry.expectedPackageVersion === EXPECTED_VERSION,
+  );
+  const tenantListIdDefaultKeys = entries.flatMap((entry) =>
+    entry.tenantListIdDefaultKeys.map((key) => `${entry.title}.${key}`),
+  );
 
   const checks = [
     check('product ID matches expected Foleon package', productId === EXPECTED_PRODUCT_ID),
@@ -256,6 +302,16 @@ function main(): void {
       'Manager toolbox entry routes to manage and is visible',
       byTitle.get('HB Intel Foleon Manager')?.foleonRoute === 'manage' &&
         byTitle.get('HB Intel Foleon Manager')?.hiddenFromToolbox === false,
+    ),
+    check(
+      'toolbox entries include safe Foleon governance defaults',
+      allEntriesHaveSafeDefaults,
+      entries.map((entry) => `${entry.title}: expectedPackageVersion=${entry.expectedPackageVersion ?? 'missing'}`).join('; '),
+    ),
+    check(
+      'toolbox entries do not hard-code tenant list IDs',
+      tenantListIdDefaultKeys.length === 0,
+      tenantListIdDefaultKeys.join(', '),
     ),
     check('loader asset paths are present', collectLoaderAssetPaths(componentManifest).length > 0),
     check('packaged elements.xml is present', !!packagedAssets['elements.xml']),

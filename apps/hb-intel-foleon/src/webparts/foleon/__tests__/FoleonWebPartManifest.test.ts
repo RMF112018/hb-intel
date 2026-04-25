@@ -8,7 +8,15 @@ interface FoleonManifestEntry {
   readonly description: { readonly default: string };
   readonly hiddenFromToolbox?: boolean;
   readonly properties?: {
+    readonly acceptedFoleonOrigins?: string;
+    readonly allowPreview?: boolean;
+    readonly expectedManifestId?: string;
+    readonly expectedPackageVersion?: string;
     readonly foleonRoute?: string;
+    readonly contentRegistryListId?: string;
+    readonly placementsListId?: string;
+    readonly eventsListId?: string;
+    readonly syncRunsListId?: string;
   };
 }
 
@@ -26,6 +34,12 @@ function loadManifest(): FoleonManifest {
 
 describe('Foleon web part manifest toolbox entries', () => {
   const manifest = loadManifest();
+  const tenantListIdKeys = [
+    'contentRegistryListId',
+    'placementsListId',
+    'eventsListId',
+    'syncRunsListId',
+  ] as const;
 
   it('preserves one route-driven component identity and SharePoint web part host', () => {
     expect(manifest.id).toBe(FOLEON_WEBPART_ID);
@@ -55,5 +69,18 @@ describe('Foleon web part manifest toolbox entries', () => {
     );
     expect(manager?.hiddenFromToolbox).toBe(false);
     expect(manager?.properties?.foleonRoute).toBe('manage');
+  });
+
+  it('provides safe governance defaults without tenant-specific list IDs', () => {
+    for (const entry of manifest.preconfiguredEntries) {
+      expect(entry.properties?.acceptedFoleonOrigins).toBe('https://viewer.us.foleon.com');
+      expect(entry.properties?.allowPreview).toBe(false);
+      expect(entry.properties?.expectedManifestId).toBe(FOLEON_WEBPART_ID);
+      expect(entry.properties?.expectedPackageVersion).toBe(FOLEON_PACKAGE_VERSION);
+
+      for (const key of tenantListIdKeys) {
+        expect(entry.properties?.[key]).toBeUndefined();
+      }
+    }
   });
 });

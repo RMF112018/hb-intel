@@ -20,8 +20,10 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import {
   type IPropertyPaneConfiguration,
   PropertyPaneDropdown,
+  PropertyPaneLabel,
   PropertyPaneTextField,
   PropertyPaneSlider,
+  PropertyPaneToggle,
 } from '@microsoft/sp-property-pane';
 import {
   applyFoleonRuntimeConfigBridge,
@@ -565,6 +567,103 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                     description:
                       'Optional explicit year scope. Leave blank or set 0 to follow the host page Year context.',
                     placeholder: '0',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (webPartId === FOLEON_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'HB Intel Foleon Connector Settings' },
+            groups: [
+              {
+                groupName: 'Required SharePoint lists',
+                groupFields: [
+                  PropertyPaneTextField('contentRegistryListId', {
+                    label: 'Content Registry list ID',
+                    description: 'GUID of HB_FoleonContentRegistry. Required for all hosted routes.',
+                    placeholder: '00000000-0000-0000-0000-000000000000',
+                  }),
+                  PropertyPaneTextField('placementsListId', {
+                    label: 'Homepage Placements list ID',
+                    description: 'GUID of HB_FoleonHomepagePlacements. Required for the Highlights route.',
+                    placeholder: '00000000-0000-0000-0000-000000000000',
+                  }),
+                  PropertyPaneTextField('eventsListId', {
+                    label: 'Interaction Events list ID',
+                    description: 'GUID of HB_FoleonInteractionEvents. Optional, but required for telemetry writes.',
+                    placeholder: '00000000-0000-0000-0000-000000000000',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Foleon governance',
+                groupFields: [
+                  PropertyPaneTextField('acceptedFoleonOrigins', {
+                    label: 'Accepted Foleon origins',
+                    description:
+                      'One origin per line or comma-separated. The runtime bridge normalizes this into the governed origin allowlist.',
+                    multiline: true,
+                    placeholder: 'https://viewer.us.foleon.com',
+                  }),
+                  PropertyPaneToggle('allowPreview', {
+                    label: 'Allow preview URLs',
+                    onText: 'Preview URLs allowed',
+                    offText: 'Production viewer URLs only',
+                  }),
+                  PropertyPaneTextField('expectedManifestId', {
+                    label: 'Expected manifest ID',
+                    description: 'Governance proof value. Leave as the packaged Foleon webpart ID unless directed.',
+                    placeholder: FOLEON_WEBPART_ID,
+                  }),
+                  PropertyPaneTextField('expectedPackageVersion', {
+                    label: 'Expected package version',
+                    description: 'Governance proof value for the deployed Foleon package.',
+                    placeholder: '1.0.15.0',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Advanced route and backend',
+                groupFields: [
+                  PropertyPaneLabel('foleonRouteGuidance', {
+                    text:
+                      'The toolbox entry normally sets the Foleon route. Change it only to repair a stale page instance or intentionally customize a page.',
+                  }),
+                  PropertyPaneDropdown('foleonRoute', {
+                    label: 'Foleon route',
+                    options: [
+                      { key: 'highlights', text: 'highlights' },
+                      { key: 'manage', text: 'manage' },
+                      { key: 'hub', text: 'hub' },
+                      { key: 'reader', text: 'reader' },
+                    ],
+                    selectedKey: this.properties.foleonRoute ?? 'highlights',
+                  }),
+                  PropertyPaneTextField('foleonDocId', {
+                    label: 'Pinned Foleon document ID',
+                    description: 'Optional. Used when a reader-route page is pinned to one Foleon document.',
+                  }),
+                  PropertyPaneTextField('foleonReaderRoutePath', {
+                    label: 'Reader route path',
+                    description: 'Optional SitePage path that hosts the reader route.',
+                    placeholder: '/sites/HBCentral/SitePages/Foleon-Reader.aspx',
+                  }),
+                  PropertyPaneTextField('foleonApiBaseUrl', {
+                    label: 'Foleon API base URL',
+                    description: 'Optional existing HB Intel Functions base URL. Omit for same-origin /api.',
+                    placeholder: 'https://<functions-app>.azurewebsites.net/api',
+                  }),
+                  PropertyPaneTextField('foleonApiResource', {
+                    label: 'Foleon API resource',
+                    description: 'Optional Entra resource/application ID URI for SPFx token acquisition.',
+                    placeholder: 'api://<application-id-or-uri>',
                   }),
                 ],
               },

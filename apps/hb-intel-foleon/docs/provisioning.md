@@ -66,7 +66,7 @@ lists in install order.
    This package cannot be tenant-wide-deployed. Tenant-wide
    deployment of a `.sppkg` containing SharePoint assets is
    unsupported and the feature framework will be silently ignored.
-5. Confirm the App Catalog lists the package with version `1.0.14.0`.
+5. Confirm the App Catalog lists the package with version `1.0.15.0`.
 
 ## 5. Install on `/sites/HBCentral`
 
@@ -103,23 +103,36 @@ https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists/getbyti
 
 Record the four GUIDs. They are required for webpart configuration.
 
-## 7. Wire GUIDs into the webpart mount config
+## 7. Wire GUIDs into the webpart property pane
 
 Add the Foleon webpart to a page on HBCentral and open the property
-pane. Set:
+pane. Set the list bindings:
 
 - `contentRegistryListId` → GUID from `HB_FoleonContentRegistry`.
 - `placementsListId` → GUID from `HB_FoleonHomepagePlacements`.
 - `eventsListId` → GUID from `HB_FoleonInteractionEvents`.
+
+Set or confirm the governed defaults:
+
 - `acceptedFoleonOrigins` → at minimum `https://viewer.us.foleon.com`
-  plus any custom publisher subdomain.
+  plus any custom publisher subdomain, one origin per line or
+  comma-separated.
 - `allowPreview` → leave `false` for production.
+- `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
+- `expectedPackageVersion` → `1.0.15.0`.
+
+The toolbox entry normally sets `foleonRoute`. Use the advanced route
+dropdown only to repair a stale page instance or to intentionally pin a
+custom page to `highlights`, `manage`, `hub`, or `reader`.
+
+Optional runtime fields:
+
+- `foleonDocId` → Foleon document ID for pinned reader-route pages.
+- `foleonReaderRoutePath` → SitePage path that hosts the reader route.
 - `foleonApiBaseUrl` → existing HB Intel Functions app base URL, or
   omit only when the page is served from the same origin as `/api`.
 - `foleonApiResource` → Entra resource/application ID URI used by SPFx
   to acquire backend access tokens.
-- `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
-- `expectedPackageVersion` → `1.0.14.0`.
 
 `HB_FoleonSyncRuns` is written by the backend sync and validation
 routes. Operators review the newest run proof in the connector's
@@ -161,7 +174,7 @@ window.__hbIntel_foleonRuntimeBindingProof
 
 Expected:
 
-- `packageVersion === '1.0.14.0'`.
+- `packageVersion === '1.0.15.0'`.
 - `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
 - `hostMode === 'sharepoint'`.
 - `canInitialize === true`.
