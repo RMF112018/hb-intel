@@ -15,6 +15,7 @@ import type {
   FoleonContentSummaryDto,
   FoleonPlacementDto,
   FoleonPlacementMutationRequest,
+  FoleonReaderKey,
   FoleonSyncRunDto,
   FoleonSyncStatusDto,
   FoleonValidationResult,
@@ -846,6 +847,15 @@ export function validateContentMutation(
   if (input.openMode === 'New Tab Only' && input.allowEmbed) {
     warnings.push('New Tab Only content should not depend on iframe embed.');
   }
+  if (input.activeEdition && !isPublicReadyContentInput(input)) {
+    warnings.push('Active reader editions should be published, visible, homepage eligible, and have a reader URL.');
+  }
+  if (input.readerKey === 'company-pulse' && !input.lastEditorialUpdate) {
+    warnings.push('Company Pulse active editions should include Last Editorial Update.');
+  }
+  if (input.readerKey === 'project-spotlight' && !input.archiveGroup?.trim()) {
+    warnings.push('Project Spotlight active editions should include Archive Group.');
+  }
   if (input.displayFrom && input.displayThrough) {
     const from = Date.parse(input.displayFrom);
     const through = Date.parse(input.displayThrough);
@@ -871,6 +881,7 @@ function validatePlacementMutation(
   correlationId: string,
 ): FoleonValidationResult {
   const blockingReasons: string[] = [];
+  const warnings: string[] = [];
   if (!input.title.trim()) blockingReasons.push('Placement title is required.');
   if (input.isActive && (content.publishStatus !== 'Published' || !content.isVisible)) {
     blockingReasons.push('Active placement requires published, visible content.');
@@ -885,10 +896,14 @@ function validatePlacementMutation(
       blockingReasons.push('Placement Display Through must be after Display From.');
     }
   }
+  const placementLane = readerLaneForPlacementKey(input.placementKey);
+  if (placementLane && readerLaneForContent(content) !== placementLane) {
+    warnings.push(`${input.placementKey} should point to ${readerLaneLabel(placementLane)} content.`);
+  }
   return {
-    status: blockingReasons.length > 0 ? 'blocked' : 'valid',
+    status: blockingReasons.length > 0 ? 'blocked' : warnings.length > 0 ? 'warning' : 'valid',
     blockingReasons,
-    warnings: [],
+    warnings,
     normalizedFields: {
       ContentLookupId: input.contentItemId,
       ContentIdCache: content.foleonDocId,
@@ -896,6 +911,35 @@ function validatePlacementMutation(
     checkedAtUtc: new Date().toISOString(),
     correlationId,
   };
+}
+
+function isPublicReadyContentInput(input: FoleonContentMutationRequest): boolean {
+  return (
+    input.publishStatus === 'Published' &&
+    input.isVisible &&
+    input.isHomepageEligible === true &&
+    (Boolean(input.publishedUrl) || Boolean(input.embedUrl))
+  );
+}
+
+function readerLaneForPlacementKey(placementKey: FoleonPlacementDto['placementKey']): FoleonReaderKey | null {
+  if (placementKey === 'Project Spotlight Active') return 'project-spotlight';
+  if (placementKey === 'Company Pulse Active') return 'company-pulse';
+  return null;
+}
+
+function readerLaneForContent(content: FoleonContentDetailDto): FoleonReaderKey | null {
+  if (content.readerKey === 'project-spotlight' || content.contentTypeKey === 'Project Spotlight') {
+    return 'project-spotlight';
+  }
+  if (content.readerKey === 'company-pulse' || content.contentTypeKey === 'Company Pulse') {
+    return 'company-pulse';
+  }
+  return null;
+}
+
+function readerLaneLabel(lane: FoleonReaderKey): string {
+  return lane === 'project-spotlight' ? 'Project Spotlight' : 'Company Pulse';
 }
 
 function validateHttpsUrl(value: string | undefined, label: string, blockingReasons: string[]): void {

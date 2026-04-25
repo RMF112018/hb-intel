@@ -37,6 +37,7 @@ export function ManageMetricCards(props: {
   readonly published: number;
   readonly blocked: number;
   readonly activePlacements: number;
+  readonly laneWarnings: number;
   readonly syncHealth: string;
 }): React.ReactNode {
   return (
@@ -45,7 +46,8 @@ export function ManageMetricCards(props: {
         <Metric label="Published" value={props.published} tone="green" />
         <Metric label="Blocked" value={props.blocked} tone="red" />
         <Metric label="Active placements" value={props.activePlacements} tone="blue" />
-        <Metric label="Sync health" value={props.syncHealth} tone="gold" />
+        <Metric label="Lane warnings" value={props.laneWarnings} tone="gold" />
+        <Metric label="Sync health" value={props.syncHealth} tone="blue" />
       </div>
       <Separator.Root
         style={{ marginTop: 14, background: 'var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12))' }}

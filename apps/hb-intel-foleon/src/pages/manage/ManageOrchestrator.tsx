@@ -16,6 +16,7 @@ import { ManagePreviewGuidancePanel } from './ManagePreviewGuidancePanel.js';
 import { ManageRegistryPanel } from './ManageRegistryPanel.js';
 import { ManageShellHeader } from './ManageShellHeader.js';
 import { ManageSyncPanel } from './ManageSyncPanel.js';
+import { buildReaderLaneWarnings, toContentMutation } from './manageMutationUtils.js';
 import { runFoleonSync } from './manageWorkflows.js';
 import { useManageBreakpoint } from './useManageBreakpoint.js';
 import './foleonManageTokens.css';
@@ -125,6 +126,12 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   ).length;
   const blocked = state.content.filter((record) => record.validationStatus === 'blocked').length;
   const activePlacements = state.placements.filter((placement) => placement.isActive).length;
+  const laneWarningCount = state.content.reduce((count, record) => count + buildReaderLaneWarnings({
+    draft: toContentMutation(record),
+    record,
+    allContent: state.content,
+    placements: state.placements,
+  }).length, 0);
   const shouldShowPreviewGuidance = state.content.length === 0 || published === 0 || homepageReady === 0;
 
   return (
@@ -163,6 +170,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
               published={published}
               blocked={blocked}
               activePlacements={activePlacements}
+              laneWarnings={laneWarningCount}
               syncHealth={state.syncStatus?.health ?? 'unknown'}
             />
             {shouldShowPreviewGuidance ? (
@@ -172,7 +180,14 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
               />
             ) : null}
             {selected ? (
-              <ManageContentEditorPanel record={selected} api={api} onRefresh={load} setMessage={setMessage} />
+              <ManageContentEditorPanel
+                record={selected}
+                allContent={state.content}
+                placements={state.placements}
+                api={api}
+                onRefresh={load}
+                setMessage={setMessage}
+              />
             ) : (
               <FoleonEmpty title="No registry records yet." description="Create a draft or sync Foleon Docs." />
             )}

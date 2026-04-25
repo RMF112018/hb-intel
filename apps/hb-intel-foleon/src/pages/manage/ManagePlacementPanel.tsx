@@ -8,6 +8,7 @@ import type {
   FoleonPlacementMutation,
 } from '../../types/foleon-management.types.js';
 import { ManageCheckbox, ManageSelectField, ManageTextField } from './ManageFieldPrimitives.js';
+import { placementAlignmentWarnings } from './manageMutationUtils.js';
 import f from './manageFields.module.css';
 
 function ValidationList(props: { readonly reasons: ReadonlyArray<string> }): React.ReactNode {
@@ -46,6 +47,12 @@ export function ManagePlacementPanel(props: {
     }
   }, [draft.contentItemId, firstContent]);
 
+  const draftWarnings = placementAlignmentWarnings({
+    placementKey: draft.placementKey,
+    contentItemId: draft.contentItemId,
+    content: props.content,
+  });
+
   const create = async (): Promise<void> => {
     await props.api.createPlacement(draft);
     props.setMessage('Homepage placement saved with backend ContentIdCache validation.');
@@ -69,7 +76,15 @@ export function ManagePlacementPanel(props: {
           id="pl-key"
           label="Placement"
           value={draft.placementKey}
-          options={['Hero', 'Primary Card', 'Secondary Card', 'Carousel', 'Archive Rail']}
+          options={[
+            'Hero',
+            'Primary Card',
+            'Secondary Card',
+            'Carousel',
+            'Archive Rail',
+            'Project Spotlight Active',
+            'Company Pulse Active',
+          ]}
           onChange={(placementKey): void =>
             setDraft({ ...draft, placementKey: placementKey as FoleonPlacementMutation['placementKey'] })
           }
@@ -104,16 +119,28 @@ export function ManagePlacementPanel(props: {
           Create placement
         </HbcButton>
       </div>
+      {draftWarnings.length > 0 ? (
+        <div role="status" aria-label="Placement lane guidance">
+          <ValidationList reasons={draftWarnings} />
+        </div>
+      ) : null}
       <div style={{ display: 'grid', gap: 10, marginTop: 14 }}>
-        {props.placements.map((placement) => (
-          <article key={placement.id} className={f.placementCard}>
-            <strong>{placement.title}</strong>
-            <div className={f.metaMuted}>
-              {placement.placementKey} • Doc {placement.foleonDocId} • Rank {placement.sortRank}
-            </div>
-            <ValidationList reasons={placement.blockingReasons} />
-          </article>
-        ))}
+        {props.placements.map((placement) => {
+          const alignmentWarnings = placementAlignmentWarnings({
+            placementKey: placement.placementKey,
+            contentItemId: placement.contentItemId,
+            content: props.content,
+          });
+          return (
+            <article key={placement.id} className={f.placementCard}>
+              <strong>{placement.title}</strong>
+              <div className={f.metaMuted}>
+                {placement.placementKey} • Doc {placement.foleonDocId} • Rank {placement.sortRank}
+              </div>
+              <ValidationList reasons={[...placement.blockingReasons, ...alignmentWarnings]} />
+            </article>
+          );
+        })}
       </div>
     </section>
   );

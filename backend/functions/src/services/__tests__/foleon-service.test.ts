@@ -94,6 +94,58 @@ describe('Foleon service validation', () => {
     });
   });
 
+  it('warns when active reader lane content is not public-ready', () => {
+    const result = validateContentMutation({
+      title: 'Company Pulse',
+      foleonDocId: 5001,
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      activeEdition: true,
+      publishStatus: 'Draft',
+      isVisible: false,
+      isHomepageEligible: true,
+      openMode: 'Inline Reader',
+      allowEmbed: true,
+      publishedUrl: 'https://viewer.us.foleon.com/company/pulse',
+    }, 'corr-test');
+
+    expect(result.status).toBe('warning');
+    expect(result.warnings).toContain(
+      'Active reader editions should be published, visible, homepage eligible, and have a reader URL.',
+    );
+    expect(result.warnings).toContain(
+      'Company Pulse active editions should include Last Editorial Update.',
+    );
+  });
+
+  it('warns for reader placement lane mismatches', async () => {
+    const service = new MockFoleonService();
+    const content = await service.createContent({
+      title: 'Company Pulse',
+      foleonDocId: 5002,
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      publishStatus: 'Published',
+      isVisible: true,
+      isHomepageEligible: true,
+      openMode: 'Inline Reader',
+      allowEmbed: true,
+      publishedUrl: 'https://viewer.us.foleon.com/company/pulse',
+    }, 'corr-test');
+
+    const placement = await service.createPlacement({
+      title: 'Project Spotlight active reader',
+      placementKey: 'Project Spotlight Active',
+      contentItemId: Number(content.id),
+      isActive: true,
+      sortRank: 1,
+      layoutVariant: 'Large Feature',
+    }, 'corr-test');
+
+    expect(placement.validationStatus).toBe('warning');
+    expect(placement.blockingReasons).toEqual([]);
+  });
+
   it('writes ContentIdCache from the selected content FoleonDocId', async () => {
     const service = new MockFoleonService();
     const placement = await service.createPlacement({

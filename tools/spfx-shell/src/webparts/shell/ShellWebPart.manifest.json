@@ -29,7 +29,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.18.0",
+        "expectedPackageVersion": "1.0.19.0",
         "foleonRoute": "highlights"
       }
     },
@@ -50,7 +50,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.18.0",
+        "expectedPackageVersion": "1.0.19.0",
         "foleonRoute": "projectSpotlight"
       }
     },
@@ -71,7 +71,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.18.0",
+        "expectedPackageVersion": "1.0.19.0",
         "foleonRoute": "companyPulse"
       }
     },
@@ -92,7 +92,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.18.0",
+        "expectedPackageVersion": "1.0.19.0",
         "foleonRoute": "manage"
       }
     }

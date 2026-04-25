@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ManagePage } from '../ManagePage.js';
 import { createFoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
-import type { FoleonManagedContent } from '../../types/foleon-management.types.js';
+import type { FoleonManagedContent, FoleonPlacement } from '../../types/foleon-management.types.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from '../../webparts/foleon/runtimeContract.js';
 
 function mockContract(overrides: Partial<IFoleonRuntimeContract> = {}): IFoleonRuntimeContract {
@@ -34,6 +34,7 @@ function mockContract(overrides: Partial<IFoleonRuntimeContract> = {}): IFoleonR
 
 function installManageFetchMock(args: {
   readonly content?: ReadonlyArray<FoleonManagedContent>;
+  readonly placements?: ReadonlyArray<FoleonPlacement>;
   readonly status?: number;
   readonly message?: string;
 } = {}): void {
@@ -54,6 +55,9 @@ function installManageFetchMock(args: {
     const ok = { ok: true as const, status: 200 };
     if (url.includes('/foleon/content')) {
       return { ...ok, json: async () => ({ data: args.content ?? [] }) } as Response;
+    }
+    if (url.includes('/foleon/placements')) {
+      return { ...ok, json: async () => ({ data: args.placements ?? [] }) } as Response;
     }
     if (url.includes('/foleon/sync/status')) {
       return {
@@ -158,6 +162,111 @@ describe('ManagePage', () => {
     expect(guidance.textContent).not.toContain('Sync Docs');
     expect(guidance.textContent).not.toContain('Create placement');
     expect(guidance.textContent).not.toContain('Read');
+  });
+
+  it('loads and saves reader lane fields without silent field loss', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    installManageFetchMock({
+      content: [managedContent({
+        contentTypeKey: 'Company Pulse',
+        readerKey: 'company-pulse',
+        cadence: 'Frequent',
+        homepageSlot: 'Company Pulse Reader',
+        archiveGroup: '2026-Q2',
+        activeEdition: true,
+        primaryAudience: 'Operations',
+        lastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+      })],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    expect(await screen.findByDisplayValue('company-pulse')).toBeTruthy();
+    expect(screen.getByDisplayValue('Frequent')).toBeTruthy();
+    expect(screen.getByDisplayValue('Company Pulse Reader')).toBeTruthy();
+    expect(screen.getByDisplayValue('2026-Q2')).toBeTruthy();
+    expect(screen.getByDisplayValue('Operations')).toBeTruthy();
+    expect(screen.getByDisplayValue('2026-04-25T12:00:00.000Z')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+
+    await waitFor(() => {
+      const patch = fetchSpy.mock.calls.find((call) => String(call[0]).includes('/foleon/content/content-1') && (call[1] as RequestInit | undefined)?.method === 'PATCH');
+      expect(patch).toBeTruthy();
+      const body = JSON.parse(String((patch?.[1] as RequestInit).body));
+      expect(body).toMatchObject({
+        contentTypeKey: 'Company Pulse',
+        readerKey: 'company-pulse',
+        cadence: 'Frequent',
+        homepageSlot: 'Company Pulse Reader',
+        archiveGroup: '2026-Q2',
+        activeEdition: true,
+        primaryAudience: 'Operations',
+        lastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+      });
+    });
+  });
+
+  it('applies reader presets to local draft only until Save', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    installManageFetchMock({ content: [managedContent({ publishStatus: 'Draft' })] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Configure as Project Spotlight' }));
+
+    expect(screen.getByDisplayValue('Project Spotlight')).toBeTruthy();
+    expect(screen.getByDisplayValue('project-spotlight')).toBeTruthy();
+    expect(screen.getByDisplayValue('Monthly')).toBeTruthy();
+    expect(screen.getByDisplayValue('Project Spotlight Reader')).toBeTruthy();
+    expect(fetchSpy.mock.calls.some((call) => (call[1] as RequestInit | undefined)?.method === 'PATCH')).toBe(false);
+  });
+
+  it('shows reader lane governance warnings', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: true,
+          publishStatus: 'Draft',
+          archiveGroup: '',
+        }),
+        managedContent({
+          id: 'content-2',
+          sharePointItemId: 2,
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: true,
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    expect(await screen.findByText('More than one active Project Spotlight edition is configured.')).toBeTruthy();
+    expect(screen.getByText('Active reader editions should be published, visible, homepage eligible, and have a reader URL.')).toBeTruthy();
+    expect(screen.getByText('Project Spotlight active editions should include Archive Group.')).toBeTruthy();
+  });
+
+  it('shows placement lane alignment warnings for mismatched content', async () => {
+    installManageFetchMock({
+      content: [managedContent({
+        contentTypeKey: 'Company Pulse',
+        readerKey: 'company-pulse',
+        publishStatus: 'Draft',
+        isVisible: false,
+      })],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.change(await screen.findByLabelText('Placement'), {
+      target: { value: 'Project Spotlight Active' },
+    });
+
+    expect(screen.getByText('Project Spotlight Active should point to Project Spotlight content.')).toBeTruthy();
+    expect(screen.getByText('Project Spotlight Active points to content that is not public-ready.')).toBeTruthy();
   });
 });
 

@@ -4,7 +4,15 @@ import { cva } from 'class-variance-authority';
 import { Save } from 'lucide-react';
 import type { FoleonManagementApi } from '../../services/FoleonManagementApi.js';
 import { FoleonManagementApiError } from '../../services/FoleonManagementApi.js';
-import type { FoleonContentMutation, FoleonManagedContent } from '../../types/foleon-management.types.js';
+import type {
+  FoleonCadence,
+  FoleonContentMutation,
+  FoleonHomepageSlot,
+  FoleonManagedContent,
+  FoleonPrimaryAudience,
+  FoleonReaderKey,
+  FoleonPlacement,
+} from '../../types/foleon-management.types.js';
 import {
   ManageCheckbox,
   ManageFieldLabel,
@@ -12,7 +20,12 @@ import {
   ManageTextField,
 } from './ManageFieldPrimitives.js';
 import { runContentPublish, runContentSuppress, runContentValidate } from './manageWorkflows.js';
-import { contentMutationFingerprint, toContentMutation } from './manageMutationUtils.js';
+import {
+  applyReaderLanePreset,
+  buildReaderLaneWarnings,
+  contentMutationFingerprint,
+  toContentMutation,
+} from './manageMutationUtils.js';
 import f from './manageFields.module.css';
 
 const statusPill = cva(f.statusPill, {
@@ -42,6 +55,8 @@ function ValidationList(props: { readonly reasons: ReadonlyArray<string> }): Rea
 
 export function ManageContentEditorPanel(props: {
   readonly record: FoleonManagedContent;
+  readonly allContent: ReadonlyArray<FoleonManagedContent>;
+  readonly placements: ReadonlyArray<FoleonPlacement>;
   readonly api: FoleonManagementApi;
   readonly onRefresh: () => Promise<void>;
   readonly setMessage: (message: string | null) => void;
@@ -54,6 +69,15 @@ export function ManageContentEditorPanel(props: {
     [props.record],
   );
   const dirty = contentMutationFingerprint(draft) !== baselineFingerprint;
+  const laneWarnings = useMemo(
+    () => buildReaderLaneWarnings({
+      draft,
+      record: props.record,
+      allContent: props.allContent,
+      placements: props.placements,
+    }),
+    [draft, props.record, props.allContent, props.placements],
+  );
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent): void => {
@@ -94,12 +118,81 @@ export function ManageContentEditorPanel(props: {
       </div>
       <div className={f.gridFields}>
         <ManageTextField id="foleon-title" label="Title" value={draft.title} onChange={(title): void => setDraft({ ...draft, title })} />
+        <ManageSelectField
+          id="foleon-content-type"
+          label="Content type"
+          value={draft.contentTypeKey}
+          options={[
+            'Project Highlight',
+            'Newsletter',
+            'Company News',
+            'Market Update',
+            'Leadership',
+            'Other',
+            'Project Spotlight',
+            'Company Pulse',
+          ]}
+          onChange={(contentTypeKey): void => setDraft({ ...draft, contentTypeKey })}
+        />
         <ManageTextField
           id="foleon-docid"
           label="Foleon Doc ID"
           helpText="Positive integer matching the Foleon document identifier in the governed registry."
           value={String(draft.foleonDocId)}
           onChange={(value): void => setDraft({ ...draft, foleonDocId: Number.parseInt(value, 10) || 0 })}
+        />
+        <ManageSelectField
+          id="foleon-reader-key"
+          label="Reader key"
+          helpText="Lane key used by the Project Spotlight and Company Pulse public reader resolvers."
+          value={draft.readerKey ?? ''}
+          options={['', 'project-spotlight', 'company-pulse']}
+          onChange={(readerKey): void =>
+            setDraft({ ...draft, readerKey: readerKey ? readerKey as FoleonReaderKey : undefined })
+          }
+        />
+        <ManageSelectField
+          id="foleon-cadence"
+          label="Cadence"
+          value={draft.cadence ?? ''}
+          options={['', 'Monthly', 'Weekly', 'Frequent', 'Ad Hoc']}
+          onChange={(cadence): void =>
+            setDraft({ ...draft, cadence: cadence ? cadence as FoleonCadence : undefined })
+          }
+        />
+        <ManageSelectField
+          id="foleon-homepage-slot"
+          label="Homepage slot"
+          value={draft.homepageSlot ?? ''}
+          options={['', 'Project Spotlight Reader', 'Company Pulse Reader']}
+          onChange={(homepageSlot): void =>
+            setDraft({ ...draft, homepageSlot: homepageSlot ? homepageSlot as FoleonHomepageSlot : undefined })
+          }
+        />
+        <ManageTextField
+          id="foleon-archive-group"
+          label="Archive group"
+          value={draft.archiveGroup ?? ''}
+          onChange={(archiveGroup): void => setDraft({ ...draft, archiveGroup })}
+        />
+        <ManageSelectField
+          id="foleon-primary-audience"
+          label="Primary audience"
+          value={draft.primaryAudience ?? ''}
+          options={['', 'Companywide', 'Operations', 'Field', 'Leadership', 'Marketing', 'Safety', 'IT']}
+          onChange={(primaryAudience): void =>
+            setDraft({
+              ...draft,
+              primaryAudience: primaryAudience ? primaryAudience as FoleonPrimaryAudience : undefined,
+            })
+          }
+        />
+        <ManageTextField
+          id="foleon-last-editorial-update"
+          label="Last editorial update"
+          helpText="Use an ISO date or datetime. Company Pulse readers use this as the latest update label."
+          value={draft.lastEditorialUpdate ?? ''}
+          onChange={(lastEditorialUpdate): void => setDraft({ ...draft, lastEditorialUpdate })}
         />
         <ManageSelectField
           id="foleon-status"
@@ -154,6 +247,12 @@ export function ManageContentEditorPanel(props: {
       </div>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', margin: '14px 0' }}>
         <ManageCheckbox
+          id="foleon-active-edition"
+          label="Active reader edition"
+          checked={draft.activeEdition === true}
+          onChange={(activeEdition): void => setDraft({ ...draft, activeEdition })}
+        />
+        <ManageCheckbox
           id="foleon-visible"
           label="Visible"
           checked={draft.isVisible}
@@ -178,6 +277,25 @@ export function ManageContentEditorPanel(props: {
           onChange={(requiresExternalOpen): void => setDraft({ ...draft, requiresExternalOpen })}
         />
       </div>
+      <div className={f.flexToolbar} aria-label="Reader lane presets">
+        <HbcButton
+          variant="secondary"
+          onClick={(): void => setDraft((current) => applyReaderLanePreset(current, 'project-spotlight'))}
+        >
+          Configure as Project Spotlight
+        </HbcButton>
+        <HbcButton
+          variant="secondary"
+          onClick={(): void => setDraft((current) => applyReaderLanePreset(current, 'company-pulse'))}
+        >
+          Configure as Company Pulse
+        </HbcButton>
+      </div>
+      {laneWarnings.length > 0 ? (
+        <div role="status" aria-label="Reader lane guidance">
+          <ValidationList reasons={laneWarnings} />
+        </div>
+      ) : null}
       <ValidationList reasons={props.record.blockingReasons} />
       <div className={f.flexToolbar}>
         <HbcButton variant="primary" onClick={(): void => void save()}>
