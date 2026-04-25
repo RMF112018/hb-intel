@@ -50,7 +50,7 @@ describe('App runtime contract gate', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -92,7 +92,7 @@ describe('App runtime contract gate', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
     });
@@ -100,7 +100,7 @@ describe('App runtime contract gate', () => {
     render(<App spfxContext={{}} runtimeContract={runtimeContract} />);
     expect(
       screen.getByText(
-        'Shell-hosted Safety runtime is disabled until equivalent backend binding and approval guarantees are established.',
+        'Shell-hosted Safety must declare the hosting webpart manifest ID.',
       ),
     ).toBeInTheDocument();
   });

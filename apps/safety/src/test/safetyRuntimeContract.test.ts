@@ -52,7 +52,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -68,7 +68,7 @@ describe('resolveSafetyRuntimeContract', () => {
     expect(contract.blockingReasons).toEqual([]);
   });
 
-  it('fails closed when Safety is hosted by shell webpart', () => {
+  it('fails closed when shell-hosted Safety omits the hosting webpart manifest ID', () => {
     configureSafetyListGuids(COMPLETE_HOSTED_OVERLAY);
 
     const contract = resolveSafetyRuntimeContract({
@@ -79,7 +79,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -87,8 +87,63 @@ describe('resolveSafetyRuntimeContract', () => {
 
     expect(contract.canInitializeCommands).toBe(false);
     expect(contract.blockingReasons).toContain(
-      'Shell-hosted Safety runtime is disabled until equivalent backend binding and approval guarantees are established.',
+      'Shell-hosted Safety must declare the hosting webpart manifest ID.',
     );
+    expect(contract.governed.webPartIdPresent).toBe(false);
+    expect(contract.governed.webPartIdMatchesManifest).toBe(false);
+  });
+
+  it('fails closed when shell-hosted Safety declares a mismatched webPartId', () => {
+    configureSafetyListGuids(COMPLETE_HOSTED_OVERLAY);
+
+    const contract = resolveSafetyRuntimeContract({
+      hasSpfxContext: true,
+      hostSource: 'shell-webpart',
+      config: {
+        functionAppUrl: 'https://functions.example.com/',
+        apiAudience: 'api://safety-functions',
+        acceptedBackendOrigin: 'https://functions.example.com',
+        expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+        expectedPackageVersion: '1.2.42.0',
+        expectedApiAudience: 'api://safety-functions',
+        expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+        webPartId: '00000000-0000-0000-0000-000000000000',
+      },
+    });
+
+    expect(contract.canInitializeCommands).toBe(false);
+    expect(contract.blockingReasons).toContain(
+      'Shell-hosted Safety webPartId does not match Safety webpart authority.',
+    );
+    expect(contract.governed.webPartIdPresent).toBe(true);
+    expect(contract.governed.webPartIdMatchesManifest).toBe(false);
+  });
+
+  it('passes shell-hosted Safety with matching webPartId and complete governance', () => {
+    configureSafetyListGuids(COMPLETE_HOSTED_OVERLAY);
+
+    const fnUrl = 'https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net';
+    const audience = 'api://08c399eb-a394-4087-b859-659d493f8dc7';
+    const contract = resolveSafetyRuntimeContract({
+      hasSpfxContext: true,
+      hostSource: 'shell-webpart',
+      config: {
+        functionAppUrl: fnUrl,
+        apiAudience: audience,
+        acceptedBackendOrigin: fnUrl,
+        expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+        expectedPackageVersion: '1.2.42.0',
+        expectedApiAudience: audience,
+        expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+        webPartId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+      },
+    });
+
+    expect(contract.canInitializeCommands).toBe(true);
+    expect(contract.blockingReasons).toEqual([]);
+    expect(contract.governed.webPartIdPresent).toBe(true);
+    expect(contract.governed.webPartIdMatchesManifest).toBe(true);
+    expect(contract.governed.webPartId).toBe('ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e');
   });
 
   it('fails closed when backend URL origin does not match accepted backend origin', () => {
@@ -100,7 +155,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://other-functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -142,7 +197,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://operator-typo',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -166,7 +221,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -188,7 +243,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedHostedGuidOverlayFingerprint: 'fnv1a32:deadbeef',
       },
     });
@@ -210,7 +265,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: audience,
         acceptedBackendOrigin: fnUrl,
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.41.0',
+        expectedPackageVersion: '1.2.42.0',
         expectedApiAudience: audience,
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -222,7 +277,7 @@ describe('resolveSafetyRuntimeContract', () => {
     expect(contract.backend.apiAudience).toBe(audience);
     expect(contract.governed.acceptedBackendOrigin).toBe(fnUrl);
     expect(contract.governed.expectedManifestId).toBe('ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e');
-    expect(contract.governed.expectedPackageVersion).toBe('1.2.41.0');
+    expect(contract.governed.expectedPackageVersion).toBe('1.2.42.0');
     expect(contract.governed.expectedApiAudience).toBe(audience);
     expect(contract.hostedGuidOverlay.expectedFingerprint).toBe('fnv1a32:36b2f764');
   });

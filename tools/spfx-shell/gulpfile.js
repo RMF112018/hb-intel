@@ -32,6 +32,15 @@ build.configureWebpack.mergeConfig({
         __BACKEND_MODE__: JSON.stringify(process.env.BACKEND_MODE || ''),
         __ALLOW_BACKEND_MODE_SWITCH__: JSON.stringify(process.env.ALLOW_BACKEND_MODE_SWITCH || ''),
         __API_AUDIENCE__: JSON.stringify(process.env.API_AUDIENCE || ''),
+        // Per-domain Safety governance constants. Populated only when the
+        // build orchestrator (tools/build-spfx-package.ts) is producing the
+        // Safety .sppkg. Empty strings for every other domain — the shell's
+        // render() guards each value with a non-empty check.
+        __SAFETY_ACCEPTED_BACKEND_ORIGIN__: JSON.stringify(process.env.SAFETY_ACCEPTED_BACKEND_ORIGIN || ''),
+        __SAFETY_EXPECTED_MANIFEST_ID__: JSON.stringify(process.env.SAFETY_EXPECTED_MANIFEST_ID || ''),
+        __SAFETY_EXPECTED_PACKAGE_VERSION__: JSON.stringify(process.env.SAFETY_EXPECTED_PACKAGE_VERSION || ''),
+        __SAFETY_EXPECTED_API_AUDIENCE__: JSON.stringify(process.env.SAFETY_EXPECTED_API_AUDIENCE || ''),
+        __SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT__: JSON.stringify(process.env.SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT || ''),
       })
     );
 

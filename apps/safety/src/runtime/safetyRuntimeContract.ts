@@ -18,6 +18,12 @@ export interface ISafetyMountConfig {
   expectedPackageVersion?: string;
   expectedApiAudience?: string;
   expectedHostedGuidOverlayFingerprint?: string;
+  /**
+   * Hosting webpart manifest ID supplied by the SPFx shell. Required for
+   * shell-hosted Safety; must equal SAFETY_WEBPART_MANIFEST_ID for the
+   * runtime contract to permit initialization.
+   */
+  webPartId?: string;
 }
 
 export type SafetyHostMode = 'sharepoint' | 'mock';
@@ -50,6 +56,9 @@ export interface ISafetyRuntimeContract {
     readonly manifestIdMatchesExpected: boolean;
     readonly packageVersionMatchesExpected: boolean;
     readonly apiAudienceMatchesExpected: boolean;
+    readonly webPartId: string | null;
+    readonly webPartIdPresent: boolean;
+    readonly webPartIdMatchesManifest: boolean;
   };
   readonly canInitializeCommands: boolean;
   readonly blockingReasons: ReadonlyArray<string>;
@@ -77,6 +86,9 @@ export function resolveSafetyRuntimeContract(params: {
   const expectedApiAudience = normalizeText(params.config?.expectedApiAudience);
   const expectedHostedGuidOverlayFingerprint = normalizeText(params.config?.expectedHostedGuidOverlayFingerprint);
   const actualHostedGuidOverlayFingerprint = hostedSafetyGuidOverlayFingerprint();
+  const webPartId = normalizeText(params.config?.webPartId);
+  const webPartIdPresent = !!webPartId;
+  const webPartIdMatchesManifest = webPartId === SAFETY_WEBPART_MANIFEST_ID;
   const backendOrigin = baseUrlValid && baseUrl ? new URL(baseUrl).origin : null;
   const backendOriginMatchesAccepted = !backendOrigin || !acceptedBackendOrigin
     ? false
@@ -90,9 +102,15 @@ export function resolveSafetyRuntimeContract(params: {
   const blockingReasons: string[] = [];
   if (hostMode === 'sharepoint') {
     if (hostSource === 'shell-webpart') {
-      blockingReasons.push(
-        'Shell-hosted Safety runtime is disabled until equivalent backend binding and approval guarantees are established.',
-      );
+      if (!webPartIdPresent) {
+        blockingReasons.push(
+          'Shell-hosted Safety must declare the hosting webpart manifest ID.',
+        );
+      } else if (!webPartIdMatchesManifest) {
+        blockingReasons.push(
+          'Shell-hosted Safety webPartId does not match Safety webpart authority.',
+        );
+      }
     }
     if (!baseUrlPresent) {
       blockingReasons.push('Backend base URL is missing.');
@@ -161,6 +179,9 @@ export function resolveSafetyRuntimeContract(params: {
       manifestIdMatchesExpected: manifestIdMatchesExpected || hostMode === 'mock',
       packageVersionMatchesExpected: packageVersionMatchesExpected || hostMode === 'mock',
       apiAudienceMatchesExpected: apiAudienceMatchesExpected || hostMode === 'mock',
+      webPartId,
+      webPartIdPresent,
+      webPartIdMatchesManifest: webPartIdMatchesManifest || hostMode === 'mock',
     },
     canInitializeCommands: hostMode === 'mock' || blockingReasons.length === 0,
     blockingReasons,

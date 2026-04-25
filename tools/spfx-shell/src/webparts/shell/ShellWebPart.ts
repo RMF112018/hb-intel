@@ -31,6 +31,11 @@ declare const __FUNCTION_APP_URL__: string;
 declare const __BACKEND_MODE__: string;
 declare const __ALLOW_BACKEND_MODE_SWITCH__: string;
 declare const __API_AUDIENCE__: string;
+declare const __SAFETY_ACCEPTED_BACKEND_ORIGIN__: string;
+declare const __SAFETY_EXPECTED_MANIFEST_ID__: string;
+declare const __SAFETY_EXPECTED_PACKAGE_VERSION__: string;
+declare const __SAFETY_EXPECTED_API_AUDIENCE__: string;
+declare const __SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT__: string;
 
 interface IAppModule {
   mount(el: HTMLElement, spfxContext?: unknown, config?: Record<string, unknown>): Promise<void>;
@@ -303,6 +308,30 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
           runtimeConfig.apiAudience = __API_AUDIENCE__;
         }
         runtimeConfig.webPartId = (this.manifest as any).id;
+        // Per-domain Safety governance — only populated when the orchestrator
+        // built this shell with the Safety env vars set. Each define carries
+        // an empty string for non-Safety domains, so the conditional guards
+        // skip these assignments and Foleon/Hero/Kudos/etc. mount paths
+        // never see Safety contract fields.
+        if (typeof __SAFETY_ACCEPTED_BACKEND_ORIGIN__ === 'string' && __SAFETY_ACCEPTED_BACKEND_ORIGIN__) {
+          runtimeConfig.acceptedBackendOrigin = __SAFETY_ACCEPTED_BACKEND_ORIGIN__;
+        }
+        if (typeof __SAFETY_EXPECTED_MANIFEST_ID__ === 'string' && __SAFETY_EXPECTED_MANIFEST_ID__) {
+          runtimeConfig.expectedManifestId = __SAFETY_EXPECTED_MANIFEST_ID__;
+        }
+        if (typeof __SAFETY_EXPECTED_PACKAGE_VERSION__ === 'string' && __SAFETY_EXPECTED_PACKAGE_VERSION__) {
+          runtimeConfig.expectedPackageVersion = __SAFETY_EXPECTED_PACKAGE_VERSION__;
+        }
+        if (typeof __SAFETY_EXPECTED_API_AUDIENCE__ === 'string' && __SAFETY_EXPECTED_API_AUDIENCE__) {
+          runtimeConfig.expectedApiAudience = __SAFETY_EXPECTED_API_AUDIENCE__;
+        }
+        if (
+          typeof __SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT__ === 'string' &&
+          __SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT__
+        ) {
+          runtimeConfig.expectedHostedGuidOverlayFingerprint =
+            __SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT__;
+        }
         runtimeConfig.webPartProperties = this.properties as Record<string, unknown>;
         runtimeConfig.assetBaseUrl = this._assetBaseUrl;
         const hostPageYear = this.resolveHostPageYear();

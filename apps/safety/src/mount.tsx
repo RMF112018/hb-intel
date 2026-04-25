@@ -106,6 +106,7 @@ function publishRuntimeBindingProof(
       expectedPackageVersion: config?.expectedPackageVersion ?? null,
       expectedApiAudience: config?.expectedApiAudience ?? null,
       expectedHostedGuidOverlayFingerprint: config?.expectedHostedGuidOverlayFingerprint ?? null,
+      webPartId: config?.webPartId ?? null,
     },
     governedAuthority: {
       expectedManifestId: SAFETY_WEBPART_MANIFEST_ID,

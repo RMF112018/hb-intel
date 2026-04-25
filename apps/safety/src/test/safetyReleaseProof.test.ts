@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
+import { hostedSafetyGuidOverlayFingerprint } from '../runtime/hostedSafetyGuidBinding.js';
 
 const appDir = resolve(__dirname, '../..');
 
@@ -36,6 +37,12 @@ describe('print-release-proof.mjs', () => {
     expect(proof.runtimeBinding.expectedApiAudience).toMatch(/^api:\/\//);
     expect(proof.runtimeBinding.hostedGuidOverlayFingerprint).toMatch(
       /^fnv1a32:[0-9a-f]{8}$/,
+    );
+    // Cross-source identity: the script's regex-extracted overlay + replay
+    // of FNV-1a 32 must equal the runtime's source-of-truth computation.
+    // Seals the script-vs-runtime drift seam.
+    expect(proof.runtimeBinding.hostedGuidOverlayFingerprint).toBe(
+      hostedSafetyGuidOverlayFingerprint(),
     );
 
     // Generated timestamp is ISO-8601.

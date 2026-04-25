@@ -2519,6 +2519,56 @@ for (const domain of domains) {
   }
 
   // ── Step 3: Run SPFx gulp build ─────────────────────────────────────
+  // Per-domain Safety governance: when packaging the Safety domain, derive
+  // FUNCTION_APP_URL / API_AUDIENCE from apps/safety/config/runtime-binding.json
+  // (overriding any process env values) and supply five governance env vars
+  // the shell webpart consumes via DefinePlugin. The fingerprint is sourced
+  // from the existing apps/safety/scripts/print-release-proof.mjs authority,
+  // which extracts REQUIRED_HOSTED_KEYS + HBCENTRAL_HOSTED_GUID_OVERLAY from
+  // apps/safety/src/runtime/hostedSafetyGuidBinding.ts and replays FNV-1a 32.
+  // safetyReleaseProof.test.ts cross-validates that the script's output equals
+  // the runtime's hostedSafetyGuidOverlayFingerprint(); no drift seam.
+  let safetyShellEnv: Record<string, string> = {};
+  if (domain.dir === 'safety') {
+    const safetyAppDir = path.join(ROOT, 'apps', 'safety');
+    const safetyRuntimeBinding = JSON.parse(
+      fs.readFileSync(path.join(safetyAppDir, 'config/runtime-binding.json'), 'utf8'),
+    ) as {
+      acceptedBackendOrigin?: string;
+      expectedApiAudience?: string;
+      defaultFunctionAppUrl?: string;
+      defaultApiAudience?: string;
+    };
+    const safetyPkgSolution = JSON.parse(
+      fs.readFileSync(path.join(safetyAppDir, 'config/package-solution.json'), 'utf8'),
+    ) as { solution: { version: string } };
+    const safetyManifest = JSON.parse(
+      fs.readFileSync(
+        path.join(safetyAppDir, 'src/webparts/safety/SafetyWebPart.manifest.json'),
+        'utf8',
+      ),
+    ) as { id: string };
+
+    const releaseProofStdout = execSync(
+      `node ${path.join(safetyAppDir, 'scripts/print-release-proof.mjs')}`,
+      { encoding: 'utf8' },
+    );
+    const releaseProof = JSON.parse(releaseProofStdout) as {
+      runtimeBinding: { hostedGuidOverlayFingerprint: string };
+    };
+    const fingerprint = releaseProof.runtimeBinding.hostedGuidOverlayFingerprint;
+
+    safetyShellEnv = {
+      FUNCTION_APP_URL: safetyRuntimeBinding.defaultFunctionAppUrl ?? '',
+      API_AUDIENCE: safetyRuntimeBinding.defaultApiAudience ?? '',
+      SAFETY_ACCEPTED_BACKEND_ORIGIN: safetyRuntimeBinding.acceptedBackendOrigin ?? '',
+      SAFETY_EXPECTED_MANIFEST_ID: safetyManifest.id,
+      SAFETY_EXPECTED_PACKAGE_VERSION: safetyPkgSolution.solution.version,
+      SAFETY_EXPECTED_API_AUDIENCE: safetyRuntimeBinding.expectedApiAudience ?? '',
+      SAFETY_EXPECTED_HOSTED_GUID_OVERLAY_FINGERPRINT: fingerprint,
+    };
+  }
+
   const shellEnv = {
     APP_BUNDLE_NAME: bundleName,
     APP_GLOBAL_NAME: globalName,
@@ -2531,6 +2581,8 @@ for (const domain of domains) {
     BACKEND_MODE: resolveDefaultBackendMode(domain.dir),
     ALLOW_BACKEND_MODE_SWITCH: process.env.ALLOW_BACKEND_MODE_SWITCH ?? '',
     API_AUDIENCE: process.env.API_AUDIENCE ?? '',
+    // Safety-only overrides; empty/absent for every other domain.
+    ...safetyShellEnv,
   };
 
   console.log('  Running gulp bundle --ship...');
