@@ -8,6 +8,7 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts,.tsx",
     "test": "vitest run --config vitest.config.ts",
+    "package:proof": "tsx scripts/prove-foleon-package.ts",
     "provision:print": "tsx scripts/print-foleon-provisioning.ts"
   },
   "dependencies": {

@@ -134,6 +134,9 @@ describe('FoleonApp — route-level no-iframe invariants (DOM proof)', () => {
     withLocation('foleonRoute=hub', () => {
       const { container } = render(<FoleonApp contract={baseContract({ route: 'hub' })} />);
       expect(container.querySelectorAll('iframe')).toHaveLength(0);
+      expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
+        'data-hbc-foleon-route',
+      )).toBe('hub');
     });
   });
 
@@ -144,6 +147,17 @@ describe('FoleonApp — route-level no-iframe invariants (DOM proof)', () => {
       expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
         'data-hbc-foleon-route',
       )).toBe('manage');
+    });
+  });
+
+  it('Reader route renders the reader route marker from deep-link state', () => {
+    withLocation('foleonRoute=reader&docId=1234', () => {
+      const { container } = render(
+        <FoleonApp contract={baseContract({ route: 'reader', docId: 1234 })} />,
+      );
+      expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
+        'data-hbc-foleon-route',
+      )).toBe('reader');
     });
   });
 

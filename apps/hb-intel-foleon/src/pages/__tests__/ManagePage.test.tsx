@@ -60,4 +60,25 @@ describe('ManagePage', () => {
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(document.querySelector('iframe')).toBeNull();
   });
+
+  it('does not expose manager controls when the runtime authorization check is rejected', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({
+        message: 'You are not authorized to manage Foleon content.',
+        code: 'foleon.manager.forbidden',
+        requestId: 'corr-forbidden',
+      }),
+    } as Response);
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'You are not authorized to manage Foleon content.',
+    );
+    expect(screen.queryByRole('complementary', { name: /Foleon content registry/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Sync Foleon/i })).toBeNull();
+    expect(document.querySelector('iframe')).toBeNull();
+  });
 });
