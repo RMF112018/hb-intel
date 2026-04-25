@@ -64,14 +64,25 @@ None currently identified for launch-critical runtime paths.
 closure still requires clean-site proof that SharePoint created the
 unique constraint.
 
-## 7. Retention
+## 7. Feature Framework Views
+
+Initial Feature Framework provisioning creates only the minimal default
+`All Items` view. Filtered and sorted operational views are intentionally
+deferred to controlled post-provision creation after clean-site list
+rendering is proven.
+
+Recommended post-provision view:
+
+- **Recent Events** — sort `EventTimestamp desc`.
+
+## 8. Retention
 
 - Raw events: retain 12–18 months.
 - Rolled-up aggregates: stored separately (future
   `HB_FoleonAnalyticsSnapshots` list — deferred).
 - Archive or purge older raw records when volume becomes material.
 
-## 8. Service consumers
+## 9. Service consumers
 
 - `apps/hb-intel-foleon/src/services/FoleonTelemetryService.ts`
   - Write-only at the list level; no read path from the webpart.

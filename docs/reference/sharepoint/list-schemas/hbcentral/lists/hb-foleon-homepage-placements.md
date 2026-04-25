@@ -68,13 +68,20 @@ None currently identified for launch-critical runtime paths.
   the target row's `FoleonDocId`. The repo does not auto-synchronize
   this; a backend sync job may be added later (deferred).
 
-## 7. Recommended Views
+## 7. Feature Framework Views
+
+Initial Feature Framework provisioning creates only the minimal default
+`All Items` view. Filtered and sorted operational views are intentionally
+deferred to controlled post-provision creation after clean-site list
+rendering is proven.
+
+## 8. Recommended Post-Provision Views
 
 | View Name | Filter | Sort |
 |---|---|---|
 | Active Placements | `IsActive = Yes` | `SortRank asc` |
 
-## 8. Service consumers
+## 9. Service consumers
 
 - `apps/hb-intel-foleon/src/services/FoleonPlacementService.ts`
   - `$select`: `Id, Title, PlacementKey, ContentIdCache,

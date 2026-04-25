@@ -16,7 +16,7 @@ export const ASSETS_DIR = resolve(PACKAGE_ROOT, 'sharepoint', 'assets');
 export const PACKAGE_SOLUTION_PATH = resolve(PACKAGE_ROOT, 'config', 'package-solution.json');
 
 export const EXPECTED_FEATURE_ID = 'ae66c036-8036-4f10-bb63-0d75107e7ce9';
-export const EXPECTED_VERSION = '1.0.12.0';
+export const EXPECTED_VERSION = '1.0.13.0';
 export const MAX_CUSTOM_INDEXED_FIELDS = 20;
 export const EXPECTED_ELEMENT_MANIFESTS = ['elements.xml'] as const;
 export const EXPECTED_SCHEMA_FILES = [
@@ -160,6 +160,7 @@ export interface ParsedField {
 
 export interface ParsedView {
   readonly displayName: string;
+  readonly defaultView: boolean;
   readonly fieldRefs: ReadonlyArray<string>;
 }
 
@@ -298,6 +299,7 @@ export function parseSchemaXml(fileName: string, xml: string): ParsedListSchema 
   const views = asArray(list.MetaData?.Views?.View as Record<string, unknown> | ReadonlyArray<Record<string, unknown>>)
     .map((view) => ({
       displayName: String(view.DisplayName ?? ''),
+      defaultView: view.DefaultView === 'TRUE',
       fieldRefs: collectFieldRefs(view),
     }));
   return {
@@ -434,6 +436,8 @@ function validateSchemas(model: FoleonFeatureAssetModel): ValidationCheck[] {
     }
 
     const declaredFieldNames = new Set([...fieldNames, 'Title']);
+    checks.push(check(`${expected.internalName} provisions exactly one default view`, schema.views.length === 1 && schema.views[0]?.defaultView === true, schema.views.map((view) => view.displayName).join(', ')));
+    checks.push(check(`${expected.internalName} default view is minimal All Items`, schema.views[0]?.displayName === 'All Items' && JSON.stringify(schema.views[0]?.fieldRefs ?? []) === JSON.stringify(['LinkTitle']), JSON.stringify(schema.views[0]?.fieldRefs ?? [])));
     for (const view of schema.views) {
       const unknownRefs = view.fieldRefs.filter((name) => !declaredFieldNames.has(name) && !KNOWN_VIEW_BUILTINS.has(name));
       checks.push(check(`${expected.internalName} view ${view.displayName} references known fields`, unknownRefs.length === 0, unknownRefs.join(', ')));

@@ -56,22 +56,12 @@
       <Field ID="{B9F5020D-F01E-4A10-8010-C0F0E0D2000D}" Name="ClientInfoJson" DisplayName="Client Info JSON" Type="Note" Required="FALSE" NumLines="8" RichText="FALSE" />
     </Fields>
     <Views>
-      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Recent Events" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="All Items" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
         <RowLimit Paged="TRUE">100</RowLimit>
         <Toolbar Type="Standard" />
         <ViewFields>
           <FieldRef Name="LinkTitle" />
-          <FieldRef Name="EventType" />
-          <FieldRef Name="FoleonDocId" />
-          <FieldRef Name="PageContext" />
-          <FieldRef Name="EventTimestamp" />
-          <FieldRef Name="SessionId" />
         </ViewFields>
-        <Query>
-          <OrderBy><FieldRef Name="EventTimestamp" Ascending="FALSE" /></OrderBy>
-        </Query>
       </View>
     </Views>
     <Forms>

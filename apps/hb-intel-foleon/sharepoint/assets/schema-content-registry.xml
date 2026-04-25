@@ -130,101 +130,12 @@
       <Field ID="{B9F50027-F01E-4A10-8010-C0F0E0D00027}" Name="AdminNotes" DisplayName="Admin Notes" Type="Note" Required="FALSE" NumLines="6" RichText="FALSE" />
     </Fields>
     <Views>
-      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Active Published Content" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="All Items" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
         <RowLimit Paged="TRUE">50</RowLimit>
         <Toolbar Type="Standard" />
         <ViewFields>
           <FieldRef Name="LinkTitle" />
-          <FieldRef Name="ContentTypeKey" />
-          <FieldRef Name="PublishStatus" />
-          <FieldRef Name="PublishedOn" />
-          <FieldRef Name="IsHomepageEligible" />
-          <FieldRef Name="AllowEmbed" />
-          <FieldRef Name="MarketingOwner" />
         </ViewFields>
-        <Query>
-          <Where>
-            <And>
-              <Eq><FieldRef Name="IsVisible" /><Value Type="Boolean">1</Value></Eq>
-              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
-            </And>
-          </Where>
-          <OrderBy><FieldRef Name="PublishedOn" Ascending="FALSE" /></OrderBy>
-        </Query>
-      </View>
-      <View BaseViewID="2" Type="HTML" DisplayName="Homepage Eligible" SetupPath="pages\viewpage.aspx" Url="Homepage.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
-        <RowLimit Paged="TRUE">50</RowLimit>
-        <Toolbar Type="Standard" />
-        <ViewFields>
-          <FieldRef Name="LinkTitle" />
-          <FieldRef Name="ContentTypeKey" />
-          <FieldRef Name="SortRank" />
-          <FieldRef Name="PublishedOn" />
-          <FieldRef Name="DisplayFrom" />
-          <FieldRef Name="DisplayThrough" />
-        </ViewFields>
-        <Query>
-          <Where>
-            <And>
-              <And>
-                <Eq><FieldRef Name="IsHomepageEligible" /><Value Type="Boolean">1</Value></Eq>
-                <Eq><FieldRef Name="IsVisible" /><Value Type="Boolean">1</Value></Eq>
-              </And>
-              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
-            </And>
-          </Where>
-          <OrderBy>
-            <FieldRef Name="SortRank" Ascending="TRUE" />
-            <FieldRef Name="PublishedOn" Ascending="FALSE" />
-          </OrderBy>
-        </Query>
-      </View>
-      <View BaseViewID="3" Type="HTML" DisplayName="Newsletters" SetupPath="pages\viewpage.aspx" Url="Newsletters.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
-        <RowLimit Paged="TRUE">50</RowLimit>
-        <Toolbar Type="Standard" />
-        <ViewFields>
-          <FieldRef Name="LinkTitle" />
-          <FieldRef Name="IssueDate" />
-          <FieldRef Name="PublishStatus" />
-          <FieldRef Name="PublishedOn" />
-        </ViewFields>
-        <Query>
-          <Where>
-            <And>
-              <Eq><FieldRef Name="ContentTypeKey" /><Value Type="Choice">Newsletter</Value></Eq>
-              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
-            </And>
-          </Where>
-          <OrderBy><FieldRef Name="IssueDate" Ascending="FALSE" /></OrderBy>
-        </Query>
-      </View>
-      <View BaseViewID="4" Type="HTML" DisplayName="Project Highlights" SetupPath="pages\viewpage.aspx" Url="ProjectHighlights.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
-        <RowLimit Paged="TRUE">50</RowLimit>
-        <Toolbar Type="Standard" />
-        <ViewFields>
-          <FieldRef Name="LinkTitle" />
-          <FieldRef Name="RelatedProjectNumber" />
-          <FieldRef Name="RelatedProjectName" />
-          <FieldRef Name="IssueDate" />
-          <FieldRef Name="PublishStatus" />
-        </ViewFields>
-        <Query>
-          <Where>
-            <And>
-              <Eq><FieldRef Name="ContentTypeKey" /><Value Type="Choice">Project Highlight</Value></Eq>
-              <Eq><FieldRef Name="PublishStatus" /><Value Type="Choice">Published</Value></Eq>
-            </And>
-          </Where>
-          <OrderBy><FieldRef Name="IssueDate" Ascending="FALSE" /></OrderBy>
-        </Query>
       </View>
     </Views>
     <Forms>

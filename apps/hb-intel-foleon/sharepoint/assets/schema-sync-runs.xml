@@ -56,44 +56,12 @@
       <Field ID="{B9F5030C-F01E-4A10-8010-C0F0E0D3000C}" Name="BackendVersion" DisplayName="Backend Version" Type="Text" Required="FALSE" MaxLength="32" />
     </Fields>
     <Views>
-      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Recent Runs" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="All Items" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
         <RowLimit Paged="TRUE">50</RowLimit>
         <Toolbar Type="Standard" />
         <ViewFields>
           <FieldRef Name="LinkTitle" />
-          <FieldRef Name="RunKind" />
-          <FieldRef Name="Status" />
-          <FieldRef Name="StartedUtc" />
-          <FieldRef Name="EndedUtc" />
-          <FieldRef Name="TriggerSource" />
-          <FieldRef Name="ErrorCount" />
-          <FieldRef Name="CorrelationId" />
         </ViewFields>
-        <Query>
-          <OrderBy><FieldRef Name="StartedUtc" Ascending="FALSE" /></OrderBy>
-        </Query>
-      </View>
-      <View BaseViewID="2" Type="HTML" DisplayName="Failed Runs" SetupPath="pages\viewpage.aspx" Url="Failed.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
-        <RowLimit Paged="TRUE">50</RowLimit>
-        <Toolbar Type="Standard" />
-        <ViewFields>
-          <FieldRef Name="LinkTitle" />
-          <FieldRef Name="RunKind" />
-          <FieldRef Name="StartedUtc" />
-          <FieldRef Name="EndedUtc" />
-          <FieldRef Name="ErrorCount" />
-          <FieldRef Name="CorrelationId" />
-        </ViewFields>
-        <Query>
-          <Where>
-            <Eq><FieldRef Name="Status" /><Value Type="Choice">Failed</Value></Eq>
-          </Where>
-          <OrderBy><FieldRef Name="StartedUtc" Ascending="FALSE" /></OrderBy>
-        </Query>
       </View>
     </Views>
     <Forms>

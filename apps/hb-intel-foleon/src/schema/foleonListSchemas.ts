@@ -162,10 +162,7 @@ export const FOLEON_CONTENT_REGISTRY_SCHEMA: FoleonListSchema = {
     'SyncSource',
   ],
   views: [
-    { name: 'Active Published Content', filter: 'IsVisible=Yes AND PublishStatus=Published', sort: 'PublishedOn desc' },
-    { name: 'Homepage Eligible', filter: 'IsHomepageEligible=Yes AND IsVisible=Yes AND PublishStatus=Published', sort: 'SortRank asc, PublishedOn desc' },
-    { name: 'Newsletters', filter: "ContentTypeKey='Newsletter' AND PublishStatus='Published'", sort: 'IssueDate desc' },
-    { name: 'Project Highlights', filter: "ContentTypeKey='Project Highlight' AND PublishStatus='Published'", sort: 'IssueDate desc' },
+    { name: 'All Items', filter: '', sort: '' },
   ],
 };
 
@@ -210,7 +207,7 @@ export const FOLEON_HOMEPAGE_PLACEMENTS_SCHEMA: FoleonListSchema = {
     'LayoutVariant',
   ],
   views: [
-    { name: 'Active Placements', filter: 'IsActive=Yes', sort: 'SortRank asc' },
+    { name: 'All Items', filter: '', sort: '' },
   ],
 };
 
@@ -261,7 +258,7 @@ export const FOLEON_INTERACTION_EVENTS_SCHEMA: FoleonListSchema = {
     'SessionId',
   ],
   views: [
-    { name: 'Recent Events', filter: '', sort: 'EventTimestamp desc' },
+    { name: 'All Items', filter: '', sort: '' },
   ],
 };
 
@@ -298,8 +295,7 @@ export const FOLEON_SYNC_RUNS_SCHEMA: FoleonListSchema = {
     'CorrelationId',
   ],
   views: [
-    { name: 'Recent Runs', filter: '', sort: 'StartedUtc desc' },
-    { name: 'Failed Runs', filter: "Status eq 'Failed'", sort: 'StartedUtc desc' },
+    { name: 'All Items', filter: '', sort: '' },
   ],
 };
 

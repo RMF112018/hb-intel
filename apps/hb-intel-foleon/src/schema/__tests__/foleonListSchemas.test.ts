@@ -93,10 +93,9 @@ describe('Foleon list schemas', () => {
     expect(trigger?.choices).toEqual(['Timer', 'Manual', 'AdminApi']);
   });
 
-  it('Sync Runs exposes Recent Runs and Failed Runs views', () => {
+  it('Sync Runs provisions only the minimal default view', () => {
     const names = FOLEON_SYNC_RUNS_SCHEMA.views.map((v) => v.name);
-    expect(names).toContain('Recent Runs');
-    expect(names).toContain('Failed Runs');
+    expect(names).toEqual(['All Items']);
   });
 });
 

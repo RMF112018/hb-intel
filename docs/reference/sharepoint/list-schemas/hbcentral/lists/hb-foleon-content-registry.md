@@ -91,7 +91,14 @@ ContentTypeKey
 IsFeatured
 ```
 
-## 6. Recommended Views
+## 6. Feature Framework Views
+
+Initial Feature Framework provisioning creates only the minimal default
+`All Items` view. Filtered and sorted operational views are intentionally
+deferred to controlled post-provision creation after clean-site list
+rendering is proven.
+
+## 7. Recommended Post-Provision Views
 
 | View Name | Filter | Sort |
 |---|---|---|
@@ -100,7 +107,7 @@ IsFeatured
 | Newsletters | `ContentTypeKey = 'Newsletter' AND PublishStatus = Published` | `IssueDate desc` |
 | Project Highlights | `ContentTypeKey = 'Project Highlight' AND PublishStatus = Published` | `IssueDate desc` |
 
-## 7. Service consumers
+## 8. Service consumers
 
 - `apps/hb-intel-foleon/src/services/FoleonContentService.ts`
   - `$select` mirrors every non-computed field.

@@ -58,7 +58,14 @@ None currently identified for launch-critical runtime paths.
 closure still requires clean-site proof that SharePoint created the
 unique constraint.
 
-## Views
+## Feature Framework Views
+
+Initial Feature Framework provisioning creates only the minimal default
+`All Items` view. Filtered and sorted operational views are intentionally
+deferred to controlled post-provision creation after clean-site list
+rendering is proven.
+
+## Recommended Post-Provision Views
 
 - **Recent Runs** — sort `StartedUtc desc`.
 - **Failed Runs** — filter `Status eq 'Failed'`, sort `StartedUtc desc`.

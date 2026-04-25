@@ -61,27 +61,12 @@
       <Field ID="{B9F5010A-F01E-4A10-8010-C0F0E0D1000A}" Name="AdminNotes" DisplayName="Admin Notes" Type="Note" Required="FALSE" NumLines="6" RichText="FALSE" />
     </Fields>
     <Views>
-      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="Active Placements" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
-        <XslLink Default="TRUE">main.xsl</XslLink>
-        <JSLink>clienttemplates.js</JSLink>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="All Items" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
         <RowLimit Paged="TRUE">50</RowLimit>
         <Toolbar Type="Standard" />
         <ViewFields>
           <FieldRef Name="LinkTitle" />
-          <FieldRef Name="PlacementKey" />
-          <FieldRef Name="ContentLookup" />
-          <FieldRef Name="ContentIdCache" />
-          <FieldRef Name="SortRank" />
-          <FieldRef Name="LayoutVariant" />
-          <FieldRef Name="DisplayFrom" />
-          <FieldRef Name="DisplayThrough" />
         </ViewFields>
-        <Query>
-          <Where>
-            <Eq><FieldRef Name="IsActive" /><Value Type="Boolean">1</Value></Eq>
-          </Where>
-          <OrderBy><FieldRef Name="SortRank" Ascending="TRUE" /></OrderBy>
-        </Query>
       </View>
     </Views>
     <Forms>
