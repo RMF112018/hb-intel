@@ -54,6 +54,43 @@ export type { ProjectWeekRollup } from './scoring/projectWeekRollup.js';
 export { computeBusinessKey, computeDuplicateKey } from './scoring/duplicateKey.js';
 export type { DuplicateKeyInput } from './scoring/duplicateKey.js';
 
+// -- Excellence ----------------------------------------------------------
+export {
+  averageAcceptedPercent,
+  buildHomepagePayload,
+  buildPreviewPayload,
+  EXCELLENCE_GENERATOR_VERSION,
+  EXCELLENCE_REASON_CODES,
+  generateCandidateScore,
+  rankCandidates,
+} from './excellence/index.js';
+export type {
+  BuildHomepagePayloadOptions,
+  BuildPreviewPayloadOptions,
+  ExcellenceReasonCode,
+  SafetyActivityEvidence,
+  SafetyActivityEvidenceSource,
+  SafetyActivityEvidenceStatus,
+  SafetyExcellenceCandidateInput,
+  SafetyExcellenceCandidateScore,
+  SafetyExcellenceContextMetadata,
+  SafetyExcellenceCtaLink,
+  SafetyExcellenceDataConfidence,
+  SafetyExcellenceEligibilityStatus,
+  SafetyExcellenceFreshness,
+  SafetyExcellencePrimarySpotlight,
+  SafetyExcellencePublishRecommendation,
+  SafetyExcellenceSecondarySignal,
+  SafetyExcellenceStatusSignal,
+  SafetyExcellenceStatusVariant,
+  SafetyExcellenceTopLineSummary,
+  SafetyExcellenceUrgency,
+  SafetyFieldExcellenceHomepagePayload,
+  SafetyFieldExcellencePreviewPayload,
+  SafetyFieldExcellencePublishStatus,
+  SafetyFieldExcellencePublishedPayloadDraft,
+} from './excellence/index.js';
+
 // -- Lists ---------------------------------------------------------------
 export {
   HBCENTRAL_SITE_URL,
