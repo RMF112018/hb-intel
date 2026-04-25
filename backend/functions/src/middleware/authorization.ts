@@ -242,7 +242,10 @@ export type SafetyRouteAction =
   | 'ingest'
   | 'replay'
   | 'excellence-rollup-read'
-  | 'excellence-rollup-generate';
+  | 'excellence-rollup-generate'
+  | 'excellence-highlight-read'
+  | 'excellence-highlight-approve'
+  | 'excellence-highlight-publish';
 export type SafetyRouteRoleFamily =
   | 'safety-specific'
   | 'global-override'
@@ -329,6 +332,25 @@ const SAFETY_ACTION_ROLES: Readonly<Record<SafetyRouteAction, ReadonlyArray<stri
   // Restricted to HBIntelSafetyAdmin (plus existing global override and
   // workload-automation paths). Reviewers cannot generate.
   'excellence-rollup-generate': [
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  // Safety Field Excellence highlight leadership read (single highlight).
+  // Reviewers and Admins may inspect a highlight's state and frozen payload
+  // for review/approval workflows. The public homepage current endpoint uses
+  // a separate, broader gate (`authorizeExcellenceHomepageCurrentRoute`).
+  'excellence-highlight-read': [
+    ...SAFETY_REVIEWER_ROLES,
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  // Safety Field Excellence highlight mutation: approve, override, suppress,
+  // rollback. Restricted to HBIntelSafetyAdmin. Reviewers cannot mutate.
+  'excellence-highlight-approve': [
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  // Safety Field Excellence highlight publish — homepage-impacting action.
+  // Restricted to HBIntelSafetyAdmin (plus existing global override and
+  // workload-automation paths).
+  'excellence-highlight-publish': [
     ...SAFETY_ADMIN_ROLES,
   ],
 } as const;
@@ -430,6 +452,63 @@ export function authorizeSafetyRoute(
     deniedResponse: forbiddenResponse('Insufficient role', requestId),
     matchedRole: null,
     matchedRoleFamily: 'denied',
+  };
+}
+
+/**
+ * Safety Field Excellence homepage current-published endpoint gate.
+ *
+ * Distinct from `authorizeSafetyRoute` because the homepage current endpoint
+ * is consumed by the SPFx homepage adapter for normal authenticated employees
+ * who do not necessarily hold a Safety reviewer/admin role. This helper
+ * permits any delegated token holding `access_as_user` (no Safety role
+ * required) and any app-only workload token holding the existing Automation
+ * role.
+ *
+ * The endpoint that calls this helper MUST return only published,
+ * homepage-safe content — never raw candidate internals, RawChecklistJson,
+ * raw findings text, employee performance details, or backend Graph/token
+ * diagnostics.
+ */
+export function authorizeExcellenceHomepageCurrentRoute(
+  claims: IValidatedClaims,
+  requestId?: string,
+): ISafetyRouteAuthorizationDecision {
+  if (isAppOnlyToken(claims)) {
+    const workloadDenied = requireWorkloadRole(claims, requestId);
+    if (workloadDenied) {
+      return {
+        allowed: false,
+        deniedResponse: workloadDenied,
+        matchedRole: null,
+        matchedRoleFamily: 'denied',
+      };
+    }
+    return {
+      allowed: true,
+      deniedResponse: null,
+      matchedRole: firstMatchedRole(claims, AUTOMATION_ROLES),
+      matchedRoleFamily: 'workload-automation',
+    };
+  }
+
+  const scopeDenied = requireDelegatedScope(claims, requestId);
+  if (scopeDenied) {
+    return {
+      allowed: false,
+      deniedResponse: scopeDenied,
+      matchedRole: null,
+      matchedRoleFamily: 'denied',
+    };
+  }
+
+  // Any delegated user with `access_as_user` is permitted to read the
+  // published homepage-safe artifact. No Safety role gate.
+  return {
+    allowed: true,
+    deniedResponse: null,
+    matchedRole: null,
+    matchedRoleFamily: 'safety-specific',
   };
 }
 

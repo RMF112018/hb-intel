@@ -38,6 +38,7 @@ import type { IManagedIdentityTokenService } from './managed-identity-token-serv
 import {
   EXCELLENCE_CANDIDATE_SELECT,
   EXCELLENCE_FINDING_SELECT,
+  EXCELLENCE_HIGHLIGHT_SELECT,
   EXCELLENCE_INSPECTION_SELECT,
   EXCELLENCE_PROJECT_WEEK_SELECT,
 } from './safety-field-excellence-query-contracts.js';
@@ -70,6 +71,43 @@ export interface IPersistedSafetyFieldExcellenceCandidate
   readonly itemId: number;
   readonly reportingPeriodSpItemId: number;
   readonly projectWeekRecordSpItemId: number;
+}
+
+export interface IHighlightSelection {
+  readonly primaryCandidateItemId?: number;
+  readonly secondaryCandidateItemIds: ReadonlyArray<number>;
+  readonly sourceCandidateItemIds: ReadonlyArray<number>;
+}
+
+export interface IPersistedSafetyFieldExcellenceWeeklyHighlight {
+  readonly itemId: number;
+  readonly etag?: string;
+  readonly title: string;
+  readonly reportingPeriodSpItemId: number;
+  readonly weekStartDate: string;
+  readonly weekEndDate: string;
+  readonly periodLabel: string;
+  readonly publishStatus:
+    | 'draft'
+    | 'pending-review'
+    | 'approved'
+    | 'published'
+    | 'archived'
+    | 'suppressed';
+  readonly primaryCandidateSpItemId: number | null;
+  readonly secondaryCandidateItemIds: ReadonlyArray<number>;
+  readonly homepagePayloadJson: string;
+  readonly sourceCandidateItemIds: ReadonlyArray<number>;
+  readonly selectionMethodVersion: string;
+  readonly dataConfidence: 'high' | 'medium' | 'low' | null;
+  readonly dataQualityNotes: string | null;
+  readonly editorialOverrideApplied: boolean;
+  readonly overrideReason: string | null;
+  readonly approvedBy: string | null;
+  readonly approvedAt: string | null;
+  readonly publishedAt: string | null;
+  readonly freshUntil: string | null;
+  readonly rollbackFromItemId: number | null;
 }
 
 export interface ISafetyFieldExcellenceGraphRepository {
@@ -113,6 +151,38 @@ export interface ISafetyFieldExcellenceGraphRepository {
     readonly publishRecommendation?: string;
     readonly top?: number;
   }): Promise<ReadonlyArray<IPersistedSafetyFieldExcellenceCandidate>>;
+
+  getCandidateScoreByItemId(input: {
+    readonly itemId: number;
+  }): Promise<IPersistedSafetyFieldExcellenceCandidate | null>;
+
+  upsertDraftWeeklyHighlight(input: {
+    readonly reportingPeriod: SafetyReportingPeriod;
+    readonly selection: IHighlightSelection;
+    readonly homepagePayloadJson: string;
+    readonly selectionMethodVersion: string;
+    readonly dataConfidence: 'high' | 'medium' | 'low';
+    readonly dataQualityNotes?: string;
+  }): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight>;
+
+  getWeeklyHighlightByItemId(input: {
+    readonly itemId: number;
+  }): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight | null>;
+
+  updateWeeklyHighlightFields(input: {
+    readonly itemId: number;
+    readonly fields: Record<string, unknown>;
+  }): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight>;
+
+  listCurrentPublishedHighlights(input: {
+    readonly now: string;
+    readonly includeStale?: boolean;
+  }): Promise<ReadonlyArray<IPersistedSafetyFieldExcellenceWeeklyHighlight>>;
+
+  archivePriorPublishedHighlights(input: {
+    readonly reportingPeriodSpItemId: number;
+    readonly excludingItemId: number;
+  }): Promise<ReadonlyArray<number>>;
 }
 
 export class SafetyFieldExcellenceCandidateIdentityCollisionError extends Error {
@@ -142,6 +212,30 @@ export class SafetyFieldExcellenceCandidateIdentityCollisionError extends Error 
     this.projectWeekRecordSpItemId = input.projectWeekRecordSpItemId;
     this.projectNumber = input.projectNumber;
     this.generatorVersion = input.generatorVersion;
+    this.matchCount = input.matchCount;
+  }
+}
+
+export class SafetyFieldExcellenceHighlightIdentityCollisionError extends Error {
+  readonly code = 'HIGHLIGHT_IDENTITY_COLLISION';
+  readonly reportingPeriodSpItemId: number;
+  readonly selectionMethodVersion: string;
+  readonly matchCount: number;
+
+  constructor(input: {
+    reportingPeriodSpItemId: number;
+    selectionMethodVersion: string;
+    matchCount: number;
+  }) {
+    super(
+      `Highlight identity collision: ${input.matchCount} records matched ` +
+        `(reportingPeriodSpItemId=${input.reportingPeriodSpItemId}, ` +
+        `selectionMethodVersion=${input.selectionMethodVersion}). ` +
+        'Draft upsert refused; manual remediation required.',
+    );
+    this.name = 'SafetyFieldExcellenceHighlightIdentityCollisionError';
+    this.reportingPeriodSpItemId = input.reportingPeriodSpItemId;
+    this.selectionMethodVersion = input.selectionMethodVersion;
     this.matchCount = input.matchCount;
   }
 }
@@ -377,6 +471,217 @@ export class SafetyFieldExcellenceGraphRepository
     });
     return rows.map(mapPersistedCandidate);
   }
+
+  async getCandidateScoreByItemId(input: {
+    itemId: number;
+  }): Promise<IPersistedSafetyFieldExcellenceCandidate | null> {
+    const descriptor = this.list('SafetyFieldExcellenceCandidateScores');
+    const item = await this.graph.getItemById(
+      descriptor.siteUrl,
+      descriptor.id,
+      input.itemId,
+      EXCELLENCE_CANDIDATE_SELECT,
+    );
+    return item ? mapPersistedCandidate(item) : null;
+  }
+
+  async upsertDraftWeeklyHighlight(input: {
+    reportingPeriod: SafetyReportingPeriod;
+    selection: IHighlightSelection;
+    homepagePayloadJson: string;
+    selectionMethodVersion: string;
+    dataConfidence: 'high' | 'medium' | 'low';
+    dataQualityNotes?: string;
+  }): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight> {
+    const descriptor = this.list('SafetyFieldExcellenceWeeklyHighlights');
+    const existing = await this.graph.listItemsBounded(
+      descriptor.siteUrl,
+      descriptor.id,
+      {
+        filter:
+          `fields/ReportingPeriodIdLookupId eq ${input.reportingPeriod.spItemId} ` +
+          `and fields/SelectionMethodVersion eq '${escapeGraphString(input.selectionMethodVersion)}'`,
+        top: 2,
+        select: EXCELLENCE_HIGHLIGHT_SELECT,
+      },
+      'excellence-highlight-natural-key',
+    );
+
+    if (existing.length > 1) {
+      throw new SafetyFieldExcellenceHighlightIdentityCollisionError({
+        reportingPeriodSpItemId: input.reportingPeriod.spItemId,
+        selectionMethodVersion: input.selectionMethodVersion,
+        matchCount: existing.length,
+      });
+    }
+
+    const payload = toHighlightWritePayload({
+      reportingPeriod: input.reportingPeriod,
+      selection: input.selection,
+      homepagePayloadJson: input.homepagePayloadJson,
+      selectionMethodVersion: input.selectionMethodVersion,
+      dataConfidence: input.dataConfidence,
+      dataQualityNotes: input.dataQualityNotes,
+      publishStatus: 'pending-review',
+    });
+
+    if (existing.length === 0) {
+      const created = await this.graph.createItem(descriptor.siteUrl, descriptor.id, payload);
+      const itemId = Number(created.id);
+      const fresh = await this.graph.getItemById(
+        descriptor.siteUrl,
+        descriptor.id,
+        itemId,
+        EXCELLENCE_HIGHLIGHT_SELECT,
+      );
+      if (!fresh) throw new Error(`Created highlight ${itemId} could not be re-read.`);
+      return mapPersistedHighlight(fresh);
+    }
+
+    const current = existing[0];
+    const itemId = Number(current.id);
+    for (let attempt = 1; attempt <= SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS; attempt++) {
+      const fresh = await this.graph.getItemById(
+        descriptor.siteUrl,
+        descriptor.id,
+        itemId,
+        EXCELLENCE_HIGHLIGHT_SELECT,
+      );
+      assertSafetyGraphEtag(
+        fresh?.etag,
+        `SafetyFieldExcellenceWeeklyHighlights/${itemId}`,
+      );
+      try {
+        await this.graph.updateItemWithConcurrency(
+          descriptor.siteUrl,
+          descriptor.id,
+          itemId,
+          payload,
+          fresh.etag,
+        );
+        const refreshed = await this.graph.getItemById(
+          descriptor.siteUrl,
+          descriptor.id,
+          itemId,
+          EXCELLENCE_HIGHLIGHT_SELECT,
+        );
+        if (!refreshed) throw new Error(`Updated highlight ${itemId} could not be re-read.`);
+        return mapPersistedHighlight(refreshed);
+      } catch (err) {
+        if (!(err instanceof GraphConcurrencyError)) throw err;
+        if (attempt === SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS) throw err;
+        await backoffDelay(attempt);
+      }
+    }
+    throw new Error('safety-field-excellence highlight upsert exhausted concurrency retries');
+  }
+
+  async getWeeklyHighlightByItemId(input: {
+    itemId: number;
+  }): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight | null> {
+    const descriptor = this.list('SafetyFieldExcellenceWeeklyHighlights');
+    const item = await this.graph.getItemById(
+      descriptor.siteUrl,
+      descriptor.id,
+      input.itemId,
+      EXCELLENCE_HIGHLIGHT_SELECT,
+    );
+    return item ? mapPersistedHighlight(item) : null;
+  }
+
+  async updateWeeklyHighlightFields(input: {
+    itemId: number;
+    fields: Record<string, unknown>;
+  }): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight> {
+    const descriptor = this.list('SafetyFieldExcellenceWeeklyHighlights');
+    for (let attempt = 1; attempt <= SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS; attempt++) {
+      const fresh = await this.graph.getItemById(
+        descriptor.siteUrl,
+        descriptor.id,
+        input.itemId,
+        EXCELLENCE_HIGHLIGHT_SELECT,
+      );
+      assertSafetyGraphEtag(
+        fresh?.etag,
+        `SafetyFieldExcellenceWeeklyHighlights/${input.itemId}`,
+      );
+      try {
+        await this.graph.updateItemWithConcurrency(
+          descriptor.siteUrl,
+          descriptor.id,
+          input.itemId,
+          input.fields,
+          fresh.etag,
+        );
+        const refreshed = await this.graph.getItemById(
+          descriptor.siteUrl,
+          descriptor.id,
+          input.itemId,
+          EXCELLENCE_HIGHLIGHT_SELECT,
+        );
+        if (!refreshed) {
+          throw new Error(`Updated highlight ${input.itemId} could not be re-read.`);
+        }
+        return mapPersistedHighlight(refreshed);
+      } catch (err) {
+        if (!(err instanceof GraphConcurrencyError)) throw err;
+        if (attempt === SAFETY_GRAPH_CONCURRENCY_MAX_ATTEMPTS) throw err;
+        await backoffDelay(attempt);
+      }
+    }
+    throw new Error('safety-field-excellence highlight update exhausted concurrency retries');
+  }
+
+  async listCurrentPublishedHighlights(input: {
+    now: string;
+    includeStale?: boolean;
+  }): Promise<ReadonlyArray<IPersistedSafetyFieldExcellenceWeeklyHighlight>> {
+    const descriptor = this.list('SafetyFieldExcellenceWeeklyHighlights');
+    const filters: string[] = [`fields/PublishStatus eq 'published'`];
+    if (!input.includeStale) {
+      filters.push(`fields/FreshUntil ge '${escapeGraphString(input.now)}'`);
+    }
+    const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
+      filter: filters.join(' and '),
+      orderBy: 'fields/WeekEndDate desc',
+      select: EXCELLENCE_HIGHLIGHT_SELECT,
+      top: 50,
+    });
+    return rows.map(mapPersistedHighlight);
+  }
+
+  async archivePriorPublishedHighlights(input: {
+    reportingPeriodSpItemId: number;
+    excludingItemId: number;
+  }): Promise<ReadonlyArray<number>> {
+    const descriptor = this.list('SafetyFieldExcellenceWeeklyHighlights');
+    const rows = await this.graph.listItems(descriptor.siteUrl, descriptor.id, {
+      filter:
+        `fields/ReportingPeriodIdLookupId eq ${input.reportingPeriodSpItemId} ` +
+        `and fields/PublishStatus eq 'published'`,
+      select: EXCELLENCE_HIGHLIGHT_SELECT,
+      top: 50,
+    });
+
+    const archived: number[] = [];
+    for (const row of rows) {
+      const itemId = Number(row.id);
+      if (itemId === input.excludingItemId) continue;
+      try {
+        await this.updateWeeklyHighlightFields({
+          itemId,
+          fields: { PublishStatus: 'archived' },
+        });
+        archived.push(itemId);
+      } catch (err) {
+        // surface failure to caller via empty/short array; service layer
+        // emits its own diagnostic. Intentionally not swallowing — rethrow
+        // so the publish service can decide how to react.
+        throw err;
+      }
+    }
+    return archived;
+  }
 }
 
 // -- Mappers and write payload --------------------------------------------
@@ -555,6 +860,111 @@ function shallowEqual(a: unknown, b: unknown): boolean {
     return JSON.stringify(a) === JSON.stringify(b);
   }
   return String(a) === String(b);
+}
+
+export function toHighlightWritePayload(input: {
+  reportingPeriod: SafetyReportingPeriod;
+  selection: IHighlightSelection;
+  homepagePayloadJson: string;
+  selectionMethodVersion: string;
+  dataConfidence: 'high' | 'medium' | 'low';
+  dataQualityNotes?: string;
+  publishStatus:
+    | 'draft'
+    | 'pending-review'
+    | 'approved'
+    | 'published'
+    | 'archived'
+    | 'suppressed';
+}): Record<string, unknown> {
+  const { reportingPeriod, selection } = input;
+  const payload: Record<string, unknown> = {
+    Title: `Safety Field Excellence — ${reportingPeriod.weekStartDate} → ${reportingPeriod.weekEndDate}`,
+    ReportingPeriodIdLookupId: reportingPeriod.spItemId,
+    WeekStartDate: reportingPeriod.weekStartDate,
+    WeekEndDate: reportingPeriod.weekEndDate,
+    PeriodLabel: reportingPeriod.periodLabel,
+    PublishStatus: input.publishStatus,
+    SecondaryCandidateIdsJson: JSON.stringify([...selection.secondaryCandidateItemIds]),
+    HomepagePayloadJson: input.homepagePayloadJson,
+    SourceCandidateIdsJson: JSON.stringify([...selection.sourceCandidateItemIds]),
+    SelectionMethodVersion: input.selectionMethodVersion,
+    DataConfidence: input.dataConfidence,
+    DataQualityNotes: input.dataQualityNotes ?? '',
+    EditorialOverrideApplied: false,
+  };
+  if (selection.primaryCandidateItemId !== undefined) {
+    payload.PrimaryCandidateIdLookupId = selection.primaryCandidateItemId;
+  }
+  return payload;
+}
+
+function mapPersistedHighlight(
+  row: IGraphListItem,
+): IPersistedSafetyFieldExcellenceWeeklyHighlight {
+  const itemId = Number(row.id);
+  return {
+    itemId,
+    etag: row.etag,
+    title: String(row.fields.Title ?? ''),
+    reportingPeriodSpItemId: toNumber(row.fields.ReportingPeriodIdLookupId),
+    weekStartDate: sliceDate(row.fields.WeekStartDate),
+    weekEndDate: sliceDate(row.fields.WeekEndDate),
+    periodLabel: String(row.fields.PeriodLabel ?? ''),
+    publishStatus: toHighlightPublishStatus(row.fields.PublishStatus),
+    primaryCandidateSpItemId: toOptionalNumber(row.fields.PrimaryCandidateIdLookupId),
+    secondaryCandidateItemIds: parseJsonNumberArray(row.fields.SecondaryCandidateIdsJson),
+    homepagePayloadJson: String(row.fields.HomepagePayloadJson ?? ''),
+    sourceCandidateItemIds: parseJsonNumberArray(row.fields.SourceCandidateIdsJson),
+    selectionMethodVersion: String(row.fields.SelectionMethodVersion ?? ''),
+    dataConfidence: toDataConfidence(row.fields.DataConfidence),
+    dataQualityNotes: optionalString(row.fields.DataQualityNotes) ?? null,
+    editorialOverrideApplied: Boolean(row.fields.EditorialOverrideApplied ?? false),
+    overrideReason: optionalString(row.fields.OverrideReason) ?? null,
+    approvedBy: optionalString(row.fields.ApprovedBy) ?? null,
+    approvedAt: optionalString(row.fields.ApprovedAt) ?? null,
+    publishedAt: optionalString(row.fields.PublishedAt) ?? null,
+    freshUntil: optionalString(row.fields.FreshUntil) ?? null,
+    rollbackFromItemId: toOptionalNumber(row.fields.RollbackFromItemId),
+  };
+}
+
+function toHighlightPublishStatus(
+  value: unknown,
+): IPersistedSafetyFieldExcellenceWeeklyHighlight['publishStatus'] {
+  const text = String(value ?? 'draft');
+  if (
+    text === 'draft' ||
+    text === 'pending-review' ||
+    text === 'approved' ||
+    text === 'published' ||
+    text === 'archived' ||
+    text === 'suppressed'
+  ) {
+    return text;
+  }
+  return 'draft';
+}
+
+function toDataConfidence(value: unknown): 'high' | 'medium' | 'low' | null {
+  const text = String(value ?? '').trim();
+  if (text === 'high' || text === 'medium' || text === 'low') return text;
+  return null;
+}
+
+function parseJsonNumberArray(value: unknown): ReadonlyArray<number> {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(String(value));
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((entry) => Number(entry))
+        .filter((n) => Number.isFinite(n) && n > 0);
+    }
+  } catch {
+    /* fall through */
+  }
+  return [];
 }
 
 function mapPersistedCandidate(row: IGraphListItem): IPersistedSafetyFieldExcellenceCandidate {

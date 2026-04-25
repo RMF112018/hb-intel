@@ -84,8 +84,8 @@ describe('P5-02 Unsupported scope regression guard', () => {
       'acknowledgments', 'adminApi', 'buyout', 'cleanupIdempotency', 'compliance',
       'contracts', 'estimating', 'health', 'leads', 'notifications',
       'pmp', 'projectRequests', 'projects', 'provisioningSaga',
-      'proxy', 'risk', 'schedule', 'scorecards', 'signalr', 'timerFullSpec',
-      'legacyFallbackDiscovery',
+      'proxy', 'risk', 'safetyFieldExcellenceWeeklyRollup', 'schedule',
+      'scorecards', 'signalr', 'timerFullSpec', 'legacyFallbackDiscovery',
     ]);
 
     const functionsDir = resolve(FUNCTIONS_SRC, 'functions');

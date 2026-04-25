@@ -34,6 +34,22 @@ import {
   type SafetyFieldExcellenceRollupGenerateResponse,
   type SafetyFieldExcellenceRollupRequest,
 } from './safety-field-excellence-rollup-service.js';
+import {
+  SafetyFieldExcellencePublishService,
+  type ApproveHighlightRequest,
+  type CurrentHighlightArtifact,
+  type CurrentHighlightRequest,
+  type DraftHighlightRequest,
+  type DraftHighlightResponse,
+  type HighlightActionResponse,
+  type OverrideHighlightRequest,
+  type PublishHighlightRequest,
+  type RollbackHighlightRequest,
+  type SuppressHighlightRequest,
+} from './safety-field-excellence-publish-service.js';
+import type {
+  IPersistedSafetyFieldExcellenceWeeklyHighlight,
+} from './safety-field-excellence-graph-repository.js';
 import type {
   ISafetyIngestionOperationResult,
   ISafetyIngestionPreviewOperationResult,
@@ -127,6 +143,37 @@ export interface ISharePointService {
     input: SafetyFieldExcellenceCandidateListRequest,
     requestId?: string,
   ): Promise<SafetyFieldExcellenceCandidateListResponse>;
+  draftSafetyFieldExcellenceWeeklyHighlight(
+    input: DraftHighlightRequest,
+    requestId?: string,
+  ): Promise<DraftHighlightResponse>;
+  getSafetyFieldExcellenceHighlight(
+    itemId: number,
+  ): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight | null>;
+  approveSafetyFieldExcellenceHighlight(
+    input: ApproveHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse>;
+  overrideSafetyFieldExcellenceHighlight(
+    input: OverrideHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse>;
+  publishSafetyFieldExcellenceHighlight(
+    input: PublishHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse>;
+  suppressSafetyFieldExcellenceHighlight(
+    input: SuppressHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse>;
+  rollbackSafetyFieldExcellenceHighlight(
+    input: RollbackHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse>;
+  getCurrentSafetyFieldExcellenceHomepageHighlight(
+    input: CurrentHighlightRequest,
+    requestId?: string,
+  ): Promise<CurrentHighlightArtifact>;
 
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
@@ -153,6 +200,7 @@ export class SharePointService implements ISharePointService {
   private readonly ingestion: ISafetyIngestionApplicationService;
   private readonly excellenceRepository: ISafetyFieldExcellenceGraphRepository;
   private readonly excellenceRollup: SafetyFieldExcellenceRollupService;
+  private readonly excellencePublish: SafetyFieldExcellencePublishService;
 
   constructor(
     tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService(),
@@ -183,6 +231,10 @@ export class SharePointService implements ISharePointService {
       ?? new SafetyFieldExcellenceGraphRepository(tokenService);
     this.excellenceRollup = new SafetyFieldExcellenceRollupService({
       repository: this.excellenceRepository,
+    });
+    this.excellencePublish = new SafetyFieldExcellencePublishService({
+      repository: this.excellenceRepository,
+      rollupService: this.excellenceRollup,
     });
   }
 
@@ -328,6 +380,61 @@ export class SharePointService implements ISharePointService {
     requestId?: string,
   ): Promise<SafetyFieldExcellenceCandidateListResponse> {
     return this.excellenceRollup.listCandidates(input, requestId);
+  }
+
+  draftSafetyFieldExcellenceWeeklyHighlight(
+    input: DraftHighlightRequest,
+    requestId?: string,
+  ): Promise<DraftHighlightResponse> {
+    return this.excellencePublish.draftHighlightFromRollup(input, requestId);
+  }
+
+  async getSafetyFieldExcellenceHighlight(
+    itemId: number,
+  ): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight | null> {
+    return this.excellencePublish.getHighlight(itemId);
+  }
+
+  approveSafetyFieldExcellenceHighlight(
+    input: ApproveHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return this.excellencePublish.approveHighlight(input, requestId);
+  }
+
+  overrideSafetyFieldExcellenceHighlight(
+    input: OverrideHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return this.excellencePublish.overrideHighlight(input, requestId);
+  }
+
+  publishSafetyFieldExcellenceHighlight(
+    input: PublishHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return this.excellencePublish.publishHighlight(input, requestId);
+  }
+
+  suppressSafetyFieldExcellenceHighlight(
+    input: SuppressHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return this.excellencePublish.suppressHighlight(input, requestId);
+  }
+
+  rollbackSafetyFieldExcellenceHighlight(
+    input: RollbackHighlightRequest,
+    requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return this.excellencePublish.rollbackHighlight(input, requestId);
+  }
+
+  getCurrentSafetyFieldExcellenceHomepageHighlight(
+    input: CurrentHighlightRequest,
+    requestId?: string,
+  ): Promise<CurrentHighlightArtifact> {
+    return this.excellencePublish.getCurrentHomepageHighlight(input, requestId);
   }
 
   // --- Backward-compatible wrappers ---
@@ -595,6 +702,61 @@ export class MockSharePointService implements ISharePointService {
       candidates: [],
       diagnostics: [],
     };
+  }
+
+  async draftSafetyFieldExcellenceWeeklyHighlight(
+    _input: DraftHighlightRequest,
+    _requestId?: string,
+  ): Promise<DraftHighlightResponse> {
+    return { success: true, highlight: null, diagnostics: [] };
+  }
+
+  async getSafetyFieldExcellenceHighlight(
+    _itemId: number,
+  ): Promise<IPersistedSafetyFieldExcellenceWeeklyHighlight | null> {
+    return null;
+  }
+
+  async approveSafetyFieldExcellenceHighlight(
+    _input: ApproveHighlightRequest,
+    _requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return { success: true, highlight: null, diagnostics: [] };
+  }
+
+  async overrideSafetyFieldExcellenceHighlight(
+    _input: OverrideHighlightRequest,
+    _requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return { success: true, highlight: null, diagnostics: [] };
+  }
+
+  async publishSafetyFieldExcellenceHighlight(
+    _input: PublishHighlightRequest,
+    _requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return { success: true, highlight: null, diagnostics: [] };
+  }
+
+  async suppressSafetyFieldExcellenceHighlight(
+    _input: SuppressHighlightRequest,
+    _requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return { success: true, highlight: null, diagnostics: [] };
+  }
+
+  async rollbackSafetyFieldExcellenceHighlight(
+    _input: RollbackHighlightRequest,
+    _requestId?: string,
+  ): Promise<HighlightActionResponse> {
+    return { success: true, highlight: null, diagnostics: [] };
+  }
+
+  async getCurrentSafetyFieldExcellenceHomepageHighlight(
+    _input: CurrentHighlightRequest,
+    _requestId?: string,
+  ): Promise<CurrentHighlightArtifact> {
+    return { state: 'no-published-highlight', diagnostics: [] };
   }
 
   async probeSafetyReportingPeriodRead(

@@ -16,6 +16,9 @@ import './functions/adminApi/legacy-fallback-routes.js';
 // Safety record-keeping admin API routes are co-hosted with the monolithic
 // host to support production ingestion and provisioning operations.
 import './functions/adminApi/safety-record-keeping-routes.js';
+// Safety Field Excellence rollup, candidates, highlight workflow, and
+// homepage current endpoint (Waves 03–04).
+import './functions/adminApi/safety-field-excellence-routes.js';
 // Foleon connector routes keep content management, placement, and sync writes
 // behind the backend app-role and Graph control plane.
 import './functions/adminApi/foleon-routes.js';
@@ -25,6 +28,9 @@ import './functions/health/index.js';
 
 // Idempotency cleanup timer (P1-D1)
 import './functions/cleanupIdempotency/index.js';
+
+// Safety Field Excellence weekly rollup timer (Wave 04).
+import './functions/safetyFieldExcellenceWeeklyRollup/index.js';
 
 // Phase 1 domain route handlers (P1-C1-a)
 import './functions/leads/index.js';

@@ -191,7 +191,59 @@ export const EXCELLENCE_QUERY_CONTRACTS: readonly ISafetyFieldExcellenceQueryCon
   },
 ] as const;
 
+const HIGHLIGHT_SELECT = [
+  'Title',
+  'ReportingPeriodIdLookupId',
+  'WeekStartDate',
+  'WeekEndDate',
+  'PeriodLabel',
+  'PublishStatus',
+  'PrimaryCandidateIdLookupId',
+  'SecondaryCandidateIdsJson',
+  'HomepagePayloadJson',
+  'SourceCandidateIdsJson',
+  'SelectionMethodVersion',
+  'DataConfidence',
+  'DataQualityNotes',
+  'EditorialOverrideApplied',
+  'OverrideReason',
+  'ApprovedBy',
+  'ApprovedAt',
+  'PublishedAt',
+  'FreshUntil',
+  'RollbackFromItemId',
+] as const;
+
+export const EXCELLENCE_HIGHLIGHT_QUERY_CONTRACTS: readonly ISafetyFieldExcellenceQueryContract[] = [
+  {
+    id: 'excellence-highlight-natural-key',
+    list: 'SafetyFieldExcellenceCandidateScores',
+    purpose:
+      'Idempotent draft upsert read by (ReportingPeriodIdLookupId, SelectionMethodVersion). ' +
+      'Targets `Safety Field Excellence Weekly Highlights` (entry retains `list` shape for ' +
+      'the contract registry; runtime resolves the highlights list at call time).',
+    strategy:
+      'Bounded single-page compound $filter with top:2; >1 match throws ' +
+      'HIGHLIGHT_IDENTITY_COLLISION (natural-key violation).',
+    requiredIndexedFields: ['ReportingPeriodIdLookupId'],
+    select: HIGHLIGHT_SELECT,
+  },
+  {
+    id: 'excellence-current-published-highlights',
+    list: 'SafetyFieldExcellenceCandidateScores',
+    purpose:
+      'Read the most recent published, fresh weekly highlight for the homepage current ' +
+      'endpoint. Targets `Safety Field Excellence Weekly Highlights`.',
+    strategy:
+      "Paged listItems with $filter (PublishStatus eq 'published' and FreshUntil ge '<now>') " +
+      'ordered by WeekEndDate desc, top:50.',
+    requiredIndexedFields: ['PublishStatus', 'WeekEndDate', 'FreshUntil'],
+    select: HIGHLIGHT_SELECT,
+  },
+] as const;
+
 export const EXCELLENCE_PROJECT_WEEK_SELECT = PROJECT_WEEK_SELECT;
 export const EXCELLENCE_INSPECTION_SELECT = INSPECTION_SELECT;
 export const EXCELLENCE_FINDING_SELECT = FINDING_SELECT;
 export const EXCELLENCE_CANDIDATE_SELECT = CANDIDATE_SELECT;
+export const EXCELLENCE_HIGHLIGHT_SELECT = HIGHLIGHT_SELECT;
