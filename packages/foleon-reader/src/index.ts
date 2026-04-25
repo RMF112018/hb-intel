@@ -7,6 +7,8 @@ export { ProjectSpotlightReader } from './readers/ProjectSpotlightReader.js';
 export type { ProjectSpotlightReaderProps } from './readers/ProjectSpotlightReader.js';
 export { CompanyPulseReader } from './readers/CompanyPulseReader.js';
 export type { CompanyPulseReaderProps } from './readers/CompanyPulseReader.js';
+export { LeadershipMessageReader } from './readers/LeadershipMessageReader.js';
+export type { LeadershipMessageReaderProps } from './readers/LeadershipMessageReader.js';
 export {
   createEmbeddedFoleonRuntimeContract,
   DEFAULT_FOLEON_ORIGINS,

@@ -23,6 +23,11 @@
   border-radius: 22px;
 }
 
+.leadership .chrome {
+  border-radius: 30px;
+  background: color-mix(in srgb, #ffffff 92%, #e8edf2);
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
@@ -34,6 +39,11 @@
 .pulse .hero {
   grid-template-columns: minmax(0, 1fr) minmax(190px, 260px);
   padding: 22px;
+}
+
+.leadership .hero {
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 300px);
+  padding: 26px;
 }
 
 .eyebrow {
@@ -56,6 +66,11 @@
 .pulse .title {
   font-size: clamp(25px, 3.8vw, 42px);
   line-height: 1.02;
+}
+
+.leadership .title {
+  font-size: clamp(27px, 4.2vw, 50px);
+  line-height: 1;
 }
 
 .summary {
@@ -172,6 +187,15 @@
   --preview-gradient-a: #c95f1a;
   --preview-gradient-b: #f7b267;
   --preview-gradient-c: #fff7ed;
+}
+
+.readerPreviewLeadership {
+  --preview-accent: #24364d;
+  --preview-accent-strong: #172538;
+  --preview-accent-soft: #edf1f5;
+  --preview-gradient-a: #172538;
+  --preview-gradient-b: #7b8798;
+  --preview-gradient-c: #f4f6f8;
 }
 
 .previewBanner {

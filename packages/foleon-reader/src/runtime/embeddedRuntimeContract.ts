@@ -12,7 +12,8 @@ export type FoleonRoute =
   | 'hub'
   | 'manage'
   | 'projectSpotlight'
-  | 'companyPulse';
+  | 'companyPulse'
+  | 'leadershipMessage';
 
 export interface IFoleonMountConfig {
   readonly contentRegistryListId?: string;
@@ -140,7 +141,8 @@ function normalizeRoute(value: unknown): FoleonRoute {
     value === 'highlights' ||
     value === 'manage' ||
     value === 'projectSpotlight' ||
-    value === 'companyPulse'
+    value === 'companyPulse' ||
+    value === 'leadershipMessage'
   ) {
     return value;
   }

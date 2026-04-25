@@ -23,7 +23,8 @@ export interface IFoleonMountConfig {
     | 'hub'
     | 'manage'
     | 'projectSpotlight'
-    | 'companyPulse';
+    | 'companyPulse'
+    | 'leadershipMessage';
   /** Target docId when the SPFx page is pinned to the reader route. */
   readonly foleonDocId?: number | string;
   /** Target SitePage that hosts the reader webpart. Used for card navigation. */

@@ -3,10 +3,11 @@ import type { FoleonContentRecord } from './types/foleon-content.types.js';
 import type { FoleonGateReason } from './types/foleon-runtime.types.js';
 import type { IFoleonRuntimeContract } from './runtime/embeddedRuntimeContract.js';
 import { CompanyPulseReader } from './readers/CompanyPulseReader.js';
+import { LeadershipMessageReader } from './readers/LeadershipMessageReader.js';
 import { ProjectSpotlightReader } from './readers/ProjectSpotlightReader.js';
 import type { FoleonEmbeddedReaderStatus } from './readers/FoleonReaderModule.js';
 
-export type FoleonEmbeddedReaderLaneKey = 'projectSpotlight' | 'companyPulse';
+export type FoleonEmbeddedReaderLaneKey = 'projectSpotlight' | 'companyPulse' | 'leadershipMessage';
 
 export interface FoleonEmbeddedReaderLaneProps {
   readonly lane: FoleonEmbeddedReaderLaneKey;
@@ -23,5 +24,8 @@ export function FoleonEmbeddedReaderLane(props: FoleonEmbeddedReaderLaneProps): 
   if (props.lane === 'projectSpotlight') {
     return <ProjectSpotlightReader {...props} />;
   }
-  return <CompanyPulseReader {...props} />;
+  if (props.lane === 'companyPulse') {
+    return <CompanyPulseReader {...props} />;
+  }
+  return <LeadershipMessageReader {...props} />;
 }

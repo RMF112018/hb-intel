@@ -3,6 +3,7 @@ declare const styles: {
   readonly shell: string;
   readonly spotlight: string;
   readonly pulse: string;
+  readonly leadership: string;
   readonly chrome: string;
   readonly hero: string;
   readonly eyebrow: string;
@@ -20,6 +21,7 @@ declare const styles: {
   readonly readerPreviewFallback: string;
   readonly readerPreviewSpotlight: string;
   readonly readerPreviewPulse: string;
+  readonly readerPreviewLeadership: string;
   readonly previewBanner: string;
   readonly previewEyebrow: string;
   readonly previewTitle: string;

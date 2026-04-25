@@ -1,5 +1,8 @@
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { FoleonEmbeddedReaderLane } from '../../FoleonEmbeddedReaderLane.js';
 import type { IFoleonRuntimeContract } from '../../runtime/embeddedRuntimeContract.js';
 import type { FoleonContentRecord } from '../../types/foleon-content.types.js';
 import { createFoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
@@ -84,12 +87,22 @@ function renderModule(overrides: {
     onGateBlocked: vi.fn(),
   };
   const config = overrides.config ?? FOLEON_READER_CONFIGS.projectSpotlight;
+  const tone = config.readerKey === 'project-spotlight'
+    ? 'spotlight'
+    : config.readerKey === 'company-pulse'
+      ? 'pulse'
+      : 'leadership';
+  const pageContext = config.readerKey === 'project-spotlight'
+    ? 'Project Spotlight'
+    : config.readerKey === 'company-pulse'
+      ? 'Company Pulse'
+      : 'Leadership Message';
   const view = render(
     <FoleonReaderModule
       contract={makeContract()}
       config={config}
-      tone={config.readerKey === 'project-spotlight' ? 'spotlight' : 'pulse'}
-      pageContext={config.readerKey === 'project-spotlight' ? 'Project Spotlight' : 'Company Pulse'}
+      tone={tone}
+      pageContext={pageContext}
       {...callbacks}
     />,
   );
@@ -174,6 +187,35 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
+  it('renders Leadership Message preview with executive tone and content-coming-soon composition', async () => {
+    resolveMock.mockResolvedValue({
+      kind: 'preview',
+      config: FOLEON_READER_CONFIGS.leadershipMessage,
+      reason: 'no-active-record',
+      warnings: [],
+    });
+    const { callbacks, container } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
+
+    expect(FOLEON_READER_CONFIGS.leadershipMessage).toMatchObject({
+      readerKey: 'leadership-message',
+      contentTypeKey: 'Leadership',
+      placementKey: 'Leadership Message Active',
+    });
+    expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
+    expect(screen.getByText('Preview layout')).toBeTruthy();
+    expect(screen.getByLabelText('Leadership Message feature placeholder')).toBeTruthy();
+    expect(screen.getByLabelText('Leadership Message supporting preview placeholders')).toBeTruthy();
+    expect(screen.getByLabelText('Preview metadata zones')).toBeTruthy();
+    expect(screen.getByText('Content coming soon')).toBeTruthy();
+    expect(screen.getByText('Executive message edition placeholder')).toBeTruthy();
+    expect(container.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+    expect(document.querySelectorAll('iframe')).toHaveLength(0);
+    expect(container.querySelectorAll('a')).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: /read|open|archive/i })).toBeNull();
+    expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+    expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
+  });
+
   it('mounts the iframe for a ready desktop record and emits open on load', async () => {
     const record = makeRecord();
     resolveMock.mockResolvedValue({
@@ -193,6 +235,37 @@ describe('FoleonReaderModule', () => {
 
     unmount();
     expect(callbacks.onReaderClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses Leadership Message config and page context for ready reader events', async () => {
+    const record = makeRecord({
+      title: 'Quarterly Leadership Note',
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      embedUrl: 'https://viewer.us.foleon.com/embed/leadership',
+      publishedUrl: 'https://viewer.us.foleon.com/published/leadership',
+    });
+    resolveMock.mockResolvedValue({
+      kind: 'ready',
+      config: FOLEON_READER_CONFIGS.leadershipMessage,
+      record,
+      embedUrl: record.embedUrl!,
+      warnings: [],
+    });
+    const { callbacks } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
+
+    expect(resolveMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          readerKey: 'leadership-message',
+          contentTypeKey: 'Leadership',
+          placementKey: 'Leadership Message Active',
+        }),
+      }),
+    );
+    const iframe = await screen.findByTitle('Leadership Message: Quarterly Leadership Note');
+    fireEvent.load(iframe);
+    expect(callbacks.onReaderOpen).toHaveBeenCalledWith(record, 'ok', 'Leadership Message');
   });
 
   it('renders blocked real records without an iframe', async () => {
@@ -269,7 +342,7 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onReaderOpen).toHaveBeenCalledTimes(1);
   });
 
-  it('renders both reader lanes in one React tree without Foleon globals or shared roots', async () => {
+  it('renders all three embedded reader lanes in one React tree without Foleon globals or shared roots', async () => {
     resolveMock.mockImplementation(async (params) => ({
       kind: 'preview',
       config: params.config,
@@ -287,18 +360,19 @@ describe('FoleonReaderModule', () => {
 
     render(
       <>
-        <FoleonReaderModule
+        <FoleonEmbeddedReaderLane
           contract={makeContract()}
-          config={FOLEON_READER_CONFIGS.projectSpotlight}
-          tone="spotlight"
-          pageContext="Project Spotlight"
+          lane="projectSpotlight"
           {...callbacks}
         />
-        <FoleonReaderModule
+        <FoleonEmbeddedReaderLane
           contract={{ ...makeContract(), route: 'companyPulse' }}
-          config={FOLEON_READER_CONFIGS.companyPulse}
-          tone="pulse"
-          pageContext="Company Pulse"
+          lane="companyPulse"
+          {...callbacks}
+        />
+        <FoleonEmbeddedReaderLane
+          contract={{ ...makeContract(), route: 'leadershipMessage' }}
+          lane="leadershipMessage"
           {...callbacks}
         />
       </>,
@@ -306,11 +380,34 @@ describe('FoleonReaderModule', () => {
 
     expect(await screen.findByText('Project Spotlight reader')).toBeTruthy();
     expect(await screen.findByText('Company Pulse reader')).toBeTruthy();
-    expect(resolveMock).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
+    expect(resolveMock).toHaveBeenCalledTimes(3);
     expect(document.querySelector('[data-preview-tone="blue"]')).not.toBeNull();
     expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
+    expect(document.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-foleon-preview-route]')).toHaveLength(3);
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
   });
 
+  it('keeps the shared package independent of standalone app globals and roots', () => {
+    const source = readPackageSource(resolve(__dirname, '../..'));
+
+    expect(source).not.toContain('apps/hb-intel-foleon');
+    expect(source).not.toContain('__hbIntel_foleon');
+    expect(source).not.toContain('createRoot(');
+  });
 });
+
+function readPackageSource(directory: string): string {
+  return readdirSync(directory)
+    .flatMap((entry) => {
+      const path = join(directory, entry);
+      const stats = statSync(path);
+      if (stats.isDirectory()) {
+        return entry === '__tests__' ? [] : [readPackageSource(path)];
+      }
+      return /\.(ts|tsx|css)$/.test(entry) ? [readFileSync(path, 'utf8')] : [];
+    })
+    .join('\n');
+}

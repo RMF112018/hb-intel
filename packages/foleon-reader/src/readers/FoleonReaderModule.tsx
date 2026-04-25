@@ -14,6 +14,8 @@ import type { FoleonReaderModuleConfig } from './readerConfigs.js';
 import { FoleonReaderPreview } from './FoleonReaderPreview.js';
 import styles from './FoleonReaderModule.module.css';
 
+export type FoleonReaderTone = 'spotlight' | 'pulse' | 'leadership';
+
 export type FoleonEmbeddedReaderStatus =
   | { readonly kind: 'loading' }
   | { readonly kind: 'preview'; readonly resolution: Extract<FoleonReaderResolution, { readonly kind: 'preview' }> }
@@ -24,7 +26,7 @@ export type FoleonEmbeddedReaderStatus =
 interface FoleonReaderModuleProps {
   readonly contract: IFoleonRuntimeContract;
   readonly config: FoleonReaderModuleConfig;
-  readonly tone: 'spotlight' | 'pulse';
+  readonly tone: FoleonReaderTone;
   readonly pageContext: FoleonPageContext;
   readonly onOpenArchive: () => void;
   readonly onReaderOpen: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
@@ -158,10 +160,11 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
 
   const record = resolution.record;
   const shouldMountIframe = !isMobile || readerOpen;
+  const laneLabels = readerToneLabels(tone);
   const monthlyLabel = tone === 'spotlight'
-    ? formatDate(record.issueDate ?? record.publishedOn) ?? 'Monthly edition'
-    : formatDate(record.lastEditorialUpdate ?? record.publishedOn) ?? 'Latest update';
-  const shellClass = `${styles.shell} ${tone === 'spotlight' ? styles.spotlight : styles.pulse}`;
+    ? formatDate(record.issueDate ?? record.publishedOn) ?? laneLabels.freshnessFallback
+    : formatDate(record.lastEditorialUpdate ?? record.publishedOn) ?? laneLabels.freshnessFallback;
+  const shellClass = `${styles.shell} ${readerToneClass(tone)}`;
 
   return (
     <section className={shellClass} aria-labelledby={`${config.readerKey}-reader-title`}>
@@ -169,7 +172,7 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
         <header className={styles.hero}>
           <div>
             <p className={styles.eyebrow}>
-              {tone === 'spotlight' ? 'Project Spotlight Reader' : 'Company Pulse Reader'}
+              {laneLabels.eyebrow}
             </p>
             <h2 className={styles.title} id={`${config.readerKey}-reader-title`}>{record.title}</h2>
             {record.summary ? <p className={styles.summary}>{record.summary}</p> : null}
@@ -185,7 +188,7 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
           </div>
           <aside className={styles.rail} aria-label={`${config.title} metadata`}>
             <div>
-              <p className={styles.railLabel}>{tone === 'spotlight' ? 'Monthly status' : 'Latest update'}</p>
+              <p className={styles.railLabel}>{laneLabels.freshnessLabel}</p>
               <p className={styles.railValue}>{monthlyLabel}</p>
             </div>
             <div>
@@ -256,6 +259,38 @@ function formatDate(raw: string | undefined): string | null {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+function readerToneClass(tone: FoleonReaderTone): string {
+  if (tone === 'spotlight') return styles.spotlight;
+  if (tone === 'pulse') return styles.pulse;
+  return styles.leadership;
+}
+
+function readerToneLabels(tone: FoleonReaderTone): {
+  readonly eyebrow: string;
+  readonly freshnessLabel: string;
+  readonly freshnessFallback: string;
+} {
+  if (tone === 'spotlight') {
+    return {
+      eyebrow: 'Project Spotlight Reader',
+      freshnessLabel: 'Monthly status',
+      freshnessFallback: 'Monthly edition',
+    };
+  }
+  if (tone === 'pulse') {
+    return {
+      eyebrow: 'Company Pulse Reader',
+      freshnessLabel: 'Latest update',
+      freshnessFallback: 'Latest update',
+    };
+  }
+  return {
+    eyebrow: 'Leadership Message Reader',
+    freshnessLabel: 'Executive update',
+    freshnessFallback: 'Leadership edition',
+  };
 }
 
 function gateReasonFromBlocked(reason: BlockedResolutionReason): FoleonGateReason {

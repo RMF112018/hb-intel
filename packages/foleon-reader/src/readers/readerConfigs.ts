@@ -24,6 +24,12 @@ export const FOLEON_READER_CONFIGS = {
     placementKey: 'Company Pulse Active',
     title: 'Company Pulse',
   },
+  leadershipMessage: {
+    readerKey: 'leadership-message',
+    contentTypeKey: 'Leadership',
+    placementKey: 'Leadership Message Active',
+    title: 'Leadership Message',
+  },
 } as const satisfies Record<string, FoleonReaderModuleConfig>;
 
 export type FoleonReaderConfigId = keyof typeof FOLEON_READER_CONFIGS;
