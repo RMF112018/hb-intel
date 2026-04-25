@@ -18,7 +18,7 @@
  *      Placements' ContentLookup to Content Registry's ListInstance
  *      Url character-for-character,
  *   5. declares each field the code-level schema marks
- *      required/indexed/unique,
+ *      required/indexed-at-provisioning/unique,
  *   6. honors versioning posture (Interaction Events = disabled,
  *      other three = enabled),
  *   7. keeps skipFeatureDeployment === false on the site-installed
@@ -186,11 +186,11 @@ describe.each(EXPECTED_SCHEMA_FILES)(
         if (field.required) {
           expectFieldAttr(xml, field, 'Required="TRUE"');
         }
-        if (field.indexed) {
+        if (field.indexedAtProvisioning) {
           expectFieldAttr(xml, field, 'Indexed="TRUE"');
         }
         if (field.unique) {
-          expectFieldAttr(xml, field, 'AllowDuplicateValues="FALSE"');
+          expectFieldAttr(xml, field, 'EnforceUniqueValues="TRUE"');
         }
       });
     }
@@ -239,7 +239,7 @@ describe('Homepage Placements ContentLookup — cross-list binding', () => {
     expect(lookupXml).toContain('Type="Lookup"');
     expect(lookupXml).toContain(`List="${contentRegistryUrl}"`);
     expect(lookupXml).toContain('ShowField="Title"');
-    expect(lookupXml).toContain('Required="TRUE"');
+    expect(lookupXml).toContain('Required="FALSE"');
     expect(lookupXml).toContain('Indexed="TRUE"');
   });
 
@@ -255,28 +255,31 @@ describe('Homepage Placements ContentLookup — cross-list binding', () => {
 });
 
 describe('Uniqueness invariants', () => {
-  it('Content Registry FoleonDocId is indexed + AllowDuplicateValues=FALSE', () => {
+  it('Content Registry FoleonDocId is indexed + EnforceUniqueValues=TRUE', () => {
     const xml = loadAsset('schema-content-registry.xml');
     const match = xml.match(/<Field\s+[\s\S]*?Name="FoleonDocId"[\s\S]*?\/>/);
     expect(match).not.toBeNull();
     expect(match![0]!).toContain('Indexed="TRUE"');
-    expect(match![0]!).toContain('AllowDuplicateValues="FALSE"');
+    expect(match![0]!).toContain('EnforceUniqueValues="TRUE"');
+    expect(match![0]!).not.toContain('AllowDuplicateValues="FALSE"');
   });
 
-  it('Interaction Events EventId is indexed + AllowDuplicateValues=FALSE', () => {
+  it('Interaction Events EventId is indexed + EnforceUniqueValues=TRUE', () => {
     const xml = loadAsset('schema-interaction-events.xml');
     const match = xml.match(/<Field\s+[\s\S]*?Name="EventId"[\s\S]*?\/>/);
     expect(match).not.toBeNull();
     expect(match![0]!).toContain('Indexed="TRUE"');
-    expect(match![0]!).toContain('AllowDuplicateValues="FALSE"');
+    expect(match![0]!).toContain('EnforceUniqueValues="TRUE"');
+    expect(match![0]!).not.toContain('AllowDuplicateValues="FALSE"');
   });
 
-  it('Sync Runs RunId is indexed + AllowDuplicateValues=FALSE', () => {
+  it('Sync Runs RunId is indexed + EnforceUniqueValues=TRUE', () => {
     const xml = loadAsset('schema-sync-runs.xml');
     const match = xml.match(/<Field\s+[\s\S]*?Name="RunId"[\s\S]*?\/>/);
     expect(match).not.toBeNull();
     expect(match![0]!).toContain('Indexed="TRUE"');
-    expect(match![0]!).toContain('AllowDuplicateValues="FALSE"');
+    expect(match![0]!).toContain('EnforceUniqueValues="TRUE"');
+    expect(match![0]!).not.toContain('AllowDuplicateValues="FALSE"');
   });
 });
 

@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-foleon",
     "id": "c23635f5-ab4d-44c2-96b5-2a2c90f4afc0",
-    "version": "1.0.8.0",
+    "version": "1.0.12.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": false,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Foleon Publications"
+        "default": "HB Intel Foleon Connector"
       },
       "longDescription": {
-        "default": "HB Intel Foleon Publications — governed discovery, reader, and archive surface for Marketing's Foleon project highlights and newsletters inside SharePoint. Provisions the four governed Foleon lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs) when installed on the target site."
+        "default": "HB Intel Foleon Connector — governed content management, placement, backend sync proof, reader, and archive surface for Marketing's Foleon project highlights and newsletters inside SharePoint. Provisions the four governed Foleon lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs) when installed on the target site."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,10 +27,10 @@
     },
     "features": [
       {
-        "title": "hb-intel-foleon Feature",
-        "description": "Deploys HB Intel Foleon Publications webpart assets and provisions the four governed Foleon SharePoint lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs).",
+        "title": "HB Intel Foleon Connector Feature",
+        "description": "Deploys HB Intel Foleon Connector webpart assets and provisions the four governed Foleon SharePoint lists (Content Registry, Homepage Placements, Interaction Events, Sync Runs).",
         "id": "ae66c036-8036-4f10-bb63-0d75107e7ce9",
-        "version": "1.0.8.0",
+        "version": "1.0.12.0",
         "assets": {
           "elementManifests": [
             "elements.xml"

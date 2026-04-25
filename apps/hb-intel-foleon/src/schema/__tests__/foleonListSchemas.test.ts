@@ -7,6 +7,7 @@ import {
   FOLEON_SYNC_RUNS_SCHEMA,
   assertFiltersAreIndexed,
   assertSelectFieldsInSchema,
+  isFieldFilterSafe,
   isFieldIndexed,
   selectFieldsFor,
 } from '../foleonListSchemas.js';
@@ -31,11 +32,11 @@ describe('Foleon list schemas', () => {
       expect(new Set(names).size).toBe(names.length);
     });
 
-    it('lists every requiredIndexedFields entry as an actual indexed field', () => {
+    it('lists every requiredIndexedFields entry as an actual launch-provisioned indexed field', () => {
       for (const name of schema.requiredIndexedFields) {
         const field = schema.fields.find((f) => f.internalName === name);
         expect(field, `${schema.internalName} missing required indexed field ${name}`).toBeDefined();
-        expect(field?.indexed, `${schema.internalName}.${name} must be indexed`).toBe(true);
+        expect(field?.indexedAtProvisioning, `${schema.internalName}.${name} must be indexed at provisioning`).toBe(true);
       }
     });
 
@@ -50,6 +51,7 @@ describe('Foleon list schemas', () => {
     );
     expect(lookup?.type).toBe('Lookup');
     expect(lookup?.lookupTarget).toBe('HB_FoleonContentRegistry');
+    expect(lookup?.required).toBe(false);
   });
 
   it('Content Registry enforces IsVisible / PublishStatus / AllowEmbed as indexed required gates', () => {
@@ -57,7 +59,17 @@ describe('Foleon list schemas', () => {
     for (const name of gates) {
       const field = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === name);
       expect(field?.required).toBe(true);
-      expect(field?.indexed).toBe(true);
+      expect(field?.indexedAtProvisioning).toBe(true);
+    }
+  });
+
+  it('Content Registry tracks future indexes separately from live launch indexes', () => {
+    const recommendedOnly = ['FoleonProjectId', 'ContentTypeKey', 'IsFeatured'];
+    for (const name of recommendedOnly) {
+      const field = FOLEON_CONTENT_REGISTRY_SCHEMA.fields.find((f) => f.internalName === name);
+      expect(field?.indexedAtProvisioning).toBe(false);
+      expect(field?.recommendedIndex).toBe(true);
+      expect(field?.filterSafe).not.toBe(true);
     }
   });
 
@@ -66,13 +78,13 @@ describe('Foleon list schemas', () => {
       (f) => f.internalName === 'EventId',
     );
     expect(eventId?.unique).toBe(true);
-    expect(eventId?.indexed).toBe(true);
+    expect(eventId?.indexedAtProvisioning).toBe(true);
   });
 
   it('Sync Runs enforces RunId unique + indexed and covers the run lifecycle choices', () => {
     const runId = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'RunId');
     expect(runId?.unique).toBe(true);
-    expect(runId?.indexed).toBe(true);
+    expect(runId?.indexedAtProvisioning).toBe(true);
     const status = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'Status');
     expect(status?.choices).toEqual(['Running', 'Succeeded', 'Failed', 'Cancelled']);
     const kind = FOLEON_SYNC_RUNS_SCHEMA.fields.find((f) => f.internalName === 'RunKind');
@@ -98,7 +110,7 @@ describe('selectFieldsFor', () => {
 });
 
 describe('assertFiltersAreIndexed', () => {
-  it('passes when every filter field is indexed', () => {
+  it('passes when every filter field is marked filter-safe against a live index', () => {
     expect(() =>
       assertFiltersAreIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, [
         'FoleonDocId',
@@ -108,10 +120,10 @@ describe('assertFiltersAreIndexed', () => {
     ).not.toThrow();
   });
 
-  it('throws for a non-indexed filter field', () => {
+  it('throws for a non-filter-safe field even when it is recommended for a future index', () => {
     expect(() =>
-      assertFiltersAreIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, ['Summary']),
-    ).toThrow(/Summary/);
+      assertFiltersAreIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, ['ContentTypeKey']),
+    ).toThrow(/ContentTypeKey/);
   });
 });
 
@@ -139,9 +151,18 @@ describe('assertSelectFieldsInSchema', () => {
 });
 
 describe('isFieldIndexed', () => {
-  it('returns true for indexed fields and false otherwise', () => {
+  it('returns true for launch-provisioned indexed fields and false otherwise', () => {
     expect(isFieldIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, 'PublishStatus')).toBe(true);
+    expect(isFieldIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, 'ContentTypeKey')).toBe(false);
     expect(isFieldIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, 'Summary')).toBe(false);
     expect(isFieldIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, 'DoesNotExist')).toBe(false);
+  });
+});
+
+describe('isFieldFilterSafe', () => {
+  it('returns true only when a field has a live index and explicit filter approval', () => {
+    expect(isFieldFilterSafe(FOLEON_CONTENT_REGISTRY_SCHEMA, 'PublishStatus')).toBe(true);
+    expect(isFieldFilterSafe(FOLEON_CONTENT_REGISTRY_SCHEMA, 'PublishedOn')).toBe(false);
+    expect(isFieldFilterSafe(FOLEON_CONTENT_REGISTRY_SCHEMA, 'ContentTypeKey')).toBe(false);
   });
 });

@@ -31,7 +31,7 @@ describe('buildFoleonProvisioningPlan', () => {
 
   it('emits the indexed-field count consistent with the fields array', () => {
     for (const list of plan.lists) {
-      const indexedFromFields = list.fields.filter((f) => f.indexed).length;
+      const indexedFromFields = list.fields.filter((f) => f.indexedAtProvisioning).length;
       expect(list.indexedFieldCount).toBe(indexedFromFields);
     }
   });

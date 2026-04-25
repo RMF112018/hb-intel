@@ -40,7 +40,7 @@
              Type="Lookup"
              List="Lists/HB_FoleonContentRegistry"
              ShowField="Title"
-             Required="TRUE"
+             Required="FALSE"
              Indexed="TRUE" />
       <Field ID="{B9F50103-F01E-4A10-8010-C0F0E0D10003}" Name="ContentIdCache" DisplayName="Content ID Cache" Type="Number" Required="FALSE" Indexed="TRUE" Decimals="0" />
       <Field ID="{B9F50104-F01E-4A10-8010-C0F0E0D10004}" Name="IsActive" DisplayName="Is Active" Type="Boolean" Required="TRUE" Indexed="TRUE">

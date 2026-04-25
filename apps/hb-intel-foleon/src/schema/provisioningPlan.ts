@@ -24,7 +24,9 @@ export interface FoleonProvisioningListPlan {
     readonly displayName: string;
     readonly type: string;
     readonly required: boolean;
-    readonly indexed: boolean;
+    readonly indexedAtProvisioning: boolean;
+    readonly recommendedIndex: boolean;
+    readonly filterSafe: boolean;
     readonly unique: boolean;
     readonly choices?: ReadonlyArray<string>;
     readonly lookupTarget?: string;
@@ -57,12 +59,16 @@ export function buildFoleonProvisioningListPlan(
     displayName: field.displayName,
     type: field.type,
     required: field.required,
-    indexed: field.indexed,
+    indexedAtProvisioning: field.indexedAtProvisioning,
+    recommendedIndex: !!field.recommendedIndex,
+    filterSafe: !!field.filterSafe,
     unique: !!field.unique,
     ...(field.choices ? { choices: field.choices } : {}),
     ...(field.lookupTarget ? { lookupTarget: field.lookupTarget } : {}),
   }));
-  const indexes = schema.fields.filter((field) => field.indexed).map((field) => field.internalName);
+  const indexes = schema.fields
+    .filter((field) => field.indexedAtProvisioning)
+    .map((field) => field.internalName);
   return {
     displayName: schema.displayName,
     internalName: schema.internalName,

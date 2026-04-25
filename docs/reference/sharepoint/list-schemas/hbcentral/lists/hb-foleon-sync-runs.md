@@ -38,10 +38,25 @@ query historical runs once Wave 02 writers ship.
 | `CorrelationId`  | Correlation ID    | Text     | no       | yes     | Ties to backend tracing                        |
 | `BackendVersion` | Backend Version   | Text     | no       | no      | Backend semver at write time                   |
 
-## Required indexed set
+## Launch Provisioned Indexed Columns
+
+Feature Framework launch provisioning intentionally avoids over-indexing.
+Additional indexes must be created through controlled post-provisioning
+and validated before service code treats them as filter-safe.
 
 `RunId`, `RunKind`, `Status`, `StartedUtc`, `EndedUtc`, `TriggerSource`,
 `ErrorCount`, `CorrelationId`.
+
+## Recommended Future Indexed Columns
+
+None currently identified for launch-critical runtime paths.
+
+## Uniqueness Posture
+
+`RunId` is provisioned with `Indexed="TRUE"` and
+`EnforceUniqueValues="TRUE"` per Microsoft field schema guidance. Tenant
+closure still requires clean-site proof that SharePoint created the
+unique constraint.
 
 ## Views
 

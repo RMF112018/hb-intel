@@ -66,7 +66,7 @@ lists in install order.
    This package cannot be tenant-wide-deployed. Tenant-wide
    deployment of a `.sppkg` containing SharePoint assets is
    unsupported and the feature framework will be silently ignored.
-5. Confirm the App Catalog lists the package with version `1.0.10.0`.
+5. Confirm the App Catalog lists the package with version `1.0.12.0`.
 
 ## 5. Install on `/sites/HBCentral`
 
@@ -80,8 +80,9 @@ lists in install order.
    1. Creates `Lists/HB_FoleonContentRegistry` from
       `schema-content-registry.xml`.
    2. Creates `Lists/HB_FoleonHomepagePlacements` from
-      `schema-homepage-placements.xml` (its `ContentLookup` lookup
-      binds to the list created in step 1).
+      `schema-homepage-placements.xml` (its optional `ContentLookup`
+      lookup binds to the list created in step 1; `ContentIdCache` is
+      the runtime-critical relationship field).
    3. Creates `Lists/HB_FoleonInteractionEvents` from
       `schema-interaction-events.xml` (versioning disabled).
    4. Creates `Lists/HB_FoleonSyncRuns` from
@@ -118,7 +119,7 @@ pane. Set:
 - `foleonApiResource` → Entra resource/application ID URI used by SPFx
   to acquire backend access tokens.
 - `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
-- `expectedPackageVersion` → `1.0.10.0`.
+- `expectedPackageVersion` → `1.0.12.0`.
 
 `HB_FoleonSyncRuns` is written by the backend sync and validation
 routes. Operators review the newest run proof in the connector's
@@ -129,9 +130,11 @@ Save the page. The webpart should render.
 ## 8. Verify indexes, views, and lookup binding
 
 1. **Indexes** — open each list → **Settings → Indexed columns** and
-   confirm the required-indexed set declared in the markdown docs is
-   marked indexed. SharePoint creates these as part of the schema
-   provisioning; if any are missing, re-install or add manually.
+   confirm the launch-provisioned indexed set declared in the markdown
+   docs is marked indexed. Feature Framework launch provisioning
+   intentionally avoids over-indexing; recommended future indexes must
+   be created through controlled provisioning and validated before
+   service code treats them as filter-safe.
 2. **Views** — each list shows the recommended views:
    - Content Registry: Active Published Content, Homepage Eligible,
      Newsletters, Project Highlights.
@@ -139,12 +142,15 @@ Save the page. The webpart should render.
    - Interaction Events: Recent Events.
    - Sync Runs: Recent Runs, Failed Runs.
 3. **Lookup binding** — on Homepage Placements → **Settings** →
-   `ContentLookup` column → confirm it targets
+   `ContentLookup` column → confirm it is optional and targets
    `Foleon Content Registry`. If SharePoint failed to resolve the
-   URL-form lookup binding at feature activation time (rare; occurs
-   when the Content Registry list was not yet fully committed), the
-   lookup will show as unresolved — re-bind it manually via list
-   settings.
+   URL-form lookup binding at feature activation time, the lookup will
+   show as unresolved; repair it through controlled post-provisioning
+   and validate `ContentLookupId` before tenant closure.
+4. **Unique fields** — confirm `FoleonDocId`, `EventId`, and `RunId`
+   are indexed and enforce unique values in SharePoint field settings.
+   Source XML uses `EnforceUniqueValues="TRUE"`, but tenant closure
+   requires clean-site proof.
 
 ## 9. Runtime binding proof
 
@@ -156,7 +162,7 @@ window.__hbIntel_foleonRuntimeBindingProof
 
 Expected:
 
-- `packageVersion === '1.0.10.0'`.
+- `packageVersion === '1.0.12.0'`.
 - `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
 - `hostMode === 'sharepoint'`.
 - `canInitialize === true`.
@@ -185,10 +191,11 @@ builds on non-production pages.
 
 ## 12. Known limitations
 
-- **Lookup URL-form resolution is provisioning-time-sensitive.** If
-  the `ContentLookup` binding fails to resolve during feature
-  activation, re-bind manually via list settings (step 8). This is
-  a Microsoft documented behavior, not a repo bug.
+- **Lookup URL-form resolution is provisioning-time-sensitive.**
+  `ContentLookup` is optional during Feature Framework provisioning. If
+  the binding fails to resolve during feature activation, repair it
+  through controlled post-provisioning and keep `ContentIdCache` as the
+  runtime-critical relationship field.
 - **Wave 02 deferrals** — `HB_FoleonProjectsRegistry` and
   `HB_FoleonAnalyticsSnapshots` schemas are not in this package (see
   ADR-0125). They require business-side field design.

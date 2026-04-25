@@ -23,7 +23,7 @@
       <ContentTypeRef ID="0x01" />
     </ContentTypes>
     <Fields>
-      <Field ID="{B9F50301-F01E-4A10-8010-C0F0E0D30001}" Name="RunId" DisplayName="Run ID" Type="Text" Required="TRUE" Indexed="TRUE" AllowDuplicateValues="FALSE" MaxLength="64" />
+      <Field ID="{B9F50301-F01E-4A10-8010-C0F0E0D30001}" Name="RunId" DisplayName="Run ID" Type="Text" Required="TRUE" Indexed="TRUE" EnforceUniqueValues="TRUE" MaxLength="64" />
       <Field ID="{B9F50302-F01E-4A10-8010-C0F0E0D30002}" Name="RunKind" DisplayName="Run Kind" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
         <CHOICES>
           <CHOICE>Docs</CHOICE>

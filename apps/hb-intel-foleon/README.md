@@ -165,6 +165,7 @@ Canonical tenant-facing field tables live under
 - `hb-foleon-content-registry.md`
 - `hb-foleon-homepage-placements.md`
 - `hb-foleon-interaction-events.md`
+- `hb-foleon-sync-runs.md`
 
 The code-level schema source of truth is
 `apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`. Drift between
@@ -179,10 +180,12 @@ pnpm --filter @hbc/spfx-hb-intel-foleon provision:print
 
 For MVP, provision in `/sites/HBCentral`:
 
-1. `HB_FoleonContentRegistry` — all columns per §List 1, indexes on the
-   fields listed under _Required Indexed Columns_.
+1. `HB_FoleonContentRegistry` — all columns per §List 1, launch indexes
+   on the fields listed under _Launch Provisioned Indexed Columns_.
 2. `HB_FoleonHomepagePlacements` — all columns per §List 3 with its
-   indexes; `ContentLookup` is a Lookup to Content Registry.
+   launch indexes; `ContentLookup` is an optional Lookup to Content
+   Registry and `ContentIdCache` is the runtime-critical relationship
+   field.
 3. `HB_FoleonInteractionEvents` — columns per §List 4 with its
    indexes.
 4. Add the three list GUIDs to the webpart mount config.

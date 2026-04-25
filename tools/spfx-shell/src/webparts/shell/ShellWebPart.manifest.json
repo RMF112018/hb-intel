@@ -18,15 +18,32 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Foleon"
+        "default": "HB Intel Foleon Highlights"
       },
       "description": {
-        "default": "Governed discovery, reader, and archive surface for Marketing's Foleon publications inside SharePoint."
+        "default": "Show governed Foleon highlights and route readers into SharePoint-hosted publication experiences."
       },
       "officeFabricIconFontName": "ReadingMode",
       "hiddenFromToolbox": false,
       "properties": {
         "foleonRoute": "highlights"
+      }
+    },
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Intel Foleon Manager"
+      },
+      "description": {
+        "default": "Manage Foleon content registry, placements, validation, and sync proof."
+      },
+      "officeFabricIconFontName": "Settings",
+      "hiddenFromToolbox": false,
+      "properties": {
+        "foleonRoute": "manage"
       }
     }
   ]

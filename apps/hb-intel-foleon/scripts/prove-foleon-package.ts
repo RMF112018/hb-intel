@@ -8,7 +8,7 @@ const PACKAGE_PATH = resolve(REPO_ROOT, 'dist', 'sppkg', 'hb-intel-foleon.sppkg'
 const OUTPUT_PATH = resolve(REPO_ROOT, 'dist', 'sppkg', 'hb-intel-foleon-package-proof.json');
 
 const EXPECTED_PRODUCT_ID = 'c23635f5-ab4d-44c2-96b5-2a2c90f4afc0';
-const EXPECTED_VERSION = '1.0.11.0';
+const EXPECTED_VERSION = '1.0.12.0';
 const EXPECTED_FEATURE_ID = 'ae66c036-8036-4f10-bb63-0d75107e7ce9';
 const EXPECTED_COMPONENT_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
 const EXPECTED_SCHEMA_FILES = [
@@ -164,8 +164,8 @@ function main(): void {
   const byTitle = new Map(entries.map((entry) => [entry.title, entry]));
   const checks = [
     { name: 'product ID matches expected Foleon package', pass: productId === EXPECTED_PRODUCT_ID },
-    { name: 'solution version is 1.0.11.0', pass: solutionVersion === EXPECTED_VERSION },
-    { name: 'feature version is 1.0.11.0', pass: featureVersion === EXPECTED_VERSION },
+    { name: `solution version is ${EXPECTED_VERSION}`, pass: solutionVersion === EXPECTED_VERSION },
+    { name: `feature version is ${EXPECTED_VERSION}`, pass: featureVersion === EXPECTED_VERSION },
     { name: 'single expected component ID is packaged', pass: proof.components[0]!.id === EXPECTED_COMPONENT_ID },
     {
       name: 'supported hosts are SharePointWebPart',

@@ -23,7 +23,7 @@
       <ContentTypeRef ID="0x01" />
     </ContentTypes>
     <Fields>
-      <Field ID="{B9F50201-F01E-4A10-8010-C0F0E0D20001}" Name="EventId" DisplayName="Event ID" Type="Text" Required="TRUE" Indexed="TRUE" AllowDuplicateValues="FALSE" MaxLength="64" />
+      <Field ID="{B9F50201-F01E-4A10-8010-C0F0E0D20001}" Name="EventId" DisplayName="Event ID" Type="Text" Required="TRUE" Indexed="TRUE" EnforceUniqueValues="TRUE" MaxLength="64" />
       <Field ID="{B9F50202-F01E-4A10-8010-C0F0E0D20002}" Name="EventType" DisplayName="Event Type" Type="Choice" Required="TRUE" Indexed="TRUE" Format="Dropdown">
         <CHOICES>
           <CHOICE>Card Impression</CHOICE>

@@ -37,7 +37,11 @@
 | Session ID | SessionId | Text | No | Yes | No | anonymous session key |
 | Client Info JSON | ClientInfoJson | Note | No | No | No | optional |
 
-## 4. Required Indexed Columns
+## 4. Launch Provisioned Indexed Columns
+
+Feature Framework launch provisioning intentionally avoids over-indexing.
+Additional indexes must be created through controlled post-provisioning
+and validated before service code treats them as filter-safe.
 
 ```
 EventId
@@ -49,14 +53,25 @@ EventTimestamp
 SessionId
 ```
 
-## 5. Retention
+## 5. Recommended Future Indexed Columns
+
+None currently identified for launch-critical runtime paths.
+
+## 6. Uniqueness Posture
+
+`EventId` is provisioned with `Indexed="TRUE"` and
+`EnforceUniqueValues="TRUE"` per Microsoft field schema guidance. Tenant
+closure still requires clean-site proof that SharePoint created the
+unique constraint.
+
+## 7. Retention
 
 - Raw events: retain 12–18 months.
 - Rolled-up aggregates: stored separately (future
   `HB_FoleonAnalyticsSnapshots` list — deferred).
 - Archive or purge older raw records when volume becomes material.
 
-## 6. Service consumers
+## 8. Service consumers
 
 - `apps/hb-intel-foleon/src/services/FoleonTelemetryService.ts`
   - Write-only at the list level; no read path from the webpart.

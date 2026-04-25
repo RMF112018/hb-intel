@@ -20,9 +20,9 @@
 
 | Display Name | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
-| Title | Title | Text | Yes | Yes | admin-facing placement label |
+| Title | Title | Text | Yes | No | admin-facing placement label; built-in field not provisioned as a custom launch index |
 | Placement Key | PlacementKey | Choice | Yes | Yes | Hero, Primary Card, Secondary Card, Carousel, Archive Rail |
-| Content Lookup | ContentLookup | Lookup | Yes | Yes | lookup target: `HB_FoleonContentRegistry` |
+| Content Lookup | ContentLookup | Lookup | No | Yes | optional during Feature Framework launch; lookup target: `HB_FoleonContentRegistry` |
 | Content ID Cache | ContentIdCache | Number | No | Yes | cached `FoleonDocId`; used by the webpart highlight query to resolve without expanding the lookup |
 | Is Active | IsActive | Boolean | Yes | Yes | placement on/off |
 | Display From | DisplayFrom | DateTime | No | Yes | |
@@ -32,7 +32,11 @@
 | Layout Variant | LayoutVariant | Choice | No | Yes | Large Feature, Compact Card, Square Tile, Text Rail |
 | Admin Notes | AdminNotes | Note | No | No | |
 
-## 4. Required Indexed Columns
+## 4. Launch Provisioned Indexed Columns
+
+Feature Framework launch provisioning intentionally avoids over-indexing.
+Additional indexes must be created through controlled post-provisioning
+and validated before service code treats them as filter-safe.
 
 ```
 PlacementKey
@@ -44,10 +48,18 @@ SortRank
 LayoutVariant
 ```
 
-## 5. Lookup Binding
+## 5. Recommended Future Indexed Columns
+
+None currently identified for launch-critical runtime paths.
+
+## 6. Lookup Binding
 
 - `ContentLookup` → `HB_FoleonContentRegistry.Title` display field; `Id`
   is the REST join key.
+- `ContentLookup` remains in the initial schema only as an optional
+  short-term compromise because the runtime service selects
+  `ContentLookupId`. Clean-site validation must prove the lookup resolves
+  after Feature Framework activation.
 - `ContentIdCache` is a **denormalized cache of FoleonDocId**, not the
   SharePoint `Id`. It exists so the Highlights query can resolve
   placements → content records without a second lookup expansion.
@@ -56,13 +68,13 @@ LayoutVariant
   the target row's `FoleonDocId`. The repo does not auto-synchronize
   this; a backend sync job may be added later (deferred).
 
-## 6. Recommended Views
+## 7. Recommended Views
 
 | View Name | Filter | Sort |
 |---|---|---|
 | Active Placements | `IsActive = Yes` | `SortRank asc` |
 
-## 7. Service consumers
+## 8. Service consumers
 
 - `apps/hb-intel-foleon/src/services/FoleonPlacementService.ts`
   - `$select`: `Id, Title, PlacementKey, ContentIdCache,
