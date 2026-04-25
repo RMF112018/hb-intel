@@ -23,6 +23,7 @@ function routeAnnouncement(route: FoleonRoute): string {
   if (route === 'manage') return 'Showing Foleon Connector management.';
   if (route === 'projectSpotlight') return 'Showing Project Spotlight reader.';
   if (route === 'companyPulse') return 'Showing Company Pulse reader.';
+  if (route === 'leadershipMessage') return 'Showing Leadership Message reader.';
   return 'Showing Foleon highlights.';
 }
 import {
@@ -39,7 +40,7 @@ import { HighlightsPage } from './pages/HighlightsPage.js';
 import { ReaderPage } from './pages/ReaderPage.js';
 import { ContentHubPage } from './pages/ContentHubPage.js';
 import { ManagePage } from './pages/ManagePage.js';
-import { CompanyPulseReader, ProjectSpotlightReader } from '@hbc/foleon-reader';
+import { CompanyPulseReader, LeadershipMessageReader, ProjectSpotlightReader } from '@hbc/foleon-reader';
 import { FoleonError } from './components/FoleonStates.js';
 import { adminIssueDetails } from './runtime/foleonConfigIssues.js';
 
@@ -326,7 +327,7 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
       />
     );
   }
-  if (nav.route === 'projectSpotlight' || nav.route === 'companyPulse') {
+  if (nav.route === 'projectSpotlight' || nav.route === 'companyPulse' || nav.route === 'leadershipMessage') {
     const readerProps = {
       contract,
       onOpenArchive: (): void => goto({ route: 'hub', docId: null }),
@@ -359,9 +360,13 @@ function renderPage(args: RenderPageArgs): React.ReactNode {
           errorCode: 'reader.gate_blocked',
         }),
     };
-    return nav.route === 'projectSpotlight'
-      ? <ProjectSpotlightReader {...readerProps} />
-      : <CompanyPulseReader {...readerProps} />;
+    if (nav.route === 'projectSpotlight') {
+      return <ProjectSpotlightReader {...readerProps} />;
+    }
+    if (nav.route === 'companyPulse') {
+      return <CompanyPulseReader {...readerProps} />;
+    }
+    return <LeadershipMessageReader {...readerProps} />;
   }
   return (
     <HighlightsPage
@@ -384,7 +389,8 @@ export function readNavFromLocation(contract: IFoleonRuntimeContract): AppNavSta
     routeParam === 'hub' ||
     routeParam === 'manage' ||
     routeParam === 'projectSpotlight' ||
-    routeParam === 'companyPulse'
+    routeParam === 'companyPulse' ||
+    routeParam === 'leadershipMessage'
       ? routeParam
       : routeParam === 'highlights'
         ? 'highlights'

@@ -48,7 +48,7 @@ describe('Foleon web part manifest toolbox entries', () => {
   });
 
   it('exposes dedicated public reader and Manager toolbox entries', () => {
-    expect(manifest.preconfiguredEntries).toHaveLength(4);
+    expect(manifest.preconfiguredEntries).toHaveLength(5);
 
     const byTitle = new Map(
       manifest.preconfiguredEntries.map((entry) => [entry.title.default, entry]),
@@ -56,6 +56,7 @@ describe('Foleon web part manifest toolbox entries', () => {
     const highlights = byTitle.get('HB Intel Foleon Highlights');
     const projectSpotlight = byTitle.get('HB Intel Project Spotlight Reader');
     const companyPulse = byTitle.get('HB Intel Company Pulse Reader');
+    const leadershipMessage = byTitle.get('HB Intel Leadership Message Reader');
     const manager = byTitle.get('HB Intel Foleon Manager');
 
     expect(highlights).toBeDefined();
@@ -78,6 +79,14 @@ describe('Foleon web part manifest toolbox entries', () => {
     );
     expect(companyPulse?.hiddenFromToolbox).toBe(false);
     expect(companyPulse?.properties?.foleonRoute).toBe('companyPulse');
+
+    expect(leadershipMessage).toBeDefined();
+    expect(leadershipMessage?.description.default).toBe(
+      'Show the active Leadership Message Foleon reader for executive communications.',
+    );
+    expect(leadershipMessage?.hiddenFromToolbox).toBe(false);
+    expect(leadershipMessage?.properties?.foleonRoute).toBe('leadershipMessage');
+    expect(leadershipMessage?.properties?.expectedPackageVersion).toBe('1.0.23.0');
 
     expect(manager).toBeDefined();
     expect(manager?.description.default).toBe(

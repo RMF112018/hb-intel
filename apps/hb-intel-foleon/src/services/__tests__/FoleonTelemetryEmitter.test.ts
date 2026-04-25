@@ -88,6 +88,10 @@ describe('FoleonTelemetryEmitter — envelope build', () => {
   it('maps dedicated reader routes to bounded page contexts', () => {
     expect(makeEmitter({ getRoute: () => 'projectSpotlight' }).buildEnvelope('Reader Open').pageContext).toBe('Project Spotlight');
     expect(makeEmitter({ getRoute: () => 'companyPulse' }).buildEnvelope('Reader Open').pageContext).toBe('Company Pulse');
+    const leadershipEnvelope = makeEmitter({ getRoute: () => 'leadershipMessage' }).buildEnvelope('Reader Open');
+    expect(leadershipEnvelope.pageContext).toBe('Leadership Message');
+    expect(JSON.stringify(leadershipEnvelope)).not.toContain('leadership-message');
+    expect(JSON.stringify(leadershipEnvelope)).not.toContain('Leadership Message Active');
   });
 
   it('respects an explicit pageContext override', () => {

@@ -56,7 +56,7 @@ const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 const PROJECT_SITES_WEBPART_ID = 'e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b';
 const FOLEON_WEBPART_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
 const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
-const FOLEON_EXPECTED_PACKAGE_VERSION = '1.0.22.0';
+const FOLEON_EXPECTED_PACKAGE_VERSION = '1.0.23.0';
 
 // Hero Banner domain webparts (public 39762a4d-… and admin
 // 23d22f2d-…) deliberately expose no property-pane fields. The
@@ -663,6 +663,9 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                       { key: 'manage', text: 'manage' },
                       { key: 'hub', text: 'hub' },
                       { key: 'reader', text: 'reader' },
+                      { key: 'projectSpotlight', text: 'projectSpotlight' },
+                      { key: 'companyPulse', text: 'companyPulse' },
+                      { key: 'leadershipMessage', text: 'leadershipMessage' },
                     ],
                     selectedKey: this.properties.foleonRoute ?? 'highlights',
                   }),

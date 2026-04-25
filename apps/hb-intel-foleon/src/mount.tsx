@@ -97,7 +97,7 @@ export interface IFoleonRuntimeBindingProof {
   readonly manifestId: string;
   readonly packageVersion: string;
   readonly hostMode: 'sharepoint' | 'mock';
-  readonly route: 'highlights' | 'reader' | 'hub' | 'manage' | 'projectSpotlight' | 'companyPulse';
+  readonly route: 'highlights' | 'reader' | 'hub' | 'manage' | 'projectSpotlight' | 'companyPulse' | 'leadershipMessage';
   readonly canInitialize: boolean;
   readonly presence: {
     readonly spfxContext: boolean;

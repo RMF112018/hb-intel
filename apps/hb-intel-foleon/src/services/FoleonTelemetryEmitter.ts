@@ -135,6 +135,7 @@ function pageContextFromRoute(route: FoleonRoute): FoleonPageContext {
   if (route === 'hub') return 'Content Hub';
   if (route === 'projectSpotlight') return 'Project Spotlight';
   if (route === 'companyPulse') return 'Company Pulse';
+  if (route === 'leadershipMessage') return 'Leadership Message';
   return 'Homepage';
 }
 

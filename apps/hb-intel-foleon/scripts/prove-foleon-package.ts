@@ -309,6 +309,11 @@ function main(): void {
         byTitle.get('HB Intel Company Pulse Reader')?.hiddenFromToolbox === false,
     ),
     check(
+      'Leadership Message toolbox entry routes to leadershipMessage and is visible',
+      byTitle.get('HB Intel Leadership Message Reader')?.foleonRoute === 'leadershipMessage' &&
+        byTitle.get('HB Intel Leadership Message Reader')?.hiddenFromToolbox === false,
+    ),
+    check(
       'Manager toolbox entry routes to manage and is visible',
       byTitle.get('HB Intel Foleon Manager')?.foleonRoute === 'manage' &&
         byTitle.get('HB Intel Foleon Manager')?.hiddenFromToolbox === false,

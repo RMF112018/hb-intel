@@ -4,7 +4,7 @@ import type {
 } from '@hbc/foleon-reader';
 
 export const HOMEPAGE_EMBEDDED_FOLEON_MANIFEST_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
-export const HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION = '1.0.22.0';
+export const HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION = '1.0.23.0';
 
 export interface HomepageFoleonConfig {
   readonly foleonContentRegistryListId?: string;

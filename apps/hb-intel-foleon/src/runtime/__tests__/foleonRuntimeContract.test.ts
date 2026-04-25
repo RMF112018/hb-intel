@@ -87,6 +87,19 @@ describe('resolveFoleonRuntimeContract', () => {
     expect(contract.route).toBe('companyPulse');
   });
 
+  it('accepts Leadership Message route without a placements GUID', () => {
+    const contract = resolveFoleonRuntimeContract({
+      hasSpfxContext: true,
+      siteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+      config: {
+        contentRegistryListId: '11111111-1111-1111-1111-111111111111',
+        foleonRoute: 'leadershipMessage',
+      },
+    });
+    expect(contract.canInitialize).toBe(true);
+    expect(contract.route).toBe('leadershipMessage');
+  });
+
   it('blocks when expected manifest ID mismatches', () => {
     const contract = resolveFoleonRuntimeContract({
       hasSpfxContext: true,

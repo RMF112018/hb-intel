@@ -95,6 +95,14 @@ describe('readNavFromLocation', () => {
     });
   });
 
+  it('reads foleonRoute=leadershipMessage', () => {
+    withLocation('foleonRoute=leadershipMessage&docId=999', () => {
+      const nav = readNavFromLocation(baseContract());
+      expect(nav.route).toBe('leadershipMessage');
+      expect(nav.docId).toBe(null);
+    });
+  });
+
   it('falls back to contract.route when foleonRoute is unknown', () => {
     withLocation('foleonRoute=garbage', () => {
       const nav = readNavFromLocation(baseContract({ route: 'hub' }));
@@ -198,6 +206,18 @@ describe('FoleonApp — route-level no-iframe invariants (DOM proof)', () => {
       expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
         'data-hbc-foleon-route',
       )).toBe('companyPulse');
+      expect(container.querySelectorAll('iframe')).toHaveLength(0);
+    });
+  });
+
+  it('Leadership Message route renders the dedicated route marker', () => {
+    withLocation('foleonRoute=leadershipMessage', () => {
+      const { container } = render(
+        <FoleonApp contract={baseContract({ route: 'leadershipMessage' })} />,
+      );
+      expect(container.querySelector('[data-hbc-foleon-route]')?.getAttribute(
+        'data-hbc-foleon-route',
+      )).toBe('leadershipMessage');
       expect(container.querySelectorAll('iframe')).toHaveLength(0);
     });
   });
