@@ -25,7 +25,13 @@ export function SafetyFieldExcellenceZone({
   functionAppBaseUrl,
   getFunctionAppToken,
 }: HbHomepageZoneProps): React.JSX.Element {
+  // Wave 07.1 diagnostic: capture raw-key presence vs. resolvable shape so
+  // the runtime proof can disambiguate "page config did not include the
+  // dynamic block" from "block present but value is unusable".
+  const rawDynamicCandidate = (moduleConfig as Record<string, unknown>).safetyFieldExcellenceDynamic;
+  const safetyFieldExcellenceDynamicConfigSeen = rawDynamicCandidate !== undefined;
   const dynamicConfig = readDynamicConfig(moduleConfig);
+  const safetyFieldExcellenceDynamicConfigResolved = dynamicConfig !== undefined;
   const sourceMode: SafetyFieldExcellenceSourceMode =
     dynamicConfig?.sourceMode ?? 'curated-only';
   const hasCuratedConfig = Boolean(moduleConfig.safetyFieldExcellence);
@@ -42,6 +48,8 @@ export function SafetyFieldExcellenceZone({
           safetyHubUrl={dynamicConfig?.safetyHubUrl}
           hasCuratedConfig={hasCuratedConfig}
           getFunctionAppToken={getFunctionAppToken}
+          safetyFieldExcellenceDynamicConfigSeen={safetyFieldExcellenceDynamicConfigSeen}
+          safetyFieldExcellenceDynamicConfigResolved={safetyFieldExcellenceDynamicConfigResolved}
         >
           {(resolution) => (
             <SafetyFieldExcellence

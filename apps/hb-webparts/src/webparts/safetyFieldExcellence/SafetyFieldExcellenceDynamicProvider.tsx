@@ -46,6 +46,19 @@ export interface SafetyFieldExcellenceDynamicProviderProps {
   readonly fetchImpl?: typeof fetch;
   readonly packageVersion?: string;
   readonly expectedPackageVersion?: string;
+  /**
+   * Wave 07.1 diagnostic. Forwarded onto the runtime proof object so
+   * operators can distinguish "the page config did not include the
+   * `safetyFieldExcellenceDynamic` key" from later failure modes.
+   */
+  readonly safetyFieldExcellenceDynamicConfigSeen?: boolean;
+  /**
+   * Wave 07.1 diagnostic. Forwarded onto the runtime proof object so
+   * operators can distinguish "the key exists but its value did not
+   * resolve to a usable dynamic config" from "the dynamic config was
+   * resolved but downstream wiring is incomplete".
+   */
+  readonly safetyFieldExcellenceDynamicConfigResolved?: boolean;
   readonly children: (resolution: SafetyFieldExcellenceDynamicResolution) => React.ReactNode;
 }
 
@@ -358,6 +371,9 @@ function publishProof(
     previewFallbackRendered:
       resolution.dataSource === 'preview-fallback' || resolution.dataSource === 'error-fallback',
     staleTreatment: resolution.state === 'stale' || resolution.isStale,
+    // Wave 07.1: dynamic-config diagnostic visibility for hosted self-diagnosis.
+    safetyFieldExcellenceDynamicConfigSeen: props.safetyFieldExcellenceDynamicConfigSeen,
+    safetyFieldExcellenceDynamicConfigResolved: props.safetyFieldExcellenceDynamicConfigResolved,
     ...extra,
   });
 }

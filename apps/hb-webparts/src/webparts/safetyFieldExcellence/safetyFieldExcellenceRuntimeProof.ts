@@ -47,6 +47,22 @@ export interface SafetyFieldExcellenceRuntimeProof {
    */
   previewFallbackRendered?: boolean;
   staleTreatment?: boolean;
+  /**
+   * Wave 07.1 diagnostic. True when the raw `safetyFieldExcellenceDynamic`
+   * key was present on the `ModuleConfigSlices` object the zone received
+   * from the homepage shell — regardless of whether the value was a usable
+   * shape. Lets operators distinguish "page config missing the key" from
+   * "page config has the key but the value didn't validate".
+   */
+  safetyFieldExcellenceDynamicConfigSeen?: boolean;
+  /**
+   * Wave 07.1 diagnostic. True when `readDynamicConfig(moduleConfig)`
+   * returned a usable `SafetyFieldExcellenceDynamicConfig` (the key exists
+   * AND the value is an object the zone could resolve). Necessarily false
+   * whenever `safetyFieldExcellenceDynamicConfigSeen` is false; may be
+   * false even when seen is true (key present but value unusable).
+   */
+  safetyFieldExcellenceDynamicConfigResolved?: boolean;
 }
 
 declare global {

@@ -213,6 +213,68 @@ describe('SafetyFieldExcellenceDynamicProvider', () => {
     expect(cap.current()?.fallbackReason).toContain('not-configured');
   });
 
+  it('Wave 07.1 diagnostic: when neither prop is passed, runtime proof leaves both fields undefined', async () => {
+    const cap = captureResolution();
+    render(
+      <SafetyFieldExcellenceDynamicProvider
+        sourceMode="curated-only"
+        hasCuratedConfig={true}
+      >
+        {cap.child}
+      </SafetyFieldExcellenceDynamicProvider>,
+    );
+    await waitFor(() => {
+      expect(cap.current()?.state).toBe('idle');
+    });
+    const proof = readSafetyFieldExcellenceRuntimeProof();
+    expect(proof?.safetyFieldExcellenceDynamicConfigSeen).toBeUndefined();
+    expect(proof?.safetyFieldExcellenceDynamicConfigResolved).toBeUndefined();
+  });
+
+  it('Wave 07.1 diagnostic: seen=true, resolved=false surfaces the exact values on the proof', async () => {
+    const cap = captureResolution();
+    render(
+      <SafetyFieldExcellenceDynamicProvider
+        sourceMode="curated-only"
+        hasCuratedConfig={true}
+        safetyFieldExcellenceDynamicConfigSeen={true}
+        safetyFieldExcellenceDynamicConfigResolved={false}
+      >
+        {cap.child}
+      </SafetyFieldExcellenceDynamicProvider>,
+    );
+    await waitFor(() => {
+      expect(cap.current()?.state).toBe('idle');
+    });
+    const proof = readSafetyFieldExcellenceRuntimeProof();
+    expect(proof?.safetyFieldExcellenceDynamicConfigSeen).toBe(true);
+    expect(proof?.safetyFieldExcellenceDynamicConfigResolved).toBe(false);
+  });
+
+  it('Wave 07.1 diagnostic: seen=true, resolved=true surfaces both as true on the proof', async () => {
+    const fetchImpl = vi.fn(async () => buildNoPublishedResponse());
+    const cap = captureResolution();
+    render(
+      <SafetyFieldExcellenceDynamicProvider
+        sourceMode="dynamic-only"
+        functionAppBaseUrl="https://x.example"
+        getFunctionAppToken={async () => 'token'}
+        hasCuratedConfig={false}
+        fetchImpl={fetchImpl as unknown as typeof fetch}
+        safetyFieldExcellenceDynamicConfigSeen={true}
+        safetyFieldExcellenceDynamicConfigResolved={true}
+      >
+        {cap.child}
+      </SafetyFieldExcellenceDynamicProvider>,
+    );
+    await waitFor(() => {
+      expect(cap.current()?.dataSource).toBe('preview-fallback');
+    });
+    const proof = readSafetyFieldExcellenceRuntimeProof();
+    expect(proof?.safetyFieldExcellenceDynamicConfigSeen).toBe(true);
+    expect(proof?.safetyFieldExcellenceDynamicConfigResolved).toBe(true);
+  });
+
   it('runtime proof never includes tokens or raw payload content', async () => {
     const fetchImpl = vi.fn(async () => buildPublishedResponse());
     const cap = captureResolution();

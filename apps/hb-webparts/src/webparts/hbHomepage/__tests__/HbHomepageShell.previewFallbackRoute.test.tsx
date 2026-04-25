@@ -147,6 +147,9 @@ describe('HbHomepageShell — full-route preview fallback proof (Wave 07 wiring)
       expect(proof?.backendFunctionAppUrlConfigured).toBe(true);
       expect(proof?.currentEndpointConfigured).toBe(true);
       expect(proof?.fallbackReason).toBe('no-published-highlight');
+      // Wave 07.1 diagnostic: page config carried a usable dynamic block.
+      expect(proof?.safetyFieldExcellenceDynamicConfigSeen).toBe(true);
+      expect(proof?.safetyFieldExcellenceDynamicConfigResolved).toBe(true);
     });
   });
 
@@ -209,6 +212,49 @@ describe('HbHomepageShell — full-route preview fallback proof (Wave 07 wiring)
       expect(proof?.backendFunctionAppUrlConfigured).toBe(true);
       expect(proof?.currentEndpointConfigured).toBe(false);
       expect(proof?.fallbackReason).toBe('function-app-token-not-configured');
+      // Wave 07.1 diagnostic: page config carried a usable dynamic block;
+      // the missing piece is the token provider, not the dynamic config.
+      expect(proof?.safetyFieldExcellenceDynamicConfigSeen).toBe(true);
+      expect(proof?.safetyFieldExcellenceDynamicConfigResolved).toBe(true);
+    });
+  });
+
+  it('Wave 07.1 diagnostic: page config has the safetyFieldExcellenceDynamic key but its value is null → seen=true, resolved=false; zone falls back to curated-only render path', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const shellRef = React.createRef<HTMLDivElement>();
+    const container = makeStubContainer();
+    // Key is present on the config but its value is null. SafetyFieldExcellenceZone
+    // sees the key (raw candidate !== undefined) but readDynamicConfig rejects
+    // the non-object value, so the resolved dynamic config stays undefined.
+    const config: Record<string, unknown> = {
+      safetyFieldExcellenceDynamic: null,
+    };
+
+    render(
+      <HbHomepageShell
+        config={config}
+        identity={{ displayName: 'Test', email: 'test@example.com' }}
+        siteUrl="https://contoso.sharepoint.com/sites/HBCentral"
+        getGraphToken={async () => 'graph-token'}
+        getFunctionAppToken={undefined}
+        functionAppBaseUrl={undefined}
+        container={container}
+        shellRef={shellRef}
+      />,
+    );
+
+    // No dynamic resolution → no fetch.
+    expect(fetchSpy).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      const proof = readSafetyFieldExcellenceRuntimeProof();
+      expect(proof?.safetyFieldExcellenceDynamicConfigSeen).toBe(true);
+      expect(proof?.safetyFieldExcellenceDynamicConfigResolved).toBe(false);
+      // The zone falls back to curated-only because the dynamic block could
+      // not be resolved. This is the exact disambiguation the Wave 07.1
+      // diagnostic is designed to surface.
+      expect(proof?.sourceMode).toBe('curated-only');
+      expect(proof?.dataSource).toBe('curated');
     });
   });
 });
