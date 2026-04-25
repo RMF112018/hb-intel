@@ -173,7 +173,8 @@ describe('SafetyFieldExcellenceDataAdapter', () => {
         getToken: async () => TOKEN,
         fetchImpl: fetchImpl as unknown as typeof fetch,
       });
-      expect((fetchImpl.mock.calls[0]?.[0] as string)).toContain('includeStale=true');
+      const calls = fetchImpl.mock.calls as unknown as Array<[string, RequestInit | undefined]>;
+      expect(calls[0]?.[0]).toContain('includeStale=true');
     });
 
     it('attaches Authorization header with bearer token', async () => {
@@ -183,8 +184,9 @@ describe('SafetyFieldExcellenceDataAdapter', () => {
         getToken: async () => TOKEN,
         fetchImpl: fetchImpl as unknown as typeof fetch,
       });
-      const init = fetchImpl.mock.calls[0]?.[1] as RequestInit;
-      const auth = (init.headers as Record<string, string>).Authorization;
+      const calls = fetchImpl.mock.calls as unknown as Array<[string, RequestInit]>;
+      const init = calls[0]?.[1];
+      const auth = (init?.headers as Record<string, string>).Authorization;
       expect(auth).toBe(`Bearer ${TOKEN}`);
     });
   });

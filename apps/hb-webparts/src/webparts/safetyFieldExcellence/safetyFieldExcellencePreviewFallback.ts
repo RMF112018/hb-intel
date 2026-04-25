@@ -55,6 +55,10 @@ export function buildSafetyExcellencePreviewFallbackConfig(
       indicator: { label: 'Preview', variant: 'info' },
       freshness: { source: 'curated' },
     },
+    // Each preview signal carries a distinct indicator variant so the
+    // surface reads as a productized preview of four evidence categories,
+    // not as flat-gray filler tiles. Urgency stays `'routine'` — the
+    // preview is not an alarm.
     secondarySignals: [
       {
         id: 'safety-preview-inspection-consistency',
@@ -62,7 +66,7 @@ export function buildSafetyExcellencePreviewFallbackConfig(
         summary:
           'Published highlights will consider rolling inspection performance, not a single score.',
         urgency: 'routine',
-        indicator: { label: 'Example signal', variant: 'neutral' },
+        indicator: { label: 'Example · Inspection', variant: 'info' },
       },
       {
         id: 'safety-preview-activity-evidence',
@@ -70,7 +74,7 @@ export function buildSafetyExcellencePreviewFallbackConfig(
         summary:
           'The model will look for evidence that meaningful work was active on site.',
         urgency: 'routine',
-        indicator: { label: 'Example signal', variant: 'neutral' },
+        indicator: { label: 'Example · Exposure', variant: 'success' },
       },
       {
         id: 'safety-preview-corrective-response',
@@ -78,7 +82,7 @@ export function buildSafetyExcellencePreviewFallbackConfig(
         summary:
           'Corrective-action behavior and finding severity will inform recognition.',
         urgency: 'routine',
-        indicator: { label: 'Example signal', variant: 'neutral' },
+        indicator: { label: 'Example · Response', variant: 'warning' },
       },
       {
         id: 'safety-preview-finding-severity',
@@ -86,7 +90,7 @@ export function buildSafetyExcellencePreviewFallbackConfig(
         summary:
           'Trend in high- and medium-severity findings will be a recognition input.',
         urgency: 'routine',
-        indicator: { label: 'Example signal', variant: 'neutral' },
+        indicator: { label: 'Example · Trend', variant: 'neutral' },
       },
     ],
     sectionCta,

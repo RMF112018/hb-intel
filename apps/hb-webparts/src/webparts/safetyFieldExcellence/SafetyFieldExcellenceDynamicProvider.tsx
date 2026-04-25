@@ -354,6 +354,10 @@ function publishProof(
     isStale: resolution.isStale,
     packageVersion: props.packageVersion,
     expectedPackageVersion: props.expectedPackageVersion,
+    // Wave 06: non-sensitive UI/UX cues for evidence + hosted proof.
+    previewFallbackRendered:
+      resolution.dataSource === 'preview-fallback' || resolution.dataSource === 'error-fallback',
+    staleTreatment: resolution.state === 'stale' || resolution.isStale,
     ...extra,
   });
 }

@@ -40,6 +40,13 @@ export interface SafetyFieldExcellenceRuntimeProof {
   lastFetchCompletedAt?: string;
   packageVersion?: string;
   expectedPackageVersion?: string;
+  /**
+   * Wave 06: non-sensitive UI/UX proof fields. Set by the dynamic provider
+   * based on the resolved render path. Useful for evidence docs and hosted
+   * proof. Never includes tokens, raw payload content, or finding text.
+   */
+  previewFallbackRendered?: boolean;
+  staleTreatment?: boolean;
 }
 
 declare global {

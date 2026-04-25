@@ -8,8 +8,10 @@ import {
   type HbcSafetyHomepageSurfaceMode,
   type HbcSafetyHomepageSurfaceProps,
   type LucideIcon,
+  type SafetyDataConfidence,
   type SafetySecondarySignal as SafetySurfaceSecondarySignal,
   type SafetySignalSeverity,
+  type SafetySurfaceFallbackReason,
 } from '@hbc/ui-kit/homepage';
 import type { NormalizedSafetyFieldExcellenceModel } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import type {
@@ -83,9 +85,18 @@ export function resolveConsumerState(
   };
 }
 
+export interface SafetySurfaceModelExtras {
+  readonly isPreview?: boolean;
+  readonly isStale?: boolean;
+  readonly fallbackReason?: SafetySurfaceFallbackReason;
+  readonly dataConfidence?: SafetyDataConfidence;
+  readonly primaryLastUpdatedLabel?: string;
+}
+
 export function mapSafetySurfaceModel(
   normalized: NormalizedSafetyFieldExcellenceModel,
   mode: HbcSafetyHomepageSurfaceMode,
+  extras: SafetySurfaceModelExtras = {},
 ): Omit<HbcSafetyHomepageSurfaceProps, 'title' | 'icon'> {
   const secondarySignals: SafetySurfaceSecondarySignal[] = normalized.secondary.map((item) => {
     const urgency = item.urgency;
@@ -134,6 +145,12 @@ export function mapSafetySurfaceModel(
       ? normalized.sectionCta
       : undefined;
 
+  // Stale signal is now expressed at the surface level via `isStale` (which
+  // renders the `Stale` chip in the primary header). Suppress the legacy
+  // badge-level "Stale" pill to avoid duplication when the caller has set
+  // `extras.isStale`.
+  const showLegacyStaleBadge = !extras.isStale && Boolean(normalized.featured?.isStale);
+
   return {
     mode,
     posture: {
@@ -144,6 +161,10 @@ export function mapSafetySurfaceModel(
     },
     degradedNotice,
     action,
+    isPreview: extras.isPreview,
+    isStale: extras.isStale,
+    fallbackReason: extras.fallbackReason,
+    dataConfidence: extras.dataConfidence,
     primary: normalized.featured
       ? {
           title: normalized.featured.title,
@@ -152,6 +173,9 @@ export function mapSafetySurfaceModel(
           urgencyLabel: URGENCY_LABEL_MAP[featuredUrgency],
           icon: URGENCY_ICON_MAP[featuredUrgency],
           severity: URGENCY_SIGNAL_SEVERITY_MAP[featuredUrgency],
+          lastUpdatedLabel:
+            extras.primaryLastUpdatedLabel ?? normalized.featured.freshnessLabel,
+          dataConfidence: extras.dataConfidence,
           badges: (
             <>
               <HbcPremiumBadge
@@ -164,7 +188,7 @@ export function mapSafetySurfaceModel(
                   status={normalized.featured.indicator.variant ?? 'warning'}
                 />
               ) : null}
-              {normalized.featured.isStale ? (
+              {showLegacyStaleBadge ? (
                 <HbcPremiumBadge label="Stale" status="warning" />
               ) : null}
             </>

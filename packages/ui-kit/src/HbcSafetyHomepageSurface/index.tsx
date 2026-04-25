@@ -1,7 +1,15 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion } from 'motion/react';
-import type { LucideIcon } from 'lucide-react';
+import {
+  AlertTriangle,
+  Clock,
+  Eye,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  type LucideIcon,
+} from 'lucide-react';
 import { HbcPremiumCta } from '../HbcPremiumCta/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import styles from './safety-homepage-surface.module.css';
@@ -11,6 +19,25 @@ export type HbcSafetyHomepageSurfaceMode = 'standard' | 'compact' | 'minimal';
 export type SafetySignalSeverity = 'default' | 'success' | 'warning' | 'danger';
 
 export type SafetyPostureTone = 'info' | 'success' | 'warning' | 'critical' | 'neutral';
+
+export type SafetyDataConfidence = 'high' | 'medium' | 'low';
+
+/**
+ * Surface-level signal of why the rendered content is not "fresh live published
+ * data". Drives an explicit visual cue (chip + state attribute) so a user never
+ * mistakes a fallback render for a fresh recognition.
+ *
+ *  - 'live-data-unavailable' — the dynamic adapter could not load live data;
+ *    surface is rendering whatever fallback content was supplied.
+ *  - 'no-published-highlight' — backend confirmed no published artifact exists.
+ *  - 'preview' — surface is rendering preview/example content awaiting data.
+ *  - 'curated-fallback' — dynamic mode resolved to curated content as fallback.
+ */
+export type SafetySurfaceFallbackReason =
+  | 'live-data-unavailable'
+  | 'no-published-highlight'
+  | 'preview'
+  | 'curated-fallback';
 
 export interface SafetySurfaceCta {
   label: string;
@@ -33,6 +60,16 @@ export interface SafetyPrimarySignal {
   badges?: React.ReactNode;
   metaItems?: SafetySurfaceMetaItem[];
   cta?: SafetySurfaceCta;
+  /**
+   * Optional caption shown under the primary title (e.g. "Published Apr 25 ·
+   * Fresh through May 2"). Visible in all modes.
+   */
+  lastUpdatedLabel?: string;
+  /**
+   * Per-signal data-confidence override. When omitted, the surface-level
+   * `dataConfidence` prop is used. Visible in standard + compact only.
+   */
+  dataConfidence?: SafetyDataConfidence;
 }
 
 export interface SafetySecondarySignal {
@@ -63,6 +100,36 @@ export interface HbcSafetyHomepageSurfaceProps {
   action?: SafetySurfaceCta;
   mode?: HbcSafetyHomepageSurfaceMode;
   degradedNotice?: string;
+  /**
+   * Icon to render alongside `degradedNotice`. Defaults to `AlertTriangle` so
+   * the notice is never color-only.
+   */
+  degradedNoticeIcon?: LucideIcon;
+  /**
+   * When true, the surface renders a clear "Preview" chip and a dashed accent
+   * so users never mistake preview/example content for fresh published data.
+   * Visible in all modes (preview cue must survive shell compression).
+   */
+  isPreview?: boolean;
+  /**
+   * When true, the surface renders a Stale chip (with `Clock` icon — not
+   * color-only) on the primary signal and applies a subtle warm wash. Stale
+   * cue is visible in all modes including minimal.
+   */
+  isStale?: boolean;
+  /**
+   * Why the rendered content is not fresh live data. Drives a non-alarming
+   * "Live data temporarily unavailable" / "Awaiting published weekly data" /
+   * preview / curated-fallback chip in the posture region. Never exposes raw
+   * error text.
+   */
+  fallbackReason?: SafetySurfaceFallbackReason;
+  /**
+   * Surface-level data confidence for the published artifact. Renders a small
+   * confidence chip (high → ShieldCheck/success, medium → Shield/info,
+   * low → ShieldAlert/warning). Visible in standard + compact.
+   */
+  dataConfidence?: SafetyDataConfidence;
   className?: string;
   'aria-label'?: string;
 }
@@ -86,6 +153,25 @@ const SIGNAL_CAP_BY_MODE: Record<HbcSafetyHomepageSurfaceMode, number> = {
   standard: 4,
   compact: 3,
   minimal: 2,
+};
+
+const FALLBACK_REASON_LABEL: Record<SafetySurfaceFallbackReason, string> = {
+  'live-data-unavailable': 'Live data temporarily unavailable',
+  'no-published-highlight': 'Awaiting published weekly data',
+  'preview': 'Preview',
+  'curated-fallback': 'Authoring source',
+};
+
+const DATA_CONFIDENCE_ICON: Record<SafetyDataConfidence, LucideIcon> = {
+  high: ShieldCheck,
+  medium: Shield,
+  low: ShieldAlert,
+};
+
+const DATA_CONFIDENCE_LABEL: Record<SafetyDataConfidence, string> = {
+  high: 'High confidence',
+  medium: 'Medium confidence',
+  low: 'Low confidence',
 };
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as [number, number, number, number];
@@ -154,6 +240,11 @@ export function HbcSafetyHomepageSurface({
   action,
   mode = 'standard',
   degradedNotice,
+  degradedNoticeIcon,
+  isPreview = false,
+  isStale = false,
+  fallbackReason,
+  dataConfidence,
   className,
   'aria-label': ariaLabel,
 }: HbcSafetyHomepageSurfaceProps): React.JSX.Element {
@@ -173,6 +264,10 @@ export function HbcSafetyHomepageSurface({
   const showSurfaceAction = mode === 'standard' || (mode === 'compact' && !showPrimaryCta);
   const primarySeverity = primary?.severity ?? 'default';
   const PrimaryIcon = primary?.icon;
+  const DegradedIcon = degradedNoticeIcon ?? AlertTriangle;
+  const effectiveConfidence = primary?.dataConfidence ?? dataConfidence;
+  const showConfidenceChip = mode !== 'minimal' && Boolean(effectiveConfidence);
+  const ConfidenceIcon = effectiveConfidence ? DATA_CONFIDENCE_ICON[effectiveConfidence] : null;
   const primaryMotion = reducedMotion
     ? {}
     : {
@@ -183,11 +278,21 @@ export function HbcSafetyHomepageSurface({
 
   return (
     <section
-      className={clsx(styles.root, mode === 'compact' && styles.modeCompact, mode === 'minimal' && styles.modeMinimal, className)}
+      className={clsx(
+        styles.root,
+        mode === 'compact' && styles.modeCompact,
+        mode === 'minimal' && styles.modeMinimal,
+        isPreview && styles.statePreview,
+        isStale && styles.stateStale,
+        className,
+      )}
       aria-label={ariaLabel ?? title}
       data-hbc-premium="safety-homepage-surface"
       data-hbc-homepage="operational-safety"
       data-hbc-safety-mode={mode}
+      data-hbc-safety-preview={isPreview ? 'true' : undefined}
+      data-hbc-safety-stale={isStale ? 'true' : undefined}
+      data-hbc-safety-fallback-reason={fallbackReason}
     >
       <header className={styles.postureBand}>
         <div className={styles.postureLead}>
@@ -199,6 +304,34 @@ export function HbcSafetyHomepageSurface({
             ) : null}
             {posture.label}
           </span>
+          {fallbackReason ? (
+            <span
+              className={clsx(
+                styles.fallbackChip,
+                fallbackReason === 'live-data-unavailable' && styles.fallbackChipWarning,
+                fallbackReason === 'preview' && styles.fallbackChipPreview,
+                fallbackReason === 'no-published-highlight' && styles.fallbackChipPreview,
+                fallbackReason === 'curated-fallback' && styles.fallbackChipNeutral,
+              )}
+              role="status"
+            >
+              <Eye size={12} strokeWidth={2.25} aria-hidden="true" />
+              {FALLBACK_REASON_LABEL[fallbackReason]}
+            </span>
+          ) : null}
+          {showConfidenceChip && ConfidenceIcon && effectiveConfidence ? (
+            <span
+              className={clsx(
+                styles.confidenceChip,
+                styles[`confidence-${effectiveConfidence}` as 'confidence-high' | 'confidence-medium' | 'confidence-low'],
+              )}
+              aria-label={DATA_CONFIDENCE_LABEL[effectiveConfidence]}
+              title={DATA_CONFIDENCE_LABEL[effectiveConfidence]}
+            >
+              <ConfidenceIcon size={12} strokeWidth={2.25} aria-hidden="true" />
+              {DATA_CONFIDENCE_LABEL[effectiveConfidence]}
+            </span>
+          ) : null}
           {posture.updatedLabel && mode !== 'minimal' ? (
             <span className={styles.updatedLabel}>{posture.updatedLabel}</span>
           ) : null}
@@ -227,20 +360,37 @@ export function HbcSafetyHomepageSurface({
         >
           {degradedNotice ? (
             <p className={styles.degradedNotice} role="status">
-              {degradedNotice}
+              <DegradedIcon
+                size={14}
+                strokeWidth={2.25}
+                aria-hidden="true"
+                className={styles.degradedNoticeIcon}
+              />
+              <span>{degradedNotice}</span>
             </p>
           ) : null}
           {primary ? (
             <>
               <div className={styles.primaryHeader}>
                 <span className={styles.primaryKicker}>{primary.urgencyLabel ?? 'Primary signal'}</span>
-                {PrimaryIcon ? (
-                  <span className={styles.primaryIcon} aria-hidden="true">
-                    <PrimaryIcon size={18} strokeWidth={2.25} />
-                  </span>
-                ) : null}
+                <span className={styles.primaryHeaderEnd}>
+                  {isStale ? (
+                    <span className={styles.staleChip} role="status">
+                      <Clock size={12} strokeWidth={2.25} aria-hidden="true" />
+                      Stale
+                    </span>
+                  ) : null}
+                  {PrimaryIcon ? (
+                    <span className={styles.primaryIcon} aria-hidden="true">
+                      <PrimaryIcon size={18} strokeWidth={2.25} />
+                    </span>
+                  ) : null}
+                </span>
               </div>
               <h3 className={styles.primaryTitle}>{primary.title}</h3>
+              {primary.lastUpdatedLabel ? (
+                <p className={styles.primaryLastUpdated}>{primary.lastUpdatedLabel}</p>
+              ) : null}
               {showPrimarySummary && primarySummary ? <p className={styles.primarySummary}>{primarySummary}</p> : null}
               {primary.badges ? <div className={styles.primaryBadges}>{primary.badges}</div> : null}
               {visibleMeta.length > 0 ? (

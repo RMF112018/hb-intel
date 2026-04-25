@@ -1,6 +1,15 @@
 declare const styles: {
   readonly body: string;
+  readonly 'confidence-high': string;
+  readonly 'confidence-low': string;
+  readonly 'confidence-medium': string;
+  readonly confidenceChip: string;
   readonly degradedNotice: string;
+  readonly degradedNoticeIcon: string;
+  readonly fallbackChip: string;
+  readonly fallbackChipNeutral: string;
+  readonly fallbackChipPreview: string;
+  readonly fallbackChipWarning: string;
   readonly headline: string;
   readonly modeCompact: string;
   readonly modeMinimal: string;
@@ -19,8 +28,10 @@ declare const styles: {
   readonly primaryBadges: string;
   readonly primaryFallback: string;
   readonly primaryHeader: string;
+  readonly primaryHeaderEnd: string;
   readonly primaryIcon: string;
   readonly primaryKicker: string;
+  readonly primaryLastUpdated: string;
   readonly primaryMeta: string;
   readonly primaryMetaItem: string;
   readonly primaryRegion: string;
@@ -43,6 +54,9 @@ declare const styles: {
   readonly signalRow: string;
   readonly signalRowCompact: string;
   readonly signalTitle: string;
+  readonly staleChip: string;
+  readonly stateStale: string;
+  readonly statePreview: string;
   readonly updatedLabel: string;
 };
 

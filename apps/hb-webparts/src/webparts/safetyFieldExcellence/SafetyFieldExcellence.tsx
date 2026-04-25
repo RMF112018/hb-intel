@@ -20,6 +20,8 @@ import * as React from 'react';
 import {
   HbcSafetyHomepageSurface,
   Shield,
+  type SafetyDataConfidence,
+  type SafetySurfaceFallbackReason,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import {
@@ -113,7 +115,23 @@ export function SafetyFieldExcellence({
     }
 
     const operationalMode = resolveOperationalMode(shellRenderMode);
-    const surfaceModel = mapSafetySurfaceModel(normalized, operationalMode);
+    const isPreview = dynamicDataSource === 'preview-fallback';
+    const isStale = dynamicState === 'stale';
+    const fallbackReason = resolveSurfaceFallbackReason(dynamicState, dynamicDataSource);
+    const dataConfidence = pickDataConfidence(canonicalConfig);
+    const primaryLastUpdatedLabel = canonicalConfig?.primarySpotlight?.freshness?.updatedAt
+      ? formatPrimaryLastUpdatedLabel(
+          canonicalConfig.primarySpotlight.freshness.updatedAt,
+          canonicalConfig.primarySpotlight.freshness.expiresAt,
+        )
+      : undefined;
+    const surfaceModel = mapSafetySurfaceModel(normalized, operationalMode, {
+      isPreview,
+      isStale,
+      fallbackReason,
+      dataConfidence,
+      primaryLastUpdatedLabel,
+    });
     return (
       <HbcSafetyHomepageSurface
         title={normalized.heading}
@@ -145,4 +163,61 @@ function pickDynamicOrCurated(
     return dynamicConfig ?? curated;
   }
   return curated;
+}
+
+/**
+ * Map the dynamic state machine to the surface's `fallbackReason` chip so
+ * fallback renders are visibly differentiated from fresh recognition.
+ * Returns `undefined` for fresh dynamic and curated paths (no chip needed).
+ */
+function resolveSurfaceFallbackReason(
+  state: SafetyFieldExcellenceDynamicState | undefined,
+  dataSource: SafetyFieldExcellenceDataSource | undefined,
+): SafetySurfaceFallbackReason | undefined {
+  if (dataSource === 'preview-fallback') return 'preview';
+  if (dataSource === 'curated-fallback') return 'curated-fallback';
+  if (dataSource === 'error-fallback') return 'live-data-unavailable';
+  if (state === 'no-published-highlight') return 'no-published-highlight';
+  return undefined;
+}
+
+/**
+ * Best-effort `dataConfidence` extraction from the canonical config. The
+ * dynamic adapter persists confidence on the homepage payload via the
+ * Wave 04 contract; canonical curated configs may carry it on a custom
+ * field. Returns `undefined` when not present so the surface chip is
+ * suppressed cleanly.
+ */
+function pickDataConfidence(
+  config: SafetyFieldExcellenceConfig | undefined,
+): SafetyDataConfidence | undefined {
+  if (!config) return undefined;
+  const candidate = (config as { dataConfidence?: unknown }).dataConfidence;
+  if (candidate === 'high' || candidate === 'medium' || candidate === 'low') return candidate;
+  return undefined;
+}
+
+/**
+ * Build the primary signal's "Published … · Fresh through …" caption. Both
+ * timestamps are ISO; we render readable dates. If `updatedAt` is missing
+ * we return undefined so the surface omits the caption cleanly.
+ */
+function formatPrimaryLastUpdatedLabel(
+  updatedAt: string | undefined,
+  expiresAt: string | undefined,
+): string | undefined {
+  if (!updatedAt) return undefined;
+  const updated = formatIsoCalendarDate(updatedAt);
+  const expires = expiresAt ? formatIsoCalendarDate(expiresAt) : undefined;
+  if (!updated) return undefined;
+  return expires ? `Published ${updated} · Fresh through ${expires}` : `Published ${updated}`;
+}
+
+function formatIsoCalendarDate(iso: string): string | undefined {
+  const dt = new Date(iso);
+  if (Number.isNaN(dt.getTime())) return undefined;
+  // Stable, locale-agnostic short form. We keep it server-side-safe.
+  const month = dt.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+  const day = dt.getUTCDate();
+  return `${month} ${day}`;
 }

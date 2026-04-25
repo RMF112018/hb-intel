@@ -132,6 +132,9 @@
 }
 
 .degradedNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -139,6 +142,120 @@
   background: rgba(181, 71, 8, 0.08);
   font-size: 0.75rem;
   color: #8a4208;
+}
+
+.degradedNoticeIcon {
+  flex: none;
+}
+
+.fallbackChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.fallbackChipWarning {
+  color: var(--surface-warning);
+  background: rgba(181, 71, 8, 0.1);
+}
+
+.fallbackChipPreview {
+  color: var(--surface-brand);
+  background: rgba(34, 83, 145, 0.08);
+}
+
+.fallbackChipNeutral {
+  color: var(--surface-muted);
+  background: rgba(71, 85, 105, 0.1);
+}
+
+.confidenceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid currentColor;
+}
+
+.confidence-high {
+  color: var(--surface-success);
+  background: rgba(21, 112, 61, 0.08);
+}
+
+.confidence-medium {
+  color: var(--surface-brand);
+  background: rgba(34, 83, 145, 0.08);
+}
+
+.confidence-low {
+  color: var(--surface-warning);
+  background: rgba(181, 71, 8, 0.08);
+}
+
+.primaryHeaderEnd {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.staleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--surface-warning);
+  background: rgba(181, 71, 8, 0.1);
+  border: 1px solid currentColor;
+}
+
+.primaryLastUpdated {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--surface-muted);
+  letter-spacing: 0.02em;
+}
+
+.statePreview {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(34, 83, 145, 0.04) 0,
+      rgba(34, 83, 145, 0.04) 8px,
+      transparent 8px,
+      transparent 16px
+    ),
+    var(--surface-shell);
+  border-style: dashed;
+  border-color: rgba(34, 83, 145, 0.4);
+}
+
+.statePreview .primaryRegion {
+  border-style: dashed;
+}
+
+.stateStale .primaryRegion {
+  background:
+    linear-gradient(180deg, rgba(181, 71, 8, 0.06) 0%, rgba(181, 71, 8, 0.02) 100%),
+    var(--surface-elevated);
 }
 
 .primaryHeader {
@@ -265,11 +382,46 @@ button.signalRow {
   cursor: pointer;
 }
 
+/*
+ * Baseline interactive cue: subtle right-side chevron indicator on
+ * interactive rows so keyboard / non-mouse users see that a row is
+ * actionable without depending on hover. Color-blind safe: uses a glyph,
+ * not color alone.
+ */
+a.signalRow,
+button.signalRow {
+  position: relative;
+  padding-right: 28px;
+}
+
+a.signalRow::after,
+button.signalRow::after {
+  content: '›';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--surface-muted);
+  opacity: 0.6;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
 a.signalRow:hover,
 button.signalRow:hover {
   transform: translateY(-1px);
   border-color: rgba(34, 83, 145, 0.34);
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+a.signalRow:hover::after,
+button.signalRow:hover::after,
+a.signalRow:focus-visible::after,
+button.signalRow:focus-visible::after {
+  opacity: 1;
+  color: var(--surface-brand);
+  transform: translateY(-50%) translateX(2px);
 }
 
 a.signalRow:focus-visible,
@@ -444,5 +596,17 @@ button.signalRow:focus-visible {
   button.signalRow:hover {
     transform: none;
     box-shadow: none;
+  }
+
+  a.signalRow::after,
+  button.signalRow::after {
+    transition: none;
+  }
+
+  a.signalRow:hover::after,
+  button.signalRow:hover::after,
+  a.signalRow:focus-visible::after,
+  button.signalRow:focus-visible::after {
+    transform: translateY(-50%);
   }
 }

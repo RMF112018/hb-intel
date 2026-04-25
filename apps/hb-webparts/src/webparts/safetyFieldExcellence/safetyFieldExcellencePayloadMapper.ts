@@ -130,7 +130,23 @@ export function mapBackendPublishedToConfig(
     return { success: false, config: null, invalidReason: 'primary-invalid' };
   }
 
-  const config: SafetyFieldExcellenceConfig = {
+  // Pass `dataConfidence` through on the canonical config object so the
+  // SPFx surface can render the confidence chip. The canonical config type
+  // does not declare this field, so we attach it via type-extension on the
+  // returned object — `SafetyFieldExcellence.tsx` reads it through a typed
+  // helper (`pickDataConfidence`).
+  const dataConfidence: 'high' | 'medium' | 'low' | undefined =
+    payload.dataConfidence === 'high' ||
+    payload.dataConfidence === 'medium' ||
+    payload.dataConfidence === 'low'
+      ? payload.dataConfidence
+      : current.dataConfidence === 'high' ||
+        current.dataConfidence === 'medium' ||
+        current.dataConfidence === 'low'
+        ? current.dataConfidence
+        : undefined;
+
+  const config: SafetyFieldExcellenceConfig & { dataConfidence?: 'high' | 'medium' | 'low' } = {
     heading,
     topLineSummary,
     primarySpotlight,
@@ -138,6 +154,7 @@ export function mapBackendPublishedToConfig(
     sectionCta,
     maxSecondaryItems: 4,
     staleAfterHours: 168,
+    dataConfidence,
   };
   return { success: true, config };
 }

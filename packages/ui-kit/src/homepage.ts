@@ -192,10 +192,12 @@ export { HbcSafetyHomepageSurface } from './HbcSafetyHomepageSurface/index.js';
 export type {
   HbcSafetyHomepageSurfaceProps,
   HbcSafetyHomepageSurfaceMode,
-  SafetySignalSeverity,
+  SafetyDataConfidence,
+  SafetyPostureSummary,
   SafetyPrimarySignal,
   SafetySecondarySignal,
-  SafetyPostureSummary,
+  SafetySignalSeverity,
+  SafetySurfaceFallbackReason,
 } from './HbcSafetyHomepageSurface/index.js';
 
 // ── Wave 01 follow-on — People & Culture surface family ──────────────
