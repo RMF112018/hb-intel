@@ -66,7 +66,7 @@ lists in install order.
    This package cannot be tenant-wide-deployed. Tenant-wide
    deployment of a `.sppkg` containing SharePoint assets is
    unsupported and the feature framework will be silently ignored.
-5. Confirm the App Catalog lists the package with version `1.0.13.0`.
+5. Confirm the App Catalog lists the package with version `1.0.14.0`.
 
 ## 5. Install on `/sites/HBCentral`
 
@@ -119,7 +119,7 @@ pane. Set:
 - `foleonApiResource` → Entra resource/application ID URI used by SPFx
   to acquire backend access tokens.
 - `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
-- `expectedPackageVersion` → `1.0.13.0`.
+- `expectedPackageVersion` → `1.0.14.0`.
 
 `HB_FoleonSyncRuns` is written by the backend sync and validation
 routes. Operators review the newest run proof in the connector's
@@ -161,7 +161,7 @@ window.__hbIntel_foleonRuntimeBindingProof
 
 Expected:
 
-- `packageVersion === '1.0.13.0'`.
+- `packageVersion === '1.0.14.0'`.
 - `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
 - `hostMode === 'sharepoint'`.
 - `canInitialize === true`.

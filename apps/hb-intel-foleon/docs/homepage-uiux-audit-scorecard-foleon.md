@@ -1,7 +1,7 @@
 # Foleon Connector — Homepage UI/UX Audit Scorecard (closure)
 
 **Package:** `@hbc/spfx-hb-intel-foleon`  
-**SPFx / manifest version:** `1.0.13.0` (see `config/package-solution.json`, `FoleonWebPart.manifest.json`, `runtimeContract.ts`)  
+**SPFx / manifest version:** `1.0.14.0` (see `config/package-solution.json`, `FoleonWebPart.manifest.json`, `runtimeContract.ts`)  
 **Date:** 2026-04-24  
 **Auditor:** Engineering (automated closure draft — replace with human sign-off before release).
 
