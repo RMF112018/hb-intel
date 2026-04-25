@@ -10,6 +10,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@hbc/foleon-reader': resolve(__dirname, '../../packages/foleon-reader/src/index.ts'),
+      '@hbc/foleon-reader/': resolve(__dirname, '../../packages/foleon-reader/src/'),
       '@hbc/ui-kit/homepage': resolve(__dirname, '../../packages/ui-kit/src/homepage.ts'),
       '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts'),

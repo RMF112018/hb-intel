@@ -1,0 +1,310 @@
+/**
+ * Read-side SharePoint service for the Foleon Content Registry.
+ *
+ * Uses @hbc/sharepoint-platform list-by-GUID descriptor endpoint
+ * builders so the service inherits the repo-wide GUID-binding rule
+ * (never bind by list title) even though the SharePoint data-model
+ * plan names the list `HB_FoleonContentRegistry`.
+ */
+import {
+  buildListItemsEndpoint,
+  fetchListItemsJson,
+  type SharePointListDescriptor,
+  type ListItemsQuery,
+} from '@hbc/sharepoint-platform';
+import type {
+  FoleonContentRecord,
+  FoleonCadence,
+  FoleonContentType,
+  FoleonHomepageSlot,
+  FoleonOpenMode,
+  FoleonPrimaryAudience,
+  FoleonPublishStatus,
+  FoleonReaderKey,
+  FoleonSyncSource,
+} from '../types/foleon-content.types.js';
+import {
+  FOLEON_CONTENT_REGISTRY_SCHEMA,
+  assertSelectFieldsInSchema,
+  assertFiltersAreIndexed,
+} from '../schema/foleonReaderQuerySchema.js';
+import { assertValidListGuid } from '../schema/validateListGuid.js';
+
+export const FOLEON_CONTENT_REGISTRY_TITLE = 'HB_FoleonContentRegistry' as const;
+
+// Every filter column the service is allowed to push. Verified at
+// module-init time so a non-indexed field cannot be pushed into the
+// live query surface by accident.
+const CONTENT_FILTER_FIELDS = [
+  'FoleonDocId',
+  'ReaderKey',
+  'ActiveEdition',
+  'IsVisible',
+  'PublishStatus',
+  'IsHomepageEligible',
+] as const;
+assertFiltersAreIndexed(FOLEON_CONTENT_REGISTRY_SCHEMA, CONTENT_FILTER_FIELDS);
+
+interface FoleonContentRawRow {
+  Id?: number;
+  Title?: string;
+  FoleonDocId?: number;
+  FoleonDocUid?: string;
+  FoleonIdentifier?: string;
+  FoleonProjectId?: number;
+  FoleonProjectName?: string;
+  ContentTypeKey?: string;
+  ReaderKey?: string;
+  Cadence?: string;
+  HomepageSlot?: string;
+  ArchiveGroup?: string;
+  ActiveEdition?: boolean;
+  PrimaryAudience?: string;
+  LastEditorialUpdate?: string;
+  PublishStatus?: string;
+  IsVisible?: boolean;
+  IsFeatured?: boolean;
+  IsHomepageEligible?: boolean;
+  PublishedUrl?: { Url?: string } | string | null;
+  PreviewUrl?: { Url?: string } | string | null;
+  EmbedUrl?: { Url?: string } | string | null;
+  ThumbnailUrl?: { Url?: string } | string | null;
+  HeroImageUrl?: { Url?: string } | string | null;
+  Summary?: string;
+  IssueDate?: string;
+  PublishedOn?: string;
+  DisplayFrom?: string;
+  DisplayThrough?: string;
+  SortRank?: number;
+  RelatedProjectNumber?: string;
+  RelatedProjectName?: string;
+  Region?: string;
+  Sector?: string;
+  OpenMode?: string;
+  AllowEmbed?: boolean;
+  RequiresExternalOpen?: boolean;
+  SyncSource?: string;
+}
+
+// Public routes intentionally use a scalar-safe projection to avoid
+// SharePoint REST person/lookup expansion requirements.
+const CONTENT_SELECT_FIELDS_ARRAY = [
+  'Id',
+  'Title',
+  'FoleonDocId',
+  'FoleonDocUid',
+  'FoleonIdentifier',
+  'FoleonProjectId',
+  'FoleonProjectName',
+  'ContentTypeKey',
+  'ReaderKey',
+  'Cadence',
+  'HomepageSlot',
+  'ArchiveGroup',
+  'ActiveEdition',
+  'PrimaryAudience',
+  'LastEditorialUpdate',
+  'PublishStatus',
+  'IsVisible',
+  'IsFeatured',
+  'IsHomepageEligible',
+  'PublishedUrl',
+  'PreviewUrl',
+  'EmbedUrl',
+  'ThumbnailUrl',
+  'HeroImageUrl',
+  'Summary',
+  'IssueDate',
+  'PublishedOn',
+  'DisplayFrom',
+  'DisplayThrough',
+  'SortRank',
+  'RelatedProjectNumber',
+  'RelatedProjectName',
+  'Region',
+  'Sector',
+  'OpenMode',
+  'AllowEmbed',
+  'RequiresExternalOpen',
+  'SyncSource',
+] as const;
+assertSelectFieldsInSchema(FOLEON_CONTENT_REGISTRY_SCHEMA, CONTENT_SELECT_FIELDS_ARRAY);
+const CONTENT_SELECT_FIELDS = CONTENT_SELECT_FIELDS_ARRAY.join(',');
+
+export interface FoleonContentQueryParams {
+  readonly siteUrl: string;
+  readonly contentRegistryListId: string;
+  readonly foleonDocId?: number;
+  readonly readerKey?: FoleonReaderKey;
+  readonly activeEditionOnly?: boolean;
+  readonly homepageEligibleOnly?: boolean;
+  readonly publishedOnly?: boolean;
+  readonly top?: number;
+  readonly signal?: AbortSignal;
+}
+
+export async function fetchFoleonContent(
+  params: FoleonContentQueryParams,
+): Promise<ReadonlyArray<FoleonContentRecord>> {
+  assertValidListGuid(params.contentRegistryListId, 'HB_FoleonContentRegistry');
+  const descriptor: SharePointListDescriptor = {
+    id: params.contentRegistryListId,
+    title: FOLEON_CONTENT_REGISTRY_TITLE,
+    urlSegment: FOLEON_CONTENT_REGISTRY_TITLE,
+  };
+  const filterClauses: string[] = [];
+  if (typeof params.foleonDocId === 'number') {
+    filterClauses.push(`FoleonDocId eq ${params.foleonDocId}`);
+  }
+  if (params.readerKey) {
+    filterClauses.push(`ReaderKey eq '${escapeODataString(params.readerKey)}'`);
+  }
+  if (params.activeEditionOnly) {
+    filterClauses.push('ActiveEdition eq 1');
+  }
+  if (params.publishedOnly) {
+    filterClauses.push(`IsVisible eq 1`);
+    filterClauses.push(`PublishStatus eq 'Published'`);
+  }
+  if (params.homepageEligibleOnly) {
+    filterClauses.push(`IsHomepageEligible eq 1`);
+  }
+  const query: ListItemsQuery = {
+    select: CONTENT_SELECT_FIELDS,
+    top: params.top ?? 100,
+    ...(filterClauses.length > 0 ? { filter: filterClauses.join(' and ') } : {}),
+  };
+  const endpoint = buildListItemsEndpoint(params.siteUrl, descriptor, query);
+  const rows = await fetchListItemsJson<FoleonContentRawRow>(endpoint, {
+    signal: params.signal,
+    label: FOLEON_CONTENT_REGISTRY_TITLE,
+  });
+  return rows.map(toFoleonContentRecord).filter((row): row is FoleonContentRecord => row !== null);
+}
+
+export function toFoleonContentRecord(row: FoleonContentRawRow): FoleonContentRecord | null {
+  if (typeof row.Id !== 'number' || typeof row.FoleonDocId !== 'number') return null;
+  return {
+    id: row.Id,
+    title: row.Title ?? '',
+    foleonDocId: row.FoleonDocId,
+    foleonDocUid: row.FoleonDocUid,
+    foleonIdentifier: row.FoleonIdentifier,
+    foleonProjectId: row.FoleonProjectId,
+    foleonProjectName: row.FoleonProjectName,
+    contentTypeKey: normalizeContentType(row.ContentTypeKey),
+    readerKey: normalizeReaderKey(row.ReaderKey),
+    cadence: normalizeCadence(row.Cadence),
+    homepageSlot: normalizeHomepageSlot(row.HomepageSlot),
+    archiveGroup: row.ArchiveGroup,
+    activeEdition: typeof row.ActiveEdition === 'boolean' ? row.ActiveEdition : undefined,
+    primaryAudience: normalizePrimaryAudience(row.PrimaryAudience),
+    lastEditorialUpdate: row.LastEditorialUpdate,
+    publishStatus: normalizePublishStatus(row.PublishStatus),
+    isVisible: !!row.IsVisible,
+    isFeatured: !!row.IsFeatured,
+    isHomepageEligible: !!row.IsHomepageEligible,
+    publishedUrl: readHyperlink(row.PublishedUrl),
+    previewUrl: readHyperlink(row.PreviewUrl),
+    embedUrl: readHyperlink(row.EmbedUrl),
+    thumbnailUrl: readHyperlink(row.ThumbnailUrl),
+    heroImageUrl: readHyperlink(row.HeroImageUrl),
+    summary: row.Summary,
+    issueDate: row.IssueDate,
+    publishedOn: row.PublishedOn,
+    displayFrom: row.DisplayFrom,
+    displayThrough: row.DisplayThrough,
+    sortRank: row.SortRank,
+    relatedProjectNumber: row.RelatedProjectNumber,
+    relatedProjectName: row.RelatedProjectName,
+    region: row.Region,
+    sector: row.Sector,
+    openMode: normalizeOpenMode(row.OpenMode),
+    allowEmbed: !!row.AllowEmbed,
+    requiresExternalOpen: !!row.RequiresExternalOpen,
+    syncSource: normalizeSyncSource(row.SyncSource),
+  };
+}
+
+function readHyperlink(value: FoleonContentRawRow['PublishedUrl']): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'string') return value;
+  return value.Url ?? undefined;
+}
+
+function escapeODataString(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+function normalizeContentType(value: string | undefined): FoleonContentType {
+  const allowed: ReadonlyArray<FoleonContentType> = [
+    'Project Spotlight',
+    'Company Pulse',
+    'Project Highlight',
+    'Newsletter',
+    'Company News',
+    'Market Update',
+    'Leadership',
+    'Other',
+  ];
+  return allowed.includes(value as FoleonContentType) ? (value as FoleonContentType) : 'Other';
+}
+
+function normalizeReaderKey(value: string | undefined): FoleonReaderKey | undefined {
+  const allowed: ReadonlyArray<FoleonReaderKey> = ['project-spotlight', 'company-pulse'];
+  return allowed.includes(value as FoleonReaderKey) ? (value as FoleonReaderKey) : undefined;
+}
+
+function normalizeCadence(value: string | undefined): FoleonCadence | undefined {
+  const allowed: ReadonlyArray<FoleonCadence> = ['Monthly', 'Weekly', 'Frequent', 'Ad Hoc'];
+  return allowed.includes(value as FoleonCadence) ? (value as FoleonCadence) : undefined;
+}
+
+function normalizeHomepageSlot(value: string | undefined): FoleonHomepageSlot | undefined {
+  const allowed: ReadonlyArray<FoleonHomepageSlot> = [
+    'Project Spotlight Reader',
+    'Company Pulse Reader',
+  ];
+  return allowed.includes(value as FoleonHomepageSlot) ? (value as FoleonHomepageSlot) : undefined;
+}
+
+function normalizePrimaryAudience(value: string | undefined): FoleonPrimaryAudience | undefined {
+  const allowed: ReadonlyArray<FoleonPrimaryAudience> = [
+    'Companywide',
+    'Operations',
+    'Field',
+    'Leadership',
+    'Marketing',
+    'Safety',
+    'IT',
+  ];
+  return allowed.includes(value as FoleonPrimaryAudience) ? (value as FoleonPrimaryAudience) : undefined;
+}
+
+function normalizePublishStatus(value: string | undefined): FoleonPublishStatus {
+  const allowed: ReadonlyArray<FoleonPublishStatus> = [
+    'Draft',
+    'Preview',
+    'Published',
+    'Archived',
+    'Offline',
+    'Suppressed',
+  ];
+  return allowed.includes(value as FoleonPublishStatus) ? (value as FoleonPublishStatus) : 'Draft';
+}
+
+function normalizeOpenMode(value: string | undefined): FoleonOpenMode {
+  const allowed: ReadonlyArray<FoleonOpenMode> = [
+    'Inline Reader',
+    'Fullscreen Reader',
+    'New Tab Only',
+  ];
+  return allowed.includes(value as FoleonOpenMode) ? (value as FoleonOpenMode) : 'Inline Reader';
+}
+
+function normalizeSyncSource(value: string | undefined): FoleonSyncSource {
+  const allowed: ReadonlyArray<FoleonSyncSource> = ['Manual', 'Foleon API', 'Hybrid'];
+  return allowed.includes(value as FoleonSyncSource) ? (value as FoleonSyncSource) : 'Manual';
+}
+
+export { CONTENT_SELECT_FIELDS as FOLEON_CONTENT_SELECT_FIELDS };

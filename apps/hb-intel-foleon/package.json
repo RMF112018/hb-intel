@@ -13,6 +13,7 @@
     "provision:print": "tsx scripts/print-foleon-provisioning.ts"
   },
   "dependencies": {
+    "@hbc/foleon-reader": "workspace:*",
     "@hbc/sharepoint-platform": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@radix-ui/react-scroll-area": "^1.2.0",

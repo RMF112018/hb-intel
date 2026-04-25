@@ -37,6 +37,8 @@
       "@hbc/query-hooks/*": ["packages/query-hooks/src/*"],
       "@hbc/ui-kit": ["packages/ui-kit/src/index.ts"],
       "@hbc/ui-kit/*": ["packages/ui-kit/src/*"],
+      "@hbc/foleon-reader": ["packages/foleon-reader/src/index.ts"],
+      "@hbc/foleon-reader/*": ["packages/foleon-reader/src/*"],
       "@hbc/homepage-launcher": ["packages/homepage-launcher/src/index.ts"],
       "@hbc/homepage-launcher/*": ["packages/homepage-launcher/src/*"],
       "@hbc/auth": ["packages/auth/src/index.ts"],

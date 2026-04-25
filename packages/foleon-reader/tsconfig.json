@@ -1,10 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
+    "outDir": "dist",
+    "rootDir": "src",
     "paths": {
-      "@hbc/foleon-reader": ["packages/foleon-reader/src/index.ts"],
-      "@hbc/foleon-reader/*": ["packages/foleon-reader/src/*"],
       "@hbc/ui-kit/homepage": ["../../packages/ui-kit/src/homepage.ts"],
       "@hbc/ui-kit/theme": ["../../packages/ui-kit/src/theme/index.ts"],
       "@hbc/ui-kit": ["../../packages/ui-kit/src/index.ts"],

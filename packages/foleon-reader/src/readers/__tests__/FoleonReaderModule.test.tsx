@@ -1,10 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
+import type { IFoleonRuntimeContract } from '../../runtime/embeddedRuntimeContract.js';
 import type { FoleonContentRecord } from '../../types/foleon-content.types.js';
 import { createFoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
 import { resolveFoleonReaderContent } from '../../services/FoleonReaderContentService.js';
-import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from '../../webparts/foleon/runtimeContract.js';
 import {
   FOLEON_READER_CONFIGS,
   type FoleonReaderModuleConfig,
@@ -57,8 +56,8 @@ function makeContract(): IFoleonRuntimeContract {
     },
     originPolicy: createFoleonOriginPolicy(['https://viewer.us.foleon.com']),
     governed: {
-      expectedManifestId: FOLEON_WEBPART_ID,
-      expectedPackageVersion: FOLEON_PACKAGE_VERSION,
+      expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
+      expectedPackageVersion: '1.0.20.0',
       manifestIdMatchesExpected: true,
       packageVersionMatchesExpected: true,
     },
@@ -230,4 +229,49 @@ describe('FoleonReaderModule', () => {
     fireEvent.load(iframe);
     expect(callbacks.onReaderOpen).toHaveBeenCalledTimes(1);
   });
+
+  it('renders both reader lanes in one React tree without Foleon globals or shared roots', async () => {
+    resolveMock.mockImplementation(async (params) => ({
+      kind: 'preview',
+      config: params.config,
+      reason: 'no-active-record',
+      warnings: [],
+    }));
+    installMatchMedia(false);
+    const callbacks = {
+      onOpenArchive: vi.fn(),
+      onReaderOpen: vi.fn(),
+      onReaderClose: vi.fn(),
+      onEmbedError: vi.fn(),
+      onGateBlocked: vi.fn(),
+    };
+
+    render(
+      <>
+        <FoleonReaderModule
+          contract={makeContract()}
+          config={FOLEON_READER_CONFIGS.projectSpotlight}
+          tone="spotlight"
+          pageContext="Project Spotlight"
+          {...callbacks}
+        />
+        <FoleonReaderModule
+          contract={{ ...makeContract(), route: 'companyPulse' }}
+          config={FOLEON_READER_CONFIGS.companyPulse}
+          tone="pulse"
+          pageContext="Company Pulse"
+          {...callbacks}
+        />
+      </>,
+    );
+
+    expect(await screen.findByText('Project Spotlight reader')).toBeTruthy();
+    expect(await screen.findByText('Company Pulse reader')).toBeTruthy();
+    expect(resolveMock).toHaveBeenCalledTimes(2);
+    expect(document.querySelector('[data-preview-tone="blue"]')).not.toBeNull();
+    expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
+    expect(document.querySelectorAll('iframe')).toHaveLength(0);
+    expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
+  });
+
 });

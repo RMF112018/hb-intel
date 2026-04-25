@@ -39,8 +39,7 @@ import { HighlightsPage } from './pages/HighlightsPage.js';
 import { ReaderPage } from './pages/ReaderPage.js';
 import { ContentHubPage } from './pages/ContentHubPage.js';
 import { ManagePage } from './pages/ManagePage.js';
-import { ProjectSpotlightReader } from './readers/ProjectSpotlightReader.js';
-import { CompanyPulseReader } from './readers/CompanyPulseReader.js';
+import { CompanyPulseReader, ProjectSpotlightReader } from '@hbc/foleon-reader';
 import { FoleonError } from './components/FoleonStates.js';
 import { adminIssueDetails } from './runtime/foleonConfigIssues.js';
 
