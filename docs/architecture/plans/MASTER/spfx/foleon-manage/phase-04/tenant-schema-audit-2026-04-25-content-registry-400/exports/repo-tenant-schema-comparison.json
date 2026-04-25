@@ -1,0 +1,1549 @@
+{
+  "GeneratedAtUtc": "2026-04-25T19:15:00Z",
+  "Comparisons": [
+    {
+      "ListKey": "HB_FoleonContentRegistry",
+      "DisplayTitle": "Foleon Content Registry",
+      "Id": "2e57615d-457e-49b8-aef3-038e85cbe068",
+      "RootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry",
+      "ItemCount": 0,
+      "ExpectedCustomFieldCount": 39,
+      "MatchedCustomFieldCount": 39,
+      "MissingCustomFields": [],
+      "TypeMismatches": [],
+      "RequiredMismatches": [],
+      "IndexMismatches": [],
+      "UniqueMismatches": [],
+      "Rows": [
+        {
+          "InternalName": "FoleonDocId",
+          "Expected": {
+            "InternalName": "FoleonDocId",
+            "Id": "b9f50001-f01e-4a10-8010-c0f0e0d00001",
+            "Type": "Number",
+            "Required": true,
+            "Indexed": true,
+            "Unique": true
+          },
+          "Tenant": {
+            "Id": "b9f50001-f01e-4a10-8010-c0f0e0d00001",
+            "Type": "Number",
+            "Required": true,
+            "Indexed": true,
+            "Unique": true,
+            "SchemaXml": "<Field ID=\"{b9f50001-f01e-4a10-8010-c0f0e0d00001}\" Name=\"FoleonDocId\" DisplayName=\"Foleon Doc ID\" Type=\"Number\" Required=\"TRUE\" Indexed=\"TRUE\" EnforceUniqueValues=\"TRUE\" Decimals=\"0\" ColName=\"float1\" RowOrdinal=\"0\" StaticName=\"FoleonDocId\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FoleonDocUid",
+          "Expected": {
+            "InternalName": "FoleonDocUid",
+            "Id": "b9f50002-f01e-4a10-8010-c0f0e0d00002",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50002-f01e-4a10-8010-c0f0e0d00002",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50002-f01e-4a10-8010-c0f0e0d00002}\" Name=\"FoleonDocUid\" DisplayName=\"Foleon Doc UID\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"128\" ColName=\"nvarchar7\" RowOrdinal=\"0\" StaticName=\"FoleonDocUid\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FoleonIdentifier",
+          "Expected": {
+            "InternalName": "FoleonIdentifier",
+            "Id": "b9f50003-f01e-4a10-8010-c0f0e0d00003",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50003-f01e-4a10-8010-c0f0e0d00003",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50003-f01e-4a10-8010-c0f0e0d00003}\" Name=\"FoleonIdentifier\" DisplayName=\"Foleon Identifier\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"128\" ColName=\"nvarchar8\" RowOrdinal=\"0\" StaticName=\"FoleonIdentifier\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FoleonProjectId",
+          "Expected": {
+            "InternalName": "FoleonProjectId",
+            "Id": "b9f50004-f01e-4a10-8010-c0f0e0d00004",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50004-f01e-4a10-8010-c0f0e0d00004",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50004-f01e-4a10-8010-c0f0e0d00004}\" Name=\"FoleonProjectId\" DisplayName=\"Foleon Project ID\" Type=\"Number\" Required=\"FALSE\" Decimals=\"0\" ColName=\"float2\" RowOrdinal=\"0\" StaticName=\"FoleonProjectId\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FoleonProjectName",
+          "Expected": {
+            "InternalName": "FoleonProjectName",
+            "Id": "b9f50005-f01e-4a10-8010-c0f0e0d00005",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50005-f01e-4a10-8010-c0f0e0d00005",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50005-f01e-4a10-8010-c0f0e0d00005}\" Name=\"FoleonProjectName\" DisplayName=\"Foleon Project Name\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"255\" ColName=\"nvarchar9\" RowOrdinal=\"0\" StaticName=\"FoleonProjectName\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ContentTypeKey",
+          "Expected": {
+            "InternalName": "ContentTypeKey",
+            "Id": "b9f50006-f01e-4a10-8010-c0f0e0d00006",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50006-f01e-4a10-8010-c0f0e0d00006",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50006-f01e-4a10-8010-c0f0e0d00006}\" Name=\"ContentTypeKey\" DisplayName=\"Content Type\" Type=\"Choice\" Required=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar10\" RowOrdinal=\"0\" StaticName=\"ContentTypeKey\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><CHOICES><CHOICE>Project Highlight</CHOICE><CHOICE>Newsletter</CHOICE><CHOICE>Company News</CHOICE><CHOICE>Market Update</CHOICE><CHOICE>Leadership</CHOICE><CHOICE>Other</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "PublishStatus",
+          "Expected": {
+            "InternalName": "PublishStatus",
+            "Id": "b9f50007-f01e-4a10-8010-c0f0e0d00007",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50007-f01e-4a10-8010-c0f0e0d00007",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50007-f01e-4a10-8010-c0f0e0d00007}\" Name=\"PublishStatus\" DisplayName=\"Status\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar11\" RowOrdinal=\"0\" StaticName=\"PublishStatus\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><CHOICES><CHOICE>Draft</CHOICE><CHOICE>Preview</CHOICE><CHOICE>Published</CHOICE><CHOICE>Archived</CHOICE><CHOICE>Offline</CHOICE><CHOICE>Suppressed</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "IsVisible",
+          "Expected": {
+            "InternalName": "IsVisible",
+            "Id": "b9f50008-f01e-4a10-8010-c0f0e0d00008",
+            "Type": "Boolean",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50008-f01e-4a10-8010-c0f0e0d00008",
+            "Type": "Boolean",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50008-f01e-4a10-8010-c0f0e0d00008}\" Name=\"IsVisible\" DisplayName=\"Is Visible\" Type=\"Boolean\" Required=\"TRUE\" Indexed=\"TRUE\" ColName=\"bit1\" RowOrdinal=\"0\" StaticName=\"IsVisible\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>1</Default></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "IsFeatured",
+          "Expected": {
+            "InternalName": "IsFeatured",
+            "Id": "b9f50009-f01e-4a10-8010-c0f0e0d00009",
+            "Type": "Boolean",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50009-f01e-4a10-8010-c0f0e0d00009",
+            "Type": "Boolean",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50009-f01e-4a10-8010-c0f0e0d00009}\" Name=\"IsFeatured\" DisplayName=\"Is Featured\" Type=\"Boolean\" Required=\"FALSE\" ColName=\"bit2\" RowOrdinal=\"0\" StaticName=\"IsFeatured\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>0</Default></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "IsHomepageEligible",
+          "Expected": {
+            "InternalName": "IsHomepageEligible",
+            "Id": "b9f5000a-f01e-4a10-8010-c0f0e0d0000a",
+            "Type": "Boolean",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5000a-f01e-4a10-8010-c0f0e0d0000a",
+            "Type": "Boolean",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5000a-f01e-4a10-8010-c0f0e0d0000a}\" Name=\"IsHomepageEligible\" DisplayName=\"Is Homepage Eligible\" Type=\"Boolean\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"bit3\" RowOrdinal=\"0\" StaticName=\"IsHomepageEligible\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>0</Default></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "PublishedUrl",
+          "Expected": {
+            "InternalName": "PublishedUrl",
+            "Id": "b9f5000b-f01e-4a10-8010-c0f0e0d0000b",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5000b-f01e-4a10-8010-c0f0e0d0000b",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5000b-f01e-4a10-8010-c0f0e0d0000b}\" Name=\"PublishedUrl\" DisplayName=\"Published URL\" Type=\"URL\" Required=\"FALSE\" Format=\"Hyperlink\" ColName=\"nvarchar12\" RowOrdinal=\"0\" ColName2=\"nvarchar13\" RowOrdinal2=\"0\" StaticName=\"PublishedUrl\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "PreviewUrl",
+          "Expected": {
+            "InternalName": "PreviewUrl",
+            "Id": "b9f5000c-f01e-4a10-8010-c0f0e0d0000c",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5000c-f01e-4a10-8010-c0f0e0d0000c",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5000c-f01e-4a10-8010-c0f0e0d0000c}\" Name=\"PreviewUrl\" DisplayName=\"Preview URL\" Type=\"URL\" Required=\"FALSE\" Format=\"Hyperlink\" ColName=\"nvarchar14\" RowOrdinal=\"0\" ColName2=\"nvarchar15\" RowOrdinal2=\"0\" StaticName=\"PreviewUrl\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "EmbedUrl",
+          "Expected": {
+            "InternalName": "EmbedUrl",
+            "Id": "b9f5000d-f01e-4a10-8010-c0f0e0d0000d",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5000d-f01e-4a10-8010-c0f0e0d0000d",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5000d-f01e-4a10-8010-c0f0e0d0000d}\" Name=\"EmbedUrl\" DisplayName=\"Embed URL\" Type=\"URL\" Required=\"FALSE\" Format=\"Hyperlink\" ColName=\"nvarchar16\" RowOrdinal=\"0\" ColName2=\"nvarchar17\" RowOrdinal2=\"0\" StaticName=\"EmbedUrl\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ThumbnailUrl",
+          "Expected": {
+            "InternalName": "ThumbnailUrl",
+            "Id": "b9f5000e-f01e-4a10-8010-c0f0e0d0000e",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5000e-f01e-4a10-8010-c0f0e0d0000e",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5000e-f01e-4a10-8010-c0f0e0d0000e}\" Name=\"ThumbnailUrl\" DisplayName=\"Thumbnail URL\" Type=\"URL\" Required=\"FALSE\" Format=\"Hyperlink\" ColName=\"nvarchar18\" RowOrdinal=\"0\" ColName2=\"nvarchar19\" RowOrdinal2=\"0\" StaticName=\"ThumbnailUrl\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "HeroImageUrl",
+          "Expected": {
+            "InternalName": "HeroImageUrl",
+            "Id": "b9f5000f-f01e-4a10-8010-c0f0e0d0000f",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5000f-f01e-4a10-8010-c0f0e0d0000f",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5000f-f01e-4a10-8010-c0f0e0d0000f}\" Name=\"HeroImageUrl\" DisplayName=\"Hero Image URL\" Type=\"URL\" Required=\"FALSE\" Format=\"Hyperlink\" ColName=\"nvarchar20\" RowOrdinal=\"0\" ColName2=\"nvarchar21\" RowOrdinal2=\"0\" StaticName=\"HeroImageUrl\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "Summary",
+          "Expected": {
+            "InternalName": "Summary",
+            "Id": "b9f50010-f01e-4a10-8010-c0f0e0d00010",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50010-f01e-4a10-8010-c0f0e0d00010",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50010-f01e-4a10-8010-c0f0e0d00010}\" Name=\"Summary\" DisplayName=\"Summary\" Type=\"Note\" Required=\"FALSE\" NumLines=\"6\" RichText=\"FALSE\" ColName=\"ntext2\" RowOrdinal=\"0\" StaticName=\"Summary\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "MarketingOwner",
+          "Expected": {
+            "InternalName": "MarketingOwner",
+            "Id": "b9f50011-f01e-4a10-8010-c0f0e0d00011",
+            "Type": "User",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50011-f01e-4a10-8010-c0f0e0d00011",
+            "Type": "User",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50011-f01e-4a10-8010-c0f0e0d00011}\" Name=\"MarketingOwner\" DisplayName=\"Marketing Owner\" Type=\"User\" List=\"UserInfo\" Required=\"FALSE\" UserSelectionMode=\"0\" ShowField=\"ImnName\" ColName=\"int1\" RowOrdinal=\"0\" StaticName=\"MarketingOwner\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "IssueDate",
+          "Expected": {
+            "InternalName": "IssueDate",
+            "Id": "b9f50012-f01e-4a10-8010-c0f0e0d00012",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50012-f01e-4a10-8010-c0f0e0d00012",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50012-f01e-4a10-8010-c0f0e0d00012}\" Name=\"IssueDate\" DisplayName=\"Issue Date\" Type=\"DateTime\" Format=\"DateOnly\" Required=\"FALSE\" ColName=\"datetime1\" RowOrdinal=\"0\" StaticName=\"IssueDate\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FirstPublishedOn",
+          "Expected": {
+            "InternalName": "FirstPublishedOn",
+            "Id": "b9f50013-f01e-4a10-8010-c0f0e0d00013",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50013-f01e-4a10-8010-c0f0e0d00013",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50013-f01e-4a10-8010-c0f0e0d00013}\" Name=\"FirstPublishedOn\" DisplayName=\"First Published On\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" ColName=\"datetime2\" RowOrdinal=\"0\" StaticName=\"FirstPublishedOn\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "PublishedOn",
+          "Expected": {
+            "InternalName": "PublishedOn",
+            "Id": "b9f50014-f01e-4a10-8010-c0f0e0d00014",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50014-f01e-4a10-8010-c0f0e0d00014",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50014-f01e-4a10-8010-c0f0e0d00014}\" Name=\"PublishedOn\" DisplayName=\"Published On\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"datetime3\" RowOrdinal=\"0\" StaticName=\"PublishedOn\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FoleonModifiedOn",
+          "Expected": {
+            "InternalName": "FoleonModifiedOn",
+            "Id": "b9f50015-f01e-4a10-8010-c0f0e0d00015",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50015-f01e-4a10-8010-c0f0e0d00015",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50015-f01e-4a10-8010-c0f0e0d00015}\" Name=\"FoleonModifiedOn\" DisplayName=\"Foleon Modified On\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" ColName=\"datetime4\" RowOrdinal=\"0\" StaticName=\"FoleonModifiedOn\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "DisplayFrom",
+          "Expected": {
+            "InternalName": "DisplayFrom",
+            "Id": "b9f50016-f01e-4a10-8010-c0f0e0d00016",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50016-f01e-4a10-8010-c0f0e0d00016",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50016-f01e-4a10-8010-c0f0e0d00016}\" Name=\"DisplayFrom\" DisplayName=\"Display From\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"datetime5\" RowOrdinal=\"0\" StaticName=\"DisplayFrom\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "DisplayThrough",
+          "Expected": {
+            "InternalName": "DisplayThrough",
+            "Id": "b9f50017-f01e-4a10-8010-c0f0e0d00017",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50017-f01e-4a10-8010-c0f0e0d00017",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50017-f01e-4a10-8010-c0f0e0d00017}\" Name=\"DisplayThrough\" DisplayName=\"Display Through\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"datetime6\" RowOrdinal=\"0\" StaticName=\"DisplayThrough\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "SortRank",
+          "Expected": {
+            "InternalName": "SortRank",
+            "Id": "b9f50018-f01e-4a10-8010-c0f0e0d00018",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50018-f01e-4a10-8010-c0f0e0d00018",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50018-f01e-4a10-8010-c0f0e0d00018}\" Name=\"SortRank\" DisplayName=\"Sort Rank\" Type=\"Number\" Required=\"FALSE\" Indexed=\"TRUE\" Decimals=\"0\" ColName=\"float3\" RowOrdinal=\"0\" StaticName=\"SortRank\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "AudienceGroups",
+          "Expected": {
+            "InternalName": "AudienceGroups",
+            "Id": "b9f50019-f01e-4a10-8010-c0f0e0d00019",
+            "Type": "UserMulti",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50019-f01e-4a10-8010-c0f0e0d00019",
+            "Type": "UserMulti",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50019-f01e-4a10-8010-c0f0e0d00019}\" Name=\"AudienceGroups\" DisplayName=\"Audience Groups\" Type=\"UserMulti\" List=\"UserInfo\" Required=\"FALSE\" Mult=\"TRUE\" UserSelectionMode=\"1\" ShowField=\"ImnName\" ColName=\"int2\" RowOrdinal=\"0\" StaticName=\"AudienceGroups\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "RelatedProjectNumber",
+          "Expected": {
+            "InternalName": "RelatedProjectNumber",
+            "Id": "b9f5001a-f01e-4a10-8010-c0f0e0d0001a",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5001a-f01e-4a10-8010-c0f0e0d0001a",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5001a-f01e-4a10-8010-c0f0e0d0001a}\" Name=\"RelatedProjectNumber\" DisplayName=\"Related Project Number\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"64\" ColName=\"nvarchar22\" RowOrdinal=\"0\" StaticName=\"RelatedProjectNumber\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "RelatedProjectName",
+          "Expected": {
+            "InternalName": "RelatedProjectName",
+            "Id": "b9f5001b-f01e-4a10-8010-c0f0e0d0001b",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5001b-f01e-4a10-8010-c0f0e0d0001b",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5001b-f01e-4a10-8010-c0f0e0d0001b}\" Name=\"RelatedProjectName\" DisplayName=\"Related Project Name\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"255\" ColName=\"nvarchar23\" RowOrdinal=\"0\" StaticName=\"RelatedProjectName\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "RelatedProjectSiteUrl",
+          "Expected": {
+            "InternalName": "RelatedProjectSiteUrl",
+            "Id": "b9f5001c-f01e-4a10-8010-c0f0e0d0001c",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5001c-f01e-4a10-8010-c0f0e0d0001c",
+            "Type": "URL",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5001c-f01e-4a10-8010-c0f0e0d0001c}\" Name=\"RelatedProjectSiteUrl\" DisplayName=\"Related Project Site URL\" Type=\"URL\" Required=\"FALSE\" Format=\"Hyperlink\" ColName=\"nvarchar24\" RowOrdinal=\"0\" ColName2=\"nvarchar25\" RowOrdinal2=\"0\" StaticName=\"RelatedProjectSiteUrl\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "Region",
+          "Expected": {
+            "InternalName": "Region",
+            "Id": "b9f5001d-f01e-4a10-8010-c0f0e0d0001d",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5001d-f01e-4a10-8010-c0f0e0d0001d",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5001d-f01e-4a10-8010-c0f0e0d0001d}\" Name=\"Region\" DisplayName=\"Region\" Type=\"Choice\" Required=\"FALSE\" Format=\"Dropdown\" ColName=\"nvarchar26\" RowOrdinal=\"0\" StaticName=\"Region\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><CHOICES><CHOICE>North Florida</CHOICE><CHOICE>Central Florida</CHOICE><CHOICE>Southeast Florida</CHOICE><CHOICE>Southwest Florida</CHOICE><CHOICE>Companywide</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "Sector",
+          "Expected": {
+            "InternalName": "Sector",
+            "Id": "b9f5001e-f01e-4a10-8010-c0f0e0d0001e",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5001e-f01e-4a10-8010-c0f0e0d0001e",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5001e-f01e-4a10-8010-c0f0e0d0001e}\" Name=\"Sector\" DisplayName=\"Sector\" Type=\"Choice\" Required=\"FALSE\" Format=\"Dropdown\" ColName=\"nvarchar27\" RowOrdinal=\"0\" StaticName=\"Sector\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><CHOICES><CHOICE>Luxury Residential</CHOICE><CHOICE>Commercial</CHOICE><CHOICE>Multifamily</CHOICE><CHOICE>Environmental</CHOICE><CHOICE>Internal</CHOICE><CHOICE>Other</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "Tags",
+          "Expected": {
+            "InternalName": "Tags",
+            "Id": "b9f5001f-f01e-4a10-8010-c0f0e0d0001f",
+            "Type": "MultiChoice",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5001f-f01e-4a10-8010-c0f0e0d0001f",
+            "Type": "MultiChoice",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5001f-f01e-4a10-8010-c0f0e0d0001f}\" Name=\"Tags\" DisplayName=\"Tags\" Type=\"MultiChoice\" Required=\"FALSE\" FillInChoice=\"TRUE\" ColName=\"ntext3\" RowOrdinal=\"0\" StaticName=\"Tags\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><CHOICES><CHOICE>Case Study</CHOICE><CHOICE>Award</CHOICE><CHOICE>Safety</CHOICE><CHOICE>Sustainability</CHOICE><CHOICE>Innovation</CHOICE><CHOICE>Community</CHOICE><CHOICE>Leadership</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "OpenMode",
+          "Expected": {
+            "InternalName": "OpenMode",
+            "Id": "b9f50020-f01e-4a10-8010-c0f0e0d00020",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50020-f01e-4a10-8010-c0f0e0d00020",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50020-f01e-4a10-8010-c0f0e0d00020}\" Name=\"OpenMode\" DisplayName=\"Open Mode\" Type=\"Choice\" Required=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar28\" RowOrdinal=\"0\" StaticName=\"OpenMode\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>Inline Reader</Default><CHOICES><CHOICE>Inline Reader</CHOICE><CHOICE>Fullscreen Reader</CHOICE><CHOICE>New Tab Only</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "AllowEmbed",
+          "Expected": {
+            "InternalName": "AllowEmbed",
+            "Id": "b9f50021-f01e-4a10-8010-c0f0e0d00021",
+            "Type": "Boolean",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50021-f01e-4a10-8010-c0f0e0d00021",
+            "Type": "Boolean",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50021-f01e-4a10-8010-c0f0e0d00021}\" Name=\"AllowEmbed\" DisplayName=\"Allow Embed\" Type=\"Boolean\" Required=\"TRUE\" Indexed=\"TRUE\" ColName=\"bit4\" RowOrdinal=\"0\" StaticName=\"AllowEmbed\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>1</Default></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "RequiresExternalOpen",
+          "Expected": {
+            "InternalName": "RequiresExternalOpen",
+            "Id": "b9f50022-f01e-4a10-8010-c0f0e0d00022",
+            "Type": "Boolean",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50022-f01e-4a10-8010-c0f0e0d00022",
+            "Type": "Boolean",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50022-f01e-4a10-8010-c0f0e0d00022}\" Name=\"RequiresExternalOpen\" DisplayName=\"Requires External Open\" Type=\"Boolean\" Required=\"FALSE\" ColName=\"bit5\" RowOrdinal=\"0\" StaticName=\"RequiresExternalOpen\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>0</Default></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "LastSynced",
+          "Expected": {
+            "InternalName": "LastSynced",
+            "Id": "b9f50023-f01e-4a10-8010-c0f0e0d00023",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50023-f01e-4a10-8010-c0f0e0d00023",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50023-f01e-4a10-8010-c0f0e0d00023}\" Name=\"LastSynced\" DisplayName=\"Last Synced\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" ColName=\"datetime7\" RowOrdinal=\"0\" StaticName=\"LastSynced\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "SyncSource",
+          "Expected": {
+            "InternalName": "SyncSource",
+            "Id": "b9f50024-f01e-4a10-8010-c0f0e0d00024",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50024-f01e-4a10-8010-c0f0e0d00024",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50024-f01e-4a10-8010-c0f0e0d00024}\" Name=\"SyncSource\" DisplayName=\"Sync Source\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar29\" RowOrdinal=\"0\" StaticName=\"SyncSource\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\"><Default>Manual</Default><CHOICES><CHOICE>Manual</CHOICE><CHOICE>Foleon API</CHOICE><CHOICE>Hybrid</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "SyncHash",
+          "Expected": {
+            "InternalName": "SyncHash",
+            "Id": "b9f50025-f01e-4a10-8010-c0f0e0d00025",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50025-f01e-4a10-8010-c0f0e0d00025",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50025-f01e-4a10-8010-c0f0e0d00025}\" Name=\"SyncHash\" DisplayName=\"Sync Hash\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"128\" ColName=\"nvarchar30\" RowOrdinal=\"0\" StaticName=\"SyncHash\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "RawFoleonJson",
+          "Expected": {
+            "InternalName": "RawFoleonJson",
+            "Id": "b9f50026-f01e-4a10-8010-c0f0e0d00026",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50026-f01e-4a10-8010-c0f0e0d00026",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50026-f01e-4a10-8010-c0f0e0d00026}\" Name=\"RawFoleonJson\" DisplayName=\"Raw Foleon JSON\" Type=\"Note\" Required=\"FALSE\" NumLines=\"10\" RichText=\"FALSE\" ColName=\"ntext4\" RowOrdinal=\"0\" StaticName=\"RawFoleonJson\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "AdminNotes",
+          "Expected": {
+            "InternalName": "AdminNotes",
+            "Id": "b9f50027-f01e-4a10-8010-c0f0e0d00027",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50027-f01e-4a10-8010-c0f0e0d00027",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50027-f01e-4a10-8010-c0f0e0d00027}\" Name=\"AdminNotes\" DisplayName=\"Admin Notes\" Type=\"Note\" Required=\"FALSE\" NumLines=\"6\" RichText=\"FALSE\" ColName=\"ntext5\" RowOrdinal=\"0\" StaticName=\"AdminNotes\" SourceID=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" />"
+          },
+          "Status": "match"
+        }
+      ]
+    },
+    {
+      "ListKey": "HB_FoleonHomepagePlacements",
+      "DisplayTitle": "Foleon Homepage Placements",
+      "Id": "5b4754b6-9411-453d-8e16-1247ec5b476a",
+      "RootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonHomepagePlacements",
+      "ItemCount": 0,
+      "ExpectedCustomFieldCount": 10,
+      "MatchedCustomFieldCount": 10,
+      "MissingCustomFields": [],
+      "TypeMismatches": [],
+      "RequiredMismatches": [],
+      "IndexMismatches": [],
+      "UniqueMismatches": [],
+      "Rows": [
+        {
+          "InternalName": "PlacementKey",
+          "Expected": {
+            "InternalName": "PlacementKey",
+            "Id": "b9f50101-f01e-4a10-8010-c0f0e0d10001",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50101-f01e-4a10-8010-c0f0e0d10001",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50101-f01e-4a10-8010-c0f0e0d10001}\" Name=\"PlacementKey\" DisplayName=\"Placement Key\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar7\" RowOrdinal=\"0\" StaticName=\"PlacementKey\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\"><CHOICES><CHOICE>Hero</CHOICE><CHOICE>Primary Card</CHOICE><CHOICE>Secondary Card</CHOICE><CHOICE>Carousel</CHOICE><CHOICE>Archive Rail</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ContentLookup",
+          "Expected": {
+            "InternalName": "ContentLookup",
+            "Id": "b9f50102-f01e-4a10-8010-c0f0e0d10002",
+            "Type": "Lookup",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50102-f01e-4a10-8010-c0f0e0d10002",
+            "Type": "Lookup",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50102-f01e-4a10-8010-c0f0e0d10002}\" Name=\"ContentLookup\" DisplayName=\"Content Lookup\" Type=\"Lookup\" List=\"{2E57615D-457E-49B8-AEF3-038E85CBE068}\" ShowField=\"Title\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"int1\" RowOrdinal=\"0\" StaticName=\"ContentLookup\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ContentIdCache",
+          "Expected": {
+            "InternalName": "ContentIdCache",
+            "Id": "b9f50103-f01e-4a10-8010-c0f0e0d10003",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50103-f01e-4a10-8010-c0f0e0d10003",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50103-f01e-4a10-8010-c0f0e0d10003}\" Name=\"ContentIdCache\" DisplayName=\"Content ID Cache\" Type=\"Number\" Required=\"FALSE\" Indexed=\"TRUE\" Decimals=\"0\" ColName=\"float1\" RowOrdinal=\"0\" StaticName=\"ContentIdCache\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "IsActive",
+          "Expected": {
+            "InternalName": "IsActive",
+            "Id": "b9f50104-f01e-4a10-8010-c0f0e0d10004",
+            "Type": "Boolean",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50104-f01e-4a10-8010-c0f0e0d10004",
+            "Type": "Boolean",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50104-f01e-4a10-8010-c0f0e0d10004}\" Name=\"IsActive\" DisplayName=\"Is Active\" Type=\"Boolean\" Required=\"TRUE\" Indexed=\"TRUE\" ColName=\"bit1\" RowOrdinal=\"0\" StaticName=\"IsActive\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\"><Default>1</Default></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "DisplayFrom",
+          "Expected": {
+            "InternalName": "DisplayFrom",
+            "Id": "b9f50105-f01e-4a10-8010-c0f0e0d10005",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50105-f01e-4a10-8010-c0f0e0d10005",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50105-f01e-4a10-8010-c0f0e0d10005}\" Name=\"DisplayFrom\" DisplayName=\"Display From\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"datetime1\" RowOrdinal=\"0\" StaticName=\"DisplayFrom\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "DisplayThrough",
+          "Expected": {
+            "InternalName": "DisplayThrough",
+            "Id": "b9f50106-f01e-4a10-8010-c0f0e0d10006",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50106-f01e-4a10-8010-c0f0e0d10006",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50106-f01e-4a10-8010-c0f0e0d10006}\" Name=\"DisplayThrough\" DisplayName=\"Display Through\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"datetime2\" RowOrdinal=\"0\" StaticName=\"DisplayThrough\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "SortRank",
+          "Expected": {
+            "InternalName": "SortRank",
+            "Id": "b9f50107-f01e-4a10-8010-c0f0e0d10007",
+            "Type": "Number",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50107-f01e-4a10-8010-c0f0e0d10007",
+            "Type": "Number",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50107-f01e-4a10-8010-c0f0e0d10007}\" Name=\"SortRank\" DisplayName=\"Sort Rank\" Type=\"Number\" Required=\"TRUE\" Indexed=\"TRUE\" Decimals=\"0\" ColName=\"float2\" RowOrdinal=\"0\" StaticName=\"SortRank\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "AudienceGroups",
+          "Expected": {
+            "InternalName": "AudienceGroups",
+            "Id": "b9f50108-f01e-4a10-8010-c0f0e0d10008",
+            "Type": "UserMulti",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50108-f01e-4a10-8010-c0f0e0d10008",
+            "Type": "UserMulti",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50108-f01e-4a10-8010-c0f0e0d10008}\" Name=\"AudienceGroups\" DisplayName=\"Audience Groups\" Type=\"UserMulti\" List=\"UserInfo\" Required=\"FALSE\" Mult=\"TRUE\" UserSelectionMode=\"1\" ShowField=\"ImnName\" ColName=\"int2\" RowOrdinal=\"0\" StaticName=\"AudienceGroups\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "LayoutVariant",
+          "Expected": {
+            "InternalName": "LayoutVariant",
+            "Id": "b9f50109-f01e-4a10-8010-c0f0e0d10009",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50109-f01e-4a10-8010-c0f0e0d10009",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50109-f01e-4a10-8010-c0f0e0d10009}\" Name=\"LayoutVariant\" DisplayName=\"Layout Variant\" Type=\"Choice\" Required=\"FALSE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar8\" RowOrdinal=\"0\" StaticName=\"LayoutVariant\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\"><CHOICES><CHOICE>Large Feature</CHOICE><CHOICE>Compact Card</CHOICE><CHOICE>Square Tile</CHOICE><CHOICE>Text Rail</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "AdminNotes",
+          "Expected": {
+            "InternalName": "AdminNotes",
+            "Id": "b9f5010a-f01e-4a10-8010-c0f0e0d1000a",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5010a-f01e-4a10-8010-c0f0e0d1000a",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5010a-f01e-4a10-8010-c0f0e0d1000a}\" Name=\"AdminNotes\" DisplayName=\"Admin Notes\" Type=\"Note\" Required=\"FALSE\" NumLines=\"6\" RichText=\"FALSE\" ColName=\"ntext2\" RowOrdinal=\"0\" StaticName=\"AdminNotes\" SourceID=\"{5B4754B6-9411-453D-8E16-1247EC5B476A}\" />"
+          },
+          "Status": "match"
+        }
+      ]
+    },
+    {
+      "ListKey": "HB_FoleonInteractionEvents",
+      "DisplayTitle": "Foleon Interaction Events",
+      "Id": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
+      "RootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonInteractionEvents",
+      "ItemCount": 0,
+      "ExpectedCustomFieldCount": 13,
+      "MatchedCustomFieldCount": 13,
+      "MissingCustomFields": [],
+      "TypeMismatches": [],
+      "RequiredMismatches": [],
+      "IndexMismatches": [],
+      "UniqueMismatches": [],
+      "Rows": [
+        {
+          "InternalName": "EventId",
+          "Expected": {
+            "InternalName": "EventId",
+            "Id": "b9f50201-f01e-4a10-8010-c0f0e0d20001",
+            "Type": "Text",
+            "Required": true,
+            "Indexed": true,
+            "Unique": true
+          },
+          "Tenant": {
+            "Id": "b9f50201-f01e-4a10-8010-c0f0e0d20001",
+            "Type": "Text",
+            "Required": true,
+            "Indexed": true,
+            "Unique": true,
+            "SchemaXml": "<Field ID=\"{b9f50201-f01e-4a10-8010-c0f0e0d20001}\" Name=\"EventId\" DisplayName=\"Event ID\" Type=\"Text\" Required=\"TRUE\" Indexed=\"TRUE\" EnforceUniqueValues=\"TRUE\" MaxLength=\"64\" ColName=\"nvarchar7\" RowOrdinal=\"0\" StaticName=\"EventId\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "EventType",
+          "Expected": {
+            "InternalName": "EventType",
+            "Id": "b9f50202-f01e-4a10-8010-c0f0e0d20002",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50202-f01e-4a10-8010-c0f0e0d20002",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50202-f01e-4a10-8010-c0f0e0d20002}\" Name=\"EventType\" DisplayName=\"Event Type\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar8\" RowOrdinal=\"0\" StaticName=\"EventType\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\"><CHOICES><CHOICE>Card Impression</CHOICE><CHOICE>Card Click</CHOICE><CHOICE>Reader Open</CHOICE><CHOICE>Reader Close</CHOICE><CHOICE>External Open</CHOICE><CHOICE>Embed Error</CHOICE><CHOICE>Search</CHOICE><CHOICE>Filter</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FoleonDocId",
+          "Expected": {
+            "InternalName": "FoleonDocId",
+            "Id": "b9f50203-f01e-4a10-8010-c0f0e0d20003",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50203-f01e-4a10-8010-c0f0e0d20003",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50203-f01e-4a10-8010-c0f0e0d20003}\" Name=\"FoleonDocId\" DisplayName=\"Foleon Doc ID\" Type=\"Number\" Required=\"FALSE\" Indexed=\"TRUE\" Decimals=\"0\" ColName=\"float1\" RowOrdinal=\"0\" StaticName=\"FoleonDocId\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ContentRegistryItemId",
+          "Expected": {
+            "InternalName": "ContentRegistryItemId",
+            "Id": "b9f50204-f01e-4a10-8010-c0f0e0d20004",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50204-f01e-4a10-8010-c0f0e0d20004",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50204-f01e-4a10-8010-c0f0e0d20004}\" Name=\"ContentRegistryItemId\" DisplayName=\"Content Registry Item ID\" Type=\"Number\" Required=\"FALSE\" Indexed=\"TRUE\" Decimals=\"0\" ColName=\"float2\" RowOrdinal=\"0\" StaticName=\"ContentRegistryItemId\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "UserEmailHash",
+          "Expected": {
+            "InternalName": "UserEmailHash",
+            "Id": "b9f50205-f01e-4a10-8010-c0f0e0d20005",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50205-f01e-4a10-8010-c0f0e0d20005",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50205-f01e-4a10-8010-c0f0e0d20005}\" Name=\"UserEmailHash\" DisplayName=\"User Email Hash\" Type=\"Text\" Required=\"FALSE\" Indexed=\"TRUE\" MaxLength=\"128\" ColName=\"nvarchar9\" RowOrdinal=\"0\" StaticName=\"UserEmailHash\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "UserDepartment",
+          "Expected": {
+            "InternalName": "UserDepartment",
+            "Id": "b9f50206-f01e-4a10-8010-c0f0e0d20006",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50206-f01e-4a10-8010-c0f0e0d20006",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50206-f01e-4a10-8010-c0f0e0d20006}\" Name=\"UserDepartment\" DisplayName=\"User Department\" Type=\"Text\" Required=\"FALSE\" Indexed=\"TRUE\" MaxLength=\"128\" ColName=\"nvarchar10\" RowOrdinal=\"0\" StaticName=\"UserDepartment\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "PageContext",
+          "Expected": {
+            "InternalName": "PageContext",
+            "Id": "b9f50207-f01e-4a10-8010-c0f0e0d20007",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50207-f01e-4a10-8010-c0f0e0d20007",
+            "Type": "Choice",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50207-f01e-4a10-8010-c0f0e0d20007}\" Name=\"PageContext\" DisplayName=\"Page Context\" Type=\"Choice\" Required=\"FALSE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar11\" RowOrdinal=\"0\" StaticName=\"PageContext\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\"><CHOICES><CHOICE>Homepage</CHOICE><CHOICE>Content Hub</CHOICE><CHOICE>Reader</CHOICE><CHOICE>Project Site</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "SearchQuery",
+          "Expected": {
+            "InternalName": "SearchQuery",
+            "Id": "b9f50208-f01e-4a10-8010-c0f0e0d20008",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50208-f01e-4a10-8010-c0f0e0d20008",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50208-f01e-4a10-8010-c0f0e0d20008}\" Name=\"SearchQuery\" DisplayName=\"Search Query\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"255\" ColName=\"nvarchar12\" RowOrdinal=\"0\" StaticName=\"SearchQuery\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "FilterStateJson",
+          "Expected": {
+            "InternalName": "FilterStateJson",
+            "Id": "b9f50209-f01e-4a10-8010-c0f0e0d20009",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50209-f01e-4a10-8010-c0f0e0d20009",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50209-f01e-4a10-8010-c0f0e0d20009}\" Name=\"FilterStateJson\" DisplayName=\"Filter State JSON\" Type=\"Note\" Required=\"FALSE\" NumLines=\"4\" RichText=\"FALSE\" ColName=\"ntext2\" RowOrdinal=\"0\" StaticName=\"FilterStateJson\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ReferrerPath",
+          "Expected": {
+            "InternalName": "ReferrerPath",
+            "Id": "b9f5020a-f01e-4a10-8010-c0f0e0d2000a",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5020a-f01e-4a10-8010-c0f0e0d2000a",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5020a-f01e-4a10-8010-c0f0e0d2000a}\" Name=\"ReferrerPath\" DisplayName=\"Referrer Path\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"255\" ColName=\"nvarchar13\" RowOrdinal=\"0\" StaticName=\"ReferrerPath\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "EventTimestamp",
+          "Expected": {
+            "InternalName": "EventTimestamp",
+            "Id": "b9f5020b-f01e-4a10-8010-c0f0e0d2000b",
+            "Type": "DateTime",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5020b-f01e-4a10-8010-c0f0e0d2000b",
+            "Type": "DateTime",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5020b-f01e-4a10-8010-c0f0e0d2000b}\" Name=\"EventTimestamp\" DisplayName=\"Event Timestamp\" Type=\"DateTime\" Format=\"DateTime\" Required=\"TRUE\" Indexed=\"TRUE\" ColName=\"datetime1\" RowOrdinal=\"0\" StaticName=\"EventTimestamp\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "SessionId",
+          "Expected": {
+            "InternalName": "SessionId",
+            "Id": "b9f5020c-f01e-4a10-8010-c0f0e0d2000c",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5020c-f01e-4a10-8010-c0f0e0d2000c",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5020c-f01e-4a10-8010-c0f0e0d2000c}\" Name=\"SessionId\" DisplayName=\"Session ID\" Type=\"Text\" Required=\"FALSE\" Indexed=\"TRUE\" MaxLength=\"64\" ColName=\"nvarchar14\" RowOrdinal=\"0\" StaticName=\"SessionId\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ClientInfoJson",
+          "Expected": {
+            "InternalName": "ClientInfoJson",
+            "Id": "b9f5020d-f01e-4a10-8010-c0f0e0d2000d",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5020d-f01e-4a10-8010-c0f0e0d2000d",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5020d-f01e-4a10-8010-c0f0e0d2000d}\" Name=\"ClientInfoJson\" DisplayName=\"Client Info JSON\" Type=\"Note\" Required=\"FALSE\" NumLines=\"8\" RichText=\"FALSE\" ColName=\"ntext3\" RowOrdinal=\"0\" StaticName=\"ClientInfoJson\" SourceID=\"{7786B5AC-D1E5-418B-9951-8E797DDA3D7A}\" />"
+          },
+          "Status": "match"
+        }
+      ]
+    },
+    {
+      "ListKey": "HB_FoleonSyncRuns",
+      "DisplayTitle": "Foleon Sync Runs",
+      "Id": "f29dabe9-16c8-4c67-ab9e-98e12f771680",
+      "RootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonSyncRuns",
+      "ItemCount": 0,
+      "ExpectedCustomFieldCount": 12,
+      "MatchedCustomFieldCount": 12,
+      "MissingCustomFields": [],
+      "TypeMismatches": [],
+      "RequiredMismatches": [],
+      "IndexMismatches": [],
+      "UniqueMismatches": [],
+      "Rows": [
+        {
+          "InternalName": "RunId",
+          "Expected": {
+            "InternalName": "RunId",
+            "Id": "b9f50301-f01e-4a10-8010-c0f0e0d30001",
+            "Type": "Text",
+            "Required": true,
+            "Indexed": true,
+            "Unique": true
+          },
+          "Tenant": {
+            "Id": "b9f50301-f01e-4a10-8010-c0f0e0d30001",
+            "Type": "Text",
+            "Required": true,
+            "Indexed": true,
+            "Unique": true,
+            "SchemaXml": "<Field ID=\"{b9f50301-f01e-4a10-8010-c0f0e0d30001}\" Name=\"RunId\" DisplayName=\"Run ID\" Type=\"Text\" Required=\"TRUE\" Indexed=\"TRUE\" EnforceUniqueValues=\"TRUE\" MaxLength=\"64\" ColName=\"nvarchar7\" RowOrdinal=\"0\" StaticName=\"RunId\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "RunKind",
+          "Expected": {
+            "InternalName": "RunKind",
+            "Id": "b9f50302-f01e-4a10-8010-c0f0e0d30002",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50302-f01e-4a10-8010-c0f0e0d30002",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50302-f01e-4a10-8010-c0f0e0d30002}\" Name=\"RunKind\" DisplayName=\"Run Kind\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar8\" RowOrdinal=\"0\" StaticName=\"RunKind\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\"><CHOICES><CHOICE>Docs</CHOICE><CHOICE>Projects</CHOICE><CHOICE>Analytics</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "Status",
+          "Expected": {
+            "InternalName": "Status",
+            "Id": "b9f50303-f01e-4a10-8010-c0f0e0d30003",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50303-f01e-4a10-8010-c0f0e0d30003",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50303-f01e-4a10-8010-c0f0e0d30003}\" Name=\"Status\" DisplayName=\"Status\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar9\" RowOrdinal=\"0\" StaticName=\"Status\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\"><CHOICES><CHOICE>Running</CHOICE><CHOICE>Succeeded</CHOICE><CHOICE>Failed</CHOICE><CHOICE>Cancelled</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "StartedUtc",
+          "Expected": {
+            "InternalName": "StartedUtc",
+            "Id": "b9f50304-f01e-4a10-8010-c0f0e0d30004",
+            "Type": "DateTime",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50304-f01e-4a10-8010-c0f0e0d30004",
+            "Type": "DateTime",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50304-f01e-4a10-8010-c0f0e0d30004}\" Name=\"StartedUtc\" DisplayName=\"Started (UTC)\" Type=\"DateTime\" Format=\"DateTime\" Required=\"TRUE\" Indexed=\"TRUE\" ColName=\"datetime1\" RowOrdinal=\"0\" StaticName=\"StartedUtc\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "EndedUtc",
+          "Expected": {
+            "InternalName": "EndedUtc",
+            "Id": "b9f50305-f01e-4a10-8010-c0f0e0d30005",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50305-f01e-4a10-8010-c0f0e0d30005",
+            "Type": "DateTime",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50305-f01e-4a10-8010-c0f0e0d30005}\" Name=\"EndedUtc\" DisplayName=\"Ended (UTC)\" Type=\"DateTime\" Format=\"DateTime\" Required=\"FALSE\" Indexed=\"TRUE\" ColName=\"datetime2\" RowOrdinal=\"0\" StaticName=\"EndedUtc\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "TriggerSource",
+          "Expected": {
+            "InternalName": "TriggerSource",
+            "Id": "b9f50306-f01e-4a10-8010-c0f0e0d30006",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50306-f01e-4a10-8010-c0f0e0d30006",
+            "Type": "Choice",
+            "Required": true,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50306-f01e-4a10-8010-c0f0e0d30006}\" Name=\"TriggerSource\" DisplayName=\"Trigger Source\" Type=\"Choice\" Required=\"TRUE\" Indexed=\"TRUE\" Format=\"Dropdown\" ColName=\"nvarchar10\" RowOrdinal=\"0\" StaticName=\"TriggerSource\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\"><CHOICES><CHOICE>Timer</CHOICE><CHOICE>Manual</CHOICE><CHOICE>AdminApi</CHOICE></CHOICES></Field>"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ItemsFetched",
+          "Expected": {
+            "InternalName": "ItemsFetched",
+            "Id": "b9f50307-f01e-4a10-8010-c0f0e0d30007",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50307-f01e-4a10-8010-c0f0e0d30007",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50307-f01e-4a10-8010-c0f0e0d30007}\" Name=\"ItemsFetched\" DisplayName=\"Items Fetched\" Type=\"Number\" Required=\"FALSE\" Decimals=\"0\" ColName=\"float1\" RowOrdinal=\"0\" StaticName=\"ItemsFetched\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ItemsWritten",
+          "Expected": {
+            "InternalName": "ItemsWritten",
+            "Id": "b9f50308-f01e-4a10-8010-c0f0e0d30008",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50308-f01e-4a10-8010-c0f0e0d30008",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50308-f01e-4a10-8010-c0f0e0d30008}\" Name=\"ItemsWritten\" DisplayName=\"Items Written\" Type=\"Number\" Required=\"FALSE\" Decimals=\"0\" ColName=\"float2\" RowOrdinal=\"0\" StaticName=\"ItemsWritten\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ErrorCount",
+          "Expected": {
+            "InternalName": "ErrorCount",
+            "Id": "b9f50309-f01e-4a10-8010-c0f0e0d30009",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f50309-f01e-4a10-8010-c0f0e0d30009",
+            "Type": "Number",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f50309-f01e-4a10-8010-c0f0e0d30009}\" Name=\"ErrorCount\" DisplayName=\"Error Count\" Type=\"Number\" Required=\"FALSE\" Indexed=\"TRUE\" Decimals=\"0\" ColName=\"float3\" RowOrdinal=\"0\" StaticName=\"ErrorCount\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "ErrorsJson",
+          "Expected": {
+            "InternalName": "ErrorsJson",
+            "Id": "b9f5030a-f01e-4a10-8010-c0f0e0d3000a",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5030a-f01e-4a10-8010-c0f0e0d3000a",
+            "Type": "Note",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5030a-f01e-4a10-8010-c0f0e0d3000a}\" Name=\"ErrorsJson\" DisplayName=\"Errors JSON\" Type=\"Note\" Required=\"FALSE\" NumLines=\"10\" RichText=\"FALSE\" ColName=\"ntext2\" RowOrdinal=\"0\" StaticName=\"ErrorsJson\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "CorrelationId",
+          "Expected": {
+            "InternalName": "CorrelationId",
+            "Id": "b9f5030b-f01e-4a10-8010-c0f0e0d3000b",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5030b-f01e-4a10-8010-c0f0e0d3000b",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": true,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5030b-f01e-4a10-8010-c0f0e0d3000b}\" Name=\"CorrelationId\" DisplayName=\"Correlation ID\" Type=\"Text\" Required=\"FALSE\" Indexed=\"TRUE\" MaxLength=\"64\" ColName=\"nvarchar11\" RowOrdinal=\"0\" StaticName=\"CorrelationId\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        },
+        {
+          "InternalName": "BackendVersion",
+          "Expected": {
+            "InternalName": "BackendVersion",
+            "Id": "b9f5030c-f01e-4a10-8010-c0f0e0d3000c",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false
+          },
+          "Tenant": {
+            "Id": "b9f5030c-f01e-4a10-8010-c0f0e0d3000c",
+            "Type": "Text",
+            "Required": false,
+            "Indexed": false,
+            "Unique": false,
+            "SchemaXml": "<Field ID=\"{b9f5030c-f01e-4a10-8010-c0f0e0d3000c}\" Name=\"BackendVersion\" DisplayName=\"Backend Version\" Type=\"Text\" Required=\"FALSE\" MaxLength=\"32\" ColName=\"nvarchar12\" RowOrdinal=\"0\" StaticName=\"BackendVersion\" SourceID=\"{F29DABE9-16C8-4C67-AB9E-98E12F771680}\" />"
+          },
+          "Status": "match"
+        }
+      ]
+    }
+  ]
+}

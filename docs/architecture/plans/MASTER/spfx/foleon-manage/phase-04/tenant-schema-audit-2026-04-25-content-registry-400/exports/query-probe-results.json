@@ -1,0 +1,129 @@
+{
+  "SiteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "Web": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "ExtractedAtUtc": "2026-04-25T19:06:58.7774220Z",
+  "GuidResolution": {
+    "ProvidedGuid": "2e57615d-457e-49b8-aef3-038e85cbe068",
+    "ResolvedTitle": "Foleon Content Registry",
+    "ResolvedId": "2e57615d-457e-49b8-aef3-038e85cbe068",
+    "RootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry",
+    "BaseTemplate": 100,
+    "ItemCount": 0,
+    "Hidden": false,
+    "EnableVersioning": true,
+    "Created": "2026-04-25T09:50:54Z",
+    "LastItemModifiedDate": "2026-04-25T09:51:23Z"
+  },
+  "Probes": [
+    {
+      "Name": "list-metadata-by-guid",
+      "TimestampUtc": "2026-04-25T19:06:56.7390700Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')?$select=Title,Id,RootFolder/ServerRelativeUrl&$expand=RootFolder",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"RootFolder\":{\"ServerRelativeUrl\":\"/sites/HBCentral/Lists/HB_FoleonContentRegistry\"},\"Id\":\"2e57615d-457e-49b8-aef3-038e85cbe068\",\"Title\":\"Foleon Content Registry\"}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "items-id-title",
+      "TimestampUtc": "2026-04-25T19:06:57.2145600Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "items-docid",
+      "TimestampUtc": "2026-04-25T19:06:57.4386270Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "items-core-select",
+      "TimestampUtc": "2026-04-25T19:06:57.6419830Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,IsVisible,PublishStatus,IsHomepageEligible&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "filter-isvisible",
+      "TimestampUtc": "2026-04-25T19:06:57.8097350Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,IsVisible,PublishStatus,IsHomepageEligible&$filter=IsVisible eq 1&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "filter-publishstatus",
+      "TimestampUtc": "2026-04-25T19:06:57.9753490Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,IsVisible,PublishStatus,IsHomepageEligible&$filter=PublishStatus eq 'Published'&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "filter-homepageeligible",
+      "TimestampUtc": "2026-04-25T19:06:58.1447110Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,IsVisible,PublishStatus,IsHomepageEligible&$filter=IsHomepageEligible eq 1&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "filter-combined",
+      "TimestampUtc": "2026-04-25T19:06:58.3056760Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,IsVisible,PublishStatus,IsHomepageEligible&$filter=IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1&$top=1",
+      "StatusCode": 200,
+      "Succeeded": true,
+      "ResponseBody": "{\"value\":[]}",
+      "ErrorCode": null,
+      "ErrorMessage": null,
+      "CorrelationId": null
+    },
+    {
+      "Name": "full-runtime-select-no-filter",
+      "TimestampUtc": "2026-04-25T19:06:58.4680330Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,FoleonDocUid,FoleonIdentifier,FoleonProjectId,FoleonProjectName,ContentTypeKey,PublishStatus,IsVisible,IsFeatured,IsHomepageEligible,PublishedUrl,PreviewUrl,EmbedUrl,ThumbnailUrl,HeroImageUrl,Summary,MarketingOwner,IssueDate,FirstPublishedOn,PublishedOn,FoleonModifiedOn,DisplayFrom,DisplayThrough,SortRank,AudienceGroups,RelatedProjectNumber,RelatedProjectName,RelatedProjectSiteUrl,Region,Sector,Tags,OpenMode,AllowEmbed,RequiresExternalOpen,LastSynced,SyncSource,SyncHash,RawFoleonJson,AdminNotes&$top=1",
+      "StatusCode": null,
+      "Succeeded": false,
+      "ResponseBody": "{\"odata.error\":{\"code\":\"-1, Microsoft.SharePoint.SPException\",\"message\":{\"lang\":\"en-US\",\"value\":\"The query to field 'MarketingOwner' is not valid. The $select query string must specify the target fields and the $expand query string must contains MarketingOwner.\"}}}",
+      "ErrorCode": null,
+      "ErrorMessage": "{\"odata.error\":{\"code\":\"-1, Microsoft.SharePoint.SPException\",\"message\":{\"lang\":\"en-US\",\"value\":\"The query to field 'MarketingOwner' is not valid. The $select query string must specify the target fields and the $expand query string must contains MarketingOwner.\"}}}",
+      "CorrelationId": null
+    },
+    {
+      "Name": "full-runtime-select-filter",
+      "TimestampUtc": "2026-04-25T19:06:58.6228750Z",
+      "RequestUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/_api/web/lists(guid'2e57615d-457e-49b8-aef3-038e85cbe068')/items?$select=Id,Title,FoleonDocId,FoleonDocUid,FoleonIdentifier,FoleonProjectId,FoleonProjectName,ContentTypeKey,PublishStatus,IsVisible,IsFeatured,IsHomepageEligible,PublishedUrl,PreviewUrl,EmbedUrl,ThumbnailUrl,HeroImageUrl,Summary,MarketingOwner,IssueDate,FirstPublishedOn,PublishedOn,FoleonModifiedOn,DisplayFrom,DisplayThrough,SortRank,AudienceGroups,RelatedProjectNumber,RelatedProjectName,RelatedProjectSiteUrl,Region,Sector,Tags,OpenMode,AllowEmbed,RequiresExternalOpen,LastSynced,SyncSource,SyncHash,RawFoleonJson,AdminNotes&$filter=IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1&$top=100",
+      "StatusCode": null,
+      "Succeeded": false,
+      "ResponseBody": "{\"odata.error\":{\"code\":\"-1, Microsoft.SharePoint.SPException\",\"message\":{\"lang\":\"en-US\",\"value\":\"The query to field 'MarketingOwner' is not valid. The $select query string must specify the target fields and the $expand query string must contains MarketingOwner.\"}}}",
+      "ErrorCode": null,
+      "ErrorMessage": "{\"odata.error\":{\"code\":\"-1, Microsoft.SharePoint.SPException\",\"message\":{\"lang\":\"en-US\",\"value\":\"The query to field 'MarketingOwner' is not valid. The $select query string must specify the target fields and the $expand query string must contains MarketingOwner.\"}}}",
+      "CorrelationId": null
+    }
+  ]
+}
