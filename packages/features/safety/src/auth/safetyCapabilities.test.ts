@@ -7,6 +7,7 @@ import {
   SAFETY_REVIEWER_ROLE,
   SAFETY_SUBMITTER_ROLE,
   resolveSafetyCapabilities,
+  safetyCapabilitiesFromTokenRoles,
   safetyCapabilityReason,
 } from './safetyCapabilities.js';
 
@@ -84,35 +85,39 @@ describe('safetyCapabilities — role-string identity with backend', () => {
 });
 
 describe('resolveSafetyCapabilities', () => {
-  it('null roles → all denied', () => {
+  it('null roles → all denied, state=unauthorized', () => {
     expect(resolveSafetyCapabilities(null)).toEqual({
       canPreview: false,
       canIngest: false,
       canReplay: false,
+      state: 'unauthorized',
     });
   });
 
-  it('undefined roles → all denied', () => {
+  it('undefined roles → all denied, state=unauthorized', () => {
     expect(resolveSafetyCapabilities(undefined)).toEqual({
       canPreview: false,
       canIngest: false,
       canReplay: false,
+      state: 'unauthorized',
     });
   });
 
-  it('empty roles array → all denied', () => {
+  it('empty roles array → all denied, state=unauthorized', () => {
     expect(resolveSafetyCapabilities([])).toEqual({
       canPreview: false,
       canIngest: false,
       canReplay: false,
+      state: 'unauthorized',
     });
   });
 
-  it('unknown role → all denied', () => {
+  it('unknown role → all denied (state=authorized — qualifying matrix yielded zero matches but token authority was present)', () => {
     expect(resolveSafetyCapabilities(['SomeOtherRole'])).toEqual({
       canPreview: false,
       canIngest: false,
       canReplay: false,
+      state: 'authorized',
     });
   });
 
@@ -121,6 +126,7 @@ describe('resolveSafetyCapabilities', () => {
       canPreview: true,
       canIngest: true,
       canReplay: false,
+      state: 'authorized',
     });
   });
 
@@ -129,6 +135,7 @@ describe('resolveSafetyCapabilities', () => {
       canPreview: true,
       canIngest: true,
       canReplay: true,
+      state: 'authorized',
     });
   });
 
@@ -137,6 +144,7 @@ describe('resolveSafetyCapabilities', () => {
       canPreview: true,
       canIngest: false,
       canReplay: true,
+      state: 'authorized',
     });
   });
 
@@ -145,6 +153,7 @@ describe('resolveSafetyCapabilities', () => {
       canPreview: true,
       canIngest: true,
       canReplay: true,
+      state: 'authorized',
     });
   });
 
@@ -155,6 +164,7 @@ describe('resolveSafetyCapabilities', () => {
         canPreview: true,
         canIngest: true,
         canReplay: true,
+        state: 'authorized',
       });
     },
   );
@@ -166,6 +176,7 @@ describe('resolveSafetyCapabilities', () => {
       canPreview: true,
       canIngest: true,
       canReplay: true,
+      state: 'authorized',
     });
   });
 
@@ -176,20 +187,98 @@ describe('resolveSafetyCapabilities', () => {
       canPreview: true,
       canIngest: true,
       canReplay: false,
+      state: 'authorized',
+    });
+  });
+});
+
+describe('safetyCapabilitiesFromTokenRoles', () => {
+  it('Admin role from token → full access', () => {
+    expect(safetyCapabilitiesFromTokenRoles(['Admin'])).toEqual({
+      canPreview: true,
+      canIngest: true,
+      canReplay: true,
+      state: 'authorized',
+    });
+  });
+
+  it('HBIntelAdmin from token → full access', () => {
+    expect(safetyCapabilitiesFromTokenRoles(['HBIntelAdmin'])).toEqual({
+      canPreview: true,
+      canIngest: true,
+      canReplay: true,
+      state: 'authorized',
+    });
+  });
+
+  it('BreakGlass from token → full access', () => {
+    expect(safetyCapabilitiesFromTokenRoles(['BreakGlass'])).toEqual({
+      canPreview: true,
+      canIngest: true,
+      canReplay: true,
+      state: 'authorized',
+    });
+  });
+
+  it('HBIntelSafetySubmitter → preview + ingest only', () => {
+    expect(safetyCapabilitiesFromTokenRoles([SAFETY_SUBMITTER_ROLE])).toEqual({
+      canPreview: true,
+      canIngest: true,
+      canReplay: false,
+      state: 'authorized',
+    });
+  });
+
+  it('HBIntelSafetyReviewer → preview + replay only', () => {
+    expect(safetyCapabilitiesFromTokenRoles([SAFETY_REVIEWER_ROLE])).toEqual({
+      canPreview: true,
+      canIngest: false,
+      canReplay: true,
+      state: 'authorized',
+    });
+  });
+
+  it('empty token roles → unauthorized', () => {
+    expect(safetyCapabilitiesFromTokenRoles([])).toEqual({
+      canPreview: false,
+      canIngest: false,
+      canReplay: false,
+      state: 'unauthorized',
     });
   });
 });
 
 describe('safetyCapabilityReason', () => {
-  it('returns non-empty text for each capability key', () => {
+  it('returns the default unauthorized message when state is omitted', () => {
     expect(safetyCapabilityReason('canPreview')).toMatch(/authorized/i);
     expect(safetyCapabilityReason('canIngest')).toMatch(/authorized/i);
     expect(safetyCapabilityReason('canReplay')).toMatch(/authorized/i);
   });
 
-  it('mentions the administrator escalation path (honest CTA)', () => {
+  it('mentions the administrator escalation path on the default message (honest CTA)', () => {
     expect(safetyCapabilityReason('canPreview')).toMatch(/administrator/i);
     expect(safetyCapabilityReason('canIngest')).toMatch(/administrator/i);
     expect(safetyCapabilityReason('canReplay')).toMatch(/administrator/i);
+  });
+
+  it('returns a distinct message for state=token-unavailable', () => {
+    const msg = safetyCapabilityReason('canPreview', 'token-unavailable');
+    expect(msg).toMatch(/token/i);
+    expect(msg).toMatch(/SharePoint API access/i);
+    expect(msg).not.toMatch(/not authorized to preview/i);
+  });
+
+  it('returns a distinct message for state=scope-missing', () => {
+    const msg = safetyCapabilityReason('canIngest', 'scope-missing');
+    expect(msg).toMatch(/access_as_user/);
+  });
+
+  it('returns a distinct message for state=pending', () => {
+    expect(safetyCapabilityReason('canReplay', 'pending')).toMatch(/Resolving/i);
+  });
+
+  it('falls back to the default message for state=authorized or unauthorized', () => {
+    expect(safetyCapabilityReason('canPreview', 'authorized')).toMatch(/not authorized to preview/i);
+    expect(safetyCapabilityReason('canPreview', 'unauthorized')).toMatch(/not authorized to preview/i);
   });
 });

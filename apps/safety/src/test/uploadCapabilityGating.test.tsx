@@ -34,10 +34,12 @@ const capabilitiesFixture: {
   canPreview: boolean;
   canIngest: boolean;
   canReplay: boolean;
+  state: 'pending' | 'authorized' | 'unauthorized' | 'token-unavailable' | 'scope-missing';
 } = {
   canPreview: true,
   canIngest: true,
   canReplay: true,
+  state: 'authorized',
 };
 
 vi.mock('@hbc/features-safety', () => ({
@@ -69,7 +71,16 @@ vi.mock('@hbc/features-safety', () => ({
   isSafetyBackendCommandError: () => false,
   SafetyUploadError: class extends Error {},
   useSafetyCapabilities: () => capabilitiesFixture,
-  safetyCapabilityReason: (key: 'canPreview' | 'canIngest' | 'canReplay') => {
+  safetyCapabilityReason: (
+    key: 'canPreview' | 'canIngest' | 'canReplay',
+    state?: 'pending' | 'authorized' | 'unauthorized' | 'token-unavailable' | 'scope-missing',
+  ) => {
+    if (state === 'token-unavailable') {
+      return key === 'canPreview' ? 'TOKEN-UNAVAILABLE-PREVIEW' : 'TOKEN-UNAVAILABLE-INGEST';
+    }
+    if (state === 'scope-missing') {
+      return key === 'canPreview' ? 'SCOPE-MISSING-PREVIEW' : 'SCOPE-MISSING-INGEST';
+    }
     switch (key) {
       case 'canPreview':
         return 'NOT-AUTHORIZED-PREVIEW';
@@ -201,11 +212,13 @@ describe('UploadPage — frontend capability gating', () => {
     capabilitiesFixture.canPreview = true;
     capabilitiesFixture.canIngest = true;
     capabilitiesFixture.canReplay = true;
+    capabilitiesFixture.state = 'authorized';
   });
 
   it('disables Preview and Commit and surfaces the preview reason when the user has no preview capability', async () => {
     capabilitiesFixture.canPreview = false;
     capabilitiesFixture.canIngest = false;
+    capabilitiesFixture.state = 'unauthorized';
     render(<UploadPage />);
     await completeIntake();
 
@@ -226,6 +239,7 @@ describe('UploadPage — frontend capability gating', () => {
   it('allows Preview but disables Commit with an ingest-specific reason for a Reviewer', async () => {
     capabilitiesFixture.canPreview = true;
     capabilitiesFixture.canIngest = false;
+    capabilitiesFixture.state = 'authorized';
     render(<UploadPage />);
     await completeIntake();
 
@@ -263,5 +277,38 @@ describe('UploadPage — frontend capability gating', () => {
 
     await userEvent.click(previewButton);
     expect(previewMutate).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the token-unavailable diagnostic distinct from generic unauthorized', async () => {
+    capabilitiesFixture.canPreview = false;
+    capabilitiesFixture.canIngest = false;
+    capabilitiesFixture.state = 'token-unavailable';
+    render(<UploadPage />);
+    await completeIntake();
+
+    const previewButton = screen.getByRole('button', { name: /preview checklist/i });
+    expect(previewButton).toBeDisabled();
+
+    const blocked = document.querySelector(
+      '[data-safety-ui="upload-preview-capability-blocked"]',
+    );
+    expect(blocked).toBeInTheDocument();
+    expect(blocked!.textContent).toContain('TOKEN-UNAVAILABLE-PREVIEW');
+    expect(blocked!.textContent).not.toContain('NOT-AUTHORIZED-PREVIEW');
+  });
+
+  it('renders the scope-missing diagnostic distinct from generic unauthorized', async () => {
+    capabilitiesFixture.canPreview = false;
+    capabilitiesFixture.canIngest = false;
+    capabilitiesFixture.state = 'scope-missing';
+    render(<UploadPage />);
+    await completeIntake();
+
+    const blocked = document.querySelector(
+      '[data-safety-ui="upload-preview-capability-blocked"]',
+    );
+    expect(blocked).toBeInTheDocument();
+    expect(blocked!.textContent).toContain('SCOPE-MISSING-PREVIEW');
+    expect(blocked!.textContent).not.toContain('NOT-AUTHORIZED-PREVIEW');
   });
 });

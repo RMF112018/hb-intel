@@ -188,17 +188,49 @@ export type {
 
 // -- Auth / Capabilities -------------------------------------------------
 export {
+  PENDING_SAFETY_CAPABILITIES,
   SAFETY_ACTION_ROLES,
   SAFETY_ADMIN_ROLE,
   SAFETY_GLOBAL_OVERRIDE_ROLES,
   SAFETY_OPERATOR_ROLE,
   SAFETY_REVIEWER_ROLE,
   SAFETY_SUBMITTER_ROLE,
+  SCOPE_MISSING_SAFETY_CAPABILITIES,
+  TOKEN_UNAVAILABLE_SAFETY_CAPABILITIES,
+  UNAUTHORIZED_SAFETY_CAPABILITIES,
   resolveSafetyCapabilities,
+  safetyCapabilitiesFromTokenRoles,
   safetyCapabilityReason,
 } from './auth/safetyCapabilities.js';
 export type {
   SafetyAction,
   SafetyCapabilities,
+  SafetyCapabilityState,
 } from './auth/safetyCapabilities.js';
 export { useSafetyCapabilities } from './auth/useSafetyCapabilities.js';
+export {
+  SafetyCapabilityProvider,
+  useSafetyCapabilityContext,
+} from './auth/SafetyCapabilityProvider.js';
+export type { SafetyCapabilityProviderProps } from './auth/SafetyCapabilityProvider.js';
+export {
+  acquireSpfxApiTokenAuthority,
+} from './auth/spfxApiTokenAuthority.js';
+export type {
+  AadTokenProviderHost,
+  ApiTokenAuthority,
+  ApiTokenErrorClass,
+  DecodedApiTokenClaims,
+} from './auth/spfxApiTokenAuthority.js';
+export {
+  buildSafetyCapabilityProof,
+  publishSafetyCapabilityProof,
+  SAFETY_CAPABILITY_PROOF_GLOBAL_KEY,
+} from './auth/safetyCapabilityProof.js';
+export type {
+  PublishSafetyCapabilityProofInput,
+  SafetyCapabilityProof,
+  SafetyCapabilityProofDecoded,
+  SafetyCapabilitySourcePath,
+  SafetyCapabilityTokenStatus,
+} from './auth/safetyCapabilityProof.js';

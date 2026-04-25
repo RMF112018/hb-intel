@@ -3,7 +3,7 @@
   "id": "ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e",
   "alias": "SafetyWebPart",
   "componentType": "WebPart",
-  "version": "1.2.42.0",
+  "version": "1.2.43.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [

@@ -6,10 +6,12 @@ import { ComplexityProvider } from '@hbc/complexity';
 import { ForceOfficeMode } from './ForceOfficeMode.js';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import {
+  SafetyCapabilityProvider,
   SafetyRepositoryProvider,
   createSafetyInspectionRepository,
   currentSafetyGuidOverlay,
   emitSafetyFrontendEvent,
+  type AadTokenProviderHost,
 } from '@hbc/features-safety';
 import { createWebpartRouter } from './router/index.js';
 import { useSafetyLayoutMode } from './responsive/safetyBreakpoints.js';
@@ -199,15 +201,25 @@ export function App({ spfxContext, runtimeContract }: AppProps): React.ReactNode
                 </SafetyStatusPanel>
               </div>
             ) : (
-              <SafetyRepositoryProvider repository={repository}>
-                <div
-                  ref={contentRef}
-                  data-safety-mode={layoutMode}
-                  className="safety-app-root"
-                >
-                  <RouterProvider router={router} />
-                </div>
-              </SafetyRepositoryProvider>
+              <SafetyCapabilityProvider
+                host={
+                  resolvedRuntimeContract.hostMode === 'sharepoint' &&
+                  typed?.aadTokenProviderFactory
+                    ? (typed as unknown as AadTokenProviderHost)
+                    : undefined
+                }
+                apiAudience={resolvedRuntimeContract.backend.apiAudience ?? ''}
+              >
+                <SafetyRepositoryProvider repository={repository}>
+                  <div
+                    ref={contentRef}
+                    data-safety-mode={layoutMode}
+                    className="safety-app-root"
+                  >
+                    <RouterProvider router={router} />
+                  </div>
+                </SafetyRepositoryProvider>
+              </SafetyCapabilityProvider>
             )}
           </ComplexityProvider>
         </HbcErrorBoundary>

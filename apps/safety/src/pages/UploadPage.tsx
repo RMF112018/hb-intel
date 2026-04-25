@@ -429,11 +429,11 @@ export function UploadPage(): ReactNode {
   const commitDisabled =
     !commitReady || ingestion.isPending || !capabilities.canIngest;
   const previewCapabilityReason = !capabilities.canPreview
-    ? safetyCapabilityReason('canPreview')
+    ? safetyCapabilityReason('canPreview', capabilities.state)
     : null;
   const commitCapabilityReason =
     capabilities.canPreview && !capabilities.canIngest
-      ? safetyCapabilityReason('canIngest')
+      ? safetyCapabilityReason('canIngest', capabilities.state)
       : null;
 
   const mismatch = ingestion.data?.metadataMismatch;

@@ -15,7 +15,7 @@ describe('Safety API permission contract', () => {
     const permissionRequests = packageSolution.solution?.webApiPermissionRequests ?? [];
 
     expect(permissionRequests).toContainEqual({
-      resource: 'hb-intel-api-production',
+      resource: 'HB SharePoint Creator',
       scope: 'access_as_user',
     });
   });
