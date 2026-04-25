@@ -10,6 +10,7 @@ export default defineConfig(({ command }) => ({
     alias: [
       { find: '@hbc/auth/spfx', replacement: resolve(__dirname, '../../packages/auth/src/spfx/index.ts') },
       { find: '@hbc/auth', replacement: resolve(__dirname, '../../packages/auth/src/index.ts') },
+      { find: '@hbc/foleon-reader', replacement: resolve(__dirname, '../../packages/foleon-reader/src/index.ts') },
       { find: '@hbc/homepage-launcher', replacement: resolve(__dirname, '../../packages/homepage-launcher/src/index.ts') },
       { find: '@hbc/ui-kit/app-shell', replacement: resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts') },
       { find: '@hbc/ui-kit/homepage', replacement: resolve(__dirname, '../../packages/ui-kit/src/homepage.ts') },
@@ -17,8 +18,12 @@ export default defineConfig(({ command }) => ({
       { find: '@hbc/ui-kit/theme', replacement: resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts') },
       { find: '@hbc/ui-kit/icons', replacement: resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx') },
       { find: '@hbc/models', replacement: resolve(__dirname, '../../packages/models/src/index.ts') },
-      { find: '@hb-homepage/runtime', replacement: resolve(__dirname, '../hb-webparts/src/webparts/hbHomepage/HbHomepage.tsx') },
+      // Regex alias must come BEFORE the bare-string alias so subpaths like
+      // `@hb-homepage/runtime/wiring/safetyFunctionAppWiring` resolve to the
+      // correct file under `apps/hb-webparts/src/webparts/hbHomepage/wiring/`
+      // instead of being concatenated onto the bare HbHomepage.tsx target.
       { find: /^@hb-homepage\/runtime\/(.*)/, replacement: resolve(__dirname, '../hb-webparts/src/webparts/hbHomepage/$1') },
+      { find: '@hb-homepage/runtime', replacement: resolve(__dirname, '../hb-webparts/src/webparts/hbHomepage/HbHomepage.tsx') },
       { find: /^@hb-homepage\/helpers\/(.*)/, replacement: resolve(__dirname, '../hb-webparts/src/homepage/helpers/$1') },
       { find: /^@hb-homepage\/data\/(.*)/, replacement: resolve(__dirname, '../hb-webparts/src/homepage/data/$1') },
     ],

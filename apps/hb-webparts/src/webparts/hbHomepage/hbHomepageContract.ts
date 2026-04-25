@@ -7,6 +7,7 @@ import type {
   HbHomepageWrapperHeroConfig,
   HbHomepageWrapperRailConfig,
 } from './hbHomepageWrapperConfig.js';
+import type { HomepageFoleonConfig } from './wiring/foleonHomepageConfig.js';
 
 export type { ModuleConfigSlices, RendererContext, ShellLayoutInput };
 // Re-export wrapper-facing integration types. These describe composition
@@ -120,6 +121,24 @@ export interface HbHomepageProps {
   siteUrl?: string;
   getGraphToken?: () => Promise<string>;
   getApiToken?: () => Promise<string>;
+  getFoleonApiToken?: () => Promise<string>;
+  /**
+   * Wave 07 wiring: token acquisition seam for the Safety Field Excellence
+   * dynamic adapter and any future Function App-backed zones. Mount
+   * constructs this from `functionAppAudience` (preferred) or the legacy
+   * `backendAudience` property, then forwards it through the shell into
+   * `HbHomepageZoneProps.getFunctionAppToken`. When absent, dynamic source
+   * modes degrade to curated/preview fallbacks.
+   */
+  getFunctionAppToken?: () => Promise<string>;
+  /**
+   * Wave 07 wiring: Function App base URL the homepage adapter calls
+   * (e.g. `https://hbintel-functions.example.com`). Resolved by mount
+   * from top-level `functionAppBaseUrl` or, as a fallback, the nested
+   * `safetyFieldExcellenceDynamic.functionAppBaseUrl`. Forwarded through
+   * the shell into `HbHomepageZoneProps.functionAppBaseUrl`.
+   */
+  functionAppBaseUrl?: string;
   kudosListHostUrl?: string;
 }
 
@@ -135,6 +154,7 @@ export interface HbHomepageZoneProps {
   assetBaseUrl?: string;
   siteUrl?: string;
   getGraphToken?: () => Promise<string>;
+  getFoleonApiToken?: () => Promise<string>;
   /**
    * Wave 05: token acquisition seam for the Safety Field Excellence dynamic
    * adapter (and other Function App-backed zones in the future). The shell
@@ -154,4 +174,5 @@ export interface HbHomepageZoneProps {
   functionAppBaseUrl?: string;
   profilePhotoResolver?: ProfilePhotoResolver;
   kudosListHostUrl?: string;
+  foleonConfig?: HomepageFoleonConfig;
 }

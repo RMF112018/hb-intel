@@ -24,6 +24,8 @@ import {
   storePriorityActionsListHostUrl,
 } from '@hb-homepage/data/spContext';
 import type { HomepageIdentityInput } from '@hb-homepage/helpers/identity';
+import { resolveSafetyFunctionAppWiring } from '@hb-homepage/runtime/wiring/safetyFunctionAppWiring';
+import { readHomepageFoleonApiResource } from '@hb-homepage/runtime/wiring/foleonHomepageConfig';
 
 let root: Root | undefined;
 
@@ -78,6 +80,14 @@ export async function mount(
   const getApiToken = webPartProperties?.backendAudience
     ? createApiTokenProvider(String(webPartProperties.backendAudience))
     : undefined;
+  const foleonApiResource = readHomepageFoleonApiResource(webPartProperties);
+  const getFoleonApiToken = foleonApiResource
+    ? createApiTokenProvider(foleonApiResource)
+    : undefined;
+  const { functionAppBaseUrl, getFunctionAppToken } = resolveSafetyFunctionAppWiring(
+    webPartProperties,
+    createApiTokenProvider,
+  );
 
   root = createRoot(el);
   const appTree = createElement(HbHomepage, {
@@ -87,6 +97,9 @@ export async function mount(
     siteUrl,
     getGraphToken,
     getApiToken,
+    getFoleonApiToken,
+    getFunctionAppToken,
+    functionAppBaseUrl,
   });
   root.render(
     createElement(

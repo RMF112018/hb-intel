@@ -536,6 +536,7 @@ export function extractModuleConfigSlices(config: Record<string, unknown> | unde
     peopleCulturePublic: config.peopleCulturePublic as Record<string, unknown> | undefined,
     hbKudos: config.hbKudos as Record<string, unknown> | undefined,
     safetyFieldExcellence: config.safetyFieldExcellence as Record<string, unknown> | undefined,
+    safetyFieldExcellenceDynamic: config.safetyFieldExcellenceDynamic as Record<string, unknown> | undefined,
     activeAudience: typeof config.activeAudience === 'string' ? config.activeAudience : undefined,
   };
 }

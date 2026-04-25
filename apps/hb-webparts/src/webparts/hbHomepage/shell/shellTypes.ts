@@ -253,6 +253,13 @@ export interface ModuleConfigSlices {
   readonly peopleCulturePublic?: Record<string, unknown>;
   readonly hbKudos?: Record<string, unknown>;
   readonly safetyFieldExcellence?: Record<string, unknown>;
+  /**
+   * Wave 07 wiring: dynamic Safety Field Excellence configuration block.
+   * Carried untyped at this seam; `SafetyFieldExcellenceZone` validates
+   * its inner shape against
+   * `SafetyFieldExcellenceDynamicConfig` before consuming it.
+   */
+  readonly safetyFieldExcellenceDynamic?: Record<string, unknown>;
   readonly activeAudience?: string;
 }
 

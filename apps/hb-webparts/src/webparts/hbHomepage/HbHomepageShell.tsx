@@ -33,6 +33,7 @@ import type {
 import { effectiveBandOrientation } from './shell/shellTypes.js';
 import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
 import { ShellFallbackSurface } from './ShellFallbackSurface.js';
+import { extractHomepageFoleonConfig } from './wiring/foleonHomepageConfig.js';
 import { CompanyPulseZone } from './zones/CompanyPulseZone.js';
 import { LeadershipMessageZone } from './zones/LeadershipMessageZone.js';
 import { ProjectPortfolioSpotlightZone } from './zones/ProjectPortfolioSpotlightZone.js';
@@ -252,6 +253,9 @@ export function HbHomepageShell({
   assetBaseUrl,
   siteUrl,
   getGraphToken,
+  getFoleonApiToken,
+  getFunctionAppToken,
+  functionAppBaseUrl,
   container,
   shellRef,
 }: HbHomepageProps & {
@@ -268,6 +272,10 @@ export function HbHomepageShell({
     () => extractModuleConfigSlices(config),
     [config],
   );
+  const foleonConfig = React.useMemo(
+    () => extractHomepageFoleonConfig(config),
+    [config],
+  );
 
   const layoutState = React.useMemo(
     () => parseShellLayout(config?.shellLayout),
@@ -282,7 +290,11 @@ export function HbHomepageShell({
     assetBaseUrl,
     siteUrl,
     getGraphToken,
+    getFoleonApiToken,
+    getFunctionAppToken,
+    functionAppBaseUrl,
     profilePhotoResolver,
+    foleonConfig,
   };
 
   return (

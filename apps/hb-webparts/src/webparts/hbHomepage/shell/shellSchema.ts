@@ -88,5 +88,12 @@ export const ModuleConfigSlicesSchema = z.object({
   peopleCulturePublic: z.record(z.unknown()).optional(),
   hbKudos: z.record(z.unknown()).optional(),
   safetyFieldExcellence: z.record(z.unknown()).optional(),
+  /**
+   * Wave 07 wiring: dynamic Safety Field Excellence configuration block.
+   * Consumed by `SafetyFieldExcellenceZone` to choose source mode and
+   * Function App base URL. Allowed to pass through the slice extractor
+   * untyped because the zone validates its inner shape.
+   */
+  safetyFieldExcellenceDynamic: z.record(z.unknown()).optional(),
   activeAudience: z.string().optional(),
 });
