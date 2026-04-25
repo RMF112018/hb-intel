@@ -13,7 +13,7 @@ function assertFoleonPropertiesCopyToTopLevel(): void {
     placementsListId: 'placements-list-guid',
     eventsListId: 'events-list-guid',
     expectedManifestId: FOLEON_WEBPART_ID,
-    expectedPackageVersion: '1.0.15.0',
+    expectedPackageVersion: '1.0.16.0',
     foleonRoute: 'manage' as const,
     foleonDocId: 1234,
     foleonReaderRoutePath: ' /SitePages/Foleon-Reader.aspx ',
@@ -31,7 +31,7 @@ function assertFoleonPropertiesCopyToTopLevel(): void {
   assert.equal(runtimeConfig.placementsListId, 'placements-list-guid');
   assert.equal(runtimeConfig.eventsListId, 'events-list-guid');
   assert.equal(runtimeConfig.expectedManifestId, FOLEON_WEBPART_ID);
-  assert.equal(runtimeConfig.expectedPackageVersion, '1.0.15.0');
+  assert.equal(runtimeConfig.expectedPackageVersion, '1.0.16.0');
   assert.equal(runtimeConfig.foleonRoute, 'manage');
   assert.equal(runtimeConfig.foleonDocId, 1234);
   assert.equal(runtimeConfig.foleonReaderRoutePath, '/SitePages/Foleon-Reader.aspx');

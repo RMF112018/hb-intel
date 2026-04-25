@@ -107,6 +107,79 @@ describe('runtime binding proof (redacted)', () => {
     expect(proof?.fingerprints.originAllowlistCount).toBe(1);
   });
 
+  it('describes top-level and nested webpart-property bridge presence without exposing values', async () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    await mount(el, undefined, {
+      contentRegistryListId: TEST_CONTENT_REGISTRY,
+      foleonRoute: 'manage',
+      expectedPackageVersion: FOLEON_PACKAGE_VERSION,
+      webPartProperties: {
+        contentRegistryListId: TEST_CONTENT_REGISTRY,
+        placementsListId: TEST_PLACEMENTS,
+        foleonRoute: 'manage',
+        expectedPackageVersion: FOLEON_PACKAGE_VERSION,
+      },
+    } as Parameters<typeof mount>[2]);
+
+    const proof = readProof();
+    expect(proof?.foleonPropertyBridge).toEqual({
+      webPartPropertiesPresent: true,
+      topLevelConfigPresent: {
+        contentRegistryListId: true,
+        placementsListId: false,
+        eventsListId: false,
+        foleonRoute: true,
+        expectedManifestId: false,
+        expectedPackageVersion: true,
+        acceptedFoleonOrigins: false,
+        allowPreview: false,
+      },
+      nestedWebPartPropertiesPresent: {
+        contentRegistryListId: true,
+        placementsListId: true,
+        eventsListId: false,
+        foleonRoute: true,
+        expectedManifestId: false,
+        expectedPackageVersion: true,
+        acceptedFoleonOrigins: false,
+        allowPreview: false,
+      },
+      bridgeAppearsApplied: true,
+    });
+    expect(proof?.configSource).toEqual({
+      contentRegistryListId: 'top-level',
+      placementsListId: 'nested-only',
+      eventsListId: 'missing',
+      foleonRoute: 'top-level',
+    });
+
+    const serialized = JSON.stringify(proof);
+    expect(serialized).not.toContain(TEST_CONTENT_REGISTRY);
+    expect(serialized).not.toContain(TEST_PLACEMENTS);
+  });
+
+  it('marks bridge application false when nested Foleon properties do not reach top-level config', async () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    await mount(el, undefined, {
+      webPartProperties: {
+        contentRegistryListId: TEST_CONTENT_REGISTRY,
+        foleonRoute: 'manage',
+      },
+    } as Parameters<typeof mount>[2]);
+
+    const proof = readProof();
+    expect(proof?.foleonPropertyBridge.webPartPropertiesPresent).toBe(true);
+    expect(proof?.foleonPropertyBridge.bridgeAppearsApplied).toBe(false);
+    expect(proof?.configSource).toEqual({
+      contentRegistryListId: 'nested-only',
+      placementsListId: 'missing',
+      eventsListId: 'missing',
+      foleonRoute: 'nested-only',
+    });
+  });
+
   it('never leaks a preview URL segment into the proof even when allowPreview=true', async () => {
     const el = document.createElement('div');
     document.body.appendChild(el);

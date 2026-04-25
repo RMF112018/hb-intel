@@ -144,14 +144,35 @@ version values are never emitted. Operators get:
   reader route path, and origin allowlist set (sorted + deduped).
   Non-cryptographic; suitable only for deploy-correlation.
 - `governance.*` — booleans: manifest / version identity match.
+- `foleonPropertyBridge.*` — booleans showing whether Foleon page
+  properties exist under `webPartProperties`, whether the same
+  allowlisted keys reached top-level config, and whether the Prompt 01
+  bridge appears applied.
+- `configSource.*` — redacted source labels (`top-level`,
+  `nested-only`, or `missing`) for list IDs and route.
 - `issueCodes` — array of `FoleonConfigErrorCode` values.
 - `diagnostics.adminIssues` — present only when
   `?foleon-diagnostics=1` was in the URL; carries
-  `{ code, adminLabel }` pairs. Standard tenant loads never emit
+  `{ code, adminLabel, adminRemediation }` entries. Standard tenant loads never emit
   this field.
 
 No preview URL paths, credentials, or caller-supplied strings are
 interpolated into the proof.
+
+Inspect the proof in a hosted page with:
+
+```js
+JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
+```
+
+Healthy SharePoint proof for package `1.0.16.0` should include
+`canInitialize: true`, `issueCodes: []`, and true presence for
+`siteUrl`, `contentRegistryListId`, `placementsListId`, and
+`eventsListId`. If `configSource.foleonRoute` is `nested-only` or the
+top-level `route` is unexpected, repair `foleonRoute` in the advanced
+property pane group. If `package-version-mismatch` appears, update the
+page's persisted `expectedPackageVersion` or confirm the App Catalog
+package version.
 
 ## Backend connector workflow
 

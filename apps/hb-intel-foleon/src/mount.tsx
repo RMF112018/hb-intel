@@ -128,6 +128,18 @@ export interface IFoleonRuntimeBindingProof {
     readonly manifestIdMatchesExpected: boolean;
     readonly packageVersionMatchesExpected: boolean;
   };
+  readonly foleonPropertyBridge: {
+    readonly webPartPropertiesPresent: boolean;
+    readonly topLevelConfigPresent: FoleonPropertyBridgePresence;
+    readonly nestedWebPartPropertiesPresent: FoleonPropertyBridgePresence;
+    readonly bridgeAppearsApplied: boolean;
+  };
+  readonly configSource: {
+    readonly contentRegistryListId: FoleonConfigSource;
+    readonly placementsListId: FoleonConfigSource;
+    readonly eventsListId: FoleonConfigSource;
+    readonly foleonRoute: FoleonConfigSource;
+  };
   readonly issueCodes: ReadonlyArray<FoleonConfigErrorCode>;
   /**
    * Present only when the page URL carried `?foleon-diagnostics=1`
@@ -137,8 +149,22 @@ export interface IFoleonRuntimeBindingProof {
     readonly adminIssues: ReadonlyArray<{
       readonly code: FoleonConfigErrorCode;
       readonly adminLabel: string;
+      readonly adminRemediation: string;
     }>;
   };
+}
+
+type FoleonConfigSource = 'top-level' | 'nested-only' | 'missing';
+
+interface FoleonPropertyBridgePresence {
+  readonly contentRegistryListId: boolean;
+  readonly placementsListId: boolean;
+  readonly eventsListId: boolean;
+  readonly foleonRoute: boolean;
+  readonly expectedManifestId: boolean;
+  readonly expectedPackageVersion: boolean;
+  readonly acceptedFoleonOrigins: boolean;
+  readonly allowPreview: boolean;
 }
 
 function publishRuntimeBindingProof(
@@ -146,6 +172,7 @@ function publishRuntimeBindingProof(
   config: IFoleonMountConfig | undefined,
 ): void {
   const diagnosticsEnabled = shouldEnableDiagnostics();
+  const bridgeDiagnostics = buildFoleonPropertyBridgeDiagnostics(config);
   const proof: IFoleonRuntimeBindingProof = {
     generatedAt: new Date().toISOString(),
     bundleMarker: '__hbIntel_foleon',
@@ -191,6 +218,8 @@ function publishRuntimeBindingProof(
       manifestIdMatchesExpected: contract.governed.manifestIdMatchesExpected,
       packageVersionMatchesExpected: contract.governed.packageVersionMatchesExpected,
     },
+    foleonPropertyBridge: bridgeDiagnostics.foleonPropertyBridge,
+    configSource: bridgeDiagnostics.configSource,
     issueCodes: contract.issues.map((issue) => issue.code),
     ...(diagnosticsEnabled
       ? {
@@ -209,6 +238,82 @@ function publishRuntimeBindingProof(
       }
     ).__hbIntel_foleonRuntimeBindingProof = proof;
   }
+}
+
+const FOLEON_BRIDGE_KEYS = [
+  'contentRegistryListId',
+  'placementsListId',
+  'eventsListId',
+  'foleonRoute',
+  'expectedManifestId',
+  'expectedPackageVersion',
+  'acceptedFoleonOrigins',
+  'allowPreview',
+] as const;
+
+type FoleonSourceKey = 'contentRegistryListId' | 'placementsListId' | 'eventsListId' | 'foleonRoute';
+
+function buildFoleonPropertyBridgeDiagnostics(config: IFoleonMountConfig | undefined): Pick<
+  IFoleonRuntimeBindingProof,
+  'foleonPropertyBridge' | 'configSource'
+> {
+  const topLevelConfig = config as Record<string, unknown> | undefined;
+  const nestedProperties = topLevelConfig?.webPartProperties;
+  const nestedConfig =
+    nestedProperties && typeof nestedProperties === 'object'
+      ? nestedProperties as Record<string, unknown>
+      : undefined;
+
+  const topLevelConfigPresent = buildBridgePresence(topLevelConfig);
+  const nestedWebPartPropertiesPresent = buildBridgePresence(nestedConfig);
+  const nestedBridgeKeys = FOLEON_BRIDGE_KEYS.filter((key) => nestedWebPartPropertiesPresent[key]);
+  const bridgeAppearsApplied =
+    nestedBridgeKeys.length > 0 &&
+    nestedBridgeKeys.some((key) => topLevelConfigPresent[key]);
+
+  return {
+    foleonPropertyBridge: {
+      webPartPropertiesPresent: !!nestedConfig,
+      topLevelConfigPresent,
+      nestedWebPartPropertiesPresent,
+      bridgeAppearsApplied,
+    },
+    configSource: {
+      contentRegistryListId: resolveConfigSource('contentRegistryListId', topLevelConfigPresent, nestedWebPartPropertiesPresent),
+      placementsListId: resolveConfigSource('placementsListId', topLevelConfigPresent, nestedWebPartPropertiesPresent),
+      eventsListId: resolveConfigSource('eventsListId', topLevelConfigPresent, nestedWebPartPropertiesPresent),
+      foleonRoute: resolveConfigSource('foleonRoute', topLevelConfigPresent, nestedWebPartPropertiesPresent),
+    },
+  };
+}
+
+function buildBridgePresence(config: Record<string, unknown> | undefined): FoleonPropertyBridgePresence {
+  return {
+    contentRegistryListId: hasConfigValue(config?.contentRegistryListId),
+    placementsListId: hasConfigValue(config?.placementsListId),
+    eventsListId: hasConfigValue(config?.eventsListId),
+    foleonRoute: hasConfigValue(config?.foleonRoute),
+    expectedManifestId: hasConfigValue(config?.expectedManifestId),
+    expectedPackageVersion: hasConfigValue(config?.expectedPackageVersion),
+    acceptedFoleonOrigins: hasConfigValue(config?.acceptedFoleonOrigins),
+    allowPreview: typeof config?.allowPreview === 'boolean',
+  };
+}
+
+function hasConfigValue(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== undefined && value !== null;
+}
+
+function resolveConfigSource(
+  key: FoleonSourceKey,
+  topLevelConfigPresent: FoleonPropertyBridgePresence,
+  nestedWebPartPropertiesPresent: FoleonPropertyBridgePresence,
+): FoleonConfigSource {
+  if (topLevelConfigPresent[key]) return 'top-level';
+  if (nestedWebPartPropertiesPresent[key]) return 'nested-only';
+  return 'missing';
 }
 
 async function createBackendTokenProvider(

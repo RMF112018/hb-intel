@@ -66,7 +66,7 @@ lists in install order.
    This package cannot be tenant-wide-deployed. Tenant-wide
    deployment of a `.sppkg` containing SharePoint assets is
    unsupported and the feature framework will be silently ignored.
-5. Confirm the App Catalog lists the package with version `1.0.15.0`.
+5. Confirm the App Catalog lists the package with version `1.0.16.0`.
 
 ## 5. Install on `/sites/HBCentral`
 
@@ -119,7 +119,12 @@ Set or confirm the governed defaults:
   comma-separated.
 - `allowPreview` → leave `false` for production.
 - `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
-- `expectedPackageVersion` → `1.0.15.0`.
+- `expectedPackageVersion` → `1.0.16.0`.
+
+Existing page instances that already persisted `expectedPackageVersion`
+may keep the old value after an app upgrade. If diagnostics report
+`package-version-mismatch`, update this property-pane field manually to
+the App Catalog package version.
 
 The toolbox entry normally sets `foleonRoute`. Use the advanced route
 dropdown only to repair a stale page instance or to intentionally pin a
@@ -169,12 +174,12 @@ Save the page. The webpart should render.
 Open the page hosting the Foleon webpart. In browser DevTools:
 
 ```js
-window.__hbIntel_foleonRuntimeBindingProof
+JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
 ```
 
 Expected:
 
-- `packageVersion === '1.0.15.0'`.
+- `packageVersion === '1.0.16.0'`.
 - `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
 - `hostMode === 'sharepoint'`.
 - `canInitialize === true`.
@@ -186,6 +191,38 @@ Expected:
 
 Add `?foleon-diagnostics=1` to the page URL to surface admin-scope
 issues if any remain.
+
+Healthy SharePoint proof after list GUIDs are configured should include:
+
+```json
+{
+  "packageVersion": "1.0.16.0",
+  "hostMode": "sharepoint",
+  "canInitialize": true,
+  "issueCodes": [],
+  "presence": {
+    "spfxContext": true,
+    "siteUrl": true,
+    "contentRegistryListId": true,
+    "placementsListId": true,
+    "eventsListId": true
+  }
+}
+```
+
+Failure interpretation:
+
+- `presence.contentRegistryListId === false` → set
+  `contentRegistryListId` in the property pane.
+- `presence.placementsListId === false` on the Highlights route → set
+  `placementsListId` in the property pane.
+- `configSource.foleonRoute === "nested-only"` or an unexpected `route`
+  value → repair `foleonRoute` in the advanced property pane group.
+- `package-version-mismatch` → update `expectedPackageVersion` or
+  confirm the App Catalog package version.
+- `foleonPropertyBridge.webPartPropertiesPresent === true` with
+  `foleonPropertyBridge.bridgeAppearsApplied === false` → suspect a
+  stale shell package or bridge regression.
 
 ## 10. Audience groups
 

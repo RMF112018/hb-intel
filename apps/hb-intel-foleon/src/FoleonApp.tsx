@@ -37,6 +37,7 @@ import { ReaderPage } from './pages/ReaderPage.js';
 import { ContentHubPage } from './pages/ContentHubPage.js';
 import { ManagePage } from './pages/ManagePage.js';
 import { FoleonError } from './components/FoleonStates.js';
+import { adminIssueDetails } from './runtime/foleonConfigIssues.js';
 
 interface FoleonAppProps {
   readonly contract: IFoleonRuntimeContract;
@@ -159,9 +160,8 @@ export function FoleonApp(props: FoleonAppProps): React.ReactNode {
       typeof window !== 'undefined' &&
       new URLSearchParams(window.location.search).get('foleon-diagnostics') === '1';
     const adminDetail = diagnosticsOn
-      ? contract.issues
-          .filter((issue) => issue.scope === 'admin')
-          .map((issue) => `${issue.code}: ${issue.adminLabel}`)
+      ? adminIssueDetails(contract.issues)
+          .map((issue) => `${issue.code}: ${issue.adminLabel} ${issue.adminRemediation}`)
           .join(' ')
       : undefined;
     return (

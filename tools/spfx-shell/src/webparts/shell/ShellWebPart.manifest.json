@@ -26,6 +26,10 @@
       "officeFabricIconFontName": "ReadingMode",
       "hiddenFromToolbox": false,
       "properties": {
+        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
+        "allowPreview": false,
+        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+        "expectedPackageVersion": "1.0.16.0",
         "foleonRoute": "highlights"
       }
     },
@@ -43,6 +47,10 @@
       "officeFabricIconFontName": "Settings",
       "hiddenFromToolbox": false,
       "properties": {
+        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
+        "allowPreview": false,
+        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+        "expectedPackageVersion": "1.0.16.0",
         "foleonRoute": "manage"
       }
     }

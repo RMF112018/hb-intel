@@ -46,6 +46,21 @@ const ADMIN_LABELS: Record<FoleonConfigErrorCode, string> = {
     'Expected package version does not match governed Foleon package version.',
 };
 
+const ADMIN_REMEDIATION: Record<FoleonConfigErrorCode, string> = {
+  'missing-site-url':
+    'Confirm the webpart is running in SharePoint host mode and not in an unsupported host or test shell.',
+  'missing-content-registry-list-id':
+    "Open the Foleon webpart property pane and set contentRegistryListId using the GUID from /_api/web/lists/getbytitle('HB_FoleonContentRegistry')?$select=Id.",
+  'missing-placements-list-id':
+    "Open the Foleon webpart property pane and set placementsListId using the GUID from /_api/web/lists/getbytitle('HB_FoleonHomepagePlacements')?$select=Id.",
+  'no-origins-allowlisted':
+    'Open the Foleon webpart property pane and set acceptedFoleonOrigins to the approved Foleon viewer origin, such as https://viewer.us.foleon.com.',
+  'manifest-id-mismatch':
+    'Open the Foleon webpart property pane and reset expectedManifestId to the packaged Foleon webpart ID.',
+  'package-version-mismatch':
+    'Open the Foleon webpart property pane and set expectedPackageVersion to the deployed App Catalog package version, or confirm the App Catalog package was upgraded.',
+};
+
 export function makeIssue(
   code: FoleonConfigErrorCode,
   scope: FoleonConfigIssueScope = 'admin',
@@ -71,14 +86,26 @@ export function userCopyForIssues(issues: ReadonlyArray<FoleonConfigIssue>): str
  */
 export function adminIssueDetails(
   issues: ReadonlyArray<FoleonConfigIssue>,
-): ReadonlyArray<{ code: FoleonConfigErrorCode; adminLabel: string }> {
+): ReadonlyArray<{
+  code: FoleonConfigErrorCode;
+  adminLabel: string;
+  adminRemediation: string;
+}> {
   const seen = new Set<FoleonConfigErrorCode>();
-  const out: Array<{ code: FoleonConfigErrorCode; adminLabel: string }> = [];
+  const out: Array<{
+    code: FoleonConfigErrorCode;
+    adminLabel: string;
+    adminRemediation: string;
+  }> = [];
   for (const issue of issues) {
     if (issue.scope !== 'admin') continue;
     if (seen.has(issue.code)) continue;
     seen.add(issue.code);
-    out.push({ code: issue.code, adminLabel: issue.adminLabel });
+    out.push({
+      code: issue.code,
+      adminLabel: issue.adminLabel,
+      adminRemediation: ADMIN_REMEDIATION[issue.code],
+    });
   }
   return out;
 }

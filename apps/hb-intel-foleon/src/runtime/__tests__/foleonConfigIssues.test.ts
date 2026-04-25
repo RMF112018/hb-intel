@@ -58,4 +58,23 @@ describe('FoleonConfigIssue helpers', () => {
       'manifest-id-mismatch',
     ]);
   });
+
+  it('adminIssueDetails includes fixed remediation guidance for admin diagnostics', () => {
+    const details = adminIssueDetails([
+      makeIssue('missing-content-registry-list-id'),
+      makeIssue('missing-placements-list-id'),
+      makeIssue('package-version-mismatch'),
+    ]);
+
+    expect(details[0]?.adminRemediation).toContain('contentRegistryListId');
+    expect(details[0]?.adminRemediation).toContain(
+      "/_api/web/lists/getbytitle('HB_FoleonContentRegistry')?$select=Id",
+    );
+    expect(details[1]?.adminRemediation).toContain('placementsListId');
+    expect(details[1]?.adminRemediation).toContain(
+      "/_api/web/lists/getbytitle('HB_FoleonHomepagePlacements')?$select=Id",
+    );
+    expect(details[2]?.adminRemediation).toContain('expectedPackageVersion');
+    expect(details[2]?.adminRemediation).toContain('App Catalog package');
+  });
 });

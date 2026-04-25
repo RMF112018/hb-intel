@@ -625,7 +625,7 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                   PropertyPaneTextField('expectedPackageVersion', {
                     label: 'Expected package version',
                     description: 'Governance proof value for the deployed Foleon package.',
-                    placeholder: '1.0.15.0',
+                    placeholder: '1.0.16.0',
                   }),
                 ],
               },

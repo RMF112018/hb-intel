@@ -4,6 +4,7 @@ import { FoleonApp, readNavFromLocation } from '../FoleonApp.js';
 import { createFoleonOriginPolicy } from '../services/FoleonOriginPolicy.js';
 import type { IFoleonRuntimeContract } from '../runtime/foleonRuntimeContract.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from '../webparts/foleon/runtimeContract.js';
+import { makeIssue } from '../runtime/foleonConfigIssues.js';
 
 function baseContract(
   overrides: Partial<IFoleonRuntimeContract> = {},
@@ -176,6 +177,43 @@ describe('FoleonApp — route-level no-iframe invariants (DOM proof)', () => {
     const main = container.querySelector('main[aria-label="Foleon"]');
     expect(main).not.toBeNull();
     expect(main?.getAttribute('data-hbc-foleon-route')).toBe('config-error');
+  });
+
+  it('keeps blocked-state copy generic unless diagnostics mode is enabled', () => {
+    const { container } = render(
+      <FoleonApp
+        contract={baseContract({
+          canInitialize: false,
+          issues: [makeIssue('missing-content-registry-list-id')],
+        })}
+      />,
+    );
+
+    expect(container.textContent).toContain(
+      'Foleon integration is not fully configured. Contact an HB Central admin.',
+    );
+    expect(container.textContent).not.toContain('missing-content-registry-list-id');
+    expect(container.textContent).not.toContain('contentRegistryListId');
+    expect(container.textContent).not.toContain('/_api/web/lists');
+  });
+
+  it('shows actionable admin remediation when diagnostics mode is enabled', () => {
+    withLocation('foleon-diagnostics=1', () => {
+      const { container } = render(
+        <FoleonApp
+          contract={baseContract({
+            canInitialize: false,
+            issues: [makeIssue('missing-content-registry-list-id')],
+          })}
+        />,
+      );
+
+      expect(container.textContent).toContain('missing-content-registry-list-id');
+      expect(container.textContent).toContain('contentRegistryListId');
+      expect(container.textContent).toContain(
+        "/_api/web/lists/getbytitle('HB_FoleonContentRegistry')?$select=Id",
+      );
+    });
   });
 });
 
