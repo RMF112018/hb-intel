@@ -123,35 +123,56 @@ describe('FoleonReaderModule', () => {
     cleanup();
   });
 
-  it('renders Project Spotlight preview without iframe or production content telemetry', async () => {
+  it('renders Project Spotlight preview with original-style structure and no fake live controls', async () => {
     resolveMock.mockResolvedValue({
       kind: 'preview',
       config: FOLEON_READER_CONFIGS.projectSpotlight,
       reason: 'no-active-record',
       warnings: [],
     });
-    const { callbacks } = renderModule();
+    const { callbacks, container } = renderModule();
 
     expect(await screen.findByText('Project Spotlight reader')).toBeTruthy();
+    expect(screen.getByText('Preview layout')).toBeTruthy();
+    expect(screen.getByLabelText('Project Spotlight feature placeholder')).toBeTruthy();
+    expect(screen.getByLabelText('Project Spotlight supporting preview placeholders')).toBeTruthy();
+    expect(screen.getByLabelText('Preview metadata zones')).toBeTruthy();
+    expect(screen.getByLabelText('Preview status')).toBeTruthy();
+    expect(screen.getByText('Content coming soon')).toBeTruthy();
+    expect(container.querySelector('[data-preview-tone="blue"]')).not.toBeNull();
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
+    expect(container.querySelectorAll('a')).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: /read|open|archive/i })).toBeNull();
+    expect(container.querySelector('[disabled], [aria-disabled="true"]')).toBeNull();
+    expect(container.textContent).not.toContain('viewer.us.foleon.com');
     expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+    expect(callbacks.onReaderClose).not.toHaveBeenCalled();
+    expect(callbacks.onEmbedError).not.toHaveBeenCalled();
     expect(callbacks.onGateBlocked).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Open full archive' }));
-    expect(callbacks.onOpenArchive).toHaveBeenCalledTimes(1);
+    expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
-  it('renders Company Pulse preview shape', async () => {
+  it('renders Company Pulse preview with orange tone and complete placeholder zones', async () => {
     resolveMock.mockResolvedValue({
       kind: 'preview',
       config: FOLEON_READER_CONFIGS.companyPulse,
       reason: 'no-active-record',
       warnings: [],
     });
-    renderModule({ config: FOLEON_READER_CONFIGS.companyPulse });
+    const { callbacks, container } = renderModule({ config: FOLEON_READER_CONFIGS.companyPulse });
 
     expect(await screen.findByText('Company Pulse reader')).toBeTruthy();
+    expect(screen.getByText('Preview layout')).toBeTruthy();
+    expect(screen.getByLabelText('Company Pulse feature placeholder')).toBeTruthy();
+    expect(screen.getByLabelText('Company Pulse supporting preview placeholders')).toBeTruthy();
+    expect(screen.getByLabelText('Preview metadata zones')).toBeTruthy();
+    expect(screen.getByText('Content coming soon')).toBeTruthy();
+    expect(container.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
+    expect(container.querySelectorAll('a')).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: /read|open|archive/i })).toBeNull();
+    expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+    expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
   it('mounts the iframe for a ready desktop record and emits open on load', async () => {

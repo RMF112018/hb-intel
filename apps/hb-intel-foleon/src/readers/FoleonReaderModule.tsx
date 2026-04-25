@@ -106,7 +106,6 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
       <FoleonReaderPreview
         config={config}
         tone={tone}
-        onOpenArchive={onOpenArchive}
       />
     );
   }

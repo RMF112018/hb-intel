@@ -32,3 +32,24 @@ This artifact defines how the **manage** SPFx route behaves across viewports. Im
 
 - `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
 - `docs/reference/spfx-surfaces/homepage-uiux-audit-checklist.md`
+
+## Split-Lane Reader Preview Fallback
+
+The Project Spotlight and Company Pulse preview fallbacks use explicit CSS media queries rather than runtime viewport logic. Validation should cover:
+
+| Case | Viewport | Expected preview behavior |
+|------|----------|---------------------------|
+| **wide-desktop** | ≥ 1440px | Richest two-column composition with feature placeholder, supporting cards, and visible status rail. |
+| **desktop** | 1024–1439px | Same composition with tighter spacing and no horizontal overflow. |
+| **tablet-landscape** | 900–1023px | Stacked feature/support composition; status rail and support zones use compact multi-card rows. |
+| **tablet-portrait** | 600–899px | Single-column stack; feature placeholder appears before supporting zones. |
+| **phone-portrait** | < 600px | Touch-first single-column preview with no iframe, fake reader button, or fake archive button. |
+| **short-height** | height < 640px | Reduced padding and placeholder heights to avoid trapping the user in a tall preview panel. |
+| **narrowest-stable** | width < 360px | Single-column metadata/status rails; wrapping pills and readable text with no horizontal overflow. |
+
+Manual screenshot validation, if no automated visual harness is available:
+
+1. Open `foleonRoute=projectSpotlight` with no active edition and capture at 1440, 1024, 900, 768, 390, and 320px widths.
+2. Repeat for `foleonRoute=companyPulse`.
+3. Capture one short-height case below 640px.
+4. Confirm the preview contains no `iframe`, fake read/open/archive controls, anchors, fake Foleon URLs, or production content telemetry triggers.
