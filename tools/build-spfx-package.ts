@@ -325,16 +325,22 @@ const SAFETY_PACKAGED_ROUTE_MARKERS = [
   { key: 'ingest command route', needle: '/api/safety-records/ingest' },
   { key: 'replay command route', needle: '/api/safety-records/replay' },
 ] as const;
-const SAFETY_PACKAGED_CONFIG_MARKERS = [
-  { key: 'token audience property key', needle: 'apiAudience' },
-  { key: 'token acquisition failure code', needle: 'TOKEN_ACQUISITION_FAILED' },
-  { key: 'backend bearer wiring seam', needle: 'Authorization' },
-  { key: 'runtime accepted backend origin key', needle: 'acceptedBackendOrigin' },
-  { key: 'runtime binding proof global marker', needle: '__hbIntel_safetyRuntimeBindingProof' },
-  { key: 'governed manifest authority marker', needle: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e' },
-  { key: 'governed package version marker', needle: '1.2.36.0' },
-  { key: 'hosted GUID fingerprint contract key', needle: 'expectedHostedGuidOverlayFingerprint' },
-] as const;
+function safetyPackagedConfigMarkers(packageVersion: string): ReadonlyArray<{ key: string; needle: string }> {
+  return [
+    { key: 'token audience property key', needle: 'apiAudience' },
+    { key: 'token acquisition failure code', needle: 'TOKEN_ACQUISITION_FAILED' },
+    { key: 'backend bearer wiring seam', needle: 'Authorization' },
+    { key: 'runtime accepted backend origin key', needle: 'acceptedBackendOrigin' },
+    { key: 'runtime binding proof global marker', needle: '__hbIntel_safetyRuntimeBindingProof' },
+    { key: 'governed manifest authority marker', needle: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e' },
+    // Version needle is read from the live package-solution.json so it
+    // tracks the deploy invariant automatically — never hardcode a frozen
+    // version here; the bundle stamp is generated at build time from the
+    // same source via apps/safety/config/runtimeDefines.ts.
+    { key: 'governed package version marker', needle: packageVersion },
+    { key: 'hosted GUID fingerprint contract key', needle: 'expectedHostedGuidOverlayFingerprint' },
+  ];
+}
 
 interface PackageRuntimeMarker {
   id: string;
@@ -3100,7 +3106,11 @@ for (const domain of domains) {
         needle: marker.needle,
         present: bundleText.includes(marker.needle),
       }));
-      const configMarkerChecks = SAFETY_PACKAGED_CONFIG_MARKERS.map((marker) => ({
+      const livePackageVersion =
+        typeof domainPkgSolution?.solution?.version === 'string'
+          ? domainPkgSolution.solution.version
+          : '';
+      const configMarkerChecks = safetyPackagedConfigMarkers(livePackageVersion).map((marker) => ({
         marker: marker.key,
         needle: marker.needle,
         present: bundleText.includes(marker.needle),
@@ -3163,7 +3173,9 @@ for (const domain of domains) {
         packagingRunId: freshnessEvidence.runId,
         governedAuthority: {
           expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-          expectedPackageVersion: '1.2.36.0',
+          // Sourced from apps/safety/config/package-solution.json so the
+          // proof tracks the deploy invariant automatically.
+          expectedPackageVersion: livePackageVersion,
           expectedHostedGuidOverlayFingerprint: 'fnv1a32:36b2f764',
         },
         checks: {
