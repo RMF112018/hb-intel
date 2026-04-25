@@ -237,7 +237,12 @@ export interface AuthzTelemetryEvent {
   callerUpn?: string;
 }
 
-export type SafetyRouteAction = 'preview' | 'ingest' | 'replay';
+export type SafetyRouteAction =
+  | 'preview'
+  | 'ingest'
+  | 'replay'
+  | 'excellence-rollup-read'
+  | 'excellence-rollup-generate';
 export type SafetyRouteRoleFamily =
   | 'safety-specific'
   | 'global-override'
@@ -309,6 +314,21 @@ const SAFETY_ACTION_ROLES: Readonly<Record<SafetyRouteAction, ReadonlyArray<stri
   replay: [
     ...SAFETY_OPERATOR_ROLES,
     ...SAFETY_REVIEWER_ROLES,
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  // Safety Field Excellence rollup read access — leadership review surface.
+  // Reviewers may inspect candidates and dry-run scoring; Admins may also
+  // generate. Global override (Admin/HBIntelAdmin/BreakGlass) and the
+  // workload-automation app-only branch retain their existing behavior via
+  // the shared `authorizeSafetyRoute` flow.
+  'excellence-rollup-read': [
+    ...SAFETY_REVIEWER_ROLES,
+    ...SAFETY_ADMIN_ROLES,
+  ],
+  // Safety Field Excellence rollup generate (writes candidate score records).
+  // Restricted to HBIntelSafetyAdmin (plus existing global override and
+  // workload-automation paths). Reviewers cannot generate.
+  'excellence-rollup-generate': [
     ...SAFETY_ADMIN_ROLES,
   ],
 } as const;

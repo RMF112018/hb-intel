@@ -22,6 +22,18 @@ import {
   SafetyIngestionApplicationService,
   type ISafetyIngestionApplicationService,
 } from './safety-ingestion-application-service.js';
+import {
+  SafetyFieldExcellenceGraphRepository,
+  type ISafetyFieldExcellenceGraphRepository,
+} from './safety-field-excellence-graph-repository.js';
+import {
+  SafetyFieldExcellenceRollupService,
+  type SafetyFieldExcellenceCandidateListRequest,
+  type SafetyFieldExcellenceCandidateListResponse,
+  type SafetyFieldExcellenceRollupDryRunResponse,
+  type SafetyFieldExcellenceRollupGenerateResponse,
+  type SafetyFieldExcellenceRollupRequest,
+} from './safety-field-excellence-rollup-service.js';
 import type {
   ISafetyIngestionOperationResult,
   ISafetyIngestionPreviewOperationResult,
@@ -106,6 +118,16 @@ export interface ISharePointService {
     requestId?: string,
   ): Promise<ISafetyReportingPeriodProbeResult>;
 
+  runSafetyFieldExcellenceRollup(
+    input: SafetyFieldExcellenceRollupRequest,
+    dryRun: boolean,
+    requestId?: string,
+  ): Promise<SafetyFieldExcellenceRollupDryRunResponse | SafetyFieldExcellenceRollupGenerateResponse>;
+  listSafetyFieldExcellenceCandidates(
+    input: SafetyFieldExcellenceCandidateListRequest,
+    requestId?: string,
+  ): Promise<SafetyFieldExcellenceCandidateListResponse>;
+
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
   setPermissions(siteUrl: string, projectId: string): Promise<void>;
@@ -129,6 +151,8 @@ export class SharePointService implements ISharePointService {
   private readonly sharePoint: ISharePointProvisioningService;
   private readonly safetyProvisioning: ISafetyProvisioningService;
   private readonly ingestion: ISafetyIngestionApplicationService;
+  private readonly excellenceRepository: ISafetyFieldExcellenceGraphRepository;
+  private readonly excellenceRollup: SafetyFieldExcellenceRollupService;
 
   constructor(
     tokenService: IManagedIdentityTokenService = new ManagedIdentityTokenService(),
@@ -137,6 +161,7 @@ export class SharePointService implements ISharePointService {
       graphDiscovery?: IGraphListDiscoveryService;
       safetyProvisioning?: ISafetyProvisioningService;
       ingestion?: ISafetyIngestionApplicationService;
+      excellenceRepository?: ISafetyFieldExcellenceGraphRepository;
     },
   ) {
     const sharePoint = collaborators?.sharePoint ?? new SharePointProvisioningService(tokenService);
@@ -153,6 +178,12 @@ export class SharePointService implements ISharePointService {
         undefined,
         { allowNonGraphCodePathForTests: false },
       );
+    this.excellenceRepository =
+      collaborators?.excellenceRepository
+      ?? new SafetyFieldExcellenceGraphRepository(tokenService);
+    this.excellenceRollup = new SafetyFieldExcellenceRollupService({
+      repository: this.excellenceRepository,
+    });
   }
 
   // --- SharePoint provisioning delegation ---
@@ -280,6 +311,23 @@ export class SharePointService implements ISharePointService {
     requestId?: string,
   ): Promise<ISafetyReportingPeriodProbeResult> {
     return this.ingestion.probeSafetyReportingPeriodRead(input, requestId);
+  }
+
+  // --- Safety Field Excellence rollup delegation ---
+
+  runSafetyFieldExcellenceRollup(
+    input: SafetyFieldExcellenceRollupRequest,
+    dryRun: boolean,
+    requestId?: string,
+  ): Promise<SafetyFieldExcellenceRollupDryRunResponse | SafetyFieldExcellenceRollupGenerateResponse> {
+    return this.excellenceRollup.runRollup({ request: input, dryRun, requestId });
+  }
+
+  listSafetyFieldExcellenceCandidates(
+    input: SafetyFieldExcellenceCandidateListRequest,
+    requestId?: string,
+  ): Promise<SafetyFieldExcellenceCandidateListResponse> {
+    return this.excellenceRollup.listCandidates(input, requestId);
   }
 
   // --- Backward-compatible wrappers ---
@@ -495,6 +543,56 @@ export class MockSharePointService implements ISharePointService {
           },
         },
       },
+      diagnostics: [],
+    };
+  }
+
+  async runSafetyFieldExcellenceRollup(
+    input: SafetyFieldExcellenceRollupRequest,
+    dryRun: boolean,
+    _requestId?: string,
+  ): Promise<SafetyFieldExcellenceRollupDryRunResponse | SafetyFieldExcellenceRollupGenerateResponse> {
+    const reportingPeriodId = input.reportingPeriodId ?? 'period-mock';
+    const reportingPeriodSpItemId = input.reportingPeriodSpItemId ?? 1;
+    const generatorVersion = input.generatorVersion ?? 'safety-excellence-scoring/0.1';
+    const generatedAt = input.generatedAt ?? '2026-04-25T00:00:00.000Z';
+    const summary = {
+      success: true,
+      reportingPeriodId,
+      reportingPeriodSpItemId,
+      generatorVersion,
+      generatedAt,
+      candidateCount: 0,
+      eligibleCount: 0,
+      lowConfidenceCount: 0,
+      needsReviewCount: 0,
+      ineligibleCount: 0,
+      suppressedPerfectScoreCount: 0,
+      missingActivityEvidenceCount: 0,
+      candidates: [],
+      diagnostics: [],
+    };
+    if (dryRun) {
+      return { ...summary, dryRun: true };
+    }
+    return {
+      ...summary,
+      dryRun: false,
+      createdCount: 0,
+      updatedCount: 0,
+      unchangedCount: 0,
+      candidateItemIds: [],
+    };
+  }
+
+  async listSafetyFieldExcellenceCandidates(
+    input: SafetyFieldExcellenceCandidateListRequest,
+    _requestId?: string,
+  ): Promise<SafetyFieldExcellenceCandidateListResponse> {
+    return {
+      success: true,
+      reportingPeriodId: input.reportingPeriodId ?? 'period-mock',
+      candidates: [],
       diagnostics: [],
     };
   }
