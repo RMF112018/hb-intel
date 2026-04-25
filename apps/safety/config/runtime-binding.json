@@ -1,7 +1,7 @@
 {
   "$schema": "./runtime-binding.schema.json",
-  "acceptedBackendOrigin": "https://hb-intel-api-production.azurewebsites.net",
-  "expectedApiAudience": "api://hb-intel-api-production",
-  "defaultFunctionAppUrl": "https://hb-intel-api-production.azurewebsites.net",
-  "defaultApiAudience": "api://hb-intel-api-production"
+  "acceptedBackendOrigin": "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net",
+  "expectedApiAudience": "api://08c399eb-a394-4087-b859-659d493f8dc7",
+  "defaultFunctionAppUrl": "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net",
+  "defaultApiAudience": "api://08c399eb-a394-4087-b859-659d493f8dc7"
 }

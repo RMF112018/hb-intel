@@ -17,19 +17,21 @@ describe('Safety production runtime contract source-of-truth', () => {
     expect(mountSource).toContain('__hbIntel_safetyRuntimeBindingProof');
   });
 
-  it('SafetyWebPart delegates render to mount with governed backend config fields', () => {
+  it('SafetyWebPart delegates render to mount with fully governed backend config fields', () => {
     const webpartSource = readRepo('apps/safety/src/webparts/safety/SafetyWebPart.tsx');
     expect(webpartSource).toContain('void mount(this.domElement, this.context, {');
-    expect(webpartSource).toContain('this.properties.functionAppUrl');
-    expect(webpartSource).toContain('this.properties.apiAudience');
+    expect(webpartSource).toContain('functionAppUrl: SAFETY_DEFAULT_FUNCTION_APP_URL');
+    expect(webpartSource).toContain('apiAudience: SAFETY_DEFAULT_API_AUDIENCE');
     expect(webpartSource).toContain(
       'acceptedBackendOrigin: SAFETY_ACCEPTED_BACKEND_ORIGIN',
     );
     expect(webpartSource).toContain('expectedManifestId: SAFETY_WEBPART_MANIFEST_ID');
     expect(webpartSource).toContain('expectedPackageVersion: SAFETY_PACKAGE_VERSION');
     expect(webpartSource).toContain('expectedApiAudience: SAFETY_EXPECTED_API_AUDIENCE');
-    expect(webpartSource).toContain("PropertyPaneTextField('functionAppUrl'");
-    expect(webpartSource).toContain("PropertyPaneTextField('apiAudience'");
+    expect(webpartSource).not.toContain('this.properties.functionAppUrl');
+    expect(webpartSource).not.toContain('this.properties.apiAudience');
+    expect(webpartSource).not.toContain("PropertyPaneTextField('functionAppUrl'");
+    expect(webpartSource).not.toContain("PropertyPaneTextField('apiAudience'");
   });
 
   it('governed binding module is the sole home for manifest/version/origin/audience constants', () => {

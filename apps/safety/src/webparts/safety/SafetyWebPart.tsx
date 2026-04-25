@@ -4,13 +4,14 @@
  * SharePoint calls onInit() → render() on this class.
  * This is the bridge between SharePoint page context and the React app.
  *
- * Runtime binding is **governed**: the accepted backend origin and expected
- * API audience come from `governedRuntimeBinding.ts` (baked in at build
- * time from `config/runtime-binding.json` and `config/package-solution.json`),
- * NOT from property-pane input. The property pane still accepts the
- * `functionAppUrl` and `apiAudience` operators configure per site, but the
- * runtime contract validates those against the governed values and fails
- * closed on drift — no operator edit can loosen the allowlist.
+ * Runtime binding is **fully governed** end-to-end. Every value in the
+ * Safety runtime contract — including `functionAppUrl` and `apiAudience` —
+ * is sourced from build-time governance (`config/runtime-binding.json` →
+ * Vite defines → `governedRuntimeBinding.ts`). No SharePoint page-instance
+ * value, no property-pane edit, and no manifest preconfigured property can
+ * override the governed binding. The only deployment-time knob is the set
+ * of `HBC_SAFETY_*` build-time environment variables consumed by
+ * `runtimeDefines.ts`.
  *
  * @see docs/how-to/safety-runtime-binding.md
  * @decision D-PH7-BW-7 — RBAC permission mapping wired
@@ -33,8 +34,6 @@ import {
 
 export interface ISafetyWebPartProps {
   description: string;
-  functionAppUrl: string;
-  apiAudience: string;
 }
 
 /**
@@ -46,13 +45,9 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
   }
 
   public render(): void {
-    const functionAppUrl =
-      this.properties.functionAppUrl?.trim() || SAFETY_DEFAULT_FUNCTION_APP_URL;
-    const apiAudience =
-      this.properties.apiAudience?.trim() || SAFETY_DEFAULT_API_AUDIENCE;
     void mount(this.domElement, this.context, {
-      functionAppUrl,
-      apiAudience,
+      functionAppUrl: SAFETY_DEFAULT_FUNCTION_APP_URL,
+      apiAudience: SAFETY_DEFAULT_API_AUDIENCE,
       acceptedBackendOrigin: SAFETY_ACCEPTED_BACKEND_ORIGIN,
       expectedManifestId: SAFETY_WEBPART_MANIFEST_ID,
       expectedPackageVersion: SAFETY_PACKAGE_VERSION,
@@ -81,16 +76,6 @@ export default class SafetyWebPart extends BaseClientSideWebPart<ISafetyWebPartP
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: 'Description',
-                }),
-                PropertyPaneTextField('functionAppUrl', {
-                  label: 'Function App URL',
-                  description:
-                    'Operator override. Origin must match the governed accepted backend origin; otherwise the app fails closed.',
-                }),
-                PropertyPaneTextField('apiAudience', {
-                  label: 'API Audience',
-                  description:
-                    'Operator override. Must match the governed expected API audience; otherwise the app fails closed.',
                 }),
               ],
             },

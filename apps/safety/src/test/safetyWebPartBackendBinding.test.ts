@@ -8,24 +8,24 @@ const WEBPART_SOURCE = readFileSync(
 );
 
 describe('SafetyWebPart backend binding source proof', () => {
-  it('passes functionAppUrl and apiAudience into mount config', () => {
-    expect(WEBPART_SOURCE).toContain('functionAppUrl,');
-    expect(WEBPART_SOURCE).toContain('apiAudience,');
-    expect(WEBPART_SOURCE).toContain('this.properties.functionAppUrl');
-    expect(WEBPART_SOURCE).toContain('this.properties.apiAudience');
+  it('passes governed functionAppUrl and apiAudience constants into mount config', () => {
+    expect(WEBPART_SOURCE).toContain('functionAppUrl: SAFETY_DEFAULT_FUNCTION_APP_URL');
+    expect(WEBPART_SOURCE).toContain('apiAudience: SAFETY_DEFAULT_API_AUDIENCE');
   });
 
-  it('exposes functionAppUrl and apiAudience in property pane', () => {
-    expect(WEBPART_SOURCE).toContain("PropertyPaneTextField('functionAppUrl'");
-    expect(WEBPART_SOURCE).toContain("PropertyPaneTextField('apiAudience'");
+  it('does not source backend URL or API audience from page-instance properties', () => {
+    expect(WEBPART_SOURCE).not.toContain('this.properties.functionAppUrl');
+    expect(WEBPART_SOURCE).not.toContain('this.properties.apiAudience');
+  });
+
+  it('does not expose backend URL or API audience as property-pane fields', () => {
+    expect(WEBPART_SOURCE).not.toContain("PropertyPaneTextField('functionAppUrl'");
+    expect(WEBPART_SOURCE).not.toContain("PropertyPaneTextField('apiAudience'");
   });
 
   it('reads acceptedBackendOrigin from governed binding, not from property pane', () => {
-    // Governance: the allowlist is NOT derived from any this.properties value.
-    // The origin comes from SAFETY_ACCEPTED_BACKEND_ORIGIN.
     expect(WEBPART_SOURCE).toContain('SAFETY_ACCEPTED_BACKEND_ORIGIN');
     expect(WEBPART_SOURCE).toContain('acceptedBackendOrigin: SAFETY_ACCEPTED_BACKEND_ORIGIN');
-    // Old derivation helper must not return — the property-pane typo path is closed.
     expect(WEBPART_SOURCE).not.toMatch(/tryResolveOrigin\s*\(/);
     expect(WEBPART_SOURCE).not.toMatch(
       /acceptedBackendOrigin\s*=\s*this\.tryResolveOrigin\(/,
@@ -40,7 +40,6 @@ describe('SafetyWebPart backend binding source proof', () => {
   it('reads manifest id and package version from governed binding module', () => {
     expect(WEBPART_SOURCE).toContain('SAFETY_WEBPART_MANIFEST_ID');
     expect(WEBPART_SOURCE).toContain('SAFETY_PACKAGE_VERSION');
-    // No class-scoped redeclaration.
     expect(WEBPART_SOURCE).not.toMatch(/private static readonly SAFETY_MANIFEST_ID/);
     expect(WEBPART_SOURCE).not.toMatch(/private static readonly SAFETY_PACKAGE_VERSION/);
   });

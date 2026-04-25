@@ -52,7 +52,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.40.0',
+        expectedPackageVersion: '1.2.41.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -79,7 +79,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.40.0',
+        expectedPackageVersion: '1.2.41.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -100,7 +100,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://other-functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.40.0',
+        expectedPackageVersion: '1.2.41.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -142,7 +142,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://operator-typo',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.40.0',
+        expectedPackageVersion: '1.2.41.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -166,7 +166,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.40.0',
+        expectedPackageVersion: '1.2.41.0',
         expectedApiAudience: 'api://safety-functions',
         expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
       },
@@ -188,7 +188,7 @@ describe('resolveSafetyRuntimeContract', () => {
         apiAudience: 'api://safety-functions',
         acceptedBackendOrigin: 'https://functions.example.com',
         expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
-        expectedPackageVersion: '1.2.40.0',
+        expectedPackageVersion: '1.2.41.0',
         expectedHostedGuidOverlayFingerprint: 'fnv1a32:deadbeef',
       },
     });
@@ -197,5 +197,33 @@ describe('resolveSafetyRuntimeContract', () => {
     expect(contract.blockingReasons).toContain(
       'Hosted GUID overlay fingerprint does not match expected governance value.',
     );
+  });
+
+  it('produces fully governed contract for SharePoint-hosted Safety with Prompt 02 tenant values', () => {
+    configureSafetyListGuids(COMPLETE_HOSTED_OVERLAY);
+    const fnUrl = 'https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net';
+    const audience = 'api://08c399eb-a394-4087-b859-659d493f8dc7';
+    const contract = resolveSafetyRuntimeContract({
+      hasSpfxContext: true,
+      config: {
+        functionAppUrl: fnUrl,
+        apiAudience: audience,
+        acceptedBackendOrigin: fnUrl,
+        expectedManifestId: 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e',
+        expectedPackageVersion: '1.2.41.0',
+        expectedApiAudience: audience,
+        expectedHostedGuidOverlayFingerprint: hostedSafetyGuidOverlayFingerprint(),
+      },
+    });
+
+    expect(contract.canInitializeCommands).toBe(true);
+    expect(contract.blockingReasons).toEqual([]);
+    expect(contract.backend.baseUrl).toBe(fnUrl);
+    expect(contract.backend.apiAudience).toBe(audience);
+    expect(contract.governed.acceptedBackendOrigin).toBe(fnUrl);
+    expect(contract.governed.expectedManifestId).toBe('ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e');
+    expect(contract.governed.expectedPackageVersion).toBe('1.2.41.0');
+    expect(contract.governed.expectedApiAudience).toBe(audience);
+    expect(contract.hostedGuidOverlay.expectedFingerprint).toBe('fnv1a32:36b2f764');
   });
 });
