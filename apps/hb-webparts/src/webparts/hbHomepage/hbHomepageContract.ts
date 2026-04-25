@@ -135,6 +135,23 @@ export interface HbHomepageZoneProps {
   assetBaseUrl?: string;
   siteUrl?: string;
   getGraphToken?: () => Promise<string>;
+  /**
+   * Wave 05: token acquisition seam for the Safety Field Excellence dynamic
+   * adapter (and other Function App-backed zones in the future). The shell
+   * does not own this; SPFx hosts wire it in via `AadHttpClient` /
+   * `AadTokenProvider`. When absent, dynamic source modes degrade
+   * gracefully to curated/preview fallbacks. Never resolves an MSAL token
+   * directly from a webpart.
+   */
+  getFunctionAppToken?: () => Promise<string>;
+  /**
+   * Wave 05: Function App base URL the homepage adapter calls (e.g.
+   * `https://hbintel-functions.example.com`). Used only by zones that
+   * consume Function App-backed endpoints (e.g. Safety Field Excellence
+   * dynamic adapter). When absent, dynamic source modes degrade
+   * gracefully.
+   */
+  functionAppBaseUrl?: string;
   profilePhotoResolver?: ProfilePhotoResolver;
   kudosListHostUrl?: string;
 }

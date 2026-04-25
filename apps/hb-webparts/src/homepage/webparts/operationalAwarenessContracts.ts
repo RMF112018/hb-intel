@@ -174,6 +174,55 @@ export type SafetyFieldExcellenceConfigInput =
   | Partial<SafetyFieldExcellenceConfig>
   | Partial<LegacySafetyFieldExcellenceConfig>;
 
+// -- Wave 05 — Safety Field Excellence dynamic source modes ---------------
+
+/**
+ * Source-mode contract for the Safety Field Excellence dynamic adapter.
+ * Default behavior remains `curated-only` until explicitly cut over by
+ * tenant operators.
+ */
+export type SafetyFieldExcellenceSourceMode =
+  | 'curated-only'
+  | 'dynamic-preview'
+  | 'dynamic-with-curated-fallback'
+  | 'dynamic-only';
+
+/**
+ * Frontend-only data adapter state. Maps the backend
+ * `homepage/current` response into a renderable state machine.
+ */
+export type SafetyFieldExcellenceDynamicState =
+  | 'idle'
+  | 'loading'
+  | 'ready'
+  | 'preview'
+  | 'stale'
+  | 'no-published-highlight'
+  | 'invalid-payload'
+  | 'auth-error'
+  | 'network-error'
+  | 'error';
+
+/**
+ * Frontend-only data-source classification recorded in the runtime
+ * proof object. The shipped UI never exposes this label to end users.
+ */
+export type SafetyFieldExcellenceDataSource =
+  | 'curated'
+  | 'dynamic'
+  | 'preview-fallback'
+  | 'curated-fallback'
+  | 'error-fallback';
+
+export interface SafetyFieldExcellenceDynamicConfig {
+  readonly sourceMode?: SafetyFieldExcellenceSourceMode;
+  readonly functionAppBaseUrl?: string;
+  readonly includeStale?: boolean;
+  readonly diagnosticsEnabled?: boolean;
+  readonly emergencyUseCuratedFallback?: boolean;
+  readonly safetyHubUrl?: string;
+}
+
 export const DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG: Required<
   Pick<ProjectPortfolioSpotlightConfig, 'heading' | 'maxSecondaryItems' | 'staleAfterHours' | 'allProjectsLabel' | 'allProjectsUrl'>
 > = {
