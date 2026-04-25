@@ -211,6 +211,45 @@ describe('FoleonReaderModule', () => {
     await waitFor(() => expect(callbacks.onGateBlocked).toHaveBeenCalledWith('embed-disallowed', 'Project Spotlight'));
   });
 
+  it('reports reader status transitions without emitting preview telemetry', async () => {
+    resolveMock.mockResolvedValue({
+      kind: 'preview',
+      config: FOLEON_READER_CONFIGS.projectSpotlight,
+      reason: 'no-active-record',
+      warnings: [],
+    });
+    installMatchMedia(false);
+    const onStatusChange = vi.fn();
+    const callbacks = {
+      onOpenArchive: vi.fn(),
+      onReaderOpen: vi.fn(),
+      onReaderClose: vi.fn(),
+      onEmbedError: vi.fn(),
+      onGateBlocked: vi.fn(),
+    };
+
+    render(
+      <FoleonReaderModule
+        contract={makeContract()}
+        config={FOLEON_READER_CONFIGS.projectSpotlight}
+        tone="spotlight"
+        pageContext="Project Spotlight"
+        onStatusChange={onStatusChange}
+        {...callbacks}
+      />,
+    );
+
+    await screen.findByText('Project Spotlight reader');
+    expect(onStatusChange).toHaveBeenCalledWith({ kind: 'loading' });
+    expect(onStatusChange).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'preview' }),
+    );
+    expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+    expect(callbacks.onReaderClose).not.toHaveBeenCalled();
+    expect(callbacks.onEmbedError).not.toHaveBeenCalled();
+    expect(callbacks.onGateBlocked).not.toHaveBeenCalled();
+  });
+
   it('keeps mobile readers collapsed until user activation', async () => {
     const record = makeRecord();
     resolveMock.mockResolvedValue({

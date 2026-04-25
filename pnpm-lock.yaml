@@ -514,6 +514,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/foleon-reader':
+        specifier: workspace:*
+        version: link:../../packages/foleon-reader
       '@hbc/homepage-launcher':
         specifier: workspace:*
         version: link:../../packages/homepage-launcher
@@ -846,6 +849,9 @@ importers:
 
   apps/hb-webparts:
     dependencies:
+      '@hbc/foleon-reader':
+        specifier: workspace:*
+        version: link:../../packages/foleon-reader
       '@hbc/homepage-launcher':
         specifier: workspace:*
         version: link:../../packages/homepage-launcher

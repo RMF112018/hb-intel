@@ -23,5 +23,8 @@ export type {
   FoleonReaderModuleConfig,
 } from './readers/readerConfigs.js';
 export type {
+  FoleonEmbeddedReaderStatus,
+} from './readers/FoleonReaderModule.js';
+export type {
   FoleonReaderResolution,
 } from './services/FoleonReaderContentService.js';

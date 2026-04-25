@@ -11,6 +11,7 @@ export default defineConfig(({ command }) => ({
     alias: {
       '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/auth': resolve(__dirname, '../../packages/auth/src/index.ts'),
+      '@hbc/foleon-reader': resolve(__dirname, '../../packages/foleon-reader/src/index.ts'),
       '@hbc/homepage-launcher': resolve(
         __dirname,
         '../../packages/homepage-launcher/src/index.ts',

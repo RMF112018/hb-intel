@@ -55,6 +55,8 @@ const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
 const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 const PROJECT_SITES_WEBPART_ID = 'e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b';
 const FOLEON_WEBPART_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
+const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
+const FOLEON_EXPECTED_PACKAGE_VERSION = '1.0.21.0';
 
 // Hero Banner domain webparts (public 39762a4d-… and admin
 // 23d22f2d-…) deliberately expose no property-pane fields. The
@@ -109,6 +111,24 @@ interface IShellWebPartProperties extends IShellFoleonRuntimeConfigProperties {
   backendUrl?: string;
   /** @deprecated Legacy compatibility only. */
   backendAudience?: string;
+  /** Homepage-embedded Foleon Content Registry list ID. */
+  foleonContentRegistryListId?: string;
+  /** Homepage-embedded Foleon Homepage Placements list ID. */
+  foleonPlacementsListId?: string;
+  /** Homepage-embedded Foleon Interaction Events list ID. */
+  foleonEventsListId?: string;
+  /** Homepage-embedded Foleon accepted origins list. */
+  foleonAcceptedOrigins?: string;
+  /** Homepage-embedded Foleon preview URL allowance. */
+  foleonAllowPreview?: boolean;
+  /** Homepage-embedded Foleon expected manifest ID. */
+  foleonExpectedManifestId?: string;
+  /** Homepage-embedded Foleon expected package version. */
+  foleonExpectedPackageVersion?: string;
+  /** Homepage-embedded Foleon API base URL. */
+  foleonApiBaseUrl?: string;
+  /** Homepage-embedded Foleon API resource for optional SPFx token acquisition. */
+  foleonApiResource?: string;
 }
 
 export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
@@ -658,6 +678,79 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                   PropertyPaneTextField('foleonApiBaseUrl', {
                     label: 'Foleon API base URL',
                     description: 'Optional existing HB Intel Functions base URL. Omit for same-origin /api.',
+                    placeholder: 'https://<functions-app>.azurewebsites.net/api',
+                  }),
+                  PropertyPaneTextField('foleonApiResource', {
+                    label: 'Foleon API resource',
+                    description: 'Optional Entra resource/application ID URI for SPFx token acquisition.',
+                    placeholder: 'api://<application-id-or-uri>',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (webPartId === HB_HOMEPAGE_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'HB Homepage Settings' },
+            groups: [
+              {
+                groupName: 'Embedded Foleon lists',
+                groupFields: [
+                  PropertyPaneTextField('foleonContentRegistryListId', {
+                    label: 'Foleon Content Registry list ID',
+                    description: 'GUID of HB_FoleonContentRegistry. Required for embedded Project Spotlight and Company Pulse lanes.',
+                    placeholder: '00000000-0000-0000-0000-000000000000',
+                  }),
+                  PropertyPaneTextField('foleonPlacementsListId', {
+                    label: 'Foleon Homepage Placements list ID',
+                    description: 'GUID of HB_FoleonHomepagePlacements. Used to resolve active lane placements when available.',
+                    placeholder: '00000000-0000-0000-0000-000000000000',
+                  }),
+                  PropertyPaneTextField('foleonEventsListId', {
+                    label: 'Foleon Interaction Events list ID',
+                    description: 'GUID of HB_FoleonInteractionEvents. Optional, but required for telemetry writes.',
+                    placeholder: '00000000-0000-0000-0000-000000000000',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Embedded Foleon governance',
+                groupFields: [
+                  PropertyPaneTextField('foleonAcceptedOrigins', {
+                    label: 'Accepted Foleon origins',
+                    description: 'One origin per line or comma-separated. Used by the embedded reader origin policy.',
+                    multiline: true,
+                    placeholder: 'https://viewer.us.foleon.com',
+                  }),
+                  PropertyPaneToggle('foleonAllowPreview', {
+                    label: 'Allow Foleon preview URLs',
+                    onText: 'Preview URLs allowed',
+                    offText: 'Production viewer URLs only',
+                  }),
+                  PropertyPaneTextField('foleonExpectedManifestId', {
+                    label: 'Expected Foleon manifest ID',
+                    description: 'Governance proof value for the deployed Foleon package.',
+                    placeholder: FOLEON_WEBPART_ID,
+                  }),
+                  PropertyPaneTextField('foleonExpectedPackageVersion', {
+                    label: 'Expected Foleon package version',
+                    description: 'Governance proof value for the deployed Foleon package.',
+                    placeholder: FOLEON_EXPECTED_PACKAGE_VERSION,
+                  }),
+                ],
+              },
+              {
+                groupName: 'Embedded Foleon backend',
+                groupFields: [
+                  PropertyPaneTextField('foleonApiBaseUrl', {
+                    label: 'Foleon API base URL',
+                    description: 'Optional existing HB Intel Functions base URL. Omit for SharePoint public reader resolution.',
                     placeholder: 'https://<functions-app>.azurewebsites.net/api',
                   }),
                   PropertyPaneTextField('foleonApiResource', {

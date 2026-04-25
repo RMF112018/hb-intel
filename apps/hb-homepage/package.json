@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@hbc/auth": "workspace:*",
+    "@hbc/foleon-reader": "workspace:*",
     "@hbc/homepage-launcher": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "react": "^18.3.1",

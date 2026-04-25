@@ -10,6 +10,7 @@
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
+    "@hbc/foleon-reader": "workspace:*",
     "@hbc/homepage-launcher": "workspace:*",
     "@hbc/sharepoint-platform": "workspace:*",
     "@hbc/ui-kit": "workspace:*",

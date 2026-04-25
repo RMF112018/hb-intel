@@ -14,6 +14,13 @@ import type { FoleonReaderModuleConfig } from './readerConfigs.js';
 import { FoleonReaderPreview } from './FoleonReaderPreview.js';
 import styles from './FoleonReaderModule.module.css';
 
+export type FoleonEmbeddedReaderStatus =
+  | { readonly kind: 'loading' }
+  | { readonly kind: 'preview'; readonly resolution: Extract<FoleonReaderResolution, { readonly kind: 'preview' }> }
+  | { readonly kind: 'ready'; readonly resolution: Extract<FoleonReaderResolution, { readonly kind: 'ready' }> }
+  | { readonly kind: 'blocked'; readonly resolution: Extract<FoleonReaderResolution, { readonly kind: 'blocked' }> }
+  | { readonly kind: 'error'; readonly resolution?: Extract<FoleonReaderResolution, { readonly kind: 'error' }>; readonly message?: string };
+
 interface FoleonReaderModuleProps {
   readonly contract: IFoleonRuntimeContract;
   readonly config: FoleonReaderModuleConfig;
@@ -24,6 +31,7 @@ interface FoleonReaderModuleProps {
   readonly onReaderClose: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
   readonly onEmbedError: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
   readonly onGateBlocked: (gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
+  readonly onStatusChange?: (status: FoleonEmbeddedReaderStatus) => void;
 }
 
 export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactNode {
@@ -35,6 +43,7 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
     onOpenArchive,
     onReaderClose,
     onReaderOpen,
+    onStatusChange,
     pageContext,
     tone,
   } = props;
@@ -67,6 +76,35 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
     })();
     return (): void => controller.abort();
   }, [contract, config]);
+
+  useEffect(() => {
+    if (!onStatusChange) return;
+    if (state.kind === 'loading') {
+      onStatusChange({ kind: 'loading' });
+      return;
+    }
+    if (state.kind === 'error') {
+      onStatusChange({ kind: 'error', message: state.message });
+      return;
+    }
+    if (state.resolution.kind === 'preview') {
+      onStatusChange({ kind: 'preview', resolution: state.resolution });
+      return;
+    }
+    if (state.resolution.kind === 'ready') {
+      onStatusChange({ kind: 'ready', resolution: state.resolution });
+      return;
+    }
+    if (state.resolution.kind === 'blocked') {
+      onStatusChange({ kind: 'blocked', resolution: state.resolution });
+      return;
+    }
+    onStatusChange({
+      kind: 'error',
+      resolution: state.resolution,
+      message: state.resolution.reason,
+    });
+  }, [state, onStatusChange]);
 
   useEffect(() => {
     if (state.kind !== 'resolved' || state.resolution.kind !== 'blocked') return;

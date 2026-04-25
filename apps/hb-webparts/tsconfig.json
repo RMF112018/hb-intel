@@ -3,6 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
+      "@hbc/foleon-reader": ["packages/foleon-reader/src/index.ts"],
+      "@hbc/foleon-reader/*": ["packages/foleon-reader/src/*"],
       "@hbc/homepage-launcher": ["packages/homepage-launcher/src/index.ts"],
       "@hbc/homepage-launcher/*": ["packages/homepage-launcher/src/*"],
       "@hbc/ui-kit/homepage": ["../../packages/ui-kit/src/homepage.ts"],

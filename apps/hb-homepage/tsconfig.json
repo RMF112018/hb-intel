@@ -6,6 +6,8 @@
     "paths": {
       "@hbc/auth/spfx": ["packages/auth/src/spfx/index.ts"],
       "@hbc/auth": ["packages/auth/src/index.ts"],
+      "@hbc/foleon-reader": ["packages/foleon-reader/src/index.ts"],
+      "@hbc/foleon-reader/*": ["packages/foleon-reader/src/*"],
       "@hbc/homepage-launcher": ["packages/homepage-launcher/src/index.ts"],
       "@hbc/homepage-launcher/*": ["packages/homepage-launcher/src/*"],
       "@hbc/ui-kit/app-shell": ["packages/ui-kit/src/app-shell.ts"],
