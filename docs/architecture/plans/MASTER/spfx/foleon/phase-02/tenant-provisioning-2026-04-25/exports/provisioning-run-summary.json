@@ -1,0 +1,417 @@
+{
+  "generatedUtc": "2026-04-25T20:05:16.5298280Z",
+  "startedUtc": "2026-04-25T20:03:56.0081440Z",
+  "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "clientId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "authCommand": "Connect-PnPOnline -Url \"https://hedrickbrotherscom.sharepoint.com/sites/HBCentral\" -ClientId \"08c399eb-a394-4087-b859-659d493f8dc7\" -Interactive",
+  "mutationLists": [
+    "HB_FoleonContentRegistry",
+    "HB_FoleonHomepagePlacements",
+    "HB_FoleonInteractionEvents"
+  ],
+  "inspectOnlyLists": [
+    "HB_FoleonSyncRuns"
+  ],
+  "resolvedLists": {
+    "HB_FoleonContentRegistry": {
+      "approvedName": "HB_FoleonContentRegistry",
+      "title": "Foleon Content Registry",
+      "id": "2e57615d-457e-49b8-aef3-038e85cbe068",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonContentRegistry"
+    },
+    "HB_FoleonInteractionEvents": {
+      "approvedName": "HB_FoleonInteractionEvents",
+      "title": "Foleon Interaction Events",
+      "id": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonInteractionEvents"
+    },
+    "HB_FoleonHomepagePlacements": {
+      "approvedName": "HB_FoleonHomepagePlacements",
+      "title": "Foleon Homepage Placements",
+      "id": "5b4754b6-9411-453d-8e16-1247ec5b476a",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonHomepagePlacements"
+    },
+    "HB_FoleonSyncRuns": {
+      "approvedName": "HB_FoleonSyncRuns",
+      "title": "Foleon Sync Runs",
+      "id": "f29dabe9-16c8-4c67-ab9e-98e12f771680",
+      "rootFolderServerRelativeUrl": "/sites/HBCentral/Lists/HB_FoleonSyncRuns"
+    }
+  },
+  "actions": [
+    {
+      "list": "site",
+      "target": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+      "action": "connect",
+      "result": "reachable",
+      "detail": "HB Central",
+      "timestampUtc": "2026-04-25T20:04:01.9371320Z"
+    },
+    {
+      "list": "HB_FoleonContentRegistry",
+      "target": "list",
+      "action": "resolve-list",
+      "result": "resolved",
+      "detail": "mutation-target title='Foleon Content Registry' root='/sites/HBCentral/Lists/HB_FoleonContentRegistry'",
+      "timestampUtc": "2026-04-25T20:04:05.1567120Z"
+    },
+    {
+      "list": "HB_FoleonHomepagePlacements",
+      "target": "list",
+      "action": "resolve-list",
+      "result": "resolved",
+      "detail": "mutation-target title='Foleon Homepage Placements' root='/sites/HBCentral/Lists/HB_FoleonHomepagePlacements'",
+      "timestampUtc": "2026-04-25T20:04:08.1517330Z"
+    },
+    {
+      "list": "HB_FoleonInteractionEvents",
+      "target": "list",
+      "action": "resolve-list",
+      "result": "resolved",
+      "detail": "mutation-target title='Foleon Interaction Events' root='/sites/HBCentral/Lists/HB_FoleonInteractionEvents'",
+      "timestampUtc": "2026-04-25T20:04:10.4289210Z"
+    },
+    {
+      "list": "HB_FoleonSyncRuns",
+      "target": "list",
+      "action": "resolve-list",
+      "result": "resolved",
+      "detail": "inspect-only title='Foleon Sync Runs' root='/sites/HBCentral/Lists/HB_FoleonSyncRuns'",
+      "timestampUtc": "2026-04-25T20:04:12.7127170Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ReaderKey",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-25T20:04:23.9246260Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ReaderKey",
+      "action": "verify-choices",
+      "result": "unchanged",
+      "detail": "all required choices present",
+      "timestampUtc": "2026-04-25T20:04:25.3562820Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "Cadence",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-25T20:04:27.4290980Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "Cadence",
+      "action": "verify-choices",
+      "result": "unchanged",
+      "detail": "all required choices present",
+      "timestampUtc": "2026-04-25T20:04:28.8091240Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "HomepageSlot",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-25T20:04:30.7169530Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "HomepageSlot",
+      "action": "verify-choices",
+      "result": "unchanged",
+      "detail": "all required choices present",
+      "timestampUtc": "2026-04-25T20:04:32.1830810Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ArchiveGroup",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-25T20:04:33.8018290Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ActiveEdition",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-25T20:04:36.2712060Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "PrimaryAudience",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-25T20:04:38.7788700Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "PrimaryAudience",
+      "action": "verify-choices",
+      "result": "unchanged",
+      "detail": "all required choices present",
+      "timestampUtc": "2026-04-25T20:04:40.1723600Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "LastEditorialUpdate",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-25T20:04:41.9026420Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ContentTypeKey",
+      "action": "append-choices",
+      "result": "updated",
+      "detail": "Project Spotlight, Company Pulse",
+      "timestampUtc": "2026-04-25T20:04:43.4395410Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "PlacementKey",
+      "action": "append-choices",
+      "result": "updated",
+      "detail": "Project Spotlight Active, Company Pulse Active",
+      "timestampUtc": "2026-04-25T20:04:44.2746090Z"
+    },
+    {
+      "list": "Foleon Interaction Events",
+      "target": "PageContext",
+      "action": "append-choices",
+      "result": "updated",
+      "detail": "Project Spotlight, Company Pulse",
+      "timestampUtc": "2026-04-25T20:04:45.1562700Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ReaderKey",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:47.5146210Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "HomepageSlot",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:49.7574990Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ArchiveGroup",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:51.9845430Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "ActiveEdition",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:54.2482850Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "LastEditorialUpdate",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:56.5792300Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "FoleonDocId",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:57.2665410Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "PublishStatus",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:58.0185950Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "IsVisible",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:58.7495500Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "IsHomepageEligible",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:04:59.4321100Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "PublishedOn",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:00.1663260Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "DisplayFrom",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:00.8837040Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "DisplayThrough",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:01.5878590Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "SortRank",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:02.2652200Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "AllowEmbed",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:02.9850000Z"
+    },
+    {
+      "list": "Foleon Content Registry",
+      "target": "SyncSource",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:03.6106870Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "PlacementKey",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:04.3520910Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "ContentIdCache",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:05.0949230Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "IsActive",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:05.7770390Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "DisplayFrom",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:06.4542050Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "DisplayThrough",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:07.1315710Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "SortRank",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:07.8196660Z"
+    },
+    {
+      "list": "Foleon Homepage Placements",
+      "target": "LayoutVariant",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:08.4950490Z"
+    },
+    {
+      "list": "Foleon Interaction Events",
+      "target": "PageContext",
+      "action": "verify-index",
+      "result": "present",
+      "detail": "",
+      "timestampUtc": "2026-04-25T20:05:09.1933200Z"
+    }
+  ],
+  "probes": [
+    {
+      "name": "scalar-safe-content-select",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Content Registry')/items?$select=Id,Title,ReaderKey,ContentTypeKey,ActiveEdition,IsVisible,PublishStatus,IsHomepageEligible,HomepageSlot,ArchiveGroup,LastEditorialUpdate&$top=1",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.0022060Z"
+    },
+    {
+      "name": "project-spotlight-active-reader-filter",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Content Registry')/items?$select=Id,Title,ReaderKey,ContentTypeKey,ActiveEdition,IsVisible,PublishStatus,IsHomepageEligible,PublishedOn,LastEditorialUpdate&$filter=ReaderKey eq 'project-spotlight' and ActiveEdition eq 1 and IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1&$top=1",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.1667450Z"
+    },
+    {
+      "name": "company-pulse-active-reader-filter",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Content Registry')/items?$select=Id,Title,ReaderKey,ContentTypeKey,ActiveEdition,IsVisible,PublishStatus,IsHomepageEligible,PublishedOn,LastEditorialUpdate&$filter=ReaderKey eq 'company-pulse' and ActiveEdition eq 1 and IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1&$top=1",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.3269550Z"
+    },
+    {
+      "name": "active-placements",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Homepage Placements')/items?$select=Id,Title,PlacementKey,ContentIdCache,IsActive,SortRank&$filter=IsActive eq 1&$top=5",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.5286640Z"
+    }
+  ]
+}

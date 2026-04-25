@@ -1,0 +1,44 @@
+{
+  "generatedUtc": "2026-04-25T20:05:16.5288820Z",
+  "startedUtc": "2026-04-25T20:03:56.0081440Z",
+  "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "clientId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "probes": [
+    {
+      "name": "scalar-safe-content-select",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Content Registry')/items?$select=Id,Title,ReaderKey,ContentTypeKey,ActiveEdition,IsVisible,PublishStatus,IsHomepageEligible,HomepageSlot,ArchiveGroup,LastEditorialUpdate&$top=1",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.0022060Z"
+    },
+    {
+      "name": "project-spotlight-active-reader-filter",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Content Registry')/items?$select=Id,Title,ReaderKey,ContentTypeKey,ActiveEdition,IsVisible,PublishStatus,IsHomepageEligible,PublishedOn,LastEditorialUpdate&$filter=ReaderKey eq 'project-spotlight' and ActiveEdition eq 1 and IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1&$top=1",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.1667450Z"
+    },
+    {
+      "name": "company-pulse-active-reader-filter",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Content Registry')/items?$select=Id,Title,ReaderKey,ContentTypeKey,ActiveEdition,IsVisible,PublishStatus,IsHomepageEligible,PublishedOn,LastEditorialUpdate&$filter=ReaderKey eq 'company-pulse' and ActiveEdition eq 1 and IsVisible eq 1 and PublishStatus eq 'Published' and IsHomepageEligible eq 1&$top=1",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.3269550Z"
+    },
+    {
+      "name": "active-placements",
+      "relativeUrl": "/_api/web/lists/getbytitle('Foleon Homepage Placements')/items?$select=Id,Title,PlacementKey,ContentIdCache,IsActive,SortRank&$filter=IsActive eq 1&$top=5",
+      "httpStatus": 200,
+      "returnedItemCount": 0,
+      "ok": true,
+      "error": null,
+      "timestampUtc": "2026-04-25T20:05:16.5286640Z"
+    }
+  ]
+}
