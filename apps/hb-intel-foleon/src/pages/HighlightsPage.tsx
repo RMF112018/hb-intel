@@ -6,7 +6,9 @@ import type { IFoleonRuntimeContract } from '../runtime/foleonRuntimeContract.js
 import { fetchFoleonContent } from '../services/FoleonContentService.js';
 import { fetchFoleonPlacements } from '../services/FoleonPlacementService.js';
 import { FoleonCard } from '../components/FoleonCard.js';
-import { FoleonEmpty, FoleonError, FoleonLoadingState } from '../components/FoleonStates.js';
+import { FoleonError, FoleonLoadingState } from '../components/FoleonStates.js';
+import { FoleonPreviewFallback } from '../components/FoleonPreviewFallback.js';
+import { getFoleonHighlightsPreviewRecords } from '../preview/FoleonPreviewData.js';
 
 interface HighlightsPageProps {
   readonly contract: IFoleonRuntimeContract;
@@ -45,7 +47,9 @@ export function HighlightsPage(props: HighlightsPageProps): React.ReactNode {
         ]);
         const records = materializeHighlights(placements, content);
         setState({ kind: 'ready', records });
-        onCardImpression(records);
+        if (records.length > 0) {
+          onCardImpression(records);
+        }
       } catch (err) {
         if ((err as { name?: string }).name === 'AbortError') return;
         setState({ kind: 'error', message: (err as Error).message });
@@ -66,12 +70,7 @@ export function HighlightsPage(props: HighlightsPageProps): React.ReactNode {
       );
     }
     if (state.records.length === 0) {
-      return (
-        <FoleonEmpty
-          title="No Marketing highlights are currently published."
-          description="Check back soon — Marketing will add new Foleon publications here."
-        />
-      );
+      return <FoleonPreviewFallback route="highlights" records={getFoleonHighlightsPreviewRecords()} />;
     }
     const [feature, ...rest] = state.records;
     return (
