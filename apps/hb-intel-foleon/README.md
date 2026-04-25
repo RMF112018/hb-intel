@@ -16,6 +16,36 @@ The reader web part never renders an iframe until every gate passes:
 `RequiresExternalOpen`, a non-empty published/embed URL, display
 window, and URL origin on the allowlist.
 
+## Public preview fallback
+
+Version `1.0.17.0` adds clearly labeled preview layouts for configured
+public routes that do not yet have renderable Foleon content. This is a
+static UI preview, not mock Foleon content.
+
+- **Highlights** shows a preview layout only after the site URL,
+  Content Registry list, and Homepage Placements list are configured,
+  both read calls succeed, and no renderable Highlights records resolve.
+- **Content Hub** shows an archive preview only after the Content
+  Registry read succeeds with zero registry records. If live records
+  exist and a search or content-type filter misses, the normal
+  filter-specific empty state remains.
+- **Manager** shows read-only guidance when public preview remains
+  likely relevant because no published, visible, homepage-ready content
+  is available.
+
+Preview records are isolated from `FoleonContentRecord`: they use
+`source: 'preview'`, string `preview-*` IDs, display-only fields, and no
+Foleon doc IDs, SharePoint item IDs, URLs, iframe/embed fields, open
+mode fields, or telemetry identifiers. Preview cards do not call the
+Reader, external-open handlers, card impressions, production content
+telemetry, or backend APIs. Empty-registry Hub search updates local UI
+only; live-record Hub search still emits the normal Search telemetry
+envelope.
+
+Preview fallback does **not** appear for missing configuration, fetch
+errors, Reader routes, live public-ready records, or Content Hub
+filter/search misses against an existing live corpus.
+
 ## Build / test
 
 ```bash
@@ -165,14 +195,27 @@ Inspect the proof in a hosted page with:
 JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
 ```
 
-Healthy SharePoint proof for package `1.0.16.0` should include
-`canInitialize: true`, `issueCodes: []`, and true presence for
+Healthy SharePoint proof should include `canInitialize: true`,
+`issueCodes: []`, and true presence for
 `siteUrl`, `contentRegistryListId`, `placementsListId`, and
 `eventsListId`. If `configSource.foleonRoute` is `nested-only` or the
 top-level `route` is unexpected, repair `foleonRoute` in the advanced
 property pane group. If `package-version-mismatch` appears, update the
 page's persisted `expectedPackageVersion` or confirm the App Catalog
 package version.
+
+Healthy SharePoint proof for package `1.0.17.0` should include
+`packageVersion: "1.0.17.0"`, `canInitialize: true`,
+`issueCodes: []`, and `governance.packageVersionMatchesExpected: true`
+after the page property bag has been updated.
+
+New webpart instances inherit the manifest default
+`expectedPackageVersion: "1.0.17.0"`. Existing tenant pages may still
+persist `expectedPackageVersion: "1.0.16.0"` in the webpart property
+bag after the package is upgraded. If runtime proof reports
+`package-version-mismatch` while the App Catalog package is correct,
+open the Foleon property pane and update `expectedPackageVersion` to
+`1.0.17.0`.
 
 ## Backend connector workflow
 

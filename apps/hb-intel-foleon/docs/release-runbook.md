@@ -64,6 +64,10 @@ window.__hbIntel_foleonRuntimeBindingProof
 - [ ] `originPolicy.hasAllowlist === true` and
       `fingerprints.originAllowlistCount >= 1`.
 - [ ] `issueCodes` is `[]`.
+- [ ] Existing page instances have `expectedPackageVersion` updated to
+      the released version in the Foleon property pane. New instances
+      inherit the manifest default, but existing pages may still persist
+      an older value and trigger `package-version-mismatch`.
 
 ## 4. List truth
 
@@ -99,6 +103,10 @@ All four governed lists must exist on the HBCentral site before launch.
 ## 6. Telemetry truth
 
 - [ ] `presence.eventsListId === true` in the runtime binding proof.
+- [ ] Empty-registry Content Hub preview search does not write a normal
+      live Search telemetry row.
+- [ ] Live-record Content Hub search still writes the normal Search
+      telemetry envelope with raw text redacted.
 - [ ] A manual card-click on a published record produces a new row in
       `HB_FoleonInteractionEvents` (`SearchQuery` is `null` — privacy
       rule) and `ClientInfoJson` contains the full governed envelope
@@ -162,7 +170,11 @@ pnpm --filter @hbc/spfx-hb-intel-foleon lint
 pnpm --filter @hbc/spfx-hb-intel-foleon check-types
 pnpm --filter @hbc/spfx-hb-intel-foleon test
 pnpm --filter @hbc/spfx-hb-intel-foleon build
-pnpm --filter @hbc/spfx-hb-intel-foleon provision:print > /tmp/foleon-provisioning-plan.json
+pnpm --filter @hbc/spfx-hb-intel-foleon schema:validate
+npx tsx tools/spfx-shell/scripts/validate-foleon-runtime-config-bridge.ts
+pnpm --dir tools/spfx-shell build
+npx tsx tools/build-spfx-package.ts --domain hb-intel-foleon
+pnpm --filter @hbc/spfx-hb-intel-foleon package:proof
 ```
 
 Expected:
@@ -173,9 +185,55 @@ Expected:
 - `build` — Vite bundle emitted at
   `apps/hb-intel-foleon/dist/hb-intel-foleon-app.js` (≈320 KB,
   gzip ≈97 KB).
-- `provision:print` — emits all 4 list plans.
+- `schema:validate` — Feature Framework schema truth passes.
+- package build — emits `dist/sppkg/hb-intel-foleon.sppkg`.
+- `package:proof` — package, feature, webpart, toolbox defaults, and
+  packaged schema assets align with source truth.
 
-## 12. Release sign-off
+Generated `.sppkg` and package-proof artifacts are ignored by repo
+policy (`*.sppkg`) and are not committed unless release policy changes.
+
+## 12. Preview fallback tenant validation
+
+For `1.0.17.0`, validate the preview fallback posture before release
+sign-off:
+
+1. Deploy `dist/sppkg/hb-intel-foleon.sppkg` to the App Catalog and
+   install/update it on `/sites/HBCentral`.
+2. Open the Foleon property pane and set
+   `expectedPackageVersion` to `1.0.17.0` on existing pages. New page
+   instances inherit this manifest default; existing instances may
+   retain `1.0.16.0` until manually updated.
+3. Inspect:
+
+   ```js
+   JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
+   ```
+
+   Expected after property update:
+   - `packageVersion: "1.0.17.0"`
+   - `canInitialize: true`
+   - `issueCodes: []`
+   - `governance.packageVersionMatchesExpected: true`
+4. Confirm proof remains redacted: no raw list GUIDs, origins, reader
+   paths, preview fixture data, or sample titles.
+5. With configured lists but no public/renderable records, confirm
+   Highlights shows the labeled preview layout.
+6. With zero registry records, confirm Content Hub shows the archive
+   preview layout.
+7. Type in Hub search while the registry is empty and confirm no normal
+   live Search telemetry row is written.
+8. Add or sync one published, visible, public-ready registry record and
+   confirm Content Hub preview disappears.
+9. Add or activate valid homepage placements as required by Highlights
+   and confirm Highlights preview disappears when renderable records
+   exist.
+10. Confirm live card impressions/clicks occur only for real records.
+11. Confirm Reader gates, iframe/origin policy, and
+    `?foleon-diagnostics=1` behavior remain unchanged and do not expose
+    preview fixture data.
+
+## 13. Release sign-off
 
 Copy this block into the release ticket or PR description. Every row
 must be checked or the exception named.

@@ -12,6 +12,8 @@ explicitly excepted in the release sign-off.
 - `FoleonIframeHost` (embedded viewer)
 - `FoleonStates` (loading / empty / error primitives)
 - `FoleonCard` (card surface)
+- `FoleonPreviewFallback` / `FoleonPreviewCard` (static preview
+  fallback layouts)
 
 Out of scope: the Foleon publication itself — third-party content
 inside the iframe is not covered by this checklist. Tenant admins
@@ -24,6 +26,7 @@ must verify publication accessibility in Foleon's own tooling.
 | 1.3.1 Info & Relationships — `<main>` landmark  | `FoleonApp.tsx` renders `<main id="foleon-main" aria-label="Foleon" data-hbc-foleon-route>` | ✔      |
 | 1.3.1 — Route-level `<section>` wrappers         | `HighlightsPage`, `ContentHubPage`, `ReaderPage` each wrap their body in `<section aria-label>` | ✔   |
 | 1.3.1 — Route heading per surface                | `<h2>Marketing highlights</h2>`, `<h2>All publications</h2>`, `<h2>{record.title}</h2>`       | ✔      |
+| 1.3.1 — Preview fallback structure               | `FoleonPreviewFallback.test.tsx` asserts named preview regions, feature/compact placeholders, metadata zones, and future action labels | ✔ |
 
 ## Bypass and focus
 
@@ -40,6 +43,7 @@ must verify publication accessibility in Foleon's own tooling.
 | ----------------------------- | -------------------------------------------------------------------------------------------------- | ------ |
 | 2.1.1 Keyboard                | All interactive elements are native `<button>` / `<a>` (`FoleonCard`, `HbcButton`, `HbcSearch`)    | ✔      |
 | 2.1.2 No Keyboard Trap        | `FoleonIframeHost` does not programmatically retain focus; iframe is a single tab stop             | ✔      |
+| 2.1.1 — Preview fallback is non-interactive | Preview tests assert no anchors, iframes, fake working buttons, or disabled reader buttons are rendered | ✔ |
 
 ## Name, role, value
 
@@ -80,6 +84,10 @@ code is required — the mapping is exhaustive.
 | `src/__tests__/routeDeepLinks.test.tsx`                     | Skip-link present, aria-live announcer present, `<main>` landmark present with proper `data-hbc-foleon-route`, zero iframes on Highlights/Hub/config-error |
 | `src/components/__tests__/FoleonIframeHost.test.tsx`        | Iframe attributes honored; `title`, `sandbox`, `allow`, `referrerPolicy`, `loading`     |
 | `src/services/__tests__/FoleonReaderGate.test.ts`           | All 10 gate reasons covered; every blocked-state mapping exists                         |
+| `src/components/__tests__/FoleonPreviewFallback.test.tsx`   | Preview fallback regions, placeholders, labels, and non-interactive posture             |
+| `src/pages/__tests__/HighlightsPage.preview.test.tsx`       | Highlights configured-empty preview, live precedence, errors, and no preview telemetry  |
+| `src/pages/__tests__/ContentHubPage.preview.test.tsx`       | Hub empty-registry preview, live filter-empty behavior, empty-search telemetry suppression |
+| `src/pages/__tests__/ManagePage.test.tsx`                   | Manager read-only preview guidance trigger and no fake action surface                   |
 
 ## Manual verification checklist
 

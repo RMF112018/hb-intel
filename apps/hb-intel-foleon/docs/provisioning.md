@@ -66,7 +66,7 @@ lists in install order.
    This package cannot be tenant-wide-deployed. Tenant-wide
    deployment of a `.sppkg` containing SharePoint assets is
    unsupported and the feature framework will be silently ignored.
-5. Confirm the App Catalog lists the package with version `1.0.16.0`.
+5. Confirm the App Catalog lists the package with version `1.0.17.0`.
 
 ## 5. Install on `/sites/HBCentral`
 
@@ -119,12 +119,13 @@ Set or confirm the governed defaults:
   comma-separated.
 - `allowPreview` → leave `false` for production.
 - `expectedManifestId` → `2160edb3-675e-4451-92bb-8345f9d1c71e`.
-- `expectedPackageVersion` → `1.0.16.0`.
+- `expectedPackageVersion` → `1.0.17.0`.
 
 Existing page instances that already persisted `expectedPackageVersion`
-may keep the old value after an app upgrade. If diagnostics report
-`package-version-mismatch`, update this property-pane field manually to
-the App Catalog package version.
+may keep the old `1.0.16.0` value after an app upgrade. If diagnostics
+report `package-version-mismatch`, update this property-pane field
+manually to `1.0.17.0` after confirming the App Catalog package
+version.
 
 The toolbox entry normally sets `foleonRoute`. Use the advanced route
 dropdown only to repair a stale page instance or to intentionally pin a
@@ -179,7 +180,7 @@ JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
 
 Expected:
 
-- `packageVersion === '1.0.16.0'`.
+- `packageVersion === '1.0.17.0'`.
 - `manifestId === '2160edb3-675e-4451-92bb-8345f9d1c71e'`.
 - `hostMode === 'sharepoint'`.
 - `canInitialize === true`.
@@ -196,7 +197,7 @@ Healthy SharePoint proof after list GUIDs are configured should include:
 
 ```json
 {
-  "packageVersion": "1.0.16.0",
+  "packageVersion": "1.0.17.0",
   "hostMode": "sharepoint",
   "canInitialize": true,
   "issueCodes": [],
@@ -218,8 +219,9 @@ Failure interpretation:
   `placementsListId` in the property pane.
 - `configSource.foleonRoute === "nested-only"` or an unexpected `route`
   value → repair `foleonRoute` in the advanced property pane group.
-- `package-version-mismatch` → update `expectedPackageVersion` or
-  confirm the App Catalog package version.
+- `package-version-mismatch` → update persisted
+  `expectedPackageVersion` to `1.0.17.0` or confirm the App Catalog
+  package version.
 - `foleonPropertyBridge.webPartPropertiesPresent === true` with
   `foleonPropertyBridge.bridgeAppearsApplied === false` → suspect a
   stale shell package or bridge regression.
@@ -238,7 +240,42 @@ reject URLs containing `/preview/` unless the webpart's mount config
 carries `allowPreview=true` — a setting reserved for admin-review
 builds on non-production pages.
 
-## 12. Known limitations
+## 12. Public preview fallback validation
+
+The `1.0.17.0` package includes static preview layouts for configured
+public routes that have no renderable published content yet. This does
+not change SharePoint provisioning: no new lists, fields, views, or
+backend dependencies are required.
+
+Tenant validation after upgrade:
+
+1. Add or update the Foleon webpart property pane values. Existing page
+   instances may still persist `expectedPackageVersion: "1.0.16.0"`;
+   update it to `1.0.17.0`.
+2. Inspect runtime proof:
+
+   ```js
+   JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
+   ```
+
+   Expected after property update: `packageVersion: "1.0.17.0"`,
+   `canInitialize: true`, `issueCodes: []`, and
+   `governance.packageVersionMatchesExpected: true`.
+3. With configured lists but no public/renderable content, confirm
+   Highlights shows the labeled preview layout.
+4. With zero registry records, confirm Content Hub shows the archive
+   preview layout.
+5. Type in Hub search while the registry is empty and confirm no live
+   Search telemetry row is written.
+6. Add or sync one published, visible, public-ready registry record.
+   Confirm Content Hub preview disappears and live cards render.
+7. Add or activate valid homepage placements as required by Highlights.
+   Confirm Highlights preview disappears when renderable live records
+   exist.
+8. Confirm Reader gates and `?foleon-diagnostics=1` remain unchanged
+   and do not expose preview fixture data.
+
+## 13. Known limitations
 
 - **Lookup URL-form resolution is provisioning-time-sensitive.**
   `ContentLookup` is optional during Feature Framework provisioning. If

@@ -44,6 +44,23 @@ backend is a one-line change in `mount.tsx` — see
 | `Search`          | Content Hub search emits a non-empty trimmed query  | `searchQueryLength` (never the text), `pageContext: 'Content Hub'`                                  |
 | `Filter`          | Reserved for future Content Hub filter events       | TBD                                                                                                 |
 
+## Preview fallback telemetry posture
+
+The `1.0.17.0` preview fallback is intentionally non-telemetry-producing:
+
+- Preview records are not `FoleonContentRecord` objects and are not
+  passed to live card, reader, external-open, or telemetry paths.
+- Highlights and Hub preview cards do not emit `Card Impression`,
+  `Card Click`, `Reader Open`, `Reader Close`, `Embed Error`, or
+  `External Open` events.
+- Empty-registry Content Hub search updates local UI state only and
+  does not call the telemetry-facing `onSearch` prop.
+- Content Hub search against a live registry still emits the normal
+  `Search` telemetry envelope with only `searchQueryLength`; raw search
+  text remains excluded.
+- Manager preview guidance is read-only and does not call sync,
+  placement, reader/open/external, or telemetry workflows.
+
 ## Envelope reference
 
 `FoleonTelemetryEnvelope` is the shape sent to the active sink:
