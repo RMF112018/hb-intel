@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "2160edb3-675e-4451-92bb-8345f9d1c71e",
+  "id": "e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
@@ -18,104 +18,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Foleon Highlights"
+        "default": "HB Homepage"
       },
       "description": {
-        "default": "Show governed Foleon highlights and route readers into SharePoint-hosted publication experiences."
+        "default": "Composed homepage orchestrator with a dedicated homepage launcher, rendering Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos in a governed entry-stack shell."
       },
-      "officeFabricIconFontName": "ReadingMode",
+      "officeFabricIconFontName": "Home",
       "hiddenFromToolbox": false,
-      "properties": {
-        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
-        "allowPreview": false,
-        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.23.0",
-        "foleonRoute": "highlights"
-      }
-    },
-    {
-      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": {
-        "default": "HB Intel"
-      },
-      "title": {
-        "default": "HB Intel Project Spotlight Reader"
-      },
-      "description": {
-        "default": "Show the active Project Spotlight Foleon reader for a monthly project profile."
-      },
-      "officeFabricIconFontName": "ReadingMode",
-      "hiddenFromToolbox": false,
-      "properties": {
-        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
-        "allowPreview": false,
-        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.23.0",
-        "foleonRoute": "projectSpotlight"
-      }
-    },
-    {
-      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": {
-        "default": "HB Intel"
-      },
-      "title": {
-        "default": "HB Intel Company Pulse Reader"
-      },
-      "description": {
-        "default": "Show the active Company Pulse Foleon reader for company updates and recognition."
-      },
-      "officeFabricIconFontName": "News",
-      "hiddenFromToolbox": false,
-      "properties": {
-        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
-        "allowPreview": false,
-        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.23.0",
-        "foleonRoute": "companyPulse"
-      }
-    },
-    {
-      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": {
-        "default": "HB Intel"
-      },
-      "title": {
-        "default": "HB Intel Leadership Message Reader"
-      },
-      "description": {
-        "default": "Show the active Leadership Message Foleon reader for executive communications."
-      },
-      "officeFabricIconFontName": "Message",
-      "hiddenFromToolbox": false,
-      "properties": {
-        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
-        "allowPreview": false,
-        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.23.0",
-        "foleonRoute": "leadershipMessage"
-      }
-    },
-    {
-      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": {
-        "default": "HB Intel"
-      },
-      "title": {
-        "default": "HB Intel Foleon Manager"
-      },
-      "description": {
-        "default": "Manage Foleon content registry, placements, validation, and sync proof."
-      },
-      "officeFabricIconFontName": "Settings",
-      "hiddenFromToolbox": false,
-      "properties": {
-        "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
-        "allowPreview": false,
-        "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.23.0",
-        "foleonRoute": "manage"
-      }
+      "properties": {}
     }
   ]
 }

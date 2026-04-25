@@ -42,6 +42,20 @@ describe('homepage embedded Foleon config', () => {
       foleonApiBaseUrl: 'https://functions.example/api',
       foleonApiResource: 'api://foleon-api',
     });
+    expect(toEmbeddedFoleonMountConfig(config, 'companyPulse')).toEqual(
+      expect.objectContaining({
+        foleonRoute: 'companyPulse',
+        expectedPackageVersion: '1.0.23.0',
+        foleonApiResource: 'api://foleon-api',
+      }),
+    );
+    expect(toEmbeddedFoleonMountConfig(config, 'leadershipMessage')).toEqual(
+      expect.objectContaining({
+        foleonRoute: 'leadershipMessage',
+        expectedPackageVersion: '1.0.23.0',
+        foleonApiResource: 'api://foleon-api',
+      }),
+    );
   });
 
   it('defaults expected Foleon package governance to current Wave 01 package truth', () => {

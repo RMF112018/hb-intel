@@ -100,7 +100,7 @@ function ContentStateInspector({
   occupantId,
   onRead,
 }: {
-  occupantId: 'project-portfolio-spotlight' | 'company-pulse';
+  occupantId: 'project-portfolio-spotlight' | 'company-pulse' | 'leadership-message';
   onRead: (report: OccupantContentStateReport | undefined) => void;
 }): null {
   const report = useOccupantContentStateReport(occupantId);
@@ -183,6 +183,87 @@ describe('FoleonHomepageLaneHost', () => {
     await waitFor(() => expect(latest?.kind).toBe('strong'));
     expect(latest?.summary).toBe('live-reader');
     expect(mocks.laneSpy.mock.calls[0][0].lane).toBe('companyPulse');
+  });
+
+  it('maps homepage config into the embedded Leadership Message reader lane', async () => {
+    let latest: OccupantContentStateReport | undefined;
+    const { container } = render(
+      <OccupantContentStateProvider>
+        <FoleonHomepageLaneHost
+          {...makeZoneProps()}
+          lane="leadershipMessage"
+          occupantId="leadership-message"
+        />
+        <ContentStateInspector
+          occupantId="leadership-message"
+          onRead={(report) => {
+            latest = report;
+          }}
+        />
+      </OccupantContentStateProvider>,
+    );
+
+    await waitFor(() => expect(mocks.laneSpy).toHaveBeenCalled());
+    expect(container.querySelector('[data-test-foleon-lane="leadershipMessage"]')).not.toBeNull();
+    expect(mocks.contractSpy.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        siteUrl: 'https://contoso.sharepoint.com/sites/HBCentral',
+        getAccessToken: expect.any(Function),
+        telemetryIdentity: expect.objectContaining({
+          correlationId: 'hb-homepage-leadership-message',
+        }),
+      }),
+    );
+    expect(mocks.contractSpy.mock.calls[0][0].config).toEqual(
+      expect.objectContaining({
+        contentRegistryListId: 'content-list',
+        placementsListId: 'placements-list',
+        eventsListId: 'events-list',
+        acceptedFoleonOrigins: ['https://viewer.us.foleon.com'],
+        allowPreview: false,
+        expectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
+        expectedPackageVersion: '1.0.23.0',
+        foleonRoute: 'leadershipMessage',
+        foleonApiBaseUrl: 'https://functions.example/api',
+        foleonApiResource: 'api://foleon-api',
+      }),
+    );
+    await waitFor(() => expect(latest?.kind).toBe('empty'));
+    expect(latest?.occupantId).toBe('leadership-message');
+    expect(latest?.summary).toBe('no-active-record');
+  });
+
+  it('renders all three Foleon lanes together without homepage global mount conflicts', async () => {
+    const { container } = render(
+      <OccupantContentStateProvider>
+        <FoleonHomepageLaneHost
+          {...makeZoneProps()}
+          lane="projectSpotlight"
+          occupantId="project-portfolio-spotlight"
+        />
+        <FoleonHomepageLaneHost
+          {...makeZoneProps()}
+          lane="companyPulse"
+          occupantId="company-pulse"
+        />
+        <FoleonHomepageLaneHost
+          {...makeZoneProps()}
+          lane="leadershipMessage"
+          occupantId="leadership-message"
+        />
+      </OccupantContentStateProvider>,
+    );
+
+    await waitFor(() => expect(container.querySelectorAll('[data-test-foleon-lane]')).toHaveLength(3));
+    expect(container.querySelectorAll('[data-test-foleon-lane]')).toHaveLength(3);
+    expect(container.querySelector('[data-test-foleon-lane="projectSpotlight"]')).not.toBeNull();
+    expect(container.querySelector('[data-test-foleon-lane="companyPulse"]')).not.toBeNull();
+    expect(container.querySelector('[data-test-foleon-lane="leadershipMessage"]')).not.toBeNull();
+    expect(container.querySelectorAll('iframe')).toHaveLength(0);
+    expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
+    expect(mocks.contractSpy.mock.calls.map((call) => call[0].config.foleonRoute)).toEqual(
+      expect.arrayContaining(['projectSpotlight', 'companyPulse', 'leadershipMessage']),
+    );
   });
 
   it('reports invalid and does not render the reader lane when required config is missing', async () => {

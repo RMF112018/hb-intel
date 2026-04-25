@@ -21,7 +21,7 @@ import styles from './FoleonHomepageLaneHost.module.css';
 
 interface FoleonHomepageLaneHostProps extends HbHomepageZoneProps {
   readonly lane: FoleonEmbeddedReaderLaneKey;
-  readonly occupantId: Extract<OccupantId, 'project-portfolio-spotlight' | 'company-pulse'>;
+  readonly occupantId: Extract<OccupantId, 'project-portfolio-spotlight' | 'company-pulse' | 'leadership-message'>;
 }
 
 type EmbeddedLaneProps = React.ComponentProps<typeof FoleonEmbeddedReaderLane>;

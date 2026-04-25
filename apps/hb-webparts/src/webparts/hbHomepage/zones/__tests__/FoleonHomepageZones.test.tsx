@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import type { HbHomepageZoneProps } from '../../hbHomepageContract.js';
 import { ProjectPortfolioSpotlightZone } from '../ProjectPortfolioSpotlightZone.js';
 import { CompanyPulseZone } from '../CompanyPulseZone.js';
+import { LeadershipMessageZone } from '../LeadershipMessageZone.js';
 
 const hostSpy = vi.hoisted(() => vi.fn());
 
@@ -22,6 +23,7 @@ function makeZoneProps(): HbHomepageZoneProps {
     moduleConfig: {
       projectPortfolioSpotlight: { legacyTitle: 'Legacy Project Portfolio Spotlight' },
       companyPulse: { legacyTitle: 'Legacy Company Pulse' },
+      leadershipMessage: { legacyTitle: 'Legacy Leadership Message' },
     },
     siteUrl: 'https://contoso.sharepoint.com/sites/HBCentral',
   };
@@ -58,5 +60,19 @@ describe('Foleon homepage zone cutover wrappers', () => {
     );
     expect(document.querySelector('[data-test-foleon-host="companyPulse"]')).not.toBeNull();
     expect(document.body.textContent).not.toContain('Legacy Company Pulse');
+  });
+
+  it('wires LeadershipMessageZone to the Leadership Message Foleon lane', () => {
+    render(<LeadershipMessageZone {...makeZoneProps()} />);
+
+    expect(screen.getByLabelText('Leadership Message')).toBeTruthy();
+    expect(hostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lane: 'leadershipMessage',
+        occupantId: 'leadership-message',
+      }),
+    );
+    expect(document.querySelector('[data-test-foleon-host="leadershipMessage"]')).not.toBeNull();
+    expect(document.body.textContent).not.toContain('Legacy Leadership Message');
   });
 });

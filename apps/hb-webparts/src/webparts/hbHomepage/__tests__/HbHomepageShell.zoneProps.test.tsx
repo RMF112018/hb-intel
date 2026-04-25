@@ -4,6 +4,9 @@ import { render, act } from '@testing-library/react';
 import type { ShellContainerState } from '../shell/useShellContainer.js';
 
 const safetyZoneSpy = vi.fn();
+const companyPulseZoneSpy = vi.fn();
+const leadershipMessageZoneSpy = vi.fn();
+const projectPortfolioSpotlightZoneSpy = vi.fn();
 
 // Module-level mock: capture every prop SafetyFieldExcellenceZone receives
 // so we can assert the new Function App seams reach the zone via zoneProps.
@@ -25,13 +28,22 @@ vi.mock('../zones/SafetyFieldExcellenceZone.js', () => ({
 // Stub the other zones so the preset can render without exercising
 // their internals — this test is scoped to forwarding, not zone behavior.
 vi.mock('../zones/CompanyPulseZone.js', () => ({
-  CompanyPulseZone: (): React.JSX.Element => React.createElement('div', { 'data-test-mock': 'company-pulse' }),
+  CompanyPulseZone: (props: Record<string, unknown>): React.JSX.Element => {
+    companyPulseZoneSpy(props);
+    return React.createElement('div', { 'data-test-mock': 'company-pulse' });
+  },
 }));
 vi.mock('../zones/LeadershipMessageZone.js', () => ({
-  LeadershipMessageZone: (): React.JSX.Element => React.createElement('div', { 'data-test-mock': 'leadership-message' }),
+  LeadershipMessageZone: (props: Record<string, unknown>): React.JSX.Element => {
+    leadershipMessageZoneSpy(props);
+    return React.createElement('div', { 'data-test-mock': 'leadership-message' });
+  },
 }));
 vi.mock('../zones/ProjectPortfolioSpotlightZone.js', () => ({
-  ProjectPortfolioSpotlightZone: (): React.JSX.Element => React.createElement('div', { 'data-test-mock': 'project-portfolio-spotlight' }),
+  ProjectPortfolioSpotlightZone: (props: Record<string, unknown>): React.JSX.Element => {
+    projectPortfolioSpotlightZoneSpy(props);
+    return React.createElement('div', { 'data-test-mock': 'project-portfolio-spotlight' });
+  },
 }));
 vi.mock('../zones/PeopleCulturePublicZone.js', () => ({
   PeopleCulturePublicZone: (): React.JSX.Element => React.createElement('div', { 'data-test-mock': 'people-culture-public' }),
@@ -40,8 +52,7 @@ vi.mock('../zones/HbKudosZone.js', () => ({
   HbKudosZone: (): React.JSX.Element => React.createElement('div', { 'data-test-mock': 'hb-kudos' }),
 }));
 
-// Imported AFTER vi.mock so the mocked modules take effect.
-// eslint-disable-next-line import/first
+// Imported after vi.mock so the mocked modules take effect.
 import { HbHomepageShell } from '../HbHomepageShell.js';
 
 function makeStubContainer(): ShellContainerState {
@@ -115,5 +126,59 @@ describe('HbHomepageShell — zoneProps forwarding (Wave 07 wiring)', () => {
     const propsReceived = safetyZoneSpy.mock.calls[0][0] as Record<string, unknown>;
     expect(propsReceived.functionAppBaseUrl).toBeUndefined();
     expect(propsReceived.getFunctionAppToken).toBeUndefined();
+  });
+
+  it('forwards homepage Foleon config and token seams into all three communications zones', () => {
+    companyPulseZoneSpy.mockClear();
+    leadershipMessageZoneSpy.mockClear();
+    projectPortfolioSpotlightZoneSpy.mockClear();
+    const fakeFoleonToken = vi.fn(async () => 'foleon-token');
+    const shellRef = React.createRef<HTMLDivElement>();
+    const container = makeStubContainer();
+    const foleonConfig = {
+      foleonContentRegistryListId: 'content-list-id',
+      foleonPlacementsListId: 'placements-list-id',
+      foleonEventsListId: 'events-list-id',
+      foleonAcceptedOrigins: 'https://viewer.us.foleon.com, https://viewer.eu.foleon.com',
+      foleonAllowPreview: false,
+      foleonExpectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
+      foleonExpectedPackageVersion: '1.0.23.0',
+      foleonApiBaseUrl: 'https://functions.example/api',
+      foleonApiResource: 'api://foleon-api',
+    };
+
+    let rendered: ReturnType<typeof render> | undefined;
+    act(() => {
+      rendered = render(
+        <HbHomepageShell
+          config={foleonConfig}
+          identity={{ displayName: 'Test', email: 'test@example.com' }}
+          siteUrl="https://contoso.sharepoint.com/sites/HBCentral"
+          getGraphToken={async () => 'graph-token'}
+          getFoleonApiToken={fakeFoleonToken}
+          container={container}
+          shellRef={shellRef}
+        />,
+      );
+    });
+
+    const shell = rendered?.container.querySelector('[data-shell-post-hero="true"]');
+    expect(shell?.getAttribute('data-shell-prohibited-pairing-diagnostics')).toBe('0');
+    for (const spy of [companyPulseZoneSpy, leadershipMessageZoneSpy, projectPortfolioSpotlightZoneSpy]) {
+      expect(spy).toHaveBeenCalled();
+      const propsReceived = spy.mock.calls[0][0] as Record<string, unknown>;
+      expect(propsReceived.getFoleonApiToken).toBe(fakeFoleonToken);
+      expect(propsReceived.foleonConfig).toEqual({
+        foleonContentRegistryListId: 'content-list-id',
+        foleonPlacementsListId: 'placements-list-id',
+        foleonEventsListId: 'events-list-id',
+        foleonAcceptedOrigins: ['https://viewer.us.foleon.com', 'https://viewer.eu.foleon.com'],
+        foleonAllowPreview: false,
+        foleonExpectedManifestId: '2160edb3-675e-4451-92bb-8345f9d1c71e',
+        foleonExpectedPackageVersion: '1.0.23.0',
+        foleonApiBaseUrl: 'https://functions.example/api',
+        foleonApiResource: 'api://foleon-api',
+      });
+    }
   });
 });
