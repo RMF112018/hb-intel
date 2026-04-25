@@ -189,7 +189,6 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
   { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage', freshBuildRequired: true },
-  { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi', freshBuildRequired: true },
   { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
   { dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single', freshBuildRequired: true },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
