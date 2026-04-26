@@ -91,6 +91,53 @@ export interface FoleonReaderFeatureCallout {
   readonly body: string;
 }
 
+/**
+ * Company Pulse briefing lead — the latest active editorial update.
+ * Populated only when `lane === 'companyPulse'`. Ready-state values
+ * are derived from `FoleonContentRecord`; preview values are clearly
+ * labeled sample copy.
+ */
+export interface FoleonReaderBriefingLead {
+  readonly title: string;
+  readonly body: string;
+  readonly category?: string;
+  readonly dateline?: string;
+  readonly isPlaceholder: boolean;
+}
+
+/**
+ * Company Pulse compact secondary digest item. Used **only** by preview
+ * (sample updates spanning the four conceptual categories). Ready state
+ * leaves the digest empty because the registry currently carries one
+ * active record per lane; secondary editions live in the archive.
+ */
+export interface FoleonReaderBriefingItem {
+  readonly id: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly category: string;
+  readonly dateline?: string;
+}
+
+/**
+ * Company Pulse category chip. Static taxonomy that describes the
+ * lane's editorial scope (news / events / recognition / operations).
+ * Not derived from the active record.
+ */
+export interface FoleonReaderCategoryChip {
+  readonly id: string;
+  readonly label: string;
+}
+
+/**
+ * Company Pulse pulse timeline strip entry. Optional. Preview-only.
+ */
+export interface FoleonReaderPulseTimelineEntry {
+  readonly id: string;
+  readonly label: string;
+  readonly value: string;
+}
+
 export interface FoleonReaderViewModel {
   readonly lane: FoleonReaderLayoutKey;
   readonly state: FoleonReaderViewState;
@@ -121,6 +168,14 @@ export interface FoleonReaderViewModel {
   readonly projectFacts?: FoleonReaderProjectFacts;
   /** Project Spotlight only. Pulse + Leadership leave this `undefined`. */
   readonly featureCallout?: FoleonReaderFeatureCallout;
+  /** Company Pulse only. Spotlight + Leadership leave this `undefined`. */
+  readonly briefingLead?: FoleonReaderBriefingLead;
+  /** Company Pulse only. Empty array in ready state (no fabricated digest items). */
+  readonly briefingDigest?: readonly FoleonReaderBriefingItem[];
+  /** Company Pulse only. Static taxonomy in both states. */
+  readonly categoryChips?: readonly FoleonReaderCategoryChip[];
+  /** Company Pulse preview only. Ready state leaves this `undefined`. */
+  readonly pulseTimeline?: readonly FoleonReaderPulseTimelineEntry[];
 }
 
 // ---------------------------------------------------------------------------
@@ -306,6 +361,24 @@ export function createPreviewFoleonReaderViewModel(
           body: 'Sample editorial framing — a one- to two-sentence narrative explaining the project\'s significance will appear here when a live Project Spotlight edition is published.',
         }
       : undefined;
+  const briefingLead: FoleonReaderBriefingLead | undefined =
+    lane === 'companyPulse'
+      ? {
+          title: 'Sample latest update',
+          body: 'A live Company Pulse update will summarize the latest companywide editorial here when the next edition is published.',
+          category: 'News',
+          dateline: 'Sample dateline',
+          isPlaceholder: true,
+        }
+      : undefined;
+  const briefingDigest: readonly FoleonReaderBriefingItem[] | undefined =
+    lane === 'companyPulse'
+      ? PULSE_PREVIEW_DIGEST
+      : undefined;
+  const categoryChips: readonly FoleonReaderCategoryChip[] | undefined =
+    lane === 'companyPulse' ? PULSE_CATEGORY_CHIPS : undefined;
+  const pulseTimeline: readonly FoleonReaderPulseTimelineEntry[] | undefined =
+    lane === 'companyPulse' ? PULSE_PREVIEW_TIMELINE : undefined;
 
   return {
     lane,
@@ -352,8 +425,61 @@ export function createPreviewFoleonReaderViewModel(
     titleElementId: `${config.readerKey}-preview-title`,
     projectFacts,
     featureCallout,
+    briefingLead,
+    briefingDigest,
+    categoryChips,
+    pulseTimeline,
   };
 }
+
+// Static Company Pulse taxonomy — describes the lane's editorial scope.
+// Used in both preview and ready state because chips are not record-derived.
+const PULSE_CATEGORY_CHIPS: readonly FoleonReaderCategoryChip[] = [
+  { id: 'news', label: 'News' },
+  { id: 'events', label: 'Events' },
+  { id: 'recognition', label: 'Recognition' },
+  { id: 'operations', label: 'Operations' },
+];
+
+// Honest preview placeholders — clearly labeled when rendered next to the
+// preview banner. Each item names a conceptual category so the preview
+// shows the briefing's editorial coverage at a glance.
+const PULSE_PREVIEW_DIGEST: readonly FoleonReaderBriefingItem[] = [
+  {
+    id: 'preview-news',
+    title: 'Sample news update',
+    summary: 'A short companywide news brief will appear here when an edition is published.',
+    category: 'News',
+    dateline: 'Sample dateline',
+  },
+  {
+    id: 'preview-events',
+    title: 'Sample upcoming event',
+    summary: 'Highlights and registration affordances for an upcoming event will appear here.',
+    category: 'Events',
+    dateline: 'Sample dateline',
+  },
+  {
+    id: 'preview-recognition',
+    title: 'Sample recognition note',
+    summary: 'Recognition for a person, team, or milestone will appear here.',
+    category: 'Recognition',
+    dateline: 'Sample dateline',
+  },
+  {
+    id: 'preview-operations',
+    title: 'Sample operations update',
+    summary: 'A practical operations or process update will appear here.',
+    category: 'Operations',
+    dateline: 'Sample dateline',
+  },
+];
+
+const PULSE_PREVIEW_TIMELINE: readonly FoleonReaderPulseTimelineEntry[] = [
+  { id: 'this-week', label: 'This week', value: 'Sample dateline' },
+  { id: 'last-week', label: 'Last week', value: 'Sample dateline' },
+  { id: 'two-weeks', label: 'Two weeks ago', value: 'Sample dateline' },
+];
 
 export function createReadyFoleonReaderViewModel(
   config: FoleonReaderModuleConfig,
@@ -388,6 +514,31 @@ export function createReadyFoleonReaderViewModel(
               : 'Editorial framing for this Project Spotlight edition has not been provided.',
         }
       : undefined;
+  const briefingLead: FoleonReaderBriefingLead | undefined =
+    lane === 'companyPulse'
+      ? {
+          // Lead is sourced ONLY from the active record. No invented data.
+          title: record.title,
+          body:
+            record.summary && record.summary.trim().length > 0
+              ? record.summary
+              : 'Editorial summary for this Company Pulse edition has not been provided.',
+          category: record.contentTypeKey,
+          dateline:
+            formatFreshnessDate(record.lastEditorialUpdate ?? record.publishedOn) ?? undefined,
+          isPlaceholder: false,
+        }
+      : undefined;
+  // Ready-state digest is intentionally empty — the registry currently
+  // carries one active record per lane and the adapter does not fabricate
+  // secondary updates. Previous editions live in the archive (the layout
+  // surfaces an "Open archive" affordance to reach them).
+  const briefingDigest: readonly FoleonReaderBriefingItem[] | undefined =
+    lane === 'companyPulse' ? [] : undefined;
+  const categoryChips: readonly FoleonReaderCategoryChip[] | undefined =
+    lane === 'companyPulse' ? PULSE_CATEGORY_CHIPS : undefined;
+  // Timeline strip is preview-only — no live multi-edition source.
+  const pulseTimeline: readonly FoleonReaderPulseTimelineEntry[] | undefined = undefined;
 
   const freshnessFormatted = formatFreshnessDate(pickFreshnessRaw(lane, record));
   const freshnessValue = freshnessFormatted ?? labels.freshnessFallback;
@@ -452,5 +603,9 @@ export function createReadyFoleonReaderViewModel(
     titleElementId: `${config.readerKey}-reader-title`,
     projectFacts,
     featureCallout,
+    briefingLead,
+    briefingDigest,
+    categoryChips,
+    pulseTimeline,
   };
 }

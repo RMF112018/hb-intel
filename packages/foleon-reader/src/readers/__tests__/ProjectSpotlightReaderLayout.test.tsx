@@ -197,7 +197,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(collapsed.container.querySelector('iframe')).toBeNull();
   });
 
-  it('does not interfere with sibling lanes — Pulse and Leadership wrappers still render their compatibility-shell markers', () => {
+  it('does not interfere with sibling lanes — Pulse renders its briefing layout, Leadership stays on the compatibility shell', () => {
     const pulseVm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const leadershipVm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
     render(
@@ -206,12 +206,22 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
         <LeadershipMessageReaderLayout viewModel={leadershipVm} iframeSurface={null} />
       </>,
     );
-    // Pulse and Leadership are still on the legacy compatibility shell and
-    // therefore still emit `data-preview-tone` and `data-foleon-preview-route`.
-    expect(document.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
-    expect(document.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
-    expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
-    expect(document.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+
+    // Per-lane scoped assertions.
+    const pulse = document.querySelector('[data-foleon-reader-layout="company-pulse"]');
+    const leadership = document.querySelector('[data-foleon-reader-layout="leadership-message"]');
+    expect(pulse).not.toBeNull();
+    expect(leadership).not.toBeNull();
+
+    // Pulse: lane-owned briefing layout (Prompt-04). No legacy markers.
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-briefing');
+    expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
+    expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
+
+    // Leadership: still on the compatibility shell pending Prompt 05.
+    expect(leadership?.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+    expect(leadership?.querySelector('[data-foleon-preview-route]')).not.toBeNull();
+
     // The Project Spotlight feature marker is NOT present (no spotlight rendered here).
     expect(document.querySelector('[data-foleon-layout="project-spotlight-feature"]')).toBeNull();
   });

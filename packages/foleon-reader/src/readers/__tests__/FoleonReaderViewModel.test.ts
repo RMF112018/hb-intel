@@ -300,6 +300,114 @@ describe('view model — Project Spotlight projectFacts and featureCallout', () 
   });
 });
 
+describe('view model — Company Pulse briefing fields', () => {
+  it('preview view model populates Pulse fields with labeled placeholders only for the companyPulse lane', () => {
+    const pulse = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    expect(pulse.briefingLead?.isPlaceholder).toBe(true);
+    expect(pulse.briefingDigest?.length).toBe(4);
+    expect(pulse.categoryChips?.map((c) => c.id)).toEqual([
+      'news',
+      'events',
+      'recognition',
+      'operations',
+    ]);
+    expect(pulse.pulseTimeline).toBeDefined();
+
+    const spotlight = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    const leadership = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
+    expect(spotlight.briefingLead).toBeUndefined();
+    expect(spotlight.briefingDigest).toBeUndefined();
+    expect(spotlight.categoryChips).toBeUndefined();
+    expect(spotlight.pulseTimeline).toBeUndefined();
+    expect(leadership.briefingLead).toBeUndefined();
+    expect(leadership.briefingDigest).toBeUndefined();
+    expect(leadership.categoryChips).toBeUndefined();
+    expect(leadership.pulseTimeline).toBeUndefined();
+  });
+
+  it('ready view model derives the briefing lead only from FoleonContentRecord and never fabricates digest items', () => {
+    const resolution = makeReadyResolution(FOLEON_READER_CONFIGS.companyPulse, {
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      title: 'Companywide April Brief',
+      summary: 'Operational, recognition, and event highlights for the week of April 14.',
+      lastEditorialUpdate: '2026-04-14T00:00:00.000Z',
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse, {
+      resolution,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+
+    expect(vm.briefingLead).toBeDefined();
+    expect(vm.briefingLead?.isPlaceholder).toBe(false);
+    expect(vm.briefingLead?.title).toBe('Companywide April Brief');
+    expect(vm.briefingLead?.body).toBe(
+      'Operational, recognition, and event highlights for the week of April 14.',
+    );
+    expect(vm.briefingLead?.category).toBe('Company Pulse');
+    expect(typeof vm.briefingLead?.dateline).toBe('string');
+
+    // Ready-state digest is intentionally empty — no fabricated entries.
+    expect(vm.briefingDigest).toEqual([]);
+    // Timeline is preview-only.
+    expect(vm.pulseTimeline).toBeUndefined();
+    // Category chips are static taxonomy.
+    expect(vm.categoryChips?.map((c) => c.id)).toEqual([
+      'news',
+      'events',
+      'recognition',
+      'operations',
+    ]);
+  });
+
+  it('ready briefing body uses an honest fallback when the record carries no summary', () => {
+    const noSummary = makeReadyResolution(FOLEON_READER_CONFIGS.companyPulse, {
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      summary: undefined,
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse, {
+      resolution: noSummary,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vm.briefingLead?.body).toMatch(/has not been provided/);
+  });
+
+  it('Spotlight and Leadership ready view models leave Pulse fields undefined', () => {
+    const spotlightRes = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight);
+    const leadershipRes = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+    });
+    const spotlightVm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: spotlightRes,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    const leadershipVm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage, {
+      resolution: leadershipRes,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(spotlightVm.briefingLead).toBeUndefined();
+    expect(spotlightVm.briefingDigest).toBeUndefined();
+    expect(spotlightVm.categoryChips).toBeUndefined();
+    expect(leadershipVm.briefingLead).toBeUndefined();
+    expect(leadershipVm.briefingDigest).toBeUndefined();
+    expect(leadershipVm.categoryChips).toBeUndefined();
+  });
+});
+
 describe('createReadyFoleonReaderViewModel — actions and warnings', () => {
   it('always includes Open archive; includes Open reader only when mobile gate is active', () => {
     const onArchive = vi.fn();

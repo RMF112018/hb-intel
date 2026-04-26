@@ -175,7 +175,7 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
-  it('renders Company Pulse preview with orange tone and complete placeholder zones', async () => {
+  it('renders Company Pulse preview through the lane-owned briefing layout, not the legacy compatibility shell', async () => {
     resolveMock.mockResolvedValue({
       kind: 'preview',
       config: FOLEON_READER_CONFIGS.companyPulse,
@@ -184,17 +184,32 @@ describe('FoleonReaderModule', () => {
     });
     const { callbacks, container } = renderModule({ config: FOLEON_READER_CONFIGS.companyPulse });
 
-    expect(await screen.findByText('Company Pulse reader')).toBeTruthy();
+    // Phase-04 Wave-01 Prompt-04: Company Pulse identity is layout-key
+    // driven. Tone-based markers are intentionally not emitted by this
+    // lane's new briefing layout.
+    await screen.findByLabelText('Pulse categories');
+    expect(container.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-layout="company-pulse-briefing"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
+    expect(container.querySelector('[data-preview-tone]')).toBeNull();
+    expect(container.querySelector('[data-foleon-preview-route]')).toBeNull();
+
+    // Honest preview labeling preserved.
     expect(screen.getByText('Preview layout')).toBeTruthy();
-    expect(screen.getByLabelText('Company Pulse feature placeholder')).toBeTruthy();
-    expect(screen.getByLabelText('Company Pulse supporting preview placeholders')).toBeTruthy();
-    expect(screen.getByLabelText('Preview metadata zones')).toBeTruthy();
-    expect(screen.getByText('Content coming soon')).toBeTruthy();
-    expect(container.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
+
+    // The new briefing layout no longer renders the legacy three-card support skeleton.
+    expect(screen.queryByLabelText('Company Pulse supporting preview placeholders')).toBeNull();
+    expect(screen.queryByLabelText('Preview metadata zones')).toBeNull();
+    expect(screen.queryByLabelText('Preview status')).toBeNull();
+
+    // No live reader telemetry, no iframe, no production callbacks fired.
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect(container.querySelectorAll('a')).toHaveLength(0);
-    expect(screen.queryByRole('button', { name: /read|open|archive/i })).toBeNull();
+    expect(container.textContent).not.toContain('viewer.us.foleon.com');
     expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+    expect(callbacks.onReaderClose).not.toHaveBeenCalled();
+    expect(callbacks.onEmbedError).not.toHaveBeenCalled();
+    expect(callbacks.onGateBlocked).not.toHaveBeenCalled();
     expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
@@ -389,31 +404,38 @@ describe('FoleonReaderModule', () => {
       </>,
     );
 
-    expect(await screen.findByText('Project Spotlight reader')).toBeTruthy();
-    expect(await screen.findByText('Company Pulse reader')).toBeTruthy();
+    await screen.findByLabelText('Project Spotlight metadata');
+    await screen.findByLabelText('Pulse categories');
     expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
     expect(resolveMock).toHaveBeenCalledTimes(3);
 
-    // Phase-04 Wave-01 Prompt-02: each lane resolves to its own registered
-    // layout component identified by a unique data-foleon-reader-layout
-    // marker. Phase-04 Wave-01 Prompt-03: Project Spotlight has moved off
-    // the tone-driven compatibility shell to its lane-owned feature layout
-    // and emits the additional `data-foleon-layout="project-spotlight-feature"`
-    // marker. Pulse + Leadership remain on the compatibility shell and
-    // therefore still emit the legacy `data-preview-tone` markers.
-    expect(document.querySelector('[data-foleon-reader-layout="project-spotlight"]')).not.toBeNull();
-    expect(document.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
-    expect(document.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-foleon-reader-layout]')).toHaveLength(3);
-    expect(document.querySelectorAll('[data-foleon-reader-state="preview"]')).toHaveLength(3);
-    expect(document.querySelector('[data-foleon-layout="project-spotlight-feature"]')).not.toBeNull();
+    // Per-lane scoped assertions. Each lane wrapper is queried and tested
+    // independently — no exact global counts, so future prompts can
+    // migrate Leadership without churning this test.
+    const spotlight = document.querySelector('[data-foleon-reader-layout="project-spotlight"]');
+    const pulse = document.querySelector('[data-foleon-reader-layout="company-pulse"]');
+    const leadership = document.querySelector('[data-foleon-reader-layout="leadership-message"]');
+    expect(spotlight).not.toBeNull();
+    expect(pulse).not.toBeNull();
+    expect(leadership).not.toBeNull();
 
-    // Pulse + Leadership keep tone markers (compatibility shell). Spotlight does not.
-    expect(document.querySelector('[data-preview-tone="blue"]')).toBeNull();
-    expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
-    expect(document.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-foleon-preview-route]')).toHaveLength(2);
+    // Project Spotlight: lane-owned feature layout, no legacy markers.
+    // Wrapper carries both data-foleon-reader-layout and data-foleon-layout
+    // on the same element, so check via getAttribute, not descendant query.
+    expect(spotlight?.getAttribute('data-foleon-layout')).toBe('project-spotlight-feature');
+    expect(spotlight?.querySelector('[data-preview-tone]')).toBeNull();
+    expect(spotlight?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
+    // Company Pulse: lane-owned briefing layout, no legacy markers.
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-briefing');
+    expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
+    expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
+
+    // Leadership Message: still on the compatibility shell pending Prompt 05.
+    expect(leadership?.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+    expect(leadership?.querySelector('[data-foleon-preview-route]')).not.toBeNull();
+
+    // Global preview-state invariant.
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
   });
