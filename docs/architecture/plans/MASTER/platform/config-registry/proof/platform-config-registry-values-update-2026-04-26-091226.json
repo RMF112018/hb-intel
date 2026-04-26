@@ -1,0 +1,47 @@
+{
+  "generatedUtc": "2026-04-26T09:12:41.1504940Z",
+  "mode": "live",
+  "targetSite": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "appId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "tenant": "hedrickbrothers.com",
+  "authMode": "DeviceLogin",
+  "targetSet": "FoleonApiResource",
+  "listTitle": "HB Platform Configuration Registry",
+  "listUrl": "/sites/HBCentral/Lists/HB Platform Configuration Registry",
+  "intendedUpdateCount": 1,
+  "expectedUpdateCount": 1,
+  "updates": [
+    {
+      "configKey": "FoleonApiResource",
+      "logicalKey": "Foleon|Production|Backend|FoleonApiResource|True",
+      "itemId": 10,
+      "scopeKey": "Backend",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ApiResource",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ValidationStatus",
+        "ValueType"
+      ],
+      "targetValues": {
+        "ApiResource": "api://08c399eb-a394-4087-b859-659d493f8dc7",
+        "ConfigValue": "api://08c399eb-a394-4087-b859-659d493f8dc7",
+        "ValueType": "Url",
+        "LastUpdatedAt": "2026-04-26T09:12:39.7227400Z",
+        "AdminNotes": "Populated with confirmed Azure Entra Application ID URI from HB SharePoint Creator / Expose an API. Pending SPFx token acquisition and backend route validation.",
+        "ValidationStatus": "Not Validated"
+      }
+    }
+  ],
+  "guidParseCheck": "pass",
+  "backendUrlCheck": "pass",
+  "duplicateActiveKeyCheck": "pass",
+  "secretHygieneCheck": "pass",
+  "foleonClientSecretReferenceOnly": "pass",
+  "warningCount": 0,
+  "warnings": [],
+  "errorCount": 0,
+  "errors": []
+}

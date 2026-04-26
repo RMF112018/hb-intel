@@ -84,13 +84,15 @@ $ExpectedSeedKeys = @(
 )
 
 $ConfirmedBackendBaseUrl = "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net"
+$ConfirmedFoleonApiResource = "api://08c399eb-a394-4087-b859-659d493f8dc7"
 $ConfirmedValueExpectations = @(
   @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonContentRegistryListGuid"; ConfigValue = "2e57615d-457e-49b8-aef3-038e85cbe068"; ListGuid = "2e57615d-457e-49b8-aef3-038e85cbe068"; ValueType = "Guid" },
   @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonHomepagePlacementsListGuid"; ConfigValue = "5b4754b6-9411-453d-8e16-1247ec5b476a"; ListGuid = "5b4754b6-9411-453d-8e16-1247ec5b476a"; ValueType = "Guid" },
   @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonInteractionEventsListGuid"; ConfigValue = "7786b5ac-d1e5-418b-9951-8e797dda3d7a"; ListGuid = "7786b5ac-d1e5-418b-9951-8e797dda3d7a"; ValueType = "Guid" },
   @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonSyncRunsListGuid"; ConfigValue = "f29dabe9-16c8-4c67-ab9e-98e12f771680"; ListGuid = "f29dabe9-16c8-4c67-ab9e-98e12f771680"; ValueType = "Guid" },
   @{ ApplicationKey = "FunctionApp"; ScopeKey = "Backend"; ConfigKey = "BackendFunctionAppUrl"; ConfigValue = $ConfirmedBackendBaseUrl; ApiBaseUrl = $ConfirmedBackendBaseUrl; ValueType = "Url" },
-  @{ ApplicationKey = "Foleon"; ScopeKey = "Backend"; ConfigKey = "FoleonApiBaseUrl"; ConfigValue = $ConfirmedBackendBaseUrl; ApiBaseUrl = $ConfirmedBackendBaseUrl; ValueType = "Url" }
+  @{ ApplicationKey = "Foleon"; ScopeKey = "Backend"; ConfigKey = "FoleonApiBaseUrl"; ConfigValue = $ConfirmedBackendBaseUrl; ApiBaseUrl = $ConfirmedBackendBaseUrl; ValueType = "Url" },
+  @{ ApplicationKey = "Foleon"; ScopeKey = "Backend"; ConfigKey = "FoleonApiResource"; ConfigValue = $ConfirmedFoleonApiResource; ApiResource = $ConfirmedFoleonApiResource; ValueType = "Url" }
 )
 
 function Connect-RegistryTenant {
@@ -198,6 +200,15 @@ function Test-BackendUrlText {
   return $true
 }
 
+function Test-ApiResourceText {
+  param([string]$Value)
+  if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
+  if ($Value -ne $ConfirmedFoleonApiResource) { return $false }
+  if ($Value -match "/\.default($|/)") { return $false }
+  if ($Value -match "^api://[^/]+/.+") { return $false }
+  return $true
+}
+
 $checks = [System.Collections.Generic.List[object]]::new()
 $warnings = [System.Collections.Generic.List[string]]::new()
 $failures = [System.Collections.Generic.List[string]]::new()
@@ -267,7 +278,7 @@ if ($null -ne $list) {
   try {
     $items = @(Get-PnPListItem -List $ListTitle -PageSize 2000 -Fields @(
           "Title", "ApplicationKey", "EnvironmentKey", "ScopeKey", "ConfigKey", "ConfigValue", "ConfigValueJson",
-          "ValueType", "IsRequired", "IsSecretReference", "SecretReferenceName", "ListGuid", "ApiBaseUrl",
+          "ValueType", "IsRequired", "IsSecretReference", "SecretReferenceName", "ListGuid", "ApiBaseUrl", "ApiResource",
           "ValidationStatus", "IsActive"
         ))
     $readAccess = $true
@@ -307,10 +318,18 @@ if ($readAccess) {
       continue
     }
 
+    $exactlyOne = @($itemsByLogicalKey[$expectedKey]).Count -eq 1
+    Add-Check -Checks $checks -Name "confirmed value record exactly once: $expectedKey" -Passed $exactlyOne
+    if (-not $exactlyOne) {
+      $failures.Add("Confirmed-value record is not unique: $expectedKey.") | Out-Null
+      continue
+    }
+
     $item = $itemsByLogicalKey[$expectedKey][0]
     $configValue = Get-ItemTextValue -Item $item -FieldName "ConfigValue"
     $valueType = Get-ItemTextValue -Item $item -FieldName "ValueType"
     $apiBaseUrl = Get-ItemTextValue -Item $item -FieldName "ApiBaseUrl"
+    $apiResource = Get-ItemTextValue -Item $item -FieldName "ApiResource"
     $listGuid = Get-ItemTextValue -Item $item -FieldName "ListGuid"
 
     $configValueMatches = $configValue -eq [string]$expectedValue.ConfigValue
@@ -339,7 +358,21 @@ if ($readAccess) {
       }
     }
 
-    if ($expectedValue.ValueType -eq "Url") {
+    if ($expectedValue.ContainsKey("ApiResource")) {
+      $configResourceValid = Test-ApiResourceText -Value $configValue
+      $apiResourceMatches = $apiResource -eq [string]$expectedValue.ApiResource
+      $apiResourceValid = Test-ApiResourceText -Value $apiResource
+      Add-Check -Checks $checks -Name "confirmed API resource ConfigValue: $($expectedValue.ConfigKey)" -Passed $configResourceValid
+      Add-Check -Checks $checks -Name "confirmed ApiResource: $($expectedValue.ConfigKey)" -Passed ($apiResourceMatches -and $apiResourceValid)
+      Add-Check -Checks $checks -Name "confirmed API resource has no /.default: $($expectedValue.ConfigKey)" -Passed ($configValue -notmatch "/\.default($|/)" -and $apiResource -notmatch "/\.default($|/)")
+      Add-Check -Checks $checks -Name "confirmed API resource has no custom scope suffix: $($expectedValue.ConfigKey)" -Passed ($configValue -notmatch "^api://[^/]+/.+" -and $apiResource -notmatch "^api://[^/]+/.+")
+      if (-not $configResourceValid) {
+        $failures.Add("$($expectedValue.ConfigKey): ConfigValue must equal the confirmed Application ID URI and omit /.default or custom scope suffixes.") | Out-Null
+      }
+      if (-not ($apiResourceMatches -and $apiResourceValid)) {
+        $failures.Add("$($expectedValue.ConfigKey): ApiResource mismatch or invalid Application ID URI shape.") | Out-Null
+      }
+    } elseif ($expectedValue.ValueType -eq "Url") {
       $configUrlValid = Test-BackendUrlText -Value $configValue
       $apiUrlMatches = $apiBaseUrl -eq [string]$expectedValue.ApiBaseUrl
       $apiUrlValid = Test-BackendUrlText -Value $apiBaseUrl
@@ -393,6 +426,23 @@ if ($readAccess) {
     }
   }
   Add-Check -Checks $checks -Name "secret storage hygiene" -Passed ($secretIssueCount -eq 0) -Detail "issues=$secretIssueCount"
+
+  $foleonClientSecretKey = "Foleon|$EnvironmentKey|Backend|FoleonClientSecret|True"
+  $foleonClientSecretFound = $itemsByLogicalKey.ContainsKey($foleonClientSecretKey) -and @($itemsByLogicalKey[$foleonClientSecretKey]).Count -eq 1
+  Add-Check -Checks $checks -Name "FoleonClientSecret remains secret reference record" -Passed $foleonClientSecretFound
+  if ($foleonClientSecretFound) {
+    $secretItem = $itemsByLogicalKey[$foleonClientSecretKey][0]
+    $secretReferenceOnly = (Read-Bool $secretItem["IsSecretReference"]) -and
+      -not [string]::IsNullOrWhiteSpace((Get-ItemTextValue -Item $secretItem -FieldName "SecretReferenceName")) -and
+      [string]::IsNullOrWhiteSpace((Get-ItemTextValue -Item $secretItem -FieldName "ConfigValue")) -and
+      [string]::IsNullOrWhiteSpace((Get-ItemTextValue -Item $secretItem -FieldName "ConfigValueJson"))
+    Add-Check -Checks $checks -Name "FoleonClientSecret reference only" -Passed $secretReferenceOnly
+    if (-not $secretReferenceOnly) {
+      $failures.Add("FoleonClientSecret must remain a secret reference only.") | Out-Null
+    }
+  } else {
+    $failures.Add("FoleonClientSecret active secret reference record was not found exactly once.") | Out-Null
+  }
 }
 
 if ($null -ne $list) {
@@ -426,7 +476,8 @@ if ($null -ne $list) {
 }
 
 $manualActions = @(
-  "Populate blocked placeholder values after tenant/API validation: Foleon list GUIDs, API base/resource, homepage package version, backend Function App URL.",
+  "Validate SPFx token acquisition for FoleonApiResource and backend route authorization before marking writePathReady complete.",
+  "Populate any remaining package/version placeholders only after tenant/package validation.",
   "Confirm list permissions: platform admins manage, app/admin principal read/write as required, Foleon marketing read unless a scoped admin workflow requires otherwise, general employees no direct edit.",
   "Keep secret values outside SharePoint; SharePoint stores reference names only."
 )

@@ -5,6 +5,7 @@ param(
   [string]$Tenant = "hedrickbrothers.com",
   [ValidateSet("DeviceLogin", "Interactive")] [string]$AuthMode = "DeviceLogin",
   [string]$EnvironmentKey = "Production",
+  [ValidateSet("ConfirmedFoleonValues", "FoleonApiResource")] [string]$TargetSet = "ConfirmedFoleonValues",
   [switch]$DryRun,
   [string]$OutputDir = "",
   [string]$ProofPath = ""
@@ -18,6 +19,7 @@ $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 $RunStartedUtc = (Get-Date).ToUniversalTime()
 $RunStamp = $RunStartedUtc.ToString("yyyy-MM-dd-HHmmss")
 $BackendBaseUrl = "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net"
+$FoleonApiResourceValue = "api://08c399eb-a394-4087-b859-659d493f8dc7"
 
 if ([string]::IsNullOrWhiteSpace($Tenant)) {
   throw "Tenant is required. Repo truth uses 'hedrickbrothers.com'; pass -Tenant explicitly if that changes."
@@ -44,8 +46,9 @@ $SummaryJsonPath = [System.IO.Path]::ChangeExtension($ProofPath, ".json")
 $GuidAdminNotes = "Populated with confirmed tenant list GUID after Prompt 00 provisioning. Pending registry-reader/runtime validation."
 $FoleonApiAdminNotes = "Populated with confirmed Azure Function App default domain for Foleon runtime API access. Do not append /api; frontend service composes /api/foleon routes."
 $BackendAdminNotes = "Populated with confirmed Azure Function App default domain. Do not append /api; frontend service composes /api/foleon routes."
+$FoleonApiResourceAdminNotes = "Populated with confirmed Azure Entra Application ID URI from HB SharePoint Creator / Expose an API. Pending SPFx token acquisition and backend route validation."
 
-$Targets = @(
+$ConfirmedFoleonTargets = @(
   @{
     ConfigKey = "FoleonContentRegistryListGuid"
     ExpectedApplicationKey = "Foleon"
@@ -101,6 +104,25 @@ $Targets = @(
     AdminNotes = $FoleonApiAdminNotes
   }
 )
+
+$FoleonApiResourceTargets = @(
+  @{
+    ConfigKey = "FoleonApiResource"
+    ExpectedApplicationKey = "Foleon"
+    ConfigValue = $FoleonApiResourceValue
+    ApiResource = $FoleonApiResourceValue
+    ValueType = "Url"
+    ValidationStatus = "Not Validated"
+    AdminNotes = $FoleonApiResourceAdminNotes
+  }
+)
+
+if ($TargetSet -eq "FoleonApiResource") {
+  $Targets = @($FoleonApiResourceTargets)
+} else {
+  $Targets = @($ConfirmedFoleonTargets)
+}
+$ExpectedUpdateCount = @($Targets).Count
 
 function Connect-RegistryTenant {
   $params = @{
@@ -165,6 +187,12 @@ function Assert-UrlTarget {
   param([hashtable]$Target)
   if ($Target.ValueType -ne "Url") { return $true }
   $value = [string]$Target.ConfigValue
+  if ($Target.ContainsKey("ApiResource")) {
+    return $value -eq $FoleonApiResourceValue -and
+      [string]$Target.ApiResource -eq $FoleonApiResourceValue -and
+      $value -notmatch "/\.default($|/)" -and
+      $value -notmatch "^api://[^/]+/.+"
+  }
   if (-not $value.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { return $false }
   if ($value -match "/api(/|$)") { return $false }
   return $true
@@ -185,6 +213,9 @@ function Get-UpdateValues {
   if ($Target.ContainsKey("ApiBaseUrl")) {
     $values.ApiBaseUrl = $Target.ApiBaseUrl
   }
+  if ($Target.ContainsKey("ApiResource")) {
+    $values.ApiResource = $Target.ApiResource
+  }
   return $values
 }
 
@@ -198,7 +229,7 @@ if ($null -eq $list) {
 
 $itemFields = @(
   "Title", "ApplicationKey", "EnvironmentKey", "ScopeKey", "ConfigKey", "ConfigValue", "ConfigValueJson", "ValueType",
-  "IsSecretReference", "SecretReferenceName", "ListGuid", "ApiBaseUrl", "ValidationStatus", "AdminNotes", "IsActive", "LastUpdatedAt"
+  "IsSecretReference", "SecretReferenceName", "ListGuid", "ApiBaseUrl", "ApiResource", "ValidationStatus", "AdminNotes", "IsActive", "LastUpdatedAt"
 )
 $items = @(Get-PnPListItem -List $ListTitle -PageSize 2000 -Fields $itemFields)
 
@@ -214,7 +245,7 @@ foreach ($target in $Targets) {
     continue
   }
   if (-not (Assert-UrlTarget -Target $target)) {
-    $errors.Add("$($target.ConfigKey): target URL must include https:// and must not include /api.") | Out-Null
+    $errors.Add("$($target.ConfigKey): target URL/resource value has an invalid shape.") | Out-Null
     continue
   }
 
@@ -305,8 +336,8 @@ foreach ($issue in $secretIssues) {
   $errors.Add($issue) | Out-Null
 }
 
-if ($updatedCount -ne 6) {
-  $errors.Add("Expected exactly six intended updates; observed $updatedCount.") | Out-Null
+if ($updatedCount -ne $ExpectedUpdateCount) {
+  $errors.Add("Expected exactly $ExpectedUpdateCount intended update(s) for target set $TargetSet; observed $updatedCount.") | Out-Null
 }
 
 if ($errors.Count -gt 0 -and -not $DryRun) {
@@ -320,10 +351,11 @@ $summary = [ordered]@{
   appId = $AppId
   tenant = $Tenant
   authMode = $AuthMode
+  targetSet = $TargetSet
   listTitle = $ListTitle
   listUrl = [string]$list.RootFolder.ServerRelativeUrl
   intendedUpdateCount = $updatedCount
-  expectedUpdateCount = 6
+  expectedUpdateCount = $ExpectedUpdateCount
   updates = @($updates)
   guidParseCheck = if (@($Targets | Where-Object { $_.ValueType -eq "Guid" -and -not (Assert-GuidTarget -Target $_) }).Count -eq 0) { "pass" } else { "fail" }
   backendUrlCheck = if (@($Targets | Where-Object { $_.ValueType -eq "Url" -and -not (Assert-UrlTarget -Target $_) }).Count -eq 0) { "pass" } else { "fail" }
@@ -339,7 +371,8 @@ $summary = [ordered]@{
 $summary | ConvertTo-Json -Depth 20 | Set-Content -Path $SummaryJsonPath -Encoding UTF8
 
 $dryRunArg = if ($DryRun) { " -DryRun" } else { "" }
-$commandText = "pwsh tools/pnp-runner-local/scripts/update-platform-configuration-registry-values.ps1 -SiteUrl `"$SiteUrl`" -AppId `"$AppId`" -Tenant `"$Tenant`" -EnvironmentKey `"$EnvironmentKey`"$dryRunArg"
+$targetSetArg = if ($TargetSet -ne "ConfirmedFoleonValues") { " -TargetSet $TargetSet" } else { "" }
+$commandText = "pwsh tools/pnp-runner-local/scripts/update-platform-configuration-registry-values.ps1 -SiteUrl `"$SiteUrl`" -AppId `"$AppId`" -Tenant `"$Tenant`" -EnvironmentKey `"$EnvironmentKey`"$targetSetArg$dryRunArg"
 
 $proofLines = @(
   "# HB Platform Configuration Registry Value Update Proof",
@@ -350,9 +383,10 @@ $proofLines = @(
   "- Target site: $SiteUrl",
   "- App ID used: $AppId",
   "- Tenant: $Tenant",
+  "- Target set: $TargetSet",
   "- List title: $ListTitle",
   "- List URL: $($summary.listUrl)",
-  "- Intended updates: $updatedCount / 6",
+  "- Intended updates: $updatedCount / $ExpectedUpdateCount",
   "- GUID parse check: $($summary.guidParseCheck)",
   "- Backend URL check: $($summary.backendUrlCheck)",
   "- Duplicate active key check: $($summary.duplicateActiveKeyCheck)",
@@ -393,7 +427,7 @@ $proofLines | Set-Content -Path $ProofPath -Encoding UTF8
 Write-Host ""
 Write-Host "Summary JSON: $SummaryJsonPath"
 Write-Host "Proof: $ProofPath"
-Write-Host "Intended updates: $updatedCount / 6"
+Write-Host "Intended updates: $updatedCount / $ExpectedUpdateCount"
 Write-Host "Errors: $($errors.Count)"
 Write-Host "Warnings: $($warnings.Count)"
 

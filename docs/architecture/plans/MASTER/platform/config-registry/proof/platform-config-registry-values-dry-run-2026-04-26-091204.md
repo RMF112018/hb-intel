@@ -1,0 +1,35 @@
+# HB Platform Configuration Registry Value Update Proof
+
+- Generated UTC: 2026-04-26T09:12:19.3873420Z
+- Mode: dry-run
+- Command run: pwsh tools/pnp-runner-local/scripts/update-platform-configuration-registry-values.ps1 -SiteUrl "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral" -AppId "08c399eb-a394-4087-b859-659d493f8dc7" -Tenant "hedrickbrothers.com" -EnvironmentKey "Production" -TargetSet FoleonApiResource -DryRun
+- Target site: https://hedrickbrotherscom.sharepoint.com/sites/HBCentral
+- App ID used: 08c399eb-a394-4087-b859-659d493f8dc7
+- Tenant: hedrickbrothers.com
+- Target set: FoleonApiResource
+- List title: HB Platform Configuration Registry
+- List URL: /sites/HBCentral/Lists/HB Platform Configuration Registry
+- Intended updates: 1 / 1
+- GUID parse check: pass
+- Backend URL check: pass
+- Duplicate active key check: pass
+- Secret hygiene check: pass
+- FoleonClientSecret reference-only check: pass
+- Errors: 0
+- Warnings: 0
+
+## Updated Records
+
+- FoleonApiResource: would-update; logical key Foleon|Production|Backend|FoleonApiResource|True; fields AdminNotes, ApiResource, ConfigValue, LastUpdatedAt, ValidationStatus, ValueType
+
+## Errors
+
+- None.
+
+## Warnings
+
+- None.
+
+## Summary JSON
+
+- /Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/platform/config-registry/proof/platform-config-registry-values-dry-run-2026-04-26-091204.json
