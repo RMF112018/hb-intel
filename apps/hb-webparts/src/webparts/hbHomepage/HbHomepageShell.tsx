@@ -10,6 +10,11 @@ import {
 import type { ShellContainerState } from './shell/useShellContainer.js';
 import { resolveBandLayout } from './shell/slotComfortResolver.js';
 import {
+  resolveShellBandLayoutMode,
+  resolveShellSlotEdgeBleed,
+  resolveShellSlotVisualSide,
+} from './shell/edgeContract.js';
+import {
   resolveShellClosureProof,
   resolveShellConformance,
   toShellConformanceDataAttributes,
@@ -63,9 +68,16 @@ const ZONE_COMPONENTS: Readonly<Partial<Record<OccupantId, React.ComponentType<H
 interface ShellSlotRendererProps {
   resolved: ResolvedSlot;
   zoneProps: HbHomepageZoneProps;
+  bandColumns: 1 | 2;
+  bandOrientation: BandOrientation;
 }
 
-function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): React.JSX.Element | null {
+function ShellSlotRenderer({
+  resolved,
+  zoneProps,
+  bandColumns,
+  bandOrientation,
+}: ShellSlotRendererProps): React.JSX.Element | null {
   const { slot, comfort } = resolved;
   const reports = useOccupantContentStateReports();
   if (!slot.occupantId) return null;
@@ -73,6 +85,23 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
   const descriptor = getOccupant(slot.occupantId);
   const effectiveSpan = comfort.effectiveColumnSpan;
   const contentStateAttrs = toOccupantContentStateDataAttributes(reports.get(slot.occupantId));
+
+  const bandLayoutMode = resolveShellBandLayoutMode(bandColumns);
+  const visualSide = resolveShellSlotVisualSide({
+    columns: bandColumns,
+    orientation: bandOrientation,
+    effectiveColumnSpan: effectiveSpan,
+  });
+  const edgeBleed = resolveShellSlotEdgeBleed({
+    occupantId: slot.occupantId,
+    visualSide,
+  });
+
+  const edgeContractAttrs = {
+    'data-shell-band-layout': bandLayoutMode,
+    'data-shell-slot-visual-side': visualSide,
+    'data-shell-slot-edge-bleed': edgeBleed,
+  } as const;
 
   const slotClassName = `${styles.slot} ${styles[`slot_${slot.role}`]} ${styles[`span_${effectiveSpan}`]}`;
 
@@ -83,6 +112,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
         data-shell-slot={slot.id}
         data-shell-occupant={slot.occupantId}
         data-shell-slot-state="unknown"
+        {...edgeContractAttrs}
       >
         <ShellFallbackSurface zoneName={slot.occupantId} reason="unknown-occupant" />
       </div>
@@ -96,6 +126,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
         data-shell-slot={slot.id}
         data-shell-occupant={slot.occupantId}
         data-shell-slot-state="inactive"
+        {...edgeContractAttrs}
       >
         <ShellFallbackSurface zoneName={slot.occupantId} reason="inactive-candidate" />
       </div>
@@ -110,6 +141,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
         data-shell-slot={slot.id}
         data-shell-occupant={slot.occupantId}
         data-shell-slot-state="invalid"
+        {...edgeContractAttrs}
       >
         <ShellFallbackSurface zoneName={slot.occupantId} reason="invalid-assignment" />
       </div>
@@ -126,6 +158,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
       data-shell-comfort-reason={comfort.reason}
       data-shell-render-mode={comfort.renderMode}
       data-shell-slot-state="active"
+      {...edgeContractAttrs}
       {...contentStateAttrs}
     >
       <ZoneComponent {...zoneProps} shellRenderMode={comfort.renderMode} />
@@ -198,7 +231,13 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDeci
       {...firstLaneAttrs}
     >
       {layout.slots.map((resolved) => (
-        <ShellSlotRenderer key={resolved.slot.id} resolved={resolved} zoneProps={zoneProps} />
+        <ShellSlotRenderer
+          key={resolved.slot.id}
+          resolved={resolved}
+          zoneProps={zoneProps}
+          bandColumns={layout.columns}
+          bandOrientation={orientation}
+        />
       ))}
     </div>
   );

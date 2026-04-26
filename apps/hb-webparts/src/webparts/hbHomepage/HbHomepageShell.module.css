@@ -21,6 +21,15 @@
      outer envelope authority. */
   --hb-homepage-shell-body-inset-block: 1.5rem;
   --hb-homepage-shell-body-inset-inline: 1rem;
+  /* Edge-to-window contract (Phase-04 Wave-01 Prompt-01).
+     Default: zero bleed — output identical to pre-contract rendering.
+     Opt-in: an ancestor with [data-hb-homepage-edge-mode="edge-to-window"]
+     activates the bleed amount below. The max(0px, ...) call is a
+     no-overflow safeguard: bleed never goes negative even if the safe
+     inline inset is misconfigured. */
+  --hb-homepage-edge-safe-inline: var(--hb-homepage-shell-body-inset-inline);
+  --hb-homepage-edge-bleed-inline-start: 0px;
+  --hb-homepage-edge-bleed-inline-end: 0px;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -223,6 +232,42 @@
   .bandRecipe_stacked_secondary_strip .slot_compact {
     max-width: 78ch;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Edge-to-window contract — gated opt-in bleed for eligible Foleon slots
+   ---------------------------------------------------------------------------
+   The bleed rules below activate only when an ancestor element carries
+   `data-hb-homepage-edge-mode="edge-to-window"`. Default rendering is
+   `data-hb-homepage-edge-mode="standard"` so these selectors do not match.
+
+   No-overflow safeguards in this layer:
+     - `max(0px, ...)` clamps the bleed amount so it cannot go negative.
+     - The bleed amount is sourced from `--hb-homepage-edge-safe-inline`,
+       which mirrors the shell body inline inset — never larger than the
+       outer envelope's own inset budget.
+     - Outer envelope max-width (2400px, owned by HbHomepageEntryStack)
+       remains the canvas boundary; bleed reaches it but cannot exceed it.
+
+   No global overflow-x: hidden is used.
+   --------------------------------------------------------------------------- */
+
+[data-hb-homepage-edge-mode="edge-to-window"] .shell {
+  --hb-homepage-edge-bleed-inline-start: max(0px, var(--hb-homepage-edge-safe-inline));
+  --hb-homepage-edge-bleed-inline-end: max(0px, var(--hb-homepage-edge-safe-inline));
+}
+
+[data-hb-homepage-edge-mode="edge-to-window"] .slot[data-shell-slot-edge-bleed="left"] {
+  margin-inline-start: calc(var(--hb-homepage-edge-bleed-inline-start) * -1);
+}
+
+[data-hb-homepage-edge-mode="edge-to-window"] .slot[data-shell-slot-edge-bleed="right"] {
+  margin-inline-end: calc(var(--hb-homepage-edge-bleed-inline-end) * -1);
+}
+
+[data-hb-homepage-edge-mode="edge-to-window"] .slot[data-shell-slot-edge-bleed="both"] {
+  margin-inline-start: calc(var(--hb-homepage-edge-bleed-inline-start) * -1);
+  margin-inline-end: calc(var(--hb-homepage-edge-bleed-inline-end) * -1);
 }
 
 /* ---------------------------------------------------------------------------

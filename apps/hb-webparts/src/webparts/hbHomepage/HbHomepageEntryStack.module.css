@@ -30,6 +30,17 @@
   --hb-homepage-entry-shared-inline-inset: var(--hb-homepage-actions-inset-inline);
   --hb-homepage-entry-hero-to-launcher-gap: 0.625rem;
   --hb-homepage-entry-launcher-to-shell-gap: 1.5rem;
+  /* Edge-to-window contract (Phase-04 Wave-01 Prompt-01).
+     Default: zero hero bleed — hosted output identical to today.
+     Opt-in: combined attributes
+       [data-hb-homepage-edge-mode="edge-to-window"]
+       [data-hb-homepage-hero-edge="both"]
+     activate the gated rule below. The bleed amount is bounded by
+     max(0px, --hb-homepage-edge-safe-inline) so it cannot go negative,
+     and the outer-envelope max-width still caps the canvas reach. */
+  --hb-homepage-edge-safe-inline: var(--hb-homepage-entry-shared-inline-inset);
+  --hb-homepage-hero-edge-inline-start: 0px;
+  --hb-homepage-hero-edge-inline-end: 0px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -110,4 +121,36 @@
 
 .entryStack > .actionsRegion:first-child {
   margin-block-start: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Edge-to-window contract — gated opt-in hero bleed
+   ---------------------------------------------------------------------------
+   Activates only when BOTH attributes are set on the entry-stack root:
+     data-hb-homepage-edge-mode="edge-to-window"
+     data-hb-homepage-hero-edge="both"
+
+   Effect: drop the hero region's inline padding so hero internals can
+   reach the inner edge of the outer envelope (max-width 2400px). Hero
+   internals retain whatever padding their own CSS module owns — this
+   layer only releases the entry-stack-owned outer inset.
+
+   No-overflow safeguards in this layer:
+     - The entry stack's `max-width: 2400px` (line 37) caps how far the
+       hero can reach; padding-inline 0 means it reaches that cap, not
+       past it.
+     - max(0px, ...) is used wherever a runtime-computed bleed amount is
+       composed. The selector below releases padding rather than applying
+       a negative margin, so a negative value is structurally impossible.
+
+   No global overflow-x: hidden is used.
+   --------------------------------------------------------------------------- */
+
+[data-hb-homepage-edge-mode="edge-to-window"][data-hb-homepage-hero-edge="both"] .heroRegion {
+  padding-inline: 0;
+}
+
+[data-hb-homepage-edge-mode="edge-to-window"][data-hb-homepage-hero-edge="both"] .heroRegion {
+  --hb-homepage-hero-edge-inline-start: max(0px, var(--hb-homepage-edge-safe-inline));
+  --hb-homepage-hero-edge-inline-end: max(0px, var(--hb-homepage-edge-safe-inline));
 }

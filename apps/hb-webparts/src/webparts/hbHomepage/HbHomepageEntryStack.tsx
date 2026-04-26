@@ -9,6 +9,7 @@ import { HbHomepageShell } from './HbHomepageShell.js';
 import { HbHomepageLauncherBand } from './HbHomepageLauncherBand.js';
 import { extractHbHomepageWrapperConfig } from './hbHomepageWrapperConfig.js';
 import { toHeroEntryStackState, useShellContainer } from './shell/useShellContainer.js';
+import { DEFAULT_HOMEPAGE_EDGE_POLICY } from './shell/edgeContract.js';
 import styles from './HbHomepageEntryStack.module.css';
 
 // ---------------------------------------------------------------------------
@@ -61,6 +62,8 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       data-hb-homepage-outer-envelope-owner="hb-homepage-wrapper"
       data-hb-homepage-outer-envelope-max-width={HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}
       data-hb-homepage-outer-envelope-contract={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
+      data-hb-homepage-edge-mode={DEFAULT_HOMEPAGE_EDGE_POLICY.edgeMode}
+      data-hb-homepage-hero-edge={DEFAULT_HOMEPAGE_EDGE_POLICY.heroEdge}
       data-hb-homepage-entry-stack-rail-enabled={rail.enabled || undefined}
       data-hb-homepage-entry-stack-rail-alignment-mode={rail.alignmentMode}
       data-hb-homepage-entry-stack-hero-enabled={hero.enabled || undefined}
