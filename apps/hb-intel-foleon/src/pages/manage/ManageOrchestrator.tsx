@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { HbcButton } from '@hbc/ui-kit/homepage';
 import type {
@@ -15,8 +15,8 @@ import type {
 import { FoleonError, FoleonLoadingState } from '../../components/FoleonStates.js';
 import { FoleonConfigTab } from './FoleonConfigTab.js';
 import { HomepageFoleonContentTab } from './HomepageFoleonContentTab.js';
+import { buildManagerStatusChips, resolveSafeFoleonOpenOrigin } from './manageHeaderStatusModel.js';
 import { ManageShellHeader } from './ManageShellHeader.js';
-import { ManageSyncPanel } from './ManageSyncPanel.js';
 import { sortManagedContentForHomepage } from './manageLaneViewModel.js';
 import { runFoleonSync } from './manageWorkflows.js';
 import { ManageTabs, type ManageTabKey } from './ManageTabs.js';
@@ -49,7 +49,18 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<ManageTabKey>('content');
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const breakpoint = useManageBreakpoint();
+
+  const selectTab = useCallback((tab: ManageTabKey): void => {
+    setSelectedTab(tab);
+    if (tab === 'content') setDiagnosticsOpen(false);
+  }, []);
+
+  const openDiagnostics = useCallback((): void => {
+    setSelectedTab('config');
+    setDiagnosticsOpen(true);
+  }, []);
 
   const load = async (): Promise<void> => {
     const preflightBlocker = getHostedPreflightBlocker(props.contract);
@@ -129,6 +140,35 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     );
   }, [ready, query]);
 
+  const statusChips = useMemo(() => {
+    if (state.kind !== 'ready') {
+      return buildManagerStatusChips({
+        contract: props.contract,
+        content: [],
+        placements: [],
+        syncStatus: null,
+        runs: [],
+        managerReadPathProven: false,
+      });
+    }
+    return buildManagerStatusChips({
+      contract: props.contract,
+      content: state.content,
+      placements: state.placements,
+      syncStatus: state.syncStatus,
+      runs: state.runs,
+      managerReadPathProven: state.managerReadPathProven,
+    });
+  }, [state, props.contract]);
+
+  const safeFoleonOpenUrl = useMemo(
+    () => resolveSafeFoleonOpenOrigin(props.contract.originPolicy.allowedOrigins),
+    [props.contract.originPolicy.allowedOrigins],
+  );
+  const openFoleonUnavailableReason = safeFoleonOpenUrl
+    ? undefined
+    : 'Open Foleon needs an approved HTTPS viewer origin (none is configured).';
+
   if (state.kind === 'loading') {
     return (
       <section className={`foleonManageRoot ${shell.shell}`} aria-busy="true">
@@ -139,7 +179,12 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   if (state.kind === 'blocked') {
     return (
       <section className={`foleonManageRoot ${shell.shell}`}>
-        <FoleonError title="Foleon Connector is blocked" description={`${state.code}: ${state.message}`} onRetry={props.onBack} />
+        <FoleonError
+          title="Foleon Manager cannot load yet"
+          description={state.message}
+          technicalDetails={state.code}
+          onRetry={props.onBack}
+        />
       </section>
     );
   }
@@ -147,8 +192,9 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     return (
       <section className={`foleonManageRoot ${shell.shell}`}>
         <FoleonError
-          title="Unable to load the Foleon Connector"
-          description={`${state.message}${state.requestId ? ` Correlation: ${state.requestId}` : ''}`}
+          title="Unable to load Foleon Manager"
+          description={state.message}
+          technicalDetails={state.requestId ? `Request ID: ${state.requestId}` : undefined}
           onRetry={(): void => void load()}
         />
       </section>
@@ -161,7 +207,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     <Tooltip.Provider delayDuration={280}>
       <section
         className={`foleonManageRoot ${shell.shell}`}
-        aria-label="Foleon Connector management"
+        aria-label="Foleon Manager"
         data-breakpoint-width={breakpoint.widthBand}
         data-breakpoint-short-height={breakpoint.shortHeight ? 'true' : 'false'}
         data-breakpoint-narrow-stable={breakpoint.narrowestStable ? 'true' : 'false'}
@@ -173,6 +219,10 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           onSyncProjects={(): void => void runFoleonSync(api, 'projects', load, setMessage)}
           canSync={canSync}
           syncBlockReason={canSync ? undefined : 'sync path is not ready'}
+          statusChips={statusChips}
+          safeFoleonOpenUrl={safeFoleonOpenUrl}
+          openFoleonUnavailableReason={openFoleonUnavailableReason}
+          onViewDiagnostics={openDiagnostics}
         />
 
         {message ? (
@@ -186,7 +236,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           </div>
         ) : null}
 
-        <ManageTabs selected={selectedTab} onSelect={setSelectedTab} />
+        <ManageTabs selected={selectedTab} onSelect={selectTab} />
         {selectedTab === 'content' ? (
           <HomepageFoleonContentTab
             contract={props.contract}
@@ -204,9 +254,14 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
             setMessage={setMessage}
           />
         ) : (
-          <FoleonConfigTab contract={props.contract} managerReadPathProven={state.managerReadPathProven} />
+          <FoleonConfigTab
+            contract={props.contract}
+            managerReadPathProven={state.managerReadPathProven}
+            runs={state.runs}
+            diagnosticsOpen={diagnosticsOpen}
+            onDiagnosticsOpenChange={setDiagnosticsOpen}
+          />
         )}
-        <ManageSyncPanel runs={state.runs} />
       </section>
     </Tooltip.Provider>
   );

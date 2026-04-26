@@ -1,15 +1,20 @@
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
+import type { FoleonSyncRun } from '../../types/foleon-management.types.js';
 import {
   buildConfigSourceRows,
   buildRuntimeReadinessCards,
   buildSafeDiagnostics,
 } from './manageConfigViewModel.js';
+import { ManageSyncPanel } from './ManageSyncPanel.js';
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
 
 export function FoleonConfigTab(props: {
   readonly contract: IFoleonRuntimeContract;
   readonly managerReadPathProven?: boolean;
+  readonly runs: ReadonlyArray<FoleonSyncRun>;
+  readonly diagnosticsOpen: boolean;
+  readonly onDiagnosticsOpenChange: (open: boolean) => void;
 }): React.ReactNode {
   const readiness = props.contract.foleonReadiness && props.managerReadPathProven
     ? {
@@ -45,8 +50,10 @@ export function FoleonConfigTab(props: {
         <div className={shell.readinessGrid}>
           {readinessCards.map((card) => (
             <article key={card.label} className={shell.readinessCard} data-readiness-status={card.status}>
-              <span className={f.guidanceKicker}>{card.label}</span>
-              <strong>{card.status}</strong>
+              <div className={shell.readinessCardTitle}>
+                <span className={f.guidanceKicker}>{card.label}</span>
+                <strong className={shell.readinessStatus}>{card.status}</strong>
+              </div>
               <p>{card.detail}</p>
               <small>{card.nextAction}</small>
             </article>
@@ -161,10 +168,21 @@ export function FoleonConfigTab(props: {
         </dl>
       </section>
 
-      <section className={f.editorSection} aria-label="Admin diagnostics">
-        <details>
-          <summary className={shell.detailsSummary}>Admin Diagnostics (redacted)</summary>
-          <pre className={shell.safeDiagnostics}>{JSON.stringify(safeDiagnostics, null, 2)}</pre>
+      <section className={f.editorSection} aria-label="Diagnostics and sync history">
+        <h3 className={f.sectionTitle}>Diagnostics</h3>
+        <details
+          className={shell.diagnosticsDetails}
+          open={props.diagnosticsOpen}
+          onToggle={(event): void => {
+            const el = event.currentTarget;
+            props.onDiagnosticsOpenChange(el.open);
+          }}
+        >
+          <summary className={shell.detailsSummary}>Redacted diagnostics and sync run history</summary>
+          <div className={shell.diagnosticsBody}>
+            <ManageSyncPanel runs={props.runs} />
+            <pre className={shell.safeDiagnostics}>{JSON.stringify(safeDiagnostics, null, 2)}</pre>
+          </div>
         </details>
       </section>
     </div>

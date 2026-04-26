@@ -1,5 +1,6 @@
 import type {
   FoleonConfigDiagnostics,
+  FoleonReadinessIssueCode,
   FoleonRuntimeReadiness,
   IFoleonRuntimeContract,
 } from '../../runtime/foleonRuntimeContract.js';
@@ -123,14 +124,29 @@ function card(
   };
 }
 
+/** Maps readiness card labels to blocker codes so token-related cards do not cross-match. */
+const READINESS_CARD_BLOCKER_CODES: Readonly<Record<string, ReadonlyArray<FoleonReadinessIssueCode>>> = {
+  Registry: ['registry-duplicate-active-key', 'registry-secret-hygiene-failed', 'registry-unavailable'],
+  'List Bindings': ['list-bindings-missing'],
+  'Backend URL': ['backend-url-missing'],
+  'API Resource': ['auth-resource-missing'],
+  'Token Provider': ['token-provider-unavailable'],
+  'Token Acquisition': ['token-acquisition-failed'],
+  'Backend Safe Config': ['backend-safe-config-unavailable', 'backend-graph-config-missing'],
+  'Route Authorization': ['backend-route-authorization-failed', 'backend-route-authorization-unproven'],
+  'Read Path': ['backend-route-authorization-failed'],
+  'Write Path': ['backend-route-authorization-failed', 'backend-route-authorization-unproven'],
+  'Sync Path': ['sync-oauth-config-missing'],
+};
+
 function withBlocker(
   entry: RuntimeReadinessCard,
   diagnostics: FoleonConfigDiagnostics | undefined,
 ): RuntimeReadinessCard {
   if (entry.status === 'Valid') return entry;
-  const blocker = diagnostics?.blockers.find((item) =>
-    entry.label.toLowerCase().split(' ').some((word) => item.code.includes(word)),
-  );
+  const codes = READINESS_CARD_BLOCKER_CODES[entry.label];
+  if (!codes?.length) return entry;
+  const blocker = diagnostics?.blockers.find((item) => codes.includes(item.code));
   return blocker ? { ...entry, detail: safeBlockerMessage(blocker.code, blocker.message) } : entry;
 }
 

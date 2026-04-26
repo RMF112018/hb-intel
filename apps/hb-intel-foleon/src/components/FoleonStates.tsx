@@ -30,6 +30,8 @@ export function FoleonEmpty(props: FoleonEmptyProps): React.ReactNode {
 interface FoleonErrorProps {
   readonly title: string;
   readonly description?: string;
+  /** Shown inside a collapsed disclosure; keep primary description human-readable. */
+  readonly technicalDetails?: string;
   readonly externalUrl?: string;
   readonly onRetry?: () => void;
 }
@@ -48,6 +50,12 @@ export function FoleonError(props: FoleonErrorProps): React.ReactNode {
     >
       <h3 style={{ margin: '0 0 8px' }}>{props.title}</h3>
       {props.description ? <p style={{ margin: '0 0 12px' }}>{props.description}</p> : null}
+      {props.technicalDetails ? (
+        <details style={{ margin: '0 0 12px', fontSize: 13 }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Technical details</summary>
+          <pre style={{ margin: '8px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{props.technicalDetails}</pre>
+        </details>
+      ) : null}
       <div style={{ display: 'flex', gap: 8 }}>
         {props.onRetry ? (
           <HbcButton variant="secondary" onClick={props.onRetry}>

@@ -16,8 +16,33 @@
   margin-bottom: var(--foleon-manage-space-md);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'intro actions'
+    'chips chips'
+    'sync sync';
   gap: var(--foleon-manage-space-md);
-  align-items: center;
+  align-items: start;
+}
+
+.headerIntro {
+  grid-area: intro;
+}
+
+.headerActions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.headerChips {
+  grid-area: chips;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+  align-items: stretch;
 }
 
 .kicker {
@@ -47,13 +72,92 @@
   justify-content: flex-end;
 }
 
+.syncFieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.syncLegend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.syncFieldsetButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+  clear: both;
+}
+
+.statusChip {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100% / 0.55);
+  padding: 8px 12px;
+  min-width: 0;
+  max-width: 280px;
+  display: grid;
+  gap: 2px;
+}
+
+.statusChipLabel {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.statusChipValue {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.actionUnavailable {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 220px;
+}
+
+.actionUnavailableReason {
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+  text-align: right;
+  line-height: 1.3;
+}
+
 .syncBlockReason {
-  grid-column: 1 / -1;
+  grid-area: sync;
   margin: 0;
   color: var(--foleon-manage-fg-muted);
   font-size: 13px;
   font-weight: 700;
   text-align: right;
+}
+
+.readinessCardTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35em;
+  margin-bottom: 6px;
+}
+
+.readinessStatus {
+  margin: 0;
 }
 
 .statusBanner {
@@ -214,6 +318,16 @@
 .detailsSummary {
   cursor: pointer;
   font-weight: 800;
+}
+
+.diagnosticsDetails {
+  margin-top: 8px;
+}
+
+.diagnosticsBody {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+  margin-top: var(--foleon-manage-space-sm);
 }
 
 .safeDiagnostics {

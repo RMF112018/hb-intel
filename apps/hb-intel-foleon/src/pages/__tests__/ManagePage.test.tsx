@@ -304,13 +304,16 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect((await screen.findByRole('heading', { name: /Foleon Connector/i })).textContent).toMatch(/Foleon Connector/i);
+    expect((await screen.findByRole('heading', { name: /Foleon Manager/i })).textContent).toMatch(/Foleon Manager/i);
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(screen.getByText('Published')).toBeTruthy();
     expect(screen.getByRole('region', { name: /Public preview layouts may still be visible/i })).toBeTruthy();
     expect(screen.getByText(/public routes do not yet have renderable published content/i)).toBeTruthy();
     expect(screen.getByText(/do not create records, open readers, call external links, or emit production content telemetry/i)).toBeTruthy();
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
+    expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByText('Redacted diagnostics and sync run history'));
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
     expect(document.querySelector('iframe')).toBeNull();
   });
@@ -338,6 +341,9 @@ describe('ManagePage', () => {
     expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
+    expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByText('Redacted diagnostics and sync run history'));
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
   });
 
@@ -365,7 +371,7 @@ describe('ManagePage', () => {
       />,
     );
 
-    expect((await screen.findByRole('alert')).textContent).toContain('Foleon Connector is blocked');
+    expect((await screen.findByRole('alert')).textContent).toContain('Foleon Manager cannot load yet');
     expect(screen.getByRole('alert').textContent).toContain('backend-url-missing');
     expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
   });
@@ -427,7 +433,8 @@ describe('ManagePage', () => {
       />,
     );
 
-    expect(await screen.findByRole('heading', { name: /Foleon Connector/i })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: /Foleon Manager/i })).toBeTruthy();
+    expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Homepage Foleon Content' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Config' })).toBeTruthy();
     expect(
@@ -668,6 +675,30 @@ describe('ManagePage', () => {
 
     expect(screen.getByText('Project Spotlight Active should point to Project Spotlight content.')).toBeTruthy();
     expect(screen.getByText('Project Spotlight Active points to content that is not public-ready.')).toBeTruthy();
+  });
+
+  it('renders Foleon Manager title, plain-language status chips, and keeps sync history under Config diagnostics', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('heading', { name: 'Foleon Manager' });
+    expect(screen.getByText('Marketing Operations')).toBeTruthy();
+    expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
+    expect(screen.getByText('Content lanes')).toBeTruthy();
+    expect(screen.getByText('API connection')).toBeTruthy();
+    expect(screen.getByText('Registry status')).toBeTruthy();
+    expect(screen.getByText('Last sync')).toBeTruthy();
+
+    const contentPanel = screen.getByRole('tabpanel', { name: 'Homepage Foleon Content' });
+    expect(contentPanel.textContent).not.toMatch(/TOKEN ACQUISITIONBlocked/i);
+
+    expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'View diagnostics' }));
+    expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
+    const details = screen.getByText('Redacted diagnostics and sync run history').closest('details');
+    expect(details?.hasAttribute('open')).toBe(true);
+    expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
   });
 });
 
