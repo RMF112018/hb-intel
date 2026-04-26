@@ -1,4 +1,7 @@
 import * as React from 'react';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as url from 'node:url';
 import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
 import { render, cleanup, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import { createFoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
@@ -222,5 +225,42 @@ describe('FoleonFullWindowViewerProvider — open/close + structured result', ()
     const iframe = document.querySelector('iframe');
     expect(iframe).not.toBeNull();
     expect(iframe?.getAttribute('title')).toBe('The Seaglass Residence — Foleon viewer');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase-04 Wave-01 Prompt-04C — static CSS proof
+// ---------------------------------------------------------------------------
+// JSDOM cannot measure layout geometry. The strongest static guarantee is
+// to read the viewer + lane CSS modules from disk and confirm no global
+// `overflow-x: hidden` declaration was introduced. The viewer overlay's
+// `overflow: hidden` is scoped to the dialog container — not global —
+// and is not matched by this assertion.
+// ---------------------------------------------------------------------------
+
+const HERE = path.dirname(url.fileURLToPath(import.meta.url));
+const VIEWER_CSS_PATH = path.resolve(HERE, '..', 'FoleonFullWindowViewer.module.css');
+const LAYOUTS_CSS_PATH = path.resolve(
+  HERE,
+  '..',
+  '..',
+  'readers',
+  'layouts',
+  'FoleonReaderLayouts.module.css',
+);
+
+function readCss(p: string): string {
+  return fs.readFileSync(p, 'utf8');
+}
+
+describe('Prompt-04C — static CSS no-global-overflow proof', () => {
+  it('FoleonFullWindowViewer.module.css does not introduce a global overflow-x: hidden declaration', () => {
+    const css = readCss(VIEWER_CSS_PATH);
+    expect(css).not.toMatch(/overflow-x\s*:\s*hidden\s*;/);
+  });
+
+  it('FoleonReaderLayouts.module.css does not introduce a global overflow-x: hidden declaration', () => {
+    const css = readCss(LAYOUTS_CSS_PATH);
+    expect(css).not.toMatch(/overflow-x\s*:\s*hidden\s*;/);
   });
 });

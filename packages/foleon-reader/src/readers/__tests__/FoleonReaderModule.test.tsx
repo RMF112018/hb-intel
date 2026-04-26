@@ -281,6 +281,66 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onViewerIframeLoaded).toHaveBeenCalledTimes(1);
   });
 
+  it('Company Pulse ready opens the full-window viewer when the lead-update card is clicked, and emits viewer telemetry', async () => {
+    const record = makeRecord({
+      title: 'Companywide April Brief',
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+      embedUrl: 'https://viewer.us.foleon.com/embed/pulse',
+      publishedUrl: 'https://viewer.us.foleon.com/published/pulse',
+      lastEditorialUpdate: '2026-04-14T00:00:00.000Z',
+    });
+    resolveMock.mockResolvedValue({
+      kind: 'ready',
+      config: FOLEON_READER_CONFIGS.companyPulse,
+      record,
+      embedUrl: record.embedUrl!,
+      warnings: [],
+    });
+    const { callbacks, container } = renderModule({ config: FOLEON_READER_CONFIGS.companyPulse });
+
+    // Wait for the lane-owned briefing layout.
+    await screen.findByLabelText('Pulse categories');
+    expect(container.querySelectorAll('iframe')).toHaveLength(0);
+
+    const launch = within(
+      container.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: record.title });
+    fireEvent.click(launch);
+
+    // Viewer telemetry fires (distinct from inline iframe lifecycle).
+    expect(callbacks.onViewerOpen).toHaveBeenCalledTimes(1);
+    expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+
+    // Viewer iframe mounts and emits onViewerIframeLoaded on load.
+    const iframe = await screen.findByTitle(`${record.title} — Foleon viewer`);
+    fireEvent.load(iframe);
+    expect(callbacks.onViewerIframeLoaded).toHaveBeenCalledTimes(1);
+  });
+
+  it('Leadership Message preview remains on the compatibility shell pending Prompt 05 (lane-readiness sanity)', async () => {
+    resolveMock.mockResolvedValue({
+      kind: 'preview',
+      config: FOLEON_READER_CONFIGS.leadershipMessage,
+      reason: 'no-active-record',
+      warnings: [],
+    });
+    const { container } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
+
+    // Lane wrapper still resolves to the registry-driven Leadership component.
+    const leadership = await screen.findByText('Leadership Message reader');
+    expect(leadership).toBeTruthy();
+    expect(
+      container.querySelector('[data-foleon-reader-layout="leadership-message"]'),
+    ).not.toBeNull();
+    // Compatibility-shell legacy markers are still emitted by Leadership today.
+    expect(container.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-preview-route]')).not.toBeNull();
+    // Leadership has NOT moved to the lane-owned viewer/card model yet.
+    expect(container.querySelector('[data-foleon-article-card]')).toBeNull();
+    expect(container.querySelector('[data-foleon-layout]')).toBeNull();
+  });
+
   it('uses Leadership Message config and page context for ready reader events', async () => {
     const record = makeRecord({
       title: 'Quarterly Leadership Note',

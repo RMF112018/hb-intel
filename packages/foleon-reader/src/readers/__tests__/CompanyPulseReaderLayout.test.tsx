@@ -3,6 +3,8 @@ import { render, cleanup, screen, fireEvent } from '@testing-library/react';
 import { CompanyPulseReaderLayout } from '../layouts/CompanyPulseReaderLayout.js';
 import { ProjectSpotlightReaderLayout } from '../layouts/ProjectSpotlightReaderLayout.js';
 import { LeadershipMessageReaderLayout } from '../layouts/LeadershipMessageReaderLayout.js';
+import { FoleonFullWindowViewerProvider } from '../../components/FoleonFullWindowViewerProvider.js';
+import { createFoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
 import {
   createPreviewFoleonReaderViewModel,
   createReadyFoleonReaderViewModel,
@@ -241,6 +243,37 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     fireEvent.click(launch);
     expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('preview-only');
     expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('Phase-04 Wave-01 Prompt-04C: card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {
+    const viewModel = buildReadyViewModel();
+    const { container } = render(
+      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const card = container.querySelector('[data-foleon-article-card]') as HTMLElement;
+    expect(card).not.toBeNull();
+    const interactiveInsideCard = card.querySelectorAll(
+      'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    expect(interactiveInsideCard.length).toBe(1);
+    expect(interactiveInsideCard[0].tagName).toBe('BUTTON');
+  });
+
+  it('Phase-04 Wave-01 Prompt-04C: keyboard activation on the card-launch button opens the viewer when wrapped in the provider', () => {
+    const viewModel = buildReadyViewModel();
+    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
+
+    const rendered = render(
+      <FoleonFullWindowViewerProvider originPolicy={policy}>
+        <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
+    const launch = rendered.getByRole('button', { name: viewModel.briefingLead!.title });
+    // Keyboard activation on a native button — fire keyDown then click,
+    // matching the browser's synthesized Enter/Space → click flow.
+    fireEvent.keyDown(launch, { key: 'Enter' });
+    fireEvent.click(launch);
+    expect(rendered.queryByRole('dialog')).not.toBeNull();
   });
 
   it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {
