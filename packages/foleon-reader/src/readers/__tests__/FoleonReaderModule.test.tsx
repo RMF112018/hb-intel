@@ -552,6 +552,131 @@ describe('FoleonReaderModule', () => {
     expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
   });
 
+  it('Phase-04 Wave-01 Prompt-06: all three lanes ready in one tree — each card opens its own lane-scoped viewer in sequence', async () => {
+    const recordsByConfig = new Map<string, FoleonContentRecord>([
+      [
+        FOLEON_READER_CONFIGS.projectSpotlight.readerKey,
+        makeRecord({
+          id: 101,
+          title: 'The Seaglass Residence',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+          embedUrl: 'https://viewer.us.foleon.com/embed/spotlight',
+          publishedUrl: 'https://viewer.us.foleon.com/published/spotlight',
+        }),
+      ],
+      [
+        FOLEON_READER_CONFIGS.companyPulse.readerKey,
+        makeRecord({
+          id: 102,
+          title: 'Companywide April Brief',
+          contentTypeKey: 'Company Pulse',
+          readerKey: 'company-pulse',
+          embedUrl: 'https://viewer.us.foleon.com/embed/pulse',
+          publishedUrl: 'https://viewer.us.foleon.com/published/pulse',
+          lastEditorialUpdate: '2026-04-14T00:00:00.000Z',
+        }),
+      ],
+      [
+        FOLEON_READER_CONFIGS.leadershipMessage.readerKey,
+        makeRecord({
+          id: 103,
+          title: 'A Quarterly Leadership Note',
+          contentTypeKey: 'Leadership',
+          readerKey: 'leadership-message',
+          embedUrl: 'https://viewer.us.foleon.com/embed/leadership',
+          publishedUrl: 'https://viewer.us.foleon.com/published/leadership',
+          summary: 'A focused executive note.',
+        }),
+      ],
+    ]);
+    resolveMock.mockImplementation(async (params) => {
+      const record = recordsByConfig.get(params.config.readerKey)!;
+      return {
+        kind: 'ready',
+        config: params.config,
+        record,
+        embedUrl: record.embedUrl!,
+        warnings: [],
+      };
+    });
+    installMatchMedia(false);
+    const callbacks = {
+      onOpenArchive: vi.fn(),
+      onReaderOpen: vi.fn(),
+      onReaderClose: vi.fn(),
+      onEmbedError: vi.fn(),
+      onGateBlocked: vi.fn(),
+      onViewerOpen: vi.fn(),
+      onViewerClose: vi.fn(),
+      onViewerIframeLoaded: vi.fn(),
+      onViewerIframeError: vi.fn(),
+    };
+
+    const { container } = render(
+      <>
+        <FoleonEmbeddedReaderLane
+          contract={makeContract()}
+          lane="projectSpotlight"
+          {...callbacks}
+        />
+        <FoleonEmbeddedReaderLane
+          contract={{ ...makeContract(), route: 'companyPulse' }}
+          lane="companyPulse"
+          {...callbacks}
+        />
+        <FoleonEmbeddedReaderLane
+          contract={{ ...makeContract(), route: 'leadershipMessage' }}
+          lane="leadershipMessage"
+          {...callbacks}
+        />
+      </>,
+    );
+
+    // Wait for all three lanes to render the lane-owned layouts.
+    await screen.findByLabelText('Project Spotlight metadata');
+    await screen.findByLabelText('Pulse categories');
+    await screen.findByText('A Quarterly Leadership Note');
+
+    // Per-lane wrappers — used to scope card-button queries.
+    const spotlightWrapper = container.querySelector('[data-foleon-reader-layout="project-spotlight"]') as HTMLElement;
+    const pulseWrapper = container.querySelector('[data-foleon-reader-layout="company-pulse"]') as HTMLElement;
+    const leadershipWrapper = container.querySelector('[data-foleon-reader-layout="leadership-message"]') as HTMLElement;
+
+    // ----- Spotlight viewer launch -----
+    const spotlightCard = within(
+      spotlightWrapper.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: 'The Seaglass Residence' });
+    fireEvent.click(spotlightCard);
+    let dialog = await screen.findByRole('dialog');
+    expect(dialog.getAttribute('data-foleon-viewer-lane')).toBe('projectSpotlight');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close Foleon viewer' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    // ----- Pulse viewer launch -----
+    const pulseCard = within(
+      pulseWrapper.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: 'Companywide April Brief' });
+    fireEvent.click(pulseCard);
+    dialog = await screen.findByRole('dialog');
+    expect(dialog.getAttribute('data-foleon-viewer-lane')).toBe('companyPulse');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close Foleon viewer' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    // ----- Leadership viewer launch -----
+    const leadershipCard = within(
+      leadershipWrapper.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: 'A Quarterly Leadership Note' });
+    fireEvent.click(leadershipCard);
+    dialog = await screen.findByRole('dialog');
+    expect(dialog.getAttribute('data-foleon-viewer-lane')).toBe('leadershipMessage');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close Foleon viewer' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    // No inline iframes ever mounted for any of the three lanes.
+    expect(container.querySelectorAll('iframe')).toHaveLength(0);
+  });
+
   it('keeps the shared package independent of standalone app globals and roots', () => {
     const source = readPackageSource(resolve(__dirname, '../..'));
 
