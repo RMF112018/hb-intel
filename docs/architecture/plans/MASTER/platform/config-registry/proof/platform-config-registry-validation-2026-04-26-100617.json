@@ -1,0 +1,1050 @@
+{
+  "generatedUtc": "2026-04-26T10:06:39.9484670Z",
+  "targetSite": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "appId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "tenant": "hedrickbrothers.com",
+  "authMode": "DeviceLogin",
+  "listTitle": "HB Platform Configuration Registry",
+  "listUrl": "/sites/HBCentral/Lists/HB Platform Configuration Registry",
+  "fieldCount": 54,
+  "indexCount": 12,
+  "itemCount": 14,
+  "seededRecordCount": 14,
+  "expectedSeedRecordCount": 14,
+  "duplicateActiveKeyCheck": "pass",
+  "secretStorageCheck": "pass",
+  "readAccess": true,
+  "writeAccess": true,
+  "warningCount": 0,
+  "warnings": [],
+  "failureCount": 0,
+  "failures": [],
+  "checks": [
+    {
+      "name": "list exists",
+      "passed": true,
+      "severity": "error",
+      "detail": "HB Platform Configuration Registry"
+    },
+    {
+      "name": "field exists: Title",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: Title",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: Title",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "field exists: ApplicationKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ApplicationKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Choice; expected=Choice"
+    },
+    {
+      "name": "required flag: ApplicationKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "index exists: ApplicationKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: EnvironmentKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: EnvironmentKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Choice; expected=Choice"
+    },
+    {
+      "name": "required flag: EnvironmentKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "index exists: EnvironmentKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: ScopeKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ScopeKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ScopeKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "index exists: ScopeKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: ConfigKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ConfigKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ConfigKey",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "index exists: ConfigKey",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: ConfigValue",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ConfigValue",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Note; expected=Note"
+    },
+    {
+      "name": "required flag: ConfigValue",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ConfigValueJson",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ConfigValueJson",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Note; expected=Note"
+    },
+    {
+      "name": "required flag: ConfigValueJson",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ValueType",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ValueType",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Choice; expected=Choice"
+    },
+    {
+      "name": "required flag: ValueType",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "field exists: IsRequired",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: IsRequired",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Boolean; expected=Boolean"
+    },
+    {
+      "name": "required flag: IsRequired",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "field exists: IsSecretReference",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: IsSecretReference",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Boolean; expected=Boolean"
+    },
+    {
+      "name": "required flag: IsSecretReference",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "index exists: IsSecretReference",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: SecretReferenceName",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: SecretReferenceName",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: SecretReferenceName",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: SiteUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: SiteUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: SiteUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ListTitle",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ListTitle",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ListTitle",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "index exists: ListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: WebId",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: WebId",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: WebId",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: TenantId",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: TenantId",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: TenantId",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ManifestId",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ManifestId",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ManifestId",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "index exists: ManifestId",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: ExpectedPackageVersion",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ExpectedPackageVersion",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ExpectedPackageVersion",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: ApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: AcceptedOrigins",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: AcceptedOrigins",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Note; expected=Note"
+    },
+    {
+      "name": "required flag: AcceptedOrigins",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ValidationRule",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ValidationRule",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Note; expected=Note"
+    },
+    {
+      "name": "required flag: ValidationRule",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: ValidationStatus",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: ValidationStatus",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Choice; expected=Choice"
+    },
+    {
+      "name": "required flag: ValidationStatus",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "index exists: ValidationStatus",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: LastValidatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: LastValidatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=DateTime; expected=DateTime"
+    },
+    {
+      "name": "required flag: LastValidatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: OwnerGroup",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: OwnerGroup",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Text; expected=Text"
+    },
+    {
+      "name": "required flag: OwnerGroup",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: AdminNotes",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: AdminNotes",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Note; expected=Note"
+    },
+    {
+      "name": "required flag: AdminNotes",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: IsActive",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: IsActive",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Boolean; expected=Boolean"
+    },
+    {
+      "name": "required flag: IsActive",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=True; expected=True"
+    },
+    {
+      "name": "index exists: IsActive",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: EffectiveFrom",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: EffectiveFrom",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=DateTime; expected=DateTime"
+    },
+    {
+      "name": "required flag: EffectiveFrom",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "index exists: EffectiveFrom",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: EffectiveThrough",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: EffectiveThrough",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=DateTime; expected=DateTime"
+    },
+    {
+      "name": "required flag: EffectiveThrough",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "index exists: EffectiveThrough",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field exists: LastUpdatedBy",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: LastUpdatedBy",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=User; expected=User"
+    },
+    {
+      "name": "required flag: LastUpdatedBy",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "field exists: LastUpdatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "field type: LastUpdatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=DateTime; expected=DateTime"
+    },
+    {
+      "name": "required flag: LastUpdatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=False; expected=False"
+    },
+    {
+      "name": "index exists: LastUpdatedAt",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "read capability",
+      "passed": true,
+      "severity": "error",
+      "detail": "items=14"
+    },
+    {
+      "name": "seed exists: Foleon|Production|Marketing-New|MarketingNewHostPageUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|HBCentral|HBCentralHubSiteUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|SPFx|ExpectedManifestId|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|SPFx|AcceptedFoleonOrigins|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|Backend|FoleonApiBaseUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|Backend|FoleonApiResource|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Homepage|Production|SPFx|HomepageExpectedPackageVersion|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|SPFx|FoleonExpectedPackageVersion|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "seed exists: Foleon|Production|Backend|FoleonClientSecret|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: FoleonContentRegistryListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: FoleonContentRegistryListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Guid"
+    },
+    {
+      "name": "confirmed GUID ConfigValue parses: FoleonContentRegistryListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ListGuid: FoleonContentRegistryListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: FoleonHomepagePlacementsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: FoleonHomepagePlacementsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Guid"
+    },
+    {
+      "name": "confirmed GUID ConfigValue parses: FoleonHomepagePlacementsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ListGuid: FoleonHomepagePlacementsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: FoleonInteractionEventsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: FoleonInteractionEventsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Guid"
+    },
+    {
+      "name": "confirmed GUID ConfigValue parses: FoleonInteractionEventsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ListGuid: FoleonInteractionEventsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: FoleonSyncRunsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: FoleonSyncRunsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Guid"
+    },
+    {
+      "name": "confirmed GUID ConfigValue parses: FoleonSyncRunsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ListGuid: FoleonSyncRunsListGuid",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: BackendFunctionAppUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: BackendFunctionAppUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Url"
+    },
+    {
+      "name": "confirmed backend ConfigValue URL: BackendFunctionAppUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ApiBaseUrl URL: BackendFunctionAppUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: Foleon|Production|Backend|FoleonApiBaseUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: Foleon|Production|Backend|FoleonApiBaseUrl|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: FoleonApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: FoleonApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Url"
+    },
+    {
+      "name": "confirmed backend ConfigValue URL: FoleonApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ApiBaseUrl URL: FoleonApiBaseUrl",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exists: Foleon|Production|Backend|FoleonApiResource|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed value record exactly once: Foleon|Production|Backend|FoleonApiResource|True",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ConfigValue: FoleonApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ValueType: FoleonApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": "actual=Url"
+    },
+    {
+      "name": "confirmed API resource ConfigValue: FoleonApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed ApiResource: FoleonApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed API resource has no /.default: FoleonApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "confirmed API resource has no custom scope suffix: FoleonApiResource",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "duplicate active logical keys",
+      "passed": true,
+      "severity": "error",
+      "detail": "duplicates=0"
+    },
+    {
+      "name": "secret storage hygiene",
+      "passed": true,
+      "severity": "error",
+      "detail": "issues=0"
+    },
+    {
+      "name": "FoleonClientSecret remains secret reference record",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "FoleonClientSecret reference only",
+      "passed": true,
+      "severity": "error",
+      "detail": ""
+    },
+    {
+      "name": "write capability",
+      "passed": true,
+      "severity": "error",
+      "detail": "temporary item add/delete succeeded"
+    }
+  ],
+  "manualActions": [
+    "Validate SPFx token acquisition for FoleonApiResource and backend route authorization before marking writePathReady complete.",
+    "Populate any remaining package/version placeholders only after tenant/package validation.",
+    "Confirm list permissions: platform admins manage, app/admin principal read/write as required, Foleon marketing read unless a scoped admin workflow requires otherwise, general employees no direct edit.",
+    "Keep secret values outside SharePoint; SharePoint stores reference names only."
+  ]
+}
