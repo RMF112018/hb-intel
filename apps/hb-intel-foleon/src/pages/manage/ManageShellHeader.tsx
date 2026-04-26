@@ -41,16 +41,17 @@ export function ManageShellHeader(props: {
           </div>
         </fieldset>
         {props.safeFoleonOpenUrl ? (
-          <HbcButton
-            variant="secondary"
-            title="Opens the approved Foleon viewer origin in a new tab"
-            onClick={(): void => {
-              window.open(props.safeFoleonOpenUrl ?? '', '_blank', 'noopener,noreferrer');
-            }}
-          >
-            <ExternalLink size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
-            Open Foleon (site)
-          </HbcButton>
+          <span title="Opens the approved Foleon viewer origin in a new tab">
+            <HbcButton
+              variant="secondary"
+              onClick={(): void => {
+                window.open(props.safeFoleonOpenUrl ?? '', '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <ExternalLink size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
+              Open Foleon (site)
+            </HbcButton>
+          </span>
         ) : (
           <span className={shell.actionUnavailable} title={props.openFoleonUnavailableReason}>
             <HbcButton variant="secondary" disabled>

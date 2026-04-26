@@ -155,7 +155,11 @@ describe('ManagePage', () => {
     expect((await screen.findAllByText('Project Spotlight')).length).toBeGreaterThan(0);
     expect(screen.getAllByText('Company Pulse').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Leadership Message').length).toBeGreaterThan(0);
-    expect(screen.getByRole('region', { name: /Lane status overview/i })).toBeTruthy();
+    const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
+    expect(laneSummary).toBeTruthy();
+    expect(within(laneSummary).getAllByRole('listitem').length).toBe(3);
+    expect(laneSummary.textContent).not.toMatch(/project-spotlight|company-pulse|leadership-message/);
+    expect(laneSummary.textContent).not.toMatch(/Project Spotlight Active|Company Pulse Active|Leadership Message Active/);
   });
 
   it('renders split readiness states and source labels on the Config tab', async () => {
@@ -434,6 +438,8 @@ describe('ManagePage', () => {
     );
 
     expect(await screen.findByRole('heading', { name: /Foleon Manager/i })).toBeTruthy();
+    const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
+    expect(within(laneSummary).getAllByText('Needs setup').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Homepage Foleon Content' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Config' })).toBeTruthy();
@@ -675,6 +681,64 @@ describe('ManagePage', () => {
 
     expect(screen.getByText('Project Spotlight Active should point to Project Spotlight content.')).toBeTruthy();
     expect(screen.getByText('Project Spotlight Active points to content that is not public-ready.')).toBeTruthy();
+  });
+
+  it('updates selected-lane workspace when a different lane card is selected', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({ title: 'PS', readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true }),
+        managedContent({
+          id: 'content-2',
+          sharePointItemId: 2,
+          title: 'LM',
+          readerKey: 'leadership-message',
+          contentTypeKey: 'Leadership',
+          activeEdition: true,
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('region', { name: /Project Spotlight workspace/i });
+    const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
+    const laneCards = within(laneSummary).getAllByRole('listitem');
+    expect(laneCards.length).toBe(3);
+    fireEvent.click(laneCards[2]!);
+    expect(await screen.findByRole('region', { name: /Leadership Message workspace/i })).toBeTruthy();
+  });
+
+  it('shows plain-language write guidance when write path is disabled', async () => {
+    installManageFetchMock({
+      content: [managedContent({ readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true })],
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    const editor = await screen.findByRole('region', { name: /Content detail editor/i });
+    expect(editor.textContent).toMatch(/Write actions are disabled/i);
+    expect(editor.textContent).not.toMatch(/backend-route-authorization-unproven/);
+    expect(editor.textContent).not.toMatch(/token-acquisition-failed/);
+  });
+
+  it('does not send PATCH when Save is disabled for write path', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    installManageFetchMock({
+      content: [managedContent({ readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true })],
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('region', { name: /Content detail editor/i });
+    const save = screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    fireEvent.click(save);
+
+    expect(
+      fetchSpy.mock.calls.filter(
+        (call) => String(call[0]).includes('/foleon/content/') && (call[1] as RequestInit | undefined)?.method === 'PATCH',
+      ).length,
+    ).toBe(0);
   });
 
   it('renders Foleon Manager title, plain-language status chips, and keeps sync history under Config diagnostics', async () => {

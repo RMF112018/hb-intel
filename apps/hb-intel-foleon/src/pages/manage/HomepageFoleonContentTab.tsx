@@ -1,28 +1,31 @@
-import { HbcButton } from '@hbc/ui-kit/homepage';
-import { isAllowedFoleonUrl } from '../../services/FoleonOriginPolicy.js';
+import { useMemo } from 'react';
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
 import type {
   FoleonManagedContent,
   FoleonPlacement,
   FoleonSyncStatus,
 } from '../../types/foleon-management.types.js';
-import { ManageContentEditorPanel } from './ManageContentEditorPanel.js';
 import { ManageMetricCards } from './ManageMetricCards.js';
-import { ManagePlacementPanel } from './ManagePlacementPanel.js';
-import { ManagePreviewGuidancePanel } from './ManagePreviewGuidancePanel.js';
-import { ManageRegistryPanel } from './ManageRegistryPanel.js';
 import type { FoleonManagementApi } from '../../services/FoleonManagementApi.js';
-import { FoleonEmpty } from '../../components/FoleonStates.js';
+import { ManagePreviewGuidancePanel } from './ManagePreviewGuidancePanel.js';
+import { ContentLibraryPanel } from './ContentLibraryPanel.js';
+import { SelectedLaneWorkspace } from './SelectedLaneWorkspace.js';
 import {
   buildFoleonLaneViewModels,
+  buildPublishChecklist,
+  displayLaneState,
+  placementStatusPlain,
+  summarizePublishReadinessForCard,
   type FoleonLaneViewModel,
 } from './manageLaneViewModel.js';
-import { buildReaderLaneWarnings, toContentMutation } from './manageMutationUtils.js';
+import { buildReaderLaneWarnings, toContentMutation, type FoleonReaderLane } from './manageMutationUtils.js';
+import { plainLanguageWriteBlockReason } from './manageWritePathMessage.js';
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
 
 export function HomepageFoleonContentTab(props: {
   readonly contract: IFoleonRuntimeContract;
+  readonly managerReadPathProven: boolean;
   readonly content: ReadonlyArray<FoleonManagedContent>;
   readonly placements: ReadonlyArray<FoleonPlacement>;
   readonly syncStatus: FoleonSyncStatus | null;
@@ -32,7 +35,9 @@ export function HomepageFoleonContentTab(props: {
   readonly filteredContent: ReadonlyArray<FoleonManagedContent>;
   readonly selected: FoleonManagedContent | null;
   readonly selectedId: string | null;
-  readonly onSelect: (id: string) => void;
+  readonly selectedLane: FoleonReaderLane;
+  readonly onSelectLane: (lane: FoleonReaderLane) => void;
+  readonly onSelectRecord: (id: string) => void;
   readonly onRefresh: () => Promise<void>;
   readonly setMessage: (message: string | null) => void;
 }): React.ReactNode {
@@ -41,13 +46,14 @@ export function HomepageFoleonContentTab(props: {
     ? { ...readiness, backendSafeConfigReady: true, readPathReady: true, writePathReady: readiness.writePathReady }
     : readiness;
   const canWrite = props.contract.hostMode !== 'sharepoint' || readiness?.writePathReady === true;
-  const writeBlockReason = readinessBlockReason(props.contract);
+  const writeBlockMessage = plainLanguageWriteBlockReason(props.contract);
   const lanes = buildFoleonLaneViewModels({
     content: props.content,
     placements: props.placements,
     readiness: effectiveReadiness,
-    hasLoadedReadPath: true,
+    hasLoadedReadPath: props.managerReadPathProven,
   });
+  const laneVm = lanes.find((lane) => lane.lane === props.selectedLane) ?? lanes[0];
   const published = props.content.filter((record) => record.publishStatus === 'Published' && record.isVisible).length;
   const homepageReady = props.content.filter(
     (record) => record.publishStatus === 'Published' && record.isVisible && record.isHomepageEligible,
@@ -62,6 +68,28 @@ export function HomepageFoleonContentTab(props: {
   }).length, 0);
   const shouldShowPreviewGuidance = props.content.length === 0 || published === 0 || homepageReady === 0;
 
+  const workspaceWarnings = useMemo(() => {
+    if (!props.selected) return laneVm.warnings;
+    const w = buildReaderLaneWarnings({
+      draft: toContentMutation(props.selected),
+      record: props.selected,
+      allContent: props.content,
+      placements: props.placements,
+    });
+    return Array.from(new Set([...laneVm.warnings, ...w, ...props.selected.blockingReasons]));
+  }, [props.selected, laneVm, props.content, props.placements]);
+
+  const workspaceChecklist = useMemo(
+    () =>
+      buildPublishChecklist({
+        record: props.selected ?? laneVm.activeContent ?? laneVm.stagedContent,
+        placement: laneVm.placement,
+        readiness: effectiveReadiness,
+        warnings: workspaceWarnings,
+      }),
+    [props.selected, laneVm, effectiveReadiness, workspaceWarnings],
+  );
+
   return (
     <div role="tabpanel" aria-label="Homepage Foleon Content" className={shell.tabPanel}>
       <ManageMetricCards
@@ -71,169 +99,110 @@ export function HomepageFoleonContentTab(props: {
         laneWarnings={laneWarningCount}
         syncHealth={props.syncStatus?.health ?? 'unknown'}
       />
-      <LaneStatusOverview
-        lanes={lanes}
-        canWrite={canWrite}
-        writeBlockReason={writeBlockReason}
-        contract={props.contract}
-      />
       {shouldShowPreviewGuidance ? (
         <ManagePreviewGuidancePanel
           publicReadyContentCount={published}
           homepageReadyContentCount={homepageReady}
         />
       ) : null}
-      <div className={shell.layout}>
-        <ManageRegistryPanel
-          query={props.query}
-          onQueryChange={props.onQueryChange}
-          filteredContent={props.filteredContent}
-          selectedId={props.selectedId}
-          onSelect={props.onSelect}
-        />
-        <main className={shell.main}>
-          {props.selected ? (
-            <>
-              <PublishReadinessChecklist lane={lanes.find((lane) => lane.activeContent?.id === props.selected?.id)} />
-              <ManageContentEditorPanel
-                record={props.selected}
-                allContent={props.content}
-                placements={props.placements}
-                api={props.api}
-                onRefresh={props.onRefresh}
-                setMessage={props.setMessage}
-                originPolicy={props.contract.originPolicy}
-                canWrite={canWrite}
-                writeBlockReason={writeBlockReason}
+      <div className={shell.contentLaneStack}>
+        <section className={f.editorSection} aria-label="Homepage lane summary">
+          <p className={f.guidanceKicker}>Homepage Foleon Content</p>
+          <h3 className={f.sectionTitle}>Lanes</h3>
+          <div className={shell.laneSummaryRow} role="list">
+            {lanes.map((lane) => (
+              <LaneSummaryCard
+                key={lane.lane}
+                lane={lane}
+                selected={lane.lane === props.selectedLane}
+                onSelect={(): void => props.onSelectLane(lane.lane)}
               />
-            </>
-          ) : (
-            <FoleonEmpty title="No registry records yet." description="Create a draft or sync Foleon Docs." />
-          )}
-          <ManagePlacementPanel
-            content={props.content}
-            placements={props.placements}
-            api={props.api}
-            onRefresh={props.onRefresh}
-            setMessage={props.setMessage}
-            canWrite={canWrite}
-            writeBlockReason={writeBlockReason}
-          />
-        </main>
+            ))}
+          </div>
+        </section>
+        <SelectedLaneWorkspace
+          contract={props.contract}
+          laneVm={laneVm}
+          selected={props.selected}
+          checklist={workspaceChecklist}
+          content={props.content}
+          placements={props.placements}
+          api={props.api}
+          onRefresh={props.onRefresh}
+          setMessage={props.setMessage}
+          canWrite={canWrite}
+          writeBlockMessage={writeBlockMessage}
+        />
       </div>
+      <ContentLibraryPanel
+        query={props.query}
+        onQueryChange={props.onQueryChange}
+        filteredContent={props.filteredContent}
+        selectedId={props.selectedId}
+        onSelectRecord={props.onSelectRecord}
+      />
     </div>
   );
 }
 
-function LaneStatusOverview(props: {
-  readonly lanes: ReadonlyArray<FoleonLaneViewModel>;
-  readonly canWrite: boolean;
-  readonly writeBlockReason: string;
-  readonly contract: IFoleonRuntimeContract;
+function LaneSummaryCard(props: {
+  readonly lane: FoleonLaneViewModel;
+  readonly selected: boolean;
+  readonly onSelect: () => void;
 }): React.ReactNode {
+  const statusLabel = displayLaneState(props.lane.state);
+  const activeTitle = props.lane.activeContent?.title ?? 'None';
+  const stagedTitle = props.lane.stagedContent?.title;
+  const windowText = formatWindow(props.lane.placement);
+  const placementText = placementStatusPlain(props.lane.placement);
+  const readinessLine = summarizePublishReadinessForCard(props.lane.checklist);
+
   return (
-    <section className={f.editorSection} aria-label="Lane status overview">
-      <div className={shell.sectionHeaderRow}>
+    <button
+      type="button"
+      role="listitem"
+      className={`${shell.laneSummaryButton} ${props.selected ? shell.laneSummaryButtonSelected : ''}`}
+      data-lane-state={props.lane.state}
+      aria-pressed={props.selected}
+      onClick={props.onSelect}
+    >
+      <div className={shell.laneSummaryButtonHeader}>
+        <strong>{props.lane.label}</strong>
+        <span className={f.statusPill}>{statusLabel}</span>
+      </div>
+      <dl className={shell.laneSummaryDl}>
         <div>
-          <p className={f.guidanceKicker}>Homepage Foleon Content</p>
-          <h3 className={f.sectionTitle}>Lane Status Overview</h3>
+          <dt>Active content</dt>
+          <dd>{activeTitle}</dd>
         </div>
-        <span className={f.metaMuted}>{props.canWrite ? 'Writes ready' : `Writes blocked: ${props.writeBlockReason}`}</span>
-      </div>
-      <div className={shell.laneGrid}>
-        {props.lanes.map((lane) => (
-          <article key={lane.lane} className={shell.laneCard} data-lane-state={lane.state}>
-            <div className={shell.sectionHeaderRow}>
-              <div>
-                <strong>{lane.label}</strong>
-                <div className={f.metaMuted}>{lane.readerKey} • {lane.placementKey}</div>
-              </div>
-              <span className={f.statusPill}>{lane.state}</span>
-            </div>
-            <dl className={shell.definitionGrid}>
-              <dt>Active content</dt>
-              <dd>{lane.activeContent?.title ?? 'None'}</dd>
-              <dt>Publication ID</dt>
-              <dd>{lane.activeContent ? shortId(lane.activeContent.foleonDocId) : 'Missing'}</dd>
-              <dt>Placement</dt>
-              <dd>{lane.placement ? `${lane.placement.isActive ? 'Active' : 'Inactive'} • ${lane.placement.validationStatus}` : 'Missing'}</dd>
-              <dt>Display window</dt>
-              <dd>{formatWindow(lane.placement)}</dd>
-              <dt>Validation</dt>
-              <dd>{lane.activeContent?.validationStatus ?? 'unknown'}</dd>
-              <dt>Publish status</dt>
-              <dd>{lane.activeContent?.publishStatus ?? 'None'}</dd>
-              <dt>Next action</dt>
-              <dd>{lane.nextAction}</dd>
-            </dl>
-            <div className={f.flexToolbar} aria-label={`${lane.label} actions`}>
-              <HbcButton variant="secondary" disabled={!lane.activeContent}>View</HbcButton>
-              <HbcButton variant="secondary" disabled={!props.canWrite}>{props.canWrite ? 'Edit' : 'Edit blocked'}</HbcButton>
-              <HbcButton variant="secondary" disabled={!props.canWrite}>Validate</HbcButton>
-              <HbcButton variant="secondary" disabled={!props.canWrite}>Publish</HbcButton>
-              <HbcButton variant="secondary" disabled={!props.canWrite}>Manage Placement</HbcButton>
-              {safeProductionUrl(lane.activeContent?.publishedUrl, props.contract) ? (
-                <HbcButton
-                  variant="secondary"
-                  onClick={(): void => {
-                    window.open(lane.activeContent?.publishedUrl ?? '', '_blank', 'noopener,noreferrer');
-                  }}
-                >
-                  Open Foleon
-                </HbcButton>
-              ) : null}
-            </div>
-            {lane.warnings.length > 0 ? (
-              <ul className={f.validationBad}>
-                {lane.warnings.map((warning) => <li key={warning}>{warning}</li>)}
-              </ul>
-            ) : null}
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function safeProductionUrl(url: string | undefined, contract: IFoleonRuntimeContract): boolean {
-  return Boolean(url && isAllowedFoleonUrl(contract.originPolicy, url).allowed);
-}
-
-function PublishReadinessChecklist(props: {
-  readonly lane?: FoleonLaneViewModel;
-}): React.ReactNode {
-  if (!props.lane) return null;
-  return (
-    <section className={f.editorSection} aria-label="Publish readiness checklist">
-      <h3 className={f.sectionTitle}>Publish Readiness Checklist</h3>
-      <div className={shell.checkGrid}>
-        {props.lane.checklist.map((item) => (
-          <div key={item.label} className={shell.checkItem} data-check-status={item.status}>
-            <strong>{item.label}</strong>
-            <span>{item.status === 'pass' ? 'Pass' : 'Blocked'}</span>
-            <small>{item.detail}</small>
+        {stagedTitle ? (
+          <div>
+            <dt>Staged content</dt>
+            <dd>{stagedTitle}</dd>
           </div>
-        ))}
-      </div>
-    </section>
+        ) : null}
+        <div>
+          <dt>Display window</dt>
+          <dd>{windowText}</dd>
+        </div>
+        <div>
+          <dt>Placement</dt>
+          <dd>{placementText}</dd>
+        </div>
+        <div>
+          <dt>Publish readiness</dt>
+          <dd>{readinessLine}</dd>
+        </div>
+        <div>
+          <dt>Next step</dt>
+          <dd>{props.lane.nextAction}</dd>
+        </div>
+      </dl>
+    </button>
   );
-}
-
-function readinessBlockReason(contract: IFoleonRuntimeContract): string {
-  const blocker = contract.foleonConfigDiagnostics?.blockers[0];
-  if (blocker) return blocker.code;
-  const readiness = contract.foleonReadiness;
-  if (readiness?.backendSafeConfigReady !== true) return 'backend-safe-config-unavailable';
-  if (readiness.backendRouteAuthorizationReady !== true) return 'backend-route-authorization-unproven';
-  return 'write-path-not-proven';
-}
-
-function shortId(value: number): string {
-  const text = String(value);
-  return text.length <= 4 ? text : `...${text.slice(-4)}`;
 }
 
 function formatWindow(placement: FoleonPlacement | undefined): string {
-  if (!placement) return 'Missing';
+  if (!placement) return 'Not set';
   return `${placement.displayFrom ?? 'Now'} to ${placement.displayThrough ?? 'Open'}`;
 }

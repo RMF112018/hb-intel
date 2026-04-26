@@ -13,6 +13,8 @@ import {
   type FoleonReaderLane,
 } from './manageMutationUtils.js';
 
+const LANE_ORDER: ReadonlyArray<FoleonReaderLane> = ['project-spotlight', 'company-pulse', 'leadership-message'];
+
 export interface FoleonLaneViewModel {
   readonly lane: FoleonReaderLane;
   readonly label: string;
@@ -71,7 +73,11 @@ function buildLaneViewModel(
   const activeContent = laneContent.find((record) => record.activeEdition === true) ?? laneContent.find(isPublicReadyReaderRecord);
   const stagedContent = laneContent.find((record) => record.id !== activeContent?.id && record.publishStatus !== 'Published');
   const placement = args.placements.find((entry) => readerLaneForPlacementKey(entry.placementKey) === laneDef.lane);
-  const readConfigReady = Boolean(args.hasLoadedReadPath || args.readiness?.readPathReady || args.readiness?.listBindingsReady);
+  const readConfigReady = Boolean(
+    args.hasLoadedReadPath &&
+      (args.readiness?.listBindingsReady ?? true) &&
+      (args.readiness?.readPathReady ?? true),
+  );
   const warnings = activeContent
     ? buildReaderLaneWarnings({
         draft: {
@@ -165,7 +171,7 @@ function resolveNextAction(
   return 'Monitor display window and validation.';
 }
 
-function buildPublishChecklist(args: {
+export function buildPublishChecklist(args: {
   readonly record?: FoleonManagedContent;
   readonly placement?: FoleonPlacement;
   readonly readiness?: FoleonRuntimeReadiness;
@@ -179,7 +185,13 @@ function buildPublishChecklist(args: {
     item('Homepage eligible', Boolean(record?.isHomepageEligible), 'Content must be marked homepage eligible.'),
     item('Publish status valid', record?.publishStatus === 'Published', `Current status: ${record?.publishStatus ?? 'Missing'}.`),
     item('Active edition uniqueness', !args.warnings.some((warning) => warning.includes('More than one active')), 'Only one active edition should exist per lane.'),
-    item('Placement assigned', Boolean(args.placement?.isActive), args.placement ? `${args.placement.placementKey} is ${args.placement.isActive ? 'active' : 'inactive'}.` : 'No active placement.'),
+    item(
+      'Placement assigned',
+      Boolean(args.placement?.isActive),
+      args.placement
+        ? (args.placement.isActive ? 'Homepage placement is active.' : 'Homepage placement is inactive.')
+        : 'No homepage placement assigned.',
+    ),
     item('Read path ready', Boolean(args.readiness?.readPathReady || record), 'Manager has read content and placement data.'),
     item('Write path ready', args.readiness?.writePathReady === true, 'Required for save, validate, publish, suppress, and placement mutations.'),
     item('Route authorization proven', args.readiness?.backendRouteAuthorizationReady === true, 'Backend route authorization must be proven before writes are considered ready.'),
@@ -188,6 +200,56 @@ function buildPublishChecklist(args: {
 
 function item(label: string, pass: boolean, detail: string): PublishChecklistItem {
   return { label, status: pass ? 'pass' : 'blocked', detail };
+}
+
+/** UI label: internal state remains `Config Incomplete`. */
+export function displayLaneState(state: FoleonLaneViewModel['state']): string {
+  return state === 'Config Incomplete' ? 'Needs setup' : state;
+}
+
+export function laneStatePriority(state: FoleonLaneViewModel['state']): number {
+  switch (state) {
+    case 'Blocked':
+      return 0;
+    case 'Config Incomplete':
+      return 1;
+    case 'Preview':
+      return 2;
+    case 'Empty':
+      return 3;
+    case 'Live':
+      return 4;
+    default:
+      return 5;
+  }
+}
+
+export function pickDefaultLaneSelection(
+  lanes: ReadonlyArray<FoleonLaneViewModel>,
+): { readonly lane: FoleonReaderLane; readonly contentId: string | null } {
+  const ordered = [...lanes].sort((left, right) => {
+    const byState = laneStatePriority(left.state) - laneStatePriority(right.state);
+    if (byState !== 0) return byState;
+    return LANE_ORDER.indexOf(left.lane) - LANE_ORDER.indexOf(right.lane);
+  });
+  const first = ordered[0];
+  if (!first) return { lane: 'project-spotlight', contentId: null };
+  return {
+    lane: first.lane,
+    contentId: first.activeContent?.id ?? first.stagedContent?.id ?? null,
+  };
+}
+
+export function summarizePublishReadinessForCard(checklist: ReadonlyArray<PublishChecklistItem>): string {
+  const pass = checklist.filter((entry) => entry.status === 'pass').length;
+  const total = checklist.length;
+  return `${pass} of ${total} publish checks passing`;
+}
+
+export function placementStatusPlain(placement: FoleonPlacement | undefined): string {
+  if (!placement) return 'Not assigned';
+  if (placement.isActive) return 'Active on homepage';
+  return 'Inactive on homepage';
 }
 
 function scoreRecord(record: FoleonManagedContent): number {

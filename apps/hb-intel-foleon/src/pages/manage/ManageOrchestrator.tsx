@@ -17,7 +17,12 @@ import { FoleonConfigTab } from './FoleonConfigTab.js';
 import { HomepageFoleonContentTab } from './HomepageFoleonContentTab.js';
 import { buildManagerStatusChips, resolveSafeFoleonOpenOrigin } from './manageHeaderStatusModel.js';
 import { ManageShellHeader } from './ManageShellHeader.js';
-import { sortManagedContentForHomepage } from './manageLaneViewModel.js';
+import {
+  buildFoleonLaneViewModels,
+  pickDefaultLaneSelection,
+  sortManagedContentForHomepage,
+} from './manageLaneViewModel.js';
+import { readerLaneForContent, type FoleonReaderLane } from './manageMutationUtils.js';
 import { runFoleonSync } from './manageWorkflows.js';
 import { ManageTabs, type ManageTabKey } from './ManageTabs.js';
 import { useManageBreakpoint } from './useManageBreakpoint.js';
@@ -46,6 +51,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const api = useMemo(() => createFoleonManagementApi(props.contract), [props.contract]);
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedLane, setSelectedLane] = useState<FoleonReaderLane | null>(null);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<ManageTabKey>('content');
@@ -74,6 +80,9 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         runs: [],
         managerReadPathProven: false,
       });
+      const initDegraded = resolveInitialSelection(props.contract, [], [], false);
+      setSelectedId((current) => current ?? initDegraded.contentId);
+      setSelectedLane((current) => current ?? initDegraded.lane);
       return;
     }
     if (preflightBlocker) {
@@ -106,7 +115,9 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         setMessage('Foleon sync is not ready because backend Foleon OAuth configuration is incomplete. Content and placement reads remain available.');
       }
       setState({ kind: 'ready', content, placements, syncStatus, runs, managerReadPathProven: true });
-      setSelectedId((current) => current ?? content[0]?.id ?? null);
+      const init = resolveInitialSelection(props.contract, content, placements, true);
+      setSelectedId((current) => current ?? init.contentId);
+      setSelectedLane((current) => current ?? init.lane);
     } catch (err) {
       if (err instanceof FoleonReadinessError) {
         setState({ kind: 'blocked', code: err.code, message: err.message });
@@ -125,7 +136,43 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   }, [api]);
 
   const ready = state.kind === 'ready' ? state : null;
-  const selected = ready?.content.find((record) => record.id === selectedId) ?? ready?.content[0] ?? null;
+  const lanes = useMemo(
+    () =>
+      ready
+        ? buildLanesForOrchestrator(props.contract, ready.content, ready.placements, ready.managerReadPathProven)
+        : [],
+    [ready, props.contract],
+  );
+  const defaultLanePick = useMemo(
+    () => (lanes.length > 0 ? pickDefaultLaneSelection(lanes) : { lane: 'project-spotlight' as const, contentId: null }),
+    [lanes],
+  );
+  const effectiveSelectedLane = selectedLane ?? defaultLanePick.lane;
+
+  const selectLane = useCallback(
+    (lane: FoleonReaderLane): void => {
+      const vm = lanes.find((entry) => entry.lane === lane);
+      setSelectedLane(lane);
+      setSelectedId(vm?.activeContent?.id ?? vm?.stagedContent?.id ?? null);
+    },
+    [lanes],
+  );
+
+  const selectRegistryRecord = useCallback(
+    (id: string): void => {
+      if (state.kind !== 'ready') return;
+      setSelectedId(id);
+      const record = state.content.find((entry) => entry.id === id);
+      const lane = record ? readerLaneForContent(record) : null;
+      if (lane) setSelectedLane(lane);
+    },
+    [state],
+  );
+
+  const selected = useMemo(() => {
+    if (!ready || !selectedId) return null;
+    return ready.content.find((record) => record.id === selectedId) ?? null;
+  }, [ready, selectedId]);
   const filteredContent = useMemo(() => {
     if (!ready) return [];
     const needle = query.trim().toLowerCase();
@@ -240,6 +287,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         {selectedTab === 'content' ? (
           <HomepageFoleonContentTab
             contract={props.contract}
+            managerReadPathProven={state.managerReadPathProven}
             content={state.content}
             placements={state.placements}
             syncStatus={state.syncStatus}
@@ -248,8 +296,10 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
             onQueryChange={setQuery}
             filteredContent={filteredContent}
             selected={selected}
-            selectedId={selected?.id ?? null}
-            onSelect={setSelectedId}
+            selectedId={selectedId}
+            selectedLane={effectiveSelectedLane}
+            onSelectLane={selectLane}
+            onSelectRecord={selectRegistryRecord}
             onRefresh={load}
             setMessage={setMessage}
           />
@@ -265,6 +315,40 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
       </section>
     </Tooltip.Provider>
   );
+}
+
+function buildLanesForOrchestrator(
+  contract: IFoleonRuntimeContract,
+  content: ReadonlyArray<FoleonManagedContent>,
+  placements: ReadonlyArray<FoleonPlacement>,
+  managerReadPathProven: boolean,
+): ReturnType<typeof buildFoleonLaneViewModels> {
+  const readiness = contract.foleonReadiness;
+  const effectiveReadiness = readiness
+    ? { ...readiness, backendSafeConfigReady: true, readPathReady: true, writePathReady: readiness.writePathReady }
+    : readiness;
+  return buildFoleonLaneViewModels({
+    content,
+    placements,
+    readiness: effectiveReadiness,
+    hasLoadedReadPath: managerReadPathProven,
+  });
+}
+
+/** Lane-priority default; if that lane has no record, fall back to first sorted record for library/orphan UX. */
+function resolveInitialSelection(
+  contract: IFoleonRuntimeContract,
+  content: ReadonlyArray<FoleonManagedContent>,
+  placements: ReadonlyArray<FoleonPlacement>,
+  managerReadPathProven: boolean,
+): { readonly contentId: string | null; readonly lane: FoleonReaderLane } {
+  const lanes = buildLanesForOrchestrator(contract, content, placements, managerReadPathProven);
+  const pick = pickDefaultLaneSelection(lanes);
+  if (pick.contentId) return pick;
+  if (content.length === 0) return pick;
+  const first = sortManagedContentForHomepage(content)[0];
+  const lane = readerLaneForContent(first) ?? pick.lane;
+  return { contentId: first.id, lane };
 }
 
 class FoleonReadinessError extends Error {
