@@ -1,0 +1,572 @@
+{
+  "generatedUtc": "2026-04-26T08:17:34.5588860Z",
+  "mode": "live",
+  "targetSite": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "appId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "tenant": "hedrickbrothers.com",
+  "authMode": "DeviceLogin",
+  "listTitle": "HB Platform Configuration Registry",
+  "listInternalKey": "HB_PlatformConfigurationRegistry",
+  "listCreated": true,
+  "listUrl": "/sites/HBCentral/Lists/HB Platform Configuration Registry",
+  "fieldCount": 54,
+  "indexCount": 12,
+  "seedRequested": true,
+  "seedSummary": {
+    "inserted": 14,
+    "updated": 0,
+    "skipped": 0,
+    "records": [
+      {
+        "logicalKey": "Foleon|Production|Marketing-New|MarketingNewHostPageUrl|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|HBCentralHubSiteUrl|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|SPFx|ExpectedManifestId|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|SPFx|AcceptedFoleonOrigins|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|Backend|FoleonApiBaseUrl|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|Backend|FoleonApiResource|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Homepage|Production|SPFx|HomepageExpectedPackageVersion|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|SPFx|FoleonExpectedPackageVersion|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+        "result": "created"
+      },
+      {
+        "logicalKey": "Foleon|Production|Backend|FoleonClientSecret|True",
+        "result": "created"
+      }
+    ]
+  },
+  "warningCount": 0,
+  "warnings": [],
+  "actions": [
+    {
+      "target": "HB Platform Configuration Registry",
+      "action": "create-list",
+      "result": "created",
+      "detail": "HB_PlatformConfigurationRegistry",
+      "timestampUtc": "2026-04-26T08:15:31.8378080Z"
+    },
+    {
+      "target": "HB Platform Configuration Registry",
+      "action": "normalize-list-settings",
+      "result": "updated",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:36.9442610Z"
+    },
+    {
+      "target": "ApplicationKey",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:15:39.1176600Z"
+    },
+    {
+      "target": "ApplicationKey",
+      "action": "enable-fill-in-choice",
+      "result": "updated",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:41.2384840Z"
+    },
+    {
+      "target": "ApplicationKey",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "Required",
+      "timestampUtc": "2026-04-26T08:15:42.0056190Z"
+    },
+    {
+      "target": "ApplicationKey",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:44.2303290Z"
+    },
+    {
+      "target": "EnvironmentKey",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:15:45.8742380Z"
+    },
+    {
+      "target": "EnvironmentKey",
+      "action": "enable-fill-in-choice",
+      "result": "updated",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:47.9506980Z"
+    },
+    {
+      "target": "EnvironmentKey",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "Required",
+      "timestampUtc": "2026-04-26T08:15:48.7339310Z"
+    },
+    {
+      "target": "EnvironmentKey",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:50.7676370Z"
+    },
+    {
+      "target": "ScopeKey",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:52.2601590Z"
+    },
+    {
+      "target": "ScopeKey",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:55.0111740Z"
+    },
+    {
+      "target": "ConfigKey",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:56.4645630Z"
+    },
+    {
+      "target": "ConfigKey",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "Required",
+      "timestampUtc": "2026-04-26T08:15:57.8715240Z"
+    },
+    {
+      "target": "ConfigKey",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:59.9613480Z"
+    },
+    {
+      "target": "ConfigValue",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:16:01.6352980Z"
+    },
+    {
+      "target": "ConfigValueJson",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:16:03.8121490Z"
+    },
+    {
+      "target": "ValueType",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:16:06.0368340Z"
+    },
+    {
+      "target": "ValueType",
+      "action": "enable-fill-in-choice",
+      "result": "updated",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:16:08.1061890Z"
+    },
+    {
+      "target": "ValueType",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "Required",
+      "timestampUtc": "2026-04-26T08:16:08.8940870Z"
+    },
+    {
+      "target": "IsRequired",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-26T08:16:10.3077040Z"
+    },
+    {
+      "target": "IsRequired",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "DefaultValue, Required",
+      "timestampUtc": "2026-04-26T08:16:11.7941860Z"
+    },
+    {
+      "target": "IsSecretReference",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-26T08:16:13.2297360Z"
+    },
+    {
+      "target": "IsSecretReference",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "DefaultValue, Required",
+      "timestampUtc": "2026-04-26T08:16:14.6758990Z"
+    },
+    {
+      "target": "IsSecretReference",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:16:17.1096790Z"
+    },
+    {
+      "target": "SecretReferenceName",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:18.5043620Z"
+    },
+    {
+      "target": "SiteUrl",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:20.5703830Z"
+    },
+    {
+      "target": "ListTitle",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:22.6344140Z"
+    },
+    {
+      "target": "ListGuid",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:24.7712210Z"
+    },
+    {
+      "target": "ListGuid",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:16:27.5422300Z"
+    },
+    {
+      "target": "WebId",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:29.0469820Z"
+    },
+    {
+      "target": "TenantId",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:31.2245610Z"
+    },
+    {
+      "target": "ManifestId",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:33.3785280Z"
+    },
+    {
+      "target": "ManifestId",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:16:36.0588970Z"
+    },
+    {
+      "target": "ExpectedPackageVersion",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:37.4781920Z"
+    },
+    {
+      "target": "ApiBaseUrl",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:39.6850060Z"
+    },
+    {
+      "target": "ApiResource",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:41.7326090Z"
+    },
+    {
+      "target": "AcceptedOrigins",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:16:43.8325110Z"
+    },
+    {
+      "target": "ValidationRule",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:16:46.0218140Z"
+    },
+    {
+      "target": "ValidationStatus",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:16:48.2808180Z"
+    },
+    {
+      "target": "ValidationStatus",
+      "action": "enable-fill-in-choice",
+      "result": "updated",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:16:50.3410510Z"
+    },
+    {
+      "target": "ValidationStatus",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "Required",
+      "timestampUtc": "2026-04-26T08:16:51.1342100Z"
+    },
+    {
+      "target": "ValidationStatus",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:16:53.3952420Z"
+    },
+    {
+      "target": "LastValidatedAt",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:16:54.8639300Z"
+    },
+    {
+      "target": "OwnerGroup",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:16:56.9002440Z"
+    },
+    {
+      "target": "AdminNotes",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:16:58.9188740Z"
+    },
+    {
+      "target": "IsActive",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-26T08:17:00.9806890Z"
+    },
+    {
+      "target": "IsActive",
+      "action": "update-field-settings",
+      "result": "updated",
+      "detail": "DefaultValue, Required",
+      "timestampUtc": "2026-04-26T08:17:02.3571710Z"
+    },
+    {
+      "target": "IsActive",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:04.4299110Z"
+    },
+    {
+      "target": "EffectiveFrom",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:17:05.8421290Z"
+    },
+    {
+      "target": "EffectiveFrom",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:08.6559970Z"
+    },
+    {
+      "target": "EffectiveThrough",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:17:10.2066130Z"
+    },
+    {
+      "target": "EffectiveThrough",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:12.9266480Z"
+    },
+    {
+      "target": "LastUpdatedBy",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=User",
+      "timestampUtc": "2026-04-26T08:17:14.6604300Z"
+    },
+    {
+      "target": "LastUpdatedAt",
+      "action": "create-field",
+      "result": "created",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:17:16.8407310Z"
+    },
+    {
+      "target": "LastUpdatedAt",
+      "action": "create-index",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:19.5548510Z"
+    },
+    {
+      "target": "Foleon|Production|Marketing-New|MarketingNewHostPageUrl|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:21.3712220Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|HBCentralHubSiteUrl|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:22.4133740Z"
+    },
+    {
+      "target": "Foleon|Production|SPFx|ExpectedManifestId|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:23.3206340Z"
+    },
+    {
+      "target": "Foleon|Production|SPFx|AcceptedFoleonOrigins|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:24.2047090Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:25.1069080Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:25.9927740Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:26.9084470Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:27.7915780Z"
+    },
+    {
+      "target": "Foleon|Production|Backend|FoleonApiBaseUrl|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:28.7125250Z"
+    },
+    {
+      "target": "Foleon|Production|Backend|FoleonApiResource|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:29.6012070Z"
+    },
+    {
+      "target": "Homepage|Production|SPFx|HomepageExpectedPackageVersion|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:30.5223820Z"
+    },
+    {
+      "target": "Foleon|Production|SPFx|FoleonExpectedPackageVersion|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:31.3968190Z"
+    },
+    {
+      "target": "FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:32.3054060Z"
+    },
+    {
+      "target": "Foleon|Production|Backend|FoleonClientSecret|True",
+      "action": "seed-record",
+      "result": "created",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:17:33.2118780Z"
+    }
+  ]
+}

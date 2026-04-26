@@ -8,6 +8,7 @@
 - project: Projects, projectViewerGroups
 - page/destination: HB Article Destination Pages, Homepage Project Spotlights
 - template/configuration: HB Article Template Registry, Hero Banner Config
+- platform/configuration: HB Platform Configuration Registry
 - command-band/configuration: Priority Actions Band Config, Priority Actions Band Items
 - workflow/history: HB Article Workflow History
 - error/audit: HB Article Publishing Errors, Kudos Audit Events
@@ -72,6 +73,14 @@
 - Outbound lookup dependencies: AppPrincipals, User Information List.
 - Critical key-like fields: ArticleId, ComplianceAssetId, Destination, ID, ManualSortOverride, PageId, ProjectId, TemplateKey, TemplateOverrideAllowed, WorkflowState, _ComplianceTagUserId.
 - Likely downstream consumers: webparts/services that query this list by internal-name contracts (verify in app code for exact consumers).
+
+### HB Platform Configuration Registry
+- Role: centralized non-secret configuration registry for platform applications and validation state.
+- Outbound lookup dependencies: User Information List for optional `LastUpdatedBy` only.
+- Logical key: `ApplicationKey + EnvironmentKey + ScopeKey + ConfigKey + IsActive` (not enforced natively by SharePoint).
+- Security posture: secret-backed rows store only `SecretReferenceName`; `ConfigValue` and `ConfigValueJson` must not contain secrets.
+- Provisioning and validation: `tools/pnp-runner-local/scripts/provision-platform-configuration-registry.ps1` and `tools/pnp-runner-local/scripts/validate-platform-configuration-registry.ps1`.
+- Full field table: `lists/hb-platform-configuration-registry.md`.
 
 ### HB Foleon Content Registry (provisioned by Foleon SPFx feature on install)
 - Role: canonical registry of Foleon Docs eligible for HB Central discovery/reader/content-hub.

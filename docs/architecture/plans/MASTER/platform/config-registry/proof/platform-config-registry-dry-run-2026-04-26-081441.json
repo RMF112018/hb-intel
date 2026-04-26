@@ -1,0 +1,481 @@
+{
+  "generatedUtc": "2026-04-26T08:15:04.5180940Z",
+  "mode": "dry-run",
+  "targetSite": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "appId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "tenant": "hedrickbrothers.com",
+  "authMode": "DeviceLogin",
+  "listTitle": "HB Platform Configuration Registry",
+  "listInternalKey": "HB_PlatformConfigurationRegistry",
+  "listCreated": false,
+  "listUrl": "/sites/HBCentral/Lists/HB Platform Configuration Registry",
+  "fieldCount": 31,
+  "indexCount": 12,
+  "seedRequested": true,
+  "seedSummary": {
+    "inserted": 14,
+    "updated": 0,
+    "skipped": 0,
+    "records": [
+      {
+        "logicalKey": "Foleon|Production|Marketing-New|MarketingNewHostPageUrl|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|HBCentralHubSiteUrl|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|SPFx|ExpectedManifestId|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|SPFx|AcceptedFoleonOrigins|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|Backend|FoleonApiBaseUrl|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|Backend|FoleonApiResource|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Homepage|Production|SPFx|HomepageExpectedPackageVersion|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|SPFx|FoleonExpectedPackageVersion|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+        "result": "would-create"
+      },
+      {
+        "logicalKey": "Foleon|Production|Backend|FoleonClientSecret|True",
+        "result": "would-create"
+      }
+    ]
+  },
+  "warningCount": 0,
+  "warnings": [],
+  "actions": [
+    {
+      "target": "HB Platform Configuration Registry",
+      "action": "create-list",
+      "result": "would-create",
+      "detail": "HB_PlatformConfigurationRegistry",
+      "timestampUtc": "2026-04-26T08:15:04.4791870Z"
+    },
+    {
+      "target": "ApplicationKey",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:15:04.4863240Z"
+    },
+    {
+      "target": "ApplicationKey",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4877880Z"
+    },
+    {
+      "target": "EnvironmentKey",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:15:04.4882630Z"
+    },
+    {
+      "target": "EnvironmentKey",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4892100Z"
+    },
+    {
+      "target": "ScopeKey",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4898850Z"
+    },
+    {
+      "target": "ScopeKey",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4902380Z"
+    },
+    {
+      "target": "ConfigKey",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4907750Z"
+    },
+    {
+      "target": "ConfigKey",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4915370Z"
+    },
+    {
+      "target": "ConfigValue",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:15:04.4921970Z"
+    },
+    {
+      "target": "ConfigValueJson",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:15:04.4926560Z"
+    },
+    {
+      "target": "ValueType",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:15:04.4934210Z"
+    },
+    {
+      "target": "IsRequired",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-26T08:15:04.4937320Z"
+    },
+    {
+      "target": "IsSecretReference",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-26T08:15:04.4940090Z"
+    },
+    {
+      "target": "IsSecretReference",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4942860Z"
+    },
+    {
+      "target": "SecretReferenceName",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4945620Z"
+    },
+    {
+      "target": "SiteUrl",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4948370Z"
+    },
+    {
+      "target": "ListTitle",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4951120Z"
+    },
+    {
+      "target": "ListGuid",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4953700Z"
+    },
+    {
+      "target": "ListGuid",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4956120Z"
+    },
+    {
+      "target": "WebId",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4958610Z"
+    },
+    {
+      "target": "TenantId",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4961080Z"
+    },
+    {
+      "target": "ManifestId",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4963500Z"
+    },
+    {
+      "target": "ManifestId",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.4965860Z"
+    },
+    {
+      "target": "ExpectedPackageVersion",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4969500Z"
+    },
+    {
+      "target": "ApiBaseUrl",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4971930Z"
+    },
+    {
+      "target": "ApiResource",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.4974510Z"
+    },
+    {
+      "target": "AcceptedOrigins",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:15:04.4977760Z"
+    },
+    {
+      "target": "ValidationRule",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:15:04.4983580Z"
+    },
+    {
+      "target": "ValidationStatus",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Choice",
+      "timestampUtc": "2026-04-26T08:15:04.4986920Z"
+    },
+    {
+      "target": "ValidationStatus",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5034880Z"
+    },
+    {
+      "target": "LastValidatedAt",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:15:04.5038340Z"
+    },
+    {
+      "target": "OwnerGroup",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Text",
+      "timestampUtc": "2026-04-26T08:15:04.5040580Z"
+    },
+    {
+      "target": "AdminNotes",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Note",
+      "timestampUtc": "2026-04-26T08:15:04.5042890Z"
+    },
+    {
+      "target": "IsActive",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=Boolean",
+      "timestampUtc": "2026-04-26T08:15:04.5045050Z"
+    },
+    {
+      "target": "IsActive",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5047040Z"
+    },
+    {
+      "target": "EffectiveFrom",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:15:04.5049230Z"
+    },
+    {
+      "target": "EffectiveFrom",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5051200Z"
+    },
+    {
+      "target": "EffectiveThrough",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:15:04.5053180Z"
+    },
+    {
+      "target": "EffectiveThrough",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5057470Z"
+    },
+    {
+      "target": "LastUpdatedBy",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=User",
+      "timestampUtc": "2026-04-26T08:15:04.5060090Z"
+    },
+    {
+      "target": "LastUpdatedAt",
+      "action": "create-field",
+      "result": "would-create",
+      "detail": "type=DateTime",
+      "timestampUtc": "2026-04-26T08:15:04.5062420Z"
+    },
+    {
+      "target": "LastUpdatedAt",
+      "action": "create-index",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5064470Z"
+    },
+    {
+      "target": "Foleon|Production|Marketing-New|MarketingNewHostPageUrl|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5095200Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|HBCentralHubSiteUrl|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5098090Z"
+    },
+    {
+      "target": "Foleon|Production|SPFx|ExpectedManifestId|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5100470Z"
+    },
+    {
+      "target": "Foleon|Production|SPFx|AcceptedFoleonOrigins|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5102670Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5104930Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5107050Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5109300Z"
+    },
+    {
+      "target": "Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5113610Z"
+    },
+    {
+      "target": "Foleon|Production|Backend|FoleonApiBaseUrl|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5117500Z"
+    },
+    {
+      "target": "Foleon|Production|Backend|FoleonApiResource|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5120460Z"
+    },
+    {
+      "target": "Homepage|Production|SPFx|HomepageExpectedPackageVersion|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5123000Z"
+    },
+    {
+      "target": "Foleon|Production|SPFx|FoleonExpectedPackageVersion|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5126600Z"
+    },
+    {
+      "target": "FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5129980Z"
+    },
+    {
+      "target": "Foleon|Production|Backend|FoleonClientSecret|True",
+      "action": "seed-record",
+      "result": "would-create",
+      "detail": "",
+      "timestampUtc": "2026-04-26T08:15:04.5132610Z"
+    }
+  ]
+}

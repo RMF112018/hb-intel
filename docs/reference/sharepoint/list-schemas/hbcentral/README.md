@@ -7,7 +7,7 @@
 - Audience: engineers, maintainers, and code agents building features against HBCentral data contracts.
 
 ## 2. Scope
-- Extracted all resolvable lists/libraries visible at the site (42 resolved, 0 failed in baseline extraction), added phase-01 command-band list references provisioned on April 17, 2026, and added Safety Record Keeping list reports from current repo schema authority seams.
+- Extracted all resolvable lists/libraries visible at the site (42 resolved, 0 failed in baseline extraction), added phase-01 command-band list references provisioned on April 17, 2026, added Safety Record Keeping list reports from current repo schema authority seams, and added the platform configuration registry provisioning contract.
 - Inventory separates business/custom lists, system/OOB lists, hidden/system lists, and document libraries.
 - Detailed per-list reports include all business/custom lists plus implementation-relevant system lists.
 - Libraries are inventoried; detailed reports are focused on list schemas unless a library behaves as app data store.
@@ -48,6 +48,7 @@
 | HB Article Template Registry | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Article Workflow History | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Articles | business/custom | false | 0 | Yes | Implementation-relevant |
+| HB Platform Configuration Registry | business/custom | false | n/a | Yes | Provisioning contract; target registry for non-secret platform configuration |
 | HB Foleon Content Registry | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
 | HB Foleon Homepage Placements | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
 | HB Foleon Interaction Events | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
