@@ -386,6 +386,14 @@ describe('FoleonReaderModule', () => {
     expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
     expect(document.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
     expect(document.querySelectorAll('[data-foleon-preview-route]')).toHaveLength(3);
+    // Phase-04 Wave-01 Prompt-02: each lane resolves to its own registered
+    // layout component identified by a unique data-foleon-reader-layout
+    // marker. Tone alone is no longer the proof of lane differentiation.
+    expect(document.querySelector('[data-foleon-reader-layout="project-spotlight"]')).not.toBeNull();
+    expect(document.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
+    expect(document.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-foleon-reader-layout]')).toHaveLength(3);
+    expect(document.querySelectorAll('[data-foleon-reader-state="preview"]')).toHaveLength(3);
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
   });

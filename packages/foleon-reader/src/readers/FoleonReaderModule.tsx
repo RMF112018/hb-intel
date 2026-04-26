@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { HbcButton } from '@hbc/ui-kit/homepage';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IFoleonRuntimeContract } from '../runtime/embeddedRuntimeContract.js';
 import type { FoleonContentRecord } from '../types/foleon-content.types.js';
 import type { FoleonGateReason } from '../types/foleon-runtime.types.js';
@@ -11,9 +10,31 @@ import {
   type FoleonReaderResolution,
 } from '../services/FoleonReaderContentService.js';
 import type { FoleonReaderModuleConfig } from './readerConfigs.js';
-import { FoleonReaderPreview } from './FoleonReaderPreview.js';
-import styles from './FoleonReaderModule.module.css';
+import {
+  createPreviewFoleonReaderViewModel,
+  createReadyFoleonReaderViewModel,
+  resolveFoleonReaderLayoutKey,
+} from './FoleonReaderViewModel.js';
+import { getFoleonReaderLayout } from './FoleonReaderLayoutRegistry.js';
 
+// ---------------------------------------------------------------------------
+// Foleon reader orchestrator
+// ---------------------------------------------------------------------------
+// Owns the loading / error / blocked / preview / ready state machine,
+// iframe lifecycle, gate telemetry, and mobile lazy-mount. Visual
+// composition is delegated to per-lane layout components via the registry
+// in `FoleonReaderLayoutRegistry`. The orchestrator passes a normalized
+// `FoleonReaderViewModel` plus a pre-rendered iframe surface to the
+// resolved layout component.
+// ---------------------------------------------------------------------------
+
+/**
+ * Tone is preserved on the public prop surface for backward compatibility.
+ * Internally the orchestrator resolves the lane's layout key from
+ * `config.readerKey` via the typed mapper in `FoleonReaderViewModel.ts`,
+ * which is the authoritative seam used by the registry. Tone is no longer
+ * the source of layout differentiation.
+ */
 export type FoleonReaderTone = 'spotlight' | 'pulse' | 'leadership';
 
 export type FoleonEmbeddedReaderStatus =
@@ -47,7 +68,6 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
     onReaderOpen,
     onStatusChange,
     pageContext,
-    tone,
   } = props;
   const [state, setState] = useState<ReaderModuleState>({ kind: 'loading' });
   const [readerOpen, setReaderOpen] = useState(false);
@@ -130,6 +150,12 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
     onReaderOpen(record, reason, pageContext);
   }, [onReaderOpen, pageContext]);
 
+  const handleActivateMobileReader = useCallback((): void => {
+    setReaderOpen(true);
+  }, []);
+
+  const layoutKey = useMemo(() => resolveFoleonReaderLayoutKey(config), [config]);
+
   if (state.kind === 'loading') {
     return <FoleonLoadingState label={`Loading ${config.title} reader...`} />;
   }
@@ -141,14 +167,6 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
   if (resolution.kind === 'error') {
     return <FoleonError title="Unable to load reader" description={resolution.reason} />;
   }
-  if (resolution.kind === 'preview') {
-    return (
-      <FoleonReaderPreview
-        config={config}
-        tone={tone}
-      />
-    );
-  }
   if (resolution.kind === 'blocked') {
     return (
       <FoleonError
@@ -157,75 +175,45 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
       />
     );
   }
+  if (!layoutKey) {
+    return (
+      <FoleonError
+        title="Unable to load reader"
+        description={`No layout is registered for reader key "${config.readerKey}".`}
+      />
+    );
+  }
+
+  const Layout = getFoleonReaderLayout(layoutKey);
+
+  if (resolution.kind === 'preview') {
+    const previewViewModel = createPreviewFoleonReaderViewModel(config);
+    return <Layout viewModel={previewViewModel} iframeSurface={null} />;
+  }
 
   const record = resolution.record;
   const shouldMountIframe = !isMobile || readerOpen;
-  const laneLabels = readerToneLabels(tone);
-  const monthlyLabel = tone === 'spotlight'
-    ? formatDate(record.issueDate ?? record.publishedOn) ?? laneLabels.freshnessFallback
-    : formatDate(record.lastEditorialUpdate ?? record.publishedOn) ?? laneLabels.freshnessFallback;
-  const shellClass = `${styles.shell} ${readerToneClass(tone)}`;
+  const mobileGateActive = isMobile && !readerOpen;
 
-  return (
-    <section className={shellClass} aria-labelledby={`${config.readerKey}-reader-title`}>
-      <div className={styles.chrome}>
-        <header className={styles.hero}>
-          <div>
-            <p className={styles.eyebrow}>
-              {laneLabels.eyebrow}
-            </p>
-            <h2 className={styles.title} id={`${config.readerKey}-reader-title`}>{record.title}</h2>
-            {record.summary ? <p className={styles.summary}>{record.summary}</p> : null}
-            <div className={styles.actions}>
-              {isMobile && !readerOpen ? (
-                <HbcButton onClick={(): void => setReaderOpen(true)}>Open reader</HbcButton>
-              ) : null}
-              <HbcButton variant="secondary" onClick={onOpenArchive}>
-                Open full archive
-              </HbcButton>
-              <span className={styles.archiveNote}>Lane archive filtering comes in a later workflow.</span>
-            </div>
-          </div>
-          <aside className={styles.rail} aria-label={`${config.title} metadata`}>
-            <div>
-              <p className={styles.railLabel}>{laneLabels.freshnessLabel}</p>
-              <p className={styles.railValue}>{monthlyLabel}</p>
-            </div>
-            <div>
-              <p className={styles.railLabel}>Audience</p>
-              <p className={styles.railValue}>{record.primaryAudience ?? 'Companywide'}</p>
-            </div>
-            <div>
-              <p className={styles.railLabel}>Archive group</p>
-              <p className={styles.railValue}>{record.archiveGroup ?? 'Archive coming soon'}</p>
-            </div>
-          </aside>
-        </header>
-        {resolution.warnings.length > 0 ? (
-          <p className={styles.warning}>Reader resolved with admin warnings for the Manager workflow.</p>
-        ) : null}
-        {isMobile && !readerOpen ? (
-          <div className={styles.mobileCard} aria-label={`${config.title} collapsed mobile reader`}>
-            <p className={styles.railLabel}>Reader ready</p>
-            <p className={styles.railValue}>Open the publication when you are ready to load the Foleon iframe.</p>
-          </div>
-        ) : null}
-        <div className={styles.readerStage} data-open={shouldMountIframe ? 'true' : 'false'}>
-          {shouldMountIframe ? (
-            <div className={styles.frameWrap}>
-              <FoleonIframeHost
-                src={resolution.embedUrl}
-                title={`${config.title}: ${record.title}`}
-                policy={contract.originPolicy}
-                onLoaded={(): void => handleIframeLoaded(record)}
-                onError={(): void => onEmbedError(record, 'ok', pageContext)}
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </section>
-  );
+  const readyViewModel = createReadyFoleonReaderViewModel(config, {
+    resolution,
+    shouldMountIframe,
+    mobileGateActive,
+    onActivateMobileReader: handleActivateMobileReader,
+    onOpenArchive,
+  });
+
+  const iframeSurface = shouldMountIframe ? (
+    <FoleonIframeHost
+      src={resolution.embedUrl}
+      title={readyViewModel.iframe?.title ?? `${config.title}: ${record.title}`}
+      policy={contract.originPolicy}
+      onLoaded={(): void => handleIframeLoaded(record)}
+      onError={(): void => onEmbedError(record, 'ok', pageContext)}
+    />
+  ) : null;
+
+  return <Layout viewModel={readyViewModel} iframeSurface={iframeSurface} />;
 }
 
 type ReaderModuleState =
@@ -248,49 +236,6 @@ function useIsMobileReader(): boolean {
     return (): void => query.removeEventListener('change', update);
   }, []);
   return isMobile;
-}
-
-function formatDate(raw: string | undefined): string | null {
-  if (!raw) return null;
-  const parsed = Date.parse(raw);
-  if (Number.isNaN(parsed)) return null;
-  return new Date(parsed).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-function readerToneClass(tone: FoleonReaderTone): string {
-  if (tone === 'spotlight') return styles.spotlight;
-  if (tone === 'pulse') return styles.pulse;
-  return styles.leadership;
-}
-
-function readerToneLabels(tone: FoleonReaderTone): {
-  readonly eyebrow: string;
-  readonly freshnessLabel: string;
-  readonly freshnessFallback: string;
-} {
-  if (tone === 'spotlight') {
-    return {
-      eyebrow: 'Project Spotlight Reader',
-      freshnessLabel: 'Monthly status',
-      freshnessFallback: 'Monthly edition',
-    };
-  }
-  if (tone === 'pulse') {
-    return {
-      eyebrow: 'Company Pulse Reader',
-      freshnessLabel: 'Latest update',
-      freshnessFallback: 'Latest update',
-    };
-  }
-  return {
-    eyebrow: 'Leadership Message Reader',
-    freshnessLabel: 'Executive update',
-    freshnessFallback: 'Leadership edition',
-  };
 }
 
 function gateReasonFromBlocked(reason: BlockedResolutionReason): FoleonGateReason {

@@ -42,3 +42,26 @@ export type {
 export type {
   FoleonReaderResolution,
 } from './services/FoleonReaderContentService.js';
+export type {
+  FoleonReaderLayoutKey,
+  FoleonReaderViewModel,
+  FoleonReaderViewState,
+  FoleonReaderChip,
+  FoleonReaderFact,
+  FoleonReaderSupportItem,
+  FoleonReaderAction,
+  FoleonReaderActionVariant,
+  FoleonReaderIframeModel,
+  FoleonReaderMobileGate,
+} from './readers/FoleonReaderViewModel.js';
+export {
+  resolveFoleonReaderLayoutKey,
+} from './readers/FoleonReaderViewModel.js';
+export type {
+  FoleonReaderLayoutProps,
+  FoleonReaderLayoutComponent,
+} from './readers/FoleonReaderLayoutRegistry.js';
+export {
+  FOLEON_READER_LAYOUTS,
+  getFoleonReaderLayout,
+} from './readers/FoleonReaderLayoutRegistry.js';
