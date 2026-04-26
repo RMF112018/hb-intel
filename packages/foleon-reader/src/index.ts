@@ -65,3 +65,21 @@ export {
   FOLEON_READER_LAYOUTS,
   getFoleonReaderLayout,
 } from './readers/FoleonReaderLayoutRegistry.js';
+// Phase-04 Wave-01 Prompt-04A — shared Foleon full-window viewer contract.
+// Conservative public surface: types, provider, and hook only. The viewer
+// component itself and the target adapters stay internal.
+export type {
+  FoleonViewerSource,
+  FoleonViewerDisabledReason,
+  FoleonViewerTarget,
+  FoleonViewerOpenResult,
+  FoleonArticleCardViewModel,
+} from './readers/FoleonViewerTypes.js';
+export type {
+  FoleonFullWindowViewerContextValue,
+  FoleonFullWindowViewerProviderProps,
+} from './components/FoleonFullWindowViewerProvider.js';
+export {
+  FoleonFullWindowViewerProvider,
+  useFoleonFullWindowViewer,
+} from './components/FoleonFullWindowViewerProvider.js';

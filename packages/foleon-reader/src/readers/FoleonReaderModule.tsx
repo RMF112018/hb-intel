@@ -16,6 +16,8 @@ import {
   resolveFoleonReaderLayoutKey,
 } from './FoleonReaderViewModel.js';
 import { getFoleonReaderLayout } from './FoleonReaderLayoutRegistry.js';
+import { FoleonFullWindowViewerProvider } from '../components/FoleonFullWindowViewerProvider.js';
+import type { FoleonViewerTarget } from './FoleonViewerTypes.js';
 
 // ---------------------------------------------------------------------------
 // Foleon reader orchestrator
@@ -55,6 +57,16 @@ interface FoleonReaderModuleProps {
   readonly onEmbedError: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
   readonly onGateBlocked: (gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
   readonly onStatusChange?: (status: FoleonEmbeddedReaderStatus) => void;
+  /**
+   * Phase-04 Wave-01 Prompt-04A — full-window viewer telemetry hooks.
+   * Distinct from the inline iframe lifecycle (`onReaderOpen` / etc.).
+   * The provider is lane-scoped; each `FoleonReaderModule` instance
+   * creates its own provider and emits these events independently.
+   */
+  readonly onViewerOpen?: (target: FoleonViewerTarget) => void;
+  readonly onViewerClose?: (target: FoleonViewerTarget) => void;
+  readonly onViewerIframeLoaded?: (target: FoleonViewerTarget) => void;
+  readonly onViewerIframeError?: (target: FoleonViewerTarget) => void;
 }
 
 export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactNode {
@@ -67,6 +79,10 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
     onReaderClose,
     onReaderOpen,
     onStatusChange,
+    onViewerOpen,
+    onViewerClose,
+    onViewerIframeLoaded,
+    onViewerIframeError,
     pageContext,
   } = props;
   const [state, setState] = useState<ReaderModuleState>({ kind: 'loading' });
@@ -188,7 +204,17 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
 
   if (resolution.kind === 'preview') {
     const previewViewModel = createPreviewFoleonReaderViewModel(config);
-    return <Layout viewModel={previewViewModel} iframeSurface={null} />;
+    return (
+      <FoleonFullWindowViewerProvider
+        originPolicy={contract.originPolicy}
+        onViewerOpen={onViewerOpen}
+        onViewerClose={onViewerClose}
+        onViewerIframeLoaded={onViewerIframeLoaded}
+        onViewerIframeError={onViewerIframeError}
+      >
+        <Layout viewModel={previewViewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>
+    );
   }
 
   const record = resolution.record;
@@ -213,7 +239,17 @@ export function FoleonReaderModule(props: FoleonReaderModuleProps): React.ReactN
     />
   ) : null;
 
-  return <Layout viewModel={readyViewModel} iframeSurface={iframeSurface} />;
+  return (
+    <FoleonFullWindowViewerProvider
+      originPolicy={contract.originPolicy}
+      onViewerOpen={onViewerOpen}
+      onViewerClose={onViewerClose}
+      onViewerIframeLoaded={onViewerIframeLoaded}
+      onViewerIframeError={onViewerIframeError}
+    >
+      <Layout viewModel={readyViewModel} iframeSurface={iframeSurface} />
+    </FoleonFullWindowViewerProvider>
+  );
 }
 
 type ReaderModuleState =

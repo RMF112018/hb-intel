@@ -1,6 +1,11 @@
 import type { FoleonContentRecord, FoleonReaderKey } from '../types/foleon-content.types.js';
 import type { FoleonReaderResolution } from '../services/FoleonReaderContentService.js';
 import type { FoleonReaderModuleConfig } from './readerConfigs.js';
+import type { FoleonArticleCardViewModel } from './FoleonViewerTypes.js';
+import {
+  createPreviewFoleonViewerTarget,
+  createReadyFoleonViewerTarget,
+} from './FoleonViewerTypes.js';
 
 // ---------------------------------------------------------------------------
 // Foleon reader — shared view model + lane layout key mapper
@@ -176,6 +181,15 @@ export interface FoleonReaderViewModel {
   readonly categoryChips?: readonly FoleonReaderCategoryChip[];
   /** Company Pulse preview only. Ready state leaves this `undefined`. */
   readonly pulseTimeline?: readonly FoleonReaderPulseTimelineEntry[];
+  /**
+   * Article-card view model representing the lane's primary article launch
+   * surface. Always populated for governed lanes (Spotlight / Pulse /
+   * Leadership) in both preview and ready states. Layouts that wire the
+   * shared full-window viewer (Prompt 04B and later) consume this card and
+   * call `useFoleonFullWindowViewer().openViewer(card.target)` from a
+   * launch control. Disabled targets carry an explicit `target.disabledReason`.
+   */
+  readonly primaryArticle?: FoleonArticleCardViewModel;
 }
 
 // ---------------------------------------------------------------------------
@@ -429,6 +443,24 @@ export function createPreviewFoleonReaderViewModel(
     briefingDigest,
     categoryChips,
     pulseTimeline,
+    primaryArticle: createPreviewArticleCard(config, lane, preview),
+  };
+}
+
+function createPreviewArticleCard(
+  config: FoleonReaderModuleConfig,
+  lane: FoleonReaderLayoutKey,
+  preview: LanePreviewCopy,
+): FoleonArticleCardViewModel {
+  return {
+    id: `${config.readerKey}-preview-card`,
+    title: preview.title,
+    summary: preview.description,
+    eyebrow: LANE_LABELS[lane].eyebrow,
+    category: preview.cadenceLabel,
+    dateline: preview.statusLabel,
+    previewOnly: true,
+    target: createPreviewFoleonViewerTarget(config),
   };
 }
 
@@ -607,5 +639,19 @@ export function createReadyFoleonReaderViewModel(
     briefingDigest,
     categoryChips,
     pulseTimeline,
+    primaryArticle: {
+      id: `${config.readerKey}-active-${record.id}`,
+      title: record.title,
+      summary: record.summary,
+      eyebrow: labels.eyebrow,
+      category: record.contentTypeKey,
+      dateline: freshnessValue,
+      previewOnly: false,
+      target: createReadyFoleonViewerTarget({
+        config,
+        record,
+        embedUrl: resolution.embedUrl,
+      }),
+    },
   };
 }
