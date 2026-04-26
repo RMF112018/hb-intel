@@ -83,6 +83,16 @@ $ExpectedSeedKeys = @(
   "Foleon|$EnvironmentKey|Backend|FoleonClientSecret|True"
 )
 
+$ConfirmedBackendBaseUrl = "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net"
+$ConfirmedValueExpectations = @(
+  @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonContentRegistryListGuid"; ConfigValue = "2e57615d-457e-49b8-aef3-038e85cbe068"; ListGuid = "2e57615d-457e-49b8-aef3-038e85cbe068"; ValueType = "Guid" },
+  @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonHomepagePlacementsListGuid"; ConfigValue = "5b4754b6-9411-453d-8e16-1247ec5b476a"; ListGuid = "5b4754b6-9411-453d-8e16-1247ec5b476a"; ValueType = "Guid" },
+  @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonInteractionEventsListGuid"; ConfigValue = "7786b5ac-d1e5-418b-9951-8e797dda3d7a"; ListGuid = "7786b5ac-d1e5-418b-9951-8e797dda3d7a"; ValueType = "Guid" },
+  @{ ApplicationKey = "Foleon"; ScopeKey = "HBCentral"; ConfigKey = "FoleonSyncRunsListGuid"; ConfigValue = "f29dabe9-16c8-4c67-ab9e-98e12f771680"; ListGuid = "f29dabe9-16c8-4c67-ab9e-98e12f771680"; ValueType = "Guid" },
+  @{ ApplicationKey = "FunctionApp"; ScopeKey = "Backend"; ConfigKey = "BackendFunctionAppUrl"; ConfigValue = $ConfirmedBackendBaseUrl; ApiBaseUrl = $ConfirmedBackendBaseUrl; ValueType = "Url" },
+  @{ ApplicationKey = "Foleon"; ScopeKey = "Backend"; ConfigKey = "FoleonApiBaseUrl"; ConfigValue = $ConfirmedBackendBaseUrl; ApiBaseUrl = $ConfirmedBackendBaseUrl; ValueType = "Url" }
+)
+
 function Connect-RegistryTenant {
   $params = @{
     Url = $SiteUrl
@@ -174,6 +184,20 @@ function Test-SecretLikeKey {
   return $Key -match "(?i)(secret|password|passwd|token|credential|certificate|privatekey)"
 }
 
+function Test-GuidText {
+  param([string]$Value)
+  $parsed = [guid]::Empty
+  return [guid]::TryParse($Value, [ref]$parsed)
+}
+
+function Test-BackendUrlText {
+  param([string]$Value)
+  if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
+  if (-not $Value.StartsWith("https://", [System.StringComparison]::OrdinalIgnoreCase)) { return $false }
+  if ($Value -match "/api(/|$)") { return $false }
+  return $true
+}
+
 $checks = [System.Collections.Generic.List[object]]::new()
 $warnings = [System.Collections.Generic.List[string]]::new()
 $failures = [System.Collections.Generic.List[string]]::new()
@@ -243,7 +267,8 @@ if ($null -ne $list) {
   try {
     $items = @(Get-PnPListItem -List $ListTitle -PageSize 2000 -Fields @(
           "Title", "ApplicationKey", "EnvironmentKey", "ScopeKey", "ConfigKey", "ConfigValue", "ConfigValueJson",
-          "ValueType", "IsRequired", "IsSecretReference", "SecretReferenceName", "ValidationStatus", "IsActive"
+          "ValueType", "IsRequired", "IsSecretReference", "SecretReferenceName", "ListGuid", "ApiBaseUrl",
+          "ValidationStatus", "IsActive"
         ))
     $readAccess = $true
     Add-Check -Checks $checks -Name "read capability" -Passed $true -Detail "items=$($items.Count)"
@@ -270,6 +295,62 @@ if ($readAccess) {
       $seedFoundCount += 1
     } else {
       $failures.Add("Missing expected seed record: $expectedKey.") | Out-Null
+    }
+  }
+
+  foreach ($expectedValue in $ConfirmedValueExpectations) {
+    $expectedKey = "$($expectedValue.ApplicationKey)|$EnvironmentKey|$($expectedValue.ScopeKey)|$($expectedValue.ConfigKey)|True"
+    $found = $itemsByLogicalKey.ContainsKey($expectedKey)
+    Add-Check -Checks $checks -Name "confirmed value record exists: $expectedKey" -Passed $found
+    if (-not $found) {
+      $failures.Add("Missing confirmed-value record: $expectedKey.") | Out-Null
+      continue
+    }
+
+    $item = $itemsByLogicalKey[$expectedKey][0]
+    $configValue = Get-ItemTextValue -Item $item -FieldName "ConfigValue"
+    $valueType = Get-ItemTextValue -Item $item -FieldName "ValueType"
+    $apiBaseUrl = Get-ItemTextValue -Item $item -FieldName "ApiBaseUrl"
+    $listGuid = Get-ItemTextValue -Item $item -FieldName "ListGuid"
+
+    $configValueMatches = $configValue -eq [string]$expectedValue.ConfigValue
+    Add-Check -Checks $checks -Name "confirmed ConfigValue: $($expectedValue.ConfigKey)" -Passed $configValueMatches
+    if (-not $configValueMatches) {
+      $failures.Add("$($expectedValue.ConfigKey): ConfigValue mismatch.") | Out-Null
+    }
+
+    $valueTypeMatches = $valueType -eq [string]$expectedValue.ValueType
+    Add-Check -Checks $checks -Name "confirmed ValueType: $($expectedValue.ConfigKey)" -Passed $valueTypeMatches -Detail "actual=$valueType"
+    if (-not $valueTypeMatches) {
+      $failures.Add("$($expectedValue.ConfigKey): ValueType mismatch.") | Out-Null
+    }
+
+    if ($expectedValue.ValueType -eq "Guid") {
+      $guidConfigValid = Test-GuidText -Value $configValue
+      $listGuidMatches = $listGuid -eq [string]$expectedValue.ListGuid
+      $listGuidValid = Test-GuidText -Value $listGuid
+      Add-Check -Checks $checks -Name "confirmed GUID ConfigValue parses: $($expectedValue.ConfigKey)" -Passed $guidConfigValid
+      Add-Check -Checks $checks -Name "confirmed ListGuid: $($expectedValue.ConfigKey)" -Passed ($listGuidMatches -and $listGuidValid)
+      if (-not $guidConfigValid) {
+        $failures.Add("$($expectedValue.ConfigKey): ConfigValue is not valid GUID text.") | Out-Null
+      }
+      if (-not ($listGuidMatches -and $listGuidValid)) {
+        $failures.Add("$($expectedValue.ConfigKey): ListGuid mismatch or invalid GUID text.") | Out-Null
+      }
+    }
+
+    if ($expectedValue.ValueType -eq "Url") {
+      $configUrlValid = Test-BackendUrlText -Value $configValue
+      $apiUrlMatches = $apiBaseUrl -eq [string]$expectedValue.ApiBaseUrl
+      $apiUrlValid = Test-BackendUrlText -Value $apiBaseUrl
+      Add-Check -Checks $checks -Name "confirmed backend ConfigValue URL: $($expectedValue.ConfigKey)" -Passed $configUrlValid
+      Add-Check -Checks $checks -Name "confirmed ApiBaseUrl URL: $($expectedValue.ConfigKey)" -Passed ($apiUrlMatches -and $apiUrlValid)
+      if (-not $configUrlValid) {
+        $failures.Add("$($expectedValue.ConfigKey): ConfigValue must include https:// and must not include /api.") | Out-Null
+      }
+      if (-not ($apiUrlMatches -and $apiUrlValid)) {
+        $failures.Add("$($expectedValue.ConfigKey): ApiBaseUrl mismatch or includes invalid URL shape.") | Out-Null
+      }
     }
   }
 

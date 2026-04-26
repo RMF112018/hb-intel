@@ -1,0 +1,155 @@
+{
+  "generatedUtc": "2026-04-26T08:40:45.4731860Z",
+  "mode": "live",
+  "targetSite": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "appId": "08c399eb-a394-4087-b859-659d493f8dc7",
+  "tenant": "hedrickbrothers.com",
+  "authMode": "DeviceLogin",
+  "listTitle": "HB Platform Configuration Registry",
+  "listUrl": "/sites/HBCentral/Lists/HB Platform Configuration Registry",
+  "intendedUpdateCount": 6,
+  "expectedUpdateCount": 6,
+  "updates": [
+    {
+      "configKey": "FoleonContentRegistryListGuid",
+      "logicalKey": "Foleon|Production|HBCentral|FoleonContentRegistryListGuid|True",
+      "itemId": 5,
+      "scopeKey": "HBCentral",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ListGuid",
+        "ValidationStatus"
+      ],
+      "targetValues": {
+        "ValidationStatus": "Not Validated",
+        "LastUpdatedAt": "2026-04-26T08:40:37.8227980Z",
+        "ListGuid": "2e57615d-457e-49b8-aef3-038e85cbe068",
+        "ValueType": "Guid",
+        "ConfigValue": "2e57615d-457e-49b8-aef3-038e85cbe068",
+        "AdminNotes": "Populated with confirmed tenant list GUID after Prompt 00 provisioning. Pending registry-reader/runtime validation."
+      }
+    },
+    {
+      "configKey": "FoleonHomepagePlacementsListGuid",
+      "logicalKey": "Foleon|Production|HBCentral|FoleonHomepagePlacementsListGuid|True",
+      "itemId": 6,
+      "scopeKey": "HBCentral",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ListGuid",
+        "ValidationStatus"
+      ],
+      "targetValues": {
+        "ValidationStatus": "Not Validated",
+        "LastUpdatedAt": "2026-04-26T08:40:37.8227980Z",
+        "ListGuid": "5b4754b6-9411-453d-8e16-1247ec5b476a",
+        "ValueType": "Guid",
+        "ConfigValue": "5b4754b6-9411-453d-8e16-1247ec5b476a",
+        "AdminNotes": "Populated with confirmed tenant list GUID after Prompt 00 provisioning. Pending registry-reader/runtime validation."
+      }
+    },
+    {
+      "configKey": "FoleonInteractionEventsListGuid",
+      "logicalKey": "Foleon|Production|HBCentral|FoleonInteractionEventsListGuid|True",
+      "itemId": 7,
+      "scopeKey": "HBCentral",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ListGuid",
+        "ValidationStatus"
+      ],
+      "targetValues": {
+        "ValidationStatus": "Not Validated",
+        "LastUpdatedAt": "2026-04-26T08:40:37.8227980Z",
+        "ListGuid": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
+        "ValueType": "Guid",
+        "ConfigValue": "7786b5ac-d1e5-418b-9951-8e797dda3d7a",
+        "AdminNotes": "Populated with confirmed tenant list GUID after Prompt 00 provisioning. Pending registry-reader/runtime validation."
+      }
+    },
+    {
+      "configKey": "FoleonSyncRunsListGuid",
+      "logicalKey": "Foleon|Production|HBCentral|FoleonSyncRunsListGuid|True",
+      "itemId": 8,
+      "scopeKey": "HBCentral",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ListGuid",
+        "ValidationStatus"
+      ],
+      "targetValues": {
+        "ValidationStatus": "Not Validated",
+        "LastUpdatedAt": "2026-04-26T08:40:37.8227980Z",
+        "ListGuid": "f29dabe9-16c8-4c67-ab9e-98e12f771680",
+        "ValueType": "Guid",
+        "ConfigValue": "f29dabe9-16c8-4c67-ab9e-98e12f771680",
+        "AdminNotes": "Populated with confirmed tenant list GUID after Prompt 00 provisioning. Pending registry-reader/runtime validation."
+      }
+    },
+    {
+      "configKey": "BackendFunctionAppUrl",
+      "logicalKey": "FunctionApp|Production|Backend|BackendFunctionAppUrl|True",
+      "itemId": 13,
+      "scopeKey": "Backend",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ApiBaseUrl",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ValidationStatus"
+      ],
+      "targetValues": {
+        "ApiBaseUrl": "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net",
+        "ValidationStatus": "Not Validated",
+        "LastUpdatedAt": "2026-04-26T08:40:37.8227980Z",
+        "ValueType": "Url",
+        "ConfigValue": "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net",
+        "AdminNotes": "Populated with confirmed Azure Function App default domain. Do not append /api; frontend service composes /api/foleon routes."
+      }
+    },
+    {
+      "configKey": "FoleonApiBaseUrl",
+      "logicalKey": "Foleon|Production|Backend|FoleonApiBaseUrl|True",
+      "itemId": 9,
+      "scopeKey": "Backend",
+      "result": "updated",
+      "changedFields": [
+        "AdminNotes",
+        "ApiBaseUrl",
+        "ConfigValue",
+        "LastUpdatedAt",
+        "ValidationStatus"
+      ],
+      "targetValues": {
+        "ApiBaseUrl": "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net",
+        "ValidationStatus": "Not Validated",
+        "LastUpdatedAt": "2026-04-26T08:40:37.8227980Z",
+        "ValueType": "Url",
+        "ConfigValue": "https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net",
+        "AdminNotes": "Populated with confirmed Azure Function App default domain for Foleon runtime API access. Do not append /api; frontend service composes /api/foleon routes."
+      }
+    }
+  ],
+  "guidParseCheck": "pass",
+  "backendUrlCheck": "pass",
+  "duplicateActiveKeyCheck": "pass",
+  "secretHygieneCheck": "pass",
+  "foleonClientSecretReferenceOnly": "pass",
+  "warningCount": 0,
+  "warnings": [],
+  "errorCount": 0,
+  "errors": []
+}
