@@ -1,10 +1,17 @@
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
+import { hasConsentRequiredBlocker } from './manageDegradedCopy.js';
 
 /** Plain-language reason writes are disabled for marketing surfaces (no raw issue codes). */
-export function plainLanguageWriteBlockReason(contract: IFoleonRuntimeContract): string {
+export function plainLanguageWriteBlockReason(
+  contract: IFoleonRuntimeContract,
+  managerReadPathProven = true,
+): string {
+  if (contract.hostMode === 'sharepoint' && !managerReadPathProven) {
+    return 'API-backed content is not loaded for this session, so saving and publishing stay off.';
+  }
   const blocker = contract.foleonConfigDiagnostics?.blockers[0];
   if (blocker?.code === 'token-acquisition-failed') {
-    if (blocker.message.toLowerCase().includes('consent_required')) {
+    if (hasConsentRequiredBlocker(contract)) {
       return 'A SharePoint administrator must approve the app connection before you can save or publish.';
     }
     return 'Sign-in to the content service is not ready; saves and publishes stay paused until access works.';

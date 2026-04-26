@@ -166,6 +166,44 @@
   margin-bottom: var(--foleon-manage-space-md);
 }
 
+.bannerPrimary {
+  margin: 0 0 var(--foleon-manage-space-xs);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.bannerNextStep {
+  margin: 0 0 var(--foleon-manage-space-xs);
+  color: var(--foleon-manage-fg-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.bannerTechnical {
+  margin: var(--foleon-manage-space-xs) 0;
+  border: 1px dashed var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  padding: var(--foleon-manage-space-xs) var(--foleon-manage-space-sm);
+  background: hsl(0 0% 100% / 0.5);
+}
+
+.bannerTechnicalSummary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.bannerTechnicalBody {
+  margin: var(--foleon-manage-space-xs) 0 0;
+  font-size: 13px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.bannerActions {
+  margin-top: var(--foleon-manage-space-sm);
+}
+
 .layout {
   display: grid;
   gap: var(--foleon-manage-space-md);
@@ -258,6 +296,28 @@
   font-size: 14px;
   line-height: 1.3;
   word-break: break-word;
+}
+
+.laneStateHint {
+  margin: 0 0 var(--foleon-manage-space-xs);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--foleon-manage-fg-muted);
+  text-align: left;
+}
+
+.limitedModeBanner {
+  composes: panel;
+  padding: var(--foleon-manage-space-sm);
+  border-left: 6px solid var(--foleon-manage-warning);
+  margin-bottom: var(--foleon-manage-space-xs);
+}
+
+.limitedModeCopy {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 600;
 }
 
 .selectedLaneWorkspace {

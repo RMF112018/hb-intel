@@ -10,7 +10,7 @@ import { FoleonEmpty } from '../../components/FoleonStates.js';
 import { ManageContentEditorPanel } from './ManageContentEditorPanel.js';
 import { ManagePlacementPanel } from './ManagePlacementPanel.js';
 import type { FoleonLaneViewModel, PublishChecklistItem } from './manageLaneViewModel.js';
-import { displayLaneState } from './manageLaneViewModel.js';
+import { displayLaneState, laneStateConsumerHint } from './manageLaneViewModel.js';
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
 
@@ -36,6 +36,7 @@ export function SelectedLaneWorkspace(props: {
           <p className={f.metaMuted}>
             <span>Status: </span>
             <strong>{displayLaneState(props.laneVm.state)}</strong>
+            <span> — {laneStateConsumerHint(props.laneVm.state)}</span>
             {props.canWrite ? null : (
               <>
                 <span> — </span>

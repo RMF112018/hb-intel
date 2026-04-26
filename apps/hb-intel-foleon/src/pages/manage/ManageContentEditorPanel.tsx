@@ -29,6 +29,7 @@ import {
   toContentMutation,
   validateFoleonContentWorkflow,
 } from './manageMutationUtils.js';
+import { plainLanguagePublishDisabledReason } from './manageDegradedCopy.js';
 import f from './manageFields.module.css';
 
 const statusPill = cva(f.statusPill, {
@@ -94,6 +95,14 @@ export function ManageContentEditorPanel(props: {
     [draft, props.record, props.allContent, props.originPolicy],
   );
   const publishBlockers = blockingWorkflowIssues(workflowIssues);
+  const publishDisabledExplain = plainLanguagePublishDisabledReason(
+    props.canWrite !== false,
+    props.writeBlockReason,
+    publishBlockers,
+  );
+  const publishDisabled = props.canWrite === false || publishBlockers.length > 0;
+  const writeActionsHintId = 'foleon-manage-write-actions-reason';
+  const publishActionsHintId = 'foleon-manage-publish-reason';
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent): void => {
@@ -350,25 +359,43 @@ export function ManageContentEditorPanel(props: {
       </section>
       <ValidationList reasons={props.record.blockingReasons} />
       {props.canWrite === false ? (
-        <p className={f.metaMuted} role="status">
+        <p className={f.metaMuted} role="status" id={writeActionsHintId}>
           Write actions are disabled: {props.writeBlockReason ?? 'write path is not ready'}.
         </p>
       ) : null}
+      {props.canWrite !== false && publishBlockers.length > 0 ? (
+        <p className={f.metaMuted} role="status" id={publishActionsHintId}>
+          Publish is blocked: {publishDisabledExplain}.
+        </p>
+      ) : null}
       <div className={f.flexToolbar}>
-        <HbcButton variant="primary" disabled={props.canWrite === false} onClick={(): void => void save()}>
+        <HbcButton
+          variant="primary"
+          disabled={props.canWrite === false}
+          aria-describedby={props.canWrite === false ? writeActionsHintId : undefined}
+          onClick={(): void => void save()}
+        >
           <Save size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
           Save
         </HbcButton>
         <HbcButton
           variant="secondary"
           disabled={props.canWrite === false}
+          aria-describedby={props.canWrite === false ? writeActionsHintId : undefined}
           onClick={(): void => void runContentValidate(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
           Validate
         </HbcButton>
         <HbcButton
           variant="secondary"
-          disabled={props.canWrite === false || publishBlockers.length > 0}
+          disabled={publishDisabled}
+          aria-describedby={
+            publishDisabled
+              ? props.canWrite === false
+                ? writeActionsHintId
+                : publishActionsHintId
+              : undefined
+          }
           onClick={(): void => void runContentPublish(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
           {publishBlockers.length > 0 ? 'Publish blocked' : 'Publish'}
@@ -376,6 +403,7 @@ export function ManageContentEditorPanel(props: {
         <HbcButton
           variant="secondary"
           disabled={props.canWrite === false}
+          aria-describedby={props.canWrite === false ? writeActionsHintId : undefined}
           onClick={(): void => void runContentSuppress(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
           Suppress

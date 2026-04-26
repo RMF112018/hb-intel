@@ -33,4 +33,8 @@ export interface HbcButtonProps {
   style?: React.CSSProperties;
   /** HTML button type */
   type?: 'button' | 'submit' | 'reset';
+  /** Accessible name when visible label is insufficient (e.g. icon-only buttons) */
+  'aria-label'?: string;
+  /** References element(s) that describe the button (e.g. disabled reasons without overriding the name) */
+  'aria-describedby'?: string;
 }

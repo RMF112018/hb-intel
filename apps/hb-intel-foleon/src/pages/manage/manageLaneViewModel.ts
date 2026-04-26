@@ -207,6 +207,24 @@ export function displayLaneState(state: FoleonLaneViewModel['state']): string {
   return state === 'Config Incomplete' ? 'Needs setup' : state;
 }
 
+/** One-line consumer hint for lane summary cards (no keys or IDs). */
+export function laneStateConsumerHint(state: FoleonLaneViewModel['state']): string {
+  switch (state) {
+    case 'Live':
+      return 'Shown to visitors when placement and schedule allow.';
+    case 'Preview':
+      return 'Not the live homepage edition yet; keep validating before promotion.';
+    case 'Blocked':
+      return 'Fix validation or placement issues before this lane can go live.';
+    case 'Empty':
+      return 'Add or sync content for this lane to move forward.';
+    case 'Config Incomplete':
+      return 'Finish SharePoint and registry setup so this lane can load safely.';
+    default:
+      return '';
+  }
+}
+
 export function laneStatePriority(state: FoleonLaneViewModel['state']): number {
   switch (state) {
     case 'Blocked':

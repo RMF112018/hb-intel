@@ -125,6 +125,8 @@ export const HbcButton: React.FC<HbcButtonProps> = ({
   className,
   style: styleProp,
   type = 'button',
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
 }) => {
   const styles = useStyles();
   const effectiveSize = useTouchSize(size);
@@ -140,6 +142,8 @@ export const HbcButton: React.FC<HbcButtonProps> = ({
       type={type}
       disabled={disabled || loading}
       aria-pressed={pressed}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       onClick={onClick}
       className={mergeClasses(
         styles.base,

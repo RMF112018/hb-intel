@@ -31,11 +31,23 @@ export function ManageShellHeader(props: {
         <fieldset className={shell.syncFieldset} disabled={props.canSync === false}>
           <legend className={shell.syncLegend}>Sync content</legend>
           <div className={shell.syncFieldsetButtons}>
-            <HbcButton variant="primary" disabled={props.canSync === false} onClick={props.onSyncDocs}>
+            <HbcButton
+              variant="primary"
+              disabled={props.canSync === false}
+              aria-label={props.canSync === false ? undefined : 'Sync Foleon documents'}
+              aria-describedby={props.canSync === false ? 'foleon-manage-sync-readiness' : undefined}
+              onClick={props.onSyncDocs}
+            >
               <RefreshCw size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
               {props.canSync === false ? 'Sync blocked' : 'Sync Docs'}
             </HbcButton>
-            <HbcButton variant="secondary" disabled={props.canSync === false} onClick={props.onSyncProjects}>
+            <HbcButton
+              variant="secondary"
+              disabled={props.canSync === false}
+              aria-label={props.canSync === false ? undefined : 'Sync Foleon projects'}
+              aria-describedby={props.canSync === false ? 'foleon-manage-sync-readiness' : undefined}
+              onClick={props.onSyncProjects}
+            >
               Sync Projects
             </HbcButton>
           </div>
@@ -73,7 +85,9 @@ export function ManageShellHeader(props: {
         ))}
       </div>
       {props.canSync === false ? (
-        <p className={shell.syncBlockReason}>Sync readiness: {props.syncBlockReason ?? 'sync path is not ready'}.</p>
+        <p id="foleon-manage-sync-readiness" className={shell.syncBlockReason}>
+          Sync readiness: {props.syncBlockReason ?? 'sync path is not ready'}.
+        </p>
       ) : null}
     </header>
   );

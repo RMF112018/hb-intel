@@ -14,10 +14,12 @@ import {
   buildFoleonLaneViewModels,
   buildPublishChecklist,
   displayLaneState,
+  laneStateConsumerHint,
   placementStatusPlain,
   summarizePublishReadinessForCard,
   type FoleonLaneViewModel,
 } from './manageLaneViewModel.js';
+import { showHomepageLimitedMode } from './manageDegradedCopy.js';
 import { buildReaderLaneWarnings, toContentMutation, type FoleonReaderLane } from './manageMutationUtils.js';
 import { plainLanguageWriteBlockReason } from './manageWritePathMessage.js';
 import shell from './manageShell.module.css';
@@ -45,8 +47,11 @@ export function HomepageFoleonContentTab(props: {
   const effectiveReadiness = readiness
     ? { ...readiness, backendSafeConfigReady: true, readPathReady: true, writePathReady: readiness.writePathReady }
     : readiness;
-  const canWrite = props.contract.hostMode !== 'sharepoint' || readiness?.writePathReady === true;
-  const writeBlockMessage = plainLanguageWriteBlockReason(props.contract);
+  const canWrite =
+    props.contract.hostMode !== 'sharepoint' ||
+    (readiness?.writePathReady === true && props.managerReadPathProven);
+  const writeBlockMessage = plainLanguageWriteBlockReason(props.contract, props.managerReadPathProven);
+  const limitedMode = showHomepageLimitedMode(props.contract, props.managerReadPathProven);
   const lanes = buildFoleonLaneViewModels({
     content: props.content,
     placements: props.placements,
@@ -92,6 +97,14 @@ export function HomepageFoleonContentTab(props: {
 
   return (
     <div role="tabpanel" aria-label="Homepage Foleon Content" className={shell.tabPanel}>
+      {limitedMode ? (
+        <div role="status" className={shell.limitedModeBanner} aria-label="Limited mode">
+          <p className={shell.limitedModeCopy}>
+            Limited mode: you can review lanes and configuration, but the service did not load editable content for this
+            session.
+          </p>
+        </div>
+      ) : null}
       <ManageMetricCards
         published={published}
         blocked={blocked}
@@ -114,6 +127,7 @@ export function HomepageFoleonContentTab(props: {
               <LaneSummaryCard
                 key={lane.lane}
                 lane={lane}
+                hint={laneStateConsumerHint(lane.state)}
                 selected={lane.lane === props.selectedLane}
                 onSelect={(): void => props.onSelectLane(lane.lane)}
               />
@@ -147,6 +161,7 @@ export function HomepageFoleonContentTab(props: {
 
 function LaneSummaryCard(props: {
   readonly lane: FoleonLaneViewModel;
+  readonly hint: string;
   readonly selected: boolean;
   readonly onSelect: () => void;
 }): React.ReactNode {
@@ -170,6 +185,7 @@ function LaneSummaryCard(props: {
         <strong>{props.lane.label}</strong>
         <span className={f.statusPill}>{statusLabel}</span>
       </div>
+      {props.hint ? <p className={shell.laneStateHint}>{props.hint}</p> : null}
       <dl className={shell.laneSummaryDl}>
         <div>
           <dt>Active content</dt>

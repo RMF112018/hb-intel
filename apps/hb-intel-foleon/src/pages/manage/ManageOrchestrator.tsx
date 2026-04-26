@@ -26,6 +26,11 @@ import { readerLaneForContent, type FoleonReaderLane } from './manageMutationUti
 import { runFoleonSync } from './manageWorkflows.js';
 import { ManageTabs, type ManageTabKey } from './ManageTabs.js';
 import { useManageBreakpoint } from './useManageBreakpoint.js';
+import {
+  plainLanguageSyncBlockReason,
+  tokenAcquisitionDegradedBannerNextStep,
+  tokenAcquisitionDegradedBannerPrimary,
+} from './manageDegradedCopy.js';
 import './foleonManageTokens.css';
 import shell from './manageShell.module.css';
 
@@ -71,7 +76,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const load = async (): Promise<void> => {
     const preflightBlocker = getHostedPreflightBlocker(props.contract);
     if (preflightBlocker?.code === 'token-acquisition-failed') {
-      setMessage(`${preflightBlocker.message} Approve HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.`);
+      setMessage(null);
       setState({
         kind: 'ready',
         content: [],
@@ -249,6 +254,11 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   }
 
   const canSync = props.contract.hostMode !== 'sharepoint' || props.contract.foleonReadiness?.syncPathReady === true;
+  const tokenAcquisitionDegraded =
+    state.kind === 'ready' &&
+    !state.managerReadPathProven &&
+    props.contract.foleonConfigDiagnostics?.blockers.some((b) => b.code === 'token-acquisition-failed');
+  const syncBlockReasonPlain = canSync ? undefined : plainLanguageSyncBlockReason(props.contract, state.managerReadPathProven);
 
   return (
     <Tooltip.Provider delayDuration={280}>
@@ -265,21 +275,33 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           onSyncDocs={(): void => void runFoleonSync(api, 'docs', load, setMessage)}
           onSyncProjects={(): void => void runFoleonSync(api, 'projects', load, setMessage)}
           canSync={canSync}
-          syncBlockReason={canSync ? undefined : 'sync path is not ready'}
+          syncBlockReason={syncBlockReasonPlain}
           statusChips={statusChips}
           safeFoleonOpenUrl={safeFoleonOpenUrl}
           openFoleonUnavailableReason={openFoleonUnavailableReason}
           onViewDiagnostics={openDiagnostics}
         />
 
-        {message ? (
-          <div role="status" className={shell.statusBanner}>
-            {message}
-            {props.contract.foleonConfigDiagnostics?.blockers.some((blocker) => blocker.code === 'token-acquisition-failed') ? (
+        {tokenAcquisitionDegraded ? (
+          <div role="status" className={shell.statusBanner} aria-label="API access required">
+            <p className={shell.bannerPrimary}>{tokenAcquisitionDegradedBannerPrimary()}</p>
+            <p className={shell.bannerNextStep}>{tokenAcquisitionDegradedBannerNextStep()}</p>
+            <details className={shell.bannerTechnical}>
+              <summary className={shell.bannerTechnicalSummary}>Technical reference</summary>
+              <p className={shell.bannerTechnicalBody}>
+                Recorded readiness code: token-acquisition-failed. Raw service messages are omitted from this banner.
+              </p>
+            </details>
+            <div className={shell.bannerActions}>
               <HbcButton variant="secondary" onClick={(): void => void load()}>
                 Retry API readiness
               </HbcButton>
-            ) : null}
+            </div>
+          </div>
+        ) : null}
+        {message ? (
+          <div role="status" className={shell.statusBanner}>
+            {message}
           </div>
         ) : null}
 

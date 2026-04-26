@@ -289,6 +289,78 @@ describe('ManagePage', () => {
     ).toBe(true);
   });
 
+  it('shows lane state microcopy for a live lane on the homepage summary', async () => {
+    installManageFetchMock({
+      content: [managedContent({
+        title: 'Live Project Spotlight',
+        contentTypeKey: 'Project Spotlight',
+        readerKey: 'project-spotlight',
+        homepageSlot: 'Project Spotlight Reader',
+        activeEdition: true,
+        archiveGroup: '2026-Q1',
+        publishedUrl: 'https://viewer.us.foleon.com/project/live',
+        embedUrl: 'https://viewer.us.foleon.com/project/live/embed',
+      })],
+      placements: [managedPlacement()],
+    });
+
+    render(
+      <ManagePage
+        contract={hostedContract({
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: true,
+            backendSafeConfigReady: true,
+            backendRouteAuthorizationReady: true,
+            readPathReady: true,
+            writePathReady: true,
+            syncPathReady: true,
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    const laneSummary = await screen.findByRole('region', { name: /Homepage lane summary/i });
+    expect(laneSummary.textContent).toContain('Shown to visitors');
+  });
+
+  it('does not surface raw token acquisition diagnostics in the primary API banner', async () => {
+    installManageFetchMock({ content: [] });
+    const rawPreflight = 'AADSTS7000218: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni';
+    render(
+      <ManagePage
+        contract={hostedContract({
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: true,
+            backendRouteAuthorizationReady: true,
+            readPathReady: true,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+          foleonConfigDiagnostics: {
+            blockers: [{ code: 'token-acquisition-failed', message: rawPreflight }],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    const banner = await screen.findByRole('status', { name: 'API access required' });
+    expect(banner.textContent).not.toContain(rawPreflight);
+    expect(banner.textContent).not.toContain('eyJ');
+  });
+
   it('does not render unsafe raw config values in the normal Config UI', async () => {
     installManageFetchMock({ content: [managedContent()] });
     const rawBackendUrl = 'https://functions.secret.example.test';
@@ -454,16 +526,23 @@ describe('ManagePage', () => {
     );
 
     expect(await screen.findByRole('heading', { name: /Foleon Manager/i })).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'Limited mode' })).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'API access required' })).toBeTruthy();
+    const apiBanner = screen.getByRole('status', { name: 'API access required' });
+    expect(apiBanner.textContent).toContain('API access for the Foleon integration');
+    expect(apiBanner.textContent).toContain('Admin Center API access');
+    expect(apiBanner.textContent).not.toContain('consent_required');
+    const technical = within(apiBanner).getByText('Technical reference').closest('details');
+    expect(technical?.textContent).toContain('token-acquisition-failed');
+    const syncPrimary = screen.getByRole('button', { name: 'Sync blocked' }) as HTMLButtonElement;
+    const syncReadinessId = syncPrimary.getAttribute('aria-describedby');
+    expect(syncReadinessId).toBe('foleon-manage-sync-readiness');
+    expect(document.getElementById(syncReadinessId ?? '')?.textContent).toMatch(/approved API access|API access/i);
     const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
     expect(within(laneSummary).getAllByText('Needs setup').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Homepage Foleon Content' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Config' })).toBeTruthy();
-    expect(
-      screen.getAllByRole('status').some((entry) =>
-        entry.textContent?.includes('Approve HB SharePoint Creator / access_as_user')
-      ),
-    ).toBe(true);
     expect(screen.getByRole('button', { name: 'Retry API readiness' })).toBeTruthy();
     expect((screen.getByRole('button', { name: 'Sync blocked' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Create placement blocked' }) as HTMLButtonElement).disabled).toBe(true);
@@ -856,6 +935,60 @@ describe('ManagePage', () => {
     expect(payload).toContain('"hostMode"');
     expect(payload).not.toContain('https://functions.test');
     delete (globalThis.navigator as { clipboard?: unknown }).clipboard;
+  });
+
+  it('prefers publish validation copy over write-path messaging when saves are allowed', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          readerKey: 'company-pulse',
+          contentTypeKey: 'Company Pulse',
+          homepageSlot: 'Company Pulse Reader',
+          publishStatus: 'Published',
+          isVisible: true,
+          isHomepageEligible: true,
+          publishedUrl: 'https://viewer.us.foleon.com/org/published',
+          openMode: 'Inline Reader',
+          embedUrl: '',
+          lastEditorialUpdate: '2026-04-25T12:00:00.000Z',
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('region', { name: /Content detail editor/i });
+    expect(screen.queryByText(/Write actions are disabled/i)).toBeNull();
+    const publishHint = screen.getByText(/Publish is blocked:/i);
+    expect(publishHint.textContent).toMatch(/embed URL|Inline Reader/i);
+    expect((screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(false);
+    const publishBtn = screen.getByRole('button', { name: /Publish blocked/i }) as HTMLButtonElement;
+    expect(publishBtn.disabled).toBe(true);
+    const publishDescId = publishBtn.getAttribute('aria-describedby');
+    expect(publishDescId).toBe('foleon-manage-publish-reason');
+    expect(document.getElementById(publishDescId ?? '')?.textContent).toMatch(/embed URL|Inline Reader/i);
+  });
+
+  it('shows a short blocker-code hint in expanded diagnostics when blockers exist', async () => {
+    installManageFetchMock({ content: [] });
+    render(
+      <ManagePage
+        contract={mockContract({
+          foleonConfigDiagnostics: {
+            blockers: [{ code: 'token-acquisition-failed', message: 'consent_required: redacted detail' }],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    await screen.findByRole('heading', { name: 'Foleon Manager' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
+    const note = screen.getByRole('note');
+    expect(note.textContent).toMatch(/aligns with readiness codes on record for support/i);
+    expect(note.textContent).toContain('token-acquisition-failed');
+    expect(note.textContent).not.toContain('consent_required');
   });
 });
 

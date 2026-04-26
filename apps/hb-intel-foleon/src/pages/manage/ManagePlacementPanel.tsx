@@ -121,16 +121,21 @@ export function ManagePlacementPanel(props: {
           onChange={(isActive): void => setDraft({ ...draft, isActive })}
         />
       </div>
-      <div style={{ marginTop: 12 }}>
-        <HbcButton variant="primary" disabled={props.canWrite === false} onClick={(): void => void create()}>
-          {props.canWrite === false ? 'Create placement blocked' : 'Create placement'}
-        </HbcButton>
-      </div>
       {props.canWrite === false ? (
-        <p className={f.metaMuted} role="status">
+        <p className={f.metaMuted} role="status" id="foleon-manage-placement-write-reason">
           Placement writes are disabled: {props.writeBlockReason ?? 'write path is not ready'}.
         </p>
       ) : null}
+      <div style={{ marginTop: 12 }}>
+        <HbcButton
+          variant="primary"
+          disabled={props.canWrite === false}
+          aria-describedby={props.canWrite === false ? 'foleon-manage-placement-write-reason' : undefined}
+          onClick={(): void => void create()}
+        >
+          {props.canWrite === false ? 'Create placement blocked' : 'Create placement'}
+        </HbcButton>
+      </div>
       {draftWarnings.length > 0 ? (
         <div role="status" aria-label="Placement lane guidance">
           <ValidationList reasons={draftWarnings} />

@@ -4,9 +4,11 @@ import type { FoleonSyncRun } from '../../types/foleon-management.types.js';
 import {
   buildConfigSourceRows,
   buildRequiredAdminActions,
+  buildSafeDiagnostics,
   buildSystemHealthGroups,
   formatRedactedDiagnosticsJson,
 } from './manageConfigViewModel.js';
+import { hasConsentRequiredBlocker } from './manageDegradedCopy.js';
 import { ManageSyncPanel } from './ManageSyncPanel.js';
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
@@ -48,6 +50,10 @@ export function FoleonConfigTab(props: {
   );
   const configRows = useMemo(() => buildConfigSourceRows(diagnostics), [diagnostics]);
   const proofJson = useMemo(() => formatRedactedDiagnosticsJson(props.contract), [props.contract]);
+  const diagnosticBlockerCodes = useMemo(() => {
+    const codes = buildSafeDiagnostics(props.contract).blockerCodes;
+    return Array.isArray(codes) ? codes : [];
+  }, [props.contract]);
 
   const copyProof = useCallback(async () => {
     try {
@@ -134,6 +140,11 @@ export function FoleonConfigTab(props: {
         {props.diagnosticsOpen ? (
           <div className={shell.diagnosticsBody}>
               <ManageSyncPanel runs={props.runs} />
+              {diagnosticBlockerCodes.length > 0 ? (
+                <p className={f.metaMuted} role="note">
+                  This redacted export aligns with readiness codes on record for support: {diagnosticBlockerCodes.join(', ')}.
+                </p>
+              ) : null}
               <div className={shell.diagnosticsToolbar}>
                 <button type="button" className={shell.copyProofButton} onClick={(): void => void copyProof()}>
                   Copy redacted proof
@@ -232,13 +243,6 @@ export function FoleonConfigTab(props: {
       </section>
     </div>
   );
-}
-
-function hasConsentRequiredBlocker(contract: IFoleonRuntimeContract): boolean {
-  return contract.foleonConfigDiagnostics?.blockers.some((blocker) =>
-    blocker.code === 'token-acquisition-failed' &&
-    blocker.message.toLowerCase().includes('consent_required')
-  ) ?? false;
 }
 
 function bindingStatus(readiness: IFoleonRuntimeContract['foleonReadiness']): string {
