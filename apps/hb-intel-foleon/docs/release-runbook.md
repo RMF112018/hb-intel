@@ -42,11 +42,10 @@ surfaces.
 - [ ] `grep -R "X.Y.Z.0" apps/hb-intel-foleon` returns ≥ 3 hits and
       no stale previous version string remains.
 
-For the three-lane homepage communications cutover, Foleon package
-truth remains `1.0.23.0`. The homepage package embeds that expected
-version through its persisted/configured `foleonExpectedPackageVersion`
-contract; do not bump or rebuild Foleon during the final documentation
-closure unless source/package truth changes.
+For the registry-reader runtime bridge, Foleon package truth is
+`1.0.24.0`. Homepage-embedded Foleon config still uses its own
+persisted/configured `foleonExpectedPackageVersion` contract until that
+package lane is explicitly promoted.
 
 ## 3. Runtime truth
 

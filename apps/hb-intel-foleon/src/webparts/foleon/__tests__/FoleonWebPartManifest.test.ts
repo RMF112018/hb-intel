@@ -86,7 +86,7 @@ describe('Foleon web part manifest toolbox entries', () => {
     );
     expect(leadershipMessage?.hiddenFromToolbox).toBe(false);
     expect(leadershipMessage?.properties?.foleonRoute).toBe('leadershipMessage');
-    expect(leadershipMessage?.properties?.expectedPackageVersion).toBe('1.0.23.0');
+    expect(leadershipMessage?.properties?.expectedPackageVersion).toBe(FOLEON_PACKAGE_VERSION);
 
     expect(manager).toBeDefined();
     expect(manager?.description.default).toBe(
