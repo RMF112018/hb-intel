@@ -162,7 +162,7 @@ describe('ManagePage', () => {
     expect(laneSummary.textContent).not.toMatch(/Project Spotlight Active|Company Pulse Active|Leadership Message Active/);
   });
 
-  it('renders split readiness states and source labels on the Config tab', async () => {
+  it('renders six system health regions with split readiness on the Config tab', async () => {
     installManageFetchMock({ content: [managedContent()] });
 
     render(
@@ -210,12 +210,25 @@ describe('ManagePage', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
 
     expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Runtime readiness summary/i })).toBeTruthy();
-    expect(screen.getByText('Token Provider')).toBeTruthy();
-    expect(screen.getByText('Token Acquisition')).toBeTruthy();
-    expect(screen.getByText('Backend Safe Config')).toBeTruthy();
-    expect(screen.getByText('Route Authorization')).toBeTruthy();
-    expect(screen.getByText('Write Path')).toBeTruthy();
+    expect(screen.getByRole('region', { name: /System health summary/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /^API approval and tokens$/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /^Backend connection$/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /^Registry connection$/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /^SharePoint lists$/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /^Route authorization and publishing access$/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /^Sync access and packaging$/i })).toBeTruthy();
+    expect(screen.getByText('API token acquisition')).toBeTruthy();
+    expect(screen.getByText('Safe configuration probe')).toBeTruthy();
+    expect(screen.getByText('Route authorization')).toBeTruthy();
+    expect(screen.getByText('Read access')).toBeTruthy();
+    expect(screen.getByText('Publishing (write) access')).toBeTruthy();
+    expect(screen.getByText('Sync access')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
+    await waitFor(() => {
+      expect(screen.getByText('Config source by setting (technical names)')).toBeTruthy();
+    });
+    fireEvent.click(screen.getByText('Config source by setting (technical names)'));
     expect(screen.getAllByText('Override').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Registry').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Default').length).toBeGreaterThan(0);
@@ -301,6 +314,9 @@ describe('ManagePage', () => {
     expect(normalConfigText).not.toContain(rawApiResource);
     expect(normalConfigText).not.toContain(rawListGuid);
     expect(normalConfigText).not.toContain('token-');
+    expect(normalConfigText).not.toContain('FoleonContentRegistryListGuid');
+    expect(normalConfigText).not.toContain('HB_Foleon');
+    expect(normalConfigText).not.toContain('Config key');
   });
 
   it('renders manage shell, workflows, and preview guidance for zero content without iframe hosts', async () => {
@@ -317,7 +333,7 @@ describe('ManagePage', () => {
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
-    fireEvent.click(screen.getByText('Redacted diagnostics and sync run history'));
+    fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
     expect(document.querySelector('iframe')).toBeNull();
   });
@@ -347,7 +363,7 @@ describe('ManagePage', () => {
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
-    fireEvent.click(screen.getByText('Redacted diagnostics and sync run history'));
+    fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
   });
 
@@ -492,10 +508,9 @@ describe('ManagePage', () => {
 
     const configText = screen.getByRole('tabpanel', { name: 'Config' }).textContent ?? '';
     expect(screen.getByRole('region', { name: 'API approval required' })).toBeTruthy();
-    expect(configText).toContain('API Consent Missing');
-    expect(configText).toContain('Blocked: consent_required');
-    expect(configText).toContain('Backend read path, write path, and sync path are unavailable');
-    expect(configText).toContain('Approve HB SharePoint Creator / access_as_user');
+    expect(configText).toContain('API approval required');
+    expect(configText).toContain('Tenant approval needed for the Foleon API');
+    expect(configText).toMatch(/Approve API access for the Foleon integration/i);
     expect(configText).not.toContain(rawToken);
     expect(configText).not.toContain(rawSecret);
   });
@@ -760,9 +775,87 @@ describe('ManagePage', () => {
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'View diagnostics' }));
     expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
-    const details = screen.getByText('Redacted diagnostics and sync run history').closest('details');
-    expect(details?.hasAttribute('open')).toBe(true);
+    expect(
+      screen.getByRole('button', { name: /Hide redacted diagnostics, sync history, and technical proof/i }).getAttribute('aria-expanded'),
+    ).toBe('true');
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
+  });
+
+  it('ranks API approval actions above list binding actions in Required admin actions', async () => {
+    installManageFetchMock({ content: [] });
+    render(
+      <ManagePage
+        contract={mockContract({
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: false,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+          foleonConfigDiagnostics: {
+            blockers: [
+              {
+                code: 'token-acquisition-failed',
+                message: 'consent_required: Approve HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.',
+              },
+              { code: 'list-bindings-missing', message: 'List bindings are missing for this site.' },
+            ],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    await screen.findByRole('tab', { name: 'Config' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    const list = screen.getByRole('region', { name: /Required admin actions/i }).querySelector('ol');
+    expect(list).toBeTruthy();
+    const items = within(list as HTMLElement).getAllByRole('listitem');
+    expect(items.length).toBeGreaterThanOrEqual(2);
+    expect(items[0]?.textContent).toMatch(/Approve API access|API token/i);
+    expect(items[0]?.textContent).not.toMatch(/Bind required SharePoint lists/i);
+    expect(items.some((li) => li.textContent?.includes('Bind required SharePoint lists'))).toBe(true);
+  });
+
+  it('does not mount diagnostics bodies until diagnostics are opened', async () => {
+    installManageFetchMock({ content: [] });
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('heading', { name: 'Foleon Manager' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    expect(screen.queryByRole('button', { name: 'Copy redacted proof' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
+    expect(screen.getByRole('button', { name: 'Copy redacted proof' })).toBeTruthy();
+  });
+
+  it('copies redacted diagnostics JSON when Copy redacted proof is used', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+    installManageFetchMock({ content: [] });
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('heading', { name: 'Foleon Manager' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Copy redacted proof' }));
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalled();
+    });
+    const payload = writeText.mock.calls[0]?.[0] as string;
+    expect(payload).toContain('"hostMode"');
+    expect(payload).not.toContain('https://functions.test');
+    delete (globalThis.navigator as { clipboard?: unknown }).clipboard;
   });
 });
 

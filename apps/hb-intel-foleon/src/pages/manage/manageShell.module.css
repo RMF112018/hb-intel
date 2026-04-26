@@ -333,6 +333,7 @@
 
 .laneCard[data-lane-state='Live'],
 .readinessCard[data-readiness-status='Valid'],
+.healthLineCard[data-readiness-status='Valid'],
 .checkItem[data-check-status='pass'] {
   border-left: 6px solid var(--foleon-manage-success);
 }
@@ -344,8 +345,14 @@
 .laneCard[data-lane-state='Blocked'],
 .laneCard[data-lane-state='Config Incomplete'],
 .readinessCard[data-readiness-status='Blocked'],
+.healthLineCard[data-readiness-status='Blocked'],
 .checkItem[data-check-status='blocked'] {
   border-left: 6px solid var(--foleon-manage-danger);
+}
+
+.readinessCard[data-readiness-status='Warning'],
+.healthLineCard[data-readiness-status='Warning'] {
+  border-left: 6px solid var(--foleon-manage-warning);
 }
 
 .laneCard[data-lane-state='Empty'] {
@@ -400,6 +407,129 @@
 .detailsSummary {
   cursor: pointer;
   font-weight: 800;
+}
+
+.configConsentBanner {
+  composes: panel;
+  padding: var(--foleon-manage-space-md);
+  border-left: 6px solid var(--foleon-manage-warning);
+}
+
+.configHealthStack {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.healthGroup {
+  composes: panel;
+  padding: var(--foleon-manage-space-md);
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.healthGroupTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.healthLines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--foleon-manage-space-sm);
+}
+
+.healthLineCard {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100% / 0.72);
+  padding: var(--foleon-manage-space-sm);
+  min-width: 0;
+}
+
+.healthLineDetail {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.adminActionList {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.adminActionItem {
+  padding-bottom: var(--foleon-manage-space-xs);
+  border-bottom: 1px solid var(--foleon-manage-panel-border);
+}
+
+.adminActionItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.nestedDiagnostics {
+  margin-top: var(--foleon-manage-space-sm);
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  padding: var(--foleon-manage-space-xs) var(--foleon-manage-space-sm);
+  background: hsl(0 0% 100% / 0.45);
+}
+
+.nestedDiagnosticsSummary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.diagnosticsToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-sm);
+  align-items: center;
+}
+
+.copyProofButton {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100% / 0.9);
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.copyProofButton:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.copyProofStatus {
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+  font-weight: 600;
+}
+
+.diagnosticsToggle {
+  margin-top: var(--foleon-manage-space-xs);
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100% / 0.9);
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  max-width: 720px;
+}
+
+.diagnosticsToggle:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
 }
 
 .diagnosticsDetails {

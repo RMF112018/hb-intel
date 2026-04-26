@@ -1,13 +1,23 @@
+import { useCallback, useMemo, useState } from 'react';
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
 import type { FoleonSyncRun } from '../../types/foleon-management.types.js';
 import {
   buildConfigSourceRows,
-  buildRuntimeReadinessCards,
-  buildSafeDiagnostics,
+  buildRequiredAdminActions,
+  buildSystemHealthGroups,
+  formatRedactedDiagnosticsJson,
 } from './manageConfigViewModel.js';
 import { ManageSyncPanel } from './ManageSyncPanel.js';
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
+
+const LIST_ROLE_DIAGNOSTIC_LABELS: ReadonlyArray<{ readonly internal: string; readonly title: string }> = [
+  { internal: 'HB_FoleonContentRegistry', title: 'Foleon content registry list' },
+  { internal: 'HB_FoleonHomepagePlacements', title: 'Homepage placements list' },
+  { internal: 'HB_FoleonInteractionEvents', title: 'Interaction events list' },
+  { internal: 'HB_FoleonSyncRuns', title: 'Sync run history list' },
+  { internal: 'HB Platform Configuration Registry', title: 'Platform configuration registry' },
+];
 
 export function FoleonConfigTab(props: {
   readonly contract: IFoleonRuntimeContract;
@@ -16,6 +26,8 @@ export function FoleonConfigTab(props: {
   readonly diagnosticsOpen: boolean;
   readonly onDiagnosticsOpenChange: (open: boolean) => void;
 }): React.ReactNode {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+
   const readiness = props.contract.foleonReadiness && props.managerReadPathProven
     ? {
         ...props.contract.foleonReadiness,
@@ -24,166 +36,199 @@ export function FoleonConfigTab(props: {
         writePathReady: props.contract.foleonReadiness.writePathReady,
       }
     : props.contract.foleonReadiness;
-  const readinessCards = buildRuntimeReadinessCards(
-    readiness,
-    props.contract.foleonConfigDiagnostics,
-  );
-  const configRows = buildConfigSourceRows(props.contract.foleonConfigDiagnostics);
-  const safeDiagnostics = buildSafeDiagnostics(props.contract);
   const consentRequired = hasConsentRequiredBlocker(props.contract);
+  const diagnostics = props.contract.foleonConfigDiagnostics;
+  const healthGroups = useMemo(
+    () => buildSystemHealthGroups({ readiness, diagnostics, contract: props.contract }),
+    [readiness, diagnostics, props.contract],
+  );
+  const adminActions = useMemo(
+    () => buildRequiredAdminActions({ readiness, diagnostics, consentRequired }),
+    [readiness, diagnostics, consentRequired],
+  );
+  const configRows = useMemo(() => buildConfigSourceRows(diagnostics), [diagnostics]);
+  const proofJson = useMemo(() => formatRedactedDiagnosticsJson(props.contract), [props.contract]);
+
+  const copyProof = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(proofJson);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 2000);
+    } catch {
+      setCopyState('failed');
+      window.setTimeout(() => setCopyState('idle'), 3000);
+    }
+  }, [proofJson]);
 
   return (
     <div role="tabpanel" aria-label="Config" className={shell.tabPanel}>
       {consentRequired ? (
-        <section className={f.editorSection} aria-label="API approval required">
-          <p className={f.guidanceKicker}>API Consent Missing</p>
-          <h3 className={f.sectionTitle}>Tenant API Approval Required</h3>
-          <p className={f.metaMuted}>
-            Token acquisition failed with consent_required. Backend read path, write path, and sync path are unavailable until a SharePoint admin approves HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.
-          </p>
+        <section className={shell.configConsentBanner} aria-label="API approval required">
+          <p className={f.guidanceKicker}>API approval required</p>
+          <h3 className={f.sectionTitle}>Tenant approval needed for the Foleon API</h3>
+          <p className={f.metaMuted}>SharePoint cannot acquire a token until an administrator completes API access approval.</p>
         </section>
       ) : null}
 
-      <section className={f.editorSection} aria-label="Runtime readiness summary">
-        <p className={f.guidanceKicker}>Registry-Aware Config</p>
-        <h3 className={f.sectionTitle}>Runtime Readiness Summary</h3>
-        <div className={shell.readinessGrid}>
-          {readinessCards.map((card) => (
-            <article key={card.label} className={shell.readinessCard} data-readiness-status={card.status}>
-              <div className={shell.readinessCardTitle}>
-                <span className={f.guidanceKicker}>{card.label}</span>
-                <strong className={shell.readinessStatus}>{card.status}</strong>
-              </div>
-              <p>{card.detail}</p>
-              <small>{card.nextAction}</small>
-            </article>
-          ))}
-        </div>
+      <section className={f.editorSection} role="region" aria-label="Required admin actions">
+        <h2 className={f.sectionTitle}>Required admin actions</h2>
+        {adminActions.length === 0 ? (
+          <p className={f.metaMuted}>No administrator actions are required for the checks we monitor.</p>
+        ) : (
+          <ol className={shell.adminActionList}>
+            {adminActions.map((action) => (
+              <li key={action.id} className={shell.adminActionItem}>
+                <strong>{action.title}</strong>
+                <p className={f.metaMuted}>{action.body}</p>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
-      <section className={f.editorSection} aria-label="Registry source status">
-        <h3 className={f.sectionTitle}>Registry Source Status</h3>
-        <dl className={shell.definitionGrid}>
-          <dt>Registry source</dt>
-          <dd>{props.contract.foleonConfigDiagnostics?.registryFetchStatus ?? 'not-configured'}</dd>
-          <dt>Registry validation</dt>
-          <dd>{readiness?.registryReady ? 'Valid' : 'Blocked'}</dd>
-          <dt>Duplicate active keys</dt>
-          <dd>{props.contract.foleonConfigDiagnostics?.registryDuplicateActiveKeysDetected ? 'Blocked' : 'Clear'}</dd>
-          <dt>Secret hygiene</dt>
-          <dd>{props.contract.foleonConfigDiagnostics?.registrySecretHygieneStatus ?? 'unknown'}</dd>
-        </dl>
-      </section>
-
-      <section className={f.editorSection} aria-label="Config source by value">
-        <h3 className={f.sectionTitle}>Config Source by Value</h3>
-        <div className={shell.tableWrap}>
-          <table className={shell.configTable}>
-            <thead>
-              <tr>
-                <th>Config key</th>
-                <th>Value</th>
-                <th>Source</th>
-                <th>Status</th>
-                <th>Required</th>
-                <th>Action needed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {configRows.map((row) => (
-                <tr key={row.key}>
-                  <td>{row.key}</td>
-                  <td>{row.displayValue}</td>
-                  <td>{row.source}</td>
-                  <td>{row.validationStatus}</td>
-                  <td>{row.required ? 'Required' : 'Optional'}</td>
-                  <td>{row.actionNeeded}</td>
-                </tr>
+      <section className={shell.configHealthStack} role="region" aria-label="System health summary">
+        <h2 className={f.sectionTitle}>System health</h2>
+        {healthGroups.map((group) => (
+          <section
+            key={group.id}
+            role="region"
+            className={shell.healthGroup}
+            aria-label={group.title}
+            aria-labelledby={`config-health-${group.id}`}
+          >
+            <h3 className={shell.healthGroupTitle} id={`config-health-${group.id}`}>
+              {group.title}
+            </h3>
+            <p className={f.metaMuted}>{group.description}</p>
+            <div className={shell.healthLines}>
+              {group.lines.map((ln) => (
+                <article
+                  key={ln.id}
+                  className={shell.healthLineCard}
+                  data-readiness-status={ln.status}
+                >
+                  <div className={shell.readinessCardTitle}>
+                    <span className={f.guidanceKicker}>{ln.label}</span>
+                    <strong className={shell.readinessStatus}>{ln.status}</strong>
+                  </div>
+                  <p className={shell.healthLineDetail}>{ln.detail}</p>
+                </article>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </section>
+        ))}
       </section>
 
-      <section className={f.editorSection} aria-label="SharePoint list bindings">
-        <h3 className={f.sectionTitle}>SharePoint List Bindings</h3>
-        <div className={shell.readinessGrid}>
-          {['HB_FoleonContentRegistry', 'HB_FoleonHomepagePlacements', 'HB_FoleonInteractionEvents', 'HB_FoleonSyncRuns', 'HB Platform Configuration Registry'].map((label) => (
-            <article key={label} className={shell.readinessCard}>
-              <strong>{label}</strong>
-              <span>{label === 'HB_FoleonSyncRuns' ? syncStatus(readiness) : bindingStatus(readiness)}</span>
-              <small>Raw list identifiers are redacted in the Manager UI.</small>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className={f.editorSection} aria-label="Backend API and auth readiness">
-        <h3 className={f.sectionTitle}>Backend / API / Auth Readiness</h3>
-        <dl className={shell.definitionGrid}>
-          <dt>Backend URL</dt>
-          <dd>{readiness?.backendUrlReady ? 'Configured (redacted)' : 'Missing'}</dd>
-          <dt>Safe-config probe</dt>
-          <dd>{readiness?.backendSafeConfigReady ? 'Valid' : 'Blocked'}</dd>
-          <dt>API resource</dt>
-          <dd>{readiness?.authResourceReady ? 'Configured (redacted)' : 'Missing'}</dd>
-          <dt>Token provider</dt>
-          <dd>{readiness?.tokenProviderReady ? 'Valid' : 'Blocked'}</dd>
-          <dt>Token acquisition</dt>
-          <dd>{readiness?.tokenAcquisitionReady ? 'Valid' : consentRequired ? 'Blocked: consent_required' : 'Blocked'}</dd>
-          <dt>Route authorization</dt>
-          <dd>{readiness?.backendRouteAuthorizationReady ? 'Valid' : 'Blocked'}</dd>
-          <dt>Read readiness</dt>
-          <dd>{readiness?.readPathReady ? 'Valid' : 'Proven by current Manager load only'}</dd>
-          <dt>Write readiness</dt>
-          <dd>{readiness?.writePathReady ? 'Valid' : 'Blocked until safe-config and route authorization are proven'}</dd>
-          <dt>Sync readiness</dt>
-          <dd>{readiness?.syncPathReady ? 'Valid' : 'Blocked until backend Foleon OAuth/API config is ready'}</dd>
-        </dl>
-      </section>
-
-      <section className={f.editorSection} aria-label="Origin and production URL policy">
-        <h3 className={f.sectionTitle}>Origin and Production URL Policy</h3>
-        <dl className={shell.definitionGrid}>
-          <dt>Accepted Foleon origins</dt>
-          <dd>{props.contract.originPolicy.allowedOrigins.length} configured (values redacted)</dd>
-          <dt>Production viewer URL policy</dt>
-          <dd>{props.contract.originPolicy.requireHttps ? 'HTTPS required' : 'HTTPS not required'}</dd>
-          <dt>Preview/admin review</dt>
-          <dd>{props.contract.originPolicy.allowPreview ? 'Preview URLs allowed for review' : 'Preview URLs blocked for production'}</dd>
-        </dl>
-      </section>
-
-      <section className={f.editorSection} aria-label="Package and manifest governance">
-        <h3 className={f.sectionTitle}>Package / Manifest Governance</h3>
-        <dl className={shell.definitionGrid}>
-          <dt>Runtime manifest ID</dt>
-          <dd>{props.contract.governed.manifestIdMatchesExpected ? 'Matches expected' : 'Mismatch'}</dd>
-          <dt>Expected manifest ID</dt>
-          <dd>Configured (redacted)</dd>
-          <dt>Runtime package version</dt>
-          <dd>{props.contract.governed.expectedPackageVersion ?? 'Missing'}</dd>
-          <dt>Expected package version</dt>
-          <dd>{props.contract.governed.packageVersionMatchesExpected ? 'Matches expected' : 'Mismatch'}</dd>
-        </dl>
-      </section>
-
-      <section className={f.editorSection} aria-label="Diagnostics and sync history">
-        <h3 className={f.sectionTitle}>Diagnostics</h3>
-        <details
-          className={shell.diagnosticsDetails}
-          open={props.diagnosticsOpen}
-          onToggle={(event): void => {
-            const el = event.currentTarget;
-            props.onDiagnosticsOpenChange(el.open);
-          }}
+      <section className={f.editorSection} aria-label="Diagnostics">
+        <h2 className={f.sectionTitle}>Diagnostics</h2>
+        <button
+          type="button"
+          className={shell.diagnosticsToggle}
+          aria-expanded={props.diagnosticsOpen}
+          onClick={(): void => props.onDiagnosticsOpenChange(!props.diagnosticsOpen)}
         >
-          <summary className={shell.detailsSummary}>Redacted diagnostics and sync run history</summary>
+          {props.diagnosticsOpen
+            ? 'Hide redacted diagnostics, sync history, and technical proof'
+            : 'Show redacted diagnostics, sync history, and technical proof'}
+        </button>
+        {props.diagnosticsOpen ? (
           <div className={shell.diagnosticsBody}>
-            <ManageSyncPanel runs={props.runs} />
-            <pre className={shell.safeDiagnostics}>{JSON.stringify(safeDiagnostics, null, 2)}</pre>
-          </div>
-        </details>
+              <ManageSyncPanel runs={props.runs} />
+              <div className={shell.diagnosticsToolbar}>
+                <button type="button" className={shell.copyProofButton} onClick={(): void => void copyProof()}>
+                  Copy redacted proof
+                </button>
+                {copyState === 'copied' ? (
+                  <span role="status" className={shell.copyProofStatus}>
+                    Copied to clipboard
+                  </span>
+                ) : null}
+                {copyState === 'failed' ? (
+                  <span role="status" className={shell.copyProofStatus}>
+                    Clipboard unavailable in this browser context
+                  </span>
+                ) : null}
+              </div>
+
+              <details className={shell.nestedDiagnostics}>
+                <summary className={shell.nestedDiagnosticsSummary}>Config source by setting (technical names)</summary>
+                <div className={shell.tableWrap}>
+                  <table className={shell.configTable}>
+                    <thead>
+                      <tr>
+                        <th>Config key</th>
+                        <th>Value</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Required</th>
+                        <th>Action needed</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {configRows.map((row) => (
+                        <tr key={row.key}>
+                          <td>{row.key}</td>
+                          <td>{row.displayValue}</td>
+                          <td>{row.source}</td>
+                          <td>{row.validationStatus}</td>
+                          <td>{row.required ? 'Required' : 'Optional'}</td>
+                          <td>{row.actionNeeded}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details className={shell.nestedDiagnostics}>
+                <summary className={shell.nestedDiagnosticsSummary}>Registry technical status</summary>
+                <dl className={shell.definitionGrid}>
+                  <dt>Registry source</dt>
+                  <dd>{diagnostics?.registryFetchStatus ?? 'not-configured'}</dd>
+                  <dt>Registry validation</dt>
+                  <dd>{readiness?.registryReady ? 'Valid' : 'Blocked'}</dd>
+                  <dt>Duplicate active keys</dt>
+                  <dd>{diagnostics?.registryDuplicateActiveKeysDetected ? 'Blocked' : 'Clear'}</dd>
+                  <dt>Secret hygiene</dt>
+                  <dd>{diagnostics?.registrySecretHygieneStatus ?? 'unknown'}</dd>
+                </dl>
+              </details>
+
+              <details className={shell.nestedDiagnostics}>
+                <summary className={shell.nestedDiagnosticsSummary}>SharePoint list roles (internal names)</summary>
+                <div className={shell.readinessGrid}>
+                  {LIST_ROLE_DIAGNOSTIC_LABELS.map((entry) => (
+                    <article key={entry.internal} className={shell.readinessCard}>
+                      <strong>{entry.internal}</strong>
+                      <span>{entry.internal === 'HB_FoleonSyncRuns' ? syncStatus(readiness) : bindingStatus(readiness)}</span>
+                      <small>{entry.title}</small>
+                    </article>
+                  ))}
+                </div>
+              </details>
+
+              <details className={shell.nestedDiagnostics}>
+                <summary className={shell.nestedDiagnosticsSummary}>Origin, packaging, and redacted JSON</summary>
+                <dl className={shell.definitionGrid}>
+                  <dt>Accepted Foleon origins</dt>
+                  <dd>{props.contract.originPolicy.allowedOrigins.length} configured (values redacted)</dd>
+                  <dt>Production viewer URL policy</dt>
+                  <dd>{props.contract.originPolicy.requireHttps ? 'HTTPS required' : 'HTTPS not required'}</dd>
+                  <dt>Preview/admin review</dt>
+                  <dd>{props.contract.originPolicy.allowPreview ? 'Preview URLs allowed for review' : 'Preview URLs blocked for production'}</dd>
+                  <dt>Runtime manifest ID</dt>
+                  <dd>{props.contract.governed.manifestIdMatchesExpected ? 'Matches expected' : 'Mismatch'}</dd>
+                  <dt>Expected manifest ID</dt>
+                  <dd>Configured (redacted)</dd>
+                  <dt>Runtime package version</dt>
+                  <dd>{props.contract.governed.expectedPackageVersion ?? 'Missing'}</dd>
+                  <dt>Expected package version</dt>
+                  <dd>{props.contract.governed.packageVersionMatchesExpected ? 'Matches expected' : 'Mismatch'}</dd>
+                </dl>
+                <pre className={shell.safeDiagnostics}>{proofJson}</pre>
+              </details>
+            </div>
+        ) : null}
       </section>
     </div>
   );
