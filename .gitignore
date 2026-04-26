@@ -155,3 +155,9 @@ docs/architecture/plans/MASTER/phase-1-deliverables/Deployment-*
 # Local operator evidence (health/ready, role-matrix, probes); not for version control
 .tmp/functions-validation/
 functions-artifact.zip
+.tmp/foleon-wave03a-baseline.json
+.tmp/foleon-wave03a-capture.ps1
+.tmp/foleon-wave03a-guid-probe.json
+.tmp/foleon-wave03a-guid-probe.ps1
+.tmp/foleon-wave03a-manual-views.json
+.tmp/foleon-wave03a-manual-views.ps1

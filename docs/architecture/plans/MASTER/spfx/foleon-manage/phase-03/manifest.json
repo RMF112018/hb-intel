@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-04-25 10:03:35 UTC",
+  "files": [
+    {
+      "name": "00_README.md",
+      "sha256": "cf60ac63a1cfbe1b559486bea80fc1c63364c598a250983d03d5e4e28b07a89e",
+      "bytes": 2456
+    },
+    {
+      "name": "01_AUDIT_FINDINGS.md",
+      "sha256": "bd1a890a74ccb6d38a577f3a9c5f6eca20a143b58af32699bec08a0f92540e20",
+      "bytes": 7570
+    },
+    {
+      "name": "02_PROMPT_01_RUNTIME_BRIDGE_FIX.md",
+      "sha256": "5d9e175fb2d81a9ace7b311d1ad747c3e0602f5117ad7c47b1f425188c1c3797",
+      "bytes": 7265
+    },
+    {
+      "name": "03_PROMPT_02_FOLEON_PROPERTY_PANE_AND_DEFAULTS.md",
+      "sha256": "28bfcb9f39e62c823790cb27d8ed1cada7a302e8972db1df653b2d17d350bf4d",
+      "bytes": 6431
+    },
+    {
+      "name": "04_PROMPT_03_DIAGNOSTICS_AND_PACKAGE_PROOF.md",
+      "sha256": "a50bf64b4471f437ca1d4d63c093cda58f02b351180c5eaffc5c26266275e4ce",
+      "bytes": 5667
+    },
+    {
+      "name": "05_PROMPT_04_TENANT_PAGE_VALIDATION_AND_MIGRATION.md",
+      "sha256": "bdd3779924c0bb54c4a9d77371d031325a19ba7f3a4568a5143f2fba371db13c",
+      "bytes": 5539
+    },
+    {
+      "name": "06_PROMPT_05_OPTIONAL_LIST_AUTODISCOVERY.md",
+      "sha256": "4c2b4659f780591142762427a6b66922cdcd0fdafab8a8397b9c1ec62b2be39a",
+      "bytes": 4983
+    },
+    {
+      "name": "07_VALIDATION_CHECKLIST.md",
+      "sha256": "a115ce76f05dc17fb0f0b37407725ec21c1f16547c5bde30e90fba8e0ea13cb5",
+      "bytes": 4425
+    }
+  ]
+}

@@ -84,13 +84,16 @@
 
 ### HB Foleon Content Registry (provisioned by Foleon SPFx feature on install)
 - Role: canonical registry of Foleon Docs eligible for HB Central discovery/reader/content-hub.
+- Tenant display title: `Foleon Content Registry`; root URL remains `/Lists/HB_FoleonContentRegistry`.
 - Outbound lookups: `MarketingOwner` → User Information List; `AudienceGroups` → User Information List (multi).
 - Reconciliation key: `FoleonDocId` (unique).
 - Downstream consumers: `apps/hb-intel-foleon/src/services/FoleonContentService.ts`.
+- Query discipline note: public REST callers must not directly select person fields (`MarketingOwner`, `AudienceGroups`) without target-property `$expand`.
 - Full field table: `lists/hb-foleon-content-registry.md`.
 
 ### HB Foleon Homepage Placements (provisioned by Foleon SPFx feature on install)
 - Role: controls homepage discovery surface without code deploy.
+- Tenant display title: `Foleon Homepage Placements`; root URL remains `/Lists/HB_FoleonHomepagePlacements`.
 - Outbound lookup: `ContentLookup` → `HB_FoleonContentRegistry` (required).
 - Denormalized cache: `ContentIdCache` mirrors `FoleonDocId` on the linked registry row; the SPFx Highlights query uses it to resolve placements without expanding the lookup.
 - Downstream consumers: `apps/hb-intel-foleon/src/services/FoleonPlacementService.ts`.
@@ -98,6 +101,7 @@
 
 ### HB Foleon Interaction Events (provisioned by Foleon SPFx feature on install)
 - Role: SharePoint-side interaction analytics for Foleon publications.
+- Tenant display title: `Foleon Interaction Events`; root URL remains `/Lists/HB_FoleonInteractionEvents`.
 - Reconciliation key: `EventId` (unique).
 - Versioning intentionally disabled (event volume).
 - Downstream consumers: `apps/hb-intel-foleon/src/services/FoleonEventSink.ts` (SharePoint sink) + `FoleonTelemetryEmitter.ts`.
@@ -105,6 +109,7 @@
 
 ### HB Foleon Sync Runs (provisioned by Foleon SPFx feature on install)
 - Role: operational log of backend Foleon sync jobs (Docs, Projects, Analytics).
+- Tenant display title: `Foleon Sync Runs`; root URL remains `/Lists/HB_FoleonSyncRuns`.
 - Reconciliation key: `RunId` (unique).
 - Versioning: enabled (low-volume, audit-relevant).
 - Writer: deferred to Wave 02 backend sync host (see ADR-0125); list is provisioned empty at launch so the contract is stable before writers ship.

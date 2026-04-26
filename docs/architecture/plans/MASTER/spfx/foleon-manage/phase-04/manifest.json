@@ -1,0 +1,55 @@
+{
+  "package": "foleon_preview_fallback_package",
+  "generatedAt": "2026-04-25T15:10:37Z",
+  "repo": "RMF112018/hb-intel",
+  "branch": "main",
+  "scope": "Audit and development/prompt package for hb-intel-foleon preview fallback feature",
+  "currentKnownPackageVersion": "1.0.16.0",
+  "recommendedNextPackageVersion": "1.0.17.0",
+  "implementationStatus": "Not implemented; planning and prompt package only",
+  "files": [
+    "00_README.md",
+    "01_REPO_TRUTH_AUDIT_FINDINGS.md",
+    "02_PREVIEW_FALLBACK_REQUIREMENTS.md",
+    "03_UI_UX_SPECIFICATION.md",
+    "04_TECHNICAL_ARCHITECTURE_PLAN.md",
+    "05_DATA_FIXTURE_AND_CONTENT_MODEL.md",
+    "06_ROUTE_BEHAVIOR_MATRIX.md",
+    "07_TESTING_AND_VALIDATION_PLAN.md",
+    "08_RISK_EXPOSURE_AND_GOVERNANCE.md",
+    "09_IMPLEMENTATION_PROMPT_PACKAGE_README.md",
+    "10_PROMPT_01_PREVIEW_MODEL_AND_FIXTURES.md",
+    "11_PROMPT_02_HIGHLIGHTS_PREVIEW_FALLBACK.md",
+    "12_PROMPT_03_CONTENT_HUB_PREVIEW_FALLBACK.md",
+    "13_PROMPT_04_MANAGER_PREVIEW_GUIDANCE.md",
+    "14_PROMPT_05_TESTS_DOCS_AND_PACKAGE_PROOF.md",
+    "15_TENANT_VALIDATION_RUNBOOK.md",
+    "manifest.json"
+  ],
+  "keyDecisions": {
+    "fallbackControl": "runtime condition, not property pane, in first pass",
+    "enabledByDefaultWhenConfiguredAndEmpty": true,
+    "previewFixtureSource": "static TypeScript fixtures",
+    "previewTelemetry": "no production telemetry for preview records",
+    "routes": [
+      "highlights",
+      "hub",
+      "optional manage guidance"
+    ],
+    "readerPreview": "not automatic; preserve reader gate"
+  },
+  "validationCommands": [
+    "git status --short",
+    "git branch --show-current",
+    "git log -5 --oneline",
+    "npx tsx tools/spfx-shell/scripts/validate-foleon-runtime-config-bridge.ts",
+    "pnpm --filter @hbc/spfx-hb-intel-foleon lint",
+    "pnpm --filter @hbc/spfx-hb-intel-foleon check-types",
+    "pnpm --filter @hbc/spfx-hb-intel-foleon test",
+    "pnpm --filter @hbc/spfx-hb-intel-foleon build",
+    "pnpm --filter @hbc/spfx-hb-intel-foleon schema:validate",
+    "pnpm --dir tools/spfx-shell build",
+    "npx tsx tools/build-spfx-package.ts --domain hb-intel-foleon",
+    "pnpm --filter @hbc/spfx-hb-intel-foleon package:proof"
+  ]
+}

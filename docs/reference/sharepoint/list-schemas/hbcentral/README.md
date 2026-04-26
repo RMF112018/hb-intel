@@ -49,9 +49,10 @@
 | HB Article Workflow History | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Articles | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Platform Configuration Registry | business/custom | false | n/a | Yes | Provisioning contract; target registry for non-secret platform configuration |
-| HB Foleon Content Registry | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
-| HB Foleon Homepage Placements | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
-| HB Foleon Interaction Events | business/custom | pending | 0 | Yes | Target schema — not yet provisioned (Foleon SPFx MVP) |
+| Foleon Content Registry | business/custom | false | 0 | Yes | Provisioned and tenant-validated on 2026-04-25; GUID `2e57615d-457e-49b8-aef3-038e85cbe068`; root `Lists/HB_FoleonContentRegistry` |
+| Foleon Homepage Placements | business/custom | false | 0 | Yes | Provisioned and tenant-validated on 2026-04-25; GUID `5b4754b6-9411-453d-8e16-1247ec5b476a`; root `Lists/HB_FoleonHomepagePlacements` |
+| Foleon Interaction Events | business/custom | false | 0 | Yes | Provisioned and tenant-validated on 2026-04-25; GUID `7786b5ac-d1e5-418b-9951-8e797dda3d7a`; root `Lists/HB_FoleonInteractionEvents` |
+| Foleon Sync Runs | business/custom | false | 0 | Yes | Provisioned and tenant-validated on 2026-04-25; GUID `f29dabe9-16c8-4c67-ab9e-98e12f771680`; root `Lists/HB_FoleonSyncRuns` |
 | Hero Banner Config | business/custom | false | 0 | Yes | Implementation-relevant |
 | Priority Actions Band Config | business/custom | false | 3 | Yes | Phase-05 curated seed validated (run `f671390c-bc35-46b0-9937-da9b77b1ac94`, 2026-04-18) |
 | Priority Actions Band Items | business/custom | false | 10 | Yes | Phase-05 curated seed validated (run `f671390c-bc35-46b0-9937-da9b77b1ac94`, 2026-04-18) |

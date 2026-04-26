@@ -4,6 +4,15 @@ Operational log of Foleon sync jobs. Provisioned ahead of the backend
 sync work so schema and indexes are stable; reader/tenant admins can
 query historical runs once Wave 02 writers ship.
 
+## Tenant Validation (2026-04-25)
+
+- List ID: `f29dabe9-16c8-4c67-ab9e-98e12f771680`
+- Display Name: `Foleon Sync Runs`
+- Internal Name: `HB_FoleonSyncRuns`
+- Root URL: `/sites/HBCentral/Lists/HB_FoleonSyncRuns`
+- Hidden: `false`
+- Item count at audit: `0`
+
 ## Purpose
 
 - Observability: track every sync run (Docs, Projects, Analytics) with
@@ -55,8 +64,8 @@ None currently identified for launch-critical runtime paths.
 
 `RunId` is provisioned with `Indexed="TRUE"` and
 `EnforceUniqueValues="TRUE"` per Microsoft field schema guidance. Tenant
-closure still requires clean-site proof that SharePoint created the
-unique constraint.
+audit confirms the uniqueness flag is present in live `SchemaXml` and
+matches provisioning assets.
 
 ## Feature Framework Views
 

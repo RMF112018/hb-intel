@@ -2,15 +2,18 @@
 
 ## 1. Objective
 - Target-state schema for `HB_FoleonInteractionEvents` at `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`.
-- **Status: not yet provisioned on tenant.** Provision per `apps/hb-intel-foleon/docs/provisioning.md`.
+- **Status: provisioned and tenant-validated (2026-04-25).**
 - Code-level source of truth: `apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`
   (`FOLEON_INTERACTION_EVENTS_SCHEMA`).
 
 ## 2. List-Level Metadata
-- List ID: _assigned at provision time_
+- List ID: `7786b5ac-d1e5-418b-9951-8e797dda3d7a`
 - Display Name: `Foleon Interaction Events`
 - Internal Name: `HB_FoleonInteractionEvents`
+- Root URL: `/sites/HBCentral/Lists/HB_FoleonInteractionEvents`
 - Template: Generic List (base template 100)
+- Hidden: `false`
+- Item count at audit: `0`
 - Versioning: **disabled** (events are high-volume; versions would
   explode storage with no operational benefit)
 - Attachments: disabled
@@ -61,8 +64,8 @@ None currently identified for launch-critical runtime paths.
 
 `EventId` is provisioned with `Indexed="TRUE"` and
 `EnforceUniqueValues="TRUE"` per Microsoft field schema guidance. Tenant
-closure still requires clean-site proof that SharePoint created the
-unique constraint.
+audit confirms the uniqueness flag is present in live `SchemaXml` and
+matches provisioning assets.
 
 ## 7. Feature Framework Views
 

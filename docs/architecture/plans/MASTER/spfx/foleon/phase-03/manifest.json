@@ -1,0 +1,31 @@
+{
+  "package": "foleon_three_lane_homepage_development_package",
+  "generatedAt": "2026-04-25T21:34:48+00:00",
+  "repo": "RMF112018/hb-intel",
+  "scope": "Development plan and prompt package for three-lane Foleon communications replacement in HB Homepage",
+  "lanes": [
+    "Project Spotlight",
+    "Company Pulse",
+    "Leadership Message"
+  ],
+  "files": [
+    "00_README.md",
+    "01_CURRENT_STATE_AND_REPO_TRUTH_CONTEXT.md",
+    "02_THREE_LANE_COMMUNICATIONS_TARGET.md",
+    "03_DATA_MODEL_AND_TENANT_SCHEMA_DELTAS.md",
+    "04_SHARED_PACKAGE_EXTRACTION_PLAN.md",
+    "05_STANDALONE_FOLEON_ALIGNMENT_PLAN.md",
+    "06_HOMEPAGE_CUTOVER_PLAN.md",
+    "07_UI_BREAKPOINT_PREVIEW_SPEC.md",
+    "08_TESTING_VALIDATION_PACKAGE_PROOF.md",
+    "09_RISK_REGISTER_AND_DECISIONS.md",
+    "10_EXECUTION_WAVES.md",
+    "11_PROMPT_01_LEADERSHIP_SCHEMA_AND_TENANT.md",
+    "12_PROMPT_02_SHARED_READER_PACKAGE.md",
+    "13_PROMPT_03_STANDALONE_FOLEON_LEADERSHIP_ALIGNMENT.md",
+    "14_PROMPT_04_HOMEPAGE_THREE_LANE_CUTOVER.md",
+    "15_PROMPT_05_FINAL_DOCS_VERSION_PACKAGE_PROOF.md",
+    "16_TENANT_ROLLOUT_RUNBOOK.md",
+    "manifest.json"
+  ]
+}
