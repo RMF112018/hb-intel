@@ -301,9 +301,10 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
-    // Leadership: still on the compatibility shell pending Prompt 05.
-    expect(leadership?.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
-    expect(leadership?.querySelector('[data-foleon-preview-route]')).not.toBeNull();
+    // Leadership (Prompt-05): lane-owned executive layout. No legacy markers.
+    expect(leadership?.getAttribute('data-foleon-layout')).toBe('leadership-message');
+    expect(leadership?.querySelector('[data-preview-tone]')).toBeNull();
+    expect(leadership?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
     // The Project Spotlight feature marker is NOT present (no spotlight rendered here).
     expect(document.querySelector('[data-foleon-layout="project-spotlight-feature"]')).toBeNull();

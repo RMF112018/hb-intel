@@ -650,6 +650,197 @@
   }
 }
 
+/* ===== Leadership Message executive surface =====
+   Phase-04 Wave-01 Prompt-05. Calm, premium, restrained — strong
+   typography, minimal decorative chrome, no outer card border. Edge-
+   bleed-ready outer surface: zero outer margin/padding. Internal safe
+   area on inner blocks via clamp-based padding consistent with the
+   Spotlight feature surface and the Pulse briefing surface. */
+
+.executiveSurface {
+  --hb-foleon-executive-inline-safe: clamp(1rem, 4vw, 2.5rem);
+  --hb-foleon-executive-block-gap: clamp(1rem, 2.25vw, 1.75rem);
+  display: grid;
+  gap: var(--hb-foleon-executive-block-gap);
+  margin-inline: 0;
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+  background:
+    radial-gradient(circle at 6% 8%, color-mix(in srgb, #edf1f5 92%, transparent), transparent 38%),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 60%);
+  color: var(--hbc-text-primary, #14212b);
+  box-sizing: border-box;
+}
+
+.executiveHeader {
+  display: grid;
+  gap: 0.625rem;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+}
+
+.executiveEyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.875rem;
+  align-items: center;
+}
+
+.executiveEyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #24364d;
+}
+
+.executiveCadence {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #edf1f5 80%, #ffffff);
+  border: 1px solid color-mix(in srgb, #24364d 24%, transparent);
+  color: #24364d;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.executivePreviewLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #f7b267 70%, #ffffff);
+  color: #1c2c40;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.executiveBylineRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.875rem;
+  align-items: baseline;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+}
+
+.executiveByline {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+.executiveRole {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hbc-text-secondary, #4e5c66);
+  letter-spacing: 0.02em;
+}
+
+.executiveBylineAbsent {
+  margin: 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.executiveTitle {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  max-width: 60ch;
+  font-weight: 700;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+.executivePullQuote {
+  margin: 0;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  font-size: clamp(17px, 1.6vw, 22px);
+  line-height: 1.45;
+  font-style: italic;
+  font-weight: 500;
+  color: #24364d;
+  max-width: 60ch;
+  border-inline-start: 3px solid color-mix(in srgb, #24364d 36%, transparent);
+  margin-inline-start: 0;
+  padding-inline-start: clamp(1.25rem, 4vw, 2.75rem);
+}
+
+.executiveBody {
+  margin: 0;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--hbc-text-primary, #14212b);
+  max-width: 70ch;
+}
+
+.executiveContextNotes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.625rem 1.5rem;
+  margin: 0;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  list-style: none;
+}
+
+.executiveContextNoteItem {
+  display: grid;
+  gap: 4px;
+}
+
+.executiveContextNoteLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.executiveContextNoteValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+.executiveFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  position: relative;
+  z-index: 2;
+}
+
+.executiveArchiveNote {
+  font-size: 13px;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.executiveWarning {
+  margin: 0;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  color: var(--hbc-text-secondary, #4e5c66);
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .executiveSurface {
+    --hb-foleon-executive-block-gap: 1rem;
+  }
+  .executiveContextNotes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* ===== Phase-04 Wave-01 Prompt-04B — Clickable article cards =====
    Card-launch pattern (Inclusive Components / Heydon Pickering): the
    visible launch control is a `<button>` wrapping the card title. A

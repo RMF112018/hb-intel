@@ -5,6 +5,7 @@ import type { FoleonPageContext } from '../types/foleon-event.types.js';
 import { FOLEON_READER_CONFIGS } from './readerConfigs.js';
 import { FoleonReaderModule } from './FoleonReaderModule.js';
 import type { FoleonEmbeddedReaderStatus } from './FoleonReaderModule.js';
+import type { FoleonViewerTarget } from './FoleonViewerTypes.js';
 
 export interface ProjectSpotlightReaderProps {
   readonly contract: IFoleonRuntimeContract;
@@ -14,6 +15,10 @@ export interface ProjectSpotlightReaderProps {
   readonly onEmbedError: (record: FoleonContentRecord, gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
   readonly onGateBlocked: (gateResult: FoleonGateReason, pageContext: FoleonPageContext) => void;
   readonly onStatusChange?: (status: FoleonEmbeddedReaderStatus) => void;
+  readonly onViewerOpen?: (target: FoleonViewerTarget) => void;
+  readonly onViewerClose?: (target: FoleonViewerTarget) => void;
+  readonly onViewerIframeLoaded?: (target: FoleonViewerTarget) => void;
+  readonly onViewerIframeError?: (target: FoleonViewerTarget) => void;
 }
 
 export function ProjectSpotlightReader(props: ProjectSpotlightReaderProps): React.ReactNode {
@@ -29,6 +34,10 @@ export function ProjectSpotlightReader(props: ProjectSpotlightReaderProps): Reac
       onEmbedError={props.onEmbedError}
       onGateBlocked={props.onGateBlocked}
       onStatusChange={props.onStatusChange}
+      onViewerOpen={props.onViewerOpen}
+      onViewerClose={props.onViewerClose}
+      onViewerIframeLoaded={props.onViewerIframeLoaded}
+      onViewerIframeError={props.onViewerIframeError}
     />
   );
 }

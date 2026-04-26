@@ -327,9 +327,10 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     const leadership = container.querySelector('[data-foleon-reader-layout="leadership-message"]');
     expect(spotlight?.getAttribute('data-foleon-layout')).toBe('project-spotlight-feature');
     expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-briefing');
-    // Leadership remains on the compatibility shell pending Prompt 05.
-    expect(leadership?.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
-    expect(leadership?.querySelector('[data-foleon-preview-route]')).not.toBeNull();
+    // Leadership (Prompt-05): lane-owned executive layout. No legacy markers.
+    expect(leadership?.getAttribute('data-foleon-layout')).toBe('leadership-message');
+    expect(leadership?.querySelector('[data-preview-tone]')).toBeNull();
+    expect(leadership?.querySelector('[data-foleon-preview-route]')).toBeNull();
     // Pulse no longer emits the legacy compatibility-shell markers.
     expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();

@@ -143,6 +143,23 @@ export interface FoleonReaderPulseTimelineEntry {
   readonly value: string;
 }
 
+/**
+ * Leadership Message executive composition. Populated only when
+ * `lane === 'leadershipMessage'`. Ready-state values are sourced
+ * **only** from `FoleonContentRecord` fields the schema actually
+ * carries. Fields the schema does not carry (byline, role, portrait)
+ * remain `undefined` — the layout renders an honest fallback or omits
+ * the row. Preview values are clearly labeled sample copy.
+ */
+export interface FoleonReaderLeadershipMessage {
+  readonly byline?: string;
+  readonly role?: string;
+  readonly pullQuote?: string;
+  readonly messageBody?: string;
+  readonly contextNotes?: readonly { readonly id: string; readonly label: string; readonly value: string }[];
+  readonly isPlaceholder: boolean;
+}
+
 export interface FoleonReaderViewModel {
   readonly lane: FoleonReaderLayoutKey;
   readonly state: FoleonReaderViewState;
@@ -181,6 +198,8 @@ export interface FoleonReaderViewModel {
   readonly categoryChips?: readonly FoleonReaderCategoryChip[];
   /** Company Pulse preview only. Ready state leaves this `undefined`. */
   readonly pulseTimeline?: readonly FoleonReaderPulseTimelineEntry[];
+  /** Leadership Message only. Spotlight + Pulse leave this `undefined`. */
+  readonly leadershipMessage?: FoleonReaderLeadershipMessage;
   /**
    * Article-card view model representing the lane's primary article launch
    * surface. Always populated for governed lanes (Spotlight / Pulse /
@@ -393,6 +412,22 @@ export function createPreviewFoleonReaderViewModel(
     lane === 'companyPulse' ? PULSE_CATEGORY_CHIPS : undefined;
   const pulseTimeline: readonly FoleonReaderPulseTimelineEntry[] | undefined =
     lane === 'companyPulse' ? PULSE_PREVIEW_TIMELINE : undefined;
+  const leadershipMessage: FoleonReaderLeadershipMessage | undefined =
+    lane === 'leadershipMessage'
+      ? {
+          byline: 'Sample executive byline',
+          role: 'Sample role',
+          pullQuote:
+            'Sample pull quote — a short, weighted statement framing the executive message will appear here when a live edition is published.',
+          messageBody:
+            'Sample message body — the focused leadership communication will appear here once a live Leadership Message edition is connected.',
+          contextNotes: [
+            { id: 'audience', label: 'Audience', value: 'Sample audience' },
+            { id: 'cadence', label: 'Cadence', value: 'Leadership' },
+          ],
+          isPlaceholder: true,
+        }
+      : undefined;
 
   return {
     lane,
@@ -443,6 +478,7 @@ export function createPreviewFoleonReaderViewModel(
     briefingDigest,
     categoryChips,
     pulseTimeline,
+    leadershipMessage,
     primaryArticle: createPreviewArticleCard(config, lane, preview),
   };
 }
@@ -513,6 +549,39 @@ const PULSE_PREVIEW_TIMELINE: readonly FoleonReaderPulseTimelineEntry[] = [
   { id: 'two-weeks', label: 'Two weeks ago', value: 'Sample dateline' },
 ];
 
+// ---------------------------------------------------------------------------
+// Leadership Message ready-state derivations — sourced only from
+// FoleonContentRecord. No invented data.
+// ---------------------------------------------------------------------------
+
+function deriveLeadershipPullQuote(summary: string): string | undefined {
+  const trimmed = summary.trim();
+  if (trimmed.length === 0) return undefined;
+  // Use the first sentence (bounded by `.`/`!`/`?`) up to ~180 chars as a
+  // pull quote. Keeps things short and editorial without invention.
+  const match = trimmed.match(/^[^.!?]*[.!?]/);
+  const candidate = (match ? match[0] : trimmed).trim();
+  if (candidate.length === 0) return undefined;
+  return candidate.length > 180 ? `${candidate.slice(0, 180).trimEnd()}…` : candidate;
+}
+
+function deriveLeadershipContextNotes(
+  record: FoleonContentRecord,
+): readonly { readonly id: string; readonly label: string; readonly value: string }[] {
+  const notes: { readonly id: string; readonly label: string; readonly value: string }[] = [];
+  notes.push({
+    id: 'audience',
+    label: 'Audience',
+    value: record.primaryAudience ?? 'Companywide',
+  });
+  notes.push({
+    id: 'archive-group',
+    label: 'Archive group',
+    value: record.archiveGroup ?? 'Archive coming soon',
+  });
+  return notes;
+}
+
 export function createReadyFoleonReaderViewModel(
   config: FoleonReaderModuleConfig,
   context: ReadyAdapterContext,
@@ -571,6 +640,27 @@ export function createReadyFoleonReaderViewModel(
     lane === 'companyPulse' ? PULSE_CATEGORY_CHIPS : undefined;
   // Timeline strip is preview-only — no live multi-edition source.
   const pulseTimeline: readonly FoleonReaderPulseTimelineEntry[] | undefined = undefined;
+  const leadershipMessage: FoleonReaderLeadershipMessage | undefined =
+    lane === 'leadershipMessage'
+      ? {
+          // FoleonContentRecord schema does not currently carry byline,
+          // role, or portrait fields. The layout shows honest fallbacks
+          // or omits rows when these are absent — the adapter never
+          // invents executive identity.
+          byline: undefined,
+          role: undefined,
+          pullQuote:
+            record.summary && record.summary.trim().length > 0
+              ? deriveLeadershipPullQuote(record.summary)
+              : undefined,
+          messageBody:
+            record.summary && record.summary.trim().length > 0
+              ? record.summary
+              : 'Editorial summary for this Leadership Message has not been provided.',
+          contextNotes: deriveLeadershipContextNotes(record),
+          isPlaceholder: false,
+        }
+      : undefined;
 
   const freshnessFormatted = formatFreshnessDate(pickFreshnessRaw(lane, record));
   const freshnessValue = freshnessFormatted ?? labels.freshnessFallback;
@@ -639,6 +729,7 @@ export function createReadyFoleonReaderViewModel(
     briefingDigest,
     categoryChips,
     pulseTimeline,
+    leadershipMessage,
     primaryArticle: {
       id: `${config.readerKey}-active-${record.id}`,
       title: record.title,

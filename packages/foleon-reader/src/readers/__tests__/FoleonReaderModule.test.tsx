@@ -217,7 +217,7 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
-  it('renders Leadership Message preview with executive tone and content-coming-soon composition', async () => {
+  it('renders Leadership Message preview through the lane-owned executive layout, not the legacy compatibility shell', async () => {
     resolveMock.mockResolvedValue({
       kind: 'preview',
       config: FOLEON_READER_CONFIGS.leadershipMessage,
@@ -231,18 +231,30 @@ describe('FoleonReaderModule', () => {
       contentTypeKey: 'Leadership',
       placementKey: 'Leadership Message Active',
     });
-    expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
-    expect(screen.getByText('Preview layout')).toBeTruthy();
-    expect(screen.getByLabelText('Leadership Message feature placeholder')).toBeTruthy();
-    expect(screen.getByLabelText('Leadership Message supporting preview placeholders')).toBeTruthy();
-    expect(screen.getByLabelText('Preview metadata zones')).toBeTruthy();
-    expect(screen.getByText('Content coming soon')).toBeTruthy();
-    expect(screen.getByText('Executive message edition placeholder')).toBeTruthy();
-    expect(container.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+
+    // Phase-04 Wave-01 Prompt-05: Leadership identity is layout-key driven.
+    // Tone-based markers are intentionally not emitted by this lane's new
+    // executive layout.
+    await screen.findByText('Preview layout');
+    expect(container.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-layout="leadership-message"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
+    expect(container.querySelector('[data-preview-tone]')).toBeNull();
+    expect(container.querySelector('[data-foleon-preview-route]')).toBeNull();
+
+    // The new executive layout no longer renders the legacy three-card support skeleton.
+    expect(screen.queryByLabelText('Leadership Message supporting preview placeholders')).toBeNull();
+    expect(screen.queryByLabelText('Preview metadata zones')).toBeNull();
+    expect(screen.queryByLabelText('Preview status')).toBeNull();
+
+    // No live reader telemetry, no iframe, no production callbacks fired.
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect(container.querySelectorAll('a')).toHaveLength(0);
-    expect(screen.queryByRole('button', { name: /read|open|archive/i })).toBeNull();
+    expect(container.textContent).not.toContain('viewer.us.foleon.com');
     expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+    expect(callbacks.onReaderClose).not.toHaveBeenCalled();
+    expect(callbacks.onEmbedError).not.toHaveBeenCalled();
+    expect(callbacks.onGateBlocked).not.toHaveBeenCalled();
     expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
@@ -318,7 +330,7 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onViewerIframeLoaded).toHaveBeenCalledTimes(1);
   });
 
-  it('Leadership Message preview remains on the compatibility shell pending Prompt 05 (lane-readiness sanity)', async () => {
+  it('Leadership Message preview now renders the lane-owned executive layout (Prompt 05 migration complete)', async () => {
     resolveMock.mockResolvedValue({
       kind: 'preview',
       config: FOLEON_READER_CONFIGS.leadershipMessage,
@@ -327,21 +339,17 @@ describe('FoleonReaderModule', () => {
     });
     const { container } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
 
-    // Lane wrapper still resolves to the registry-driven Leadership component.
-    const leadership = await screen.findByText('Leadership Message reader');
-    expect(leadership).toBeTruthy();
-    expect(
-      container.querySelector('[data-foleon-reader-layout="leadership-message"]'),
-    ).not.toBeNull();
-    // Compatibility-shell legacy markers are still emitted by Leadership today.
-    expect(container.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
-    expect(container.querySelector('[data-foleon-preview-route]')).not.toBeNull();
-    // Leadership has NOT moved to the lane-owned viewer/card model yet.
-    expect(container.querySelector('[data-foleon-article-card]')).toBeNull();
-    expect(container.querySelector('[data-foleon-layout]')).toBeNull();
+    await screen.findByText('Preview layout');
+    // Lane-owned layout markers present.
+    expect(container.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-layout="leadership-message"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-article-card]')).not.toBeNull();
+    // Legacy compatibility-shell markers gone.
+    expect(container.querySelector('[data-preview-tone]')).toBeNull();
+    expect(container.querySelector('[data-foleon-preview-route]')).toBeNull();
   });
 
-  it('uses Leadership Message config and page context for ready reader events', async () => {
+  it('Leadership Message ready opens the full-window viewer when the executive card is clicked, and emits viewer telemetry', async () => {
     const record = makeRecord({
       title: 'Quarterly Leadership Note',
       contentTypeKey: 'Leadership',
@@ -356,7 +364,7 @@ describe('FoleonReaderModule', () => {
       embedUrl: record.embedUrl!,
       warnings: [],
     });
-    const { callbacks } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
+    const { callbacks, container } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
 
     expect(resolveMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -367,9 +375,25 @@ describe('FoleonReaderModule', () => {
         }),
       }),
     );
-    const iframe = await screen.findByTitle('Leadership Message: Quarterly Leadership Note');
+
+    // Phase-04 Wave-01 Prompt-05: Leadership now uses the lane-owned
+    // executive layout + shared full-window viewer. No inline iframe.
+    await screen.findByText('Quarterly Leadership Note');
+    expect(container.querySelectorAll('iframe')).toHaveLength(0);
+
+    const launch = within(
+      container.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: record.title });
+    fireEvent.click(launch);
+
+    // Viewer telemetry fires (distinct from inline iframe lifecycle).
+    expect(callbacks.onViewerOpen).toHaveBeenCalledTimes(1);
+    expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+
+    // Viewer iframe mounts and emits onViewerIframeLoaded on load.
+    const iframe = await screen.findByTitle(`${record.title} — Foleon viewer`);
     fireEvent.load(iframe);
-    expect(callbacks.onReaderOpen).toHaveBeenCalledWith(record, 'ok', 'Leadership Message');
+    expect(callbacks.onViewerIframeLoaded).toHaveBeenCalledTimes(1);
   });
 
   it('renders blocked real records without an iframe', async () => {
@@ -518,9 +542,10 @@ describe('FoleonReaderModule', () => {
     expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
-    // Leadership Message: still on the compatibility shell pending Prompt 05.
-    expect(leadership?.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
-    expect(leadership?.querySelector('[data-foleon-preview-route]')).not.toBeNull();
+    // Leadership Message (Prompt-05): lane-owned executive layout, no legacy markers.
+    expect(leadership?.getAttribute('data-foleon-layout')).toBe('leadership-message');
+    expect(leadership?.querySelector('[data-preview-tone]')).toBeNull();
+    expect(leadership?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
     // Global preview-state invariant.
     expect(document.querySelectorAll('iframe')).toHaveLength(0);

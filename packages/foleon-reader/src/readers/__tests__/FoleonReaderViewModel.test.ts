@@ -408,6 +408,97 @@ describe('view model — Company Pulse briefing fields', () => {
   });
 });
 
+describe('view model — Leadership Message executive composition', () => {
+  it('preview view model populates leadershipMessage with sample-labeled placeholders only for the leadershipMessage lane', () => {
+    const leadership = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
+    expect(leadership.leadershipMessage).toBeDefined();
+    expect(leadership.leadershipMessage?.isPlaceholder).toBe(true);
+    expect(leadership.leadershipMessage?.byline).toBe('Sample executive byline');
+    expect(leadership.leadershipMessage?.role).toBe('Sample role');
+    expect(typeof leadership.leadershipMessage?.pullQuote).toBe('string');
+    expect(typeof leadership.leadershipMessage?.messageBody).toBe('string');
+
+    const spotlight = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    const pulse = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    expect(spotlight.leadershipMessage).toBeUndefined();
+    expect(pulse.leadershipMessage).toBeUndefined();
+  });
+
+  it('ready view model derives leadershipMessage only from FoleonContentRecord — byline/role stay undefined when the schema does not carry them', () => {
+    const resolution = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      title: 'A Quarterly Note from Leadership',
+      summary: 'A focused message on the year ahead. We are committing to clearer communication and faster decisions.',
+      lastEditorialUpdate: '2026-04-10T00:00:00.000Z',
+      primaryAudience: 'Companywide',
+      archiveGroup: '2026-Q2',
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage, {
+      resolution,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+
+    expect(vm.leadershipMessage).toBeDefined();
+    expect(vm.leadershipMessage?.isPlaceholder).toBe(false);
+    // byline + role are NOT carried by FoleonContentRecord today — adapter
+    // never invents executive identity; layout shows honest fallback.
+    expect(vm.leadershipMessage?.byline).toBeUndefined();
+    expect(vm.leadershipMessage?.role).toBeUndefined();
+    // pullQuote derived from the first sentence of record.summary.
+    expect(vm.leadershipMessage?.pullQuote).toBe('A focused message on the year ahead.');
+    // messageBody derived from full record.summary.
+    expect(vm.leadershipMessage?.messageBody).toMatch(/clearer communication/);
+    // contextNotes derived from record-backed fields only.
+    const noteIds = vm.leadershipMessage?.contextNotes?.map((n) => n.id);
+    expect(noteIds).toEqual(['audience', 'archive-group']);
+  });
+
+  it('ready view model uses an honest fallback for messageBody when record.summary is missing', () => {
+    const noSummary = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      summary: undefined,
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage, {
+      resolution: noSummary,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vm.leadershipMessage?.messageBody).toMatch(/has not been provided/);
+    expect(vm.leadershipMessage?.pullQuote).toBeUndefined();
+  });
+
+  it('Spotlight and Pulse ready view models leave leadershipMessage undefined', () => {
+    const spotlightRes = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight);
+    const pulseRes = makeReadyResolution(FOLEON_READER_CONFIGS.companyPulse, {
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+    });
+    const spotlightVm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: spotlightRes,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    const pulseVm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse, {
+      resolution: pulseRes,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(spotlightVm.leadershipMessage).toBeUndefined();
+    expect(pulseVm.leadershipMessage).toBeUndefined();
+  });
+});
+
 describe('createReadyFoleonReaderViewModel — actions and warnings', () => {
   it('always includes Open archive; includes Open reader only when mobile gate is active', () => {
     const onArchive = vi.fn();

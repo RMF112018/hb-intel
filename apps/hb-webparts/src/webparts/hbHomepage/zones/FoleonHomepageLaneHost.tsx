@@ -76,6 +76,16 @@ export function FoleonHomepageLaneHost(props: FoleonHomepageLaneHostProps): Reac
   const handleGateBlocked = React.useCallback<EmbeddedLaneProps['onGateBlocked']>((gateResult) => {
     setStatus({ kind: 'error', message: gateResult });
   }, []);
+  // Phase-04 Wave-01 Prompt-05 — once Spotlight + Pulse + Leadership all
+  // run on the full-window viewer model, no governed Foleon lane fires
+  // inline `onEmbedError` for ready iframes. Wire the viewer-side iframe
+  // error to the same occupant error-status path so the homepage lane
+  // continues to surface iframe failures regardless of which surface
+  // (inline or viewer) hosted the iframe. The `record.id`-based reason
+  // keeps the existing single-line message contract.
+  const handleViewerIframeError = React.useCallback<NonNullable<EmbeddedLaneProps['onViewerIframeError']>>(() => {
+    setStatus({ kind: 'error', message: 'viewer-iframe-error' });
+  }, []);
 
   if (!contract.canInitialize) {
     return (
@@ -108,6 +118,7 @@ export function FoleonHomepageLaneHost(props: FoleonHomepageLaneHostProps): Reac
         onEmbedError={handleEmbedError}
         onGateBlocked={handleGateBlocked}
         onStatusChange={setStatus}
+        onViewerIframeError={handleViewerIframeError}
       />
     </div>
   );
