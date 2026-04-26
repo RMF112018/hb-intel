@@ -63,5 +63,10 @@ declare const styles: {
   readonly briefingMobileGateBody: string;
   readonly briefingIframeFrame: string;
   readonly briefingWarning: string;
+  readonly articleCard: string;
+  readonly cardLaunch: string;
+  readonly disabledReason: string;
+  readonly articleFooter: string;
+  readonly briefingFooter: string;
 };
 export default styles;

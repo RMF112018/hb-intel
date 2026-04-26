@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
-import { render, cleanup, screen } from '@testing-library/react';
+import { render, cleanup, screen, fireEvent } from '@testing-library/react';
 import { CompanyPulseReaderLayout } from '../layouts/CompanyPulseReaderLayout.js';
 import { ProjectSpotlightReaderLayout } from '../layouts/ProjectSpotlightReaderLayout.js';
 import { LeadershipMessageReaderLayout } from '../layouts/LeadershipMessageReaderLayout.js';
@@ -194,34 +194,66 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     ).toBeTruthy();
   });
 
-  it('renders the iframe inside .briefingIframeFrame only when viewModel.iframe?.visible is true and iframeSurface is non-null', () => {
+  it('Phase-04 Wave-01 Prompt-04B: never renders an inline iframe, even when iframeSurface is provided or visible', () => {
     const viewModel = buildReadyViewModel();
-    const withIframe = render(
+    const rendered = render(
       <CompanyPulseReaderLayout
         viewModel={viewModel}
-        iframeSurface={<iframe title="pulse-iframe" />}
+        iframeSurface={<iframe title="should-not-render-inline" />}
       />,
     );
-    expect(withIframe.container.querySelector('iframe')).not.toBeNull();
-    cleanup();
+    expect(rendered.container.querySelector('iframe')).toBeNull();
+  });
 
-    const withoutSurface = render(
+  it('renders the lead update as the article card with stable interaction markers', () => {
+    const viewModel = buildReadyViewModel();
+    const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
-    expect(withoutSurface.container.querySelector('iframe')).toBeNull();
-    cleanup();
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card).not.toBeNull();
+    expect(card?.getAttribute('data-foleon-article-lane')).toBe('companyPulse');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('enabled');
+    expect(card?.getAttribute('data-foleon-viewer-target-id')).toMatch(/^company-pulse-active-/);
+    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    expect(launch).toBeTruthy();
+    expect(launch.getAttribute('aria-disabled')).toBeNull();
+  });
 
-    const collapsedVm: FoleonReaderViewModel = {
-      ...viewModel,
-      iframe: viewModel.iframe ? { ...viewModel.iframe, visible: false } : undefined,
-    };
-    const collapsed = render(
-      <CompanyPulseReaderLayout
-        viewModel={collapsedVm}
-        iframeSurface={<iframe title="pulse-iframe-2" />}
-      />,
+  it('preview state lead card is aria-disabled with a visible reason and aria-describedby', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const { container } = render(
+      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
-    expect(collapsed.container.querySelector('iframe')).toBeNull();
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
+    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    expect(launch.getAttribute('aria-disabled')).toBe('true');
+    const reasonId = launch.getAttribute('aria-describedby');
+    expect(reasonId).toBeTruthy();
+    expect(container.querySelector(`#${reasonId}`)?.textContent).toMatch(/preview only/i);
+  });
+
+  it('clicking a disabled (preview) lead is a no-op and surfaces the structured refusal as a DOM marker', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    fireEvent.click(launch);
+    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('preview-only');
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {
+    const viewModel = buildReadyViewModel({ allowEmbed: false });
+    const { container } = render(
+      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
+    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    expect(launch.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(launch);
+    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
   });
 
   it('outer wrapper is edge-bleed-ready (no inline margin-inline overrides on the layout root)', () => {

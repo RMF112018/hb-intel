@@ -650,4 +650,99 @@
   }
 }
 
+/* ===== Phase-04 Wave-01 Prompt-04B — Clickable article cards =====
+   Card-launch pattern (Inclusive Components / Heydon Pickering): the
+   visible launch control is a `<button>` wrapping the card title. A
+   transparent `::after` pseudo-element on the button is `position:
+   absolute; inset: 0;` over the `position: relative` `.articleCard`,
+   so clicks anywhere on the card trigger the button. There are NO
+   nested interactive controls inside the card surface. The "Open
+   full archive" footer action lives OUTSIDE the article card.
+
+   Disabled state uses `aria-disabled="true"` (preserves focus so
+   screen readers can announce the disabled reason via
+   `aria-describedby`); the click handler suppresses activation. */
+
+.articleCard {
+  position: relative;
+}
+
+.articleCard[data-foleon-article-state='disabled'],
+.articleCard[data-foleon-article-state='preview'] {
+  cursor: not-allowed;
+}
+
+.cardLaunch {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline;
+  letter-spacing: inherit;
+}
+
+.cardLaunch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Visible focus ring across the full card when the launch button has
+   keyboard focus. */
+.cardLaunch:focus-visible::after {
+  outline: 3px solid var(--hbc-brand-50, #9ed4f2);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.cardLaunch[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+/* Disabled reason copy — visible inside the card, referenced via
+   aria-describedby for assistive tech. */
+.disabledReason {
+  margin: 0;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+  color: color-mix(in srgb, var(--hbc-text-secondary, #4e5c66) 92%, #ffffff);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Pulse-specific: disabled reason inside the lead card (already inside
+   inset block, no extra inline safe area needed). */
+.briefingLead .disabledReason {
+  padding-inline: 0;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+/* Footer outside the article card — holds the "Open full archive"
+   secondary action and any post-card affordances. Its interactive
+   children sit ABOVE the card-launch pseudo-element via z-index. */
+.articleFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+  position: relative;
+  z-index: 2;
+}
+
+.briefingFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  padding-inline: var(--hb-foleon-briefing-inline-safe);
+  position: relative;
+  z-index: 2;
+}
+
 /* Reduced motion preserved by inheriting host shell rules. */

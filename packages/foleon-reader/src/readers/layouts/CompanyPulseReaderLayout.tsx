@@ -1,30 +1,43 @@
-import type { ReactNode } from 'react';
+import * as React from 'react';
 import { HbcButton } from '@hbc/ui-kit/homepage';
 import type { FoleonReaderLayoutProps } from '../FoleonReaderLayoutRegistry.js';
-import type { FoleonReaderViewModel } from '../FoleonReaderViewModel.js';
+import type {
+  FoleonReaderAction,
+  FoleonReaderViewModel,
+} from '../FoleonReaderViewModel.js';
+import type { FoleonViewerDisabledReason } from '../FoleonViewerTypes.js';
+import { useFoleonFullWindowViewer } from '../../components/FoleonFullWindowViewerProvider.js';
 import styles from './FoleonReaderLayouts.module.css';
 
 // ---------------------------------------------------------------------------
-// Company Pulse reader layout — Phase-04 Wave-01 Prompt-04
+// Company Pulse reader layout — Phase-04 Wave-01 Prompt-04B
 // ---------------------------------------------------------------------------
-// Lane-owned briefing / newsroom digest composition. No longer delegates
-// to the shared compatibility shell. The outer surface is edge-bleed-ready
-// by structure (zero outer `margin-inline` and zero outer `padding-inline`);
-// the Prompt-01 shell-slot edge contract drives any active bleed. This
-// component does NOT activate global edge-to-window behavior on its own.
+// Lane-owned briefing / newsroom digest. The lead update card is the
+// interactive launch surface for the shared full-window Foleon viewer
+// (Inclusive Components card-launch pattern). Disabled targets carry
+// `aria-disabled` plus `aria-describedby` and surface a visible reason.
+// Inline iframe is removed for this lane — the Foleon document opens in
+// the shared full-window viewer.
 //
-// Identity is layout-key-driven, not tone-driven. Legacy `data-preview-tone`
-// markers are intentionally NOT emitted by this layout.
-//
-// Ready-state secondary digest is intentionally empty: the registry
-// currently carries one active record per lane. The layout surfaces an
-// "Open archive" affordance plus an explanatory empty-digest state rather
-// than fabricating digest entries.
+// Ready-state secondary digest stays empty (no fabricated entries); the
+// "Open full archive" footer affordance directs users to previous editions.
 // ---------------------------------------------------------------------------
 
-export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.ReactNode {
-  const { viewModel, iframeSurface } = props;
+export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.JSX.Element | null {
+  const { viewModel } = props;
   const isPreview = viewModel.state === 'preview';
+  const card = viewModel.primaryArticle;
+  if (!card) return null;
+
+  const target = card.target;
+  const isDisabled = !target.canOpen;
+  const articleState: 'enabled' | 'disabled' | 'preview' = isPreview
+    ? 'preview'
+    : isDisabled
+      ? 'disabled'
+      : 'enabled';
+  const reasonId = `${target.id}-disabled-reason`;
+  const archiveAction = pickArchiveAction(viewModel.actions);
 
   return (
     <div
@@ -67,8 +80,12 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
 
         {viewModel.briefingLead ? (
           <section
-            className={styles.briefingLead}
+            className={`${styles.briefingLead} ${styles.articleCard}`}
             aria-label="Latest Company Pulse update"
+            data-foleon-article-card
+            data-foleon-article-lane="companyPulse"
+            data-foleon-viewer-target-id={target.id}
+            data-foleon-article-state={articleState}
           >
             <p className={styles.leadKicker}>
               <span>Latest update</span>
@@ -83,8 +100,26 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
                 </>
               ) : null}
             </p>
-            <h3 className={styles.leadTitle}>{viewModel.briefingLead.title}</h3>
+            <h3 className={styles.leadTitle}>
+              <CardLaunchButton
+                target={target}
+                reasonId={reasonId}
+                isDisabled={isDisabled}
+              >
+                {viewModel.briefingLead.title}
+              </CardLaunchButton>
+            </h3>
             <p className={styles.leadBody}>{viewModel.briefingLead.body}</p>
+            {isDisabled ? (
+              <p
+                id={reasonId}
+                className={styles.disabledReason}
+                role="status"
+                aria-live="polite"
+              >
+                {formatDisabledReason(target.disabledReason)}
+              </p>
+            ) : null}
           </section>
         ) : null}
 
@@ -101,34 +136,18 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
           </ol>
         ) : null}
 
-        {viewModel.actions.length > 0 || viewModel.archiveNote ? (
-          <div className={styles.briefingActions}>
-            {viewModel.actions.map((action) => (
-              <HbcButton
-                key={action.id}
-                variant={action.variant === 'secondary' ? 'secondary' : undefined}
-                onClick={action.onClick}
-              >
-                {action.label}
+        {archiveAction || viewModel.archiveNote ? (
+          <div className={styles.briefingFooter}>
+            {archiveAction ? (
+              <HbcButton variant="secondary" onClick={archiveAction.onClick}>
+                {archiveAction.label}
               </HbcButton>
-            ))}
+            ) : null}
             {viewModel.archiveNote ? (
               <span className={styles.briefingArchiveNote}>{viewModel.archiveNote}</span>
             ) : null}
           </div>
         ) : null}
-
-        {viewModel.mobileGate ? (
-          <div
-            className={styles.briefingMobileGate}
-            aria-label="Company Pulse collapsed mobile reader"
-          >
-            <p className={styles.briefingMobileGateLabel}>{viewModel.mobileGate.headline}</p>
-            <p className={styles.briefingMobileGateBody}>{viewModel.mobileGate.body}</p>
-          </div>
-        ) : null}
-
-        {renderIframeFrame(viewModel, iframeSurface)}
 
         {viewModel.warnings.map((warning, i) => (
           <p key={i} className={styles.briefingWarning}>
@@ -140,13 +159,61 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
   );
 }
 
+function pickArchiveAction(actions: readonly FoleonReaderAction[]): FoleonReaderAction | undefined {
+  return actions.find((action) => action.id === 'open-archive');
+}
+
+interface CardLaunchButtonProps {
+  readonly target: NonNullable<FoleonReaderViewModel['primaryArticle']>['target'];
+  readonly reasonId: string;
+  readonly isDisabled: boolean;
+  readonly children: React.ReactNode;
+}
+
+function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
+  const { target, reasonId, isDisabled, children } = props;
+  const viewer = useFoleonFullWindowViewer();
+
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      if (isDisabled) {
+        event.currentTarget.setAttribute(
+          'data-foleon-article-last-refusal',
+          target.disabledReason ?? 'unknown',
+        );
+        return;
+      }
+      const result = viewer.openViewer(target, event.currentTarget);
+      if (result.opened === false) {
+        event.currentTarget.setAttribute(
+          'data-foleon-article-last-refusal',
+          result.reason,
+        );
+      } else {
+        event.currentTarget.removeAttribute('data-foleon-article-last-refusal');
+      }
+    },
+    [isDisabled, target, viewer],
+  );
+
+  return (
+    <button
+      type="button"
+      className={styles.cardLaunch}
+      aria-disabled={isDisabled || undefined}
+      aria-describedby={isDisabled ? reasonId : undefined}
+      onClick={handleClick}
+    >
+      {children}
+    </button>
+  );
+}
+
 function renderDigest(viewModel: FoleonReaderViewModel): React.ReactNode {
   const digest = viewModel.briefingDigest;
   if (!digest) return null;
 
   if (digest.length === 0) {
-    // Honest empty-digest state — the active record is the lead, and
-    // previous editions live in the archive.
     return (
       <div
         className={styles.digestEmpty}
@@ -185,11 +252,17 @@ function renderDigest(viewModel: FoleonReaderViewModel): React.ReactNode {
   );
 }
 
-function renderIframeFrame(
-  viewModel: FoleonReaderViewModel,
-  iframeSurface: ReactNode | null,
-): React.ReactNode {
-  if (!viewModel.iframe?.visible) return null;
-  if (iframeSurface === null) return null;
-  return <div className={styles.briefingIframeFrame}>{iframeSurface}</div>;
+function formatDisabledReason(reason: FoleonViewerDisabledReason | undefined): string {
+  switch (reason) {
+    case 'preview-only':
+      return 'Preview only — a live Company Pulse update will open here when published.';
+    case 'no-embed-url':
+      return 'This Company Pulse update does not carry an embeddable Foleon URL yet.';
+    case 'embed-not-allowed':
+      return 'This Company Pulse update disallows in-line embedding by governance policy.';
+    case 'requires-external-open':
+      return 'This Company Pulse update must be opened in a new tab. Use the published link if available.';
+    default:
+      return 'This Company Pulse update is not available in the in-line viewer.';
+  }
 }

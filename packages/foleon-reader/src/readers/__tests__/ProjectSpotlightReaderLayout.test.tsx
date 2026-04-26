@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
-import { render, cleanup, screen } from '@testing-library/react';
+import { render, cleanup, screen, fireEvent } from '@testing-library/react';
 
 beforeAll(() => {
   // HbcButton inspects pointer-coarseness via window.matchMedia. JSDOM does
@@ -164,37 +164,76 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(facts?.textContent).toContain('Not listed');
   });
 
-  it('renders the iframe inside .iframeFrame only when viewModel.iframe?.visible is true and iframeSurface is non-null', () => {
+  it('Phase-04 Wave-01 Prompt-04B: never renders an inline iframe, even when iframeSurface is provided', () => {
+    // The viewer is now the only iframe surface for this lane. Even if the
+    // orchestrator passes an iframeSurface React element, the lane layout
+    // must not render it inline.
     const viewModel = buildReadyViewModel();
-    // visible true + non-null surface ⇒ rendered
-    const withIframe = render(
+    const rendered = render(
       <ProjectSpotlightReaderLayout
         viewModel={viewModel}
-        iframeSurface={<iframe title="test-iframe" />}
+        iframeSurface={<iframe title="should-not-render-inline" />}
       />,
     );
-    expect(withIframe.container.querySelector('iframe')).not.toBeNull();
-    cleanup();
+    expect(rendered.container.querySelector('iframe')).toBeNull();
+  });
 
-    // visible true + null surface ⇒ not rendered
-    const withoutSurface = render(
+  it('renders the article card with stable interaction markers and uses a card-launch button bound to the title', () => {
+    const viewModel = buildReadyViewModel();
+    const { container } = render(
       <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
-    expect(withoutSurface.container.querySelector('iframe')).toBeNull();
-    cleanup();
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card).not.toBeNull();
+    expect(card?.getAttribute('data-foleon-article-lane')).toBe('projectSpotlight');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('enabled');
+    expect(card?.getAttribute('data-foleon-viewer-target-id')).toMatch(/^project-spotlight-active-/);
+    // Card-launch button uses the article title as its accessible name.
+    const launchButton = screen.getByRole('button', {
+      name: viewModel.primaryArticle!.title,
+    });
+    expect(launchButton).toBeTruthy();
+    expect(launchButton.getAttribute('aria-disabled')).toBeNull();
+  });
 
-    // visible false ⇒ not rendered
-    const collapsedVm: FoleonReaderViewModel = {
-      ...viewModel,
-      iframe: viewModel.iframe ? { ...viewModel.iframe, visible: false } : undefined,
-    };
-    const collapsed = render(
-      <ProjectSpotlightReaderLayout
-        viewModel={collapsedVm}
-        iframeSurface={<iframe title="test-iframe-2" />}
-      />,
+  it('preview state article card is aria-disabled with a visible reason and aria-describedby', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
-    expect(collapsed.container.querySelector('iframe')).toBeNull();
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
+    const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+    expect(launchButton.getAttribute('aria-disabled')).toBe('true');
+    const reasonId = launchButton.getAttribute('aria-describedby');
+    expect(reasonId).toBeTruthy();
+    const reasonEl = container.querySelector(`#${reasonId}`);
+    expect(reasonEl?.textContent).toMatch(/preview only/i);
+  });
+
+  it('clicking a disabled (preview) card is a no-op and surfaces the structured refusal as a DOM marker', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    render(<ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+    fireEvent.click(launchButton);
+    expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBe('preview-only');
+    // No dialog opened (no provider in scope, but disabled state short-circuits anyway).
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {
+    const viewModel = buildReadyViewModel({ allowEmbed: false });
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
+    const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+    expect(launchButton.getAttribute('aria-disabled')).toBe('true');
+    const reasonEl = container.querySelector(`#${launchButton.getAttribute('aria-describedby')}`);
+    expect(reasonEl?.textContent).toMatch(/disallows in-line embedding/i);
+    fireEvent.click(launchButton);
+    expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
   });
 
   it('does not interfere with sibling lanes — Pulse renders its briefing layout, Leadership stays on the compatibility shell', () => {

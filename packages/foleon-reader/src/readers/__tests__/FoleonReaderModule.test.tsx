@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { FoleonEmbeddedReaderLane } from '../../FoleonEmbeddedReaderLane.js';
 import type { IFoleonRuntimeContract } from '../../runtime/embeddedRuntimeContract.js';
 import type { FoleonContentRecord } from '../../types/foleon-content.types.js';
@@ -85,6 +85,10 @@ function renderModule(overrides: {
     onReaderClose: vi.fn(),
     onEmbedError: vi.fn(),
     onGateBlocked: vi.fn(),
+    onViewerOpen: vi.fn(),
+    onViewerClose: vi.fn(),
+    onViewerIframeLoaded: vi.fn(),
+    onViewerIframeError: vi.fn(),
   };
   const config = overrides.config ?? FOLEON_READER_CONFIGS.projectSpotlight;
   const tone = config.readerKey === 'project-spotlight'
@@ -242,7 +246,7 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onOpenArchive).not.toHaveBeenCalled();
   });
 
-  it('mounts the iframe for a ready desktop record and emits open on load', async () => {
+  it('Project Spotlight ready opens the full-window viewer when the article card is clicked, and emits viewer telemetry', async () => {
     const record = makeRecord();
     resolveMock.mockResolvedValue({
       kind: 'ready',
@@ -251,16 +255,30 @@ describe('FoleonReaderModule', () => {
       embedUrl: record.embedUrl!,
       warnings: [],
     });
-    const { callbacks, unmount } = renderModule();
+    const { callbacks, container } = renderModule();
 
-    const iframe = await screen.findByTitle('Project Spotlight: The Seaglass Residence');
-    fireEvent.load(iframe);
-    fireEvent.load(iframe);
-    expect(callbacks.onReaderOpen).toHaveBeenCalledTimes(1);
-    expect(callbacks.onReaderOpen).toHaveBeenCalledWith(record, 'ok', 'Project Spotlight');
+    // Wait for the lane-owned layout to render.
+    await screen.findByLabelText('Project Spotlight metadata');
 
-    unmount();
-    expect(callbacks.onReaderClose).toHaveBeenCalledTimes(1);
+    // Phase-04 Wave-01 Prompt-04B: inline iframe is removed for this lane.
+    expect(container.querySelectorAll('iframe')).toHaveLength(0);
+
+    // The article card is the launch surface — clicking the title button
+    // (or anywhere on the card via the stretched ::after pseudo-element)
+    // opens the shared full-window viewer.
+    const launch = within(
+      container.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: record.title });
+    fireEvent.click(launch);
+
+    // Viewer telemetry fires (distinct from inline iframe lifecycle).
+    expect(callbacks.onViewerOpen).toHaveBeenCalledTimes(1);
+    expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
+
+    // Viewer iframe mounts and emits onViewerIframeLoaded on load.
+    const iframe = await screen.findByTitle(`${record.title} — Foleon viewer`);
+    fireEvent.load(iframe);
+    expect(callbacks.onViewerIframeLoaded).toHaveBeenCalledTimes(1);
   });
 
   it('uses Leadership Message config and page context for ready reader events', async () => {
@@ -349,7 +367,7 @@ describe('FoleonReaderModule', () => {
     expect(callbacks.onGateBlocked).not.toHaveBeenCalled();
   });
 
-  it('keeps mobile readers collapsed until user activation', async () => {
+  it('Project Spotlight ready on mobile mounts no inline iframe and opens the viewer when the article card is clicked', async () => {
     const record = makeRecord();
     resolveMock.mockResolvedValue({
       kind: 'ready',
@@ -358,14 +376,23 @@ describe('FoleonReaderModule', () => {
       embedUrl: record.embedUrl!,
       warnings: [],
     });
-    const { callbacks } = renderModule({ mobile: true });
+    const { callbacks, container } = renderModule({ mobile: true });
 
-    expect(await screen.findByText('Reader ready')).toBeTruthy();
+    // Wait for the lane-owned layout (mobile breakpoint renders the same
+    // article card; the legacy "Reader ready" inline-iframe gate is gone).
+    await screen.findByLabelText('Project Spotlight metadata');
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
-    fireEvent.click(screen.getByRole('button', { name: 'Open reader' }));
-    const iframe = await screen.findByTitle('Project Spotlight: The Seaglass Residence');
+    expect(screen.queryByText('Reader ready')).toBeNull();
+
+    const launch = within(
+      container.querySelector('[data-foleon-article-card]') as HTMLElement,
+    ).getByRole('button', { name: record.title });
+    fireEvent.click(launch);
+
+    expect(callbacks.onViewerOpen).toHaveBeenCalledTimes(1);
+    const iframe = await screen.findByTitle(`${record.title} — Foleon viewer`);
     fireEvent.load(iframe);
-    expect(callbacks.onReaderOpen).toHaveBeenCalledTimes(1);
+    expect(callbacks.onViewerIframeLoaded).toHaveBeenCalledTimes(1);
   });
 
   it('renders all three embedded reader lanes in one React tree without Foleon globals or shared roots', async () => {
