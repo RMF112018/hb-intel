@@ -1,0 +1,32 @@
+/** Auto-generated type declaration for FoleonReaderLayouts.module.css */
+declare const styles: {
+  readonly featureSurface: string;
+  readonly mediaBanner: string;
+  readonly mediaInner: string;
+  readonly eyebrowRow: string;
+  readonly eyebrow: string;
+  readonly cadenceMarker: string;
+  readonly previewLabel: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly ribbon: string;
+  readonly ribbonItem: string;
+  readonly ribbonLabel: string;
+  readonly ribbonValue: string;
+  readonly callout: string;
+  readonly calloutHeading: string;
+  readonly calloutBody: string;
+  readonly projectFacts: string;
+  readonly projectFactItem: string;
+  readonly projectFactLabel: string;
+  readonly projectFactValue: string;
+  readonly projectFactValuePlaceholder: string;
+  readonly actions: string;
+  readonly archiveNote: string;
+  readonly mobileGate: string;
+  readonly mobileGateLabel: string;
+  readonly mobileGateBody: string;
+  readonly iframeFrame: string;
+  readonly warning: string;
+};
+export default styles;

@@ -204,6 +204,102 @@ describe('createReadyFoleonReaderViewModel — defaults and iframe model', () =>
   });
 });
 
+describe('view model — Project Spotlight projectFacts and featureCallout', () => {
+  it('preview view model populates projectFacts as labeled placeholders only for Project Spotlight', () => {
+    const spotlight = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    expect(spotlight.projectFacts).toBeDefined();
+    expect(spotlight.projectFacts?.arePlaceholders).toBe(true);
+    expect(spotlight.projectFacts?.client).toBe('Sample client');
+    expect(spotlight.featureCallout?.heading).toBe('Why this project matters');
+
+    const pulse = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const leadership = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
+    expect(pulse.projectFacts).toBeUndefined();
+    expect(pulse.featureCallout).toBeUndefined();
+    expect(leadership.projectFacts).toBeUndefined();
+    expect(leadership.featureCallout).toBeUndefined();
+  });
+
+  it('ready view model derives projectFacts only from FoleonContentRecord (no invented data) and uses arePlaceholders=false', () => {
+    const resolution = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      relatedProjectName: 'Seaglass Holdings LLC',
+      region: 'Gulf Coast',
+      sector: 'Hospitality',
+      // team / milestone source fields not in record schema → adapter leaves
+      // `team: undefined`; `milestone` is a date format derived from issueDate.
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vm.projectFacts).toBeDefined();
+    expect(vm.projectFacts?.arePlaceholders).toBe(false);
+    expect(vm.projectFacts?.client).toBe('Seaglass Holdings LLC');
+    expect(vm.projectFacts?.location).toBe('Gulf Coast');
+    expect(vm.projectFacts?.market).toBe('Hospitality');
+    expect(vm.projectFacts?.team).toBeUndefined();
+    expect(typeof vm.projectFacts?.milestone).toBe('string');
+  });
+
+  it('ready view model featureCallout uses record.summary when present and a stable fallback when absent', () => {
+    const withSummary = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      summary: 'A coastal residence redefining HB craft excellence.',
+    });
+    const vmWith = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: withSummary,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmWith.featureCallout?.body).toBe('A coastal residence redefining HB craft excellence.');
+
+    const noSummary = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      summary: undefined,
+    });
+    const vmWithout = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: noSummary,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmWithout.featureCallout?.body).toMatch(/has not been provided/);
+  });
+
+  it('ready view model leaves projectFacts and featureCallout undefined for Pulse and Leadership', () => {
+    const pulseRes = makeReadyResolution(FOLEON_READER_CONFIGS.companyPulse, {
+      contentTypeKey: 'Company Pulse',
+      readerKey: 'company-pulse',
+    });
+    const leadershipRes = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+    });
+    const pulseVm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse, {
+      resolution: pulseRes,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    const leadershipVm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage, {
+      resolution: leadershipRes,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(pulseVm.projectFacts).toBeUndefined();
+    expect(pulseVm.featureCallout).toBeUndefined();
+    expect(leadershipVm.projectFacts).toBeUndefined();
+    expect(leadershipVm.featureCallout).toBeUndefined();
+  });
+});
+
 describe('createReadyFoleonReaderViewModel — actions and warnings', () => {
   it('always includes Open archive; includes Open reader only when mobile gate is active', () => {
     const onArchive = vi.fn();

@@ -63,6 +63,34 @@ export interface FoleonReaderMobileGate {
   readonly body: string;
 }
 
+/**
+ * Project Spotlight project facts. Populated only when
+ * `lane === 'projectSpotlight'`. `arePlaceholders` distinguishes preview
+ * sample copy from record-backed values; layouts must label preview
+ * placeholders explicitly.
+ *
+ * Ready-state values are derived **only** from `FoleonContentRecord`
+ * fields; absent record fields render as `'Not listed'` or are omitted
+ * by the layout. The adapter never invents data for ready state.
+ */
+export interface FoleonReaderProjectFacts {
+  readonly client?: string;
+  readonly location?: string;
+  readonly market?: string;
+  readonly team?: string;
+  readonly milestone?: string;
+  readonly arePlaceholders: boolean;
+}
+
+/**
+ * Project Spotlight "Why this project matters" callout. Populated only
+ * when `lane === 'projectSpotlight'`.
+ */
+export interface FoleonReaderFeatureCallout {
+  readonly heading: string;
+  readonly body: string;
+}
+
 export interface FoleonReaderViewModel {
   readonly lane: FoleonReaderLayoutKey;
   readonly state: FoleonReaderViewState;
@@ -89,6 +117,10 @@ export interface FoleonReaderViewModel {
   readonly archiveNote?: string;
   /** Stable id for `aria-labelledby` on the layout title element. */
   readonly titleElementId: string;
+  /** Project Spotlight only. Pulse + Leadership leave this `undefined`. */
+  readonly projectFacts?: FoleonReaderProjectFacts;
+  /** Project Spotlight only. Pulse + Leadership leave this `undefined`. */
+  readonly featureCallout?: FoleonReaderFeatureCallout;
 }
 
 // ---------------------------------------------------------------------------
@@ -256,6 +288,24 @@ export function createPreviewFoleonReaderViewModel(
   const lane = LAYOUT_KEY_BY_READER_KEY[config.readerKey];
   const labels = LANE_LABELS[lane];
   const preview = LANE_PREVIEW_COPY[lane];
+  const projectFacts: FoleonReaderProjectFacts | undefined =
+    lane === 'projectSpotlight'
+      ? {
+          client: 'Sample client',
+          location: 'Sample location',
+          market: 'Sample market',
+          team: 'Sample team',
+          milestone: 'Sample milestone',
+          arePlaceholders: true,
+        }
+      : undefined;
+  const featureCallout: FoleonReaderFeatureCallout | undefined =
+    lane === 'projectSpotlight'
+      ? {
+          heading: 'Why this project matters',
+          body: 'Sample editorial framing — a one- to two-sentence narrative explaining the project\'s significance will appear here when a live Project Spotlight edition is published.',
+        }
+      : undefined;
 
   return {
     lane,
@@ -300,6 +350,8 @@ export function createPreviewFoleonReaderViewModel(
     warnings: [],
     archiveNote: undefined,
     titleElementId: `${config.readerKey}-preview-title`,
+    projectFacts,
+    featureCallout,
   };
 }
 
@@ -311,6 +363,31 @@ export function createReadyFoleonReaderViewModel(
   const labels = LANE_LABELS[lane];
   const { resolution, shouldMountIframe, mobileGateActive, onActivateMobileReader, onOpenArchive } = context;
   const record = resolution.record;
+  const projectFacts: FoleonReaderProjectFacts | undefined =
+    lane === 'projectSpotlight'
+      ? {
+          // Ready-state values are sourced ONLY from FoleonContentRecord.
+          // Fields the schema does not carry (client, team) are emitted as
+          // `undefined` and rendered by the layout as "Not listed" or
+          // omitted. The adapter never invents data for ready state.
+          client: record.relatedProjectName ?? record.relatedProjectNumber,
+          location: record.region,
+          market: record.sector,
+          team: undefined,
+          milestone: formatFreshnessDate(record.issueDate ?? record.publishedOn) ?? undefined,
+          arePlaceholders: false,
+        }
+      : undefined;
+  const featureCallout: FoleonReaderFeatureCallout | undefined =
+    lane === 'projectSpotlight'
+      ? {
+          heading: 'Why this project matters',
+          body:
+            record.summary && record.summary.trim().length > 0
+              ? record.summary
+              : 'Editorial framing for this Project Spotlight edition has not been provided.',
+        }
+      : undefined;
 
   const freshnessFormatted = formatFreshnessDate(pickFreshnessRaw(lane, record));
   const freshnessValue = freshnessFormatted ?? labels.freshnessFallback;
@@ -373,5 +450,7 @@ export function createReadyFoleonReaderViewModel(
         : [],
     archiveNote: 'Lane archive filtering comes in a later workflow.',
     titleElementId: `${config.readerKey}-reader-title`,
+    projectFacts,
+    featureCallout,
   };
 }

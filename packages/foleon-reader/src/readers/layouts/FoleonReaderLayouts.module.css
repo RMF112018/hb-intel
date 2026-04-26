@@ -1,0 +1,321 @@
+/* ---------------------------------------------------------------------------
+   Foleon reader — lane-owned layout styles
+   ---------------------------------------------------------------------------
+   Phase-04 Wave-01 Prompt-03 introduces the Project Spotlight feature
+   composition. Pulse and Leadership continue to use the compatibility
+   shell (FoleonReaderModule.module.css) until Prompts 04/05 replace them.
+
+   Edge-bleed posture:
+     - The outermost surface keeps `margin-inline: 0` and zero outer
+       `padding-inline`. The Prompt-01 shell-slot edge contract drives
+       bleed by applying `margin-inline-start/-end: calc(... * -1)` on the
+       slot wrapper above. This module does NOT activate edge-to-window
+       behavior on its own; it only stays edge-bleed-ready.
+     - Internal safe area lives on inner blocks via
+       `padding-inline: clamp(1rem, 4vw, 2.5rem)`.
+     - No global `overflow-x: hidden`.
+
+   Visual posture:
+     - No outer card border or chrome shadow on the surface.
+     - Background band carries the visual identity instead of a bordered
+       card. Media banner is full-bleed within the surface.
+     - No three generic preview support cards.
+   --------------------------------------------------------------------------- */
+
+/* ===== Project Spotlight feature surface ===== */
+
+.featureSurface {
+  --hb-foleon-feature-inline-safe: clamp(1rem, 4vw, 2.5rem);
+  --hb-foleon-feature-block-gap: clamp(1.25rem, 2.5vw, 2rem);
+  display: grid;
+  gap: var(--hb-foleon-feature-block-gap);
+  margin-inline: 0;
+  padding-block: 0 clamp(1.5rem, 3vw, 2.5rem);
+  background:
+    radial-gradient(circle at 6% 0%, color-mix(in srgb, var(--hbc-brand-50, #e8f3fb) 90%, transparent), transparent 38%),
+    linear-gradient(180deg, #f7fbfd 0%, #ffffff 60%);
+  color: var(--hbc-text-primary, #14212b);
+  box-sizing: border-box;
+}
+
+.mediaBanner {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: clamp(220px, 32vw, 360px);
+  padding-block: clamp(1.5rem, 4vw, 2.75rem);
+  padding-inline: 0;
+  margin-inline: 0;
+  background:
+    radial-gradient(circle at 80% 12%, color-mix(in srgb, #9ed4f2 60%, transparent), transparent 42%),
+    radial-gradient(circle at 12% 88%, color-mix(in srgb, #145a7f 50%, transparent), transparent 36%),
+    linear-gradient(135deg, #0f5f8f 0%, #145a7f 60%, #1c2c40 100%);
+  color: #f8fbfd;
+  isolation: isolate;
+}
+
+.mediaBanner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgb(11 22 32 / 35%) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mediaInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+}
+
+.eyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem 1rem;
+  align-items: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #ffffff 88%, #9ed4f2);
+}
+
+.cadenceMarker {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #ffffff 18%, transparent);
+  border: 1px solid color-mix(in srgb, #ffffff 28%, transparent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.previewLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #f7b267 70%, #ffffff);
+  color: #1c2c40;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  max-width: 60ch;
+}
+
+.summary {
+  margin: 0;
+  max-width: 70ch;
+  font-size: clamp(15px, 1.4vw, 17px);
+  line-height: 1.6;
+  color: color-mix(in srgb, #ffffff 86%, #9ed4f2);
+}
+
+/* ===== Metadata ribbon ===== */
+
+.ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 0;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+  list-style: none;
+}
+
+.ribbonItem {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+}
+
+.ribbonLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.ribbonValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+/* ===== Why this project matters ===== */
+
+.callout {
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+  display: grid;
+  gap: 0.5rem;
+  max-width: 80ch;
+}
+
+.calloutHeading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--hbc-brand-700, #145a7f);
+}
+
+.calloutBody {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+/* ===== Project facts ===== */
+
+.projectFacts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.875rem 1.25rem;
+  margin: 0;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+}
+
+.projectFactItem {
+  display: grid;
+  gap: 4px;
+  padding-block: 0.5rem;
+  border-block-start: 1px solid color-mix(in srgb, var(--hbc-border, #d7e0e5) 70%, transparent);
+}
+
+.projectFactItem:first-child,
+.projectFactItem:nth-child(-n + 3) {
+  border-block-start: 1px solid transparent;
+}
+
+.projectFactLabel {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.projectFactValue {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+.projectFactValuePlaceholder {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hbc-text-secondary, #4e5c66);
+  font-style: italic;
+}
+
+/* ===== Action row ===== */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  align-items: center;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+}
+
+.archiveNote {
+  font-size: 13px;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+/* ===== Mobile gate ===== */
+
+.mobileGate {
+  display: grid;
+  gap: 4px;
+  padding: 1rem 1.125rem;
+  margin-inline: var(--hb-foleon-feature-inline-safe);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--hbc-brand-50, #e8f3fb) 70%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--hbc-border, #d7e0e5) 70%, transparent);
+}
+
+.mobileGateLabel {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hbc-brand-700, #145a7f);
+}
+
+.mobileGateBody {
+  margin: 0;
+  font-size: 14px;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+/* ===== Iframe frame ===== */
+
+.iframeFrame {
+  margin-inline: var(--hb-foleon-feature-inline-safe);
+  border-radius: 18px;
+  background: #111a22;
+  overflow: hidden;
+}
+
+/* ===== Warnings ===== */
+
+.warning {
+  margin: 0;
+  padding-inline: var(--hb-foleon-feature-inline-safe);
+  color: var(--hbc-text-secondary, #4e5c66);
+  font-size: 13px;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 940px) {
+  .ribbon {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .featureSurface {
+    --hb-foleon-feature-block-gap: 1rem;
+  }
+
+  .mediaBanner {
+    min-height: 180px;
+  }
+
+  .ribbon,
+  .projectFacts {
+    grid-template-columns: 1fr;
+  }
+
+  .projectFactItem {
+    border-block-start: 1px solid color-mix(in srgb, var(--hbc-border, #d7e0e5) 70%, transparent);
+  }
+}
+
+/* Reduced motion preserved by inheriting host shell rules. */

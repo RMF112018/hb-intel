@@ -135,7 +135,7 @@ describe('FoleonReaderModule', () => {
     cleanup();
   });
 
-  it('renders Project Spotlight preview with original-style structure and no fake live controls', async () => {
+  it('renders Project Spotlight preview through the lane-owned feature layout, not the legacy compatibility shell', async () => {
     resolveMock.mockResolvedValue({
       kind: 'preview',
       config: FOLEON_READER_CONFIGS.projectSpotlight,
@@ -144,18 +144,29 @@ describe('FoleonReaderModule', () => {
     });
     const { callbacks, container } = renderModule();
 
-    expect(await screen.findByText('Project Spotlight reader')).toBeTruthy();
+    // Phase-04 Wave-01 Prompt-03: Project Spotlight identity is layout-key
+    // driven via `data-foleon-reader-layout` and `data-foleon-layout`.
+    // Tone-based markers (`data-preview-tone`) are intentionally not
+    // emitted by this lane's new feature layout.
+    const wrapper = await screen.findByLabelText('Project Spotlight metadata');
+    // sanity: ribbon is inside the new feature surface
+    expect(wrapper).toBeTruthy();
+    expect(container.querySelector('[data-foleon-reader-layout="project-spotlight"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-layout="project-spotlight-feature"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
+    expect(container.querySelector('[data-preview-tone]')).toBeNull();
+
+    // Honest preview labeling preserved.
     expect(screen.getByText('Preview layout')).toBeTruthy();
-    expect(screen.getByLabelText('Project Spotlight feature placeholder')).toBeTruthy();
-    expect(screen.getByLabelText('Project Spotlight supporting preview placeholders')).toBeTruthy();
-    expect(screen.getByLabelText('Preview metadata zones')).toBeTruthy();
-    expect(screen.getByLabelText('Preview status')).toBeTruthy();
-    expect(screen.getByText('Content coming soon')).toBeTruthy();
-    expect(container.querySelector('[data-preview-tone="blue"]')).not.toBeNull();
+
+    // The new layout no longer renders the legacy three-card support skeleton.
+    expect(screen.queryByLabelText('Project Spotlight supporting preview placeholders')).toBeNull();
+    expect(screen.queryByLabelText('Preview metadata zones')).toBeNull();
+    expect(screen.queryByLabelText('Preview status')).toBeNull();
+
+    // No live reader telemetry, no iframe, no production callbacks fired.
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect(container.querySelectorAll('a')).toHaveLength(0);
-    expect(screen.queryByRole('button', { name: /read|open|archive/i })).toBeNull();
-    expect(container.querySelector('[disabled], [aria-disabled="true"]')).toBeNull();
     expect(container.textContent).not.toContain('viewer.us.foleon.com');
     expect(callbacks.onReaderOpen).not.toHaveBeenCalled();
     expect(callbacks.onReaderClose).not.toHaveBeenCalled();
@@ -382,18 +393,27 @@ describe('FoleonReaderModule', () => {
     expect(await screen.findByText('Company Pulse reader')).toBeTruthy();
     expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
     expect(resolveMock).toHaveBeenCalledTimes(3);
-    expect(document.querySelector('[data-preview-tone="blue"]')).not.toBeNull();
-    expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
-    expect(document.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-foleon-preview-route]')).toHaveLength(3);
+
     // Phase-04 Wave-01 Prompt-02: each lane resolves to its own registered
     // layout component identified by a unique data-foleon-reader-layout
-    // marker. Tone alone is no longer the proof of lane differentiation.
+    // marker. Phase-04 Wave-01 Prompt-03: Project Spotlight has moved off
+    // the tone-driven compatibility shell to its lane-owned feature layout
+    // and emits the additional `data-foleon-layout="project-spotlight-feature"`
+    // marker. Pulse + Leadership remain on the compatibility shell and
+    // therefore still emit the legacy `data-preview-tone` markers.
     expect(document.querySelector('[data-foleon-reader-layout="project-spotlight"]')).not.toBeNull();
     expect(document.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
     expect(document.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
     expect(document.querySelectorAll('[data-foleon-reader-layout]')).toHaveLength(3);
     expect(document.querySelectorAll('[data-foleon-reader-state="preview"]')).toHaveLength(3);
+    expect(document.querySelector('[data-foleon-layout="project-spotlight-feature"]')).not.toBeNull();
+
+    // Pulse + Leadership keep tone markers (compatibility shell). Spotlight does not.
+    expect(document.querySelector('[data-preview-tone="blue"]')).toBeNull();
+    expect(document.querySelector('[data-preview-tone="orange"]')).not.toBeNull();
+    expect(document.querySelector('[data-preview-tone="navy"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-foleon-preview-route]')).toHaveLength(2);
+
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect((window as typeof window & { __hbIntel_foleon?: unknown }).__hbIntel_foleon).toBeUndefined();
   });
