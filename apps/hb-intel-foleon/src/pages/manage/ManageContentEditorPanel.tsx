@@ -4,6 +4,7 @@ import { cva } from 'class-variance-authority';
 import { Save } from 'lucide-react';
 import type { FoleonManagementApi } from '../../services/FoleonManagementApi.js';
 import { FoleonManagementApiError } from '../../services/FoleonManagementApi.js';
+import type { FoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
 import type {
   FoleonCadence,
   FoleonContentMutation,
@@ -23,8 +24,10 @@ import { runContentPublish, runContentSuppress, runContentValidate } from './man
 import {
   applyReaderLanePreset,
   buildReaderLaneWarnings,
+  blockingWorkflowIssues,
   contentMutationFingerprint,
   toContentMutation,
+  validateFoleonContentWorkflow,
 } from './manageMutationUtils.js';
 import f from './manageFields.module.css';
 
@@ -60,6 +63,7 @@ export function ManageContentEditorPanel(props: {
   readonly api: FoleonManagementApi;
   readonly onRefresh: () => Promise<void>;
   readonly setMessage: (message: string | null) => void;
+  readonly originPolicy: FoleonOriginPolicy;
   readonly canWrite?: boolean;
   readonly writeBlockReason?: string;
 }): React.ReactNode {
@@ -80,6 +84,16 @@ export function ManageContentEditorPanel(props: {
     }),
     [draft, props.record, props.allContent, props.placements],
   );
+  const workflowIssues = useMemo(
+    () => validateFoleonContentWorkflow({
+      draft,
+      record: props.record,
+      allContent: props.allContent,
+      originPolicy: props.originPolicy,
+    }),
+    [draft, props.record, props.allContent, props.originPolicy],
+  );
+  const publishBlockers = blockingWorkflowIssues(workflowIssues);
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent): void => {
@@ -240,6 +254,20 @@ export function ManageContentEditorPanel(props: {
           value={draft.sector ?? ''}
           onChange={(sector): void => setDraft({ ...draft, sector })}
         />
+        <ManageTextField
+          id="foleon-display-from"
+          label="Display from"
+          helpText="Optional ISO date/datetime. Leave blank for immediate display."
+          value={draft.displayFrom ?? ''}
+          onChange={(displayFrom): void => setDraft({ ...draft, displayFrom })}
+        />
+        <ManageTextField
+          id="foleon-display-through"
+          label="Display through"
+          helpText="Optional ISO date/datetime. Must be after Display from when set."
+          value={draft.displayThrough ?? ''}
+          onChange={(displayThrough): void => setDraft({ ...draft, displayThrough })}
+        />
       </div>
       <div style={{ marginTop: 12 }}>
         <ManageFieldLabel label="Summary" />
@@ -308,6 +336,18 @@ export function ManageContentEditorPanel(props: {
           <ValidationList reasons={laneWarnings} />
         </div>
       ) : null}
+      <section className={f.workflowChecklist} aria-label="Content workflow validation">
+        <h4 className={f.workflowChecklistTitle}>Content Workflow Validation</h4>
+        <ul className={f.workflowChecklistList}>
+          {workflowIssues.map((issue) => (
+            <li key={issue.label} data-workflow-status={issue.status}>
+              <strong>{issue.label}</strong>
+              <span>{issue.status === 'pass' ? 'Pass' : issue.status === 'warning' ? 'Review' : 'Blocked'}</span>
+              <small>{issue.detail}</small>
+            </li>
+          ))}
+        </ul>
+      </section>
       <ValidationList reasons={props.record.blockingReasons} />
       {props.canWrite === false ? (
         <p className={f.metaMuted} role="status">
@@ -328,10 +368,10 @@ export function ManageContentEditorPanel(props: {
         </HbcButton>
         <HbcButton
           variant="secondary"
-          disabled={props.canWrite === false}
+          disabled={props.canWrite === false || publishBlockers.length > 0}
           onClick={(): void => void runContentPublish(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
-          Publish
+          {publishBlockers.length > 0 ? 'Publish blocked' : 'Publish'}
         </HbcButton>
         <HbcButton
           variant="secondary"

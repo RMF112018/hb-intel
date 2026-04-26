@@ -1,4 +1,5 @@
 import { HbcButton } from '@hbc/ui-kit/homepage';
+import { isAllowedFoleonUrl } from '../../services/FoleonOriginPolicy.js';
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
 import type {
   FoleonManagedContent,
@@ -70,7 +71,12 @@ export function HomepageFoleonContentTab(props: {
         laneWarnings={laneWarningCount}
         syncHealth={props.syncStatus?.health ?? 'unknown'}
       />
-      <LaneStatusOverview lanes={lanes} canWrite={canWrite} writeBlockReason={writeBlockReason} />
+      <LaneStatusOverview
+        lanes={lanes}
+        canWrite={canWrite}
+        writeBlockReason={writeBlockReason}
+        contract={props.contract}
+      />
       {shouldShowPreviewGuidance ? (
         <ManagePreviewGuidancePanel
           publicReadyContentCount={published}
@@ -96,6 +102,7 @@ export function HomepageFoleonContentTab(props: {
                 api={props.api}
                 onRefresh={props.onRefresh}
                 setMessage={props.setMessage}
+                originPolicy={props.contract.originPolicy}
                 canWrite={canWrite}
                 writeBlockReason={writeBlockReason}
               />
@@ -122,6 +129,7 @@ function LaneStatusOverview(props: {
   readonly lanes: ReadonlyArray<FoleonLaneViewModel>;
   readonly canWrite: boolean;
   readonly writeBlockReason: string;
+  readonly contract: IFoleonRuntimeContract;
 }): React.ReactNode {
   return (
     <section className={f.editorSection} aria-label="Lane status overview">
@@ -164,6 +172,16 @@ function LaneStatusOverview(props: {
               <HbcButton variant="secondary" disabled={!props.canWrite}>Validate</HbcButton>
               <HbcButton variant="secondary" disabled={!props.canWrite}>Publish</HbcButton>
               <HbcButton variant="secondary" disabled={!props.canWrite}>Manage Placement</HbcButton>
+              {safeProductionUrl(lane.activeContent?.publishedUrl, props.contract) ? (
+                <HbcButton
+                  variant="secondary"
+                  onClick={(): void => {
+                    window.open(lane.activeContent?.publishedUrl ?? '', '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  Open Foleon
+                </HbcButton>
+              ) : null}
             </div>
             {lane.warnings.length > 0 ? (
               <ul className={f.validationBad}>
@@ -175,6 +193,10 @@ function LaneStatusOverview(props: {
       </div>
     </section>
   );
+}
+
+function safeProductionUrl(url: string | undefined, contract: IFoleonRuntimeContract): boolean {
+  return Boolean(url && isAllowedFoleonUrl(contract.originPolicy, url).allowed);
 }
 
 function PublishReadinessChecklist(props: {

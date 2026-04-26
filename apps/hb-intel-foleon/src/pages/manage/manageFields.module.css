@@ -209,3 +209,48 @@
   font-size: 13px;
   color: var(--foleon-manage-fg-muted, hsl(205 12% 38%));
 }
+
+.workflowChecklist {
+  margin-top: var(--foleon-manage-space-sm, 12px);
+  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
+  border-radius: var(--foleon-manage-radius-md, 16px);
+  padding: var(--foleon-manage-space-sm, 12px);
+  background: hsl(0 0% 100% / 0.62);
+}
+
+.workflowChecklistTitle {
+  margin: 0 0 var(--foleon-manage-space-xs, 8px);
+}
+
+.workflowChecklistList {
+  display: grid;
+  gap: var(--foleon-manage-space-xs, 8px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.workflowChecklistList li {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) auto minmax(0, 1fr);
+  gap: var(--foleon-manage-space-xs, 8px);
+  align-items: start;
+  border-left: 4px solid var(--foleon-manage-fg-muted, hsl(205 12% 38%));
+  padding-left: var(--foleon-manage-space-xs, 8px);
+}
+
+.workflowChecklistList li[data-workflow-status='pass'] {
+  border-left-color: var(--foleon-manage-success, hsl(152 48% 32%));
+}
+
+.workflowChecklistList li[data-workflow-status='warning'] {
+  border-left-color: var(--foleon-manage-warning, hsl(40 72% 48%));
+}
+
+.workflowChecklistList li[data-workflow-status='blocked'] {
+  border-left-color: var(--foleon-manage-danger, hsl(8 58% 40%));
+}
+
+.workflowChecklistList small {
+  color: var(--foleon-manage-fg-muted, hsl(205 12% 38%));
+}

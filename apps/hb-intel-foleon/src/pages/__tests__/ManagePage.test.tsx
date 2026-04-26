@@ -246,6 +246,32 @@ describe('ManagePage', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('auth-resource-missing');
   });
 
+  it('renders a live readable lane while write actions stay disabled', async () => {
+    installManageFetchMock({
+      content: [managedContent({
+        title: 'Live Project Spotlight',
+        contentTypeKey: 'Project Spotlight',
+        readerKey: 'project-spotlight',
+        homepageSlot: 'Project Spotlight Reader',
+        activeEdition: true,
+        publishedUrl: 'https://viewer.us.foleon.com/project/live',
+        embedUrl: 'https://viewer.us.foleon.com/project/live/embed',
+      })],
+      placements: [managedPlacement()],
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    expect((await screen.findAllByText('Live Project Spotlight')).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'Open Foleon' })).toBeTruthy();
+    expect((screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect(
+      screen.getAllByRole('button', { name: /Publish/i })
+        .filter((button) => /^(Publish|Publish blocked)$/.test(button.textContent?.trim() ?? ''))
+        .every((button) => (button as HTMLButtonElement).disabled),
+    ).toBe(true);
+  });
+
   it('does not render unsafe raw config values in the normal Config UI', async () => {
     installManageFetchMock({ content: [managedContent()] });
     const rawBackendUrl = 'https://functions.secret.example.test';
@@ -596,6 +622,24 @@ function managedContent(overrides: Partial<FoleonManagedContent> = {}): FoleonMa
     openMode: 'Inline Reader',
     allowEmbed: true,
     requiresExternalOpen: false,
+    ...overrides,
+  };
+}
+
+function managedPlacement(overrides: Partial<FoleonPlacement> = {}): FoleonPlacement {
+  return {
+    id: 'placement-1',
+    sharePointItemId: 10,
+    etag: '"1"',
+    title: 'Project Spotlight active placement',
+    placementKey: 'Project Spotlight Active',
+    contentItemId: 1,
+    foleonDocId: 12345,
+    isActive: true,
+    sortRank: 1,
+    layoutVariant: 'Large Feature',
+    validationStatus: 'valid',
+    blockingReasons: [],
     ...overrides,
   };
 }

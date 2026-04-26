@@ -63,6 +63,19 @@ interface GraphListResponse {
   readonly value?: ReadonlyArray<GraphListItem>;
 }
 
+type ActiveEditionConflictCandidate = Pick<
+  FoleonContentDetailDto,
+  | 'sharePointItemId'
+  | 'readerKey'
+  | 'homepageSlot'
+  | 'activeEdition'
+  | 'isHomepageEligible'
+  | 'publishStatus'
+  | 'displayFrom'
+  | 'displayThrough'
+  | 'title'
+>;
+
 export interface IFoleonService {
   listContent(): Promise<ReadonlyArray<FoleonContentSummaryDto>>;
   getContent(id: string): Promise<FoleonContentDetailDto>;
@@ -111,7 +124,10 @@ export class FoleonService implements IFoleonService {
     input: FoleonContentMutationRequest,
     correlationId: string,
   ): Promise<FoleonContentDetailDto> {
-    const validation = validateContentMutation(input, correlationId);
+    const validation = validateContentMutation(input, correlationId, {
+      allowedOrigins: this.config.allowedOrigins,
+      existingContent: await this.listContent(),
+    });
     if (validation.status === 'blocked') {
       throw new FoleonServiceError({
         status: 422,
@@ -129,7 +145,12 @@ export class FoleonService implements IFoleonService {
     input: FoleonContentMutationRequest,
     correlationId: string,
   ): Promise<FoleonContentDetailDto> {
-    const validation = validateContentMutation(input, correlationId);
+    const current = await this.getContent(id);
+    const validation = validateContentMutation(input, correlationId, {
+      allowedOrigins: this.config.allowedOrigins,
+      existingContent: await this.listContent(),
+      currentSharePointItemId: current.sharePointItemId,
+    });
     if (validation.status === 'blocked') {
       throw new FoleonServiceError({
         status: 422,
@@ -149,13 +170,21 @@ export class FoleonService implements IFoleonService {
 
   async validateContent(id: string, correlationId: string): Promise<FoleonValidationResult> {
     const content = toContentDetail(await this.readItem(this.requireContentListId(), id));
-    return validateContentMutation(contentToMutation(content), correlationId);
+    return validateContentMutation(contentToMutation(content), correlationId, {
+      allowedOrigins: this.config.allowedOrigins,
+      existingContent: await this.listContent(),
+      currentSharePointItemId: content.sharePointItemId,
+    });
   }
 
   async publishContent(id: string, correlationId: string): Promise<FoleonContentDetailDto> {
     const content = await this.getContent(id);
     const input = contentToMutation({ ...content, publishStatus: 'Published', isVisible: true });
-    const validation = validateContentMutation(input, correlationId);
+    const validation = validateContentMutation(input, correlationId, {
+      allowedOrigins: this.config.allowedOrigins,
+      existingContent: await this.listContent(),
+      currentSharePointItemId: content.sharePointItemId,
+    });
     if (validation.status === 'blocked') {
       throw new FoleonServiceError({
         status: 422,
@@ -688,7 +717,9 @@ export class MockFoleonService implements IFoleonService {
 
   async createContent(input: FoleonContentMutationRequest, correlationId: string): Promise<FoleonContentDetailDto> {
     const id = String(this.content.size + 1);
-    const validation = validateContentMutation(input, correlationId);
+    const validation = validateContentMutation(input, correlationId, {
+      existingContent: [...this.content.values()],
+    });
     const record = mutationToContent(id, input, validation);
     this.content.set(id, record);
     return record;
@@ -700,7 +731,11 @@ export class MockFoleonService implements IFoleonService {
     correlationId: string,
   ): Promise<FoleonContentDetailDto> {
     await this.getContent(id);
-    const validation = validateContentMutation(input, correlationId);
+    const current = await this.getContent(id);
+    const validation = validateContentMutation(input, correlationId, {
+      existingContent: [...this.content.values()],
+      currentSharePointItemId: current.sharePointItemId,
+    });
     const record = mutationToContent(id, input, validation);
     this.content.set(id, record);
     return record;
@@ -708,7 +743,10 @@ export class MockFoleonService implements IFoleonService {
 
   async validateContent(id: string, correlationId: string): Promise<FoleonValidationResult> {
     const record = await this.getContent(id);
-    return validateContentMutation(contentToMutation(record), correlationId);
+    return validateContentMutation(contentToMutation(record), correlationId, {
+      existingContent: [...this.content.values()],
+      currentSharePointItemId: record.sharePointItemId,
+    });
   }
 
   async publishContent(id: string, correlationId: string): Promise<FoleonContentDetailDto> {
@@ -826,6 +864,11 @@ export function createFoleonService(): IFoleonService {
 export function validateContentMutation(
   input: FoleonContentMutationRequest,
   correlationId: string,
+  options: {
+    readonly allowedOrigins?: ReadonlyArray<string>;
+    readonly existingContent?: ReadonlyArray<ActiveEditionConflictCandidate>;
+    readonly currentSharePointItemId?: number;
+  } = {},
 ): FoleonValidationResult {
   const blockingReasons: string[] = [];
   const warnings: string[] = [];
@@ -833,13 +876,22 @@ export function validateContentMutation(
   if (!Number.isInteger(input.foleonDocId) || input.foleonDocId <= 0) {
     blockingReasons.push('Foleon Doc ID must be a positive integer.');
   }
-  validateHttpsUrl(input.publishedUrl, 'Published URL', blockingReasons);
-  validateHttpsUrl(input.embedUrl, 'Embed URL', blockingReasons);
+  validateProductionUrl(input.publishedUrl, 'Published URL', blockingReasons, options.allowedOrigins);
+  validateProductionUrl(input.embedUrl, 'Embed URL', blockingReasons, options.allowedOrigins);
   if (input.publishStatus === 'Published' && !input.isVisible) {
     blockingReasons.push('Published content must be visible before display.');
   }
   if (input.publishStatus === 'Published' && !input.publishedUrl && !input.embedUrl) {
     blockingReasons.push('Published content requires a Published URL or Embed URL.');
+  }
+  if (input.publishStatus === 'Published' && input.openMode === 'Inline Reader' && !input.embedUrl) {
+    blockingReasons.push('Inline Reader published content requires an Embed URL.');
+  }
+  if (isHomepageLiveCandidate(input) && !input.readerKey) {
+    blockingReasons.push('Homepage live content requires a reader lane.');
+  }
+  if (isHomepageLiveCandidate(input) && !input.homepageSlot) {
+    blockingReasons.push('Homepage live content requires a homepage slot.');
   }
   if (input.allowEmbed && input.requiresExternalOpen) {
     warnings.push('Content allows embed but is also marked for external open.');
@@ -862,6 +914,10 @@ export function validateContentMutation(
     if (!Number.isNaN(from) && !Number.isNaN(through) && through < from) {
       blockingReasons.push('Display Through must be after Display From.');
     }
+  }
+  const activeConflict = findActiveEditionConflict(input, options.existingContent ?? [], options.currentSharePointItemId);
+  if (activeConflict) {
+    blockingReasons.push(activeConflict);
   }
   return {
     status: blockingReasons.length > 0 ? 'blocked' : warnings.length > 0 ? 'warning' : 'valid',
@@ -922,6 +978,54 @@ function isPublicReadyContentInput(input: FoleonContentMutationRequest): boolean
   );
 }
 
+function isHomepageLiveCandidate(input: FoleonContentMutationRequest): boolean {
+  return Boolean(
+    input.activeEdition === true &&
+    input.publishStatus === 'Published' &&
+    input.isVisible &&
+    input.isHomepageEligible === true,
+  );
+}
+
+function findActiveEditionConflict(
+  input: FoleonContentMutationRequest,
+  existingContent: ReadonlyArray<ActiveEditionConflictCandidate>,
+  currentSharePointItemId: number | undefined,
+): string | null {
+  if (!isHomepageLiveCandidate(input) || !input.readerKey || !input.homepageSlot) return null;
+  const conflict = existingContent.find((record) =>
+    record.sharePointItemId !== currentSharePointItemId &&
+    record.readerKey === input.readerKey &&
+    record.homepageSlot === input.homepageSlot &&
+    record.activeEdition === true &&
+    record.isHomepageEligible === true &&
+    record.publishStatus === 'Published' &&
+    windowsOverlap(input.displayFrom, input.displayThrough, record.displayFrom, record.displayThrough)
+  );
+  return conflict
+    ? `${readerLaneLabel(input.readerKey)} already has an overlapping active edition: ${conflict.title}.`
+    : null;
+}
+
+function windowsOverlap(
+  leftFrom: string | undefined,
+  leftThrough: string | undefined,
+  rightFrom: string | undefined,
+  rightThrough: string | undefined,
+): boolean {
+  const leftStart = parseOptionalDate(leftFrom) ?? Number.NEGATIVE_INFINITY;
+  const leftEnd = parseOptionalDate(leftThrough) ?? Number.POSITIVE_INFINITY;
+  const rightStart = parseOptionalDate(rightFrom) ?? Number.NEGATIVE_INFINITY;
+  const rightEnd = parseOptionalDate(rightThrough) ?? Number.POSITIVE_INFINITY;
+  return leftStart <= rightEnd && rightStart <= leftEnd;
+}
+
+function parseOptionalDate(value: string | undefined): number | null {
+  if (!value?.trim()) return null;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
 function readerLaneForPlacementKey(placementKey: FoleonPlacementDto['placementKey']): FoleonReaderKey | null {
   if (placementKey === 'Project Spotlight Active') return 'project-spotlight';
   if (placementKey === 'Company Pulse Active') return 'company-pulse';
@@ -948,13 +1052,21 @@ function readerLaneLabel(lane: FoleonReaderKey): string {
   return 'Leadership Message';
 }
 
-function validateHttpsUrl(value: string | undefined, label: string, blockingReasons: string[]): void {
+function validateProductionUrl(
+  value: string | undefined,
+  label: string,
+  blockingReasons: string[],
+  allowedOrigins: ReadonlyArray<string> = ['https://viewer.us.foleon.com'],
+): void {
   if (!value) return;
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:') blockingReasons.push(`${label} must use HTTPS.`);
     if (url.href.toLowerCase().includes('preview')) {
       blockingReasons.push(`${label} cannot be a preview URL for publish-ready content.`);
+    }
+    if (!allowedOrigins.includes(url.origin)) {
+      blockingReasons.push(`${label} origin is not allowlisted.`);
     }
   } catch {
     blockingReasons.push(`${label} must be a valid URL.`);

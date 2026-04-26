@@ -118,6 +118,80 @@ describe('Foleon service validation', () => {
     );
   });
 
+  it('blocks inline reader publishing without an embed URL', () => {
+    const result = validateContentMutation({
+      title: 'Inline Project Spotlight',
+      foleonDocId: 5101,
+      contentTypeKey: 'Project Spotlight',
+      readerKey: 'project-spotlight',
+      homepageSlot: 'Project Spotlight Reader',
+      activeEdition: true,
+      publishStatus: 'Published',
+      isVisible: true,
+      isHomepageEligible: true,
+      openMode: 'Inline Reader',
+      allowEmbed: true,
+      publishedUrl: 'https://viewer.us.foleon.com/project/spotlight',
+    }, 'corr-test');
+
+    expect(result.status).toBe('blocked');
+    expect(result.blockingReasons).toContain('Inline Reader published content requires an Embed URL.');
+  });
+
+  it('blocks production URLs outside the configured origin allowlist', () => {
+    const result = validateContentMutation({
+      title: 'Wrong Origin',
+      foleonDocId: 5102,
+      contentTypeKey: 'Project Spotlight',
+      readerKey: 'project-spotlight',
+      homepageSlot: 'Project Spotlight Reader',
+      activeEdition: true,
+      publishStatus: 'Published',
+      isVisible: true,
+      isHomepageEligible: true,
+      openMode: 'New Tab Only',
+      allowEmbed: false,
+      publishedUrl: 'https://example.com/project/spotlight',
+    }, 'corr-test', { allowedOrigins: ['https://viewer.us.foleon.com'] });
+
+    expect(result.status).toBe('blocked');
+    expect(result.blockingReasons).toContain('Published URL origin is not allowlisted.');
+  });
+
+  it('blocks overlapping active editions for the same lane and homepage slot', () => {
+    const result = validateContentMutation({
+      title: 'New Project Spotlight',
+      foleonDocId: 5103,
+      contentTypeKey: 'Project Spotlight',
+      readerKey: 'project-spotlight',
+      homepageSlot: 'Project Spotlight Reader',
+      activeEdition: true,
+      publishStatus: 'Published',
+      isVisible: true,
+      isHomepageEligible: true,
+      openMode: 'New Tab Only',
+      allowEmbed: false,
+      publishedUrl: 'https://viewer.us.foleon.com/project/new',
+      displayFrom: '2026-05-01T00:00:00.000Z',
+      displayThrough: '2026-05-31T00:00:00.000Z',
+    }, 'corr-test', {
+      existingContent: [{
+        sharePointItemId: 20,
+        title: 'Existing Project Spotlight',
+        readerKey: 'project-spotlight',
+        homepageSlot: 'Project Spotlight Reader',
+        activeEdition: true,
+        publishStatus: 'Published',
+        isHomepageEligible: true,
+        displayFrom: '2026-05-15T00:00:00.000Z',
+        displayThrough: '2026-06-15T00:00:00.000Z',
+      }],
+    });
+
+    expect(result.status).toBe('blocked');
+    expect(result.blockingReasons.join(' ')).toContain('overlapping active edition');
+  });
+
   it('warns for reader placement lane mismatches', async () => {
     const service = new MockFoleonService();
     const content = await service.createContent({

@@ -52,6 +52,8 @@ export interface FoleonManagedContent {
   readonly summary?: string;
   readonly region?: string;
   readonly sector?: string;
+  readonly displayFrom?: string;
+  readonly displayThrough?: string;
   readonly publishedOn?: string;
   readonly validationStatus: FoleonValidationStatus;
   readonly blockingReasons: ReadonlyArray<string>;
@@ -83,6 +85,8 @@ export interface FoleonContentMutation {
   readonly region?: string;
   readonly sector?: string;
   readonly tags?: ReadonlyArray<string>;
+  readonly displayFrom?: string;
+  readonly displayThrough?: string;
   readonly openMode: FoleonOpenMode;
   readonly allowEmbed: boolean;
   readonly requiresExternalOpen: boolean;
