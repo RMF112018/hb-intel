@@ -11,22 +11,29 @@ compile success.
 
 ## Version authority
 The standalone homepage package has exactly one authoritative version
-field, and two fields that must mirror it:
+field, plus package/runtime mirror fields that must move with it:
 
 1. **Authority** — `apps/hb-homepage/config/package-solution.json`
    → `solution.version` (SPFx 4-part schema: `{00}.{00}.{00}.{00}`)
 2. **Mirror A** — same file → `solution.features[0].version`
 3. **Mirror B** — `apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json`
    → `version`
+4. **Mirror C** — `apps/hb-webparts/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json`
+   → `version`
+5. **Mirror D** — `packages/homepage-launcher/src/constants.ts`
+   → `HOMEPAGE_LAUNCHER_VERSION`
+6. **Packaging mirror** — `tools/spfx-shell/config/package-solution.json`
+   → generated/staged SPFx shell copy of the homepage package solution
 
-All three MUST be identical. The guard is enforced in two places:
+All semantic homepage version fields MUST be identical. The guard is
+enforced in two places:
 
 - **Build-time**: `tools/build-spfx-package.ts --domain hb-homepage`
   refuses to produce a .sppkg if any of the three diverge.
 - **Test-time**: `apps/hb-webparts/src/webparts/hbHomepage/__tests__/hbHomepagePackageAuthority.test.ts`
   fails in CI / vitest if the authority drifts.
 
-A version bump is always three coordinated edits.
+A version bump is always a coordinated authority + mirror update.
 
 ## Rebuild command
 ```
@@ -43,25 +50,23 @@ Outputs:
   hero-banner shipping contract (this runbook's
   primary artifact)**
 
-For the Foleon communications-lane cutover, the expected closure
-artifact is:
+For the Foleon communications-lane cutover, the promoted deployment
+target after the 1.1.79.0 audit/proof commit is:
 
 - `dist/sppkg/hb-intel-homepage.sppkg`
-- homepage package version `1.1.78.0`
+- homepage package version `1.1.79.0`
 - embedded Foleon expected package version `1.0.23.0`
 - generated proof JSONs:
   - `dist/sppkg/hb-intel-homepage-effectiveness-proof.json`
   - `dist/sppkg/hb-homepage-package-truth-proof.json`
 
 Generated `dist/` artifacts are ignored by repo policy and must not be
-staged for this documentation/evidence closure.
-
-If the current proof JSON reports any homepage version other than
-`1.1.78.0`, do not use that artifact to close the three-lane Foleon
-communications cutover. The Prompt 05 evidence record documents one
-such local mismatch: the ignored artifact on disk was fresh relative to
-dirty local source, but reported `1.1.79.0` and therefore did not satisfy
-the accepted `1.1.78.0` closure target.
+staged for this documentation/evidence closure. The prior accepted
+cutover target was `1.1.78.0`; after the audit confirmed coherent
+homepage version authority, fresh package proof, unchanged three-lane
+runtime behavior, and unchanged embedded Foleon expected package version
+`1.0.23.0`, use the current `1.1.79.0` artifact only after the
+audit/proof commit that records those facts.
 
 Canonical homepage banner ownership seam:
 - `apps/hb-homepage/assets/hero-banners/`

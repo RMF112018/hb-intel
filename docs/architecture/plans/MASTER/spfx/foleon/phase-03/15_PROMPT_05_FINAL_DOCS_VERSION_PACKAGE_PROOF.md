@@ -49,7 +49,7 @@ Document:
 - staged status.
 
 Final closure evidence is captured in
-[`17_FINAL_CLOSURE_EVIDENCE.md`](./17_FINAL_CLOSURE_EVIDENCE.md). This pass does not rebuild Foleon; it documents the existing Foleon `1.0.23.0` package/runtime truth and the homepage `1.1.78.0` package artifact proof.
+[`17_FINAL_CLOSURE_EVIDENCE.md`](./17_FINAL_CLOSURE_EVIDENCE.md). This pass does not rebuild Foleon; it documents the existing Foleon `1.0.23.0` package/runtime truth and the audited promotion from the prior accepted homepage `1.1.78.0` cutover target to the coherent homepage `1.1.79.0` package artifact proof.
 
 ## Tenant follow-up
 

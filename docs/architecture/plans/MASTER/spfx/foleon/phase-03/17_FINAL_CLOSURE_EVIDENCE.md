@@ -1,20 +1,20 @@
 # Final Closure Evidence — Three-Lane Foleon Homepage Cutover
 
-Generated for Prompt 05 on 2026-04-25. This is a documentation/evidence closure pass only: no tenant mutation, no Foleon source change, no homepage source change, no package/version bump, and no generated `dist/` artifact staging.
+Generated for Prompt 05 on 2026-04-25 and updated by the 2026-04-26 audit/proof promotion pass. This is a documentation/evidence closure pass with scoped homepage version-authority alignment only: no tenant mutation, no Foleon source change, no Foleon package/version bump, no homepage runtime behavior change, and no generated `dist/` artifact staging.
 
 ## Closure Status
 
-Not fully closed. Live repo truth currently contains unrelated dirty homepage/package source changes that bump the generated homepage package proof to `1.1.79.0`. The accepted three-lane cutover target remains `1.1.78.0`, so the required `1.1.78.0` homepage package proof cannot be claimed from the current ignored artifact without changing or reverting source, which is outside this documentation-only pass.
+Closed after audit. The prior accepted three-lane cutover target was `1.1.78.0`; the promoted deployment target is now `1.1.79.0`.
 
-Do not use the current `1.1.79.0` ignored artifact to close or deploy the `1.1.78.0` Foleon communications-lane cutover.
+Use the current `1.1.79.0` ignored artifact only after the audit/proof commit that records coherent homepage version authority, fresh package proof, unchanged three-lane runtime behavior, unchanged embedded Foleon expected package version `1.0.23.0`, and no tenant mutation.
 
 ## Package and Version Truth
 
 | Surface | Version | Evidence |
 |---|---:|---|
 | Foleon package/runtime expected version | `1.0.23.0` | `apps/hb-intel-foleon/src/webparts/foleon/runtimeContract.ts`; Foleon manifest defaults remain at `1.0.23.0`. |
-| Accepted homepage cutover target | `1.1.78.0` | Prompt 04 acceptance target. |
-| Current dirty homepage artifact/source truth | `1.1.79.0` | Current ignored proof JSON and dirty `apps/hb-homepage/config/package-solution.json`, `apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json`, and `tools/spfx-shell/config/package-solution.json`. |
+| Prior accepted homepage cutover target | `1.1.78.0` | Prompt 04 acceptance target retained as historical context. |
+| Promoted homepage deployment target | `1.1.79.0` | Audited coherent package authority across `apps/hb-homepage`, `apps/hb-webparts`, `packages/homepage-launcher`, and `tools/spfx-shell/config/package-solution.json`. |
 | Embedded homepage Foleon expected version | `1.0.23.0` | `apps/hb-webparts/src/webparts/hbHomepage/wiring/foleonHomepageConfig.ts`. |
 
 No Foleon package rebuild was required for this documentation pass. The existing Foleon `1.0.23.0` package truth remains the deployment baseline for the embedded homepage lanes.
@@ -24,7 +24,7 @@ No Foleon package rebuild was required for this documentation pass. The existing
 | Item | Value |
 |---|---|
 | Homepage package artifact | `dist/sppkg/hb-intel-homepage.sppkg` |
-| Current SHA256 | `a9893a18367e78f767b8ba6219cc3caa95af4fa34af091e8d7f56ec8d78f5f18` |
+| Current SHA256 | `5c7e3c98760fcea37308f6d7270e78d544704cd3e3ce8fc780f86347a36526ef` |
 | Effectiveness proof | `dist/sppkg/hb-intel-homepage-effectiveness-proof.json` |
 | Package truth proof | `dist/sppkg/hb-homepage-package-truth-proof.json` |
 | Artifact staged/tracked status | Not staged and not tracked; `git status --ignored -- dist/sppkg` reports `!! dist/`. |
@@ -33,12 +33,12 @@ Current ignored homepage package proof confirms:
 
 - `versionAuthority.aligned: true`.
 - `solutionVersion`, `featureVersion`, and `webpartManifestVersion` are all `1.1.79.0`.
-- Packaged app bundle is `ClientSideAssets/hb-homepage-app-c1b687e6.js`.
+- Packaged app bundle is `ClientSideAssets/hb-homepage-app-507b9572.js`.
 - Package-truth proof `freshness.pass: true` with details: app bundle hash matches the current dirty local build.
 - Package-truth proof `sourcePackageSemanticAlignment.pass: true`.
 - Package-truth proof `liveRuntimeProof.pass: true`, including the homepage webpart id `e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf`.
 
-This is valid evidence that the package artifact is fresh relative to the current dirty tree, but it is not valid proof for the accepted `1.1.78.0` cutover package.
+This is valid evidence that the package artifact is fresh relative to the audited `1.1.79.0` source/version state. `1.1.79.0` replaces `1.1.78.0` as the accepted deployment target after the audit/proof commit.
 
 ## Validation Command Results
 
@@ -53,10 +53,10 @@ This is valid evidence that the package artifact is fresh relative to the curren
 | `pnpm --filter @hbc/spfx-hb-intel-foleon schema:validate` | `0` | Passed | Feature Framework validation passed `498` checks. | In-scope schema/package source validation. |
 | `pnpm --filter @hbc/spfx-hb-webparts lint` | `1` | Blocked | `10` errors, `19` warnings. Errors are in Kudos static guardrails, People Culture token guardrails, preview fallback route test, missing lint plugin rules, hbKudos hooks, Safety dynamic provider, and related unrelated files. | Unrelated broad-suite blocker; changed Foleon/homepage cutover files have focused tests passing. |
 | `pnpm --filter @hbc/spfx-hb-webparts check-types` | `2` | Blocked | Three TypeScript errors: `hbKudosAccessibilityGuardrails.test.tsx` missing `laneMode`, `homepageHeroDaypartPrecedence.test.tsx` implicit `any`, `PriorityActionsRail.tsx` `"more-tools"` type mismatch. | Unrelated broad-suite blocker; none are in the cutover commit file list. |
-| `pnpm --filter @hbc/spfx-hb-webparts test` | `1` | Blocked | Full suite result: `16` failed files, `94` passed files; `24` failed tests, `1224` passed tests. Failures are in bundle budget, discovery, hero, interactive states, Kudos, People Culture, Priority Actions, top-band, utility webparts, and snapshots. | Unrelated broad-suite blocker; focused Foleon homepage tests pass. |
+| `pnpm --filter @hbc/spfx-hb-webparts test` | `1` | Blocked | Full suite result: `16` failed files, `95` passed files; `24` failed tests, `1237` passed tests. Failures are in bundle budget, discovery, hero, interactive states, Kudos, People Culture, Priority Actions, top-band, utility webparts, and snapshots. | Unrelated broad-suite blocker; focused Foleon homepage tests pass. |
 | `pnpm --filter @hbc/spfx-hb-homepage lint` | `2` | Blocked | ESLint cannot find a configuration file under `apps/hb-homepage/src` or ancestors. | Repo configuration blocker for that package script. |
 | `pnpm --filter @hbc/spfx-hb-homepage build` | `0` | Passed | `tsc --noEmit && vite build` completed and emitted `hb-homepage-app.js`. | In-scope homepage package validation. |
-| `npx tsx tools/build-spfx-package.ts --domain hb-homepage` | `0` | Passed, but not acceptance-proof | Fresh build enforced, Node `18.20.8` used for SPFx tooling, package and proof JSONs emitted under `dist/sppkg/`; current proof is `1.1.79.0`, not the accepted `1.1.78.0` target. | Package proof is current but blocked for `1.1.78.0` closure by unrelated dirty version/source changes. |
+| `npx tsx tools/build-spfx-package.ts --domain hb-homepage` | `0` | Passed | Fresh build enforced, Node `18.20.8` used for SPFx tooling, package and proof JSONs emitted under `dist/sppkg/`; current proof is `1.1.79.0`, the promoted accepted deployment target. | In-scope package proof for audited homepage promotion. |
 
 Focused changed-area validation:
 
@@ -109,7 +109,7 @@ foleonApiBaseUrl
 foleonApiResource
 ```
 
-Hosted deployment must also confirm homepage package/version governance at `1.1.78.0`.
+Hosted deployment must also confirm homepage package/version governance at `1.1.79.0`; `1.1.78.0` remains the historical prior accepted target.
 
 ## Hosted Validation Checklist
 

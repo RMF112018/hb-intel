@@ -6,7 +6,7 @@
 - Shared package extraction is committed and validated.
 - Standalone Foleon Leadership route is available if required.
 - Homepage package is rebuilt with the three-lane cutover.
-- Homepage package/version governance is `1.1.78.0`.
+- Homepage package/version governance is the audited promoted target `1.1.79.0`; the prior accepted cutover target was `1.1.78.0`.
 - Embedded Foleon expected package version is `1.0.23.0`.
 
 ## Schema choice verification
@@ -46,7 +46,7 @@ foleonExpectedManifestId
 foleonExpectedPackageVersion = 1.0.23.0
 foleonApiBaseUrl
 foleonApiResource
-homepage package/version governance = 1.1.78.0
+homepage package/version governance = 1.1.79.0
 ```
 
 ## Content setup
