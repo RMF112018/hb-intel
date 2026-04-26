@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PRESET } from '../defaultPreset.js';
 import {
@@ -6,6 +8,33 @@ import {
   OPERATIONS_SAFETY_PRESET,
 } from '../presetLibrary.js';
 import { parseShellLayout } from '../shellValidation.js';
+
+const SHELL_CSS_PATH = resolve(__dirname, '../../HbHomepageShell.module.css');
+const PAIRED_ROW_RULE_PATTERN =
+  /\.bandPaired\s+\.span_major\s*,\s*\.bandPaired\s+\.span_minor\s*\{[^}]*\bgrid-row\s*:\s*1\s*;/s;
+
+function getPairedBreakpointCssBlocks(): string[] {
+  const css = readFileSync(SHELL_CSS_PATH, 'utf8');
+  const breakpointNeedle = '@container homepage-shell (min-width: 940px)';
+  const blocks: string[] = [];
+  let searchFrom = 0;
+
+  for (
+    let breakpointStart = css.indexOf(breakpointNeedle, searchFrom);
+    breakpointStart !== -1;
+    breakpointStart = css.indexOf(breakpointNeedle, searchFrom)
+  ) {
+    const nextBreakpointStart = css.indexOf('@container', breakpointStart + breakpointNeedle.length);
+    blocks.push(
+      nextBreakpointStart === -1
+        ? css.slice(breakpointStart)
+        : css.slice(breakpointStart, nextBreakpointStart),
+    );
+    searchFrom = breakpointStart + breakpointNeedle.length;
+  }
+
+  return blocks;
+}
 
 describe('Safety homepage integration placement', () => {
   it('keeps safety as row-2 secondary in the default flagship flow', () => {
@@ -20,6 +49,13 @@ describe('Safety homepage integration placement', () => {
     expect(safetySlot?.columnSpan).toBe('minor');
     expect(pulseSlot?.role).toBe('primary');
     expect(pulseSlot?.columnSpan).toBe('major');
+  });
+
+  it('pins paired major and minor slots to the same grid row at the paired breakpoint', () => {
+    const pairedBreakpointCssBlocks = getPairedBreakpointCssBlocks();
+
+    expect(pairedBreakpointCssBlocks.length).toBeGreaterThan(0);
+    expect(pairedBreakpointCssBlocks.some((block) => PAIRED_ROW_RULE_PATTERN.test(block))).toBe(true);
   });
 
   it('keeps named safety-bearing presets intentionally explicit', () => {

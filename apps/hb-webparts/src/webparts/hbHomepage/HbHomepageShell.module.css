@@ -182,6 +182,11 @@
 }
 
 @container homepage-shell (min-width: 940px) {
+  .bandPaired .span_major,
+  .bandPaired .span_minor {
+    grid-row: 1;
+  }
+
   /* Left-dominant: major column on the left, minor on the right. */
   .bandOrientation_left_dominant .span_major {
     grid-column: 1 / 2;
