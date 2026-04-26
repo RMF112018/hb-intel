@@ -2,6 +2,10 @@ import type {
   FoleonEmbeddedReaderLaneKey,
   IFoleonMountConfig,
 } from '@hbc/foleon-reader';
+import {
+  resolveFoleonRegistryRuntimeConfig,
+  type FoleonRegistryBootstrapConfig,
+} from '@hbc/foleon-reader';
 
 export const HOMEPAGE_EMBEDDED_FOLEON_MANIFEST_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
 export const HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION = '1.0.23.0';
@@ -22,30 +26,51 @@ export function extractHomepageFoleonConfig(
   config: Record<string, unknown> | undefined,
 ): HomepageFoleonConfig {
   const nested = isRecord(config?.foleon) ? config.foleon : undefined;
-  return {
-    foleonContentRegistryListId: readString(
+  const explicitMountConfig: IFoleonMountConfig = {
+    contentRegistryListId: readString(
       config?.foleonContentRegistryListId ?? nested?.foleonContentRegistryListId,
     ),
-    foleonPlacementsListId: readString(
+    placementsListId: readString(
       config?.foleonPlacementsListId ?? nested?.foleonPlacementsListId,
     ),
-    foleonEventsListId: readString(
+    eventsListId: readString(
       config?.foleonEventsListId ?? nested?.foleonEventsListId,
     ),
-    foleonAcceptedOrigins: readOrigins(
+    acceptedFoleonOrigins: readOrigins(
       config?.foleonAcceptedOrigins ?? nested?.foleonAcceptedOrigins,
     ),
-    foleonAllowPreview: readBoolean(
+    allowPreview: readBoolean(
       config?.foleonAllowPreview ?? nested?.foleonAllowPreview,
     ),
-    foleonExpectedManifestId: readString(
+    expectedManifestId: readString(
       config?.foleonExpectedManifestId ?? nested?.foleonExpectedManifestId,
-    ) ?? HOMEPAGE_EMBEDDED_FOLEON_MANIFEST_ID,
-    foleonExpectedPackageVersion: readString(
+    ),
+    expectedPackageVersion: readString(
       config?.foleonExpectedPackageVersion ?? nested?.foleonExpectedPackageVersion,
-    ) ?? HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION,
+    ),
     foleonApiBaseUrl: readString(config?.foleonApiBaseUrl ?? nested?.foleonApiBaseUrl),
     foleonApiResource: readString(config?.foleonApiResource ?? nested?.foleonApiResource),
+  };
+  const registry = readRegistryBootstrap(config?.platformConfigRegistry ?? nested?.platformConfigRegistry);
+  const resolved = resolveFoleonRegistryRuntimeConfig({
+    overrides: explicitMountConfig,
+    registry,
+    defaultConfig: {
+      expectedManifestId: HOMEPAGE_EMBEDDED_FOLEON_MANIFEST_ID,
+      expectedPackageVersion: HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION,
+    },
+  }).config;
+
+  return {
+    foleonContentRegistryListId: resolved.contentRegistryListId,
+    foleonPlacementsListId: resolved.placementsListId,
+    foleonEventsListId: resolved.eventsListId,
+    foleonAcceptedOrigins: resolved.acceptedFoleonOrigins,
+    foleonAllowPreview: resolved.allowPreview,
+    foleonExpectedManifestId: resolved.expectedManifestId ?? HOMEPAGE_EMBEDDED_FOLEON_MANIFEST_ID,
+    foleonExpectedPackageVersion: resolved.expectedPackageVersion ?? HOMEPAGE_EMBEDDED_FOLEON_PACKAGE_VERSION,
+    foleonApiBaseUrl: resolved.foleonApiBaseUrl,
+    foleonApiResource: resolved.foleonApiResource,
   };
 }
 
@@ -75,6 +100,10 @@ export function toEmbeddedFoleonMountConfig(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readRegistryBootstrap(value: unknown): FoleonRegistryBootstrapConfig | undefined {
+  return isRecord(value) && isRecord(value.bootstrap) ? value as unknown as FoleonRegistryBootstrapConfig : undefined;
 }
 
 function readString(value: unknown): string | undefined {

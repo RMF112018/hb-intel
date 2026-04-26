@@ -96,10 +96,36 @@ function assertNonFoleonWebpartDoesNotReceiveBridgeFields(): void {
   assert.deepEqual(runtimeConfig, { webPartProperties: properties });
 }
 
+function assertRegistryDefaultsFillOnlyMissingValues(): void {
+  const properties = {
+    contentRegistryListId: 'content-list-guid',
+  };
+  const runtimeConfig: Record<string, unknown> = {
+    webPartProperties: properties,
+  };
+
+  applyFoleonRuntimeConfigBridge(
+    runtimeConfig,
+    FOLEON_WEBPART_ID,
+    properties,
+    FOLEON_WEBPART_ID,
+    {
+      contentRegistryListId: 'registry-content-guid',
+      placementsListId: 'registry-placements-guid',
+      foleonApiBaseUrl: 'https://functions.example.test',
+    },
+  );
+
+  assert.equal(runtimeConfig.contentRegistryListId, 'content-list-guid');
+  assert.equal(runtimeConfig.placementsListId, 'registry-placements-guid');
+  assert.equal(runtimeConfig.foleonApiBaseUrl, 'https://functions.example.test');
+}
+
 assertFoleonPropertiesCopyToTopLevel();
 assertBlankStringsAreIgnored();
 assertDedicatedReaderRoutesBridge();
 assertAcceptedOriginsStringNormalizesToArray();
 assertNonFoleonWebpartDoesNotReceiveBridgeFields();
+assertRegistryDefaultsFillOnlyMissingValues();
 
 console.log('PASS Foleon SPFx runtime config bridge validation');

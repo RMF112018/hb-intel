@@ -13,6 +13,10 @@ export {
   createEmbeddedFoleonRuntimeContract,
   DEFAULT_FOLEON_ORIGINS,
 } from './runtime/embeddedRuntimeContract.js';
+export {
+  resolveFoleonRegistryRuntimeConfig,
+  resolveFoleonRegistryValues,
+} from './runtime/foleonRegistryConfig.js';
 export type {
   FoleonEmbeddedPackageIdentity,
   FoleonHostMode,
@@ -21,6 +25,14 @@ export type {
   IFoleonMountConfig,
   IFoleonRuntimeContract,
 } from './runtime/embeddedRuntimeContract.js';
+export type {
+  FoleonRegistryBootstrapConfig,
+  FoleonRegistryConfigKey,
+  FoleonRegistryReadinessState,
+  FoleonRegistryRuntimeSummary,
+  ResolvedFoleonRegistryRuntimeConfig,
+  ResolveFoleonRegistryRuntimeConfigOptions,
+} from './runtime/foleonRegistryConfig.js';
 export type {
   FoleonReaderModuleConfig,
 } from './readers/readerConfigs.js';

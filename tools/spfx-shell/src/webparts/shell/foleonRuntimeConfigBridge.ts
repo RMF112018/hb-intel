@@ -72,10 +72,25 @@ export function applyFoleonRuntimeConfigBridge(
   webPartId: string | undefined,
   properties: IShellFoleonRuntimeConfigProperties,
   foleonWebPartId: string,
+  registryDefaults: Record<string, unknown> = {},
 ): void {
   if (webPartId !== foleonWebPartId) {
     return;
   }
 
-  Object.assign(runtimeConfig, buildFoleonRuntimeConfigBridge(properties));
+  const explicitConfig = buildFoleonRuntimeConfigBridge(properties);
+  Object.assign(runtimeConfig, fillRegistryDefaults(explicitConfig, registryDefaults));
+}
+
+function fillRegistryDefaults(
+  explicitConfig: Record<string, unknown>,
+  registryDefaults: Record<string, unknown>,
+): Record<string, unknown> {
+  const merged = { ...explicitConfig };
+  for (const [key, value] of Object.entries(registryDefaults)) {
+    if (merged[key] === undefined && value !== undefined && value !== '') {
+      merged[key] = value;
+    }
+  }
+  return merged;
 }

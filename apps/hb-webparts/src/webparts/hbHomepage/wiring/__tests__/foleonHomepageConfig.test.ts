@@ -79,4 +79,66 @@ describe('homepage embedded Foleon config', () => {
     expect(config.foleonPlacementsListId).toBe('nested-placements');
     expect(config.foleonEventsListId).toBe('nested-events');
   });
+
+  it('fills missing homepage Foleon properties from registry values', () => {
+    const config = extractHomepageFoleonConfig({
+      platformConfigRegistry: {
+        bootstrap: {
+          siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+          listTitle: 'HB Platform Configuration Registry',
+          environmentKey: 'Production',
+        },
+        records: [
+          registryRecord('FoleonContentRegistryListGuid', 'HBCentral', 'Guid', '11111111-1111-1111-1111-111111111111'),
+          registryRecord('FoleonHomepagePlacementsListGuid', 'HBCentral', 'Guid', '22222222-2222-2222-2222-222222222222'),
+          registryRecord('FoleonInteractionEventsListGuid', 'HBCentral', 'Guid', '33333333-3333-3333-3333-333333333333'),
+          registryRecord('FoleonApiBaseUrl', 'Backend', 'Url', 'https://functions.example.test'),
+        ],
+      },
+    });
+
+    expect(config.foleonContentRegistryListId).toBe('11111111-1111-1111-1111-111111111111');
+    expect(config.foleonPlacementsListId).toBe('22222222-2222-2222-2222-222222222222');
+    expect(config.foleonEventsListId).toBe('33333333-3333-3333-3333-333333333333');
+    expect(config.foleonApiBaseUrl).toBe('https://functions.example.test');
+  });
+
+  it('keeps explicit homepage Foleon properties ahead of registry values', () => {
+    const config = extractHomepageFoleonConfig({
+      foleonContentRegistryListId: 'override-content',
+      platformConfigRegistry: {
+        bootstrap: {
+          siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+          listTitle: 'HB Platform Configuration Registry',
+          environmentKey: 'Production',
+        },
+        records: [
+          registryRecord('FoleonContentRegistryListGuid', 'HBCentral', 'Guid', '11111111-1111-1111-1111-111111111111'),
+        ],
+      },
+    });
+
+    expect(config.foleonContentRegistryListId).toBe('override-content');
+  });
 });
+
+function registryRecord(
+  configKey: string,
+  scopeKey: string,
+  valueType: string,
+  value: string,
+): Record<string, unknown> {
+  return {
+    applicationKey: 'Foleon',
+    environmentKey: 'Production',
+    scopeKey,
+    configKey,
+    valueType,
+    isActive: true,
+    validationStatus: 'Not Validated',
+    isSecretReference: false,
+    configValue: value,
+    listGuid: valueType === 'Guid' ? value : undefined,
+    apiBaseUrl: valueType === 'Url' ? value : undefined,
+  };
+}

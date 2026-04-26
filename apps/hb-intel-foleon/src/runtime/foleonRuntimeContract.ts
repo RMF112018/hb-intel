@@ -50,6 +50,13 @@ export interface IFoleonRuntimeContract {
   readonly apiBaseUrl: string | null;
   readonly apiResource: string | null;
   readonly getAccessToken?: () => Promise<string>;
+  readonly foleonReadiness?: {
+    readonly listBindingsReady: boolean;
+    readonly backendUrlReady: boolean;
+    readonly authResourceReady: boolean;
+    readonly tokenProviderReady: boolean;
+    readonly writePathReady: boolean;
+  };
   /**
    * Identity carried on every outbound telemetry envelope.
    * `correlationId` is per-mount; `sessionId` is per-browser-session.
@@ -133,6 +140,13 @@ export function resolveFoleonRuntimeContract(params: {
     readerRoutePath,
     apiBaseUrl,
     apiResource,
+    foleonReadiness: {
+      listBindingsReady: Boolean(listIds.contentRegistry && (route !== 'highlights' || listIds.placements)),
+      backendUrlReady: Boolean(apiBaseUrl),
+      authResourceReady: Boolean(apiResource),
+      tokenProviderReady: false,
+      writePathReady: false,
+    },
     telemetry: {
       correlationId: params.telemetryIdentity?.correlationId ?? '',
       sessionId: params.telemetryIdentity?.sessionId ?? '',

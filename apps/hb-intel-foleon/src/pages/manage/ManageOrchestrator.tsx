@@ -48,11 +48,11 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const breakpoint = useManageBreakpoint();
 
   const load = async (): Promise<void> => {
-    if (props.contract.hostMode === 'sharepoint' && !props.contract.apiBaseUrl && !props.contract.getAccessToken) {
+    if (props.contract.hostMode === 'sharepoint' && props.contract.foleonReadiness?.writePathReady !== true) {
       setState({
         kind: 'blocked',
         message:
-          'The connector needs a backend API URL or SPFx token provider configuration before writes are enabled.',
+          'The connector needs a backend API URL, Foleon API resource, SPFx token provider, and backend readiness proof before writes are enabled.',
       });
       return;
     }

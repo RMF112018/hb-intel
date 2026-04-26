@@ -38,3 +38,17 @@ export {
   type CacheInvalidationBus,
   createCacheInvalidationBus,
 } from './cacheInvalidation.js';
+
+export {
+  type PlatformConfigNormalizationOptions,
+  type PlatformConfigRegistryBootstrap,
+  type PlatformConfigRegistryRecord,
+  type PlatformConfigResolution,
+  type PlatformConfigResolveRequest,
+  type PlatformConfigSource,
+  type PlatformConfigValueType,
+  fingerprintText,
+  normalizeRegistryRecord,
+  normalizeRegistryValue,
+  resolvePlatformConfigValue,
+} from './configRegistry.js';

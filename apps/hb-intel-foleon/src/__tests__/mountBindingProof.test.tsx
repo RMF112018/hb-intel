@@ -8,6 +8,7 @@ const TEST_EVENTS = '33333333-3333-3333-3333-333333333333';
 const TEST_ORIGIN = 'https://viewer.us.foleon.com';
 const TEST_READER_ROUTE = '/sites/HBCentral/SitePages/Foleon-Reader.aspx';
 const TEST_DOC_ID = 9999999;
+const TEST_BACKEND_URL = 'https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net';
 
 function readProof(): IFoleonRuntimeBindingProof | undefined {
   return (
@@ -247,5 +248,97 @@ describe('runtime binding proof (redacted)', () => {
     await mount(el, undefined, {});
     const proof = readProof();
     expect(Array.isArray(proof?.issueCodes)).toBe(true);
+  });
+
+  it('publishes safe registry readiness diagnostics without raw registry values', async () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    await mount(el, undefined, {
+      platformConfigRegistry: {
+        bootstrap: {
+          siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+          listTitle: 'HB Platform Configuration Registry',
+          environmentKey: 'Production',
+        },
+        records: [
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'HBCentral',
+            configKey: 'FoleonContentRegistryListGuid',
+            valueType: 'Guid',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_CONTENT_REGISTRY,
+            listGuid: TEST_CONTENT_REGISTRY,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'HBCentral',
+            configKey: 'FoleonHomepagePlacementsListGuid',
+            valueType: 'Guid',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_PLACEMENTS,
+            listGuid: TEST_PLACEMENTS,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'HBCentral',
+            configKey: 'FoleonInteractionEventsListGuid',
+            valueType: 'Guid',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_EVENTS,
+            listGuid: TEST_EVENTS,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'Backend',
+            configKey: 'FoleonApiBaseUrl',
+            valueType: 'Url',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_BACKEND_URL,
+            apiBaseUrl: TEST_BACKEND_URL,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'Backend',
+            configKey: 'FoleonClientSecret',
+            valueType: 'SecretReference',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: true,
+            secretReferenceName: 'HB_FOLEON_CLIENT_SECRET',
+          },
+        ],
+      },
+    });
+
+    const proof = readProof();
+    expect(proof?.registry.registryResolved).toBe(true);
+    expect(proof?.registry.foleonReadiness.listBindingsReady).toBe(true);
+    expect(proof?.registry.foleonReadiness.backendUrlReady).toBe(true);
+    expect(proof?.registry.foleonReadiness.authResourceReady).toBe(false);
+    expect(proof?.registry.foleonReadiness.tokenProviderReady).toBe(false);
+    expect(proof?.registry.foleonReadiness.writePathReady).toBe(false);
+    expect(proof?.registry.registryReadinessState).toBe('auth-resource-missing');
+    expect(proof?.registry.configSourceByKey.FoleonContentRegistryListGuid).toBe('registry');
+
+    const serialized = JSON.stringify(proof);
+    expect(serialized).not.toContain(TEST_CONTENT_REGISTRY);
+    expect(serialized).not.toContain(TEST_PLACEMENTS);
+    expect(serialized).not.toContain(TEST_EVENTS);
+    expect(serialized).not.toContain(TEST_BACKEND_URL);
+    expect(serialized).not.toContain('HB_FOLEON_CLIENT_SECRET');
   });
 });

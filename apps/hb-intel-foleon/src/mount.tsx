@@ -20,6 +20,10 @@ import { createElement, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { storeSiteUrl } from '@hbc/sharepoint-platform';
+import {
+  resolveFoleonRegistryRuntimeConfig,
+  type FoleonRegistryRuntimeSummary,
+} from '@hbc/foleon-reader';
 import { FoleonApp } from './FoleonApp.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from './webparts/foleon/runtimeContract.js';
 import {
@@ -57,20 +61,38 @@ export async function mount(
     correlationId: createFoleonEventId(),
     sessionId: resolveFoleonSessionId(),
   };
+  const registryRuntime = resolveFoleonRegistryRuntimeConfig({
+    overrides: config,
+    registry: config?.platformConfigRegistry,
+  });
+  const resolvedConfig = registryRuntime.config as IFoleonMountConfig;
   const contract = resolveFoleonRuntimeContract({
     hasSpfxContext: !!spfxContext,
     siteUrl,
-    config,
+    config: resolvedConfig,
     telemetryIdentity,
   });
   const tokenProvider =
-    spfxContext && config?.foleonApiResource
-      ? await createBackendTokenProvider(spfxContext, config.foleonApiResource)
+    spfxContext && resolvedConfig.foleonApiResource
+      ? await createBackendTokenProvider(spfxContext, resolvedConfig.foleonApiResource)
       : undefined;
+  const registryRuntimeWithToken = resolveFoleonRegistryRuntimeConfig({
+    overrides: config,
+    registry: config?.platformConfigRegistry,
+    tokenProviderReady: Boolean(tokenProvider),
+    backendSafeConfigReady: false,
+  });
   const mountedContract: IFoleonRuntimeContract = tokenProvider
-    ? { ...contract, getAccessToken: tokenProvider }
-    : contract;
-  publishRuntimeBindingProof(mountedContract, config);
+    ? {
+        ...contract,
+        getAccessToken: tokenProvider,
+        foleonReadiness: registryRuntimeWithToken.summary.foleonReadiness,
+      }
+    : {
+        ...contract,
+        foleonReadiness: registryRuntimeWithToken.summary.foleonReadiness,
+      };
+  publishRuntimeBindingProof(mountedContract, resolvedConfig, registryRuntimeWithToken.summary);
 
   root = createRoot(el);
   root.render(createElement(FoleonApp, { contract: mountedContract }) as ReactNode);
@@ -140,6 +162,29 @@ export interface IFoleonRuntimeBindingProof {
     readonly eventsListId: FoleonConfigSource;
     readonly foleonRoute: FoleonConfigSource;
   };
+  readonly registry: {
+    readonly registryResolved: boolean;
+    readonly registryListPresent: boolean;
+    readonly registryValuesResolvedCount: number;
+    readonly registryValuesMissing: ReadonlyArray<string>;
+    readonly registryValuesBlocked: ReadonlyArray<string>;
+    readonly registryValuesInvalid: ReadonlyArray<string>;
+    readonly registryValuesExpired: ReadonlyArray<string>;
+    readonly configSourceByKey: Readonly<Record<string, string>>;
+    readonly configStatusByKey: Readonly<Record<string, string>>;
+    readonly registryDuplicateActiveKeysDetected: boolean;
+    readonly registrySecretHygieneStatus: 'pass' | 'fail' | 'unknown';
+    readonly registryReadinessState: string;
+    readonly syncSupportConfigured: boolean;
+    readonly foleonReadiness: {
+      readonly listBindingsReady: boolean;
+      readonly backendUrlReady: boolean;
+      readonly authResourceReady: boolean;
+      readonly tokenProviderReady: boolean;
+      readonly writePathReady: boolean;
+    };
+    readonly fingerprints: Readonly<Record<string, string>>;
+  };
   readonly issueCodes: ReadonlyArray<FoleonConfigErrorCode>;
   /**
    * Present only when the page URL carried `?foleon-diagnostics=1`
@@ -170,6 +215,7 @@ interface FoleonPropertyBridgePresence {
 function publishRuntimeBindingProof(
   contract: IFoleonRuntimeContract,
   config: IFoleonMountConfig | undefined,
+  registrySummary: FoleonRegistryRuntimeSummary,
 ): void {
   const diagnosticsEnabled = shouldEnableDiagnostics();
   const bridgeDiagnostics = buildFoleonPropertyBridgeDiagnostics(config);
@@ -220,6 +266,23 @@ function publishRuntimeBindingProof(
     },
     foleonPropertyBridge: bridgeDiagnostics.foleonPropertyBridge,
     configSource: bridgeDiagnostics.configSource,
+    registry: {
+      registryResolved: registrySummary.registryResolved,
+      registryListPresent: registrySummary.registryListPresent,
+      registryValuesResolvedCount: registrySummary.registryValuesResolvedCount,
+      registryValuesMissing: registrySummary.registryValuesMissing,
+      registryValuesBlocked: registrySummary.registryValuesBlocked,
+      registryValuesInvalid: registrySummary.registryValuesInvalid,
+      registryValuesExpired: registrySummary.registryValuesExpired,
+      configSourceByKey: registrySummary.configSourceByKey,
+      configStatusByKey: registrySummary.configStatusByKey,
+      registryDuplicateActiveKeysDetected: registrySummary.registryDuplicateActiveKeysDetected,
+      registrySecretHygieneStatus: registrySummary.registrySecretHygieneStatus,
+      registryReadinessState: registrySummary.registryReadinessState,
+      syncSupportConfigured: registrySummary.syncSupportConfigured,
+      foleonReadiness: registrySummary.foleonReadiness,
+      fingerprints: registrySummary.fingerprints,
+    },
     issueCodes: contract.issues.map((issue) => issue.code),
     ...(diagnosticsEnabled
       ? {

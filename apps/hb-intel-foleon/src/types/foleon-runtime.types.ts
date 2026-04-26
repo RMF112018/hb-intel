@@ -1,4 +1,5 @@
 import type { FoleonContentRecord } from './foleon-content.types.js';
+import type { FoleonRegistryBootstrapConfig } from '@hbc/foleon-reader';
 
 export interface IFoleonMountConfig {
   /** SharePoint list GUID for HB_FoleonContentRegistry. Hosted config. */
@@ -33,6 +34,8 @@ export interface IFoleonMountConfig {
   readonly foleonApiBaseUrl?: string;
   /** Entra resource/application ID URI for acquiring backend API tokens in SPFx. */
   readonly foleonApiResource?: string;
+  /** Optional registry bootstrap/records payload supplied by a host bridge. */
+  readonly platformConfigRegistry?: FoleonRegistryBootstrapConfig;
 }
 
 export type FoleonGateReason =
