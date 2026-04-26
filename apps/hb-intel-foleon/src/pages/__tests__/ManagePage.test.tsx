@@ -396,10 +396,11 @@ describe('ManagePage', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('auth-resource-missing');
   });
 
-  it('reports token acquisition failures separately from token provider creation', async () => {
+  it('renders Manager shell in API consent required degraded mode', async () => {
     render(
       <ManagePage
         contract={hostedContract({
+          getAccessToken: undefined,
           foleonReadiness: {
             registryReady: true,
             listBindingsReady: true,
@@ -413,12 +414,77 @@ describe('ManagePage', () => {
             writePathReady: false,
             syncPathReady: false,
           },
+          foleonConfigDiagnostics: {
+            blockers: [
+              {
+                code: 'token-acquisition-failed',
+                message: 'consent_required: Approve HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.',
+              },
+            ],
+          },
         })}
         onBack={(): void => undefined}
       />,
     );
 
-    expect((await screen.findByRole('alert')).textContent).toContain('token-acquisition-failed');
+    expect(await screen.findByRole('heading', { name: /Foleon Connector/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Homepage Foleon Content' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Config' })).toBeTruthy();
+    expect(
+      screen.getAllByRole('status').some((entry) =>
+        entry.textContent?.includes('Approve HB SharePoint Creator / access_as_user')
+      ),
+    ).toBe(true);
+    expect(screen.getByRole('button', { name: 'Retry API readiness' })).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Sync blocked' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Create placement blocked' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('renders Config consent_required state without raw secrets or tokens', async () => {
+    const rawToken = 'ey.secret-token-value';
+    const rawSecret = 'client-secret-value';
+    render(
+      <ManagePage
+        contract={hostedContract({
+          getAccessToken: undefined,
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+          foleonConfigDiagnostics: {
+            blockers: [
+              {
+                code: 'token-acquisition-failed',
+                message: `consent_required: approve access_as_user. ${rawToken} ${rawSecret}`,
+              },
+            ],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    await screen.findByRole('tab', { name: 'Config' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+
+    const configText = screen.getByRole('tabpanel', { name: 'Config' }).textContent ?? '';
+    expect(screen.getByRole('region', { name: 'API approval required' })).toBeTruthy();
+    expect(configText).toContain('API Consent Missing');
+    expect(configText).toContain('Blocked: consent_required');
+    expect(configText).toContain('Backend read path, write path, and sync path are unavailable');
+    expect(configText).toContain('Approve HB SharePoint Creator / access_as_user');
+    expect(configText).not.toContain(rawToken);
+    expect(configText).not.toContain(rawSecret);
   });
 
   it('does not expose manager controls when the runtime authorization check is rejected', async () => {

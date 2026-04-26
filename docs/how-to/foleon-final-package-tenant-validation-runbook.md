@@ -1,6 +1,6 @@
 # Foleon Final Package and Tenant Validation Runbook
 
-Use this runbook to validate the registry-first Foleon Manager after the `1.0.27.0` package is built and uploaded to SharePoint. Local package proof and tenant-hosted proof are separate gates; do not mark deployment complete until hosted evidence is captured.
+Use this runbook to validate the registry-first Foleon Manager after the `1.0.28.0` package is built and uploaded to SharePoint. Local package proof and tenant-hosted proof are separate gates; do not mark deployment complete until hosted evidence is captured.
 
 ## Targets
 
@@ -8,7 +8,7 @@ Use this runbook to validate the registry-first Foleon Manager after the `1.0.27
 - Manager page: `https://hedrickbrotherscom.sharepoint.com/sites/Marketing-New/SitePages/Foleon-Manager.aspx`
 - Marketing site root for homepage lanes: `https://hedrickbrotherscom.sharepoint.com/sites/Marketing-New`
 - Package artifact to deploy: `dist/sppkg/hb-intel-foleon.sppkg`
-- Expected package version: `1.0.27.0`
+- Expected package version: `1.0.28.0`
 - Foleon web part ID: `2160edb3-675e-4451-92bb-8345f9d1c71e`
 - App ID / API resource basis: `08c399eb-a394-4087-b859-659d493f8dc7`
 
@@ -31,10 +31,11 @@ pnpm --filter @hbc/spfx-hb-intel-foleon package:proof
 
 Expected package proof fields:
 
-- `solutionVersion`: `1.0.27.0`
-- `feature.version`: `1.0.27.0`
+- `solutionVersion`: `1.0.28.0`
+- `feature.version`: `1.0.28.0`
 - `components[0].id`: `2160edb3-675e-4451-92bb-8345f9d1c71e`
-- Every preconfigured entry `expectedPackageVersion`: `1.0.27.0`
+- Every preconfigured entry `expectedPackageVersion`: `1.0.28.0`
+- Package declares `webApiPermissionRequests` for `HB SharePoint Creator` / `access_as_user`.
 - Package truth proof `checks.structuralValidity.pass`: `true`
 - Package truth proof `checks.freshness.pass`: `true`
 - Package truth proof `checks.sourcePackageSemanticAlignment.pass`: `true`
@@ -70,6 +71,13 @@ Expected proof fields:
 
 Open `https://hedrickbrotherscom.sharepoint.com/sites/Marketing-New/SitePages/Foleon-Manager.aspx` after uploading and approving `hb-intel-foleon.sppkg`.
 
+Before retesting token readiness, go to **SharePoint Admin Center -> Advanced -> API access** and approve:
+
+- Resource: `HB SharePoint Creator`
+- Scope: `access_as_user`
+
+Before that approval exists, expected hosted behavior is degraded but rendered: the Manager shell loads, both tabs are available, and the Config tab shows `consent_required` with the tenant action above. A full-surface fatal error for `AADSTS65001` is not acceptable.
+
 Capture screenshots of:
 
 - Manager page loaded with no fatal error.
@@ -87,7 +95,7 @@ JSON.stringify(window.__hbIntel_foleonRuntimeBindingProof, null, 2)
 
 Expected proof fields:
 
-- `packageVersion`: `1.0.27.0`
+- `packageVersion`: `1.0.28.0`
 - `manifestId`: `2160edb3-675e-4451-92bb-8345f9d1c71e`
 - `hostMode`: `sharepoint`
 - `route`: `manage`
@@ -106,6 +114,8 @@ Expected proof fields:
 - `registry.foleonReadiness.listBindingsReady`: `true`
 - `registry.foleonReadiness.backendUrlReady`: `true`
 - `registry.foleonReadiness.authResourceReady`: `true`
+- `registry.foleonReadiness.tokenProviderReady`: `true`
+- `registry.foleonReadiness.tokenAcquisitionReady`: `true` after API access approval.
 - `registry.foleonReadiness.readPathReady`: `true` only after the Manager read probe succeeds.
 - `registry.foleonReadiness.writePathReady`: `true` only after backend safe config and route authorization are proven.
 

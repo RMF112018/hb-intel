@@ -25,9 +25,20 @@ export function FoleonConfigTab(props: {
   );
   const configRows = buildConfigSourceRows(props.contract.foleonConfigDiagnostics);
   const safeDiagnostics = buildSafeDiagnostics(props.contract);
+  const consentRequired = hasConsentRequiredBlocker(props.contract);
 
   return (
     <div role="tabpanel" aria-label="Config" className={shell.tabPanel}>
+      {consentRequired ? (
+        <section className={f.editorSection} aria-label="API approval required">
+          <p className={f.guidanceKicker}>API Consent Missing</p>
+          <h3 className={f.sectionTitle}>Tenant API Approval Required</h3>
+          <p className={f.metaMuted}>
+            Token acquisition failed with consent_required. Backend read path, write path, and sync path are unavailable until a SharePoint admin approves HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.
+          </p>
+        </section>
+      ) : null}
+
       <section className={f.editorSection} aria-label="Runtime readiness summary">
         <p className={f.guidanceKicker}>Registry-Aware Config</p>
         <h3 className={f.sectionTitle}>Runtime Readiness Summary</h3>
@@ -112,7 +123,7 @@ export function FoleonConfigTab(props: {
           <dt>Token provider</dt>
           <dd>{readiness?.tokenProviderReady ? 'Valid' : 'Blocked'}</dd>
           <dt>Token acquisition</dt>
-          <dd>{readiness?.tokenAcquisitionReady ? 'Valid' : 'Blocked'}</dd>
+          <dd>{readiness?.tokenAcquisitionReady ? 'Valid' : consentRequired ? 'Blocked: consent_required' : 'Blocked'}</dd>
           <dt>Route authorization</dt>
           <dd>{readiness?.backendRouteAuthorizationReady ? 'Valid' : 'Blocked'}</dd>
           <dt>Read readiness</dt>
@@ -158,6 +169,13 @@ export function FoleonConfigTab(props: {
       </section>
     </div>
   );
+}
+
+function hasConsentRequiredBlocker(contract: IFoleonRuntimeContract): boolean {
+  return contract.foleonConfigDiagnostics?.blockers.some((blocker) =>
+    blocker.code === 'token-acquisition-failed' &&
+    blocker.message.toLowerCase().includes('consent_required')
+  ) ?? false;
 }
 
 function bindingStatus(readiness: IFoleonRuntimeContract['foleonReadiness']): string {

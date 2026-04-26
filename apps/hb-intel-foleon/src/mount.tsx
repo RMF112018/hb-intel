@@ -448,13 +448,21 @@ async function createBackendTokenProvider(
       },
     };
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       tokenProviderReady: true,
       tokenAcquisitionReady: false,
       failureCode: 'token-acquisition-failed',
-      failureMessage: error instanceof Error ? error.message : String(error),
+      failureMessage: consentRequired(message)
+        ? 'consent_required: Approve HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.'
+        : 'SPFx token acquisition failed for the resolved Foleon API resource.',
     };
   }
+}
+
+function consentRequired(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return normalized.includes('aadsts65001') || normalized.includes('consent_required');
 }
 
 function buildRuntimeReadiness(

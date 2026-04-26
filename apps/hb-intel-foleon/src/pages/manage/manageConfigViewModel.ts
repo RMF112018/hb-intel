@@ -131,7 +131,17 @@ function withBlocker(
   const blocker = diagnostics?.blockers.find((item) =>
     entry.label.toLowerCase().split(' ').some((word) => item.code.includes(word)),
   );
-  return blocker ? { ...entry, detail: blocker.message } : entry;
+  return blocker ? { ...entry, detail: safeBlockerMessage(blocker.code, blocker.message) } : entry;
+}
+
+function safeBlockerMessage(code: string, message: string): string {
+  if (code === 'token-acquisition-failed' && message.toLowerCase().includes('consent_required')) {
+    return 'consent_required: Approve HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.';
+  }
+  if (code === 'token-acquisition-failed') {
+    return 'SPFx token acquisition failed for the resolved Foleon API resource.';
+  }
+  return message;
 }
 
 function normalizeSource(source: string | undefined): ConfigSourceLabel {

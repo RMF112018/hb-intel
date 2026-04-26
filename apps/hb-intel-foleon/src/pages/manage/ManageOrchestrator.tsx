@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { HbcButton } from '@hbc/ui-kit/homepage';
 import type {
   FoleonReadinessIssueCode,
   IFoleonRuntimeContract,
@@ -38,6 +39,7 @@ type LoadState =
       readonly placements: ReadonlyArray<FoleonPlacement>;
       readonly syncStatus: FoleonSyncStatus | null;
       readonly runs: ReadonlyArray<FoleonSyncRun>;
+      readonly managerReadPathProven: boolean;
     };
 
 export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactNode {
@@ -51,6 +53,18 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
 
   const load = async (): Promise<void> => {
     const preflightBlocker = getHostedPreflightBlocker(props.contract);
+    if (preflightBlocker?.code === 'token-acquisition-failed') {
+      setMessage(`${preflightBlocker.message} Approve HB SharePoint Creator / access_as_user in SharePoint Admin Center API access.`);
+      setState({
+        kind: 'ready',
+        content: [],
+        placements: [],
+        syncStatus: null,
+        runs: [],
+        managerReadPathProven: false,
+      });
+      return;
+    }
     if (preflightBlocker) {
       setState({ kind: 'blocked', ...preflightBlocker });
       return;
@@ -80,7 +94,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
       if (!safeConfig.foleonApiConfigured) {
         setMessage('Foleon sync is not ready because backend Foleon OAuth configuration is incomplete. Content and placement reads remain available.');
       }
-      setState({ kind: 'ready', content, placements, syncStatus, runs });
+      setState({ kind: 'ready', content, placements, syncStatus, runs, managerReadPathProven: true });
       setSelectedId((current) => current ?? content[0]?.id ?? null);
     } catch (err) {
       if (err instanceof FoleonReadinessError) {
@@ -164,6 +178,11 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         {message ? (
           <div role="status" className={shell.statusBanner}>
             {message}
+            {props.contract.foleonConfigDiagnostics?.blockers.some((blocker) => blocker.code === 'token-acquisition-failed') ? (
+              <HbcButton variant="secondary" onClick={(): void => void load()}>
+                Retry API readiness
+              </HbcButton>
+            ) : null}
           </div>
         ) : null}
 
@@ -185,7 +204,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
             setMessage={setMessage}
           />
         ) : (
-          <FoleonConfigTab contract={props.contract} managerReadPathProven />
+          <FoleonConfigTab contract={props.contract} managerReadPathProven={state.managerReadPathProven} />
         )}
         <ManageSyncPanel runs={state.runs} />
       </section>
@@ -257,8 +276,22 @@ function getHostedPreflightBlocker(
   if (!readiness.tokenAcquisitionReady) {
     return {
       code: 'token-acquisition-failed',
-      message: 'SPFx token acquisition failed for the resolved Foleon API resource.',
+      message: consentRequired(propsBlockerMessage(contract))
+        ? 'API consent missing; token acquisition failed with consent_required.'
+        : 'SPFx token acquisition failed for the resolved Foleon API resource.',
     };
   }
   return null;
+}
+
+function propsBlockerMessage(contract: IFoleonRuntimeContract): string {
+  return contract.foleonConfigDiagnostics?.blockers
+    .filter((blocker) => blocker.code === 'token-acquisition-failed')
+    .map((blocker) => blocker.message)
+    .join(' ') ?? '';
+}
+
+function consentRequired(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return normalized.includes('consent_required') || normalized.includes('aadsts65001');
 }
