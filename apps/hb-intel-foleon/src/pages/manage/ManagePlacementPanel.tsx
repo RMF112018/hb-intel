@@ -30,6 +30,8 @@ export function ManagePlacementPanel(props: {
   readonly api: FoleonManagementApi;
   readonly onRefresh: () => Promise<void>;
   readonly setMessage: (message: string | null) => void;
+  readonly canWrite?: boolean;
+  readonly writeBlockReason?: string;
 }): React.ReactNode {
   const firstContent = props.content[0];
   const [draft, setDraft] = useState<FoleonPlacementMutation>({
@@ -54,6 +56,10 @@ export function ManagePlacementPanel(props: {
   });
 
   const create = async (): Promise<void> => {
+    if (props.canWrite === false) {
+      props.setMessage(`Placement writes are blocked: ${props.writeBlockReason ?? 'write path is not ready'}.`);
+      return;
+    }
     await props.api.createPlacement(draft);
     props.setMessage('Homepage placement saved with backend ContentIdCache validation.');
     await props.onRefresh();
@@ -116,10 +122,15 @@ export function ManagePlacementPanel(props: {
         />
       </div>
       <div style={{ marginTop: 12 }}>
-        <HbcButton variant="primary" onClick={(): void => void create()}>
-          Create placement
+        <HbcButton variant="primary" disabled={props.canWrite === false} onClick={(): void => void create()}>
+          {props.canWrite === false ? 'Create placement blocked' : 'Create placement'}
         </HbcButton>
       </div>
+      {props.canWrite === false ? (
+        <p className={f.metaMuted} role="status">
+          Placement writes are disabled: {props.writeBlockReason ?? 'write path is not ready'}.
+        </p>
+      ) : null}
       {draftWarnings.length > 0 ? (
         <div role="status" aria-label="Placement lane guidance">
           <ValidationList reasons={draftWarnings} />

@@ -11,16 +11,14 @@ import type {
   FoleonSyncRun,
   FoleonSyncStatus,
 } from '../../types/foleon-management.types.js';
-import { FoleonEmpty, FoleonError, FoleonLoadingState } from '../../components/FoleonStates.js';
-import { ManageContentEditorPanel } from './ManageContentEditorPanel.js';
-import { ManageMetricCards } from './ManageMetricCards.js';
-import { ManagePlacementPanel } from './ManagePlacementPanel.js';
-import { ManagePreviewGuidancePanel } from './ManagePreviewGuidancePanel.js';
-import { ManageRegistryPanel } from './ManageRegistryPanel.js';
+import { FoleonError, FoleonLoadingState } from '../../components/FoleonStates.js';
+import { FoleonConfigTab } from './FoleonConfigTab.js';
+import { HomepageFoleonContentTab } from './HomepageFoleonContentTab.js';
 import { ManageShellHeader } from './ManageShellHeader.js';
 import { ManageSyncPanel } from './ManageSyncPanel.js';
-import { buildReaderLaneWarnings, toContentMutation } from './manageMutationUtils.js';
+import { sortManagedContentForHomepage } from './manageLaneViewModel.js';
 import { runFoleonSync } from './manageWorkflows.js';
+import { ManageTabs, type ManageTabKey } from './ManageTabs.js';
 import { useManageBreakpoint } from './useManageBreakpoint.js';
 import './foleonManageTokens.css';
 import shell from './manageShell.module.css';
@@ -48,6 +46,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<ManageTabKey>('content');
   const breakpoint = useManageBreakpoint();
 
   const load = async (): Promise<void> => {
@@ -105,8 +104,9 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const filteredContent = useMemo(() => {
     if (!ready) return [];
     const needle = query.trim().toLowerCase();
-    if (!needle) return ready.content;
-    return ready.content.filter((record) =>
+    const ordered = sortManagedContentForHomepage(ready.content);
+    if (!needle) return ordered;
+    return ordered.filter((record) =>
       [record.title, record.summary, record.region, record.sector, String(record.foleonDocId)]
         .filter(Boolean)
         .join(' ')
@@ -141,19 +141,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     );
   }
 
-  const published = state.content.filter((record) => record.publishStatus === 'Published' && record.isVisible).length;
-  const homepageReady = state.content.filter(
-    (record) => record.publishStatus === 'Published' && record.isVisible && record.isHomepageEligible,
-  ).length;
-  const blocked = state.content.filter((record) => record.validationStatus === 'blocked').length;
-  const activePlacements = state.placements.filter((placement) => placement.isActive).length;
-  const laneWarningCount = state.content.reduce((count, record) => count + buildReaderLaneWarnings({
-    draft: toContentMutation(record),
-    record,
-    allContent: state.content,
-    placements: state.placements,
-  }).length, 0);
-  const shouldShowPreviewGuidance = state.content.length === 0 || published === 0 || homepageReady === 0;
+  const canSync = props.contract.hostMode !== 'sharepoint' || props.contract.foleonReadiness?.syncPathReady === true;
 
   return (
     <Tooltip.Provider delayDuration={280}>
@@ -169,6 +157,8 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           onBack={props.onBack}
           onSyncDocs={(): void => void runFoleonSync(api, 'docs', load, setMessage)}
           onSyncProjects={(): void => void runFoleonSync(api, 'projects', load, setMessage)}
+          canSync={canSync}
+          syncBlockReason={canSync ? undefined : 'sync path is not ready'}
         />
 
         {message ? (
@@ -177,51 +167,27 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           </div>
         ) : null}
 
-        <div className={`${shell.layout} ${breakpoint.layoutGridClass}`}>
-          <ManageRegistryPanel
+        <ManageTabs selected={selectedTab} onSelect={setSelectedTab} />
+        {selectedTab === 'content' ? (
+          <HomepageFoleonContentTab
+            contract={props.contract}
+            content={state.content}
+            placements={state.placements}
+            syncStatus={state.syncStatus}
+            api={api}
             query={query}
             onQueryChange={setQuery}
             filteredContent={filteredContent}
+            selected={selected}
             selectedId={selected?.id ?? null}
             onSelect={setSelectedId}
+            onRefresh={load}
+            setMessage={setMessage}
           />
-
-          <main className={shell.main}>
-            <ManageMetricCards
-              published={published}
-              blocked={blocked}
-              activePlacements={activePlacements}
-              laneWarnings={laneWarningCount}
-              syncHealth={state.syncStatus?.health ?? 'unknown'}
-            />
-            {shouldShowPreviewGuidance ? (
-              <ManagePreviewGuidancePanel
-                publicReadyContentCount={published}
-                homepageReadyContentCount={homepageReady}
-              />
-            ) : null}
-            {selected ? (
-              <ManageContentEditorPanel
-                record={selected}
-                allContent={state.content}
-                placements={state.placements}
-                api={api}
-                onRefresh={load}
-                setMessage={setMessage}
-              />
-            ) : (
-              <FoleonEmpty title="No registry records yet." description="Create a draft or sync Foleon Docs." />
-            )}
-            <ManagePlacementPanel
-              content={state.content}
-              placements={state.placements}
-              api={api}
-              onRefresh={load}
-              setMessage={setMessage}
-            />
-            <ManageSyncPanel runs={state.runs} />
-          </main>
-        </div>
+        ) : (
+          <FoleonConfigTab contract={props.contract} managerReadPathProven />
+        )}
+        <ManageSyncPanel runs={state.runs} />
       </section>
     </Tooltip.Provider>
   );

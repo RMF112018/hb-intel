@@ -131,6 +131,148 @@ afterEach(() => {
 });
 
 describe('ManagePage', () => {
+  it('renders two tabs with Homepage Foleon Content selected by default', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    expect((await screen.findByRole('tab', { name: 'Homepage Foleon Content' })).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('tab', { name: 'Config' }).getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByRole('tabpanel', { name: 'Homepage Foleon Content' })).toBeTruthy();
+  });
+
+  it('renders the three homepage lane cards in the content tab', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({ title: 'Project Spotlight edition', readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true }),
+        managedContent({ id: 'content-2', sharePointItemId: 2, title: 'Company Pulse edition', readerKey: 'company-pulse', contentTypeKey: 'Company Pulse', activeEdition: true }),
+        managedContent({ id: 'content-3', sharePointItemId: 3, title: 'Leadership edition', readerKey: 'leadership-message', contentTypeKey: 'Leadership', activeEdition: true }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    expect((await screen.findAllByText('Project Spotlight')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Company Pulse').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Leadership Message').length).toBeGreaterThan(0);
+    expect(screen.getByRole('region', { name: /Lane status overview/i })).toBeTruthy();
+  });
+
+  it('renders split readiness states and source labels on the Config tab', async () => {
+    installManageFetchMock({ content: [managedContent()] });
+
+    render(
+      <ManagePage
+        contract={hostedContract({
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: true,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: true,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+          foleonConfigDiagnostics: {
+            registryFetchStatus: 'available',
+            registrySecretHygieneStatus: 'pass',
+            registryDuplicateActiveKeysDetected: false,
+            configSourceByKey: {
+              FoleonContentRegistryListGuid: 'override',
+              FoleonHomepagePlacementsListGuid: 'registry',
+              FoleonInteractionEventsListGuid: 'default',
+              FoleonSyncRunsListGuid: 'missing',
+              FoleonApiBaseUrl: 'blocked',
+            },
+            configStatusByKey: {
+              FoleonContentRegistryListGuid: 'override',
+              FoleonHomepagePlacementsListGuid: 'registry',
+              FoleonInteractionEventsListGuid: 'default',
+              FoleonSyncRunsListGuid: 'missing',
+              FoleonApiBaseUrl: 'blocked',
+            },
+            blockers: [],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    await screen.findByRole('region', { name: /Content detail editor/i });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+
+    expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /Runtime readiness summary/i })).toBeTruthy();
+    expect(screen.getByText('Token Provider')).toBeTruthy();
+    expect(screen.getByText('Token Acquisition')).toBeTruthy();
+    expect(screen.getByText('Backend Safe Config')).toBeTruthy();
+    expect(screen.getByText('Route Authorization')).toBeTruthy();
+    expect(screen.getByText('Write Path')).toBeTruthy();
+    expect(screen.getAllByText('Override').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Registry').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Default').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Missing').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Blocked').length).toBeGreaterThan(0);
+  });
+
+  it('keeps apiBaseUrl-only and backend readiness gaps from showing write readiness', async () => {
+    installManageFetchMock({ content: [managedContent()] });
+
+    render(
+      <ManagePage
+        contract={hostedContract({
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: false,
+            tokenProviderReady: false,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: true,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    expect((await screen.findByRole('alert')).textContent).toContain('auth-resource-missing');
+  });
+
+  it('does not render unsafe raw config values in the normal Config UI', async () => {
+    installManageFetchMock({ content: [managedContent()] });
+    const rawBackendUrl = 'https://functions.secret.example.test';
+    const rawApiResource = 'api://08c399eb-a394-4087-b859-659d493f8dc7';
+    const rawListGuid = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+
+    render(
+      <ManagePage
+        contract={hostedContract({
+          apiBaseUrl: rawBackendUrl,
+          apiResource: rawApiResource,
+          listIds: { contentRegistry: rawListGuid, placements: rawListGuid, events: rawListGuid },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    await screen.findByRole('region', { name: /Content detail editor/i });
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    const normalConfigText = screen.getByRole('tabpanel', { name: 'Config' }).textContent ?? '';
+
+    expect(normalConfigText).not.toContain(rawBackendUrl);
+    expect(normalConfigText).not.toContain(rawApiResource);
+    expect(normalConfigText).not.toContain(rawListGuid);
+    expect(normalConfigText).not.toContain('token-');
+  });
+
   it('renders manage shell, workflows, and preview guidance for zero content without iframe hosts', async () => {
     installManageFetchMock({ content: [] });
 
@@ -310,7 +452,9 @@ describe('ManagePage', () => {
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
     expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
-    expect(screen.getByRole('status').textContent).toContain('backend Foleon OAuth configuration is incomplete');
+    expect(screen.getAllByRole('status').some((entry) =>
+      entry.textContent?.includes('backend Foleon OAuth configuration is incomplete')
+    )).toBe(true);
   });
 
   it('keeps preview guidance read-only without fake admin actions or editable preview content', async () => {
@@ -409,9 +553,9 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByText('More than one active Project Spotlight edition is configured.')).toBeTruthy();
-    expect(screen.getByText('Active reader editions should be published, visible, homepage eligible, and have a reader URL.')).toBeTruthy();
-    expect(screen.getByText('Project Spotlight active editions should include Archive Group.')).toBeTruthy();
+    expect((await screen.findAllByText('More than one active Project Spotlight edition is configured.')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Active reader editions should be published, visible, homepage eligible, and have a reader URL.').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Project Spotlight active editions should include Archive Group.').length).toBeGreaterThan(0);
   });
 
   it('shows placement lane alignment warnings for mismatched content', async () => {

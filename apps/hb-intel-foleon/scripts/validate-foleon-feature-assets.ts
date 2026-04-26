@@ -16,7 +16,7 @@ export const ASSETS_DIR = resolve(PACKAGE_ROOT, 'sharepoint', 'assets');
 export const PACKAGE_SOLUTION_PATH = resolve(PACKAGE_ROOT, 'config', 'package-solution.json');
 
 export const EXPECTED_FEATURE_ID = 'ae66c036-8036-4f10-bb63-0d75107e7ce9';
-export const EXPECTED_VERSION = '1.0.25.0';
+export const EXPECTED_VERSION = '1.0.26.0';
 export const MAX_CUSTOM_INDEXED_FIELDS = 20;
 export const EXPECTED_ELEMENT_MANIFESTS = ['elements.xml'] as const;
 export const EXPECTED_SCHEMA_FILES = [

@@ -6,6 +6,8 @@ export function ManageShellHeader(props: {
   readonly onBack: () => void;
   readonly onSyncDocs: () => void;
   readonly onSyncProjects: () => void;
+  readonly canSync?: boolean;
+  readonly syncBlockReason?: string;
 }): React.ReactNode {
   return (
     <header className={shell.header}>
@@ -22,14 +24,17 @@ export function ManageShellHeader(props: {
           <ArrowLeft size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
           Back to highlights
         </HbcButton>
-        <HbcButton variant="primary" onClick={props.onSyncDocs}>
+        <HbcButton variant="primary" disabled={props.canSync === false} onClick={props.onSyncDocs}>
           <RefreshCw size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
-          Sync Docs
+          {props.canSync === false ? 'Sync blocked' : 'Sync Docs'}
         </HbcButton>
-        <HbcButton variant="secondary" onClick={props.onSyncProjects}>
+        <HbcButton variant="secondary" disabled={props.canSync === false} onClick={props.onSyncProjects}>
           Sync Projects
         </HbcButton>
       </div>
+      {props.canSync === false ? (
+        <p className={shell.syncBlockReason}>Sync readiness: {props.syncBlockReason ?? 'sync path is not ready'}.</p>
+      ) : null}
     </header>
   );
 }

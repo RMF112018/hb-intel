@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { Library } from 'lucide-react';
 import type { FoleonManagedContent } from '../../types/foleon-management.types.js';
 import { FoleonEmpty } from '../../components/FoleonStates.js';
+import { readerLaneForContent, readerLaneLabel } from './manageMutationUtils.js';
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
 
@@ -45,7 +46,7 @@ export function ManageRegistryPanel(props: {
                 >
                   <strong>{record.title}</strong>
                   <span className={shell.registryMeta}>
-                    Doc {record.foleonDocId} • {record.publishStatus}
+                    {laneLabel(record)} • Doc {record.foleonDocId} • {record.publishStatus}
                   </span>
                   <small className={shell.registrySmall}>
                     {record.validationStatus}
@@ -64,4 +65,9 @@ export function ManageRegistryPanel(props: {
       </ScrollArea.Root>
     </aside>
   );
+}
+
+function laneLabel(record: FoleonManagedContent): string {
+  const lane = readerLaneForContent(record);
+  return lane ? readerLaneLabel(lane) : 'Unassigned lane';
 }

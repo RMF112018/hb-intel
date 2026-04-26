@@ -43,7 +43,7 @@ surfaces.
       no stale previous version string remains.
 
 For the registry-reader runtime bridge, Foleon package truth is
-`1.0.25.0`. Homepage-embedded Foleon config still uses its own
+`1.0.26.0`. Homepage-embedded Foleon config still uses its own
 persisted/configured `foleonExpectedPackageVersion` contract until that
 package lane is explicitly promoted.
 

@@ -47,6 +47,15 @@
   justify-content: flex-end;
 }
 
+.syncBlockReason {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--foleon-manage-fg-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+}
+
 .statusBanner {
   composes: panel;
   padding: var(--foleon-manage-space-sm);
@@ -74,6 +83,147 @@
 .main {
   display: grid;
   gap: var(--foleon-manage-space-md);
+}
+
+.tabs {
+  composes: panel;
+  display: flex;
+  gap: var(--foleon-manage-space-xs);
+  padding: var(--foleon-manage-space-xs);
+  margin-bottom: var(--foleon-manage-space-md);
+  flex-wrap: wrap;
+}
+
+.tabButton {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 10px 16px;
+}
+
+.tabButton:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.tabButtonActive {
+  background: var(--foleon-manage-accent-soft);
+  border-color: var(--foleon-manage-accent);
+}
+
+.tabPanel {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--foleon-manage-space-sm);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.laneGrid,
+.readinessGrid,
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--foleon-manage-space-sm);
+}
+
+.laneCard,
+.readinessCard,
+.checkItem {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100% / 0.72);
+  padding: var(--foleon-manage-space-sm);
+}
+
+.laneCard[data-lane-state='Live'],
+.readinessCard[data-readiness-status='Valid'],
+.checkItem[data-check-status='pass'] {
+  border-left: 6px solid var(--foleon-manage-success);
+}
+
+.laneCard[data-lane-state='Preview'] {
+  border-left: 6px solid var(--foleon-manage-accent);
+}
+
+.laneCard[data-lane-state='Blocked'],
+.laneCard[data-lane-state='Config Incomplete'],
+.readinessCard[data-readiness-status='Blocked'],
+.checkItem[data-check-status='blocked'] {
+  border-left: 6px solid var(--foleon-manage-danger);
+}
+
+.laneCard[data-lane-state='Empty'] {
+  border-left: 6px solid var(--foleon-manage-fg-muted);
+}
+
+.definitionGrid {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: var(--foleon-manage-space-sm) 0 0;
+}
+
+.definitionGrid dt {
+  color: var(--foleon-manage-fg-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.definitionGrid dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.configTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+
+.configTable th,
+.configTable td {
+  border-bottom: 1px solid var(--foleon-manage-panel-border);
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.configTable th {
+  color: var(--foleon-manage-fg-muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.detailsSummary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.safeDiagnostics {
+  max-height: 360px;
+  overflow: auto;
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(205 32% 14%);
+  color: hsl(0 0% 100%);
+  padding: var(--foleon-manage-space-sm);
+  white-space: pre-wrap;
 }
 
 .registryScroll {

@@ -60,6 +60,8 @@ export function ManageContentEditorPanel(props: {
   readonly api: FoleonManagementApi;
   readonly onRefresh: () => Promise<void>;
   readonly setMessage: (message: string | null) => void;
+  readonly canWrite?: boolean;
+  readonly writeBlockReason?: string;
 }): React.ReactNode {
   const [draft, setDraft] = useState(() => toContentMutation(props.record));
   useEffect(() => setDraft(toContentMutation(props.record)), [props.record]);
@@ -90,6 +92,10 @@ export function ManageContentEditorPanel(props: {
   }, [dirty]);
 
   const save = async (): Promise<void> => {
+    if (props.canWrite === false) {
+      props.setMessage(`Writes are blocked: ${props.writeBlockReason ?? 'write path is not ready'}.`);
+      return;
+    }
     try {
       await props.api.updateContent(props.record.id, draft);
       props.setMessage('Content metadata saved through the backend route.');
@@ -303,25 +309,33 @@ export function ManageContentEditorPanel(props: {
         </div>
       ) : null}
       <ValidationList reasons={props.record.blockingReasons} />
+      {props.canWrite === false ? (
+        <p className={f.metaMuted} role="status">
+          Write actions are disabled: {props.writeBlockReason ?? 'write path is not ready'}.
+        </p>
+      ) : null}
       <div className={f.flexToolbar}>
-        <HbcButton variant="primary" onClick={(): void => void save()}>
+        <HbcButton variant="primary" disabled={props.canWrite === false} onClick={(): void => void save()}>
           <Save size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
           Save
         </HbcButton>
         <HbcButton
           variant="secondary"
+          disabled={props.canWrite === false}
           onClick={(): void => void runContentValidate(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
           Validate
         </HbcButton>
         <HbcButton
           variant="secondary"
+          disabled={props.canWrite === false}
           onClick={(): void => void runContentPublish(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
           Publish
         </HbcButton>
         <HbcButton
           variant="secondary"
+          disabled={props.canWrite === false}
           onClick={(): void => void runContentSuppress(props.api, props.record.id, props.onRefresh, props.setMessage)}
         >
           Suppress
