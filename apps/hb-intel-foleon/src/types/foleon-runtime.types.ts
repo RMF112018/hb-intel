@@ -36,6 +36,11 @@ export interface IFoleonMountConfig {
   readonly foleonApiResource?: string;
   /** Optional registry bootstrap/records payload supplied by a host bridge. */
   readonly platformConfigRegistry?: FoleonRegistryBootstrapConfig;
+  /** Safe host diagnostics for registry bootstrap/fetch status. */
+  readonly platformConfigRegistryStatus?: {
+    readonly status: 'not-configured' | 'available' | 'unavailable';
+    readonly message?: string;
+  };
 }
 
 export type FoleonGateReason =

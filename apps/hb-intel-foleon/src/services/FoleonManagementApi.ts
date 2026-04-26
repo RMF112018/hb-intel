@@ -44,6 +44,7 @@ export interface FoleonManagementApi {
   readonly deletePlacement: (id: string) => Promise<FoleonPlacement>;
   readonly syncDocs: () => Promise<FoleonSyncRun>;
   readonly syncProjects: () => Promise<FoleonSyncRun>;
+  readonly getSafeConfig: () => Promise<FoleonSyncStatus['config']>;
   readonly getSyncStatus: () => Promise<FoleonSyncStatus>;
   readonly listSyncRuns: () => Promise<ReadonlyArray<FoleonSyncRun>>;
 }
@@ -105,13 +106,21 @@ export function createFoleonManagementApi(contract: IFoleonRuntimeContract): Fol
     }),
     syncDocs: () => request('/foleon/sync/docs', { method: 'POST' }),
     syncProjects: () => request('/foleon/sync/projects', { method: 'POST' }),
+    getSafeConfig: () => request('/foleon/config'),
     getSyncStatus: () => request('/foleon/sync/status'),
     listSyncRuns: () => request('/foleon/sync/runs'),
   };
 }
 
+/**
+ * Compose an HB Intel Functions URL. Foleon registry values should store the
+ * Function App origin only; this helper appends `/api` for Azure Functions.
+ * Legacy/page-local values that already end in `/api` are normalized so
+ * callers never request `/api/api/...`.
+ */
 export function buildApiUrl(apiBaseUrl: string | null, path: string): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   if (!apiBaseUrl) return `/api${cleanPath}`;
-  return `${apiBaseUrl.replace(/\/$/, '')}/api${cleanPath}`;
+  const cleanBase = apiBaseUrl.replace(/\/$/, '').replace(/\/api$/i, '');
+  return `${cleanBase}/api${cleanPath}`;
 }

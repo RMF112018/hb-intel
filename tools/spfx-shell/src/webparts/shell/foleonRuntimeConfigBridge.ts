@@ -11,6 +11,9 @@ export interface IShellFoleonRuntimeConfigProperties {
   foleonReaderRoutePath?: string;
   foleonApiBaseUrl?: string;
   foleonApiResource?: string;
+  foleonRegistrySiteUrl?: string;
+  foleonRegistryListTitle?: string;
+  foleonRegistryEnvironmentKey?: string;
 }
 
 type FoleonConfigKey = Exclude<

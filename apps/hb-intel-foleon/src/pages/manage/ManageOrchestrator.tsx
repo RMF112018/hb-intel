@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
+import type {
+  FoleonReadinessIssueCode,
+  IFoleonRuntimeContract,
+} from '../../runtime/foleonRuntimeContract.js';
 import { createFoleonManagementApi, FoleonManagementApiError } from '../../services/FoleonManagementApi.js';
 import type {
   FoleonManagedContent,
@@ -29,7 +32,7 @@ export interface ManageOrchestratorProps {
 
 type LoadState =
   | { readonly kind: 'loading' }
-  | { readonly kind: 'blocked'; readonly message: string }
+  | { readonly kind: 'blocked'; readonly code: FoleonReadinessIssueCode; readonly message: string }
   | { readonly kind: 'error'; readonly message: string; readonly requestId?: string }
   | {
       readonly kind: 'ready';
@@ -48,25 +51,43 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const breakpoint = useManageBreakpoint();
 
   const load = async (): Promise<void> => {
-    if (props.contract.hostMode === 'sharepoint' && props.contract.foleonReadiness?.writePathReady !== true) {
-      setState({
-        kind: 'blocked',
-        message:
-          'The connector needs a backend API URL, Foleon API resource, SPFx token provider, and backend readiness proof before writes are enabled.',
-      });
+    const preflightBlocker = getHostedPreflightBlocker(props.contract);
+    if (preflightBlocker) {
+      setState({ kind: 'blocked', ...preflightBlocker });
       return;
     }
     setState({ kind: 'loading' });
     try {
-      const [content, placements, syncStatus, runs] = await Promise.all([
-        api.listContent(),
-        api.listPlacements(),
-        api.getSyncStatus(),
-        api.listSyncRuns().catch(() => []),
-      ]);
+      const safeConfig = await api.getSafeConfig().catch((err: unknown) => {
+        throw asReadinessError('backend-safe-config-unavailable', err);
+      });
+      if (!safeConfig.sharePointSiteConfigured || !safeConfig.graphConfigured) {
+        setState({
+          kind: 'blocked',
+          code: 'backend-graph-config-missing',
+          message:
+            'The Foleon backend is reachable, but its SharePoint Graph/list configuration is incomplete. Reads remain blocked until backend list settings are configured.',
+        });
+        return;
+      }
+      const content = await api.listContent().catch((err: unknown) => {
+        throw asReadinessError('backend-route-authorization-failed', err);
+      });
+      const placements = await api.listPlacements().catch((err: unknown) => {
+        throw asReadinessError('backend-route-authorization-failed', err);
+      });
+      const syncStatus = await api.getSyncStatus().catch(() => null);
+      const runs = await api.listSyncRuns().catch(() => []);
+      if (!safeConfig.foleonApiConfigured) {
+        setMessage('Foleon sync is not ready because backend Foleon OAuth configuration is incomplete. Content and placement reads remain available.');
+      }
       setState({ kind: 'ready', content, placements, syncStatus, runs });
       setSelectedId((current) => current ?? content[0]?.id ?? null);
     } catch (err) {
+      if (err instanceof FoleonReadinessError) {
+        setState({ kind: 'blocked', code: err.code, message: err.message });
+        return;
+      }
       setState({
         kind: 'error',
         message: err instanceof Error ? err.message : String(err),
@@ -104,7 +125,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   if (state.kind === 'blocked') {
     return (
       <section className={`foleonManageRoot ${shell.shell}`}>
-        <FoleonError title="Foleon Connector is blocked" description={state.message} onRetry={props.onBack} />
+        <FoleonError title="Foleon Connector is blocked" description={`${state.code}: ${state.message}`} onRetry={props.onBack} />
       </section>
     );
   }
@@ -204,4 +225,74 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
       </section>
     </Tooltip.Provider>
   );
+}
+
+class FoleonReadinessError extends Error {
+  constructor(
+    readonly code: FoleonReadinessIssueCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'FoleonReadinessError';
+  }
+}
+
+function asReadinessError(code: FoleonReadinessIssueCode, err: unknown): FoleonReadinessError {
+  const suffix = err instanceof FoleonManagementApiError && err.requestId
+    ? ` Correlation: ${err.requestId}`
+    : '';
+  if (code === 'backend-safe-config-unavailable') {
+    return new FoleonReadinessError(
+      code,
+      `Unable to verify backend safe configuration before loading Manager reads.${suffix}`,
+    );
+  }
+  return new FoleonReadinessError(
+    code,
+    `The backend rejected a Foleon read-route readiness probe. Confirm token audience acceptance and route authorization before enabling Manager reads.${suffix}`,
+  );
+}
+
+function getHostedPreflightBlocker(
+  contract: IFoleonRuntimeContract,
+): { readonly code: FoleonReadinessIssueCode; readonly message: string } | null {
+  if (contract.hostMode !== 'sharepoint') return null;
+  const readiness = contract.foleonReadiness;
+  if (contract.foleonConfigDiagnostics?.registryDuplicateActiveKeysDetected) {
+    return {
+      code: 'registry-duplicate-active-key',
+      message: 'Duplicate active Foleon registry keys were detected. Resolve the registry conflict before loading the Manager.',
+    };
+  }
+  if (!readiness?.listBindingsReady) {
+    return {
+      code: 'list-bindings-missing',
+      message: 'Foleon SharePoint list bindings are missing. Confirm the registry list GUID records are active and valid.',
+    };
+  }
+  if (!readiness.backendUrlReady) {
+    return {
+      code: 'backend-url-missing',
+      message: 'Foleon backend API base URL is missing. Confirm FoleonApiBaseUrl is resolved from the registry or explicit webpart properties.',
+    };
+  }
+  if (!readiness.authResourceReady) {
+    return {
+      code: 'auth-resource-missing',
+      message: 'Foleon API resource is missing. Confirm FoleonApiResource is resolved from the registry or explicit webpart properties.',
+    };
+  }
+  if (!readiness.tokenProviderReady) {
+    return {
+      code: 'token-provider-unavailable',
+      message: 'SPFx could not create an AAD token provider for the Foleon API resource.',
+    };
+  }
+  if (!readiness.tokenAcquisitionReady) {
+    return {
+      code: 'token-acquisition-failed',
+      message: 'SPFx token acquisition failed for the resolved Foleon API resource.',
+    };
+  }
+  return null;
 }

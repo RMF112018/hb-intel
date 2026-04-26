@@ -3,6 +3,12 @@ import {
   applyFoleonRuntimeConfigBridge,
   buildFoleonRuntimeConfigBridge,
 } from '../src/webparts/shell/foleonRuntimeConfigBridge';
+import {
+  buildFoleonRegistryBootstrap,
+  buildFoleonRegistryConfig,
+  buildFoleonRegistryItemsUrl,
+  buildFoleonRegistryUnavailableConfig,
+} from '../src/webparts/shell/foleonRegistryShellBridge';
 
 const FOLEON_WEBPART_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
 const NON_FOLEON_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
@@ -121,11 +127,71 @@ function assertRegistryDefaultsFillOnlyMissingValues(): void {
   assert.equal(runtimeConfig.foleonApiBaseUrl, 'https://functions.example.test');
 }
 
+function assertRegistryBootstrapDefaultsAndOverrides(): void {
+  const defaults = buildFoleonRegistryBootstrap({});
+  assert.equal(defaults.siteUrl, 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral');
+  assert.equal(defaults.listTitle, 'HB Platform Configuration Registry');
+  assert.equal(defaults.environmentKey, 'Production');
+
+  const overrides = buildFoleonRegistryBootstrap({
+    foleonRegistrySiteUrl: ' https://tenant.sharepoint.com/sites/Other ',
+    foleonRegistryListTitle: ' Registry ',
+    foleonRegistryEnvironmentKey: ' Test ',
+  });
+  assert.equal(overrides.siteUrl, 'https://tenant.sharepoint.com/sites/Other');
+  assert.equal(overrides.listTitle, 'Registry');
+  assert.equal(overrides.environmentKey, 'Test');
+}
+
+function assertRegistryFetchUrlIsFoleonScoped(): void {
+  const url = decodeURIComponent(buildFoleonRegistryItemsUrl(buildFoleonRegistryBootstrap({})).replace(/\+/g, ' '));
+  assert.match(url, /ApplicationKey eq 'Foleon'/);
+  assert.match(url, /ApplicationKey eq 'FunctionApp'/);
+  assert.match(url, /EnvironmentKey eq 'Production'/);
+}
+
+function assertRegistryRecordsMapToRuntimeConfig(): void {
+  const bootstrap = buildFoleonRegistryBootstrap({});
+  const config = buildFoleonRegistryConfig(bootstrap, [
+    {
+      ApplicationKey: 'Foleon',
+      EnvironmentKey: 'Production',
+      ScopeKey: 'Backend',
+      ConfigKey: 'FoleonApiResource',
+      ValueType: 'Url',
+      IsActive: true,
+      ValidationStatus: 'Valid',
+      IsSecretReference: false,
+      ConfigValue: 'api://08c399eb-a394-4087-b859-659d493f8dc7',
+      ApiResource: 'api://08c399eb-a394-4087-b859-659d493f8dc7',
+    },
+  ]);
+  const registry = config.platformConfigRegistry as { readonly records: ReadonlyArray<Record<string, unknown>> };
+  assert.equal(registry.records[0].configKey, 'FoleonApiResource');
+  assert.equal(registry.records[0].apiResource, 'api://08c399eb-a394-4087-b859-659d493f8dc7');
+  assert.deepEqual(config.platformConfigRegistryStatus, { status: 'available' });
+}
+
+function assertRegistryFailurePassesSafeDiagnostics(): void {
+  const bootstrap = buildFoleonRegistryBootstrap({});
+  const config = buildFoleonRegistryUnavailableConfig(bootstrap, 'network unavailable');
+  const registry = config.platformConfigRegistry as { readonly records: ReadonlyArray<Record<string, unknown>> };
+  assert.deepEqual(registry.records, []);
+  assert.deepEqual(config.platformConfigRegistryStatus, {
+    status: 'unavailable',
+    message: 'network unavailable',
+  });
+}
+
 assertFoleonPropertiesCopyToTopLevel();
 assertBlankStringsAreIgnored();
 assertDedicatedReaderRoutesBridge();
 assertAcceptedOriginsStringNormalizesToArray();
 assertNonFoleonWebpartDoesNotReceiveBridgeFields();
 assertRegistryDefaultsFillOnlyMissingValues();
+assertRegistryBootstrapDefaultsAndOverrides();
+assertRegistryFetchUrlIsFoleonScoped();
+assertRegistryRecordsMapToRuntimeConfig();
+assertRegistryFailurePassesSafeDiagnostics();
 
 console.log('PASS Foleon SPFx runtime config bridge validation');

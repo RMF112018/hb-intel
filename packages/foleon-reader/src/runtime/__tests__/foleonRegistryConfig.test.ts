@@ -12,6 +12,7 @@ const GUIDS = {
 };
 
 const BACKEND_URL = 'https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net';
+const API_RESOURCE = 'api://08c399eb-a394-4087-b859-659d493f8dc7';
 
 function record(overrides: Partial<PlatformConfigRegistryRecord>): PlatformConfigRegistryRecord {
   return {
@@ -34,6 +35,7 @@ function baselineRecords(): PlatformConfigRegistryRecord[] {
     record({ configKey: 'FoleonInteractionEventsListGuid', valueType: 'Guid', configValue: GUIDS.events, listGuid: GUIDS.events }),
     record({ configKey: 'FoleonSyncRunsListGuid', valueType: 'Guid', configValue: GUIDS.sync, listGuid: GUIDS.sync }),
     record({ scopeKey: 'Backend', configKey: 'FoleonApiBaseUrl', valueType: 'Url', configValue: BACKEND_URL, apiBaseUrl: BACKEND_URL }),
+    record({ scopeKey: 'Backend', configKey: 'FoleonApiResource', valueType: 'Url', configValue: API_RESOURCE, apiResource: API_RESOURCE }),
     record({ scopeKey: 'SPFx', configKey: 'AcceptedFoleonOrigins', valueType: 'OriginList', configValueJson: '["https://viewer.us.foleon.com"]' }),
     record({ scopeKey: 'SPFx', configKey: 'ExpectedManifestId', valueType: 'Guid', configValue: '2160edb3-675e-4451-92bb-8345f9d1c71e' }),
     record({ scopeKey: 'SPFx', configKey: 'FoleonExpectedPackageVersion', valueType: 'Version', configValue: '1.0.23.0' }),
@@ -67,8 +69,10 @@ describe('resolveFoleonRegistryRuntimeConfig', () => {
     expect(result.config.placementsListId).toBe(GUIDS.placements);
     expect(result.config.eventsListId).toBe(GUIDS.events);
     expect(result.config.foleonApiBaseUrl).toBe(BACKEND_URL);
+    expect(result.config.foleonApiResource).toBe(API_RESOURCE);
     expect(result.summary.foleonReadiness.listBindingsReady).toBe(true);
     expect(result.summary.foleonReadiness.backendUrlReady).toBe(true);
+    expect(result.summary.foleonReadiness.authResourceReady).toBe(true);
   });
 
   it('rejects blocked placeholders and keeps readiness partial', () => {
@@ -134,7 +138,19 @@ describe('resolveFoleonRegistryRuntimeConfig', () => {
       .toBe('https://fallback.example.test');
   });
 
-  it('redacts secret-reference values and reports auth-resource-missing', () => {
+  it('rejects API resources that include delegated token scopes', () => {
+    const records = baselineRecords().map((entry) =>
+      entry.configKey === 'FoleonApiResource'
+        ? { ...entry, configValue: `${API_RESOURCE}/.default`, apiResource: `${API_RESOURCE}/.default` }
+        : entry,
+    );
+    const result = resolveFoleonRegistryRuntimeConfig({ registry: registry(records) });
+    expect(result.config.foleonApiResource).toBeUndefined();
+    expect(result.summary.registryValuesInvalid).toContain('FoleonApiResource');
+    expect(result.summary.foleonReadiness.authResourceReady).toBe(false);
+  });
+
+  it('redacts secret-reference values without exposing secret names', () => {
     const result = resolveFoleonRegistryRuntimeConfig({
       registry: registry([
         ...baselineRecords(),
@@ -149,8 +165,6 @@ describe('resolveFoleonRegistryRuntimeConfig', () => {
       ]),
     });
     expect(JSON.stringify(result.summary)).not.toContain('HB_FOLEON_CLIENT_SECRET');
-    expect(result.summary.registryReadinessState).toBe('auth-resource-missing');
-    expect(result.summary.foleonReadiness.authResourceReady).toBe(false);
     expect(result.summary.foleonReadiness.writePathReady).toBe(false);
   });
 });

@@ -32,14 +32,54 @@ function mockContract(overrides: Partial<IFoleonRuntimeContract> = {}): IFoleonR
   };
 }
 
+function hostedContract(overrides: Partial<IFoleonRuntimeContract> = {}): IFoleonRuntimeContract {
+  return mockContract({
+    hostMode: 'sharepoint',
+    siteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+    listIds: {
+      contentRegistry: '11111111-1111-1111-1111-111111111111',
+      placements: '22222222-2222-2222-2222-222222222222',
+      events: '33333333-3333-3333-3333-333333333333',
+    },
+    apiBaseUrl: 'https://functions.test',
+    apiResource: 'api://foleon',
+    foleonReadiness: {
+      registryReady: true,
+      listBindingsReady: true,
+      backendUrlReady: true,
+      authResourceReady: true,
+      tokenProviderReady: true,
+      tokenAcquisitionReady: true,
+      backendSafeConfigReady: false,
+      backendRouteAuthorizationReady: false,
+      readPathReady: false,
+      writePathReady: false,
+      syncPathReady: false,
+    },
+    foleonConfigDiagnostics: { blockers: [] },
+    ...overrides,
+  });
+}
+
 function installManageFetchMock(args: {
   readonly content?: ReadonlyArray<FoleonManagedContent>;
   readonly placements?: ReadonlyArray<FoleonPlacement>;
+  readonly safeConfig?: { readonly graphConfigured: boolean; readonly foleonApiConfigured: boolean; readonly sharePointSiteConfigured: boolean };
   readonly status?: number;
+  readonly failOn?: 'all' | 'config' | 'content' | 'placements';
   readonly message?: string;
 } = {}): void {
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-    if (args.status && args.status >= 400) {
+    const url = String(input);
+    const failOn = args.failOn ?? 'all';
+    const shouldFail =
+      args.status &&
+      args.status >= 400 &&
+      (failOn === 'all' ||
+        (failOn === 'config' && url.includes('/foleon/config')) ||
+        (failOn === 'content' && url.includes('/foleon/content')) ||
+        (failOn === 'placements' && url.includes('/foleon/placements')));
+    if (shouldFail) {
       return {
         ok: false,
         status: args.status,
@@ -51,8 +91,19 @@ function installManageFetchMock(args: {
       } as Response;
     }
 
-    const url = String(input);
     const ok = { ok: true as const, status: 200 };
+    if (url.includes('/foleon/config')) {
+      return {
+        ...ok,
+        json: async () => ({
+          data: args.safeConfig ?? {
+            graphConfigured: true,
+            foleonApiConfigured: true,
+            sharePointSiteConfigured: true,
+          },
+        }),
+      } as Response;
+    }
     if (url.includes('/foleon/content')) {
       return { ...ok, json: async () => ({ data: args.content ?? [] }) } as Response;
     }
@@ -125,27 +176,141 @@ describe('ManagePage', () => {
   it('does not render preview guidance in backend-blocked state', async () => {
     render(
       <ManagePage
-        contract={mockContract({ hostMode: 'sharepoint', apiBaseUrl: null, getAccessToken: undefined })}
+        contract={hostedContract({
+          apiBaseUrl: null,
+          getAccessToken: undefined,
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: false,
+            authResourceReady: true,
+            tokenProviderReady: false,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+        })}
         onBack={(): void => undefined}
       />,
     );
 
     expect((await screen.findByRole('alert')).textContent).toContain('Foleon Connector is blocked');
+    expect(screen.getByRole('alert').textContent).toContain('backend-url-missing');
     expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
   });
 
-  it('does not expose manager controls when the runtime authorization check is rejected', async () => {
-    installManageFetchMock({ status: 403, message: 'You are not authorized to manage Foleon content.' });
+  it('blocks hosted Manager when apiBaseUrl is present without an API resource', async () => {
+    render(
+      <ManagePage
+        contract={hostedContract({
+          apiResource: null,
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: false,
+            tokenProviderReady: false,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
 
-    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+    expect((await screen.findByRole('alert')).textContent).toContain('auth-resource-missing');
+  });
+
+  it('reports token acquisition failures separately from token provider creation', async () => {
+    render(
+      <ManagePage
+        contract={hostedContract({
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    expect((await screen.findByRole('alert')).textContent).toContain('token-acquisition-failed');
+  });
+
+  it('does not expose manager controls when the runtime authorization check is rejected', async () => {
+    installManageFetchMock({
+      status: 403,
+      failOn: 'content',
+      message: 'You are not authorized to manage Foleon content.',
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
     expect((await screen.findByRole('alert')).textContent).toContain(
-      'You are not authorized to manage Foleon content.',
+      'backend-route-authorization-failed',
     );
     expect(screen.queryByRole('complementary', { name: /Foleon content registry/i })).toBeNull();
     expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /Sync Foleon/i })).toBeNull();
     expect(document.querySelector('iframe')).toBeNull();
+  });
+
+  it('blocks hosted Manager when backend safe config cannot be proven', async () => {
+    installManageFetchMock({
+      status: 500,
+      failOn: 'config',
+      message: 'Safe config unavailable.',
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    expect((await screen.findByRole('alert')).textContent).toContain('backend-safe-config-unavailable');
+  });
+
+  it('loads hosted Manager reads after token readiness and read-only backend probes pass', async () => {
+    installManageFetchMock({
+      content: [managedContent({ publishStatus: 'Published', isVisible: true, isHomepageEligible: true })],
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
+    const calls = (globalThis.fetch as unknown as { readonly mock: { readonly calls: ReadonlyArray<ReadonlyArray<unknown>> } }).mock.calls;
+    expect(calls.filter((call) => String(call[0]).includes('/foleon/content')).length).toBe(1);
+    expect(calls.filter((call) => String(call[0]).includes('/foleon/placements')).length).toBe(1);
+  });
+
+  it('keeps sync readiness separate from content and placement reads', async () => {
+    installManageFetchMock({
+      safeConfig: {
+        graphConfigured: true,
+        foleonApiConfigured: false,
+        sharePointSiteConfigured: true,
+      },
+      content: [managedContent({ publishStatus: 'Published', isVisible: true, isHomepageEligible: true })],
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toContain('backend Foleon OAuth configuration is incomplete');
   });
 
   it('keeps preview guidance read-only without fake admin actions or editable preview content', async () => {

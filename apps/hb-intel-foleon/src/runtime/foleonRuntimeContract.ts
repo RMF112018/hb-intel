@@ -50,13 +50,8 @@ export interface IFoleonRuntimeContract {
   readonly apiBaseUrl: string | null;
   readonly apiResource: string | null;
   readonly getAccessToken?: () => Promise<string>;
-  readonly foleonReadiness?: {
-    readonly listBindingsReady: boolean;
-    readonly backendUrlReady: boolean;
-    readonly authResourceReady: boolean;
-    readonly tokenProviderReady: boolean;
-    readonly writePathReady: boolean;
-  };
+  readonly foleonReadiness?: FoleonRuntimeReadiness;
+  readonly foleonConfigDiagnostics?: FoleonConfigDiagnostics;
   /**
    * Identity carried on every outbound telemetry envelope.
    * `correlationId` is per-mount; `sessionId` is per-browser-session.
@@ -73,6 +68,48 @@ export interface IFoleonRuntimeContract {
    * should inspect `issues` directly.
    */
   readonly blockingReasons: ReadonlyArray<string>;
+}
+
+export type FoleonReadinessIssueCode =
+  | 'registry-unavailable'
+  | 'registry-duplicate-active-key'
+  | 'registry-secret-hygiene-failed'
+  | 'list-bindings-missing'
+  | 'backend-url-missing'
+  | 'auth-resource-missing'
+  | 'token-provider-unavailable'
+  | 'token-acquisition-failed'
+  | 'backend-safe-config-unavailable'
+  | 'backend-graph-config-missing'
+  | 'backend-route-authorization-unproven'
+  | 'backend-route-authorization-failed'
+  | 'sync-oauth-config-missing';
+
+export interface FoleonRuntimeReadiness {
+  readonly registryReady: boolean;
+  readonly listBindingsReady: boolean;
+  readonly backendUrlReady: boolean;
+  readonly authResourceReady: boolean;
+  readonly tokenProviderReady: boolean;
+  readonly tokenAcquisitionReady: boolean;
+  readonly backendSafeConfigReady: boolean;
+  readonly backendRouteAuthorizationReady: boolean;
+  readonly readPathReady: boolean;
+  readonly writePathReady: boolean;
+  readonly syncPathReady: boolean;
+}
+
+export interface FoleonConfigDiagnostics {
+  readonly registryFetchStatus?: 'not-configured' | 'available' | 'unavailable';
+  readonly registryFetchMessage?: string;
+  readonly registryDuplicateActiveKeysDetected?: boolean;
+  readonly registrySecretHygieneStatus?: 'pass' | 'fail' | 'unknown';
+  readonly configSourceByKey?: Readonly<Record<string, string>>;
+  readonly configStatusByKey?: Readonly<Record<string, string>>;
+  readonly blockers: ReadonlyArray<{
+    readonly code: FoleonReadinessIssueCode;
+    readonly message: string;
+  }>;
 }
 
 export interface FoleonTelemetryIdentity {
@@ -103,6 +140,20 @@ export function resolveFoleonRuntimeContract(params: {
   const readerRoutePath = normalizeText(params.config?.foleonReaderRoutePath);
   const apiBaseUrl = normalizeText(params.config?.foleonApiBaseUrl);
   const apiResource = normalizeText(params.config?.foleonApiResource);
+  const listBindingsReady = Boolean(listIds.contentRegistry && (route !== 'highlights' || listIds.placements));
+  const readiness: FoleonRuntimeReadiness = {
+    registryReady: hostMode === 'mock',
+    listBindingsReady,
+    backendUrlReady: Boolean(apiBaseUrl),
+    authResourceReady: Boolean(apiResource),
+    tokenProviderReady: false,
+    tokenAcquisitionReady: false,
+    backendSafeConfigReady: false,
+    backendRouteAuthorizationReady: false,
+    readPathReady: hostMode === 'mock',
+    writePathReady: false,
+    syncPathReady: false,
+  };
 
   const manifestIdMatchesExpected =
     !expectedManifestId || expectedManifestId === FOLEON_WEBPART_ID;
@@ -140,13 +191,8 @@ export function resolveFoleonRuntimeContract(params: {
     readerRoutePath,
     apiBaseUrl,
     apiResource,
-    foleonReadiness: {
-      listBindingsReady: Boolean(listIds.contentRegistry && (route !== 'highlights' || listIds.placements)),
-      backendUrlReady: Boolean(apiBaseUrl),
-      authResourceReady: Boolean(apiResource),
-      tokenProviderReady: false,
-      writePathReady: false,
-    },
+    foleonReadiness: readiness,
+    foleonConfigDiagnostics: { blockers: [] },
     telemetry: {
       correlationId: params.telemetryIdentity?.correlationId ?? '',
       sessionId: params.telemetryIdentity?.sessionId ?? '',

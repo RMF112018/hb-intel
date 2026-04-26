@@ -28,6 +28,9 @@ import { FoleonApp } from './FoleonApp.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from './webparts/foleon/runtimeContract.js';
 import {
   resolveFoleonRuntimeContract,
+  type FoleonConfigDiagnostics,
+  type FoleonReadinessIssueCode,
+  type FoleonRuntimeReadiness,
   type IFoleonRuntimeContract,
 } from './runtime/foleonRuntimeContract.js';
 import type { IFoleonMountConfig } from './types/foleon-runtime.types.js';
@@ -75,22 +78,37 @@ export async function mount(
   const tokenProvider =
     spfxContext && resolvedConfig.foleonApiResource
       ? await createBackendTokenProvider(spfxContext, resolvedConfig.foleonApiResource)
-      : undefined;
+      : {
+          tokenProviderReady: false,
+          tokenAcquisitionReady: false,
+          failureCode: resolvedConfig.foleonApiResource ? 'token-provider-unavailable' as const : undefined,
+        };
   const registryRuntimeWithToken = resolveFoleonRegistryRuntimeConfig({
     overrides: config,
     registry: config?.platformConfigRegistry,
-    tokenProviderReady: Boolean(tokenProvider),
+    tokenProviderReady: tokenProvider.tokenProviderReady,
     backendSafeConfigReady: false,
   });
+  const foleonReadiness = buildRuntimeReadiness(
+    registryRuntimeWithToken.summary,
+    tokenProvider,
+  );
+  const foleonConfigDiagnostics = buildRuntimeConfigDiagnostics(
+    registryRuntimeWithToken.summary,
+    resolvedConfig,
+    tokenProvider,
+  );
   const mountedContract: IFoleonRuntimeContract = tokenProvider
     ? {
         ...contract,
-        getAccessToken: tokenProvider,
-        foleonReadiness: registryRuntimeWithToken.summary.foleonReadiness,
+        ...(tokenProvider.getAccessToken ? { getAccessToken: tokenProvider.getAccessToken } : {}),
+        foleonReadiness,
+        foleonConfigDiagnostics,
       }
     : {
         ...contract,
-        foleonReadiness: registryRuntimeWithToken.summary.foleonReadiness,
+        foleonReadiness,
+        foleonConfigDiagnostics,
       };
   publishRuntimeBindingProof(mountedContract, resolvedConfig, registryRuntimeWithToken.summary);
 
@@ -177,12 +195,20 @@ export interface IFoleonRuntimeBindingProof {
     readonly registryReadinessState: string;
     readonly syncSupportConfigured: boolean;
     readonly foleonReadiness: {
+      readonly registryReady: boolean;
       readonly listBindingsReady: boolean;
       readonly backendUrlReady: boolean;
       readonly authResourceReady: boolean;
       readonly tokenProviderReady: boolean;
+      readonly tokenAcquisitionReady: boolean;
+      readonly backendSafeConfigReady: boolean;
+      readonly backendRouteAuthorizationReady: boolean;
+      readonly readPathReady: boolean;
       readonly writePathReady: boolean;
+      readonly syncPathReady: boolean;
     };
+    readonly registryFetchStatus: 'not-configured' | 'available' | 'unavailable';
+    readonly readinessBlockers: ReadonlyArray<string>;
     readonly fingerprints: Readonly<Record<string, string>>;
   };
   readonly issueCodes: ReadonlyArray<FoleonConfigErrorCode>;
@@ -280,7 +306,12 @@ function publishRuntimeBindingProof(
       registrySecretHygieneStatus: registrySummary.registrySecretHygieneStatus,
       registryReadinessState: registrySummary.registryReadinessState,
       syncSupportConfigured: registrySummary.syncSupportConfigured,
-      foleonReadiness: registrySummary.foleonReadiness,
+      foleonReadiness: contract.foleonReadiness ?? buildRuntimeReadiness(registrySummary, {
+        tokenProviderReady: false,
+        tokenAcquisitionReady: false,
+      }),
+      registryFetchStatus: contract.foleonConfigDiagnostics?.registryFetchStatus ?? 'not-configured',
+      readinessBlockers: contract.foleonConfigDiagnostics?.blockers.map((blocker) => blocker.code) ?? [],
       fingerprints: registrySummary.fingerprints,
     },
     issueCodes: contract.issues.map((issue) => issue.code),
@@ -379,16 +410,120 @@ function resolveConfigSource(
   return 'missing';
 }
 
+interface BackendTokenProviderResult {
+  readonly getAccessToken?: () => Promise<string>;
+  readonly tokenProviderReady: boolean;
+  readonly tokenAcquisitionReady: boolean;
+  readonly failureCode?: FoleonReadinessIssueCode;
+  readonly failureMessage?: string;
+}
+
 async function createBackendTokenProvider(
   spfxContext: WebPartContext,
   resource: string,
-): Promise<(() => Promise<string>) | undefined> {
+): Promise<BackendTokenProviderResult> {
+  let provider: { getToken(resource: string): Promise<string> };
   try {
-    const provider = await spfxContext.aadTokenProviderFactory.getTokenProvider();
-    return () => provider.getToken(resource);
-  } catch {
-    return undefined;
+    provider = await spfxContext.aadTokenProviderFactory.getTokenProvider();
+  } catch (error) {
+    return {
+      tokenProviderReady: false,
+      tokenAcquisitionReady: false,
+      failureCode: 'token-provider-unavailable',
+      failureMessage: error instanceof Error ? error.message : String(error),
+    };
   }
+  try {
+    let firstToken = await provider.getToken(resource);
+    return {
+      tokenProviderReady: true,
+      tokenAcquisitionReady: true,
+      getAccessToken: async (): Promise<string> => {
+        if (firstToken) {
+          const token = firstToken;
+          firstToken = '';
+          return token;
+        }
+        return provider.getToken(resource);
+      },
+    };
+  } catch (error) {
+    return {
+      tokenProviderReady: true,
+      tokenAcquisitionReady: false,
+      failureCode: 'token-acquisition-failed',
+      failureMessage: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+function buildRuntimeReadiness(
+  registrySummary: FoleonRegistryRuntimeSummary,
+  tokenProvider: Pick<BackendTokenProviderResult, 'tokenProviderReady' | 'tokenAcquisitionReady'>,
+): FoleonRuntimeReadiness {
+  const registryReady =
+    registrySummary.registryResolved &&
+    !registrySummary.registryDuplicateActiveKeysDetected &&
+    registrySummary.registrySecretHygieneStatus !== 'fail';
+  return {
+    registryReady,
+    listBindingsReady: registrySummary.foleonReadiness.listBindingsReady,
+    backendUrlReady: registrySummary.foleonReadiness.backendUrlReady,
+    authResourceReady: registrySummary.foleonReadiness.authResourceReady,
+    tokenProviderReady: tokenProvider.tokenProviderReady,
+    tokenAcquisitionReady: tokenProvider.tokenAcquisitionReady,
+    backendSafeConfigReady: false,
+    backendRouteAuthorizationReady: false,
+    readPathReady: false,
+    writePathReady: false,
+    syncPathReady: false,
+  };
+}
+
+function buildRuntimeConfigDiagnostics(
+  registrySummary: FoleonRegistryRuntimeSummary,
+  config: IFoleonMountConfig,
+  tokenProvider: BackendTokenProviderResult,
+): FoleonConfigDiagnostics {
+  const blockers: Array<FoleonConfigDiagnostics['blockers'][number]> = [];
+  const registryFetchStatus = config.platformConfigRegistryStatus?.status ??
+    (registrySummary.registryResolved ? 'available' : 'not-configured');
+  if (registryFetchStatus === 'unavailable') {
+    blockers.push({
+      code: 'registry-unavailable',
+      message: config.platformConfigRegistryStatus?.message ?? 'Platform configuration registry could not be read.',
+    });
+  }
+  if (registrySummary.registryDuplicateActiveKeysDetected) {
+    blockers.push({ code: 'registry-duplicate-active-key', message: 'Duplicate active registry keys were detected.' });
+  }
+  if (registrySummary.registrySecretHygieneStatus === 'fail') {
+    blockers.push({ code: 'registry-secret-hygiene-failed', message: 'Registry secret hygiene checks failed.' });
+  }
+  if (!registrySummary.foleonReadiness.listBindingsReady) {
+    blockers.push({ code: 'list-bindings-missing', message: 'Required Foleon SharePoint list bindings are missing.' });
+  }
+  if (!registrySummary.foleonReadiness.backendUrlReady) {
+    blockers.push({ code: 'backend-url-missing', message: 'Foleon backend API base URL is missing.' });
+  }
+  if (!registrySummary.foleonReadiness.authResourceReady) {
+    blockers.push({ code: 'auth-resource-missing', message: 'Foleon API resource is missing.' });
+  }
+  if (tokenProvider.failureCode) {
+    blockers.push({
+      code: tokenProvider.failureCode,
+      message: tokenProvider.failureMessage ?? 'SPFx token readiness failed.',
+    });
+  }
+  return {
+    registryFetchStatus,
+    registryFetchMessage: config.platformConfigRegistryStatus?.message,
+    registryDuplicateActiveKeysDetected: registrySummary.registryDuplicateActiveKeysDetected,
+    registrySecretHygieneStatus: registrySummary.registrySecretHygieneStatus,
+    configSourceByKey: registrySummary.configSourceByKey,
+    configStatusByKey: registrySummary.configStatusByKey,
+    blockers,
+  };
 }
 
 function shouldEnableDiagnostics(): boolean {

@@ -9,6 +9,7 @@ const TEST_ORIGIN = 'https://viewer.us.foleon.com';
 const TEST_READER_ROUTE = '/sites/HBCentral/SitePages/Foleon-Reader.aspx';
 const TEST_DOC_ID = 9999999;
 const TEST_BACKEND_URL = 'https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net';
+const TEST_API_RESOURCE = 'api://08c399eb-a394-4087-b859-659d493f8dc7';
 
 function readProof(): IFoleonRuntimeBindingProof | undefined {
   return (
@@ -340,5 +341,103 @@ describe('runtime binding proof (redacted)', () => {
     expect(serialized).not.toContain(TEST_EVENTS);
     expect(serialized).not.toContain(TEST_BACKEND_URL);
     expect(serialized).not.toContain('HB_FOLEON_CLIENT_SECRET');
+  });
+
+  it('uses the resolved registry API resource for SPFx token acquisition without exposing it in proof', async () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const requestedResources: string[] = [];
+    const spfxContext = {
+      pageContext: {
+        web: { absoluteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral' },
+      },
+      aadTokenProviderFactory: {
+        getTokenProvider: async () => ({
+          getToken: async (resource: string) => {
+            requestedResources.push(resource);
+            return 'token';
+          },
+        }),
+      },
+    };
+
+    await mount(el, spfxContext as never, {
+      platformConfigRegistry: {
+        bootstrap: {
+          siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+          listTitle: 'HB Platform Configuration Registry',
+          environmentKey: 'Production',
+        },
+        records: [
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'HBCentral',
+            configKey: 'FoleonContentRegistryListGuid',
+            valueType: 'Guid',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_CONTENT_REGISTRY,
+            listGuid: TEST_CONTENT_REGISTRY,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'HBCentral',
+            configKey: 'FoleonHomepagePlacementsListGuid',
+            valueType: 'Guid',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_PLACEMENTS,
+            listGuid: TEST_PLACEMENTS,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'HBCentral',
+            configKey: 'FoleonInteractionEventsListGuid',
+            valueType: 'Guid',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_EVENTS,
+            listGuid: TEST_EVENTS,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'Backend',
+            configKey: 'FoleonApiBaseUrl',
+            valueType: 'Url',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_BACKEND_URL,
+            apiBaseUrl: TEST_BACKEND_URL,
+          },
+          {
+            applicationKey: 'Foleon',
+            environmentKey: 'Production',
+            scopeKey: 'Backend',
+            configKey: 'FoleonApiResource',
+            valueType: 'Url',
+            isActive: true,
+            validationStatus: 'Not Validated',
+            isSecretReference: false,
+            configValue: TEST_API_RESOURCE,
+            apiResource: TEST_API_RESOURCE,
+          },
+        ],
+      },
+    });
+
+    const proof = readProof();
+    expect(requestedResources).toEqual([TEST_API_RESOURCE]);
+    expect(proof?.registry.foleonReadiness.authResourceReady).toBe(true);
+    expect(proof?.registry.foleonReadiness.tokenProviderReady).toBe(true);
+    expect(proof?.registry.foleonReadiness.tokenAcquisitionReady).toBe(true);
+    expect(JSON.stringify(proof)).not.toContain(TEST_API_RESOURCE);
   });
 });

@@ -324,6 +324,9 @@ function normalizeRecordValue(record: PlatformConfigRegistryRecord): unknown {
     case 'Guid':
       return normalizeGuid(record.configValue ?? record.listGuid, record.configKey);
     case 'Url':
+      if (record.configKey === 'FoleonApiResource') {
+        return normalizeApiResource(record.configValue ?? record.apiResource, record.configKey);
+      }
       return normalizeBackendUrl(record.configValue ?? record.apiBaseUrl, record.configKey);
     case 'OriginList':
       return normalizeOrigins(record);
@@ -547,6 +550,14 @@ function normalizeBackendUrl(value: string | undefined, configKey: string): stri
     throw new Error(`${configKey} must not include /api.`);
   }
   return parsed.toString().replace(/\/$/, '');
+}
+
+function normalizeApiResource(value: string | undefined, configKey: string): string {
+  const text = requireText(value, configKey);
+  if (!text.startsWith('api://')) throw new Error(`${configKey} must use an api:// Application ID URI.`);
+  if (text.includes('/.default')) throw new Error(`${configKey} must not include /.default.`);
+  if (/^api:\/\/[^/]+\/.+/.test(text)) throw new Error(`${configKey} must not include a custom scope suffix.`);
+  return text;
 }
 
 function normalizeOrigins(record: PlatformConfigRegistryRecord): ReadonlyArray<string> {
