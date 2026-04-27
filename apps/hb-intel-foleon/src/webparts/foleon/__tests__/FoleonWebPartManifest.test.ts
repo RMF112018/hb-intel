@@ -57,7 +57,7 @@ describe('Foleon web part manifest toolbox entries', () => {
     const projectSpotlight = byTitle.get('HB Intel Project Spotlight Reader');
     const companyPulse = byTitle.get('HB Intel Company Pulse Reader');
     const leadershipMessage = byTitle.get('HB Intel Leadership Message Reader');
-    const manager = byTitle.get('HB Intel Foleon Manager');
+    const manager = byTitle.get('HB Intel Foleon Feed Manager');
 
     expect(highlights).toBeDefined();
     expect(highlights?.description.default).toBe(
@@ -90,7 +90,7 @@ describe('Foleon web part manifest toolbox entries', () => {
 
     expect(manager).toBeDefined();
     expect(manager?.description.default).toBe(
-      'Manage Foleon content registry, placements, validation, and sync proof.',
+      'Place Foleon-produced content into HB Central feeds, schedule display windows, and validate what employees will see.',
     );
     expect(manager?.hiddenFromToolbox).toBe(false);
     expect(manager?.properties?.foleonRoute).toBe('manage');

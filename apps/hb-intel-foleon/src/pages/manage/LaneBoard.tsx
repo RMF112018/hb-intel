@@ -12,7 +12,10 @@ import {
   type FoleonLaneViewModel,
 } from './manageLaneViewModel.js';
 import { readerLaneForContent } from './manageMutationUtils.js';
-import { navButtonId, navPanelId } from './ManagerPrimaryNav.js';
+// Legacy nav id helpers retained inline. This component is no longer mounted by
+// the active shell; new shell ids live in feedManagerViewModel.ts.
+const navButtonId = (key: string): string => `foleon-manage-nav-${key}`;
+const navPanelId = (key: string): string => `foleon-manage-panel-${key}`;
 import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
 

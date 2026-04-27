@@ -8,7 +8,10 @@ import type { FoleonManagementApi } from '../../services/FoleonManagementApi.js'
 import { ContentInbox } from './ContentInbox.js';
 import { ContextualWorkflowPanel } from './ContextualWorkflowPanel.js';
 import { LimitedModeWorkspaceNotice } from './LimitedModeWorkspaceNotice.js';
-import { navButtonId, navPanelId } from './ManagerPrimaryNav.js';
+// Legacy nav id helpers retained inline. This component is no longer mounted by
+// the active shell; new shell ids live in feedManagerViewModel.ts.
+const navButtonId = (key: string): string => `foleon-manage-nav-${key}`;
+const navPanelId = (key: string): string => `foleon-manage-panel-${key}`;
 import type { ContentInboxBucketId } from './contentInboxViewModel.js';
 import { showHomepageLimitedMode } from './manageDegradedCopy.js';
 import { plainLanguageWriteBlockReason } from './manageWritePathMessage.js';

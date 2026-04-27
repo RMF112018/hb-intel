@@ -14,28 +14,15 @@ import type {
 } from '../../types/foleon-management.types.js';
 import { FoleonError, FoleonLoadingState } from '../../components/FoleonStates.js';
 import { FoleonConfigTab } from './FoleonConfigTab.js';
-import { ContentOperationsWorkspace } from './ContentOperationsWorkspace.js';
-import { LaneBoard } from './LaneBoard.js';
-import { RecommendedNextActionBand } from './RecommendedNextActionBand.js';
 import { buildManagerStatusChips, resolveSafeFoleonOpenOrigin } from './manageHeaderStatusModel.js';
-import { ManageOperationsShell } from './ManageOperationsShell.js';
-import { type ManagerPrimaryNavKey } from './ManagerPrimaryNav.js';
-import { buildManagerOperationsCounts } from './managerOperationsViewModel.js';
+import { FoleonFeedManagerApp } from './FoleonFeedManagerApp.js';
 import {
-  buildRecommendedNextAction,
-  type RecommendedNextAction,
-} from './recommendedNextAction.js';
-import type { ContentInboxBucketId } from './contentInboxViewModel.js';
-import {
-  buildFoleonLaneViewModels,
-  pickDefaultLaneSelection,
-  sortManagedContentForHomepage,
-} from './manageLaneViewModel.js';
-import { readerLaneForContent, type FoleonReaderLane } from './manageMutationUtils.js';
+  buildFeedManagerHeaderModel,
+  type FeedManagerWorkspaceKey,
+} from './feedManagerViewModel.js';
 import { runFoleonSync } from './manageWorkflows.js';
 import { useManageBreakpoint } from './useManageBreakpoint.js';
 import {
-  plainLanguageSyncBlockReason,
   tokenAcquisitionDegradedBannerNextStep,
   tokenAcquisitionDegradedBannerPrimary,
 } from './manageDegradedCopy.js';
@@ -63,45 +50,20 @@ type LoadState =
 export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactNode {
   const api = useMemo(() => createFoleonManagementApi(props.contract), [props.contract]);
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [selectedNav, setSelectedNav] = useState<ManagerPrimaryNavKey>('content-operations');
+  const [selectedKey, setSelectedKey] = useState<FeedManagerWorkspaceKey>('feed-desk');
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
-  const [focusBucketId, setFocusBucketId] = useState<ContentInboxBucketId | null>(null);
-  const [workflowPanelOpen, setWorkflowPanelOpen] = useState(false);
   const breakpoint = useManageBreakpoint();
 
-  const selectNav = useCallback((key: ManagerPrimaryNavKey): void => {
-    setSelectedNav(key);
-    if (key !== 'admin-config') setDiagnosticsOpen(false);
-    if (key !== 'content-operations') {
-      setFocusBucketId(null);
-      setWorkflowPanelOpen(false);
-    }
+  const onSelectKey = useCallback((key: FeedManagerWorkspaceKey): void => {
+    setSelectedKey(key);
+    if (key !== 'admin') setDiagnosticsOpen(false);
   }, []);
 
-  const openWorkflowPanel = useCallback((): void => setWorkflowPanelOpen(true), []);
-  const closeWorkflowPanel = useCallback((): void => setWorkflowPanelOpen(false), []);
-
-  const openDiagnostics = useCallback((): void => {
-    setSelectedNav('admin-config');
+  const openAdminDiagnostics = useCallback((): void => {
+    setSelectedKey('admin');
     setDiagnosticsOpen(true);
-    setFocusBucketId(null);
   }, []);
-
-  const reviewNewContent = useCallback((): void => {
-    setSelectedNav('content-operations');
-    setFocusBucketId('unassigned');
-    setMessage('Review new content in the Content Operations workspace below.');
-  }, []);
-
-  const managePlacements = useCallback((): void => {
-    setSelectedNav('content-operations');
-    setFocusBucketId(null);
-    setMessage('Manage placements from the Content Operations workspace below.');
-  }, []);
-
-  const clearFocusBucket = useCallback((): void => setFocusBucketId(null), []);
 
   const load = async (): Promise<void> => {
     const preflightBlocker = getHostedPreflightBlocker(props.contract);
@@ -115,8 +77,6 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         runs: [],
         managerReadPathProven: false,
       });
-      const initDegraded = resolveInitialSelection(props.contract, [], [], false);
-      setSelectedId((current) => current ?? initDegraded.contentId);
       return;
     }
     if (preflightBlocker) {
@@ -149,8 +109,6 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         setMessage('Foleon sync is not ready because backend Foleon OAuth configuration is incomplete. Content and placement reads remain available.');
       }
       setState({ kind: 'ready', content, placements, syncStatus, runs, managerReadPathProven: true });
-      const init = resolveInitialSelection(props.contract, content, placements, true);
-      setSelectedId((current) => current ?? init.contentId);
     } catch (err) {
       if (err instanceof FoleonReadinessError) {
         setState({ kind: 'blocked', code: err.code, message: err.message });
@@ -167,23 +125,6 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   useEffect(() => {
     void load();
   }, [api]);
-
-  const ready = state.kind === 'ready' ? state : null;
-  const lanes = useMemo(
-    () =>
-      ready
-        ? buildLanesForOrchestrator(props.contract, ready.content, ready.placements, ready.managerReadPathProven)
-        : [],
-    [ready, props.contract],
-  );
-
-  const selectRegistryRecord = useCallback(
-    (id: string): void => {
-      if (state.kind !== 'ready') return;
-      setSelectedId(id);
-    },
-    [state],
-  );
 
   const statusChips = useMemo(() => {
     if (state.kind !== 'ready') {
@@ -214,12 +155,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     ? undefined
     : 'Open Foleon needs an approved HTTPS viewer origin (none is configured).';
 
-  const operationsCounts = useMemo(
-    () => buildManagerOperationsCounts({ content: ready?.content ?? [], placements: ready?.placements ?? [], lanes }),
-    [ready, lanes],
-  );
-
-  const onOpenFoleonFromPreview = useCallback((): void => {
+  const onOpenFoleon = useCallback((): void => {
     if (!safeFoleonOpenUrl) return;
     window.open(safeFoleonOpenUrl, '_blank', 'noopener,noreferrer');
   }, [safeFoleonOpenUrl]);
@@ -261,37 +197,63 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   }
 
   const canSync = props.contract.hostMode !== 'sharepoint' || props.contract.foleonReadiness?.syncPathReady === true;
-  const tokenAcquisitionDegraded =
+  const tokenAcquisitionDegraded = Boolean(
     state.kind === 'ready' &&
-    !state.managerReadPathProven &&
-    props.contract.foleonConfigDiagnostics?.blockers.some((b) => b.code === 'token-acquisition-failed');
-  const syncBlockReasonPlain = canSync ? undefined : plainLanguageSyncBlockReason(props.contract, state.managerReadPathProven);
+      !state.managerReadPathProven &&
+      props.contract.foleonConfigDiagnostics?.blockers.some((b) => b.code === 'token-acquisition-failed'),
+  );
 
-  const recommendedAction = buildRecommendedNextAction({
-    counts: operationsCounts,
-    tokenAcquisitionDegraded: Boolean(tokenAcquisitionDegraded),
+  const headerModel = buildFeedManagerHeaderModel({
     canSync,
-    contentLoaded: state.content.length,
+    tokenAcquisitionDegraded,
+    safeFoleonOpenUrl,
+    openFoleonUnavailableReason,
+    statusChips,
+    onSyncDocs: (): void => void runFoleonSync(api, 'docs', load, setMessage),
+    onOpenAdminDiagnostics: openAdminDiagnostics,
+    onOpenFoleon,
+    onBack: props.onBack,
   });
 
-  const onActivateRecommendedAction = (action: RecommendedNextAction): void => {
-    if (!action.target) return;
-    if (action.target.kind === 'select-nav') {
-      selectNav(action.target.key);
-      return;
-    }
-    if (action.target.kind === 'focus-bucket') {
-      setSelectedNav('content-operations');
-      setDiagnosticsOpen(false);
-      setFocusBucketId(action.target.bucketId);
-    }
-  };
+  const tokenDegradedBanner = tokenAcquisitionDegraded ? (
+    <div role="status" className={shell.statusBanner} aria-label="API access required">
+      <p className={shell.bannerPrimary}>{tokenAcquisitionDegradedBannerPrimary()}</p>
+      <p className={shell.bannerNextStep}>{tokenAcquisitionDegradedBannerNextStep()}</p>
+      <details className={shell.bannerTechnical}>
+        <summary className={shell.bannerTechnicalSummary}>Technical reference</summary>
+        <p className={shell.bannerTechnicalBody}>
+          Recorded readiness code: token-acquisition-failed. Raw service messages are omitted from this banner.
+        </p>
+      </details>
+      <div className={shell.bannerActions}>
+        <HbcButton variant="secondary" onClick={(): void => void load()}>
+          Retry API readiness
+        </HbcButton>
+      </div>
+    </div>
+  ) : null;
+
+  const statusBanner = message ? (
+    <div role="status" className={shell.statusBanner}>
+      {message}
+    </div>
+  ) : null;
+
+  const adminPanel = (
+    <FoleonConfigTab
+      contract={props.contract}
+      managerReadPathProven={state.managerReadPathProven}
+      runs={state.runs}
+      diagnosticsOpen={diagnosticsOpen}
+      onDiagnosticsOpenChange={setDiagnosticsOpen}
+    />
+  );
 
   return (
     <Tooltip.Provider delayDuration={280}>
       <section
         className={`foleonManageRoot ${shell.shell}`}
-        aria-label="Foleon Content Operations"
+        aria-label="Foleon Feed Manager"
         data-foleon-manager-canvas="wide"
         data-breakpoint-width={breakpoint.widthBand}
         data-breakpoint-short-height={breakpoint.shortHeight ? 'true' : 'false'}
@@ -299,142 +261,17 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         data-breakpoint-row-sharing={breakpoint.rowSharingEligible ? 'true' : 'false'}
         data-manager-layout={breakpoint.rowSharingEligible ? 'three-zone' : breakpoint.widthBand}
       >
-        <ManageOperationsShell
-          headerProps={{
-            onBack: props.onBack,
-            onSyncDocs: (): void => void runFoleonSync(api, 'docs', load, setMessage),
-            onSyncProjects: (): void => void runFoleonSync(api, 'projects', load, setMessage),
-            canSync,
-            syncBlockReason: syncBlockReasonPlain,
-            onReviewNewContent: reviewNewContent,
-            onManagePlacements: managePlacements,
-            safeFoleonOpenUrl,
-            openFoleonUnavailableReason,
-            onAdminDiagnostics: openDiagnostics,
-            statusChips,
-          }}
-          counts={operationsCounts}
-          selectedNav={selectedNav}
-          onSelectNav={selectNav}
-          onOpenFoleonFromPreview={onOpenFoleonFromPreview}
-          canOpenFoleon={Boolean(safeFoleonOpenUrl)}
-          openFoleonUnavailableReason={openFoleonUnavailableReason}
-          recommendedAction={
-            <RecommendedNextActionBand
-              action={recommendedAction}
-              onActivate={onActivateRecommendedAction}
-            />
-          }
-          banners={
-            <>
-              {tokenAcquisitionDegraded ? (
-                <div role="status" className={shell.statusBanner} aria-label="API access required">
-                  <p className={shell.bannerPrimary}>{tokenAcquisitionDegradedBannerPrimary()}</p>
-                  <p className={shell.bannerNextStep}>{tokenAcquisitionDegradedBannerNextStep()}</p>
-                  <details className={shell.bannerTechnical}>
-                    <summary className={shell.bannerTechnicalSummary}>Technical reference</summary>
-                    <p className={shell.bannerTechnicalBody}>
-                      Recorded readiness code: token-acquisition-failed. Raw service messages are omitted from this banner.
-                    </p>
-                  </details>
-                  <div className={shell.bannerActions}>
-                    <HbcButton variant="secondary" onClick={(): void => void load()}>
-                      Retry API readiness
-                    </HbcButton>
-                  </div>
-                </div>
-              ) : null}
-              {message ? (
-                <div role="status" className={shell.statusBanner}>
-                  {message}
-                </div>
-              ) : null}
-            </>
-          }
-        >
-          {selectedNav === 'content-operations' ? (
-            <ContentOperationsWorkspace
-              contract={props.contract}
-              managerReadPathProven={state.managerReadPathProven}
-              content={state.content}
-              placements={state.placements}
-              api={api}
-              selectedId={selectedId}
-              onSelectRecord={selectRegistryRecord}
-              focusBucketId={focusBucketId}
-              onClearFocusBucket={clearFocusBucket}
-              workflowPanelOpen={workflowPanelOpen}
-              onOpenWorkflowPanel={openWorkflowPanel}
-              onCloseWorkflowPanel={closeWorkflowPanel}
-              onRefresh={load}
-              setMessage={setMessage}
-            />
-          ) : null}
-          {selectedNav === 'lane-board' ? (
-            <LaneBoard
-              lanes={lanes}
-              content={state.content}
-              onSelectRecord={(id): void => {
-                selectRegistryRecord(id);
-                setSelectedNav('content-operations');
-                setWorkflowPanelOpen(true);
-              }}
-              onTriggerSync={(): void => void runFoleonSync(api, 'docs', load, setMessage)}
-              canSync={canSync}
-              canWrite={
-                props.contract.hostMode !== 'sharepoint' ||
-                (props.contract.foleonReadiness?.writePathReady === true && state.managerReadPathProven)
-              }
-              writeBlockReason={canSync ? '' : (syncBlockReasonPlain ?? '')}
-            />
-          ) : null}
-          {selectedNav === 'admin-config' ? (
-            <FoleonConfigTab
-              contract={props.contract}
-              managerReadPathProven={state.managerReadPathProven}
-              runs={state.runs}
-              diagnosticsOpen={diagnosticsOpen}
-              onDiagnosticsOpenChange={setDiagnosticsOpen}
-            />
-          ) : null}
-        </ManageOperationsShell>
+        <FoleonFeedManagerApp
+          selectedKey={selectedKey}
+          onSelectKey={onSelectKey}
+          headerModel={headerModel}
+          tokenDegradedBanner={tokenDegradedBanner}
+          statusBanner={statusBanner}
+          adminPanel={adminPanel}
+        />
       </section>
     </Tooltip.Provider>
   );
-}
-
-function buildLanesForOrchestrator(
-  contract: IFoleonRuntimeContract,
-  content: ReadonlyArray<FoleonManagedContent>,
-  placements: ReadonlyArray<FoleonPlacement>,
-  managerReadPathProven: boolean,
-): ReturnType<typeof buildFoleonLaneViewModels> {
-  const readiness = contract.foleonReadiness;
-  const effectiveReadiness = readiness
-    ? { ...readiness, backendSafeConfigReady: true, readPathReady: true, writePathReady: readiness.writePathReady }
-    : readiness;
-  return buildFoleonLaneViewModels({
-    content,
-    placements,
-    readiness: effectiveReadiness,
-    hasLoadedReadPath: managerReadPathProven,
-  });
-}
-
-/** Lane-priority default; if that lane has no record, fall back to first sorted record for library/orphan UX. */
-function resolveInitialSelection(
-  contract: IFoleonRuntimeContract,
-  content: ReadonlyArray<FoleonManagedContent>,
-  placements: ReadonlyArray<FoleonPlacement>,
-  managerReadPathProven: boolean,
-): { readonly contentId: string | null; readonly lane: FoleonReaderLane } {
-  const lanes = buildLanesForOrchestrator(contract, content, placements, managerReadPathProven);
-  const pick = pickDefaultLaneSelection(lanes);
-  if (pick.contentId) return pick;
-  if (content.length === 0) return pick;
-  const first = sortManagedContentForHomepage(content)[0];
-  const lane = readerLaneForContent(first) ?? pick.lane;
-  return { contentId: first.id, lane };
 }
 
 class FoleonReadinessError extends Error {

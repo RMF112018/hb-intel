@@ -1,45 +1,32 @@
 import { clsx } from 'clsx';
 import type { KeyboardEvent } from 'react';
+import {
+  FEED_MANAGER_NAV_ENTRIES,
+  feedManagerNavButtonId,
+  feedManagerNavPanelId,
+  type FeedManagerWorkspaceKey,
+} from './feedManagerViewModel.js';
 import shell from './manageShell.module.css';
 
-export type ManagerPrimaryNavKey =
-  | 'content-operations'
-  | 'lane-board'
-  | 'preview'
-  | 'admin-config';
-
-export interface ManagerPrimaryNavEntry {
-  readonly key: ManagerPrimaryNavKey;
-  readonly label: string;
+export interface FeedManagerNavProps {
+  readonly selected: FeedManagerWorkspaceKey;
+  readonly onSelect: (key: FeedManagerWorkspaceKey) => void;
 }
 
-export const MANAGER_PRIMARY_NAV_ENTRIES: ReadonlyArray<ManagerPrimaryNavEntry> = [
-  { key: 'content-operations', label: 'Content Operations' },
-  { key: 'lane-board', label: 'Lane Board' },
-  { key: 'preview', label: 'Preview' },
-  { key: 'admin-config', label: 'Admin / Config' },
-];
+export function FeedManagerNav(props: FeedManagerNavProps): React.ReactNode {
+  const ordered = FEED_MANAGER_NAV_ENTRIES;
 
-export function navButtonId(key: ManagerPrimaryNavKey): string {
-  return `foleon-manage-nav-${key}`;
-}
-
-export function navPanelId(key: ManagerPrimaryNavKey): string {
-  return `foleon-manage-panel-${key}`;
-}
-
-export function ManagerPrimaryNav(props: {
-  readonly selected: ManagerPrimaryNavKey;
-  readonly onSelect: (key: ManagerPrimaryNavKey) => void;
-}): React.ReactNode {
-  const ordered = MANAGER_PRIMARY_NAV_ENTRIES;
-
-  const focusEntry = (key: ManagerPrimaryNavKey): void => {
-    const target = document.querySelector<HTMLButtonElement>(`[data-foleon-manage-nav="${key}"]`);
+  const focusEntry = (key: FeedManagerWorkspaceKey): void => {
+    const target = document.querySelector<HTMLButtonElement>(
+      `[data-feed-manager-nav="${key}"]`,
+    );
     target?.focus();
   };
 
-  const onKeyDown = (key: ManagerPrimaryNavKey, event: KeyboardEvent<HTMLButtonElement>): void => {
+  const onKeyDown = (
+    key: FeedManagerWorkspaceKey,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ): void => {
     const index = ordered.findIndex((entry) => entry.key === key);
     if (index < 0) return;
     if (event.key === 'ArrowRight') {
@@ -79,7 +66,7 @@ export function ManagerPrimaryNav(props: {
     <div
       className={shell.primaryNav}
       role="tablist"
-      aria-label="Foleon Manager workspaces"
+      aria-label="Foleon Feed Manager workspaces"
     >
       {ordered.map((entry) => {
         const isSelected = entry.key === props.selected;
@@ -88,12 +75,15 @@ export function ManagerPrimaryNav(props: {
             key={entry.key}
             type="button"
             role="tab"
-            id={navButtonId(entry.key)}
-            data-foleon-manage-nav={entry.key}
+            id={feedManagerNavButtonId(entry.key)}
+            data-feed-manager-nav={entry.key}
             aria-selected={isSelected}
-            aria-controls={navPanelId(entry.key)}
+            aria-controls={feedManagerNavPanelId(entry.key)}
             tabIndex={isSelected ? 0 : -1}
-            className={clsx(shell.primaryNavButton, isSelected ? shell.primaryNavButtonActive : null)}
+            className={clsx(
+              shell.primaryNavButton,
+              isSelected ? shell.primaryNavButtonActive : null,
+            )}
             onClick={(): void => props.onSelect(entry.key)}
             onKeyDown={(event): void => onKeyDown(entry.key, event)}
           >

@@ -67,13 +67,7 @@ export function FoleonConfigTab(props: {
   }, [proofJson]);
 
   return (
-    <div
-      role="tabpanel"
-      id="foleon-manage-panel-admin-config"
-      aria-labelledby="foleon-manage-nav-admin-config"
-      aria-label="Admin / Config"
-      className={shell.tabPanel}
-    >
+    <div className={shell.tabPanel} aria-label="Foleon admin diagnostics">
       {consentRequired ? (
         <section className={shell.configConsentBanner} aria-label="API approval required">
           <p className={f.guidanceKicker}>API approval required</p>
