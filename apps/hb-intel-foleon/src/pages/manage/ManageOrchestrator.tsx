@@ -14,11 +14,18 @@ import type {
 } from '../../types/foleon-management.types.js';
 import { FoleonError, FoleonLoadingState } from '../../components/FoleonStates.js';
 import { FoleonConfigTab } from './FoleonConfigTab.js';
-import { HomepageFoleonContentTab } from './HomepageFoleonContentTab.js';
+import { ContentOperationsWorkspace } from './ContentOperationsWorkspace.js';
+import { LaneBoard } from './LaneBoard.js';
+import { RecommendedNextActionBand } from './RecommendedNextActionBand.js';
 import { buildManagerStatusChips, resolveSafeFoleonOpenOrigin } from './manageHeaderStatusModel.js';
 import { ManageOperationsShell } from './ManageOperationsShell.js';
 import { type ManagerPrimaryNavKey } from './ManagerPrimaryNav.js';
 import { buildManagerOperationsCounts } from './managerOperationsViewModel.js';
+import {
+  buildRecommendedNextAction,
+  type RecommendedNextAction,
+} from './recommendedNextAction.js';
+import type { ContentInboxBucketId } from './contentInboxViewModel.js';
 import {
   buildFoleonLaneViewModels,
   pickDefaultLaneSelection,
@@ -57,32 +64,44 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const api = useMemo(() => createFoleonManagementApi(props.contract), [props.contract]);
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedLane, setSelectedLane] = useState<FoleonReaderLane | null>(null);
-  const [query, setQuery] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [selectedNav, setSelectedNav] = useState<ManagerPrimaryNavKey>('content-operations');
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [focusBucketId, setFocusBucketId] = useState<ContentInboxBucketId | null>(null);
+  const [workflowPanelOpen, setWorkflowPanelOpen] = useState(false);
   const breakpoint = useManageBreakpoint();
 
   const selectNav = useCallback((key: ManagerPrimaryNavKey): void => {
     setSelectedNav(key);
     if (key !== 'admin-config') setDiagnosticsOpen(false);
+    if (key !== 'content-operations') {
+      setFocusBucketId(null);
+      setWorkflowPanelOpen(false);
+    }
   }, []);
+
+  const openWorkflowPanel = useCallback((): void => setWorkflowPanelOpen(true), []);
+  const closeWorkflowPanel = useCallback((): void => setWorkflowPanelOpen(false), []);
 
   const openDiagnostics = useCallback((): void => {
     setSelectedNav('admin-config');
     setDiagnosticsOpen(true);
+    setFocusBucketId(null);
   }, []);
 
   const reviewNewContent = useCallback((): void => {
     setSelectedNav('content-operations');
+    setFocusBucketId('unassigned');
     setMessage('Review new content in the Content Operations workspace below.');
   }, []);
 
   const managePlacements = useCallback((): void => {
     setSelectedNav('content-operations');
+    setFocusBucketId(null);
     setMessage('Manage placements from the Content Operations workspace below.');
   }, []);
+
+  const clearFocusBucket = useCallback((): void => setFocusBucketId(null), []);
 
   const load = async (): Promise<void> => {
     const preflightBlocker = getHostedPreflightBlocker(props.contract);
@@ -98,7 +117,6 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
       });
       const initDegraded = resolveInitialSelection(props.contract, [], [], false);
       setSelectedId((current) => current ?? initDegraded.contentId);
-      setSelectedLane((current) => current ?? initDegraded.lane);
       return;
     }
     if (preflightBlocker) {
@@ -133,7 +151,6 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
       setState({ kind: 'ready', content, placements, syncStatus, runs, managerReadPathProven: true });
       const init = resolveInitialSelection(props.contract, content, placements, true);
       setSelectedId((current) => current ?? init.contentId);
-      setSelectedLane((current) => current ?? init.lane);
     } catch (err) {
       if (err instanceof FoleonReadinessError) {
         setState({ kind: 'blocked', code: err.code, message: err.message });
@@ -159,49 +176,14 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         : [],
     [ready, props.contract],
   );
-  const defaultLanePick = useMemo(
-    () => (lanes.length > 0 ? pickDefaultLaneSelection(lanes) : { lane: 'project-spotlight' as const, contentId: null }),
-    [lanes],
-  );
-  const effectiveSelectedLane = selectedLane ?? defaultLanePick.lane;
-
-  const selectLane = useCallback(
-    (lane: FoleonReaderLane): void => {
-      const vm = lanes.find((entry) => entry.lane === lane);
-      setSelectedLane(lane);
-      setSelectedId(vm?.activeContent?.id ?? vm?.stagedContent?.id ?? null);
-    },
-    [lanes],
-  );
 
   const selectRegistryRecord = useCallback(
     (id: string): void => {
       if (state.kind !== 'ready') return;
       setSelectedId(id);
-      const record = state.content.find((entry) => entry.id === id);
-      const lane = record ? readerLaneForContent(record) : null;
-      if (lane) setSelectedLane(lane);
     },
     [state],
   );
-
-  const selected = useMemo(() => {
-    if (!ready || !selectedId) return null;
-    return ready.content.find((record) => record.id === selectedId) ?? null;
-  }, [ready, selectedId]);
-  const filteredContent = useMemo(() => {
-    if (!ready) return [];
-    const needle = query.trim().toLowerCase();
-    const ordered = sortManagedContentForHomepage(ready.content);
-    if (!needle) return ordered;
-    return ordered.filter((record) =>
-      [record.title, record.summary, record.region, record.sector, String(record.foleonDocId)]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(needle),
-    );
-  }, [ready, query]);
 
   const statusChips = useMemo(() => {
     if (state.kind !== 'ready') {
@@ -244,14 +226,18 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
 
   if (state.kind === 'loading') {
     return (
-      <section className={`foleonManageRoot ${shell.shell}`} aria-busy="true">
+      <section
+        className={`foleonManageRoot ${shell.shell}`}
+        data-foleon-manager-canvas="wide"
+        aria-busy="true"
+      >
         <FoleonLoadingState />
       </section>
     );
   }
   if (state.kind === 'blocked') {
     return (
-      <section className={`foleonManageRoot ${shell.shell}`}>
+      <section className={`foleonManageRoot ${shell.shell}`} data-foleon-manager-canvas="wide">
         <FoleonError
           title="Foleon Manager cannot load yet"
           description={state.message}
@@ -263,7 +249,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   }
   if (state.kind === 'error') {
     return (
-      <section className={`foleonManageRoot ${shell.shell}`}>
+      <section className={`foleonManageRoot ${shell.shell}`} data-foleon-manager-canvas="wide">
         <FoleonError
           title="Unable to load Foleon Manager"
           description={state.message}
@@ -281,11 +267,32 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     props.contract.foleonConfigDiagnostics?.blockers.some((b) => b.code === 'token-acquisition-failed');
   const syncBlockReasonPlain = canSync ? undefined : plainLanguageSyncBlockReason(props.contract, state.managerReadPathProven);
 
+  const recommendedAction = buildRecommendedNextAction({
+    counts: operationsCounts,
+    tokenAcquisitionDegraded: Boolean(tokenAcquisitionDegraded),
+    canSync,
+    contentLoaded: state.content.length,
+  });
+
+  const onActivateRecommendedAction = (action: RecommendedNextAction): void => {
+    if (!action.target) return;
+    if (action.target.kind === 'select-nav') {
+      selectNav(action.target.key);
+      return;
+    }
+    if (action.target.kind === 'focus-bucket') {
+      setSelectedNav('content-operations');
+      setDiagnosticsOpen(false);
+      setFocusBucketId(action.target.bucketId);
+    }
+  };
+
   return (
     <Tooltip.Provider delayDuration={280}>
       <section
         className={`foleonManageRoot ${shell.shell}`}
         aria-label="Foleon Content Operations"
+        data-foleon-manager-canvas="wide"
         data-breakpoint-width={breakpoint.widthBand}
         data-breakpoint-short-height={breakpoint.shortHeight ? 'true' : 'false'}
         data-breakpoint-narrow-stable={breakpoint.narrowestStable ? 'true' : 'false'}
@@ -312,6 +319,12 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           onOpenFoleonFromPreview={onOpenFoleonFromPreview}
           canOpenFoleon={Boolean(safeFoleonOpenUrl)}
           openFoleonUnavailableReason={openFoleonUnavailableReason}
+          recommendedAction={
+            <RecommendedNextActionBand
+              action={recommendedAction}
+              onActivate={onActivateRecommendedAction}
+            />
+          }
           banners={
             <>
               {tokenAcquisitionDegraded ? (
@@ -340,23 +353,39 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           }
         >
           {selectedNav === 'content-operations' ? (
-            <HomepageFoleonContentTab
+            <ContentOperationsWorkspace
               contract={props.contract}
               managerReadPathProven={state.managerReadPathProven}
               content={state.content}
               placements={state.placements}
-              syncStatus={state.syncStatus}
               api={api}
-              query={query}
-              onQueryChange={setQuery}
-              filteredContent={filteredContent}
-              selected={selected}
               selectedId={selectedId}
-              selectedLane={effectiveSelectedLane}
-              onSelectLane={selectLane}
               onSelectRecord={selectRegistryRecord}
+              focusBucketId={focusBucketId}
+              onClearFocusBucket={clearFocusBucket}
+              workflowPanelOpen={workflowPanelOpen}
+              onOpenWorkflowPanel={openWorkflowPanel}
+              onCloseWorkflowPanel={closeWorkflowPanel}
               onRefresh={load}
               setMessage={setMessage}
+            />
+          ) : null}
+          {selectedNav === 'lane-board' ? (
+            <LaneBoard
+              lanes={lanes}
+              content={state.content}
+              onSelectRecord={(id): void => {
+                selectRegistryRecord(id);
+                setSelectedNav('content-operations');
+                setWorkflowPanelOpen(true);
+              }}
+              onTriggerSync={(): void => void runFoleonSync(api, 'docs', load, setMessage)}
+              canSync={canSync}
+              canWrite={
+                props.contract.hostMode !== 'sharepoint' ||
+                (props.contract.foleonReadiness?.writePathReady === true && state.managerReadPathProven)
+              }
+              writeBlockReason={canSync ? '' : (syncBlockReasonPlain ?? '')}
             />
           ) : null}
           {selectedNav === 'admin-config' ? (

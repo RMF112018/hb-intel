@@ -5,6 +5,45 @@
   container-type: inline-size;
 }
 
+/*
+ * Manager-only canvas escape.
+ *
+ * The Foleon Manager web part declares supportsFullBleed: true. When an operator
+ * places it in a SharePoint Full-width section, the surrounding canvas zone is
+ * already wide enough. When operators place it in a standard one-column section
+ * (the default), the canvas constrains the surface and produces a left-heavy
+ * layout. This escape lets the manager root reclaim the visible viewport width
+ * without modifying SharePoint global chrome and without affecting any other
+ * Foleon route.
+ *
+ * Activation rules:
+ *  - Applied ONLY when [data-foleon-manager-canvas="wide"] is present on the
+ *    foleonManageRoot. The orchestrator sets this attribute for the manage route
+ *    only — reader, highlights, projectSpotlight, companyPulse, leadershipMessage,
+ *    hub, and embedded reader routes never set it.
+ *  - Conservative: targets only the manager root. No parent selectors. No
+ *    SharePoint-internal selectors (.SPCanvas-*, .CanvasZone--*).
+ *  - Gutter token (--foleon-manage-canvas-gutter, default 32px) keeps content
+ *    off the viewport edge at all zoom levels.
+ *  - 100vw used inside @supports so unsupported environments fall back to
+ *    width: 100%.
+ *
+ * Hosted proof at 100%, 75%, narrow / tablet width, and short-height conditions
+ * is operator-pending and is the gate for flagship acceptance.
+ */
+.foleonManageRoot[data-foleon-manager-canvas='wide'] {
+  width: 100%;
+  margin-inline: auto;
+}
+
+@supports (width: 100vw) {
+  .foleonManageRoot[data-foleon-manager-canvas='wide'] {
+    width: min(100%, calc(100vw - var(--foleon-manage-canvas-gutter)));
+    max-width: calc(100vw - var(--foleon-manage-canvas-gutter));
+    margin-inline: calc(50% - 50vw + (var(--foleon-manage-canvas-gutter) / 2));
+  }
+}
+
 .panel {
   border: 1px solid var(--foleon-manage-panel-border);
   border-radius: var(--foleon-manage-radius-lg);
@@ -477,6 +516,574 @@
 }
 
 .placeholderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+}
+
+/* Wave 2 — Content Operations workspace + Lane Board + workflow panel + recommended action */
+
+.recommendedNextAction {
+  composes: panel;
+  padding: var(--foleon-manage-space-md) var(--foleon-manage-space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-sm);
+  align-items: center;
+  justify-content: space-between;
+  border-left: 6px solid var(--foleon-manage-accent);
+}
+
+.recommendedNextAction[data-action-id='resolve-blocked'] {
+  border-left-color: var(--foleon-manage-danger);
+}
+
+.recommendedNextAction[data-action-id='token-degraded'],
+.recommendedNextAction[data-action-id='sync-blocked'] {
+  border-left-color: var(--foleon-manage-warning);
+}
+
+.recommendedNextAction[data-action-id='all-stable'],
+.recommendedNextAction[data-action-id='no-content'] {
+  border-left-color: var(--foleon-manage-success);
+}
+
+.recommendedNextActionHeadline {
+  margin: 0;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.contentOperationsWorkspace {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.contentInbox {
+  composes: panel;
+  padding: var(--foleon-manage-space-lg);
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.contentInboxHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-sm);
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.contentInboxToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+  align-items: center;
+}
+
+.contentInboxSearchLabel {
+  display: grid;
+  gap: 4px;
+  min-width: 240px;
+}
+
+.contentInboxSearchLabelText {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.contentInboxSearchInput {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  padding: 8px 12px;
+  font: inherit;
+  background: hsl(0 0% 100%);
+  color: inherit;
+}
+
+.contentInboxSearchInput:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.contentInboxBuckets {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.contentInboxBucket {
+  display: grid;
+  gap: var(--foleon-manage-space-xs);
+  border-top: 1px solid var(--foleon-manage-panel-border);
+  padding-top: var(--foleon-manage-space-sm);
+}
+
+.contentInboxBucket:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.contentInboxBucket[data-bucket-id='blocked'] {
+  border-left: 4px solid var(--foleon-manage-danger);
+  padding-left: var(--foleon-manage-space-sm);
+}
+
+.contentInboxBucket[data-bucket-id='unassigned'] {
+  border-left: 4px solid var(--foleon-manage-warning);
+  padding-left: var(--foleon-manage-space-sm);
+}
+
+.contentInboxBucket[data-bucket-id='live'] {
+  border-left: 4px solid var(--foleon-manage-success);
+  padding-left: var(--foleon-manage-space-sm);
+}
+
+.contentInboxBucket[data-bucket-id='staged'] {
+  border-left: 4px solid var(--foleon-manage-accent);
+  padding-left: var(--foleon-manage-space-sm);
+}
+
+.contentInboxBucket[data-bucket-id='published-eligible'] {
+  border-left: 4px solid var(--foleon-manage-accent-soft);
+  padding-left: var(--foleon-manage-space-sm);
+}
+
+.contentInboxBucketHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-sm);
+  align-items: baseline;
+}
+
+.contentInboxBucketTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.contentInboxBucketCount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.contentInboxBucketDescription {
+  margin: 0;
+  font-size: 13px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.contentInboxBucketEmpty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.contentInboxList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.contentInboxItem {
+  margin: 0;
+}
+
+.contentInboxRow {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-bottom: 1px solid var(--foleon-manage-panel-border);
+  background: hsl(0 0% 100% / 0.4);
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  border-radius: var(--foleon-manage-radius-sm);
+}
+
+.contentInboxRow:hover,
+.contentInboxRow:focus-visible {
+  background: hsl(0 0% 100%);
+  border-color: var(--foleon-manage-panel-border);
+}
+
+.contentInboxRow:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.contentInboxRow[data-selected='true'] {
+  border-color: var(--foleon-manage-accent);
+  box-shadow: 0 0 0 1px var(--foleon-manage-accent-soft);
+}
+
+.contentInboxRowTitle {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.contentInboxRowMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.contentInboxRowLane {
+  font-weight: 700;
+}
+
+.contentInboxRowStatus {
+  font-weight: 700;
+}
+
+.contentInboxRowValidation {
+  text-transform: capitalize;
+}
+
+.contentInboxRowValidation[data-validation-status='blocked'] {
+  color: var(--foleon-manage-danger);
+}
+
+.contentInboxRowValidation[data-validation-status='warning'] {
+  color: var(--foleon-manage-warning);
+}
+
+.contentInboxRowDate {
+  font-style: italic;
+}
+
+/* Contextual workflow panel — keyboard-safe slide-over.
+ * Non-modal: Esc closes; backdrop click closes; focus returns to the trigger row. */
+
+.workflowPanelOverlay {
+  position: fixed;
+  inset: 0;
+  background: hsl(205 32% 14% / 0.32);
+  z-index: 50;
+}
+
+.workflowPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 100vw);
+  background: hsl(0 0% 100%);
+  border-left: 1px solid var(--foleon-manage-panel-border);
+  box-shadow: -16px 0 60px var(--foleon-manage-shadow);
+  display: flex;
+  flex-direction: column;
+  z-index: 51;
+  overflow: hidden;
+}
+
+.workflowPanelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--foleon-manage-space-sm);
+  padding: var(--foleon-manage-space-md) var(--foleon-manage-space-lg);
+  border-bottom: 1px solid var(--foleon-manage-panel-border);
+}
+
+.workflowPanelCloseButton {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100%);
+  padding: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workflowPanelCloseButton:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.workflowPanelBody {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--foleon-manage-space-md) var(--foleon-manage-space-lg);
+  display: grid;
+  gap: var(--foleon-manage-space-lg);
+}
+
+.workflowPanelSection {
+  display: grid;
+  gap: var(--foleon-manage-space-xs);
+}
+
+.workflowPanelSectionTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.workflowChecklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.workflowChecklistItem {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-sm);
+  padding: 8px 12px;
+  background: hsl(0 0% 100% / 0.6);
+}
+
+.workflowChecklistItem[data-check-status='pass'] {
+  border-left: 4px solid var(--foleon-manage-success);
+}
+
+.workflowChecklistItem[data-check-status='warning'] {
+  border-left: 4px solid var(--foleon-manage-warning);
+}
+
+.workflowChecklistItem[data-check-status='blocked'] {
+  border-left: 4px solid var(--foleon-manage-danger);
+}
+
+.workflowChecklistItem strong {
+  font-size: 13px;
+}
+
+.workflowChecklistItem span {
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+/* Lane Board — three-column workspace */
+
+.laneBoard {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.laneBoardHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.laneBoardColumns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--foleon-manage-space-md);
+}
+
+.laneBoardColumn {
+  composes: panel;
+  padding: var(--foleon-manage-space-md);
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.laneBoardColumn[data-lane-state='Live'] {
+  border-top: 6px solid var(--foleon-manage-success);
+}
+
+.laneBoardColumn[data-lane-state='Preview'] {
+  border-top: 6px solid var(--foleon-manage-accent);
+}
+
+.laneBoardColumn[data-lane-state='Blocked'],
+.laneBoardColumn[data-lane-state='Config Incomplete'] {
+  border-top: 6px solid var(--foleon-manage-danger);
+}
+
+.laneBoardColumn[data-lane-state='Empty'] {
+  border-top: 6px solid var(--foleon-manage-fg-muted);
+}
+
+.laneBoardColumnHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.laneBoardColumnTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.laneBoardColumnHint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardStatePill {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--foleon-manage-accent-soft);
+  color: var(--foleon-manage-fg);
+}
+
+.laneBoardStatePill[data-lane-state='Blocked'],
+.laneBoardStatePill[data-lane-state='Config Incomplete'] {
+  background: hsl(8 58% 92%);
+  color: var(--foleon-manage-danger);
+}
+
+.laneBoardStatePill[data-lane-state='Live'] {
+  background: hsl(152 48% 92%);
+  color: var(--foleon-manage-success);
+}
+
+.laneBoardSection {
+  display: grid;
+  gap: 6px;
+}
+
+.laneBoardSectionTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardSectionEmpty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardFacts {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.laneBoardFacts div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.laneBoardFacts dt {
+  margin: 0;
+  font-weight: 700;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardFacts dd {
+  margin: 0;
+}
+
+.laneBoardNextAction {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.laneBoardWarnings {
+  list-style: disc inside;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--foleon-manage-danger);
+  display: grid;
+  gap: 4px;
+}
+
+.laneBoardCandidates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.laneBoardCandidateButton {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-sm);
+  background: hsl(0 0% 100% / 0.7);
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.laneBoardCandidateButton:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.laneBoardCandidateButton strong {
+  font-size: 13px;
+}
+
+.laneBoardCandidateButton span {
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardRecordCard {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-sm);
+  padding: var(--foleon-manage-space-sm);
+  background: hsl(0 0% 100%);
+}
+
+.laneBoardRecordTitle {
+  font-size: 14px;
+}
+
+.laneBoardRecordMeta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardWriteNotice {
+  margin: 0;
+  font-size: 12px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.laneBoardFooter {
   display: flex;
   flex-wrap: wrap;
   gap: var(--foleon-manage-space-xs);

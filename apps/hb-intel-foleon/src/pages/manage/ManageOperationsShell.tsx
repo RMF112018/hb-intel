@@ -19,6 +19,7 @@ export interface ManageOperationsShellProps {
   readonly onOpenFoleonFromPreview: () => void;
   readonly canOpenFoleon: boolean;
   readonly openFoleonUnavailableReason?: string;
+  readonly recommendedAction?: React.ReactNode;
   readonly banners?: React.ReactNode;
   readonly children: React.ReactNode;
 }
@@ -28,13 +29,9 @@ export function ManageOperationsShell(props: ManageOperationsShellProps): React.
     <div className={shell.operationsShell}>
       <CommandHeader {...props.headerProps} />
       <StatusSummaryStrip counts={props.counts} />
+      {props.recommendedAction}
       {props.banners}
       <ManagerPrimaryNav selected={props.selectedNav} onSelect={props.onSelectNav} />
-      {props.selectedNav === 'lane-board' ? (
-        <LaneBoardPlaceholderPanel
-          onUseContentOperations={(): void => props.onSelectNav('content-operations')}
-        />
-      ) : null}
       {props.selectedNav === 'preview' ? (
         <PreviewPlaceholderPanel
           onUseContentOperations={(): void => props.onSelectNav('content-operations')}
@@ -43,55 +40,8 @@ export function ManageOperationsShell(props: ManageOperationsShellProps): React.
           openFoleonUnavailableReason={props.openFoleonUnavailableReason}
         />
       ) : null}
-      {props.selectedNav === 'content-operations' || props.selectedNav === 'admin-config'
-        ? props.children
-        : null}
+      {props.selectedNav !== 'preview' ? props.children : null}
     </div>
-  );
-}
-
-function LaneBoardPlaceholderPanel(props: {
-  readonly onUseContentOperations: () => void;
-}): React.ReactNode {
-  return (
-    <section
-      role="tabpanel"
-      id={navPanelId('lane-board')}
-      aria-labelledby={navButtonId('lane-board')}
-      aria-label="Lane Board"
-      className={shell.placeholderPanel}
-      data-foleon-placeholder="lane-board"
-    >
-      <header className={shell.placeholderHeader}>
-        <p className={shell.placeholderKicker}>Workspace</p>
-        <h3 className={shell.placeholderTitle}>Lane Board</h3>
-      </header>
-      <dl className={shell.placeholderBody}>
-        <div>
-          <dt>Purpose</dt>
-          <dd>
-            This workspace will become the primary lane-based placement board for Project Spotlight,
-            Company Pulse, and Leadership Message.
-          </dd>
-        </div>
-        <div>
-          <dt>Current availability</dt>
-          <dd>Placement data is still managed through Content Operations in this wave.</dd>
-        </div>
-        <div>
-          <dt>Next action</dt>
-          <dd>
-            Use Content Operations to review content and manage current placement readiness until the
-            Lane Board workflow is implemented.
-          </dd>
-        </div>
-      </dl>
-      <div className={shell.placeholderActions}>
-        <HbcButton variant="primary" onClick={props.onUseContentOperations}>
-          Open Content Operations
-        </HbcButton>
-      </div>
-    </section>
   );
 }
 

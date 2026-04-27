@@ -22,6 +22,9 @@
   --foleon-manage-space-sm: 12px;
   --foleon-manage-space-md: 16px;
   --foleon-manage-space-lg: 24px;
+  /* Total horizontal gutter preserved when the manager surface escapes the SharePoint canvas.
+   * Half is applied as a margin on each side so content never slams into the viewport edge. */
+  --foleon-manage-canvas-gutter: 32px;
   --foleon-manage-gradient-shell: radial-gradient(
       circle at top left,
       hsl(186 94% 22% / 0.18),

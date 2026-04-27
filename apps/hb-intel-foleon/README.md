@@ -16,6 +16,36 @@ The reader web part never renders an iframe until every gate passes:
 `RequiresExternalOpen`, a non-empty published/embed URL, display
 window, and URL origin on the allowlist.
 
+## Manager surface — full-width placement
+
+When hosting the HB Intel Foleon Manager (`?foleonRoute=manage`) as the
+primary management page on a SharePoint site, place the web part in a
+SharePoint **Full-width section** (Edit Page → Add section → Full-width
+section). A standard one-column section caps canvas width at the page
+template default and produces a left-heavy layout where the manager
+console only fills part of the page.
+
+The web part already declares `supportsFullBleed: true` so it is eligible
+for Full-width sections. The manager surface also applies a scoped
+canvas escape (`data-foleon-manager-canvas="wide"` on the manager root)
+so that, even inside a one-column section, the console expands toward
+the visible viewport width while preserving a safe gutter on each side.
+The escape is scoped to the manager route only — Highlights, Reader,
+Content Hub, and any embedded reader lanes do not opt in and are
+unaffected.
+
+After app catalog deployment, validate the manager page at:
+
+- 100% browser zoom on a desktop window
+- 75% browser zoom on a desktop window
+- Narrow / tablet width (≤ 1100px wide)
+- Short-height windows (≤ 700px tall)
+
+Confirm that the surface uses the available canvas without horizontal
+scrolling and that text and controls do not slam into the viewport
+edge. Hosted visual proof at these conditions is operator-pending and
+is the gate for flagship acceptance of the manager workspace rebuild.
+
 ## Public preview fallback
 
 Version `1.0.17.0` adds clearly labeled preview layouts for configured

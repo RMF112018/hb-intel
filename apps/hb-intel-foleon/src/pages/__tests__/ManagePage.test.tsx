@@ -176,7 +176,7 @@ describe('ManagePage', () => {
     expect(adminTab.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('renders the three homepage lane cards in the content tab', async () => {
+  it('renders the three homepage lane columns on the Lane Board', async () => {
     installManageFetchMock({
       content: [
         managedContent({ title: 'Project Spotlight edition', readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true }),
@@ -187,16 +187,16 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect((await screen.findAllByText('Project Spotlight')).length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Company Pulse').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Leadership Message').length).toBeGreaterThan(0);
-    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
-    expect(laneNavigation).toBeTruthy();
-    expect(within(laneNavigation).getAllByRole('listitem').length).toBe(3);
-    expect(laneNavigation.textContent).not.toMatch(/project-spotlight|company-pulse|leadership-message/);
+    fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
+    const board = screen.getByRole('tabpanel', { name: 'Lane Board' });
+    const columns = board.querySelectorAll('[data-lane-key]');
+    expect(columns.length).toBe(3);
+    expect(within(board).getByRole('listitem', { name: /Project Spotlight lane/i })).toBeTruthy();
+    expect(within(board).getByRole('listitem', { name: /Company Pulse lane/i })).toBeTruthy();
+    expect(within(board).getByRole('listitem', { name: /Leadership Message lane/i })).toBeTruthy();
   });
 
-  it('renders the full admin workspace shell with layout proof markers', async () => {
+  it('renders the content-operations workspace markers and inbox panel by default', async () => {
     installManageFetchMock({
       content: [managedContent({ readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true })],
       placements: [managedPlacement()],
@@ -204,37 +204,26 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByRole('region', { name: /Homepage Foleon manager workspace/i })).toBeTruthy();
-    expect(screen.getByRole('complementary', { name: /Homepage lane navigation/i })).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Project Spotlight workspace/i })).toBeTruthy();
-    expect(screen.getByRole('complementary', { name: /Publish readiness and next actions/i })).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Secondary content library/i })).toBeTruthy();
+    const workspace = await screen.findByRole('tabpanel', { name: 'Content Operations' });
+    expect(workspace.getAttribute('data-manager-workspace')).toBe('content-operations');
+    expect(within(workspace).getByRole('region', { name: 'Content inbox' })).toBeTruthy();
     expect(document.querySelector('[data-manager-layout]')).toBeTruthy();
-    expect(document.querySelector('[data-manager-workspace="admin"]')).toBeTruthy();
   });
 
-  it('supports keyboard access to lane navigation', async () => {
+  it('opens the contextual workflow panel when an inbox row is selected', async () => {
     installManageFetchMock({
       content: [
         managedContent({ title: 'Project edition', readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true }),
-        managedContent({
-          id: 'content-2',
-          sharePointItemId: 2,
-          title: 'Company edition',
-          readerKey: 'company-pulse',
-          contentTypeKey: 'Company Pulse',
-          activeEdition: true,
-        }),
       ],
     });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('region', { name: /Project Spotlight workspace/i });
-    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
-    const laneItems = within(laneNavigation).getAllByRole('listitem');
-    fireEvent.keyDown(laneItems[0]!, { key: 'ArrowRight' });
-    expect(await screen.findByRole('region', { name: /Company Pulse workspace/i })).toBeTruthy();
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    const row = within(inbox).getByRole('button', { name: /Project edition/ });
+    fireEvent.click(row);
+    const panel = screen.getByRole('dialog', { name: 'Project edition' });
+    expect(panel.getAttribute('data-foleon-workflow-panel')).toBe('open');
   });
 
   it('renders six system health regions with split readiness on the Config tab', async () => {
@@ -281,7 +270,7 @@ describe('ManagePage', () => {
       />,
     );
 
-    await screen.findByRole('region', { name: /Content detail editor/i });
+    await screen.findByRole('region', { name: 'Content inbox' });
     fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
 
     expect(screen.getByRole('tabpanel', { name: 'Admin / Config' })).toBeTruthy();
@@ -338,7 +327,7 @@ describe('ManagePage', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('auth-resource-missing');
   });
 
-  it('renders a live readable lane while write actions stay disabled', async () => {
+  it('keeps Save and Publish disabled when the workflow panel opens for a live record on a write-blocked tenant', async () => {
     installManageFetchMock({
       content: [managedContent({
         title: 'Live Project Spotlight',
@@ -354,17 +343,19 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
-    expect((await screen.findAllByText('Live Project Spotlight')).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('button', { name: 'Open Foleon' }).length).toBeGreaterThan(0);
-    expect((screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(true);
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Live Project Spotlight/ }));
+    const panel = screen.getByRole('dialog', { name: 'Live Project Spotlight' });
+    expect((within(panel).getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(true);
     expect(
-      screen.getAllByRole('button', { name: /Publish/i })
+      within(panel)
+        .getAllByRole('button', { name: /Publish/i })
         .filter((button) => /^(Publish|Publish blocked)$/.test(button.textContent?.trim() ?? ''))
         .every((button) => (button as HTMLButtonElement).disabled),
     ).toBe(true);
   });
 
-  it('shows lane state microcopy for a live lane on the homepage summary', async () => {
+  it('shows lane state microcopy on the Lane Board for a live lane', async () => {
     installManageFetchMock({
       content: [managedContent({
         title: 'Live Project Spotlight',
@@ -400,8 +391,9 @@ describe('ManagePage', () => {
       />,
     );
 
-    const laneNavigation = await screen.findByRole('complementary', { name: /Homepage lane navigation/i });
-    expect(laneNavigation.textContent).toContain('Shown to visitors');
+    fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
+    const psColumn = screen.getByRole('listitem', { name: /Project Spotlight lane/i });
+    expect(psColumn.textContent).toContain('Shown to visitors');
   });
 
   it('does not surface raw token acquisition diagnostics in the primary API banner', async () => {
@@ -453,7 +445,7 @@ describe('ManagePage', () => {
       />,
     );
 
-    await screen.findByRole('region', { name: /Content detail editor/i });
+    await screen.findByRole('region', { name: 'Content inbox' });
     fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     const normalConfigText = screen.getByRole('tabpanel', { name: 'Admin / Config' }).textContent ?? '';
 
@@ -466,17 +458,14 @@ describe('ManagePage', () => {
     expect(normalConfigText).not.toContain('Config key');
   });
 
-  it('renders manage shell, workflows, and preview guidance for zero content without iframe hosts', async () => {
+  it('renders manage shell and inbox for zero content without iframe hosts and keeps sync history under Admin diagnostics', async () => {
     installManageFetchMock({ content: [] });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
     expect((await screen.findByRole('heading', { name: /Foleon Content Operations/i })).textContent).toMatch(/Foleon Content Operations/i);
-    expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
-    expect(screen.getByText('Published')).toBeTruthy();
-    expect(screen.getByText('Preview structure active')).toBeTruthy();
-    expect(screen.getByText(/lane model remains visible while the data set is light/i)).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
+    const inbox = screen.getByRole('region', { name: 'Content inbox' });
+    expect(inbox.textContent).toContain('No content yet');
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
@@ -484,29 +473,27 @@ describe('ManagePage', () => {
     expect(document.querySelector('iframe')).toBeNull();
   });
 
-  it('renders preview guidance when content exists but no records are public-ready', async () => {
+  it('routes a draft record into the staged or unassigned inbox bucket without inventing reader output', async () => {
     installManageFetchMock({
       content: [managedContent({ publishStatus: 'Draft', isVisible: true, isHomepageEligible: true })],
     });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByText('Preview structure active')).toBeTruthy();
-    expect(screen.getByText(/lane model remains visible while the data set is light/i)).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Content detail editor/i })).toBeTruthy();
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    expect(inbox.querySelector('[data-bucket-id="unassigned"]')?.textContent).toContain('Managed Foleon record');
+    expect(inbox.querySelector('iframe')).toBeNull();
   });
 
-  it('hides preview guidance when records are public and homepage ready', async () => {
+  it('routes a published-eligible placed record into the live or published-eligible bucket', async () => {
     installManageFetchMock({
       content: [managedContent({ publishStatus: 'Published', isVisible: true, isHomepageEligible: true })],
     });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
-    expect(screen.queryByText('Preview structure active')).toBeNull();
-    expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    expect(inbox.textContent).toContain('Managed Foleon record');
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
@@ -612,14 +599,13 @@ describe('ManagePage', () => {
     const syncReadinessId = syncPrimary.getAttribute('aria-describedby');
     expect(syncReadinessId).toBe('foleon-manage-sync-readiness');
     expect(document.getElementById(syncReadinessId ?? '')?.textContent).toMatch(/approved API access|API access/i);
-    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
-    expect(within(laneNavigation).getAllByText('Needs setup').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Content Operations' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Lane Board' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Preview' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Admin / Config' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Retry API readiness' })).toBeTruthy();
     expect((screen.getByRole('button', { name: 'Sync blocked' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: 'Create placement blocked' }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
@@ -705,8 +691,7 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
+    expect(await screen.findByRole('region', { name: 'Content inbox' })).toBeTruthy();
     const calls = (globalThis.fetch as unknown as { readonly mock: { readonly calls: ReadonlyArray<ReadonlyArray<unknown>> } }).mock.calls;
     expect(calls.filter((call) => String(call[0]).includes('/foleon/content')).length).toBe(1);
     expect(calls.filter((call) => String(call[0]).includes('/foleon/placements')).length).toBe(1);
@@ -724,29 +709,26 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
+    expect(await screen.findByRole('region', { name: 'Content inbox' })).toBeTruthy();
     expect(screen.getAllByRole('status').some((entry) =>
       entry.textContent?.includes('backend Foleon OAuth configuration is incomplete')
     )).toBe(true);
   });
 
-  it('keeps preview guidance read-only without fake admin actions or editable preview content', async () => {
+  it('keeps the Preview placeholder read-only without fake admin actions or invented reader output', async () => {
     installManageFetchMock({ content: [] });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    const guidance = await screen.findByText('Preview structure active');
-    const note = guidance.closest('[role="note"]') as HTMLElement;
-    expect(within(note).queryByRole('link')).toBeNull();
-    expect(within(note).queryByRole('button')).toBeNull();
-    expect(note.querySelector('iframe')).toBeNull();
-    expect(note.querySelector('input, textarea, select')).toBeNull();
-    expect(note.querySelector('[aria-disabled="true"], [disabled]')).toBeNull();
-    expect(note.textContent).not.toContain('Sync Docs');
-    expect(note.textContent).not.toContain('Create placement');
+    fireEvent.click(await screen.findByRole('tab', { name: 'Preview' }));
+    const panel = screen.getByRole('tabpanel', { name: 'Preview' });
+    expect(panel.querySelector('iframe')).toBeNull();
+    expect(panel.querySelector('input, textarea, select')).toBeNull();
+    expect(panel.textContent).not.toContain('Sync Docs');
+    expect(panel.textContent).not.toContain('Create placement');
   });
 
-  it('loads and saves reader lane fields without silent field loss', async () => {
+  it('loads and saves reader lane fields without silent field loss when the workflow panel is open', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
     installManageFetchMock({
       content: [managedContent({
@@ -763,14 +745,18 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByDisplayValue('company-pulse')).toBeTruthy();
-    expect(screen.getByDisplayValue('Frequent')).toBeTruthy();
-    expect(screen.getByDisplayValue('Company Pulse Reader')).toBeTruthy();
-    expect(screen.getByDisplayValue('2026-Q2')).toBeTruthy();
-    expect(screen.getByDisplayValue('Operations')).toBeTruthy();
-    expect(screen.getByDisplayValue('2026-04-25T12:00:00.000Z')).toBeTruthy();
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Managed Foleon record/ }));
+    const panel = screen.getByRole('dialog', { name: 'Managed Foleon record' });
 
-    fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+    expect(within(panel).getByDisplayValue('company-pulse')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('Frequent')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('Company Pulse Reader')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('2026-Q2')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('Operations')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('2026-04-25T12:00:00.000Z')).toBeTruthy();
+
+    fireEvent.click(within(panel).getByRole('button', { name: /^Save$/i }));
 
     await waitFor(() => {
       const patch = fetchSpy.mock.calls.find((call) => String(call[0]).includes('/foleon/content/content-1') && (call[1] as RequestInit | undefined)?.method === 'PATCH');
@@ -789,22 +775,26 @@ describe('ManagePage', () => {
     });
   });
 
-  it('applies reader presets to local draft only until Save', async () => {
+  it('applies reader presets to local draft only until Save inside the workflow panel', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
     installManageFetchMock({ content: [managedContent({ publishStatus: 'Draft' })] });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Configure as Project Spotlight' }));
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Managed Foleon record/ }));
+    const panel = screen.getByRole('dialog', { name: 'Managed Foleon record' });
 
-    expect(screen.getByDisplayValue('Project Spotlight')).toBeTruthy();
-    expect(screen.getByDisplayValue('project-spotlight')).toBeTruthy();
-    expect(screen.getByDisplayValue('Monthly')).toBeTruthy();
-    expect(screen.getByDisplayValue('Project Spotlight Reader')).toBeTruthy();
+    fireEvent.click(within(panel).getByRole('button', { name: 'Configure as Project Spotlight' }));
+
+    expect(within(panel).getByDisplayValue('Project Spotlight')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('project-spotlight')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('Monthly')).toBeTruthy();
+    expect(within(panel).getByDisplayValue('Project Spotlight Reader')).toBeTruthy();
     expect(fetchSpy.mock.calls.some((call) => (call[1] as RequestInit | undefined)?.method === 'PATCH')).toBe(false);
   });
 
-  it('shows reader lane governance warnings', async () => {
+  it('surfaces reader lane governance warnings in the workflow panel', async () => {
     installManageFetchMock({
       content: [
         managedContent({
@@ -826,12 +816,16 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect((await screen.findAllByText('More than one active Project Spotlight edition is configured.')).length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Active reader editions should be published, visible, homepage eligible, and have a reader URL.').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Project Spotlight active editions should include Archive Group.').length).toBeGreaterThan(0);
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getAllByRole('button', { name: /Managed Foleon record/ })[0]!);
+    const panel = screen.getByRole('dialog');
+    const validationSection = within(panel).getByRole('region', { name: 'Validation and blockers' });
+    expect(within(validationSection).getByText('More than one active Project Spotlight edition is configured.')).toBeTruthy();
+    expect(within(validationSection).getByText('Active reader editions should be published, visible, homepage eligible, and have a reader URL.')).toBeTruthy();
+    expect(within(validationSection).getByText('Project Spotlight active editions should include Archive Group.')).toBeTruthy();
   });
 
-  it('shows placement lane alignment warnings for mismatched content', async () => {
+  it('surfaces placement lane alignment warnings inside the workflow panel for mismatched content', async () => {
     installManageFetchMock({
       content: [managedContent({
         contentTypeKey: 'Company Pulse',
@@ -843,15 +837,19 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    fireEvent.change(await screen.findByLabelText('Placement'), {
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Managed Foleon record/ }));
+    const panel = screen.getByRole('dialog');
+
+    fireEvent.change(within(panel).getByLabelText('Placement'), {
       target: { value: 'Project Spotlight Active' },
     });
 
-    expect(screen.getByText('Project Spotlight Active should point to Project Spotlight content.')).toBeTruthy();
-    expect(screen.getByText('Project Spotlight Active points to content that is not public-ready.')).toBeTruthy();
+    expect(within(panel).getByText('Project Spotlight Active should point to Project Spotlight content.')).toBeTruthy();
+    expect(within(panel).getByText('Project Spotlight Active points to content that is not public-ready.')).toBeTruthy();
   });
 
-  it('updates selected-lane workspace when a different lane card is selected', async () => {
+  it('opens the workflow panel for a Lane Board record candidate and selects Content Operations', async () => {
     installManageFetchMock({
       content: [
         managedContent({ title: 'PS', readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true }),
@@ -868,36 +866,38 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('region', { name: /Project Spotlight workspace/i });
-    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
-    const laneItems = within(laneNavigation).getAllByRole('listitem');
-    expect(laneItems.length).toBe(3);
-    fireEvent.click(laneItems[2]!);
-    expect(await screen.findByRole('region', { name: /Leadership Message workspace/i })).toBeTruthy();
+    fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
+    const lmColumn = screen.getByRole('listitem', { name: /Leadership Message lane/i });
+    fireEvent.click(within(lmColumn).getByRole('button', { name: 'Open live in workflow' }));
+    expect(screen.getByRole('tab', { name: 'Content Operations' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('dialog', { name: 'LM' })).toBeTruthy();
   });
 
-  it('shows plain-language write guidance when write path is disabled', async () => {
+  it('shows plain-language write guidance in the workflow panel editor when write path is disabled', async () => {
     installManageFetchMock({
       content: [managedContent({ readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true })],
     });
 
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
-    const editor = await screen.findByRole('region', { name: /Content detail editor/i });
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Managed Foleon record/ }));
+    const panel = screen.getByRole('dialog', { name: 'Managed Foleon record' });
+    const editor = within(panel).getByRole('region', { name: /Content detail editor/i });
     expect(editor.textContent).toMatch(/Write actions are disabled/i);
     expect(editor.textContent).not.toMatch(/backend-route-authorization-unproven/);
     expect(editor.textContent).not.toMatch(/token-acquisition-failed/);
-    const save = screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
+    const save = within(panel).getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
     const saveReasonId = save.getAttribute('aria-describedby');
     expect(saveReasonId).toBe('foleon-manage-write-actions-reason');
     expect(document.getElementById(saveReasonId ?? '')?.textContent).toMatch(/Write actions are disabled/i);
-    const placement = screen.getByRole('button', { name: /Create placement blocked/i }) as HTMLButtonElement;
+    const placement = within(panel).getByRole('button', { name: /Create placement blocked/i }) as HTMLButtonElement;
     const placementReasonId = placement.getAttribute('aria-describedby');
     expect(placementReasonId).toBe('foleon-manage-placement-write-reason');
     expect(document.getElementById(placementReasonId ?? '')?.textContent).toMatch(/Placement writes are disabled/i);
   });
 
-  it('does not send PATCH when Save is disabled for write path', async () => {
+  it('does not send PATCH when Save is disabled for write path inside the workflow panel', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
     installManageFetchMock({
       content: [managedContent({ readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true })],
@@ -905,8 +905,10 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('region', { name: /Content detail editor/i });
-    const save = screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Managed Foleon record/ }));
+    const panel = screen.getByRole('dialog');
+    const save = within(panel).getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
     expect(save.disabled).toBe(true);
     fireEvent.click(save);
 
@@ -1039,12 +1041,14 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('region', { name: /Content detail editor/i });
-    expect(screen.queryByText(/Write actions are disabled/i)).toBeNull();
-    const publishHint = screen.getByText(/Publish is blocked:/i);
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(within(inbox).getByRole('button', { name: /Managed Foleon record/ }));
+    const panel = screen.getByRole('dialog', { name: 'Managed Foleon record' });
+    expect(within(panel).queryByText(/Write actions are disabled/i)).toBeNull();
+    const publishHint = within(panel).getByText(/Publish is blocked:/i);
     expect(publishHint.textContent).toMatch(/embed URL|Inline Reader/i);
-    expect((screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(false);
-    const publishBtn = screen.getByRole('button', { name: /Publish blocked/i }) as HTMLButtonElement;
+    expect((within(panel).getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(false);
+    const publishBtn = within(panel).getByRole('button', { name: /Publish blocked/i }) as HTMLButtonElement;
     expect(publishBtn.disabled).toBe(true);
     const publishDescId = publishBtn.getAttribute('aria-describedby');
     expect(publishDescId).toBe('foleon-manage-publish-reason');
@@ -1112,28 +1116,155 @@ describe('ManagePage', () => {
     expect(live).not.toBeNull();
   });
 
-  it('renders Lane Board placeholder workspace with structured copy and live CTA', async () => {
-    installManageFetchMock({ content: [] });
+  it('renders the real Lane Board with the derivable per-lane sections and a candidate when present', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Active PS edition',
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: true,
+          publishedUrl: 'https://viewer.us.foleon.com/ps/live',
+          embedUrl: 'https://viewer.us.foleon.com/ps/live/embed',
+        }),
+        managedContent({
+          id: 'content-staged',
+          sharePointItemId: 2,
+          title: 'PS staged edition',
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: false,
+          publishStatus: 'Draft',
+        }),
+        managedContent({
+          id: 'content-candidate',
+          sharePointItemId: 3,
+          title: 'PS candidate edition',
+          foleonDocId: 12346,
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: false,
+          publishStatus: 'Published',
+          isVisible: true,
+          isHomepageEligible: true,
+        }),
+      ],
+      placements: [managedPlacement()],
+    });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
     fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
-    const panel = screen.getByRole('tabpanel', { name: 'Lane Board' });
-    expect(panel.getAttribute('id')).toBe('foleon-manage-panel-lane-board');
-    expect(panel.textContent).toContain(
-      'This workspace will become the primary lane-based placement board for Project Spotlight, Company Pulse, and Leadership Message.',
-    );
-    expect(panel.textContent).toContain(
-      'Placement data is still managed through Content Operations in this wave.',
-    );
-    expect(panel.textContent).toContain(
-      'Use Content Operations to review content and manage current placement readiness until the Lane Board workflow is implemented.',
-    );
-    expect(within(panel).queryByRole('button', { name: /Coming soon/i })).toBeNull();
+    const psColumn = screen.getByRole('listitem', { name: /Project Spotlight lane/i });
+    expect(within(psColumn).getByRole('region', { name: 'Live edition' })).toBeTruthy();
+    expect(within(psColumn).getByRole('region', { name: 'Staged or draft' })).toBeTruthy();
+    expect(within(psColumn).getByRole('region', { name: 'Next recommended action' })).toBeTruthy();
+    expect(within(psColumn).getByRole('region', { name: 'Available content candidates' })).toBeTruthy();
+    expect(within(psColumn).getByRole('button', { name: /PS candidate edition/ })).toBeTruthy();
+  });
 
-    fireEvent.click(within(panel).getByRole('button', { name: 'Open Content Operations' }));
+  it('Lane Board candidate selection opens the workflow panel in Content Operations', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Active PS edition',
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: true,
+        }),
+        managedContent({
+          id: 'content-staged',
+          sharePointItemId: 2,
+          title: 'PS staged',
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: false,
+          publishStatus: 'Draft',
+        }),
+        managedContent({
+          id: 'content-candidate',
+          sharePointItemId: 3,
+          title: 'PS candidate',
+          foleonDocId: 12346,
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: false,
+          publishStatus: 'Published',
+          isVisible: true,
+          isHomepageEligible: true,
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
+    const psColumn = screen.getByRole('listitem', { name: /Project Spotlight lane/i });
+    fireEvent.click(within(psColumn).getByRole('button', { name: /PS candidate/ }));
     expect(screen.getByRole('tab', { name: 'Content Operations' }).getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByRole('tabpanel', { name: 'Content Operations' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'PS candidate' })).toBeTruthy();
+  });
+
+  it('renders the Recommended next action band with action id derivable from current operations counts', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const band = await screen.findByRole('region', { name: 'Recommended next action' });
+    expect(band.getAttribute('data-action-id')).toBeTruthy();
+    expect(['no-content', 'all-stable']).toContain(band.getAttribute('data-action-id'));
+  });
+
+  it('keeps the canvas escape attribute on the manager root only', async () => {
+    installManageFetchMock({ content: [] });
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('heading', { name: 'Foleon Content Operations' });
+    const manageRoots = document.querySelectorAll('.foleonManageRoot');
+    expect(manageRoots.length).toBeGreaterThan(0);
+    manageRoots.forEach((root) => {
+      expect((root as HTMLElement).getAttribute('data-foleon-manager-canvas')).toBe('wide');
+    });
+    // Reader / highlights / embed routes are not mounted by ManagePage at all,
+    // so the attribute must not exist outside the manage root.
+    document.querySelectorAll('[data-foleon-manager-canvas="wide"]').forEach((node) => {
+      expect((node as HTMLElement).classList.contains('foleonManageRoot')).toBe(true);
+    });
+  });
+
+  it('focuses the unassigned bucket when "Review new content" header action is invoked', async () => {
+    installManageFetchMock({
+      content: [managedContent({ title: 'Drifting', publishStatus: 'Draft' })],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('region', { name: 'Content inbox' });
+    fireEvent.click(screen.getByRole('button', { name: 'Review new content' }));
+    const inbox = screen.getByRole('region', { name: 'Content inbox' });
+    expect(inbox.querySelector('[data-bucket-id="unassigned"]')).toBeTruthy();
+    expect(within(inbox).getByRole('button', { name: 'Show all buckets' })).toBeTruthy();
+  });
+
+  it('returns focus to the originating row when the workflow panel closes via Esc', async () => {
+    installManageFetchMock({
+      content: [managedContent({ title: 'Focus row' })],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const inbox = await screen.findByRole('region', { name: 'Content inbox' });
+    const row = within(inbox).getByRole('button', { name: /Focus row/ }) as HTMLButtonElement;
+    row.focus();
+    fireEvent.click(row);
+    const panel = screen.getByRole('dialog', { name: 'Focus row' });
+    expect(panel).toBeTruthy();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Focus row' })).toBeNull();
+    });
+    expect(document.activeElement).toBe(row);
   });
 
   it('renders Preview placeholder workspace and reuses safe-origin Open Foleon behavior', async () => {
