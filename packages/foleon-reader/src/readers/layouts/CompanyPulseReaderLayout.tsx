@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { HbcButton } from '@hbc/ui-kit/homepage';
 import type { FoleonReaderLayoutProps } from '../FoleonReaderLayoutRegistry.js';
-import type { FoleonReaderAction } from '../FoleonReaderViewModel.js';
-import type { FoleonViewerDisabledReason } from '../FoleonViewerTypes.js';
+import type { FoleonReaderAction, FoleonReaderPulseStoryCard } from '../FoleonReaderViewModel.js';
+import type { FoleonViewerDisabledReason, FoleonViewerTarget } from '../FoleonViewerTypes.js';
 import { useFoleonFullWindowViewer } from '../../components/FoleonFullWindowViewerProvider.js';
 import styles from './FoleonReaderLayouts.module.css';
 
 // ---------------------------------------------------------------------------
-// Company Pulse editorial board layout — CP-03
+// Company Pulse editorial board layout — CP-03 / CP-04
 // ---------------------------------------------------------------------------
 // Company Pulse presents a featured top story and supporting article board.
 // Ready state remains honest with current resolver constraints: one real
@@ -70,36 +70,40 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
             data-foleon-viewer-target-id={target.id}
             data-foleon-article-state={articleState}
           >
-            <MediaStage title={featured?.title ?? card.title} media={viewModel.pulseMedia} isPreview={isPreview} />
+            <div className={styles.pulseFeaturedStack}>
+              <MediaStage title={featured?.title ?? card.title} media={viewModel.pulseMedia} isPreview={isPreview} />
 
-            <div className={styles.pulseFeaturedContent}>
-              <div className={styles.pulseEyebrowRow}>
-                <p className={styles.pulseEyebrow}>Top story</p>
-                <span className={styles.pulseStateChip}>{isPreview ? 'Preview' : 'Live'}</span>
-                {isPreview ? (
-                  <span className={styles.pulseSampleChip}>Sample story</span>
-                ) : null}
+              <div className={styles.pulseFeaturedContent}>
+                <div className={styles.pulseEyebrowRow}>
+                  <p className={styles.pulseEyebrow}>Top story</p>
+                  <span className={styles.pulseStateChip}>{isPreview ? 'Preview' : 'Live'}</span>
+                  {isPreview ? (
+                    <span className={styles.pulseSampleChip}>Sample story</span>
+                  ) : null}
+                </div>
+                {!isPreview ? (
+                  <p className={styles.pulseFreshness}>Updated {featured?.dateline ?? viewModel.freshnessValue}</p>
+                ) : (
+                  <p className={styles.pulseFreshness}>Preview - sample headline</p>
+                )}
+                <h3 className={styles.pulseFeaturedTitle}>
+                  <PulseLaunchButton target={target} reasonId={reasonId} isDisabled={isDisabled} variant="featured">
+                    <span className={styles.pulseFeaturedTitleClamp}>{featured?.title ?? card.title}</span>
+                    <span className={styles.pulseFeaturedCta} aria-hidden="true">
+                      Open story
+                      <span className={styles.showcaseCtaArrow} aria-hidden="true">
+                        →
+                      </span>
+                    </span>
+                  </PulseLaunchButton>
+                </h3>
+                <p className={styles.pulseFeaturedSummary}>
+                  {featured?.summary && featured.summary.trim().length > 0
+                    ? featured.summary
+                    : 'Open story to read the latest Company Pulse update in Foleon.'}
+                </p>
+                <CoverageLabels />
               </div>
-              {!isPreview ? (
-                <p className={styles.pulseFreshness}>Updated {featured?.dateline ?? viewModel.freshnessValue}</p>
-              ) : (
-                <p className={styles.pulseFreshness}>Preview - sample headline</p>
-              )}
-              <h3 className={styles.pulseFeaturedTitle}>
-                <CardLaunchButton target={target} reasonId={reasonId} isDisabled={isDisabled}>
-                  <span>{featured?.title ?? card.title}</span>
-                  <span className={styles.pulseFeaturedCta} aria-hidden="true">
-                    Open story
-                    <span className={styles.showcaseCtaArrow} aria-hidden="true">→</span>
-                  </span>
-                </CardLaunchButton>
-              </h3>
-              <p className={styles.pulseFeaturedSummary}>
-                {featured?.summary && featured.summary.trim().length > 0
-                  ? featured.summary
-                  : 'Open story to read the latest Company Pulse update in Foleon.'}
-              </p>
-              <CoverageLabels />
             </div>
 
             {isDisabled ? (
@@ -117,32 +121,14 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
           <section className={styles.pulseStoryBoard} aria-label="Supporting Company Pulse stories">
             {board && board.supportingStories.length > 0 ? (
               board.supportingStories.slice(0, 4).map((story) => (
-                <article
-                  key={story.id}
-                  className={styles.pulseStoryCard}
-                  data-foleon-pulse-story-state={story.isPreview ? 'preview-sample' : 'live'}
-                >
-                  <div className={styles.pulseStoryMedia} aria-hidden="true" />
-                  <div className={styles.pulseStoryContent}>
-                    <p className={styles.pulseStoryCategory}>
-                      {story.category ?? 'Around HB'}
-                      {story.isSample ? ' - Sample story' : ''}
-                    </p>
-                    <h4 className={styles.pulseStoryTitle}>{story.title}</h4>
-                    {story.summary ? (
-                      <p className={styles.pulseStorySummary}>{story.summary}</p>
-                    ) : null}
-                    {story.dateline ? (
-                      <p className={styles.pulseStoryMeta}>{story.dateline}</p>
-                    ) : null}
-                  </div>
-                </article>
+                <PulseStoryCard key={story.id} story={story} isPreview={isPreview} />
               ))
             ) : (
               <div className={styles.pulseEmptyBoard} data-foleon-pulse-board-state="empty">
                 <p className={styles.pulseEmptyBoardHeading}>Supporting story board</p>
                 <p className={styles.pulseEmptyBoardBody}>
-                  {board?.supportingEmptyNote ?? 'Additional Company Pulse stories will appear here when more Foleon items are available.'}
+                  {board?.supportingEmptyNote ??
+                    'Additional Company Pulse stories will appear here when more Foleon items are available.'}
                 </p>
                 <div className={styles.pulseEmptyBoardSlots} aria-hidden="true">
                   <span />
@@ -175,15 +161,17 @@ function pickArchiveAction(actions: readonly FoleonReaderAction[]): FoleonReader
   return actions.find((action) => action.id === 'open-archive');
 }
 
-interface CardLaunchButtonProps {
-  readonly target: NonNullable<FoleonReaderLayoutProps['viewModel']['primaryArticle']>['target'];
+interface PulseLaunchButtonProps {
+  readonly target: FoleonViewerTarget;
   readonly reasonId: string;
   readonly isDisabled: boolean;
+  readonly variant: 'featured' | 'supporting';
+  readonly accessibleName?: string;
   readonly children: React.ReactNode;
 }
 
-function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
-  const { target, reasonId, isDisabled, children } = props;
+function PulseLaunchButton(props: PulseLaunchButtonProps): React.JSX.Element {
+  const { target, reasonId, isDisabled, variant, accessibleName, children } = props;
   const viewer = useFoleonFullWindowViewer();
 
   const handleClick = React.useCallback(
@@ -208,16 +196,90 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
     [isDisabled, target, viewer],
   );
 
+  const buttonClass =
+    variant === 'featured' ? styles.pulseLaunchButton : styles.pulseStoryCardLaunch;
+
   return (
     <button
       type="button"
-      className={styles.pulseLaunchButton}
+      className={buttonClass}
+      aria-label={variant === 'supporting' ? accessibleName : undefined}
       aria-disabled={isDisabled || undefined}
       aria-describedby={isDisabled ? reasonId : undefined}
       onClick={handleClick}
     >
       {children}
     </button>
+  );
+}
+
+function PulseStoryCard(props: {
+  readonly story: FoleonReaderPulseStoryCard;
+  readonly isPreview: boolean;
+}): React.JSX.Element {
+  const { story, isPreview } = props;
+  const t = story.target;
+  const isDisabled = !t.canOpen;
+  const articleState: 'enabled' | 'disabled' | 'preview' = isPreview
+    ? 'preview'
+    : isDisabled
+      ? 'disabled'
+      : 'enabled';
+  const reasonId = `${t.id}-supporting-disabled`;
+
+  return (
+    <article
+      className={styles.pulseStoryCard}
+      data-foleon-article-card
+      data-foleon-article-lane="companyPulse"
+      data-foleon-viewer-target-id={t.id}
+      data-foleon-article-state={articleState}
+      data-foleon-pulse-story-state={story.isPreview ? 'preview-sample' : 'live'}
+    >
+      <PulseLaunchButton
+        target={t}
+        reasonId={reasonId}
+        isDisabled={isDisabled}
+        variant="supporting"
+        accessibleName={story.title}
+      >
+        <div className={styles.pulseStoryMedia}>
+          {story.imageUrl ? (
+            <img
+              className={styles.pulseStoryMediaImage}
+              src={story.imageUrl}
+              alt={story.imageAlt ?? ''}
+              loading="lazy"
+            />
+          ) : (
+            <div className={styles.pulseStoryMediaFallback} aria-hidden="true" />
+          )}
+        </div>
+        <div className={styles.pulseStoryContent}>
+          <p className={styles.pulseStoryCategory}>
+            {story.category ?? 'Around HB'}
+            {story.isSample ? ' - Sample story' : ''}
+          </p>
+          <span className={styles.pulseStoryTitle} aria-hidden="true">
+            {story.title}
+          </span>
+          <span className={styles.pulseStoryCardCta} aria-hidden="true">
+            Open story <span aria-hidden="true">→</span>
+          </span>
+          {story.summary ? (
+            <p className={styles.pulseStorySummary}>{story.summary}</p>
+          ) : null}
+          {story.dateline ? (
+            <p className={styles.pulseStoryMeta}>{story.dateline}</p>
+          ) : null}
+        </div>
+      </PulseLaunchButton>
+      {isDisabled ? (
+        <p id={reasonId} className={styles.pulseStoryDisabledReason} role="status" aria-live="polite">
+          {formatDisabledReason(t.disabledReason)}
+        </p>
+      ) : null}
+    </article>
   );
 }
 

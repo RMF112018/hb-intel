@@ -13,6 +13,8 @@ import {
 import { FOLEON_READER_CONFIGS } from '../readerConfigs.js';
 import type { FoleonContentRecord } from '../../types/foleon-content.types.js';
 import type { FoleonReaderResolution } from '../../services/FoleonReaderContentService.js';
+import type { FoleonViewerTarget } from '../FoleonViewerTypes.js';
+import layoutStyles from '../layouts/FoleonReaderLayouts.module.css';
 
 beforeAll(() => {
   if (typeof window !== 'undefined' && !window.matchMedia) {
@@ -77,6 +79,29 @@ function buildReadyViewModel(
   });
 }
 
+function buildPreviewWithFirstSupportingDisabled(): FoleonReaderViewModel {
+  const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+  const board = vm.pulseBoard!;
+  const first = board.supportingStories[0];
+  const disabledTarget: FoleonViewerTarget = {
+    id: `${first.id}-disabled-test`,
+    lane: 'companyPulse',
+    source: 'active-record',
+    renderMode: 'iframe',
+    title: first.title,
+    viewerUrl: undefined,
+    canOpen: false,
+    disabledReason: 'embed-not-allowed',
+  };
+  return {
+    ...vm,
+    pulseBoard: {
+      ...board,
+      supportingStories: [{ ...first, target: disabledTarget }, ...board.supportingStories.slice(1)],
+    },
+  };
+}
+
 describe('CompanyPulseReaderLayout — editorial board composition', () => {
   it('emits editorial-board marker with stable lane markers', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
@@ -94,6 +119,63 @@ describe('CompanyPulseReaderLayout — editorial board composition', () => {
     expect(screen.getByText(/Latest from Company Pulse \(Preview\)/)).toBeTruthy();
     expect(screen.getByText(/Sample layout showing a featured story and supporting Company Pulse story board/i)).toBeTruthy();
     expect(container.querySelectorAll('[data-foleon-pulse-story-state="preview-sample"]').length).toBe(4);
+    expect(container.querySelectorAll('[data-foleon-article-card]').length).toBe(5);
+    expect(container.querySelector(`.${layoutStyles.pulseFeaturedStack}`)).not.toBeNull();
+  });
+
+  it('preview supporting article cards expose viewer target markers', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const supporting = container.querySelectorAll('[data-foleon-pulse-story-state="preview-sample"]');
+    expect(supporting.length).toBe(4);
+    supporting.forEach((node) => {
+      expect(node.getAttribute('data-foleon-article-lane')).toBe('companyPulse');
+      expect(node.getAttribute('data-foleon-viewer-target-id')).toBeTruthy();
+      expect(node.getAttribute('data-foleon-article-state')).toBe('preview');
+    });
+  });
+
+  it('preview supporting card opens local preview viewer', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
+    render(
+      <FoleonFullWindowViewerProvider originPolicy={policy}>
+        <CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
+    const supportingTitle = vm.pulseBoard!.supportingStories[0].title;
+    const launch = screen.getByRole('button', { name: supportingTitle });
+    fireEvent.click(launch);
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
+    expect(dialog?.querySelector('iframe')).toBeNull();
+  });
+
+  it('each preview supporting card has exactly one native button', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const board = container.querySelector('[aria-label="Supporting Company Pulse stories"]');
+    expect(board).not.toBeNull();
+    const articles = board!.querySelectorAll('[data-foleon-pulse-story-state="preview-sample"]');
+    expect(articles.length).toBe(4);
+    articles.forEach((article) => {
+      const buttons = article.querySelectorAll('button');
+      expect(buttons.length).toBe(1);
+    });
+  });
+
+  it('disabled supporting card records refusal and shows visible reason', () => {
+    const vm = buildPreviewWithFirstSupportingDisabled();
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const supportingTitle = vm.pulseBoard!.supportingStories[0].title;
+    const launch = screen.getByRole('button', { name: supportingTitle });
+    expect(launch.getAttribute('aria-disabled')).toBe('true');
+    const reasonId = launch.getAttribute('aria-describedby');
+    expect(reasonId).toBeTruthy();
+    expect(container.querySelector(`#${reasonId}`)).not.toBeNull();
+    fireEvent.click(launch);
+    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
   });
 
   it('preview supporting cards are clearly sample stories', () => {
