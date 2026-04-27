@@ -131,36 +131,49 @@ afterEach(() => {
 });
 
 describe('ManagePage', () => {
-  it('renders two tabs with Homepage Foleon Content selected by default', async () => {
+  it('renders four primary nav entries with Content Operations selected by default', async () => {
     installManageFetchMock({ content: [] });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    const contentTab = await screen.findByRole('tab', { name: 'Homepage Foleon Content' });
-    const configTab = screen.getByRole('tab', { name: 'Config' });
+    const contentTab = await screen.findByRole('tab', { name: 'Content Operations' });
+    const laneBoardTab = screen.getByRole('tab', { name: 'Lane Board' });
+    const previewTab = screen.getByRole('tab', { name: 'Preview' });
+    const adminTab = screen.getByRole('tab', { name: 'Admin / Config' });
     expect(contentTab.getAttribute('aria-selected')).toBe('true');
-    expect(configTab.getAttribute('aria-selected')).toBe('false');
-    expect(contentTab.getAttribute('aria-controls')).toBe('foleon-manage-panel-content');
-    expect(configTab.getAttribute('aria-controls')).toBe('foleon-manage-panel-config');
-    expect(screen.getByRole('tabpanel', { name: 'Homepage Foleon Content' }).getAttribute('id')).toBe('foleon-manage-panel-content');
+    expect(laneBoardTab.getAttribute('aria-selected')).toBe('false');
+    expect(previewTab.getAttribute('aria-selected')).toBe('false');
+    expect(adminTab.getAttribute('aria-selected')).toBe('false');
+    expect((laneBoardTab as HTMLButtonElement).disabled).toBe(false);
+    expect((previewTab as HTMLButtonElement).disabled).toBe(false);
+    expect(contentTab.getAttribute('aria-controls')).toBe('foleon-manage-panel-content-operations');
+    expect(adminTab.getAttribute('aria-controls')).toBe('foleon-manage-panel-admin-config');
+    expect(screen.getByRole('tabpanel', { name: 'Content Operations' }).getAttribute('id')).toBe('foleon-manage-panel-content-operations');
   });
 
-  it('supports keyboard tab switching with Arrow/Home/End keys', async () => {
+  it('supports keyboard tab switching with Arrow/Home/End keys across the four-key nav', async () => {
     installManageFetchMock({ content: [] });
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    const contentTab = await screen.findByRole('tab', { name: 'Homepage Foleon Content' });
-    const configTab = screen.getByRole('tab', { name: 'Config' });
+    const contentTab = await screen.findByRole('tab', { name: 'Content Operations' });
+    const laneBoardTab = screen.getByRole('tab', { name: 'Lane Board' });
+    const previewTab = screen.getByRole('tab', { name: 'Preview' });
+    const adminTab = screen.getByRole('tab', { name: 'Admin / Config' });
     (contentTab as HTMLButtonElement).focus();
     fireEvent.keyDown(contentTab, { key: 'ArrowRight' });
-    expect(configTab.getAttribute('aria-selected')).toBe('true');
-    expect(document.activeElement).toBe(configTab);
-    fireEvent.keyDown(configTab, { key: 'Home' });
+    expect(laneBoardTab.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(laneBoardTab);
+    fireEvent.keyDown(laneBoardTab, { key: 'ArrowRight' });
+    expect(previewTab.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(previewTab);
+    fireEvent.keyDown(previewTab, { key: 'End' });
+    expect(adminTab.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(adminTab);
+    fireEvent.keyDown(adminTab, { key: 'Home' });
     expect(contentTab.getAttribute('aria-selected')).toBe('true');
     expect(document.activeElement).toBe(contentTab);
-    fireEvent.keyDown(contentTab, { key: 'End' });
-    expect(configTab.getAttribute('aria-selected')).toBe('true');
-    expect(document.activeElement).toBe(configTab);
+    fireEvent.keyDown(contentTab, { key: 'ArrowLeft' });
+    expect(adminTab.getAttribute('aria-selected')).toBe('true');
   });
 
   it('renders the three homepage lane cards in the content tab', async () => {
@@ -269,9 +282,9 @@ describe('ManagePage', () => {
     );
 
     await screen.findByRole('region', { name: /Content detail editor/i });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
 
-    expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
+    expect(screen.getByRole('tabpanel', { name: 'Admin / Config' })).toBeTruthy();
     expect(screen.getByRole('region', { name: /System health summary/i })).toBeTruthy();
     expect(screen.getByRole('region', { name: /^API approval and tokens$/i })).toBeTruthy();
     expect(screen.getByRole('region', { name: /^Backend connection$/i })).toBeTruthy();
@@ -441,8 +454,8 @@ describe('ManagePage', () => {
     );
 
     await screen.findByRole('region', { name: /Content detail editor/i });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
-    const normalConfigText = screen.getByRole('tabpanel', { name: 'Config' }).textContent ?? '';
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
+    const normalConfigText = screen.getByRole('tabpanel', { name: 'Admin / Config' }).textContent ?? '';
 
     expect(normalConfigText).not.toContain(rawBackendUrl);
     expect(normalConfigText).not.toContain(rawApiResource);
@@ -458,14 +471,14 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect((await screen.findByRole('heading', { name: /Foleon Manager/i })).textContent).toMatch(/Foleon Manager/i);
+    expect((await screen.findByRole('heading', { name: /Foleon Content Operations/i })).textContent).toMatch(/Foleon Content Operations/i);
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(screen.getByText('Published')).toBeTruthy();
     expect(screen.getByText('Preview structure active')).toBeTruthy();
     expect(screen.getByText(/lane model remains visible while the data set is light/i)).toBeTruthy();
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
     expect(document.querySelector('iframe')).toBeNull();
@@ -495,7 +508,7 @@ describe('ManagePage', () => {
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     expect(screen.getByRole('region', { name: /Sync run history/i })).toBeTruthy();
   });
@@ -586,7 +599,7 @@ describe('ManagePage', () => {
       />,
     );
 
-    expect(await screen.findByRole('heading', { name: /Foleon Manager/i })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: /Foleon Content Operations/i })).toBeTruthy();
     expect(screen.getByRole('status', { name: 'Limited mode' })).toBeTruthy();
     expect(screen.getByRole('status', { name: 'API access required' })).toBeTruthy();
     const apiBanner = screen.getByRole('status', { name: 'API access required' });
@@ -602,8 +615,8 @@ describe('ManagePage', () => {
     const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
     expect(within(laneNavigation).getAllByText('Needs setup').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
-    expect(screen.getByRole('tab', { name: 'Homepage Foleon Content' })).toBeTruthy();
-    expect(screen.getByRole('tab', { name: 'Config' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Content Operations' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Admin / Config' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Retry API readiness' })).toBeTruthy();
     expect((screen.getByRole('button', { name: 'Sync blocked' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Create placement blocked' }) as HTMLButtonElement).disabled).toBe(true);
@@ -643,10 +656,10 @@ describe('ManagePage', () => {
       />,
     );
 
-    await screen.findByRole('tab', { name: 'Config' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    await screen.findByRole('tab', { name: 'Admin / Config' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
 
-    const configText = screen.getByRole('tabpanel', { name: 'Config' }).textContent ?? '';
+    const configText = screen.getByRole('tabpanel', { name: 'Admin / Config' }).textContent ?? '';
     expect(screen.getByRole('region', { name: 'API approval required' })).toBeTruthy();
     expect(configText).toContain('API approval required');
     expect(configText).toContain('Tenant approval needed for the Foleon API');
@@ -904,12 +917,12 @@ describe('ManagePage', () => {
     ).toBe(0);
   });
 
-  it('renders Foleon Manager title, plain-language status chips, and keeps sync history under Config diagnostics', async () => {
+  it('renders Foleon Content Operations title, plain-language status chips, and keeps sync history under Admin diagnostics', async () => {
     installManageFetchMock({ content: [] });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('heading', { name: 'Foleon Manager' });
+    await screen.findByRole('heading', { name: 'Foleon Content Operations' });
     expect(screen.getByText('Marketing Operations')).toBeTruthy();
     expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
     expect(screen.getByText('Content lanes')).toBeTruthy();
@@ -917,12 +930,12 @@ describe('ManagePage', () => {
     expect(screen.getByText('Registry status')).toBeTruthy();
     expect(screen.getByText('Last sync')).toBeTruthy();
 
-    const contentPanel = screen.getByRole('tabpanel', { name: 'Homepage Foleon Content' });
+    const contentPanel = screen.getByRole('tabpanel', { name: 'Content Operations' });
     expect(contentPanel.textContent).not.toMatch(/TOKEN ACQUISITIONBlocked/i);
 
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'View Diagnostics' }));
-    expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Admin diagnostics' }));
+    expect(screen.getByRole('tabpanel', { name: 'Admin / Config' })).toBeTruthy();
     expect(
       screen.getByRole('button', { name: /Hide redacted diagnostics, sync history, and technical proof/i }).getAttribute('aria-expanded'),
     ).toBe('true');
@@ -961,8 +974,8 @@ describe('ManagePage', () => {
       />,
     );
 
-    await screen.findByRole('tab', { name: 'Config' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    await screen.findByRole('tab', { name: 'Admin / Config' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     const list = screen.getByRole('region', { name: /Required admin actions/i }).querySelector('ol');
     expect(list).toBeTruthy();
     const items = within(list as HTMLElement).getAllByRole('listitem');
@@ -976,8 +989,8 @@ describe('ManagePage', () => {
     installManageFetchMock({ content: [] });
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('heading', { name: 'Foleon Manager' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    await screen.findByRole('heading', { name: 'Foleon Content Operations' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     expect(screen.queryByRole('button', { name: 'Copy redacted proof' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     expect(screen.getByRole('button', { name: 'Copy redacted proof' })).toBeTruthy();
@@ -993,8 +1006,8 @@ describe('ManagePage', () => {
     installManageFetchMock({ content: [] });
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    await screen.findByRole('heading', { name: 'Foleon Manager' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    await screen.findByRole('heading', { name: 'Foleon Content Operations' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     fireEvent.click(screen.getByRole('button', { name: 'Copy redacted proof' }));
     await waitFor(() => {
@@ -1051,13 +1064,150 @@ describe('ManagePage', () => {
       />,
     );
 
-    await screen.findByRole('heading', { name: 'Foleon Manager' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    await screen.findByRole('heading', { name: 'Foleon Content Operations' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Admin / Config' }));
     fireEvent.click(screen.getByRole('button', { name: /Show redacted diagnostics, sync history, and technical proof/i }));
     const note = screen.getByRole('note');
     expect(note.textContent).toMatch(/aligns with readiness codes on record for support/i);
     expect(note.textContent).toContain('token-acquisition-failed');
     expect(note.textContent).not.toContain('consent_required');
+  });
+
+  it('renders the operations summary strip with derivable counts', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Live PS',
+          readerKey: 'project-spotlight',
+          contentTypeKey: 'Project Spotlight',
+          activeEdition: true,
+          publishedUrl: 'https://viewer.us.foleon.com/ps/live',
+          embedUrl: 'https://viewer.us.foleon.com/ps/live/embed',
+        }),
+        managedContent({
+          id: 'content-2',
+          sharePointItemId: 2,
+          title: 'Orphan content',
+          foleonDocId: 99999,
+          readerKey: 'company-pulse',
+          contentTypeKey: 'Company Pulse',
+          activeEdition: true,
+          publishStatus: 'Draft',
+          isVisible: false,
+          isHomepageEligible: false,
+        }),
+      ],
+      placements: [managedPlacement()],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const summary = await screen.findByRole('region', { name: 'Operations summary' });
+    const live = within(summary).getByText('Live').parentElement?.querySelector(`[data-summary-id="live"], [aria-label="Live count"]`);
+    expect(within(summary).getByText('Live')).toBeTruthy();
+    expect(within(summary).getByText('Staged')).toBeTruthy();
+    expect(within(summary).getByText('Blocked')).toBeTruthy();
+    expect(within(summary).getByText('Unassigned')).toBeTruthy();
+    expect(summary.querySelector('[data-summary-id="unassigned"]')?.textContent).toContain('1');
+    expect(live).not.toBeNull();
+  });
+
+  it('renders Lane Board placeholder workspace with structured copy and live CTA', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
+    const panel = screen.getByRole('tabpanel', { name: 'Lane Board' });
+    expect(panel.getAttribute('id')).toBe('foleon-manage-panel-lane-board');
+    expect(panel.textContent).toContain(
+      'This workspace will become the primary lane-based placement board for Project Spotlight, Company Pulse, and Leadership Message.',
+    );
+    expect(panel.textContent).toContain(
+      'Placement data is still managed through Content Operations in this wave.',
+    );
+    expect(panel.textContent).toContain(
+      'Use Content Operations to review content and manage current placement readiness until the Lane Board workflow is implemented.',
+    );
+    expect(within(panel).queryByRole('button', { name: /Coming soon/i })).toBeNull();
+
+    fireEvent.click(within(panel).getByRole('button', { name: 'Open Content Operations' }));
+    expect(screen.getByRole('tab', { name: 'Content Operations' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('tabpanel', { name: 'Content Operations' })).toBeTruthy();
+  });
+
+  it('renders Preview placeholder workspace and reuses safe-origin Open Foleon behavior', async () => {
+    installManageFetchMock({ content: [] });
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Preview' }));
+    const panel = screen.getByRole('tabpanel', { name: 'Preview' });
+    expect(panel.getAttribute('id')).toBe('foleon-manage-panel-preview');
+    expect(panel.textContent).toContain(
+      'This workspace will provide employee-facing reader previews before content is activated on HB Central.',
+    );
+    expect(panel.textContent).toContain('Preview routing is not active in this wave.');
+    expect(panel.textContent).toContain(
+      'Use Open Foleon for source review and Content Operations for readiness validation until the governed reader preview workflow is implemented.',
+    );
+    expect(panel.querySelector('iframe')).toBeNull();
+
+    fireEvent.click(within(panel).getByRole('button', { name: /Open Foleon/i }));
+    expect(openSpy).toHaveBeenCalledWith('https://viewer.us.foleon.com', '_blank', 'noopener,noreferrer');
+
+    fireEvent.click(within(panel).getByRole('button', { name: 'Open Content Operations' }));
+    expect(screen.getByRole('tab', { name: 'Content Operations' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('disables Preview Open Foleon when no safe origin is configured and surfaces the unavailable reason', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(
+      <ManagePage
+        contract={mockContract({ originPolicy: createFoleonOriginPolicy([]) })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Preview' }));
+    const panel = screen.getByRole('tabpanel', { name: 'Preview' });
+    const openButton = within(panel).getByRole('button', { name: /Open Foleon/i }) as HTMLButtonElement;
+    expect(openButton.disabled).toBe(true);
+    expect(panel.textContent).toMatch(/approved HTTPS viewer origin/i);
+  });
+
+  it('Review new content header action selects Content Operations and emits a status hint', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Lane Board' }));
+    expect(screen.getByRole('tab', { name: 'Lane Board' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review new content' }));
+
+    expect(screen.getByRole('tab', { name: 'Content Operations' }).getAttribute('aria-selected')).toBe('true');
+    expect(
+      screen.getAllByRole('status').some((entry) => /Review new content in the Content Operations workspace/i.test(entry.textContent ?? '')),
+    ).toBe(true);
+  });
+
+  it('Manage placements header action selects Content Operations and emits a status hint', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Admin / Config' }));
+    expect(screen.getByRole('tab', { name: 'Admin / Config' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Manage placements' }));
+
+    expect(screen.getByRole('tab', { name: 'Content Operations' }).getAttribute('aria-selected')).toBe('true');
+    expect(
+      screen.getAllByRole('status').some((entry) => /Manage placements from the Content Operations workspace/i.test(entry.textContent ?? '')),
+    ).toBe(true);
   });
 });
 

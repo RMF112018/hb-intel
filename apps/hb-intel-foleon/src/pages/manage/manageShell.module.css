@@ -67,39 +67,6 @@
   color: var(--foleon-manage-fg-muted);
 }
 
-.actions {
-  display: flex;
-  gap: var(--foleon-manage-space-xs);
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.syncFieldset {
-  margin: 0;
-  padding: 0;
-  border: none;
-  min-width: 0;
-}
-
-.syncLegend {
-  float: left;
-  width: 100%;
-  padding: 0;
-  margin: 0 0 6px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--foleon-manage-fg-muted);
-}
-
-.syncFieldsetButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--foleon-manage-space-xs);
-  clear: both;
-}
-
 .buttonIcon {
   margin-right: 6px;
   vertical-align: text-bottom;
@@ -338,16 +305,104 @@
   margin-top: 0;
 }
 
-.tabs {
+.operationsShell {
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.commandGroup {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  align-content: flex-start;
+}
+
+.commandGroupLegend {
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.commandGroupButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+}
+
+.summaryStrip {
+  composes: panel;
+  padding: var(--foleon-manage-space-sm) var(--foleon-manage-space-md);
+}
+
+.summaryStripList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--foleon-manage-space-sm);
+}
+
+.summaryStripItem {
+  display: grid;
+  gap: 2px;
+  border-left: 4px solid var(--foleon-manage-accent-soft);
+  padding-left: var(--foleon-manage-space-sm);
+  min-width: 0;
+}
+
+.summaryStripItem[data-summary-id='live'] {
+  border-left-color: var(--foleon-manage-success);
+}
+
+.summaryStripItem[data-summary-id='blocked'] {
+  border-left-color: var(--foleon-manage-danger);
+}
+
+.summaryStripItem[data-summary-id='staged'] {
+  border-left-color: var(--foleon-manage-accent);
+}
+
+.summaryStripItem[data-summary-id='unassigned'] {
+  border-left-color: var(--foleon-manage-warning);
+}
+
+.summaryStripValue {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.summaryStripLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.summaryStripEmpty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.primaryNav {
   composes: panel;
   display: flex;
   gap: var(--foleon-manage-space-xs);
   padding: var(--foleon-manage-space-xs);
-  margin-bottom: var(--foleon-manage-space-md);
   flex-wrap: wrap;
 }
 
-.tabButton {
+.primaryNavButton {
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
@@ -358,14 +413,73 @@
   padding: 10px 16px;
 }
 
-.tabButton:focus-visible {
+.primaryNavButton:focus-visible {
   outline: 2px solid var(--foleon-manage-accent);
   outline-offset: 2px;
 }
 
-.tabButtonActive {
+.primaryNavButtonActive {
   background: var(--foleon-manage-accent-soft);
   border-color: var(--foleon-manage-accent);
+}
+
+.placeholderPanel {
+  composes: panel;
+  padding: var(--foleon-manage-space-lg);
+  display: grid;
+  gap: var(--foleon-manage-space-md);
+}
+
+.placeholderHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.placeholderKicker {
+  margin: 0;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.placeholderTitle {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.placeholderBody {
+  margin: 0;
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.placeholderBody div {
+  display: grid;
+  gap: 4px;
+}
+
+.placeholderBody dt {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foleon-manage-fg-muted);
+}
+
+.placeholderBody dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 720px;
+}
+
+.placeholderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
 }
 
 .tabPanel {

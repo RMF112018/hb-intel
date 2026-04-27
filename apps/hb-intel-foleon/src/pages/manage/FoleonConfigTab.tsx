@@ -69,9 +69,9 @@ export function FoleonConfigTab(props: {
   return (
     <div
       role="tabpanel"
-      id="foleon-manage-panel-config"
-      aria-labelledby="foleon-manage-tab-config"
-      aria-label="Config"
+      id="foleon-manage-panel-admin-config"
+      aria-labelledby="foleon-manage-nav-admin-config"
+      aria-label="Admin / Config"
       className={shell.tabPanel}
     >
       {consentRequired ? (

@@ -16,7 +16,9 @@ import { FoleonError, FoleonLoadingState } from '../../components/FoleonStates.j
 import { FoleonConfigTab } from './FoleonConfigTab.js';
 import { HomepageFoleonContentTab } from './HomepageFoleonContentTab.js';
 import { buildManagerStatusChips, resolveSafeFoleonOpenOrigin } from './manageHeaderStatusModel.js';
-import { ManageShellHeader } from './ManageShellHeader.js';
+import { ManageOperationsShell } from './ManageOperationsShell.js';
+import { type ManagerPrimaryNavKey } from './ManagerPrimaryNav.js';
+import { buildManagerOperationsCounts } from './managerOperationsViewModel.js';
 import {
   buildFoleonLaneViewModels,
   pickDefaultLaneSelection,
@@ -24,7 +26,6 @@ import {
 } from './manageLaneViewModel.js';
 import { readerLaneForContent, type FoleonReaderLane } from './manageMutationUtils.js';
 import { runFoleonSync } from './manageWorkflows.js';
-import { ManageTabs, type ManageTabKey } from './ManageTabs.js';
 import { useManageBreakpoint } from './useManageBreakpoint.js';
 import {
   plainLanguageSyncBlockReason,
@@ -59,18 +60,28 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
   const [selectedLane, setSelectedLane] = useState<FoleonReaderLane | null>(null);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState<ManageTabKey>('content');
+  const [selectedNav, setSelectedNav] = useState<ManagerPrimaryNavKey>('content-operations');
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const breakpoint = useManageBreakpoint();
 
-  const selectTab = useCallback((tab: ManageTabKey): void => {
-    setSelectedTab(tab);
-    if (tab === 'content') setDiagnosticsOpen(false);
+  const selectNav = useCallback((key: ManagerPrimaryNavKey): void => {
+    setSelectedNav(key);
+    if (key !== 'admin-config') setDiagnosticsOpen(false);
   }, []);
 
   const openDiagnostics = useCallback((): void => {
-    setSelectedTab('config');
+    setSelectedNav('admin-config');
     setDiagnosticsOpen(true);
+  }, []);
+
+  const reviewNewContent = useCallback((): void => {
+    setSelectedNav('content-operations');
+    setMessage('Review new content in the Content Operations workspace below.');
+  }, []);
+
+  const managePlacements = useCallback((): void => {
+    setSelectedNav('content-operations');
+    setMessage('Manage placements from the Content Operations workspace below.');
   }, []);
 
   const load = async (): Promise<void> => {
@@ -221,6 +232,16 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     ? undefined
     : 'Open Foleon needs an approved HTTPS viewer origin (none is configured).';
 
+  const operationsCounts = useMemo(
+    () => buildManagerOperationsCounts({ content: ready?.content ?? [], placements: ready?.placements ?? [], lanes }),
+    [ready, lanes],
+  );
+
+  const onOpenFoleonFromPreview = useCallback((): void => {
+    if (!safeFoleonOpenUrl) return;
+    window.open(safeFoleonOpenUrl, '_blank', 'noopener,noreferrer');
+  }, [safeFoleonOpenUrl]);
+
   if (state.kind === 'loading') {
     return (
       <section className={`foleonManageRoot ${shell.shell}`} aria-busy="true">
@@ -264,77 +285,90 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     <Tooltip.Provider delayDuration={280}>
       <section
         className={`foleonManageRoot ${shell.shell}`}
-        aria-label="Foleon Manager"
+        aria-label="Foleon Content Operations"
         data-breakpoint-width={breakpoint.widthBand}
         data-breakpoint-short-height={breakpoint.shortHeight ? 'true' : 'false'}
         data-breakpoint-narrow-stable={breakpoint.narrowestStable ? 'true' : 'false'}
         data-breakpoint-row-sharing={breakpoint.rowSharingEligible ? 'true' : 'false'}
         data-manager-layout={breakpoint.rowSharingEligible ? 'three-zone' : breakpoint.widthBand}
       >
-        <ManageShellHeader
-          onBack={props.onBack}
-          onSyncDocs={(): void => void runFoleonSync(api, 'docs', load, setMessage)}
-          onSyncProjects={(): void => void runFoleonSync(api, 'projects', load, setMessage)}
-          canSync={canSync}
-          syncBlockReason={syncBlockReasonPlain}
-          statusChips={statusChips}
-          safeFoleonOpenUrl={safeFoleonOpenUrl}
+        <ManageOperationsShell
+          headerProps={{
+            onBack: props.onBack,
+            onSyncDocs: (): void => void runFoleonSync(api, 'docs', load, setMessage),
+            onSyncProjects: (): void => void runFoleonSync(api, 'projects', load, setMessage),
+            canSync,
+            syncBlockReason: syncBlockReasonPlain,
+            onReviewNewContent: reviewNewContent,
+            onManagePlacements: managePlacements,
+            safeFoleonOpenUrl,
+            openFoleonUnavailableReason,
+            onAdminDiagnostics: openDiagnostics,
+            statusChips,
+          }}
+          counts={operationsCounts}
+          selectedNav={selectedNav}
+          onSelectNav={selectNav}
+          onOpenFoleonFromPreview={onOpenFoleonFromPreview}
+          canOpenFoleon={Boolean(safeFoleonOpenUrl)}
           openFoleonUnavailableReason={openFoleonUnavailableReason}
-          onViewDiagnostics={openDiagnostics}
-        />
-
-        {tokenAcquisitionDegraded ? (
-          <div role="status" className={shell.statusBanner} aria-label="API access required">
-            <p className={shell.bannerPrimary}>{tokenAcquisitionDegradedBannerPrimary()}</p>
-            <p className={shell.bannerNextStep}>{tokenAcquisitionDegradedBannerNextStep()}</p>
-            <details className={shell.bannerTechnical}>
-              <summary className={shell.bannerTechnicalSummary}>Technical reference</summary>
-              <p className={shell.bannerTechnicalBody}>
-                Recorded readiness code: token-acquisition-failed. Raw service messages are omitted from this banner.
-              </p>
-            </details>
-            <div className={shell.bannerActions}>
-              <HbcButton variant="secondary" onClick={(): void => void load()}>
-                Retry API readiness
-              </HbcButton>
-            </div>
-          </div>
-        ) : null}
-        {message ? (
-          <div role="status" className={shell.statusBanner}>
-            {message}
-          </div>
-        ) : null}
-
-        <ManageTabs selected={selectedTab} onSelect={selectTab} />
-        {selectedTab === 'content' ? (
-          <HomepageFoleonContentTab
-            contract={props.contract}
-            managerReadPathProven={state.managerReadPathProven}
-            content={state.content}
-            placements={state.placements}
-            syncStatus={state.syncStatus}
-            api={api}
-            query={query}
-            onQueryChange={setQuery}
-            filteredContent={filteredContent}
-            selected={selected}
-            selectedId={selectedId}
-            selectedLane={effectiveSelectedLane}
-            onSelectLane={selectLane}
-            onSelectRecord={selectRegistryRecord}
-            onRefresh={load}
-            setMessage={setMessage}
-          />
-        ) : (
-          <FoleonConfigTab
-            contract={props.contract}
-            managerReadPathProven={state.managerReadPathProven}
-            runs={state.runs}
-            diagnosticsOpen={diagnosticsOpen}
-            onDiagnosticsOpenChange={setDiagnosticsOpen}
-          />
-        )}
+          banners={
+            <>
+              {tokenAcquisitionDegraded ? (
+                <div role="status" className={shell.statusBanner} aria-label="API access required">
+                  <p className={shell.bannerPrimary}>{tokenAcquisitionDegradedBannerPrimary()}</p>
+                  <p className={shell.bannerNextStep}>{tokenAcquisitionDegradedBannerNextStep()}</p>
+                  <details className={shell.bannerTechnical}>
+                    <summary className={shell.bannerTechnicalSummary}>Technical reference</summary>
+                    <p className={shell.bannerTechnicalBody}>
+                      Recorded readiness code: token-acquisition-failed. Raw service messages are omitted from this banner.
+                    </p>
+                  </details>
+                  <div className={shell.bannerActions}>
+                    <HbcButton variant="secondary" onClick={(): void => void load()}>
+                      Retry API readiness
+                    </HbcButton>
+                  </div>
+                </div>
+              ) : null}
+              {message ? (
+                <div role="status" className={shell.statusBanner}>
+                  {message}
+                </div>
+              ) : null}
+            </>
+          }
+        >
+          {selectedNav === 'content-operations' ? (
+            <HomepageFoleonContentTab
+              contract={props.contract}
+              managerReadPathProven={state.managerReadPathProven}
+              content={state.content}
+              placements={state.placements}
+              syncStatus={state.syncStatus}
+              api={api}
+              query={query}
+              onQueryChange={setQuery}
+              filteredContent={filteredContent}
+              selected={selected}
+              selectedId={selectedId}
+              selectedLane={effectiveSelectedLane}
+              onSelectLane={selectLane}
+              onSelectRecord={selectRegistryRecord}
+              onRefresh={load}
+              setMessage={setMessage}
+            />
+          ) : null}
+          {selectedNav === 'admin-config' ? (
+            <FoleonConfigTab
+              contract={props.contract}
+              managerReadPathProven={state.managerReadPathProven}
+              runs={state.runs}
+              diagnosticsOpen={diagnosticsOpen}
+              onDiagnosticsOpenChange={setDiagnosticsOpen}
+            />
+          ) : null}
+        </ManageOperationsShell>
       </section>
     </Tooltip.Provider>
   );
