@@ -239,7 +239,11 @@ describe('FoleonReaderModule', () => {
     // Phase-04 Wave-01 Prompt-05: Leadership identity is layout-key driven.
     // Tone-based markers are intentionally not emitted by this lane's new
     // executive layout.
-    await screen.findByText('Preview layout');
+    await waitFor(() => {
+      const lm = container.querySelector('[data-foleon-layout="leadership-message"]');
+      expect(lm?.textContent).toContain('Preview');
+      expect(lm?.textContent).not.toContain('Preview layout');
+    });
     expect(container.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-layout="leadership-message"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
@@ -347,7 +351,11 @@ describe('FoleonReaderModule', () => {
     });
     const { container } = renderModule({ config: FOLEON_READER_CONFIGS.leadershipMessage });
 
-    await screen.findByText('Preview layout');
+    await waitFor(() => {
+      const lm = container.querySelector('[data-foleon-layout="leadership-message"]');
+      expect(lm?.textContent).toContain('Preview');
+      expect(lm?.textContent).not.toContain('Preview layout');
+    });
     // Lane-owned layout markers present.
     expect(container.querySelector('[data-foleon-reader-layout="leadership-message"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-layout="leadership-message"]')).not.toBeNull();
@@ -533,7 +541,10 @@ describe('FoleonReaderModule', () => {
       ).not.toBeNull();
     });
     await screen.findByLabelText('Company Pulse coverage');
-    expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
+    await waitFor(() => {
+      const leadership = document.querySelector('[data-foleon-reader-layout="leadership-message"]');
+      expect(leadership?.textContent).toContain('Leadership Message');
+    });
     expect(resolveMock).toHaveBeenCalledTimes(3);
 
     // Per-lane scoped assertions. Each lane wrapper is queried and tested

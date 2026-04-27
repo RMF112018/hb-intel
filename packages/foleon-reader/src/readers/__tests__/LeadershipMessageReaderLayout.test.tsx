@@ -81,6 +81,14 @@ function buildReadyViewModel(
 const TEST_POLICY = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
 
 describe('LeadershipMessageReaderLayout — lane-owned executive composition', () => {
+  function assertLeadershipUiClean(container: HTMLElement): void {
+    const text = container.textContent ?? '';
+    expect(text).not.toContain('Executive byline not provided.');
+    expect(text).not.toContain('Leadership Message reader');
+    expect(text).not.toContain('Preview layout');
+    expect(text.toLowerCase()).not.toMatch(/sample executive|sample role|sample pull quote|sample audience/i);
+  }
+
   it('emits the new data-foleon-layout marker alongside the registry markers', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
     const { container } = render(
@@ -91,6 +99,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(wrapper?.getAttribute('data-foleon-reader-layout')).toBe('leadership-message');
     expect(wrapper?.getAttribute('data-foleon-reader-lane')).toBe('leadershipMessage');
     expect(wrapper?.getAttribute('data-foleon-reader-state')).toBe('preview');
+    assertLeadershipUiClean(container);
   });
 
   it('does not emit Project Spotlight or Company Pulse layout markers', () => {
@@ -138,39 +147,39 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(readyWrapper?.getAttribute('data-foleon-reader-state')).toBe('ready');
   });
 
-  it('keeps an honest visible preview label in preview state', () => {
+  it('shows the shared Preview banner label in preview state', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
-    render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
-    expect(screen.getByText('Preview layout')).toBeTruthy();
+    const { container } = render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    expect(screen.getByText('Preview')).toBeTruthy();
+    assertLeadershipUiClean(container);
   });
 
-  it('renders an honest fallback when the FoleonContentRecord schema does not carry byline/role', () => {
+  it('omits executive byline rows when the schema does not carry byline/role (no absence copy)', () => {
     const viewModel = buildReadyViewModel();
-    render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
-    // Schema does not carry byline/role today — layout renders the honest
-    // fallback rather than fabricating executive identity.
-    expect(screen.getByText('Executive byline not provided.')).toBeTruthy();
+    const { container } = render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    expect(screen.queryByText('Executive byline not provided.')).toBeNull();
+    assertLeadershipUiClean(container);
   });
 
-  it('renders the message body and pull quote derived from FoleonContentRecord (no invented data)', () => {
+  it('renders teaser from view model summary without a summary-derived pull quote or duplicate body paragraph', () => {
     const viewModel = buildReadyViewModel();
     const { container } = render(
       <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
-    // Pull quote = first sentence of record.summary, rendered in a <blockquote>.
-    const blockquote = container.querySelector('blockquote');
-    expect(blockquote?.textContent).toBe('A focused message on the year ahead.');
-    // Message body = full record.summary, rendered in a paragraph that
-    // mentions the back-half text only the body carries.
+    expect(container.querySelector('blockquote')).toBeNull();
     expect(container.textContent).toContain('We are committing to clearer communication');
+    assertLeadershipUiClean(container);
   });
 
-  it('uses an honest fallback for the message body when the record carries no summary', () => {
+  it('does not surface editorial absence copy when the record carries no summary', () => {
     const viewModel = buildReadyViewModel({ summary: undefined });
-    render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    const { container } = render(
+      <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
     expect(
-      screen.getByText(/Editorial summary for this Leadership Message has not been provided\./i),
-    ).toBeTruthy();
+      screen.queryByText(/Editorial summary for this Leadership Message has not been provided\./i),
+    ).toBeNull();
+    assertLeadershipUiClean(container);
   });
 
   it('Phase-04 Wave-01 Prompt-05: never renders an inline iframe, even when iframeSurface is provided', () => {

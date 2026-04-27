@@ -6,6 +6,12 @@ import {
   createPreviewFoleonViewerTarget,
   createReadyFoleonViewerTarget,
 } from './FoleonViewerTypes.js';
+import {
+  buildLeadershipPreviewSlice,
+  buildLeadershipReadySlice,
+  type LeadershipViewerTargetInput,
+  type LeadershipMessageLaneModel,
+} from './viewModels/leadershipMessageViewModel.js';
 
 // ---------------------------------------------------------------------------
 // Foleon reader — shared view model + lane layout key mapper
@@ -189,21 +195,12 @@ export interface FoleonReaderPulseBoardModel {
 }
 
 /**
- * Leadership Message executive composition. Populated only when
- * `lane === 'leadershipMessage'`. Ready-state values are sourced
- * **only** from `FoleonContentRecord` fields the schema actually
- * carries. Fields the schema does not carry (byline, role, portrait)
- * remain `undefined` — the layout renders an honest fallback or omits
- * the row. Preview values are clearly labeled sample copy.
+ * Leadership Message lane slice — teaser-first access point into Foleon.
+ * Populated only when `lane === 'leadershipMessage'`.
+ *
+ * Full article body lives in Foleon only; see `LeadershipMessageLaneModel`.
  */
-export interface FoleonReaderLeadershipMessage {
-  readonly byline?: string;
-  readonly role?: string;
-  readonly pullQuote?: string;
-  readonly messageBody?: string;
-  readonly contextNotes?: readonly { readonly id: string; readonly label: string; readonly value: string }[];
-  readonly isPlaceholder: boolean;
-}
+export type FoleonReaderLeadershipMessage = LeadershipMessageLaneModel;
 
 export interface FoleonReaderViewModel {
   readonly lane: FoleonReaderLayoutKey;
@@ -317,7 +314,7 @@ const LANE_LABELS: Readonly<Record<FoleonReaderLayoutKey, LaneLabels>> = {
     freshnessFallback: 'Current edition',
   },
   leadershipMessage: {
-    eyebrow: 'Leadership Message Reader',
+    eyebrow: 'Leadership Message',
     freshnessLabel: 'Executive update',
     freshnessFallback: 'Leadership edition',
   },
@@ -345,6 +342,22 @@ function formatFreshnessDate(raw: string | undefined): string | null {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+function toLeadershipViewerTargetInput(target: FoleonViewerTarget): LeadershipViewerTargetInput {
+  if (target.renderMode === 'preview') {
+    return {
+      source: target.source,
+      renderMode: 'preview',
+      canOpen: true,
+    };
+  }
+  return {
+    source: target.source,
+    renderMode: 'iframe',
+    canOpen: target.canOpen,
+    disabledReason: target.disabledReason,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -397,19 +410,25 @@ const LANE_PREVIEW_COPY: Readonly<Record<FoleonReaderLayoutKey, LanePreviewCopy>
     ],
   },
   leadershipMessage: {
-    title: 'Leadership Message reader',
+    title: 'Leadership Message',
     description:
-      'This sample structure previews the executive communications lane before a governed Leadership Message edition is published.',
-    statusLabel: 'Executive message',
+      'Preview — connect a governed Leadership Message edition to display the active executive update here.',
+    statusLabel: 'Preview edition',
     cadenceLabel: 'Leadership',
-    featureTitle: 'Executive message edition placeholder',
+    featureTitle: 'Leadership Message',
     featureCopy:
-      'A refined leadership communication area will introduce the active executive message, key context, and publication framing once live Foleon content is connected.',
+      'When an edition is published, this lane surfaces the headline and teaser from governed metadata and opens the full message in Foleon.',
     governanceNote: 'Leadership content type required for alignment',
     supportCards: [
-      ['Executive context', 'Leadership framing, message intent, and companywide relevance will appear here.'],
-      ['Message status', 'Active-edition governance keeps the current leadership message clear and intentional.'],
-      ['Archive posture', 'Archive filtering will appear when live lane archive behavior is connected.'],
+      [
+        'Edition status',
+        'The active leadership message appears here once publishing connects this lane to Foleon.',
+      ],
+      [
+        'Governance',
+        'Content type and placement align this lane with the configured Leadership Message slot.',
+      ],
+      ['Archive', 'Prior editions remain available through the full archive when enabled.'],
     ],
   },
 };
@@ -492,23 +511,17 @@ export function createPreviewFoleonReaderViewModel(
           accessibleLabel: undefined,
         }
       : undefined;
+  const previewTarget = createPreviewFoleonViewerTarget(config);
   const leadershipMessage: FoleonReaderLeadershipMessage | undefined =
     lane === 'leadershipMessage'
-      ? {
-          byline: 'Sample executive byline',
-          role: 'Sample role',
-          pullQuote:
-            'Sample pull quote — a short, weighted statement framing the executive message will appear here when a live edition is published.',
-          messageBody:
-            'Sample message body — the focused leadership communication will appear here once a live Leadership Message edition is connected.',
-          contextNotes: [
-            { id: 'audience', label: 'Audience', value: 'Sample audience' },
-            { id: 'cadence', label: 'Cadence', value: 'Leadership' },
-          ],
-          isPlaceholder: true,
-        }
+      ? buildLeadershipPreviewSlice({
+          laneLabel: labels.eyebrow,
+          statusLabel: preview.statusLabel,
+          headline: preview.title,
+          teaser: preview.description,
+          targetInput: toLeadershipViewerTargetInput(previewTarget),
+        })
       : undefined;
-  const previewTarget = createPreviewFoleonViewerTarget(config);
   const pulseBoard: FoleonReaderPulseBoardModel | undefined =
     lane === 'companyPulse'
       ? {
@@ -550,7 +563,7 @@ export function createPreviewFoleonReaderViewModel(
     title: preview.title,
     summary: preview.description,
     eyebrow: labels.eyebrow,
-    previewLabel: lane === 'leadershipMessage' ? 'Preview layout' : 'Preview',
+    previewLabel: 'Preview',
     freshnessLabel: labels.freshnessLabel,
     freshnessValue: labels.freshnessFallback,
     audience: 'Companywide',
@@ -687,9 +700,6 @@ function buildReadyPulseMedia(record: FoleonContentRecord): FoleonReaderPulseMed
 }
 
 // ---------------------------------------------------------------------------
-// Leadership Message ready-state derivations — sourced only from
-// FoleonContentRecord. No invented data.
-// ---------------------------------------------------------------------------
 
 function buildReadyProjectMedia(record: FoleonContentRecord): FoleonReaderProjectMedia {
   const hero = record.heroImageUrl?.trim();
@@ -722,34 +732,6 @@ function buildProjectLabel(record: FoleonContentRecord): string | undefined {
   // Suppress when the label duplicates the title (case-insensitive).
   if (trimmed.toLowerCase() === record.title.trim().toLowerCase()) return undefined;
   return trimmed;
-}
-
-function deriveLeadershipPullQuote(summary: string): string | undefined {
-  const trimmed = summary.trim();
-  if (trimmed.length === 0) return undefined;
-  // Use the first sentence (bounded by `.`/`!`/`?`) up to ~180 chars as a
-  // pull quote. Keeps things short and editorial without invention.
-  const match = trimmed.match(/^[^.!?]*[.!?]/);
-  const candidate = (match ? match[0] : trimmed).trim();
-  if (candidate.length === 0) return undefined;
-  return candidate.length > 180 ? `${candidate.slice(0, 180).trimEnd()}…` : candidate;
-}
-
-function deriveLeadershipContextNotes(
-  record: FoleonContentRecord,
-): readonly { readonly id: string; readonly label: string; readonly value: string }[] {
-  const notes: { readonly id: string; readonly label: string; readonly value: string }[] = [];
-  notes.push({
-    id: 'audience',
-    label: 'Audience',
-    value: record.primaryAudience ?? 'Companywide',
-  });
-  notes.push({
-    id: 'archive-group',
-    label: 'Archive group',
-    value: record.archiveGroup ?? 'Archive coming soon',
-  });
-  return notes;
 }
 
 export function createReadyFoleonReaderViewModel(
@@ -826,27 +808,29 @@ export function createReadyFoleonReaderViewModel(
     lane === 'companyPulse'
       ? buildReadyPulseMedia(record)
       : undefined;
+
+  const readyViewerTarget = createReadyFoleonViewerTarget({
+    config,
+    record,
+    embedUrl: resolution.embedUrl,
+  });
+  const freshnessFormatted = formatFreshnessDate(pickFreshnessRaw(lane, record));
+  const freshnessValue = freshnessFormatted ?? labels.freshnessFallback;
+  const audience = record.primaryAudience ?? 'Companywide';
+  const archiveGroup = record.archiveGroup ?? 'Archive coming soon';
+
   const leadershipMessage: FoleonReaderLeadershipMessage | undefined =
     lane === 'leadershipMessage'
-      ? {
-          // FoleonContentRecord schema does not currently carry byline,
-          // role, or portrait fields. The layout shows honest fallbacks
-          // or omits rows when these are absent — the adapter never
-          // invents executive identity.
-          byline: undefined,
-          role: undefined,
-          pullQuote:
-            record.summary && record.summary.trim().length > 0
-              ? deriveLeadershipPullQuote(record.summary)
-              : undefined,
-          messageBody:
-            record.summary && record.summary.trim().length > 0
-              ? record.summary
-              : 'Editorial summary for this Leadership Message has not been provided.',
-          contextNotes: deriveLeadershipContextNotes(record),
-          isPlaceholder: false,
-        }
+      ? buildLeadershipReadySlice({
+          record,
+          laneLabel: labels.eyebrow,
+          statusLabel: freshnessValue,
+          headline: record.title,
+          teaser: record.summary,
+          targetInput: toLeadershipViewerTargetInput(readyViewerTarget),
+        })
       : undefined;
+
   const pulseBoard: FoleonReaderPulseBoardModel | undefined =
     lane === 'companyPulse'
       ? {
@@ -863,21 +847,12 @@ export function createReadyFoleonReaderViewModel(
             imageAlt: pulseMedia?.accessibleLabel,
             isPreview: false,
             isSample: false,
-            target: createReadyFoleonViewerTarget({
-              config,
-              record,
-              embedUrl: resolution.embedUrl,
-            }),
+            target: readyViewerTarget,
           },
           supportingStories: [],
           supportingEmptyNote: 'Additional Company Pulse stories will appear here when more Foleon items are available.',
         }
       : undefined;
-
-  const freshnessFormatted = formatFreshnessDate(pickFreshnessRaw(lane, record));
-  const freshnessValue = freshnessFormatted ?? labels.freshnessFallback;
-  const audience = record.primaryAudience ?? 'Companywide';
-  const archiveGroup = record.archiveGroup ?? 'Archive coming soon';
 
   const actions: FoleonReaderAction[] = [];
   if (mobileGateActive) {
@@ -910,11 +885,14 @@ export function createReadyFoleonReaderViewModel(
     audience,
     archiveGroup,
     chips: [],
-    facts: [
-      { id: 'freshness', label: labels.freshnessLabel, value: freshnessValue },
-      { id: 'audience', label: 'Audience', value: audience },
-      { id: 'archive-group', label: 'Archive group', value: archiveGroup },
-    ],
+    facts:
+      lane === 'leadershipMessage'
+        ? [{ id: 'freshness', label: labels.freshnessLabel, value: freshnessValue }]
+        : [
+            { id: 'freshness', label: labels.freshnessLabel, value: freshnessValue },
+            { id: 'audience', label: 'Audience', value: audience },
+            { id: 'archive-group', label: 'Archive group', value: archiveGroup },
+          ],
     supportItems: [],
     governanceNotes: [],
     statusNotes: [],
@@ -933,7 +911,14 @@ export function createReadyFoleonReaderViewModel(
       resolution.warnings.length > 0
         ? ['Reader resolved with admin warnings for the Manager workflow.']
         : [],
-    archiveNote: 'The archive opens previous Company Pulse editions.',
+    archiveNote:
+      lane === 'companyPulse'
+        ? 'The archive opens previous Company Pulse editions.'
+        : lane === 'leadershipMessage'
+          ? 'Earlier leadership messages are available in the archive.'
+          : lane === 'projectSpotlight'
+            ? 'The archive opens previous Company Pulse editions.'
+            : undefined,
     titleElementId: `${config.readerKey}-reader-title`,
     projectFacts,
     featureCallout,
@@ -956,11 +941,7 @@ export function createReadyFoleonReaderViewModel(
       category: record.contentTypeKey,
       dateline: freshnessValue,
       previewOnly: false,
-      target: createReadyFoleonViewerTarget({
-        config,
-        record,
-        embedUrl: resolution.embedUrl,
-      }),
+      target: readyViewerTarget,
     },
   };
 }

@@ -218,12 +218,14 @@ function createPreviewContent(
       return {
         badge: 'Preview',
         title: 'Leadership Message Preview',
-        summary: 'A local preview of the executive message surface before a live Leadership Message edition is available.',
+        summary:
+          'Validates the governed executive lane before an active Leadership Message edition is configured.',
         lane,
-        notice: 'A live Leadership Message Foleon edition will open here once the active executive update is configured.',
+        notice:
+          'When an active edition is selected, this opens the Leadership Message in the governed Foleon viewer.',
         primaryLabel: 'Executive update',
-        secondaryLabel: 'Message preview',
-        bullets: ['Byline area', 'Pull quote', 'Message body'],
+        secondaryLabel: 'Foleon publication',
+        bullets: ['Headline and teaser', 'Publication status', 'Full message in Foleon'],
       };
     default:
       return {

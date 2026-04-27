@@ -19,7 +19,7 @@ export function FoleonReaderPreview(props: FoleonReaderPreviewProps): React.Reac
     >
       <header className={styles.previewBanner}>
         <div>
-          <p className={styles.previewEyebrow}>Preview layout</p>
+          <p className={styles.previewEyebrow}>Preview</p>
           <h2 className={styles.previewTitle} id={`${props.config.readerKey}-preview-title`}>
             {preview.title}
           </h2>
@@ -126,17 +126,25 @@ function previewCopyForTone(tone: FoleonReaderTone): {
   return {
     className: styles.readerPreviewLeadership,
     toneName: 'navy',
-    title: 'Leadership Message reader',
-    description: 'This sample structure previews the executive communications lane before a governed Leadership Message edition is published.',
-    statusLabel: 'Executive message',
+    title: 'Leadership Message',
+    description:
+      'Preview — connect a governed Leadership Message edition to display the active executive update here.',
+    statusLabel: 'Preview edition',
     cadenceLabel: 'Leadership',
-    featureTitle: 'Executive message edition placeholder',
-    featureCopy: 'A refined leadership communication area will introduce the active executive message, key context, and publication framing once live Foleon content is connected.',
+    featureTitle: 'Leadership Message',
+    featureCopy:
+      'When an edition is published, this lane surfaces the headline and teaser from governed metadata and opens the full message in Foleon.',
     governanceNote: 'Leadership content type required for alignment',
     supportCards: [
-      ['Executive context', 'Leadership framing, message intent, and companywide relevance will appear here.'],
-      ['Message status', 'Active-edition governance keeps the current leadership message clear and intentional.'],
-      ['Archive posture', 'Archive filtering will appear when live lane archive behavior is connected.'],
+      [
+        'Edition status',
+        'The active leadership message appears here once publishing connects this lane to Foleon.',
+      ],
+      [
+        'Governance',
+        'Content type and placement align this lane with the configured Leadership Message slot.',
+      ],
+      ['Archive', 'Prior editions remain available through the full archive when enabled.'],
     ],
   };
 }

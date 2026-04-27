@@ -549,14 +549,28 @@ describe('view model — Company Pulse briefing fields', () => {
 });
 
 describe('view model — Leadership Message executive composition', () => {
-  it('preview view model populates leadershipMessage with sample-labeled placeholders only for the leadershipMessage lane', () => {
+  const forbiddenPreviewSubstrings = [
+    'Sample executive byline',
+    'Sample role',
+    'Sample pull quote',
+    'Sample audience',
+    'Preview layout',
+  ] as const;
+
+  function assertNoForbiddenLeadershipStrings(vmSerialized: string): void {
+    for (const bad of forbiddenPreviewSubstrings) {
+      expect(vmSerialized.includes(bad)).toBe(false);
+    }
+    expect(vmSerialized.includes('Sample')).toBe(false);
+  }
+
+  it('preview view model populates leadershipMessage without sample placeholders for the leadershipMessage lane', () => {
     const leadership = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
     expect(leadership.leadershipMessage).toBeDefined();
     expect(leadership.leadershipMessage?.isPlaceholder).toBe(true);
-    expect(leadership.leadershipMessage?.byline).toBe('Sample executive byline');
-    expect(leadership.leadershipMessage?.role).toBe('Sample role');
-    expect(typeof leadership.leadershipMessage?.pullQuote).toBe('string');
-    expect(typeof leadership.leadershipMessage?.messageBody).toBe('string');
+    expect(leadership.leadershipMessage?.cta.kind).toBe('preview');
+    expect(leadership.leadershipMessage?.laneLabel).toBe('Leadership Message');
+    assertNoForbiddenLeadershipStrings(JSON.stringify(leadership.leadershipMessage));
 
     const spotlight = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     const pulse = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
@@ -564,7 +578,7 @@ describe('view model — Leadership Message executive composition', () => {
     expect(pulse.leadershipMessage).toBeUndefined();
   });
 
-  it('ready view model derives leadershipMessage only from FoleonContentRecord — byline/role stay undefined when the schema does not carry them', () => {
+  it('ready view model derives leadershipMessage from FoleonContentRecord — no summary-derived pull quote', () => {
     const resolution = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
       contentTypeKey: 'Leadership',
       readerKey: 'leadership-message',
@@ -584,20 +598,18 @@ describe('view model — Leadership Message executive composition', () => {
 
     expect(vm.leadershipMessage).toBeDefined();
     expect(vm.leadershipMessage?.isPlaceholder).toBe(false);
-    // byline + role are NOT carried by FoleonContentRecord today — adapter
-    // never invents executive identity; layout shows honest fallback.
-    expect(vm.leadershipMessage?.byline).toBeUndefined();
-    expect(vm.leadershipMessage?.role).toBeUndefined();
-    // pullQuote derived from the first sentence of record.summary.
-    expect(vm.leadershipMessage?.pullQuote).toBe('A focused message on the year ahead.');
-    // messageBody derived from full record.summary.
-    expect(vm.leadershipMessage?.messageBody).toMatch(/clearer communication/);
-    // contextNotes derived from record-backed fields only.
+    expect(vm.leadershipMessage?.pullQuote).toBeUndefined();
+    expect(vm.leadershipMessage?.cta.kind).toBe('live');
     const noteIds = vm.leadershipMessage?.contextNotes?.map((n) => n.id);
-    expect(noteIds).toEqual(['audience', 'archive-group']);
+    expect(noteIds).toContain('published');
+    expect(noteIds).toContain('topic');
+    expect(noteIds?.includes('archive-group')).toBe(false);
+
+    const serialized = JSON.stringify(vm.leadershipMessage);
+    expect(serialized.includes('Executive byline not provided.')).toBe(false);
   });
 
-  it('ready view model uses an honest fallback for messageBody when record.summary is missing', () => {
+  it('ready view model omits teaser text in leadership slice when record.summary is missing', () => {
     const noSummary = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
       contentTypeKey: 'Leadership',
       readerKey: 'leadership-message',
@@ -610,8 +622,41 @@ describe('view model — Leadership Message executive composition', () => {
       onActivateMobileReader: () => undefined,
       onOpenArchive: () => undefined,
     });
-    expect(vm.leadershipMessage?.messageBody).toMatch(/has not been provided/);
+    expect(vm.leadershipMessage?.teaser).toBeUndefined();
     expect(vm.leadershipMessage?.pullQuote).toBeUndefined();
+  });
+
+  it('Leadership ready view model exposes only freshness in facts (no audience/archive rows)', () => {
+    const resolution = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+      title: 'Note',
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage, {
+      resolution,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vm.facts.map((f) => f.id)).toEqual(['freshness']);
+    expect(JSON.stringify(vm.facts)).not.toMatch(/Archive group|Audience/i);
+  });
+
+  it('Leadership ready view model uses neutral archive note (not Company Pulse copy)', () => {
+    const resolution = makeReadyResolution(FOLEON_READER_CONFIGS.leadershipMessage, {
+      contentTypeKey: 'Leadership',
+      readerKey: 'leadership-message',
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage, {
+      resolution,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vm.archiveNote).toMatch(/leadership messages/i);
+    expect(vm.archiveNote).not.toMatch(/Company Pulse/i);
   });
 
   it('Spotlight and Pulse ready view models leave leadershipMessage undefined', () => {

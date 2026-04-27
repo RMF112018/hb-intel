@@ -106,10 +106,6 @@ export function LeadershipMessageReaderLayout(
             </blockquote>
           ) : null}
 
-          {message?.messageBody ? (
-            <p className={styles.executiveBody}>{message.messageBody}</p>
-          ) : null}
-
           {message?.contextNotes && message.contextNotes.length > 0 ? (
             <ul
               className={styles.executiveContextNotes}
@@ -172,18 +168,10 @@ function ExecutiveByline(props: {
 }): React.JSX.Element | null {
   const { message } = props;
   if (!message) return null;
-  // Ready state: byline + role are sourced ONLY from FoleonContentRecord.
-  // The current schema does not carry these fields, so ready state shows
-  // an honest fallback rather than fabricating identity. Preview is
-  // clearly sample-labeled.
   const hasByline = typeof message.byline === 'string' && message.byline.trim().length > 0;
   const hasRole = typeof message.role === 'string' && message.role.trim().length > 0;
   if (!hasByline && !hasRole) {
-    return (
-      <div className={styles.executiveBylineRow}>
-        <p className={styles.executiveBylineAbsent}>Executive byline not provided.</p>
-      </div>
-    );
+    return null;
   }
   return (
     <div className={styles.executiveBylineRow}>
