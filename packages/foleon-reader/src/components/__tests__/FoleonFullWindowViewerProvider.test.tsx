@@ -303,6 +303,41 @@ describe('Prompt-04C — static CSS no-global-overflow proof', () => {
     expect(css).toContain('2147483000');
   });
 
+  it('FoleonFullWindowViewer.module.css defines the cinematic open animation keyframes', () => {
+    const css = readCss(VIEWER_CSS_PATH);
+    for (const keyframe of [
+      'foleonReaderOverlayReveal',
+      'foleonReaderHeaderReveal',
+      'foleonReaderBodyReveal',
+      'foleonReaderLightSweep',
+      'foleonReaderPreviewContentReveal',
+    ]) {
+      expect(css).toContain(`@keyframes ${keyframe}`);
+    }
+  });
+
+  it('FoleonFullWindowViewer.module.css disables reveal motion for reduced-motion users', () => {
+    const css = readCss(VIEWER_CSS_PATH);
+    const reducedMotion = css.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+    expect(reducedMotion).toContain('.overlay');
+    expect(reducedMotion).toContain('.overlay::before');
+    expect(reducedMotion).toContain('.header');
+    expect(reducedMotion).toContain('.body');
+    expect(reducedMotion).toContain('.previewGrid');
+    expect(reducedMotion).toMatch(/animation\s*:\s*none\s*;/);
+    expect(reducedMotion).toMatch(/transition\s*:\s*none\s*;/);
+    expect(reducedMotion).toMatch(/transform\s*:\s*none\s*;/);
+    expect(reducedMotion).toMatch(/filter\s*:\s*none\s*;/);
+  });
+
+  it('FoleonFullWindowViewer.module.css does not animate the iframe element directly', () => {
+    const css = readCss(VIEWER_CSS_PATH);
+    const iframeRule = css.match(/\.iframeFrame\s+iframe\s*\{[^}]*\}/)?.[0] ?? '';
+    expect(iframeRule).toBeTruthy();
+    expect(iframeRule).not.toMatch(/animation\s*:/);
+    expect(iframeRule).not.toMatch(/transition\s*:/);
+  });
+
   it('FoleonReaderLayouts.module.css does not introduce a global overflow-x: hidden declaration', () => {
     const css = readCss(LAYOUTS_CSS_PATH);
     expect(css).not.toMatch(/overflow-x\s*:\s*hidden\s*;/);

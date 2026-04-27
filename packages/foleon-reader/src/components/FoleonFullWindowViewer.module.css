@@ -9,6 +9,9 @@
    --------------------------------------------------------------------------- */
 
 .overlay {
+  --foleon-reader-open-duration: 420ms;
+  --foleon-reader-open-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
   position: fixed;
   inset: 0;
   /* Intentionally above SharePoint suite/header chrome. Consumers can override
@@ -24,9 +27,27 @@
   /* Scoped overflow containment: prevents iframe content from spilling
      outside the dialog without affecting the rest of the document. */
   overflow: hidden;
+  transform-origin: center center;
+  animation: foleonReaderOverlayReveal var(--foleon-reader-open-duration) var(--foleon-reader-open-ease) both;
+}
+
+.overlay::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 24%, color-mix(in srgb, #9ed4f2 24%, transparent), transparent 28%),
+    linear-gradient(115deg, transparent 0%, color-mix(in srgb, #ffffff 10%, transparent) 42%, transparent 58%);
+  opacity: 0;
+  transform: translateX(-8%) scale(1.04);
+  animation: foleonReaderLightSweep 520ms var(--foleon-reader-open-ease) both;
 }
 
 .header {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
@@ -37,6 +58,7 @@
     clamp(0.75rem, 2vw, 1.25rem);
   border-block-end: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
   background: color-mix(in srgb, #0c1722 88%, transparent);
+  animation: foleonReaderHeaderReveal 360ms var(--foleon-reader-open-ease) 40ms both;
 }
 
 .headerInner {
@@ -104,7 +126,9 @@
   align-items: stretch;
   background: #0a121b;
   position: relative;
+  z-index: 1;
   overflow: hidden;
+  animation: foleonReaderBodyReveal 420ms var(--foleon-reader-open-ease) 80ms both;
 }
 
 .iframeFrame {
@@ -185,6 +209,7 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 90ms both;
 }
 
 .previewTitle {
@@ -195,6 +220,7 @@
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.05em;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 120ms both;
 }
 
 .previewSummary {
@@ -203,6 +229,7 @@
   color: color-mix(in srgb, #ffffff 84%, #9ed4f2);
   font-size: clamp(15px, 2vw, 18px);
   line-height: 1.55;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 150ms both;
 }
 
 .previewNotice {
@@ -213,12 +240,14 @@
   color: color-mix(in srgb, #ffffff 78%, #9ed4f2);
   font-size: 14px;
   line-height: 1.5;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 180ms both;
 }
 
 .previewMetaRow {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 210ms both;
 }
 
 .previewMetaRow span {
@@ -244,6 +273,7 @@
     color-mix(in srgb, #0a121b 78%, #9ed4f2);
   box-shadow: 0 22px 80px color-mix(in srgb, #000000 42%, transparent);
   overflow: hidden;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 160ms both;
 }
 
 .previewSkeleton::before {
@@ -281,6 +311,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  animation: foleonReaderPreviewContentReveal 420ms var(--foleon-reader-open-ease) 240ms both;
 }
 
 .previewCard {
@@ -294,6 +325,71 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+@keyframes foleonReaderOverlayReveal {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) translateY(10px) scale(0.985);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1200px) translateY(0) scale(1);
+  }
+}
+
+@keyframes foleonReaderHeaderReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes foleonReaderBodyReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes foleonReaderLightSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-10%) scale(1.04);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(10%) scale(1);
+  }
+}
+
+@keyframes foleonReaderPreviewContentReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 @media (max-width: 720px) {
@@ -317,6 +413,22 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlay::before,
+  .header,
+  .body,
+  .previewBadge,
+  .previewTitle,
+  .previewSummary,
+  .previewNotice,
+  .previewMetaRow,
+  .previewSkeleton,
+  .previewGrid {
+    animation: none;
+    transition: none;
+    transform: none;
+    filter: none;
+  }
   .closeButton {
     transition: none;
   }
