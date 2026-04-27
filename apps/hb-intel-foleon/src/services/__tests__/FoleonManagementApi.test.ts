@@ -46,9 +46,11 @@ describe('FoleonManagementApi', () => {
       .toBe('https://functions.example.com/api/foleon/content');
     expect(buildApiUrl('https://functions.example.com/api/', '/foleon/content'))
       .toBe('https://functions.example.com/api/foleon/content');
+    expect(buildApiUrl('https://functions.example.com', 'foleon/config'))
+      .toBe('https://functions.example.com/api/foleon/config');
   });
 
-  it('attaches SPFx-acquired bearer token when configured', async () => {
+  it('attaches SPFx-acquired bearer token without forcing credentialed CORS', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
       json: async () => ({ data: [] }),
@@ -61,6 +63,24 @@ describe('FoleonManagementApi', () => {
 
     const headers = fetchSpy.mock.calls[0]?.[1]?.headers as Headers;
     expect(headers.get('Authorization')).toBe('Bearer token-123');
+    expect(fetchSpy.mock.calls[0]?.[1]?.credentials).toBeUndefined();
+  });
+
+  it('does not attach authorization when token acquisition is absent or empty', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: [] }),
+    } as Response);
+
+    await createFoleonManagementApi(contract({ getAccessToken: undefined })).listContent();
+    await createFoleonManagementApi(contract({ getAccessToken: async () => '' })).listContent();
+
+    const firstHeaders = fetchSpy.mock.calls[0]?.[1]?.headers as Headers;
+    const secondHeaders = fetchSpy.mock.calls[1]?.[1]?.headers as Headers;
+    expect(firstHeaders.has('Authorization')).toBe(false);
+    expect(secondHeaders.has('Authorization')).toBe(false);
+    expect(fetchSpy.mock.calls[0]?.[1]?.credentials).toBeUndefined();
+    expect(fetchSpy.mock.calls[1]?.[1]?.credentials).toBeUndefined();
   });
 
   it('surfaces backend correlation IDs on Graph conflicts', async () => {

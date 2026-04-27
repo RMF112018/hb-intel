@@ -59,7 +59,6 @@ export function createFoleonManagementApi(contract: IFoleonRuntimeContract): Fol
     const response = await fetch(buildApiUrl(contract.apiBaseUrl, path), {
       ...init,
       headers,
-      credentials: 'include',
     });
     const json = await response.json().catch(() => ({})) as { data?: T } & FoleonApiError;
     if (!response.ok) {
