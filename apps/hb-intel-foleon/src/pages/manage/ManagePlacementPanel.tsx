@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { HbcButton } from '@hbc/ui-kit/homepage';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, LockKeyhole } from 'lucide-react';
 import type { FoleonManagementApi } from '../../services/FoleonManagementApi.js';
 import type {
   FoleonManagedContent,
   FoleonPlacement,
   FoleonPlacementMutation,
 } from '../../types/foleon-management.types.js';
+import type { FoleonReaderLane } from './manageMutationUtils.js';
 import { ManageCheckbox, ManageSelectField, ManageTextField } from './ManageFieldPrimitives.js';
 import { placementAlignmentWarnings } from './manageMutationUtils.js';
+import shell from './manageShell.module.css';
 import f from './manageFields.module.css';
 
 function ValidationList(props: { readonly reasons: ReadonlyArray<string> }): React.ReactNode {
@@ -32,11 +34,16 @@ export function ManagePlacementPanel(props: {
   readonly setMessage: (message: string | null) => void;
   readonly canWrite?: boolean;
   readonly writeBlockReason?: string;
+  readonly focusedLane?: FoleonReaderLane;
+  readonly focusedLaneLabel?: string;
+  readonly focusedPlacementKey?: string;
+  readonly focusedContent?: FoleonManagedContent;
 }): React.ReactNode {
-  const firstContent = props.content[0];
+  const firstContent = props.focusedContent ?? props.content[0];
+  const focusedPlacementKey = normalizePlacementKey(props.focusedPlacementKey);
   const [draft, setDraft] = useState<FoleonPlacementMutation>({
-    title: 'Homepage feature',
-    placementKey: 'Hero',
+    title: props.focusedLaneLabel ? `${props.focusedLaneLabel} homepage placement` : 'Homepage feature',
+    placementKey: focusedPlacementKey,
     contentItemId: firstContent?.sharePointItemId ?? 0,
     isActive: true,
     sortRank: 1,
@@ -49,11 +56,24 @@ export function ManagePlacementPanel(props: {
     }
   }, [draft.contentItemId, firstContent]);
 
+  useEffect(() => {
+    if (!props.focusedPlacementKey && !props.focusedLaneLabel) return;
+    setDraft((current) => ({
+      ...current,
+      title: props.focusedLaneLabel ? `${props.focusedLaneLabel} homepage placement` : current.title,
+      placementKey: focusedPlacementKey,
+      contentItemId: firstContent?.sharePointItemId ?? current.contentItemId,
+    }));
+  }, [firstContent?.sharePointItemId, focusedPlacementKey, props.focusedLaneLabel]);
+
   const draftWarnings = placementAlignmentWarnings({
     placementKey: draft.placementKey,
     contentItemId: draft.contentItemId,
     content: props.content,
   });
+  const visiblePlacements = props.focusedPlacementKey
+    ? props.placements.filter((placement) => placement.placementKey === props.focusedPlacementKey)
+    : props.placements;
 
   const create = async (): Promise<void> => {
     if (props.canWrite === false) {
@@ -66,11 +86,14 @@ export function ManagePlacementPanel(props: {
   };
 
   return (
-    <section className={f.editorSection} aria-label="Placement manager">
-      <h3 className={f.sectionTitle}>
-        <LayoutGrid size={18} style={{ verticalAlign: 'text-bottom', marginRight: 6 }} aria-hidden />
-        Placement Manager
-      </h3>
+    <section className={shell.placementRailPanel} aria-label="Placement manager">
+      <div className={shell.panelTitleRow}>
+        <LayoutGrid size={18} aria-hidden />
+        <div>
+          <p className={f.guidanceKicker}>Placement manager</p>
+          <h3 className={f.sectionTitle}>{props.focusedLaneLabel ?? 'Homepage placements'}</h3>
+        </div>
+      </div>
       <div className={f.gridPlacement}>
         <ManageTextField
           id="pl-title"
@@ -113,7 +136,7 @@ export function ManagePlacementPanel(props: {
           onChange={(value): void => setDraft({ ...draft, sortRank: Number.parseInt(value, 10) || 0 })}
         />
       </div>
-      <div style={{ marginTop: 12 }}>
+      <div className={shell.placementCheckboxRow}>
         <ManageCheckbox
           id="pl-active"
           label="Active placement"
@@ -122,11 +145,12 @@ export function ManagePlacementPanel(props: {
         />
       </div>
       {props.canWrite === false ? (
-        <p className={f.metaMuted} role="status" id="foleon-manage-placement-write-reason">
-          Placement writes are disabled: {props.writeBlockReason ?? 'write path is not ready'}.
+        <p className={shell.placementWriteNotice} role="status" id="foleon-manage-placement-write-reason">
+          <LockKeyhole size={15} aria-hidden />
+          <span>Placement writes are disabled: {props.writeBlockReason ?? 'write path is not ready'}.</span>
         </p>
       ) : null}
-      <div style={{ marginTop: 12 }}>
+      <div className={shell.placementActionRow}>
         <HbcButton
           variant="primary"
           disabled={props.canWrite === false}
@@ -141,8 +165,11 @@ export function ManagePlacementPanel(props: {
           <ValidationList reasons={draftWarnings} />
         </div>
       ) : null}
-      <div style={{ display: 'grid', gap: 10, marginTop: 14 }}>
-        {props.placements.map((placement) => {
+      <div className={shell.placementList}>
+        {visiblePlacements.length === 0 ? (
+          <p className={f.metaMuted}>No placement record is assigned to this lane yet.</p>
+        ) : null}
+        {visiblePlacements.map((placement) => {
           const alignmentWarnings = placementAlignmentWarnings({
             placementKey: placement.placementKey,
             contentItemId: placement.contentItemId,
@@ -161,4 +188,18 @@ export function ManagePlacementPanel(props: {
       </div>
     </section>
   );
+}
+
+function normalizePlacementKey(value: string | undefined): FoleonPlacementMutation['placementKey'] {
+  const allowed: ReadonlyArray<FoleonPlacementMutation['placementKey']> = [
+    'Hero',
+    'Primary Card',
+    'Secondary Card',
+    'Carousel',
+    'Archive Rail',
+    'Project Spotlight Active',
+    'Company Pulse Active',
+    'Leadership Message Active',
+  ];
+  return allowed.find((entry) => entry === value) ?? 'Hero';
 }

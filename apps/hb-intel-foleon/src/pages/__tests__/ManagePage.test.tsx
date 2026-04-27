@@ -177,11 +177,51 @@ describe('ManagePage', () => {
     expect((await screen.findAllByText('Project Spotlight')).length).toBeGreaterThan(0);
     expect(screen.getAllByText('Company Pulse').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Leadership Message').length).toBeGreaterThan(0);
-    const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
-    expect(laneSummary).toBeTruthy();
-    expect(within(laneSummary).getAllByRole('listitem').length).toBe(3);
-    expect(laneSummary.textContent).not.toMatch(/project-spotlight|company-pulse|leadership-message/);
-    expect(laneSummary.textContent).not.toMatch(/Project Spotlight Active|Company Pulse Active|Leadership Message Active/);
+    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
+    expect(laneNavigation).toBeTruthy();
+    expect(within(laneNavigation).getAllByRole('listitem').length).toBe(3);
+    expect(laneNavigation.textContent).not.toMatch(/project-spotlight|company-pulse|leadership-message/);
+  });
+
+  it('renders the full admin workspace shell with layout proof markers', async () => {
+    installManageFetchMock({
+      content: [managedContent({ readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true })],
+      placements: [managedPlacement()],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    expect(await screen.findByRole('region', { name: /Homepage Foleon manager workspace/i })).toBeTruthy();
+    expect(screen.getByRole('complementary', { name: /Homepage lane navigation/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /Project Spotlight workspace/i })).toBeTruthy();
+    expect(screen.getByRole('complementary', { name: /Publish readiness and next actions/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /Secondary content library/i })).toBeTruthy();
+    expect(document.querySelector('[data-manager-layout]')).toBeTruthy();
+    expect(document.querySelector('[data-manager-workspace="admin"]')).toBeTruthy();
+  });
+
+  it('supports keyboard access to lane navigation', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({ title: 'Project edition', readerKey: 'project-spotlight', contentTypeKey: 'Project Spotlight', activeEdition: true }),
+        managedContent({
+          id: 'content-2',
+          sharePointItemId: 2,
+          title: 'Company edition',
+          readerKey: 'company-pulse',
+          contentTypeKey: 'Company Pulse',
+          activeEdition: true,
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('region', { name: /Project Spotlight workspace/i });
+    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
+    const laneItems = within(laneNavigation).getAllByRole('listitem');
+    fireEvent.keyDown(laneItems[0]!, { key: 'ArrowRight' });
+    expect(await screen.findByRole('region', { name: /Company Pulse workspace/i })).toBeTruthy();
   });
 
   it('renders six system health regions with split readiness on the Config tab', async () => {
@@ -302,7 +342,7 @@ describe('ManagePage', () => {
     render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
 
     expect((await screen.findAllByText('Live Project Spotlight')).length).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: 'Open Foleon' })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: 'Open Foleon' }).length).toBeGreaterThan(0);
     expect((screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement).disabled).toBe(true);
     expect(
       screen.getAllByRole('button', { name: /Publish/i })
@@ -347,8 +387,8 @@ describe('ManagePage', () => {
       />,
     );
 
-    const laneSummary = await screen.findByRole('region', { name: /Homepage lane summary/i });
-    expect(laneSummary.textContent).toContain('Shown to visitors');
+    const laneNavigation = await screen.findByRole('complementary', { name: /Homepage lane navigation/i });
+    expect(laneNavigation.textContent).toContain('Shown to visitors');
   });
 
   it('does not surface raw token acquisition diagnostics in the primary API banner', async () => {
@@ -421,9 +461,8 @@ describe('ManagePage', () => {
     expect((await screen.findByRole('heading', { name: /Foleon Manager/i })).textContent).toMatch(/Foleon Manager/i);
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(screen.getByText('Published')).toBeTruthy();
-    expect(screen.getByRole('region', { name: /Public preview layouts may still be visible/i })).toBeTruthy();
-    expect(screen.getByText(/public routes do not yet have renderable published content/i)).toBeTruthy();
-    expect(screen.getByText(/do not create records, open readers, call external links, or emit production content telemetry/i)).toBeTruthy();
+    expect(screen.getByText('Preview structure active')).toBeTruthy();
+    expect(screen.getByText(/lane model remains visible while the data set is light/i)).toBeTruthy();
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
@@ -439,8 +478,8 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect(await screen.findByRole('region', { name: /Public preview layouts may still be visible/i })).toBeTruthy();
-    expect(screen.getByText(/Draft, hidden, unpublished, archived, suppressed, or non-homepage-ready records/i)).toBeTruthy();
+    expect(await screen.findByText('Preview structure active')).toBeTruthy();
+    expect(screen.getByText(/lane model remains visible while the data set is light/i)).toBeTruthy();
     expect(screen.getByRole('region', { name: /Content detail editor/i })).toBeTruthy();
   });
 
@@ -452,7 +491,7 @@ describe('ManagePage', () => {
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
     expect(await screen.findByRole('region', { name: /Content detail editor/i })).toBeTruthy();
-    expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
+    expect(screen.queryByText('Preview structure active')).toBeNull();
     expect(screen.getByRole('complementary', { name: /Foleon content registry/i })).toBeTruthy();
     expect(screen.getByRole('region', { name: /Placement manager/i })).toBeTruthy();
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
@@ -487,7 +526,7 @@ describe('ManagePage', () => {
 
     expect((await screen.findByRole('alert')).textContent).toContain('Foleon Manager cannot load yet');
     expect(screen.getByRole('alert').textContent).toContain('backend-url-missing');
-    expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
+    expect(screen.queryByText('Preview structure active')).toBeNull();
   });
 
   it('blocks hosted Manager when apiBaseUrl is present without an API resource', async () => {
@@ -560,8 +599,8 @@ describe('ManagePage', () => {
     const syncReadinessId = syncPrimary.getAttribute('aria-describedby');
     expect(syncReadinessId).toBe('foleon-manage-sync-readiness');
     expect(document.getElementById(syncReadinessId ?? '')?.textContent).toMatch(/approved API access|API access/i);
-    const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
-    expect(within(laneSummary).getAllByText('Needs setup').length).toBeGreaterThanOrEqual(1);
+    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
+    expect(within(laneNavigation).getAllByText('Needs setup').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('list', { name: 'Manager status' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Homepage Foleon Content' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Config' })).toBeTruthy();
@@ -629,7 +668,7 @@ describe('ManagePage', () => {
       'backend-route-authorization-failed',
     );
     expect(screen.queryByRole('complementary', { name: /Foleon content registry/i })).toBeNull();
-    expect(screen.queryByRole('region', { name: /Public preview layouts may still be visible/i })).toBeNull();
+    expect(screen.queryByText('Preview structure active')).toBeNull();
     expect(screen.queryByRole('button', { name: /Sync Foleon/i })).toBeNull();
     expect(document.querySelector('iframe')).toBeNull();
   });
@@ -683,15 +722,15 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    const guidance = await screen.findByRole('region', { name: /Public preview layouts may still be visible/i });
-    expect(within(guidance).queryByRole('link')).toBeNull();
-    expect(within(guidance).queryByRole('button')).toBeNull();
-    expect(guidance.querySelector('iframe')).toBeNull();
-    expect(guidance.querySelector('input, textarea, select')).toBeNull();
-    expect(guidance.querySelector('[aria-disabled="true"], [disabled]')).toBeNull();
-    expect(guidance.textContent).not.toContain('Sync Docs');
-    expect(guidance.textContent).not.toContain('Create placement');
-    expect(guidance.textContent).not.toContain('Read');
+    const guidance = await screen.findByText('Preview structure active');
+    const note = guidance.closest('[role="note"]') as HTMLElement;
+    expect(within(note).queryByRole('link')).toBeNull();
+    expect(within(note).queryByRole('button')).toBeNull();
+    expect(note.querySelector('iframe')).toBeNull();
+    expect(note.querySelector('input, textarea, select')).toBeNull();
+    expect(note.querySelector('[aria-disabled="true"], [disabled]')).toBeNull();
+    expect(note.textContent).not.toContain('Sync Docs');
+    expect(note.textContent).not.toContain('Create placement');
   });
 
   it('loads and saves reader lane fields without silent field loss', async () => {
@@ -817,10 +856,10 @@ describe('ManagePage', () => {
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
     await screen.findByRole('region', { name: /Project Spotlight workspace/i });
-    const laneSummary = screen.getByRole('region', { name: /Homepage lane summary/i });
-    const laneCards = within(laneSummary).getAllByRole('listitem');
-    expect(laneCards.length).toBe(3);
-    fireEvent.click(laneCards[2]!);
+    const laneNavigation = screen.getByRole('complementary', { name: /Homepage lane navigation/i });
+    const laneItems = within(laneNavigation).getAllByRole('listitem');
+    expect(laneItems.length).toBe(3);
+    fireEvent.click(laneItems[2]!);
     expect(await screen.findByRole('region', { name: /Leadership Message workspace/i })).toBeTruthy();
   });
 
@@ -882,7 +921,7 @@ describe('ManagePage', () => {
     expect(contentPanel.textContent).not.toMatch(/TOKEN ACQUISITIONBlocked/i);
 
     expect(screen.queryByRole('region', { name: /Sync run history/i })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'View diagnostics' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View Diagnostics' }));
     expect(screen.getByRole('tabpanel', { name: 'Config' })).toBeTruthy();
     expect(
       screen.getByRole('button', { name: /Hide redacted diagnostics, sync history, and technical proof/i }).getAttribute('aria-expanded'),

@@ -1,6 +1,8 @@
 .shell {
-  max-width: 1600px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: min(1880px, 100%);
+  margin: 0;
+  container-type: inline-size;
 }
 
 .panel {
@@ -96,6 +98,11 @@
   flex-wrap: wrap;
   gap: var(--foleon-manage-space-xs);
   clear: both;
+}
+
+.buttonIcon {
+  margin-right: 6px;
+  vertical-align: text-bottom;
 }
 
 .statusChip {
@@ -328,7 +335,7 @@
 }
 
 .contentLibrarySection {
-  margin-top: var(--foleon-manage-space-xs);
+  margin-top: 0;
 }
 
 .tabs {
@@ -473,6 +480,30 @@
   composes: panel;
   padding: var(--foleon-manage-space-md);
   border-left: 6px solid var(--foleon-manage-warning);
+}
+
+.configAdminConsole {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--foleon-manage-space-sm);
+}
+
+.configSummaryCard {
+  composes: panel;
+  padding: var(--foleon-manage-space-md);
+  display: grid;
+  gap: 6px;
+}
+
+.configSummaryCard strong {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.configSummaryCard span {
+  color: var(--foleon-manage-fg-muted);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .configHealthStack {
@@ -669,4 +700,583 @@
 .registrySmall {
   font-size: 12px;
   color: var(--foleon-manage-fg-muted);
+}
+
+.workspaceShell {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(460px, 1.58fr) minmax(300px, 0.92fr);
+  gap: var(--foleon-manage-space-md);
+  align-items: start;
+  margin-bottom: var(--foleon-manage-space-md);
+}
+
+.laneNavigationRail,
+.readinessRail,
+.selectedLaneWorkspace,
+.libraryBand {
+  min-width: 0;
+}
+
+.laneNavigationRail,
+.readinessRail {
+  composes: panel;
+  padding: var(--foleon-manage-space-md);
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.laneNavigationRail {
+  position: sticky;
+  top: var(--foleon-manage-space-md);
+}
+
+.railHeader,
+.panelTitleRow {
+  display: flex;
+  gap: var(--foleon-manage-space-xs);
+  align-items: flex-start;
+}
+
+.railIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 14px;
+  color: hsl(0 0% 100%);
+  background: linear-gradient(145deg, var(--foleon-manage-accent), hsl(205 46% 22%));
+  flex: 0 0 auto;
+}
+
+.laneNavScroll {
+  max-height: min(650px, 68vh);
+  min-width: 0;
+}
+
+.laneNavViewport {
+  width: 100%;
+  max-height: min(650px, 68vh);
+}
+
+.laneNavList {
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+  padding-right: 2px;
+}
+
+.laneNavButton {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-lg);
+  background:
+    linear-gradient(180deg, hsl(0 0% 100% / 0.94), hsl(0 0% 100% / 0.72)),
+    var(--foleon-manage-panel);
+  padding: var(--foleon-manage-space-sm);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  display: grid;
+  gap: var(--foleon-manage-space-xs);
+  min-width: 0;
+  box-shadow: 0 16px 42px hsl(200 45% 20% / 0.07);
+}
+
+.laneNavButton:hover {
+  transform: translateY(-1px);
+  border-color: hsl(186 94% 22% / 0.36);
+}
+
+.laneNavButton:focus-visible {
+  outline: 2px solid var(--foleon-manage-accent);
+  outline-offset: 2px;
+}
+
+.laneNavButtonSelected {
+  border-color: var(--foleon-manage-accent);
+  background:
+    radial-gradient(circle at 12% 10%, hsl(168 45% 94% / 0.95), transparent 42%),
+    hsl(0 0% 100% / 0.96);
+  box-shadow: 0 0 0 2px var(--foleon-manage-accent-soft), 0 20px 54px hsl(186 94% 22% / 0.14);
+}
+
+.laneNavLive {
+  border-left: 6px solid var(--foleon-manage-success);
+}
+
+.laneNavPreview {
+  border-left: 6px solid var(--foleon-manage-accent);
+}
+
+.laneNavBlocked {
+  border-left: 6px solid var(--foleon-manage-danger);
+}
+
+.laneNavEmpty,
+.laneNavSetup {
+  border-left: 6px solid var(--foleon-manage-warning);
+}
+
+.laneNavTopline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.laneStateIcon {
+  color: var(--foleon-manage-accent);
+  display: inline-flex;
+}
+
+.laneStatusPill,
+.workspaceStateBadge,
+.workspacePlacementBadge,
+.laneReadinessChip {
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--foleon-manage-accent-soft);
+  color: var(--foleon-manage-fg);
+}
+
+.laneNavFacts {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.laneNavFacts div {
+  display: grid;
+  gap: 1px;
+}
+
+.laneNavFacts dt {
+  color: var(--foleon-manage-fg-muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.laneNavFacts dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.laneReadinessChip {
+  width: fit-content;
+  background: hsl(0 0% 100% / 0.78);
+  border: 1px solid var(--foleon-manage-panel-border);
+}
+
+.tooltipContent {
+  z-index: 1000;
+  max-width: 280px;
+  border-radius: var(--foleon-manage-radius-sm);
+  background: hsl(205 32% 14%);
+  color: hsl(0 0% 100%);
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  box-shadow: 0 16px 42px hsl(205 32% 14% / 0.25);
+}
+
+.tooltipArrow {
+  fill: hsl(205 32% 14%);
+}
+
+.limitedModeWorkspaceNotice {
+  composes: panel;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--foleon-manage-space-md);
+  padding: var(--foleon-manage-space-md);
+  border-left: 7px solid var(--foleon-manage-warning);
+  background:
+    radial-gradient(circle at 4% 20%, hsl(40 72% 48% / 0.16), transparent 34%),
+    hsl(0 0% 100% / 0.9);
+}
+
+.limitedModeNoticeIcon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: hsl(40 72% 48% / 0.16);
+  color: hsl(32 80% 28%);
+}
+
+.limitedModeSubcopy {
+  margin: var(--foleon-manage-space-xs) 0 0;
+  color: var(--foleon-manage-fg-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.workspaceHero {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--foleon-manage-space-sm);
+  align-items: flex-start;
+}
+
+.workspaceTitle {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 0.98;
+}
+
+.workspaceLead {
+  margin: var(--foleon-manage-space-xs) 0 0;
+  max-width: 760px;
+  color: var(--foleon-manage-fg-muted);
+  line-height: 1.45;
+}
+
+.workspaceStatusCluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--foleon-manage-space-xs);
+  justify-content: flex-end;
+}
+
+.workspaceStateBadge[data-lane-state='Live'] {
+  background: hsl(152 48% 32% / 0.14);
+  color: var(--foleon-manage-success);
+}
+
+.workspaceStateBadge[data-lane-state='Blocked'] {
+  background: hsl(8 58% 40% / 0.12);
+  color: var(--foleon-manage-danger);
+}
+
+.workspacePlacementBadge {
+  background: hsl(0 0% 100% / 0.82);
+  border: 1px solid var(--foleon-manage-panel-border);
+}
+
+.writePathNotice,
+.placementWriteNotice {
+  display: flex;
+  gap: var(--foleon-manage-space-xs);
+  align-items: flex-start;
+  border: 1px solid hsl(40 72% 48% / 0.32);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(40 72% 48% / 0.1);
+  color: hsl(32 80% 28%);
+  padding: var(--foleon-manage-space-xs) var(--foleon-manage-space-sm);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.laneEditionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--foleon-manage-space-sm);
+}
+
+.laneOperationalCard {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-lg);
+  background:
+    linear-gradient(180deg, hsl(0 0% 100% / 0.92), hsl(0 0% 100% / 0.68)),
+    var(--foleon-manage-panel);
+  padding: var(--foleon-manage-space-sm);
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.laneOperationalCard strong {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.laneOperationalCard small {
+  color: var(--foleon-manage-fg-muted);
+  line-height: 1.35;
+}
+
+.cardIconLabel {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--foleon-manage-accent);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.workspaceEmptyState {
+  border: 1px dashed var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-lg);
+  background: hsl(0 0% 100% / 0.48);
+}
+
+.publishChecklistPanel,
+.placementRailPanel {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-lg);
+  background: hsl(0 0% 100% / 0.64);
+  padding: var(--foleon-manage-space-md);
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+}
+
+.checkPass {
+  background: hsl(152 48% 32% / 0.08);
+}
+
+.checkBlocked {
+  background: hsl(8 58% 40% / 0.07);
+}
+
+.checkItem span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 800;
+}
+
+.nextActionPanel {
+  border-radius: var(--foleon-manage-radius-lg);
+  padding: var(--foleon-manage-space-md);
+  display: grid;
+  gap: 6px;
+  color: hsl(0 0% 100%);
+  background:
+    radial-gradient(circle at 10% 0%, hsl(168 66% 68% / 0.26), transparent 44%),
+    linear-gradient(145deg, hsl(205 42% 18%), hsl(186 94% 22%));
+  box-shadow: 0 24px 70px hsl(205 32% 14% / 0.18);
+}
+
+.nextActionPanel span {
+  color: hsl(0 0% 100% / 0.82);
+  font-size: 13px;
+}
+
+.workspaceSeparator {
+  height: 1px;
+  width: 100%;
+  background: var(--foleon-manage-panel-border);
+}
+
+.readinessScore {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--foleon-manage-space-sm);
+  align-items: center;
+}
+
+.readinessScore span {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  background: var(--foleon-manage-accent-soft);
+  color: var(--foleon-manage-accent);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.readinessScore p {
+  margin: 0;
+  color: var(--foleon-manage-fg-muted);
+  font-weight: 750;
+}
+
+.operationalMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--foleon-manage-space-xs);
+}
+
+.operationalMetric {
+  border: 1px solid var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-md);
+  background: hsl(0 0% 100% / 0.68);
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.operationalMetric span {
+  color: var(--foleon-manage-fg-muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.operationalMetric strong {
+  font-size: 20px;
+  word-break: break-word;
+}
+
+.operationalMetric[data-tone='bad'] {
+  border-color: hsl(8 58% 40% / 0.34);
+}
+
+.operationalMetric[data-tone='warn'] {
+  border-color: hsl(40 72% 48% / 0.4);
+}
+
+.operationalMetric[data-tone='good'] {
+  border-color: hsl(152 48% 32% / 0.3);
+}
+
+.previewGuidanceCompact {
+  border-radius: var(--foleon-manage-radius-md);
+  background: var(--foleon-manage-accent-soft);
+  padding: var(--foleon-manage-space-sm);
+  display: grid;
+  gap: 4px;
+}
+
+.previewGuidanceCompact span {
+  color: var(--foleon-manage-fg-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.libraryBand {
+  display: grid;
+}
+
+.placementList {
+  display: grid;
+  gap: 10px;
+  margin-top: var(--foleon-manage-space-sm);
+}
+
+.placementCheckboxRow,
+.placementActionRow {
+  margin-top: var(--foleon-manage-space-sm);
+}
+
+.scrollbar {
+  width: 8px;
+}
+
+.scrollbarHorizontal {
+  height: 8px;
+}
+
+.scrollThumb {
+  border-radius: 999px;
+  background: hsl(205 18% 18% / 0.24);
+}
+
+@container (max-width: 1180px) {
+  .workspaceShell {
+    grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.35fr);
+  }
+
+  .readinessRail {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1fr);
+  }
+}
+
+@container (max-width: 860px) {
+  .workspaceShell {
+    grid-template-columns: 1fr;
+  }
+
+  .configAdminConsole {
+    grid-template-columns: 1fr;
+  }
+
+  .laneNavigationRail {
+    position: static;
+  }
+
+  .laneNavScroll,
+  .laneNavViewport {
+    max-height: none;
+  }
+
+  .laneNavList {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(250px, 72%);
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .readinessRail {
+    grid-template-columns: 1fr;
+  }
+
+  .laneEditionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .operationalMetricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 560px) {
+  .header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'intro'
+      'actions'
+      'chips'
+      'sync';
+  }
+
+  .headerActions,
+  .actions {
+    justify-content: flex-start;
+  }
+
+  .workspaceHero,
+  .sectionHeaderRow {
+    display: grid;
+  }
+
+  .workspaceStatusCluster {
+    justify-content: flex-start;
+  }
+
+  .operationalMetricGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .limitedModeWorkspaceNotice {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 640px) {
+  .foleonManageRoot {
+    min-height: auto;
+  }
+
+  .header {
+    padding: var(--foleon-manage-space-md);
+  }
+
+  .title {
+    font-size: clamp(26px, 4vw, 40px);
+  }
+
+  .subtitle {
+    margin-top: var(--foleon-manage-space-xs);
+  }
+
+  .laneNavScroll,
+  .laneNavViewport {
+    max-height: 58vh;
+  }
 }

@@ -1,5 +1,6 @@
 import { HbcButton } from '@hbc/ui-kit/homepage';
-import { ArrowLeft, ExternalLink, RefreshCw } from 'lucide-react';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { ArrowLeft, BarChart3, ExternalLink, RefreshCw } from 'lucide-react';
 import type { ManagerStatusChip } from './manageHeaderStatusModel.js';
 import shell from './manageShell.module.css';
 
@@ -20,14 +21,10 @@ export function ManageShellHeader(props: {
         <p className={shell.kicker}>Marketing Operations</p>
         <h2 className={shell.title}>Foleon Manager</h2>
         <p className={shell.subtitle}>
-          Manage homepage Foleon content, placements, and publishing readiness.
+          Manage homepage Foleon editions, lane placement, and publish readiness from one SharePoint-hosted workspace.
         </p>
       </div>
       <div className={shell.headerActions}>
-        <HbcButton variant="secondary" onClick={props.onBack}>
-          <ArrowLeft size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
-          Back to highlights
-        </HbcButton>
         <fieldset className={shell.syncFieldset} disabled={props.canSync === false}>
           <legend className={shell.syncLegend}>Sync content</legend>
           <div className={shell.syncFieldsetButtons}>
@@ -38,7 +35,7 @@ export function ManageShellHeader(props: {
               aria-describedby={props.canSync === false ? 'foleon-manage-sync-readiness' : undefined}
               onClick={props.onSyncDocs}
             >
-              <RefreshCw size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
+              <RefreshCw size={16} className={shell.buttonIcon} aria-hidden />
               {props.canSync === false ? 'Sync blocked' : 'Sync Docs'}
             </HbcButton>
             <HbcButton
@@ -53,27 +50,42 @@ export function ManageShellHeader(props: {
           </div>
         </fieldset>
         {props.safeFoleonOpenUrl ? (
-          <span title="Opens the approved Foleon viewer origin in a new tab">
-            <HbcButton
-              variant="secondary"
-              onClick={(): void => {
-                window.open(props.safeFoleonOpenUrl ?? '', '_blank', 'noopener,noreferrer');
-              }}
-            >
-              <ExternalLink size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} aria-hidden />
-              Open Foleon (site)
-            </HbcButton>
-          </span>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <span>
+                <HbcButton
+                  variant="secondary"
+                  onClick={(): void => {
+                    window.open(props.safeFoleonOpenUrl ?? '', '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  <ExternalLink size={16} className={shell.buttonIcon} aria-hidden />
+                  Open Foleon
+                </HbcButton>
+              </span>
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Content className={shell.tooltipContent} side="bottom">
+                Opens the approved Foleon viewer origin in a new tab.
+                <Tooltip.Arrow className={shell.tooltipArrow} />
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip.Root>
         ) : (
-          <span className={shell.actionUnavailable} title={props.openFoleonUnavailableReason}>
+          <span className={shell.actionUnavailable}>
             <HbcButton variant="secondary" disabled>
-              Open Foleon (site)
+              Open Foleon
             </HbcButton>
             <span className={shell.actionUnavailableReason}>{props.openFoleonUnavailableReason}</span>
           </span>
         )}
         <HbcButton variant="secondary" onClick={props.onViewDiagnostics}>
-          View diagnostics
+          <BarChart3 size={16} className={shell.buttonIcon} aria-hidden />
+          View Diagnostics
+        </HbcButton>
+        <HbcButton variant="secondary" onClick={props.onBack}>
+          <ArrowLeft size={16} className={shell.buttonIcon} aria-hidden />
+          Back
         </HbcButton>
       </div>
       <div className={shell.headerChips} role="list" aria-label="Manager status">

@@ -82,6 +82,24 @@ export function FoleonConfigTab(props: {
         </section>
       ) : null}
 
+      <section className={shell.configAdminConsole} aria-label="Config admin console overview">
+        <article className={shell.configSummaryCard}>
+          <p className={f.guidanceKicker}>API approval and token state</p>
+          <strong>{readiness?.tokenAcquisitionReady ? 'Token path approved' : 'Approval or token readiness needed'}</strong>
+          <span>{consentRequired ? 'Tenant API approval is required before Manager reads, writes, or sync can run.' : 'Token readiness is tracked separately from route and write readiness.'}</span>
+        </article>
+        <article className={shell.configSummaryCard}>
+          <p className={f.guidanceKicker}>SharePoint list bindings</p>
+          <strong>{readiness?.listBindingsReady ? 'Required lists are bound' : 'List bindings need attention'}</strong>
+          <span>Content registry, placements, interaction events, and sync runs stay governed by the package feature assets.</span>
+        </article>
+        <article className={shell.configSummaryCard}>
+          <p className={f.guidanceKicker}>Package and manifest governance</p>
+          <strong>{props.contract.governed.packageVersionMatchesExpected ? 'Package version matches expected' : 'Package version mismatch'}</strong>
+          <span>Manifest identity and package version proof are summarized here; raw IDs remain in expanded diagnostics only.</span>
+        </article>
+      </section>
+
       <section className={f.editorSection} role="region" aria-label="Required admin actions">
         <h2 className={f.sectionTitle}>Required admin actions</h2>
         {adminActions.length === 0 ? (

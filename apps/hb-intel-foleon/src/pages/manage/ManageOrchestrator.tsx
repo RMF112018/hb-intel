@@ -269,6 +269,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
         data-breakpoint-short-height={breakpoint.shortHeight ? 'true' : 'false'}
         data-breakpoint-narrow-stable={breakpoint.narrowestStable ? 'true' : 'false'}
         data-breakpoint-row-sharing={breakpoint.rowSharingEligible ? 'true' : 'false'}
+        data-manager-layout={breakpoint.rowSharingEligible ? 'three-zone' : breakpoint.widthBand}
       >
         <ManageShellHeader
           onBack={props.onBack}
