@@ -3,7 +3,50 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { ManagePage } from '../ManagePage.js';
 import { createFoleonOriginPolicy } from '../../services/FoleonOriginPolicy.js';
 import type { IFoleonRuntimeContract } from '../../runtime/foleonRuntimeContract.js';
+import type {
+  FoleonManagedContent,
+  FoleonPlacement,
+} from '../../types/foleon-management.types.js';
 import { FOLEON_PACKAGE_VERSION, FOLEON_WEBPART_ID } from '../../webparts/foleon/runtimeContract.js';
+
+function managedContent(overrides: Partial<FoleonManagedContent> = {}): FoleonManagedContent {
+  return {
+    id: 'content-1',
+    sharePointItemId: 1,
+    etag: '"1"',
+    title: 'Managed Foleon record',
+    foleonDocId: 12345,
+    contentTypeKey: 'Project Highlight',
+    publishStatus: 'Published',
+    isVisible: true,
+    isHomepageEligible: true,
+    summary: 'Managed content summary.',
+    validationStatus: 'valid',
+    blockingReasons: [],
+    openMode: 'Inline Reader',
+    allowEmbed: true,
+    requiresExternalOpen: false,
+    ...overrides,
+  };
+}
+
+function managedPlacement(overrides: Partial<FoleonPlacement> = {}): FoleonPlacement {
+  return {
+    id: 'placement-1',
+    sharePointItemId: 10,
+    etag: '"1"',
+    title: 'Project Spotlight active placement',
+    placementKey: 'Project Spotlight Active',
+    contentItemId: 1,
+    foleonDocId: 12345,
+    isActive: true,
+    sortRank: 1,
+    layoutVariant: 'Large Feature',
+    validationStatus: 'valid',
+    blockingReasons: [],
+    ...overrides,
+  };
+}
 
 function mockContract(overrides: Partial<IFoleonRuntimeContract> = {}): IFoleonRuntimeContract {
   return {
@@ -61,8 +104,8 @@ function hostedContract(overrides: Partial<IFoleonRuntimeContract> = {}): IFoleo
 }
 
 function installManageFetchMock(args: {
-  readonly content?: ReadonlyArray<unknown>;
-  readonly placements?: ReadonlyArray<unknown>;
+  readonly content?: ReadonlyArray<FoleonManagedContent>;
+  readonly placements?: ReadonlyArray<FoleonPlacement>;
   readonly safeConfig?: { readonly graphConfigured: boolean; readonly foleonApiConfigured: boolean; readonly sharePointSiteConfigured: boolean };
   readonly status?: number;
   readonly failOn?: 'all' | 'config' | 'content' | 'placements';
@@ -160,7 +203,7 @@ describe('ManagePage — Foleon Feed Manager shell', () => {
     expect(screen.queryByRole('tab', { name: 'Admin / Config' })).toBeNull();
   });
 
-  it('renders the Feed Desk target structure: Feed Slots, Editorial Queue, Inspector', async () => {
+  it('renders the Feed Desk target structure: Feed Slots, Editorial Queue, Feed Inspector', async () => {
     installManageFetchMock({ content: [] });
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
@@ -168,10 +211,226 @@ describe('ManagePage — Foleon Feed Manager shell', () => {
     const panel = await screen.findByRole('tabpanel', { name: 'Feed Desk' });
     expect(within(panel).getByRole('region', { name: 'Feed Slots' })).toBeTruthy();
     expect(within(panel).getByRole('region', { name: 'Editorial Queue' })).toBeTruthy();
-    expect(within(panel).getByRole('region', { name: 'Inspector' })).toBeTruthy();
+    expect(within(panel).getByRole('complementary', { name: 'Feed Inspector' })).toBeTruthy();
     expect(panel.querySelector('[data-feed-slot="project-spotlight"]')).toBeTruthy();
     expect(panel.querySelector('[data-feed-slot="company-pulse"]')).toBeTruthy();
     expect(panel.querySelector('[data-feed-slot="leadership-message"]')).toBeTruthy();
+  });
+
+  it('feed slots render with three lanes and surface live/next/status copy from record-backed data', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Active PS edition',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+          activeEdition: true,
+          publishStatus: 'Published',
+          isVisible: true,
+          isHomepageEligible: true,
+          publishedUrl: 'https://viewer.us.foleon.com/ps/live',
+          embedUrl: 'https://viewer.us.foleon.com/ps/live/embed',
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('tabpanel', { name: 'Feed Desk' });
+    const psSlot = document.querySelector('[data-feed-slot="project-spotlight"]') as HTMLElement | null;
+    expect(psSlot).toBeTruthy();
+    expect(psSlot?.textContent).toContain('Project Spotlight');
+    expect(psSlot?.textContent).toContain('Active PS edition');
+  });
+
+  it('editorial queue renders rows from synced content with the Display window column', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Project edition with window',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+          publishStatus: 'Published',
+          isVisible: true,
+          isHomepageEligible: true,
+          displayFrom: '2026-04-01T00:00:00.000Z',
+          displayThrough: '2026-04-30T23:59:00.000Z',
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const queue = await screen.findByRole('region', { name: 'Editorial Queue' });
+    const rows = queue.querySelectorAll('[data-editorial-queue-row]');
+    expect(rows.length).toBe(1);
+    expect(rows[0]?.textContent).toContain('Project edition with window');
+    expect(rows[0]?.textContent).toMatch(/Apr/);
+  });
+
+  it('selecting an editorial queue row populates the inspector with summary and readiness sections', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Inspectable record',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+          publishStatus: 'Published',
+          isVisible: true,
+          isHomepageEligible: true,
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const queue = await screen.findByRole('region', { name: 'Editorial Queue' });
+    const row = queue.querySelector('[data-editorial-queue-row]') as HTMLElement | null;
+    expect(row).toBeTruthy();
+    fireEvent.click(row!);
+
+    const inspector = screen.getByRole('complementary', { name: 'Feed Inspector' });
+    expect(within(inspector).getByRole('heading', { name: 'Inspectable record' })).toBeTruthy();
+    expect(inspector.querySelector('[data-feed-inspector-section="summary"]')).toBeTruthy();
+    expect(inspector.querySelector('[data-feed-inspector-section="readiness"]')).toBeTruthy();
+    expect(inspector.querySelector('[data-feed-inspector-section="placement"]')).toBeTruthy();
+    expect(inspector.querySelector('[data-feed-inspector-section="schedule"]')).toBeTruthy();
+    expect(inspector.querySelector('[data-feed-inspector-section="preview"]')).toBeTruthy();
+    expect(inspector.querySelector('[data-feed-inspector-section="publish"]')).toBeTruthy();
+  });
+
+  it('feed desk shows a "Sync from Foleon" setup callout when no content has been synced yet', async () => {
+    installManageFetchMock({ content: [] });
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const callout = await screen.findByRole('region', { name: 'Feed Desk setup' });
+    expect(callout.getAttribute('data-feed-desk-callout')).toBe('empty');
+    expect(callout.textContent).toContain('No Foleon content has been synced yet');
+    expect(within(callout).getByRole('button', { name: 'Sync from Foleon' })).toBeTruthy();
+  });
+
+  it('feed desk routes the setup callout to admin diagnostics when token is degraded', async () => {
+    render(
+      <ManagePage
+        contract={hostedContract({
+          getAccessToken: undefined,
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+          foleonConfigDiagnostics: {
+            blockers: [{ code: 'token-acquisition-failed', message: 'consent_required: redacted' }],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    const callout = await screen.findByRole('region', { name: 'Feed Desk setup' });
+    expect(callout.getAttribute('data-feed-desk-callout')).toBe('token-degraded');
+    fireEvent.click(within(callout).getByRole('button', { name: 'Open admin diagnostics' }));
+    expect(screen.getByRole('tab', { name: 'Admin' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('filtering editorial queue to Unassigned shows only records without any placement', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          id: 'content-1',
+          sharePointItemId: 1,
+          foleonDocId: 1001,
+          title: 'Assigned record',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+        }),
+        managedContent({
+          id: 'content-2',
+          sharePointItemId: 2,
+          foleonDocId: 1002,
+          title: 'Unassigned record',
+          contentTypeKey: 'Company Pulse',
+          readerKey: 'company-pulse',
+        }),
+      ],
+      placements: [
+        managedPlacement({ contentItemId: 1, foleonDocId: 1001, isActive: true }),
+      ],
+    });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const queue = await screen.findByRole('region', { name: 'Editorial Queue' });
+    expect(queue.querySelectorAll('[data-editorial-queue-row]').length).toBe(2);
+    fireEvent.click(within(queue).getByRole('radio', { name: /Unassigned/ }));
+    const filteredRows = queue.querySelectorAll('[data-editorial-queue-row]');
+    expect(filteredRows.length).toBe(1);
+    expect(filteredRows[0]?.textContent).toContain('Unassigned record');
+  });
+
+  it('inspector preview section disables Open Foleon with a structured reason when no safe origin is configured', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'No-origin record',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+        }),
+      ],
+    });
+
+    render(
+      <ManagePage
+        contract={mockContract({ originPolicy: createFoleonOriginPolicy([]) })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    const queue = await screen.findByRole('region', { name: 'Editorial Queue' });
+    fireEvent.click(queue.querySelector('[data-editorial-queue-row]') as HTMLElement);
+    const inspector = screen.getByRole('complementary', { name: 'Feed Inspector' });
+    const previewSection = inspector.querySelector(
+      '[data-feed-inspector-section="preview"]',
+    ) as HTMLElement;
+    const openFoleon = within(previewSection).getByRole('button', { name: /Open Foleon/i }) as HTMLButtonElement;
+    expect(openFoleon.disabled).toBe(true);
+    const reasonId = openFoleon.getAttribute('aria-describedby');
+    expect(reasonId).toBeTruthy();
+    expect(document.getElementById(reasonId ?? '')?.textContent).toMatch(/HTTPS viewer origin/i);
+  });
+
+  it('inspector publish section embeds the editor and surfaces write-block reason on Save when write path is blocked', async () => {
+    installManageFetchMock({
+      content: [
+        managedContent({
+          title: 'Hosted record',
+          contentTypeKey: 'Project Spotlight',
+          readerKey: 'project-spotlight',
+        }),
+      ],
+    });
+
+    render(<ManagePage contract={hostedContract()} onBack={(): void => undefined} />);
+
+    const queue = await screen.findByRole('region', { name: 'Editorial Queue' });
+    fireEvent.click(queue.querySelector('[data-editorial-queue-row]') as HTMLElement);
+    const inspector = screen.getByRole('complementary', { name: 'Feed Inspector' });
+    const publishSection = inspector.querySelector(
+      '[data-feed-inspector-section="publish"]',
+    ) as HTMLElement;
+    const save = within(publishSection).getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    const reasonId = save.getAttribute('aria-describedby');
+    expect(reasonId).toBe('foleon-manage-write-actions-reason');
+    expect(document.getElementById(reasonId ?? '')?.textContent).toMatch(/Write actions are disabled/i);
   });
 
   it('header renders the Foleon Feed Manager title, subtitle, and exactly one primary action', async () => {

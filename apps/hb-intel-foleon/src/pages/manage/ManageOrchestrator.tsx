@@ -14,6 +14,7 @@ import type {
 } from '../../types/foleon-management.types.js';
 import { FoleonError, FoleonLoadingState } from '../../components/FoleonStates.js';
 import { FoleonConfigTab } from './FoleonConfigTab.js';
+import { FeedDeskWorkspace } from './FeedDeskWorkspace.js';
 import { buildManagerStatusChips, resolveSafeFoleonOpenOrigin } from './manageHeaderStatusModel.js';
 import { FoleonFeedManagerApp } from './FoleonFeedManagerApp.js';
 import {
@@ -26,6 +27,7 @@ import {
   tokenAcquisitionDegradedBannerNextStep,
   tokenAcquisitionDegradedBannerPrimary,
 } from './manageDegradedCopy.js';
+import { plainLanguageWriteBlockReason } from './manageWritePathMessage.js';
 import './foleonManageTokens.css';
 import shell from './manageShell.module.css';
 
@@ -202,6 +204,13 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
       !state.managerReadPathProven &&
       props.contract.foleonConfigDiagnostics?.blockers.some((b) => b.code === 'token-acquisition-failed'),
   );
+  const canWrite =
+    props.contract.hostMode !== 'sharepoint' ||
+    (props.contract.foleonReadiness?.writePathReady === true && state.managerReadPathProven);
+  const writeBlockReason = canWrite
+    ? undefined
+    : plainLanguageWriteBlockReason(props.contract, state.managerReadPathProven);
+  const onSyncDocsCallback = (): void => void runFoleonSync(api, 'docs', load, setMessage);
 
   const headerModel = buildFeedManagerHeaderModel({
     canSync,
@@ -209,7 +218,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     safeFoleonOpenUrl,
     openFoleonUnavailableReason,
     statusChips,
-    onSyncDocs: (): void => void runFoleonSync(api, 'docs', load, setMessage),
+    onSyncDocs: onSyncDocsCallback,
     onOpenAdminDiagnostics: openAdminDiagnostics,
     onOpenFoleon,
     onBack: props.onBack,
@@ -249,6 +258,26 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
     />
   );
 
+  const feedDeskBody = (
+    <FeedDeskWorkspace
+      contract={props.contract}
+      api={api}
+      content={state.content}
+      placements={state.placements}
+      managerReadPathProven={state.managerReadPathProven}
+      canSync={canSync}
+      canWrite={canWrite}
+      writeBlockReason={writeBlockReason}
+      tokenAcquisitionDegraded={tokenAcquisitionDegraded}
+      safeFoleonOpenUrl={safeFoleonOpenUrl}
+      openFoleonUnavailableReason={openFoleonUnavailableReason}
+      onSyncDocs={onSyncDocsCallback}
+      onOpenAdminDiagnostics={openAdminDiagnostics}
+      onRefresh={load}
+      setMessage={setMessage}
+    />
+  );
+
   return (
     <Tooltip.Provider delayDuration={280}>
       <section
@@ -267,6 +296,7 @@ export function ManageOrchestrator(props: ManageOrchestratorProps): React.ReactN
           headerModel={headerModel}
           tokenDegradedBanner={tokenDegradedBanner}
           statusBanner={statusBanner}
+          feedDeskBody={feedDeskBody}
           adminPanel={adminPanel}
         />
       </section>

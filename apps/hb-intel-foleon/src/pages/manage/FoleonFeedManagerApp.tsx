@@ -8,18 +8,13 @@ import {
 } from './feedManagerViewModel.js';
 import shell from './manageShell.module.css';
 
-const FEED_SLOTS: ReadonlyArray<{ readonly id: string; readonly label: string }> = [
-  { id: 'project-spotlight', label: 'Project Spotlight' },
-  { id: 'company-pulse', label: 'Company Pulse' },
-  { id: 'leadership-message', label: 'Leadership Message' },
-];
-
 export interface FoleonFeedManagerAppProps {
   readonly selectedKey: FeedManagerWorkspaceKey;
   readonly onSelectKey: (key: FeedManagerWorkspaceKey) => void;
   readonly headerModel: FeedManagerHeaderModel;
   readonly tokenDegradedBanner?: React.ReactNode;
   readonly statusBanner?: React.ReactNode;
+  readonly feedDeskBody: React.ReactNode;
   readonly adminPanel: React.ReactNode;
 }
 
@@ -30,7 +25,7 @@ export function FoleonFeedManagerApp(props: FoleonFeedManagerAppProps): React.Re
       {props.tokenDegradedBanner}
       {props.statusBanner}
       <FeedManagerNav selected={props.selectedKey} onSelect={props.onSelectKey} />
-      {props.selectedKey === 'feed-desk' ? <FeedDeskPanel /> : null}
+      {props.selectedKey === 'feed-desk' ? <FeedDeskPanel>{props.feedDeskBody}</FeedDeskPanel> : null}
       {props.selectedKey === 'schedule' ? <SchedulePanel /> : null}
       {props.selectedKey === 'preview' ? <PreviewPanel /> : null}
       {props.selectedKey === 'admin' ? <AdminPanel>{props.adminPanel}</AdminPanel> : null}
@@ -52,64 +47,14 @@ function workspacePanelProps(key: FeedManagerWorkspaceKey): {
   };
 }
 
-function FeedDeskPanel(): React.ReactNode {
+function FeedDeskPanel(props: { readonly children: React.ReactNode }): React.ReactNode {
   return (
     <section
       {...workspacePanelProps('feed-desk')}
       aria-label="Feed Desk"
       className={shell.feedDeskPanel}
     >
-      <div className={shell.feedDeskGrid}>
-        <FeedDeskColumn
-          heading="Feed Slots"
-          description="HB Central feeds that surface Foleon content to employees."
-        >
-          <ul className={shell.feedSlotList} role="list">
-            {FEED_SLOTS.map((slot) => (
-              <li
-                key={slot.id}
-                className={shell.feedSlotCard}
-                data-feed-slot={slot.id}
-              >
-                <p className={shell.feedSlotLabel}>{slot.label}</p>
-                <p className={shell.feedSlotEmpty}>No content placed.</p>
-              </li>
-            ))}
-          </ul>
-        </FeedDeskColumn>
-        <FeedDeskColumn
-          heading="Editorial Queue"
-          description="Foleon content available to place into a feed slot."
-        >
-          <p className={shell.feedDeskEmpty}>No content placed yet.</p>
-        </FeedDeskColumn>
-        <FeedDeskColumn
-          heading="Inspector"
-          description="Details for the selected feed slot or editorial item."
-        >
-          <p className={shell.feedDeskEmpty}>Select an item to inspect.</p>
-        </FeedDeskColumn>
-      </div>
-    </section>
-  );
-}
-
-function FeedDeskColumn(props: {
-  readonly heading: string;
-  readonly description: string;
-  readonly children: React.ReactNode;
-}): React.ReactNode {
-  return (
-    <section
-      className={shell.feedDeskColumn}
-      aria-label={props.heading}
-      data-feed-desk-column={props.heading.toLowerCase().replace(/\s+/g, '-')}
-    >
-      <header className={shell.feedDeskColumnHeader}>
-        <h3 className={shell.feedDeskColumnHeading}>{props.heading}</h3>
-        <p className={shell.feedDeskColumnDescription}>{props.description}</p>
-      </header>
-      <div className={shell.feedDeskColumnBody}>{props.children}</div>
+      {props.children}
     </section>
   );
 }
