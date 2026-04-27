@@ -8,6 +8,14 @@ Follow all existing repo governance, UI doctrine, package-version authority, and
 
 Do not implement unrelated changes. Do not change Safety Field Excellence, HB Kudos, People & Culture, backend sync, SharePoint list schemas, Foleon iframe governance, or Foleon routes unless this prompt explicitly instructs you to do so.
 
+Use 00_BASELINE_AUDIT.md, 01_EDGE_CONTRACT_REPORT.md, 02_VIEW_MODEL_AND_REGISTRY_REPORT.md, and 03_PROJECT_SPOTLIGHT_LAYOUT_REPORT.md as controlling baseline documents.
+
+Do not reopen the shell edge contract, shared view-model registry, or Project Spotlight layout unless implementation evidence proves a defect.
+
+This pass should replace only the Company Pulse compatibility layout with a true lane-owned briefing/newsroom digest composition. Do not redesign Leadership Message yet, and do not modify Project Spotlight except for shared type/test adjustments required by Company Pulse.
+
+Company Pulse should not mimic the Project Spotlight feature layout. It should be a scannable, frequent-update briefing with a latest-update lead, compact secondary update zones, category chips, freshness context, and preview/production parity.
+
 ## Objective
 
 Implement a lane-specific Company Pulse reader layout that feels like a frequent newsroom / company briefing digest, not a project feature card.

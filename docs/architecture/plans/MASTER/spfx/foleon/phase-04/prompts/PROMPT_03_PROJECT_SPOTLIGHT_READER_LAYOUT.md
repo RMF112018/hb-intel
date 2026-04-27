@@ -8,6 +8,12 @@ Follow all existing repo governance, UI doctrine, package-version authority, and
 
 Do not implement unrelated changes. Do not change Safety Field Excellence, HB Kudos, People & Culture, backend sync, SharePoint list schemas, Foleon iframe governance, or Foleon routes unless this prompt explicitly instructs you to do so.
 
+Use 00_BASELINE_AUDIT.md, 01_EDGE_CONTRACT_REPORT.md, and 02_VIEW_MODEL_AND_REGISTRY_REPORT.md as controlling baseline documents.
+
+Do not reopen the edge contract or registry architecture unless implementation evidence proves they are defective.
+
+This pass should replace only the Project Spotlight compatibility layout with a true lane-owned Project Spotlight composition. Do not redesign Company Pulse or Leadership Message yet except as needed to preserve shared types/tests.
+
 ## Objective
 
 Implement a lane-specific Project Spotlight reader layout that feels like a monthly visual project profile, not a generic preview card.

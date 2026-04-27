@@ -16,6 +16,17 @@ The connector needs a backend API URL or SPFx token provider configuration befor
 
 This pass must not solve the issue by simply adding another isolated page-local configuration dependency. Registry-backed config is the target path; property-pane config is only override/bootstrap compatibility.
 
+Current confirmed registry state:
+
+- `listBindingsReady=true`
+- `backendUrlReady=true`
+- `authResourceReady=true`
+- `tokenProviderReady` is not yet proven
+- `backendAuthReady` is not yet proven
+- `writePathReady=false`
+
+This wave must not claim write readiness until SPFx token acquisition, backend token audience acceptance, Foleon route authorization, and backend safe-config readiness are all proven.
+
 ## Required Preconditions
 
 Confirm before coding:
