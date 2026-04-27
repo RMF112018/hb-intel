@@ -80,14 +80,14 @@ function buildReadyViewModel(
   });
 }
 
-describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
+describe('CompanyPulseReaderLayout — edition launcher composition', () => {
   it('emits the new data-foleon-layout marker alongside the registry markers', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
 
-    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-briefing"]');
+    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-edition-launcher"]');
     expect(wrapper).not.toBeNull();
     expect(wrapper?.getAttribute('data-foleon-reader-layout')).toBe('company-pulse');
     expect(wrapper?.getAttribute('data-foleon-reader-lane')).toBe('companyPulse');
@@ -124,7 +124,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
       <CompanyPulseReaderLayout viewModel={previewVm} iframeSurface={null} />,
     );
     const previewWrapper = previewRender.container.querySelector(
-      '[data-foleon-layout="company-pulse-briefing"]',
+      '[data-foleon-layout="company-pulse-edition-launcher"]',
     );
     expect(previewWrapper?.getAttribute('data-foleon-reader-state')).toBe('preview');
     cleanup();
@@ -134,7 +134,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
       <CompanyPulseReaderLayout viewModel={readyVm} iframeSurface={null} />,
     );
     const readyWrapper = readyRender.container.querySelector(
-      '[data-foleon-layout="company-pulse-briefing"]',
+      '[data-foleon-layout="company-pulse-edition-launcher"]',
     );
     expect(readyWrapper).not.toBeNull();
     expect(readyWrapper?.getAttribute('data-foleon-reader-state')).toBe('ready');
@@ -143,37 +143,37 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
   it('keeps an honest visible preview label in preview state', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
-    expect(screen.getByText('Preview layout')).toBeTruthy();
+    expect(screen.getByText('Preview')).toBeTruthy();
   });
 
-  it('renders a non-empty digest spanning the four conceptual categories in preview state', () => {
+  it('renders non-interactive publication coverage cues, not a digest list', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
 
-    const digest = container.querySelector('[data-foleon-pulse-digest-state="populated"]');
-    expect(digest).not.toBeNull();
-    const text = digest?.textContent ?? '';
+    const coverage = container.querySelector('[aria-label="Company Pulse coverage"]');
+    expect(coverage).not.toBeNull();
+    const text = coverage?.textContent ?? '';
+    expect(container.querySelector('[data-foleon-pulse-digest-state="populated"]')).toBeNull();
     expect(text).toContain('News');
     expect(text).toContain('Events');
     expect(text).toContain('Recognition');
     expect(text).toContain('Operations');
   });
 
-  it('renders an explanatory empty-digest state in ready mode and never fabricates secondary digest items', () => {
+  it('does not render digest or timeline structures in ready mode', () => {
     const viewModel = buildReadyViewModel();
     const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
 
     expect(container.querySelector('[data-foleon-pulse-digest-state="populated"]')).toBeNull();
-    const empty = container.querySelector('[data-foleon-pulse-digest-state="empty"]');
-    expect(empty).not.toBeNull();
-    expect(empty?.textContent ?? '').toMatch(/archive/i);
+    expect(container.querySelector('[data-foleon-pulse-digest-state="empty"]')).toBeNull();
+    expect(container.querySelector('[aria-label="Pulse timeline"]')).toBeNull();
   });
 
-  it('renders the briefing lead derived from FoleonContentRecord (no invented data)', () => {
+  it('renders the edition launcher card derived from FoleonContentRecord (no invented data)', () => {
     const viewModel = buildReadyViewModel({
       title: 'Companywide April Brief',
       summary: 'Operational, recognition, and event highlights for the week of April 14.',
@@ -182,17 +182,17 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
 
-    const lead = container.querySelector('[aria-label="Latest Company Pulse update"]');
+    const lead = container.querySelector('[aria-label="Current Company Pulse edition"]');
     expect(lead).not.toBeNull();
     expect(lead?.textContent).toContain('Companywide April Brief');
     expect(lead?.textContent).toContain('Operational, recognition, and event highlights');
   });
 
-  it('uses an honest fallback in the lead body when the record carries no summary', () => {
+  it('uses an honest publication fallback when the record carries no summary', () => {
     const viewModel = buildReadyViewModel({ summary: undefined });
     render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
     expect(
-      screen.getByText(/Editorial summary for this Company Pulse edition has not been provided\./i),
+      screen.getByText(/full Company Pulse publication opens in the governed Foleon viewer/i),
     ).toBeTruthy();
   });
 
@@ -207,7 +207,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     expect(rendered.container.querySelector('iframe')).toBeNull();
   });
 
-  it('renders the lead update as the article card with stable interaction markers', () => {
+  it('renders one dominant launcher card with stable interaction markers', () => {
     const viewModel = buildReadyViewModel();
     const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
@@ -217,9 +217,10 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     expect(card?.getAttribute('data-foleon-article-lane')).toBe('companyPulse');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('enabled');
     expect(card?.getAttribute('data-foleon-viewer-target-id')).toMatch(/^company-pulse-active-/);
-    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     expect(launch).toBeTruthy();
     expect(launch.getAttribute('aria-disabled')).toBeNull();
+    expect(card?.textContent ?? '').toContain('Open Company Pulse');
   });
 
   it('preview state lead card is actionable without disabled semantics', () => {
@@ -229,7 +230,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
-    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     expect(launch.getAttribute('aria-disabled')).toBeNull();
     expect(launch.getAttribute('aria-describedby')).toBeNull();
   });
@@ -244,7 +245,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
-    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     expect(launch.getAttribute('aria-disabled')).toBeNull();
     expect(launch.getAttribute('aria-describedby')).toBeNull();
     fireEvent.click(launch);
@@ -263,7 +264,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
         <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const launch = rendered.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = rendered.getByRole('button', { name: viewModel.primaryArticle!.title });
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
     const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
@@ -295,7 +296,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
         <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const launch = rendered.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = rendered.getByRole('button', { name: viewModel.primaryArticle!.title });
     // Keyboard activation on a native button — fire keyDown then click,
     // matching the browser's synthesized Enter/Space → click flow.
     fireEvent.keyDown(launch, { key: 'Enter' });
@@ -310,7 +311,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
-    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     expect(launch.getAttribute('aria-disabled')).toBe('true');
     fireEvent.click(launch);
     expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
@@ -326,7 +327,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
-    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     expect(launch.getAttribute('aria-disabled')).toBe('true');
     const reasonId = launch.getAttribute('aria-describedby');
     expect(reasonId).toBeTruthy();
@@ -344,7 +345,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
-    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-briefing"]') as HTMLElement | null;
+    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-edition-launcher"]') as HTMLElement | null;
     expect(wrapper).not.toBeNull();
     // No inline `margin-inline` / `margin-left` / `margin-right` style applied directly to the wrapper.
     expect(wrapper?.style.marginInline).toBe('');
@@ -373,7 +374,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     const pulse = container.querySelector('[data-foleon-reader-layout="company-pulse"]');
     const leadership = container.querySelector('[data-foleon-reader-layout="leadership-message"]');
     expect(spotlight?.getAttribute('data-foleon-layout')).toBe('project-spotlight-feature');
-    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-briefing');
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-edition-launcher');
     // Leadership (Prompt-05): lane-owned executive layout. No legacy markers.
     expect(leadership?.getAttribute('data-foleon-layout')).toBe('leadership-message');
     expect(leadership?.querySelector('[data-preview-tone]')).toBeNull();

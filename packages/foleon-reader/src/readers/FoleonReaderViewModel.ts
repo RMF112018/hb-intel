@@ -161,6 +161,14 @@ export interface FoleonReaderPulseTimelineEntry {
   readonly value: string;
 }
 
+export interface FoleonReaderPulseMedia {
+  readonly primaryImageUrl?: string;
+  readonly thumbnailUrl?: string;
+  readonly hasRecordMedia: boolean;
+  readonly isPlaceholder: boolean;
+  readonly accessibleLabel?: string;
+}
+
 /**
  * Leadership Message executive composition. Populated only when
  * `lane === 'leadershipMessage'`. Ready-state values are sourced
@@ -227,6 +235,8 @@ export interface FoleonReaderViewModel {
   readonly categoryChips?: readonly FoleonReaderCategoryChip[];
   /** Company Pulse preview only. Ready state leaves this `undefined`. */
   readonly pulseTimeline?: readonly FoleonReaderPulseTimelineEntry[];
+  /** Company Pulse only. Preview placeholder or ready record-backed media. */
+  readonly pulseMedia?: FoleonReaderPulseMedia;
   /** Leadership Message only. Spotlight + Pulse leave this `undefined`. */
   readonly leadershipMessage?: FoleonReaderLeadershipMessage;
   /**
@@ -281,9 +291,9 @@ const LANE_LABELS: Readonly<Record<FoleonReaderLayoutKey, LaneLabels>> = {
     freshnessFallback: 'This month',
   },
   companyPulse: {
-    eyebrow: 'Company Pulse Reader',
-    freshnessLabel: 'Latest update',
-    freshnessFallback: 'Latest update',
+    eyebrow: 'Company Pulse',
+    freshnessLabel: 'Updated',
+    freshnessFallback: 'Current edition',
   },
   leadershipMessage: {
     eyebrow: 'Leadership Message Reader',
@@ -350,11 +360,11 @@ const LANE_PREVIEW_COPY: Readonly<Record<FoleonReaderLayoutKey, LanePreviewCopy>
     ],
   },
   companyPulse: {
-    title: 'Company Pulse reader',
+    title: 'Company Pulse',
     description:
-      'This sample structure previews the frequent company update lane for news, events, recognition, and operations before an active Company Pulse edition is published.',
-    statusLabel: 'Latest company update',
-    cadenceLabel: 'Frequent',
+      'Preview how HB Central introduces the current Company Pulse edition before a live Foleon publication is selected.',
+    statusLabel: 'Current edition',
+    cadenceLabel: 'Current edition',
     featureTitle: 'Company update edition placeholder',
     featureCopy:
       'A compact publication area will summarize the active edition, latest update cadence, and operational context once live Foleon content is connected.',
@@ -451,6 +461,16 @@ export function createPreviewFoleonReaderViewModel(
     lane === 'companyPulse' ? PULSE_CATEGORY_CHIPS : undefined;
   const pulseTimeline: readonly FoleonReaderPulseTimelineEntry[] | undefined =
     lane === 'companyPulse' ? PULSE_PREVIEW_TIMELINE : undefined;
+  const pulseMedia: FoleonReaderPulseMedia | undefined =
+    lane === 'companyPulse'
+      ? {
+          primaryImageUrl: undefined,
+          thumbnailUrl: undefined,
+          hasRecordMedia: false,
+          isPlaceholder: true,
+          accessibleLabel: undefined,
+        }
+      : undefined;
   const leadershipMessage: FoleonReaderLeadershipMessage | undefined =
     lane === 'leadershipMessage'
       ? {
@@ -477,7 +497,7 @@ export function createPreviewFoleonReaderViewModel(
     title: preview.title,
     summary: preview.description,
     eyebrow: labels.eyebrow,
-    previewLabel: lane === 'projectSpotlight' ? 'Preview' : 'Preview layout',
+    previewLabel: lane === 'leadershipMessage' ? 'Preview layout' : 'Preview',
     freshnessLabel: labels.freshnessLabel,
     freshnessValue: labels.freshnessFallback,
     audience: 'Companywide',
@@ -517,6 +537,7 @@ export function createPreviewFoleonReaderViewModel(
     briefingDigest,
     categoryChips,
     pulseTimeline,
+    pulseMedia,
     leadershipMessage,
     projectMedia,
     projectLabel: undefined,
@@ -591,6 +612,25 @@ const PULSE_PREVIEW_TIMELINE: readonly FoleonReaderPulseTimelineEntry[] = [
   { id: 'last-week', label: 'Last week', value: 'Sample dateline' },
   { id: 'two-weeks', label: 'Two weeks ago', value: 'Sample dateline' },
 ];
+
+function buildReadyPulseMedia(record: FoleonContentRecord): FoleonReaderPulseMedia {
+  const hero = record.heroImageUrl?.trim();
+  const thumb = record.thumbnailUrl?.trim();
+  const primary = (hero && hero.length > 0 ? hero : undefined) ?? (thumb && thumb.length > 0 ? thumb : undefined);
+  const thumbnail =
+    thumb && thumb.length > 0 && thumb !== primary ? thumb : undefined;
+  const hasRecordMedia = primary !== undefined;
+  const accessibleLabel = hasRecordMedia
+    ? `Company Pulse cover image for ${record.title}`
+    : undefined;
+  return {
+    primaryImageUrl: primary,
+    thumbnailUrl: thumbnail,
+    hasRecordMedia,
+    isPlaceholder: false,
+    accessibleLabel,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Leadership Message ready-state derivations — sourced only from
@@ -728,6 +768,10 @@ export function createReadyFoleonReaderViewModel(
     lane === 'companyPulse' ? PULSE_CATEGORY_CHIPS : undefined;
   // Timeline strip is preview-only — no live multi-edition source.
   const pulseTimeline: readonly FoleonReaderPulseTimelineEntry[] | undefined = undefined;
+  const pulseMedia: FoleonReaderPulseMedia | undefined =
+    lane === 'companyPulse'
+      ? buildReadyPulseMedia(record)
+      : undefined;
   const leadershipMessage: FoleonReaderLeadershipMessage | undefined =
     lane === 'leadershipMessage'
       ? {
@@ -809,7 +853,7 @@ export function createReadyFoleonReaderViewModel(
       resolution.warnings.length > 0
         ? ['Reader resolved with admin warnings for the Manager workflow.']
         : [],
-    archiveNote: 'Lane archive filtering comes in a later workflow.',
+    archiveNote: 'The archive opens previous Company Pulse editions.',
     titleElementId: `${config.readerKey}-reader-title`,
     projectFacts,
     featureCallout,
@@ -817,6 +861,7 @@ export function createReadyFoleonReaderViewModel(
     briefingDigest,
     categoryChips,
     pulseTimeline,
+    pulseMedia,
     leadershipMessage,
     projectMedia,
     projectLabel,

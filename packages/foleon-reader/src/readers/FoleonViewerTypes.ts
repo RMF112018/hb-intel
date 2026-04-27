@@ -207,12 +207,12 @@ function createPreviewContent(
       return {
         badge: 'Preview',
         title: 'Company Pulse Preview',
-        summary: 'A local preview of the briefing layout for company updates, events, recognition, and operations.',
+        summary: 'This preview shows how HB Central introduces the current Company Pulse edition.',
         lane,
-        notice: 'A live Company Pulse Foleon edition will open here once the active update is configured.',
-        primaryLabel: 'Latest update',
-        secondaryLabel: 'Frequent briefing',
-        bullets: ['News', 'Events', 'Recognition', 'Operations'],
+        notice: 'When a live edition is selected, this window opens the governed Foleon viewer.',
+        primaryLabel: 'Current edition',
+        secondaryLabel: 'Foleon publication',
+        bullets: ['Current edition', 'Company updates', 'Recognition and events', 'Full Foleon publication'],
       };
     case 'leadershipMessage':
       return {

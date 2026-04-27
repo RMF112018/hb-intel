@@ -131,7 +131,7 @@ describe('createReadyFoleonReaderViewModel — freshness preference', () => {
     });
     // The chosen field should be lastEditorialUpdate (March), not publishedOn (April).
     expect(vm.freshnessValue).toMatch(/Mar/);
-    expect(vm.freshnessLabel).toBe('Latest update');
+    expect(vm.freshnessLabel).toBe('Updated');
   });
 
   it('Leadership Message prefers lastEditorialUpdate over publishedOn', () => {

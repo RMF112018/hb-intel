@@ -1,26 +1,19 @@
 import * as React from 'react';
 import { HbcButton } from '@hbc/ui-kit/homepage';
 import type { FoleonReaderLayoutProps } from '../FoleonReaderLayoutRegistry.js';
-import type {
-  FoleonReaderAction,
-  FoleonReaderViewModel,
-} from '../FoleonReaderViewModel.js';
+import type { FoleonReaderAction } from '../FoleonReaderViewModel.js';
 import type { FoleonViewerDisabledReason } from '../FoleonViewerTypes.js';
 import { useFoleonFullWindowViewer } from '../../components/FoleonFullWindowViewerProvider.js';
 import styles from './FoleonReaderLayouts.module.css';
 
 // ---------------------------------------------------------------------------
-// Company Pulse reader layout — Phase-04 Wave-01 Prompt-04B
+// Company Pulse edition launcher layout — CP-02
 // ---------------------------------------------------------------------------
-// Lane-owned briefing / newsroom digest. The lead update card is the
-// interactive launch surface for the shared full-window Foleon viewer
-// (Inclusive Components card-launch pattern). Disabled targets carry
-// `aria-disabled` plus `aria-describedby` and surface a visible reason.
-// Inline iframe is removed for this lane — the Foleon document opens in
-// the shared full-window viewer.
-//
-// Ready-state secondary digest stays empty (no fabricated entries); the
-// "Open full archive" footer affordance directs users to previous editions.
+// Company Pulse is a Foleon publication access point. The dominant edition
+// card is the single interactive launch surface for the shared full-window
+// viewer (Inclusive Components card-launch pattern). Disabled targets carry
+// `aria-disabled` + `aria-describedby` with a visible reason. Inline iframe
+// is never rendered in this lane.
 // ---------------------------------------------------------------------------
 
 export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.JSX.Element | null {
@@ -44,113 +37,82 @@ export function CompanyPulseReaderLayout(props: FoleonReaderLayoutProps): React.
       data-foleon-reader-layout="company-pulse"
       data-foleon-reader-lane="companyPulse"
       data-foleon-reader-state={viewModel.state}
-      data-foleon-layout="company-pulse-briefing"
+      data-foleon-layout="company-pulse-edition-launcher"
     >
       <article
-        className={styles.briefingSurface}
+        className={styles.pulseEditionSurface}
         aria-labelledby={viewModel.titleElementId}
       >
-        <header className={styles.briefingHeader}>
-          <div className={styles.briefingHeaderRow}>
-            <p className={styles.briefingEyebrow}>{viewModel.eyebrow}</p>
-            <span className={styles.briefingCadence}>Frequent</span>
-            {isPreview && viewModel.previewLabel ? (
-              <span className={styles.briefingPreviewLabel} aria-label="Preview content">
-                {viewModel.previewLabel}
+        <section
+          className={`${styles.pulseEditionCard} ${styles.articleCard}`}
+          aria-label="Current Company Pulse edition"
+          data-foleon-article-card
+          data-foleon-article-lane="companyPulse"
+          data-foleon-viewer-target-id={target.id}
+          data-foleon-article-state={articleState}
+        >
+          <MediaStage
+            title={card.title}
+            media={viewModel.pulseMedia}
+            isPreview={isPreview}
+          />
+          <div className={styles.pulseEditionOverlay}>
+            <div className={styles.pulseEyebrowRow}>
+              <p className={styles.pulseEyebrow}>Company Pulse</p>
+              <span className={styles.pulseStateChip}>
+                {isPreview ? 'Preview' : (viewModel.cadenceLabel ?? 'Current edition')}
               </span>
-            ) : null}
-          </div>
-          <h2 className={styles.briefingTitle} id={viewModel.titleElementId}>
-            {viewModel.title}
-          </h2>
-          {viewModel.summary ? (
-            <p className={styles.briefingSummary}>{viewModel.summary}</p>
-          ) : null}
-        </header>
-
-        {viewModel.categoryChips && viewModel.categoryChips.length > 0 ? (
-          <ul className={styles.categoryChips} aria-label="Pulse categories">
-            {viewModel.categoryChips.map((chip) => (
-              <li key={chip.id} className={styles.categoryChip}>
-                {chip.label}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        {viewModel.briefingLead ? (
-          <section
-            className={`${styles.briefingLead} ${styles.articleCard}`}
-            aria-label="Latest Company Pulse update"
-            data-foleon-article-card
-            data-foleon-article-lane="companyPulse"
-            data-foleon-viewer-target-id={target.id}
-            data-foleon-article-state={articleState}
-          >
-            <p className={styles.leadKicker}>
-              <span>Latest update</span>
-              {' · '}
-              <span>{viewModel.freshnessValue}</span>
-              {viewModel.briefingLead.dateline ? (
-                <>
-                  {' · '}
-                  <span className={styles.leadDateline}>
-                    {viewModel.briefingLead.dateline}
-                  </span>
-                </>
-              ) : null}
-            </p>
-            <h3 className={styles.leadTitle}>
-              <CardLaunchButton
-                target={target}
-                reasonId={reasonId}
-                isDisabled={isDisabled}
-              >
-                {viewModel.briefingLead.title}
+            </div>
+            {!isPreview ? (
+              <p className={styles.pulseFreshness}>Updated {viewModel.freshnessValue}</p>
+            ) : (
+              <p className={styles.pulseFreshness}>Preview - no live edition selected</p>
+            )}
+            <h2 className={styles.pulseEditionTitle} id={viewModel.titleElementId}>
+              <CardLaunchButton target={target} reasonId={reasonId} isDisabled={isDisabled}>
+                <span>{card.title}</span>
+                <span className={styles.pulseCtaPill} aria-hidden="true">
+                  Open Company Pulse
+                  <span className={styles.showcaseCtaArrow} aria-hidden="true">→</span>
+                </span>
               </CardLaunchButton>
-            </h3>
-            <p className={styles.leadBody}>{viewModel.briefingLead.body}</p>
-            {isDisabled ? (
-              <p
-                id={reasonId}
-                className={styles.disabledReason}
-                role="status"
-                aria-live="polite"
-              >
-                {formatDisabledReason(target.disabledReason)}
-              </p>
-            ) : null}
-          </section>
-        ) : null}
-
-        {renderDigest(viewModel)}
-
-        {isPreview && viewModel.pulseTimeline && viewModel.pulseTimeline.length > 0 ? (
-          <ol className={styles.pulseTimeline} aria-label="Pulse timeline">
-            {viewModel.pulseTimeline.map((entry) => (
-              <li key={entry.id} className={styles.timelineEntry}>
-                <span className={styles.timelineLabel}>{entry.label}</span>
-                <span className={styles.timelineValue}>{entry.value}</span>
-              </li>
-            ))}
-          </ol>
-        ) : null}
+            </h2>
+            <p className={styles.pulseEditionTeaser}>
+              {card.summary && card.summary.trim().length > 0
+                ? card.summary
+                : 'The full Company Pulse publication opens in the governed Foleon viewer.'}
+            </p>
+            <CoverageLabels />
+          </div>
+          {isDisabled ? (
+            <p
+              id={reasonId}
+              className={styles.pulseDisabledReason}
+              role="status"
+              aria-live="polite"
+            >
+              {formatDisabledReason(target.disabledReason)}
+            </p>
+          ) : null}
+        </section>
 
         {archiveAction || viewModel.archiveNote ? (
-          <div className={styles.briefingFooter}>
+          <div className={styles.pulseFooter}>
             {archiveAction ? (
               <HbcButton variant="secondary" onClick={archiveAction.onClick}>
-                {archiveAction.label}
+                View previous editions
               </HbcButton>
             ) : null}
             {viewModel.archiveNote ? (
-              <span className={styles.briefingArchiveNote}>{viewModel.archiveNote}</span>
+              <span className={styles.pulseArchiveNote}>
+                {viewModel.archiveNote.replace('Lane archive filtering comes in a later workflow.', 'The archive opens previous Company Pulse editions.')}
+              </span>
             ) : null}
           </div>
         ) : null}
 
         {viewModel.warnings.map((warning, i) => (
-          <p key={i} className={styles.briefingWarning}>
+          <p key={i} className={styles.pulseWarning}>
             {warning}
           </p>
         ))}
@@ -164,7 +126,7 @@ function pickArchiveAction(actions: readonly FoleonReaderAction[]): FoleonReader
 }
 
 interface CardLaunchButtonProps {
-  readonly target: NonNullable<FoleonReaderViewModel['primaryArticle']>['target'];
+  readonly target: NonNullable<FoleonReaderLayoutProps['viewModel']['primaryArticle']>['target'];
   readonly reasonId: string;
   readonly isDisabled: boolean;
   readonly children: React.ReactNode;
@@ -199,7 +161,7 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
   return (
     <button
       type="button"
-      className={styles.cardLaunch}
+      className={styles.pulseLaunchButton}
       aria-disabled={isDisabled || undefined}
       aria-describedby={isDisabled ? reasonId : undefined}
       onClick={handleClick}
@@ -209,60 +171,52 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
   );
 }
 
-function renderDigest(viewModel: FoleonReaderViewModel): React.ReactNode {
-  const digest = viewModel.briefingDigest;
-  if (!digest) return null;
-
-  if (digest.length === 0) {
-    return (
-      <div
-        className={styles.digestEmpty}
-        aria-label="Company Pulse digest"
-        data-foleon-pulse-digest-state="empty"
-      >
-        <p className={styles.digestEmptyHeading}>More updates</p>
-        <p className={styles.digestEmptyBody}>
-          Previous Company Pulse editions are available in the archive. Use
-          {' '}
-          <strong>Open full archive</strong>
-          {' '}
-          to browse earlier updates.
-        </p>
-      </div>
-    );
-  }
-
+function CoverageLabels(): React.JSX.Element {
   return (
-    <ul
-      className={styles.briefingDigest}
-      aria-label="Recent Company Pulse updates"
-      data-foleon-pulse-digest-state="populated"
-    >
-      {digest.map((item) => (
-        <li key={item.id} className={styles.digestItem}>
-          <p className={styles.digestCategory}>{item.category}</p>
-          <h4 className={styles.digestTitle}>{item.title}</h4>
-          <p className={styles.digestSummary}>{item.summary}</p>
-          {item.dateline ? (
-            <p className={styles.digestDateline}>{item.dateline}</p>
-          ) : null}
-        </li>
-      ))}
+    <ul className={styles.pulseCoverageLabels} aria-label="Company Pulse coverage">
+      <li className={styles.pulseCoverageLabel}>Company News</li>
+      <li className={styles.pulseCoverageLabel}>Events</li>
+      <li className={styles.pulseCoverageLabel}>Recognition</li>
+      <li className={styles.pulseCoverageLabel}>Operations</li>
     </ul>
+  );
+}
+
+function MediaStage(props: {
+  readonly title: string;
+  readonly media: FoleonReaderLayoutProps['viewModel']['pulseMedia'];
+  readonly isPreview: boolean;
+}): React.JSX.Element {
+  const { title, media, isPreview } = props;
+  const showImage = !isPreview && media?.hasRecordMedia === true && media.primaryImageUrl;
+  return (
+    <div className={styles.pulseMediaStage}>
+      {showImage ? (
+        <img
+          className={styles.pulseMediaImage}
+          src={media!.primaryImageUrl}
+          alt={media!.accessibleLabel ?? `Company Pulse cover image for ${title}`}
+          loading="lazy"
+        />
+      ) : (
+        <div className={styles.pulseMediaPlaceholder} aria-hidden="true" />
+      )}
+      <div className={styles.pulseMediaScrim} aria-hidden="true" />
+    </div>
   );
 }
 
 function formatDisabledReason(reason: FoleonViewerDisabledReason | undefined): string {
   switch (reason) {
     case 'preview-only':
-      return 'Preview only — a live Company Pulse update will open here when published.';
+      return 'Preview only — the current Company Pulse edition will open here when published.';
     case 'no-embed-url':
-      return 'This Company Pulse update does not carry an embeddable Foleon URL yet.';
+      return 'This Company Pulse edition is missing its Foleon viewer link.';
     case 'embed-not-allowed':
-      return 'This Company Pulse update disallows in-line embedding by governance policy.';
+      return 'This Company Pulse edition cannot open in the embedded viewer.';
     case 'requires-external-open':
-      return 'This Company Pulse update must be opened in a new tab. Use the published link if available.';
+      return 'This Company Pulse edition must open outside HB Central.';
     default:
-      return 'This Company Pulse update is not available in the in-line viewer.';
+      return 'This Company Pulse edition is not available yet.';
   }
 }

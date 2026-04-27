@@ -335,7 +335,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     const pulse = container.querySelector('[data-foleon-reader-layout="company-pulse"]');
     const leadership = container.querySelector('[data-foleon-reader-layout="leadership-message"]');
     expect(spotlight?.getAttribute('data-foleon-layout')).toBe('project-spotlight-feature');
-    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-briefing');
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-edition-launcher');
     expect(leadership?.getAttribute('data-foleon-layout')).toBe('leadership-message');
     // None of the three lanes emit legacy compatibility-shell markers anymore.
     expect(spotlight?.querySelector('[data-preview-tone]')).toBeNull();

@@ -195,15 +195,15 @@ describe('FoleonReaderModule', () => {
     // Phase-04 Wave-01 Prompt-04: Company Pulse identity is layout-key
     // driven. Tone-based markers are intentionally not emitted by this
     // lane's new briefing layout.
-    await screen.findByLabelText('Pulse categories');
+    await screen.findByLabelText('Company Pulse coverage');
     expect(container.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
-    expect(container.querySelector('[data-foleon-layout="company-pulse-briefing"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-layout="company-pulse-edition-launcher"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
     expect(container.querySelector('[data-preview-tone]')).toBeNull();
     expect(container.querySelector('[data-foleon-preview-route]')).toBeNull();
 
     // Honest preview labeling preserved.
-    expect(screen.getByText('Preview layout')).toBeTruthy();
+    expect(screen.getByText('Preview')).toBeTruthy();
 
     // The new briefing layout no longer renders the legacy three-card support skeleton.
     expect(screen.queryByLabelText('Company Pulse supporting preview placeholders')).toBeNull();
@@ -320,7 +320,7 @@ describe('FoleonReaderModule', () => {
     const { callbacks, container } = renderModule({ config: FOLEON_READER_CONFIGS.companyPulse });
 
     // Wait for the lane-owned briefing layout.
-    await screen.findByLabelText('Pulse categories');
+    await screen.findByLabelText('Company Pulse coverage');
     expect(container.querySelectorAll('iframe')).toHaveLength(0);
 
     const launch = within(
@@ -532,7 +532,7 @@ describe('FoleonReaderModule', () => {
         document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
       ).not.toBeNull();
     });
-    await screen.findByLabelText('Pulse categories');
+    await screen.findByLabelText('Company Pulse coverage');
     expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
     expect(resolveMock).toHaveBeenCalledTimes(3);
 
@@ -554,7 +554,7 @@ describe('FoleonReaderModule', () => {
     expect(spotlight?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
     // Company Pulse: lane-owned briefing layout, no legacy markers.
-    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-briefing');
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-edition-launcher');
     expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
@@ -655,7 +655,7 @@ describe('FoleonReaderModule', () => {
         document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
       ).not.toBeNull();
     });
-    await screen.findByLabelText('Pulse categories');
+    await screen.findByLabelText('Company Pulse coverage');
     await screen.findByText('A Quarterly Leadership Note');
 
     // Per-lane wrappers — used to scope card-button queries.

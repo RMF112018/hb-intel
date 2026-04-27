@@ -650,6 +650,248 @@
   }
 }
 
+/* ===== CP-02 — Company Pulse edition launcher ===== */
+
+.pulseEditionSurface {
+  --hb-foleon-pulse-inline-safe: clamp(1rem, 4vw, 2.5rem);
+  display: grid;
+  gap: clamp(0.875rem, 2vw, 1.25rem);
+  margin-inline: 0;
+  padding-block: 0 clamp(1.25rem, 2.5vw, 2rem);
+  background:
+    radial-gradient(circle at 90% 8%, color-mix(in srgb, #ffe5d3 70%, transparent), transparent 40%),
+    linear-gradient(180deg, #fff4ea 0%, #ffffff 62%);
+  color: var(--hbc-text-primary, #14212b);
+  box-sizing: border-box;
+}
+
+.pulseEditionCard {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.pulseEditionCard[data-foleon-article-state='disabled'],
+.pulseEditionCard[data-foleon-article-state='preview'] {
+  cursor: not-allowed;
+}
+
+.pulseMediaStage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: clamp(220px, 34vw, 380px);
+  background: #a24312;
+}
+
+.pulseMediaImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pulseMediaPlaceholder {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 78% 12%, color-mix(in srgb, #ffbd8d 65%, transparent), transparent 42%),
+    radial-gradient(circle at 14% 82%, color-mix(in srgb, #b4531c 55%, transparent), transparent 36%),
+    linear-gradient(140deg, #8d3c10 0%, #a24312 52%, #28170e 100%);
+}
+
+.pulseMediaScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 24%, rgb(22 12 7 / 78%) 100%);
+  pointer-events: none;
+}
+
+.pulseEditionOverlay {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(clamp(150px, 24vw, 260px) * -1);
+  padding: clamp(1rem, 2.25vw, 1.5rem) var(--hb-foleon-pulse-inline-safe) clamp(1rem, 2vw, 1.25rem);
+  display: grid;
+  gap: 0.625rem;
+  color: #fff6f0;
+}
+
+.pulseEyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.875rem;
+  align-items: center;
+}
+
+.pulseEyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #ffffff 92%, #ffd5b7);
+}
+
+.pulseStateChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #ffffff 18%, transparent);
+  border: 1px solid color-mix(in srgb, #ffffff 30%, transparent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff6f0;
+}
+
+.pulseFreshness {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #ffffff 82%, #ffd5b7);
+}
+
+.pulseEditionTitle {
+  margin: 0;
+  font-size: clamp(28px, 4.4vw, 48px);
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+  max-width: 22ch;
+  color: #ffffff;
+}
+
+.pulseEditionTeaser {
+  margin: 0;
+  max-width: 64ch;
+  font-size: clamp(15px, 1.35vw, 17px);
+  line-height: 1.55;
+  color: color-mix(in srgb, #ffffff 88%, #ffd5b7);
+}
+
+.pulseCoverageLabels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  list-style: none;
+  margin: 0.125rem 0 0;
+  padding: 0;
+}
+
+.pulseCoverageLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #ffffff 12%, transparent);
+  border: 1px solid color-mix(in srgb, #ffffff 18%, transparent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #ffffff 84%, #ffd5b7);
+}
+
+.pulseLaunchButton {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline;
+  letter-spacing: inherit;
+}
+
+.pulseLaunchButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.pulseLaunchButton:focus-visible::after {
+  outline: 3px solid var(--hbc-brand-50, #9ed4f2);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.pulseLaunchButton[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.pulseCtaPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.625rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #ffffff 92%, transparent);
+  color: #14212b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pulseLaunchButton[aria-disabled='true'] .pulseCtaPill {
+  background: color-mix(in srgb, #ffffff 58%, transparent);
+  color: color-mix(in srgb, #14212b 70%, #ffffff);
+}
+
+.pulseDisabledReason {
+  margin: 0;
+  padding-inline: var(--hb-foleon-pulse-inline-safe);
+  color: var(--hbc-text-secondary, #4e5c66);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pulseFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  padding-inline: var(--hb-foleon-pulse-inline-safe);
+  position: relative;
+  z-index: 2;
+}
+
+.pulseArchiveNote {
+  font-size: 13px;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.pulseWarning {
+  margin: 0;
+  padding-inline: var(--hb-foleon-pulse-inline-safe);
+  color: var(--hbc-text-secondary, #4e5c66);
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .pulseMediaStage {
+    aspect-ratio: 4 / 3;
+    min-height: 210px;
+  }
+  .pulseEditionOverlay {
+    margin-top: calc(clamp(110px, 30vw, 170px) * -1);
+  }
+  .pulseEditionTitle {
+    max-width: 100%;
+  }
+}
+
 /* ===== Leadership Message executive surface =====
    Phase-04 Wave-01 Prompt-05. Calm, premium, restrained — strong
    typography, minimal decorative chrome, no outer card border. Edge-
