@@ -1269,9 +1269,16 @@
    area on inner blocks via clamp-based padding consistent with the
    Spotlight feature surface and the Pulse briefing surface. */
 
+/* Prompt 03: nested SharePoint homepage slots — fluid surface; text measure only on inner wrappers.
+   No new animations added here (reduced-motion checklist: no new motion to override). */
 .executiveSurface {
   --hb-foleon-executive-inline-safe: clamp(1rem, 4vw, 2.5rem);
   --hb-foleon-executive-block-gap: clamp(1rem, 2.25vw, 1.75rem);
+  container-type: inline-size;
+  container-name: foleon-leadership-brief;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   display: grid;
   gap: var(--hb-foleon-executive-block-gap);
   margin-inline: 0;
@@ -1281,6 +1288,28 @@
     linear-gradient(180deg, #f8fafc 0%, #ffffff 60%);
   color: var(--hbc-text-primary, #14212b);
   box-sizing: border-box;
+}
+
+@container foleon-leadership-brief (max-width: 36rem) {
+  .executiveEyebrowRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .briefingChipList {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-block-end: 0.25rem;
+  }
+}
+
+@container foleon-leadership-brief (max-width: 22rem) {
+  .briefingTeaser {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
 }
 
 .executiveHeader {
@@ -1361,12 +1390,18 @@
   color: var(--hbc-text-secondary, #4e5c66);
 }
 
+.executiveTitleMeasure {
+  width: 100%;
+  max-width: 60ch;
+  min-width: 0;
+}
+
 .executiveTitle {
   margin: 0;
   font-size: clamp(26px, 4vw, 44px);
   line-height: 1.05;
   letter-spacing: -0.025em;
-  max-width: 60ch;
+  max-width: none;
   font-weight: 700;
   color: var(--hbc-text-primary, #14212b);
 }
@@ -1472,8 +1507,21 @@
   margin: 0;
   font-size: clamp(15px, 1.35vw, 17px);
   line-height: 1.55;
+  width: 100%;
   max-width: 65ch;
+  min-width: 0;
   color: var(--hbc-text-primary, #14212b);
+}
+
+@media (max-height: 520px) {
+  .executiveSurface {
+    --hb-foleon-executive-block-gap: 0.85rem;
+    padding-block: 1rem;
+  }
+
+  .briefingLaunchTrack {
+    padding-block: 0.25rem 0.5rem;
+  }
 }
 
 .briefingLaunchTrack {
@@ -1489,6 +1537,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
   padding: 0.65rem 1.35rem;
   border-radius: 999px;
   background: linear-gradient(180deg, color-mix(in srgb, #24364d 88%, #ffffff) 0%, #24364d 100%);

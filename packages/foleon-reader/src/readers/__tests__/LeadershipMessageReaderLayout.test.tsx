@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { render, cleanup, screen, fireEvent } from '@testing-library/react';
-import { LeadershipMessageReaderLayout } from '../layouts/LeadershipMessageReaderLayout.js';
+import {
+  LeadershipMessageReaderLayout,
+  getLeadershipPresentationState,
+} from '../layouts/LeadershipMessageReaderLayout.js';
 import { ProjectSpotlightReaderLayout } from '../layouts/ProjectSpotlightReaderLayout.js';
 import { CompanyPulseReaderLayout } from '../layouts/CompanyPulseReaderLayout.js';
 import {
@@ -92,7 +95,7 @@ function leadershipLaunchAccessibleName(
     case 'preview':
       return `Open leadership message preview: ${h}`;
     case 'external':
-      return `Open leadership message externally: ${h}`;
+      return `Open in Foleon: ${h}`;
     case 'blocked':
       return `Message unavailable: ${h}`;
   }
@@ -103,11 +106,15 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     const text = container.textContent ?? '';
     expect(text).not.toContain('Executive byline not provided.');
     expect(text).not.toMatch(/Leadership Message Reader/i);
+    expect(text).not.toContain('Leadership Message reader');
     expect(text).not.toContain('Preview layout');
     expect(text).not.toContain('Cadence');
     expect(text).not.toContain('Archive group');
     expect(text.toLowerCase()).not.toContain('not been provided');
     expect(text.toLowerCase()).not.toMatch(/sample executive|sample role|sample pull quote|sample audience/i);
+    expect(text).not.toContain('no-embed-url');
+    expect(text).not.toContain('embed-not-allowed');
+    expect(text).not.toContain('requires-external-open');
   }
 
   it('emits the new data-foleon-layout marker alongside the registry markers', () => {
@@ -168,10 +175,11 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(readyWrapper?.getAttribute('data-foleon-reader-state')).toBe('ready');
   });
 
-  it('shows the shared Preview banner label in preview state', () => {
+  it('shows the shared Preview banner label and Preview only status in preview state', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
     const { container } = render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
     expect(screen.getByText('Preview')).toBeTruthy();
+    expect(screen.getByText('Preview only')).toBeTruthy();
     assertLeadershipUiClean(container);
   });
 
@@ -330,6 +338,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     const viewModel = buildReadyViewModel({ requiresExternalOpen: true });
     const { container } = render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
     expect(viewModel.leadershipMessage?.cta.kind).toBe('external');
+    expect(screen.getByText('This message opens in a new tab.')).toBeTruthy();
     const link = container.querySelector('a[href="https://viewer.us.foleon.com/published/leadership"]');
     expect(link).not.toBeNull();
     expect(link?.textContent).toContain('Open published message');
@@ -404,5 +413,45 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(spotlight?.querySelector('[data-foleon-preview-route]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
     expect(leadership?.querySelector('[data-foleon-preview-route]')).toBeNull();
+  });
+});
+
+describe('getLeadershipPresentationState — centralized copy', () => {
+  it('preview uses Preview only status and teaser fallback when empty', () => {
+    const p = getLeadershipPresentationState({
+      viewModelState: 'preview',
+      ctaKind: 'preview',
+      disabledReason: undefined,
+      hasResolvedTeaser: false,
+      isDisabled: false,
+    });
+    expect(p.eyebrow).toBe('Leadership message preview');
+    expect(p.statusLabel).toBe('Preview only');
+    expect(p.teaserFallback).toContain('Preview content shown for layout validation');
+  });
+
+  it('ready live uses Current status', () => {
+    const p = getLeadershipPresentationState({
+      viewModelState: 'ready',
+      ctaKind: 'live',
+      disabledReason: undefined,
+      hasResolvedTeaser: true,
+      isDisabled: false,
+    });
+    expect(p.eyebrow).toBe('A message from leadership');
+    expect(p.statusLabel).toBe('Current');
+  });
+
+  it('external maps Opens in Foleon and tab helper', () => {
+    const p = getLeadershipPresentationState({
+      viewModelState: 'ready',
+      ctaKind: 'external',
+      disabledReason: 'requires-external-open',
+      hasResolvedTeaser: true,
+      isDisabled: true,
+    });
+    expect(p.statusLabel).toBe('Opens in Foleon');
+    expect(p.ctaHelperCopy).toContain('new tab');
+    expect(p.disabledReasonCopy).toContain('published link');
   });
 });

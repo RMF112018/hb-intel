@@ -26,6 +26,9 @@ export interface LeadershipViewerTargetInput {
 
 export type LeadershipMessageCtaKind = 'preview' | 'live' | 'external' | 'blocked';
 
+/** Phase-08 external-open helper — paired with primary `Open in Foleon` when opening outside the inline viewer. */
+export const LEADERSHIP_EXTERNAL_TAB_HELPER_COPY = 'This message opens in a new tab.';
+
 export interface LeadershipMessageCta {
   readonly kind: LeadershipMessageCtaKind;
   readonly primaryLabel: string;
@@ -96,8 +99,8 @@ export function deriveLeadershipCta(
   if (target.renderMode === 'iframe' && target.disabledReason === 'requires-external-open') {
     return {
       kind: 'external',
-      primaryLabel: 'Open full message',
-      secondaryLabel: 'Opens outside the inline viewer',
+      primaryLabel: 'Open in Foleon',
+      secondaryLabel: LEADERSHIP_EXTERNAL_TAB_HELPER_COPY,
       disabledReason: 'requires-external-open',
     };
   }

@@ -7,19 +7,22 @@ import type {
 } from '../FoleonReaderViewModel.js';
 import type { FoleonViewerDisabledReason, FoleonViewerTarget } from '../FoleonViewerTypes.js';
 import type { LeadershipMessageCtaKind } from '../viewModels/leadershipMessageViewModel.js';
+import { LEADERSHIP_EXTERNAL_TAB_HELPER_COPY } from '../viewModels/leadershipMessageViewModel.js';
 import { useFoleonFullWindowViewer } from '../../components/FoleonFullWindowViewerProvider.js';
 import styles from './FoleonReaderLayouts.module.css';
 
 // ---------------------------------------------------------------------------
-// Leadership Message — Executive Briefing Feature (Prompt 02)
+// Leadership Message — Executive Briefing (Prompt 02–03)
 // ---------------------------------------------------------------------------
-// Calm executive access point into Foleon-managed content. Single in-card
-// launch button (`styles.cardLaunch`) with ::after covering `.articleCard`;
-// non-interactive bands use `pointer-events: none` so the overlay remains
-// the hit target. Full article body stays in Foleon — teaser only here.
+// Presentation copy is centralized in `getLeadershipPresentationState`.
+// No new animations were introduced in Prompt 03 (prefers-reduced-motion
+// checklist satisfied by not adding motion here).
 //
 // `iframeSurface` / `viewModel.mobileGate` ignored — full-window viewer only.
 // ---------------------------------------------------------------------------
+
+const PREVIEW_TEASER_FALLBACK =
+  'Preview content shown for layout validation only. A live leadership message will appear here when a Foleon item is selected and published.';
 
 const FORBIDDEN_CHIP_FRAGMENTS = [
   'leadership message reader',
@@ -31,6 +34,8 @@ const FORBIDDEN_CHIP_FRAGMENTS = [
   'not been provided',
 ] as const;
 
+const MAX_CONTEXT_CHIPS = 3;
+
 function sanitizeChipFragment(raw: string): string | null {
   const t = raw.trim();
   if (!t.length) return null;
@@ -41,6 +46,87 @@ function sanitizeChipFragment(raw: string): string | null {
   return t;
 }
 
+export interface LeadershipPresentationState {
+  readonly eyebrow: string;
+  readonly statusLabel: string;
+  readonly teaserFallback?: string;
+  readonly disabledReasonCopy?: string;
+  readonly ctaHelperCopy?: string;
+}
+
+function employeeLeadershipDisabledCopy(
+  reason: FoleonViewerDisabledReason | undefined,
+  mode: LeadershipMessageCtaKind | 'preview',
+): string {
+  if (mode === 'external' && reason === 'requires-external-open') {
+    return 'Use the published link below to open this message in Foleon.';
+  }
+  switch (reason) {
+    case 'preview-only':
+      return 'Preview only — a live leadership message will open here when it is published.';
+    case 'no-embed-url':
+      return 'This Foleon item is missing an approved viewer URL.';
+    case 'embed-not-allowed':
+      return 'This Foleon item cannot open in the embedded viewer.';
+    case 'requires-external-open':
+      return 'This Foleon item requires opening in a new tab.';
+    default:
+      return 'The current leadership message cannot be opened from HB Central right now.';
+  }
+}
+
+/** Single source for eyebrow, status chip, teaser fallback, disabled copy, and CTA helper — Prompt 03. */
+export function getLeadershipPresentationState(input: {
+  readonly viewModelState: 'preview' | 'ready';
+  readonly ctaKind: LeadershipMessageCtaKind;
+  readonly disabledReason: FoleonViewerDisabledReason | undefined;
+  readonly hasResolvedTeaser: boolean;
+  readonly isDisabled: boolean;
+}): LeadershipPresentationState {
+  const { viewModelState, ctaKind, disabledReason, hasResolvedTeaser, isDisabled } = input;
+  const previewPresentation = viewModelState === 'preview' || ctaKind === 'preview';
+
+  if (previewPresentation) {
+    return {
+      eyebrow: 'Leadership message preview',
+      statusLabel: 'Preview only',
+      teaserFallback: hasResolvedTeaser ? undefined : PREVIEW_TEASER_FALLBACK,
+      disabledReasonCopy: isDisabled ? employeeLeadershipDisabledCopy(disabledReason, 'preview') : undefined,
+      ctaHelperCopy: undefined,
+    };
+  }
+
+  const eyebrow = 'A message from leadership';
+
+  if (ctaKind === 'live') {
+    return {
+      eyebrow,
+      statusLabel: 'Current',
+      teaserFallback: undefined,
+      disabledReasonCopy: isDisabled ? employeeLeadershipDisabledCopy(disabledReason, 'live') : undefined,
+      ctaHelperCopy: undefined,
+    };
+  }
+
+  if (ctaKind === 'external') {
+    return {
+      eyebrow,
+      statusLabel: 'Opens in Foleon',
+      teaserFallback: undefined,
+      disabledReasonCopy: isDisabled ? employeeLeadershipDisabledCopy(disabledReason, 'external') : undefined,
+      ctaHelperCopy: LEADERSHIP_EXTERNAL_TAB_HELPER_COPY,
+    };
+  }
+
+  return {
+    eyebrow,
+    statusLabel: 'Unavailable',
+    teaserFallback: undefined,
+    disabledReasonCopy: isDisabled ? employeeLeadershipDisabledCopy(disabledReason, 'blocked') : undefined,
+    ctaHelperCopy: undefined,
+  };
+}
+
 function leadershipLaunchAriaLabel(kind: LeadershipMessageCtaKind, headline: string): string {
   const h = headline.trim().length > 0 ? headline.trim() : 'Leadership Message';
   switch (kind) {
@@ -49,7 +135,7 @@ function leadershipLaunchAriaLabel(kind: LeadershipMessageCtaKind, headline: str
     case 'preview':
       return `Open leadership message preview: ${h}`;
     case 'external':
-      return `Open leadership message externally: ${h}`;
+      return `Open in Foleon: ${h}`;
     case 'blocked':
       return `Message unavailable: ${h}`;
     default:
@@ -84,12 +170,25 @@ export function LeadershipMessageReaderLayout(
   const archiveAction = pickArchiveAction(viewModel.actions);
   const message = viewModel.leadershipMessage;
   const headline = viewModel.title;
-  const teaser =
+
+  const resolvedTeaserContent =
     message?.teaser !== undefined && message.teaser.trim().length > 0
       ? message.teaser.trim()
       : viewModel.summary?.trim() ?? undefined;
+  const hasResolvedTeaser = resolvedTeaserContent !== undefined;
 
   const ctaKind: LeadershipMessageCtaKind = message?.cta.kind ?? (isPreview ? 'preview' : 'blocked');
+
+  const presentation = getLeadershipPresentationState({
+    viewModelState: viewModel.state,
+    ctaKind,
+    disabledReason: target.disabledReason,
+    hasResolvedTeaser,
+    isDisabled,
+  });
+
+  const teaser = resolvedTeaserContent ?? presentation.teaserFallback;
+
   const primaryLabel =
     message?.cta.primaryLabel ??
     (isPreview ? 'Open preview' : isDisabled ? 'Message unavailable' : 'Read the leadership message');
@@ -97,6 +196,12 @@ export function LeadershipMessageReaderLayout(
 
   const externalPublishedUrl =
     message?.cta.kind === 'external' ? publishedUrlFromTarget(target) : undefined;
+
+  const showFooterBand =
+    archiveAction ||
+    viewModel.archiveNote ||
+    externalPublishedUrl ||
+    message?.cta.kind === 'external';
 
   return (
     <div
@@ -117,8 +222,8 @@ export function LeadershipMessageReaderLayout(
           <div className={styles.briefingPassiveBand}>
             <header className={styles.briefingBriefHeader}>
               <div className={styles.executiveEyebrowRow}>
-                <p className={styles.executiveEyebrow}>{message?.laneLabel ?? viewModel.eyebrow}</p>
-                <span className={styles.executiveCadence}>{message?.statusLabel ?? 'Executive update'}</span>
+                <p className={styles.executiveEyebrow}>{presentation.eyebrow}</p>
+                <span className={styles.executiveCadence}>{presentation.statusLabel}</span>
                 {isPreview && viewModel.previewLabel ? (
                   <span
                     className={styles.executivePreviewLabel}
@@ -128,9 +233,11 @@ export function LeadershipMessageReaderLayout(
                   </span>
                 ) : null}
               </div>
-              <h2 className={styles.executiveTitle} id={viewModel.titleElementId}>
-                {headline}
-              </h2>
+              <div className={styles.executiveTitleMeasure}>
+                <h2 className={styles.executiveTitle} id={viewModel.titleElementId}>
+                  {headline}
+                </h2>
+              </div>
               {teaser ? <p className={styles.briefingTeaser}>{teaser}</p> : null}
             </header>
           </div>
@@ -155,28 +262,28 @@ export function LeadershipMessageReaderLayout(
 
             <LeadershipContextChips notes={message?.contextNotes} />
 
-            {isDisabled ? (
+            {isDisabled && presentation.disabledReasonCopy ? (
               <p
                 id={reasonId}
                 className={styles.briefingDisabledReason}
                 role="status"
                 aria-live="polite"
               >
-                {formatDisabledReason(target.disabledReason, message?.cta.kind)}
+                {presentation.disabledReasonCopy}
               </p>
             ) : null}
           </div>
         </div>
 
-        {archiveAction || viewModel.archiveNote || externalPublishedUrl || message?.cta.secondaryLabel ? (
+        {showFooterBand ? (
           <div className={styles.executiveFooter}>
             {archiveAction ? (
               <HbcButton variant="secondary" onClick={archiveAction.onClick}>
                 {archiveAction.label}
               </HbcButton>
             ) : null}
-            {message?.cta.kind === 'external' && message.cta.secondaryLabel ? (
-              <span className={styles.briefingExternalHint}>{message.cta.secondaryLabel}</span>
+            {message?.cta.kind === 'external' && presentation.ctaHelperCopy ? (
+              <span className={styles.briefingExternalHint}>{presentation.ctaHelperCopy}</span>
             ) : null}
             {externalPublishedUrl ? (
               <a
@@ -210,7 +317,9 @@ function LeadershipContextChips(props: {
   const { notes } = props;
   if (!notes || notes.length === 0) return null;
   const chips: React.ReactNode[] = [];
+  let count = 0;
   for (const note of notes) {
+    if (count >= MAX_CONTEXT_CHIPS) break;
     const lab = sanitizeChipFragment(note.label);
     const val = sanitizeChipFragment(note.value);
     if (!lab && !val) continue;
@@ -220,6 +329,7 @@ function LeadershipContextChips(props: {
         {val ? <span className={styles.briefingChipValue}>{val}</span> : null}
       </li>,
     );
+    count += 1;
   }
   if (chips.length === 0) return null;
   return (
@@ -299,25 +409,4 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
       {children}
     </button>
   );
-}
-
-function formatDisabledReason(
-  reason: FoleonViewerDisabledReason | undefined,
-  ctaKind: LeadershipMessageCtaKind | undefined,
-): string {
-  if (ctaKind === 'external' && reason === 'requires-external-open') {
-    return 'This message opens outside the inline viewer. Use the published link below when available.';
-  }
-  switch (reason) {
-    case 'preview-only':
-      return 'Preview only — a live Leadership Message will open here when published.';
-    case 'no-embed-url':
-      return 'This Leadership Message does not carry an embeddable Foleon URL yet.';
-    case 'embed-not-allowed':
-      return 'This Leadership Message disallows in-line embedding by governance policy.';
-    case 'requires-external-open':
-      return 'This Leadership Message must be opened from the published link.';
-    default:
-      return 'This Leadership Message is not available in the in-line viewer.';
-  }
 }

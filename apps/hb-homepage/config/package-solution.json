@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-homepage",
     "id": "b7d3f8a1-4c62-4e9b-a851-2d6f0e3c7a49",
-    "version": "1.1.97.0",
+    "version": "1.1.98.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

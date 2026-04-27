@@ -132,6 +132,7 @@ declare const styles: {
   readonly executiveRole: string;
   readonly executiveBylineAbsent: string;
   readonly executiveTitle: string;
+  readonly executiveTitleMeasure: string;
   readonly executivePullQuote: string;
   readonly executiveBody: string;
   readonly executiveContextNotes: string;
