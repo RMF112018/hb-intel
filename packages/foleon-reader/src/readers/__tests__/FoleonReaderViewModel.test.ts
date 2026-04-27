@@ -71,8 +71,8 @@ describe('createPreviewFoleonReaderViewModel', () => {
     expect(vm.state).toBe('preview');
     expect(vm.lane).toBe('projectSpotlight');
     expect(vm.readerKey).toBe('project-spotlight');
-    expect(vm.eyebrow).toBe('Project Spotlight Reader');
-    expect(vm.previewLabel).toBe('Preview layout');
+    expect(vm.eyebrow).toBe('Project Spotlight');
+    expect(vm.previewLabel).toBe('Preview');
   });
 
   it('defaults audience to "Companywide" and archive group to "Archive coming soon"', () => {
@@ -91,7 +91,7 @@ describe('createPreviewFoleonReaderViewModel', () => {
   it('carries an honest, visible preview label and content-coming-soon chip', () => {
     const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     const labels = vm.chips.map((c) => c.label);
-    expect(vm.previewLabel).toBe('Preview layout');
+    expect(vm.previewLabel).toBe('Preview');
     expect(labels).toContain('Content coming soon');
   });
 });
@@ -111,7 +111,7 @@ describe('createReadyFoleonReaderViewModel — freshness preference', () => {
     });
     // April 1 should win over April 20 — exact format depends on locale, so
     // we assert by parsing the value.
-    expect(vm.freshnessLabel).toBe('Monthly status');
+    expect(vm.freshnessLabel).toBe('Featured');
     expect(vm.freshnessValue).toMatch(/2026/);
   });
 
@@ -210,7 +210,7 @@ describe('view model — Project Spotlight projectFacts and featureCallout', () 
     expect(spotlight.projectFacts).toBeDefined();
     expect(spotlight.projectFacts?.arePlaceholders).toBe(true);
     expect(spotlight.projectFacts?.client).toBe('Sample client');
-    expect(spotlight.featureCallout?.heading).toBe('Why this project matters');
+    expect(spotlight.featureCallout?.heading).toBe("Why we're featuring it");
 
     const pulse = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const leadership = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
@@ -297,6 +297,146 @@ describe('view model — Project Spotlight projectFacts and featureCallout', () 
     expect(pulseVm.featureCallout).toBeUndefined();
     expect(leadershipVm.projectFacts).toBeUndefined();
     expect(leadershipVm.featureCallout).toBeUndefined();
+  });
+});
+
+describe('view model — Project Spotlight visual-first fields (PS-02)', () => {
+  it('preview view model populates projectMedia as a placeholder, ctaLabel, and cadenceLabel only for the projectSpotlight lane', () => {
+    const spotlight = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    expect(spotlight.projectMedia).toBeDefined();
+    expect(spotlight.projectMedia?.isPlaceholder).toBe(true);
+    expect(spotlight.projectMedia?.hasRecordMedia).toBe(false);
+    expect(spotlight.ctaLabel).toBe('View project spotlight');
+    expect(spotlight.cadenceLabel).toBe('Monthly feature');
+
+    const pulse = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const leadership = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
+    expect(pulse.projectMedia).toBeUndefined();
+    expect(pulse.ctaLabel).toBeUndefined();
+    expect(pulse.cadenceLabel).toBeUndefined();
+    expect(leadership.projectMedia).toBeUndefined();
+    expect(leadership.ctaLabel).toBeUndefined();
+    expect(leadership.cadenceLabel).toBeUndefined();
+  });
+
+  it('ready view model derives projectMedia.primaryImageUrl from heroImageUrl when present, falls back to thumbnailUrl when absent', () => {
+    const withHero = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      heroImageUrl: 'https://cdn.example.com/hero.jpg',
+      thumbnailUrl: 'https://cdn.example.com/thumb.jpg',
+    });
+    const vmHero = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: withHero,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmHero.projectMedia?.primaryImageUrl).toBe('https://cdn.example.com/hero.jpg');
+    expect(vmHero.projectMedia?.thumbnailUrl).toBe('https://cdn.example.com/thumb.jpg');
+    expect(vmHero.projectMedia?.hasRecordMedia).toBe(true);
+    expect(vmHero.projectMedia?.isPlaceholder).toBe(false);
+    expect(vmHero.projectMedia?.accessibleLabel).toContain('A Hosted Edition Title');
+
+    const onlyThumb = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      heroImageUrl: undefined,
+      thumbnailUrl: 'https://cdn.example.com/thumb.jpg',
+    });
+    const vmThumb = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: onlyThumb,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmThumb.projectMedia?.primaryImageUrl).toBe('https://cdn.example.com/thumb.jpg');
+    // When thumbnail is the primary, it should not be surfaced separately as a supporting tile.
+    expect(vmThumb.projectMedia?.thumbnailUrl).toBeUndefined();
+    expect(vmThumb.projectMedia?.hasRecordMedia).toBe(true);
+  });
+
+  it('ready view model marks projectMedia.hasRecordMedia false when neither heroImageUrl nor thumbnailUrl is present', () => {
+    const noMedia = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      heroImageUrl: undefined,
+      thumbnailUrl: undefined,
+    });
+    const vm = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: noMedia,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vm.projectMedia?.hasRecordMedia).toBe(false);
+    expect(vm.projectMedia?.primaryImageUrl).toBeUndefined();
+    expect(vm.projectMedia?.accessibleLabel).toBeUndefined();
+  });
+
+  it('cadenceLabel uses record.cadence when present, else "Monthly feature"', () => {
+    const withCadence = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      cadence: 'Monthly',
+    });
+    const vmWith = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: withCadence,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmWith.cadenceLabel).toBe('Monthly');
+
+    const noCadence = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      cadence: undefined,
+    });
+    const vmWithout = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: noCadence,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmWithout.cadenceLabel).toBe('Monthly feature');
+  });
+
+  it('projectLabel surfaces relatedProjectName when distinct from title, else falls back to relatedProjectNumber, else undefined', () => {
+    const withName = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      title: 'The Seaglass Residence',
+      relatedProjectName: 'Seaglass Holdings LLC',
+    });
+    const vmName = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: withName,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmName.projectLabel).toBe('Seaglass Holdings LLC');
+
+    const matchingTitle = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      title: 'The Seaglass Residence',
+      relatedProjectName: 'The Seaglass Residence',
+    });
+    const vmMatch = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: matchingTitle,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmMatch.projectLabel).toBeUndefined();
+
+    const onlyNumber = makeReadyResolution(FOLEON_READER_CONFIGS.projectSpotlight, {
+      title: 'The Seaglass Residence',
+      relatedProjectName: undefined,
+      relatedProjectNumber: '24-1107',
+    });
+    const vmNumber = createReadyFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight, {
+      resolution: onlyNumber,
+      shouldMountIframe: true,
+      mobileGateActive: false,
+      onActivateMobileReader: () => undefined,
+      onOpenArchive: () => undefined,
+    });
+    expect(vmNumber.projectLabel).toBe('24-1107');
   });
 });
 

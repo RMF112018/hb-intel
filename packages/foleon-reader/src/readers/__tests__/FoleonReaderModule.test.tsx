@@ -152,16 +152,20 @@ describe('FoleonReaderModule', () => {
     // driven via `data-foleon-reader-layout` and `data-foleon-layout`.
     // Tone-based markers (`data-preview-tone`) are intentionally not
     // emitted by this lane's new feature layout.
-    const wrapper = await screen.findByLabelText('Project Spotlight metadata');
-    // sanity: ribbon is inside the new feature surface
+    await waitFor(() => {
+      expect(
+        document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
+      ).not.toBeNull();
+    });
+    const wrapper = document.querySelector('[data-foleon-reader-layout="project-spotlight"]');
     expect(wrapper).toBeTruthy();
     expect(container.querySelector('[data-foleon-reader-layout="project-spotlight"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-layout="project-spotlight-feature"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
     expect(container.querySelector('[data-preview-tone]')).toBeNull();
 
-    // Honest preview labeling preserved.
-    expect(screen.getByText('Preview layout')).toBeTruthy();
+    // Honest preview labeling preserved (PS-02 employee-facing copy).
+    expect(screen.getByText('Preview')).toBeTruthy();
 
     // The new layout no longer renders the legacy three-card support skeleton.
     expect(screen.queryByLabelText('Project Spotlight supporting preview placeholders')).toBeNull();
@@ -270,7 +274,11 @@ describe('FoleonReaderModule', () => {
     const { callbacks, container } = renderModule();
 
     // Wait for the lane-owned layout to render.
-    await screen.findByLabelText('Project Spotlight metadata');
+    await waitFor(() => {
+      expect(
+        document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
+      ).not.toBeNull();
+    });
 
     // Phase-04 Wave-01 Prompt-04B: inline iframe is removed for this lane.
     expect(container.querySelectorAll('iframe')).toHaveLength(0);
@@ -440,7 +448,7 @@ describe('FoleonReaderModule', () => {
       />,
     );
 
-    await screen.findByText('Project Spotlight reader');
+    await screen.findByText("This Month's Project Spotlight");
     expect(onStatusChange).toHaveBeenCalledWith({ kind: 'loading' });
     expect(onStatusChange).toHaveBeenCalledWith(
       expect.objectContaining({ kind: 'preview' }),
@@ -464,7 +472,11 @@ describe('FoleonReaderModule', () => {
 
     // Wait for the lane-owned layout (mobile breakpoint renders the same
     // article card; the legacy "Reader ready" inline-iframe gate is gone).
-    await screen.findByLabelText('Project Spotlight metadata');
+    await waitFor(() => {
+      expect(
+        document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
+      ).not.toBeNull();
+    });
     expect(document.querySelectorAll('iframe')).toHaveLength(0);
     expect(screen.queryByText('Reader ready')).toBeNull();
 
@@ -515,7 +527,11 @@ describe('FoleonReaderModule', () => {
       </>,
     );
 
-    await screen.findByLabelText('Project Spotlight metadata');
+    await waitFor(() => {
+      expect(
+        document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
+      ).not.toBeNull();
+    });
     await screen.findByLabelText('Pulse categories');
     expect(await screen.findByText('Leadership Message reader')).toBeTruthy();
     expect(resolveMock).toHaveBeenCalledTimes(3);
@@ -634,7 +650,11 @@ describe('FoleonReaderModule', () => {
     );
 
     // Wait for all three lanes to render the lane-owned layouts.
-    await screen.findByLabelText('Project Spotlight metadata');
+    await waitFor(() => {
+      expect(
+        document.querySelector('[data-foleon-reader-layout="project-spotlight"]'),
+      ).not.toBeNull();
+    });
     await screen.findByLabelText('Pulse categories');
     await screen.findByText('A Quarterly Leadership Note');
 

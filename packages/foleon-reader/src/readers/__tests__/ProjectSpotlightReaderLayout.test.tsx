@@ -143,27 +143,134 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
   it('keeps an honest visible preview label in preview state', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     render(<ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />);
-    expect(screen.getByText('Preview layout')).toBeTruthy();
+    expect(screen.getByText('Preview')).toBeTruthy();
   });
 
-  it('renders ready-state project facts derived only from the FoleonContentRecord, with "Not listed" fallbacks for absent record fields', () => {
+  it('uses the employee-facing eyebrow ("Project Spotlight") and not the legacy reader eyebrow', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    expect(screen.getByText('Project Spotlight')).toBeTruthy();
+    expect(container.textContent).not.toContain('Project Spotlight Reader');
+    expect(container.textContent).not.toContain('Preview layout');
+  });
+
+  it('does not surface the developer-facing ribbon labels (Audience, Archive group, Monthly Status, duplicated Cadence) in the primary visual surface', () => {
+    const viewModel = buildReadyViewModel({
+      region: 'Gulf Coast',
+      sector: 'Hospitality',
+    });
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card).not.toBeNull();
+    expect(card?.textContent).not.toContain('Audience');
+    expect(card?.textContent).not.toContain('Archive group');
+    expect(card?.textContent).not.toContain('Monthly Status');
+    expect(card?.textContent).not.toContain('Monthly status');
+    // No duplicated `Cadence` ribbon row — cadence is shown only as the
+    // single chip in the eyebrow row.
+    const factRow = container.querySelector('[aria-label="Project Spotlight facts"]');
+    expect(factRow?.textContent ?? '').not.toContain('Cadence');
+  });
+
+  it('renders Location and Market chips independently of each other', () => {
+    // Only region present → Location chip alone.
+    const onlyRegion = buildReadyViewModel({ region: 'Gulf Coast', sector: undefined });
+    const renderRegion = render(
+      <ProjectSpotlightReaderLayout viewModel={onlyRegion} iframeSurface={null} />,
+    );
+    const factsRegion = renderRegion.container.querySelector('[aria-label="Project Spotlight facts"]');
+    expect(factsRegion?.textContent).toContain('Gulf Coast');
+    expect(factsRegion?.textContent).not.toContain('Market');
+    cleanup();
+
+    // Only sector present → Market chip alone.
+    const onlySector = buildReadyViewModel({ region: undefined, sector: 'Hospitality' });
+    const renderSector = render(
+      <ProjectSpotlightReaderLayout viewModel={onlySector} iframeSurface={null} />,
+    );
+    const factsSector = renderSector.container.querySelector('[aria-label="Project Spotlight facts"]');
+    expect(factsSector?.textContent).toContain('Hospitality');
+    expect(factsSector?.textContent).not.toContain('Location');
+  });
+
+  it('renders the hero image when record.heroImageUrl is present and uses a generated fallback accessibility label (not editorial alt)', () => {
+    const viewModel = buildReadyViewModel({
+      heroImageUrl: 'https://cdn.example.com/hero.jpg',
+      thumbnailUrl: 'https://cdn.example.com/thumb.jpg',
+    });
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute('src')).toBe('https://cdn.example.com/hero.jpg');
+    expect(img?.getAttribute('alt')).toContain('The Seaglass Residence');
+  });
+
+  it('falls back to thumbnailUrl when heroImageUrl is absent', () => {
+    const viewModel = buildReadyViewModel({
+      heroImageUrl: undefined,
+      thumbnailUrl: 'https://cdn.example.com/thumb.jpg',
+    });
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('https://cdn.example.com/thumb.jpg');
+  });
+
+  it('renders a polished aria-hidden placeholder when no record media exists', () => {
+    const viewModel = buildReadyViewModel({
+      heroImageUrl: undefined,
+      thumbnailUrl: undefined,
+    });
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    expect(container.querySelector('img')).toBeNull();
+    const stage = container.querySelector('[data-foleon-article-card]');
+    const placeholder = stage?.querySelector('[aria-hidden="true"]');
+    expect(placeholder).not.toBeNull();
+  });
+
+  it('uses employee-facing disabled-reason copy for preview state', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+    const reasonId = launchButton.getAttribute('aria-describedby');
+    const reasonEl = container.querySelector(`#${reasonId}`);
+    expect(reasonEl?.textContent).toMatch(/full spotlight will open/i);
+  });
+
+  it('renders ready-state visual surface derived only from the FoleonContentRecord and omits absent optional fields rather than inventing data', () => {
     const viewModel = buildReadyViewModel({
       relatedProjectName: 'Seaglass Holdings LLC',
       region: 'Gulf Coast',
       sector: 'Hospitality',
-      // team is intentionally not present in FoleonContentRecord
+      // team has no record source and is intentionally not surfaced in the
+      // visual-first layout.
     });
     const { container } = render(
       <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
 
-    const facts = container.querySelector('[aria-label="Project facts"]');
-    expect(facts).not.toBeNull();
-    expect(facts?.textContent).toContain('Seaglass Holdings LLC'); // client from relatedProjectName
-    expect(facts?.textContent).toContain('Gulf Coast'); // location from region
-    expect(facts?.textContent).toContain('Hospitality'); // market from sector
-    // Team has no record source — the layout renders "Not listed" rather than inventing a value.
-    expect(facts?.textContent).toContain('Not listed');
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card).not.toBeNull();
+    // Project label kicker carries the related-project name.
+    expect(card?.textContent).toContain('Seaglass Holdings LLC');
+    // Location and Market chips carry record-backed values.
+    expect(card?.textContent).toContain('Gulf Coast');
+    expect(card?.textContent).toContain('Hospitality');
+    // No invented data: no "Not listed", no fabricated client/team strings,
+    // no "Sample client/location/market/team/milestone" leakage.
+    expect(card?.textContent).not.toContain('Not listed');
+    expect(card?.textContent).not.toMatch(/Sample (client|location|market|team|milestone)/i);
   });
 
   it('Phase-04 Wave-01 Prompt-04B: never renders an inline iframe, even when iframeSurface is provided', () => {
@@ -210,7 +317,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     const reasonId = launchButton.getAttribute('aria-describedby');
     expect(reasonId).toBeTruthy();
     const reasonEl = container.querySelector(`#${reasonId}`);
-    expect(reasonEl?.textContent).toMatch(/preview only/i);
+    expect(reasonEl?.textContent).toMatch(/full spotlight will open/i);
   });
 
   it('clicking a disabled (preview) card is a no-op and surfaces the structured refusal as a DOM marker', () => {
@@ -275,7 +382,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     expect(launchButton.getAttribute('aria-disabled')).toBe('true');
     const reasonEl = container.querySelector(`#${launchButton.getAttribute('aria-describedby')}`);
-    expect(reasonEl?.textContent).toMatch(/disallows in-line embedding/i);
+    expect(reasonEl?.textContent).toMatch(/cannot open in the embedded viewer/i);
     fireEvent.click(launchButton);
     expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
   });

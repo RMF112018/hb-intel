@@ -2,7 +2,6 @@ import * as React from 'react';
 import { HbcButton } from '@hbc/ui-kit/homepage';
 import type { FoleonReaderLayoutProps } from '../FoleonReaderLayoutRegistry.js';
 import type {
-  FoleonReaderProjectFacts,
   FoleonReaderViewModel,
   FoleonReaderAction,
 } from '../FoleonReaderViewModel.js';
@@ -11,43 +10,27 @@ import { useFoleonFullWindowViewer } from '../../components/FoleonFullWindowView
 import styles from './FoleonReaderLayouts.module.css';
 
 // ---------------------------------------------------------------------------
-// Project Spotlight reader layout — Phase-04 Wave-01 Prompt-04B
+// Project Spotlight reader layout — Phase-05 PS-02 visual-first redesign
 // ---------------------------------------------------------------------------
-// Lane-owned monthly visual project profile. The article card itself is
-// the interactive launch surface for the shared full-window viewer
+// Employee-facing monthly project showcase. The card itself is the
+// interactive launch surface for the shared full-window viewer
 // (Inclusive Components card-launch pattern: a `<button>` wrapping the
-// title, with a transparent `::after` pseudo-element overlaying the card).
-// Disabled targets carry `aria-disabled="true"` plus `aria-describedby`
-// pointing to a visible disabled-reason; the click handler suppresses
-// activation. Inline iframe is removed for this lane — the Foleon
-// document opens in the shared full-window viewer instead.
+// title, with a transparent `::after` pseudo-element overlaying the
+// card). The CTA pill rendered inside the launch button is a visual
+// affordance only — there is exactly ONE interactive control inside
+// the article card.
 //
-// `iframeSurface` and `viewModel.mobileGate` are intentionally ignored
-// here. Leadership Message (still on the compatibility shell) continues
-// to consume them.
+// Lane identity (`data-foleon-layout="project-spotlight-feature"`),
+// data-attributes, and disabled-reason semantics are preserved from
+// 04B/04C — only the visual treatment, copy, and rendered fields
+// change. `iframeSurface` and `viewModel.mobileGate` are intentionally
+// ignored here. Inline iframe is never rendered in this lane.
 // ---------------------------------------------------------------------------
-
-interface ProjectFactRow {
-  readonly id: keyof Omit<FoleonReaderProjectFacts, 'arePlaceholders'>;
-  readonly label: string;
-}
-
-const PROJECT_FACT_ROWS: readonly ProjectFactRow[] = [
-  { id: 'client', label: 'Client' },
-  { id: 'location', label: 'Location' },
-  { id: 'market', label: 'Market' },
-  { id: 'team', label: 'Team' },
-  { id: 'milestone', label: 'Milestone' },
-];
 
 export function ProjectSpotlightReaderLayout(props: FoleonReaderLayoutProps): React.JSX.Element | null {
   const { viewModel } = props;
   const isPreview = viewModel.state === 'preview';
   const card = viewModel.primaryArticle;
-
-  // Defensive: every governed lane carries `primaryArticle` after Prompt
-  // 04A. If somehow absent, render nothing rather than fabricating a
-  // viewer target.
   if (!card) return null;
 
   const target = card.target;
@@ -59,6 +42,9 @@ export function ProjectSpotlightReaderLayout(props: FoleonReaderLayoutProps): Re
       : 'enabled';
   const reasonId = `${target.id}-disabled-reason`;
   const archiveAction = pickArchiveAction(viewModel.actions);
+  const media = viewModel.projectMedia;
+  const cadence = viewModel.cadenceLabel ?? 'Monthly feature';
+  const ctaLabel = viewModel.ctaLabel ?? 'View project spotlight';
 
   return (
     <div
@@ -68,74 +54,55 @@ export function ProjectSpotlightReaderLayout(props: FoleonReaderLayoutProps): Re
       data-foleon-layout="project-spotlight-feature"
     >
       <article
-        className={styles.featureSurface}
+        className={styles.showcaseSurface}
         aria-labelledby={viewModel.titleElementId}
       >
         <div
-          className={styles.articleCard}
+          className={styles.showcaseCard}
           data-foleon-article-card
           data-foleon-article-lane="projectSpotlight"
           data-foleon-viewer-target-id={target.id}
           data-foleon-article-state={articleState}
         >
-          <CardLaunchScrim target={target} reasonId={reasonId} title={card.title} />
+          <MediaStage media={media} title={card.title} isPreview={isPreview} />
 
-          <header className={styles.mediaBanner}>
-            <div className={styles.mediaInner}>
-              <div className={styles.eyebrowRow}>
-                <p className={styles.eyebrow}>{viewModel.eyebrow}</p>
-                <span className={styles.cadenceMarker}>Monthly</span>
-                {isPreview && viewModel.previewLabel ? (
-                  <span className={styles.previewLabel} aria-label="Preview content">
-                    {viewModel.previewLabel}
-                  </span>
-                ) : null}
-              </div>
-              <h2 className={styles.title} id={viewModel.titleElementId}>
-                <CardLaunchButton
-                  target={target}
-                  reasonId={reasonId}
-                  isDisabled={isDisabled}
-                >
-                  {card.title}
-                </CardLaunchButton>
-              </h2>
-              {viewModel.summary ? (
-                <p className={styles.summary}>{viewModel.summary}</p>
+          <div className={styles.showcaseOverlay}>
+            <div className={styles.showcaseEyebrowRow}>
+              <p className={styles.showcaseEyebrow}>{viewModel.eyebrow}</p>
+              <span className={styles.showcaseCadence}>{cadence}</span>
+              {isPreview && viewModel.previewLabel ? (
+                <span className={styles.showcasePreviewChip} aria-label="Preview content">
+                  {viewModel.previewLabel}
+                </span>
               ) : null}
             </div>
-          </header>
 
-          <ul
-            className={styles.ribbon}
-            aria-label="Project Spotlight metadata"
-          >
-            <RibbonFact label={viewModel.freshnessLabel} value={viewModel.freshnessValue} />
-            <RibbonFact label="Audience" value={viewModel.audience} />
-            <RibbonFact label="Archive group" value={viewModel.archiveGroup} />
-            <RibbonFact label="Cadence" value="Monthly" />
-          </ul>
+            {viewModel.projectLabel ? (
+              <p className={styles.showcaseProjectKicker}>Project · {viewModel.projectLabel}</p>
+            ) : null}
 
-          {viewModel.featureCallout ? (
-            <section
-              className={styles.callout}
-              aria-label="Why this project matters"
-            >
-              <h3 className={styles.calloutHeading}>
-                {viewModel.featureCallout.heading}
-              </h3>
-              <p className={styles.calloutBody}>{viewModel.featureCallout.body}</p>
-            </section>
-          ) : null}
+            <h2 className={styles.showcaseTitle} id={viewModel.titleElementId}>
+              <CardLaunchButton
+                target={target}
+                reasonId={reasonId}
+                isDisabled={isDisabled}
+                ctaLabel={ctaLabel}
+              >
+                <span className={styles.showcaseTitleText}>{card.title}</span>
+              </CardLaunchButton>
+            </h2>
 
-          {viewModel.projectFacts ? (
-            <ProjectFactsBlock facts={viewModel.projectFacts} isPreview={isPreview} />
-          ) : null}
+            {viewModel.summary ? (
+              <p className={styles.showcaseTeaser}>{viewModel.summary}</p>
+            ) : null}
+
+            <FactRow viewModel={viewModel} />
+          </div>
 
           {isDisabled ? (
             <p
               id={reasonId}
-              className={styles.disabledReason}
+              className={styles.showcaseDisabledReason}
               role="status"
               aria-live="polite"
             >
@@ -145,20 +112,20 @@ export function ProjectSpotlightReaderLayout(props: FoleonReaderLayoutProps): Re
         </div>
 
         {archiveAction || viewModel.archiveNote ? (
-          <div className={styles.articleFooter}>
+          <div className={styles.showcaseFooter}>
             {archiveAction ? (
               <HbcButton variant="secondary" onClick={archiveAction.onClick}>
                 {archiveAction.label}
               </HbcButton>
             ) : null}
             {viewModel.archiveNote ? (
-              <span className={styles.archiveNote}>{viewModel.archiveNote}</span>
+              <span className={styles.showcaseArchiveNote}>{viewModel.archiveNote}</span>
             ) : null}
           </div>
         ) : null}
 
         {viewModel.warnings.map((warning, i) => (
-          <p key={i} className={styles.warning}>
+          <p key={i} className={styles.showcaseWarning}>
             {warning}
           </p>
         ))}
@@ -172,29 +139,20 @@ function pickArchiveAction(actions: readonly FoleonReaderAction[]): FoleonReader
 }
 
 interface CardLaunchButtonProps {
-  readonly target: FoleonReaderViewModel['primaryArticle'] extends infer T
-    ? T extends { readonly target: infer U }
-      ? U
-      : never
-    : never;
+  readonly target: NonNullable<FoleonReaderViewModel['primaryArticle']>['target'];
   readonly reasonId: string;
   readonly isDisabled: boolean;
+  readonly ctaLabel: string;
   readonly children: React.ReactNode;
 }
 
 function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
-  const { target, reasonId, isDisabled, children } = props;
+  const { target, reasonId, isDisabled, ctaLabel, children } = props;
   const viewer = useFoleonFullWindowViewer();
-  const lastRefusalRef = React.useRef<HTMLButtonElement>(null);
 
   const handleClick = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       if (isDisabled) {
-        // Suppress activation. Surface the structured refusal as a DOM
-        // marker for diagnostics — disabled card was clicked, but no
-        // viewer was opened. Telemetry callers can observe this via
-        // existing data-foleon-article-state="disabled" + the button
-        // attribute below.
         event.currentTarget.setAttribute(
           'data-foleon-article-last-refusal',
           target.disabledReason ?? 'unknown',
@@ -203,9 +161,6 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
       }
       const result = viewer.openViewer(target, event.currentTarget);
       if (result.opened === false) {
-        // Defensive: pre-check should have prevented this. Surface the
-        // structured refusal so the failure is observable instead of
-        // silent.
         event.currentTarget.setAttribute(
           'data-foleon-article-last-refusal',
           result.reason,
@@ -219,83 +174,88 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
 
   return (
     <button
-      ref={lastRefusalRef}
       type="button"
-      className={styles.cardLaunch}
+      className={styles.showcaseCardLaunch}
       aria-disabled={isDisabled || undefined}
       aria-describedby={isDisabled ? reasonId : undefined}
       onClick={handleClick}
     >
       {children}
+      <span className={styles.showcaseCtaPill} aria-hidden="true">
+        {ctaLabel}
+        <span className={styles.showcaseCtaArrow} aria-hidden="true">→</span>
+      </span>
     </button>
   );
 }
 
-function CardLaunchScrim(props: {
-  readonly target: NonNullable<FoleonReaderViewModel['primaryArticle']>['target'];
-  readonly reasonId: string;
+function MediaStage(props: {
+  readonly media: FoleonReaderViewModel['projectMedia'];
   readonly title: string;
-}): React.JSX.Element | null {
-  // Reserved for future overlay decoration (e.g. hover affordance).
-  // No render in 04B — the card-launch pseudo-element handles hit-testing.
-  void props;
-  return null;
-}
-
-function RibbonFact(props: { label: string; value: string }): React.JSX.Element {
+  readonly isPreview: boolean;
+}): React.JSX.Element {
+  const { media, isPreview } = props;
+  const showImage = !isPreview && media?.hasRecordMedia === true && media.primaryImageUrl;
   return (
-    <li className={styles.ribbonItem}>
-      <span className={styles.ribbonLabel}>{props.label}</span>
-      <span className={styles.ribbonValue}>{props.value}</span>
-    </li>
+    <div className={styles.showcaseMediaStage}>
+      {showImage ? (
+        <img
+          className={styles.showcaseMediaImage}
+          src={media!.primaryImageUrl}
+          alt={media!.accessibleLabel ?? ''}
+          loading="lazy"
+        />
+      ) : (
+        <div className={styles.showcaseMediaPlaceholder} aria-hidden="true" />
+      )}
+      <div className={styles.showcaseMediaScrim} aria-hidden="true" />
+    </div>
   );
 }
 
-function ProjectFactsBlock(props: {
-  facts: FoleonReaderProjectFacts;
-  isPreview: boolean;
-}): React.JSX.Element {
-  const { facts, isPreview } = props;
-  const visibleRows = PROJECT_FACT_ROWS.flatMap((row) => {
-    const raw = facts[row.id];
-    if (isPreview) {
-      return [{ ...row, value: raw ?? 'Sample value', isPlaceholder: true }];
-    }
-    if (raw && raw.trim().length > 0) {
-      return [{ ...row, value: raw, isPlaceholder: false }];
-    }
-    return [{ ...row, value: 'Not listed', isPlaceholder: false }];
-  });
-
+function FactRow(props: { viewModel: FoleonReaderViewModel }): React.JSX.Element | null {
+  const { viewModel } = props;
+  const facts: { id: string; label: string; value: string }[] = [];
+  // Each chip is governed by its own source field. No coupling between chips.
+  const region = viewModel.projectFacts?.location;
+  const market = viewModel.projectFacts?.market;
+  const featured =
+    viewModel.freshnessValue && viewModel.freshnessValue !== viewModel.cadenceLabel
+      ? viewModel.freshnessValue
+      : undefined;
+  if (region && region.trim().length > 0) {
+    facts.push({ id: 'location', label: 'Location', value: region });
+  }
+  if (market && market.trim().length > 0) {
+    facts.push({ id: 'market', label: 'Market', value: market });
+  }
+  if (featured && featured !== 'This month') {
+    facts.push({ id: 'featured', label: 'Featured', value: featured });
+  }
+  if (facts.length === 0) return null;
   return (
-    <dl className={styles.projectFacts} aria-label="Project facts">
-      {visibleRows.map((row) => (
-        <div key={row.id} className={styles.projectFactItem}>
-          <dt className={styles.projectFactLabel}>{row.label}</dt>
-          <dd
-            className={
-              row.isPlaceholder ? styles.projectFactValuePlaceholder : styles.projectFactValue
-            }
-          >
-            {row.value}
-          </dd>
-        </div>
+    <ul className={styles.showcaseFactRow} aria-label="Project Spotlight facts">
+      {facts.map((fact) => (
+        <li key={fact.id} className={styles.showcaseFactChip}>
+          <span className={styles.showcaseFactLabel}>{fact.label}</span>
+          <span className={styles.showcaseFactValue}>{fact.value}</span>
+        </li>
       ))}
-    </dl>
+    </ul>
   );
 }
 
 function formatDisabledReason(reason: FoleonViewerDisabledReason | undefined): string {
   switch (reason) {
     case 'preview-only':
-      return 'Preview only — a live Project Spotlight edition will open here when published.';
+      return "Preview shown. The full spotlight will open when this month's feature is published.";
     case 'no-embed-url':
-      return 'This Project Spotlight record does not carry an embeddable Foleon URL yet.';
+      return 'This spotlight is missing its Foleon viewer link.';
     case 'embed-not-allowed':
-      return 'This Project Spotlight record disallows in-line embedding by governance policy.';
+      return 'This spotlight cannot open in the embedded viewer.';
     case 'requires-external-open':
-      return 'This Project Spotlight record must be opened in a new tab. Use the published link if available.';
+      return 'This spotlight must open outside the homepage.';
     default:
-      return 'This Project Spotlight document is not available in the in-line viewer.';
+      return 'This spotlight is not available in the viewer yet.';
   }
 }

@@ -97,6 +97,24 @@ export interface FoleonReaderFeatureCallout {
 }
 
 /**
+ * Project Spotlight visual media model. Populated only when
+ * `lane === 'projectSpotlight'`. Sourced exclusively from
+ * `FoleonContentRecord.heroImageUrl` / `thumbnailUrl`. The schema does
+ * not currently carry editorial alt text — `accessibleLabel` is a
+ * conservative fallback (e.g. `"Project Spotlight image for {title}"`)
+ * for screen readers, NOT editorial alt text. Decorative placeholder
+ * blocks rendered by the layout are marked `aria-hidden`.
+ */
+export interface FoleonReaderProjectMedia {
+  readonly primaryImageUrl?: string;
+  readonly thumbnailUrl?: string;
+  readonly hasRecordMedia: boolean;
+  readonly isPlaceholder: boolean;
+  /** Generated fallback accessibility label. Not editorial alt text. */
+  readonly accessibleLabel?: string;
+}
+
+/**
  * Company Pulse briefing lead — the latest active editorial update.
  * Populated only when `lane === 'companyPulse'`. Ready-state values
  * are derived from `FoleonContentRecord`; preview values are clearly
@@ -190,6 +208,17 @@ export interface FoleonReaderViewModel {
   readonly projectFacts?: FoleonReaderProjectFacts;
   /** Project Spotlight only. Pulse + Leadership leave this `undefined`. */
   readonly featureCallout?: FoleonReaderFeatureCallout;
+  /** Project Spotlight only. Carries the visual media stage state. */
+  readonly projectMedia?: FoleonReaderProjectMedia;
+  /** Project Spotlight only. Optional caption-line project label
+   *  (`relatedProjectName ?? relatedProjectNumber`) when distinct from
+   *  the title. */
+  readonly projectLabel?: string;
+  /** Project Spotlight only. Visible launch affordance label. */
+  readonly ctaLabel?: string;
+  /** Project Spotlight only. Cadence chip label
+   *  (`record.cadence ?? 'Monthly feature'`). */
+  readonly cadenceLabel?: string;
   /** Company Pulse only. Spotlight + Leadership leave this `undefined`. */
   readonly briefingLead?: FoleonReaderBriefingLead;
   /** Company Pulse only. Empty array in ready state (no fabricated digest items). */
@@ -247,9 +276,9 @@ interface LaneLabels {
 
 const LANE_LABELS: Readonly<Record<FoleonReaderLayoutKey, LaneLabels>> = {
   projectSpotlight: {
-    eyebrow: 'Project Spotlight Reader',
-    freshnessLabel: 'Monthly status',
-    freshnessFallback: 'Monthly edition',
+    eyebrow: 'Project Spotlight',
+    freshnessLabel: 'Featured',
+    freshnessFallback: 'This month',
   },
   companyPulse: {
     eyebrow: 'Company Pulse Reader',
@@ -305,11 +334,11 @@ interface LanePreviewCopy {
 
 const LANE_PREVIEW_COPY: Readonly<Record<FoleonReaderLayoutKey, LanePreviewCopy>> = {
   projectSpotlight: {
-    title: 'Project Spotlight reader',
+    title: "This Month's Project Spotlight",
     description:
-      'This sample structure previews the monthly active project profile lane before a governed Project Spotlight edition is published.',
-    statusLabel: 'Monthly project profile',
-    cadenceLabel: 'Monthly',
+      "A visual project feature will appear here once this month's Foleon spotlight is published.",
+    statusLabel: 'Featured this month',
+    cadenceLabel: 'Monthly feature',
     featureTitle: 'Featured project profile placeholder',
     featureCopy:
       'A polished project story area will introduce the active edition, project context, and editorial framing once live Foleon content is connected.',
@@ -390,8 +419,18 @@ export function createPreviewFoleonReaderViewModel(
   const featureCallout: FoleonReaderFeatureCallout | undefined =
     lane === 'projectSpotlight'
       ? {
-          heading: 'Why this project matters',
+          heading: "Why we're featuring it",
           body: 'Sample editorial framing — a one- to two-sentence narrative explaining the project\'s significance will appear here when a live Project Spotlight edition is published.',
+        }
+      : undefined;
+  const projectMedia: FoleonReaderProjectMedia | undefined =
+    lane === 'projectSpotlight'
+      ? {
+          primaryImageUrl: undefined,
+          thumbnailUrl: undefined,
+          hasRecordMedia: false,
+          isPlaceholder: true,
+          accessibleLabel: undefined,
         }
       : undefined;
   const briefingLead: FoleonReaderBriefingLead | undefined =
@@ -438,7 +477,7 @@ export function createPreviewFoleonReaderViewModel(
     title: preview.title,
     summary: preview.description,
     eyebrow: labels.eyebrow,
-    previewLabel: 'Preview layout',
+    previewLabel: lane === 'projectSpotlight' ? 'Preview' : 'Preview layout',
     freshnessLabel: labels.freshnessLabel,
     freshnessValue: labels.freshnessFallback,
     audience: 'Companywide',
@@ -479,6 +518,10 @@ export function createPreviewFoleonReaderViewModel(
     categoryChips,
     pulseTimeline,
     leadershipMessage,
+    projectMedia,
+    projectLabel: undefined,
+    ctaLabel: lane === 'projectSpotlight' ? 'View project spotlight' : undefined,
+    cadenceLabel: lane === 'projectSpotlight' ? 'Monthly feature' : undefined,
     primaryArticle: createPreviewArticleCard(config, lane, preview),
   };
 }
@@ -554,6 +597,39 @@ const PULSE_PREVIEW_TIMELINE: readonly FoleonReaderPulseTimelineEntry[] = [
 // FoleonContentRecord. No invented data.
 // ---------------------------------------------------------------------------
 
+function buildReadyProjectMedia(record: FoleonContentRecord): FoleonReaderProjectMedia {
+  const hero = record.heroImageUrl?.trim();
+  const thumb = record.thumbnailUrl?.trim();
+  const primary = (hero && hero.length > 0 ? hero : undefined) ?? (thumb && thumb.length > 0 ? thumb : undefined);
+  // Only surface `thumbnailUrl` separately when it is meaningfully distinct
+  // from the primary image (i.e. hero is the primary and thumb differs).
+  const thumbnail =
+    thumb && thumb.length > 0 && thumb !== primary ? thumb : undefined;
+  const hasRecordMedia = primary !== undefined;
+  // Generated fallback accessibility label — NOT editorial alt text.
+  // Schema does not currently carry editorial alt; PS-03 follow-up.
+  const accessibleLabel = hasRecordMedia
+    ? `Project Spotlight image for ${record.title}`
+    : undefined;
+  return {
+    primaryImageUrl: primary,
+    thumbnailUrl: thumbnail,
+    hasRecordMedia,
+    isPlaceholder: false,
+    accessibleLabel,
+  };
+}
+
+function buildProjectLabel(record: FoleonContentRecord): string | undefined {
+  const candidate = record.relatedProjectName ?? record.relatedProjectNumber;
+  if (!candidate) return undefined;
+  const trimmed = candidate.trim();
+  if (trimmed.length === 0) return undefined;
+  // Suppress when the label duplicates the title (case-insensitive).
+  if (trimmed.toLowerCase() === record.title.trim().toLowerCase()) return undefined;
+  return trimmed;
+}
+
 function deriveLeadershipPullQuote(summary: string): string | undefined {
   const trimmed = summary.trim();
   if (trimmed.length === 0) return undefined;
@@ -608,12 +684,24 @@ export function createReadyFoleonReaderViewModel(
   const featureCallout: FoleonReaderFeatureCallout | undefined =
     lane === 'projectSpotlight'
       ? {
-          heading: 'Why this project matters',
+          heading: "Why we're featuring it",
           body:
             record.summary && record.summary.trim().length > 0
               ? record.summary
-              : 'Editorial framing for this Project Spotlight edition has not been provided.',
+              : 'A project summary has not been provided for this spotlight.',
         }
+      : undefined;
+  const projectMedia: FoleonReaderProjectMedia | undefined =
+    lane === 'projectSpotlight'
+      ? buildReadyProjectMedia(record)
+      : undefined;
+  const projectLabel: string | undefined =
+    lane === 'projectSpotlight'
+      ? buildProjectLabel(record)
+      : undefined;
+  const cadenceLabel: string | undefined =
+    lane === 'projectSpotlight'
+      ? record.cadence ?? 'Monthly feature'
       : undefined;
   const briefingLead: FoleonReaderBriefingLead | undefined =
     lane === 'companyPulse'
@@ -730,6 +818,10 @@ export function createReadyFoleonReaderViewModel(
     categoryChips,
     pulseTimeline,
     leadershipMessage,
+    projectMedia,
+    projectLabel,
+    ctaLabel: lane === 'projectSpotlight' ? 'View project spotlight' : undefined,
+    cadenceLabel,
     primaryArticle: {
       id: `${config.readerKey}-active-${record.id}`,
       title: record.title,
