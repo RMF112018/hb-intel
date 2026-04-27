@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   foleonApiConfigured,
   foleonGraphConfigured,
@@ -27,6 +27,8 @@ export interface NormalizedFoleonApiDocument {
   readonly title: string;
   readonly publishedUrl?: string;
   readonly embedUrl?: string;
+  readonly thumbnailUrl?: string;
+  readonly heroImageUrl?: string;
   readonly foleonUid?: string;
   readonly identifier?: string;
 }
@@ -612,6 +614,13 @@ export class FoleonService implements IFoleonService {
     for (const doc of docs) {
       try {
         const current = byDocId.get(doc.foleonDocId);
+        const effectiveEmbedUrl = doc.embedUrl ?? doc.publishedUrl;
+        const syncHash = computeFoleonUrlSyncHash({
+          heroImageUrl: doc.heroImageUrl,
+          thumbnailUrl: doc.thumbnailUrl,
+          embedUrl: effectiveEmbedUrl,
+          publishedUrl: doc.publishedUrl,
+        });
         const mutationRequest: FoleonContentMutationRequest = {
           title: doc.title,
           foleonDocId: doc.foleonDocId,
@@ -620,7 +629,9 @@ export class FoleonService implements IFoleonService {
           isVisible: false,
           isHomepageEligible: false,
           publishedUrl: doc.publishedUrl,
-          embedUrl: doc.embedUrl ?? doc.publishedUrl,
+          embedUrl: effectiveEmbedUrl,
+          thumbnailUrl: doc.thumbnailUrl,
+          heroImageUrl: doc.heroImageUrl,
           summary: `Imported from Foleon API sync (${correlationId}).`,
           openMode: 'Inline Reader',
           allowEmbed: true,
@@ -632,6 +643,7 @@ export class FoleonService implements IFoleonService {
             ...contentFields(mutationRequest, validation),
             SyncSource: 'Foleon API',
             LastSynced: new Date().toISOString(),
+            SyncHash: syncHash,
             ...(doc.foleonUid ? { FoleonDocUid: doc.foleonUid } : {}),
             ...(doc.identifier ? { FoleonIdentifier: doc.identifier } : {}),
           };
@@ -640,12 +652,24 @@ export class FoleonService implements IFoleonService {
           created += 1;
         } else {
           const detail = toContentDetail(current);
+          const storedHash = readString(current.fields?.SyncHash);
+          if (storedHash && storedHash === syncHash) {
+            // URL-drift hash matches — Foleon-side URLs are unchanged. Skip
+            // the SharePoint PATCH entirely. PreviewUrl, Title, and other
+            // non-URL fields are intentionally not refreshed here; they
+            // drift on a different schedule and are not part of the
+            // URL-drift contract.
+            continue;
+          }
           const patch: Record<string, unknown> = {
             Title: doc.title,
             LastSynced: new Date().toISOString(),
             SyncSource: 'Foleon API',
+            SyncHash: syncHash,
             ...(doc.publishedUrl ? { PublishedUrl: doc.publishedUrl } : {}),
-            ...(doc.embedUrl ? { EmbedUrl: doc.embedUrl } : {}),
+            ...(effectiveEmbedUrl ? { EmbedUrl: effectiveEmbedUrl } : {}),
+            ...(doc.thumbnailUrl ? { ThumbnailUrl: doc.thumbnailUrl } : {}),
+            ...(doc.heroImageUrl ? { HeroImageUrl: doc.heroImageUrl } : {}),
             ...(doc.foleonUid ? { FoleonDocUid: doc.foleonUid } : {}),
             ...(doc.identifier ? { FoleonIdentifier: doc.identifier } : {}),
           };
@@ -1523,12 +1547,77 @@ export function normalizeFoleonApiDocument(raw: unknown): NormalizedFoleonApiDoc
     pickString(o.title, o.name, o.display_name, o.displayName, o.label, o.slug)
     ?? (docId ? `Foleon document ${docId}` : undefined);
   if (!docId || !title) return null;
+  const coverObj =
+    typeof o.cover === 'object' && o.cover !== null ? (o.cover as Record<string, unknown>) : undefined;
+  const imageObj =
+    typeof o.image === 'object' && o.image !== null ? (o.image as Record<string, unknown>) : undefined;
+  const thumbnailObj =
+    typeof o.thumbnail === 'object' && o.thumbnail !== null
+      ? (o.thumbnail as Record<string, unknown>)
+      : undefined;
+  // Thumbnail: prefer explicit thumbnail-shaped fields; fall back to cover URL.
+  const thumbnailUrl = firstHttpsUrl(
+    o.thumbnail_url,
+    o.thumbnailUrl,
+    thumbnailObj?.url,
+    o.preview_image_url,
+    o.previewImageUrl,
+    nestedDoc?.thumbnail_url,
+    coverObj?.thumbnail_url,
+    imageObj?.thumbnail_url,
+    o.cover_url,
+    o.coverUrl,
+    coverObj?.url,
+    o.cover_image_url,
+    o.coverImageUrl,
+    imageObj?.url,
+  );
+  // Hero image: prefer hero/cover-large variants; fall back to the same cover URL.
+  const heroImageUrl = firstHttpsUrl(
+    o.hero_image_url,
+    o.heroImageUrl,
+    o.cover_image_url,
+    o.coverImageUrl,
+    coverObj?.large_url,
+    coverObj?.original_url,
+    imageObj?.large_url,
+    imageObj?.original_url,
+    o.cover_url,
+    o.coverUrl,
+    coverObj?.url,
+    imageObj?.url,
+    nestedDoc?.hero_image_url,
+  );
   return {
     foleonDocId: docId,
     title,
     publishedUrl: firstHttpsUrl(o.url, o.public_url, o.published_url, o.share_url, o.canonical_url),
     embedUrl: firstHttpsUrl(o.embed_url, o.embedUrl, o.viewer_url),
+    thumbnailUrl,
+    heroImageUrl,
     foleonUid: pickString(o.uid, o.uuid, o.document_uid, o.documentUid),
     identifier: pickString(o.identifier, o.slug),
   };
+}
+
+/**
+ * URL-drift hash over the four Foleon-API-sourced launch/preview URLs.
+ * `PreviewUrl` is admin-only and is intentionally NOT part of this hash.
+ * Title and identity fields are intentionally NOT part of this hash —
+ * the hash exists to detect Foleon-side URL drift, not broader payload
+ * drift. See PROJECT_SPOTLIGHT_MEDIA_SCHEMA_PLAN.md §11/§14.1.
+ */
+export function computeFoleonUrlSyncHash(input: {
+  readonly heroImageUrl?: string;
+  readonly thumbnailUrl?: string;
+  readonly embedUrl?: string;
+  readonly publishedUrl?: string;
+}): string {
+  const canonical = JSON.stringify({
+    embedUrl: input.embedUrl ?? '',
+    heroImageUrl: input.heroImageUrl ?? '',
+    publishedUrl: input.publishedUrl ?? '',
+    thumbnailUrl: input.thumbnailUrl ?? '',
+  });
+  return createHash('sha256').update(canonical).digest('hex');
 }
