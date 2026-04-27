@@ -319,16 +319,39 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
   it('clicking a preview card opens the local preview viewer without a refusal marker', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
-    render(
+    const { container } = render(
       <FoleonFullWindowViewerProvider originPolicy={policy}>
         <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
     const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+    expect(launchButton.getAttribute('aria-disabled')).toBeNull();
+    expect(launchButton.getAttribute('aria-describedby')).toBeNull();
     fireEvent.click(launchButton);
     expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBeNull();
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(document.querySelector('[role="dialog"] iframe')).toBeNull();
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
+    expect(dialog?.querySelector('iframe')).toBeNull();
+  });
+
+  it('keyboard activation on a preview card opens the local preview viewer', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
+    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
+    const rendered = render(
+      <FoleonFullWindowViewerProvider originPolicy={policy}>
+        <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
+    const launchButton = rendered.getByRole('button', { name: viewModel.primaryArticle!.title });
+    fireEvent.keyDown(launchButton, { key: 'Enter' });
+    fireEvent.click(launchButton);
+    const dialog = rendered.container.querySelector('[data-foleon-full-window-viewer="active"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
+    expect(dialog?.querySelector('iframe')).toBeNull();
   });
 
   it('Phase-04 Wave-01 Prompt-04C: card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {
@@ -386,6 +409,26 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(reasonEl?.textContent).toMatch(/cannot open in the embedded viewer/i);
     fireEvent.click(launchButton);
     expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
+  });
+
+  it.each([
+    ['no-embed-url', { embedUrl: undefined }],
+    ['requires-external-open', { requiresExternalOpen: true }],
+  ] as const)('records %s refusal for ready disabled records', (reason, overrides) => {
+    const viewModel = buildReadyViewModel(overrides);
+    const { container } = render(
+      <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
+    const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+    expect(launchButton.getAttribute('aria-disabled')).toBe('true');
+    const reasonId = launchButton.getAttribute('aria-describedby');
+    expect(reasonId).toBeTruthy();
+    expect(container.querySelector(`#${reasonId}`)).not.toBeNull();
+    fireEvent.click(launchButton);
+    expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBe(reason);
+    expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).toBeNull();
   });
 
   it('does not interfere with sibling lanes — Pulse renders its briefing layout, Leadership stays on the compatibility shell', () => {

@@ -237,16 +237,39 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
   it('clicking a preview lead opens the local preview viewer without a refusal marker', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
-    render(
+    const { container } = render(
       <FoleonFullWindowViewerProvider originPolicy={policy}>
         <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
     const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    expect(launch.getAttribute('aria-disabled')).toBeNull();
+    expect(launch.getAttribute('aria-describedby')).toBeNull();
     fireEvent.click(launch);
     expect(launch.getAttribute('data-foleon-article-last-refusal')).toBeNull();
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(document.querySelector('[role="dialog"] iframe')).toBeNull();
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
+    expect(dialog?.querySelector('iframe')).toBeNull();
+  });
+
+  it('keyboard activation on a preview lead opens the local preview viewer', () => {
+    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
+    const rendered = render(
+      <FoleonFullWindowViewerProvider originPolicy={policy}>
+        <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
+    const launch = rendered.getByRole('button', { name: viewModel.briefingLead!.title });
+    fireEvent.keyDown(launch, { key: 'Enter' });
+    fireEvent.click(launch);
+    const dialog = rendered.container.querySelector('[data-foleon-full-window-viewer="active"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
+    expect(dialog?.querySelector('iframe')).toBeNull();
   });
 
   it('Phase-04 Wave-01 Prompt-04C: card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {
@@ -291,6 +314,26 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     expect(launch.getAttribute('aria-disabled')).toBe('true');
     fireEvent.click(launch);
     expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
+  });
+
+  it.each([
+    ['no-embed-url', { embedUrl: undefined }],
+    ['requires-external-open', { requiresExternalOpen: true }],
+  ] as const)('records %s refusal for ready disabled records', (reason, overrides) => {
+    const viewModel = buildReadyViewModel(overrides);
+    const { container } = render(
+      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
+    );
+    const card = container.querySelector('[data-foleon-article-card]');
+    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
+    const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
+    expect(launch.getAttribute('aria-disabled')).toBe('true');
+    const reasonId = launch.getAttribute('aria-describedby');
+    expect(reasonId).toBeTruthy();
+    expect(container.querySelector(`#${reasonId}`)).not.toBeNull();
+    fireEvent.click(launch);
+    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe(reason);
+    expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).toBeNull();
   });
 
   it('outer wrapper is edge-bleed-ready (no inline margin-inline overrides on the layout root)', () => {
