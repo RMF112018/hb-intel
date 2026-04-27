@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import type { FoleonOriginPolicy } from '../services/FoleonOriginPolicy.js';
 import type {
   FoleonViewerOpenResult,
@@ -107,20 +108,24 @@ export function FoleonFullWindowViewerProvider(
     () => ({ currentTarget, openViewer, closeViewer }),
     [currentTarget, openViewer, closeViewer],
   );
+  const activeViewer = currentTarget ? (
+    <FoleonFullWindowViewer
+      target={currentTarget}
+      originPolicy={originPolicy}
+      onClose={closeViewer}
+      onIframeLoaded={onViewerIframeLoaded}
+      onIframeError={onViewerIframeError}
+      titleId={titleId}
+    />
+  ) : null;
+  const portalTarget = typeof document !== 'undefined' && document.body
+    ? document.body
+    : null;
 
   return (
     <FoleonFullWindowViewerContext.Provider value={value}>
       {children}
-      {currentTarget ? (
-        <FoleonFullWindowViewer
-          target={currentTarget}
-          originPolicy={originPolicy}
-          onClose={closeViewer}
-          onIframeLoaded={onViewerIframeLoaded}
-          onIframeError={onViewerIframeError}
-          titleId={titleId}
-        />
-      ) : null}
+      {activeViewer && portalTarget ? createPortal(activeViewer, portalTarget) : activeViewer}
     </FoleonFullWindowViewerContext.Provider>
   );
 }

@@ -241,7 +241,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     const launch = rendered.getByRole('button', { name: viewModel.title });
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
-    const dialog = rendered.container.querySelector('[data-foleon-full-window-viewer="active"]');
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
     expect(dialog?.querySelector('iframe')).toBeNull();
@@ -303,7 +303,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     );
     const launch = rendered.getByRole('button', { name: viewModel.title });
     fireEvent.click(launch);
-    expect(rendered.queryByRole('dialog')).not.toBeNull();
+    expect(screen.queryByRole('dialog')).not.toBeNull();
   });
 
   it('keyboard activation (Enter) on the card-launch button opens the viewer when wrapped in the provider', () => {
@@ -316,7 +316,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     const launch = rendered.getByRole('button', { name: viewModel.title });
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
-    expect(rendered.queryByRole('dialog')).not.toBeNull();
+    expect(screen.queryByRole('dialog')).not.toBeNull();
   });
 
   it('does not interfere with sibling lanes — Spotlight and Pulse render their own markers', () => {

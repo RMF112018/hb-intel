@@ -348,7 +348,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     const launchButton = rendered.getByRole('button', { name: viewModel.primaryArticle!.title });
     fireEvent.keyDown(launchButton, { key: 'Enter' });
     fireEvent.click(launchButton);
-    const dialog = rendered.container.querySelector('[data-foleon-full-window-viewer="active"]');
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
     expect(dialog?.querySelector('iframe')).toBeNull();
@@ -380,7 +380,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     const launchEnter = enterRender.getByRole('button', { name: viewModel.primaryArticle!.title });
     // Native button: Enter and Space synthesize a click.
     fireEvent.click(launchEnter);
-    expect(enterRender.queryByRole('dialog')).not.toBeNull();
+    expect(screen.queryByRole('dialog')).not.toBeNull();
     cleanup();
 
     const spaceRender = render(
@@ -393,7 +393,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     fireEvent.keyDown(launchSpace, { key: 'Enter' });
     fireEvent.keyUp(launchSpace, { key: 'Enter' });
     fireEvent.click(launchSpace);
-    expect(spaceRender.queryByRole('dialog')).not.toBeNull();
+    expect(screen.queryByRole('dialog')).not.toBeNull();
   });
 
   it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {

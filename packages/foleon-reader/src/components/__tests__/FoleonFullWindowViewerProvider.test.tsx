@@ -94,7 +94,7 @@ describe('FoleonFullWindowViewerProvider — open/close + structured result', ()
     const onViewerOpen = vi.fn();
     const onViewerClose = vi.fn();
     const handle: { current: HarnessHandle | null } = { current: null };
-    render(
+    const rendered = render(
       <FoleonFullWindowViewerProvider
         originPolicy={POLICY}
         onViewerOpen={onViewerOpen}
@@ -112,6 +112,30 @@ describe('FoleonFullWindowViewerProvider — open/close + structured result', ()
     expect(onViewerOpen).toHaveBeenCalledWith(target);
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).not.toBeNull();
+    expect(
+      rendered.container.querySelector('[data-foleon-full-window-viewer="active"]'),
+    ).toBeNull();
+    const closeButton = screen.getByRole('button', { name: 'Close Foleon viewer' });
+    expect(closeButton).toBeTruthy();
+    expect(closeButton.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('portals the active viewer dialog to document.body outside the provider container', () => {
+    const handle: { current: HarnessHandle | null } = { current: null };
+    const rendered = render(
+      <FoleonFullWindowViewerProvider originPolicy={POLICY}>
+        <Harness handle={handle} />
+      </FoleonFullWindowViewerProvider>,
+    );
+    act(() => {
+      handle.current!.open(readyTarget());
+    });
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
+    expect(dialog).not.toBeNull();
+    expect(document.body.contains(dialog)).toBe(true);
+    expect(
+      rendered.container.querySelector('[data-foleon-full-window-viewer="active"]'),
+    ).toBeNull();
   });
 
   it('openViewer on a preview target renders local preview content without mounting an iframe', () => {
@@ -270,6 +294,13 @@ describe('Prompt-04C — static CSS no-global-overflow proof', () => {
   it('FoleonFullWindowViewer.module.css does not introduce a global overflow-x: hidden declaration', () => {
     const css = readCss(VIEWER_CSS_PATH);
     expect(css).not.toMatch(/overflow-x\s*:\s*hidden\s*;/);
+  });
+
+  it('FoleonFullWindowViewer.module.css uses the high SharePoint-safe modal z-index', () => {
+    const css = readCss(VIEWER_CSS_PATH);
+    expect(css).not.toMatch(/z-index\s*:\s*1000\s*;/);
+    expect(css).toContain('--hbc-foleon-viewer-z-index');
+    expect(css).toContain('2147483000');
   });
 
   it('FoleonReaderLayouts.module.css does not introduce a global overflow-x: hidden declaration', () => {

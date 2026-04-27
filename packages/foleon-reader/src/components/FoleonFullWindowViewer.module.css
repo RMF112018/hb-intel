@@ -11,7 +11,12 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  /* Intentionally above SharePoint suite/header chrome. Consumers can override
+     only if their host has an even higher governed modal layer. */
+  z-index: var(--hbc-foleon-viewer-z-index, 2147483000);
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
   background: linear-gradient(180deg, #0c1722 0%, #14212b 30%);
@@ -26,7 +31,10 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 1rem;
-  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 4vw, 2rem);
+  padding:
+    max(clamp(0.75rem, 2vw, 1.25rem), env(safe-area-inset-top))
+    clamp(1rem, 4vw, 2rem)
+    clamp(0.75rem, 2vw, 1.25rem);
   border-block-end: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
   background: color-mix(in srgb, #0c1722 88%, transparent);
 }

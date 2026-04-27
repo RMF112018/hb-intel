@@ -266,7 +266,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     const launch = rendered.getByRole('button', { name: viewModel.briefingLead!.title });
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
-    const dialog = rendered.container.querySelector('[data-foleon-full-window-viewer="active"]');
+    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
     expect(dialog?.querySelector('iframe')).toBeNull();
@@ -300,7 +300,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     // matching the browser's synthesized Enter/Space → click flow.
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
-    expect(rendered.queryByRole('dialog')).not.toBeNull();
+    expect(screen.queryByRole('dialog')).not.toBeNull();
   });
 
   it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {
