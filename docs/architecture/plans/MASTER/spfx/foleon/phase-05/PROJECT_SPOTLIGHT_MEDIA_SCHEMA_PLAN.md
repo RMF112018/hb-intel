@@ -190,7 +190,7 @@ PS-03 splits into three sequenced (and individually optional) waves. Each wave's
 Scope (gated on product approval):
 - Optional `EditorialOverrideCopy` Note field on `HB_FoleonContentRegistry`.
 - Optional `ParentSpotlightLookup` self-Lookup field on `HB_FoleonContentRegistry`.
-- Foleon sync service hardening so `HeroImageUrl` / `ThumbnailUrl` are reliably populated from Foleon API metadata at sync time, with sync-hash drift detection on cover-URL change.
+- Foleon sync service hardening so `HeroImageUrl`, `ThumbnailUrl`, `EmbedUrl`, and `PublishedUrl` are reliably populated from Foleon API metadata at sync time, with sync-hash drift detection on any of those URLs changing. This sync hardening can ship on its own even if neither schema extension is approved — it is the load-bearing PS-03A change.
 - Schema constant updates in `apps/hb-intel-foleon/src/schema/foleonListSchemas.ts`.
 - Feature Framework provisioning artifact updates (the existing `schema-content-registry.xml` gains the new fields).
 - Optional registry-key for any new field if runtime exposure is required (likely none — the reader already gets the full record shape).
@@ -252,9 +252,12 @@ binary upload UX, no alt-text/focal-point/credit/transcript fields in
 SharePoint.
 
 Implementation waves:
-PS-03A — optional Content Registry extension (EditorialOverrideCopy and/or
-        ParentSpotlightLookup) plus Foleon sync hardening for cover URL
-        extraction. Deferred indefinitely if neither field is approved.
+PS-03A — Foleon sync hardening (HeroImageUrl, ThumbnailUrl, EmbedUrl,
+        PublishedUrl reliably populated and SyncHash drift-detected at
+        sync time) AND optional Content Registry extension
+        (EditorialOverrideCopy and/or ParentSpotlightLookup). Sync
+        hardening can ship on its own even if neither schema extension
+        is approved.
 PS-03B — optional Manager UI (override-copy field, related-Foleon-documents
         panel). Gated on PS-03A.
 PS-03C — optional reader / view-model wiring (override-copy precedence,
@@ -403,12 +406,23 @@ packages/foleon-reader/src/services/FoleonReaderContentService.ts
    - Update tenant-snapshot doc.
 
 3. Foleon sync hardening (do this regardless of which fields are approved):
-   - Verify the Foleon sync writes HeroImageUrl and ThumbnailUrl from
-     Foleon API metadata when available. If the current sync omits one or
-     the other, fix that. Use the existing SyncHash drift detection to
-     trigger a re-sync when the Foleon-side cover URL changes.
-   - Add (or strengthen) a backend test that proves a republished Foleon
-     document re-syncs HeroImageUrl/ThumbnailUrl.
+   - Verify the Foleon sync writes all four launch/preview URLs from
+     Foleon API metadata when available — HeroImageUrl, ThumbnailUrl,
+     EmbedUrl, PublishedUrl. If the current sync omits any of them, fix
+     that. PreviewUrl remains admin-only and is not part of the sync
+     hardening scope.
+   - Use the existing SyncHash drift detection to trigger a re-sync
+     when any of those Foleon-side URLs change (republish, asset
+     re-host, or cover image swap).
+   - Add (or strengthen) backend tests that prove a republished Foleon
+     document re-syncs HeroImageUrl, ThumbnailUrl, EmbedUrl, and
+     PublishedUrl together (one test per URL field, plus an integrated
+     "all four refresh on republish" path).
+   - This sync hardening is the load-bearing change in PS-03A. It is
+     not gated on schema extensions — even if neither
+     EditorialOverrideCopy nor ParentSpotlightLookup is approved, the
+     sync hardening can ship on its own to make the homepage card and
+     viewer launch resilient against Foleon-side URL drift.
 
 ## Do-not-touch
 
