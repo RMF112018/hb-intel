@@ -1453,6 +1453,122 @@
   }
 }
 
+/* ----- Executive Briefing — Prompt 02 (Leadership): passive bands +
+   visible CTA row; full-card hit target preserved via .cardLaunch::after */
+
+.briefingPassiveBand {
+  pointer-events: none;
+  position: relative;
+  z-index: 0;
+}
+
+.briefingBriefHeader {
+  display: grid;
+  gap: 0.625rem;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+}
+
+.briefingTeaser {
+  margin: 0;
+  font-size: clamp(15px, 1.35vw, 17px);
+  line-height: 1.55;
+  max-width: 65ch;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+.briefingLaunchTrack {
+  position: relative;
+  z-index: 2;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  padding-block: 0.35rem 0.85rem;
+}
+
+.briefingLaunchTrack .cardLaunch {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.35rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, #24364d 88%, #ffffff) 0%, #24364d 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 14px color-mix(in srgb, #24364d 24%, transparent);
+}
+
+.briefingLaunchTrack .cardLaunch[aria-disabled='true'] {
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--hbc-text-secondary, #4e5c66) 28%, #ffffff);
+  color: #24364d;
+  box-shadow: none;
+}
+
+.briefingLaunchLabel {
+  position: relative;
+  z-index: 3;
+}
+
+.briefingChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  padding-block: 0.35rem 0;
+  list-style: none;
+}
+
+.briefingChip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  align-items: baseline;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #edf1f5 88%, #ffffff);
+  border: 1px solid color-mix(in srgb, #24364d 14%, transparent);
+  font-size: 13px;
+}
+
+.briefingChipLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hbc-text-secondary, #4e5c66);
+}
+
+.briefingChipValue {
+  font-weight: 600;
+  color: var(--hbc-text-primary, #14212b);
+}
+
+.briefingDisabledReason {
+  margin: 0;
+  padding-inline: var(--hb-foleon-executive-inline-safe);
+  padding-top: 0.35rem;
+  color: color-mix(in srgb, var(--hbc-text-secondary, #4e5c66) 92%, #ffffff);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.briefingExternalHint {
+  font-size: 13px;
+  color: var(--hbc-text-secondary, #4e5c66);
+  max-width: 42ch;
+}
+
+.briefingExternalLink {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b6fb8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ===== Phase-04 Wave-01 Prompt-04B — Clickable article cards =====
    Card-launch pattern (Inclusive Components / Heydon Pickering): the
    visible launch control is a `<button>` wrapping the card title. A

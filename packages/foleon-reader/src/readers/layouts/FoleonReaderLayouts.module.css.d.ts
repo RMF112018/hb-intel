@@ -141,6 +141,18 @@ declare const styles: {
   readonly executiveFooter: string;
   readonly executiveArchiveNote: string;
   readonly executiveWarning: string;
+  readonly briefingPassiveBand: string;
+  readonly briefingBriefHeader: string;
+  readonly briefingTeaser: string;
+  readonly briefingLaunchTrack: string;
+  readonly briefingLaunchLabel: string;
+  readonly briefingChipList: string;
+  readonly briefingChip: string;
+  readonly briefingChipLabel: string;
+  readonly briefingChipValue: string;
+  readonly briefingDisabledReason: string;
+  readonly briefingExternalHint: string;
+  readonly briefingExternalLink: string;
   readonly showcaseSurface: string;
   readonly showcaseCard: string;
   readonly showcaseMediaStage: string;

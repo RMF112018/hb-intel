@@ -5,34 +5,65 @@ import type {
   FoleonReaderAction,
   FoleonReaderViewModel,
 } from '../FoleonReaderViewModel.js';
-import type { FoleonViewerDisabledReason } from '../FoleonViewerTypes.js';
+import type { FoleonViewerDisabledReason, FoleonViewerTarget } from '../FoleonViewerTypes.js';
+import type { LeadershipMessageCtaKind } from '../viewModels/leadershipMessageViewModel.js';
 import { useFoleonFullWindowViewer } from '../../components/FoleonFullWindowViewerProvider.js';
 import styles from './FoleonReaderLayouts.module.css';
 
 // ---------------------------------------------------------------------------
-// Leadership Message reader layout — Phase-04 Wave-01 Prompt-05
+// Leadership Message — Executive Briefing Feature (Prompt 02)
 // ---------------------------------------------------------------------------
-// Lane-owned executive message / letter composition. No longer delegates
-// to the shared compatibility shell. Calm, premium, restrained — strong
-// typography, no outer card border, edge-bleed-ready outer surface.
+// Calm executive access point into Foleon-managed content. Single in-card
+// launch button (`styles.cardLaunch`) with ::after covering `.articleCard`;
+// non-interactive bands use `pointer-events: none` so the overlay remains
+// the hit target. Full article body stays in Foleon — teaser only here.
 //
-// The message card itself is the interactive launch surface for the
-// shared full-window Foleon viewer (Inclusive Components / Heydon
-// Pickering card-launch pattern, identical to Spotlight + Pulse: a real
-// `<button>` wraps the title; a transparent `::after` pseudo-element
-// overlays the entire card to capture clicks). Disabled targets carry
-// `aria-disabled="true"` plus `aria-describedby` to a visible
-// `role="status"` reason; the click handler suppresses activation and
-// surfaces the structured refusal as a DOM marker.
-//
-// `iframeSurface` and `viewModel.mobileGate` are intentionally ignored —
-// Leadership now opens the Foleon document in the shared full-window
-// viewer; no inline iframe path remains for this lane.
-//
-// FoleonContentRecord schema does NOT carry byline / role / portrait
-// fields. The layout shows honest fallbacks when these are absent and
-// never invents executive identity in ready state.
+// `iframeSurface` / `viewModel.mobileGate` ignored — full-window viewer only.
 // ---------------------------------------------------------------------------
+
+const FORBIDDEN_CHIP_FRAGMENTS = [
+  'leadership message reader',
+  'preview layout',
+  'sample',
+  'cadence',
+  'archive group',
+  'executive byline not provided',
+  'not been provided',
+] as const;
+
+function sanitizeChipFragment(raw: string): string | null {
+  const t = raw.trim();
+  if (!t.length) return null;
+  const lower = t.toLowerCase();
+  for (const frag of FORBIDDEN_CHIP_FRAGMENTS) {
+    if (lower.includes(frag)) return null;
+  }
+  return t;
+}
+
+function leadershipLaunchAriaLabel(kind: LeadershipMessageCtaKind, headline: string): string {
+  const h = headline.trim().length > 0 ? headline.trim() : 'Leadership Message';
+  switch (kind) {
+    case 'live':
+      return `Read the leadership message: ${h}`;
+    case 'preview':
+      return `Open leadership message preview: ${h}`;
+    case 'external':
+      return `Open leadership message externally: ${h}`;
+    case 'blocked':
+      return `Message unavailable: ${h}`;
+    default:
+      return `Message unavailable: ${h}`;
+  }
+}
+
+function publishedUrlFromTarget(target: FoleonViewerTarget): string | undefined {
+  if ('url' in target && typeof target.url === 'string') {
+    const u = target.url.trim();
+    return u.length > 0 ? u : undefined;
+  }
+  return undefined;
+}
 
 export function LeadershipMessageReaderLayout(
   props: FoleonReaderLayoutProps,
@@ -52,6 +83,20 @@ export function LeadershipMessageReaderLayout(
   const reasonId = `${target.id}-disabled-reason`;
   const archiveAction = pickArchiveAction(viewModel.actions);
   const message = viewModel.leadershipMessage;
+  const headline = viewModel.title;
+  const teaser =
+    message?.teaser !== undefined && message.teaser.trim().length > 0
+      ? message.teaser.trim()
+      : viewModel.summary?.trim() ?? undefined;
+
+  const ctaKind: LeadershipMessageCtaKind = message?.cta.kind ?? (isPreview ? 'preview' : 'blocked');
+  const primaryLabel =
+    message?.cta.primaryLabel ??
+    (isPreview ? 'Open preview' : isDisabled ? 'Message unavailable' : 'Read the leadership message');
+  const launchAriaLabel = leadershipLaunchAriaLabel(ctaKind, headline);
+
+  const externalPublishedUrl =
+    message?.cta.kind === 'external' ? publishedUrlFromTarget(target) : undefined;
 
   return (
     <div
@@ -60,89 +105,91 @@ export function LeadershipMessageReaderLayout(
       data-foleon-reader-state={viewModel.state}
       data-foleon-layout="leadership-message"
     >
-      <article
-        className={styles.executiveSurface}
-        aria-labelledby={viewModel.titleElementId}
-      >
+      <article className={styles.executiveSurface} aria-labelledby={viewModel.titleElementId}>
         <div
           className={styles.articleCard}
           data-foleon-article-card
           data-foleon-article-lane="leadershipMessage"
           data-foleon-viewer-target-id={target.id}
           data-foleon-article-state={articleState}
+          data-foleon-leadership-briefing="true"
         >
-          <header className={styles.executiveHeader}>
-            <div className={styles.executiveEyebrowRow}>
-              <p className={styles.executiveEyebrow}>{viewModel.eyebrow}</p>
-              <span className={styles.executiveCadence}>Executive update</span>
-              {isPreview && viewModel.previewLabel ? (
-                <span
-                  className={styles.executivePreviewLabel}
-                  aria-label="Preview content"
-                >
-                  {viewModel.previewLabel}
-                </span>
-              ) : null}
-            </div>
-            <h2 className={styles.executiveTitle} id={viewModel.titleElementId}>
-              <CardLaunchButton
-                target={target}
-                reasonId={reasonId}
-                isDisabled={isDisabled}
-              >
-                {viewModel.title}
-              </CardLaunchButton>
-            </h2>
-            {viewModel.summary ? (
-              <p className={styles.executiveBody}>{viewModel.summary}</p>
+          <div className={styles.briefingPassiveBand}>
+            <header className={styles.briefingBriefHeader}>
+              <div className={styles.executiveEyebrowRow}>
+                <p className={styles.executiveEyebrow}>{message?.laneLabel ?? viewModel.eyebrow}</p>
+                <span className={styles.executiveCadence}>{message?.statusLabel ?? 'Executive update'}</span>
+                {isPreview && viewModel.previewLabel ? (
+                  <span
+                    className={styles.executivePreviewLabel}
+                    aria-label="Preview content"
+                  >
+                    {viewModel.previewLabel}
+                  </span>
+                ) : null}
+              </div>
+              <h2 className={styles.executiveTitle} id={viewModel.titleElementId}>
+                {headline}
+              </h2>
+              {teaser ? <p className={styles.briefingTeaser}>{teaser}</p> : null}
+            </header>
+          </div>
+
+          <div className={styles.briefingLaunchTrack}>
+            <CardLaunchButton
+              target={target}
+              reasonId={reasonId}
+              isDisabled={isDisabled}
+              ariaLabel={launchAriaLabel}
+            >
+              <span className={styles.briefingLaunchLabel}>{primaryLabel}</span>
+            </CardLaunchButton>
+          </div>
+
+          <div className={styles.briefingPassiveBand}>
+            <ExecutiveByline message={message} />
+
+            {message?.pullQuote ? (
+              <blockquote className={styles.executivePullQuote}>{message.pullQuote}</blockquote>
             ) : null}
-          </header>
 
-          <ExecutiveByline message={message} />
+            <LeadershipContextChips notes={message?.contextNotes} />
 
-          {message?.pullQuote ? (
-            <blockquote className={styles.executivePullQuote}>
-              {message.pullQuote}
-            </blockquote>
-          ) : null}
-
-          {message?.contextNotes && message.contextNotes.length > 0 ? (
-            <ul
-              className={styles.executiveContextNotes}
-              aria-label="Leadership Message context"
-            >
-              {message.contextNotes.map((note) => (
-                <li key={note.id} className={styles.executiveContextNoteItem}>
-                  <span className={styles.executiveContextNoteLabel}>{note.label}</span>
-                  <span className={styles.executiveContextNoteValue}>{note.value}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          {isDisabled ? (
-            <p
-              id={reasonId}
-              className={styles.disabledReason}
-              role="status"
-              aria-live="polite"
-            >
-              {formatDisabledReason(target.disabledReason)}
-            </p>
-          ) : null}
+            {isDisabled ? (
+              <p
+                id={reasonId}
+                className={styles.briefingDisabledReason}
+                role="status"
+                aria-live="polite"
+              >
+                {formatDisabledReason(target.disabledReason, message?.cta.kind)}
+              </p>
+            ) : null}
+          </div>
         </div>
 
-        {archiveAction || viewModel.archiveNote ? (
+        {archiveAction || viewModel.archiveNote || externalPublishedUrl || message?.cta.secondaryLabel ? (
           <div className={styles.executiveFooter}>
             {archiveAction ? (
               <HbcButton variant="secondary" onClick={archiveAction.onClick}>
                 {archiveAction.label}
               </HbcButton>
             ) : null}
+            {message?.cta.kind === 'external' && message.cta.secondaryLabel ? (
+              <span className={styles.briefingExternalHint}>{message.cta.secondaryLabel}</span>
+            ) : null}
+            {externalPublishedUrl ? (
+              <a
+                className={styles.briefingExternalLink}
+                href={externalPublishedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open published message
+              </a>
+            ) : null}
             {viewModel.archiveNote ? (
-              <span className={styles.executiveArchiveNote}>
-                {viewModel.archiveNote}
-              </span>
+              <span className={styles.executiveArchiveNote}>{viewModel.archiveNote}</span>
             ) : null}
           </div>
         ) : null}
@@ -154,6 +201,31 @@ export function LeadershipMessageReaderLayout(
         ))}
       </article>
     </div>
+  );
+}
+
+function LeadershipContextChips(props: {
+  readonly notes?: readonly { readonly id: string; readonly label: string; readonly value: string }[];
+}): React.JSX.Element | null {
+  const { notes } = props;
+  if (!notes || notes.length === 0) return null;
+  const chips: React.ReactNode[] = [];
+  for (const note of notes) {
+    const lab = sanitizeChipFragment(note.label);
+    const val = sanitizeChipFragment(note.value);
+    if (!lab && !val) continue;
+    chips.push(
+      <li key={note.id} className={styles.briefingChip}>
+        {lab ? <span className={styles.briefingChipLabel}>{lab}</span> : null}
+        {val ? <span className={styles.briefingChipValue}>{val}</span> : null}
+      </li>,
+    );
+  }
+  if (chips.length === 0) return null;
+  return (
+    <ul className={styles.briefingChipList} aria-label="Leadership message details">
+      {chips}
+    </ul>
   );
 }
 
@@ -175,12 +247,8 @@ function ExecutiveByline(props: {
   }
   return (
     <div className={styles.executiveBylineRow}>
-      {hasByline ? (
-        <p className={styles.executiveByline}>{message.byline}</p>
-      ) : null}
-      {hasRole ? (
-        <p className={styles.executiveRole}>· {message.role}</p>
-      ) : null}
+      {hasByline ? <p className={styles.executiveByline}>{message.byline}</p> : null}
+      {hasRole ? <p className={styles.executiveRole}>· {message.role}</p> : null}
     </div>
   );
 }
@@ -189,11 +257,12 @@ interface CardLaunchButtonProps {
   readonly target: NonNullable<FoleonReaderViewModel['primaryArticle']>['target'];
   readonly reasonId: string;
   readonly isDisabled: boolean;
+  readonly ariaLabel: string;
   readonly children: React.ReactNode;
 }
 
 function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
-  const { target, reasonId, isDisabled, children } = props;
+  const { target, reasonId, isDisabled, ariaLabel, children } = props;
   const viewer = useFoleonFullWindowViewer();
 
   const handleClick = React.useCallback(
@@ -222,6 +291,7 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
     <button
       type="button"
       className={styles.cardLaunch}
+      aria-label={ariaLabel}
       aria-disabled={isDisabled || undefined}
       aria-describedby={isDisabled ? reasonId : undefined}
       onClick={handleClick}
@@ -231,7 +301,13 @@ function CardLaunchButton(props: CardLaunchButtonProps): React.JSX.Element {
   );
 }
 
-function formatDisabledReason(reason: FoleonViewerDisabledReason | undefined): string {
+function formatDisabledReason(
+  reason: FoleonViewerDisabledReason | undefined,
+  ctaKind: LeadershipMessageCtaKind | undefined,
+): string {
+  if (ctaKind === 'external' && reason === 'requires-external-open') {
+    return 'This message opens outside the inline viewer. Use the published link below when available.';
+  }
   switch (reason) {
     case 'preview-only':
       return 'Preview only — a live Leadership Message will open here when published.';
@@ -240,7 +316,7 @@ function formatDisabledReason(reason: FoleonViewerDisabledReason | undefined): s
     case 'embed-not-allowed':
       return 'This Leadership Message disallows in-line embedding by governance policy.';
     case 'requires-external-open':
-      return 'This Leadership Message must be opened in a new tab. Use the published link if available.';
+      return 'This Leadership Message must be opened from the published link.';
     default:
       return 'This Leadership Message is not available in the in-line viewer.';
   }

@@ -80,12 +80,33 @@ function buildReadyViewModel(
 
 const TEST_POLICY = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
 
+/** Matches `leadershipLaunchAriaLabel` in LeadershipMessageReaderLayout.tsx */
+function leadershipLaunchAccessibleName(
+  headline: string,
+  kind: 'live' | 'preview' | 'external' | 'blocked',
+): string {
+  const h = headline;
+  switch (kind) {
+    case 'live':
+      return `Read the leadership message: ${h}`;
+    case 'preview':
+      return `Open leadership message preview: ${h}`;
+    case 'external':
+      return `Open leadership message externally: ${h}`;
+    case 'blocked':
+      return `Message unavailable: ${h}`;
+  }
+}
+
 describe('LeadershipMessageReaderLayout — lane-owned executive composition', () => {
   function assertLeadershipUiClean(container: HTMLElement): void {
     const text = container.textContent ?? '';
     expect(text).not.toContain('Executive byline not provided.');
-    expect(text).not.toContain('Leadership Message reader');
+    expect(text).not.toMatch(/Leadership Message Reader/i);
     expect(text).not.toContain('Preview layout');
+    expect(text).not.toContain('Cadence');
+    expect(text).not.toContain('Archive group');
+    expect(text.toLowerCase()).not.toContain('not been provided');
     expect(text.toLowerCase()).not.toMatch(/sample executive|sample role|sample pull quote|sample audience/i);
   }
 
@@ -193,7 +214,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(rendered.container.querySelector('iframe')).toBeNull();
   });
 
-  it('renders the executive card with stable interaction markers and uses a card-launch button bound to the title', () => {
+  it('renders the executive card with stable interaction markers and a visible CTA with intentional accessible name', () => {
     const viewModel = buildReadyViewModel();
     const { container } = render(
       <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />,
@@ -203,9 +224,12 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(card?.getAttribute('data-foleon-article-lane')).toBe('leadershipMessage');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('enabled');
     expect(card?.getAttribute('data-foleon-viewer-target-id')).toMatch(/^leadership-message-active-/);
-    const launch = screen.getByRole('button', { name: viewModel.title });
+    const launch = screen.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'live'),
+    });
     expect(launch).toBeTruthy();
     expect(launch.getAttribute('aria-disabled')).toBeNull();
+    expect(launch.getAttribute('aria-label')).toBe(leadershipLaunchAccessibleName(viewModel.title, 'live'));
   });
 
   it('preview state card is actionable without disabled semantics', () => {
@@ -215,7 +239,9 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
-    const launch = screen.getByRole('button', { name: viewModel.title });
+    const launch = screen.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'preview'),
+    });
     expect(launch.getAttribute('aria-disabled')).toBeNull();
     expect(launch.getAttribute('aria-describedby')).toBeNull();
   });
@@ -229,7 +255,9 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
-    const launch = screen.getByRole('button', { name: viewModel.title });
+    const launch = screen.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'preview'),
+    });
     expect(launch.getAttribute('aria-disabled')).toBeNull();
     expect(launch.getAttribute('aria-describedby')).toBeNull();
     fireEvent.click(launch);
@@ -247,7 +275,9 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
         <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const launch = rendered.getByRole('button', { name: viewModel.title });
+    const launch = rendered.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'preview'),
+    });
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
     const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
@@ -263,30 +293,47 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     );
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
-    const launch = screen.getByRole('button', { name: viewModel.title });
+    const launch = screen.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'blocked'),
+    });
     expect(launch.getAttribute('aria-disabled')).toBe('true');
     fireEvent.click(launch);
     expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
   });
 
   it.each([
-    ['no-embed-url', { embedUrl: undefined }],
-    ['requires-external-open', { requiresExternalOpen: true }],
-  ] as const)('records %s refusal for ready disabled records', (reason, overrides) => {
-    const viewModel = buildReadyViewModel(overrides);
-    const { container } = render(
-      <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-    const card = container.querySelector('[data-foleon-article-card]');
-    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
-    const launch = screen.getByRole('button', { name: viewModel.title });
-    expect(launch.getAttribute('aria-disabled')).toBe('true');
-    const reasonId = launch.getAttribute('aria-describedby');
-    expect(reasonId).toBeTruthy();
-    expect(container.querySelector(`#${reasonId}`)).not.toBeNull();
-    fireEvent.click(launch);
-    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe(reason);
-    expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).toBeNull();
+    ['no-embed-url', { embedUrl: undefined }, 'blocked' as const],
+    ['requires-external-open', { requiresExternalOpen: true }, 'external' as const],
+  ] as const)(
+    'records %s refusal for ready disabled records',
+    (reason, overrides, ariaKind) => {
+      const viewModel = buildReadyViewModel(overrides);
+      const { container } = render(
+        <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />,
+      );
+      const card = container.querySelector('[data-foleon-article-card]');
+      expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
+      const launch = screen.getByRole('button', {
+        name: leadershipLaunchAccessibleName(viewModel.title, ariaKind),
+      });
+      expect(launch.getAttribute('aria-disabled')).toBe('true');
+      const reasonId = launch.getAttribute('aria-describedby');
+      expect(reasonId).toBeTruthy();
+      expect(container.querySelector(`#${reasonId}`)).not.toBeNull();
+      fireEvent.click(launch);
+      expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe(reason);
+      expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).toBeNull();
+    },
+  );
+
+  it('renders an outside-card published link when external-only and URL exists on target', () => {
+    const viewModel = buildReadyViewModel({ requiresExternalOpen: true });
+    const { container } = render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    expect(viewModel.leadershipMessage?.cta.kind).toBe('external');
+    const link = container.querySelector('a[href="https://viewer.us.foleon.com/published/leadership"]');
+    expect(link).not.toBeNull();
+    expect(link?.textContent).toContain('Open published message');
+    expect(container.querySelector('[data-foleon-article-card]')?.contains(link)).toBe(false);
   });
 
   it('card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {
@@ -310,7 +357,9 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
         <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const launch = rendered.getByRole('button', { name: viewModel.title });
+    const launch = rendered.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'live'),
+    });
     fireEvent.click(launch);
     expect(screen.queryByRole('dialog')).not.toBeNull();
   });
@@ -322,7 +371,9 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
         <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const launch = rendered.getByRole('button', { name: viewModel.title });
+    const launch = rendered.getByRole('button', {
+      name: leadershipLaunchAccessibleName(viewModel.title, 'live'),
+    });
     fireEvent.keyDown(launch, { key: 'Enter' });
     fireEvent.click(launch);
     expect(screen.queryByRole('dialog')).not.toBeNull();

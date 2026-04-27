@@ -399,7 +399,7 @@ describe('FoleonReaderModule', () => {
 
     const launch = within(
       container.querySelector('[data-foleon-article-card]') as HTMLElement,
-    ).getByRole('button', { name: record.title });
+    ).getByRole('button', { name: `Read the leadership message: ${record.title}` });
     fireEvent.click(launch);
 
     // Viewer telemetry fires (distinct from inline iframe lifecycle).
@@ -697,7 +697,7 @@ describe('FoleonReaderModule', () => {
     // ----- Leadership viewer launch -----
     const leadershipCard = within(
       leadershipWrapper.querySelector('[data-foleon-article-card]') as HTMLElement,
-    ).getByRole('button', { name: 'A Quarterly Leadership Note' });
+    ).getByRole('button', { name: 'Read the leadership message: A Quarterly Leadership Note' });
     fireEvent.click(leadershipCard);
     dialog = await screen.findByRole('dialog');
     expect(dialog.getAttribute('data-foleon-viewer-lane')).toBe('leadershipMessage');
