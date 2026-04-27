@@ -448,7 +448,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(leadership).not.toBeNull();
 
     // Pulse: lane-owned briefing layout (Prompt-04). No legacy markers.
-    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-edition-launcher');
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-editorial-board');
     expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
 

@@ -1,7 +1,7 @@
 import type { FoleonContentRecord, FoleonReaderKey } from '../types/foleon-content.types.js';
 import type { FoleonReaderResolution } from '../services/FoleonReaderContentService.js';
 import type { FoleonReaderModuleConfig } from './readerConfigs.js';
-import type { FoleonArticleCardViewModel } from './FoleonViewerTypes.js';
+import type { FoleonArticleCardViewModel, FoleonViewerTarget } from './FoleonViewerTypes.js';
 import {
   createPreviewFoleonViewerTarget,
   createReadyFoleonViewerTarget,
@@ -169,6 +169,25 @@ export interface FoleonReaderPulseMedia {
   readonly accessibleLabel?: string;
 }
 
+export interface FoleonReaderPulseStoryCard {
+  readonly id: string;
+  readonly title: string;
+  readonly summary?: string;
+  readonly category?: string;
+  readonly dateline?: string;
+  readonly imageUrl?: string;
+  readonly imageAlt?: string;
+  readonly isPreview?: boolean;
+  readonly isSample?: boolean;
+  readonly target: FoleonViewerTarget;
+}
+
+export interface FoleonReaderPulseBoardModel {
+  readonly featuredStory: FoleonReaderPulseStoryCard;
+  readonly supportingStories: readonly FoleonReaderPulseStoryCard[];
+  readonly supportingEmptyNote?: string;
+}
+
 /**
  * Leadership Message executive composition. Populated only when
  * `lane === 'leadershipMessage'`. Ready-state values are sourced
@@ -237,6 +256,8 @@ export interface FoleonReaderViewModel {
   readonly pulseTimeline?: readonly FoleonReaderPulseTimelineEntry[];
   /** Company Pulse only. Preview placeholder or ready record-backed media. */
   readonly pulseMedia?: FoleonReaderPulseMedia;
+  /** Company Pulse only. Featured story plus supporting board cards. */
+  readonly pulseBoard?: FoleonReaderPulseBoardModel;
   /** Leadership Message only. Spotlight + Pulse leave this `undefined`. */
   readonly leadershipMessage?: FoleonReaderLeadershipMessage;
   /**
@@ -362,7 +383,7 @@ const LANE_PREVIEW_COPY: Readonly<Record<FoleonReaderLayoutKey, LanePreviewCopy>
   companyPulse: {
     title: 'Company Pulse',
     description:
-      'Preview how HB Central introduces the current Company Pulse edition before a live Foleon publication is selected.',
+      'Preview — no live Company Pulse stories selected.',
     statusLabel: 'Current edition',
     cadenceLabel: 'Current edition',
     featureTitle: 'Company update edition placeholder',
@@ -487,6 +508,38 @@ export function createPreviewFoleonReaderViewModel(
           isPlaceholder: true,
         }
       : undefined;
+  const previewTarget = createPreviewFoleonViewerTarget(config);
+  const pulseBoard: FoleonReaderPulseBoardModel | undefined =
+    lane === 'companyPulse'
+      ? {
+          featuredStory: {
+            id: 'pulse-preview-featured',
+            title: 'Top story: Companywide operations and recognition highlights',
+            summary:
+              'Sample story — this preview shows the featured Company Pulse headline area before live stories are selected.',
+            category: 'Top story',
+            dateline: 'Sample story',
+            imageUrl: undefined,
+            imageAlt: undefined,
+            isPreview: true,
+            isSample: true,
+            target: previewTarget,
+          },
+          supportingStories: PULSE_PREVIEW_DIGEST.map((item, i) => ({
+            id: `pulse-preview-supporting-${i}`,
+            title: item.title,
+            summary: item.summary,
+            category: item.category,
+            dateline: item.dateline,
+            imageUrl: undefined,
+            imageAlt: undefined,
+            isPreview: true,
+            isSample: true,
+            target: previewTarget,
+          })),
+          supportingEmptyNote: undefined,
+        }
+      : undefined;
 
   return {
     lane,
@@ -538,6 +591,7 @@ export function createPreviewFoleonReaderViewModel(
     categoryChips,
     pulseTimeline,
     pulseMedia,
+    pulseBoard,
     leadershipMessage,
     projectMedia,
     projectLabel: undefined,
@@ -793,6 +847,32 @@ export function createReadyFoleonReaderViewModel(
           isPlaceholder: false,
         }
       : undefined;
+  const pulseBoard: FoleonReaderPulseBoardModel | undefined =
+    lane === 'companyPulse'
+      ? {
+          featuredStory: {
+            id: `${config.readerKey}-featured-${record.id}`,
+            title: record.title,
+            summary:
+              record.summary && record.summary.trim().length > 0
+                ? record.summary
+                : 'Open story to read the latest Company Pulse update in Foleon.',
+            category: 'Top story',
+            dateline: formatFreshnessDate(record.lastEditorialUpdate ?? record.publishedOn) ?? undefined,
+            imageUrl: (record.heroImageUrl ?? record.thumbnailUrl) || undefined,
+            imageAlt: pulseMedia?.accessibleLabel,
+            isPreview: false,
+            isSample: false,
+            target: createReadyFoleonViewerTarget({
+              config,
+              record,
+              embedUrl: resolution.embedUrl,
+            }),
+          },
+          supportingStories: [],
+          supportingEmptyNote: 'Additional Company Pulse stories will appear here when more Foleon items are available.',
+        }
+      : undefined;
 
   const freshnessFormatted = formatFreshnessDate(pickFreshnessRaw(lane, record));
   const freshnessValue = freshnessFormatted ?? labels.freshnessFallback;
@@ -862,6 +942,7 @@ export function createReadyFoleonReaderViewModel(
     categoryChips,
     pulseTimeline,
     pulseMedia,
+    pulseBoard,
     leadershipMessage,
     projectMedia,
     projectLabel,

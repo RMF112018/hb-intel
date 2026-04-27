@@ -197,7 +197,7 @@ describe('FoleonReaderModule', () => {
     // lane's new briefing layout.
     await screen.findByLabelText('Company Pulse coverage');
     expect(container.querySelector('[data-foleon-reader-layout="company-pulse"]')).not.toBeNull();
-    expect(container.querySelector('[data-foleon-layout="company-pulse-edition-launcher"]')).not.toBeNull();
+    expect(container.querySelector('[data-foleon-layout="company-pulse-editorial-board"]')).not.toBeNull();
     expect(container.querySelector('[data-foleon-reader-state="preview"]')).not.toBeNull();
     expect(container.querySelector('[data-preview-tone]')).toBeNull();
     expect(container.querySelector('[data-foleon-preview-route]')).toBeNull();
@@ -554,7 +554,7 @@ describe('FoleonReaderModule', () => {
     expect(spotlight?.querySelector('[data-foleon-preview-route]')).toBeNull();
 
     // Company Pulse: lane-owned briefing layout, no legacy markers.
-    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-edition-launcher');
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-editorial-board');
     expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
     expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
 

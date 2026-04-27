@@ -15,9 +15,6 @@ import type { FoleonContentRecord } from '../../types/foleon-content.types.js';
 import type { FoleonReaderResolution } from '../../services/FoleonReaderContentService.js';
 
 beforeAll(() => {
-  // HbcButton inspects pointer-coarseness via window.matchMedia. JSDOM does
-  // not provide matchMedia by default; the foleon-reader package does not
-  // ship a global test-setup, so stub it here for this suite.
   if (typeof window !== 'undefined' && !window.matchMedia) {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -80,192 +77,82 @@ function buildReadyViewModel(
   });
 }
 
-describe('CompanyPulseReaderLayout — edition launcher composition', () => {
-  it('emits the new data-foleon-layout marker alongside the registry markers', () => {
+describe('CompanyPulseReaderLayout — editorial board composition', () => {
+  it('emits editorial-board marker with stable lane markers', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-
-    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-edition-launcher"]');
+    const { container } = render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-editorial-board"]');
     expect(wrapper).not.toBeNull();
     expect(wrapper?.getAttribute('data-foleon-reader-layout')).toBe('company-pulse');
     expect(wrapper?.getAttribute('data-foleon-reader-lane')).toBe('companyPulse');
     expect(wrapper?.getAttribute('data-foleon-reader-state')).toBe('preview');
   });
 
-  it('does not emit Project Spotlight or Leadership Message layout markers', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-
-    expect(container.querySelector('[data-foleon-reader-layout="project-spotlight"]')).toBeNull();
-    expect(container.querySelector('[data-foleon-reader-layout="leadership-message"]')).toBeNull();
-    expect(container.querySelector('[data-foleon-layout="project-spotlight-feature"]')).toBeNull();
+  it('preview demonstrates featured + four sample supporting cards', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    expect(screen.getByText(/Latest from Company Pulse \(Preview\)/)).toBeTruthy();
+    expect(screen.getByText(/Sample layout showing a featured story and supporting Company Pulse story board/i)).toBeTruthy();
+    expect(container.querySelectorAll('[data-foleon-pulse-story-state="preview-sample"]').length).toBe(4);
   });
 
-  it('does not render the legacy three-card support skeleton or tone markers', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-
-    expect(container.querySelector('[aria-label$="supporting preview placeholders"]')).toBeNull();
-    expect(container.querySelector('[aria-label="Preview status"]')).toBeNull();
-    expect(container.querySelector('[aria-label="Preview metadata zones"]')).toBeNull();
-    expect(container.querySelector('[data-preview-tone]')).toBeNull();
-    expect(container.querySelector('[data-foleon-preview-route]')).toBeNull();
+  it('preview supporting cards are clearly sample stories', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    expect(screen.getAllByText(/Sample story/i).length).toBeGreaterThan(1);
   });
 
-  it('preview and ready states share the same data-foleon-layout marker; only the state attribute differs', () => {
-    const previewVm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const previewRender = render(
-      <CompanyPulseReaderLayout viewModel={previewVm} iframeSurface={null} />,
-    );
-    const previewWrapper = previewRender.container.querySelector(
-      '[data-foleon-layout="company-pulse-edition-launcher"]',
-    );
-    expect(previewWrapper?.getAttribute('data-foleon-reader-state')).toBe('preview');
-    cleanup();
-
-    const readyVm = buildReadyViewModel();
-    const readyRender = render(
-      <CompanyPulseReaderLayout viewModel={readyVm} iframeSurface={null} />,
-    );
-    const readyWrapper = readyRender.container.querySelector(
-      '[data-foleon-layout="company-pulse-edition-launcher"]',
-    );
-    expect(readyWrapper).not.toBeNull();
-    expect(readyWrapper?.getAttribute('data-foleon-reader-state')).toBe('ready');
+  it('ready renders one real featured card and honest supporting-board empty state', () => {
+    const vm = buildReadyViewModel();
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const featured = container.querySelector('[data-foleon-article-card]');
+    expect(featured).not.toBeNull();
+    expect(featured?.textContent ?? '').toContain('Companywide April Brief');
+    const emptyBoard = container.querySelector('[data-foleon-pulse-board-state="empty"]');
+    expect(emptyBoard).not.toBeNull();
+    expect(emptyBoard?.textContent ?? '').toMatch(/Additional Company Pulse stories/i);
+    expect(container.querySelectorAll('[data-foleon-pulse-story-state="live"]').length).toBe(0);
   });
 
-  it('keeps an honest visible preview label in preview state', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
-    expect(screen.getByText('Preview')).toBeTruthy();
-  });
-
-  it('renders non-interactive publication coverage cues, not a digest list', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-
-    const coverage = container.querySelector('[aria-label="Company Pulse coverage"]');
-    expect(coverage).not.toBeNull();
-    const text = coverage?.textContent ?? '';
-    expect(container.querySelector('[data-foleon-pulse-digest-state="populated"]')).toBeNull();
-    expect(text).toContain('News');
-    expect(text).toContain('Events');
-    expect(text).toContain('Recognition');
-    expect(text).toContain('Operations');
-  });
-
-  it('does not render digest or timeline structures in ready mode', () => {
-    const viewModel = buildReadyViewModel();
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-
+  it('does not render digest/timeline DOM in active layout', () => {
+    const vm = buildReadyViewModel();
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
     expect(container.querySelector('[data-foleon-pulse-digest-state="populated"]')).toBeNull();
     expect(container.querySelector('[data-foleon-pulse-digest-state="empty"]')).toBeNull();
     expect(container.querySelector('[aria-label="Pulse timeline"]')).toBeNull();
   });
 
-  it('renders the edition launcher card derived from FoleonContentRecord (no invented data)', () => {
-    const viewModel = buildReadyViewModel({
-      title: 'Companywide April Brief',
-      summary: 'Operational, recognition, and event highlights for the week of April 14.',
-    });
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-
-    const lead = container.querySelector('[aria-label="Current Company Pulse edition"]');
-    expect(lead).not.toBeNull();
-    expect(lead?.textContent).toContain('Companywide April Brief');
-    expect(lead?.textContent).toContain('Operational, recognition, and event highlights');
-  });
-
-  it('uses an honest publication fallback when the record carries no summary', () => {
-    const viewModel = buildReadyViewModel({ summary: undefined });
-    render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
-    expect(
-      screen.getByText(/full Company Pulse publication opens in the governed Foleon viewer/i),
-    ).toBeTruthy();
-  });
-
-  it('Phase-04 Wave-01 Prompt-04B: never renders an inline iframe, even when iframeSurface is provided or visible', () => {
-    const viewModel = buildReadyViewModel();
+  it('keeps no inline iframe posture even when iframeSurface is passed', () => {
+    const vm = buildReadyViewModel();
     const rendered = render(
       <CompanyPulseReaderLayout
-        viewModel={viewModel}
+        viewModel={vm}
         iframeSurface={<iframe title="should-not-render-inline" />}
       />,
     );
     expect(rendered.container.querySelector('iframe')).toBeNull();
   });
 
-  it('renders one dominant launcher card with stable interaction markers', () => {
-    const viewModel = buildReadyViewModel();
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
+  it('featured card preserves stable interaction markers', () => {
+    const vm = buildReadyViewModel();
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card).not.toBeNull();
     expect(card?.getAttribute('data-foleon-article-lane')).toBe('companyPulse');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('enabled');
     expect(card?.getAttribute('data-foleon-viewer-target-id')).toMatch(/^company-pulse-active-/);
-    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
-    expect(launch).toBeTruthy();
-    expect(launch.getAttribute('aria-disabled')).toBeNull();
-    expect(card?.textContent ?? '').toContain('Open Company Pulse');
+    expect(card?.textContent ?? '').toContain('Open story');
   });
 
-  it('preview state lead card is actionable without disabled semantics', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-    const card = container.querySelector('[data-foleon-article-card]');
-    expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
-    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
-    expect(launch.getAttribute('aria-disabled')).toBeNull();
-    expect(launch.getAttribute('aria-describedby')).toBeNull();
-  });
-
-  it('clicking a preview lead opens the local preview viewer without a refusal marker', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+  it('featured preview card opens local preview viewer', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
-    const { container } = render(
+    render(
       <FoleonFullWindowViewerProvider originPolicy={policy}>
-        <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
+        <CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const card = container.querySelector('[data-foleon-article-card]');
-    expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
-    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
-    expect(launch.getAttribute('aria-disabled')).toBeNull();
-    expect(launch.getAttribute('aria-describedby')).toBeNull();
-    fireEvent.click(launch);
-    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBeNull();
-    const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
-    expect(dialog).not.toBeNull();
-    expect(dialog?.getAttribute('data-foleon-viewer-source')).toBe('preview');
-    expect(dialog?.querySelector('iframe')).toBeNull();
-  });
-
-  it('keyboard activation on a preview lead opens the local preview viewer', () => {
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
-    const rendered = render(
-      <FoleonFullWindowViewerProvider originPolicy={policy}>
-        <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
-      </FoleonFullWindowViewerProvider>,
-    );
-    const launch = rendered.getByRole('button', { name: viewModel.primaryArticle!.title });
-    fireEvent.keyDown(launch, { key: 'Enter' });
+    const launch = screen.getByRole('button', { name: vm.pulseBoard!.featuredStory.title });
     fireEvent.click(launch);
     const dialog = document.querySelector('[data-foleon-full-window-viewer="active"]');
     expect(dialog).not.toBeNull();
@@ -273,61 +160,27 @@ describe('CompanyPulseReaderLayout — edition launcher composition', () => {
     expect(dialog?.querySelector('iframe')).toBeNull();
   });
 
-  it('Phase-04 Wave-01 Prompt-04C: card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {
-    const viewModel = buildReadyViewModel();
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-    const card = container.querySelector('[data-foleon-article-card]') as HTMLElement;
-    expect(card).not.toBeNull();
-    const interactiveInsideCard = card.querySelectorAll(
-      'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    expect(interactiveInsideCard.length).toBe(1);
-    expect(interactiveInsideCard[0].tagName).toBe('BUTTON');
-  });
-
-  it('Phase-04 Wave-01 Prompt-04C: keyboard activation on the card-launch button opens the viewer when wrapped in the provider', () => {
-    const viewModel = buildReadyViewModel();
+  it('featured ready card opens viewer when wrapped in provider', () => {
+    const vm = buildReadyViewModel();
     const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
-
-    const rendered = render(
+    render(
       <FoleonFullWindowViewerProvider originPolicy={policy}>
-        <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
+        <CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />
       </FoleonFullWindowViewerProvider>,
     );
-    const launch = rendered.getByRole('button', { name: viewModel.primaryArticle!.title });
-    // Keyboard activation on a native button — fire keyDown then click,
-    // matching the browser's synthesized Enter/Space → click flow.
-    fireEvent.keyDown(launch, { key: 'Enter' });
+    const launch = screen.getByRole('button', { name: vm.pulseBoard!.featuredStory.title });
     fireEvent.click(launch);
     expect(screen.queryByRole('dialog')).not.toBeNull();
   });
 
-  it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {
-    const viewModel = buildReadyViewModel({ allowEmbed: false });
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-    const card = container.querySelector('[data-foleon-article-card]');
-    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
-    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
-    expect(launch.getAttribute('aria-disabled')).toBe('true');
-    fireEvent.click(launch);
-    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('embed-not-allowed');
-  });
-
   it.each([
+    ['embed-not-allowed', { allowEmbed: false }],
     ['no-embed-url', { embedUrl: undefined }],
     ['requires-external-open', { requiresExternalOpen: true }],
-  ] as const)('records %s refusal for ready disabled records', (reason, overrides) => {
-    const viewModel = buildReadyViewModel(overrides);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
-    );
-    const card = container.querySelector('[data-foleon-article-card]');
-    expect(card?.getAttribute('data-foleon-article-state')).toBe('disabled');
-    const launch = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
+  ] as const)('disabled featured card records %s refusal and does not open viewer', (reason, overrides) => {
+    const vm = buildReadyViewModel(overrides);
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const launch = screen.getByRole('button', { name: vm.pulseBoard!.featuredStory.title });
     expect(launch.getAttribute('aria-disabled')).toBe('true');
     const reasonId = launch.getAttribute('aria-describedby');
     expect(reasonId).toBeTruthy();
@@ -337,23 +190,28 @@ describe('CompanyPulseReaderLayout — edition launcher composition', () => {
     expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).toBeNull();
   });
 
-  it('outer wrapper is edge-bleed-ready (no inline margin-inline overrides on the layout root)', () => {
-    // The Prompt-01 shell-slot edge contract drives bleed at the slot
-    // wrapper above this layout. The layout root must not introduce its
-    // own competing margin-inline that would interfere with that contract.
-    const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    const { container } = render(
-      <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
+  it('featured card has exactly one interactive control', () => {
+    const vm = buildReadyViewModel();
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const card = container.querySelector('[data-foleon-article-card]') as HTMLElement;
+    const interactiveInsideCard = card.querySelectorAll(
+      'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
-    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-edition-launcher"]') as HTMLElement | null;
+    expect(interactiveInsideCard.length).toBe(1);
+    expect(interactiveInsideCard[0].tagName).toBe('BUTTON');
+  });
+
+  it('outer wrapper remains edge-bleed-ready', () => {
+    const vm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
+    const { container } = render(<CompanyPulseReaderLayout viewModel={vm} iframeSurface={null} />);
+    const wrapper = container.querySelector('[data-foleon-layout="company-pulse-editorial-board"]') as HTMLElement | null;
     expect(wrapper).not.toBeNull();
-    // No inline `margin-inline` / `margin-left` / `margin-right` style applied directly to the wrapper.
     expect(wrapper?.style.marginInline).toBe('');
     expect(wrapper?.style.marginLeft).toBe('');
     expect(wrapper?.style.marginRight).toBe('');
   });
 
-  it('does not interfere with sibling lanes — Spotlight emits its feature marker and Leadership stays on the compatibility shell', () => {
+  it('does not interfere with sibling lane markers', () => {
     const spotlightVm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     const leadershipVm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
     const pulseVm = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
@@ -365,22 +223,11 @@ describe('CompanyPulseReaderLayout — edition launcher composition', () => {
       </>,
     );
 
-    // Per-lane scoping — assert by lane wrapper, not by global counts.
-    // The Prompt-02 lane marker and the Prompt-03/04 layout marker live on
-    // the SAME wrapper element, so we check the wrapper's own attributes
-    // and only descend for tone/preview markers (which the compatibility
-    // shell renders inside the wrapper).
     const spotlight = container.querySelector('[data-foleon-reader-layout="project-spotlight"]');
     const pulse = container.querySelector('[data-foleon-reader-layout="company-pulse"]');
     const leadership = container.querySelector('[data-foleon-reader-layout="leadership-message"]');
     expect(spotlight?.getAttribute('data-foleon-layout')).toBe('project-spotlight-feature');
-    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-edition-launcher');
-    // Leadership (Prompt-05): lane-owned executive layout. No legacy markers.
+    expect(pulse?.getAttribute('data-foleon-layout')).toBe('company-pulse-editorial-board');
     expect(leadership?.getAttribute('data-foleon-layout')).toBe('leadership-message');
-    expect(leadership?.querySelector('[data-preview-tone]')).toBeNull();
-    expect(leadership?.querySelector('[data-foleon-preview-route]')).toBeNull();
-    // Pulse no longer emits the legacy compatibility-shell markers.
-    expect(pulse?.querySelector('[data-preview-tone]')).toBeNull();
-    expect(pulse?.querySelector('[data-foleon-preview-route]')).toBeNull();
   });
 });

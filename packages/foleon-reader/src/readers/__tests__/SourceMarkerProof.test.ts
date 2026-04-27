@@ -53,7 +53,7 @@ describe('repo-source marker proof — foleon-reader package', () => {
   // Required Prompt-06 lane / layout identity strings.
   it.each([
     'project-spotlight-feature',
-    'company-pulse-edition-launcher',
+    'company-pulse-editorial-board',
     'leadership-message',
     'data-foleon-reader-layout',
     'data-foleon-layout',
