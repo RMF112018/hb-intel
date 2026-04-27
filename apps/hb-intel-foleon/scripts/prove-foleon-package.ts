@@ -315,8 +315,8 @@ function main(): void {
     ),
     check(
       'Manager toolbox entry routes to manage and is visible',
-      byTitle.get('HB Intel Foleon Manager')?.foleonRoute === 'manage' &&
-        byTitle.get('HB Intel Foleon Manager')?.hiddenFromToolbox === false,
+      byTitle.get('HB Intel Foleon Feed Manager')?.foleonRoute === 'manage' &&
+        byTitle.get('HB Intel Foleon Feed Manager')?.hiddenFromToolbox === false,
     ),
     check(
       'toolbox entries include safe Foleon governance defaults',

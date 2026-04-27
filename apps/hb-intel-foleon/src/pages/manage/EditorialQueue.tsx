@@ -1,9 +1,20 @@
+import { HbcButton } from '@hbc/ui-kit/homepage';
 import type {
   EditorialQueueFilterId,
   EditorialQueueFilterOption,
   EditorialQueueRow,
 } from './editorialQueueViewModel.js';
 import shell from './manageShell.module.css';
+
+export interface EditorialQueueEmptyState {
+  readonly heading: string;
+  readonly body: string;
+  readonly action?: {
+    readonly id: string;
+    readonly label: string;
+    readonly onClick: () => void;
+  };
+}
 
 export interface EditorialQueueProps {
   readonly rows: ReadonlyArray<EditorialQueueRow>;
@@ -12,6 +23,7 @@ export interface EditorialQueueProps {
   readonly onChangeFilter: (filter: EditorialQueueFilterId) => void;
   readonly selectedRowId: string | null;
   readonly onSelectRow: (rowId: string) => void;
+  readonly emptyContentState?: EditorialQueueEmptyState;
 }
 
 const COLUMNS: ReadonlyArray<{ readonly id: string; readonly label: string }> = [
@@ -65,8 +77,32 @@ export function EditorialQueue(props: EditorialQueueProps): React.ReactNode {
           );
         })}
       </div>
-      {props.rows.length === 0 ? (
-        <p className={shell.editorialQueueEmpty} role="status">
+      {props.rows.length === 0 && props.emptyContentState ? (
+        <section
+          className={shell.editorialQueueEmptyState}
+          role="status"
+          aria-label="Editorial Queue empty"
+          data-editorial-queue-empty="content"
+        >
+          <h4 className={shell.editorialQueueEmptyHeading}>{props.emptyContentState.heading}</h4>
+          <p className={shell.editorialQueueEmptyBody}>{props.emptyContentState.body}</p>
+          {props.emptyContentState.action ? (
+            <span
+              className={shell.editorialQueueEmptyAction}
+              data-editorial-queue-empty-action={props.emptyContentState.action.id}
+            >
+              <HbcButton variant="primary" onClick={props.emptyContentState.action.onClick}>
+                {props.emptyContentState.action.label}
+              </HbcButton>
+            </span>
+          ) : null}
+        </section>
+      ) : props.rows.length === 0 ? (
+        <p
+          className={shell.editorialQueueEmpty}
+          role="status"
+          data-editorial-queue-empty="filter"
+        >
           No items match this filter.
         </p>
       ) : (

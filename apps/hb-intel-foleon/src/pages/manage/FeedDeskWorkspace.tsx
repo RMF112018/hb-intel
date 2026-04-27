@@ -7,7 +7,7 @@ import type {
 } from '../../types/foleon-management.types.js';
 import { FeedSetupCallout } from './FeedSetupCallout.js';
 import { FeedSlotsSummary } from './FeedSlotsSummary.js';
-import { EditorialQueue } from './EditorialQueue.js';
+import { EditorialQueue, type EditorialQueueEmptyState } from './EditorialQueue.js';
 import { FeedInspectorPanel } from './FeedInspectorPanel.js';
 import {
   buildFeedSetupCalloutModel,
@@ -122,6 +122,29 @@ export function FeedDeskWorkspace(props: FeedDeskWorkspaceProps): React.ReactNod
     }
   };
 
+  const queueEmptyContentState: EditorialQueueEmptyState | undefined =
+    props.content.length === 0
+      ? feedDeskState === 'token-degraded' || feedDeskState === 'sync-blocked'
+        ? {
+            heading: 'No Foleon content is available yet.',
+            body: 'Resolve sync readiness to import Foleon content. Open admin diagnostics to see what needs attention.',
+            action: {
+              id: 'open-admin-diagnostics',
+              label: 'Open admin diagnostics',
+              onClick: props.onOpenAdminDiagnostics,
+            },
+          }
+        : {
+            heading: 'No Foleon content is available yet.',
+            body: 'Resolve sync readiness to import Foleon content. Run Sync from Foleon to bring in published Foleon documents.',
+            action: {
+              id: 'sync-foleon',
+              label: 'Sync from Foleon',
+              onClick: props.onSyncDocs,
+            },
+          }
+      : undefined;
+
   return (
     <div
       className={shell.feedDeskWorkspace}
@@ -141,6 +164,7 @@ export function FeedDeskWorkspace(props: FeedDeskWorkspaceProps): React.ReactNod
           onChangeFilter={setActiveFilter}
           selectedRowId={selectedRecordId}
           onSelectRow={onSelectRow}
+          emptyContentState={queueEmptyContentState}
         />
         <FeedInspectorPanel
           contract={props.contract}

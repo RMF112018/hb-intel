@@ -3,7 +3,7 @@
   "id": "2160edb3-675e-4451-92bb-8345f9d1c71e",
   "alias": "FoleonWebPart",
   "componentType": "WebPart",
-  "version": "1.0.36.0",
+  "version": "1.0.37.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
@@ -29,7 +29,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.36.0",
+        "expectedPackageVersion": "1.0.37.0",
         "foleonRoute": "highlights"
       }
     },
@@ -50,7 +50,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.36.0",
+        "expectedPackageVersion": "1.0.37.0",
         "foleonRoute": "projectSpotlight"
       }
     },
@@ -71,7 +71,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.36.0",
+        "expectedPackageVersion": "1.0.37.0",
         "foleonRoute": "companyPulse"
       }
     },
@@ -92,7 +92,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.36.0",
+        "expectedPackageVersion": "1.0.37.0",
         "foleonRoute": "leadershipMessage"
       }
     },
@@ -113,7 +113,7 @@
         "acceptedFoleonOrigins": "https://viewer.us.foleon.com",
         "allowPreview": false,
         "expectedManifestId": "2160edb3-675e-4451-92bb-8345f9d1c71e",
-        "expectedPackageVersion": "1.0.36.0",
+        "expectedPackageVersion": "1.0.37.0",
         "foleonRoute": "manage"
       }
     }

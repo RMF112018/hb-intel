@@ -3,6 +3,15 @@
   max-width: min(1880px, 100%);
   margin: 0;
   container-type: inline-size;
+  /*
+   * Deliberate inset against the SharePoint canvas. The manager-only canvas
+   * escape below stretches the surface to viewport width; this padding keeps
+   * the Feed Manager from hugging the page chrome edges. Scales with viewport
+   * so narrow tenants and short heights still feel intentionally inset.
+   */
+  padding-inline: clamp(var(--foleon-manage-space-md), 2.4vw, var(--foleon-manage-space-xl));
+  padding-block: clamp(var(--foleon-manage-space-sm), 1.8vw, var(--foleon-manage-space-lg));
+  box-sizing: border-box;
 }
 
 /*
@@ -149,9 +158,16 @@
   grid-area: actions;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--foleon-manage-space-xs);
+  gap: var(--foleon-manage-space-sm);
   justify-content: flex-end;
-  align-items: flex-start;
+  align-items: center;
+  min-width: 0;
+}
+
+@container (max-width: 900px) {
+  .headerActions {
+    justify-content: flex-start;
+  }
 }
 
 .headerChips {
@@ -2119,7 +2135,8 @@
   grid-template-areas:
     'intro actions'
     'chips chips';
-  gap: var(--foleon-manage-space-md);
+  column-gap: var(--foleon-manage-space-lg);
+  row-gap: var(--foleon-manage-space-sm);
   align-items: start;
   border-bottom: 1px solid var(--foleon-manage-divider);
 }
@@ -2129,7 +2146,15 @@
   flex-wrap: wrap;
   gap: var(--foleon-manage-space-xs);
   align-items: center;
-  margin-left: var(--foleon-manage-space-sm);
+  padding-left: var(--foleon-manage-space-sm);
+  border-left: 1px solid var(--foleon-manage-divider);
+}
+
+@container (max-width: 900px) {
+  .utilityActions {
+    padding-left: 0;
+    border-left: none;
+  }
 }
 
 .utilityAction {
@@ -2612,26 +2637,68 @@
   font-size: 13px;
 }
 
+.editorialQueueEmptyState {
+  display: grid;
+  gap: var(--foleon-manage-space-sm);
+  padding: var(--foleon-manage-space-lg);
+  border: 1px dashed var(--foleon-manage-panel-border);
+  border-radius: var(--foleon-manage-radius-lg);
+  background: var(--foleon-manage-panel);
+}
+
+.editorialQueueEmptyHeading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--foleon-manage-fg);
+}
+
+.editorialQueueEmptyBody {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--foleon-manage-fg-muted);
+  max-width: 560px;
+}
+
+.editorialQueueEmptyAction {
+  justify-self: start;
+}
+
 /* Feed Inspector */
 
 .feedInspector {
   display: grid;
   gap: var(--foleon-manage-space-md);
-  padding: var(--foleon-manage-space-md);
-  border: 1px solid var(--foleon-manage-panel-border);
-  border-radius: var(--foleon-manage-radius-lg);
-  background: var(--foleon-manage-panel);
   align-self: start;
   max-height: 80vh;
   overflow-y: auto;
+  min-width: 0;
 }
 
+/*
+ * Persistent rail (wide screens): no card chrome — rail feel from a left
+ * divider plus interior padding, so the Inspector sits as a contextual
+ * companion to the queue rather than a disconnected card.
+ */
+.feedInspector[data-feed-inspector-drawer='persistent'] {
+  border: none;
+  border-left: 1px solid var(--foleon-manage-divider);
+  background: transparent;
+  padding-inline: var(--foleon-manage-space-md) 0;
+  padding-block: 0;
+}
+
+/* Drawer mode (narrow): full card chrome and overlay. */
 .feedInspector[data-feed-inspector-drawer='open'] {
   position: fixed;
   inset: 0 0 0 auto;
   width: min(440px, 90vw);
   max-height: 100vh;
+  border: 1px solid var(--foleon-manage-panel-border);
   border-radius: 0;
+  background: var(--foleon-manage-panel);
+  padding: var(--foleon-manage-space-md);
   z-index: 60;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.18);
 }
@@ -2806,13 +2873,27 @@
   .feedDeskQueueAndInspector {
     grid-template-columns: 1fr;
   }
+}
+
+@container (max-width: 820px) {
   .editorialQueueRow {
-    grid-template-columns: 100px minmax(0, 1fr);
-    grid-template-areas:
-      'status title'
-      'status feed'
-      'status window'
-      'status readiness'
-      'status action';
+    grid-template-columns: 100px minmax(0, 2fr) minmax(0, 1fr);
+  }
+  .editorialQueueRow .editorialQueueCell:nth-child(4),
+  .editorialQueueRow .editorialQueueCell:nth-child(5),
+  .editorialQueueRow .editorialQueueCell:nth-child(6),
+  .editorialQueueRow .editorialQueueHeaderCell:nth-child(4),
+  .editorialQueueRow .editorialQueueHeaderCell:nth-child(5),
+  .editorialQueueRow .editorialQueueHeaderCell:nth-child(6) {
+    display: none;
+  }
+}
+
+@container (max-width: 540px) {
+  .feedSlotsList {
+    grid-template-columns: 1fr;
+  }
+  .editorialQueueRow {
+    grid-template-columns: 80px minmax(0, 1fr);
   }
 }

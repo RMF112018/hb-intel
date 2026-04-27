@@ -309,6 +309,50 @@ describe('ManagePage — Foleon Feed Manager shell', () => {
     expect(within(callout).getByRole('button', { name: 'Sync from Foleon' })).toBeTruthy();
   });
 
+  it('editorial queue surfaces a structured empty state alongside the setup callout when content is empty', async () => {
+    installManageFetchMock({ content: [] });
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    await screen.findByRole('region', { name: 'Feed Desk setup' });
+    const queueEmpty = screen.getByRole('status', { name: 'Editorial Queue empty' });
+    expect(queueEmpty.getAttribute('data-editorial-queue-empty')).toBe('content');
+    expect(queueEmpty.textContent).toContain('No Foleon content is available yet.');
+    expect(queueEmpty.textContent).toContain('Resolve sync readiness to import Foleon content.');
+    expect(within(queueEmpty).getByRole('button', { name: 'Sync from Foleon' })).toBeTruthy();
+  });
+
+  it('editorial queue empty state routes to admin diagnostics when sync is blocked', async () => {
+    render(
+      <ManagePage
+        contract={hostedContract({
+          getAccessToken: undefined,
+          foleonReadiness: {
+            registryReady: true,
+            listBindingsReady: true,
+            backendUrlReady: true,
+            authResourceReady: true,
+            tokenProviderReady: true,
+            tokenAcquisitionReady: false,
+            backendSafeConfigReady: false,
+            backendRouteAuthorizationReady: false,
+            readPathReady: false,
+            writePathReady: false,
+            syncPathReady: false,
+          },
+          foleonConfigDiagnostics: {
+            blockers: [{ code: 'token-acquisition-failed', message: 'consent_required: redacted' }],
+          },
+        })}
+        onBack={(): void => undefined}
+      />,
+    );
+
+    const queueEmpty = await screen.findByRole('status', { name: 'Editorial Queue empty' });
+    expect(queueEmpty.getAttribute('data-editorial-queue-empty')).toBe('content');
+    fireEvent.click(within(queueEmpty).getByRole('button', { name: 'Open admin diagnostics' }));
+    expect(screen.getByRole('tab', { name: 'Admin' }).getAttribute('aria-selected')).toBe('true');
+  });
+
   it('feed desk routes the setup callout to admin diagnostics when token is degraded', async () => {
     render(
       <ManagePage
