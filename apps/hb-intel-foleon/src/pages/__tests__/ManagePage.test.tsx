@@ -136,9 +136,31 @@ describe('ManagePage', () => {
 
     render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
 
-    expect((await screen.findByRole('tab', { name: 'Homepage Foleon Content' })).getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByRole('tab', { name: 'Config' }).getAttribute('aria-selected')).toBe('false');
-    expect(screen.getByRole('tabpanel', { name: 'Homepage Foleon Content' })).toBeTruthy();
+    const contentTab = await screen.findByRole('tab', { name: 'Homepage Foleon Content' });
+    const configTab = screen.getByRole('tab', { name: 'Config' });
+    expect(contentTab.getAttribute('aria-selected')).toBe('true');
+    expect(configTab.getAttribute('aria-selected')).toBe('false');
+    expect(contentTab.getAttribute('aria-controls')).toBe('foleon-manage-panel-content');
+    expect(configTab.getAttribute('aria-controls')).toBe('foleon-manage-panel-config');
+    expect(screen.getByRole('tabpanel', { name: 'Homepage Foleon Content' }).getAttribute('id')).toBe('foleon-manage-panel-content');
+  });
+
+  it('supports keyboard tab switching with Arrow/Home/End keys', async () => {
+    installManageFetchMock({ content: [] });
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const contentTab = await screen.findByRole('tab', { name: 'Homepage Foleon Content' });
+    const configTab = screen.getByRole('tab', { name: 'Config' });
+    (contentTab as HTMLButtonElement).focus();
+    fireEvent.keyDown(contentTab, { key: 'ArrowRight' });
+    expect(configTab.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(configTab);
+    fireEvent.keyDown(configTab, { key: 'Home' });
+    expect(contentTab.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(contentTab);
+    fireEvent.keyDown(contentTab, { key: 'End' });
+    expect(configTab.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(configTab);
   });
 
   it('renders the three homepage lane cards in the content tab', async () => {
@@ -813,6 +835,14 @@ describe('ManagePage', () => {
     expect(editor.textContent).toMatch(/Write actions are disabled/i);
     expect(editor.textContent).not.toMatch(/backend-route-authorization-unproven/);
     expect(editor.textContent).not.toMatch(/token-acquisition-failed/);
+    const save = screen.getByRole('button', { name: /^Save$/i }) as HTMLButtonElement;
+    const saveReasonId = save.getAttribute('aria-describedby');
+    expect(saveReasonId).toBe('foleon-manage-write-actions-reason');
+    expect(document.getElementById(saveReasonId ?? '')?.textContent).toMatch(/Write actions are disabled/i);
+    const placement = screen.getByRole('button', { name: /Create placement blocked/i }) as HTMLButtonElement;
+    const placementReasonId = placement.getAttribute('aria-describedby');
+    expect(placementReasonId).toBe('foleon-manage-placement-write-reason');
+    expect(document.getElementById(placementReasonId ?? '')?.textContent).toMatch(/Placement writes are disabled/i);
   });
 
   it('does not send PATCH when Save is disabled for write path', async () => {

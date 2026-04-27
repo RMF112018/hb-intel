@@ -96,7 +96,13 @@ export function HomepageFoleonContentTab(props: {
   );
 
   return (
-    <div role="tabpanel" aria-label="Homepage Foleon Content" className={shell.tabPanel}>
+    <div
+      role="tabpanel"
+      id="foleon-manage-panel-content"
+      aria-labelledby="foleon-manage-tab-content"
+      aria-label="Homepage Foleon Content"
+      className={shell.tabPanel}
+    >
       {limitedMode ? (
         <div role="status" className={shell.limitedModeBanner} aria-label="Limited mode">
           <p className={shell.limitedModeCopy}>
