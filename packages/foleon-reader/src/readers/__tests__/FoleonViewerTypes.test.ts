@@ -41,6 +41,7 @@ describe('createReadyFoleonViewerTarget — record-backed mapping', () => {
     });
     expect(target.lane).toBe('projectSpotlight');
     expect(target.source).toBe('active-record');
+    expect(target.renderMode).toBe('iframe');
     expect(target.viewerUrl).toBe('https://viewer.us.foleon.com/embed/edition');
     expect(target.url).toBe('https://viewer.us.foleon.com/published/edition');
     expect(target.canOpen).toBe(true);
@@ -93,18 +94,25 @@ describe('createReadyFoleonViewerTarget — record-backed mapping', () => {
   });
 });
 
-describe('createPreviewFoleonViewerTarget — labeled, never live', () => {
-  it('returns canOpen=false with disabledReason="preview-only" for every governed lane', () => {
+describe('createPreviewFoleonViewerTarget — local preview, never live iframe', () => {
+  it('returns openable preview-mode targets for every governed lane', () => {
     for (const config of [
       FOLEON_READER_CONFIGS.projectSpotlight,
       FOLEON_READER_CONFIGS.companyPulse,
       FOLEON_READER_CONFIGS.leadershipMessage,
     ]) {
       const target = createPreviewFoleonViewerTarget(config);
-      expect(target.canOpen).toBe(false);
-      expect(target.disabledReason).toBe('preview-only');
+      expect(target.canOpen).toBe(true);
+      expect(target.renderMode).toBe('preview');
+      expect(target.disabledReason).toBeUndefined();
       expect(target.viewerUrl).toBeUndefined();
       expect(target.source).toBe('preview');
+      expect(target.preview).toEqual(
+        expect.objectContaining({
+          badge: 'Preview',
+          lane: target.lane,
+        }),
+      );
     }
   });
 });

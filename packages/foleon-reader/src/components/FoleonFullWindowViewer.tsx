@@ -75,7 +75,11 @@ export function FoleonFullWindowViewer(props: FoleonFullWindowViewerProps): Reac
     return (): void => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const showIframe = target.canOpen && target.viewerUrl !== undefined && target.viewerUrl.length > 0;
+  const showPreview = target.renderMode === 'preview';
+  const showIframe = target.renderMode === 'iframe'
+    && target.canOpen
+    && target.viewerUrl !== undefined
+    && target.viewerUrl.length > 0;
   const iframeTitle = target.viewerUrl
     ? `${target.title} — Foleon viewer`
     : `${target.title} — Foleon viewer (unavailable)`;
@@ -122,7 +126,9 @@ export function FoleonFullWindowViewer(props: FoleonFullWindowViewerProps): Reac
         </button>
       </header>
       <div className={styles.body}>
-        {showIframe ? (
+        {showPreview ? (
+          <FoleonPreviewViewerPanel target={target} />
+        ) : showIframe ? (
           <div className={styles.iframeFrame}>
             <FoleonIframeHost
               src={target.viewerUrl!}
@@ -146,6 +152,63 @@ export function FoleonFullWindowViewer(props: FoleonFullWindowViewerProps): Reac
         )}
       </div>
     </div>
+  );
+}
+
+function FoleonPreviewViewerPanel(props: { readonly target: FoleonViewerTarget }): React.JSX.Element {
+  const { target } = props;
+  const preview = target.preview;
+  if (!preview) {
+    return (
+      <div className={styles.statePanel} role="status" aria-live="polite">
+        <p className={styles.stateHeading}>Preview unavailable</p>
+        <p className={styles.stateBody}>
+          Local preview content is not configured for this Foleon reader.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <section
+      className={styles.previewPanel}
+      aria-labelledby={`${target.id}-preview-title`}
+      data-foleon-preview-viewer-lane={preview.lane}
+    >
+      <div className={styles.previewHero}>
+        <div className={styles.previewContent}>
+          <p className={styles.previewBadge}>{preview.badge}</p>
+          <h3 id={`${target.id}-preview-title`} className={styles.previewTitle}>
+            {preview.title}
+          </h3>
+          {preview.summary ? (
+            <p className={styles.previewSummary}>{preview.summary}</p>
+          ) : null}
+          <p className={styles.previewNotice}>{preview.notice}</p>
+          <div className={styles.previewMetaRow} aria-label="Preview details">
+            {preview.primaryLabel ? (
+              <span>{preview.primaryLabel}</span>
+            ) : null}
+            {preview.secondaryLabel ? (
+              <span>{preview.secondaryLabel}</span>
+            ) : null}
+          </div>
+        </div>
+        <div className={styles.previewSkeleton} aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+      {preview.bullets && preview.bullets.length > 0 ? (
+        <ul className={styles.previewGrid} aria-label="Preview content areas">
+          {preview.bullets.map((bullet) => (
+            <li key={bullet} className={styles.previewCard}>
+              {bullet}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }
 

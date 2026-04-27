@@ -37,6 +37,8 @@ function laneFor(config: FoleonReaderModuleConfig): FoleonReaderLayoutKey | null
 
 export type FoleonViewerSource = 'active-record' | 'archive' | 'preview' | 'manual';
 
+export type FoleonViewerRenderMode = 'iframe' | 'preview';
+
 export type FoleonViewerDisabledReason =
   | 'no-embed-url'
   | 'embed-not-allowed'
@@ -44,7 +46,18 @@ export type FoleonViewerDisabledReason =
   | 'preview-only'
   | 'unknown';
 
-export interface FoleonViewerTarget {
+export interface FoleonViewerPreviewContent {
+  readonly badge: string;
+  readonly title: string;
+  readonly summary?: string;
+  readonly lane: FoleonReaderLayoutKey;
+  readonly notice: string;
+  readonly primaryLabel?: string;
+  readonly secondaryLabel?: string;
+  readonly bullets?: readonly string[];
+}
+
+interface FoleonViewerTargetBase {
   readonly id: string;
   readonly lane: FoleonReaderLayoutKey;
   readonly source: FoleonViewerSource;
@@ -52,13 +65,29 @@ export interface FoleonViewerTarget {
   readonly summary?: string;
   /** External "view on Foleon" link. Sourced from `FoleonContentRecord.publishedUrl`. */
   readonly url?: string;
-  /** Iframe-embeddable URL. Sourced from `FoleonContentRecord.embedUrl`. */
-  readonly viewerUrl?: string;
   readonly publishedLabel?: string;
   readonly categoryLabel?: string;
+}
+
+export interface FoleonIframeViewerTarget extends FoleonViewerTargetBase {
+  readonly renderMode: 'iframe';
+  /** Iframe-embeddable URL. Sourced from `FoleonContentRecord.embedUrl`. */
+  readonly viewerUrl?: string;
   readonly canOpen: boolean;
   readonly disabledReason?: FoleonViewerDisabledReason;
+  readonly preview?: undefined;
 }
+
+export interface FoleonPreviewViewerTarget extends FoleonViewerTargetBase {
+  readonly source: 'preview';
+  readonly renderMode: 'preview';
+  readonly viewerUrl?: undefined;
+  readonly canOpen: true;
+  readonly disabledReason?: undefined;
+  readonly preview: FoleonViewerPreviewContent;
+}
+
+export type FoleonViewerTarget = FoleonIframeViewerTarget | FoleonPreviewViewerTarget;
 
 export interface FoleonArticleCardViewModel {
   readonly id: string;
@@ -103,6 +132,7 @@ export function createReadyFoleonViewerTarget(input: ReadyTargetInput): FoleonVi
       id: `${config.readerKey}-active`,
       lane: 'projectSpotlight', // structurally required; never reached for governed lanes
       source: 'active-record',
+      renderMode: 'iframe',
       title: record.title,
       canOpen: false,
       disabledReason: 'unknown',
@@ -114,6 +144,7 @@ export function createReadyFoleonViewerTarget(input: ReadyTargetInput): FoleonVi
     id: `${config.readerKey}-active-${record.id}`,
     lane,
     source: 'active-record',
+    renderMode: 'iframe',
     title: record.title,
     summary: record.summary,
     url: record.publishedUrl,
@@ -149,7 +180,58 @@ export function createPreviewFoleonViewerTarget(
     viewerUrl: undefined,
     publishedLabel: undefined,
     categoryLabel: undefined,
-    canOpen: false,
-    disabledReason: 'preview-only',
+    renderMode: 'preview',
+    canOpen: true,
+    disabledReason: undefined,
+    preview: createPreviewContent(config, lane),
   };
+}
+
+function createPreviewContent(
+  config: FoleonReaderModuleConfig,
+  lane: FoleonReaderLayoutKey,
+): FoleonViewerPreviewContent {
+  switch (lane) {
+    case 'projectSpotlight':
+      return {
+        badge: 'Preview',
+        title: "This Month's Project Spotlight",
+        summary: 'A local preview of the monthly project feature card before a live Foleon edition is configured.',
+        lane,
+        notice: 'Live Foleon content will open here once the active Project Spotlight record is published and embeddable.',
+        primaryLabel: 'Project profile',
+        secondaryLabel: 'Monthly feature',
+        bullets: ['Hero image area', 'Project facts', 'Editorial summary'],
+      };
+    case 'companyPulse':
+      return {
+        badge: 'Preview',
+        title: 'Company Pulse Preview',
+        summary: 'A local preview of the briefing layout for company updates, events, recognition, and operations.',
+        lane,
+        notice: 'A live Company Pulse Foleon edition will open here once the active update is configured.',
+        primaryLabel: 'Latest update',
+        secondaryLabel: 'Frequent briefing',
+        bullets: ['News', 'Events', 'Recognition', 'Operations'],
+      };
+    case 'leadershipMessage':
+      return {
+        badge: 'Preview',
+        title: 'Leadership Message Preview',
+        summary: 'A local preview of the executive message surface before a live Leadership Message edition is available.',
+        lane,
+        notice: 'A live Leadership Message Foleon edition will open here once the active executive update is configured.',
+        primaryLabel: 'Executive update',
+        secondaryLabel: 'Message preview',
+        bullets: ['Byline area', 'Pull quote', 'Message body'],
+      };
+    default:
+      return {
+        badge: 'Preview',
+        title: `${config.title} Preview`,
+        summary: 'A local preview of this Foleon reader lane.',
+        lane,
+        notice: 'Live Foleon content will open here once an active edition is configured.',
+      };
+  }
 }

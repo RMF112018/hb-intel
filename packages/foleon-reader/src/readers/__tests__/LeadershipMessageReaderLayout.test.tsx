@@ -199,7 +199,7 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     expect(launch.getAttribute('aria-disabled')).toBeNull();
   });
 
-  it('preview state card is aria-disabled with a visible reason and aria-describedby', () => {
+  it('preview state card is actionable without disabled semantics', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
     const { container } = render(
       <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />,
@@ -207,19 +207,22 @@ describe('LeadershipMessageReaderLayout — lane-owned executive composition', (
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
     const launch = screen.getByRole('button', { name: viewModel.title });
-    expect(launch.getAttribute('aria-disabled')).toBe('true');
-    const reasonId = launch.getAttribute('aria-describedby');
-    expect(reasonId).toBeTruthy();
-    expect(container.querySelector(`#${reasonId}`)?.textContent).toMatch(/preview only/i);
+    expect(launch.getAttribute('aria-disabled')).toBeNull();
+    expect(launch.getAttribute('aria-describedby')).toBeNull();
   });
 
-  it('clicking a disabled (preview) card is a no-op and surfaces the structured refusal as a DOM marker', () => {
+  it('clicking a preview card opens the local preview viewer without a refusal marker', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.leadershipMessage);
-    render(<LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    render(
+      <FoleonFullWindowViewerProvider originPolicy={TEST_POLICY}>
+        <LeadershipMessageReaderLayout viewModel={viewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
     const launch = screen.getByRole('button', { name: viewModel.title });
     fireEvent.click(launch);
-    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('preview-only');
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"] iframe')).toBeNull();
   });
 
   it('records embed-not-allowed refusal when the underlying record blocks embedding', () => {

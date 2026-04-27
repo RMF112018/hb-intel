@@ -222,7 +222,7 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     expect(launch.getAttribute('aria-disabled')).toBeNull();
   });
 
-  it('preview state lead card is aria-disabled with a visible reason and aria-describedby', () => {
+  it('preview state lead card is actionable without disabled semantics', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
     const { container } = render(
       <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />,
@@ -230,19 +230,23 @@ describe('CompanyPulseReaderLayout — lane-owned briefing composition', () => {
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
     const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
-    expect(launch.getAttribute('aria-disabled')).toBe('true');
-    const reasonId = launch.getAttribute('aria-describedby');
-    expect(reasonId).toBeTruthy();
-    expect(container.querySelector(`#${reasonId}`)?.textContent).toMatch(/preview only/i);
+    expect(launch.getAttribute('aria-disabled')).toBeNull();
+    expect(launch.getAttribute('aria-describedby')).toBeNull();
   });
 
-  it('clicking a disabled (preview) lead is a no-op and surfaces the structured refusal as a DOM marker', () => {
+  it('clicking a preview lead opens the local preview viewer without a refusal marker', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.companyPulse);
-    render(<CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
+    render(
+      <FoleonFullWindowViewerProvider originPolicy={policy}>
+        <CompanyPulseReaderLayout viewModel={viewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
     const launch = screen.getByRole('button', { name: viewModel.briefingLead!.title });
     fireEvent.click(launch);
-    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBe('preview-only');
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(launch.getAttribute('data-foleon-article-last-refusal')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"] iframe')).toBeNull();
   });
 
   it('Phase-04 Wave-01 Prompt-04C: card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {

@@ -114,11 +114,18 @@ describe('FoleonFullWindowViewerProvider — open/close + structured result', ()
     expect(document.querySelector('[data-foleon-full-window-viewer="active"]')).not.toBeNull();
   });
 
-  it('openViewer on a canOpen=false target returns { opened: false, reason } and does NOT render the dialog', () => {
+  it('openViewer on a preview target renders local preview content without mounting an iframe', () => {
     const onViewerOpen = vi.fn();
+    const onViewerIframeLoaded = vi.fn();
+    const onViewerIframeError = vi.fn();
     const handle: { current: HarnessHandle | null } = { current: null };
     render(
-      <FoleonFullWindowViewerProvider originPolicy={POLICY} onViewerOpen={onViewerOpen}>
+      <FoleonFullWindowViewerProvider
+        originPolicy={POLICY}
+        onViewerOpen={onViewerOpen}
+        onViewerIframeLoaded={onViewerIframeLoaded}
+        onViewerIframeError={onViewerIframeError}
+      >
         <Harness handle={handle} />
       </FoleonFullWindowViewerProvider>,
     );
@@ -127,9 +134,15 @@ describe('FoleonFullWindowViewerProvider — open/close + structured result', ()
     act(() => {
       result = handle.current!.open(target);
     });
-    expect(result).toEqual({ opened: false, reason: 'preview-only' });
-    expect(onViewerOpen).not.toHaveBeenCalled();
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(result).toEqual({ opened: true, target });
+    expect(onViewerOpen).toHaveBeenCalledWith(target);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.getAttribute('data-foleon-viewer-source')).toBe('preview');
+    expect(screen.getByText('Preview')).toBeTruthy();
+    expect(screen.getByText("This Month's Project Spotlight")).toBeTruthy();
+    expect(document.querySelector('iframe')).toBeNull();
+    expect(onViewerIframeLoaded).not.toHaveBeenCalled();
+    expect(onViewerIframeError).not.toHaveBeenCalled();
   });
 
   it('disabled "embed-not-allowed" target also returns the structured reason', () => {

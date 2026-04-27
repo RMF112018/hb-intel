@@ -237,15 +237,14 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(placeholder).not.toBeNull();
   });
 
-  it('uses employee-facing disabled-reason copy for preview state', () => {
+  it('does not render disabled-reason copy for openable preview state', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     const { container } = render(
       <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
     );
     const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
-    const reasonId = launchButton.getAttribute('aria-describedby');
-    const reasonEl = container.querySelector(`#${reasonId}`);
-    expect(reasonEl?.textContent).toMatch(/full spotlight will open/i);
+    expect(launchButton.getAttribute('aria-describedby')).toBeNull();
+    expect(container.textContent).not.toMatch(/full spotlight will open/i);
   });
 
   it('renders ready-state visual surface derived only from the FoleonContentRecord and omits absent optional fields rather than inventing data', () => {
@@ -305,7 +304,7 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     expect(launchButton.getAttribute('aria-disabled')).toBeNull();
   });
 
-  it('preview state article card is aria-disabled with a visible reason and aria-describedby', () => {
+  it('preview state article card is actionable without disabled semantics', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
     const { container } = render(
       <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />,
@@ -313,21 +312,23 @@ describe('ProjectSpotlightReaderLayout — lane-owned feature composition', () =
     const card = container.querySelector('[data-foleon-article-card]');
     expect(card?.getAttribute('data-foleon-article-state')).toBe('preview');
     const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
-    expect(launchButton.getAttribute('aria-disabled')).toBe('true');
-    const reasonId = launchButton.getAttribute('aria-describedby');
-    expect(reasonId).toBeTruthy();
-    const reasonEl = container.querySelector(`#${reasonId}`);
-    expect(reasonEl?.textContent).toMatch(/full spotlight will open/i);
+    expect(launchButton.getAttribute('aria-disabled')).toBeNull();
+    expect(launchButton.getAttribute('aria-describedby')).toBeNull();
   });
 
-  it('clicking a disabled (preview) card is a no-op and surfaces the structured refusal as a DOM marker', () => {
+  it('clicking a preview card opens the local preview viewer without a refusal marker', () => {
     const viewModel = createPreviewFoleonReaderViewModel(FOLEON_READER_CONFIGS.projectSpotlight);
-    render(<ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />);
+    const policy = createFoleonOriginPolicy(['https://viewer.us.foleon.com']);
+    render(
+      <FoleonFullWindowViewerProvider originPolicy={policy}>
+        <ProjectSpotlightReaderLayout viewModel={viewModel} iframeSurface={null} />
+      </FoleonFullWindowViewerProvider>,
+    );
     const launchButton = screen.getByRole('button', { name: viewModel.primaryArticle!.title });
     fireEvent.click(launchButton);
-    expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBe('preview-only');
-    // No dialog opened (no provider in scope, but disabled state short-circuits anyway).
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(launchButton.getAttribute('data-foleon-article-last-refusal')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"] iframe')).toBeNull();
   });
 
   it('Phase-04 Wave-01 Prompt-04C: card has exactly one interactive control (single-button card-launch pattern, no nested controls)', () => {
