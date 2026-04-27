@@ -4,13 +4,12 @@
   margin: 0;
   container-type: inline-size;
   /*
-   * Deliberate inset against the SharePoint canvas. The manager-only canvas
-   * escape below stretches the surface to viewport width; this padding keeps
-   * the Feed Manager from hugging the page chrome edges. Scales with viewport
-   * so narrow tenants and short heights still feel intentionally inset.
+   * `.shell` and the manager-only canvas escape below own width and margin
+   * concerns only. Visible interior padding lives on `.feedManagerChrome`,
+   * an inner DOM wrapper inside this element. Putting padding here directly
+   * collides with the negative-margin canvas-escape calc and produces no
+   * visible inset in hosted SharePoint sections.
    */
-  padding-inline: clamp(var(--foleon-manage-space-md), 2.4vw, var(--foleon-manage-space-xl));
-  padding-block: clamp(var(--foleon-manage-space-sm), 1.8vw, var(--foleon-manage-space-lg));
   box-sizing: border-box;
 }
 
@@ -2122,6 +2121,37 @@
 /* ---------------------------------------------------------------- */
 /*  Feed Manager shell (Phase 08 hard reset)                        */
 /* ---------------------------------------------------------------- */
+
+/*
+ * Inner shell chrome: the dedicated padding owner for the entire Feed Manager
+ * surface (header, banners, nav, Feed Desk / Schedule / Preview / Admin
+ * workspaces). Lives inside `.shell` (the canvas-escape root) so width
+ * concerns and visible padding never collide.
+ *
+ * Padding scales with viewport via clamp(), with explicit narrow/mobile
+ * breakpoints below so hosted SharePoint sections always show a deliberate
+ * left/right gutter and a consistent top/bottom rhythm.
+ */
+.feedManagerChrome {
+  box-sizing: border-box;
+  width: 100%;
+  padding-inline: clamp(24px, 3vw, 56px);
+  padding-block: clamp(20px, 2.5vw, 44px) clamp(32px, 4vw, 64px);
+}
+
+@media (max-width: 900px) {
+  .feedManagerChrome {
+    padding-inline: clamp(16px, 4vw, 28px);
+    padding-block: 20px 36px;
+  }
+}
+
+@media (max-width: 540px) {
+  .feedManagerChrome {
+    padding-inline: 14px;
+    padding-block: 16px 28px;
+  }
+}
 
 .feedManagerShell {
   display: grid;

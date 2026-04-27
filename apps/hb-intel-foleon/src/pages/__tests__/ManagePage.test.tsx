@@ -172,6 +172,33 @@ afterEach(() => {
 });
 
 describe('ManagePage — Foleon Feed Manager shell', () => {
+  it('wraps the entire Feed Manager surface in an inner shell chrome wrapper', async () => {
+    installManageFetchMock({ content: [] });
+
+    render(<ManagePage contract={mockContract()} onBack={(): void => undefined} />);
+
+    const banner = await screen.findByRole('banner', { name: 'Foleon Feed Manager' });
+    const chrome = document.querySelector('[data-feed-manager-shell="chrome"]') as HTMLElement | null;
+    expect(chrome).toBeTruthy();
+    // Chrome must NOT carry the canvas-escape attribute — width concerns and
+    // padding concerns live on distinct elements so the negative-margin
+    // canvas escape never collides with interior padding.
+    expect(chrome?.getAttribute('data-foleon-manager-canvas')).toBeNull();
+    // The canvas-escape root must be an ancestor of the chrome wrapper.
+    expect(chrome?.closest('[data-foleon-manager-canvas="wide"]')).toBeTruthy();
+    // The chrome wrapper must contain the full Feed Manager surface: header,
+    // nav, and the active tabpanel.
+    expect(chrome?.contains(banner)).toBe(true);
+    const nav = within(chrome as HTMLElement).getByRole('tablist', {
+      name: 'Foleon Feed Manager workspaces',
+    });
+    expect(nav).toBeTruthy();
+    const tabs = within(chrome as HTMLElement).getAllByRole('tab');
+    expect(tabs.length).toBe(4);
+    const activePanel = within(chrome as HTMLElement).getByRole('tabpanel');
+    expect(activePanel).toBeTruthy();
+  });
+
   it('renders the four feed-manager tabs in order with Feed Desk selected by default', async () => {
     installManageFetchMock({ content: [] });
 

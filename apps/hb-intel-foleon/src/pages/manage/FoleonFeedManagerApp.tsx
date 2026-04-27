@@ -20,15 +20,17 @@ export interface FoleonFeedManagerAppProps {
 
 export function FoleonFeedManagerApp(props: FoleonFeedManagerAppProps): React.ReactNode {
   return (
-    <div className={shell.feedManagerShell}>
-      <FeedManagerHeader model={props.headerModel} />
-      {props.tokenDegradedBanner}
-      {props.statusBanner}
-      <FeedManagerNav selected={props.selectedKey} onSelect={props.onSelectKey} />
-      {props.selectedKey === 'feed-desk' ? <FeedDeskPanel>{props.feedDeskBody}</FeedDeskPanel> : null}
-      {props.selectedKey === 'schedule' ? <SchedulePanel /> : null}
-      {props.selectedKey === 'preview' ? <PreviewPanel /> : null}
-      {props.selectedKey === 'admin' ? <AdminPanel>{props.adminPanel}</AdminPanel> : null}
+    <div className={shell.feedManagerChrome} data-feed-manager-shell="chrome">
+      <div className={shell.feedManagerShell}>
+        <FeedManagerHeader model={props.headerModel} />
+        {props.tokenDegradedBanner}
+        {props.statusBanner}
+        <FeedManagerNav selected={props.selectedKey} onSelect={props.onSelectKey} />
+        {props.selectedKey === 'feed-desk' ? <FeedDeskPanel>{props.feedDeskBody}</FeedDeskPanel> : null}
+        {props.selectedKey === 'schedule' ? <SchedulePanel /> : null}
+        {props.selectedKey === 'preview' ? <PreviewPanel /> : null}
+        {props.selectedKey === 'admin' ? <AdminPanel>{props.adminPanel}</AdminPanel> : null}
+      </div>
     </div>
   );
 }
