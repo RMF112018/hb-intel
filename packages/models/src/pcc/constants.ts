@@ -28,6 +28,9 @@ export {
   REVIEWER_ACTIONS,
 } from './ApprovalCheckpoint.js';
 export { BUSINESS_AUDIT_SOURCE_CONTEXT_TYPES } from './BusinessAuditEvent.js';
+export { PCC_FEATURE_FLAG_POSTURES, PCC_FEATURE_FLAG_IDS } from './PccFeatureFlags.js';
+export { PCC_MODULE_FLAG_POSTURES } from './PccModuleFlags.js';
+export { PCC_FORBIDDEN_FIXTURE_KEYS } from './PccFixtureGuards.js';
 export {
   EXTERNAL_SYSTEM_IDS,
   EXTERNAL_SYSTEM_POSTURES,

@@ -127,6 +127,35 @@ export {
 // Comments
 export type { IComment, ICommentHistoryEntry } from './Comments.js';
 
+// Feature flags (read-model metadata only)
+export {
+  PCC_FEATURE_FLAG_IDS,
+  PCC_FEATURE_FLAG_POSTURES,
+  PCC_FEATURE_FLAGS,
+  type PccFeatureFlagId,
+  type PccFeatureFlagPosture,
+  type IPccFeatureFlag,
+} from './PccFeatureFlags.js';
+
+// Module flags (read-model metadata only)
+export {
+  PCC_MODULE_FLAG_POSTURES,
+  PCC_MODULE_FLAGS,
+  type PccModuleFlagPosture,
+  type IPccModuleFlag,
+} from './PccModuleFlags.js';
+
+// Fixture guards (pure utility)
+export {
+  PCC_FORBIDDEN_FIXTURE_KEYS,
+  PCC_FORBIDDEN_FIXTURE_VALUE_PATTERNS,
+  findForbiddenFixtureKeys,
+  type PccForbiddenFixtureKey,
+} from './PccFixtureGuards.js';
+
+// Fixtures
+export * from './fixtures/index.js';
+
 // External systems
 export {
   EXTERNAL_SYSTEM_IDS,

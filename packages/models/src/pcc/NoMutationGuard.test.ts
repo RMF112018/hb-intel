@@ -13,6 +13,7 @@ const PCC_DIR = fileURLToPath(new URL('.', import.meta.url));
 const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'mapPccPersonaToProjectRole',
   'personaHasCapability',
+  'findForbiddenFixtureKeys',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
