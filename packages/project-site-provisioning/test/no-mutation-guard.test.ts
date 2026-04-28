@@ -105,10 +105,14 @@ describe('public-export discipline', () => {
     ];
 
     for (const exportLine of exportLines) {
+      // Inspect only the identifier portion before "from '...'"; path strings
+      // legitimately contain compound terms like "apply-gate" and must not
+      // count against standalone verb-name discipline.
+      const identifierPortion = exportLine.split(/\s+from\s+/)[0] ?? exportLine;
       for (const forbidden of forbiddenExportNames) {
         const re = new RegExp(`\\b${forbidden}\\b`);
         expect(
-          re.test(exportLine),
+          re.test(identifierPortion),
           `src/index.ts must not export "${forbidden}"; offending line: ${exportLine}`,
         ).toBe(false);
       }

@@ -8,7 +8,19 @@ This package consumes the schema-only contract owned by [`@hbc/project-site-temp
 
 ## Current step status
 
-**Phase 2 Step 4 — Provisioning Manifest Dry-Run Proof Artifact Generation.** This step:
+**Phase 2 Step 5 — Non-Production Executor Adapter Boundary and Apply-Gate Scaffold.** This step:
+
+- introduces the `ApplyGateRequest`, `ApplyGateDecision`, `ApplyGateOperatorApproval`, `NonProductionTargetDeclaration`, and `RollbackPosture` contracts at `src/contracts/apply-gate.ts`,
+- adds `evaluateApplyGate` (full pipeline → decision), `validateApplyGateRequest` (request shape only), `hashJsonProofArtifact`, and `hashMarkdownProofArtifact` under `src/apply-gate/`,
+- introduces `APPLY_GATE_DECISION_VERSION = '0.1.0-apply-gate'` independently of the manifest and proof artifact versions,
+- preserves all Step 2–4 invariants, mutation gate locking, public-export discipline, source-import discipline, and the committed proof baseline pair (byte-equal to regenerated output),
+- documents the future executor adapter boundary entirely through package-level contracts. **No backend code, no Azure Function, no PnP runner script, no Graph/PnP call, no SharePoint/SPFx/Procore touchpoint** is introduced.
+
+A "ready-for-non-production-apply" decision still carries `tenantMutationPerformed: false`, `nonProductionOnly: true`, and a `notExecutableReason` stating that no executor exists in this package or any approved consumer. Production environments and production-scoped approvals are rejected unconditionally.
+
+### Step 4 reference
+
+The Step 4 dry-run proof artifact underneath this step:
 
 - introduces `createDryRunProofArtifacts`, which assembles a JSON envelope and Markdown summary from a Step 3 provisioning manifest,
 - introduces a runtime `validateDryRunProofArtifact` that enforces `dryRunOnly: true`, `tenantMutationAllowed: false`, the canonical non-execution sentinel, complete object family coverage, and locked manifest scans,
@@ -141,10 +153,20 @@ Compile-time and runtime gating both enforce `{ mutationLocked: true, liveMutati
 - **Validation sentinel:** the canonical non-execution statement is `"This proof artifact is a dry-run planning artifact only. It does not create or modify SharePoint, Graph, PnP, Procore, SPFx, backend, or tenant resources."` — the validator fails any artifact that omits or alters it.
 - **Mutation gate relationship:** the artifact carries `dryRunOnly: true` and `tenantMutationAllowed: false` as compile-time literals. `approvalState.approvalStatus` is `'not-requested'` by default and may transition to `'pending'` only via a future approval-flow step (not in scope here).
 
+## Apply-gate (Step 5)
+
+- **Contracts:** `ApplyGateRequest`, `ApplyGateDecision`, `ApplyGateOperatorApproval`, `NonProductionTargetDeclaration`, `RollbackPosture`. See `src/contracts/apply-gate.ts`.
+- **Helpers:** `evaluateApplyGate`, `validateApplyGateRequest`, `hashJsonProofArtifact`, `hashMarkdownProofArtifact`. All pure; no I/O.
+- **Block conditions:** production environment; missing/wrong target tenant declaration; missing rollback posture; missing/rejected/wrongly-scoped operator approval; manifest validation failure; manifest mutation gate unlocked; manifest carrying blockers; failed manifest scan; incomplete object family coverage; proof artifact validation failure (envelope or sentinel); manifest plannedHash mismatch with embedded proof manifest hash; optional regenerated-proof byte mismatch; optional `dryRunBaselineRef` mismatch.
+- **Decision shape:** every decision (blocked or ready) carries `manifestHash`, `proofArtifactHash`, `proofMarkdownHash` (sha256 hex), `nonProductionOnly: true`, `tenantMutationPerformed: false`, and `notExecutableReason` explaining that no executor exists in this step.
+- **Approval policy:** `approvalStatus` enum is `not-requested | pending | approved-for-non-production | rejected`. The only status that satisfies the gate is `approved-for-non-production` with `approvalScope: 'non-production-only'` and non-empty `approvedBy` + `approvedAt`. Production approvals are never valid in Step 5.
+- **Proof byte-match policy:** **optional** for the Step 5 package validator (callers may omit `regeneratedProof`); **mandatory** for any future executor before any tenant call. The future executor must regenerate the proof pair from the committed baseline inputs and confirm byte-match against the supplied `proofArtifact` JSON / `proofMarkdown` strings before invoking Graph or PnP.
+- **Executor adapter boundary:** The future executor adapter will live under `backend/functions/` and consume an `ApplyGateRequest` whose decision evaluates to `ready-for-non-production-apply`. It must additionally verify manifest immutability, regenerated proof byte-match, locked mutation gate, non-production scope, rollback posture, and operator approval before any tenant call. `@hbc/project-site-provisioning` itself remains no-mutation. SPFx must not call the executor directly; any such routing must go through an approved admin/control-plane flow. No Procore path is introduced.
+
 ## Future steps
 
-- **Step 5 — Non-production executor adapter boundary and apply-gate scaffold** under `backend/functions/`, consuming a frozen, signed, approved manifest.
-- **Future expansion:** per-instance enumeration, `enforcementLayers` per entry, secret-value scanning, timestamped per-run proof outputs alongside the committed baseline.
+- **Step 6 — Validation, drift detection, repair posture, and Phase 2 closeout.** Validate the full Phase 2 chain (template → mapper → proof → apply-gate), document drift/repair posture for the future executor adapter, and produce the Phase 2 closeout. Recommend Phase 3 entry conditions.
+- **Future expansion:** per-instance enumeration, `enforcementLayers` per entry, secret-value scanning, timestamped per-run proof outputs, executor adapter implementation under `backend/functions/`.
 
 ## Validation commands
 
@@ -200,8 +222,10 @@ pnpm --filter @hbc/project-site-template validate:all
 - [Phase 2 Step 2 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_2_Project_Site_Provisioning_Mapper_Scaffold_Closeout.md)
 - [Phase 2 Step 3 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_3_Provisioning_Manifest_Mapper_Expansion_Closeout.md)
 - [Phase 2 Step 4 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_4_Dry_Run_Proof_Artifact_Generation_Closeout.md)
+- [Phase 2 Step 5 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_5_Non_Production_Executor_Adapter_Boundary_Apply_Gate_Closeout.md)
 - [`@hbc/project-site-template` README](../project-site-template/README.md)
 - [PCC blueprint README](../../docs/architecture/blueprint/sp-project-control-center/README.md)
 - [`docs/Phase_2_Step_2_Scaffold_Notes.md`](./docs/Phase_2_Step_2_Scaffold_Notes.md)
 - [`docs/Phase_2_Step_3_Contract_Coverage_Notes.md`](./docs/Phase_2_Step_3_Contract_Coverage_Notes.md)
 - [`docs/Phase_2_Step_4_Dry_Run_Proof_Artifact_Notes.md`](./docs/Phase_2_Step_4_Dry_Run_Proof_Artifact_Notes.md)
+- [`docs/Phase_2_Step_5_Apply_Gate_Boundary_Notes.md`](./docs/Phase_2_Step_5_Apply_Gate_Boundary_Notes.md)

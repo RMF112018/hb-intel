@@ -140,3 +140,35 @@ export type {
   ValidateDryRunProofArtifactInput,
   ValidateDryRunProofArtifactOptions,
 } from './proof/validate-dry-run-proof-artifact.js';
+
+export {
+  APPLY_GATE_APPROVAL_STATUSES,
+  APPLY_GATE_DECISION_VERSION,
+  APPLY_GATE_NOT_EXECUTABLE_REASON,
+} from './contracts/apply-gate.js';
+export type {
+  ApplyGateApprovalScope,
+  ApplyGateApprovalStatus,
+  ApplyGateDecision,
+  ApplyGateDecisionVersion,
+  ApplyGateEnvironment,
+  ApplyGateOperatorApproval,
+  ApplyGateRequest,
+  ApplyGateStatus,
+  NonProductionTargetDeclaration,
+  RollbackMode,
+  RollbackPosture,
+} from './contracts/apply-gate.js';
+
+export {
+  hashJsonProofArtifact,
+  hashMarkdownProofArtifact,
+} from './apply-gate/hash-proof-artifacts.js';
+export {
+  validateApplyGateRequest,
+} from './apply-gate/validate-apply-gate-request.js';
+export type { ApplyGateRequestValidationResult } from './apply-gate/validate-apply-gate-request.js';
+export {
+  evaluateApplyGate,
+} from './apply-gate/evaluate-apply-gate.js';
+export type { EvaluateApplyGateOptions } from './apply-gate/evaluate-apply-gate.js';
