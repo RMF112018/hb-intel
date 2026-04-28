@@ -1,20 +1,167 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/workflows.schema.json",
-  "title": "Workflows Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the workflows family — workflow declarations covering decision closure, approvals, hand-offs, and stage-gated transitions. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §17, §18.",
+  "title": "Workflows Family Schema",
+  "description": "Phase 1 Step 4 Wave 3 — populated workflows family schema. Eight seeded workflow templates from Contract §17.1–§17.8 (5 MVP: Startup, Closeout, Permits, Inspections, Responsibility Matrix; 3 Deferred: Owner Contract Matrix, Subcontractor Scorecard, Lessons Learned). Captures responsibility / due-date / evidence / status fields and stage-gated transitions; ProjectStatus archive behavior bound by VR-09. Per-row workflow records inherit §16.1 baseline columns from the lists family. Field set traces verbatim to fields/families/workflows.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24). seedRule, when present, keys strictly on ProjectType (VR-08).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "workflowTemplateKey",
+    "workflowDisplayName",
+    "workflowPurpose",
+    "owningModule",
+    "seedListMappings",
+    "mvpStatus"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "workflows" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "workflowTemplateKey": { "$ref": "#/$defs/workflowTemplateKey", "description": "Stable identifier for one of the 8 seeded workflow templates." },
+    "workflowDisplayName": { "type": "string", "description": "Display name for the workflow template." },
+    "workflowPurpose": { "type": "string", "description": "Purpose of the workflow template." },
+    "owningModule": { "type": "string", "description": "Module that owns this workflow template. VR-26 referential integrity." },
+    "seedListMappings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List(s) seeded by this workflow template (e.g., Project Startup Tasks, Startup Gate Checklist for §17.1)."
+    },
+    "seedRule": {
+      "type": "object",
+      "description": "Vertical seeding rule keyed strictly on ProjectType. VR-08. Vertical seeding never keys on ProjectStage.",
+      "additionalProperties": false,
+      "properties": {
+        "keyedOn": { "type": "string", "const": "projectType" },
+        "perType": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commercial": { "type": "array", "items": { "type": "string" } },
+            "multifamily": { "type": "array", "items": { "type": "string" } },
+            "municipal": { "type": "array", "items": { "type": "string" } },
+            "luxury_residential": { "type": "array", "items": { "type": "string" } },
+            "environmental": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "required": ["keyedOn"]
+    },
+    "stageGate": { "type": "string", "description": "Stage / status that gates the workflow (e.g., active_construction → closeout). ProjectStatus archive behavior bound by VR-09." },
+    "mvpStatus": { "$ref": "#/$defs/decisionClosureStatus", "description": "Decision Closure status: 'Frozen for MVP' for §17.1–§17.5 templates; 'Deferred' for §17.6–§17.8 templates." },
+    "startupTask_TaskNumber": { "type": "string", "description": "Task number on Project Startup Tasks list (§17.1)." },
+    "startupTask_Section": { "$ref": "#/$defs/startupTaskSection", "description": "Section enum from §17.1." },
+    "closeoutTask_RequiredConditional": { "$ref": "#/$defs/closeoutDisposition", "description": "Closeout task disposition from §17.2." },
+    "closeoutMilestone_80DayWarning": { "type": "boolean", "description": "Mandatory 80-day closeout warning milestone (§17.2)." },
+    "closeoutMilestone_88DayLien": { "type": "boolean", "description": "Mandatory 88-day lien deadline milestone (§17.2)." },
+    "permits_seedSet": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Permit type seed set per §17.3 (Master, Roofing, Plumbing, HVAC, Electrical, Fire Alarm, Fire Sprinklers, Elevator, Irrigation, Low Voltage, Site-Utilities, Right-of-way)."
+    },
+    "inspections_seedGroups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Inspection group seed set per §17.4 (35 groups)."
+    },
+    "responsibilityMatrix_Workstream": { "type": "string", "description": "Responsibility matrix workstream (§17.5)." },
+    "responsibilityMatrix_PrimaryRole": { "type": "string", "description": "Primary responsible role (§17.5)." },
+    "ownerContractMatrix_ResponsibleParty": { "$ref": "#/$defs/responsibleParty", "description": "Owner Contract responsible party (§17.6). Workflow Deferred from MVP." },
+    "subcontractorScorecard_Categories": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/subcontractorScorecardCategory" },
+      "description": "Subcontractor scorecard categories with literal weights from §17.7 (20%, 20%, 20%, 15%, 15%, 10%). Workflow Deferred from MVP."
+    },
+    "lessonsLearned_Category": { "$ref": "#/$defs/lessonsLearnedCategory", "description": "Lessons Learned category enum (§17.8). Workflow Deferred from MVP." },
+    "lessonsLearned_Impact": { "$ref": "#/$defs/lessonsLearnedImpact", "description": "Lessons Learned impact enum (§17.8). Workflow Deferred from MVP." }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "workflowTemplateKey": {
+      "type": "string",
+      "description": "Eight seeded workflow templates from §17.1–§17.8.",
+      "enum": [
+        "project_startup",
+        "project_closeout",
+        "permits",
+        "inspections",
+        "responsibility_matrix",
+        "owner_contract_matrix",
+        "subcontractor_scorecard",
+        "lessons_learned"
+      ]
+    },
+    "startupTaskSection": {
+      "type": "string",
+      "description": "Project Startup Tasks section enum from §17.1.",
+      "enum": [
+        "Review Owner's Contract",
+        "Job Start-up",
+        "Order Services & Equipment",
+        "Permits Posted on Jobsite"
+      ]
+    },
+    "closeoutDisposition": {
+      "type": "string",
+      "description": "Closeout task disposition from §17.2.",
+      "enum": ["Required", "Conditional", "N/A"]
+    },
+    "responsibleParty": {
+      "type": "string",
+      "description": "Owner Contract Responsibility Matrix party enum from §17.6.",
+      "enum": ["Owner", "Architect-Engineer", "Contractor"]
+    },
+    "subcontractorScorecardCategory": {
+      "type": "string",
+      "description": "Subcontractor scorecard categories from §17.7 (literal weights live in source contract).",
+      "enum": [
+        "Safety & Compliance",
+        "Quality of Work",
+        "Schedule Performance",
+        "Cost Management",
+        "Communication & Management",
+        "Workforce & Labor"
+      ]
+    },
+    "lessonsLearnedCategory": {
+      "type": "string",
+      "description": "Lessons Learned category enum from §17.8.",
+      "enum": [
+        "Pre-Construction",
+        "Estimating & Bid",
+        "Procurement",
+        "Schedule",
+        "Cost / Budget",
+        "Safety",
+        "Quality",
+        "Subcontractors",
+        "Design / RFIs",
+        "Owner / Client",
+        "Technology / BIM",
+        "Workforce / Labor",
+        "Commissioning",
+        "Closeout / Turnover",
+        "Other"
+      ]
+    },
+    "lessonsLearnedImpact": {
+      "type": "string",
+      "description": "Lessons Learned impact enum from §17.8.",
+      "enum": ["Minor", "Moderate", "Significant", "Critical"]
+    }
+  }
 }

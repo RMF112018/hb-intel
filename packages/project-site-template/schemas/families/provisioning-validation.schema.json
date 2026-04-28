@@ -1,20 +1,112 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/provisioning-validation.schema.json",
-  "title": "Provisioning Validation Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the provisioning-validation family — provisioning-time invariants, pre-flight checks, no-native-SharePoint-admin guards, and declarative provisioning preconditions. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §19, §20, §21.",
+  "title": "Provisioning Validation Family Schema",
+  "description": "Phase 1 Step 4 Wave 3 — populated provisioning-validation family schema. Validates provisioning audit / validation records produced by the implementation service per Contract §20.1 (15-stage checklist plus Procore sub-stages 12A–12F) and §20.2 (record schema). This schema describes the SHAPE of validation/audit records only; it does NOT implement provisioning runtime — Phase 1 produces no provisioning code. rollbackRef is optional and Deferred beyond MVP. A failed Procore stage does not block stages 13–15 unless ProcoreSyncEnabled=true was requested. Stage 15 includes the no-Procore-secret-found check (R4). Field set traces verbatim to fields/families/provisioning-validation.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "validationId",
+    "ProvisioningRunId",
+    "ProjectId",
+    "ProjectNumber",
+    "SiteUrl",
+    "TemplateVersion",
+    "TriggeredBy",
+    "TriggeredFrom",
+    "StartedAt",
+    "Status",
+    "RepairAvailable",
+    "stage",
+    "expectedState",
+    "actualState",
+    "validationStatus",
+    "stageCatalog"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "provisioning-validation" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "validationId": { "type": "string", "description": "System-generated validation record identifier. VR-23." },
+    "ProvisioningRunId": { "type": "string", "description": "Unique provisioning run identifier; ties all sub-stage validations to one run. VR-23." },
+    "ProjectId": { "type": "string", "description": "Cross-reference to project." },
+    "ProjectNumber": { "type": "string", "description": "Full accounting number." },
+    "SiteUrl": { "type": "string", "format": "uri", "description": "Provisioned site URL." },
+    "TemplateVersion": { "type": "string", "description": "Template version used at provisioning." },
+    "TriggeredBy": { "type": "string", "description": "UPN of human or system initiator." },
+    "TriggeredFrom": { "type": "string", "description": "Trigger context (e.g., 'PCC UI', 'backend workflow', 'API')." },
+    "StartedAt": { "type": "string", "format": "date-time", "description": "UTC start timestamp." },
+    "CompletedAt": { "type": "string", "format": "date-time", "description": "UTC completion timestamp." },
+    "Status": { "$ref": "#/$defs/provisioningStatus", "description": "Overall provisioning status." },
+    "ValidationSummary": { "type": "string", "description": "Human-readable summary." },
+    "FailureReason": { "type": "string", "description": "Stage name + error if Status=Failed." },
+    "RepairAvailable": { "type": "boolean", "description": "Whether a repair path exists." },
+    "stage": { "$ref": "#/$defs/provisioningStage", "description": "Stage from the §20.1 checklist." },
+    "expectedState": { "type": "string", "description": "Expected state per stage." },
+    "actualState": { "type": "string", "description": "Actual state observed." },
+    "validationStatus": { "$ref": "#/$defs/perStageValidationStatus", "description": "Per-stage validation status." },
+    "auditRecordId": { "type": "string", "description": "Reference to provisioning audit log. VR-17." },
+    "rollbackRef": { "type": "string", "description": "Reference to rollback action. Optional. Rollback Deferred beyond MVP." },
+    "repairRef": { "type": "string", "description": "Reference to Site Health repair record (if available)." },
+    "stageCatalog": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/provisioningStage" },
+      "description": "15-stage catalog plus Procore sub-stages 12A–12F. VR-23. Stage 15 includes the no-Procore-secret-found check (R4)."
+    }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "provisioningStatus": {
+      "type": "string",
+      "description": "Overall provisioning run status from §20.2.",
+      "enum": ["InProgress", "Success", "Failed", "PartialSuccess"]
+    },
+    "perStageValidationStatus": {
+      "type": "string",
+      "description": "Per-stage validation status from §20.",
+      "enum": ["Passed", "Failed", "Skipped"]
+    },
+    "provisioningStage": {
+      "type": "string",
+      "description": "Provisioning stage names from §20.1.",
+      "enum": [
+        "Site Created",
+        "Site Metadata Applied",
+        "Libraries Created",
+        "Lists Created",
+        "Fields Created",
+        "Pages Created",
+        "Project Control Center Installed",
+        "Default Configuration Seeded",
+        "Permission Groups Created",
+        "Global Read-Only Group Applied",
+        "Project Team Roles Seeded",
+        "External Integration Placeholders Created",
+        "Procore Mapping Placeholder Created",
+        "Procore Subject Area Registry Seeded",
+        "Procore Settings Initialized",
+        "Procore Tool Deep Links Initialized",
+        "Procore Sync Health Placeholder Created",
+        "Procore Site Health Checks Registered",
+        "Workflow Templates Seeded",
+        "Site Health Record Created",
+        "Final Validation Passed"
+      ]
+    }
+  }
 }

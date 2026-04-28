@@ -3,7 +3,7 @@
   "templateName": "HB Standard Project Site Template",
   "templateFamily": "Project Sites",
   "templateVersion": "1.0.0-proposed",
-  "phase": "Phase 1 Step 4 Wave 2 — content and experience families populated (libraries, lists, modules, pages)",
+  "phase": "Phase 1 Step 4 Wave 3 — workflow / integration / operational families populated; all 14 families populated. Phase 1 Step 5 (validation harness) still pending.",
   "source": {
     "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
     "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
@@ -85,23 +85,23 @@
     },
     "workflows": {
       "schema": "./schemas/families/workflows.schema.json",
-      "status": "skeleton",
-      "notes": "Decision closure, approvals, hand-offs, and stage-gated transitions. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 3 — populated. 8 §17.1–§17.8 seeded workflow templates (5 MVP + 3 Deferred). Responsibility / due-date / evidence / status fields plus stage-gated transitions; ProjectStatus archive behavior bound by VR-09. seedRule keyed strictly on ProjectType (VR-08). Owner Contract Matrix, Subcontractor Scorecard, Lessons Learned carry mvpStatus 'Deferred'. mvp_status canonical (VR-24)."
     },
     "integrations": {
       "schema": "./schemas/families/integrations.schema.json",
-      "status": "skeleton",
-      "notes": "Procore (read-only operational), Sage Intacct (accounting book of record), and other allowed external systems. Procore Object Link Records and Procore Curated Summary Records remain placeholder / future-reference only. SPFx must not call Procore directly. Procore write-back deferred from MVP. No secrets stored. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 3 — populated. 8 §18.0 integrations (Procore, Sage Intacct, Compass, Document Crunch, Adobe Sign, Cupix, Teams, Outlook). Procore boundary hard-encoded: noFullProcoreMirror / noDirectSpfxToProcore / noProcoreSecrets / procoreDirectoryComparison_ReadOnly / procoreWriteback_Deferred all const true. ProcoreCompanyId default '5280', three-form contract, configuration not secret (VR-10, VR-13). Sage Intacct = accounting book of record (VR-14); Procore = operational. PCC does not become a financial book of record. OC-17 (Procore Object Link Records) and OC-18 (Procore Curated Summary Records) optional-only placeholder fields; no full Procore canonical model (VR-16 / Contract P-10). mvp_status canonical (VR-24)."
     },
     "site-health": {
       "schema": "./schemas/families/site-health.schema.json",
-      "status": "skeleton",
-      "notes": "Drift detection records, severity classification, repair tier descriptors, audit trace fields. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 3 — populated. 20+ named §19.1 checks; severity (§19.3 canonical 5-value enum, VR-21); repair tier (§19A canonical 4-value enum, VR-22); auditTrail with sanitized entries — beforeAuditState / afterAuditState are redacted compact-JSON strings, no raw payload or secrets (VR-13, VR-17). Site Health depends on every provisioned object family. mvp_status canonical (VR-24)."
     },
     "provisioning-validation": {
       "schema": "./schemas/families/provisioning-validation.schema.json",
-      "status": "skeleton",
-      "notes": "Provisioning-time invariants, pre-flight checks, no-native-SharePoint-admin guards. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 3 — populated. Validation/audit record schema for the §20.1 15-stage checklist (plus Procore sub-stages 12A–12F) and §20.2 record shape. Validates record SHAPE only — no provisioning runtime implementation produced in Phase 1. rollbackRef optional and Deferred beyond MVP. Stage 15 includes the no-Procore-secret-found check (R4). VR-17, VR-23. mvp_status canonical (VR-24)."
     },
     "validation-rules": {
       "schema": "./schemas/families/validation-rules.schema.json",

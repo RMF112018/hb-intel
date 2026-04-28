@@ -1,20 +1,162 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/integrations.schema.json",
-  "title": "Integrations Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the integrations family — declarative integration configuration including Procore (read-only operational data), Sage Intacct (accounting book of record), and other allowed external systems. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Procore Object Link Records and Procore Curated Summary Records remain placeholder / future-reference only and do not become full Procore canonical models in Phase 1. SPFx must not call Procore directly — all Procore traffic routes through `backend/functions/`. Procore write-back remains deferred from MVP. No secrets are stored in this family or any related schema; `ProcoreCompanyId = 5280` is configuration. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §11, §13, §14, §22.",
+  "title": "Integrations Family Schema",
+  "description": "Phase 1 Step 4 Wave 3 — populated integrations family schema. Eight integrations from Contract §18.0 (Procore, Sage Intacct, Compass, Document Crunch, Adobe Sign, Cupix, Teams, Outlook); Procore-specific records from §10.6 / §11.7 / §15.13.1–§15.13.6 / §18.1.5 / §18.1.7 / §18.1.12 / §18.1.13 / §22.2 / Roadmap §8. Field set traces verbatim to fields/families/integrations.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24). Procore boundary is hard-encoded: noFullProcoreMirror / noDirectSpfxToProcore / noProcoreSecrets / procoreDirectoryComparison_ReadOnly / procoreWriteback_Deferred all const true; OC-17 and OC-18 placeholder fields are optional only and never become a full Procore canonical model in Phase 1. Sage Intacct is the accounting book of record (VR-14); Procore is operational / project-management state. PCC does not become a financial book of record. ProcoreCompanyId default is '5280' as configuration, never a secret.",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "integrationName",
+    "integrationKind",
+    "sourceSystem",
+    "classification",
+    "configuredStatus",
+    "noFullProcoreMirror",
+    "noDirectSpfxToProcore",
+    "noProcoreSecrets",
+    "procoreMapping_ProjectId",
+    "procoreMapping_ProcoreCompanyId",
+    "procoreMapping_ProcoreSyncEnabled",
+    "procoreMapping_ConfiguredBy",
+    "procoreSubjectAreaRegistry_SubjectArea",
+    "procoreSubjectAreaRegistry_Enabled",
+    "procoreSubjectAreaRegistry_StorageTarget",
+    "procoreSubjectAreaRegistry_ApiLifecycleStatus",
+    "procoreSyncHealth_Status",
+    "procoreSyncHealth_RepairActionAvailable",
+    "procoreIntegrationAudit_Action",
+    "procoreDirectoryComparison_ReadOnly",
+    "procoreWriteback_Deferred",
+    "sageIntacct_ProjectId"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "integrations" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "integrationName": { "$ref": "#/$defs/integrationName", "description": "One of the eight integrations from Contract §18.0." },
+    "integrationKind": { "type": "string", "description": "Integration kind (e.g., 'project_management', 'accounting_book_of_record', 'document_review')." },
+    "sourceSystem": { "type": "string", "description": "Source-system label (e.g., 'Procore', 'Sage Intacct'). Sage Intacct is the accounting book of record per VR-14." },
+    "classification": { "$ref": "#/$defs/integrationClassification", "description": "Operational vs accounting-book-of-record. Sage Intacct = accounting; Procore = operational. PCC does not become a financial book of record." },
+    "configuredStatus": { "type": "string", "description": "Status enum from §15.2 Integration Configuration (e.g., 'Configured', 'Pending', 'Disabled')." },
+    "baseUrl": { "type": "string", "format": "uri", "description": "Integration base URL." },
+    "lastHealthCheck": { "type": "string", "format": "date-time", "description": "UTC timestamp of last health check." },
+    "lastHealthResult": { "type": "string", "description": "Last health check result." },
+    "noFullProcoreMirror": { "type": "boolean", "const": true, "description": "Hard guardrail. SharePoint is not a full Procore mirror. Allowed shapes: mapping, summary, exception, action queue, sync health, audit, object link. Forbidden shapes: raw payload, high-volume detail history, bulk attachment, full binary mirror. VR-16; Contract P-10." },
+    "noDirectSpfxToProcore": { "type": "boolean", "const": true, "description": "Hard guardrail. SPFx must not call Procore directly; all traffic routes through backend/functions/. VR-12 cross-layer (SPFx + Backend + Documentation)." },
+    "noProcoreSecrets": { "type": "boolean", "const": true, "description": "Hard guardrail. No Procore client IDs, secrets, refresh tokens, DMSA credentials, OAuth secrets, or environment credentials in any schema, SharePoint surface, SPFx surface, markdown, repo source, or client config. VR-13." },
+    "procoreMapping_ProjectId": { "type": "string", "description": "Project Procore Mapping cross-reference. §15.13.1." },
+    "procoreMapping_ProcoreCompanyId": {
+      "type": "string",
+      "default": "5280",
+      "description": "Default '5280'. Configuration, not secret. Three-form contract per §10.6 / §18.1.5. VR-10."
+    },
+    "procoreMapping_ProcoreProjectId": { "type": "string", "description": "Procore project ID (lineage). Runtime Configuration." },
+    "procoreMapping_ProcoreSyncEnabled": { "type": "boolean", "default": false, "description": "Sync enabled flag; default false at provisioning. Runtime Configuration." },
+    "procoreMapping_ConfiguredBy": { "type": "string", "description": "Mapping owner UPN. Primary: Project Manager; Fallback: Project Executive; Repair: IT/Integration Admin. Project Accountant is NOT the mapping owner. VR-11." },
+    "procoreSubjectAreaRegistry_SubjectArea": { "$ref": "#/$defs/procoreSubjectArea", "description": "Subject area enum (§15.13.2)." },
+    "procoreSubjectAreaRegistry_Enabled": { "type": "boolean", "default": false, "description": "Enabled flag; default false at provisioning. Runtime Configuration." },
+    "procoreSubjectAreaRegistry_StorageTarget": { "$ref": "#/$defs/procoreStorageTarget", "description": "Storage target. VR-16 / Contract P-10 storage strategy." },
+    "procoreSubjectAreaRegistry_ApiLifecycleStatus": { "$ref": "#/$defs/procoreApiLifecycleStatus", "description": "API lifecycle status (§15.13.2)." },
+    "procoreSyncHealth_Status": { "$ref": "#/$defs/procoreLastSyncStatus", "description": "Sync status (§15.13.3)." },
+    "procoreSyncHealth_ErrorCategory": { "$ref": "#/$defs/procoreErrorCategory", "description": "Error category enum (§15.13.3)." },
+    "procoreSyncHealth_ErrorMessageRedacted": { "type": "string", "description": "Plain-language redacted error message; never raw payload, token, or URL with secrets. §18.1.12; VR-13." },
+    "procoreSyncHealth_RepairActionAvailable": { "type": "boolean", "description": "Whether repair action surfaces in Site Health (§19A). VR-22." },
+    "procoreObjectLink_SourceSystem": {
+      "type": "string",
+      "description": "OC-17 placeholder / future-reference only. Constant 'Procore'. Phase 1 introduces no full Procore canonical object model and no Procore binary mirror; honors no-full-Procore-mirror rule (Contract P-10; VR-16). Lineage-only string."
+    },
+    "procoreObjectLink_ProcoreObjectType": { "type": "string", "description": "OC-17 placeholder / future-reference only. Lineage-only string identifying the Procore object kind (e.g., rfi, submittal, observation, punch_item, commitment, change_event)." },
+    "procoreObjectLink_ProcoreObjectId": { "type": "string", "description": "OC-17 placeholder / future-reference only. Lineage ID only; no payload mirror." },
+    "procoreObjectLink_ProcoreObjectUrl": { "type": "string", "format": "uri", "description": "OC-17 placeholder / future-reference only. Deep link to Procore object." },
+    "procoreCuratedSummary_SummaryType": { "type": "string", "description": "OC-18 placeholder / future-reference only. Phase 1 materializes no summaries; honors no-full-Procore-mirror rule (Contract P-10; VR-16)." },
+    "procoreCuratedSummary_Enabled": { "type": "boolean", "default": false, "description": "OC-18 placeholder / future-reference only. Default false." },
+    "procoreIntegrationAudit_Action": { "$ref": "#/$defs/procoreIntegrationAuditAction", "description": "Append-only audit action enum (§15.13.6). VR-17." },
+    "procoreIntegrationAudit_BeforeState": { "type": "string", "description": "Compact JSON of pre-mutation state; redacted of secrets. VR-13." },
+    "procoreIntegrationAudit_AfterState": { "type": "string", "description": "Compact JSON of post-mutation state; redacted of secrets. VR-13." },
+    "procoreDirectoryComparison_ReadOnly": { "type": "boolean", "const": true, "description": "Procore directory comparison is read-only and does not auto-grant SharePoint access. VR-15; P-17." },
+    "procoreWriteback_Deferred": { "type": "boolean", "const": true, "description": "Procore write-back remains Deferred from MVP per VR-20 / Roadmap §8 must-not-include." },
+    "sageIntacct_ProjectId": { "type": "string", "description": "Sage Intacct project ID. Sage Intacct is the accounting book of record (VR-14)." },
+    "compass_ProjectId": { "type": "string", "description": "Compass project ID (Future)." },
+    "documentCrunch_ProjectWorkspaceId": { "type": "string", "description": "Document Crunch project / workspace ID (Future)." },
+    "adobeSign_WorkspaceMapping": { "type": "string", "description": "Adobe Sign workspace / account mapping (Required at Active Construction; Deferred until then)." },
+    "cupix_ProjectId": { "type": "string", "description": "Cupix project ID (Required for Luxury Residential; Optional otherwise)." },
+    "teams_ChannelOrTeamId": { "type": "string", "description": "Microsoft Teams channel/team ID (link-out only). VR-28." },
+    "outlook_CalendarMapping": { "type": "string", "description": "Outlook Calendar mapping (link-out only). Concrete type TBD; contract describes the concept without specifying a structured type. Resolvable downstream without an architecture decision." }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "integrationName": {
+      "type": "string",
+      "description": "Eight integrations from Contract §18.0.",
+      "enum": ["procore", "sage_intacct", "compass", "document_crunch", "adobe_sign", "cupix", "teams", "outlook"]
+    },
+    "integrationClassification": {
+      "type": "string",
+      "description": "Source-system classification. Sage Intacct = accounting book of record (VR-14); Procore = operational / project-management state. PCC does not become a financial book of record.",
+      "enum": ["accounting-book-of-record", "operational", "operational-financial", "document-review", "esignature", "communication", "spatial-capture", "calendar"]
+    },
+    "procoreSubjectArea": {
+      "type": "string",
+      "description": "Procore subject area enum from §15.13.2.",
+      "enum": ["financials", "project_management", "documents_design", "quality_safety", "field_execution", "workflow"]
+    },
+    "procoreLastSyncStatus": {
+      "type": "string",
+      "description": "Procore sync status enum from §15.13.3.",
+      "enum": ["Success", "Partial", "Failed", "NotRun"]
+    },
+    "procoreErrorCategory": {
+      "type": "string",
+      "description": "Procore sync error category enum from §15.13.3.",
+      "enum": [
+        "AuthFailed",
+        "PermissionDenied",
+        "RateLimited",
+        "EndpointDeprecated",
+        "MappingMissing",
+        "ProjectNotFound",
+        "PartialSync",
+        "StaleData",
+        "MaterializationFailed",
+        "Unknown"
+      ]
+    },
+    "procoreStorageTarget": {
+      "type": "string",
+      "description": "Procore storage target enum from §15.13.2 / §18.1. Allowed shapes only; no full binary mirror (VR-16).",
+      "enum": ["raw-landing", "canonical-relational", "sharepoint-materialized", "deep-link-only"]
+    },
+    "procoreApiLifecycleStatus": {
+      "type": "string",
+      "description": "Procore API lifecycle status enum from §15.13.2.",
+      "enum": ["Stable", "Beta", "Deprecated", "Sunset", "Unknown"]
+    },
+    "procoreIntegrationAuditAction": {
+      "type": "string",
+      "description": "Procore Integration Audit action enum from §15.13.6.",
+      "enum": [
+        "mapping_configured",
+        "mapping_owner_changed",
+        "subject_area_enabled",
+        "sync_run",
+        "repair_executed",
+        "secret_violation_detected"
+      ]
+    }
+  }
 }

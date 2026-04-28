@@ -136,3 +136,101 @@ Yes — Wave 2 deliverables are complete and bounded. The ProjectStage-vs-Projec
 ```text
 Phase 1 Step 4 Wave 3 — Workflows / Integrations / Site-Health / Provisioning-Validation
 ```
+
+## Wave 3 — Workflow, Integration, and Operational Families
+
+### Summary
+
+Wave 3 populated the four workflow / integration / operational family schemas: `workflows`, `integrations`, `provisioning-validation`, `site-health`. Each schema is a JSON Schema Draft 2020-12 document validating instance records of its family. Field sets trace verbatim to the matching `fields/families/<family>.fields.json` files. The canonical Decision Closure four-value `mvp_status` enum replaces the temporary scaffold shorthand in these four schemas. The Procore boundary is hard-encoded in `integrations.schema.json`: `noFullProcoreMirror`, `noDirectSpfxToProcore`, `noProcoreSecrets`, `procoreDirectoryComparison_ReadOnly`, `procoreWriteback_Deferred` are all `const: true`. OC-17 (Procore Object Link Records) and OC-18 (Procore Curated Summary Records) appear as optional-only placeholder fields with no nested Procore canonical structure. `procoreMapping_ProcoreCompanyId` defaults to `"5280"` as configuration. Sage Intacct remains the accounting book of record; PCC does not become a financial book of record. `provisioning-validation.schema.json` validates record SHAPE only — no provisioning runtime is produced. `site-health.schema.json` audit fields are sanitized: `beforeAuditState` / `afterAuditState` are redacted compact-JSON strings; `auditEntry` rejects raw payload and secrets.
+
+After Wave 3, all 14 family schemas are populated. `template-contract.json` `status.fullExtractionComplete` remains `false` because Phase 1 Step 5 (Schema Validation Harness) is still pending.
+
+### Files Modified
+
+```text
+packages/project-site-template/schemas/families/workflows.schema.json
+packages/project-site-template/schemas/families/integrations.schema.json
+packages/project-site-template/schemas/families/provisioning-validation.schema.json
+packages/project-site-template/schemas/families/site-health.schema.json
+packages/project-site-template/template-contract.json
+packages/project-site-template/README.md
+packages/project-site-template/docs/Phase_1_Step_4_Per_Family_Schema_Population_Notes.md
+```
+
+### Files Created
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-1/Phase_1_Step_4_Per_Family_Schema_Population_Closeout.md
+```
+
+### Families Populated (Wave 3)
+
+| Family | Required Properties | Total Properties | Local `$defs` | Source Anchors | Validation Rule Refs |
+|---|---|---|---|---|---|
+| workflows | 10 | 21 | decisionClosureStatus, workflowTemplateKey, startupTaskSection, closeoutDisposition, responsibleParty, subcontractorScorecardCategory, lessonsLearnedCategory, lessonsLearnedImpact | §17.1–§17.8, §4B.2 | VR-08, VR-09, VR-24, VR-26 |
+| integrations | 26 | 41 | decisionClosureStatus, integrationName, integrationClassification, procoreSubjectArea, procoreLastSyncStatus, procoreErrorCategory, procoreStorageTarget, procoreApiLifecycleStatus, procoreIntegrationAuditAction | §10.6, §11.7, §15.13.1–§15.13.6, §18.0, §18.1.5, §18.1.7, §18.1.12, §18.1.13, §22.2, Roadmap §8 | VR-10, VR-11, VR-12, VR-13, VR-14, VR-15, VR-16, VR-17, VR-20, VR-22, VR-28 |
+| provisioning-validation | 20 | 22 | decisionClosureStatus, provisioningStatus, perStageValidationStatus, provisioningStage | §6.1, §19A, §20, §20.1, §20.2 | VR-17, VR-23 |
+| site-health | 17 | 18 | decisionClosureStatus, siteHealthSeverity, repairAutomationTier, repairApprovalStatus, siteHealthState, auditEntry | §15.2, §19, §19.1, §19.3, §19A | VR-13, VR-17, VR-21, VR-22 |
+
+### Procore Boundary Validation (Wave 3)
+
+| Boundary | Required State | Encoded As | Pass / Fail |
+|---|---|---|---|
+| OC-17 placeholder only | Optional, no canonical model | `procoreObjectLink_*` not in `required`; lineage strings only; no nested payload schema | Pass |
+| OC-18 placeholder only | Optional, no canonical model | `procoreCuratedSummary_*` not in `required`; scalar fields only; no nested payload schema | Pass |
+| No full Procore canonical model | Required | No nested Procore object schemas anywhere in `integrations.schema.json` | Pass |
+| No Procore secrets | Required | `noProcoreSecrets` `const: true`; `RedactedErrorSummary` description requires plain-language only; audit `BeforeState` / `AfterState` redacted | Pass |
+| No direct SPFx-to-Procore | Required | `noDirectSpfxToProcore` `const: true`; description references VR-12 cross-layer | Pass |
+| Procore = operational, not accounting | Required | `integrationClassification` enum separates `accounting-book-of-record` (Sage Intacct) from `operational` / `operational-financial` (Procore) | Pass |
+| Sage Intacct = accounting book of record | Required | `sageIntacct_ProjectId` required; classification enum and description reference VR-14 | Pass |
+| Procore write-back Deferred | Required | `procoreWriteback_Deferred` `const: true`; description references VR-20 / Roadmap §8 must-not-include | Pass |
+| ProcoreCompanyId as configuration not secret | Required | `procoreMapping_ProcoreCompanyId.default == "5280"`; description references VR-10 three-form contract | Pass |
+| Procore directory comparison read-only | Required | `procoreDirectoryComparison_ReadOnly` `const: true`; description references VR-15 / P-17 | Pass |
+
+### Validation Performed
+
+- JSON well-formedness on all four Wave 3 schema files and `template-contract.json`.
+- Each Wave 3 schema's `mvp_status` `$defs` matches the canonical Decision Closure four-value enum verbatim.
+- No `"mvp"`, `"deferred"`, or `"placeholder"` shorthand survives in the four Wave 3 schemas.
+- `template-contract.json` now marks all 14 families `populated`. `status.fullExtractionComplete` remains `false` because Phase 1 Step 5 is still pending.
+- `git diff --name-only schemas/families/` confirms only the four Wave 3 schema files changed under `schemas/families/`. Wave 1 and Wave 2 schemas, `enums.schema.json`, `validation-rules.schema.json`, and `template-contract.schema.json` were not modified.
+- `site-health.schema.json` `siteHealthSeverity` and `repairAutomationTier` `$defs` enums match the canonical 5-value and 4-value sets from Phase 1 Step 2 enums.schema.json verbatim.
+- `integrations.schema.json` Procore boundary booleans (`noFullProcoreMirror`, `noDirectSpfxToProcore`, `noProcoreSecrets`, `procoreDirectoryComparison_ReadOnly`, `procoreWriteback_Deferred`) are all `const: true`.
+- `procoreMapping_ProcoreCompanyId.default` equals `"5280"`.
+- OC-17 (`procoreObjectLink_*`) and OC-18 (`procoreCuratedSummary_*`) fields are absent from the `required` array.
+- `provisioning-validation.schema.json` does not include any provisioning runtime implementation; description explicitly states the schema validates record SHAPE only.
+- `site-health.schema.json` `auditEntry` `additionalProperties: false` rejects unknown keys; `beforeAuditState` and `afterAuditState` are typed `string` with description requiring redaction.
+- No backend, SPFx, provisioning, manifest, test, generated, CI, dependency, script, root-workspace, package, or deploy changes occurred.
+- No architecture-gap escalation was required.
+
+### Guardrails Preserved
+
+- All 14 schemas now bind `mvp_status` to the canonical Decision Closure four-value enum (VR-24).
+- Procore boundary hard-encoded in `integrations.schema.json` (5 const-true booleans + OC-17/OC-18 optional-only).
+- Sage Intacct remains accounting book of record (VR-14); Procore remains operational state.
+- `procoreCompanyId` recorded as configuration in three forms (canonical / surface / business), default `"5280"`, never a secret.
+- Procore write-back Deferred (VR-20).
+- Procore directory comparison read-only (VR-15; P-17).
+- Site Health severity and repair tier match canonical 5-value and 4-value enums (VR-21, VR-22).
+- Audit posture: no raw payload, no secrets, redacted compact-JSON strings (VR-13, VR-17).
+- Provisioning Validation schema captures record shape only; no provisioning runtime produced.
+- HBI Assistant remains Deferred (VR-19; encoded in modules family Wave 2).
+- External users remain Deferred (VR-18; encoded in permissions family Wave 1).
+- No new architecture decisions introduced.
+
+### Issues / Risks
+
+- The 8 Wave 2/3 family schema skeletons no longer carry temporary shorthand — that risk is fully retired.
+- Phase 1 Step 5 — Schema Validation Harness — is the next required step. Without the harness, today's verification is limited to JSON well-formedness, structural review, and `git diff` scope checks.
+- `lists.schema.json` per-list expansion remains bounded to `requiredFields` / `optionalFields` name lists; downstream consumers needing per-list validation may produce dedicated schemas at Step 5 or later.
+- `integrations.schema.json` `outlook_CalendarMapping` is typed `string`; the contract does not define a structured type, and the schema description says concrete type TBD. Resolvable downstream without an architecture decision.
+
+### Ready for Closeout?
+
+Yes. All 14 family schemas are populated; canonical taxonomy is anchored everywhere; Procore boundary is hard-encoded; Sage/Procore accounting boundary is preserved; `template-contract.json` marks all 14 families populated with `fullExtractionComplete: false`. The Phase 1 Step 4 closeout report is created alongside Wave 3.
+
+### Recommended Next Prompt
+
+```text
+Phase 1 Step 5 — Schema Validation Harness
+```

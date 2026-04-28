@@ -74,26 +74,38 @@ The 14 families come directly from the Phase 0 Step 2 Schema Family Taxonomy. Ea
 
 | Family | Skeleton File | Phase 1 Status |
 |---|---|---|
-| template-manifest | `schemas/families/template-manifest.schema.json` | skeleton |
+| template-manifest | `schemas/families/template-manifest.schema.json` | populated (Phase 1 Step 4 Wave 1) |
 | enums | `schemas/families/enums.schema.json` | populated (Phase 1 Step 2) |
-| settings | `schemas/families/settings.schema.json` | skeleton |
-| permissions | `schemas/families/permissions.schema.json` | skeleton |
-| site | `schemas/families/site.schema.json` | skeleton |
-| pages | `schemas/families/pages.schema.json` | skeleton |
-| libraries | `schemas/families/libraries.schema.json` | skeleton |
-| lists | `schemas/families/lists.schema.json` | skeleton |
-| modules | `schemas/families/modules.schema.json` | skeleton |
-| workflows | `schemas/families/workflows.schema.json` | skeleton |
-| integrations | `schemas/families/integrations.schema.json` | skeleton |
-| site-health | `schemas/families/site-health.schema.json` | skeleton |
-| provisioning-validation | `schemas/families/provisioning-validation.schema.json` | skeleton |
+| settings | `schemas/families/settings.schema.json` | populated (Phase 1 Step 4 Wave 1) |
+| permissions | `schemas/families/permissions.schema.json` | populated (Phase 1 Step 4 Wave 1) |
+| site | `schemas/families/site.schema.json` | populated (Phase 1 Step 4 Wave 1) |
+| pages | `schemas/families/pages.schema.json` | populated (Phase 1 Step 4 Wave 2) |
+| libraries | `schemas/families/libraries.schema.json` | populated (Phase 1 Step 4 Wave 2) |
+| lists | `schemas/families/lists.schema.json` | populated (Phase 1 Step 4 Wave 2) |
+| modules | `schemas/families/modules.schema.json` | populated (Phase 1 Step 4 Wave 2) |
+| workflows | `schemas/families/workflows.schema.json` | populated (Phase 1 Step 4 Wave 3) |
+| integrations | `schemas/families/integrations.schema.json` | populated (Phase 1 Step 4 Wave 3) |
+| site-health | `schemas/families/site-health.schema.json` | populated (Phase 1 Step 4 Wave 3) |
+| provisioning-validation | `schemas/families/provisioning-validation.schema.json` | populated (Phase 1 Step 4 Wave 3) |
 | validation-rules | `schemas/families/validation-rules.schema.json` | populated (Phase 1 Step 2) |
 
 Every skeleton declares the common traceability fields (`id`, `kind`, `mvp_status`, `sourceContractSection`, `sourceCatalogId`, `sourceBlueprintSection`, `sourceDecisionRef`, `validationRuleRefs`, `ownerCategory`) and requires the four safe universal fields (`id`, `kind`, `mvp_status`, `sourceContractSection`).
 
 ### Phase 1 Step 3 Status
 
-Phase 1 Step 3 — Object Family Field Consolidation — produced field maps for the 12 remaining families under `fields/`. The 12 family schema skeletons under `schemas/families/` remain skeleton-only; schema population happens in Phase 1 Step 4. See [`fields/README.md`](./fields/README.md) for the field-map index.
+Phase 1 Step 3 — Object Family Field Consolidation — produced field maps for the 12 remaining families under `fields/`. See [`fields/README.md`](./fields/README.md) for the field-map index.
+
+### Phase 1 Step 4 Status
+
+Phase 1 Step 4 — Per-Family Schema Population — populated all 14 family schemas across three waves:
+
+- Wave 1 (Core): `template-manifest`, `site`, `settings`, `permissions`.
+- Wave 2 (Content & Experience): `libraries`, `lists`, `modules`, `pages`.
+- Wave 3 (Workflow / Integration / Operational): `workflows`, `integrations`, `provisioning-validation`, `site-health`.
+
+All 14 family schemas now bind `mvp_status` to the canonical Decision Closure four-value enum (`Frozen for MVP`, `Runtime Configuration`, `Deferred`, `Proof-Gated`). Scaffold shorthand has been retired. The 12 untouched-skeletons risk recorded after Phase 1 Step 2 is now resolved.
+
+`template-contract.json` marks all 14 families `populated` and `status.fullExtractionComplete` remains `false` — Phase 1 Step 5 (Schema Validation Harness) is the next required step.
 
 ### Decision Closure Status / `mvp_status`
 

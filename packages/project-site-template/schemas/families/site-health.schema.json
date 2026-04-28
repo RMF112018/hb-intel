@@ -1,20 +1,102 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/site-health.schema.json",
-  "title": "Site Health Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the site-health family — drift detection records, severity classification, repair tier descriptors, and audit trace fields produced by the Site Health enforcement layer. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §19, §19A.",
+  "title": "Site Health Family Schema",
+  "description": "Phase 1 Step 4 Wave 3 — populated site-health family schema. Site Health depends on every provisioned object family (validates that pages, libraries, lists, fields, views, modules, groups, integrations, and provisioning state all exist and conform). Captures named drift checks (§19.1, 20+), severity classification (§19.3, 5-value canonical enum), and Repair Automation tier (§19A.1, 4-value canonical enum). Audit trail must avoid raw payload and secrets: beforeAuditState and afterAuditState are redacted compact-JSON strings; auditTrail entries carry sanitized actor, timestamp, action, and reason only. Field set traces verbatim to fields/families/site-health.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24). VR-13 (no secrets), VR-17 (audit posture), VR-21 (severity), VR-22 (repair tier).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "healthRecordId",
+    "ProjectId",
+    "checkId",
+    "checkName",
+    "driftedResourceRef",
+    "state",
+    "severity",
+    "repairTier",
+    "detectedAt",
+    "lastChecked",
+    "repairAvailable",
+    "repairExecuted",
+    "auditTrail"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "site-health" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "healthRecordId": { "type": "string", "description": "System-generated unique identifier per finding." },
+    "ProjectId": { "type": "string", "description": "Cross-reference to project." },
+    "checkId": { "type": "string", "description": "Stable identifier for the named §19.1 check (20+ checks: site exists, pages exist, libraries exist, lists exist, fields exist, views exist, app installed, module configuration exists, groups exist, global read-only applied, project team assignments valid, integration placeholders exist, template version current, no permission breakage, no missing navigation, no broken webparts, emergency repair reconciled, Procore mapping exists, ProcoreProjectId present, ProcoreProjectUrl present, Procore project reachable, enabled subject areas healthy, backend credentials available, last successful sync in tolerance, sync errors redacted, deep links configured, no stale materializations, no secrets found, ProcoreCompanyId is 5280, ConfiguredBy reflects PM/PX)." },
+    "checkName": { "type": "string", "description": "Human-readable check name." },
+    "driftedResourceRef": { "type": "string", "description": "Path / reference to the drifted resource (page, list, library, field, group, etc.). Site Health's coverage spans every provisioned object family." },
+    "state": { "$ref": "#/$defs/siteHealthState", "description": "Check state." },
+    "severity": { "$ref": "#/$defs/siteHealthSeverity", "description": "Severity classification per §19.3 canonical 5-value enum. VR-21." },
+    "repairTier": { "$ref": "#/$defs/repairAutomationTier", "description": "Repair Automation tier per §19A.1 canonical 4-value enum. VR-22." },
+    "detectedAt": { "type": "string", "format": "date-time", "description": "UTC timestamp of detection." },
+    "lastChecked": { "type": "string", "format": "date-time", "description": "UTC timestamp of last check run." },
+    "detail": { "type": "string", "description": "Plain-language detail. Must not contain raw payload, tokens, or URLs with secrets. VR-13." },
+    "repairAvailable": { "type": "boolean", "description": "Whether a repair is available for this finding." },
+    "repairAction": { "type": "string", "description": "Specific repair action description." },
+    "repairApprovalStatus": { "$ref": "#/$defs/repairApprovalStatus", "description": "Approval status for repair execution." },
+    "repairExecuted": { "type": "boolean", "description": "Whether the repair was executed." },
+    "beforeAuditState": { "type": "string", "description": "Compact JSON string of pre-repair state, redacted of all secrets and raw payload. VR-13." },
+    "afterAuditState": { "type": "string", "description": "Compact JSON string of post-repair state, redacted of all secrets and raw payload. VR-13." },
+    "auditTrail": {
+      "type": "array",
+      "description": "Sanitized audit entries; no raw payload or secrets permitted. VR-17.",
+      "items": { "$ref": "#/$defs/auditEntry" }
+    }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "siteHealthSeverity": {
+      "type": "string",
+      "description": "Canonical Site Health severity enum from Contract §19.3 (5 values). Bound to enums.schema.json canonicalEnumSets.SiteHealthSeverity.",
+      "enum": ["Info", "Warning", "Blocking", "Repair Required", "Security Risk"]
+    },
+    "repairAutomationTier": {
+      "type": "string",
+      "description": "Canonical Repair Automation tier enum from Contract §19A.1 (4 values). Bound to enums.schema.json canonicalEnumSets.RepairAutomationTier.",
+      "enum": ["T1 Auto", "T2 Approval", "T3 IT Security", "T4 Manual Only"]
+    },
+    "repairApprovalStatus": {
+      "type": "string",
+      "description": "Repair approval status from §19A.",
+      "enum": ["None", "Admin Approved", "IT Approved", "Out-of-band Manual Workflow"]
+    },
+    "siteHealthState": {
+      "type": "string",
+      "description": "Check state.",
+      "enum": ["Pass", "Fail", "Drift"]
+    },
+    "auditEntry": {
+      "type": "object",
+      "description": "Sanitized audit entry. Must not contain raw payload, tokens, or URLs with secrets.",
+      "additionalProperties": false,
+      "required": ["actorUpn", "timestamp", "action"],
+      "properties": {
+        "actorUpn": { "type": "string", "description": "UPN of actor (human or service principal)." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "UTC timestamp." },
+        "action": { "type": "string", "description": "Action taken." },
+        "reason": { "type": "string", "description": "Plain-language reason; redacted of secrets. VR-13." },
+        "beforeState": { "type": "string", "description": "Compact JSON of pre-action state, redacted of secrets. VR-13." },
+        "afterState": { "type": "string", "description": "Compact JSON of post-action state, redacted of secrets. VR-13." }
+      }
+    }
+  }
 }
