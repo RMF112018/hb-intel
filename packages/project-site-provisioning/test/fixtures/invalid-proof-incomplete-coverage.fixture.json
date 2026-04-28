@@ -1,0 +1,26 @@
+{
+  "_marker": "TEST FIXTURE — INTENTIONALLY INVALID. Used by dry-run-proof-artifact.test.ts to verify validateDryRunProofArtifact rejects artifacts whose manifest is missing object family coverage. Never to be used as a real proof artifact.",
+  "artifactVersion": "0.1.0-dry-run-proof",
+  "artifactKind": "project-site-provisioning-dry-run-proof",
+  "artifactId": "invalid-incomplete-coverage",
+  "createdAt": "2026-04-28T00:00:00.000Z",
+  "dryRunOnly": true,
+  "tenantMutationAllowed": false,
+  "approvalState": {
+    "approvalStatus": "not-requested",
+    "approvedBy": null,
+    "approvedAt": null,
+    "approvalRef": null
+  },
+  "nonExecutionStatement": "This proof artifact is a dry-run planning artifact only. It does not create or modify SharePoint, Graph, PnP, Procore, SPFx, backend, or tenant resources.",
+  "manifest": {
+    "manifestVersion": "0.2.0-contract-coverage",
+    "objectPlans": {
+      "templateManifest": { "status": "placeholder", "entries": [] },
+      "enums": { "status": "placeholder", "entries": [] }
+    },
+    "blockers": []
+  },
+  "operatorSummary": {},
+  "validation": { "manifestValidationStatus": "failed", "errors": [] }
+}

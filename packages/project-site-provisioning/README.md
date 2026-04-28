@@ -8,7 +8,20 @@ This package consumes the schema-only contract owned by [`@hbc/project-site-temp
 
 ## Current step status
 
-**Phase 2 Step 3 — Provisioning Manifest Mapper Expansion and Contract Coverage.** This step:
+**Phase 2 Step 4 — Provisioning Manifest Dry-Run Proof Artifact Generation.** This step:
+
+- introduces `createDryRunProofArtifacts`, which assembles a JSON envelope and Markdown summary from a Step 3 provisioning manifest,
+- introduces a runtime `validateDryRunProofArtifact` that enforces `dryRunOnly: true`, `tenantMutationAllowed: false`, the canonical non-execution sentinel, complete object family coverage, and locked manifest scans,
+- adds a deterministic baseline pair under [`proof/`](./proof/) — `project-site-provisioning-dry-run-baseline.json` and `project-site-provisioning-dry-run-baseline.md`,
+- adds a package-local regenerator script (`pnpm --filter @hbc/project-site-provisioning generate:proof`) that builds the package and rewrites the baseline pair from real `@hbc/project-site-template` artifacts using a frozen clock and frozen project inputs,
+- adds a baseline-determinism test that catches drift between the generator and the committed baseline,
+- preserves the Step 2 mutation gate, public-export, and source-import disciplines.
+
+The proof artifact is a planning artifact only; the manifest mutation gate stays locked, and `approvalState` defaults to `not-requested` with `null` approval fields.
+
+### Step 3 reference
+
+The Step 3 mapper underneath this step:
 
 - bumps the manifest version to `0.2.0-contract-coverage`,
 - introduces a `TemplateArtifacts` model and a synchronous `loadTemplateArtifactsFromPackage(packageRoot)` loader,
@@ -113,11 +126,25 @@ Compile-time and runtime gating both enforce `{ mutationLocked: true, liveMutati
 - **Secret value scanning deferred.** `noSecretScan` is key-scoped only.
 - **No production loader path resolution.** `loadTemplateArtifactsFromPackage` requires the caller to supply the resolved package root; pnpm node_modules path resolution is left to consumers.
 
+## Proof artifacts (Step 4)
+
+- **Folder:** [`proof/`](./proof/) (committed; `.gitignore` covers `dist/` only).
+- **Baseline pair:**
+  - `proof/project-site-provisioning-dry-run-baseline.json` — JSON envelope (`{ artifactVersion, artifactKind, artifactId, createdAt, dryRunOnly: true, tenantMutationAllowed: false, approvalState, nonExecutionStatement, manifest, operatorSummary, validation }`).
+  - `proof/project-site-provisioning-dry-run-baseline.md` — Markdown operator summary covering artifact identity, source, manifest version, mutation gate, site plan, the 14-family coverage table, integrity + scans, source coverage, warnings, blockers, the operator review checklist, and the canonical non-execution statement.
+- **Determinism rules:**
+  - same manifest + same metadata → byte-identical JSON and Markdown,
+  - meaningful manifest change → different JSON and Markdown (`plannedHash` reflects the change),
+  - different `createdAt` only → only the `createdAt` line changes; `plannedHash` is unchanged,
+  - committed timestamps in the baseline use the frozen clock `2026-04-28T00:00:00.000Z`.
+- **Regeneration:** `pnpm --filter @hbc/project-site-provisioning generate:proof` builds the package and rewrites the baseline pair. The build output (`dist/`) is gitignored; only the `proof/` pair is committed.
+- **Validation sentinel:** the canonical non-execution statement is `"This proof artifact is a dry-run planning artifact only. It does not create or modify SharePoint, Graph, PnP, Procore, SPFx, backend, or tenant resources."` — the validator fails any artifact that omits or alters it.
+- **Mutation gate relationship:** the artifact carries `dryRunOnly: true` and `tenantMutationAllowed: false` as compile-time literals. `approvalState.approvalStatus` is `'not-requested'` by default and may transition to `'pending'` only via a future approval-flow step (not in scope here).
+
 ## Future steps
 
-- **Step 4 — Provisioning Manifest Dry-Run Proof Artifact Generation.** Emit a timestamped JSON + Markdown proof artifact to a version-controlled `proof/` folder, reusing the convention established by `tools/pnp-runner-local/scripts`.
-- **Step 5+ — Non-production executor adapter under `backend/functions/`** consuming a frozen, signed, approved manifest.
-- **Future expansion:** per-instance enumeration, `enforcementLayers` per entry, secret-value scanning.
+- **Step 5 — Non-production executor adapter boundary and apply-gate scaffold** under `backend/functions/`, consuming a frozen, signed, approved manifest.
+- **Future expansion:** per-instance enumeration, `enforcementLayers` per entry, secret-value scanning, timestamped per-run proof outputs alongside the committed baseline.
 
 ## Validation commands
 
@@ -125,6 +152,7 @@ From the workspace root:
 
 ```bash
 pnpm --filter @hbc/project-site-provisioning check-types
+pnpm --filter @hbc/project-site-provisioning generate:proof
 pnpm --filter @hbc/project-site-provisioning test
 ```
 
@@ -171,7 +199,9 @@ pnpm --filter @hbc/project-site-template validate:all
 - [Phase 2 Step 1 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_1_Closeout.md)
 - [Phase 2 Step 2 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_2_Project_Site_Provisioning_Mapper_Scaffold_Closeout.md)
 - [Phase 2 Step 3 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_3_Provisioning_Manifest_Mapper_Expansion_Closeout.md)
+- [Phase 2 Step 4 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_4_Dry_Run_Proof_Artifact_Generation_Closeout.md)
 - [`@hbc/project-site-template` README](../project-site-template/README.md)
 - [PCC blueprint README](../../docs/architecture/blueprint/sp-project-control-center/README.md)
 - [`docs/Phase_2_Step_2_Scaffold_Notes.md`](./docs/Phase_2_Step_2_Scaffold_Notes.md)
 - [`docs/Phase_2_Step_3_Contract_Coverage_Notes.md`](./docs/Phase_2_Step_3_Contract_Coverage_Notes.md)
+- [`docs/Phase_2_Step_4_Dry_Run_Proof_Artifact_Notes.md`](./docs/Phase_2_Step_4_Dry_Run_Proof_Artifact_Notes.md)

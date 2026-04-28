@@ -1,0 +1,660 @@
+{
+  "artifactVersion": "0.1.0-dry-run-proof",
+  "artifactKind": "project-site-provisioning-dry-run-proof",
+  "artifactId": "project-site-provisioning-dry-run-baseline",
+  "createdAt": "2026-04-28T00:00:00.000Z",
+  "dryRunOnly": true,
+  "tenantMutationAllowed": false,
+  "approvalState": {
+    "approvalStatus": "not-requested",
+    "approvedBy": null,
+    "approvedAt": null,
+    "approvalRef": null
+  },
+  "nonExecutionStatement": "This proof artifact is a dry-run planning artifact only. It does not create or modify SharePoint, Graph, PnP, Procore, SPFx, backend, or tenant resources.",
+  "manifest": {
+    "manifestVersion": "0.2.0-contract-coverage",
+    "generatedFrom": {
+      "packageName": "@hbc/project-site-template",
+      "templateName": "HB Standard Project Site Template",
+      "templateVersion": "1.0.0-proposed",
+      "contractRef": "template-contract.json"
+    },
+    "generatedAt": "2026-04-28T00:00:00.000Z",
+    "mutationGate": {
+      "mutationLocked": true,
+      "liveMutationAllowed": false,
+      "requiresHumanApproval": true
+    },
+    "sitePlan": {
+      "status": "planned",
+      "urlDerivation": {
+        "rule": "first six characters of accounting project number, non-numerics stripped, prefixed with /sites/",
+        "inputProjectNumber": "26-000-00",
+        "projectBaseNumber": "26-000",
+        "projectBaseNumberNoHyphen": "26000",
+        "resolved": "/sites/26000",
+        "status": "derived"
+      },
+      "title": {
+        "rule": "derived from input project number and project name when supplied",
+        "inputProjectNumber": "26-000-00",
+        "inputProjectName": "HB Standard Project Site Baseline",
+        "resolved": "26-000-00 HB Standard Project Site Baseline",
+        "status": "derived"
+      }
+    },
+    "objectPlans": {
+      "templateManifest": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "tm-example-0001",
+            "family": "templateManifest",
+            "kind": "template-manifest",
+            "sourceContractSection": "§4",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "HB Intel Architecture",
+            "validationRuleRefs": [
+              "VR-01",
+              "VR-02",
+              "VR-03",
+              "VR-24"
+            ],
+            "blocksGenerationIfMissing": false,
+            "fieldCount": 19,
+            "requiredFieldCount": 19,
+            "optionalFieldCount": 0,
+            "dependencies": [
+              "enums",
+              "validation-rules"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "enums": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "enums-example-0001",
+            "family": "enums",
+            "kind": "enums",
+            "sourceContractSection": "§3.2, §4B.0, §4B.1, §22",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "HB Intel Architecture",
+            "validationRuleRefs": [
+              "VR-01",
+              "VR-02",
+              "VR-03",
+              "VR-24"
+            ],
+            "blocksGenerationIfMissing": true,
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "settings": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "settings-example-0001",
+            "family": "settings",
+            "kind": "settings",
+            "sourceContractSection": "§10, §10.6, §11.6, §15.2, §18.1.5",
+            "sourceCatalogId": "OC-09",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-10",
+              "VR-13",
+              "VR-17",
+              "VR-28"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 25,
+            "requiredFieldCount": 10,
+            "optionalFieldCount": 15,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "permissions": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "permissions-example-0001",
+            "family": "permissions",
+            "kind": "permissions",
+            "sourceContractSection": "§8, §11, §12",
+            "sourceCatalogId": "OC-08",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-11",
+              "VR-15",
+              "VR-17",
+              "VR-18",
+              "VR-27",
+              "VR-30"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 17,
+            "requiredFieldCount": 15,
+            "optionalFieldCount": 2,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "site": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "site-example-0001",
+            "family": "site",
+            "kind": "site",
+            "sourceContractSection": "§5, §6",
+            "sourceCatalogId": "OC-01",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-01",
+              "VR-02",
+              "VR-03",
+              "VR-09"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 48,
+            "requiredFieldCount": 30,
+            "optionalFieldCount": 18,
+            "dependencies": [
+              "enums",
+              "validation-rules"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "pages": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "page-example-home",
+            "family": "pages",
+            "kind": "pages",
+            "sourceContractSection": "§13",
+            "sourceCatalogId": "OC-02",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-26"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 7,
+            "requiredFieldCount": 7,
+            "optionalFieldCount": 0,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site",
+              "modules"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "libraries": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "library-example-01",
+            "family": "libraries",
+            "kind": "libraries",
+            "sourceContractSection": "§14.1",
+            "sourceCatalogId": "OC-03",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-08",
+              "VR-09",
+              "VR-29"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 16,
+            "requiredFieldCount": 10,
+            "optionalFieldCount": 6,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "lists": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "list-example-project-profile",
+            "family": "lists",
+            "kind": "lists",
+            "sourceContractSection": "§15.2",
+            "sourceCatalogId": "OC-04",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-25",
+              "VR-26",
+              "VR-29"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 41,
+            "requiredFieldCount": 19,
+            "optionalFieldCount": 22,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "modules": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "module-example-project-home",
+            "family": "modules",
+            "kind": "modules",
+            "sourceContractSection": "§8.1",
+            "sourceCatalogId": "OC-10",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-07",
+              "VR-26"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 15,
+            "requiredFieldCount": 9,
+            "optionalFieldCount": 6,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site",
+              "permissions"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "workflows": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "workflow-example-project-startup",
+            "family": "workflows",
+            "kind": "workflows",
+            "sourceContractSection": "§17.1",
+            "sourceCatalogId": "OC-13",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-08",
+              "VR-09",
+              "VR-26"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 21,
+            "requiredFieldCount": 19,
+            "optionalFieldCount": 2,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "lists",
+              "libraries"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "integrations": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "integration-example-procore",
+            "family": "integrations",
+            "kind": "integrations",
+            "sourceContractSection": "§18.0, §15.13.1",
+            "sourceCatalogId": "OC-11",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "IT / Integration Admin",
+            "validationRuleRefs": [
+              "VR-10",
+              "VR-11",
+              "VR-12",
+              "VR-13",
+              "VR-14",
+              "VR-15",
+              "VR-16",
+              "VR-17",
+              "VR-20"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 42,
+            "requiredFieldCount": 28,
+            "optionalFieldCount": 14,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "settings",
+              "site"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "siteHealth": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "site-health-example-0001",
+            "family": "siteHealth",
+            "kind": "site-health",
+            "sourceContractSection": "§19, §19.1, §19.3, §19A",
+            "sourceCatalogId": "OC-12",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-13",
+              "VR-17",
+              "VR-21",
+              "VR-22"
+            ],
+            "blocksGenerationIfMissing": true,
+            "fieldCount": 18,
+            "requiredFieldCount": 13,
+            "optionalFieldCount": 5,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "site",
+              "permissions",
+              "pages",
+              "libraries",
+              "lists",
+              "modules",
+              "workflows",
+              "integrations",
+              "settings",
+              "provisioning-validation"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "provisioningValidation": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "provisioning-validation-example-0001",
+            "family": "provisioningValidation",
+            "kind": "provisioning-validation",
+            "sourceContractSection": "§20, §20.1, §20.2",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "PCC Admin",
+            "validationRuleRefs": [
+              "VR-17",
+              "VR-23"
+            ],
+            "blocksGenerationIfMissing": false,
+            "fieldCount": 22,
+            "requiredFieldCount": 16,
+            "optionalFieldCount": 6,
+            "dependencies": [
+              "enums",
+              "validation-rules",
+              "modules"
+            ],
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      },
+      "validationRules": {
+        "status": "planned",
+        "entries": [
+          {
+            "id": "validation-rules-example-0001",
+            "family": "validationRules",
+            "kind": "validation-rules",
+            "sourceContractSection": "§22",
+            "mvpStatus": "Frozen for MVP",
+            "ownerCategory": "HB Intel Architecture",
+            "validationRuleRefs": [
+              "VR-24"
+            ],
+            "blocksGenerationIfMissing": true,
+            "plannedOnly": true,
+            "mutationAllowed": false
+          }
+        ]
+      }
+    },
+    "proof": {
+      "plannedHash": "587166e4ae01ff52da01aaf48d90a6ed017919f36a943c135ee6d761d702a584",
+      "hashAlgorithm": "sha256",
+      "hashInputSummary": {
+        "includedSections": [
+          "manifestVersion",
+          "generatedFrom",
+          "mutationGate.mutationLocked",
+          "mutationGate.liveMutationAllowed",
+          "mutationGate.requiresHumanApproval",
+          "sitePlan",
+          "objectPlans"
+        ],
+        "excludedSections": [
+          "generatedAt",
+          "proof",
+          "warnings",
+          "blockers",
+          "mutationGate.approvedBy",
+          "mutationGate.approvedAt",
+          "mutationGate.approvalRef"
+        ],
+        "canonicalization": "sorted-keys + JSON.stringify"
+      },
+      "noSecretScan": {
+        "ok": true,
+        "hits": []
+      },
+      "noProcoreMirrorScan": {
+        "ok": true,
+        "hits": []
+      },
+      "noTenantMutationScan": {
+        "ok": true,
+        "hits": []
+      },
+      "sourceCoverage": {
+        "contractFamiliesDeclared": 14,
+        "fixturesProcessed": 14,
+        "fieldMapsProcessed": 12,
+        "objectCatalogRowsProcessed": 18
+      },
+      "validationStatus": "planned-coverage"
+    },
+    "warnings": [],
+    "blockers": []
+  },
+  "operatorSummary": {
+    "site": {
+      "url": "/sites/26000",
+      "title": "26-000-00 HB Standard Project Site Baseline",
+      "urlStatus": "derived",
+      "titleStatus": "derived",
+      "inputProjectNumber": "26-000-00",
+      "projectBaseNumber": "26-000",
+      "projectBaseNumberNoHyphen": "26000"
+    },
+    "objectPlanCoverage": [
+      {
+        "family": "templateManifest",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 19,
+        "requiredFieldCount": 19,
+        "optionalFieldCount": 0
+      },
+      {
+        "family": "enums",
+        "status": "planned",
+        "entryCount": 1
+      },
+      {
+        "family": "settings",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 25,
+        "requiredFieldCount": 10,
+        "optionalFieldCount": 15
+      },
+      {
+        "family": "permissions",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 17,
+        "requiredFieldCount": 15,
+        "optionalFieldCount": 2
+      },
+      {
+        "family": "site",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 48,
+        "requiredFieldCount": 30,
+        "optionalFieldCount": 18
+      },
+      {
+        "family": "pages",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 7,
+        "requiredFieldCount": 7,
+        "optionalFieldCount": 0
+      },
+      {
+        "family": "libraries",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 16,
+        "requiredFieldCount": 10,
+        "optionalFieldCount": 6
+      },
+      {
+        "family": "lists",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 41,
+        "requiredFieldCount": 19,
+        "optionalFieldCount": 22
+      },
+      {
+        "family": "modules",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 15,
+        "requiredFieldCount": 9,
+        "optionalFieldCount": 6
+      },
+      {
+        "family": "workflows",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 21,
+        "requiredFieldCount": 19,
+        "optionalFieldCount": 2
+      },
+      {
+        "family": "integrations",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 42,
+        "requiredFieldCount": 28,
+        "optionalFieldCount": 14
+      },
+      {
+        "family": "siteHealth",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 18,
+        "requiredFieldCount": 13,
+        "optionalFieldCount": 5
+      },
+      {
+        "family": "provisioningValidation",
+        "status": "planned",
+        "entryCount": 1,
+        "fieldCount": 22,
+        "requiredFieldCount": 16,
+        "optionalFieldCount": 6
+      },
+      {
+        "family": "validationRules",
+        "status": "planned",
+        "entryCount": 1
+      }
+    ],
+    "scans": {
+      "noSecretScan": {
+        "ok": true,
+        "hits": []
+      },
+      "noProcoreMirrorScan": {
+        "ok": true,
+        "hits": []
+      },
+      "noTenantMutationScan": {
+        "ok": true,
+        "hits": []
+      }
+    },
+    "plannedHash": "587166e4ae01ff52da01aaf48d90a6ed017919f36a943c135ee6d761d702a584",
+    "hashAlgorithm": "sha256",
+    "sourceCoverage": {
+      "contractFamiliesDeclared": 14,
+      "fixturesProcessed": 14,
+      "fieldMapsProcessed": 12,
+      "objectCatalogRowsProcessed": 18
+    }
+  },
+  "validation": {
+    "manifestValidationStatus": "ok",
+    "errors": []
+  }
+}

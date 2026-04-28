@@ -107,3 +107,36 @@ export {
   validateProvisioningManifest,
 } from './validation/validate-provisioning-manifest.js';
 export type { ProvisioningManifestValidationResult } from './validation/validate-provisioning-manifest.js';
+
+export {
+  NON_EXECUTION_STATEMENT,
+  PROOF_ARTIFACT_KIND,
+  PROOF_ARTIFACT_VERSION,
+} from './contracts/dry-run-proof-artifact.js';
+export type {
+  ApprovalState,
+  CreateDryRunProofArtifactsInput,
+  DryRunProofArtifact,
+  DryRunProofArtifacts,
+  ObjectPlanCoverageRow,
+  OperatorSummary,
+  OperatorSummarySite,
+} from './contracts/dry-run-proof-artifact.js';
+
+export {
+  createDryRunProofArtifacts,
+} from './proof/create-dry-run-proof-artifacts.js';
+export {
+  serializeDryRunProofJson,
+} from './proof/serialize-dry-run-proof-json.js';
+export {
+  renderDryRunProofMarkdown,
+} from './proof/render-dry-run-proof-markdown.js';
+export {
+  validateDryRunProofArtifact,
+} from './proof/validate-dry-run-proof-artifact.js';
+export type {
+  DryRunProofArtifactValidationResult,
+  ValidateDryRunProofArtifactInput,
+  ValidateDryRunProofArtifactOptions,
+} from './proof/validate-dry-run-proof-artifact.js';

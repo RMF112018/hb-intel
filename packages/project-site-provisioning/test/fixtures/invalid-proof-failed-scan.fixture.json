@@ -1,0 +1,30 @@
+{
+  "_marker": "TEST FIXTURE — INTENTIONALLY INVALID. Used by dry-run-proof-artifact.test.ts to verify validateDryRunProofArtifact rejects artifacts whose embedded manifest reports a failed scan. Never to be used as a real proof artifact.",
+  "artifactVersion": "0.1.0-dry-run-proof",
+  "artifactKind": "project-site-provisioning-dry-run-proof",
+  "artifactId": "invalid-failed-scan",
+  "createdAt": "2026-04-28T00:00:00.000Z",
+  "dryRunOnly": true,
+  "tenantMutationAllowed": false,
+  "approvalState": {
+    "approvalStatus": "not-requested",
+    "approvedBy": null,
+    "approvedAt": null,
+    "approvalRef": null
+  },
+  "nonExecutionStatement": "This proof artifact is a dry-run planning artifact only. It does not create or modify SharePoint, Graph, PnP, Procore, SPFx, backend, or tenant resources.",
+  "manifest": {
+    "manifestVersion": "0.2.0-contract-coverage",
+    "proof": {
+      "plannedHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hashAlgorithm": "sha256",
+      "noSecretScan": { "ok": false, "hits": ["$.fake"] },
+      "noProcoreMirrorScan": { "ok": true, "hits": [] },
+      "noTenantMutationScan": { "ok": true, "hits": [] },
+      "sourceCoverage": { "contractFamiliesDeclared": 0, "fixturesProcessed": 0, "fieldMapsProcessed": 0, "objectCatalogRowsProcessed": 0 },
+      "validationStatus": "planned-coverage"
+    }
+  },
+  "operatorSummary": {},
+  "validation": { "manifestValidationStatus": "failed", "errors": [] }
+}

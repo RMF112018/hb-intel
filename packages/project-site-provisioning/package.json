@@ -2,7 +2,7 @@
   "name": "@hbc/project-site-provisioning",
   "version": "0.1.0-scaffold",
   "private": true,
-  "description": "Headless deterministic mapper/planner scaffold for the SP Project Control Center Standard Project Site Template. Step 2 scaffold — manifest contract + mutation gate + validator + minimal mapper. No tenant mutation, no Graph/PnP, no SPFx, no Procore runtime.",
+  "description": "Headless deterministic mapper/planner for the SP Project Control Center Standard Project Site Template. Phase 2 contract-coverage mapper plus dry-run proof artifact generator. No tenant mutation, no Graph/PnP, no SPFx, no Procore runtime.",
   "type": "module",
   "exports": {
     ".": {
@@ -14,12 +14,14 @@
   "types": "./src/index.ts",
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    "proof"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check-types": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:proof": "tsc --project tsconfig.json && node scripts/generate-baseline-proof.mjs"
   },
   "dependencies": {
     "@hbc/project-site-template": "workspace:*"
