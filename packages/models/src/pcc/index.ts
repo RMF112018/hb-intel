@@ -132,12 +132,19 @@ export {
   EXTERNAL_SYSTEM_IDS,
   EXTERNAL_SYSTEM_POSTURES,
   EXTERNAL_SYSTEM_CATALOG,
+  LAUNCH_LINK_STATES,
+  EXTERNAL_SYSTEM_REQUIRED_BEFORE,
   type ExternalSystemId,
   type ExternalSystemPosture,
   type ExternalSystemMappingStatus,
   type IntegrationHealthStatus,
   type IExternalSystemLink,
   type IExternalSystemCatalogEntry,
+  type LaunchLinkState,
+  type ExternalSystemRequiredBefore,
+  type ILaunchLinkProjectContext,
+  type IExternalSystemMissingConfig,
+  type ILaunchLink,
 } from './ExternalSystems.js';
 
 // Document Control sources
@@ -154,10 +161,23 @@ export {
 // Site Health
 export {
   SITE_HEALTH_SEVERITIES,
+  REPAIR_TIERS,
   type SiteHealthSeverity,
   type SiteHealthCheckState,
+  type SiteHealthRepairTier,
+  type ISiteHealthCheck,
+  type IDriftIndicator,
   type ISiteHealthSummary,
 } from './SiteHealth.js';
+
+// Repair requests
+export {
+  REPAIR_REQUEST_STATES,
+  REPAIR_REQUEST_OWNER_PERSONAS,
+  type RepairRequestState,
+  type RepairRequestOwnerPersona,
+  type IRepairRequest,
+} from './RepairRequests.js';
 
 // Settings scopes
 export {
