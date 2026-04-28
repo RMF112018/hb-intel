@@ -97,18 +97,35 @@ export {
   type WorkflowItemStatus,
   type IWorkflowItem,
   type IWorkflowItemAssignment,
+  type IWorkflowItemAssignmentHistoryEntry,
+  type IWorkflowItemTransition,
   type IWorkflowStatusMeta,
 } from './WorkflowItems.js';
 
 // Business audit
-export type { IBusinessAuditEvent } from './BusinessAuditEvent.js';
+export {
+  BUSINESS_AUDIT_SOURCE_CONTEXT_TYPES,
+  type BusinessAuditSourceContextType,
+  type BusinessAuditSourceContext,
+  type IBusinessAuditEvent,
+} from './BusinessAuditEvent.js';
 
 // Approval checkpoints
 export {
   APPROVAL_CHECKPOINT_STATES,
+  APPROVAL_CHECKPOINT_TYPES,
+  APPROVAL_AUTHORITY_TYPES,
+  REVIEWER_ACTIONS,
   type ApprovalCheckpointState,
+  type ApprovalCheckpointType,
+  type ApprovalAuthorityType,
+  type ReviewerAction,
+  type IReviewerActionRecord,
   type IApprovalCheckpoint,
 } from './ApprovalCheckpoint.js';
+
+// Comments
+export type { IComment, ICommentHistoryEntry } from './Comments.js';
 
 // External systems
 export {

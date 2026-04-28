@@ -21,7 +21,13 @@ export { PCC_WORK_CENTER_IDS } from './PccWorkCenters.js';
 export { PCC_MVP_SURFACE_IDS } from './PccMvpSurfaces.js';
 export { PCC_WORKFLOW_MODULE_IDS } from './WorkflowModules.js';
 export { WORKFLOW_ITEM_STATUSES } from './WorkflowItems.js';
-export { APPROVAL_CHECKPOINT_STATES } from './ApprovalCheckpoint.js';
+export {
+  APPROVAL_CHECKPOINT_STATES,
+  APPROVAL_CHECKPOINT_TYPES,
+  APPROVAL_AUTHORITY_TYPES,
+  REVIEWER_ACTIONS,
+} from './ApprovalCheckpoint.js';
+export { BUSINESS_AUDIT_SOURCE_CONTEXT_TYPES } from './BusinessAuditEvent.js';
 export {
   EXTERNAL_SYSTEM_IDS,
   EXTERNAL_SYSTEM_POSTURES,

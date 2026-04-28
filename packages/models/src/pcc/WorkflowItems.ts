@@ -7,6 +7,10 @@
  *
  * Phase 3 / Wave 1 / Prompt 03 adds a status-display registry alongside the
  * existing `WORKFLOW_ITEM_STATUSES` value array.
+ *
+ * Phase 3 / Wave 1 / Prompt 04 adds workflow item transition records and
+ * assignment-history entries. Both are read-model only — no engine, no
+ * dispatcher, no persistence wiring is implied.
  */
 
 import type { PccPersona } from './PccUserRoles.js';
@@ -103,3 +107,45 @@ export const WORKFLOW_STATUS_META: Readonly<Record<WorkflowItemStatus, IWorkflow
     isTerminal: true,
   },
 };
+
+/**
+ * Workflow item transition record.
+ *
+ * Captures one status transition for a workflow item. The transition record
+ * is a read-model entry — there is no transition engine, no validation, and
+ * no notification side-effect implied by this type.
+ */
+export interface IWorkflowItemTransition {
+  /** Stable transition record identifier. */
+  id: string;
+  workflowItemId: PccWorkflowItemId;
+  fromStatus: WorkflowItemStatus;
+  toStatus: WorkflowItemStatus;
+  actorUpn: string;
+  actorPersona?: PccPersona;
+  /** Free-text reason or comment captured at transition time. */
+  reason?: string;
+  /** ISO 8601 UTC. */
+  occurredAtUtc: string;
+  correlationId: string;
+}
+
+/**
+ * Workflow item assignment history entry.
+ *
+ * One row per assignment lifecycle (assigned → optionally unassigned). No
+ * service, no dispatcher; consumers manage history reconstruction themselves.
+ */
+export interface IWorkflowItemAssignmentHistoryEntry {
+  id: string;
+  itemId: PccWorkflowItemId;
+  assignedToUpn: string;
+  assignedByUpn: string;
+  /** ISO 8601 UTC when the assignment was created. */
+  assignedAtUtc: string;
+  /** ISO 8601 UTC when the assignment ended, when known. */
+  unassignedAtUtc?: string;
+  /** ISO 8601 UTC due date associated with the assignment, when known. */
+  dueDateUtc?: string;
+  note?: string;
+}
