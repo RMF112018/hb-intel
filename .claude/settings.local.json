@@ -383,7 +383,9 @@
       "mcp__Claude_in_Chrome__javascript_tool",
       "mcp__Claude_in_Chrome__read_network_requests",
       "mcp__Claude_in_Chrome__read_console_messages",
-      "Bash(npx jest *)"
+      "Bash(npx jest *)",
+      "Bash(cp packages/project-site-template/validation/reports/schema-validation-report.json /tmp/svr1.json)",
+      "Bash(cp packages/project-site-template/validation/reports/contract-integrity-report.json /tmp/cir1.json)"
     ]
   },
   "enabledPlugins": {
