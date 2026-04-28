@@ -105,7 +105,17 @@ Phase 1 Step 4 — Per-Family Schema Population — populated all 14 family sche
 
 All 14 family schemas now bind `mvp_status` to the canonical Decision Closure four-value enum (`Frozen for MVP`, `Runtime Configuration`, `Deferred`, `Proof-Gated`). Scaffold shorthand has been retired. The 12 untouched-skeletons risk recorded after Phase 1 Step 2 is now resolved.
 
-`template-contract.json` marks all 14 families `populated` and `status.fullExtractionComplete` remains `false` — Phase 1 Step 5 (Schema Validation Harness) is the next required step.
+`template-contract.json` marks all 14 families `populated`.
+
+### Phase 1 Step 5 Status
+
+Phase 1 Step 5 — Schema Validation Harness — is complete and the **full extraction gate is closed**:
+
+- `template-contract.json.status.fullExtractionComplete: true`.
+- `validation/` harness (ajv 2020-12 + integrity checker) runs cleanly post-gate (`pnpm validate:all` → exit 0).
+- Both `validation/reports/schema-validation-report.json` and `validation/reports/contract-integrity-report.json` are deterministic and source-controlled.
+
+**Phase 1 Complete. Ready for Phase 2 Planning.** Phase 2 implementation has not started; the next step is Phase 2 planning unless separately authorized.
 
 ### Decision Closure Status / `mvp_status`
 

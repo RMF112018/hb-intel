@@ -25,7 +25,7 @@
     },
     {
       "id": "4.fullExtractionComplete",
-      "label": "fullExtractionComplete remains false (Step 5 stage; Prompt 04 flips the gate)",
+      "label": "fullExtractionComplete is true after Phase 1 full extraction gate closure",
       "pass": true,
       "failures": []
     },

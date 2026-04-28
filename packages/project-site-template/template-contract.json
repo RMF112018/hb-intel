@@ -3,7 +3,7 @@
   "templateName": "HB Standard Project Site Template",
   "templateFamily": "Project Sites",
   "templateVersion": "1.0.0-proposed",
-  "phase": "Phase 1 Step 4 Wave 3 — workflow / integration / operational families populated; all 14 families populated. Phase 1 Step 5 (validation harness) still pending.",
+  "phase": "Phase 1 Step 5 — full extraction gate closed",
   "source": {
     "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
     "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
@@ -11,7 +11,7 @@
   },
   "status": {
     "readiness": "scaffold-only",
-    "fullExtractionComplete": false,
+    "fullExtractionComplete": true,
     "containsNewArchitectureDecisions": false
   },
   "fieldMaps": {

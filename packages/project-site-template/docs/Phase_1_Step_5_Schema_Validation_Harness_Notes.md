@@ -201,6 +201,35 @@ None. All integrity checks pass (16/16). All schema validations match expectatio
 
 **Prompt 04 follow-on note for the integrity checker.** The current `4.fullExtractionComplete` integrity check hard-asserts `fullExtractionComplete === false`. When Prompt 04 flips that flag to `true`, the integrity checker will start failing unless that one check is updated or parameterized to accept both states (or to flip its assertion to `=== true` post-gate). Failing to update this check at gate-flip time will cause `pnpm validate:all` to exit non-zero after final closeout. The recommended path is for Prompt 04 to either (a) update the check assertion to `=== true` once the gate flips, or (b) introduce a `STEP_5_REMEDIATION` vs `POST_FULL_EXTRACTION` mode flag the script honors. This is documented here for the gate prompt's awareness.
 
+## Post-Gate Closure (Prompt 04)
+
+Phase 1 Step 5 Prompt 04 — Full Extraction Gate — closed the gate.
+
+**Gate flip:** `template-contract.json.status.fullExtractionComplete: false → true`. `phase` field updated to `"Phase 1 Step 5 — full extraction gate closed"`.
+
+**Integrity check 4 update (post-gate invariant, not a temporary mode flag):** check `4.fullExtractionComplete` is now a post-gate invariant. The catalog label changed to `"fullExtractionComplete is true after Phase 1 full extraction gate closure"`; the assertion now requires `contract.status.fullExtractionComplete === true`. The check ID `4.fullExtractionComplete` was kept stable for report continuity.
+
+**Validation post-gate:**
+
+```text
+$ node packages/project-site-template/validation/contract-integrity-checks.mjs
+  all checks passed (16/16)
+  report: validation/reports/contract-integrity-report.json
+exit 0
+
+$ node packages/project-site-template/validation/validate-template-contract.mjs
+schema validation: clean
+report: validation/reports/schema-validation-report.json
+exit 0
+
+$ pnpm --filter @hbc/project-site-template validate:all
+exit 0
+```
+
+Determinism re-verified: two consecutive post-gate runs produce byte-identical `contract-integrity-report.json`. `schema-validation-report.json` stays byte-identical to the Prompt 03 committed version (the schema-validation harness does not depend on the gate state).
+
+**Phase 1 status:** Phase 1 is complete. The next step is **Phase 2 planning** (not implementation unless separately authorized).
+
 ## What Was Not Implemented
 
 - CI integration of the harness.

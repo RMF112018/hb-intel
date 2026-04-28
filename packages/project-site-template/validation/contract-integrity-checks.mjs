@@ -27,7 +27,7 @@ const CHECK_CATALOG = [
   { id: '1.family-schemas-exist', label: 'All 14 family schemas exist on disk' },
   { id: '2.families-listed', label: 'All 14 families listed in template-contract.json' },
   { id: '3.families-populated', label: 'All 14 families have status: populated' },
-  { id: '4.fullExtractionComplete', label: 'fullExtractionComplete remains false (Step 5 stage; Prompt 04 flips the gate)' },
+  { id: '4.fullExtractionComplete', label: 'fullExtractionComplete is true after Phase 1 full extraction gate closure' },
   { id: '5.family-schema-paths-resolve', label: 'Family schema paths in template-contract.json resolve' },
   { id: '6.field-maps-exist', label: 'Field maps exist for the 12 Step 3 field-map families' },
   { id: '7.oc-row-count', label: 'object-catalog-field-disposition.json has exactly 18 rows' },
@@ -206,11 +206,11 @@ if (contract) {
   }
 
   // ---------------------------------------------------------------------------
-  // Check 4: fullExtractionComplete remains false (Step 5 stage; gate flips
-  // only after Run-Harness-and-Remediate prompt acknowledges clean run).
+  // Check 4: fullExtractionComplete is true after Phase 1 full extraction gate
+  // closure (Prompt 04). Post-gate invariant.
   // ---------------------------------------------------------------------------
-  if (contract.status?.fullExtractionComplete !== false) {
-    fail('4.fullExtractionComplete', `Expected false, got ${contract.status?.fullExtractionComplete}`);
+  if (contract.status?.fullExtractionComplete !== true) {
+    fail('4.fullExtractionComplete', `Expected true (post-gate), got ${contract.status?.fullExtractionComplete}`);
   }
 
   // ---------------------------------------------------------------------------

@@ -1,10 +1,15 @@
-# Phase 1 Step 5 — Schema Validation Harness Closeout (Prompt 03 — Remediation and Clean Run)
+# Phase 1 Step 5 — Schema Validation Harness Closeout (Final — Full Extraction Gate Closed)
 
 ## Status
 
-This is the **interim Step 5 remediation / clean-run closeout** produced by Prompt 03 (Run Harness and Remediate Schema Defects). It is **not** a "Phase 1 Complete" or "Ready for Phase 2" closeout. The full-extraction gate flip (`template-contract.json.status.fullExtractionComplete: true`) is the explicit responsibility of the follow-up Prompt 04 — Full Extraction Gate. As of this commit, that flag remains `false`.
+**Phase 1 Step 5 — Full Extraction Gate Closed.**
 
-`Ready for Prompt 04 — Full Extraction Gate`.
+- `template-contract.json.status.fullExtractionComplete: true`.
+- Validation harness runs cleanly post-gate.
+- `Phase 1 Complete`.
+- `Ready for Phase 2 Planning`.
+
+This is the final Phase 1 Step 5 closeout. Phase 2 implementation has **not** started; the next step is Phase 2 planning unless separately authorized.
 
 ## Summary
 
@@ -93,18 +98,42 @@ The integrity checker confirms each of these in the committed `contract-integrit
 - `modules.visibilityByStage` keys are exactly the six ProjectStage tokens.
 - `seedRule.keyedOn` / `verticalSeeding.keyedOn` are `const: "projectType"` everywhere they appear.
 
-## Notes for Prompt 04 (Full Extraction Gate)
+## Prompt 04 — Full Extraction Gate Closure (executed)
 
-The integrity checker's check `4.fullExtractionComplete` currently hard-asserts the flag is `false`. When Prompt 04 flips `template-contract.json.status.fullExtractionComplete` to `true`, that single check must be updated (or parameterized) so `validate:all` does not begin failing post-gate. Recommended path: either (a) update the assertion to `=== true` at the moment of gate flip, or (b) introduce a script-level mode flag (`STEP_5_REMEDIATION` vs `POST_FULL_EXTRACTION`) that the script reads. The remediation prompt deliberately did not pre-flip the assertion because doing so would have caused this prompt's own `validate:all` run to fail.
+The integrity checker's check `4.fullExtractionComplete` was updated as a **post-gate invariant** (not a temporary mode flag):
+
+- Catalog label: `"fullExtractionComplete is true after Phase 1 full extraction gate closure"`.
+- Assertion: `contract.status.fullExtractionComplete === true`.
+- Check ID `4.fullExtractionComplete` kept stable for report continuity.
+
+The gate was then flipped: `template-contract.json.status.fullExtractionComplete: false → true`, and `phase` updated to `"Phase 1 Step 5 — full extraction gate closed"`.
+
+Post-gate validation runs all exit 0:
+
+```text
+node packages/project-site-template/validation/contract-integrity-checks.mjs   → 16/16 PASS, exit 0
+node packages/project-site-template/validation/validate-template-contract.mjs   → contract-instance PASS; 14/14 valid + 7/7 invalid fixtures correctly handled; exit 0
+pnpm --filter @hbc/project-site-template validate:all                           → exit 0
+```
+
+Determinism re-verified post-gate: two consecutive runs produce byte-identical `contract-integrity-report.json`. `schema-validation-report.json` is byte-identical to the Prompt 03 committed version (schema validation does not depend on the gate state).
+
+## Phase 1 Completion Decision
+
+`Phase 1 Complete`. All 14 family schemas populated; canonical Decision Closure taxonomy bound everywhere; Procore boundary structurally enforced; ProjectStage-vs-ProjectType boundary structurally enforced; OC-17 / OC-18 placeholder posture preserved; validation harness deterministic and clean; full extraction gate closed.
+
+## Phase 2 Readiness Decision
+
+`Ready for Phase 2 Planning`. Phase 2 implementation has not started. The next step is to plan Phase 2 — not to begin implementation unless separately authorized.
 
 ## Recommended Next Prompt
 
 ```text
-Phase 1 Step 5 — Prompt 04 Full Extraction Gate
+Phase 2 Planning
 ```
 
 ## Commit Summary
 
 ```text
-test(project-site-template): validate schema contract integrity
+test(project-site-template): close phase 1 schema validation gate
 ```
