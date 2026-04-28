@@ -3,7 +3,7 @@
   "templateName": "HB Standard Project Site Template",
   "templateFamily": "Project Sites",
   "templateVersion": "1.0.0-proposed",
-  "phase": "Phase 1 Step 1 scaffold",
+  "phase": "Phase 1 Step 2 enum and validation-rule extraction",
   "source": {
     "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
     "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
@@ -22,8 +22,8 @@
     },
     "enums": {
       "schema": "./schemas/families/enums.schema.json",
-      "status": "skeleton",
-      "notes": "ProjectType, ProjectStage, ProjectStatus, decision closure, severity, repair tier, module visibility, integration status, and forbidden-value sets. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 2 — populated. Canonical enum sets defined: ProjectType, ProjectStage, ProjectStatus, DecisionClosureStatus (mvp_status), SiteHealthSeverity, RepairAutomationTier, EnforcementLayer, ValidationRuleCategory. Anti-regression tokens confined to forbiddenValues arrays. The 12 untouched family skeletons retain temporary scaffold-local mvp_status shorthand to be reconciled when each family is populated in Phase 1 Step 3 / Step 4."
     },
     "settings": {
       "schema": "./schemas/families/settings.schema.json",
@@ -82,8 +82,8 @@
     },
     "validation-rules": {
       "schema": "./schemas/families/validation-rules.schema.json",
-      "status": "skeleton",
-      "notes": "Declarative registry across the 8 enforcement layers. Seeded by VR-01 through VR-30 from the Phase 0 Step 2 Validation Rule Table Plan; rules are append-only. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 2 — populated. 13 rule categories, 8 enforcement layers, and the 30 initial rules (VR-01 through VR-30) extracted verbatim from the Phase 0 Step 2 Validation Rule Table Plan. Cross-layer rules carry participating-layer lists; JSON Schema alone does not enforce runtime behavior. Rules are append-only as later Phase 1 steps surface additional bindings."
     }
   }
 }

@@ -75,7 +75,7 @@ The 14 families come directly from the Phase 0 Step 2 Schema Family Taxonomy. Ea
 | Family | Skeleton File | Phase 1 Status |
 |---|---|---|
 | template-manifest | `schemas/families/template-manifest.schema.json` | skeleton |
-| enums | `schemas/families/enums.schema.json` | skeleton |
+| enums | `schemas/families/enums.schema.json` | populated (Phase 1 Step 2) |
 | settings | `schemas/families/settings.schema.json` | skeleton |
 | permissions | `schemas/families/permissions.schema.json` | skeleton |
 | site | `schemas/families/site.schema.json` | skeleton |
@@ -87,9 +87,22 @@ The 14 families come directly from the Phase 0 Step 2 Schema Family Taxonomy. Ea
 | integrations | `schemas/families/integrations.schema.json` | skeleton |
 | site-health | `schemas/families/site-health.schema.json` | skeleton |
 | provisioning-validation | `schemas/families/provisioning-validation.schema.json` | skeleton |
-| validation-rules | `schemas/families/validation-rules.schema.json` | skeleton |
+| validation-rules | `schemas/families/validation-rules.schema.json` | populated (Phase 1 Step 2) |
 
 Every skeleton declares the common traceability fields (`id`, `kind`, `mvp_status`, `sourceContractSection`, `sourceCatalogId`, `sourceBlueprintSection`, `sourceDecisionRef`, `validationRuleRefs`, `ownerCategory`) and requires the four safe universal fields (`id`, `kind`, `mvp_status`, `sourceContractSection`).
+
+### Decision Closure Status / `mvp_status`
+
+The canonical four-value `mvp_status` enum is bound to the Decision Closure Register (Standard Project Site Template Contract §22; VR-24):
+
+```text
+Frozen for MVP
+Runtime Configuration
+Deferred
+Proof-Gated
+```
+
+`enums.schema.json` and `validation-rules.schema.json` already use this canonical enum directly (Phase 1 Step 2). The 12 untouched family skeletons still carry temporary scaffold-local shorthand (`mvp`, `deferred`, `placeholder`) introduced in Phase 1 Step 1; these will be reconciled to the canonical four-value enum when each family is populated in Phase 1 Step 3 / Step 4.
 
 ## What This Scaffold Does
 

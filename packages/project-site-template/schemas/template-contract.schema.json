@@ -75,7 +75,7 @@
       "required": ["schema", "status"],
       "properties": {
         "schema": { "type": "string", "description": "Relative path to the family skeleton schema file." },
-        "status": { "type": "string", "enum": ["skeleton", "draft", "complete"] },
+        "status": { "type": "string", "enum": ["skeleton", "populated", "draft", "complete"] },
         "notes": { "type": "string" }
       }
     }

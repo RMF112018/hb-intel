@@ -1,20 +1,504 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/validation-rules.schema.json",
-  "title": "Validation Rules Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the validation-rules family — declarative registry of validation rules across the 8 enforcement layers (Schema, Provisioning, Backend, SPFx, Site Health, Governance, Documentation, Cross-Layer). Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 2 — Enum and Validation Rule Extraction). The 30 initial rules (VR-01 through VR-30) defined in the Phase 0 Step 2 Validation Rule Table Plan are append-only inputs to this family. Cross-layer behaviors (e.g., \"SPFx must not call Procore directly\") are never enforced by JSON Schema alone — Enforcement Layer assignment must reflect that. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §3.2, §11, §13, §17, §19, §22.",
+  "title": "Validation Rules Family Schema",
+  "description": "Phase 1 Step 2 — populated validation-rules family schema for the SP Project Control Center machine-readable Project Site Template Contract. Defines the rule-record shape, the 13 rule categories, the 8 enforcement layers, and the initial 30 rules (VR-01 through VR-30) extracted verbatim from the Phase 0 Step 2 Validation Rule Table Plan. JSON Schema alone cannot enforce cross-layer behavior; rules with `enforcementLayer: \"Cross-Layer\"` (or with multiple participating layers in their notes) are enforced by SPFx code review, backend routing, governance, and documentation. The rules array is append-only as later Phase 1 steps surface additional bindings. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §3.2, §4B.0, §4B.1, §11, §13, §17, §18, §19, §19A, §20, §22.",
   "type": "object",
   "additionalProperties": false,
+  "required": ["id", "kind", "mvp_status", "sourceContractSection"],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "validation-rules" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "rules": {
+      "type": "array",
+      "description": "Validation rule records consumed by downstream layers. Append-only.",
+      "items": { "$ref": "#/$defs/validationRule" }
+    }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Decision Closure Register status — the canonical four-value mvp_status enum.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "ruleCategory": {
+      "type": "string",
+      "enum": [
+        "Enum Binding",
+        "Conditional Visibility",
+        "Stage / Status Behavior",
+        "Runtime Configuration",
+        "Permission / Ownership",
+        "Procore Boundary",
+        "System of Record",
+        "No Secret",
+        "No Native SharePoint Admin",
+        "Referential Integrity",
+        "Site Health / Drift / Repair",
+        "Provisioning Validation",
+        "MVP / Deferred Scope"
+      ]
+    },
+    "enforcementLayer": {
+      "type": "string",
+      "description": "Single allowed enforcement-layer token. For rules that span multiple layers, set this to `Cross-Layer` and list participating layers in `notes`.",
+      "enum": ["Schema", "Provisioning", "Backend", "SPFx", "Site Health", "Governance", "Documentation", "Cross-Layer"]
+    },
+    "validationRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleId", "ruleCategory", "sourceSection", "appliesTo", "ruleStatement", "enforcementLayer", "mvpTreatment", "blocksGenerationIfMissing"],
+      "properties": {
+        "ruleId": { "type": "string", "pattern": "^VR-\\d{2,}$" },
+        "ruleCategory": { "$ref": "#/$defs/ruleCategory" },
+        "sourceSection": { "type": "string" },
+        "appliesTo": { "type": "string" },
+        "ruleStatement": { "type": "string" },
+        "schemaFamily": { "type": "string" },
+        "enforcementLayer": { "$ref": "#/$defs/enforcementLayer" },
+        "participatingLayers": {
+          "type": "array",
+          "description": "When enforcementLayer is `Cross-Layer` or the rule spans multiple layers, list each participating layer here.",
+          "items": { "$ref": "#/$defs/enforcementLayer" }
+        },
+        "mvpTreatment": { "$ref": "#/$defs/decisionClosureStatus" },
+        "blocksGenerationIfMissing": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "ruleCategoryCatalog": [
+    "Enum Binding",
+    "Conditional Visibility",
+    "Stage / Status Behavior",
+    "Runtime Configuration",
+    "Permission / Ownership",
+    "Procore Boundary",
+    "System of Record",
+    "No Secret",
+    "No Native SharePoint Admin",
+    "Referential Integrity",
+    "Site Health / Drift / Repair",
+    "Provisioning Validation",
+    "MVP / Deferred Scope"
+  ],
+  "enforcementLayerCatalog": [
+    {
+      "name": "Schema",
+      "description": "Encoded directly in JSON Schema validators."
+    },
+    {
+      "name": "Provisioning",
+      "description": "Enforced by provisioning logic at site creation."
+    },
+    {
+      "name": "Backend",
+      "description": "Enforced by backend services."
+    },
+    {
+      "name": "SPFx",
+      "description": "Enforced by SPFx component logic."
+    },
+    {
+      "name": "Site Health",
+      "description": "Detected and reported by Site Health drift checks."
+    },
+    {
+      "name": "Governance",
+      "description": "Enforced by review and policy."
+    },
+    {
+      "name": "Documentation",
+      "description": "Enforced by documentation cross-references."
+    },
+    {
+      "name": "Cross-Layer",
+      "description": "Multiple layers participate. Schema alone cannot enforce a runtime call boundary; participating layers are listed per-rule."
+    }
+  ],
+  "initialRules": [
+    {
+      "ruleId": "VR-01",
+      "ruleCategory": "Enum Binding",
+      "sourceSection": "Contract §4B.1; D-12",
+      "appliesTo": "site.projectType",
+      "ruleStatement": "Allowed values: commercial, multifamily, municipal, luxury_residential, environmental.",
+      "schemaFamily": "enums, site",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Five-value enum binding for ProjectType."
+    },
+    {
+      "ruleId": "VR-02",
+      "ruleCategory": "Enum Binding",
+      "sourceSection": "Contract §4B.0",
+      "appliesTo": "site.projectStage",
+      "ruleStatement": "Allowed values: lead, estimating, preconstruction, active_construction, closeout, warranty.",
+      "schemaFamily": "enums, site",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Six-value enum binding for ProjectStage."
+    },
+    {
+      "ruleId": "VR-03",
+      "ruleCategory": "Enum Binding",
+      "sourceSection": "Contract §3.2",
+      "appliesTo": "site.projectStatus",
+      "ruleStatement": "Allowed values: Active, On Hold, Closed, Archived.",
+      "schemaFamily": "enums, site",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Four-value enum binding for ProjectStatus."
+    },
+    {
+      "ruleId": "VR-04",
+      "ruleCategory": "Enum Binding",
+      "sourceSection": "Contract §4B.0; §3.2; D-13",
+      "appliesTo": "site.projectStatus / site.projectStage",
+      "ruleStatement": "Anti-regression: Archived is projectStatus, not projectStage. Archived must not appear as a valid projectStage value.",
+      "schemaFamily": "enums",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Forbidden-value rule on the projectStage enum."
+    },
+    {
+      "ruleId": "VR-05",
+      "ruleCategory": "Enum Binding",
+      "sourceSection": "Contract §4B.1; §4B.0; D-12",
+      "appliesTo": "site.projectType / site.projectStage",
+      "ruleStatement": "Anti-regression: active_construction is a projectStage value only, not a projectType value. active_construction must not appear as a valid projectType value.",
+      "schemaFamily": "enums",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Forbidden-value rule on the projectType enum."
+    },
+    {
+      "ruleId": "VR-06",
+      "ruleCategory": "Enum Binding",
+      "sourceSection": "Contract D-12 closure",
+      "appliesTo": "site.projectType",
+      "ruleStatement": "Anti-regression: forbidden values preconstruction_only, warranty_closeout must not appear as valid projectType values.",
+      "schemaFamily": "enums",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Forbidden-value rule on the projectType enum."
+    },
+    {
+      "ruleId": "VR-07",
+      "ruleCategory": "Conditional Visibility",
+      "sourceSection": "Contract §4B.2; §8",
+      "appliesTo": "modules[*].visibility",
+      "ruleStatement": "Module visibility is keyed on projectStage.",
+      "schemaFamily": "modules, enums",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "SPFx"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares the visibility rule structure; SPFx enforces the runtime visibility decision."
+    },
+    {
+      "ruleId": "VR-08",
+      "ruleCategory": "Conditional Visibility",
+      "sourceSection": "Contract §4B.2",
+      "appliesTo": "lists[*].seedRule, libraries[*].seedRule",
+      "ruleStatement": "Vertical seeding (e.g., per-ProjectType seed sets) is keyed on projectType.",
+      "schemaFamily": "lists, libraries, enums",
+      "enforcementLayer": "Provisioning",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Provisioning logic applies seed rules at site creation. Schema declares seed-rule structure; the seeding action is provisioning behavior."
+    },
+    {
+      "ruleId": "VR-09",
+      "ruleCategory": "Stage / Status Behavior",
+      "sourceSection": "Contract §3.2; §5.6",
+      "appliesTo": "site.archiveBehavior",
+      "ruleStatement": "On projectStatus -> Archived: site is renamed (§5.6), libraries are flipped read-only, metadata is frozen.",
+      "schemaFamily": "site, libraries",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Backend", "Provisioning"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Rename and read-only flips are backend operations triggered by status transition; Site rename driven by provisioning utility."
+    },
+    {
+      "ruleId": "VR-10",
+      "ruleCategory": "Runtime Configuration",
+      "sourceSection": "Contract §10.6; §18.1.5; P-03",
+      "appliesTo": "settings.procoreCompanyId",
+      "ruleStatement": "Default 5280. Configuration, not secret. Three forms: canonical procore_company_id, surface ProcoreCompanyId, business 'Procore Company ID = 5280'. Site Health flags blank or non-5280 values unless an approved multi-company exception exists.",
+      "schemaFamily": "settings, integrations, site-health",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "Site Health"],
+      "mvpTreatment": "Runtime Configuration",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares default and three forms; Site Health enforces the value check at runtime."
+    },
+    {
+      "ruleId": "VR-11",
+      "ruleCategory": "Permission / Ownership",
+      "sourceSection": "Contract §10.6 (line 594); P-04",
+      "appliesTo": "permissions.procoreMappingOwner",
+      "ruleStatement": "Procore mapping owner is Project Manager; fallback owner is Project Executive when no PM is assigned. Project Accountant is not the mapping owner.",
+      "schemaFamily": "permissions, integrations",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema encodes the allowed ownership set; backend enforces the assignment rule."
+    },
+    {
+      "ruleId": "VR-12",
+      "ruleCategory": "Procore Boundary",
+      "sourceSection": "Contract §18 (line 1486); R-rules",
+      "appliesTo": "integrations.procore.*",
+      "ruleStatement": "SPFx must not call the Procore API directly. All Procore traffic routes through backend/functions/ with auth, secrets, rate limits, and audit owned by the backend.",
+      "schemaFamily": "integrations",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["SPFx", "Backend", "Documentation"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "JSON Schema alone cannot enforce a runtime call boundary; the rule is enforced by SPFx code review, backend routing, and a documented governance rule."
+    },
+    {
+      "ruleId": "VR-13",
+      "ruleCategory": "No Secret",
+      "sourceSection": "Contract R4 (around line 1503); P-01; P-02",
+      "appliesTo": "(all schemas, all SharePoint surfaces, all SPFx surfaces, all markdown docs, all repo source, all client config)",
+      "ruleStatement": "No Procore client IDs, client secrets, refresh tokens, DMSA credentials, OAuth secrets, or environment credentials may appear in any schema, SharePoint list, SPFx surface, markdown doc, repo source, or client configuration.",
+      "schemaFamily": "(all families)",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "SPFx", "Backend", "Governance", "Documentation"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema enforces by omitting fields; reviews enforce policy; backend stores secrets in key vault."
+    },
+    {
+      "ruleId": "VR-14",
+      "ruleCategory": "System of Record",
+      "sourceSection": "Contract §18 (around line 1482); P-11",
+      "appliesTo": "integrations.financial.*",
+      "ruleStatement": "Sage Intacct is the accounting book of record. Procore-sourced financial data is operational / project-management financial state and must be labeled as Procore-sourced.",
+      "schemaFamily": "integrations",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "Documentation"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares source_system and operational-vs-accounting classification; documentation enforces labeling discipline."
+    },
+    {
+      "ruleId": "VR-15",
+      "ruleCategory": "Procore Boundary",
+      "sourceSection": "Contract §11.7 (line 745); P-17",
+      "appliesTo": "integrations.procoreDirectory",
+      "ruleStatement": "Procore directory comparison is read-only. Comparison must not auto-grant SharePoint access.",
+      "schemaFamily": "integrations, permissions",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Backend", "SPFx"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares the comparison shape but does not authorize permissions."
+    },
+    {
+      "ruleId": "VR-16",
+      "ruleCategory": "Procore Boundary",
+      "sourceSection": "Contract P-10 closure",
+      "appliesTo": "integrations.procore.*",
+      "ruleStatement": "SharePoint is not a full Procore mirror. Allowed shapes: mapping, summary, exception, action queue, sync health, audit, object link. Forbidden shapes: raw payload, high-volume detail history, bulk attachment, full binary mirror.",
+      "schemaFamily": "integrations",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema enforces allowed-shape lists and rejects forbidden shapes; backend enforces sync logic."
+    },
+    {
+      "ruleId": "VR-17",
+      "ruleCategory": "No Native SharePoint Admin",
+      "sourceSection": "Contract §9 (line 485); §11 (line 616)",
+      "appliesTo": "permissions.*, settings.*",
+      "ruleStatement": "Normal users do not use native SharePoint permission / settings / edit screens for normal workflows. All access mutations route through backend/functions/ and are audit-logged.",
+      "schemaFamily": "permissions, settings",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["SPFx", "Backend", "Governance"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "SPFx UI directs users away from native screens; backend enforces audit logging; governance reviews enforce the no-bypass policy."
+    },
+    {
+      "ruleId": "VR-18",
+      "ruleCategory": "MVP / Deferred Scope",
+      "sourceSection": "Contract §11.5 (line 713); D-04",
+      "appliesTo": "permissions.externalUserTemplates",
+      "ruleStatement": "External (guest) users are deferred from MVP. External-user permission templates exist as mvp_status: deferred placeholders only.",
+      "schemaFamily": "permissions",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Deferred",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema marks external-user templates mvp_status: Deferred."
+    },
+    {
+      "ruleId": "VR-19",
+      "ruleCategory": "MVP / Deferred Scope",
+      "sourceSection": "Blueprint §30 (line 1927); Roadmap §8",
+      "appliesTo": "modules.hbiAssistant",
+      "ruleStatement": "HBI Assistant is deferred from MVP. Module entry exists as mvp_status: deferred placeholder only.",
+      "schemaFamily": "modules",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Deferred",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema marks the HBI Assistant module mvp_status: Deferred."
+    },
+    {
+      "ruleId": "VR-20",
+      "ruleCategory": "MVP / Deferred Scope",
+      "sourceSection": "Roadmap §8 must-not-include set",
+      "appliesTo": "integrations.procore.writeback",
+      "ruleStatement": "Procore write-back is deferred from MVP.",
+      "schemaFamily": "integrations",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "Governance"],
+      "mvpTreatment": "Deferred",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema omits write-back fields; governance enforces no-write-back policy until ADR."
+    },
+    {
+      "ruleId": "VR-21",
+      "ruleCategory": "Site Health / Drift / Repair",
+      "sourceSection": "Contract §19 (line 1627)",
+      "appliesTo": "site-health[*].severity",
+      "ruleStatement": "Severity values: Info, Warning, Blocking, Repair Required, Security Risk.",
+      "schemaFamily": "site-health, enums",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Five-value severity enum binding."
+    },
+    {
+      "ruleId": "VR-22",
+      "ruleCategory": "Site Health / Drift / Repair",
+      "sourceSection": "Contract §19A (line 1726)",
+      "appliesTo": "site-health[*].repairTier",
+      "ruleStatement": "Repair Automation tiers: T1 auto, T2 approval, T3 IT security, T4 manual only.",
+      "schemaFamily": "site-health, enums",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Four-value repair-tier enum binding."
+    },
+    {
+      "ruleId": "VR-23",
+      "ruleCategory": "Provisioning Validation",
+      "sourceSection": "Contract §20 (line 1773)",
+      "appliesTo": "provisioning-validation.*",
+      "ruleStatement": "Provisioning Validation Contract: stages, post-provision validation, audit records, rollback / repair references.",
+      "schemaFamily": "provisioning-validation",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Provisioning", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares the validation contract structure; backend executes."
+    },
+    {
+      "ruleId": "VR-24",
+      "ruleCategory": "MVP / Deferred Scope",
+      "sourceSection": "Contract §22 (line 2017)",
+      "appliesTo": "(all mvp_status fields)",
+      "ruleStatement": "Decision Closure Register statuses: Frozen for MVP, Runtime Configuration, Deferred, Proof-Gated only.",
+      "schemaFamily": "enums",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Four-value mvp_status enum binding. Phase 1 Step 2 reconciles enums.schema.json and validation-rules.schema.json to this canonical taxonomy; the 12 untouched family skeletons retain temporary scaffold-local shorthand pending per-family extraction."
+    },
+    {
+      "ruleId": "VR-25",
+      "ruleCategory": "Referential Integrity",
+      "sourceSection": "Contract §15",
+      "appliesTo": "lists[*].lookups",
+      "ruleStatement": "Lookup fields reference existing list rows by stable identifier.",
+      "schemaFamily": "lists",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema enforces referential integrity by stable IDs."
+    },
+    {
+      "ruleId": "VR-26",
+      "ruleCategory": "Referential Integrity",
+      "sourceSection": "Contract §13",
+      "appliesTo": "pages[*].moduleRef",
+      "ruleStatement": "Pages reference modules by stable module identifier.",
+      "schemaFamily": "pages, modules",
+      "enforcementLayer": "Schema",
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema enforces referential integrity."
+    },
+    {
+      "ruleId": "VR-27",
+      "ruleCategory": "Permission / Ownership",
+      "sourceSection": "Contract §11.3",
+      "appliesTo": "permissions.accessManager.*",
+      "ruleStatement": "Phase-based access managers per ProjectStage.",
+      "schemaFamily": "permissions",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "SPFx", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares the access manager binding by stage; SPFx and backend enforce."
+    },
+    {
+      "ruleId": "VR-28",
+      "ruleCategory": "No Secret",
+      "sourceSection": "Contract §11.6 (line 734)",
+      "appliesTo": "settings.m365GroupConnection",
+      "ruleStatement": "Microsoft 365 Group / Teams connection posture frozen for MVP; no secrets in client surfaces.",
+      "schemaFamily": "settings",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["Schema", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema marks posture frozen; backend manages connection."
+    },
+    {
+      "ruleId": "VR-29",
+      "ruleCategory": "Stage / Status Behavior",
+      "sourceSection": "Contract §3.2",
+      "appliesTo": "lists[*].readOnlyOnStatus, libraries[*].readOnlyOnStatus",
+      "ruleStatement": "Status-driven read-only behavior for Closed and Archived projects.",
+      "schemaFamily": "lists, libraries",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["SPFx", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares the rule; SPFx and backend enforce read-only."
+    },
+    {
+      "ruleId": "VR-30",
+      "ruleCategory": "Conditional Visibility",
+      "sourceSection": "Contract §11.3",
+      "appliesTo": "permissions.accessManager.activeConstructionPhase",
+      "ruleStatement": "Construction-phase access managers apply when projectStage = active_construction.",
+      "schemaFamily": "permissions",
+      "enforcementLayer": "Cross-Layer",
+      "participatingLayers": ["SPFx", "Backend"],
+      "mvpTreatment": "Frozen for MVP",
+      "blocksGenerationIfMissing": true,
+      "notes": "Schema declares the conditional binding; SPFx and backend enforce activation."
+    }
+  ]
 }

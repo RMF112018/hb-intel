@@ -1,20 +1,140 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/enums.schema.json",
-  "title": "Enums Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the enums family — ProjectType, ProjectStage, ProjectStatus, Decision Closure status, severity, repair tier, object status, module visibility, integration status, and forbidden-value sets. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 2 — Enum and Validation Rule Extraction). Anti-regression tokens (`preconstruction_only`, `warranty_closeout`, `Archived`-as-Stage, `active_construction`-as-Type) appear only inside `forbidden_values` arrays once populated, never as valid enum members. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §3.2, §4B.0, §4B.1, §22, §19, §19A.",
+  "title": "Enums Family Schema",
+  "description": "Phase 1 Step 2 — populated enum-family schema for the SP Project Control Center machine-readable Project Site Template Contract. Defines the canonical enum sets used across all other families: ProjectType, ProjectStage, ProjectStatus, DecisionClosureStatus (the four-value mvp_status taxonomy), SiteHealthSeverity, RepairAutomationTier, EnforcementLayer, and ValidationRuleCategory. Anti-regression tokens (`preconstruction_only`, `warranty_closeout`, `Archived`-as-Stage, `active_construction`-as-Type) appear only inside `forbiddenValues` arrays, never as valid enum members. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §3.2, §4B.0, §4B.1, §19, §19A, §22.",
   "type": "object",
   "additionalProperties": false,
+  "required": ["id", "kind", "mvp_status", "sourceContractSection"],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "enums" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "enumSets": {
+      "type": "object",
+      "description": "Container for enum-set instances at runtime. Schema is open in this step; per-set validation populates as later Phase 1 steps consume the canonical sets defined in canonicalEnumSets.",
+      "additionalProperties": { "$ref": "#/$defs/enumSet" }
+    }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Decision Closure Register status — the canonical four-value mvp_status enum bound by Phase 0 Step 2 Schema Family Taxonomy and VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "enumSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "allowedValues", "source", "mvpStatus"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "allowedValues": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "forbiddenValues": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string" },
+        "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
+        "mvpStatus": { "$ref": "#/$defs/decisionClosureStatus" },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "canonicalEnumSets": {
+    "ProjectType": {
+      "name": "ProjectType",
+      "description": "Project type vertical. Selected at site creation; influences seeding and module visibility.",
+      "allowedValues": ["commercial", "multifamily", "municipal", "luxury_residential", "environmental"],
+      "forbiddenValues": ["preconstruction_only", "warranty_closeout", "active_construction"],
+      "source": "Standard Project Site Template Contract §4B.1; D-12 closure",
+      "validationRuleRefs": ["VR-01", "VR-05", "VR-06", "VR-08"],
+      "mvpStatus": "Frozen for MVP",
+      "notes": "`active_construction` is forbidden only as ProjectType; it is valid as ProjectStage. `preconstruction_only` and `warranty_closeout` are deprecated tokens; never valid as active values."
+    },
+    "ProjectStage": {
+      "name": "ProjectStage",
+      "description": "Lifecycle stage of the project. Drives module visibility and access manager bindings.",
+      "allowedValues": ["lead", "estimating", "preconstruction", "active_construction", "closeout", "warranty"],
+      "forbiddenValues": ["Archived"],
+      "source": "Standard Project Site Template Contract §4B.0",
+      "validationRuleRefs": ["VR-02", "VR-04", "VR-07", "VR-30"],
+      "mvpStatus": "Frozen for MVP",
+      "notes": "`Archived` is forbidden as ProjectStage; it is valid as ProjectStatus."
+    },
+    "ProjectStatus": {
+      "name": "ProjectStatus",
+      "description": "Operational status of the site. Drives archive behavior, read-only flips, and rename rules.",
+      "allowedValues": ["Active", "On Hold", "Closed", "Archived"],
+      "forbiddenValues": [],
+      "source": "Standard Project Site Template Contract §3.2",
+      "validationRuleRefs": ["VR-03", "VR-09", "VR-29"],
+      "mvpStatus": "Frozen for MVP",
+      "notes": "Status `Archived` triggers site rename, library read-only flip, and metadata freeze (VR-09)."
+    },
+    "DecisionClosureStatus": {
+      "name": "DecisionClosureStatus",
+      "description": "Decision Closure Register status — the canonical four-value mvp_status enum. All family schemas SHOULD bind their `mvp_status` field to this enum; scaffold-local shorthand introduced in Phase 1 Step 1 is being reconciled progressively as families are populated.",
+      "allowedValues": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"],
+      "forbiddenValues": [],
+      "source": "Standard Project Site Template Contract §22; Phase 0 Step 2 Schema Family Taxonomy (Required Common Fields); VR-24",
+      "validationRuleRefs": ["VR-24"],
+      "mvpStatus": "Frozen for MVP",
+      "notes": "Scaffold-local shorthand (`mvp`, `deferred`, `placeholder`) appearing in the 12 untouched family skeletons is temporary. Mapping: `mvp → Frozen for MVP`; `deferred → Deferred`; `placeholder → Proof-Gated` or `Deferred` per per-family extraction. Final binding to this canonical enum is performed when each family is populated in Phase 1 Step 3 / Step 4."
+    },
+    "SiteHealthSeverity": {
+      "name": "SiteHealthSeverity",
+      "description": "Severity classification for Site Health drift records.",
+      "allowedValues": ["Info", "Warning", "Blocking", "Repair Required", "Security Risk"],
+      "forbiddenValues": [],
+      "source": "Standard Project Site Template Contract §19",
+      "validationRuleRefs": ["VR-21"],
+      "mvpStatus": "Frozen for MVP"
+    },
+    "RepairAutomationTier": {
+      "name": "RepairAutomationTier",
+      "description": "Repair Automation tier for Site Health repair actions.",
+      "allowedValues": ["T1 Auto", "T2 Approval", "T3 IT Security", "T4 Manual Only"],
+      "forbiddenValues": [],
+      "source": "Standard Project Site Template Contract §19A",
+      "validationRuleRefs": ["VR-22"],
+      "mvpStatus": "Frozen for MVP"
+    },
+    "EnforcementLayer": {
+      "name": "EnforcementLayer",
+      "description": "Layer at which a validation rule is enforced. Cross-Layer means multiple layers participate; participating layers are recorded per-rule.",
+      "allowedValues": ["Schema", "Provisioning", "Backend", "SPFx", "Site Health", "Governance", "Documentation", "Cross-Layer"],
+      "forbiddenValues": [],
+      "source": "Phase 0 Step 2 Validation Rule Table Plan; Standard Project Site Template Contract §22",
+      "validationRuleRefs": ["VR-12", "VR-13", "VR-17", "VR-23"],
+      "mvpStatus": "Frozen for MVP",
+      "notes": "JSON Schema alone cannot enforce runtime behavior; cross-layer rules (e.g., SPFx must not call Procore directly) are enforced by SPFx code review, backend routing, and documented governance."
+    },
+    "ValidationRuleCategory": {
+      "name": "ValidationRuleCategory",
+      "description": "Classification of validation rules by category.",
+      "allowedValues": [
+        "Enum Binding",
+        "Conditional Visibility",
+        "Stage / Status Behavior",
+        "Runtime Configuration",
+        "Permission / Ownership",
+        "Procore Boundary",
+        "System of Record",
+        "No Secret",
+        "No Native SharePoint Admin",
+        "Referential Integrity",
+        "Site Health / Drift / Repair",
+        "Provisioning Validation",
+        "MVP / Deferred Scope"
+      ],
+      "forbiddenValues": [],
+      "source": "Phase 0 Step 2 Validation Rule Table Plan",
+      "validationRuleRefs": [],
+      "mvpStatus": "Frozen for MVP"
+    }
+  }
 }
