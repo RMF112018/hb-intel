@@ -10,7 +10,10 @@ const PCC_DIR = fileURLToPath(new URL('.', import.meta.url));
  * additional `export function` introduced in the PCC domain must be added
  * here to remain inside the no-mutation guard.
  */
-const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = ['mapPccPersonaToProjectRole'];
+const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
+  'mapPccPersonaToProjectRole',
+  'personaHasCapability',
+];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {

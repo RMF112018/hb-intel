@@ -43,13 +43,17 @@ export type { IProjectProfile } from './IProjectProfile.js';
 export {
   PCC_PERSONAS,
   PCC_PERSONA_LABELS,
+  PCC_PERSONA_TIER,
+  PCC_PERSONA_CATEGORY,
   PCC_PERSONA_TO_PROJECT_ROLE,
   mapPccPersonaToProjectRole,
   type PccPersona,
   type PccUserRole,
+  type PccPersonaTier,
+  type PccPersonaCategory,
 } from './PccUserRoles.js';
 
-// Work centers
+// Work centers (contract template registry — 21 entries from §8.1)
 export {
   PCC_WORK_CENTER_IDS,
   PCC_WORK_CENTERS,
@@ -58,11 +62,22 @@ export {
   type IPccWorkCenter,
 } from './PccWorkCenters.js';
 
+// MVP surfaces (eight Phase 3 PCC app navigation surfaces)
+export {
+  PCC_MVP_SURFACE_IDS,
+  PCC_MVP_SURFACES,
+  type PccMvpSurfaceId,
+  type PccMvpSurfaceTier,
+  type IPccMvpSurface,
+} from './PccMvpSurfaces.js';
+
 // Priority actions
 export {
   PRIORITY_ACTION_CATEGORIES,
   PRIORITY_ACTION_CATEGORY_LABELS,
+  PRIORITY_ACTION_CATEGORY_META,
   type PriorityActionCategory,
+  type IPriorityActionCategoryMeta,
   type IPriorityAction,
 } from './PriorityActions.js';
 
@@ -78,9 +93,11 @@ export {
 // Workflow items
 export {
   WORKFLOW_ITEM_STATUSES,
+  WORKFLOW_STATUS_META,
   type WorkflowItemStatus,
   type IWorkflowItem,
   type IWorkflowItemAssignment,
+  type IWorkflowStatusMeta,
 } from './WorkflowItems.js';
 
 // Business audit
@@ -131,3 +148,13 @@ export {
   type PccSettingsScope,
   type IPccSettingsRef,
 } from './PccSettings.js';
+
+// Role-capability matrix (read-model, not auth runtime)
+export {
+  PCC_CAPABILITY_IDS,
+  PCC_CAPABILITIES,
+  PCC_PERSONA_CAPABILITIES,
+  personaHasCapability,
+  type PccCapabilityId,
+  type IPccCapability,
+} from './PccCapabilities.js';

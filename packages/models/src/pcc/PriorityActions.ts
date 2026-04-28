@@ -4,6 +4,9 @@
  * The priority actions rail (contract §7) surfaces top actions across modules.
  * These types describe the read-model shape only — no scoring, ranking, or
  * generation logic is implied.
+ *
+ * Phase 3 / Wave 1 / Prompt 03 adds a category-display meta registry next to
+ * the existing label map.
  */
 
 import type { PccPersona } from './PccUserRoles.js';
@@ -37,6 +40,78 @@ export const PRIORITY_ACTION_CATEGORY_LABELS: Record<PriorityActionCategory, str
   'procore-sync': 'Procore Sync',
   'documents': 'Documents',
   'safety': 'Safety',
+};
+
+export interface IPriorityActionCategoryMeta {
+  id: PriorityActionCategory;
+  displayName: string;
+  description: string;
+  mvpTier: 'MVP' | 'Later';
+}
+
+export const PRIORITY_ACTION_CATEGORY_META: Readonly<
+  Record<PriorityActionCategory, IPriorityActionCategoryMeta>
+> = {
+  'workflow': {
+    id: 'workflow',
+    displayName: 'Workflow',
+    description: 'Open workflow items requiring attention.',
+    mvpTier: 'MVP',
+  },
+  'approval': {
+    id: 'approval',
+    displayName: 'Approval',
+    description: 'Approval checkpoints awaiting decision.',
+    mvpTier: 'MVP',
+  },
+  'compliance': {
+    id: 'compliance',
+    displayName: 'Compliance',
+    description: 'Contract or regulatory obligations needing follow-up.',
+    mvpTier: 'Later',
+  },
+  'inspection': {
+    id: 'inspection',
+    displayName: 'Inspection',
+    description: 'Required inspections that are due, failed, or unscheduled.',
+    mvpTier: 'MVP',
+  },
+  'permit': {
+    id: 'permit',
+    displayName: 'Permit',
+    description: 'Permit items needing action or expiring soon.',
+    mvpTier: 'MVP',
+  },
+  'closeout': {
+    id: 'closeout',
+    displayName: 'Closeout',
+    description: 'Closeout deliverables and warranty handoff items.',
+    mvpTier: 'MVP',
+  },
+  'health': {
+    id: 'health',
+    displayName: 'Site Health',
+    description: 'Drift findings or repair acknowledgements awaiting action.',
+    mvpTier: 'MVP',
+  },
+  'procore-sync': {
+    id: 'procore-sync',
+    displayName: 'Procore Sync',
+    description: 'Procore mapping or sync health items requiring attention.',
+    mvpTier: 'Later',
+  },
+  'documents': {
+    id: 'documents',
+    displayName: 'Documents',
+    description: 'Document register items needing review or upload.',
+    mvpTier: 'Later',
+  },
+  'safety': {
+    id: 'safety',
+    displayName: 'Safety',
+    description: 'Safety acknowledgements, deficiencies, or open incidents.',
+    mvpTier: 'Later',
+  },
 };
 
 export interface IPriorityAction {

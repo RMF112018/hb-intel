@@ -11,8 +11,14 @@ export {
   PCC_PROJECT_TYPES,
 } from './PccProjectEnums.js';
 
-export { PCC_PERSONAS, PCC_PERSONA_LABELS } from './PccUserRoles.js';
+export {
+  PCC_PERSONAS,
+  PCC_PERSONA_LABELS,
+  PCC_PERSONA_TIER,
+  PCC_PERSONA_CATEGORY,
+} from './PccUserRoles.js';
 export { PCC_WORK_CENTER_IDS } from './PccWorkCenters.js';
+export { PCC_MVP_SURFACE_IDS } from './PccMvpSurfaces.js';
 export { PCC_WORKFLOW_MODULE_IDS } from './WorkflowModules.js';
 export { WORKFLOW_ITEM_STATUSES } from './WorkflowItems.js';
 export { APPROVAL_CHECKPOINT_STATES } from './ApprovalCheckpoint.js';
@@ -24,3 +30,4 @@ export { DOCUMENT_CONTROL_SOURCE_IDS } from './DocumentControl.js';
 export { SITE_HEALTH_SEVERITIES } from './SiteHealth.js';
 export { PRIORITY_ACTION_CATEGORIES, PRIORITY_ACTION_CATEGORY_LABELS } from './PriorityActions.js';
 export { PCC_SETTINGS_SCOPES } from './PccSettings.js';
+export { PCC_CAPABILITY_IDS } from './PccCapabilities.js';
