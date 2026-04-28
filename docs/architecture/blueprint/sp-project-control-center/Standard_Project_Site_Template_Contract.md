@@ -42,11 +42,12 @@ This contract is the **governing source of truth** for every project site create
 - standard SharePoint lists,
 - standard metadata fields,
 - standard permission groups,
-- the eleven user-facing permission templates,
-- Team & Access management,
+- the thirteen user-facing permission templates,
+- Team & Access management - including ten MVP-enabled internal templates and three deferred external templates,
 - Control Center Settings (project-level + template-level),
 - module-level settings surfaces,
 - external integrations (Procore, Sage Intacct, Compass, Document Crunch, Adobe Sign, Cupix, Microsoft Teams, Outlook),
+- **Procore integration** as a foundational layer: project mapping, Procore Subject Area Registry, sync health, object lineage, curated summaries, Procore Settings, Procore site-health checks (see §18.1, §15.13),
 - project workflow templates seeded from `docs/reference/example/`,
 - site health checks and drift classification,
 - template versioning,
@@ -154,12 +155,17 @@ This catalog enumerates every provisioned object kind so future schema extractio
 | 5 | List/Library Fields | ~600+ across the catalog | §15, §16 | Mixed | `lists[].fields[]`, `libraries[].fields[]` |
 | 6 | Views | Default view + named views per list/library | §13–§15 | MVP for default views | `lists[].views[]`, `libraries[].views[]` |
 | 7 | SharePoint Groups | Core 12 (see §12.2) | §12 | MVP | `groups[]` |
-| 8 | Permission Templates | 11 (see §12.4) | §12 | MVP for 6; Future for 5 | `permissionTemplates[]` |
+| 8 | Permission Templates | 13 (see §12.4) | §12 | MVP for 10; Future/deferred for 3 | `permissionTemplates[]` |
 | 9 | Configuration Records | Project Site Configuration, Module Configuration, Permission Template Configuration, Integration Configuration | §10, §15 | MVP | `configurationRecords[]` |
 | 10 | Module Records | 20 (one per module in §8) | §8 | MVP for 8; Future for 12 | `modules[]` |
 | 11 | Integration Records | 8 (Procore, Sage Intacct, Compass, Document Crunch, Adobe Sign, Cupix, Teams, Outlook) | §18 | MVP for Procore, Sage Intacct; rest Future | `integrations[]` |
 | 12 | Health Records | 1 per site, multiple checks | §19 | MVP | `healthRecord` |
 | 13 | Workflow Template Records | 8 source workflows (§17) | §17 | MVP for Startup, Closeout, Permits, Inspections, Responsibility Matrix; Future for Owner-Contract Matrix, Subcontractor Scorecard, Lessons Learned | `workflowTemplates[]` |
+| 14 | Procore Project Mapping | 1 per site | §15.13, §18.1 | MVP | `procoreMapping` |
+| 15 | Procore Subject Area Registry | 6 rows per site (one per subject area) + lifecycle metadata | §15.13, §18.1 | MVP (rows seeded `Enabled=false`); enablement Future per Recommended Practical scope | `procoreSubjectAreas[]` |
+| 16 | Procore Sync Health | 1 + N (per subject area enabled) | §15.13, §19, §18.1 | MVP placeholder; populated when sync enabled | `procoreSyncHealth[]` |
+| 17 | Procore Object Link Records | N (created when summaries / curated rows reference Procore objects) | §15.13, §18.1 | Future (Recommended Practical) | `procoreObjectLinks[]` |
+| 18 | Procore Curated Summary Records | N per enabled subject area (RFI summary, observation summary, etc.) | §15.13, §18.1 | Future (Recommended Practical) — placeholder in MVP | `procoreMaterializations[]` |
 
 The Object Catalog is the index. Every other section in this contract specifies the contents of one or more rows above.
 
@@ -317,7 +323,14 @@ Required at provisioning; optional fields may be configured later through Contro
 | Final Completion Date | Set when scheduled. |
 | Warranty Start Date | Set at handover. |
 | Warranty End Date | Set at handover. |
+| Procore Company ID | Set when Procore integration enabled. Identifies the Procore tenant/company that owns the project record. |
 | Procore Project ID | Set when Procore integration enabled. |
+| Procore Project URL | Set when Procore integration enabled. The browser URL for deep links from PCC. |
+| Procore Project Status | Set when Procore integration enabled. Reflected from Procore (Active / Inactive / Archived). |
+| Procore Sync Enabled | Set when Procore integration is configured. Boolean; defaults to `false` at provisioning. |
+| Procore Sync Profile | Set when Procore Sync Enabled. Identifies the named sync profile (e.g., `MVP-mapping-only`, `RecommendedPractical-Wave1`). |
+| Procore Last Successful Sync | System-managed; UTC timestamp of the last successful end-to-end sync run. |
+| Procore Last Sync Status | System-managed; one of `Success` / `Partial` / `Failed` / `NotRun`. |
 | Compass Project ID | Set when Compass integration enabled. |
 | Document Crunch Project / Workspace ID | Set when integration enabled. |
 | Adobe Sign Workspace / Account Mapping | Set when integration enabled. |
@@ -533,6 +546,28 @@ Microsoft 365 Group / Teams Membership
 
 A user may have SharePoint read access to a project site without being a member of its Teams team (e.g., Global Read-Only, Executive Oversight). Conversely, a Teams team member always has at least project-team-level SharePoint access. All Teams membership changes are governed through the Team & Access Center (§11) or backend provisioning, **not** through native Teams administration by project users.
 
+### 10.6 Procore Settings
+
+Control Center Settings includes a Procore configuration surface that exposes Procore mapping and integration state in business language. The settings live in the Project Procore Mapping and Procore Subject Area Registry records (§15.13); Settings is the user-facing surface to view and edit them.
+
+| Field | Source | Edit Allowed By | Notes |
+|---|---|---|---|
+| Procore Company ID | Project Procore Mapping | PCC Admin, IT / Integration Admin | |
+| Procore Project ID | Project Procore Mapping | PCC Admin, Project Executive, Project Manager, IT / Integration Admin | |
+| Procore Project URL | Project Procore Mapping (auto-generated where possible) | PCC Admin, Project Executive, Project Manager, IT / Integration Admin | Used for deep links. |
+| Enabled Procore Subject Areas | Procore Subject Area Registry | PCC Admin, IT / Integration Admin | Six subject areas: `financials`, `project_management`, `documents_design`, `quality_safety`, `field_execution`, `workflow`. Defaults to `Enabled=false` at provisioning. |
+| Sync Cadence | Procore Subject Area Registry | PCC Admin, IT / Integration Admin | Per subject area. |
+| Sync Profile | Project Procore Mapping | PCC Admin, IT / Integration Admin | E.g., `MVP-mapping-only`, `RecommendedPractical-Wave1`. |
+| Tool Deep Links | Auto-generated from Procore Project URL | (read-only in PCC) | RFIs, submittals, drawings, etc. |
+| Last Sync Status | Procore Sync Health | (read-only in PCC) | One of `Success` / `Partial` / `Failed` / `NotRun`. |
+| Last Successful Sync | Procore Sync Health | (read-only in PCC) | UTC timestamp. |
+| Configured By | Project Procore Mapping | (read-only in PCC) | UPN of last configurator. |
+| Configured Date | Project Procore Mapping | (read-only in PCC) | UTC timestamp. |
+| Health Status | Procore Sync Health | (read-only in PCC) | Surfaces severity per §19.3 + ErrorCategory per §15.13. |
+| Redacted Error Summary | Procore Sync Health | (read-only in PCC) | Plain-language message per §15.13 ErrorCategory mapping; **never** raw payload, token, URL with secrets. |
+
+All labels use plain business language. Native SharePoint list editing of these records is not exposed in PCC; emergency repair (§9.4 tier c) follows the standard tier rules.
+
 ---
 
 ## 11. Team & Access Management Contract
@@ -663,6 +698,18 @@ Project sites are **Microsoft 365 Group / Teams connected by default** unless a 
 - Teams membership changes are made through the **Team & Access Center** or backend provisioning; native Teams administration by project users is not an authorized path.
 
 The distinction between SharePoint site access and M365 / Teams membership is documented in §10.5.
+
+### 11.7 Procore directory comparison (read-only)
+
+The Team & Access Center may surface a **read-only** Procore directory comparison feed (sourced from the Procore `project_management` subject area when enabled per §15.13) showing:
+
+- PCC user exists but not in Procore,
+- Procore user exists but not in PCC,
+- role mismatch,
+- inactive user with active SharePoint access,
+- missing PX / PM / Superintendent / Project Accountant.
+
+**Procore project directory membership may be used for comparison, reconciliation, and exception reporting. It must not automatically grant SharePoint access. Auto-grant requires a future governed access-sync workflow approved by an architecture amendment** (R6). All access mutations continue to route through the §11.4 invite workflow with audit (§15 Project Access Audit).
 
 ---
 
@@ -960,6 +1007,24 @@ External         : transactional finalization (final pay app, lien releases, sig
 - HBCentral schema additions required for promoted records (subcontractor performance registry, executive closeout summary registry).
 - Whether Project Access Audit mirrors to HBCentral on every event or batches.
 
+### 15.1D Procore Data Ownership Rules
+
+Procore-derived data does not flatten the dual-record model — it adds an external-system layer with explicit ownership rules:
+
+```
+Procore-owned transactional data        : remains owned by Procore (RFIs, submittals, inspections,
+                                          observations, punch, commitments, change events,
+                                          requisitions, daily logs, etc.).
+Sage Intacct-owned accounting           : remains owned by Sage Intacct (GL, AP, AR, cash, books).
+SharePoint / PCC                         : owns project-site configuration, access, settings,
+                                          local readiness workflows, and CURATED operational summaries.
+Canonical Procore data, where stored    : owned by the BACKEND integration / data layer
+                                          (`backend/functions/`), NOT by individual SharePoint sites.
+SharePoint lists                         : are NOT the canonical store for bulk Procore transactional data.
+```
+
+The Procore Configuration Records in §15.13 (Project Procore Mapping, Subject Area Registry, Sync Health, Object Links, Curated Summaries, Integration Audit) are PCC-side configuration / curation records — they are **not** the canonical store for Procore transactional content. The package's three-layer model (raw landing → canonical relational → SharePoint materialized) is preserved verbatim; PCC adds **deep links back to Procore** as an explicit fifth surface alongside the package's document/file storage layer (see §18.1 Storage strategy).
+
 ### 15.2 Core / Governance lists (Data Ownership: Site-local + HBCentral)
 
 | List | Purpose | Owning Module | Required Fields | Optional Fields | Default Views | Seeded Data | Permission Scope | Workflow Triggers | Related Libraries / Integrations | MVP / Future | Validation Rule | Data Ownership |
@@ -1081,6 +1146,149 @@ Closeout documents and evidence remain in `10_Closeout_and_Turnover` library; tr
 | Best Practices Library | **HBCentral** (approved enterprise content) | Future |
 | Process Improvement Recommendations | **HBCentral** (approved enterprise content) | Future |
 
+### 15.13 Procore Configuration Records (Data Ownership per §15.1D)
+
+Six Procore-related records. **They are configuration records**, not operational lists — they belong to Object Catalog row family #9 / new rows §4A #14–#18. They configure and observe the Procore integration; they do **not** mirror Procore transactional content.
+
+#### 15.13.1 Project Procore Mapping (one row per site)
+
+| Field | Notes |
+|---|---|
+| `ProjectId` | Cross-reference to Project Profile. |
+| `ProjectNumber` | Full accounting number. |
+| `SharePointSiteId` | The provisioned site ID. |
+| `ProcoreCompanyId` | Lineage. |
+| `ProcoreProjectId` | Lineage. |
+| `ProcoreProjectUrl` | Used for deep links. |
+| `ProcoreProjectStatus` | Reflected from Procore. |
+| `ProcoreSyncEnabled` | Boolean; default `false` at provisioning. |
+| `SyncProfile` | E.g., `MVP-mapping-only`, `RecommendedPractical-Wave1`. |
+| `LastSuccessfulSync` | UTC timestamp; nullable until first success. |
+| `LastSyncStatus` | `Success` / `Partial` / `Failed` / `NotRun`. |
+| `LastSyncErrorRedacted` | Plain-language; per §15.13.3 ErrorCategory mapping. **Never** raw payload, token, or URL with secrets. |
+| `ConfiguredBy` | UPN. |
+| `ConfiguredDate` | UTC. |
+| `Notes` | Optional. |
+
+Permission scope: read by all on site; write by PCC Admin + IT / Integration Admin only. Data Ownership: **Site-local configuration**, mirroring the canonical mapping that lives in `backend/functions/` per §15.1D.
+
+#### 15.13.2 Procore Subject Area Registry (six rows per site, one per subject area)
+
+The `SubjectArea` field is **enumerated to the package's six subject areas exactly**: `financials`, `project_management`, `documents_design`, `quality_safety`, `field_execution`, `workflow`.
+
+| Field | Notes |
+|---|---|
+| `ProjectId` | Cross-reference. |
+| `SubjectArea` | Enum (`financials` / `project_management` / `documents_design` / `quality_safety` / `field_execution` / `workflow`). |
+| `Enabled` | Boolean; defaults `false` at provisioning. |
+| `SystemOfRecord` | Default `Procore`; `Procore + Sage` permitted for `financials` per §18.1 R5 wording. |
+| `SyncMode` | One of `webhook` / `event-stream` / `polling-incremental` / `polling-full` / `snapshot`. |
+| `SyncCadence` | Per package guidance (e.g., `near-real-time`, `hourly`, `nightly`, `daily-snapshot`). |
+| `StorageTarget` | One of `raw-landing` / `canonical-relational` / `sharepoint-materialized` / `deep-link-only` (see §18.1 storage strategy). |
+| `PCCModule` | Owning PCC module (e.g., Action Center, Project Controls Center). |
+| `SharePointListTarget` | Optional; cite the list/configuration record name (e.g., `Procore Curated Summaries`) when materialization applies. |
+| `CanonicalEntityTarget` | Package canonical entity name (e.g., `rfi`, `submittal`, `observation`). |
+| `LastSync` | UTC timestamp. |
+| `EndpointName` | The Procore endpoint family in use (e.g., `Budget Changes`, `RFIs`, `Submittals`). |
+| `EndpointVersion` | Version string from Procore (e.g., `v1.0`, `vapid`). |
+| `ApiLifecycleStatus` | Enum: `Stable` / `Beta` / `Deprecated` / `Sunset` / `Unknown`. |
+| `LastVersionReviewDate` | UTC date of last quarterly review. |
+| `VersionRisk` | Enum: `Low` / `Medium` / `High`. |
+| `HealthStatus` | Mirrors latest Procore Sync Health row for this subject area. |
+| `Notes` | Optional. |
+
+Rationale for the endpoint / version fields: package §13 explicitly flags mixed maturity (budget, workflow, schedule). API lifecycle is tracked on the same record that gates per-project enablement so review and enablement decisions stay coupled.
+
+Permission scope: read by all on site; write by PCC Admin + IT / Integration Admin. Data Ownership: **Site-local configuration**.
+
+#### 15.13.3 Procore Sync Health (1 base + N per enabled subject area)
+
+| Field | Notes |
+|---|---|
+| `ProjectId` | Cross-reference. |
+| `SubjectArea` | Same enum as 15.13.2. |
+| `LastRunStarted` | UTC. |
+| `LastRunCompleted` | UTC. |
+| `RecordsRead` | Integer. |
+| `RecordsChanged` | Integer. |
+| `RecordsFailed` | Integer. |
+| `Status` | One of `Success` / `Partial` / `Failed` / `NotRun`. |
+| `ErrorCategory` | **Enum below.** |
+| `ErrorMessageRedacted` | Plain-language UI message keyed to ErrorCategory. **Never** raw payload, token, URL with secrets. |
+| `NextRun` | UTC; planned next attempt. |
+| `RepairActionAvailable` | Boolean; if `true`, surfaces in Site Health repair flow per §19A. |
+
+**`ErrorCategory` enum** with plain-language UI mapping, severity (§19.3), and repair tier (§19A):
+
+| `ErrorCategory` | Plain-language UI message | Severity | Repair Tier |
+|---|---|---|---|
+| `AuthFailed` | "Procore sign-in failed. Contact integration admin." | Security Risk | T3 — IT-Approved |
+| `PermissionDenied` | "Procore service does not have permission for this project." | Repair Required | T3 |
+| `RateLimited` | "Procore is busy; data refresh delayed." | Warning | T1 (auto-retry) |
+| `EndpointDeprecated` | "An older Procore endpoint is in use; refresh planned." | Warning | T2 (Admin) |
+| `MappingMissing` | "Procore project mapping is not configured." | Repair Required | T2 |
+| `ProjectNotFound` | "The mapped Procore project cannot be found." | Repair Required | T3 |
+| `PartialSync` | "Some Procore data is delayed or missing." | Warning | T1 |
+| `StaleData` | "Last successful refresh is older than expected." | Warning | T1 |
+| `MaterializationFailed` | "PCC could not save the latest Procore summary." | Repair Required | T2 |
+| `Unknown` | "An unexpected Procore integration issue occurred." | Repair Required | T3 |
+
+Technical diagnostics live in `LastSyncErrorRedacted` and are bound to the Procore Integration Audit (§15.13.6); raw payloads are forbidden in this surface.
+
+Permission scope: read by Admin, IT / Integration Admin; write by system only. Data Ownership: **Site-local** (mirror of the canonical health log in `backend/functions/`).
+
+#### 15.13.4 Procore Object Links (N records per site)
+
+| Field | Notes |
+|---|---|
+| `ProjectId` | Cross-reference. |
+| `SourceSystem` | Constant `Procore`. |
+| `ProcoreCompanyId` | Lineage. |
+| `ProcoreProjectId` | Lineage. |
+| `ProcoreObjectType` | Canonical entity name (`rfi`, `submittal`, `observation`, `punch_item`, `commitment`, `change_event`, …). |
+| `ProcoreObjectId` | Lineage. |
+| `ProcoreObjectUrl` | Deep link. |
+| `ProcoreLastSyncedAt` | UTC. |
+| `CanonicalEntityId` | If a canonical-layer ID is populated. |
+| `CanonicalEntityType` | Same as `ProcoreObjectType`; expressed as the package canonical entity name. |
+| `MaterializedRecordId` | Pointer to the curated summary record when present. |
+| `RelatedPCCModule` | Owning PCC module. |
+
+Permission scope: read by all on site; write by system only. MVP: **Future** (Recommended Practical). At MVP the **pattern** exists; rows are not created until a subject area is enabled.
+
+#### 15.13.5 Procore Curated Summaries (placeholder in MVP)
+
+A configuration record (placeholder) describing per-subject-area summary types that PCC may materialize when the corresponding subject area is enabled. **No rows materialized in MVP.** Populated when Recommended Practical waves enable specific summaries (e.g., RFI summary, observation summary). Required-field shape will be defined per summary type in a follow-up amendment when the first summary is enabled; the placeholder record holds:
+
+| Field | Notes |
+|---|---|
+| `ProjectId` | Cross-reference. |
+| `SubjectArea` | Enum from 15.13.2. |
+| `SummaryType` | E.g., `rfi_open_overdue`, `observation_open_safety`. |
+| `Enabled` | Boolean. |
+| `LastMaterialized` | UTC. |
+| `MaterializationStatus` | `Success` / `Failed` / `NotRun`. |
+| `RecordCount` | Integer. |
+| `RetentionPolicy` | Per the package's retention guidance for that subject area. |
+| `Notes` | Optional. |
+
+Permission scope: read by all on site; write by system only. Data Ownership: **Site-local materialized layer** (the package's "SharePoint / HB Intel materialized layer").
+
+#### 15.13.6 Procore Integration Audit (mutation log)
+
+| Field | Notes |
+|---|---|
+| `ProjectId` | Cross-reference. |
+| `Action` | E.g., `mapping_configured`, `subject_area_enabled`, `sync_run`, `repair_executed`, `secret_violation_detected`. |
+| `ActorUpn` | Backend service principal or human admin. |
+| `Timestamp` | UTC. |
+| `BeforeState` | Compact JSON; redacted of secrets. |
+| `AfterState` | Compact JSON; redacted of secrets. |
+| `Reason` | Plain language. |
+| `Notes` | Optional. |
+
+Permission scope: read by Admin, IT / Integration Admin; write by system only; **append-only**. Data Ownership: **Backend canonical** (in `backend/functions/`) **+ Site-local copy** for PCC visibility.
+
 ---
 
 ## 16. Common List Schema Pattern
@@ -1197,9 +1405,11 @@ Each `docs/reference/example/` source converts into one or more lists' seeded da
 
 ## 18. External Integration Contract
 
+The integration table below covers all external systems. **Procore is the foundational integration** and is governed by the dedicated subsection §18.1.
+
 | Integration | Purpose | Project Mapping Field | Expected URL Field | Module Usage | Sync Direction | System of Record | Phase | Required / Optional | Configuration Owner | Health Check |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Procore | RFIs, submittals, drawings/specs, change events, daily logs, inspections, directory, commitments, punch, schedule | `Procore Project ID` | `https://app.procore.com/{tenant}/projects/{id}` | Drawing & Model, Document Control, Project Controls, Field Operations | Reads from Procore; selective writes (future) | Procore | Construction | Required (Active Construction) | Admin | Verify project mapping resolves |
+| Procore | (see §18.1) | `Procore Company ID` + `Procore Project ID` | `Procore Project URL` | Action Center, Document Control, Project Controls, Procurement & Buyout, Field Operations, Inspection Readiness, Closeout & Warranty, HBI Assistant | Reads from Procore in MVP; **selective writes deferred** (future amendment required) | Procore | Construction (mapping at Preconstruction) | Required (Active Construction); mapping placeholder created at provisioning | PCC Admin + IT / Integration Admin | Verify project mapping resolves; sync health within tolerance; no secrets in SharePoint surfaces |
 | Sage Intacct | Job setup, budget, cost reporting, commitments, pay apps, invoices, final payment | `Sage Intacct Project ID` | (system URL) | Project Controls, Procurement & Buyout, Closeout | Reads from Sage Intacct | Sage Intacct | All | Required | Admin (with Accounting) | Verify project mapping resolves |
 | Compass | Subcontractor prequalification, vendor profile, trade capacity, performance history | `Compass Project ID` | (system URL) | Procurement & Buyout, Subcontractor Performance | Reads | Compass | Construction | Optional | Admin | Verify mapping |
 | Document Crunch | Prime contract review, subcontract review, obligation extraction, risk clauses, notice requirements | `Document Crunch Project / Workspace ID` | (system URL) | Contract & Compliance | Reads + outbound triggers | Document Crunch | Preconstruction → Construction | Optional | Admin | Verify mapping |
@@ -1207,6 +1417,164 @@ Each `docs/reference/example/` source converts into one or more lists' seeded da
 | Cupix | Existing conditions, progress capture, turnover / warranty visual records, location-based context | `Cupix Project ID` | (system URL) | Drawing & Model, Field Operations, Closeout & Warranty | Reads | Cupix | Construction → Warranty | Required (Luxury Residential); Optional otherwise | Admin | Verify project resolves |
 | Microsoft Teams | Project communication, channel/team for project | `Teams Channel / Team ID` | `https://teams.microsoft.com/...` | Meeting & Communication | None (link-out) | Teams | All | Optional | Admin | Verify channel resolves |
 | Outlook Calendar | Meetings, calendar reminders (e.g., 80-day NTO reminder) | (mapping per user) | (per user) | Meeting & Communication, Closeout | None (link-out) | Outlook | All | Optional | Admin (configure reminders) | Verify rules saved |
+
+### 18.1 Procore Integration
+
+> **Procore Architecture Decision.** Procore is the system of record for Procore-owned project-management workflows. PCC is the SharePoint-hosted project operating surface that summarizes, contextualizes, deep-links, and selectively materializes Procore data. PCC must not become a parallel Procore clone or a full SharePoint mirror of Procore transactional records.
+
+The controlling local reference for Procore data modeling, canonical entities, subject areas, storage layers, and sync cadence is the Procore HB Intel data model package at:
+
+```
+docs/architecture/blueprint/sp-project-control-center/procore_hbintel_data_model_package/
+```
+
+#### 18.1.1 Purpose
+
+Surface current-state summaries, readiness checks, exception queues, project-control indicators, and deep links into Procore. Store only curated, user-facing materializations and project-specific configuration in SharePoint.
+
+#### 18.1.2 System-of-record posture
+
+Procore remains the system of record for Procore-owned project-management workflows: RFIs, submittals, drawings, specifications, daily logs, inspections, observations, incidents, punch items, commitments, change events, prime contracts, budget views, requisitions / subcontractor invoices, direct costs, directory / companies / users, meetings, correspondence, photos / field media (when used).
+
+**Sage Intacct remains the accounting book of record.** Procore may provide project-management-domain financial state — commitments, change events, requisitions, prime contract status, and project-level budget views — but PCC must label these as **Procore-sourced operational / project-management financial summaries**. PCC must never reposition Procore figures as accounting figures or use Procore values for general-ledger purposes.
+
+#### 18.1.3 SPFx boundary
+
+> **SPFx modules must not call the Procore API directly.** All Procore API interaction must route through `backend/functions/` or a later approved integration service boundary. The reasons: authentication, secret handling, rate limits, canonical mapping, logging, health checks, and error redaction.
+
+#### 18.1.4 Backend-mediated access
+
+```
+SPFx PCC modules
+  → HB backend/functions PCC API
+    → Procore Integration Service
+      → Procore API
+```
+
+The backend layer handles: Procore authentication; credential isolation; rate-limit handling; retry/backoff; API version tracking; sync orchestration; canonical mapping; raw payload retention (where appropriate); curated materialization; audit logging; sync health; diagnostics; redacted errors. The recommended (future) backend service boundary is `backend/functions/src/services/procore/` (auth, client, project-mapping, sync-orchestrator, subject-area-registry, canonical-mapper, materialization, sync-health, webhook-handler). **No code is created in this contract amendment.**
+
+#### 18.1.5 Authentication posture
+
+Per the package: **DMSA (Procore Direct Mobile Service Account)** is preferred for enterprise sync — backend-held system-to-system credentials. User-context OAuth flows are deferred until a user-action workflow requires them. Simple deep links require no API call (rely on the user's Procore session).
+
+> **Procore client IDs, client secrets, refresh tokens, DMSA credentials, OAuth secrets, and environment credentials must never be stored in SharePoint lists, SPFx code, markdown docs, or client-side configuration.** A secret discovered in any of those surfaces is a `Security Risk` (§19.3) and a `T3 — IT-Approved Security Repair` (§19A).
+
+Procore credentials are **not** held under HB SharePoint Creator (§20A boundary). Procore auth is a separate backend secret-management surface; specifics are tenant configuration recorded in §22.2.
+
+#### 18.1.6 Storage strategy
+
+Five surfaces, in order of authority and recency:
+
+```
+Procore API
+  → Raw landing / integration store           (backend; replay / archive where appropriate)
+  → Canonical relational layer                (backend; package's canonical entities)
+  → SharePoint / HB Intel materialized layer  (curated summaries; selective)
+  → Document/file storage                     (selective publish; no full binary mirror)
+  → Deep links back to Procore                (always available; default user path)
+```
+
+Layer 5 (deep links) is the default user path. PCC promotes deep links over materialization wherever a Procore tool already provides the user experience.
+
+#### 18.1.7 SharePoint materialization rules (allowed vs forbidden)
+
+**Allowed in SharePoint** (per package §10):
+
+- summaries (current-state),
+- exceptions / readiness checks,
+- action queues,
+- mapping / configuration (§15.13),
+- sync health (§15.13),
+- audit (§15.13),
+- lightweight object link records (§15.13).
+
+**Forbidden / discouraged in SharePoint** (per package):
+
+- raw Procore payloads,
+- large transactional histories,
+- high-volume detail records (timecards, production quantities, equipment events, daily-log segments at scale),
+- bulk attachments,
+- full financial line-item histories,
+- drawing / spec / document metadata at uncontrolled scale,
+- binary document replication.
+
+The package document `10-SharePoint-HB-Intel-Integration-Recommendations.md` is authoritative for materialization decisions; this contract does not relax it.
+
+#### 18.1.8 Sync cadence per subject area
+
+Sourced from the package's recommended cadences:
+
+| Subject Area | Cadence (default) | Notes |
+|---|---|---|
+| `project_management` (RFIs, submittals, observations) | near-real-time / event-based | Webhook preferred; polling fallback. |
+| `quality_safety` (inspections, incidents, punch) | near-real-time / event-based | Same. |
+| `field_execution` (daily logs, timecards, production qty) | hourly / intra-day | High-volume; canonical-layer first. |
+| `financials` (commitments, change events, requisitions, budget views) | nightly + intra-day for active projects | Snapshot cadence per package. |
+| `documents_design` (drawings, specs, document metadata) | nightly | Metadata only; no binary mirror. |
+| `workflow` | daily to hourly | Phase 7 / Future Strategic. |
+
+#### 18.1.9 Three-tier scope ladder
+
+| Tier | Scope | Source |
+|---|---|---|
+| **PCC MVP** | Project Procore Mapping, launch / deep links, Procore Settings (read-only fields populated from mapping), Sync Health placeholder, Object Link pattern. **No summaries materialized.** | This contract §21.8 |
+| **Procore Recommended Practical Model** (default future state) | Operational summaries and canonical-layer sync by subject area: directory + projects, RFIs, submittals, observations, inspections, incidents, punch, commitments, change events, requisitions, drawings/specs metadata, daily-log headers, timecards, production quantities, drawings/specs/document metadata, workflow instances, project roles. | Package `12-Core-vs-Extended-Scope-Recommendation.md` |
+| **Full Strategic Enterprise** | Cross-project analytics, HBI grounding, broader workflow / coordination / equipment / telematics, raw-payload archival/replay, **governed write-back if approved**. | Package |
+
+#### 18.1.10 MVP vs future scope
+
+MVP scope is enumerated in §21.8. Anything beyond mapping + launch links + sync health placeholder is deferred to Recommended Practical or Full Strategic Enterprise.
+
+#### 18.1.11 Write-back posture (deferred)
+
+**MVP is read-only from Procore plus deep links.** PCC may create local PCC actions based on Procore data (e.g., a PCC Action Item that references an overdue Procore RFI), but **PCC must not create / update / delete Procore records** unless a future architecture amendment approves all of:
+
+- user authorization model,
+- permission mapping,
+- audit trail,
+- confirmation UI,
+- rollback / error posture,
+- legal / commercial ownership,
+- Procore endpoint capability,
+- sandbox validation.
+
+Any pre-amendment write-back attempt is a `Security Risk`.
+
+#### 18.1.12 Error / diagnostics rules
+
+- User-facing errors must be plain language (§15.13.3 ErrorCategory mapping is canonical).
+- Technical errors must be redacted; raw Procore payloads must never appear in SharePoint UI diagnostics.
+- Credentials must never be displayed.
+- Sync failures must be visible in Site Health (§19).
+- Integration admins (PCC Admin + IT / Integration Admin) see subject-area health.
+- Ordinary users see only useful status: healthy / delayed / unavailable / not configured.
+
+#### 18.1.13 Security & audit rules
+
+- No Procore secrets in SPFx, SharePoint lists, markdown docs, or repo source (R4).
+- All Procore sync actions are audit-logged in Procore Integration Audit (§15.13.6).
+- Credential access is backend-only.
+- Environment separation is required for sandbox vs production (recorded in §22.2).
+- High-risk permission use is logged.
+- Quarterly Procore endpoint / version review (drives `LastVersionReviewDate` in §15.13.2).
+
+#### 18.1.14 Rate-limit / retry / error posture
+
+Backend handles rate-limit responses via retry-with-backoff. `ErrorCategory = RateLimited` (§15.13.3) maps to `Warning` severity and `T1` repair tier (auto-retry). Persistent `RateLimited` past a configurable threshold escalates to `Repair Required`.
+
+#### 18.1.15 Terminology Alignment
+
+PCC surface names diverge from the package's snake_case canonical layer. The Terminology Alignment table appears once for the contract here:
+
+| Concept | Package (canonical / data layer) | PCC / SharePoint surface |
+|---|---|---|
+| Top-level grouping | `subject area` (six: `financials`, `project_management`, `documents_design`, `quality_safety`, `field_execution`, `workflow`) | "Procore Subject Area"; PCC stores per-project enablement in **Procore Subject Area Registry** (§15.13.2) |
+| Canonical entity | bare snake_case (`project`, `rfi`, `submittal`, `observation`, `punch_item`, …) | Same names quoted; PCC objects that reference them use PCC field names |
+| Lineage | `procore_company_id`, `procore_project_id`, `source_system_id`, `source_updated_at`, `ingested_at` | Canonical names retained at canonical layer; SharePoint surface mirrors as `ProcoreCompanyId`, `ProcoreProjectId`, `ProcoreObjectType`, `ProcoreObjectId`, `ProcoreObjectUrl`, `ProcoreLastSyncedAt`, `SourceSystem`, `CanonicalEntityId`, `CanonicalEntityType`, `MaterializedRecordId` |
+| Storage layers | Raw landing → Canonical relational → SharePoint / HB Intel materialized → Document/file storage | Same; PCC adds **deep links back to Procore** as an explicit fifth surface |
+| Scope tier | Minimum Viable / **Recommended Practical** (default) / Full Strategic Enterprise | Anchored in §18.1.9 / §21.8 |
+| Wave priority | Wave 1–7 from `extraction_priority_matrix.csv` | Mapped to Phase 1–6 in the integration roadmap (blueprint §38) |
+| Auth | DMSA preferred for enterprise sync | DMSA cited as the default backend posture; user-context OAuth deferred |
 
 ---
 
@@ -1233,6 +1601,17 @@ Each `docs/reference/example/` source converts into one or more lists' seeded da
 - no missing navigation nodes
 - no broken webpart bindings
 - emergency repair (§9.4 tier c) reconciled
+- Procore Project Mapping record exists (§15.13.1)
+- `ProcoreProjectId` present (when `ProcoreSyncEnabled=true`)
+- `ProcoreProjectUrl` present (when `ProcoreSyncEnabled=true`)
+- Procore project reachable, when backend connectivity is configured
+- enabled Procore subject areas healthy (§15.13.2 + §15.13.3)
+- backend Procore credentials available for the configured environment
+- last successful Procore sync within tolerance
+- Procore sync errors are redacted (no raw payloads, tokens, or URLs containing secrets in PCC surfaces)
+- required Procore tool deep links configured
+- no stale Procore materializations beyond per-summary tolerance
+- no Procore secret found in any SharePoint surface (R4)
 ```
 
 ### 19.2 Health states
@@ -1264,6 +1643,18 @@ Each `docs/reference/example/` source converts into one or more lists' seeded da
 | Missing required list `Project Profile` | `Blocking` |
 | Missing required permission group | `Repair Required` |
 | Drift caused by IT emergency repair (§9.4 tier c) not reconciled | `Repair Required` |
+| Procore secret discovered in any SharePoint surface (R4) | `Security Risk` |
+| Missing `ProcoreProjectId` while `ProcoreSyncEnabled=true` | `Repair Required` |
+| Missing Procore Project Mapping when sync was enabled previously | `Repair Required` |
+| Procore Sync Health `ErrorCategory = AuthFailed` | `Security Risk` (§15.13.3) |
+| Procore Sync Health `ErrorCategory = PermissionDenied` | `Repair Required` |
+| Procore Sync Health `ErrorCategory = RateLimited` | `Warning` |
+| Procore Sync Health `ErrorCategory = EndpointDeprecated` | `Warning` |
+| Procore Sync Health `ErrorCategory = MappingMissing` | `Repair Required` |
+| Procore Sync Health `ErrorCategory = ProjectNotFound` | `Repair Required` |
+| Procore Sync Health `ErrorCategory = PartialSync` or `StaleData` | `Warning` |
+| Procore Sync Health `ErrorCategory = MaterializationFailed` | `Repair Required` |
+| Procore Sync Health `ErrorCategory = Unknown` | `Repair Required` |
 
 ### 19.5 Repair actions
 
@@ -1347,11 +1738,17 @@ Re-run Validation Result (after repair)
 10. Global Read-Only Group Applied
 11. Project Team Roles Seeded
 12. External Integration Placeholders Created
+12A. Procore Mapping Placeholder Created (§15.13.1; defaults `ProcoreSyncEnabled=false`)
+12B. Procore Subject Area Registry Seeded (§15.13.2; six rows, one per package subject area; defaults `Enabled=false`; `ApiLifecycleStatus=Unknown` until first review)
+12C. Procore Settings Initialized (§10.6 surface populated with mapping defaults)
+12D. Procore Tool Deep Links Initialized (when `ProcoreProjectId` is provided; otherwise deferred to first configuration save)
+12E. Procore Sync Health Placeholder Created (§15.13.3)
+12F. Procore Site Health Checks Registered (per §19.1 Procore lines)
 13. Workflow Templates Seeded (per §17)
 14. Site Health Record Created
-15. Final Validation Passed
+15. Final Validation Passed (includes the §19.1 line "no Procore secret found in any SharePoint surface")
 
-A failure at any stage halts subsequent stages and produces a Provisioning Error with the failed stage recorded.
+A failure at any stage halts subsequent stages and produces a Provisioning Error with the failed stage recorded. A failed Procore stage (12A–12F) does **not** block stages 13–15 unless `ProcoreSyncEnabled=true` was requested at provisioning; otherwise mapping/registry placeholders are created and the project proceeds with Procore disabled.
 
 ### 20.2 Provisioning audit fields
 
@@ -1507,6 +1904,7 @@ For each provisioning / governance operation, the likely API surface and permiss
 - **Failed permission operations** produce redacted diagnostics. The diagnostics bundle is downloadable from Site Health (Admin / IT only).
 - **Broad permissions are reviewed for removal** after provisioning proof.
 - **`Sites.Selected`** is the **target** ongoing selected-site access model.
+- **Procore credentials are not held under HB SharePoint Creator.** Procore authentication (DMSA / OAuth) is a separate backend secret-management surface owned by the future `backend/functions/src/services/procore/` boundary. Cross-reference §18.1.5 and the R4 no-secrets-in-SharePoint validation rule.
 
 ---
 
@@ -1548,6 +1946,24 @@ Per §14.3: low-risk operational libraries ship with `Shortcut Allowed`; drawing
 - External-facing project-local SharePoint groups (`PCC-{ProjectBaseNumber}-ExternalDesignTeam`, `…-OwnerClientViewer`, `…-SubcontractorLimited`): **Not provisioned in MVP** (frozen).
 - Per-project Entra groups: **Not created in MVP** (frozen — see §11.2A).
 
+### 21.8 Procore MVP scope (frozen — Phase 1 only)
+
+Phase 1 MVP for Procore is **mapping + launch links + sync health placeholder only**. No summaries are materialized in MVP.
+
+| Procore element | MVP behavior |
+|---|---|
+| Project Procore Mapping (§15.13.1) | One row created at provisioning with `ProcoreSyncEnabled=false`; populated when configuration entered through §10.6 Procore Settings. |
+| Procore Subject Area Registry (§15.13.2) | Six rows seeded at provisioning, one per package subject area (`financials`, `project_management`, `documents_design`, `quality_safety`, `field_execution`, `workflow`); all `Enabled=false`. |
+| Procore Launch Links | Generated from `ProcoreProjectUrl` once present; visible in the PCC UI. |
+| Procore Settings (§10.6) | Read-only fields populated from the mapping; edit available to PCC Admin / IT / Integration Admin. |
+| Procore Sync Health Placeholder (§15.13.3) | Empty record exists; populated when a subject area is enabled. |
+| Procore Object Link pattern (§15.13.4) | Defined; no rows created in MVP. |
+| Procore Curated Summaries (§15.13.5) | **Deferred** to Recommended Practical (§18.1.9). No rows in MVP. |
+| Backend integration | The future `backend/functions/src/services/procore/` boundary is **declared** in §18.1.4; **not implemented** in MVP. |
+| Write-back | **Deferred** unconditionally; gated by future amendment per §18.1.11. |
+
+Curated summaries, canonical-layer sync, and write-back are deferred to **Recommended Practical** or **Full Strategic Enterprise** per §18.1.9. Cross-reference §18.1 for the full integration contract.
+
 ---
 
 ## 22. Open Decisions / Architecture Freeze Items
@@ -1587,6 +2003,23 @@ This section is now split into **Frozen for MVP** (§22.1) and **Remaining Open*
 15. **HBI Assistant first-release scope** (still deferred; see §8 / §23 Phase 8).
 16. **Per-project-type list seeding** beyond the conditional rules in §4B.2.
 17. **HB SharePoint Creator permission grants** for `Sites.Selected` and review of `GroupMember.ReadWrite.All` (per §20A.4 recommendation).
+18. **Procore authentication model** — DMSA confirmation vs user-context OAuth scope; final disposition.
+19. **Procore credential storage location** — backend secret manager (Azure Key Vault assumed); explicit binding decision.
+20. **Procore Company ID strategy** — single-company vs multi-company tenant; how the company is resolved per project.
+21. **Project mapping owner** — which role triggers initial Procore mapping (Estimating Coordinator vs Project Accountant vs Admin) and which triggers a re-mapping.
+22. **MVP-enabled subject areas beyond mapping/launch links** — current default is none; if any are enabled at first release, which.
+23. **Sync cadence per subject area** — reconcile to package defaults; per-project overrides allowed?
+24. **Webhooks vs scheduled polling** — package recommends event-based for transactional, polling for reference; final decision per subject area.
+25. **Canonical storage target choice** — backend persistence engine for the canonical relational layer (Postgres, SQL Server, Cosmos, etc.); not yet selected.
+26. **Raw payload retention policy** — whether to retain raw Procore payloads for replay; retention window.
+27. **SharePoint materialization boundaries** — confirm package allowed/forbidden lists hold; any per-summary deviations?
+28. **Procore vs Sage financial SoR boundaries** — confirm §18.1.2 R5 wording at adoption time; any operational reports that need cross-source reconciliation.
+29. **Write-back governance** — when (if ever) to enable; the §18.1.11 nine-gate amendment scope.
+30. **Rate-limit / retry policy** — exact thresholds and backoff parameters.
+31. **Endpoint version tracking cadence** — quarterly review confirmed; who owns the review (Architecture vs Integration Admin).
+32. **Sandbox vs production environment separation** — environment matrix, DMSA per environment, configuration-record split.
+33. **Procore data deletion / archive policy** — per subject area; aligns to package retention guidance.
+34. **External-user / Procore-directory reconciliation** — when external users are enabled in a future release, how Procore directory entries map to PCC permission templates.
 
 ---
 
@@ -1644,6 +2077,7 @@ To faithfully represent this contract, a future schema must satisfy:
 6. **Sync policy expressibility** — every library carries one of `Sync Allowed` / `Sync Discouraged` / `Sync Blocked`.
 7. **Permission template expressibility** — every column in §12.3 is a typed field on the schema.
 8. **Provenance** — every schema element references a section and (where applicable) anchor in this markdown so contract changes propagate cleanly into schema changes.
+9. **Procore representability** — schema must represent `procoreMapping` (§15.13.1), `procoreSubjectAreas` (§15.13.2 — including the endpoint / version fields `EndpointName`, `EndpointVersion`, `ApiLifecycleStatus`, `LastVersionReviewDate`, `VersionRisk`), `procoreSyncHealth` (§15.13.3 — including the `ErrorCategory` enum), `procoreObjectLinks` (§15.13.4), `procoreMaterializations` (§15.13.5), and `procoreLineageFields` (the canonical-layer snake_case set and the SharePoint-surface PascalCase mirror per §18.1.15). Provenance back to §15.13 and §18.1 anchors is required.
 
 No schema, JSON, or code is produced in this prompt. Schema extraction is a separate authorized work item under §23 Phase 1.
 

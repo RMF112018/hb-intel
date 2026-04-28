@@ -1,0 +1,54 @@
+parent_entity,child_entity,cardinality,bridge_entity,notes
+company,project,1:M,bridge_company_project,Top-level tenant to project hierarchy
+project,bridge_project_tool_enablement,1:M,,Project to enabled tool matrix
+project,bridge_project_user,1:M,,Project to user membership
+user,bridge_project_user,1:M,,Conformed user to project memberships
+project,bridge_project_vendor,1:M,,Project to vendor membership
+vendor_organization,bridge_project_vendor,1:M,,Vendor to project memberships
+project,budget_view_row_current,1:M,,Project to current budget rows
+project,budget_view_row_snapshot,1:M,,Project to historical budget view rows
+wbs_code,budget_view_row_current,1:M,,WBS joins financial facts
+wbs_code,commitment_contract_line_item,1:M,,Commitment detail by WBS
+wbs_code,timecard_entry,1:M,,Labor detail by WBS
+wbs_code,actual_production_quantity,1:M,,Production detail by WBS
+change_event,budget_change,1:M,,Change events may feed budget changes
+change_event,commitment_change_order,1:M,,Change events may feed subcontract-side change
+change_event,prime_change_order,1:M,,Change events may feed owner-side change
+commitment_contract,commitment_contract_line_item,1:M,,Contract header to line items
+commitment_contract,commitment_change_order,1:M,,Subcontract header to subcontract COs
+commitment_change_order,commitment_change_order_line_item,1:M,,CCO header to detail
+prime_contract,prime_contract_line_item,1:M,,Prime contract header to line items
+prime_contract,prime_change_order,1:M,,Prime contract to owner-side changes
+prime_change_order,prime_change_order_line_item,1:M,,PCO header to line items
+commitment_contract,subcontractor_invoice,1:M,,Subcontract invoice to commitment
+subcontractor_invoice,subcontractor_invoice_detail,1:M,,Invoice to billed detail rows
+owner_invoice,owner_invoice_line_item,1:M,,Owner invoice to line items
+project,rfi,1:M,,Project to RFIs
+rfi,rfi_reply,1:M,,RFI to replies
+project,submittal,1:M,,Project to submittals
+submittal,submittal_response,1:M,,Submittal to responses
+submittal,bridge_submittal_approver,1:M,,Submittal to approver assignments
+project,correspondence_item,1:M,,Project to correspondence items
+project,observation,1:M,,Project to observations
+project,inspection,1:M,,Project to inspections
+inspection,inspection_item,1:M,,Inspection header to item detail
+inspection_item,bridge_inspection_item_observation,1:M,,Inspection item to related observations
+project,incident,1:M,,Project to incidents
+project,punch_item,1:M,,Project to punch
+project,coordination_issue,1:M,,Project to coordination issues
+coordination_issue,coordination_issue_activity,1:M,,Issue to activity/change history
+project,daily_log_header,1:M,,Project-date daily log header
+daily_log_header,daily_log_segment_event,1:M,,Daily header to segment rows
+project,timecard_entry,1:M,,Project to labor entries
+project,actual_production_quantity,1:M,,Project to production transactions
+equipment,equipment_project_assignment,1:M,,Equipment assignment history
+equipment,equipment_time_entry,1:M,,Equipment usage detail
+equipment,equipment_maintenance_event,1:M,,Equipment maintenance history
+project,document_folder,1:M,,Project to folder tree
+document_folder,document_file,1:M,,Folder to files
+project,drawing,1:M,,Project to drawings
+drawing_set,drawing,1:M,,Drawing set to drawings
+drawing,drawing_revision,1:M,,Drawing to revisions
+project,specification_section,1:M,,Project to specification sections
+specification_section,specification_revision,1:M,,Specification section to revisions
+document_file,bridge_entity_attachment,1:M,,Files attached to transactional entities

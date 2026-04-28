@@ -1,0 +1,159 @@
+{
+  "model_name": "hb_intel_procore_canonical_model",
+  "version": "2026-04-23",
+  "recommended_scope": "recommended_practical",
+  "source_system": "Procore REST API",
+  "hierarchy": {
+    "anchors": [
+      "company",
+      "project"
+    ],
+    "company_to_project": "bridge_company_project",
+    "project_subject_areas": [
+      "financials",
+      "project_management",
+      "documents_design",
+      "quality_safety",
+      "field_execution",
+      "workflow"
+    ]
+  },
+  "dimensions": [
+    "company",
+    "project",
+    "project_classification",
+    "user",
+    "vendor_organization",
+    "department",
+    "trade",
+    "permission_template",
+    "location",
+    "distribution_group",
+    "custom_field_definition",
+    "custom_field_option",
+    "wbs_attribute",
+    "wbs_attribute_item",
+    "wbs_code",
+    "sub_job",
+    "generic_tool_type",
+    "drawing_area",
+    "drawing_set",
+    "specification_set",
+    "project_role_reference",
+    "equipment"
+  ],
+  "bridges": [
+    "bridge_company_project",
+    "bridge_project_user",
+    "bridge_project_user_role",
+    "bridge_project_vendor",
+    "bridge_project_vendor_role",
+    "bridge_project_tool_enablement",
+    "bridge_entity_attachment",
+    "bridge_inspection_item_observation",
+    "bridge_submittal_approver",
+    "equipment_project_assignment"
+  ],
+  "facts_financial": [
+    "budget_line_item_current",
+    "budget_detail_row",
+    "budget_view_row_current",
+    "budget_view_row_snapshot",
+    "budget_change",
+    "budget_change_adjustment",
+    "change_event",
+    "commitment_contract",
+    "commitment_contract_line_item",
+    "commitment_change_order",
+    "commitment_change_order_line_item",
+    "subcontractor_invoice",
+    "subcontractor_invoice_detail",
+    "direct_cost",
+    "prime_contract",
+    "prime_contract_line_item",
+    "prime_change_order",
+    "prime_change_order_line_item",
+    "owner_invoice",
+    "owner_invoice_line_item",
+    "contract_payment",
+    "project_cost_position_snapshot"
+  ],
+  "facts_project_management": [
+    "rfi",
+    "rfi_reply",
+    "submittal",
+    "submittal_response",
+    "meeting",
+    "meeting_topic",
+    "correspondence_item",
+    "form_instance",
+    "workflow_instance",
+    "workflow_activity",
+    "task",
+    "schedule_calendar_item",
+    "project_open_item_snapshot"
+  ],
+  "facts_documents_design": [
+    "document_folder",
+    "document_file",
+    "document_upload",
+    "drawing",
+    "drawing_revision",
+    "drawing_upload",
+    "specification_section",
+    "specification_revision",
+    "email_communication"
+  ],
+  "facts_quality_safety": [
+    "observation",
+    "inspection",
+    "inspection_item",
+    "incident",
+    "action_plan",
+    "action_plan_item",
+    "punch_item",
+    "coordination_issue",
+    "coordination_issue_activity",
+    "project_quality_safety_snapshot"
+  ],
+  "facts_field_execution": [
+    "daily_log_header",
+    "daily_log_segment_event",
+    "timecard",
+    "timecard_entry",
+    "timesheet",
+    "actual_production_quantity",
+    "equipment_time_entry",
+    "equipment_maintenance_event",
+    "field_productivity_snapshot"
+  ],
+  "history_and_snapshots": [
+    "budget_view_row_snapshot",
+    "project_cost_position_snapshot",
+    "project_open_item_snapshot",
+    "project_quality_safety_snapshot",
+    "field_productivity_snapshot"
+  ],
+  "optional_extensions": [
+    "telematics_event",
+    "gps_position_event",
+    "document_markup_artifact",
+    "compliance_document_status",
+    "alert",
+    "environmental_action",
+    "property_damage",
+    "workflow_template",
+    "workflow_manager"
+  ],
+  "key_strategy": {
+    "native_keys": "Preserve Procore object IDs on every canonical entity.",
+    "surrogate_keys": "Issue HB Intel surrogate keys for conformed dimensions and facts exposed broadly in analytics.",
+    "lineage": [
+      "procore_company_id",
+      "procore_project_id",
+      "source_system_id",
+      "source_updated_at",
+      "ingested_at"
+    ]
+  }
+}
