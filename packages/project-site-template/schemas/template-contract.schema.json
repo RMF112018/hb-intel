@@ -7,10 +7,12 @@
   "additionalProperties": false,
   "required": ["templateName", "templateFamily", "templateVersion", "phase", "source", "status", "families"],
   "properties": {
+    "$schema": { "type": "string", "description": "Optional pointer to this scaffold schema for IDE-side schema-aware editing of the contract instance. Phase 1 Step 5 narrow correction." },
     "templateName": { "type": "string" },
     "templateFamily": { "type": "string" },
     "templateVersion": { "type": "string" },
     "phase": { "type": "string" },
+    "fieldMaps": { "type": "object", "description": "Reference block pointing at the Phase 1 Step 3 field-consolidation artifacts under fields/. Existence-only declaration; inner shape is documented in fields/README.md and not re-validated by this scaffold schema. Phase 1 Step 5 narrow correction." },
     "source": {
       "type": "object",
       "additionalProperties": false,

@@ -103,6 +103,7 @@ function listJsonFiles(dir) {
   try {
     return readdirSync(dir)
       .filter((name) => name.endsWith('.json'))
+      .sort() // deterministic ordering for report stability
       .map((name) => ({ name, path: join(dir, name) }))
       .filter((f) => statSync(f.path).isFile());
   } catch {
@@ -123,7 +124,6 @@ function ensureDir(dir) {
 }
 
 function main() {
-  const startedAt = new Date().toISOString();
   const { validators, schemasById, compileError } = compileAll();
 
   const results = [];
@@ -261,13 +261,22 @@ function main() {
     }
   }
 
-  // Write report (not committed; .gitignore excludes it).
+  // Sort results by (kind, name) for stable, byte-deterministic output across
+  // runs. Console table also reads in this order.
+  const KIND_ORDER = ['schema-compile', 'contract-instance', 'valid-fixture', 'invalid-fixture', 'invalid-fixture-manifest'];
+  results.sort((a, b) => {
+    const ki = KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind);
+    if (ki !== 0) return ki;
+    return String(a.name).localeCompare(String(b.name));
+  });
+
+  // Deterministic report. No timestamps, no absolute paths, sorted ordering.
   ensureDir(REPORTS_DIR);
   const report = {
-    generatedAt: startedAt,
     harnessVersion: '1.0.0',
-    schemasLoaded: schemasById ? [...schemasById.keys()] : [],
+    schemasLoaded: schemasById ? [...schemasById.keys()].sort() : [],
     unexpectedOutcomes: unexpected,
+    reportPath: 'validation/reports/schema-validation-report.json',
     results,
   };
   writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2) + '\n', 'utf8');
@@ -275,7 +284,7 @@ function main() {
   console.log(
     `\nschema validation: ${unexpected === 0 ? 'clean' : `${unexpected} unexpected outcome(s)`}`
   );
-  console.log(`report: ${REPORT_PATH}`);
+  console.log('report: validation/reports/schema-validation-report.json');
   process.exit(unexpected === 0 ? 0 : 1);
 }
 

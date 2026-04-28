@@ -1,0 +1,105 @@
+{
+  "harnessVersion": "1.0.0",
+  "totalChecks": 16,
+  "passing": 16,
+  "failing": 0,
+  "reportPath": "validation/reports/contract-integrity-report.json",
+  "checks": [
+    {
+      "id": "1.family-schemas-exist",
+      "label": "All 14 family schemas exist on disk",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "2.families-listed",
+      "label": "All 14 families listed in template-contract.json",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "3.families-populated",
+      "label": "All 14 families have status: populated",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "4.fullExtractionComplete",
+      "label": "fullExtractionComplete remains false (Step 5 stage; Prompt 04 flips the gate)",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "5.family-schema-paths-resolve",
+      "label": "Family schema paths in template-contract.json resolve",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "6.field-maps-exist",
+      "label": "Field maps exist for the 12 Step 3 field-map families",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "7.oc-row-count",
+      "label": "object-catalog-field-disposition.json has exactly 18 rows",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "8.oc-placeholder-rows",
+      "label": "OC-17 and OC-18 are extractionTreatment=placeholder-only and mvpTreatment=Deferred",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "9.procore-boundary-const",
+      "label": "integrations.schema.json Procore boundary const-true booleans + ProcoreCompanyId default 5280",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "10.secret-scan",
+      "label": "No secret-class field names or string values outside guardrail descriptions and invalid/ fixtures",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "11.no-shorthand-enum",
+      "label": "No enum definition uses scaffold shorthand values (mvp / deferred / placeholder)",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "12.no-forbidden-projecttype",
+      "label": "No projectType $defs enum contains forbidden tokens",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "13.no-archived-as-stage",
+      "label": "No projectStage $defs enum contains Archived",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "14.visibilitybystage-keys",
+      "label": "modules.visibilityByStage keys are exactly the six ProjectStage tokens",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "15.seedrule-keyedon",
+      "label": "seedRule / verticalSeeding keyedOn is \"projectType\" wherever present",
+      "pass": true,
+      "failures": []
+    },
+    {
+      "id": "16.forbidden-deps",
+      "label": "package.json declares no backend / SPFx / provisioning / Procore-runtime dependency markers",
+      "pass": true,
+      "failures": []
+    }
+  ]
+}

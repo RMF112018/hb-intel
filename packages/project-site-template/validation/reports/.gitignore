@@ -1,3 +1,5 @@
 *
 !.gitkeep
 !.gitignore
+!schema-validation-report.json
+!contract-integrity-report.json

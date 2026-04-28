@@ -155,7 +155,51 @@ Both fixtures now PASS. No schema was modified. (Nine of the populated Phase 1 S
 
 ### Report
 
-See `validation/reports/schema-validation-report.json` (regenerated on each run; not committed).
+See `validation/reports/schema-validation-report.json` and `validation/reports/contract-integrity-report.json`. **As of Prompt 03 remediation, both reports are deterministic and source-controlled** (no timestamps, no absolute paths, stable sorted ordering, byte-identical across consecutive runs).
+
+## Harness Execution Results
+
+After the Prompt 03 narrow correction to `template-contract.schema.json` (declaring `$schema` and `fieldMaps` as optional top-level properties), the harness runs cleanly:
+
+```text
+contract integrity checks — phase 1 step 5
+  all checks passed (16/16)
+
+schema validation harness — phase 1 step 5
+  contract-instance: PASS  (template-contract.json against template-contract.schema.json)
+  14 / 14 valid fixtures: PASS
+  7 / 7 invalid fixtures: PASS (each rejected by its target schema as expected)
+  schema validation: clean
+```
+
+Both `node validation/contract-integrity-checks.mjs` and `node validation/validate-template-contract.mjs` exit 0. `pnpm --filter @hbc/project-site-template validate:all` exits 0.
+
+Determinism verified: two consecutive runs produce byte-identical `schema-validation-report.json` and `contract-integrity-report.json` (`diff` reports no changes).
+
+## Remediations Performed
+
+1. **`schemas/template-contract.schema.json`** — narrow correction. Added two optional top-level properties:
+   - `$schema: { "type": "string" }` (originally added to the contract instance in Phase 1 Step 1 for IDE-side schema-aware editing).
+   - `fieldMaps: { "type": "object" }` (originally added to the contract instance in Phase 1 Step 3 to point at the `fields/` artifacts).
+   `required` array unchanged. Top-level `additionalProperties: false` preserved.
+2. **`validation/validate-template-contract.mjs`** — deterministic report writing. Removed `generatedAt` timestamp, dropped absolute paths from report contents, sorted `schemasLoaded` and `results` arrays for stable ordering. Console output uses relative report path.
+3. **`validation/contract-integrity-checks.mjs`** — added deterministic report writing. The 16 existing checks are unchanged in logic. The script now emits a `validation/reports/contract-integrity-report.json` with each check id, label, pass/fail, and any failure detail in stable catalog order.
+4. **`validation/reports/.gitignore`** — replaced blanket-ignore with a targeted allowlist for `.gitkeep`, `.gitignore`, `schema-validation-report.json`, and `contract-integrity-report.json`. Other ad-hoc generated outputs in `reports/` remain ignored by default.
+5. **`validation/README.md`** — Reports section updated to reflect the deterministic, source-controlled posture.
+
+No family schema, field map, fixture, or `template-contract.json` was modified. No backend, SPFx, provisioning, manifest, generated, CI, root-workspace, dependency, package-script, or runtime-consumer change.
+
+## Remaining Failures
+
+None. All integrity checks pass (16/16). All schema validations match expectation (14/14 valid fixtures pass, 7/7 invalid fixtures correctly rejected, contract-instance passes).
+
+## Step 5 Closeout Readiness
+
+`Ready for Prompt 04 — Full Extraction Gate`.
+
+**Important:** Prompt 03 (this prompt) does **not** flip `template-contract.json.status.fullExtractionComplete` to `true`. That gate remains `false` and is the explicit responsibility of Prompt 04.
+
+**Prompt 04 follow-on note for the integrity checker.** The current `4.fullExtractionComplete` integrity check hard-asserts `fullExtractionComplete === false`. When Prompt 04 flips that flag to `true`, the integrity checker will start failing unless that one check is updated or parameterized to accept both states (or to flip its assertion to `=== true` post-gate). Failing to update this check at gate-flip time will cause `pnpm validate:all` to exit non-zero after final closeout. The recommended path is for Prompt 04 to either (a) update the check assertion to `=== true` once the gate flips, or (b) introduce a `STEP_5_REMEDIATION` vs `POST_FULL_EXTRACTION` mode flag the script honors. This is documented here for the gate prompt's awareness.
 
 ## What Was Not Implemented
 

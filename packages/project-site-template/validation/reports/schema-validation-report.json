@@ -1,0 +1,287 @@
+{
+  "harnessVersion": "1.0.0",
+  "schemasLoaded": [
+    "enums",
+    "integrations",
+    "libraries",
+    "lists",
+    "modules",
+    "pages",
+    "permissions",
+    "provisioning-validation",
+    "settings",
+    "site",
+    "site-health",
+    "template-contract",
+    "template-manifest",
+    "validation-rules",
+    "workflows"
+  ],
+  "unexpectedOutcomes": 0,
+  "reportPath": "validation/reports/schema-validation-report.json",
+  "results": [
+    {
+      "kind": "contract-instance",
+      "name": "template-contract.json",
+      "schema": "template-contract.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "enums.valid.json",
+      "schema": "enums.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "integrations.valid.json",
+      "schema": "integrations.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "libraries.valid.json",
+      "schema": "libraries.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "lists.valid.json",
+      "schema": "lists.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "modules.valid.json",
+      "schema": "modules.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "pages.valid.json",
+      "schema": "pages.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "permissions.valid.json",
+      "schema": "permissions.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "provisioning-validation.valid.json",
+      "schema": "provisioning-validation.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "settings.valid.json",
+      "schema": "settings.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "site-health.valid.json",
+      "schema": "site-health.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "site.valid.json",
+      "schema": "site.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "template-manifest.valid.json",
+      "schema": "template-manifest.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "validation-rules.valid.json",
+      "schema": "validation-rules.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "valid-fixture",
+      "name": "workflows.valid.json",
+      "schema": "workflows.schema.json",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_integration_missing_procore_boundary_consts.json",
+      "schema": "integrations.schema.json",
+      "expectedFailureReason": "noFullProcoreMirror set to false violates const: true (VR-16; Contract P-10).",
+      "targetFamily": "integrations",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "/noFullProcoreMirror",
+          "schemaPath": "#/properties/noFullProcoreMirror/const",
+          "keyword": "const",
+          "message": "must be equal to constant",
+          "params": {
+            "allowedValue": true
+          }
+        }
+      ]
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_integration_procore_secret_like_field.json",
+      "schema": "integrations.schema.json",
+      "expectedFailureReason": "Extra property 'procoreClientSecret' violates additionalProperties: false; secret-class fields are forbidden by VR-13. Fixture intentionally contains a secret-like field name to demonstrate schema rejection; integrity-check secret scanner skips invalid/ fixtures by design.",
+      "targetFamily": "integrations",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "",
+          "schemaPath": "#/additionalProperties",
+          "keyword": "additionalProperties",
+          "message": "must NOT have additional properties",
+          "params": {
+            "additionalProperty": "procoreClientSecret"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_module_visibility_keyed_on_project_type.json",
+      "schema": "modules.schema.json",
+      "expectedFailureReason": "visibilityByStage contains key 'commercial' (a ProjectType) which violates visibilityByStage.additionalProperties: false; visibility must key strictly on the six ProjectStage tokens (VR-07).",
+      "targetFamily": "modules",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "/visibilityByStage",
+          "schemaPath": "#/properties/visibilityByStage/additionalProperties",
+          "keyword": "additionalProperties",
+          "message": "must NOT have additional properties",
+          "params": {
+            "additionalProperty": "commercial"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_mvp_status_shorthand.json",
+      "schema": "template-manifest.schema.json",
+      "expectedFailureReason": "mvp_status set to 'mvp' (scaffold shorthand) violates decisionClosureStatus $defs.enum (VR-24).",
+      "targetFamily": "template-manifest",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "/mvp_status",
+          "schemaPath": "#/$defs/decisionClosureStatus/enum",
+          "keyword": "enum",
+          "message": "must be equal to one of the allowed values",
+          "params": {
+            "allowedValues": [
+              "Frozen for MVP",
+              "Runtime Configuration",
+              "Deferred",
+              "Proof-Gated"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_project_stage_archived.json",
+      "schema": "site.schema.json",
+      "expectedFailureReason": "ProjectStage set to 'Archived' violates projectStage $defs.enum (VR-04).",
+      "targetFamily": "site",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "/ProjectStage",
+          "schemaPath": "#/$defs/projectStage/enum",
+          "keyword": "enum",
+          "message": "must be equal to one of the allowed values",
+          "params": {
+            "allowedValues": [
+              "lead",
+              "estimating",
+              "preconstruction",
+              "active_construction",
+              "closeout",
+              "warranty"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_project_type_active_construction.json",
+      "schema": "site.schema.json",
+      "expectedFailureReason": "ProjectType set to 'active_construction' violates projectType $defs.enum (VR-05).",
+      "targetFamily": "site",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "/ProjectType",
+          "schemaPath": "#/$defs/projectType/enum",
+          "keyword": "enum",
+          "message": "must be equal to one of the allowed values",
+          "params": {
+            "allowedValues": [
+              "commercial",
+              "multifamily",
+              "municipal",
+              "luxury_residential",
+              "environmental"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "kind": "invalid-fixture",
+      "name": "invalid_template_contract_missing_family.json",
+      "schema": "template-contract.schema.json",
+      "expectedFailureReason": "Top-level template-contract instance is missing the 'enums' family entry, which violates template-contract.schema.json families.required.",
+      "targetFamily": "template-contract",
+      "ajvAccepted": false,
+      "pass": true,
+      "errors": [
+        {
+          "instancePath": "/families",
+          "schemaPath": "#/properties/families/required",
+          "keyword": "required",
+          "message": "must have required property 'enums'",
+          "params": {
+            "missingProperty": "enums"
+          }
+        }
+      ]
+    }
+  ]
+}

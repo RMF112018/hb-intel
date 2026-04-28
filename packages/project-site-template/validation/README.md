@@ -111,13 +111,21 @@ Non-zero exit on any check failure.
 
 ## Reports
 
-The schema-validation harness writes a JSON report to:
+Both validation scripts write deterministic JSON reports to:
 
 ```text
 validation/reports/schema-validation-report.json
+validation/reports/contract-integrity-report.json
 ```
 
-That file is **not** committed. The `reports/` directory is tracked via `.gitkeep` and `.gitignore` rules; the report is regenerated on every run and contains a timestamp.
+Reports are **deterministic and source-controlled** as of Phase 1 Step 5 Prompt 03 remediation:
+
+- No timestamps.
+- No absolute paths.
+- Stable sorted ordering (schemasLoaded, results, checks).
+- Byte-identical across consecutive runs.
+
+The local `validation/reports/.gitignore` allowlists exactly these two report filenames plus `.gitkeep` and `.gitignore`; any other generated artifacts in `reports/` are ignored by default.
 
 ## Guardrails
 

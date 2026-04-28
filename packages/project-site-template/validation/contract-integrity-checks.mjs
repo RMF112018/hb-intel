@@ -6,7 +6,7 @@
 //   0 — every check passed.
 //   1 — at least one check failed; failures printed to stdout.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, basename } from 'node:path';
 
@@ -18,6 +18,29 @@ const FAMILIES_DIR = join(SCHEMAS_DIR, 'families');
 const FIELDS_DIR = join(PKG_ROOT, 'fields');
 const FIELDS_FAMILIES_DIR = join(FIELDS_DIR, 'families');
 const FIXTURES_VALID_DIR = join(__dirname, 'fixtures', 'valid');
+const REPORTS_DIR = join(__dirname, 'reports');
+const REPORT_PATH = join(REPORTS_DIR, 'contract-integrity-report.json');
+
+// Stable check catalog. Each running check pushes results here so the report
+// reflects all 16 checks in deterministic order regardless of failure shape.
+const CHECK_CATALOG = [
+  { id: '1.family-schemas-exist', label: 'All 14 family schemas exist on disk' },
+  { id: '2.families-listed', label: 'All 14 families listed in template-contract.json' },
+  { id: '3.families-populated', label: 'All 14 families have status: populated' },
+  { id: '4.fullExtractionComplete', label: 'fullExtractionComplete remains false (Step 5 stage; Prompt 04 flips the gate)' },
+  { id: '5.family-schema-paths-resolve', label: 'Family schema paths in template-contract.json resolve' },
+  { id: '6.field-maps-exist', label: 'Field maps exist for the 12 Step 3 field-map families' },
+  { id: '7.oc-row-count', label: 'object-catalog-field-disposition.json has exactly 18 rows' },
+  { id: '8.oc-placeholder-rows', label: 'OC-17 and OC-18 are extractionTreatment=placeholder-only and mvpTreatment=Deferred' },
+  { id: '9.procore-boundary-const', label: 'integrations.schema.json Procore boundary const-true booleans + ProcoreCompanyId default 5280' },
+  { id: '10.secret-scan', label: 'No secret-class field names or string values outside guardrail descriptions and invalid/ fixtures' },
+  { id: '11.no-shorthand-enum', label: 'No enum definition uses scaffold shorthand values (mvp / deferred / placeholder)' },
+  { id: '12.no-forbidden-projecttype', label: 'No projectType $defs enum contains forbidden tokens' },
+  { id: '13.no-archived-as-stage', label: 'No projectStage $defs enum contains Archived' },
+  { id: '14.visibilitybystage-keys', label: 'modules.visibilityByStage keys are exactly the six ProjectStage tokens' },
+  { id: '15.seedrule-keyedon', label: 'seedRule / verticalSeeding keyedOn is "projectType" wherever present' },
+  { id: '16.forbidden-deps', label: 'package.json declares no backend / SPFx / provisioning / Procore-runtime dependency markers' },
+];
 
 const FAMILY_NAMES = [
   'template-manifest',
@@ -417,16 +440,67 @@ for (const depTable of ['dependencies', 'devDependencies', 'peerDependencies']) 
 }
 
 // ---------------------------------------------------------------------------
-// Output and exit.
+// Output, report, and exit.
 // ---------------------------------------------------------------------------
+
+// Build per-check report rows in the catalog's stable order. Each catalog entry
+// becomes one row. A check is "pass" when no failure was recorded against its
+// id-prefix; otherwise "fail" with all matching failure details.
+function ensureDir(dir) {
+  try { mkdirSync(dir, { recursive: true }); } catch {}
+}
+
+const reportChecks = CHECK_CATALOG.map(({ id, label }) => {
+  const matching = failures
+    .filter((f) => f.check === id || f.check.startsWith(id + '.') || f.check.startsWith(id))
+    .sort((a, b) => a.detail.localeCompare(b.detail));
+  return {
+    id,
+    label,
+    pass: matching.length === 0,
+    failures: matching.map((m) => ({ check: m.check, detail: m.detail })),
+  };
+});
+
+// Allow id-prefix sloppy matches in the catalog above, but also bucket any
+// failure that did not map cleanly into an "uncatalogued" row. (Defensive; the
+// ids above are designed to cover every fail() call.)
+const uncatalogued = failures.filter((f) =>
+  !CHECK_CATALOG.some(({ id }) => f.check === id || f.check.startsWith(id + '.') || f.check.startsWith(id))
+);
+if (uncatalogued.length) {
+  reportChecks.push({
+    id: '99.uncatalogued',
+    label: 'Failures not mapped to a known check id',
+    pass: false,
+    failures: uncatalogued.map((m) => ({ check: m.check, detail: m.detail })),
+  });
+}
+
+const totalChecks = CHECK_CATALOG.length;
+const passingChecks = reportChecks.filter((c) => c.pass).length;
+const failingChecks = reportChecks.length - passingChecks;
+
 console.log('\ncontract integrity checks — phase 1 step 5\n');
 if (failures.length === 0) {
-  console.log('  all checks passed (16/16)');
-  process.exit(0);
+  console.log(`  all checks passed (${passingChecks}/${totalChecks})`);
 } else {
   console.log(`  ${failures.length} failure(s):\n`);
   for (const f of failures) {
     console.log(`  [${f.check}] ${f.detail}`);
   }
-  process.exit(1);
 }
+
+const report = {
+  harnessVersion: '1.0.0',
+  totalChecks,
+  passing: passingChecks,
+  failing: failingChecks,
+  reportPath: 'validation/reports/contract-integrity-report.json',
+  checks: reportChecks,
+};
+ensureDir(REPORTS_DIR);
+writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2) + '\n', 'utf8');
+console.log('\n  report: validation/reports/contract-integrity-report.json');
+
+process.exit(failures.length === 0 ? 0 : 1);
