@@ -87,3 +87,6 @@ export * from './admin-control-plane/index.js';
 
 // ─── API Schemas (Zod contract schemas for E1 contract testing) ──────────────
 export * from './api-schemas/index.js';
+
+// ─── PCC (Project Control Center shared foundations) ─────────────────────────
+export * from './pcc/index.js';
