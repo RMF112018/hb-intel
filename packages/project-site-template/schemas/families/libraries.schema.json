@@ -1,20 +1,97 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/libraries.schema.json",
-  "title": "Libraries Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the libraries family — document library declarations, content types, retention, taxonomy linkage, and folder seed structures. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §10.",
+  "title": "Libraries Family Schema",
+  "description": "Phase 1 Step 4 Wave 2 — populated libraries family schema. Document library declarations from Contract §14.1 (12 standard libraries: 8 MVP/Required, 3 Optional/Future, plus 99_Archive), sync-policy enum (§14.2), folder-permissions policy (§14.5), governed sync elevation exception (§14.5A), archive/read-only behavior (§3.2 + §5.6), and vertical seeding keyed on ProjectType (VR-08). Field set traces verbatim to fields/families/libraries.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24). No-full-Procore-mirror posture preserved (VR-16, Contract P-10): libraries do not host Procore binary mirrors, Procore document-sync, or canonical Procore document objects.",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "libraryInternalName",
+    "libraryDisplayName",
+    "purpose",
+    "primaryModule",
+    "defaultAccess",
+    "syncPolicy",
+    "retentionArchive",
+    "requiredOptional",
+    "folderPermissionsPolicy",
+    "readOnlyOnStatus"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "libraries" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "libraryInternalName": { "type": "string", "description": "Internal library name (e.g., 01_Project_Administration). 12 standard libraries from §14.1." },
+    "libraryDisplayName": { "type": "string", "description": "Display version of the library name." },
+    "purpose": { "type": "string", "description": "Library purpose statement." },
+    "primaryModule": { "type": "string", "description": "Module that primarily owns this library." },
+    "defaultAccess": { "type": "string", "description": "Default access posture (e.g., 'Project Team Member+', 'PM, PA, Admin')." },
+    "restrictedAccess": { "type": "string", "description": "Restricted-access posture (e.g., 'Read for Executive Oversight'). Optional." },
+    "recommendedMetadata": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Recommended metadata columns (e.g., DocCategory, DocStatus, ResponsibleRole)."
+    },
+    "defaultViews": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Default view names."
+    },
+    "syncPolicy": { "$ref": "#/$defs/syncPolicy", "description": "Sync policy from §14.2." },
+    "retentionArchive": { "type": "string", "description": "Retention/archive policy (e.g., '7y, archive at closeout', 'indefinite')." },
+    "requiredOptional": { "$ref": "#/$defs/requiredOptional", "description": "Required / Optional indicator." },
+    "validationRule": { "type": "string", "description": "Validation rule string from §14.1 (e.g., 'Must exist', 'Validate if module enabled')." },
+    "folderPermissionsPolicy": { "type": "string", "description": "Unique folder-level permissions are prohibited except in controlled exceptions. §14.5; VR-17." },
+    "governedSyncException": { "type": "boolean", "description": "Whether the library is elevated from Shortcut Allowed to Sync Allowed via governed exception. §14.5A." },
+    "readOnlyOnStatus": { "type": "boolean", "description": "Library flips read-only when ProjectStatus is Closed or Archived. §3.2, §5.6; VR-09, VR-29. Archived is ProjectStatus only — never ProjectStage." },
+    "seedRule": {
+      "type": "object",
+      "description": "Vertical seeding rule keyed on ProjectType. VR-08. Vertical seeding never keys on ProjectStage.",
+      "additionalProperties": false,
+      "properties": {
+        "keyedOn": { "type": "string", "const": "projectType" },
+        "perType": {
+          "type": "object",
+          "description": "Per-ProjectType seeding directives. Keys are the 5 canonical ProjectType values.",
+          "additionalProperties": false,
+          "properties": {
+            "commercial": { "type": "array", "items": { "type": "string" } },
+            "multifamily": { "type": "array", "items": { "type": "string" } },
+            "municipal": { "type": "array", "items": { "type": "string" } },
+            "luxury_residential": { "type": "array", "items": { "type": "string" } },
+            "environmental": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "required": ["keyedOn"]
+    }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "syncPolicy": {
+      "type": "string",
+      "description": "Sync Policy enum from Contract §14.2.",
+      "enum": ["Online Only", "Shortcut Allowed", "Sync Allowed", "Sync Blocked"]
+    },
+    "requiredOptional": {
+      "type": "string",
+      "description": "Library requirement marker.",
+      "enum": ["Required", "Optional"]
+    }
+  }
 }

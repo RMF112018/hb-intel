@@ -3,7 +3,7 @@
   "templateName": "HB Standard Project Site Template",
   "templateFamily": "Project Sites",
   "templateVersion": "1.0.0-proposed",
-  "phase": "Phase 1 Step 4 Wave 1 — core families populated (template-manifest, site, settings, permissions)",
+  "phase": "Phase 1 Step 4 Wave 2 — content and experience families populated (libraries, lists, modules, pages)",
   "source": {
     "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
     "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
@@ -65,23 +65,23 @@
     },
     "pages": {
       "schema": "./schemas/families/pages.schema.json",
-      "status": "skeleton",
-      "notes": "Site page structure, regions, and SPFx webpart placement directives. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 2 — populated. 17 §13 standard pages (9 MVP + 8 Future): pageUrl pattern under /SitePages/, embeddedModule references (VR-26), defaultOrder 1–17, visibility enum, mvpStatus canonical (VR-24). PCC-facing pages only — never native SharePoint admin/edit/settings surfaces (VR-17)."
     },
     "libraries": {
       "schema": "./schemas/families/libraries.schema.json",
-      "status": "skeleton",
-      "notes": "Document library declarations, content types, retention, taxonomy linkage, folder seeds. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 2 — populated. 12 §14.1 libraries (8 MVP/Required + 3 Optional/Future + 99_Archive). Sync policy enum (§14.2), folder permissions policy (§14.5; VR-17), governed sync exception (§14.5A), readOnlyOnStatus on Closed/Archived (VR-09, VR-29), seedRule keyed strictly on ProjectType (VR-08). No-full-Procore-mirror posture preserved (VR-16; Contract P-10). mvp_status canonical (VR-24)."
     },
     "lists": {
       "schema": "./schemas/families/lists.schema.json",
-      "status": "skeleton",
-      "notes": "SharePoint list declarations, columns, content types, views, visibility constraints. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 2 — populated. List-level shape covering §15.2 governance lists, §15.3–§15.11 operational lists, with §16.1 baseline columns (Status §16.2, Priority §16.3) inherited by every operational list. Per-list field expansion bounded to requiredFields/optionalFields names; full per-list schemas land downstream as needed. readOnlyOnStatus keys on ProjectStatus (Archived only as Status). Lookups bound by VR-25; owningModule by VR-26; seedRule strictly on ProjectType (VR-08). mvp_status canonical (VR-24)."
     },
     "modules": {
       "schema": "./schemas/families/modules.schema.json",
-      "status": "skeleton",
-      "notes": "SPFx webpart and module declarations. HBI Assistant module remains deferred from MVP. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 2 — populated. 20 §8.1 modules (8 MVP + 12 Later, plus governance Settings/Site Health entry). visibilityByStage keyed strictly on the six ProjectStage values per VR-07; ProjectType never used as a visibility key; 'Archived' never appears in projectStage enum. verticalSeeding (when present) keyed strictly on ProjectType per VR-08. HBI Assistant carries mvpStatus 'Deferred' per VR-19. mvp_status canonical (VR-24)."
     },
     "workflows": {
       "schema": "./schemas/families/workflows.schema.json",

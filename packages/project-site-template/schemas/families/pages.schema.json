@@ -1,20 +1,56 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/pages.schema.json",
-  "title": "Pages Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the pages family — site page structure, layouts, regions, and SPFx webpart placement directives. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §9, §15.",
+  "title": "Pages Family Schema",
+  "description": "Phase 1 Step 4 Wave 2 — populated pages family schema. Site-page declarations from Contract §13 covering the 17 standard pages (9 MVP + 8 Future): shell pages, module pages, and the governance Settings page. Every page record represents a PCC-facing page or route — never a native SharePoint admin / edit / settings surface (VR-17 no-native-SharePoint-admin posture). Pages reference modules by stable identifier (VR-26 referential integrity). Field set traces verbatim to fields/families/pages.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24). Navigation order is governed by Control Center Settings (§10) at runtime.",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "pageUrl",
+    "pagePurpose",
+    "embeddedModule",
+    "navigationLabel",
+    "defaultOrder",
+    "visibility",
+    "mvpStatus"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "pages" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "pageUrl": {
+      "type": "string",
+      "pattern": "^/SitePages/[A-Za-z0-9_\\-]+\\.aspx$",
+      "description": "Page URL path under /SitePages/ (e.g., /SitePages/Project-Control-Center.aspx). 17 §13 standard pages. PCC-facing pages only — page records MUST NOT represent native SharePoint admin, edit, or settings surfaces (VR-17). The PCC governance Settings page (/SitePages/Settings.aspx) is a PCC-facing settings surface, not a native SharePoint admin screen."
+    },
+    "pagePurpose": { "type": "string", "description": "Page purpose description." },
+    "embeddedModule": { "type": "string", "description": "Module embedded in this page; references modules family by stable identifier. VR-26 referential integrity." },
+    "navigationLabel": { "type": "string", "description": "Navigation label." },
+    "defaultOrder": { "type": "integer", "minimum": 1, "maximum": 17, "description": "Default navigation order (1–17). Navigation order ultimately governed by Control Center Settings (§10) at runtime." },
+    "visibility": { "$ref": "#/$defs/pageVisibility", "description": "Page visibility (e.g., All, Phase managers + Admin, All operational). VR-07 module visibility may further restrict per ProjectStage." },
+    "mvpStatus": { "$ref": "#/$defs/decisionClosureStatus", "description": "Decision Closure status. 9 MVP pages 'Frozen for MVP'; 8 Future pages 'Deferred'. VR-24." }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "pageVisibility": {
+      "type": "string",
+      "description": "Page visibility values from Contract §13.",
+      "enum": ["All", "Phase managers + Admin", "All operational"]
+    }
+  }
 }

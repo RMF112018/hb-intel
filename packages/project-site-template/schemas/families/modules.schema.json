@@ -1,20 +1,100 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/modules.schema.json",
-  "title": "Modules Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the modules family — SPFx webpart and module declarations, visibility, role gating, and per-stage availability. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). HBI Assistant module remains deferred from MVP — module entry exists as `mvp_status: deferred` placeholder only. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §15, §16.",
+  "title": "Modules Family Schema",
+  "description": "Phase 1 Step 4 Wave 2 — populated modules family schema. Module registry covering the 20 modules from Contract §8.1 (8 MVP + 12 Later, plus the governance Settings/Site Health entry). Module visibility is keyed on ProjectStage per VR-07 / §4B.2 and is NEVER keyed on ProjectType. Vertical seeding (when applicable) is keyed on ProjectType per VR-08 and is NEVER keyed on ProjectStage. The HBI Assistant module (#20) carries mvp_status: 'Deferred' per VR-19. Field set traces verbatim to fields/families/modules.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "ModuleId",
+    "ModuleName",
+    "Purpose",
+    "PrimaryUsers",
+    "RequiredLists",
+    "RequiredLibraries",
+    "MvpStatus",
+    "Visible",
+    "visibilityByStage"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "modules" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "ModuleId": { "type": "integer", "minimum": 1, "maximum": 99, "description": "Stable module identifier (1–20 for the §8.1 modules). VR-26 referential integrity. Schema bound to §8.3." },
+    "ModuleName": { "type": "string", "description": "Module name from §8.1 / §8.2 crosswalk." },
+    "Purpose": { "type": "string", "description": "Module purpose description." },
+    "PrimaryUsers": { "type": "string", "description": "Primary users of the module." },
+    "RequiredLists": { "type": "array", "items": { "type": "string" }, "description": "List names this module depends on." },
+    "RequiredLibraries": { "type": "array", "items": { "type": "string" }, "description": "Library names this module depends on." },
+    "RequiredSettings": { "type": "array", "items": { "type": "string" }, "description": "Settings keys this module depends on." },
+    "ExternalIntegrations": { "type": "array", "items": { "type": "string" }, "description": "Required external integrations (e.g., Procore, Teams)." },
+    "RelatedExampleDocuments": { "type": "array", "items": { "type": "string" }, "description": "Reference to §17 seeded templates." },
+    "HomeRollupContribution": { "type": "string", "description": "Module contribution to the Project Home / Command Center page." },
+    "MvpStatus": { "$ref": "#/$defs/decisionClosureStatus", "description": "Decision Closure status. HBI Assistant (#20) is 'Deferred' per VR-19. 8 MVP, 12 Later (Deferred)." },
+    "Visible": { "type": "boolean", "description": "Whether module is visible (gated by ProjectStage conditional visibility per §4B.2). VR-07." },
+    "visibilityByStage": {
+      "type": "object",
+      "description": "Visibility map keyed strictly by the six ProjectStage values. ProjectType MUST NOT appear as a key here. 'Archived' is ProjectStatus only and is NOT permitted as a key. VR-07, VR-30; Cross-Layer (Schema declares structure; SPFx enforces runtime visibility).",
+      "additionalProperties": false,
+      "properties": {
+        "lead": { "type": "boolean" },
+        "estimating": { "type": "boolean" },
+        "preconstruction": { "type": "boolean" },
+        "active_construction": { "type": "boolean" },
+        "closeout": { "type": "boolean" },
+        "warranty": { "type": "boolean" }
+      },
+      "required": ["lead", "estimating", "preconstruction", "active_construction", "closeout", "warranty"]
+    },
+    "verticalSeeding": {
+      "type": "object",
+      "description": "Optional vertical seeding directive keyed strictly on ProjectType. Vertical seeding NEVER keys on ProjectStage. VR-08.",
+      "additionalProperties": false,
+      "properties": {
+        "keyedOn": { "type": "string", "const": "projectType" },
+        "perType": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commercial": { "type": "array", "items": { "type": "string" } },
+            "multifamily": { "type": "array", "items": { "type": "string" } },
+            "municipal": { "type": "array", "items": { "type": "string" } },
+            "luxury_residential": { "type": "array", "items": { "type": "string" } },
+            "environmental": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "required": ["keyedOn"]
+    },
+    "LastConfiguredBy": { "type": "string", "description": "UPN of last configurator." },
+    "LastConfiguredDate": { "type": "string", "format": "date-time", "description": "UTC timestamp of last configuration change." }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "projectStage": {
+      "type": "string",
+      "description": "Bound to enums.schema.json canonicalEnumSets.ProjectStage. 'Archived' is ProjectStatus only and is forbidden as ProjectStage (VR-04).",
+      "enum": ["lead", "estimating", "preconstruction", "active_construction", "closeout", "warranty"]
+    },
+    "projectType": {
+      "type": "string",
+      "description": "Bound to enums.schema.json canonicalEnumSets.ProjectType. 'active_construction' (VR-05), 'preconstruction_only', 'warranty_closeout' (VR-06) forbidden as ProjectType.",
+      "enum": ["commercial", "multifamily", "municipal", "luxury_residential", "environmental"]
+    }
+  }
 }

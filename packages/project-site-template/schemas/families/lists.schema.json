@@ -1,20 +1,152 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/lists.schema.json",
-  "title": "Lists Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the lists family — SharePoint list declarations, columns, content types, views, and visibility constraints. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §10, §12.",
+  "title": "Lists Family Schema",
+  "description": "Phase 1 Step 4 Wave 2 — populated lists family schema. SharePoint list declarations covering §15.2 core/governance lists (12 MVP), §15.3 action/risk/communication lists (mostly Future), §15.4 startup lists, §15.5 permits/inspections lists, §15.11 closeout lists, with §16.1 baseline columns inherited by every operational list (Status enum §16.2, Priority enum §16.3). Field set traces verbatim to fields/families/lists.fields.json. mvp_status binds to the canonical Decision Closure four-value enum (VR-24). Per-list expansion (each list's specific requiredFields / optionalFields beyond the baseline) is bounded to the list-level shape declared in the field map; full per-list schema population for every list in §15 is out of Wave 2 scope. ReadOnlyOnStatus reflects ProjectStatus, never ProjectStage (Archived is ProjectStatus only).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "listName",
+    "listPurpose",
+    "owningModule",
+    "requiredFields",
+    "permissionScope",
+    "mvpStatus",
+    "dataOwnership",
+    "readOnlyOnStatus",
+    "baselineColumns_ProjectId",
+    "baselineColumns_ProjectNumber",
+    "baselineColumns_ProjectName",
+    "baselineColumns_ItemNumber",
+    "baselineColumns_Title",
+    "baselineColumns_Status",
+    "baselineColumns_ResponsibleRole",
+    "baselineColumns_CreatedBy",
+    "baselineColumns_CreatedDate",
+    "baselineColumns_ModifiedBy",
+    "baselineColumns_ModifiedDate"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "lists" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "listName": { "type": "string", "description": "List internal name (e.g., 'Project Profile', 'Project Roles')." },
+    "listPurpose": { "type": "string", "description": "Purpose of the list." },
+    "owningModule": { "type": "string", "description": "Owning module reference. VR-26 referential integrity." },
+    "requiredFields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Per-list required field names beyond the §16.1 baseline. Per-list field type expansion is bounded to this list of names; full per-field schemas are produced as needed by downstream consumers."
+    },
+    "optionalFields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Per-list optional field names."
+    },
+    "defaultViews": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Default view names."
+    },
+    "seededData": { "type": "string", "description": "Seed data description (e.g., 'Exactly one row', 'PX, Sr. PM, PM2, …')." },
+    "permissionScope": { "type": "string", "description": "Read/write permission scope. VR-17." },
+    "workflowTriggers": { "type": "string", "description": "Workflow trigger description (e.g., 'On change → audit')." },
+    "mvpStatus": { "$ref": "#/$defs/decisionClosureStatus", "description": "Decision Closure status for the list. VR-24." },
+    "validationRule": { "type": "string", "description": "Validation rule (e.g., 'Exactly one row', 'Append-only', 'Bucket A read-only to non-IT')." },
+    "dataOwnership": {
+      "type": "string",
+      "description": "Data ownership posture. §15.1A, §15.1D, §15.2.",
+      "enum": [
+        "Site-local",
+        "Site-local configuration",
+        "Site-local materialized layer",
+        "Backend canonical + Site-local copy",
+        "Backend canonical + Site-local copy + HBCentral enterprise registry",
+        "Site-local + mirror reference to HBCentral catalog (TBD)"
+      ]
+    },
+    "lookups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Lookup field references by stable identifier. VR-25 referential integrity."
+    },
+    "readOnlyOnStatus": {
+      "type": "boolean",
+      "description": "Status-driven read-only flip when ProjectStatus is Closed or Archived. §3.2; VR-29. Always keys on ProjectStatus, never ProjectStage."
+    },
+    "seedRule": {
+      "type": "object",
+      "description": "Vertical seeding rule keyed on ProjectType. VR-08. Vertical seeding never keys on ProjectStage.",
+      "additionalProperties": false,
+      "properties": {
+        "keyedOn": { "type": "string", "const": "projectType" },
+        "perType": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commercial": { "type": "array", "items": { "type": "string" } },
+            "multifamily": { "type": "array", "items": { "type": "string" } },
+            "municipal": { "type": "array", "items": { "type": "string" } },
+            "luxury_residential": { "type": "array", "items": { "type": "string" } },
+            "environmental": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "required": ["keyedOn"]
+    },
+    "baselineColumns_ProjectId": { "type": "string", "description": "§16.1 baseline." },
+    "baselineColumns_ProjectNumber": { "type": "string", "description": "§16.1 baseline." },
+    "baselineColumns_ProjectName": { "type": "string", "description": "§16.1 baseline." },
+    "baselineColumns_ItemNumber": { "type": "string", "description": "§16.1 baseline." },
+    "baselineColumns_Title": { "type": "string", "description": "§16.1 baseline." },
+    "baselineColumns_Category": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_Description": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_Status": { "$ref": "#/$defs/statusEnum", "description": "§16.1 baseline; §16.2 enum." },
+    "baselineColumns_Priority": { "$ref": "#/$defs/priorityEnum", "description": "§16.1 baseline (optional); §16.3 enum." },
+    "baselineColumns_ResponsibleRole": { "type": "string", "description": "§16.1 baseline; §16.4 role enum (carried as string at the schema level since the role catalog spans multiple §12 / §16.4 sources)." },
+    "baselineColumns_ResponsiblePerson": { "type": "string", "description": "§16.1 baseline (UPN, optional)." },
+    "baselineColumns_DueDate": { "type": "string", "format": "date", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_CompletedDate": { "type": "string", "format": "date-time", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_CompletedBy": { "type": "string", "description": "§16.1 baseline (UPN, optional)." },
+    "baselineColumns_EvidenceLink": { "type": "string", "format": "uri", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_EvidenceLibrary": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_EvidenceDocumentId": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_EvidenceStatus": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_RelatedModule": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_RelatedSystem": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_SourceTemplate": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_SourceTemplateVersion": { "type": "string", "description": "§16.1 baseline (optional)." },
+    "baselineColumns_CreatedBy": { "type": "string", "description": "§16.1 baseline (UPN)." },
+    "baselineColumns_CreatedDate": { "type": "string", "format": "date-time", "description": "§16.1 baseline." },
+    "baselineColumns_ModifiedBy": { "type": "string", "description": "§16.1 baseline (UPN)." },
+    "baselineColumns_ModifiedDate": { "type": "string", "format": "date-time", "description": "§16.1 baseline." }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "statusEnum": {
+      "type": "string",
+      "description": "§16.2 baseline status enum.",
+      "enum": ["Not Started", "In Progress", "Blocked", "Pending Review", "Complete", "N/A", "Cancelled"]
+    },
+    "priorityEnum": {
+      "type": "string",
+      "description": "§16.3 baseline priority enum.",
+      "enum": ["Low", "Normal", "High", "Critical"]
+    }
+  }
 }
