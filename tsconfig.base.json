@@ -95,6 +95,8 @@
       "@hbc/session-state/*": ["packages/session-state/src/*"],
       "@hbc/project-canvas": ["packages/project-canvas/src/index.ts"],
       "@hbc/project-canvas/*": ["packages/project-canvas/src/*"],
+      "@hbc/project-site-provisioning": ["packages/project-site-provisioning/src/index.ts"],
+      "@hbc/project-site-provisioning/*": ["packages/project-site-provisioning/src/*"],
       "@hbc/ai-assist": ["packages/ai-assist/src/index.ts"],
       "@hbc/ai-assist/*": ["packages/ai-assist/src/*"],
       "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/src/index.ts"],

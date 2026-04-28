@@ -1,0 +1,8 @@
+{
+  "_marker": "TEST FIXTURE — minimal Standard Project Site Template Contract input shape used by Phase 2 Step 2 scaffold tests. Not a real contract; only the identity fields read by the scaffold mapper are populated.",
+  "templateName": "HB Standard Project Site Template",
+  "templateVersion": "1.0.0-proposed",
+  "source": {
+    "contractRef": "template-contract.json"
+  }
+}

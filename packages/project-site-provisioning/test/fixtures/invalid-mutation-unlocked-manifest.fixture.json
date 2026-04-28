@@ -1,0 +1,48 @@
+{
+  "_marker": "TEST FIXTURE — INTENTIONALLY INVALID. Used only by no-mutation-guard.test.ts to verify that validateProvisioningManifest rejects manifests with an unlocked mutation gate or live-mutation flag. Never to be used as a real provisioning manifest.",
+  "manifestVersion": "0.1.0-scaffold",
+  "generatedFrom": {
+    "packageName": "@hbc/project-site-template",
+    "templateName": "HB Standard Project Site Template",
+    "templateVersion": "1.0.0-proposed",
+    "contractRef": "template-contract.json"
+  },
+  "generatedAt": "2026-04-28T00:00:00.000Z",
+  "mutationGate": {
+    "mutationLocked": false,
+    "liveMutationAllowed": true,
+    "requiresHumanApproval": false
+  },
+  "sitePlan": {
+    "status": "planned",
+    "urlDerivation": {
+      "source": "contract",
+      "pattern": "/sites/{ProjectBaseNumberNoHyphen}",
+      "resolved": null
+    },
+    "title": {
+      "source": "contract",
+      "resolved": null
+    }
+  },
+  "objectPlans": {
+    "pages": { "status": "planned", "entries": [] },
+    "libraries": { "status": "planned", "entries": [] },
+    "lists": { "status": "planned", "entries": [] },
+    "groups": { "status": "planned", "entries": [] },
+    "permissionTemplates": { "status": "planned", "entries": [] },
+    "modules": { "status": "planned", "entries": [] },
+    "workflows": { "status": "planned", "entries": [] },
+    "integrations": { "status": "planned", "entries": [] },
+    "siteHealth": { "status": "planned", "entries": [] },
+    "provisioningValidation": { "status": "planned", "entries": [] }
+  },
+  "proof": {
+    "plannedHash": null,
+    "validationStatus": "planned",
+    "noSecretScan": "planned",
+    "noProcoreMirrorScan": "planned"
+  },
+  "warnings": [],
+  "blockers": []
+}
