@@ -1,0 +1,12 @@
+{
+  "_marker": "TEST FIXTURE — INTENTIONALLY INVALID. Used by scans.test.ts to verify the noTenantMutationScan rejects manifests that suggest live tenant operations. Never to be used as a real provisioning manifest.",
+  "manifestVersion": "0.2.0-contract-coverage",
+  "sitePlan": {
+    "status": "planned",
+    "operations": "create site for tenant immediately",
+    "createSite": {
+      "url": "/sites/26000",
+      "type": "TeamSite"
+    }
+  }
+}

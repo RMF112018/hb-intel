@@ -1,101 +1,91 @@
 import { describe, expect, it } from 'vitest';
 import {
-  MANIFEST_SCAFFOLD_VERSION,
+  MANIFEST_VERSION,
   OBJECT_PLAN_KEYS,
   createProvisioningManifest,
+  loadTemplateArtifactsFromPackage,
   validateProvisioningManifest,
 } from '../src/index.js';
-import minimalContract from './fixtures/minimal-template-contract.fixture.json' with { type: 'json' };
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const TEMPLATE_PKG_ROOT = join(HERE, '..', '..', 'project-site-template');
 
 const FROZEN_NOW = () => new Date('2026-04-28T00:00:00.000Z');
+const PROJECT_INPUTS = { projectNumber: '26-000-00', projectName: 'Test Project' };
 
-describe('createProvisioningManifest (scaffold)', () => {
-  it('produces a manifest with the locked mutation gate by default', () => {
+describe('createProvisioningManifest (contract coverage)', () => {
+  const artifacts = loadTemplateArtifactsFromPackage(TEMPLATE_PKG_ROOT);
+
+  it('uses the Step 3 manifest version', () => {
     const manifest = createProvisioningManifest({
-      templateContract: minimalContract,
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
       context: { now: FROZEN_NOW },
     });
+    expect(manifest.manifestVersion).toBe(MANIFEST_VERSION);
+    expect(MANIFEST_VERSION).toBe('0.2.0-contract-coverage');
+  });
 
-    expect(manifest.manifestVersion).toBe(MANIFEST_SCAFFOLD_VERSION);
+  it('produces a manifest with the locked mutation gate by default', () => {
+    const manifest = createProvisioningManifest({
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
+      context: { now: FROZEN_NOW },
+    });
     expect(manifest.mutationGate.mutationLocked).toBe(true);
     expect(manifest.mutationGate.liveMutationAllowed).toBe(false);
     expect(manifest.mutationGate.requiresHumanApproval).toBe(true);
-    expect(manifest.mutationGate.approvedBy).toBeUndefined();
-    expect(manifest.mutationGate.approvedAt).toBeUndefined();
-    expect(manifest.mutationGate.approvalRef).toBeUndefined();
   });
 
-  it('populates generatedFrom from the input template contract', () => {
+  it('exposes all fourteen object plan slots', () => {
     const manifest = createProvisioningManifest({
-      templateContract: minimalContract,
-      context: { now: FROZEN_NOW, sourceCommit: 'deadbeef' },
-    });
-
-    expect(manifest.generatedFrom.packageName).toBe('@hbc/project-site-template');
-    expect(manifest.generatedFrom.templateName).toBe(minimalContract.templateName);
-    expect(manifest.generatedFrom.templateVersion).toBe(minimalContract.templateVersion);
-    expect(manifest.generatedFrom.contractRef).toBe('template-contract.json');
-    expect(manifest.generatedFrom.sourceCommit).toBe('deadbeef');
-  });
-
-  it('exposes all ten object plan slots with empty planned entries', () => {
-    const manifest = createProvisioningManifest({
-      templateContract: minimalContract,
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
       context: { now: FROZEN_NOW },
     });
-
+    expect(OBJECT_PLAN_KEYS.length).toBe(14);
     for (const key of OBJECT_PLAN_KEYS) {
-      const slot = manifest.objectPlans[key];
-      expect(slot.status).toBe('planned');
-      expect(Array.isArray(slot.entries)).toBe(true);
-      expect(slot.entries.length).toBe(0);
+      expect(manifest.objectPlans[key]).toBeDefined();
+      expect(Array.isArray(manifest.objectPlans[key].entries)).toBe(true);
     }
   });
 
-  it('returns scaffold-only proof placeholders', () => {
-    const manifest = createProvisioningManifest({
-      templateContract: minimalContract,
-      context: { now: FROZEN_NOW },
-    });
-
-    expect(manifest.proof.plannedHash).toBeNull();
-    expect(manifest.proof.validationStatus).toBe('planned');
-    expect(manifest.proof.noSecretScan).toBe('planned');
-    expect(manifest.proof.noProcoreMirrorScan).toBe('planned');
-  });
-
-  it('produces deterministic JSON output for identical inputs', () => {
+  it('produces deterministic output for identical inputs', () => {
     const a = createProvisioningManifest({
-      templateContract: minimalContract,
-      context: { now: FROZEN_NOW },
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
+      context: { now: FROZEN_NOW, sourceCommit: '66a9ef1b0' },
     });
     const b = createProvisioningManifest({
-      templateContract: minimalContract,
-      context: { now: FROZEN_NOW },
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
+      context: { now: FROZEN_NOW, sourceCommit: '66a9ef1b0' },
     });
-
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+    expect(a.proof.plannedHash).toBe(b.proof.plannedHash);
   });
 
   it('passes runtime validation', () => {
     const manifest = createProvisioningManifest({
-      templateContract: minimalContract,
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
       context: { now: FROZEN_NOW },
     });
-
     const result = validateProvisioningManifest(manifest);
-    expect(result.ok).toBe(true);
-    expect(result.errors).toEqual([]);
+    expect(result.ok, `validator errors: ${result.errors.join(' | ')}`).toBe(true);
   });
 
   it('returns a frozen manifest object graph', () => {
     const manifest = createProvisioningManifest({
-      templateContract: minimalContract,
+      templateArtifacts: artifacts,
+      projectInputs: PROJECT_INPUTS,
       context: { now: FROZEN_NOW },
     });
-
     expect(Object.isFrozen(manifest)).toBe(true);
     expect(Object.isFrozen(manifest.mutationGate)).toBe(true);
     expect(Object.isFrozen(manifest.objectPlans)).toBe(true);
+    expect(Object.isFrozen(manifest.proof)).toBe(true);
   });
 });

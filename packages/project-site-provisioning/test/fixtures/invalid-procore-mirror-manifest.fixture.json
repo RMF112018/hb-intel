@@ -1,0 +1,19 @@
+{
+  "_marker": "TEST FIXTURE — INTENTIONALLY INVALID. Used by scans.test.ts to verify the noProcoreMirrorScan rejects manifests that attempt to declare a full Procore mirror. Never to be used as a real provisioning manifest.",
+  "manifestVersion": "0.2.0-contract-coverage",
+  "objectPlans": {
+    "integrations": {
+      "status": "planned",
+      "entries": [
+        {
+          "id": "integrations-procore-mirror",
+          "family": "integrations",
+          "kind": "integrations",
+          "procoreMirror": {
+            "tables": ["projects", "directories", "rfis"]
+          }
+        }
+      ]
+    }
+  }
+}

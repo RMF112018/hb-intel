@@ -1,19 +1,31 @@
 import {
-  MANIFEST_SCAFFOLD_VERSION,
+  MANIFEST_VERSION,
   OBJECT_PLAN_KEYS,
   type ObjectPlans,
-  type PlanArrayPlaceholder,
+  type PlanFamilySection,
   type ProvisioningManifest,
+  type Proof,
+  type SourceCoverage,
 } from '../contracts/provisioning-manifest.js';
+import type { TemplateArtifacts } from '../contracts/template-artifacts.js';
 import { createFrozenMutationGate } from '../guards/no-mutation-guard.js';
+import { runNoProcoreMirrorScan } from '../scans/no-procore-mirror-scan.js';
+import { runNoSecretScan } from '../scans/no-secret-scan.js';
+import { runNoTenantMutationScan } from '../scans/no-tenant-mutation-scan.js';
+import { validateProvisioningManifest } from '../validation/validate-provisioning-manifest.js';
+import {
+  HASH_EXCLUDED_SECTIONS,
+  HASH_INCLUDED_SECTIONS,
+  computePlannedHash,
+} from './compute-planned-hash.js';
+import { deriveSitePlan } from './derive-site-plan.js';
+import { extractFamilyEntries } from './extract-family-entries.js';
 
 export interface CreateProvisioningManifestInput {
-  readonly templateContract: {
-    readonly templateName: string;
-    readonly templateVersion: string;
-    readonly source?: {
-      readonly contractRef?: string;
-    };
+  readonly templateArtifacts: TemplateArtifacts;
+  readonly projectInputs?: {
+    readonly projectNumber?: string;
+    readonly projectName?: string;
   };
   readonly context?: {
     readonly now?: () => Date;
@@ -21,74 +33,113 @@ export interface CreateProvisioningManifestInput {
   };
 }
 
-const PLANNED_PLAN_ARRAY: PlanArrayPlaceholder = Object.freeze({
-  status: 'planned',
-  entries: Object.freeze([] as readonly never[]),
-});
-
-const PLANNED_SITE_PLAN = Object.freeze({
-  status: 'planned' as const,
-  urlDerivation: Object.freeze({
-    source: 'contract' as const,
-    pattern: '/sites/{ProjectBaseNumberNoHyphen}',
-    resolved: null,
-  }),
-  title: Object.freeze({
-    source: 'contract' as const,
-    resolved: null,
-  }),
-});
-
-const PLANNED_PROOF = Object.freeze({
-  plannedHash: null,
-  validationStatus: 'planned' as const,
-  noSecretScan: 'planned' as const,
-  noProcoreMirrorScan: 'planned' as const,
-});
-
-function buildEmptyObjectPlans(): ObjectPlans {
-  const plans = {} as Record<keyof ObjectPlans, PlanArrayPlaceholder>;
-  for (const key of OBJECT_PLAN_KEYS) {
-    plans[key] = PLANNED_PLAN_ARRAY;
+function buildObjectPlans(artifacts: TemplateArtifacts): ObjectPlans {
+  const plans = {} as Record<string, PlanFamilySection>;
+  for (const family of OBJECT_PLAN_KEYS) {
+    const entries = extractFamilyEntries(family, artifacts);
+    plans[family] = Object.freeze({
+      status: entries.length > 0 ? 'planned' : 'placeholder',
+      entries,
+    });
   }
   return Object.freeze(plans) as ObjectPlans;
 }
 
+function buildSourceCoverage(artifacts: TemplateArtifacts): SourceCoverage {
+  return Object.freeze({
+    contractFamiliesDeclared: Object.keys(artifacts.templateContract.families ?? {}).length,
+    fixturesProcessed: Object.values(artifacts.familyFixtures).filter(Boolean).length,
+    fieldMapsProcessed: Object.values(artifacts.familyFieldMaps).filter(Boolean).length,
+    objectCatalogRowsProcessed: artifacts.objectCatalog.rows.length,
+  });
+}
+
 /**
- * Pure, deterministic scaffold mapper. Reads only the identity fields
- * from a Standard Project Site Template Contract and returns a frozen,
- * mutation-locked manifest with planned-only object plans, planned proof
- * placeholders, and empty warnings/blockers.
+ * Pure, deterministic contract-coverage mapper. Reads `TemplateArtifacts`,
+ * builds the planned site plan, populates one family-level entry per
+ * contract family that has a fixture, runs the no-secret /
+ * no-Procore-mirror / no-tenant-mutation scans, computes the
+ * deterministic SHA-256 of the planned content, and returns a frozen
+ * mutation-locked manifest.
  *
- * No I/O. No tenant calls. No Graph/PnP/SPFx/Procore.
- *
- * Determinism: when the same `templateContract` and `context.now` are
- * supplied, two calls return manifests that serialize to byte-identical
- * JSON.
+ * No I/O. No tenant calls. No Graph / PnP / SPFx / Procore. Determinism
+ * is preserved when the same artifacts, project inputs, `context.now`,
+ * and `context.sourceCommit` are supplied.
  */
 export function createProvisioningManifest(
   input: CreateProvisioningManifestInput,
 ): ProvisioningManifest {
-  const { templateContract, context } = input;
+  const { templateArtifacts, projectInputs, context } = input;
   const now = context?.now?.() ?? new Date();
 
   const generatedFrom = Object.freeze({
     packageName: '@hbc/project-site-template' as const,
-    templateName: templateContract.templateName,
-    templateVersion: templateContract.templateVersion,
-    contractRef: templateContract.source?.contractRef ?? 'template-contract.json',
+    templateName: templateArtifacts.templateContract.templateName,
+    templateVersion: templateArtifacts.templateContract.templateVersion,
+    contractRef: templateArtifacts.templateContract.source?.contractRef ?? 'template-contract.json',
     ...(context?.sourceCommit ? { sourceCommit: context.sourceCommit } : {}),
   });
 
-  return Object.freeze({
-    manifestVersion: MANIFEST_SCAFFOLD_VERSION,
+  const { sitePlan, warnings: siteWarnings } = deriveSitePlan(projectInputs);
+
+  const objectPlans = buildObjectPlans(templateArtifacts);
+
+  const mutationGate = createFrozenMutationGate();
+
+  const hashableSubset = {
+    manifestVersion: MANIFEST_VERSION,
+    generatedFrom,
+    mutationGate: {
+      mutationLocked: mutationGate.mutationLocked,
+      liveMutationAllowed: mutationGate.liveMutationAllowed,
+      requiresHumanApproval: mutationGate.requiresHumanApproval,
+    },
+    sitePlan,
+    objectPlans,
+  };
+
+  const plannedHash = computePlannedHash(hashableSubset);
+
+  const noSecretScan = runNoSecretScan(hashableSubset);
+  const noProcoreMirrorScan = runNoProcoreMirrorScan(hashableSubset, templateArtifacts);
+  const noTenantMutationScan = runNoTenantMutationScan(hashableSubset);
+
+  const proof: Proof = Object.freeze({
+    plannedHash,
+    hashAlgorithm: 'sha256' as const,
+    hashInputSummary: Object.freeze({
+      includedSections: Object.freeze([...HASH_INCLUDED_SECTIONS]),
+      excludedSections: Object.freeze([...HASH_EXCLUDED_SECTIONS]),
+      canonicalization: 'sorted-keys + JSON.stringify' as const,
+    }),
+    noSecretScan: Object.freeze(noSecretScan),
+    noProcoreMirrorScan: Object.freeze(noProcoreMirrorScan),
+    noTenantMutationScan: Object.freeze(noTenantMutationScan),
+    sourceCoverage: buildSourceCoverage(templateArtifacts),
+    validationStatus: 'planned-coverage' as const,
+  });
+
+  const warnings = Object.freeze([...siteWarnings] as readonly string[]);
+  const blockers = Object.freeze([] as readonly string[]);
+
+  const manifest: ProvisioningManifest = Object.freeze({
+    manifestVersion: MANIFEST_VERSION,
     generatedFrom,
     generatedAt: now.toISOString(),
-    mutationGate: createFrozenMutationGate(),
-    sitePlan: PLANNED_SITE_PLAN,
-    objectPlans: buildEmptyObjectPlans(),
-    proof: PLANNED_PROOF,
-    warnings: Object.freeze([] as readonly string[]),
-    blockers: Object.freeze([] as readonly string[]),
+    mutationGate,
+    sitePlan,
+    objectPlans,
+    proof,
+    warnings,
+    blockers,
   });
+
+  const selfCheck = validateProvisioningManifest(manifest);
+  if (!selfCheck.ok) {
+    throw new Error(
+      `createProvisioningManifest produced an internally invalid manifest:\n - ${selfCheck.errors.join('\n - ')}`,
+    );
+  }
+
+  return manifest;
 }
