@@ -1,0 +1,14 @@
+{
+  "name": "@hbc/project-site-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Machine-readable Project Site Template Contract scaffold for the SP Project Control Center. Phase 1 Step 1 — scaffold and family-skeleton stage only; no executable code, no build, no runtime dependencies.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": [
+    "README.md",
+    "template-contract.json",
+    "schemas/",
+    "docs/"
+  ]
+}

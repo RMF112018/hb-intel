@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hb-intel/sp-project-control-center/schemas/families/libraries.schema.json",
+  "title": "Libraries Family Skeleton",
+  "description": "Skeleton only. Phase 1 Step 1 scaffold for the libraries family — document library declarations, content types, retention, taxonomy linkage, and folder seed structures. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §10.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "const": "libraries" },
+    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "sourceContractSection": { "type": "string" },
+    "sourceCatalogId": { "type": "string" },
+    "sourceBlueprintSection": { "type": "string" },
+    "sourceDecisionRef": { "type": "string" },
+    "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
+    "ownerCategory": { "type": "string" }
+  },
+  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+}

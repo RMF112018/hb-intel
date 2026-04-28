@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hb-intel/sp-project-control-center/schemas/template-contract.schema.json",
+  "title": "Project Site Template Contract — Scaffold Schema",
+  "description": "High-level scaffold schema validating the shape of the machine-readable Project Site Template Contract during Phase 1 Step 1. Validates template identity, source-traceability, status, and the 14 schema-family entry points. Family contents are scaffold-only and are not validated in detail by this schema; full per-family validation arrives in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population; Phase 1 Step 5 — Schema Validation Harness). Traces to Phase 0 Step 2 Schema Extraction Plan, Schema Family Taxonomy, and the Standard Project Site Template Contract §4.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["templateName", "templateFamily", "templateVersion", "phase", "source", "status", "families"],
+  "properties": {
+    "templateName": { "type": "string" },
+    "templateFamily": { "type": "string" },
+    "templateVersion": { "type": "string" },
+    "phase": { "type": "string" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "blueprint", "phase0Closeout"],
+      "properties": {
+        "contract": { "type": "string" },
+        "blueprint": { "type": "string" },
+        "phase0Closeout": { "type": "string" }
+      }
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readiness", "fullExtractionComplete", "containsNewArchitectureDecisions"],
+      "properties": {
+        "readiness": { "type": "string", "enum": ["scaffold-only", "draft", "complete"] },
+        "fullExtractionComplete": { "type": "boolean" },
+        "containsNewArchitectureDecisions": { "type": "boolean" }
+      }
+    },
+    "families": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "template-manifest",
+        "enums",
+        "settings",
+        "permissions",
+        "site",
+        "pages",
+        "libraries",
+        "lists",
+        "modules",
+        "workflows",
+        "integrations",
+        "site-health",
+        "provisioning-validation",
+        "validation-rules"
+      ],
+      "properties": {
+        "template-manifest": { "$ref": "#/$defs/familyEntry" },
+        "enums": { "$ref": "#/$defs/familyEntry" },
+        "settings": { "$ref": "#/$defs/familyEntry" },
+        "permissions": { "$ref": "#/$defs/familyEntry" },
+        "site": { "$ref": "#/$defs/familyEntry" },
+        "pages": { "$ref": "#/$defs/familyEntry" },
+        "libraries": { "$ref": "#/$defs/familyEntry" },
+        "lists": { "$ref": "#/$defs/familyEntry" },
+        "modules": { "$ref": "#/$defs/familyEntry" },
+        "workflows": { "$ref": "#/$defs/familyEntry" },
+        "integrations": { "$ref": "#/$defs/familyEntry" },
+        "site-health": { "$ref": "#/$defs/familyEntry" },
+        "provisioning-validation": { "$ref": "#/$defs/familyEntry" },
+        "validation-rules": { "$ref": "#/$defs/familyEntry" }
+      }
+    }
+  },
+  "$defs": {
+    "familyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "status"],
+      "properties": {
+        "schema": { "type": "string", "description": "Relative path to the family skeleton schema file." },
+        "status": { "type": "string", "enum": ["skeleton", "draft", "complete"] },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "familyReferences": {
+    "description": "Informational map of relative $ref targets for the 14 family schemas. Concrete $ref binding to instance documents will be added when family schemas are populated in Phase 1 Step 4.",
+    "template-manifest": "./families/template-manifest.schema.json",
+    "enums": "./families/enums.schema.json",
+    "settings": "./families/settings.schema.json",
+    "permissions": "./families/permissions.schema.json",
+    "site": "./families/site.schema.json",
+    "pages": "./families/pages.schema.json",
+    "libraries": "./families/libraries.schema.json",
+    "lists": "./families/lists.schema.json",
+    "modules": "./families/modules.schema.json",
+    "workflows": "./families/workflows.schema.json",
+    "integrations": "./families/integrations.schema.json",
+    "site-health": "./families/site-health.schema.json",
+    "provisioning-validation": "./families/provisioning-validation.schema.json",
+    "validation-rules": "./families/validation-rules.schema.json"
+  }
+}

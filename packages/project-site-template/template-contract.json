@@ -1,0 +1,89 @@
+{
+  "$schema": "./schemas/template-contract.schema.json",
+  "templateName": "HB Standard Project Site Template",
+  "templateFamily": "Project Sites",
+  "templateVersion": "1.0.0-proposed",
+  "phase": "Phase 1 Step 1 scaffold",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
+    "phase0Closeout": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Closeout_Report.md"
+  },
+  "status": {
+    "readiness": "scaffold-only",
+    "fullExtractionComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "families": {
+    "template-manifest": {
+      "schema": "./schemas/families/template-manifest.schema.json",
+      "status": "skeleton",
+      "notes": "Outermost wrapper. Identity and version metadata. Skeleton only."
+    },
+    "enums": {
+      "schema": "./schemas/families/enums.schema.json",
+      "status": "skeleton",
+      "notes": "ProjectType, ProjectStage, ProjectStatus, decision closure, severity, repair tier, module visibility, integration status, and forbidden-value sets. Skeleton only."
+    },
+    "settings": {
+      "schema": "./schemas/families/settings.schema.json",
+      "status": "skeleton",
+      "notes": "Site-level configuration including the three-form ProcoreCompanyId contract (ProcoreCompanyId = 5280 is configuration, not a secret). Skeleton only."
+    },
+    "permissions": {
+      "schema": "./schemas/families/permissions.schema.json",
+      "status": "skeleton",
+      "notes": "Role / SharePoint group / permission-level mappings. External users remain deferred from MVP. Skeleton only."
+    },
+    "site": {
+      "schema": "./schemas/families/site.schema.json",
+      "status": "skeleton",
+      "notes": "Site identity, naming, URL rules, project metadata, phase association, archive behavior. Skeleton only."
+    },
+    "pages": {
+      "schema": "./schemas/families/pages.schema.json",
+      "status": "skeleton",
+      "notes": "Site page structure, regions, and SPFx webpart placement directives. Skeleton only."
+    },
+    "libraries": {
+      "schema": "./schemas/families/libraries.schema.json",
+      "status": "skeleton",
+      "notes": "Document library declarations, content types, retention, taxonomy linkage, folder seeds. Skeleton only."
+    },
+    "lists": {
+      "schema": "./schemas/families/lists.schema.json",
+      "status": "skeleton",
+      "notes": "SharePoint list declarations, columns, content types, views, visibility constraints. Skeleton only."
+    },
+    "modules": {
+      "schema": "./schemas/families/modules.schema.json",
+      "status": "skeleton",
+      "notes": "SPFx webpart and module declarations. HBI Assistant module remains deferred from MVP. Skeleton only."
+    },
+    "workflows": {
+      "schema": "./schemas/families/workflows.schema.json",
+      "status": "skeleton",
+      "notes": "Decision closure, approvals, hand-offs, and stage-gated transitions. Skeleton only."
+    },
+    "integrations": {
+      "schema": "./schemas/families/integrations.schema.json",
+      "status": "skeleton",
+      "notes": "Procore (read-only operational), Sage Intacct (accounting book of record), and other allowed external systems. Procore Object Link Records and Procore Curated Summary Records remain placeholder / future-reference only. SPFx must not call Procore directly. Procore write-back deferred from MVP. No secrets stored. Skeleton only."
+    },
+    "site-health": {
+      "schema": "./schemas/families/site-health.schema.json",
+      "status": "skeleton",
+      "notes": "Drift detection records, severity classification, repair tier descriptors, audit trace fields. Skeleton only."
+    },
+    "provisioning-validation": {
+      "schema": "./schemas/families/provisioning-validation.schema.json",
+      "status": "skeleton",
+      "notes": "Provisioning-time invariants, pre-flight checks, no-native-SharePoint-admin guards. Skeleton only."
+    },
+    "validation-rules": {
+      "schema": "./schemas/families/validation-rules.schema.json",
+      "status": "skeleton",
+      "notes": "Declarative registry across the 8 enforcement layers. Seeded by VR-01 through VR-30 from the Phase 0 Step 2 Validation Rule Table Plan; rules are append-only. Skeleton only."
+    }
+  }
+}

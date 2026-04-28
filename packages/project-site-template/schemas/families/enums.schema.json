@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hb-intel/sp-project-control-center/schemas/families/enums.schema.json",
+  "title": "Enums Family Skeleton",
+  "description": "Skeleton only. Phase 1 Step 1 scaffold for the enums family — ProjectType, ProjectStage, ProjectStatus, Decision Closure status, severity, repair tier, object status, module visibility, integration status, and forbidden-value sets. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 2 — Enum and Validation Rule Extraction). Anti-regression tokens (`preconstruction_only`, `warranty_closeout`, `Archived`-as-Stage, `active_construction`-as-Type) appear only inside `forbidden_values` arrays once populated, never as valid enum members. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §3.2, §4B.0, §4B.1, §22, §19, §19A.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "const": "enums" },
+    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "sourceContractSection": { "type": "string" },
+    "sourceCatalogId": { "type": "string" },
+    "sourceBlueprintSection": { "type": "string" },
+    "sourceDecisionRef": { "type": "string" },
+    "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
+    "ownerCategory": { "type": "string" }
+  },
+  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+}

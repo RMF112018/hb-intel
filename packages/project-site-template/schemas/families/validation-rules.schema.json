@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hb-intel/sp-project-control-center/schemas/families/validation-rules.schema.json",
+  "title": "Validation Rules Family Skeleton",
+  "description": "Skeleton only. Phase 1 Step 1 scaffold for the validation-rules family — declarative registry of validation rules across the 8 enforcement layers (Schema, Provisioning, Backend, SPFx, Site Health, Governance, Documentation, Cross-Layer). Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 2 — Enum and Validation Rule Extraction). The 30 initial rules (VR-01 through VR-30) defined in the Phase 0 Step 2 Validation Rule Table Plan are append-only inputs to this family. Cross-layer behaviors (e.g., \"SPFx must not call Procore directly\") are never enforced by JSON Schema alone — Enforcement Layer assignment must reflect that. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §3.2, §11, §13, §17, §19, §22.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "const": "validation-rules" },
+    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "sourceContractSection": { "type": "string" },
+    "sourceCatalogId": { "type": "string" },
+    "sourceBlueprintSection": { "type": "string" },
+    "sourceDecisionRef": { "type": "string" },
+    "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
+    "ownerCategory": { "type": "string" }
+  },
+  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+}
