@@ -62,11 +62,10 @@
 }
 
 .metricCard {
-  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
-  border-radius: var(--foleon-manage-radius-lg, 22px);
-  background: var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
-  box-shadow: 0 24px 70px var(--foleon-manage-shadow, hsl(200 45% 20% / 0.12));
-  padding: var(--foleon-manage-space-md, 16px);
+  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.10));
+  border-radius: var(--foleon-manage-radius-md, 12px);
+  background: var(--foleon-manage-panel, hsl(0 0% 100%));
+  padding: var(--foleon-manage-space-sm, 12px);
 }
 
 .metricToneGreen {
@@ -131,13 +130,11 @@
 }
 
 .dirtyBanner {
-  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
-  border-radius: var(--foleon-manage-radius-lg, 22px);
-  background: var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
-  box-shadow: 0 24px 70px var(--foleon-manage-shadow, hsl(200 45% 20% / 0.12));
+  background: hsl(40 72% 48% / 0.05);
+  border-radius: var(--foleon-manage-radius-sm, 10px);
   padding: var(--foleon-manage-space-sm, 12px) var(--foleon-manage-space-md, 16px);
   margin-bottom: var(--foleon-manage-space-sm, 12px);
-  border-left: 4px solid var(--foleon-manage-warning, hsl(40 72% 48%));
+  border-left: 3px solid var(--foleon-manage-warning, hsl(40 72% 48%));
   font-size: 14px;
 }
 
@@ -152,19 +149,24 @@
 }
 
 .editorSection {
-  border: 1px solid var(--foleon-manage-panel-border, hsl(205 18% 18% / 0.12));
-  border-radius: var(--foleon-manage-radius-lg, 22px);
-  background: var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
-  box-shadow: 0 24px 70px var(--foleon-manage-shadow, hsl(200 45% 20% / 0.12));
-  padding: 18px;
+  border: none;
+  border-top: 1px solid var(--foleon-manage-divider, hsl(205 18% 18% / 0.08));
+  border-radius: 0;
+  background: transparent;
+  padding: var(--foleon-manage-space-md, 16px) 0;
+}
+
+.editorSection:first-child {
+  border-top: none;
+  padding-top: 0;
 }
 
 .previewGuidance {
   composes: editorSection;
-  border-left: 6px solid var(--foleon-manage-accent, hsl(186 94% 22%));
-  background:
-    radial-gradient(circle at 8% 12%, hsl(168 45% 94% / 0.9), transparent 34%),
-    var(--foleon-manage-panel, hsl(0 0% 100% / 0.86));
+  border-left: 3px solid var(--foleon-manage-accent, hsl(186 94% 22%));
+  padding-left: var(--foleon-manage-space-sm, 12px);
+  background: hsl(186 94% 22% / 0.04);
+  border-radius: var(--foleon-manage-radius-sm, 10px);
 }
 
 .guidanceKicker {

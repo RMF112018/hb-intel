@@ -1,39 +1,44 @@
 /**
  * Foleon manage surface — local semantic tokens (single source for this route).
- * Avoids ad-hoc hex in TSX; maps to a cohesive governed palette for the connector shell.
+ *
+ * Wave 2.5 visual hierarchy rebuild:
+ *   - The root is a near-neutral page canvas (no big tinted shell wrapper).
+ *   - Brand tints live on accent tokens and are used as edges/badges/selected
+ *     states only — never as the primary container background.
+ *   - Section bands sit directly on this canvas with vertical rhythm + dividers.
+ *   - True child surfaces (lane columns, slide-over) keep a single, restrained
+ *     panel treatment via the `.panel` class.
  */
 .foleonManageRoot {
   --foleon-manage-fg: hsl(205 32% 14%);
   --foleon-manage-fg-muted: hsl(205 12% 38%);
+  --foleon-manage-canvas: hsl(210 20% 99%);
   --foleon-manage-bg: hsl(42 38% 96%);
   --foleon-manage-bg-accent: hsl(168 45% 94%);
-  --foleon-manage-panel: hsl(0 0% 100% / 0.86);
-  --foleon-manage-panel-border: hsl(205 18% 18% / 0.12);
-  --foleon-manage-shadow: hsl(200 45% 20% / 0.12);
+  --foleon-manage-panel: hsl(0 0% 100%);
+  --foleon-manage-panel-border: hsl(205 18% 18% / 0.10);
+  --foleon-manage-panel-border-strong: hsl(205 18% 18% / 0.16);
+  --foleon-manage-divider: hsl(205 18% 18% / 0.08);
+  --foleon-manage-shadow-soft: hsl(200 45% 20% / 0.04);
   --foleon-manage-accent: hsl(186 94% 22%);
   --foleon-manage-accent-soft: hsl(168 42% 92%);
   --foleon-manage-success: hsl(152 48% 32%);
   --foleon-manage-danger: hsl(8 58% 40%);
   --foleon-manage-warning: hsl(40 72% 48%);
-  --foleon-manage-radius-lg: 22px;
-  --foleon-manage-radius-md: 16px;
-  --foleon-manage-radius-sm: 12px;
+  --foleon-manage-radius-lg: 16px;
+  --foleon-manage-radius-md: 12px;
+  --foleon-manage-radius-sm: 10px;
   --foleon-manage-space-xs: 8px;
   --foleon-manage-space-sm: 12px;
   --foleon-manage-space-md: 16px;
   --foleon-manage-space-lg: 24px;
+  --foleon-manage-space-xl: 32px;
   /* Total horizontal gutter preserved when the manager surface escapes the SharePoint canvas.
    * Half is applied as a margin on each side so content never slams into the viewport edge. */
   --foleon-manage-canvas-gutter: 32px;
-  --foleon-manage-gradient-shell: radial-gradient(
-      circle at top left,
-      hsl(186 94% 22% / 0.18),
-      transparent 34%
-    ),
-    linear-gradient(135deg, hsl(42 38% 96%) 0%, hsl(168 32% 95%) 48%, hsl(220 40% 98%) 100%);
   color: var(--foleon-manage-fg);
-  background: var(--foleon-manage-gradient-shell);
+  background: var(--foleon-manage-canvas);
   min-height: 680px;
-  padding: var(--foleon-manage-space-md);
+  padding: var(--foleon-manage-space-md) 0;
   box-sizing: border-box;
 }
