@@ -39,6 +39,18 @@ The PCC does **not** replace Procore, Sage Intacct, Compass, Document Crunch, Ad
 
 ---
 
+## Phase Closeouts
+
+| Phase | Status | Documents |
+|---|---|---|
+| Phase 0 — Architecture Stabilization & Schema Extraction Planning | Complete | [`phase-0/`](./phase-0/) |
+| Phase 1 — Machine-Readable Template Contract | Complete (full extraction gate closed) | [`phase-1/`](./phase-1/) |
+| Phase 2 — Provisioning Foundation (audit & boundaries) | Step 1 complete (documentation only) | [`phase-2/`](./phase-2/) |
+
+Phase 2 Step 1 deliverables (audit, consumer boundary, closeout) live in [`phase-2/`](./phase-2/). The dated execution-scaffold package — Foleon prompts, audit report, implementation plan, prompt package, risk register, execution backlog — lives separately under [`docs/architecture/plans/MASTER/spfx/pcc/phase-02/step-1/`](../../plans/MASTER/spfx/pcc/phase-02/step-1/) and is referenced rather than duplicated.
+
+---
+
 ## Source of Truth
 
 | Scope | Governing Source |
