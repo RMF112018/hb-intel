@@ -224,6 +224,16 @@ Each project site should receive:
 - template version record;
 - provisioning audit trail.
 
+### 6.4 ProjectType, ProjectStage, and ProjectStatus
+
+Three orthogonal fields govern lifecycle, vertical context, and operational state on Project Profile (contract §3.2 / §4B):
+
+- **`ProjectType`** drives **vertical / construction context** — `commercial`, `multifamily`, `municipal`, `luxury_residential`, `environmental`. Frozen for MVP.
+- **`ProjectStage`** drives **lifecycle and module visibility** — `lead`, `estimating`, `preconstruction`, `active_construction`, `closeout`, `warranty`. Frozen for MVP. Stages `lead` and `estimating` may exist in `apps/estimating/` and `apps/accounting/` workflows **before a PCC site is provisioned**; `preconstruction` straddles the provisioning event; `active_construction` / `closeout` / `warranty` always have a site.
+- **`ProjectStatus`** drives **operational state** — `Active`, `On Hold`, `Closed`, `Archived`. **Archive is a `ProjectStatus` value, not a stage.**
+
+Construction-vertical seeding rules key on `ProjectType`. Module visibility / workflow activation rules key on `ProjectStage`. Site read-only / archive rules key on `ProjectStatus`. See contract §4B.2 for the full conditional-seeding table.
+
 ---
 
 ## 7. Project Site Type and Information Architecture
@@ -338,6 +348,8 @@ The home page should answer:
 ---
 
 ## 9. Project Control Center Module Map
+
+Module visibility is keyed on **`ProjectStage`** (lifecycle); vertical-flavored seeding within each module is keyed on **`ProjectType`**. Archive behavior is keyed on **`ProjectStatus = Archived`**. See §6.4 and contract §4B for the authoritative rules.
 
 ### 9.1 Core Modules
 
@@ -2081,6 +2093,8 @@ Site Health includes Procore checks per contract §19 / §15.13:
 - required Procore tool deep links configured
 - no stale Procore materializations beyond per-summary tolerance
 - **no Procore secret found in any SharePoint surface** (R4 — `Security Risk` if violated)
+- `ProcoreCompanyId = 5280` (or an approved multi-company exception) — flagged otherwise
+- Project Procore Mapping `ConfiguredBy` reflects the assigned Project Manager (or Project Executive fallback)
 
 Severity examples (per §19.3 of the contract) align to the §36A.10 `ErrorCategory` enum:
 
@@ -2401,7 +2415,15 @@ Per the package: **DMSA (Procore Direct Mobile Service Account)** is preferred f
 
 > **Procore client IDs, client secrets, refresh tokens, DMSA credentials, OAuth secrets, and environment credentials must never be stored in SharePoint lists, SPFx code, markdown docs, or client-side configuration.** A secret discovered in any of those surfaces is a `Security Risk` and an IT-approved security repair.
 
-Procore credentials are **not** held under HB SharePoint Creator. Procore auth is a separate backend secret-management surface; specifics are tenant configuration recorded in §41 Open Decisions.
+Procore credentials are **not** held under HB SharePoint Creator. Procore auth is a separate backend secret-management surface; specifics are tenant configuration recorded in the Decision Closure Register (§41.1).
+
+**Procore Company ID is configuration, not a secret.** HB's value is **`5280`**. Three forms are used consistently across the architecture:
+
+- canonical / data-layer: `procore_company_id`,
+- PCC / SharePoint surface: `ProcoreCompanyId`,
+- business language: "Procore Company ID = `5280`".
+
+The R4 no-secrets rule above still applies in full to client IDs, client secrets, refresh tokens, DMSA credentials, OAuth secrets, and environment credentials. The `ProcoreCompanyId` field on Project Procore Mapping is retained for future multi-company flexibility; Site Health flags blank or non-`5280` values unless an approved multi-company exception exists (§32.4).
 
 ### 36A.6 Storage strategy
 
@@ -2472,6 +2494,7 @@ Deep links are the default user path. PCC promotes deep links over materializati
 - Credential access is backend-only.
 - Environment separation is required for sandbox vs production.
 - Quarterly endpoint / version review.
+- **Mapping ownership (frozen for MVP).** Primary Procore project mapping owner: **Project Manager**. Fallback: **Project Executive** (when no PM is assigned). IT / Integration Admin may **repair or override only** through the controlled settings/repair workflow. **Project Accountant is not the mapping owner.** Mapping changes are audited through Procore Integration Audit (`mapping_owner_changed` action) and Project Site Configuration audit. See contract §10.6 / §15.13.1 / §18.1.13.
 
 ### 36A.15 Rate-limit / retry / error posture
 
@@ -2771,46 +2794,83 @@ This set directly addresses:
 
 ---
 
-## 41. Open Decisions
+## 41. MVP Decision Closure Register (condensed mirror)
 
-> **MVP Freeze Amendment (2026-04-28).** Items 1, 2, 3, 4, 5, 6, 9, and 10 below are now **frozen for MVP** and governed by the [Standard Project Site Template Contract](./Standard_Project_Site_Template_Contract.md) §22.1. Refer to the contract for the resolved values; the list below is preserved as historical context. Items 7, 8, 11, and 12 remain open and are tracked in the contract's §22.2 Remaining Open list (or as noted below).
+> **All MVP architecture decisions for PCC are now closed.** This section is a condensed mirror of the full register that lives at [Standard Project Site Template Contract](./Standard_Project_Site_Template_Contract.md) §22.2. Refer to the contract for full Implementation Impact and Owner / Validation columns. The historical "Open Decisions" list previously kept here is captured below for traceability and is now superseded by §41.1.
 
-The following decisions should be resolved before implementation:
+### 41.0 Status definitions
 
-1. Exact project site URL naming convention.
-2. Whether each project site is connected to a Microsoft 365 Group / Teams team.
-3. Standard external-user policy by project type.
-4. Whether owner/client access is allowed in the first release.
-5. Whether subcontractor access is allowed in the first release.
-6. Whether permission templates map to SharePoint groups, Entra groups, or both.
-7. How project phase is controlled and updated.
-8. Which external systems are launch-link only in the first release.
-9. Which lists are stored per project site versus centrally at HB Central.
-10. Whether closeout/lessons/subcontractor performance data should sync to a central enterprise repository.
-11. Whether HBI assistant is enabled in the MVP or deferred.
-12. Whether write-enabled Document Control actions are included in the MVP or deferred.
+| Status | Meaning |
+|---|---|
+| `Frozen for MVP` | Architecture decision is closed for the first provisioning release; implementation must follow it unless a later amendment changes it. |
+| `Runtime Configuration` | Architecture is closed but the actual value is tenant-, environment-, or project-specific and is captured in configuration during provisioning or setup. |
+| `Deferred` | Intentionally out of MVP scope; must not block MVP implementation. Future implementation requires a new amendment or release plan. |
+| `Proof-Gated` | Target direction known but final implementation depends on technical proof, tenant validation, API capability confirmation, or security review. |
 
-### 41.1 Procore Integration Open Decisions (added 2026-04-28)
+### 41.1 Register (one line per decision)
 
-The following Procore-specific decisions are tracked alongside contract §22.2 items 18–34. They do **not** block PCC MVP (mapping + launch links + sync health placeholder); they gate Recommended Practical and Strategic Enterprise enablement (§36A.16).
+#### Core PCC / SharePoint decisions
 
-13. **Procore authentication model** — DMSA confirmation vs user-context OAuth scope.
-14. **Procore credential storage location** — backend secret manager (Azure Key Vault assumed); explicit binding decision.
-15. **Procore Company ID strategy** — single-company vs multi-company tenant; per-project resolution.
-16. **Project mapping owner** — which role triggers initial mapping and which triggers re-mapping.
-17. **MVP-enabled subject areas beyond mapping/launch links** — current default is none.
-18. **Sync cadence per subject area** — reconcile to package defaults; per-project overrides.
-19. **Webhooks vs scheduled polling** — final per-subject-area decision.
-20. **Canonical storage target** — backend persistence engine for the canonical relational layer.
-21. **Raw payload retention policy** — whether and for how long.
-22. **SharePoint materialization boundaries** — confirm package allowed/forbidden lists hold.
-23. **Procore vs Sage financial SoR boundaries** — confirm §36A.2 / §25.4 wording at adoption time.
-24. **Write-back governance** — when (if ever); the §36A.13 nine-gate amendment scope.
-25. **Rate-limit / retry policy** — exact thresholds and backoff parameters.
-26. **Endpoint version tracking cadence** — quarterly review cadence; ownership.
-27. **Sandbox vs production environment separation** — environment matrix, DMSA per environment.
-28. **Procore data deletion / archive policy** — per subject area.
-29. **External-user / Procore-directory reconciliation** — when external users are enabled in a future release, mapping into PCC permission templates.
+| ID | Decision | Status | One-line closure |
+|---|---|---|---|
+| D-01 | Central Entra group object IDs | `Runtime Configuration` | Names frozen; IDs resolved from HBCentral configuration. |
+| D-02 | Project-local SharePoint group IDs | `Runtime Configuration` | Names frozen; IDs generated at provisioning. |
+| D-03 | Custom permission-level role definitions | `Frozen for MVP` | `HB Read`, `HB Contribute No Delete`, `HB Contribute`, `HB Manage Project Content`, `Full Control`. |
+| D-04 | External users (MVP) | `Deferred` | No external users in MVP. |
+| D-05 | External access approval workflow | `Deferred` | Future model captured; not built in MVP. |
+| D-06 | Final app-only permission reduction | `Proof-Gated` | Target `Sites.Create.All` + `Sites.Selected`; reduce after proof. |
+| D-07 | SharePoint REST / PnP residual permissions | `Proof-Gated` | Graph first; REST/PnP only where required. |
+| D-08 | Per-project phase exception URL suffix | `Frozen for MVP` | `/sites/{ProjectBaseNumberNoHyphen}-{PhaseSuffixNoHyphen}` (e.g., `/sites/26000-01`) when an exception is approved. |
+| D-09 | OneDrive sync enforcement | `Runtime Configuration` | PCC governs labels; IT governs device enforcement. |
+| D-10 | Project Access Audit mirror to HBCentral | `Frozen for MVP` | Mirror near-real-time; local audit is source on failure. |
+| D-11 | Site-local → HBCentral promotion workflows | `Frozen for MVP` | PM submits / PX approves / Ops curates (lessons, sub performance, closeout summary). |
+| D-12 | **ProjectType enum** | `Frozen for MVP` | `commercial`, `multifamily`, `municipal`, `luxury_residential`, `environmental`. |
+| D-13 | **ProjectStage enum** | `Frozen for MVP` | `lead`, `estimating`, `preconstruction`, `active_construction`, `closeout`, `warranty`. Archive is `ProjectStatus = Archived`, not a stage. |
+| D-14 | Repair automation edge cases | `Frozen for MVP` | T1 auto / T2 admin / T3 IT / T4 manual; no destructive auto-repair. |
+| D-15 | Default expirations for non-external templates | `Frozen for MVP` | Internal: no fixed expiration; viewer 90d; estimating/precon 30d after `active_construction`. |
+| D-16 | HBI Assistant first-release scope | `Deferred` | Architecture hooks only; no HBI in MVP. |
+| D-17 | Per-project-type list seeding beyond current rules | `Deferred` | Common seed set in MVP; future per-type expansions tracked. |
+| D-18 | HB SharePoint Creator permission grants | `Proof-Gated` | Use minimum Graph app permissions proven by implementation; `GroupMember.ReadWrite.All` only if required. |
+| D-19 | Per-stage / per-status edge behavior | `Frozen for MVP` | Stage drives module visibility; status drives archive behavior; transitions governed and audited. |
+
+#### Procore decisions
+
+| ID | Decision | Status | One-line closure |
+|---|---|---|---|
+| P-01 | Procore authentication model | `Frozen for MVP` | DMSA / backend service account; user-context OAuth deferred. |
+| P-02 | Procore credential storage | `Frozen for MVP` | Azure Key Vault per environment via managed identity. |
+| P-03 | **Procore Company ID** | `Frozen for MVP` | `ProcoreCompanyId = 5280`. Configuration; not a secret. |
+| P-04 | **Procore mapping owner** | `Frozen for MVP` | Primary: PM. Fallback: PX. Repair: IT / Integration Admin. PA excluded. |
+| P-05 | MVP-enabled Procore subject areas | `Frozen for MVP` | None. Mapping + launch links + sync health placeholder only. |
+| P-06 | Sync cadence per subject area | `Deferred` | Adopt package defaults at Recommended Practical. |
+| P-07 | Webhooks vs polling | `Deferred` | Webhooks for `project_management` / `quality_safety`; polling fallback / snapshots for others. |
+| P-08 | Canonical storage target | `Deferred` | Azure SQL (canonical) + Azure Blob (raw landing). |
+| P-09 | Raw payload retention | `Deferred` | 90 days default; longer for replay / legal hold. |
+| P-10 | SharePoint materialization boundaries | `Frozen for MVP` | Mappings / summaries / sync health / audits only; no raw payloads or bulk binaries. |
+| P-11 | Procore vs Sage financial SoR | `Frozen for MVP` | Sage is accounting book of record; Procore = operational state, labeled as Procore-sourced. |
+| P-12 | Procore write-back governance | `Deferred` | No Procore writes from PCC until amendment satisfies §36A.13 gates. |
+| P-13 | Rate-limit / retry thresholds | `Deferred` | Exponential backoff with jitter; ~1/2/4/8/16 min; 5 attempts; escalate after 3 failed runs. |
+| P-14 | Endpoint version review cadence | `Deferred` | Quarterly review; IT / Integration Admin + Architecture sign-off for high risk. |
+| P-15 | Sandbox vs production separation | `Frozen for MVP` | Strict separation of credentials, secrets, storage, config, schedules. |
+| P-16 | Procore data deletion / archive policy | `Deferred` | Soft-delete / tombstone; no immediate hard-delete. |
+| P-17 | External-user / Procore-directory reconciliation | `Frozen for MVP` | Comparison only; no auto-grant of SharePoint access (R6). |
+
+### 41.2 Historical "Open Decisions" list (superseded)
+
+Preserved for traceability. All twelve items below are now governed by entries in §41.1 / contract §22.2:
+
+1. Exact project site URL naming convention. → **D-08 / contract F1**
+2. Whether each project site is connected to a Microsoft 365 Group / Teams team. → **contract F2**
+3. Standard external-user policy by project type. → **D-04**
+4. Whether owner/client access is allowed in the first release. → **D-04**
+5. Whether subcontractor access is allowed in the first release. → **D-04**
+6. Whether permission templates map to SharePoint groups, Entra groups, or both. → **D-01 / D-02 / contract F3**
+7. How project phase is controlled and updated. → **D-13 / D-19** (resolved by ProjectStage enum and governed transitions).
+8. Which external systems are launch-link only in the first release. → resolved by **§36A.16** (PCC MVP) and **contract §21.4 / §18.1** (Procore mapping + launch links only; other systems unchanged).
+9. Which lists are stored per project site versus centrally at HB Central. → **contract F7 / D-11**
+10. Whether closeout/lessons/subcontractor performance data should sync to a central enterprise repository. → **D-11 / contract F7**
+11. Whether HBI Assistant is enabled in the MVP or deferred. → **D-16** (`Deferred`).
+12. Whether write-enabled Document Control actions are included in the MVP or deferred. → resolved by §36A.13 / **P-12** (`Deferred`); writes to project document libraries follow the existing PCC governance.
 
 ---
 
