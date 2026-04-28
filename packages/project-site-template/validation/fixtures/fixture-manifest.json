@@ -1,0 +1,51 @@
+{
+  "harnessVersion": "1.0.0",
+  "purpose": "Fixture manifest for the Phase 1 Step 5 schema validation harness. Valid fixtures are mapped by filename pattern <family>.valid.json. Invalid fixtures must declare their target schema and the rule violation each demonstrates.",
+  "valid": {
+    "convention": "<family>.valid.json — validated against schemas/families/<family>.schema.json"
+  },
+  "invalid": {
+    "invalid_project_type_active_construction.json": {
+      "targetSchema": "site",
+      "targetFamily": "site",
+      "expectedFailureReason": "ProjectType set to 'active_construction' violates projectType $defs.enum (VR-05).",
+      "failingValidationRuleRefs": ["VR-05"]
+    },
+    "invalid_project_stage_archived.json": {
+      "targetSchema": "site",
+      "targetFamily": "site",
+      "expectedFailureReason": "ProjectStage set to 'Archived' violates projectStage $defs.enum (VR-04).",
+      "failingValidationRuleRefs": ["VR-04"]
+    },
+    "invalid_mvp_status_shorthand.json": {
+      "targetSchema": "template-manifest",
+      "targetFamily": "template-manifest",
+      "expectedFailureReason": "mvp_status set to 'mvp' (scaffold shorthand) violates decisionClosureStatus $defs.enum (VR-24).",
+      "failingValidationRuleRefs": ["VR-24"]
+    },
+    "invalid_integration_missing_procore_boundary_consts.json": {
+      "targetSchema": "integrations",
+      "targetFamily": "integrations",
+      "expectedFailureReason": "noFullProcoreMirror set to false violates const: true (VR-16; Contract P-10).",
+      "failingValidationRuleRefs": ["VR-16"]
+    },
+    "invalid_integration_procore_secret_like_field.json": {
+      "targetSchema": "integrations",
+      "targetFamily": "integrations",
+      "expectedFailureReason": "Extra property 'procoreClientSecret' violates additionalProperties: false; secret-class fields are forbidden by VR-13. Fixture intentionally contains a secret-like field name to demonstrate schema rejection; integrity-check secret scanner skips invalid/ fixtures by design.",
+      "failingValidationRuleRefs": ["VR-13"]
+    },
+    "invalid_module_visibility_keyed_on_project_type.json": {
+      "targetSchema": "modules",
+      "targetFamily": "modules",
+      "expectedFailureReason": "visibilityByStage contains key 'commercial' (a ProjectType) which violates visibilityByStage.additionalProperties: false; visibility must key strictly on the six ProjectStage tokens (VR-07).",
+      "failingValidationRuleRefs": ["VR-07"]
+    },
+    "invalid_template_contract_missing_family.json": {
+      "targetSchema": "template-contract",
+      "targetFamily": "template-contract",
+      "expectedFailureReason": "Top-level template-contract instance is missing the 'enums' family entry, which violates template-contract.schema.json families.required.",
+      "failingValidationRuleRefs": []
+    }
+  }
+}

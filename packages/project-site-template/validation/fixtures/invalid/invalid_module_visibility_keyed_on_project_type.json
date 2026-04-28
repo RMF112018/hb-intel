@@ -1,0 +1,26 @@
+{
+  "id": "module-invalid-visibility-by-projecttype",
+  "kind": "modules",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§4B.2",
+  "sourceCatalogId": "OC-10",
+  "validationRuleRefs": ["VR-07"],
+  "ownerCategory": "PCC Admin",
+  "ModuleId": 1,
+  "ModuleName": "Project Home / Command Center",
+  "Purpose": "Daily entry; rollups; readiness",
+  "PrimaryUsers": "All project users",
+  "RequiredLists": ["Project Profile"],
+  "RequiredLibraries": ["01_Project_Administration"],
+  "MvpStatus": "Frozen for MVP",
+  "Visible": true,
+  "visibilityByStage": {
+    "lead": true,
+    "estimating": true,
+    "preconstruction": true,
+    "active_construction": true,
+    "closeout": true,
+    "warranty": true,
+    "commercial": true
+  }
+}

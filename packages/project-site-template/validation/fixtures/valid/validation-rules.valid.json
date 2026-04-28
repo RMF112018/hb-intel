@@ -1,0 +1,10 @@
+{
+  "id": "validation-rules-example-0001",
+  "kind": "validation-rules",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§22",
+  "sourceCatalogId": "",
+  "validationRuleRefs": ["VR-24"],
+  "ownerCategory": "HB Intel Architecture",
+  "rules": []
+}

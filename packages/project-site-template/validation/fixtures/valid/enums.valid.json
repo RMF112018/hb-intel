@@ -1,0 +1,10 @@
+{
+  "id": "enums-example-0001",
+  "kind": "enums",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§3.2, §4B.0, §4B.1, §22",
+  "sourceCatalogId": "",
+  "validationRuleRefs": ["VR-01", "VR-02", "VR-03", "VR-24"],
+  "ownerCategory": "HB Intel Architecture",
+  "enumSets": {}
+}

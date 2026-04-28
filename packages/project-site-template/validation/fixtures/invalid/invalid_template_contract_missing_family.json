@@ -1,0 +1,32 @@
+{
+  "$schema": "../../schemas/template-contract.schema.json",
+  "templateName": "HB Standard Project Site Template",
+  "templateFamily": "Project Sites",
+  "templateVersion": "1.0.0-proposed",
+  "phase": "Phase 1 Step 5 invalid fixture — missing 'enums' family",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
+    "phase0Closeout": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Closeout_Report.md"
+  },
+  "status": {
+    "readiness": "scaffold-only",
+    "fullExtractionComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "families": {
+    "template-manifest": { "schema": "./schemas/families/template-manifest.schema.json", "status": "populated" },
+    "settings": { "schema": "./schemas/families/settings.schema.json", "status": "populated" },
+    "permissions": { "schema": "./schemas/families/permissions.schema.json", "status": "populated" },
+    "site": { "schema": "./schemas/families/site.schema.json", "status": "populated" },
+    "pages": { "schema": "./schemas/families/pages.schema.json", "status": "populated" },
+    "libraries": { "schema": "./schemas/families/libraries.schema.json", "status": "populated" },
+    "lists": { "schema": "./schemas/families/lists.schema.json", "status": "populated" },
+    "modules": { "schema": "./schemas/families/modules.schema.json", "status": "populated" },
+    "workflows": { "schema": "./schemas/families/workflows.schema.json", "status": "populated" },
+    "integrations": { "schema": "./schemas/families/integrations.schema.json", "status": "populated" },
+    "site-health": { "schema": "./schemas/families/site-health.schema.json", "status": "populated" },
+    "provisioning-validation": { "schema": "./schemas/families/provisioning-validation.schema.json", "status": "populated" },
+    "validation-rules": { "schema": "./schemas/families/validation-rules.schema.json", "status": "populated" }
+  }
+}

@@ -2,13 +2,23 @@
   "name": "@hbc/project-site-template",
   "version": "0.1.0",
   "private": true,
-  "description": "Machine-readable Project Site Template Contract scaffold for the SP Project Control Center. Phase 1 Step 1 — scaffold and family-skeleton stage only; no executable code, no build, no runtime dependencies.",
+  "description": "Machine-readable Project Site Template Contract for the SP Project Control Center. Phase 1 — schema family contracts plus a package-local validation harness; no runtime, backend, SPFx, or provisioning code.",
   "license": "UNLICENSED",
   "type": "module",
   "files": [
     "README.md",
     "template-contract.json",
     "schemas/",
+    "fields/",
     "docs/"
-  ]
+  ],
+  "scripts": {
+    "validate:schemas": "node validation/validate-template-contract.mjs",
+    "validate:integrity": "node validation/contract-integrity-checks.mjs",
+    "validate:all": "node validation/validate-template-contract.mjs && node validation/contract-integrity-checks.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
 }

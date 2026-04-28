@@ -1,0 +1,61 @@
+{
+  "id": "permissions-example-0001",
+  "kind": "permissions",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§8, §11, §12",
+  "sourceCatalogId": "OC-08",
+  "validationRuleRefs": ["VR-11", "VR-15", "VR-17", "VR-18", "VR-27", "VR-30"],
+  "ownerCategory": "PCC Admin",
+  "templateKey": "project_team_member",
+  "displayName": "Project Team Member",
+  "description": "Standard project-team contributor template for internal users.",
+  "assignedSpGroup": "PCC-{ProjectBaseNumber}-ProjectTeam",
+  "permissionLevel": "HB Contribute No Delete",
+  "mvpTreatment": "Frozen for MVP",
+  "assignableBy": "Project Manager",
+  "defaultExpiration": "None",
+  "auditRequired": true,
+  "perLibraryAccess": {
+    "01_Project_Administration": "Edit",
+    "02_Contracts_and_Compliance": "Read",
+    "03_Drawings_and_Specifications": "Read",
+    "04_Permits_and_Inspections": "Edit",
+    "05_RFIs_Submittals_and_Direction": "Edit",
+    "06_Field_Operations": "Edit",
+    "07_Meetings_and_Communications": "Edit",
+    "08_Project_Controls_and_Financials": "—",
+    "09_Photos_Videos_and_Reality_Capture": "Edit",
+    "10_Closeout_and_Turnover": "Read",
+    "11_Lessons_Learned_and_Reports": "Read",
+    "99_Archive": "Read"
+  },
+  "centralEntraGroups": [
+    "HB-PCC-Global-Read-All",
+    "HB-PCC-IT-Site-Repair-Admins",
+    "HB-PCC-Template-Owners"
+  ],
+  "projectLocalSpGroups": [
+    "PCC-{ProjectBaseNumber}-Owners",
+    "PCC-{ProjectBaseNumber}-GlobalReadOnly",
+    "PCC-{ProjectBaseNumber}-ReadOnly",
+    "PCC-{ProjectBaseNumber}-ProjectTeam",
+    "PCC-{ProjectBaseNumber}-ProjectManagement",
+    "PCC-{ProjectBaseNumber}-FieldOperations",
+    "PCC-{ProjectBaseNumber}-ProjectAccounting",
+    "PCC-{ProjectBaseNumber}-SafetyQAQC",
+    "PCC-{ProjectBaseNumber}-EstimatingPreconstruction",
+    "PCC-{ProjectBaseNumber}-ExecutiveOversight"
+  ],
+  "phaseAccessManagerBindings": {
+    "preconstructionEstimating": ["Estimating Coordinator", "Lead Estimator", "Project Executive"],
+    "construction": ["Project Executive", "Project Manager", "Manager of Operational Excellence"]
+  },
+  "procoreMappingOwnerRule": {
+    "primary": "Project Manager",
+    "fallback": "Project Executive",
+    "repair": "IT / Integration Admin",
+    "forbiddenOwners": ["Project Accountant"]
+  },
+  "procoreDirectoryComparisonReadOnly": true,
+  "externalUserTemplatesDeferred": true
+}

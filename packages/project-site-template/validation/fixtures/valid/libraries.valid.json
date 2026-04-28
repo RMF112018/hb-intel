@@ -1,0 +1,34 @@
+{
+  "id": "library-example-01",
+  "kind": "libraries",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§14.1",
+  "sourceCatalogId": "OC-03",
+  "validationRuleRefs": ["VR-08", "VR-09", "VR-29"],
+  "ownerCategory": "PCC Admin",
+  "libraryInternalName": "01_Project_Administration",
+  "libraryDisplayName": "01 Project Administration",
+  "purpose": "General admin docs, transmittals, kickoff records.",
+  "primaryModule": "Document Control Center",
+  "defaultAccess": "Project Team Member+",
+  "restrictedAccess": "None",
+  "recommendedMetadata": ["DocCategory", "DocStatus", "ResponsibleRole"],
+  "defaultViews": ["All", "By Category", "By Status"],
+  "syncPolicy": "Shortcut Allowed",
+  "retentionArchive": "7y, archive at closeout",
+  "requiredOptional": "Required",
+  "validationRule": "Must exist",
+  "folderPermissionsPolicy": "Unique folder-level permissions are prohibited except in controlled exceptions.",
+  "governedSyncException": false,
+  "readOnlyOnStatus": true,
+  "seedRule": {
+    "keyedOn": "projectType",
+    "perType": {
+      "commercial": ["Kickoff_Checklist.docx"],
+      "multifamily": ["Kickoff_Checklist.docx"],
+      "municipal": ["Kickoff_Checklist.docx", "Public_Posting_Notice.docx"],
+      "luxury_residential": ["Kickoff_Checklist.docx"],
+      "environmental": ["Kickoff_Checklist.docx", "Environmental_Disclosure_Notice.docx"]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "workflow-example-project-startup",
+  "kind": "workflows",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§17.1",
+  "sourceCatalogId": "OC-13",
+  "validationRuleRefs": ["VR-08", "VR-09", "VR-26"],
+  "ownerCategory": "PCC Admin",
+  "workflowTemplateKey": "project_startup",
+  "workflowDisplayName": "Project Startup",
+  "workflowPurpose": "Seed Project Startup Tasks list and Startup Gate Checklist at provisioning.",
+  "owningModule": "Startup Center",
+  "seedListMappings": ["Project Startup Tasks", "Startup Gate Checklist"],
+  "seedRule": {
+    "keyedOn": "projectType",
+    "perType": {
+      "commercial": ["startup-task-set-commercial"],
+      "multifamily": ["startup-task-set-multifamily"],
+      "municipal": ["startup-task-set-municipal"],
+      "luxury_residential": ["startup-task-set-luxury_residential"],
+      "environmental": ["startup-task-set-environmental"]
+    }
+  },
+  "stageGate": "preconstruction → active_construction",
+  "mvpStatus": "Frozen for MVP",
+  "startupTask_TaskNumber": "1.01",
+  "startupTask_Section": "Job Start-up",
+  "permits_seedSet": ["Master", "Roofing", "Plumbing", "HVAC", "Electrical"]
+}

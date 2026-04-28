@@ -1,0 +1,16 @@
+{
+  "id": "page-example-home",
+  "kind": "pages",
+  "mvp_status": "Frozen for MVP",
+  "sourceContractSection": "§13",
+  "sourceCatalogId": "OC-02",
+  "validationRuleRefs": ["VR-26"],
+  "ownerCategory": "PCC Admin",
+  "pageUrl": "/SitePages/Project-Control-Center.aspx",
+  "pagePurpose": "PCC shell home",
+  "embeddedModule": "Project Home / Command Center",
+  "navigationLabel": "Home",
+  "defaultOrder": 1,
+  "visibility": "All",
+  "mvpStatus": "Frozen for MVP"
+}
