@@ -1,0 +1,42 @@
+{
+  "family": "site-health",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "healthRecordId", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "System-generated unique identifier per site finding.", "notes": ""},
+    {"fieldName": "ProjectId", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Cross-reference to project.", "notes": ""},
+    {"fieldName": "checkId", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19.1, §15.2 (Project Site Health)", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Stable identifier for the named §19.1 check.", "notes": "20+ named checks: site exists, pages exist, libraries exist, lists exist, fields exist, views exist, app installed, module configuration exists, groups exist, global read-only applied, project team assignments valid, integration placeholders exist, template version current, no permission breakage, no missing navigation, no broken webparts, emergency repair reconciled, Procore mapping exists, ProcoreProjectId present, ProcoreProjectUrl present, Procore project reachable, enabled subject areas healthy, backend credentials available, last successful sync in tolerance, sync errors redacted, deep links configured, no stale materializations, no secrets found, ProcoreCompanyId is 5280, ConfiguredBy reflects PM/PX."},
+    {"fieldName": "checkName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19.1", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Human-readable check name.", "notes": ""},
+    {"fieldName": "driftedResourceRef", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Path to the drifted resource (page, list, library, field, group, etc.).", "notes": ""},
+    {"fieldName": "state", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§15.2 (Project Site Health), §19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Check state (e.g., Pass, Fail, Drift).", "notes": ""},
+    {"fieldName": "severity", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19.3", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": ["VR-21"], "description": "Severity classification: Info, Warning, Blocking, Repair Required, Security Risk.", "notes": "Bound to enums.canonicalEnumSets.SiteHealthSeverity."},
+    {"fieldName": "repairTier", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19A.1", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": ["VR-22"], "description": "Repair Automation tier: T1 Auto, T2 Approval, T3 IT Security, T4 Manual Only.", "notes": "Bound to enums.canonicalEnumSets.RepairAutomationTier."},
+    {"fieldName": "detectedAt", "fieldType": "datetime", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UTC timestamp of detection.", "notes": ""},
+    {"fieldName": "lastChecked", "fieldType": "datetime", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§15.2", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UTC timestamp of last check run.", "notes": ""},
+    {"fieldName": "detail", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§15.2", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Plain-language detail.", "notes": ""},
+    {"fieldName": "repairAvailable", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19, §15.2", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Whether a repair is available for this finding.", "notes": ""},
+    {"fieldName": "repairAction", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19.5, §19A.3", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Specific repair action description.", "notes": ""},
+    {"fieldName": "repairApprovalStatus", "fieldType": "enum", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19A", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Approval status: None, Admin Approved, IT Approved, Out-of-band Manual Workflow.", "notes": ""},
+    {"fieldName": "repairExecuted", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Whether the repair was executed.", "notes": ""},
+    {"fieldName": "beforeAuditState", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19A.3", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": ["VR-13"], "description": "Compact JSON of pre-repair state; redacted of secrets.", "notes": ""},
+    {"fieldName": "afterAuditState", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19A.3", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": ["VR-13"], "description": "Compact JSON of post-repair state; redacted of secrets.", "notes": ""},
+    {"fieldName": "auditTrail", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§19", "sourceCatalogId": "OC-12", "sourceDecisionRef": "", "validationRuleRefs": ["VR-17"], "description": "Array of audit entries.", "notes": ""}
+  ],
+  "deferredFields": [],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-13", "VR-17", "VR-21", "VR-22"],
+  "dependencies": ["enums", "validation-rules", "site", "permissions", "pages", "libraries", "lists", "modules", "workflows", "integrations", "settings", "provisioning-validation"],
+  "notes": "Site Health depends on every provisioned object family. Severity (§19.3) and repair tier (§19A) bind to canonical enum sets. The 20+ named checks from §19.1 each map to a finding with severity and repair tier; check catalog will be detailed in Step 4."
+}

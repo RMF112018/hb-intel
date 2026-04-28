@@ -1,0 +1,43 @@
+{
+  "family": "template-manifest",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "templateName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Canonical template name.", "notes": "Value in the contract: 'HB Standard Project Site Template'."},
+    {"fieldName": "templateType", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Template type description.", "notes": "Contract value: 'SharePoint Online team site (governed, branded, full-page shell)'."},
+    {"fieldName": "templateVersion", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Semver-style template version. Frozen at first release.", "notes": "Contract value: '1.0.0 (proposed; frozen at first release)'."},
+    {"fieldName": "templateFamily", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Template family classification.", "notes": "Contract value: 'Project Sites'."},
+    {"fieldName": "templateOwner", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Engineering owner of the template.", "notes": "Contract value: 'HB Intel Engineering'."},
+    {"fieldName": "businessOwner", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Business owner.", "notes": "Contract value: 'HB VP of Operations'."},
+    {"fieldName": "technicalOwner", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Technical owner.", "notes": "Contract value: 'HB Intel Architecture'."},
+    {"fieldName": "provisioningAuthority", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Path to the provisioning service.", "notes": "Contract value: 'backend/functions/src/services/sharepoint-provisioning-service.ts'."},
+    {"fieldName": "provisioningApplication", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Triggering application.", "notes": "Contract value: 'apps/accounting/ (final trigger), upstream from apps/estimating/'."},
+    {"fieldName": "provisioningHost", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Azure Function App host.", "notes": "Contract value: 'Azure Function App hb-intel-function-app'."},
+    {"fieldName": "functionAppDomain", "fieldType": "url", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Function App domain.", "notes": "Contract value as published; not a secret."},
+    {"fieldName": "registeredApplication", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Registered Entra application name.", "notes": "Contract value: 'HB SharePoint Creator'."},
+    {"fieldName": "applicationClientId", "fieldType": "guid", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-13"], "description": "Application (client) ID. Public, not a secret.", "notes": "VR-13 still applies to all secret-class material associated with the app; this client ID itself is public per contract."},
+    {"fieldName": "primaryUxShell", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Primary UX shell descriptor.", "notes": "Contract value: 'Project Control Center (full-page, branded, parallel to apps/hb-homepage/ @hbc/spfx-hb-homepage)'."},
+    {"fieldName": "supportedProjectStages", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4, §4B.0", "sourceCatalogId": "", "sourceDecisionRef": "D-12", "validationRuleRefs": ["VR-02"], "description": "Allowed ProjectStage values bound by VR-02.", "notes": "Bound to enums.canonicalEnumSets.ProjectStage."},
+    {"fieldName": "supportedProjectTypes", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4, §4B.1", "sourceCatalogId": "", "sourceDecisionRef": "D-12", "validationRuleRefs": ["VR-01"], "description": "Allowed ProjectType values bound by VR-01.", "notes": "Bound to enums.canonicalEnumSets.ProjectType."},
+    {"fieldName": "supportedProjectStatus", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4, §3.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-03"], "description": "Allowed ProjectStatus values bound by VR-03.", "notes": "Bound to enums.canonicalEnumSets.ProjectStatus."},
+    {"fieldName": "effectiveDate", "fieldType": "date", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Effective date of this template version.", "notes": "Contract value: '2026-04-28'."},
+    {"fieldName": "changeControlOwner", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Change-control owner; ADR-gated.", "notes": "Contract value: 'HB Intel Architecture (ADR-gated)'."}
+  ],
+  "deferredFields": [],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-01", "VR-02", "VR-03", "VR-13", "VR-24"],
+  "dependencies": ["enums", "validation-rules"],
+  "notes": "Template manifest is the outermost wrapper. All fields trace to Contract §4. Anti-regression: deprecated tokens never appear in supportedProjectTypes / supportedProjectStages."
+}

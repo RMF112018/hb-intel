@@ -1,0 +1,39 @@
+{
+  "family": "modules",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "ModuleId", "fieldType": "integer", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.1, §8.3", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": ["VR-26"], "description": "Stable module identifier (1–20).", "notes": "20 modules created at provisioning per §8.1."},
+    {"fieldName": "ModuleName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.1, §8.2", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Module name (blueprint name).", "notes": ""},
+    {"fieldName": "Purpose", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.1", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Module purpose description.", "notes": ""},
+    {"fieldName": "PrimaryUsers", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.1", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Primary users of the module.", "notes": ""},
+    {"fieldName": "RequiredLists", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3, §15.2", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "List names this module depends on.", "notes": ""},
+    {"fieldName": "RequiredLibraries", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3, §14.1", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Library names this module depends on.", "notes": ""},
+    {"fieldName": "RequiredSettings", "fieldType": "array", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Settings keys this module depends on.", "notes": "Step 4 will resolve each entry to settings family field names."},
+    {"fieldName": "ExternalIntegrations", "fieldType": "array", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3, §18", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Required external integrations (e.g., Procore, Teams).", "notes": ""},
+    {"fieldName": "RelatedExampleDocuments", "fieldType": "array", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Reference to §17 seeded templates.", "notes": ""},
+    {"fieldName": "HomeRollupContribution", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3, §13", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Module contribution to the Project Home / Command Center page.", "notes": ""},
+    {"fieldName": "MvpStatus", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.1", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": ["VR-19", "VR-24"], "description": "Decision Closure status.", "notes": "8 modules MVP, 12 Later (Deferred), HBI Assistant (#20) explicitly Deferred per VR-19."},
+    {"fieldName": "Visible", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4B.2, §8.3", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": ["VR-07"], "description": "Whether module is visible (gated by ProjectStage conditional visibility per §4B.2).", "notes": ""},
+    {"fieldName": "visibilityByStage", "fieldType": "object", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4B.2", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": ["VR-07", "VR-30"], "description": "Visibility map keyed by ProjectStage (lead, estimating, preconstruction, active_construction, closeout, warranty).", "notes": "Cross-Layer rule: Schema declares structure; SPFx enforces runtime visibility."},
+    {"fieldName": "LastConfiguredBy", "fieldType": "person", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UPN of last configurator.", "notes": ""},
+    {"fieldName": "LastConfiguredDate", "fieldType": "datetime", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§8.3", "sourceCatalogId": "OC-10", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UTC timestamp of last configuration change.", "notes": ""}
+  ],
+  "deferredFields": ["RelatedExampleDocuments"],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-07", "VR-19", "VR-24", "VR-26", "VR-30"],
+  "dependencies": ["enums", "validation-rules", "site", "permissions"],
+  "notes": "20 modules per §8.1 (8 MVP + 12 Later). HBI Assistant (#20) Deferred per VR-19. Module Configuration list (§8.3, §15.2) holds runtime instances. ProjectStage-keyed visibility (§4B.2) is the canonical mechanism for stage-driven module surfacing."
+}

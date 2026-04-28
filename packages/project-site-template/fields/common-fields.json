@@ -1,0 +1,118 @@
+{
+  "phase": "Phase 1 Step 3 field consolidation",
+  "purpose": "Common field definitions shared across all schema families. mvp_status references the canonical Decision Closure status enum. Scaffold-local shorthand (mvp / deferred / placeholder) is not preserved as canonical.",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0Taxonomy": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Schema_Family_Taxonomy.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "canonicalDecisionClosureValues": [
+    "Frozen for MVP",
+    "Runtime Configuration",
+    "Deferred",
+    "Proof-Gated"
+  ],
+  "commonFields": [
+    {
+      "fieldName": "id",
+      "fieldType": "string",
+      "requiredByDefault": true,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy (Required Common Fields)",
+      "validationRuleRefs": [],
+      "description": "Stable identifier for the family record. Format is per-family.",
+      "notes": "Required on every record across all 14 families."
+    },
+    {
+      "fieldName": "kind",
+      "fieldType": "enum",
+      "requiredByDefault": true,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy",
+      "validationRuleRefs": [],
+      "description": "Discriminator naming the schema family. Constrained per family by the family schema.",
+      "notes": "Bound to the family-name set: template-manifest, enums, settings, permissions, site, pages, libraries, lists, modules, workflows, integrations, site-health, provisioning-validation, validation-rules."
+    },
+    {
+      "fieldName": "mvp_status",
+      "fieldType": "enum",
+      "requiredByDefault": true,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Standard Project Site Template Contract §22; Phase 0 Step 2 Schema Family Taxonomy; VR-24",
+      "validationRuleRefs": ["VR-24"],
+      "description": "Decision Closure Register status. Bound to the canonical four-value enum.",
+      "notes": "Allowed values: Frozen for MVP, Runtime Configuration, Deferred, Proof-Gated."
+    },
+    {
+      "fieldName": "sourceContractSection",
+      "fieldType": "string",
+      "requiredByDefault": true,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy (Required Common Fields)",
+      "validationRuleRefs": [],
+      "description": "Anchor in the Standard Project Site Template Contract justifying the record. Phase 1 schemas with missing sourceContractSection fail validation.",
+      "notes": "Required on every record."
+    },
+    {
+      "fieldName": "sourceCatalogId",
+      "fieldType": "string",
+      "requiredByDefault": false,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy",
+      "validationRuleRefs": [],
+      "description": "Object Catalog ID (§4A) row identifier the record traces to.",
+      "notes": "Required when the record corresponds to a §4A row; otherwise optional."
+    },
+    {
+      "fieldName": "sourceBlueprintSection",
+      "fieldType": "string",
+      "requiredByDefault": false,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy",
+      "validationRuleRefs": [],
+      "description": "Anchor in the HB Project Control Center Target Architecture Blueprint when applicable.",
+      "notes": "Optional; populated when the family is also referenced by the Blueprint."
+    },
+    {
+      "fieldName": "sourceDecisionRef",
+      "fieldType": "string",
+      "requiredByDefault": false,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy",
+      "validationRuleRefs": [],
+      "description": "Reference to the Decision Closure Register entry (D-, P-, R- code) that closed the relevant decision.",
+      "notes": "Optional; populated when a decision-register entry directly governs the field."
+    },
+    {
+      "fieldName": "validationRuleRefs",
+      "fieldType": "array",
+      "requiredByDefault": false,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy; Phase 0 Step 2 Validation Rule Table Plan",
+      "validationRuleRefs": [],
+      "description": "Array of Validation Rule IDs (e.g., VR-01) that bind to the record.",
+      "notes": "Optional but recommended on every record that participates in a validation rule."
+    },
+    {
+      "fieldName": "ownerCategory",
+      "fieldType": "string",
+      "requiredByDefault": false,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy",
+      "validationRuleRefs": [],
+      "description": "Category of owner responsible for the record (e.g., HB Intel Architecture, PCC Admin, IT/Integration Admin).",
+      "notes": "Optional; populated where ownership is contract-bound."
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "string",
+      "requiredByDefault": false,
+      "canonicalStatus": "Frozen for MVP",
+      "source": "Phase 0 Step 2 Schema Family Taxonomy",
+      "validationRuleRefs": [],
+      "description": "Free-text notes for the record.",
+      "notes": "Optional."
+    }
+  ]
+}

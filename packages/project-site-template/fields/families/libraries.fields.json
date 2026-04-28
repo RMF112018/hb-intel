@@ -1,0 +1,40 @@
+{
+  "family": "libraries",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "libraryInternalName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Internal library name (e.g., 01_Project_Administration).", "notes": "12 standard libraries (8 MVP + 4 Optional / Future, plus 99_Archive)."},
+    {"fieldName": "libraryDisplayName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Display version of the library name.", "notes": ""},
+    {"fieldName": "purpose", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Library purpose statement.", "notes": ""},
+    {"fieldName": "primaryModule", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Module that primarily owns this library.", "notes": ""},
+    {"fieldName": "defaultAccess", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1, §12", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Default access posture for the library.", "notes": ""},
+    {"fieldName": "restrictedAccess", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1, §12", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Restricted-access posture (e.g., 'Read for Executive Oversight').", "notes": ""},
+    {"fieldName": "recommendedMetadata", "fieldType": "array", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-05", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Recommended metadata columns (e.g., DocCategory, DocStatus, ResponsibleRole).", "notes": ""},
+    {"fieldName": "defaultViews", "fieldType": "array", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-06", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Default view names.", "notes": ""},
+    {"fieldName": "syncPolicy", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.2", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Online Only, Shortcut Allowed, Sync Allowed, Sync Blocked.", "notes": ""},
+    {"fieldName": "retentionArchive", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Retention/archive policy (e.g., '7y, archive at closeout', 'indefinite').", "notes": ""},
+    {"fieldName": "requiredOptional", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Required / Optional indicator.", "notes": ""},
+    {"fieldName": "validationRule", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.1", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Validation rule string from §14.1 (e.g., 'Must exist', 'Validate if module enabled').", "notes": ""},
+    {"fieldName": "folderPermissionsPolicy", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.5", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": ["VR-17"], "description": "Unique folder-level permissions are prohibited except in controlled exceptions.", "notes": ""},
+    {"fieldName": "governedSyncException", "fieldType": "boolean", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§14.5A", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Whether the library is elevated from Shortcut Allowed to Sync Allowed via governed exception.", "notes": ""},
+    {"fieldName": "readOnlyOnStatus", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§3.2, §5.6", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": ["VR-09", "VR-29"], "description": "Library flips read-only when ProjectStatus is Closed or Archived.", "notes": ""},
+    {"fieldName": "seedRule", "fieldType": "object", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4B.2", "sourceCatalogId": "OC-03", "sourceDecisionRef": "", "validationRuleRefs": ["VR-08"], "description": "Vertical seeding rule keyed on projectType.", "notes": ""}
+  ],
+  "deferredFields": [],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-08", "VR-09", "VR-17", "VR-29"],
+  "dependencies": ["enums", "validation-rules", "site"],
+  "notes": "12 §14.1 libraries: 01–08 MVP/Required, 09–11 Optional/Future, 99 Archive. Sync policy enum (§14.2) frozen. Folder-level permissions prohibited except controlled exceptions (§14.5). Governed sync elevation exception per §14.5A."
+}

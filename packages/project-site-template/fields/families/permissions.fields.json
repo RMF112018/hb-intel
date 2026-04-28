@@ -1,0 +1,41 @@
+{
+  "family": "permissions",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "templateKey", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.3, §12.6", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Stable internal template identifier.", "notes": "10 MVP keys: pcc_admin, global_read_only, executive_oversight, project_viewer, estimating_preconstruction, project_team_member, project_management, field_operations, project_accounting, safety_qaqc. 3 Deferred: external_design_team, owner_client_viewer, subcontractor_limited."},
+    {"fieldName": "displayName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.6, §16.5", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Plain business label for PCC UI.", "notes": "Never internal field name (§16.5)."},
+    {"fieldName": "description", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.6", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Template purpose statement.", "notes": ""},
+    {"fieldName": "assignedSpGroup", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.4, §12.6", "sourceCatalogId": "OC-07", "sourceDecisionRef": "D-02", "validationRuleRefs": [], "description": "Project-local SharePoint group name pattern PCC-{ProjectBaseNumber}-...", "notes": "Runtime ID stored in Project Site Configuration."},
+    {"fieldName": "assignedEntraGroup", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.4, §12.6, §22.2", "sourceCatalogId": "OC-07", "sourceDecisionRef": "D-01", "validationRuleRefs": [], "description": "Central Entra group (e.g., HB-PCC-Global-Read-All).", "notes": "Runtime OID via configuration."},
+    {"fieldName": "permissionLevel", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.2, §12.4, §12.6", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "HB Read, HB Contribute No Delete, HB Contribute, HB Manage Project Content, Full Control.", "notes": ""},
+    {"fieldName": "mvpTreatment", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§21.5", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": ["VR-18", "VR-24"], "description": "MVP / Deferred Decision Closure status.", "notes": "10 MVP, 3 Deferred (external)."},
+    {"fieldName": "assignableBy", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§11.3, §12.6", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": ["VR-27", "VR-30"], "description": "Phase-based access manager role authorized to assign template.", "notes": "Preconstruction/Estimating: Estimating Coordinator, Lead Estimator, PX. Construction: PX, PM, Manager of Operational Excellence."},
+    {"fieldName": "defaultExpiration", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.6, §22.2", "sourceCatalogId": "OC-08", "sourceDecisionRef": "D-15", "validationRuleRefs": [], "description": "None for internal active-project; 90 days for temporary internal viewers; 30 days after stage advance for Estimating/Preconstruction.", "notes": ""},
+    {"fieldName": "auditRequired", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.6", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": ["VR-17"], "description": "Whether assignment requires audit trail.", "notes": ""},
+    {"fieldName": "perLibraryAccess", "fieldType": "object", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§12.5, §12.6", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Per-library access matrix; values: Full, Manage, Edit, Read, '—' (no default).", "notes": "§12.5 matrix authoritative."},
+    {"fieldName": "centralEntraGroups", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§11.2A", "sourceCatalogId": "OC-07", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Catalog of central Entra groups (HB-PCC-Global-Read-All, HB-PCC-IT-Site-Repair-Admins, HB-PCC-Template-Owners; HB-PCC-External-Access-Approvers deferred).", "notes": ""},
+    {"fieldName": "projectLocalSpGroups", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§11.2A", "sourceCatalogId": "OC-07", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Catalog of project-local SharePoint groups (Owners, GlobalReadOnly, ReadOnly, ProjectTeam, ProjectManagement, FieldOperations, ProjectAccounting, SafetyQAQC, EstimatingPreconstruction, ExecutiveOversight; ExternalDesignTeam, OwnerClientViewer, SubcontractorLimited deferred).", "notes": ""},
+    {"fieldName": "phaseAccessManagerBindings", "fieldType": "object", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§11.3", "sourceCatalogId": "OC-08", "sourceDecisionRef": "", "validationRuleRefs": ["VR-27", "VR-30"], "description": "Phase-keyed mapping of stage to authorized inviter roles.", "notes": ""},
+    {"fieldName": "procoreMappingOwnerRule", "fieldType": "object", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§10.6, §18.1.13, §22.2", "sourceCatalogId": "OC-14", "sourceDecisionRef": "P-04", "validationRuleRefs": ["VR-11"], "description": "Procore mapping ownership rule: primary Project Manager, fallback Project Executive. Project Accountant explicitly NOT the mapping owner.", "notes": ""},
+    {"fieldName": "procoreDirectoryComparisonReadOnly", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§11.7, §22.2", "sourceCatalogId": "", "sourceDecisionRef": "P-17", "validationRuleRefs": ["VR-15"], "description": "Procore directory comparison is read-only and does not auto-grant access.", "notes": ""},
+    {"fieldName": "externalUserTemplatesDeferred", "fieldType": "boolean", "required": true, "mvpStatus": "Deferred", "sourceContractSection": "§11.5, §12.4", "sourceCatalogId": "OC-08", "sourceDecisionRef": "D-04", "validationRuleRefs": ["VR-18"], "description": "External user permission templates exist as Deferred placeholders only.", "notes": ""}
+  ],
+  "deferredFields": ["externalUserTemplatesDeferred"],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-11", "VR-15", "VR-17", "VR-18", "VR-24", "VR-27", "VR-30"],
+  "dependencies": ["enums", "validation-rules", "site"],
+  "notes": "Permissions span §8 (work-center role mapping), §11 (team / connection), §11.3 (phase-based access managers), §11.5 (external users deferred), §11.6 (M365/Teams posture - settings-owned), §11.7 (Procore directory read-only), §12 (templates and groups), §13 (page module visibility - modules-owned). Permission Template Configuration list in §15.2 holds runtime instances."
+}

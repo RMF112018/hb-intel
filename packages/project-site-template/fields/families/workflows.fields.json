@@ -1,0 +1,45 @@
+{
+  "family": "workflows",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "workflowTemplateKey", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1–§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Stable identifier for one of the 8 seeded workflow templates: project_startup, project_closeout, permits, inspections, responsibility_matrix, owner_contract_matrix (Future), subcontractor_scorecard (Future), lessons_learned (Future).", "notes": ""},
+    {"fieldName": "workflowDisplayName", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1–§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Display name for the workflow template.", "notes": ""},
+    {"fieldName": "workflowPurpose", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1–§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Purpose of the workflow template.", "notes": ""},
+    {"fieldName": "owningModule", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1–§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-26"], "description": "Module that owns this workflow template (referential integrity per VR-26).", "notes": ""},
+    {"fieldName": "seedListMappings", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1–§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "List(s) seeded by this workflow template (e.g., Project Startup Tasks, Startup Gate Checklist for §17.1).", "notes": ""},
+    {"fieldName": "seedRule", "fieldType": "object", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§4B.2", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-08"], "description": "Vertical seeding rule keyed on projectType.", "notes": ""},
+    {"fieldName": "stageGate", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1, §17.2", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-09"], "description": "Stage / status that gates the workflow (e.g., active_construction → closeout).", "notes": ""},
+    {"fieldName": "mvpStatus", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1–§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-24"], "description": "Decision Closure status: Frozen for MVP for §17.1–§17.5, Deferred for §17.6–§17.8.", "notes": ""},
+    {"fieldName": "startupTask_TaskNumber", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Task number on Project Startup Tasks list.", "notes": ""},
+    {"fieldName": "startupTask_Section", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.1", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Section enum: Review Owner's Contract, Job Start-up, Order Services & Equipment, Permits Posted on Jobsite.", "notes": ""},
+    {"fieldName": "closeoutTask_RequiredConditional", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.2", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Closeout task disposition: Required, Conditional, N/A.", "notes": ""},
+    {"fieldName": "closeoutMilestone_80DayWarning", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.2", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Mandatory 80-day closeout warning milestone.", "notes": ""},
+    {"fieldName": "closeoutMilestone_88DayLien", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.2", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Mandatory 88-day lien deadline milestone.", "notes": ""},
+    {"fieldName": "permits_seedSet", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.3", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Permit type seed set: Master, Roofing, Plumbing, HVAC, Electrical, Fire Alarm, Fire Sprinklers, Elevator, Irrigation, Low Voltage, Site-Utilities, Right-of-way.", "notes": ""},
+    {"fieldName": "inspections_seedGroups", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.4", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Inspection group seed set (35 groups per §17.4).", "notes": ""},
+    {"fieldName": "responsibilityMatrix_Workstream", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.5", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Responsibility matrix workstream.", "notes": ""},
+    {"fieldName": "responsibilityMatrix_PrimaryRole", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§17.5", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Primary responsible role.", "notes": ""},
+    {"fieldName": "ownerContractMatrix_ResponsibleParty", "fieldType": "enum", "required": true, "mvpStatus": "Deferred", "sourceContractSection": "§17.6", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-24"], "description": "Owner Contract responsible party: Owner, Architect-Engineer, Contractor.", "notes": "§17.6 workflow is Future / Deferred from MVP."},
+    {"fieldName": "subcontractorScorecard_Categories", "fieldType": "array", "required": true, "mvpStatus": "Deferred", "sourceContractSection": "§17.7", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-24"], "description": "Subcontractor scorecard categories with literal weights (20%, 20%, 20%, 15%, 15%, 10%).", "notes": "§17.7 workflow is Future / Deferred."},
+    {"fieldName": "lessonsLearned_Category", "fieldType": "enum", "required": true, "mvpStatus": "Deferred", "sourceContractSection": "§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-24"], "description": "Lessons Learned category enum (15 values per §17.8).", "notes": "§17.8 workflow is Future / Deferred."},
+    {"fieldName": "lessonsLearned_Impact", "fieldType": "enum", "required": true, "mvpStatus": "Deferred", "sourceContractSection": "§17.8", "sourceCatalogId": "OC-13", "sourceDecisionRef": "", "validationRuleRefs": ["VR-24"], "description": "Lessons Learned impact: Minor, Moderate, Significant, Critical.", "notes": ""}
+  ],
+  "deferredFields": ["ownerContractMatrix_ResponsibleParty", "subcontractorScorecard_Categories", "lessonsLearned_Category", "lessonsLearned_Impact"],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-08", "VR-09", "VR-24", "VR-26"],
+  "dependencies": ["enums", "validation-rules", "lists", "libraries"],
+  "notes": "8 seeded workflow templates from §17: §17.1 Startup, §17.2 Closeout, §17.3 Permits, §17.4 Inspections, §17.5 Responsibility Matrix (all 5 MVP); §17.6 Owner Contract Matrix, §17.7 Subcontractor Scorecard, §17.8 Lessons Learned (all 3 Future/Deferred). The contract specifies seed templates and the lists they seed; per-row workflow records inherit §16.1 baseline columns from the lists family."
+}

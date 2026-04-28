@@ -3,7 +3,7 @@
   "templateName": "HB Standard Project Site Template",
   "templateFamily": "Project Sites",
   "templateVersion": "1.0.0-proposed",
-  "phase": "Phase 1 Step 2 enum and validation-rule extraction",
+  "phase": "Phase 1 Step 3 object family field consolidation",
   "source": {
     "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
     "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
@@ -13,6 +13,29 @@
     "readiness": "scaffold-only",
     "fullExtractionComplete": false,
     "containsNewArchitectureDecisions": false
+  },
+  "fieldMaps": {
+    "phase": "Phase 1 Step 3 field consolidation",
+    "directory": "./fields/",
+    "readme": "./fields/README.md",
+    "commonFields": "./fields/common-fields.json",
+    "objectCatalogDisposition": "./fields/object-catalog-field-disposition.json",
+    "familyDependencies": "./fields/family-field-dependencies.json",
+    "families": {
+      "template-manifest": "./fields/families/template-manifest.fields.json",
+      "settings": "./fields/families/settings.fields.json",
+      "permissions": "./fields/families/permissions.fields.json",
+      "site": "./fields/families/site.fields.json",
+      "pages": "./fields/families/pages.fields.json",
+      "libraries": "./fields/families/libraries.fields.json",
+      "lists": "./fields/families/lists.fields.json",
+      "modules": "./fields/families/modules.fields.json",
+      "workflows": "./fields/families/workflows.fields.json",
+      "integrations": "./fields/families/integrations.fields.json",
+      "site-health": "./fields/families/site-health.fields.json",
+      "provisioning-validation": "./fields/families/provisioning-validation.fields.json"
+    },
+    "notes": "Field consolidation artifacts; schema population for the 12 remaining families occurs in Phase 1 Step 4. The 12 family schemas under schemas/families/ remain skeletons."
   },
   "families": {
     "template-manifest": {

@@ -1,0 +1,46 @@
+{
+  "family": "provisioning-validation",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "validationId", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-23"], "description": "System-generated validation record identifier.", "notes": ""},
+    {"fieldName": "ProvisioningRunId", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2, §6.1", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-23"], "description": "Unique provisioning run identifier; ties all sub-stage validations to one run.", "notes": ""},
+    {"fieldName": "ProjectId", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Cross-reference to project.", "notes": ""},
+    {"fieldName": "ProjectNumber", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Full accounting number.", "notes": ""},
+    {"fieldName": "SiteUrl", "fieldType": "url", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Provisioned site URL.", "notes": ""},
+    {"fieldName": "TemplateVersion", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Template version used at provisioning.", "notes": ""},
+    {"fieldName": "TriggeredBy", "fieldType": "person", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UPN of human or system initiator.", "notes": ""},
+    {"fieldName": "TriggeredFrom", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Trigger context (PCC UI, backend workflow, API).", "notes": ""},
+    {"fieldName": "StartedAt", "fieldType": "datetime", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UTC start timestamp.", "notes": ""},
+    {"fieldName": "CompletedAt", "fieldType": "datetime", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "UTC completion timestamp.", "notes": ""},
+    {"fieldName": "Status", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Status: InProgress, Success, Failed, PartialSuccess.", "notes": ""},
+    {"fieldName": "ValidationSummary", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Human-readable summary.", "notes": ""},
+    {"fieldName": "FailureReason", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Stage name + error if Status=Failed.", "notes": ""},
+    {"fieldName": "RepairAvailable", "fieldType": "boolean", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.2", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Whether a repair path exists.", "notes": ""},
+    {"fieldName": "stage", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.1", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-23"], "description": "Stage from the 15-stage provisioning checklist (1–15, plus sub-stages 12A–12F).", "notes": ""},
+    {"fieldName": "expectedState", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Expected state per stage.", "notes": ""},
+    {"fieldName": "actualState", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Actual state observed.", "notes": ""},
+    {"fieldName": "validationStatus", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Per-stage validation status: Passed, Failed, Skipped.", "notes": ""},
+    {"fieldName": "auditRecordId", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-17"], "description": "Reference to provisioning audit log.", "notes": ""},
+    {"fieldName": "rollbackRef", "fieldType": "string", "required": false, "mvpStatus": "Deferred", "sourceContractSection": "§20", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Reference to rollback action.", "notes": "Rollback deferred beyond MVP."},
+    {"fieldName": "repairRef", "fieldType": "string", "required": false, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20, §19A", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Reference to Site Health repair record (if available).", "notes": ""},
+    {"fieldName": "stageCatalog", "fieldType": "array", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§20.1", "sourceCatalogId": "", "sourceDecisionRef": "", "validationRuleRefs": ["VR-23"], "description": "15-stage catalog: Site Created, Site Metadata Applied, Libraries Created, Lists Created, Fields Created, Pages Created, Project Control Center Installed, Default Configuration Seeded, Permission Groups Created, Global Read-Only Group Applied, Project Team Roles Seeded, External Integration Placeholders Created (with Procore sub-stages 12A Mapping Placeholder Created, 12B Subject Area Registry Seeded, 12C Procore Settings Initialized, 12D Procore Tool Deep Links Initialized, 12E Procore Sync Health Placeholder Created, 12F Procore Site Health Checks Registered), Workflow Templates Seeded, Site Health Record Created, Final Validation Passed.", "notes": "Stage 15 includes the no-Procore-secret check (R4)."}
+  ],
+  "deferredFields": ["rollbackRef"],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-17", "VR-23"],
+  "dependencies": ["enums", "validation-rules", "modules"],
+  "notes": "Provisioning Validation Contract per §20.1 (15 stages + Procore sub-stages 12A–12F) and §20.2 (record schema). Implementation service: backend/functions/src/services/sharepoint-provisioning-service.ts (§20.3). A failed Procore stage does not block stages 13–15 unless ProcoreSyncEnabled=true was requested. Stage 15 includes the no-Procore-secret-found check (R4)."
+}

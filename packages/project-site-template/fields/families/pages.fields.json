@@ -1,0 +1,31 @@
+{
+  "family": "pages",
+  "phase": "Phase 1 Step 3 field consolidation",
+  "source": {
+    "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+    "phase0ObjectDisposition": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Object_Catalog_Disposition.md",
+    "phase1Enums": "packages/project-site-template/schemas/families/enums.schema.json",
+    "phase1ValidationRules": "packages/project-site-template/schemas/families/validation-rules.schema.json"
+  },
+  "status": {
+    "fieldConsolidationComplete": true,
+    "schemaPopulationComplete": false,
+    "containsNewArchitectureDecisions": false
+  },
+  "commonFields": ["id", "kind", "mvp_status", "sourceContractSection", "sourceCatalogId", "sourceBlueprintSection", "sourceDecisionRef", "validationRuleRefs", "ownerCategory", "notes"],
+  "familyFields": [
+    {"fieldName": "pageUrl", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Page URL path (e.g., /SitePages/Project-Control-Center.aspx).", "notes": "17 Standard Pages defined in §13."},
+    {"fieldName": "pagePurpose", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Page purpose description.", "notes": ""},
+    {"fieldName": "embeddedModule", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": ["VR-26"], "description": "Module embedded in this page; references modules family by stable identifier.", "notes": "Referential integrity per VR-26."},
+    {"fieldName": "navigationLabel", "fieldType": "string", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Navigation label.", "notes": ""},
+    {"fieldName": "defaultOrder", "fieldType": "integer", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": [], "description": "Default navigation order (1–17).", "notes": "Navigation order ultimately governed by Control Center Settings (§10)."},
+    {"fieldName": "visibility", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13, §4B.2", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": ["VR-07"], "description": "Page visibility (e.g., All, Phase managers + Admin, All operational); modules-keyed conditional visibility per ProjectStage.", "notes": ""},
+    {"fieldName": "mvpStatus", "fieldType": "enum", "required": true, "mvpStatus": "Frozen for MVP", "sourceContractSection": "§13", "sourceCatalogId": "OC-02", "sourceDecisionRef": "", "validationRuleRefs": ["VR-24"], "description": "MVP / Future per Decision Closure taxonomy.", "notes": "Frozen for MVP for the 9 MVP pages; Deferred for the 8 Future pages."}
+  ],
+  "deferredFields": [],
+  "proofGatedFields": [],
+  "runtimeConfigurationFields": [],
+  "validationRuleRefs": ["VR-07", "VR-24", "VR-26"],
+  "dependencies": ["enums", "validation-rules", "site", "modules"],
+  "notes": "Pages reference modules via embeddedModule (VR-26 referential integrity). The 17 §13 standard pages: 9 MVP (Home, Documents, Team, Startup, Permits & Inspections, Responsibilities, Closeout, Settings, Directory) + 8 Future (Contracts, Project Controls, Field, Meetings, Procurement, Risk Log, Lessons, HBI Assistant)."
+}

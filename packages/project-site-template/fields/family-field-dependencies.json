@@ -1,0 +1,44 @@
+{
+  "phase": "Phase 1 Step 3 field consolidation",
+  "purpose": "Field-consolidation dependency map. Records which family field maps depend on which other families' definitions to populate cleanly in Phase 1 Step 4. This is NOT a runtime dependency map; runtime behavior is governed by the validation rules family (VR-01 through VR-30) and the enforcement layers.",
+  "source": {
+    "phase0Taxonomy": "docs/architecture/blueprint/sp-project-control-center/phase-0/Phase_0_Step_2_Schema_Family_Taxonomy.md"
+  },
+  "alreadyPopulated": [
+    {"family": "enums", "schema": "packages/project-site-template/schemas/families/enums.schema.json", "phase": "Phase 1 Step 2"},
+    {"family": "validation-rules", "schema": "packages/project-site-template/schemas/families/validation-rules.schema.json", "phase": "Phase 1 Step 2"}
+  ],
+  "globalReferences": {
+    "description": "Every family references enums and validation-rules.",
+    "referencedBy": ["template-manifest", "settings", "permissions", "site", "pages", "libraries", "lists", "modules", "workflows", "integrations", "site-health", "provisioning-validation"]
+  },
+  "dependencies": [
+    {"family": "template-manifest", "dependsOn": ["enums", "validation-rules"], "rationale": "Template manifest binds supported ProjectStage / ProjectType / ProjectStatus enums and references validation rules for decision-closure status."},
+    {"family": "settings", "dependsOn": ["enums", "validation-rules", "site"], "rationale": "Settings reference site identity (ProjectId, ProjectNumber) and produce inputs that integrations consume."},
+    {"family": "permissions", "dependsOn": ["enums", "validation-rules", "site"], "rationale": "Permissions need ProjectStage for phase-based access manager bindings and site identity for project-local SP group naming. Permissions precede site / modules / workflows for invitation and audit contracts."},
+    {"family": "site", "dependsOn": ["enums", "validation-rules"], "rationale": "Site declares the canonical project metadata that pages, libraries, lists, and modules reference."},
+    {"family": "pages", "dependsOn": ["enums", "validation-rules", "site", "modules"], "rationale": "Pages reference modules by stable identifier (VR-26)."},
+    {"family": "libraries", "dependsOn": ["enums", "validation-rules", "site"], "rationale": "Libraries are scoped to the site and inherit ProjectStatus-driven read-only behavior."},
+    {"family": "lists", "dependsOn": ["enums", "validation-rules", "site"], "rationale": "Lists baseline columns (§16.1) reference site identity. Lookups (VR-25) reference other lists."},
+    {"family": "modules", "dependsOn": ["enums", "validation-rules", "site", "permissions"], "rationale": "Modules require site and permissions to declare visibility-by-stage and access-manager bindings."},
+    {"family": "workflows", "dependsOn": ["enums", "validation-rules", "lists", "libraries"], "rationale": "Workflows seed lists and reference library evidence; lists and libraries must be defined first."},
+    {"family": "integrations", "dependsOn": ["enums", "validation-rules", "settings", "site"], "rationale": "Integrations consume settings (ProcoreCompanyId, M365 posture) and reference site identity. Settings precede integrations."},
+    {"family": "site-health", "dependsOn": ["enums", "validation-rules", "site", "permissions", "pages", "libraries", "lists", "modules", "workflows", "integrations", "settings", "provisioning-validation"], "rationale": "Site-health depends on every provisioned object family because each named §19.1 check targets one of those families' surfaces."},
+    {"family": "provisioning-validation", "dependsOn": ["enums", "validation-rules", "modules"], "rationale": "Provisioning validation references the 15-stage checklist; modules precede provisioning-validation for stage-12 module configuration validation."}
+  ],
+  "stepFourPopulationOrderRecommendation": [
+    "template-manifest",
+    "site",
+    "settings",
+    "permissions",
+    "libraries",
+    "lists",
+    "modules",
+    "pages",
+    "workflows",
+    "integrations",
+    "provisioning-validation",
+    "site-health"
+  ],
+  "notes": "Field-consolidation dependencies only. Step 4 schema population will follow this recommended order so each family's referenced family is already populated when its schema is finalized. site-health is last because it depends on every other family."
+}

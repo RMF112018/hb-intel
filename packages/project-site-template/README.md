@@ -91,6 +91,10 @@ The 14 families come directly from the Phase 0 Step 2 Schema Family Taxonomy. Ea
 
 Every skeleton declares the common traceability fields (`id`, `kind`, `mvp_status`, `sourceContractSection`, `sourceCatalogId`, `sourceBlueprintSection`, `sourceDecisionRef`, `validationRuleRefs`, `ownerCategory`) and requires the four safe universal fields (`id`, `kind`, `mvp_status`, `sourceContractSection`).
 
+### Phase 1 Step 3 Status
+
+Phase 1 Step 3 — Object Family Field Consolidation — produced field maps for the 12 remaining families under `fields/`. The 12 family schema skeletons under `schemas/families/` remain skeleton-only; schema population happens in Phase 1 Step 4. See [`fields/README.md`](./fields/README.md) for the field-map index.
+
 ### Decision Closure Status / `mvp_status`
 
 The canonical four-value `mvp_status` enum is bound to the Decision Closure Register (Standard Project Site Template Contract §22; VR-24):
