@@ -8,7 +8,20 @@ This package consumes the schema-only contract owned by [`@hbc/project-site-temp
 
 ## Current step status
 
-**Phase 2 Step 5 — Non-Production Executor Adapter Boundary and Apply-Gate Scaffold.** This step:
+**Phase 2 Step 6 — Validation, Drift Detection, Repair Posture, and Phase 2 Closeout.** This step:
+
+- validates the full Phase 2 chain end-to-end (template contract → mapper → dry-run proof → apply-gate → mutation gate → non-production-only posture → no-mutation evidence),
+- adds bounded type-only **drift detection** and **repair posture** contracts under `src/contracts/drift-repair.ts` plus a pure validator in `src/drift-repair/validate-repair-posture.ts`,
+- introduces `DRIFT_REPAIR_POSTURE_VERSION = '0.1.0-posture-doc'` independently of the manifest, proof artifact, and apply-gate versions,
+- enforces literal no-execution posture (`liveQueryAllowed: false`, `graphPnpCallAllowed: false`, `automaticRepairAllowed: false`, `automaticTenantRepair: false`, `backgroundRepair: false`, `graphPnpRepair: false`, `spfxTriggeredRepair: false`),
+- enforces lifecycle reset posture (`newProofRequiredAfterRepair: true`, `newApplyGateDecisionRequired: true`),
+- delivers the [Phase 2 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Closeout.md) and Phase 3 entry conditions.
+
+**Phase 2 status: Complete. Phase 3 planning readiness: Ready.**
+
+### Step 5 reference
+
+The Step 5 apply-gate underneath this step:
 
 - introduces the `ApplyGateRequest`, `ApplyGateDecision`, `ApplyGateOperatorApproval`, `NonProductionTargetDeclaration`, and `RollbackPosture` contracts at `src/contracts/apply-gate.ts`,
 - adds `evaluateApplyGate` (full pipeline → decision), `validateApplyGateRequest` (request shape only), `hashJsonProofArtifact`, and `hashMarkdownProofArtifact` under `src/apply-gate/`,
@@ -163,10 +176,33 @@ Compile-time and runtime gating both enforce `{ mutationLocked: true, liveMutati
 - **Proof byte-match policy:** **optional** for the Step 5 package validator (callers may omit `regeneratedProof`); **mandatory** for any future executor before any tenant call. The future executor must regenerate the proof pair from the committed baseline inputs and confirm byte-match against the supplied `proofArtifact` JSON / `proofMarkdown` strings before invoking Graph or PnP.
 - **Executor adapter boundary:** The future executor adapter will live under `backend/functions/` and consume an `ApplyGateRequest` whose decision evaluates to `ready-for-non-production-apply`. It must additionally verify manifest immutability, regenerated proof byte-match, locked mutation gate, non-production scope, rollback posture, and operator approval before any tenant call. `@hbc/project-site-provisioning` itself remains no-mutation. SPFx must not call the executor directly; any such routing must go through an approved admin/control-plane flow. No Procore path is introduced.
 
+## Drift detection posture (Step 6)
+
+Phase 2 documents the future executor adapter's drift-detection contract without performing any tenant operation:
+
+- **Comparison inputs** (canonical 11): approved manifest, approved proof artifact, apply-gate decision, tenant observed state, SharePoint site URL/title, lists/libraries/pages/groups/permissions, source coverage, object family coverage, expected-vs-observed fields and settings, plannedHash + proofArtifactHash.
+- **Categories**: `none`, `informational`, `configuration-drift`, `schema-drift`, `permission-drift`, `content-placement-drift`, `integration-boundary-drift`, `security-drift`, `blocking-drift`.
+- **Severities**: `info`, `warning`, `error`, `blocking`.
+- **Required evidence**: manifest hash, proof artifact hash, observed state summary, variances, detectedAt, operatorIdentity, environment (`non-production` or `production-out-of-scope`), remediation recommendation.
+- **Literal-typed no-execution flags**: `liveQueryAllowed: false`, `graphPnpCallAllowed: false`, `automaticRepairAllowed: false`. Live drift query, Graph/PnP calls, and automatic repair belong to Phase 3+.
+
+## Repair posture (Step 6)
+
+- **Phase 2 allowed modes**: `manual-review-only`, `manual-repair-plan`.
+- **Phase 2 forbidden modes**: `future-assisted-repair`, `future-automated-repair`.
+- **Literal-typed flags**: `automaticTenantRepair: false`, `backgroundRepair: false`, `graphPnpRepair: false`, `spfxTriggeredRepair: false`, `newProofRequiredAfterRepair: true`, `newApplyGateDecisionRequired: true`.
+- **Repair plan fields**: `repairRef`, `driftCategory`, `severity`, `owner`, `manualRepairRunbookRef`, `preRepairSnapshotRequired`, `postRepairValidationRequired`, `approvalRequired`, `rollbackImpact`, `knownIrreversibleActions`, `recommendedAction`, `lifecycleStage`.
+- **Repair lifecycle**: `detected → triaged → approved → manually-repaired → revalidated → closed`.
+- **Lifecycle reset**: any repair-impacting change requires a fresh dry-run proof artifact and a fresh apply-gate decision; previous approval does not carry forward.
+
+## Phase 3 entry conditions
+
+Before Phase 3 implements the executor adapter, the following must close: non-production tenant target explicitly approved; operator approval workflow defined; audit-trail persistence location selected; future executor identity and permission model approved; Graph/PnP split finalized; rollback / manual repair runbook approved; drift detection contract accepted (pinned by `src/contracts/drift-repair.ts`); proof artifact hash / byte-match rule accepted; non-production smoke environment available; production explicitly out of scope until later phase; security review for tenant mutation path complete; no Procore runtime or write-back introduced.
+
 ## Future steps
 
-- **Step 6 — Validation, drift detection, repair posture, and Phase 2 closeout.** Validate the full Phase 2 chain (template → mapper → proof → apply-gate), document drift/repair posture for the future executor adapter, and produce the Phase 2 closeout. Recommend Phase 3 entry conditions.
-- **Future expansion:** per-instance enumeration, `enforcementLayers` per entry, secret-value scanning, timestamped per-run proof outputs, executor adapter implementation under `backend/functions/`.
+- **Phase 3 Planning — Non-Production Executor Adapter Implementation Roadmap and Risk Gate.** Phase 3 must start with planning and risk-gate closure, not immediate tenant mutation.
+- **Future expansion:** per-instance enumeration, `enforcementLayers` per entry, secret-value scanning, timestamped per-run proof outputs, executor adapter implementation under `backend/functions/`, audit-trail persistence.
 
 ## Validation commands
 
@@ -223,9 +259,12 @@ pnpm --filter @hbc/project-site-template validate:all
 - [Phase 2 Step 3 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_3_Provisioning_Manifest_Mapper_Expansion_Closeout.md)
 - [Phase 2 Step 4 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_4_Dry_Run_Proof_Artifact_Generation_Closeout.md)
 - [Phase 2 Step 5 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_5_Non_Production_Executor_Adapter_Boundary_Apply_Gate_Closeout.md)
+- [Phase 2 Step 6 Closeout](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Step_6_Validation_Drift_Repair_Posture_Closeout.md)
+- [Phase 2 Closeout (final)](../../docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Closeout.md)
 - [`@hbc/project-site-template` README](../project-site-template/README.md)
 - [PCC blueprint README](../../docs/architecture/blueprint/sp-project-control-center/README.md)
 - [`docs/Phase_2_Step_2_Scaffold_Notes.md`](./docs/Phase_2_Step_2_Scaffold_Notes.md)
 - [`docs/Phase_2_Step_3_Contract_Coverage_Notes.md`](./docs/Phase_2_Step_3_Contract_Coverage_Notes.md)
 - [`docs/Phase_2_Step_4_Dry_Run_Proof_Artifact_Notes.md`](./docs/Phase_2_Step_4_Dry_Run_Proof_Artifact_Notes.md)
 - [`docs/Phase_2_Step_5_Apply_Gate_Boundary_Notes.md`](./docs/Phase_2_Step_5_Apply_Gate_Boundary_Notes.md)
+- [`docs/Phase_2_Step_6_Validation_Drift_Repair_Closeout_Notes.md`](./docs/Phase_2_Step_6_Validation_Drift_Repair_Closeout_Notes.md)

@@ -45,9 +45,21 @@ The PCC does **not** replace Procore, Sage Intacct, Compass, Document Crunch, Ad
 |---|---|---|
 | Phase 0 — Architecture Stabilization & Schema Extraction Planning | Complete | [`phase-0/`](./phase-0/) |
 | Phase 1 — Machine-Readable Template Contract | Complete (full extraction gate closed) | [`phase-1/`](./phase-1/) |
-| Phase 2 — Provisioning Foundation (audit & boundaries) | Step 1 complete (documentation only) | [`phase-2/`](./phase-2/) |
+| Phase 2 — Provisioning Boundary (no-mutation chain) | **Complete (Steps 1–6).** Final closeout: [`phase-2/Phase_2_Closeout.md`](./phase-2/Phase_2_Closeout.md). Phase 3 planning readiness: Ready. | [`phase-2/`](./phase-2/) |
 
-Phase 2 Step 1 deliverables (audit, consumer boundary, closeout) live in [`phase-2/`](./phase-2/). The dated execution-scaffold package — Foleon prompts, audit report, implementation plan, prompt package, risk register, execution backlog — lives separately under [`docs/architecture/plans/MASTER/spfx/pcc/phase-02/step-1/`](../../plans/MASTER/spfx/pcc/phase-02/step-1/) and is referenced rather than duplicated.
+Phase 2 step closeouts (audit & boundary; mapper scaffold; contract-coverage mapper; dry-run proof artifacts; apply-gate scaffold; validation + drift/repair posture + final closeout) live in [`phase-2/`](./phase-2/):
+
+- [Step 1 — Provisioning Foundation Audit](./phase-2/Phase_2_Step_1_Provisioning_Foundation_Audit.md)
+- [Step 1 — Consumer Boundary](./phase-2/Phase_2_Step_1_Consumer_Boundary.md)
+- [Step 1 — Closeout](./phase-2/Phase_2_Step_1_Closeout.md)
+- [Step 2 — Mapper Scaffold Closeout](./phase-2/Phase_2_Step_2_Project_Site_Provisioning_Mapper_Scaffold_Closeout.md)
+- [Step 3 — Mapper Expansion Closeout](./phase-2/Phase_2_Step_3_Provisioning_Manifest_Mapper_Expansion_Closeout.md)
+- [Step 4 — Dry-Run Proof Closeout](./phase-2/Phase_2_Step_4_Dry_Run_Proof_Artifact_Generation_Closeout.md)
+- [Step 5 — Apply-Gate Closeout](./phase-2/Phase_2_Step_5_Non_Production_Executor_Adapter_Boundary_Apply_Gate_Closeout.md)
+- [Step 6 — Validation / Drift / Repair Posture Closeout](./phase-2/Phase_2_Step_6_Validation_Drift_Repair_Posture_Closeout.md)
+- [**Phase 2 Closeout (final)**](./phase-2/Phase_2_Closeout.md)
+
+The dated execution-scaffold package — Foleon prompts, audit report, implementation plan, prompt package, risk register, execution backlog — lives separately under [`docs/architecture/plans/MASTER/spfx/pcc/phase-02/step-1/`](../../plans/MASTER/spfx/pcc/phase-02/step-1/) and is referenced rather than duplicated.
 
 ---
 

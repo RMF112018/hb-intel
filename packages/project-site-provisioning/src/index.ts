@@ -172,3 +172,34 @@ export {
   evaluateApplyGate,
 } from './apply-gate/evaluate-apply-gate.js';
 export type { EvaluateApplyGateOptions } from './apply-gate/evaluate-apply-gate.js';
+
+export {
+  DRIFT_CATEGORIES,
+  DRIFT_COMPARISON_INPUTS,
+  DRIFT_REPAIR_NOT_EXECUTABLE_REASON,
+  DRIFT_REPAIR_POSTURE_VERSION,
+  DRIFT_SEVERITIES,
+  PHASE_2_ALLOWED_REPAIR_MODES,
+  PHASE_2_FORBIDDEN_REPAIR_MODES,
+  REPAIR_LIFECYCLE_STAGES,
+  REPAIR_MODES,
+} from './contracts/drift-repair.js';
+export type {
+  DriftCategory,
+  DriftComparisonInput,
+  DriftDetectionPosture,
+  DriftEnvironment,
+  DriftEvidence,
+  DriftRepairPostureVersion,
+  DriftSeverity,
+  RepairLifecycleStage,
+  RepairMode,
+  RepairPlan,
+  RepairPosture,
+} from './contracts/drift-repair.js';
+
+export {
+  validateRepairPlan,
+  validateRepairPosture,
+} from './drift-repair/validate-repair-posture.js';
+export type { PostureValidationResult } from './drift-repair/validate-repair-posture.js';
