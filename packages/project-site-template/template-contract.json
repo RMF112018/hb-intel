@@ -3,7 +3,7 @@
   "templateName": "HB Standard Project Site Template",
   "templateFamily": "Project Sites",
   "templateVersion": "1.0.0-proposed",
-  "phase": "Phase 1 Step 3 object family field consolidation",
+  "phase": "Phase 1 Step 4 Wave 1 — core families populated (template-manifest, site, settings, permissions)",
   "source": {
     "contract": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
     "blueprint": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
@@ -40,8 +40,8 @@
   "families": {
     "template-manifest": {
       "schema": "./schemas/families/template-manifest.schema.json",
-      "status": "skeleton",
-      "notes": "Outermost wrapper. Identity and version metadata. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 1 — populated. Template identity, version, ownership, supported ProjectStage/ProjectType/ProjectStatus enum bindings, source traceability, and effective date. mvp_status canonical (VR-24). No secrets (VR-13)."
     },
     "enums": {
       "schema": "./schemas/families/enums.schema.json",
@@ -50,18 +50,18 @@
     },
     "settings": {
       "schema": "./schemas/families/settings.schema.json",
-      "status": "skeleton",
-      "notes": "Site-level configuration including the three-form ProcoreCompanyId contract (ProcoreCompanyId = 5280 is configuration, not a secret). Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 1 — populated. §10 settings sections; three-form ProcoreCompanyId (default 5280, configuration not secret, VR-10); M365/Teams posture frozen (VR-28); DMSA auth posture; backend-only secret storage (VR-13); §15.2 Project Site Configuration bucketing. mvp_status canonical (VR-24)."
     },
     "permissions": {
       "schema": "./schemas/families/permissions.schema.json",
-      "status": "skeleton",
-      "notes": "Role / SharePoint group / permission-level mappings. External users remain deferred from MVP. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 1 — populated. Permission templates (10 MVP + 3 Deferred external), central Entra groups, project-local SharePoint groups, phase-based access manager bindings (VR-27, VR-30), Procore mapping owner (PM/PX, never PA — VR-11), Procore directory comparison read-only (VR-15), external-user deferral (VR-18). mvp_status canonical (VR-24)."
     },
     "site": {
       "schema": "./schemas/families/site.schema.json",
-      "status": "skeleton",
-      "notes": "Site identity, naming, URL rules, project metadata, phase association, archive behavior. Skeleton only."
+      "status": "populated",
+      "notes": "Phase 1 Step 4 Wave 1 — populated. Project identity, naming (§5/§5.6), URL conventions, §6.1 required + §6.2 optional metadata, ProjectStage/ProjectStatus/ProjectType enum bindings (VR-01–VR-06, VR-09, VR-29), archive behavior, and Sage Intacct cross-reference (VR-14). mvp_status canonical (VR-24)."
     },
     "pages": {
       "schema": "./schemas/families/pages.schema.json",

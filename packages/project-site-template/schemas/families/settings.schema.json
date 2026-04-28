@@ -1,20 +1,113 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/settings.schema.json",
-  "title": "Settings Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the settings family — site-level configuration values (regional, navigation, audit, retention, runtime configuration, three-form ProcoreCompanyId contract). Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). `ProcoreCompanyId = 5280` is configuration, not a secret. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §7, §11.",
+  "title": "Settings Family Schema",
+  "description": "Phase 1 Step 4 Wave 1 — populated settings family schema. Site-level settings, the three-form ProcoreCompanyId contract (canonical, surface, business — default 5280, configuration not secret), Microsoft 365 / Teams connection posture (frozen for MVP), Procore authentication posture (DMSA, secrets in backend only), and Project Site Configuration bucketing. Field set traces verbatim to fields/families/settings.fields.json and Standard Project Site Template Contract §10, §10.6, §11.6, §15.2, §18.1.5. mvp_status binds to the canonical Decision Closure four-value enum (VR-24).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "settingsSections",
+    "procoreCompanyId_canonical",
+    "procoreCompanyId_surface",
+    "procoreCompanyId_business",
+    "M365GroupConnected",
+    "TeamsGuestAccessAllowed",
+    "GlobalReadOnlyAddedToTeams",
+    "ITAutoAddedToTeams",
+    "ProcoreAuthMethod",
+    "ProcoreSecretStorageLocation"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "settings" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "settingsSections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Catalog of settings sections from §10.1 (13 governance sections: General Project Profile, Modules & Navigation, Team & Access, Permission Templates, Libraries & Document Areas, External Integrations, Startup/Closeout Templates, Permits & Inspections, Responsibility Matrix, Notifications/Escalations, Data Validation, Site Health/Repair, Template Version/Drift)."
+    },
+    "procoreCompanyId_canonical": {
+      "type": "string",
+      "default": "5280",
+      "description": "Canonical-layer field name 'procore_company_id'. Default 5280. Configuration, not secret. VR-10. Three-form contract per Contract §10.6 / §18.1.5."
+    },
+    "procoreCompanyId_surface": {
+      "type": "string",
+      "default": "5280",
+      "description": "SharePoint-surface field name 'ProcoreCompanyId'. Default 5280. Configuration, not secret. VR-10."
+    },
+    "procoreCompanyId_business": {
+      "type": "string",
+      "default": "Procore Company ID = 5280",
+      "description": "Business label. Configuration, not secret. VR-10."
+    },
+    "ProcoreProjectId": { "type": "string", "description": "Procore project ID. Owner: PM (fallback PX) per VR-11. Runtime Configuration." },
+    "ProcoreProjectUrl": { "type": "string", "format": "uri", "description": "Procore project URL; auto-generated where possible. Runtime Configuration." },
+    "EnabledProcoreSubjectAreas": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/procoreSubjectArea" },
+      "description": "Array of subject area enums. Defaults to Enabled=false. Runtime Configuration."
+    },
+    "SyncCadence": { "type": "string", "description": "Per subject area sync cadence. Runtime Configuration." },
+    "SyncProfile": { "type": "string", "description": "Named sync profile (e.g., MVP-mapping-only, RecommendedPractical-Wave1). Runtime Configuration." },
+    "ToolDeepLinks": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "description": "Auto-generated deep links to Procore tools. Read-only in PCC. Runtime Configuration."
+    },
+    "LastSyncStatus": {
+      "type": "string",
+      "enum": ["Success", "Partial", "Failed", "NotRun"],
+      "description": "Last sync status. Read-only in PCC. Runtime Configuration."
+    },
+    "LastSuccessfulSync": { "type": "string", "format": "date-time", "description": "UTC timestamp of last successful sync. Runtime Configuration." },
+    "ConfiguredBy": { "type": "string", "description": "UPN of last configurator; should reflect assigned PM (or PX fallback). VR-11. Project Accountant is NOT the mapping owner." },
+    "ConfiguredDate": { "type": "string", "format": "date-time", "description": "UTC timestamp of last configuration change." },
+    "HealthStatus": { "type": "string", "description": "Severity per §19.3 + ErrorCategory per §15.13.3. VR-21." },
+    "RedactedErrorSummary": { "type": "string", "description": "Plain-language error message; never raw payload, token, or URL with secrets. VR-13." },
+    "M365GroupConnected": { "type": "boolean", "description": "Project sites are M365 Group / Teams connected by default. VR-28; frozen for MVP." },
+    "TeamsGuestAccessAllowed": { "type": "boolean", "const": false, "description": "Always false in MVP. VR-28." },
+    "GlobalReadOnlyAddedToTeams": { "type": "boolean", "const": false, "description": "Always false; Global Read-Only Entra group not added to project Teams. VR-28." },
+    "ITAutoAddedToTeams": { "type": "boolean", "const": false, "description": "Always false; IT/admin not auto-added to project Teams. VR-28." },
+    "ProcoreAuthMethod": {
+      "type": "string",
+      "enum": ["DMSA"],
+      "description": "DMSA (Procore Direct Mobile Service Account); backend-held credentials. Configuration only; secrets live in backend, never in SharePoint / SPFx / markdown / repo. VR-13."
+    },
+    "ProcoreSecretStorageLocation": {
+      "type": "string",
+      "const": "backend",
+      "description": "Backend secret-management surface; never in SharePoint, SPFx, markdown, or client config. VR-13. No-secret guardrail."
+    },
+    "configBucket": {
+      "type": "string",
+      "enum": ["A", "B"],
+      "description": "Project Site Configuration bucket. Bucket A is read-only to non-IT. VR-17 (no-native-SharePoint-admin posture). §15.2."
+    },
+    "lastModifiedBy": { "type": "string", "description": "UPN of last modifier of a configuration row." },
+    "lastModifiedDate": { "type": "string", "format": "date-time", "description": "UTC timestamp of last modification." }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "procoreSubjectArea": {
+      "type": "string",
+      "description": "Procore subject area enum from Contract §15.13.2.",
+      "enum": ["financials", "project_management", "documents_design", "quality_safety", "field_execution", "workflow"]
+    }
+  }
 }

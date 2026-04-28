@@ -1,20 +1,176 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hb-intel/sp-project-control-center/schemas/families/permissions.schema.json",
-  "title": "Permissions Family Skeleton",
-  "description": "Skeleton only. Phase 1 Step 1 scaffold for the permissions family — role / SharePoint group / permission-level mappings, internal vs external posture, and ownership templates. Not fully populated. Full extraction occurs in later Phase 1 steps (Phase 1 Step 4 — Per-Family Schema Population). External (guest) users remain deferred from MVP — external-user permission templates exist as `mvp_status: deferred` placeholders only. Traces to Phase 0 Step 2 Schema Family Taxonomy and Standard Project Site Template Contract §8, §13.",
+  "title": "Permissions Family Schema",
+  "description": "Phase 1 Step 4 Wave 1 — populated permissions family schema. Permission templates (10 MVP + 3 Deferred), central Entra groups, project-local SharePoint groups, phase-based access manager bindings, Procore mapping ownership, Procore directory comparison posture, and external-user deferral. Field set traces verbatim to fields/families/permissions.fields.json and Standard Project Site Template Contract §8, §11.2A, §11.3, §11.5, §11.6, §11.7, §12. mvp_status binds to the canonical Decision Closure four-value enum (VR-24).",
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "mvp_status",
+    "sourceContractSection",
+    "templateKey",
+    "displayName",
+    "assignedSpGroup",
+    "permissionLevel",
+    "mvpTreatment",
+    "assignableBy",
+    "defaultExpiration",
+    "auditRequired",
+    "perLibraryAccess",
+    "centralEntraGroups",
+    "projectLocalSpGroups",
+    "phaseAccessManagerBindings",
+    "procoreMappingOwnerRule",
+    "procoreDirectoryComparisonReadOnly",
+    "externalUserTemplatesDeferred"
+  ],
   "properties": {
     "id": { "type": "string" },
     "kind": { "type": "string", "const": "permissions" },
-    "mvp_status": { "type": "string", "enum": ["mvp", "deferred", "placeholder"] },
+    "mvp_status": { "$ref": "#/$defs/decisionClosureStatus" },
     "sourceContractSection": { "type": "string" },
     "sourceCatalogId": { "type": "string" },
     "sourceBlueprintSection": { "type": "string" },
     "sourceDecisionRef": { "type": "string" },
     "validationRuleRefs": { "type": "array", "items": { "type": "string" } },
-    "ownerCategory": { "type": "string" }
+    "ownerCategory": { "type": "string" },
+    "notes": { "type": "string" },
+    "templateKey": { "$ref": "#/$defs/templateKey", "description": "Stable internal template identifier. 10 MVP + 3 Deferred per §12.3 / §12.4." },
+    "displayName": { "type": "string", "description": "Plain business label for PCC UI; never internal field name (§16.5)." },
+    "description": { "type": "string", "description": "Template purpose statement." },
+    "assignedSpGroup": { "type": "string", "description": "Project-local SharePoint group name pattern PCC-{ProjectBaseNumber}-... (D-02). Runtime ID stored in Project Site Configuration." },
+    "assignedEntraGroup": { "type": "string", "description": "Central Entra group (e.g., HB-PCC-Global-Read-All). Runtime OID via configuration. D-01." },
+    "permissionLevel": {
+      "type": "string",
+      "enum": ["HB Read", "HB Contribute No Delete", "HB Contribute", "HB Manage Project Content", "Full Control"],
+      "description": "Permission level per §12.2 / §12.4."
+    },
+    "mvpTreatment": { "$ref": "#/$defs/decisionClosureStatus", "description": "Decision Closure status. 10 MVP, 3 Deferred (external) per VR-18, VR-24." },
+    "assignableBy": {
+      "type": "string",
+      "enum": ["Estimating Coordinator", "Lead Estimator", "Project Executive", "Project Manager", "Manager of Operational Excellence"],
+      "description": "Phase-based access manager role authorized to assign template. VR-27, VR-30. Preconstruction/Estimating: Estimating Coordinator, Lead Estimator, PX. Construction: PX, PM, Manager of Operational Excellence."
+    },
+    "defaultExpiration": { "type": "string", "description": "None for internal active-project; 90 days for temporary internal viewers; 30 days after stage advance for Estimating/Preconstruction. D-15." },
+    "auditRequired": { "type": "boolean", "description": "Whether assignment requires audit trail. VR-17." },
+    "perLibraryAccess": {
+      "type": "object",
+      "description": "Per-library access matrix; values per library code. §12.5 matrix authoritative.",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["Full", "Manage", "Edit", "Read", "—"]
+      }
+    },
+    "centralEntraGroups": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "HB-PCC-Global-Read-All",
+          "HB-PCC-IT-Site-Repair-Admins",
+          "HB-PCC-Template-Owners",
+          "HB-PCC-External-Access-Approvers"
+        ]
+      },
+      "description": "Catalog of central Entra groups (HB-PCC-External-Access-Approvers deferred until external access enabled). §11.2A."
+    },
+    "projectLocalSpGroups": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "PCC-{ProjectBaseNumber}-Owners",
+          "PCC-{ProjectBaseNumber}-GlobalReadOnly",
+          "PCC-{ProjectBaseNumber}-ReadOnly",
+          "PCC-{ProjectBaseNumber}-ProjectTeam",
+          "PCC-{ProjectBaseNumber}-ProjectManagement",
+          "PCC-{ProjectBaseNumber}-FieldOperations",
+          "PCC-{ProjectBaseNumber}-ProjectAccounting",
+          "PCC-{ProjectBaseNumber}-SafetyQAQC",
+          "PCC-{ProjectBaseNumber}-EstimatingPreconstruction",
+          "PCC-{ProjectBaseNumber}-ExecutiveOversight",
+          "PCC-{ProjectBaseNumber}-ExternalDesignTeam",
+          "PCC-{ProjectBaseNumber}-OwnerClientViewer",
+          "PCC-{ProjectBaseNumber}-SubcontractorLimited"
+        ]
+      },
+      "description": "Catalog of project-local SharePoint groups (ExternalDesignTeam, OwnerClientViewer, SubcontractorLimited deferred until external access enabled). §11.2A."
+    },
+    "phaseAccessManagerBindings": {
+      "type": "object",
+      "description": "Phase-keyed mapping of stage to authorized inviter roles. VR-27, VR-30. §11.3.",
+      "additionalProperties": false,
+      "properties": {
+        "preconstructionEstimating": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["Estimating Coordinator", "Lead Estimator", "Project Executive"]
+          }
+        },
+        "construction": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["Project Executive", "Project Manager", "Manager of Operational Excellence"]
+          }
+        }
+      },
+      "required": ["preconstructionEstimating", "construction"]
+    },
+    "procoreMappingOwnerRule": {
+      "type": "object",
+      "description": "Procore mapping ownership rule. VR-11. Project Accountant explicitly NOT the mapping owner.",
+      "additionalProperties": false,
+      "properties": {
+        "primary": { "type": "string", "const": "Project Manager" },
+        "fallback": { "type": "string", "const": "Project Executive" },
+        "repair": { "type": "string", "const": "IT / Integration Admin" },
+        "forbiddenOwners": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Roles explicitly NOT the mapping owner. Must include 'Project Accountant'."
+        }
+      },
+      "required": ["primary", "fallback", "repair", "forbiddenOwners"]
+    },
+    "procoreDirectoryComparisonReadOnly": {
+      "type": "boolean",
+      "const": true,
+      "description": "Procore directory comparison is read-only and does not auto-grant SharePoint access. VR-15. P-17."
+    },
+    "externalUserTemplatesDeferred": {
+      "type": "boolean",
+      "const": true,
+      "description": "External user permission templates exist as Deferred placeholders only. VR-18."
+    }
   },
-  "required": ["id", "kind", "mvp_status", "sourceContractSection"]
+  "$defs": {
+    "decisionClosureStatus": {
+      "type": "string",
+      "description": "Canonical Decision Closure Register status — VR-24.",
+      "enum": ["Frozen for MVP", "Runtime Configuration", "Deferred", "Proof-Gated"]
+    },
+    "templateKey": {
+      "type": "string",
+      "description": "Permission template key. 10 MVP + 3 Deferred per Contract §12.3.",
+      "enum": [
+        "pcc_admin",
+        "global_read_only",
+        "executive_oversight",
+        "project_viewer",
+        "estimating_preconstruction",
+        "project_team_member",
+        "project_management",
+        "field_operations",
+        "project_accounting",
+        "safety_qaqc",
+        "external_design_team",
+        "owner_client_viewer",
+        "subcontractor_limited"
+      ]
+    }
+  }
 }
