@@ -1,0 +1,48 @@
+.body {
+  display: grid;
+  gap: 10px;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--pcc-color-ink-muted);
+}
+
+.previewCue {
+  font-size: 12px;
+  color: var(--pcc-color-ink-subtle);
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  border: 1px solid var(--pcc-color-line-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  color: var(--pcc-color-ink-muted);
+}
+
+.disabledAction {
+  border: 1px dashed var(--pcc-color-line-soft);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--pcc-color-ink-subtle);
+  font-size: 12px;
+}
