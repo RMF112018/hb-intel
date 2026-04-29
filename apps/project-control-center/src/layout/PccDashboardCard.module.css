@@ -1,0 +1,74 @@
+.card {
+  display: block;
+  background: var(--pcc-color-card);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-md);
+  box-shadow: var(--pcc-elevation-card);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+  padding: var(--pcc-space-md);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--pcc-space-sm);
+}
+
+.titleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.3;
+}
+
+.action {
+  display: flex;
+  gap: var(--pcc-space-xs);
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+  min-width: 0;
+}
+
+.card[data-pcc-footprint='hero'] {
+  background: linear-gradient(
+    135deg,
+    var(--pcc-color-card) 0%,
+    var(--pcc-color-canvas) 100%
+  );
+}
+
+.card[data-pcc-footprint='full'] {
+  border-style: dashed;
+}

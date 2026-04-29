@@ -1,0 +1,62 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pcc-space-xs);
+  padding: 2px var(--pcc-space-sm);
+  border-radius: var(--pcc-radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.outline {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.filled {
+  border: 1px solid transparent;
+}
+
+.pill[data-pcc-pill-tone='info'] {
+  color: var(--pcc-status-info);
+}
+.pill[data-pcc-pill-tone='info'].filled {
+  background: var(--pcc-status-info);
+  color: var(--pcc-color-on-status);
+}
+
+.pill[data-pcc-pill-tone='success'] {
+  color: var(--pcc-status-success);
+}
+.pill[data-pcc-pill-tone='success'].filled {
+  background: var(--pcc-status-success);
+  color: var(--pcc-color-on-status);
+}
+
+.pill[data-pcc-pill-tone='warning'] {
+  color: var(--pcc-status-warning);
+}
+.pill[data-pcc-pill-tone='warning'].filled {
+  background: var(--pcc-status-warning);
+  color: var(--pcc-color-on-status);
+}
+
+.pill[data-pcc-pill-tone='danger'] {
+  color: var(--pcc-status-danger);
+}
+.pill[data-pcc-pill-tone='danger'].filled {
+  background: var(--pcc-status-danger);
+  color: var(--pcc-color-on-status);
+}
+
+.pill[data-pcc-pill-tone='neutral'] {
+  color: var(--pcc-status-neutral);
+}
+.pill[data-pcc-pill-tone='neutral'].filled {
+  background: var(--pcc-status-neutral);
+  color: var(--pcc-color-on-status);
+}

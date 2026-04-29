@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
+      '@hbc/ui-kit/icons': resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx'),
       '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts'),
       '@hbc/models/pcc': resolve(__dirname, '../../packages/models/src/pcc/index.ts'),
       '@hbc/models': resolve(__dirname, '../../packages/models/src/index.ts'),

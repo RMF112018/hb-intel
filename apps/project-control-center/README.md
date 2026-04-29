@@ -36,9 +36,109 @@ apps/project-control-center/
     ├── mount.tsx
     ├── preview.tsx
     ├── test-setup.ts
-    └── styles/
-        └── PccApp.module.css
+    ├── shell/
+    │   ├── PccShell.{tsx,module.css}
+    │   ├── PccNavigationRail.{tsx,module.css}
+    │   ├── PccProjectIntelligenceHeader.{tsx,module.css}
+    │   └── PccCommandSearch.tsx
+    ├── layout/
+    │   ├── PccBentoGrid.{tsx,module.css}
+    │   ├── PccDashboardCard.{tsx,module.css}
+    │   ├── footprints.ts
+    │   ├── useBentoRowSpan.ts
+    │   └── useContainerBreakpoint.ts
+    ├── ui/
+    │   ├── PccStatusPill.{tsx,module.css}
+    │   └── PccPreviewState.{tsx,module.css}
+    ├── preview/
+    │   └── projectPlaceholder.ts
+    └── tests/
+        ├── pcc-import-guards.test.ts
+        ├── PccBentoGrid.footprints.test.tsx
+        ├── PccPreviewState.states.test.tsx
+        └── PccShell.responsive.test.tsx
 ```
+
+## Visual Direction
+
+The PCC shell visual frame is governed by the saved basis-of-design asset:
+
+- **Basis of design:** [`docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`](../../docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png)
+
+This asset is treated as governing visual direction, not a pixel-perfect
+specification. The mapping below shows how the image's cues land in
+Prompt 03 components:
+
+| Basis-of-design cue | Component | Token bridge |
+| --- | --- | --- |
+| Dark navy "Project Intelligence" header | `PccProjectIntelligenceHeader` | `HBC_DARK_HEADER`, `HBC_HEADER_TEXT`, `HBC_HEADER_ICON_MUTED` |
+| HB-orange application navigation rail | `PccNavigationRail` | `HBC_ACCENT_ORANGE` (+ hover/pressed) |
+| Compact command/search area | `PccCommandSearch` | header surface + `Search` icon from `@hbc/ui-kit/icons` |
+| Floating summary cards | `PccDashboardCard` | `HBC_SURFACE_LIGHT['surface-0']`, `elevationCard`, `HBC_RADIUS_MD` |
+| Tight bento/masonry grid | `PccBentoGrid` + `useBentoRowSpan` + `useContainerBreakpoint` | CSS Grid with measured row spans, no `grid-auto-flow: dense` |
+| Status pills next to project title | `PccStatusPill` | `HBC_STATUS_RAMP_*` ramp tokens |
+| Light operational canvas | `PccShell` canvas | `HBC_SURFACE_LIGHT['surface-2']` |
+
+## Components
+
+| Component | Role |
+| --- | --- |
+| `PccShell` | Top-level shell: stamps theme tokens as CSS variables, hosts the bento context, composes rail + header + canvas |
+| `PccNavigationRail` | HB-orange rail listing all 8 `PCC_MVP_SURFACES`; active surface marker; rail variants `expanded`/`iconOnly`/`topStrip`/`hamburger` |
+| `PccProjectIntelligenceHeader` | Dark-navy header band with project title, subtitle, search slot, status pill cluster, date scope |
+| `PccCommandSearch` | Header search affordance (display-only; non-functional in Wave 2) |
+| `PccBentoGrid` | CSS Grid container with `container-type: inline-size`, exposes a context for footprint resolution |
+| `PccDashboardCard` | Per-card wrapper that emits `data-pcc-footprint` and applies measured row span via `useBentoRowSpan` |
+| `PccStatusPill` | Small status pill primitive with five tones (info / success / warning / danger / neutral), filled / outline |
+| `PccPreviewState` | All seven W2-ODR-009 region states (preview / empty / loading / error / missing-config / unavailable-fixture / unauthorized-persona) with distinct `data-pcc-state` markers |
+
+## Footprint Contract
+
+Card footprints come from `PCC_CARD_FOOTPRINTS = ['hero', 'wide', 'standard', 'compact', 'tall', 'full']`.
+Column spans per responsive mode:
+
+| Footprint | wideDesktop | standardDesktop | tabletLandscape | tabletPortrait | phone |
+| --- | --- | --- | --- | --- | --- |
+| `hero` | 8 | 6 | 4 | 2 | 1 |
+| `wide` | 6 | 5 | 3 | 2 | 1 |
+| `standard` | 4 | 3 | 2 | 1 | 1 |
+| `compact` | 3 | 2 | 2 | 1 | 1 |
+| `tall` | 4 | 3 | 2 | 1 | 1 |
+| `full` | 12 | 8 | 6 | 2 | 1 |
+
+Row span is measured per card via `ResizeObserver` with
+`Math.ceil((measuredHeight + gap) / (rowUnit + gap))` over an 8 px row unit
+and a 16 px gap. No `grid-auto-flow: dense`. CSS columns are not used.
+
+## Responsive Modes
+
+`useContainerBreakpoint` derives the active mode from the bento grid's
+**container** inline-size (not viewport-hardcoded), via `ResizeObserver` and
+container-query positioning:
+
+| Mode | Container width | Columns | Rail variant | Header behavior |
+| --- | --- | --- | --- | --- |
+| `wideDesktop` | ≥ 1280 px | 12 | `expanded` | full pill cluster + date scope + expanded search |
+| `standardDesktop` | 1024–1279 | 8 | `expanded` | trimmed pill cluster + expanded search |
+| `tabletLandscape` | 720–1023 | 6 | `iconOnly` | search collapses to icon affordance |
+| `tabletPortrait` | 480–719 | 2 | `topStrip` | title + pill row, no date scope |
+| `phone` | < 480 | 1 | `hamburger` | title only, search and pills hidden |
+
+## State Catalog (W2-ODR-009)
+
+`PccPreviewState` renders all seven required states; later prompts wire them
+to surface conditions. Each variant emits a unique `data-pcc-state` marker
+plus a `data-pcc-state-tone` for visual contract:
+
+| `state` | Tone | Use |
+| --- | --- | --- |
+| `preview` | info | Default for all Wave 2 fixture-driven regions |
+| `empty` | neutral | No records match scope |
+| `loading` | neutral | Read-model loading; renders `aria-busy` + pulse |
+| `error` | danger | Read-model failure; renders `role="alert"` |
+| `missing-config` | warning | Required configuration not set |
+| `unavailable-fixture` | neutral | Module wired in a later wave |
+| `unauthorized-persona` | warning | Persona has no access |
 
 ## Design Decisions
 
@@ -61,13 +161,13 @@ concerns belong with the eventual webpart manifest, not with the scaffold.
 `mount(el, spfxContext?, config?)` accepts an optional `spfxContext`
 parameter strictly for forward compatibility; the parameter is unused.
 
-### CSS module instead of Griffel
+### CSS modules + theme tokens (no Griffel, no hex)
 
-Visual cues (dark navy header, HB-orange accent rail) are expressed in a
-plain CSS module with hex literals. Griffel is intentionally avoided in
-this scaffold to keep the dependency surface and toolchain footprint
-minimal. Token-driven styling via `@hbc/ui-kit/theme` lands in Prompt 03
-when the basis-of-design layout frame goes in.
+Visual cues are expressed in plain CSS modules that consume CSS custom
+properties stamped at the `PccShell` root from `@hbc/ui-kit/theme` exports
+(colors, radii, spacing, elevation, status ramps). Griffel is intentionally
+avoided to keep the dependency surface minimal. No hex literals appear in
+Prompt 03 CSS — every value comes from a verified theme export.
 
 ## Local Preview
 

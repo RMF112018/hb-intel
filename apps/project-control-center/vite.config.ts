@@ -11,6 +11,7 @@ export default defineConfig(({ command }) => ({
       // Subpath aliases first (Vite resolves top-to-bottom).
       { find: '@hbc/ui-kit/app-shell', replacement: resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts') },
       { find: '@hbc/ui-kit/theme', replacement: resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts') },
+      { find: '@hbc/ui-kit/icons', replacement: resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx') },
       { find: '@hbc/ui-kit', replacement: resolve(__dirname, '../../packages/ui-kit/src/index.ts') },
       { find: '@hbc/models/pcc', replacement: resolve(__dirname, '../../packages/models/src/pcc/index.ts') },
       { find: '@hbc/models', replacement: resolve(__dirname, '../../packages/models/src/index.ts') },

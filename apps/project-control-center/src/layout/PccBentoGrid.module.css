@@ -1,0 +1,9 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pcc-grid-columns, 12), minmax(0, 1fr));
+  grid-auto-rows: var(--pcc-grid-row-unit, 8px);
+  gap: var(--pcc-grid-gap, 16px);
+  container-type: inline-size;
+  width: 100%;
+  align-content: start;
+}

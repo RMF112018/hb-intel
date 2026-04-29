@@ -1,0 +1,181 @@
+.rail {
+  background: var(--pcc-color-rail);
+  color: var(--pcc-color-on-status);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-md);
+  padding: var(--pcc-space-md) 0;
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: var(--pcc-space-sm);
+  padding: 0 var(--pcc-space-md);
+}
+
+.brandMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--pcc-radius-sm);
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--pcc-color-on-status);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.brandLabel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.brandLabelMark {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.brandLabelSubtitle {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.surfaceList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.surfaceButton {
+  display: flex;
+  align-items: center;
+  gap: var(--pcc-space-sm);
+  padding: 10px var(--pcc-space-md);
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--pcc-color-on-status);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: not-allowed;
+  text-align: left;
+  border-left: 3px solid transparent;
+}
+
+.surfaceButton[data-pcc-surface-active='true'] {
+  background: rgba(255, 255, 255, 0.18);
+  border-left-color: var(--pcc-color-on-status);
+  font-weight: 600;
+}
+
+.surfaceIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.surfaceLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--pcc-space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  opacity: 0.92;
+}
+
+/* Responsive variants */
+
+.rail[data-pcc-rail-variant='iconOnly'] {
+  width: 64px;
+}
+
+.rail[data-pcc-rail-variant='iconOnly'] .brandLabel,
+.rail[data-pcc-rail-variant='iconOnly'] .surfaceLabel,
+.rail[data-pcc-rail-variant='iconOnly'] .footer {
+  display: none;
+}
+
+.rail[data-pcc-rail-variant='iconOnly'] .surfaceButton {
+  justify-content: center;
+  padding: 10px;
+  border-left: none;
+}
+
+.rail[data-pcc-rail-variant='topStrip'] {
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--pcc-space-sm);
+  padding: var(--pcc-space-sm) var(--pcc-space-md);
+  border-right: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.rail[data-pcc-rail-variant='topStrip'] .brandRow {
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.rail[data-pcc-rail-variant='topStrip'] .surfaceList {
+  flex-direction: row;
+  gap: var(--pcc-space-xs);
+  flex: 1 1 auto;
+  overflow-x: auto;
+}
+
+.rail[data-pcc-rail-variant='topStrip'] .surfaceButton {
+  white-space: nowrap;
+  border-left: none;
+  border-bottom: 3px solid transparent;
+  padding: 6px var(--pcc-space-sm);
+}
+
+.rail[data-pcc-rail-variant='topStrip'] .surfaceButton[data-pcc-surface-active='true'] {
+  border-bottom-color: var(--pcc-color-on-status);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.rail[data-pcc-rail-variant='topStrip'] .footer {
+  display: none;
+}
+
+.rail[data-pcc-rail-variant='hamburger'] {
+  width: 100%;
+  flex-direction: column;
+  padding: var(--pcc-space-sm) var(--pcc-space-md);
+  border-right: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.rail[data-pcc-rail-variant='hamburger'] .brandRow {
+  padding: 0;
+}
+
+.rail[data-pcc-rail-variant='hamburger'] .surfaceList {
+  display: none;
+}
+
+.rail[data-pcc-rail-variant='hamburger'] .footer {
+  display: none;
+}

@@ -1,44 +1,65 @@
 import type { FC } from 'react';
 import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
-import styles from './styles/PccApp.module.css';
+import { PccShell } from './shell/PccShell';
+import { PccDashboardCard } from './layout/PccDashboardCard';
+import { PccPreviewState } from './ui/PccPreviewState';
+import {
+  PCC_CARD_FOOTPRINTS,
+  type PccCardFootprint,
+  type PccResponsiveMode,
+} from './layout/footprints';
+import { PCC_PROJECT_PLACEHOLDER } from './preview/projectPlaceholder';
 
-export const PccApp: FC = () => {
-  const surfaces = PCC_MVP_SURFACE_IDS.map((id) => PCC_MVP_SURFACES[id]);
-
-  return (
-    <div className={styles.shell} data-pcc-shell="wave-2-scaffold">
-      <header className={styles.header}>
-        <div>
-          <p className={styles.headerTitle}>Project Control Center</p>
-          <p className={styles.headerSubtitle}>Wave 2 scaffold · preview frame</p>
-        </div>
-      </header>
-      <div className={styles.body}>
-        <div className={styles.accentRail} aria-hidden="true" />
-        <main className={styles.content}>
-          <p className={styles.previewBanner}>
-            <strong>Preview only.</strong> Fixture-driven shell. No live integrations,
-            no tenant data, no Graph/PnP, no Procore runtime.
-          </p>
-          <div>
-            <p className={styles.sectionTitle}>MVP Surfaces</p>
-            <ul className={styles.surfaceList} data-pcc-surface-list="">
-              {surfaces.map((surface) => (
-                <li
-                  key={surface.id}
-                  className={styles.surfaceItem}
-                  data-pcc-surface-id={surface.id}
-                >
-                  <span className={styles.surfaceName}>{surface.displayName}</span>
-                  <span className={styles.surfaceDescription}>{surface.description}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+const FOOTPRINT_DEMO_TITLES: Record<PccCardFootprint, string> = {
+  hero: 'Project hero',
+  wide: 'Wide insight band',
+  standard: 'Standard tile',
+  compact: 'Compact KPI',
+  tall: 'Tall side panel',
+  full: 'Full-width strip',
 };
+
+export interface PccAppProps {
+  /** Test override for the responsive mode. */
+  forceMode?: PccResponsiveMode;
+}
+
+export const PccApp: FC<PccAppProps> = ({ forceMode }) => (
+  <PccShell
+    projectName={PCC_PROJECT_PLACEHOLDER.projectName}
+    subtitle={PCC_PROJECT_PLACEHOLDER.subtitle}
+    dateScope={PCC_PROJECT_PLACEHOLDER.dateScope}
+    pills={PCC_PROJECT_PLACEHOLDER.pills}
+    forceMode={forceMode}
+  >
+    {PCC_CARD_FOOTPRINTS.map((footprint) => (
+      <PccDashboardCard
+        key={`footprint-demo-${footprint}`}
+        footprint={footprint}
+        eyebrow={`Footprint · ${footprint}`}
+        title={FOOTPRINT_DEMO_TITLES[footprint]}
+      >
+        <PccPreviewState state="preview" />
+      </PccDashboardCard>
+    ))}
+
+    {PCC_MVP_SURFACE_IDS.map((id) => {
+      const surface = PCC_MVP_SURFACES[id];
+      return (
+        <PccDashboardCard
+          key={`surface-card-${id}`}
+          footprint="standard"
+          eyebrow="MVP Surface"
+          title={surface.displayName}
+        >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--pcc-color-text-muted)' }}>
+            {surface.description}
+          </p>
+          <PccPreviewState state="preview" />
+        </PccDashboardCard>
+      );
+    })}
+  </PccShell>
+);
 
 export default PccApp;
