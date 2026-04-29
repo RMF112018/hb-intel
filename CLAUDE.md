@@ -87,19 +87,6 @@ Use `.claude/agents/README.md` for the full agent index.
 
 Use specialists only when the task clearly fits. Do not call specialists for trivial local work.
 
-Common routing:
-
-- `hb-repo-researcher` — unfamiliar repo areas, cross-package impact, authority routing, repo-truth mapping.
-- `hb-boundary-auditor` — package placement, dependency direction, ownership, shared-boundary questions.
-- `hb-implementation-plan-reviewer` — pre-execution plan review and post-execution validation.
-- `hb-verification-runner` — smallest credible validation scope and failure interpretation.
-- `hb-docs-curator` — documentation impact, placement, drift, and authority overlap.
-- `hb-ui-ux-conformance-reviewer` — UI ownership, `@hbc/ui-kit` fit, UX consistency, basis-of-design review.
-- `hb-security-and-secrets-auditor` — secrets, tokens, app settings, auth proofs, redaction posture.
-- `hb-tenant-deployment-gatekeeper` — tenant mutation, app catalog, Azure, CI/CD, Graph/PnP, rollout gates.
-- `hb-spfx-runtime-parity-auditor` — SPFx source/build/manifest/runtime/hosted parity.
-- `hb-commit-diff-auditor` — post-execution diff scope and commit summary accuracy.
-
 When a task spans concerns, use the highest-risk relevant specialist first.
 
 Recommended risk order:
