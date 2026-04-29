@@ -157,10 +157,12 @@ States used:
 
 ---
 
-## Net Wave 2 Posture (Post-Prompt-02 + Document Control Correction)
+## Net Wave 2 Posture (Post-Prompt-02 + Document Control + Team & Access Corrections)
 
-- Prompt 01 repo-truth/scope-lock gates were completed and released applicable proof-gated decisions.
 - Prompt 02 executed the app scaffold authorization for `apps/project-control-center/`; scaffold is present and target remains locked.
-- W2-ODR-013 now reflects the corrected two-lane Document Control architecture and supersedes prior access-hub-only language.
-- W2-ODR-004 remains split: Vite/local-preview released; dev-harness tab wiring remains deferred.
-- W2-ODR-012 remains deferred; all other Wave 2 decisions are closed and binding.
+- Document Control two-lane correction is closed under `W2-ODR-013`.
+- Team & Access lifecycle-preview correction is closed under `W2-ODR-016`.
+- `W2-ODR-016` governs Team Viewer, Permission Request, and Access Manager lanes.
+- Wave 2 remains preview-only/no-mutation.
+- `W2-ODR-004` remains split: Vite/local-preview released; dev-harness tab wiring remains deferred.
+- `W2-ODR-012` remains deferred.
