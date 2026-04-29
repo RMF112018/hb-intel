@@ -181,3 +181,14 @@ export type { UseHbcThemeReturn } from './useHbcTheme.js';
 export { useConnectivity } from './useConnectivity.js';
 export { useDensity } from './useDensity.js';
 export type { UseDensityReturn } from './useDensity.js';
+
+// Font registry/tokens
+export {
+  hbcFontAssetUrls,
+  HBC_FONT_FAMILY_BRAND_DISPLAY,
+  HBC_FONT_FAMILY_HEADLINE,
+  HBC_FONT_FAMILY_BODY_UI,
+  HBC_FONT_FALLBACK_UI,
+  HBC_FONT_FALLBACK_MONO,
+  hbcFontFallbackFamilies,
+} from './fonts/index.js';

@@ -4,8 +4,12 @@
  * PH4.3 §3.2 — Renamed from size-based to intent-based naming
  */
 
-const FONT_FAMILY = '"Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif';
-const FONT_FAMILY_MONO = '"Courier New", "Cascadia Code", "Fira Code", "Consolas", monospace';
+import {
+  HBC_FONT_FAMILY_BRAND_DISPLAY,
+  HBC_FONT_FAMILY_BODY_UI,
+  HBC_FONT_FAMILY_HEADLINE,
+  HBC_FONT_FALLBACK_MONO,
+} from './fonts/index.js';
 
 // ---------------------------------------------------------------------------
 // V2.1 intent-based typography scale
@@ -13,7 +17,7 @@ const FONT_FAMILY_MONO = '"Courier New", "Cascadia Code", "Fira Code", "Consolas
 
 /** Display XL — signature hero headlines, full-bleed presentation banners (W01-P01) */
 export const displayXl = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_BRAND_DISPLAY,
   fontSize: '3rem',
   fontWeight: '700',
   lineHeight: '1.15',
@@ -22,7 +26,7 @@ export const displayXl = {
 
 /** Display Lg — section hero titles, editorial feature headers (W01-P01) */
 export const displayLg = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_BRAND_DISPLAY,
   fontSize: '2.5rem',
   fontWeight: '700',
   lineHeight: '1.2',
@@ -31,7 +35,7 @@ export const displayLg = {
 
 /** Display — dashboard headers, feature banners */
 export const display = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_BRAND_DISPLAY,
   fontSize: '2rem',
   fontWeight: '700',
   lineHeight: '1.25',
@@ -40,7 +44,7 @@ export const display = {
 
 /** Heading 1 — section headers, page titles */
 export const heading1 = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_HEADLINE,
   fontSize: '1.5rem',
   fontWeight: '700',
   lineHeight: '1.3',
@@ -49,7 +53,7 @@ export const heading1 = {
 
 /** Heading 2 — card headers, subpage titles */
 export const heading2 = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_HEADLINE,
   fontSize: '1.25rem',
   fontWeight: '600',
   lineHeight: '1.35',
@@ -58,7 +62,7 @@ export const heading2 = {
 
 /** Heading 3 — panel headers, modal titles */
 export const heading3 = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_HEADLINE,
   fontSize: '1rem',
   fontWeight: '600',
   lineHeight: '1.4',
@@ -67,7 +71,7 @@ export const heading3 = {
 
 /** Heading 4 — table headers, toolbar labels */
 export const heading4 = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_HEADLINE,
   fontSize: '0.875rem',
   fontWeight: '600',
   lineHeight: '1.4',
@@ -76,7 +80,7 @@ export const heading4 = {
 
 /** Body — primary content text */
 export const body = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_BODY_UI,
   fontSize: '0.875rem',
   fontWeight: '400',
   lineHeight: '1.5',
@@ -85,7 +89,7 @@ export const body = {
 
 /** Body small — secondary content text */
 export const bodySmall = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_BODY_UI,
   fontSize: '0.75rem',
   fontWeight: '400',
   lineHeight: '1.5',
@@ -94,7 +98,7 @@ export const bodySmall = {
 
 /** Label — labels, metadata, timestamps */
 export const label = {
-  fontFamily: FONT_FAMILY,
+  fontFamily: HBC_FONT_FAMILY_BODY_UI,
   fontSize: '0.75rem',
   fontWeight: '500',
   lineHeight: '1.4',
@@ -103,7 +107,7 @@ export const label = {
 
 /** Code — code blocks, technical identifiers, project codes */
 export const code = {
-  fontFamily: FONT_FAMILY_MONO,
+  fontFamily: HBC_FONT_FALLBACK_MONO,
   fontSize: '0.8125rem',
   fontWeight: '400',
   lineHeight: '1.6',

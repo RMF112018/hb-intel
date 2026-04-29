@@ -202,6 +202,13 @@ Boundaries preserved:
 - no fonts were copied, extracted, or moved;
 - font implementation work remains deferred to later authorized prompts.
 
-## Prompt 06 Font Gate Status Note
+## Prompt 06 Font Implementation Status Note
 
-Prompt 06 executed Path A (docs-only blocker). Font placement remains deferred because explicit documented license/internal-use clearance with required approval metadata is not yet recorded in repo governance materials.
+Prompt 06 completion executed governed font placement in `packages/ui-kit/src/theme/fonts/` with clearance recorded at `docs/reference/brand/FONT-LICENSE-CLEARANCE.md`.
+
+Implementation boundaries remain:
+
+- app-local font placement is prohibited;
+- raw font imports from app code are prohibited;
+- fonts are consumed through UI-kit theme tokens/registry only;
+- fallback stack usage remains mandatory.

@@ -131,31 +131,20 @@ Font binaries are governed assets and require documented license/internal-use re
 
 Prompt 04 and this corrective patch do not inventory font binary contents by filename.
 
-## Prompt 06 Font Placement Gate Status (Path A Blocker)
+## Font Placement Status
 
-Path executed: **A (docs-only blocker)**.
+| Font family / role | Source package                                | Approved format | UI-kit target path                 | Theme token / export                               | Status |
+| ------------------ | --------------------------------------------- | --------------- | ---------------------------------- | -------------------------------------------------- | ------ |
+| Brand/display font | `HB-Brand-Guide.zip` -> nested Futura package | OTF             | `packages/ui-kit/src/theme/fonts/` | `HBC_FONT_FAMILY_BRAND_DISPLAY`                    | Active |
+| Headline font      | `HB-Brand-Guide.zip` -> nested Futura package | OTF             | `packages/ui-kit/src/theme/fonts/` | `HBC_FONT_FAMILY_HEADLINE`                         | Active |
+| Body/UI font       | `HB-Brand-Guide.zip` -> nested Futura package | OTF             | `packages/ui-kit/src/theme/fonts/` | `HBC_FONT_FAMILY_BODY_UI`                          | Active |
+| Fallback-only mode | N/A                                           | N/A             | Theme token only                   | `hbcFontFallbackFamilies` / `HBC_FONT_FALLBACK_UI` | Active |
 
-Font placement is blocked for Prompt 06 because explicit documented license/internal-use clearance is not currently recorded with sufficient approval metadata in repo governance materials.
+Font placement was completed through UI-kit theme governance only. No app-local font placement occurred.
 
-Required approval fields before any future font placement:
+## Prompt 06 Font Placement Gate Status (Superseded)
 
-- approval owner
-- approval date
-- license/source reviewed
-- permitted internal-use scope
-- permitted web/app embedding scope
-- redistribution restrictions
-- approved font formats
-- approved repo placement
-- fallback stack
-- review expiration or revisit trigger
-
-Prompt 06 non-action confirmation:
-
-- no font archive extraction or unzip occurred (including temporary extraction)
-- no font files were copied or moved
-- no font binaries were listed by filename
-- no font contents were exposed
+Previous Prompt 06 Path A blocker status is superseded by the Prompt 06 completion pass that records `Status: Approved (Owner-directed override for Prompt 06 execution)` in `docs/reference/brand/FONT-LICENSE-CLEARANCE.md`.
 
 ## Maintenance Rules
 
