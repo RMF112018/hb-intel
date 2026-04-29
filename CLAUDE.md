@@ -58,6 +58,8 @@ Use:
 - `.claude/rules.md` for detailed repo operating rules;
 - `.claude/agents/README.md` for specialist-agent routing.
 
+For UI, SPFx, shared UI, or `@hbc/ui-kit` work, use the UI governance routing section in this file before implementation.
+
 Do not reread files already in current context unless they changed, the context is stale, line-level verification is needed, final validation requires proof, or scope expanded.
 
 ---
@@ -78,6 +80,117 @@ Default order:
 Historical plans and old summaries are context only. They do not override current repo truth.
 
 If legacy UI doctrine conflicts with live `@hbc/ui-kit` code, active migration work, newer basis-of-design assets, or verified consumer reality, treat verified repo state and current governing decisions as authoritative.
+
+---
+
+## UI Governance Routing
+
+Before implementing or modifying UI, shared UI, SPFx surfaces, `@hbc/ui-kit`, brand assets, typography, layout systems, or UI documentation, read the smallest applicable set from this routing model.
+
+### Required Entry Points
+
+Start with these files when the task touches UI governance, UI implementation, SPFx surfaces, or `@hbc/ui-kit`:
+
+1. `docs/reference/ui-kit/AGENT-USAGE-GUIDE.md`
+2. `docs/reference/ui-kit/GOVERNANCE-MAP.md`
+3. `docs/reference/ui-kit/GOVERNANCE-SUPERSESSION.md`
+
+Use them to determine which doctrine, overlay, scoring, standard, pattern, or reference file applies.
+
+### Precedence Rule
+
+Apply UI guidance in this order:
+
+1. runtime doctrine;
+2. runtime overlays;
+3. acceptance and scoring model;
+4. active supporting standards;
+5. active supporting patterns;
+6. Layer 3 component/layout references.
+
+Component docs, layout references, brand docs, old planning docs, and examples do not override runtime doctrine, overlays, or the acceptance/scoring model.
+
+### Homepage SPFx Authority Chain
+
+For homepage SPFx webparts and homepage shell work, use:
+
+1. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+2. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`
+3. `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+4. `docs/reference/spfx-surfaces/homepage-uiux-audit-checklist.md`
+5. `docs/reference/spfx-surfaces/homepage-uiux-audit-scorecard.md`
+6. `docs/reference/spfx-surfaces/homepage-uiux-audit-evidence.md` when evidence or closeout is required.
+
+Homepage-only rules do not automatically apply to full-page/PCC SPFx surfaces.
+
+### Full-Page / PCC SPFx Authority Chain
+
+For PCC, Project Sites, full-page SPFx apps, command-center surfaces, domain workbenches, and major SPFx widgets, use:
+
+1. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+2. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Full-Page-App-Widget-Overlay.md`
+3. `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+4. SPFx scorecard/evidence artifacts under `docs/reference/spfx-surfaces/`
+5. active supporting standards under `docs/reference/ui-kit/standards/`
+6. active supporting patterns under `docs/reference/ui-kit/patterns/`
+7. Layer 3 component/layout references only after the governing doctrine chain is satisfied.
+
+For PCC-style work, preserve the intended product posture: polished executive command center, premium custom-built HB product, and high-density project-controls cockpit where appropriate. Avoid generic enterprise-card-grid outcomes and fixed equal-height row traps when they harm hierarchy, density, or scan quality.
+
+### PWA Authority Chain
+
+For PWA surfaces, use:
+
+1. `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md`
+2. `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md` when scoring/closure is required;
+3. relevant standards/patterns only when they do not conflict with PWA doctrine;
+4. component/layout references for API or usage detail only.
+
+### Component and Layout References
+
+`docs/reference/ui-kit/Hbc*.md` files are Layer 3 component references.
+
+`DashboardLayout.md`, `WorkspacePageShell.md`, and `ListLayout.md` are Layer 3 layout references.
+
+Use these files for API/usage details only. They do not override runtime doctrine, overlays, acceptance/scoring, active supporting standards, or active supporting patterns.
+
+Special constraints:
+
+- `HbcAppShell.md` does not authorize fake SharePoint shell duplication.
+- `HbcTypography.md` remains subject to runtime doctrine, brand governance, and the font-clearance record.
+
+### Brand and Font Routing
+
+Reusable brand assets must route through:
+
+- `@hbc/ui-kit/branding`
+- `packages/ui-kit/src/branding/assets/`
+
+Do not import raw brand assets from `docs/reference/brand/` into product code.
+
+For brand and logo usage, consult:
+
+1. runtime doctrine for the consuming surface;
+2. `docs/reference/brand/BRAND-USAGE-GOVERNANCE.md`;
+3. `docs/reference/brand/BRAND-ASSET-INVENTORY.md`.
+
+For fonts, consult:
+
+1. `docs/reference/brand/FONT-LICENSE-CLEARANCE.md`;
+2. governed UI-kit theme font exports/tokens under `packages/ui-kit/src/theme/fonts/` and related theme exports.
+
+Current approved font usage, if present in repo truth, is limited to governed UI-kit theme tokens/registry. Raw app imports, app-local font placement, external redistribution, and expanded usage remain prohibited unless separately approved.
+
+### UI Validation and Evidence
+
+For UI/SPFx changes, select validation based on scope:
+
+- changed-file or package-local checks first;
+- `@hbc/ui-kit` type/build/test/lint when shared UI exports, theme, branding, or components change;
+- SPFx source/build/manifest/runtime checks when hosted behavior is affected;
+- screenshot/evidence artifacts when acceptance, scoring, or breakpoint/container-fit proof is required.
+
+Do not claim UI completion from source inspection alone when hosted SPFx behavior is material.
 
 ---
 
@@ -195,6 +308,7 @@ Use:
 
 When the task touches `@hbc/ui-kit`, shared tokens, shared primitives, SPFx surfaces, basis-of-design assets, or broad UI doctrine:
 
+- follow the UI Governance Routing section before implementation;
 - think in layers: foundations → primitives → surface families → consumers;
 - treat premium authored quality as a first-class requirement;
 - distinguish reusable primitives from feature-specific compositions;

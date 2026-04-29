@@ -10,32 +10,31 @@ This is a planning deliverable only. It does not authorize SPFx implementation, 
 
 ## Governing Decisions
 
-| ID | Decision | Final Direction |
-|---|---|---|
-| D-001 | PCC MVP scope | Option C: Project Home + governed navigation hub + light operational workflows. |
-| D-002 | Primary MVP users | Project Executive, Project Manager, Project Accountant, Superintendent, Estimating Coordinator, Lead Estimator, Estimator, Executive Oversight / Global Read-Only. IT / Control Center Admin is required MVP support/admin. |
-| D-003 | Primary journey priority | 1. PM, 2. PX, 3. Superintendent, 4. Project Accountant, 5. Lead Estimator / Estimator / Estimating Coordinator, 6. Executive Oversight / Global Read-Only. |
-| D-004 | Project Home layout | Hybrid: project identity/current status/site health at top, immediately followed by Priority Actions Rail. |
-| D-005 | Priority Actions Rail categories | Access requests, readiness blockers, approval/checkpoint prompts, external-system mapping prompts. |
-| D-006 | Light operational workflows | Request access change, resolve readiness blocker, submit approval/checkpoint response, resolve external-system mapping issue. |
-| D-007 | Work Center Navigation | Keep eight primary work centers: Project Home, Team & Access, Documents / Document Control, Project Readiness, Approvals / Checkpoints, External Systems, Control Center Settings, Site Health. |
-| D-008 | Functional module treatment | Target structured in-app workflows over time, not template launch only. Template launch/reference is an interim fallback only. |
-| D-009 | MVP structured workflow modules | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log. |
-| D-010 | Later-phase workflow modules | Estimating Kickoff, Post-Bid Autopsy, Job Closeout Checklist. |
-| D-011 | Responsibility Matrix scope | Merge Owner Contract Responsibility Matrix into the single Responsibility Matrix module. |
-| D-012 | Document Control Center | Unified file-access hub for SharePoint Drive, OneDrive, and Procore files; not a document-control management surface. |
-| D-013 | External Systems | SharePoint, OneDrive, Procore, Sage, Microsoft Teams, Compass, Document Crunch, Cupix. |
-| D-014 | External Systems MVP behavior | Launch links only. No mapping health or context summaries required for MVP. |
-| D-015 | Team & Access | Request + approval + automated execution later. MVP plans full lifecycle; automation remains gated. |
-| D-016 | Site Health | Project-user visibility + repair request workflow; IT/Admin controls repair execution. |
-| D-017 | Control Center Settings authority | IT/Admin + Project Executive + Project Manager; PM/PX edit approved business-facing settings; IT/Admin controls technical settings. |
-| D-018 | Approvals / Checkpoints authority | IT/Admin + Project Executive + Project Manager, with authority by checkpoint type. |
-| D-019 | Structured workflow detail | Item-level status tracking. |
-| D-020 | Workflow auditability | Business audit trail for MVP; compliance-grade evidence for technical/provisioning/admin actions. |
-| D-021 | Executive Oversight / Global Read-Only | Executive summary view with governed drill-in and Document Control Center access. |
-| D-022 | Estimating / Preconstruction MVP | Hybrid: turnover visibility and access in MVP; structured Estimating Kickoff and Post-Bid Autopsy later. |
-| D-023 | Deliverable scope | Required deliverables plus supporting registers. |
-
+| ID    | Decision                               | Final Direction                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-001 | PCC MVP scope                          | Option C: Project Home + governed navigation hub + light operational workflows.                                                                                                                                                                                                                                                                                                                                              |
+| D-002 | Primary MVP users                      | Project Executive, Project Manager, Project Accountant, Superintendent, Estimating Coordinator, Lead Estimator, Estimator, Executive Oversight / Global Read-Only. IT / Control Center Admin is required MVP support/admin.                                                                                                                                                                                                  |
+| D-003 | Primary journey priority               | 1. PM, 2. PX, 3. Superintendent, 4. Project Accountant, 5. Lead Estimator / Estimator / Estimating Coordinator, 6. Executive Oversight / Global Read-Only.                                                                                                                                                                                                                                                                   |
+| D-004 | Project Home layout                    | Hybrid: project identity/current status/site health at top, immediately followed by Priority Actions Rail.                                                                                                                                                                                                                                                                                                                   |
+| D-005 | Priority Actions Rail categories       | Access requests, readiness blockers, approval/checkpoint prompts, external-system mapping prompts.                                                                                                                                                                                                                                                                                                                           |
+| D-006 | Light operational workflows            | Request access change, resolve readiness blocker, submit approval/checkpoint response, resolve external-system mapping issue.                                                                                                                                                                                                                                                                                                |
+| D-007 | Work Center Navigation                 | Keep eight primary work centers: Project Home, Team & Access, Documents / Document Control, Project Readiness, Approvals / Checkpoints, External Systems, Control Center Settings, Site Health.                                                                                                                                                                                                                              |
+| D-008 | Functional module treatment            | Target structured in-app workflows over time, not template launch only. Template launch/reference is an interim fallback only.                                                                                                                                                                                                                                                                                               |
+| D-009 | MVP structured workflow modules        | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                                                                                                                       |
+| D-010 | Later-phase workflow modules           | Estimating Kickoff, Post-Bid Autopsy, Job Closeout Checklist.                                                                                                                                                                                                                                                                                                                                                                |
+| D-011 | Responsibility Matrix scope            | Merge Owner Contract Responsibility Matrix into the single Responsibility Matrix module.                                                                                                                                                                                                                                                                                                                                     |
+| D-012 | Document Control Center                | Two-lane Document Control Center: Microsoft Files Lane for SharePoint Drive / SharePoint document libraries and OneDrive as a future Microsoft Graph-backed file-management surface, plus External Document Systems Lane for Procore Files, Document Crunch, Adobe Sign, and future external systems as access/deep-link/visibility. Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
+| D-013 | External Systems                       | SharePoint, OneDrive, Procore, Sage, Microsoft Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                                                                                                                                                                                       |
+| D-014 | External Systems MVP behavior          | Launch links only. No mapping health or context summaries required for MVP.                                                                                                                                                                                                                                                                                                                                                  |
+| D-015 | Team & Access                          | Request + approval + automated execution later. MVP plans full lifecycle; automation remains gated.                                                                                                                                                                                                                                                                                                                          |
+| D-016 | Site Health                            | Project-user visibility + repair request workflow; IT/Admin controls repair execution.                                                                                                                                                                                                                                                                                                                                       |
+| D-017 | Control Center Settings authority      | IT/Admin + Project Executive + Project Manager; PM/PX edit approved business-facing settings; IT/Admin controls technical settings.                                                                                                                                                                                                                                                                                          |
+| D-018 | Approvals / Checkpoints authority      | IT/Admin + Project Executive + Project Manager, with authority by checkpoint type.                                                                                                                                                                                                                                                                                                                                           |
+| D-019 | Structured workflow detail             | Item-level status tracking.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| D-020 | Workflow auditability                  | Business audit trail for MVP; compliance-grade evidence for technical/provisioning/admin actions.                                                                                                                                                                                                                                                                                                                            |
+| D-021 | Executive Oversight / Global Read-Only | Executive summary view with governed drill-in and Document Control Center access.                                                                                                                                                                                                                                                                                                                                            |
+| D-022 | Estimating / Preconstruction MVP       | Hybrid: turnover visibility and access in MVP; structured Estimating Kickoff and Post-Bid Autopsy later.                                                                                                                                                                                                                                                                                                                     |
+| D-023 | Deliverable scope                      | Required deliverables plus supporting registers.                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## Product Definition
 
@@ -45,39 +44,39 @@ The PCC MVP is a governed project operating surface that combines:
 2. **Governed Work Center Navigation** — structured navigation into the core project work centers.
 3. **Light Operational Workflows** — guided actions for access, readiness, approvals/checkpoints, and external-system mapping issues.
 4. **Structured Workflow Module Direction** — in-app item-level workflow planning for selected high-value project controls.
-5. **Unified Document Control Center** — file access across SharePoint Drive, OneDrive, and Procore files.
+5. **Two-Lane Document Control Center** — Microsoft Files Lane plus External Document Systems Lane.
 6. **External System Launch Hub** — launch links to the project’s external systems.
 
 The PCC is not a replacement for Procore, Sage, Compass, Document Crunch, Cupix, Teams, Outlook, SharePoint file storage, or native accounting/project-management systems. It is the governed access, coordination, readiness, and project-control layer around those systems.
 
 ## MVP Operating Principles
 
-| Principle | Meaning |
-|---|---|
-| Project-first | PCC starts with a project context, not an application menu. |
-| Role-aware | PM, PX, Superintendent, Project Accountant, Estimating users, and Executive Oversight see different emphasis based on role. |
-| Actionable but safe | Users can request, approve, and resolve business-facing items, but unsafe technical execution remains gated. |
-| Document access, not document management | Document Control Center is a unified file-access hub, not a document workflow engine. |
-| Structured workflow direction | Key spreadsheet/checklist processes become item-level workflows over time. |
-| Launch before sync | External systems are launch-link MVP integrations only. |
-| Admin boundary | IT/Admin controls technical/provisioning settings and repair execution. |
-| Planning-only until gated | Phase 3 deliverables do not implement source code or tenant changes. |
+| Principle                     | Meaning                                                                                                                                             |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project-first                 | PCC starts with a project context, not an application menu.                                                                                         |
+| Role-aware                    | PM, PX, Superintendent, Project Accountant, Estimating users, and Executive Oversight see different emphasis based on role.                         |
+| Actionable but safe           | Users can request, approve, and resolve business-facing items, but unsafe technical execution remains gated.                                        |
+| Document control boundary     | Document Control Center uses a two-lane architecture; it is not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
+| Structured workflow direction | Key spreadsheet/checklist processes become item-level workflows over time.                                                                          |
+| Launch before sync            | External systems are launch-link MVP integrations only.                                                                                             |
+| Admin boundary                | IT/Admin controls technical/provisioning settings and repair execution.                                                                             |
+| Planning-only until gated     | Phase 3 deliverables do not implement source code or tenant changes.                                                                                |
 
 ## Primary Personas
 
-| Persona | MVP Priority | Primary Need |
-|---|---:|---|
-| Project Manager | Primary | Daily command, project readiness, actions, settings, workflows, coordination. |
-| Project Executive | Primary | Oversight, readiness, risk, escalation, approvals, project health. |
-| Superintendent | Primary | Field-facing access to status, documents, readiness, permits, constraints, and project blockers. |
-| Project Accountant | Primary | Access to project setup, financial/admin documents, buyout visibility, records, approvals. |
-| Estimating Coordinator | Primary | Turnover visibility, estimating/preconstruction records, handoff context. |
-| Lead Estimator | Primary | Estimate/bid context, turnover status, preconstruction record access. |
-| Estimator | Primary | Estimating/preconstruction record access and turnover visibility. |
-| Executive Oversight / Global Read-Only | Primary | Executive summary, risk/readiness visibility, governed drill-in, Document Control Center access. |
-| IT / Control Center Admin | Required Support/Admin | Technical settings, provisioning, repair, access execution, support, governance. |
-| Safety / QAQC | Secondary | Later refinement for safety/quality-specific modules and records. |
-| Manager of Operational Excellence | Secondary | Process governance and workflow optimization. |
+| Persona                                |           MVP Priority | Primary Need                                                                                     |
+| -------------------------------------- | ---------------------: | ------------------------------------------------------------------------------------------------ |
+| Project Manager                        |                Primary | Daily command, project readiness, actions, settings, workflows, coordination.                    |
+| Project Executive                      |                Primary | Oversight, readiness, risk, escalation, approvals, project health.                               |
+| Superintendent                         |                Primary | Field-facing access to status, documents, readiness, permits, constraints, and project blockers. |
+| Project Accountant                     |                Primary | Access to project setup, financial/admin documents, buyout visibility, records, approvals.       |
+| Estimating Coordinator                 |                Primary | Turnover visibility, estimating/preconstruction records, handoff context.                        |
+| Lead Estimator                         |                Primary | Estimate/bid context, turnover status, preconstruction record access.                            |
+| Estimator                              |                Primary | Estimating/preconstruction record access and turnover visibility.                                |
+| Executive Oversight / Global Read-Only |                Primary | Executive summary, risk/readiness visibility, governed drill-in, Document Control Center access. |
+| IT / Control Center Admin              | Required Support/Admin | Technical settings, provisioning, repair, access execution, support, governance.                 |
+| Safety / QAQC                          |              Secondary | Later refinement for safety/quality-specific modules and records.                                |
+| Manager of Operational Excellence      |              Secondary | Process governance and workflow optimization.                                                    |
 
 ## Journey Priority Order
 
@@ -126,38 +125,55 @@ Priority Actions Rail, limited to:
 
 The MVP keeps eight primary work centers.
 
-| Work Center | Purpose | Included Functional Items |
-|---|---|---|
-| Project Home | Daily command surface. | Identity, current status, health, Priority Actions, readiness rollup. |
-| Team & Access | Governed project access workflow. | Access requests, approval tracking, later backend execution. |
-| Documents / Document Control | Unified file-access hub. | SharePoint Drive, OneDrive, Procore files. |
-| Project Readiness | Functional project controls and workflow modules. | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, later estimating/closeout modules. |
-| Approvals / Checkpoints | Governed decisions and approval prompts. | Setup approvals, readiness approvals, access approvals, checkpoint responses. |
-| External Systems | Launch hub. | SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix. |
-| Control Center Settings | Business and technical configuration. | PM/PX business-facing settings; IT/Admin technical settings. |
-| Site Health | Visibility into validation/drift/repair posture. | Health status, warnings, repair requests, IT/Admin execution. |
+| Work Center                  | Purpose                                           | Included Functional Items                                                                                                                                                                                                                                |
+| ---------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project Home                 | Daily command surface.                            | Identity, current status, health, Priority Actions, readiness rollup.                                                                                                                                                                                    |
+| Team & Access                | Governed project access workflow.                 | Access requests, approval tracking, later backend execution.                                                                                                                                                                                             |
+| Documents / Document Control | Two-lane architecture.                            | Microsoft Files Lane (SharePoint Drive / SharePoint document libraries + OneDrive, preview-only actions in Wave 2); External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, launch/deep-link/missing-config/access-issue in Wave 2). |
+| Project Readiness            | Functional project controls and workflow modules. | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, later estimating/closeout modules.                                                                                                                                |
+| Approvals / Checkpoints      | Governed decisions and approval prompts.          | Setup approvals, readiness approvals, access approvals, checkpoint responses.                                                                                                                                                                            |
+| External Systems             | Launch hub.                                       | SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                             |
+| Control Center Settings      | Business and technical configuration.             | PM/PX business-facing settings; IT/Admin technical settings.                                                                                                                                                                                             |
+| Site Health                  | Visibility into validation/drift/repair posture.  | Health status, warnings, repair requests, IT/Admin execution.                                                                                                                                                                                            |
 
 ## MVP Structured Workflow Modules
 
-| Module | Scope |
-|---|---|
+| Module                | Scope                                                                                        |
+| --------------------- | -------------------------------------------------------------------------------------------- |
 | Job Startup Checklist | Item-level startup workflow with owners, due dates, status, comments, history, review state. |
-| Permit Log | Item-level permit tracking workflow. |
-| Responsibility Matrix | Item-level responsibility workflow including owner-contract responsibility mapping. |
-| Constraints Log | Item-level constraints workflow. |
-| Buyout Log | Item-level procurement/project-control workflow. |
+| Permit Log            | Item-level permit tracking workflow.                                                         |
+| Responsibility Matrix | Item-level responsibility workflow including owner-contract responsibility mapping.          |
+| Constraints Log       | Item-level constraints workflow.                                                             |
+| Buyout Log            | Item-level procurement/project-control workflow.                                             |
 
 ## Later-Phase Workflow Modules
 
-| Module | Later-Phase Intent |
-|---|---|
-| Estimating Kickoff | Structured preconstruction workflow after MVP. |
-| Post-Bid Autopsy | Structured post-bid learning/handoff workflow after MVP. |
-| Job Closeout Checklist | Structured closeout workflow after MVP. |
+| Module                 | Later-Phase Intent                                       |
+| ---------------------- | -------------------------------------------------------- |
+| Estimating Kickoff     | Structured preconstruction workflow after MVP.           |
+| Post-Bid Autopsy       | Structured post-bid learning/handoff workflow after MVP. |
+| Job Closeout Checklist | Structured closeout workflow after MVP.                  |
 
 ## Document Control Center
 
-The Document Control Center is a **unified file-access hub**, not a document management surface.
+The Document Control Center is a **two-lane architecture**. Microsoft Files Lane (SharePoint Drive / SharePoint document libraries and OneDrive) is a future Microsoft Graph-backed file-management surface; External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, and future external systems) is an access/deep-link/visibility hub.
+
+### Microsoft Files Lane
+
+- SharePoint project drive / document libraries
+- OneDrive project-linked locations
+
+### External Document Systems Lane
+
+- Procore files
+- Document Crunch
+- Adobe Sign
+
+### Wave 2 Preview Boundary
+
+- Microsoft lane actions are disabled/preview-only in Wave 2 (browse, open, upload, download, copy/share link, metadata, permission/access states, approval/status cues).
+- External lane is launch/deep-link/missing-config/access-issue states only in Wave 2.
+- No live Graph/PnP/API calls; no upload/download/copy-link execution; no approval execution; no permission mutation; no external runtime/SDK/secrets; no sync/mirror/write-back/mutation.
 
 ### MVP Sources
 
@@ -171,24 +187,27 @@ The Document Control Center is a **unified file-access hub**, not a document man
 - source labeling
 - role-aware access behavior
 - missing/broken access prompt
-- no document routing
-- no review workflow
+- no standalone submittal workflow replacement
+- no transmittal/revision-routing replacement
+- no document review/routing workflow execution in Wave 2
+- no approval execution in Wave 2
+- no replacement for Procore, Document Crunch, Adobe Sign, or native external-platform workflows
 - no replacement for Procore or SharePoint libraries
 
 ## External Systems
 
 The MVP external-system model is **launch links only**.
 
-| System | MVP Behavior |
-|---|---|
-| SharePoint | Launch project site/document location. |
-| OneDrive | Launch linked project location where applicable. |
-| Procore | Launch project record/files. |
-| Sage | Launch relevant project/accounting context where available. |
-| Microsoft Teams | Launch project Team/channel. |
-| Compass | Launch project/vendor/compliance context where available. |
+| System          | MVP Behavior                                                  |
+| --------------- | ------------------------------------------------------------- |
+| SharePoint      | Launch project site/document location.                        |
+| OneDrive        | Launch linked project location where applicable.              |
+| Procore         | Launch project record/files.                                  |
+| Sage            | Launch relevant project/accounting context where available.   |
+| Microsoft Teams | Launch project Team/channel.                                  |
+| Compass         | Launch project/vendor/compliance context where available.     |
 | Document Crunch | Launch project/legal/document review context where available. |
-| Cupix | Launch project reality-capture context where available. |
+| Cupix           | Launch project reality-capture context where available.       |
 
 No mapping health, synchronization, full mirror, write-back, or external context summary is required for MVP.
 
@@ -196,48 +215,48 @@ No mapping health, synchronization, full mirror, write-back, or external context
 
 MVP target: **request + approval + automated execution later**.
 
-| Stage | MVP Position |
-|---|---|
-| Request | User submits access change request. |
-| Review | Authorized PM/PX/IT/Admin reviews depending on request type. |
-| Approval | Approval/rejection/comment tracked in PCC. |
-| Execution | Manual or external in MVP; automated backend execution later after gates close. |
-| Audit | Business audit trail for request/approval; compliance evidence for technical execution later. |
+| Stage     | MVP Position                                                                                  |
+| --------- | --------------------------------------------------------------------------------------------- |
+| Request   | User submits access change request.                                                           |
+| Review    | Authorized PM/PX/IT/Admin reviews depending on request type.                                  |
+| Approval  | Approval/rejection/comment tracked in PCC.                                                    |
+| Execution | Manual or external in MVP; automated backend execution later after gates close.               |
+| Audit     | Business audit trail for request/approval; compliance evidence for technical execution later. |
 
 ## Site Health Journey
 
 MVP target: **project-user visibility + repair request workflow**.
 
-| User Capability | MVP Position |
-|---|---|
-| See health status | Yes |
-| See warnings/drift indicators | Yes |
-| Understand resolution owner | Yes |
-| Submit repair/escalation request | Yes |
-| Execute repair | No; IT/Admin only |
-| Automated repair | Later/gated |
+| User Capability                  | MVP Position      |
+| -------------------------------- | ----------------- |
+| See health status                | Yes               |
+| See warnings/drift indicators    | Yes               |
+| Understand resolution owner      | Yes               |
+| Submit repair/escalation request | Yes               |
+| Execute repair                   | No; IT/Admin only |
+| Automated repair                 | Later/gated       |
 
 ## Control Center Settings
 
-| Role | Authority |
-|---|---|
-| Project Manager | Edit approved business-facing settings. |
-| Project Executive | Edit approved business-facing settings. |
-| IT / Control Center Admin | Edit technical, provisioning, integration, permissions, and repair settings. |
-| Executive Oversight | Read-only unless separately assigned. |
-| Estimating users | Read/update only if specific business-facing setting is assigned to their workflow. |
+| Role                      | Authority                                                                           |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| Project Manager           | Edit approved business-facing settings.                                             |
+| Project Executive         | Edit approved business-facing settings.                                             |
+| IT / Control Center Admin | Edit technical, provisioning, integration, permissions, and repair settings.        |
+| Executive Oversight       | Read-only unless separately assigned.                                               |
+| Estimating users          | Read/update only if specific business-facing setting is assigned to their workflow. |
 
 ## Approvals / Checkpoints
 
 Approval authority is by checkpoint type.
 
-| Checkpoint Type | Primary Authority |
-|---|---|
-| Technical/provisioning | IT/Admin |
-| Access/security | IT/Admin with business approval where appropriate |
-| Project/business readiness | Project Executive / Project Manager |
-| Workflow item approval | Owner/reviewer based on workflow type |
-| Executive escalation | Project Executive / Executive Oversight as read-only or escalated approver if assigned |
+| Checkpoint Type            | Primary Authority                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| Technical/provisioning     | IT/Admin                                                                               |
+| Access/security            | IT/Admin with business approval where appropriate                                      |
+| Project/business readiness | Project Executive / Project Manager                                                    |
+| Workflow item approval     | Owner/reviewer based on workflow type                                                  |
+| Executive escalation       | Project Executive / Executive Oversight as read-only or escalated approver if assigned |
 
 ## Executive Oversight / Global Read-Only
 
@@ -312,14 +331,14 @@ MVP behavior:
 
 ## Product Risks
 
-| Risk | Mitigation |
-|---|---|
-| MVP over-expands into full workflow platform | Keep MVP modules limited and implementation gated. |
-| Document Control scope becomes document management | Preserve access-hub boundary. |
-| External Systems grow into integrations too early | Launch links only for MVP. |
-| Item-level workflows require storage decisions | Capture as open implementation decision. |
-| SPFx attempts unsafe execution | Enforce backend-only technical execution boundary. |
-| Phase 2 interface churn affects read models | Keep SPFx/backend assumptions non-binding until gate review. |
+| Risk                                                             | Mitigation                                                           |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| MVP over-expands into full workflow platform                     | Keep MVP modules limited and implementation gated.                   |
+| Document Control scope drifts into standalone workflow execution | Preserve two-lane boundary and keep Wave 2 preview-only constraints. |
+| External Systems grow into integrations too early                | Launch links only for MVP.                                           |
+| Item-level workflows require storage decisions                   | Capture as open implementation decision.                             |
+| SPFx attempts unsafe execution                                   | Enforce backend-only technical execution boundary.                   |
+| Phase 2 interface churn affects read models                      | Keep SPFx/backend assumptions non-binding until gate review.         |
 
 ## Recommended Next Deliverable
 
@@ -333,25 +352,25 @@ The product architecture is implemented through the formal Phase 3 module implem
 
 ## Product-to-Wave Mapping
 
-| Product Area | Implementation Wave |
-|---|---:|
-| Project Home / Command Center | Wave 4 |
-| Priority Actions Rail | Wave 5 |
-| Team & Access | Wave 6 |
-| Documents / Document Control Center | Wave 7 |
-| Project Readiness module framework | Wave 8 |
-| Job Startup Checklist | Wave 9 |
-| Permit Log | Wave 10 |
-| Responsibility Matrix | Wave 11 |
-| Constraints Log | Wave 12 |
-| Buyout Log | Wave 13 |
-| Approvals / Checkpoints | Wave 14 |
-| External Systems | Wave 15 |
-| Control Center Settings | Wave 16 |
-| Site Health | Wave 17 |
-| Executive Oversight / Global Read-Only | Wave 18 |
-| Admin / Control Plane Review Surfaces | Wave 19 |
-| Hardening and Non-Production Readiness | Wave 20 |
+| Product Area                           | Implementation Wave |
+| -------------------------------------- | ------------------: |
+| Project Home / Command Center          |              Wave 4 |
+| Priority Actions Rail                  |              Wave 5 |
+| Team & Access                          |              Wave 6 |
+| Documents / Document Control Center    |              Wave 7 |
+| Project Readiness module framework     |              Wave 8 |
+| Job Startup Checklist                  |              Wave 9 |
+| Permit Log                             |             Wave 10 |
+| Responsibility Matrix                  |             Wave 11 |
+| Constraints Log                        |             Wave 12 |
+| Buyout Log                             |             Wave 13 |
+| Approvals / Checkpoints                |             Wave 14 |
+| External Systems                       |             Wave 15 |
+| Control Center Settings                |             Wave 16 |
+| Site Health                            |             Wave 17 |
+| Executive Oversight / Global Read-Only |             Wave 18 |
+| Admin / Control Plane Review Surfaces  |             Wave 19 |
+| Hardening and Non-Production Readiness |             Wave 20 |
 
 ## Product Implementation Rule
 

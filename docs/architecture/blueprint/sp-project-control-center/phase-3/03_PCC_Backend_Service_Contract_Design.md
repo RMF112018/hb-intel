@@ -27,25 +27,25 @@ The backend design must not authorize:
 
 These are conceptual only, not committed API contracts.
 
-| Conceptual Route | Purpose |
-|---|---|
-| `/api/pcc/projects/{projectId}/profile` | Project identity, type, stage, status, contacts. |
-| `/api/pcc/projects/{projectId}/modules` | Work Center/module registry. |
+| Conceptual Route                                 | Purpose                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| `/api/pcc/projects/{projectId}/profile`          | Project identity, type, stage, status, contacts.                  |
+| `/api/pcc/projects/{projectId}/modules`          | Work Center/module registry.                                      |
 | `/api/pcc/projects/{projectId}/priority-actions` | Access, readiness, approval/checkpoint, external mapping prompts. |
-| `/api/pcc/projects/{projectId}/readiness` | Readiness status and blockers. |
-| `/api/pcc/projects/{projectId}/responsibilities` | My Responsibilities and workflow assignments. |
-| `/api/pcc/projects/{projectId}/workflows` | Structured workflow module summaries. |
-| `/api/pcc/projects/{projectId}/workflow-items` | Item-level workflow records. |
-| `/api/pcc/projects/{projectId}/approvals` | Approval/checkpoint records and status. |
-| `/api/pcc/projects/{projectId}/team-access` | Access requests and approval tracking. |
-| `/api/pcc/projects/{projectId}/document-control` | File source registry / launch data. |
-| `/api/pcc/projects/{projectId}/external-links` | External system launch links. |
-| `/api/pcc/projects/{projectId}/site-health` | Site Health status and repair request visibility. |
-| `/api/pcc/projects/{projectId}/settings` | Business-facing settings, role-filtered. |
-| `/api/admin/pcc/site-health/repair-requests` | Admin repair request review. |
-| `/api/admin/pcc/provisioning/preview` | Future provisioning preview; blocked until gates. |
-| `/api/admin/pcc/provisioning/evidence` | Future evidence/proof review; blocked until gates. |
-| `/api/admin/pcc/provisioning/approve` | Future approval checkpoint; blocked until gates. |
+| `/api/pcc/projects/{projectId}/readiness`        | Readiness status and blockers.                                    |
+| `/api/pcc/projects/{projectId}/responsibilities` | My Responsibilities and workflow assignments.                     |
+| `/api/pcc/projects/{projectId}/workflows`        | Structured workflow module summaries.                             |
+| `/api/pcc/projects/{projectId}/workflow-items`   | Item-level workflow records.                                      |
+| `/api/pcc/projects/{projectId}/approvals`        | Approval/checkpoint records and status.                           |
+| `/api/pcc/projects/{projectId}/team-access`      | Access requests and approval tracking.                            |
+| `/api/pcc/projects/{projectId}/document-control` | File source registry / launch data.                               |
+| `/api/pcc/projects/{projectId}/external-links`   | External system launch links.                                     |
+| `/api/pcc/projects/{projectId}/site-health`      | Site Health status and repair request visibility.                 |
+| `/api/pcc/projects/{projectId}/settings`         | Business-facing settings, role-filtered.                          |
+| `/api/admin/pcc/site-health/repair-requests`     | Admin repair request review.                                      |
+| `/api/admin/pcc/provisioning/preview`            | Future provisioning preview; blocked until gates.                 |
+| `/api/admin/pcc/provisioning/evidence`           | Future evidence/proof review; blocked until gates.                |
+| `/api/admin/pcc/provisioning/approve`            | Future approval checkpoint; blocked until gates.                  |
 
 ## Read Model Concepts
 
@@ -139,14 +139,17 @@ No SPFx direct permission mutation.
 
 MVP service posture:
 
-- unified launch/source registry;
-- SharePoint Drive;
-- OneDrive;
-- Procore files;
-- permission-aware links;
+- two-lane architecture;
+- Microsoft Files Lane: SharePoint Drive / SharePoint document libraries and OneDrive as future Microsoft Graph-backed file-management;
+- External Document Systems Lane: Procore Files, Document Crunch, Adobe Sign, and future systems as access/deep-link/visibility;
+- permission-aware links and source-of-record labeling;
 - access issue prompt.
 
-No document workflow management.
+Wave 2 preview boundary:
+
+- Microsoft lane actions are disabled/preview-only;
+- external lane remains launch/deep-link/missing-config/access-issue only;
+- no live Graph/PnP/API calls, no upload/download/copy-link execution, no approval execution, no permission mutation, no external runtime/SDK/secrets, and no sync/mirror/write-back/mutation.
 
 ### External Links
 
@@ -177,17 +180,17 @@ MVP service posture:
 
 ## Auth / Role Gate Assumptions
 
-| Capability | PM | PX | Superintendent | Accountant | Estimating Users | Executive Read-Only | IT/Admin |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| View Project Home | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
-| View Document Control Center | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
-| Submit access request | Yes | Yes | Yes | Yes | Yes | No / request-only | Yes |
-| Approve business checkpoints | Yes where assigned | Yes | Limited where assigned | Limited where assigned | Limited where assigned | No | Yes for technical |
-| Edit business settings | Yes | Yes | No by default | No by default | No by default | No | Yes |
-| Edit technical settings | No | No | No | No | No | No | Yes |
-| Submit repair request | Yes | Yes | Yes | Yes | Yes | View/escalate if allowed | Yes |
-| Execute repair | No | No | No | No | No | No | Yes |
-| Run provisioning | No | No | No | No | No | No | Future-gated |
+| Capability                   |                 PM |  PX |         Superintendent |             Accountant |       Estimating Users |      Executive Read-Only |          IT/Admin |
+| ---------------------------- | -----------------: | --: | ---------------------: | ---------------------: | ---------------------: | -----------------------: | ----------------: |
+| View Project Home            |                Yes | Yes |                    Yes |                    Yes |                    Yes |                      Yes |               Yes |
+| View Document Control Center |                Yes | Yes |                    Yes |                    Yes |                    Yes |                      Yes |               Yes |
+| Submit access request        |                Yes | Yes |                    Yes |                    Yes |                    Yes |        No / request-only |               Yes |
+| Approve business checkpoints | Yes where assigned | Yes | Limited where assigned | Limited where assigned | Limited where assigned |                       No | Yes for technical |
+| Edit business settings       |                Yes | Yes |          No by default |          No by default |          No by default |                       No |               Yes |
+| Edit technical settings      |                 No |  No |                     No |                     No |                     No |                       No |               Yes |
+| Submit repair request        |                Yes | Yes |                    Yes |                    Yes |                    Yes | View/escalate if allowed |               Yes |
+| Execute repair               |                 No |  No |                     No |                     No |                     No |                       No |               Yes |
+| Run provisioning             |                 No |  No |                     No |                     No |                     No |                       No |      Future-gated |
 
 ## Evidence and Audit
 
@@ -216,13 +219,13 @@ Reserved for:
 
 ## Phase 2 Dependencies
 
-| Dependency | Required For |
-|---|---|
-| Stable dry-run proof artifact | Admin preview/evidence APIs. |
-| Mutation/executor boundary | Provisioning/apply and automated access/repair execution. |
-| Post-provision validation posture | Site Health read model and drift behavior. |
-| Approved manifest interface | Backend read model normalization. |
-| Phase 2 closeout | Any implementation that touches execution. |
+| Dependency                        | Required For                                              |
+| --------------------------------- | --------------------------------------------------------- |
+| Stable dry-run proof artifact     | Admin preview/evidence APIs.                              |
+| Mutation/executor boundary        | Provisioning/apply and automated access/repair execution. |
+| Post-provision validation posture | Site Health read model and drift behavior.                |
+| Approved manifest interface       | Backend read model normalization.                         |
+| Phase 2 closeout                  | Any implementation that touches execution.                |
 
 ## Backend Implementation Gate
 
@@ -242,22 +245,22 @@ Before implementation:
 
 The backend service contract should be implemented incrementally after the implementation gate authorizes backend work.
 
-| Wave | Backend Responsibility |
-|---:|---|
-| 1 | Shared model contracts, status enums, role definitions, fixture data. |
-| 3 | Backend read-model foundation and conceptual route families. |
-| 5 | Priority action aggregation read model. |
-| 6 | Team & Access request/approval read/update model; no permission execution. |
-| 7 | Document Control Center file-source/launch read model. |
-| 8 | Workflow module framework and item-level model. |
-| 9–13 | Module-specific workflow read/update models. |
-| 14 | Approval/checkpoint model and authority validation. |
-| 15 | External Systems launch-link read model. |
-| 16 | Settings read/update model with role gates. |
-| 17 | Site Health read model and repair-request intake; no repair execution. |
-| 18 | Executive read-only shaping / summary read model. |
-| 19 | Admin review queues. |
-| 20 | Tests, guards, evidence posture, and non-production readiness validation. |
+| Wave | Backend Responsibility                                                     |
+| ---: | -------------------------------------------------------------------------- |
+|    1 | Shared model contracts, status enums, role definitions, fixture data.      |
+|    3 | Backend read-model foundation and conceptual route families.               |
+|    5 | Priority action aggregation read model.                                    |
+|    6 | Team & Access request/approval read/update model; no permission execution. |
+|    7 | Document Control Center file-source/launch read model.                     |
+|    8 | Workflow module framework and item-level model.                            |
+| 9–13 | Module-specific workflow read/update models.                               |
+|   14 | Approval/checkpoint model and authority validation.                        |
+|   15 | External Systems launch-link read model.                                   |
+|   16 | Settings read/update model with role gates.                                |
+|   17 | Site Health read model and repair-request intake; no repair execution.     |
+|   18 | Executive read-only shaping / summary read model.                          |
+|   19 | Admin review queues.                                                       |
+|   20 | Tests, guards, evidence posture, and non-production readiness validation.  |
 
 ## Backend Implementation Guardrails
 

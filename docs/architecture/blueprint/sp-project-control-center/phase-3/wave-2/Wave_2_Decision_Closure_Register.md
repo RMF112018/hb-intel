@@ -16,7 +16,7 @@ States used:
 
 > Create/use `apps/project-control-center/` as the dedicated PCC shell app target. Use `packages/spfx` only for shared SPFx host/root exports if repo pattern requires it. Do not place PCC shell code in `apps/hb-webparts/` or extend `apps/project-sites/`.
 
-**State:** Closed.
+**State:** Closed (superseding prior access-hub-only interpretation tied to D-012 / earlier W2-ODR-013 wording).
 **Audit evidence:** `apps/project-control-center/` does not exist on `main`; no conflicting PCC shell location exists. Documented in `Wave_2_Repo_Truth_Audit.md` §4.
 **Cross-link:** `Wave_2_Scope_Lock.md` §1.
 
@@ -105,9 +105,9 @@ States used:
 **State:** Deferred. No relaxation in Wave 2.
 **Cross-link:** `Wave_2_Scope_Lock.md` §3.
 
-## W2-ODR-013 — Document Control as Unified Launch Hub
+## W2-ODR-013 — Document Control Two-Lane Architecture (Preview-Only in Wave 2)
 
-> Document Control is a unified access hub only: SharePoint Drive, OneDrive, Procore Files, Document Crunch, Adobe Sign source cards/launch placeholders. No document-management workflow.
+> Document Control follows a two-lane architecture: (1) Microsoft Files Lane for SharePoint Drive / SharePoint document libraries and OneDrive as a future Microsoft Graph-backed file-management surface rendered as disabled/preview-only affordances in Wave 2; and (2) External Document Systems Lane for Procore Files, Document Crunch, Adobe Sign, and future external systems rendered as launch/deep-link/missing-config/access-issue states. No standalone submittal workflow replacement, no transmittal/revision-routing replacement, no document review/routing workflow execution in Wave 2, and no approval execution in Wave 2.
 
 **State:** Closed.
 **Cross-link:** `Wave_2_Wireframe_and_Layout_Contract.md` §3.

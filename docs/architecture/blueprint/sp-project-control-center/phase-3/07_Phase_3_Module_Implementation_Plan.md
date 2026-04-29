@@ -25,7 +25,7 @@ Phase 3 code work should build the **PCC application layer**:
 4. Priority action aggregation.
 5. Light operational workflow framework.
 6. Structured Project Readiness workflow modules.
-7. Document Control Center access hub.
+7. Document Control Center two-lane architecture.
 8. External Systems launch hub.
 9. Site Health visibility and repair request intake.
 10. Admin/control-plane review surfaces.
@@ -49,29 +49,29 @@ Then implement each module as its own wave. This prevents every module from inve
 
 # Wave Summary
 
-| Wave | Module / Workstream | Purpose | Dependency |
-|---:|---|---|---|
-| 0 | Implementation Gate & Repo Truth Recheck | Confirm Phase 3 can move from planning to code and lock allowed paths. | Phase 2 Step 4/5/6 evidence |
-| 1 | PCC Shared Foundations | Establish shared types, read-model contracts, fixtures, feature flags, role model, status model. | Wave 0 |
-| 2 | PCC SPFx Shell Frame | Create shell/routing/layout foundation without deep module logic. | Wave 1 |
-| 3 | PCC Backend Read-Model Foundation | Create backend read-model scaffolds used by shell/modules. | Wave 1 |
-| 4 | Project Home / Command Center | Build hybrid landing page and role-aware project summary. | Waves 2–3 |
-| 5 | Priority Actions Rail | Build MVP action categories and source aggregation. | Waves 3–4 |
-| 6 | Team & Access | Build request + approval workflow; no automated permission execution. | Waves 2–3 |
-| 7 | Documents / Document Control Center | Build unified SharePoint / OneDrive / Procore file access hub. | Waves 2–3 |
-| 8 | Project Readiness Module Framework | Build shared framework for structured readiness modules. | Waves 2–3 |
-| 9 | Job Startup Checklist | Build item-level startup workflow module. | Wave 8 |
-| 10 | Permit Log | Build item-level permit workflow module. | Wave 8 |
-| 11 | Responsibility Matrix | Build item-level responsibility workflow, including owner-contract mapping. | Wave 8 |
-| 12 | Constraints Log | Build item-level constraints workflow module. | Wave 8 |
-| 13 | Buyout Log | Build item-level buyout/project-controls workflow module. | Wave 8 |
-| 14 | Approvals / Checkpoints | Build approval/checkpoint queue and authority logic. | Waves 3, 5, 6, 8–13 |
-| 15 | External Systems | Build launch hub for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix. | Waves 2–3 |
-| 16 | Control Center Settings | Build business/technical settings separation and role-gated UI. | Waves 2–3 |
-| 17 | Site Health | Build health visibility and repair request workflow; no repair execution. | Waves 2–3 |
-| 18 | Executive Oversight / Global Read-Only | Build executive summary and governed drill-in. | Waves 4–17 |
-| 19 | Admin / Control Plane Review Surfaces | Build admin queues and review surfaces for requests, approvals, repair intake. | Waves 6, 14, 17 |
-| 20 | Hardening, Doctrine Validation, and Non-Production Readiness | Close UX, accessibility, tests, guards, documentation, and rollout readiness. | All prior waves |
+| Wave | Module / Workstream                                          | Purpose                                                                                                                                          | Dependency                  |
+| ---: | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
+|    0 | Implementation Gate & Repo Truth Recheck                     | Confirm Phase 3 can move from planning to code and lock allowed paths.                                                                           | Phase 2 Step 4/5/6 evidence |
+|    1 | PCC Shared Foundations                                       | Establish shared types, read-model contracts, fixtures, feature flags, role model, status model.                                                 | Wave 0                      |
+|    2 | PCC SPFx Shell Frame                                         | Create shell/routing/layout foundation without deep module logic.                                                                                | Wave 1                      |
+|    3 | PCC Backend Read-Model Foundation                            | Create backend read-model scaffolds used by shell/modules.                                                                                       | Wave 1                      |
+|    4 | Project Home / Command Center                                | Build hybrid landing page and role-aware project summary.                                                                                        | Waves 2–3                   |
+|    5 | Priority Actions Rail                                        | Build MVP action categories and source aggregation.                                                                                              | Waves 3–4                   |
+|    6 | Team & Access                                                | Build request + approval workflow; no automated permission execution.                                                                            | Waves 2–3                   |
+|    7 | Documents / Document Control Center                          | Build two-lane model: Microsoft Files Lane (future Graph-backed file-management) + External Document Systems Lane (launch/deep-link/visibility). | Waves 2–3                   |
+|    8 | Project Readiness Module Framework                           | Build shared framework for structured readiness modules.                                                                                         | Waves 2–3                   |
+|    9 | Job Startup Checklist                                        | Build item-level startup workflow module.                                                                                                        | Wave 8                      |
+|   10 | Permit Log                                                   | Build item-level permit workflow module.                                                                                                         | Wave 8                      |
+|   11 | Responsibility Matrix                                        | Build item-level responsibility workflow, including owner-contract mapping.                                                                      | Wave 8                      |
+|   12 | Constraints Log                                              | Build item-level constraints workflow module.                                                                                                    | Wave 8                      |
+|   13 | Buyout Log                                                   | Build item-level buyout/project-controls workflow module.                                                                                        | Wave 8                      |
+|   14 | Approvals / Checkpoints                                      | Build approval/checkpoint queue and authority logic.                                                                                             | Waves 3, 5, 6, 8–13         |
+|   15 | External Systems                                             | Build launch hub for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                | Waves 2–3                   |
+|   16 | Control Center Settings                                      | Build business/technical settings separation and role-gated UI.                                                                                  | Waves 2–3                   |
+|   17 | Site Health                                                  | Build health visibility and repair request workflow; no repair execution.                                                                        | Waves 2–3                   |
+|   18 | Executive Oversight / Global Read-Only                       | Build executive summary and governed drill-in.                                                                                                   | Waves 4–17                  |
+|   19 | Admin / Control Plane Review Surfaces                        | Build admin queues and review surfaces for requests, approvals, repair intake.                                                                   | Waves 6, 14, 17             |
+|   20 | Hardening, Doctrine Validation, and Non-Production Readiness | Close UX, accessibility, tests, guards, documentation, and rollout readiness.                                                                    | All prior waves             |
 
 ---
 
@@ -86,7 +86,7 @@ Confirm that Phase 3 code work is authorized and define exact implementation pat
 - Re-audit Phase 2 Step 4/5/6 status.
 - Confirm stable dry-run/proof artifact semantics.
 - Confirm no-mutation / mutation-gate posture.
-- Confirm whether SPFx shell path is `apps/project-control-center/` or another repo-correct path.
+- Confirm SPFx shell implementation path remains `apps/project-control-center/` (already scaffolded).
 - Confirm backend route/package placement.
 - Confirm validation commands.
 - Confirm which implementation waves are authorized immediately and which remain blocked.
@@ -314,13 +314,12 @@ Build Team & Access request and approval tracking without automated permission e
 
 ## Objective
 
-Build the unified file-access hub.
+Build the two-lane Document Control architecture.
 
 ## Sources
 
-- SharePoint Drive / document libraries.
-- OneDrive project-linked locations.
-- Procore files.
+- Microsoft Files Lane: SharePoint Drive / document libraries and OneDrive.
+- External Document Systems Lane: Procore Files, Document Crunch, Adobe Sign, and future systems.
 
 ## Code Work
 
@@ -521,13 +520,13 @@ Build the approval/checkpoint module that supports business-facing and technical
 
 ## Approval Authorities
 
-| Checkpoint Type | Authority |
-|---|---|
-| Technical/provisioning | IT/Admin |
-| Access/security | IT/Admin with business approval where needed |
-| Project/business readiness | PM/PX |
-| Workflow item review | Assigned reviewer |
-| Executive escalation | PX / Executive Oversight where assigned |
+| Checkpoint Type            | Authority                                    |
+| -------------------------- | -------------------------------------------- |
+| Technical/provisioning     | IT/Admin                                     |
+| Access/security            | IT/Admin with business approval where needed |
+| Project/business readiness | PM/PX                                        |
+| Workflow item review       | Assigned reviewer                            |
+| Executive escalation       | PX / Executive Oversight where assigned      |
 
 ## Code Work
 
@@ -598,14 +597,14 @@ Build role-gated PCC settings.
 
 ## Settings Groups
 
-| Group | Editable By |
-|---|---|
-| Business-facing project settings | PM / PX / IT Admin |
-| Work center/module visibility | IT Admin, limited PM/PX if approved |
-| External launch links | IT Admin; PM/PX request or edit if approved |
-| Technical/provisioning settings | IT Admin only |
-| Permission/security settings | IT Admin only |
-| Site Health repair settings | IT Admin only |
+| Group                            | Editable By                                 |
+| -------------------------------- | ------------------------------------------- |
+| Business-facing project settings | PM / PX / IT Admin                          |
+| Work center/module visibility    | IT Admin, limited PM/PX if approved         |
+| External launch links            | IT Admin; PM/PX request or edit if approved |
+| Technical/provisioning settings  | IT Admin only                               |
+| Permission/security settings     | IT Admin only                               |
+| Site Health repair settings      | IT Admin only                               |
 
 ## Code Work
 
@@ -819,7 +818,7 @@ Phase 3 implementation can be considered complete when:
 2. backend read models support shell consumption;
 3. the approved MVP light workflows are functional;
 4. all five MVP Project Readiness modules support item-level workflow tracking;
-5. Document Control Center supports unified file-source launch/access;
+5. Document Control Center supports the two-lane posture (Microsoft lane preview-only file-management affordances; external lane launch/deep-link/missing-config/access-issue states);
 6. External Systems launch hub supports approved MVP systems;
 7. Site Health supports visibility and repair-request intake;
 8. admin review surfaces support MVP queues;

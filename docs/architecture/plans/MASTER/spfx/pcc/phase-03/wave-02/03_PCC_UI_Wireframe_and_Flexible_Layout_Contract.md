@@ -63,13 +63,7 @@ gridRowEnd = `span ${Math.ceil((height + gap) / (rowUnit + gap))}`;
 ### Widget Contract
 
 ```ts
-type PccWidgetFootprint =
-  | 'hero'
-  | 'wide'
-  | 'standard'
-  | 'compact'
-  | 'tall'
-  | 'full';
+type PccWidgetFootprint = 'hero' | 'wide' | 'standard' | 'compact' | 'tall' | 'full';
 
 interface PccShellWidgetDefinition {
   id: string;
@@ -85,18 +79,18 @@ interface PccShellWidgetDefinition {
 
 ### Initial Widget Set
 
-| Widget | Surface | Footprint | Notes |
-|---|---|---|---|
-| Project Intelligence Header | Project Home | full | Dark header with trend chart and KPI pills. |
-| Priority Actions | Project Home / Approvals | wide | High operational priority. |
-| Site Health Summary | Site Health | standard | Read-model summary only. |
-| Document Control Center | Documents | tall / wide | Access-hub preview, not workflow. |
-| Project Readiness | Project Readiness | standard | Fixture-driven readiness rollup. |
-| Approvals & Checkpoints | Approvals | standard | Preview counts only. |
-| External Systems | External Systems | compact | Launch-link/missing-config state. |
-| Team Snapshot | Team & Access | compact | Summary only, no mutation. |
-| Missing Configurations | Settings / Site Health | standard | Preview items only. |
-| Recent Activity | Project Home | tall | Fixture-only activity feed. |
+| Widget                      | Surface                  | Footprint   | Notes                                                                                                                                                                              |
+| --------------------------- | ------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project Intelligence Header | Project Home             | full        | Dark header with trend chart and KPI pills.                                                                                                                                        |
+| Priority Actions            | Project Home / Approvals | wide        | High operational priority.                                                                                                                                                         |
+| Site Health Summary         | Site Health              | standard    | Read-model summary only.                                                                                                                                                           |
+| Document Control Center     | Documents                | tall / wide | Two-lane preview: Microsoft Files Lane (disabled/preview-only file-management affordances) + External Document Systems Lane (launch/deep-link/missing-config/access-issue states). |
+| Project Readiness           | Project Readiness        | standard    | Fixture-driven readiness rollup.                                                                                                                                                   |
+| Approvals & Checkpoints     | Approvals                | standard    | Preview counts only.                                                                                                                                                               |
+| External Systems            | External Systems         | compact     | Launch-link/missing-config state.                                                                                                                                                  |
+| Team Snapshot               | Team & Access            | compact     | Summary only, no mutation.                                                                                                                                                         |
+| Missing Configurations      | Settings / Site Health   | standard    | Preview items only.                                                                                                                                                                |
+| Recent Activity             | Project Home             | tall        | Fixture-only activity feed.                                                                                                                                                        |
 
 ## Breakpoint Contract
 
