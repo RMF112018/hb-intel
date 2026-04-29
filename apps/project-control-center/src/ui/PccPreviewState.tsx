@@ -17,6 +17,7 @@ export const PCC_PREVIEW_STATES = [
   'missing-config',
   'unavailable-fixture',
   'unauthorized-persona',
+  'not-yet-implemented-operation',
 ] as const;
 
 export type PccPreviewStateKind = (typeof PCC_PREVIEW_STATES)[number];
@@ -71,6 +72,12 @@ export const PCC_PREVIEW_STATE_SPECS: Record<PccPreviewStateKind, PccPreviewStat
     badge: 'Restricted',
     title: 'Not visible to your role',
     description: 'Your persona does not have access to this region.',
+  },
+  'not-yet-implemented-operation': {
+    tone: 'neutral',
+    badge: 'Deferred',
+    title: 'Operation not yet implemented',
+    description: 'This action is intentionally disabled in Wave 2 preview mode.',
   },
 };
 

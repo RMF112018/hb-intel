@@ -1,6 +1,7 @@
 import { Fragment, type FC } from 'react';
 import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import { PccPreviewState } from '../../ui/PccPreviewState';
 import styles from './PccControlCenterSettingsSurface.module.css';
 
 const SURFACE = PCC_MVP_SURFACES['control-center-settings'];
@@ -28,9 +29,11 @@ export const PccControlCenterSettingsSurface: FC = () => (
     >
       <div className={styles.body}>
         <p>{SURFACE.description}</p>
-        <p className={styles.previewCue}>
-          Preview-only settings visibility. No save, update, tenant mutation, or backend/API execution.
-        </p>
+        <PccPreviewState
+          state="preview"
+          title="Preview-only settings visibility"
+          description="No save, update, tenant mutation, or backend/API execution is enabled."
+        />
       </div>
     </PccDashboardCard>
 
@@ -46,11 +49,14 @@ export const PccControlCenterSettingsSurface: FC = () => (
     </PccDashboardCard>
 
     <PccDashboardCard footprint="wide" eyebrow="Missing Configuration" title="Preview Backlog Items">
-      <ul className={styles.missingList}>
-        {MISSING_CONFIG_PREVIEW.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
+      <div className={styles.body}>
+        <PccPreviewState state="missing-config" />
+        <ul className={styles.missingList}>
+          {MISSING_CONFIG_PREVIEW.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
     </PccDashboardCard>
   </Fragment>
 );

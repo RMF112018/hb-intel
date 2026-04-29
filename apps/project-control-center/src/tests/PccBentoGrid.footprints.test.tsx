@@ -6,6 +6,7 @@ import {
   FOOTPRINT_COLUMN_SPANS,
   PCC_CARD_FOOTPRINTS,
 } from '../layout/footprints';
+import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
 
 describe('PccBentoGrid footprint contract', () => {
   it('renders one card per footprint and each carries data-pcc-footprint', () => {
@@ -64,5 +65,19 @@ describe('PccBentoGrid footprint contract', () => {
 
     expect(wideSpan).toBeGreaterThan(phoneSpan);
     expect(phoneSpan).toBe(1);
+  });
+
+  it('Project Home registry renders variable footprints with non-uniform spans (no paired-row dependency)', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccProjectHome />
+      </PccBentoGrid>,
+    );
+    const cards = Array.from(container.querySelectorAll('[data-pcc-card]')) as HTMLElement[];
+    expect(cards.length).toBeGreaterThan(1);
+    const footprints = new Set(cards.map((card) => card.getAttribute('data-pcc-footprint')));
+    const spans = new Set(cards.map((card) => card.getAttribute('data-pcc-column-span')));
+    expect(footprints.size).toBeGreaterThan(1);
+    expect(spans.size).toBeGreaterThan(1);
   });
 });

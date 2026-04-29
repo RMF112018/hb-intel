@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccPreviewState } from '../../ui/PccPreviewState';
 import type { TeamAccessPreviewModel } from './shared';
 import styles from './PccTeamAccessSurface.module.css';
 
@@ -27,6 +28,11 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
             Request role/permission change (preview-only)
           </button>
         </div>
+        <PccPreviewState
+          state="not-yet-implemented-operation"
+          title="Request submission is deferred"
+          description="Request persistence and workflow execution are intentionally disabled for Wave 2 preview."
+        />
 
         <span className={styles.metaRow}>Requested permission templates:</span>
         <div className={styles.tags}>
@@ -37,28 +43,32 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
           ))}
         </div>
 
-        <ul className={styles.list} data-pcc-request-preview-list="">
-          {lane.requestPreviewRecords.map((record) => (
-            <li key={record.requestId}>
-              <div className={styles.metaRow}>
-                <strong>{record.requestedUserLabel}</strong>
-                <PccStatusPill tone="info">{record.requestStatusLabel}</PccStatusPill>
-              </div>
-              <div className={styles.metaRow}>
-                Requested role: {record.requestedPersona} · Template:{' '}
-                {record.requestedPermissionTemplateLabel}
-              </div>
-              <div className={styles.metaRow}>Business justification: {record.businessJustification}</div>
-              <div className={styles.metaRow}>
-                Requested by: {record.requestedByLabel}
-                {record.reviewedByLabel ? ` · Reviewed by: ${record.reviewedByLabel}` : ''}
-              </div>
-              {record.reviewerCommentPreview ? (
-                <div className={styles.metaRow}>Approval/comment preview: {record.reviewerCommentPreview}</div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+        {lane.requestPreviewRecords.length === 0 ? (
+          <PccPreviewState state="unavailable-fixture" />
+        ) : (
+          <ul className={styles.list} data-pcc-request-preview-list="">
+            {lane.requestPreviewRecords.map((record) => (
+              <li key={record.requestId}>
+                <div className={styles.metaRow}>
+                  <strong>{record.requestedUserLabel}</strong>
+                  <PccStatusPill tone="info">{record.requestStatusLabel}</PccStatusPill>
+                </div>
+                <div className={styles.metaRow}>
+                  Requested role: {record.requestedPersona} · Template:{' '}
+                  {record.requestedPermissionTemplateLabel}
+                </div>
+                <div className={styles.metaRow}>Business justification: {record.businessJustification}</div>
+                <div className={styles.metaRow}>
+                  Requested by: {record.requestedByLabel}
+                  {record.reviewedByLabel ? ` · Reviewed by: ${record.reviewedByLabel}` : ''}
+                </div>
+                {record.reviewerCommentPreview ? (
+                  <div className={styles.metaRow}>Approval/comment preview: {record.reviewerCommentPreview}</div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </PccDashboardCard>
   );

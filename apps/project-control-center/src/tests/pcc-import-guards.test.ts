@@ -4,47 +4,56 @@ import { describe, it, expect } from 'vitest';
 
 const SRC_ROOT = resolve(__dirname, '..');
 
-const FORBIDDEN_HOMEPAGE = [
+const FORBIDDEN_MODULE_SPECIFIERS = [
   '@hbc/ui-kit/homepage',
   '@hbc/homepage-launcher',
   'apps/hb-homepage',
-  'HbcHomepageSectionShell',
-  'HbcHomepageActionRow',
-  'HbcHomepageMetadataRow',
-  'HbcSignatureHeroSurface',
-  'HbcCommandSurface',
-  'HbcLauncherSurface',
-  'HbcDiscoverySurface',
-  'HbcEditorialSurface',
-  'HbcOperationalSurface',
-  'HbcSafetyHomepageSurface',
-  'HbcPeopleCultureSurface',
-  'HbcProjectSpotlightSurface',
-  'HbcNewsroomSurface',
-  'HbcPriorityRailSurface',
-];
+  'apps/hb-webparts/src/webparts/hbHomepage/',
+  'hbHomepage/',
+  '@pnp/',
+  '@pnp/sp',
+  '@microsoft/microsoft-graph-client',
+  '@microsoft/sp-http',
+  'procore-sdk',
+  'procoreApi',
+  'procore-client',
+  '/backend/',
+  'backend/routes',
+  'backend/client',
+  'paired-row',
+] as const;
 
-const FORBIDDEN_LIVE_INTEGRATIONS = [
+const FORBIDDEN_EXECUTABLE_SEAMS = [
   '@hbc/auth',
   'bootstrapSpfxAuth',
   'resolveSpfxPermissions',
-  '@pnp/sp',
-  '@microsoft/sp-http',
-  '@microsoft/microsoft-graph-client',
-  'procoreApi',
-  'procore-sdk',
-  // Wave 2 / Prompt 06 — runtime-construction identifiers / package
-  // specifiers that must never appear in app source. Bare product names
-  // (Graph, Procore, Document Crunch, Adobe Sign) are intentionally NOT
-  // listed: they appear in legitimate product copy in JSX text.
   'MSGraphClient',
   'GraphServiceClient',
-  'sp.web',
-  '_api/web',
   'ProcoreClient',
   'DocumentCrunchClient',
   'AdobeSignClient',
-];
+  'fetch(',
+  'XMLHttpRequest',
+  'navigator.clipboard',
+  'localStorage',
+  'sessionStorage',
+  'window.open',
+  'ensureUser',
+  'PeoplePicker',
+  'ClientPeoplePicker',
+  'sp.web',
+  '_api/web',
+  'addRoleAssignment',
+  'breakRoleInheritance',
+  'createGroup',
+  'deleteObject',
+  'deleteGroup',
+  'setUserAsOwner',
+  'removeUserFromGroup',
+  'addUserToGroup',
+  'setSiteAdmin',
+  'tenant.',
+] as const;
 
 function listSourceFiles(dir: string): string[] {
   const out: string[] = [];
@@ -61,11 +70,49 @@ function listSourceFiles(dir: string): string[] {
   return out;
 }
 
-/**
- * Strip line comments, block comments, and string/template literals from a
- * source file before scanning. Keeps imports and identifiers intact.
- * Mirrors the pattern from the source-scan-guard memory: scan code, not prose.
- */
+function stripCommentsOnly(source: string): string {
+  let out = '';
+  let i = 0;
+  let mode: 'code' | 'line' | 'block' = 'code';
+  while (i < source.length) {
+    const c = source[i];
+    const next = source[i + 1];
+    if (mode === 'code') {
+      if (c === '/' && next === '/') {
+        mode = 'line';
+        i += 2;
+        continue;
+      }
+      if (c === '/' && next === '*') {
+        mode = 'block';
+        i += 2;
+        continue;
+      }
+      out += c;
+      i += 1;
+      continue;
+    }
+    if (mode === 'line') {
+      if (c === '\n') {
+        out += '\n';
+        mode = 'code';
+      }
+      i += 1;
+      continue;
+    }
+    if (mode === 'block') {
+      if (c === '*' && next === '/') {
+        mode = 'code';
+        i += 2;
+        continue;
+      }
+      i += 1;
+      continue;
+    }
+  }
+  return out;
+}
+
 function stripCommentsAndStrings(source: string): string {
   let out = '';
   let i = 0;
@@ -136,6 +183,26 @@ function stripCommentsAndStrings(source: string): string {
   return out;
 }
 
+function getModuleSpecifiers(source: string): string[] {
+  const noComments = stripCommentsOnly(source);
+  const specifiers = new Set<string>();
+  const regexes = [
+    /\bimport\s+[^'"\n;]*?\s+from\s+['"]([^'"]+)['"]/g,
+    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+    /\bexport\s+[^'"\n;]*?\s+from\s+['"]([^'"]+)['"]/g,
+  ];
+
+  for (const re of regexes) {
+    re.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(noComments)) !== null) {
+      if (match[1]) specifiers.add(match[1]);
+    }
+  }
+
+  return [...specifiers];
+}
+
 describe('PCC import guards', () => {
   const files = listSourceFiles(SRC_ROOT);
 
@@ -143,21 +210,25 @@ describe('PCC import guards', () => {
     expect(files.length).toBeGreaterThan(0);
   });
 
-  for (const forbidden of FORBIDDEN_HOMEPAGE) {
-    it(`does not import or reference '${forbidden}'`, () => {
+  for (const forbidden of FORBIDDEN_MODULE_SPECIFIERS) {
+    it(`does not import/export module specifier containing '${forbidden}'`, () => {
       const offenders: string[] = [];
       for (const file of files) {
-        const stripped = stripCommentsAndStrings(readFileSync(file, 'utf8'));
-        if (stripped.includes(forbidden)) {
+        const source = readFileSync(file, 'utf8');
+        const specifiers = getModuleSpecifiers(source);
+        if (specifiers.some((specifier) => specifier.includes(forbidden))) {
           offenders.push(file);
         }
       }
-      expect(offenders, `expected no offenders for '${forbidden}', found: ${offenders.join(', ')}`).toEqual([]);
+      expect(
+        offenders,
+        `expected no module specifier offenders for '${forbidden}', found: ${offenders.join(', ')}`,
+      ).toEqual([]);
     });
   }
 
-  for (const forbidden of FORBIDDEN_LIVE_INTEGRATIONS) {
-    it(`does not import or reference '${forbidden}'`, () => {
+  for (const forbidden of FORBIDDEN_EXECUTABLE_SEAMS) {
+    it(`does not include forbidden executable seam '${forbidden}'`, () => {
       const offenders: string[] = [];
       for (const file of files) {
         const stripped = stripCommentsAndStrings(readFileSync(file, 'utf8'));
@@ -165,7 +236,10 @@ describe('PCC import guards', () => {
           offenders.push(file);
         }
       }
-      expect(offenders, `expected no offenders for '${forbidden}', found: ${offenders.join(', ')}`).toEqual([]);
+      expect(
+        offenders,
+        `expected no executable seam offenders for '${forbidden}', found: ${offenders.join(', ')}`,
+      ).toEqual([]);
     });
   }
 });
