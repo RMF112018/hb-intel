@@ -11,7 +11,7 @@ Completed foundations are now in repo:
 - Phase 2 complete (`packages/project-site-provisioning/` headless no-mutation provisioning boundary).
 - Phase 3 Wave 1 complete (`packages/models/src/pcc/` shared PCC read-model foundations).
 
-The next/current implementation wave is Phase 3 Wave 2: PCC SPFx shell-frame and UI/UX foundation. Wave 2 is planned/current and not yet implemented in runtime app code.
+The next/current implementation wave is Phase 3 Wave 2: PCC SPFx shell-frame and UI/UX foundation. Wave 2 is active/in-progress: Prompt 02 scaffolded `apps/project-control-center/`, and subsequent Wave 2 prompts continue shell/frame/surface preview implementation with fixture-driven posture.
 
 ## 1A. Document Authority Split
 
@@ -249,9 +249,9 @@ Build the PCC shell-frame and operating-dashboard UI/UX foundation only.
 
 ## 7. Recommended Immediate Next Steps
 
-1. Confirm Wave 2 Prompt 01 repo-truth audit and shell scope lock.
-2. Keep `apps/project-control-center/` as the locked shell target when Wave 2 implementation starts.
-3. Build Wave 2 shell-frame UI/UX only after scope lock closure.
+1. Confirm Prompt 01 repo-truth audit and scope lock remain satisfied as Wave 2 continues.
+2. Keep `apps/project-control-center/` as the locked shell target while implementing subsequent Wave 2 preview prompts.
+3. Continue Wave 2 shell-frame UI/UX preview implementation under fixture/read-model-first posture.
 4. Keep Wave 2 data posture fixture/read-model-first through `@hbc/models/pcc`.
 5. Do not introduce backend routes, provisioning executor work, tenant mutation, live Graph/PnP, or Procore runtime in Wave 2.
 6. Preserve direct SPFx-to-Procore ban and no-secrets guardrails.

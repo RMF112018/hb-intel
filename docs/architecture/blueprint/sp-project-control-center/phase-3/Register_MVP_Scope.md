@@ -6,7 +6,7 @@ Generated: 2026-04-28
 
 The PCC MVP is **Project Home + governed navigation hub + light operational workflows**.
 
-It is not merely a landing page. It should support a useful project operating experience for core project roles while staying inside the Phase 3 planning-only boundary until Phase 2 gates close.
+It is not merely a landing page. It should support a useful project operating experience for core project roles and proceed through gated Phase 3 implementation waves with Wave 2 preview-only/runtime-boundary guardrails intact.
 
 ## MVP-Included Scope
 
@@ -38,19 +38,19 @@ It is not merely a landing page. It should support a useful project operating ex
 | Document management workflows          | Wave 2 includes no standalone submittal/transmittal/revision-routing/review-routing workflow execution and no approval execution. Microsoft Files Lane remains preview-only in Wave 2, then future Graph-backed capabilities may be added only through later approved gates. |
 | Deep Procore/Sage/Compass integrations | Future-gated; launch-only in MVP.                                                                                                                                                                                                                                            |
 
-## Explicitly Blocked for Phase 3 Planning Stage
+## Explicitly Blocked Until Later Approved Gates
 
-| Blocked Item           | Reason                                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| SPFx implementation    | Phase 3 planning-only until implementation gate.                                                       |
-| Backend implementation | Requires Phase 2 proof/mutation boundaries.                                                            |
-| Provisioning executor  | Blocked until Phase 2 authorizes executor behavior.                                                    |
-| Tenant mutation        | Requires approved manifest, dry-run proof, mutation gate, non-production boundary, validation posture. |
-| Procore runtime        | Explicitly deferred; launch-only MVP.                                                                  |
-| Direct SPFx-to-Procore | Forbidden.                                                                                             |
-| Procore full mirror    | Forbidden.                                                                                             |
-| Procore write-back     | Forbidden.                                                                                             |
-| Production rollout     | Production-blocked.                                                                                    |
+| Blocked Item           | Reason                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| SPFx implementation    | Allowed only through approved Phase 3 implementation waves; out-of-wave or ungated implementation is blocked. |
+| Backend implementation | Live backend operations remain blocked unless later Phase 3/Phase 2 gates explicitly authorize them.          |
+| Provisioning executor  | Blocked unless later gates explicitly authorize executor behavior.                                            |
+| Tenant mutation        | Requires approved manifest, dry-run proof, mutation gate, non-production boundary, validation posture.        |
+| Procore runtime        | Explicitly deferred; launch-only MVP.                                                                         |
+| Direct SPFx-to-Procore | Forbidden.                                                                                                    |
+| Procore full mirror    | Forbidden.                                                                                                    |
+| Procore write-back     | Forbidden.                                                                                                    |
+| Production rollout     | Production-blocked.                                                                                           |
 
 ## MVP Success Criteria
 

@@ -79,3 +79,11 @@ Keep `packages/models/src/pcc/DocumentControl.ts` unchanged in this correction. 
 - future Graph-backed capability flags;
 - external launch/deep-link behavior;
 - disabled/preview-only action state.
+
+## Follow-Up Cleanup
+
+- Canonical Wave 2 decision register was corrected, including W2-ODR-013 two-lane language in `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/01_Wave_2_Decision_Closure_Register.md`.
+- Executed-state ledger stale/corrupted language was fixed for W2-ODR-001 and W2-ODR-002 in `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-2/Wave_2_Decision_Closure_Register.md`.
+- Roadmap and target architecture scaffold status was corrected to reflect that `apps/project-control-center/` scaffold exists and Wave 2 is active/in-progress preview work.
+- Stale phrase search was completed for: `access hub only`, `currently absent`, `not yet present`, `not yet implemented in runtime app code`, and `released for the next scaffold prompt only`, with relevant in-scope governance-doc hits corrected.
+- No source/runtime/backend/provisioning/Graph/PnP/Procore/package/manifest/CI/lockfile changes were made.

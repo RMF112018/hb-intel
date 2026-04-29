@@ -40,8 +40,8 @@ Current status:
 - Phase 1 is complete (`@hbc/project-site-template` contract package exists and validation gate is closed).
 - Phase 2 is complete (`@hbc/project-site-provisioning` headless no-mutation boundary package exists).
 - Phase 3 Wave 1 is complete (PCC shared read-model foundations are shipped in `packages/models/src/pcc/`).
-- Phase 3 Wave 2 is the planned/current PCC SPFx shell-frame and UI/UX wave. It is not implemented in repo runtime code yet.
-- `apps/project-control-center/` is the locked Wave 2 target location and is currently absent in repo truth at this time.
+- Phase 3 Wave 2 is the active/current PCC SPFx shell-frame and UI/UX wave, with fixture-driven preview implementation in progress.
+- `apps/project-control-center/` is the locked Wave 2 target location and scaffold exists in repo truth.
 
 ## 1B. Document Authority Split
 
@@ -161,7 +161,7 @@ Users should not manually manage SharePoint groups, Entra groups, or library per
 - `packages/project-site-template/` exists and is the machine-readable contract package for PCC template artifacts.
 - `packages/project-site-provisioning/` exists and is the headless provisioning boundary package with no tenant mutation or live API execution.
 - `packages/models/src/pcc/` exists and exports Wave 1 shared PCC vocabulary, fixtures, and navigation-surface identifiers.
-- `apps/project-control-center/` is the locked Wave 2 shell target location and is not yet present.
+- `apps/project-control-center/` is the locked Wave 2 shell target location and scaffold is present.
 
 ### 5.1 Existing Repo Foundations
 
@@ -334,7 +334,7 @@ Each project site should carry a Project Profile record with:
 
 ```text
 apps/project-control-center/
-  Full-page SPFx shell for project team sites (locked Wave 2 target; currently absent)
+  Full-page SPFx shell for project team sites (locked Wave 2 target; scaffold present)
 
 apps/document-control-center/
   Reusable document/file browser module
@@ -416,13 +416,7 @@ Project Home must not reuse the `hb-intel-homepage` fixed paired-row composition
 The preferred Wave 2 implementation model is CSS Grid with measured row spans and predictable DOM/focus order.
 
 ```ts
-type PccWidgetFootprint =
-  | 'hero'
-  | 'wide'
-  | 'standard'
-  | 'compact'
-  | 'tall'
-  | 'full';
+type PccWidgetFootprint = 'hero' | 'wide' | 'standard' | 'compact' | 'tall' | 'full';
 ```
 
 Wave 2 layout guardrails:
@@ -481,16 +475,16 @@ The following example documents are assumed to be stored in the repo at:
 docs/reference/example/
 ```
 
-| Example Document | Primary Architecture Use |
-|---|---|
-| `Project_Startup_Checklist(1).pdf` | Startup Center, Contract & Compliance, Field Operations, Action Center |
-| `Project_Closeout_Checklist(1).pdf` | Closeout & Warranty Center, Document Control, Risk, Action Center |
-| `Permit_Log_Template.xlsx` | Permit & AHJ Center |
-| `10b_20260220_RequiredInspectionsList(1).xlsx` | Inspection Readiness Center |
-| `Responsibility Matrix - Template(1).xlsx` | Responsibility Matrix Center, Team & Access, Action Center |
-| `Responsibility Matrix - Owner Contract Template(1).xlsx` | Contract & Obligation Center |
-| `06 20260307_SOP_SubScorecard-DRAFT(1).xlsx` | Subcontractor Performance Center, Procurement & Buyout, Closeout |
-| `07 20260307_SOP_LessonsLearnedReport-DRAFT(1).xlsx` | Lessons Learned Center, Best Practices, HBI knowledge base |
+| Example Document                                          | Primary Architecture Use                                               |
+| --------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `Project_Startup_Checklist(1).pdf`                        | Startup Center, Contract & Compliance, Field Operations, Action Center |
+| `Project_Closeout_Checklist(1).pdf`                       | Closeout & Warranty Center, Document Control, Risk, Action Center      |
+| `Permit_Log_Template.xlsx`                                | Permit & AHJ Center                                                    |
+| `10b_20260220_RequiredInspectionsList(1).xlsx`            | Inspection Readiness Center                                            |
+| `Responsibility Matrix - Template(1).xlsx`                | Responsibility Matrix Center, Team & Access, Action Center             |
+| `Responsibility Matrix - Owner Contract Template(1).xlsx` | Contract & Obligation Center                                           |
+| `06 20260307_SOP_SubScorecard-DRAFT(1).xlsx`              | Subcontractor Performance Center, Procurement & Buyout, Closeout       |
+| `07 20260307_SOP_LessonsLearnedReport-DRAFT(1).xlsx`      | Lessons Learned Center, Best Practices, HBI knowledge base             |
 
 ---
 
@@ -2456,14 +2450,14 @@ The Project Control Center should provide three levels of integration:
 
 ### 36.2 Integration Candidates
 
-| Platform | Candidate Uses |
-|---|---|
-| Procore | RFIs, submittals, drawings/specs, change events, daily logs, inspections, directory, commitments, punch, schedule |
-| Sage Intacct | job setup, budget, cost reporting, commitments, pay apps, invoices, final payment |
-| Compass | subcontractor prequalification, vendor profile, trade capacity, performance history |
-| Document Crunch | prime contract review, subcontract review, obligation extraction, risk clauses, notice requirements |
-| Adobe Sign | prime contract execution, subcontract execution, change order signatures, lien releases |
-| Cupix | existing conditions, progress capture, turnover/warranty visual records, location-based photo/video context |
+| Platform        | Candidate Uses                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Procore         | RFIs, submittals, drawings/specs, change events, daily logs, inspections, directory, commitments, punch, schedule |
+| Sage Intacct    | job setup, budget, cost reporting, commitments, pay apps, invoices, final payment                                 |
+| Compass         | subcontractor prequalification, vendor profile, trade capacity, performance history                               |
+| Document Crunch | prime contract review, subcontract review, obligation extraction, risk clauses, notice requirements               |
+| Adobe Sign      | prime contract execution, subcontract execution, change order signatures, lien releases                           |
+| Cupix           | existing conditions, progress capture, turnover/warranty visual records, location-based photo/video context       |
 
 ### 36.3 External System Mapping List
 
@@ -2567,18 +2561,18 @@ Rationale for endpoint / version tracking: package §13 explicitly flags mixed m
 
 Sync runs are recorded per subject area. The canonical `ErrorCategory` enum:
 
-| `ErrorCategory` | Plain-language UI message | Severity | Repair Tier |
-|---|---|---|---|
-| `AuthFailed` | "Procore sign-in failed. Contact integration admin." | Security Risk | T3 — IT-Approved |
-| `PermissionDenied` | "Procore service does not have permission for this project." | Repair Required | T3 |
-| `RateLimited` | "Procore is busy; data refresh delayed." | Warning | T1 (auto-retry) |
-| `EndpointDeprecated` | "An older Procore endpoint is in use; refresh planned." | Warning | T2 (Admin) |
-| `MappingMissing` | "Procore project mapping is not configured." | Repair Required | T2 |
-| `ProjectNotFound` | "The mapped Procore project cannot be found." | Repair Required | T3 |
-| `PartialSync` | "Some Procore data is delayed or missing." | Warning | T1 |
-| `StaleData` | "Last successful refresh is older than expected." | Warning | T1 |
-| `MaterializationFailed` | "PCC could not save the latest Procore summary." | Repair Required | T2 |
-| `Unknown` | "An unexpected Procore integration issue occurred." | Repair Required | T3 |
+| `ErrorCategory`         | Plain-language UI message                                    | Severity        | Repair Tier      |
+| ----------------------- | ------------------------------------------------------------ | --------------- | ---------------- |
+| `AuthFailed`            | "Procore sign-in failed. Contact integration admin."         | Security Risk   | T3 — IT-Approved |
+| `PermissionDenied`      | "Procore service does not have permission for this project." | Repair Required | T3               |
+| `RateLimited`           | "Procore is busy; data refresh delayed."                     | Warning         | T1 (auto-retry)  |
+| `EndpointDeprecated`    | "An older Procore endpoint is in use; refresh planned."      | Warning         | T2 (Admin)       |
+| `MappingMissing`        | "Procore project mapping is not configured."                 | Repair Required | T2               |
+| `ProjectNotFound`       | "The mapped Procore project cannot be found."                | Repair Required | T3               |
+| `PartialSync`           | "Some Procore data is delayed or missing."                   | Warning         | T1               |
+| `StaleData`             | "Last successful refresh is older than expected."            | Warning         | T1               |
+| `MaterializationFailed` | "PCC could not save the latest Procore summary."             | Repair Required | T2               |
+| `Unknown`               | "An unexpected Procore integration issue occurred."          | Repair Required | T3               |
 
 Plain-language messages reach ordinary users; technical diagnostics live in the Procore Integration Audit (§32 Site Health).
 
@@ -2609,50 +2603,50 @@ Backend handles rate-limit responses with retry-with-backoff. `RateLimited` is `
 
 ### 36A.16 Three-tier scope ladder
 
-| Tier | Scope | Source |
-|---|---|---|
-| **PCC MVP** | Project mapping, launch / deep links, Procore Settings (read-only fields populated from mapping), Sync Health placeholder, Object Link pattern. **No summaries materialized.** | Contract §21.8 |
+| Tier                                                           | Scope                                                                                                                                                                                                                                                                                                                                             | Source                                                |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **PCC MVP**                                                    | Project mapping, launch / deep links, Procore Settings (read-only fields populated from mapping), Sync Health placeholder, Object Link pattern. **No summaries materialized.**                                                                                                                                                                    | Contract §21.8                                        |
 | **Procore Recommended Practical Model** (default future state) | Operational summaries and canonical-layer sync by subject area: directory + projects, RFIs, submittals, observations, inspections, incidents, punch, commitments, change events, requisitions, drawings/specs metadata, daily-log headers, timecards, production quantities, drawings/specs/document metadata, workflow instances, project roles. | Package `12-Core-vs-Extended-Scope-Recommendation.md` |
-| **Full Strategic Enterprise** | Cross-project analytics, HBI grounding, broader workflow / coordination / equipment / telematics, raw-payload archival/replay, **governed write-back if approved**. | Package |
+| **Full Strategic Enterprise**                                  | Cross-project analytics, HBI grounding, broader workflow / coordination / equipment / telematics, raw-payload archival/replay, **governed write-back if approved**.                                                                                                                                                                               | Package                                               |
 
 ### 36A.17 Procore Module Matrix
 
 One row per canonical entity, with the subject area called out explicitly. MVP / Future is keyed to the §36A.16 ladder (everything past mapping + launch links is Recommended Practical or later).
 
-| Canonical Entity | Subject Area | PCC Module | PCC Use | System of Record | Storage Target | MVP / Future |
-|---|---|---|---|---|---|---|
-| `project` | (cross-cutting) | Project Home / Settings | mapping, health, launch | Procore | SharePoint materialized + deep link | **MVP** (mapping placeholder) |
-| `company`, `user`, `vendor` | (cross-cutting masters) | Team & Access / Project Directory | directory comparison, contacts | Procore + PCC split | canonical (backend) | Future (Recommended Practical) |
-| `rfi` | `project_management` | Action Center / Document Control | open / overdue summaries, deep links | Procore | curated summary + deep link | Future (Recommended Practical) |
-| `submittal` | `project_management` | Action Center / Document Control | awaiting action, overdue, closeout gates | Procore | curated summary + deep link | Future (Recommended Practical) |
-| `correspondence`, `meeting`, `form` | `project_management` | Meeting & Communication | summaries, deep links | Procore | canonical + deep link | Future (Recommended Practical) |
-| `drawing` | `documents_design` | Document Control / Drawing & Model Center | latest set, revision metadata, deep links | Procore | metadata summary (no binary mirror) | Future (Recommended Practical) |
-| `specification` | `documents_design` | Document Control / Drawing & Model Center | spec set, deep links | Procore | metadata summary | Future (Recommended Practical) |
-| `daily_log` (header), `timecard_entry`, `production_quantity`, `equipment_usage` | `field_execution` | Field Operations Center | completion status, exceptions | Procore | canonical (backend); curated header summary in SharePoint only | Future (Recommended Practical for headers; full detail Future Strategic) |
-| `inspection`, `inspection_item` | `quality_safety` | Inspection Readiness / Field Operations | execution results, failed items | Procore + PCC split (PCC owns the required-inspection template) | curated summary + deep link | Future (Recommended Practical) |
-| `observation` | `quality_safety` | Field Operations / Action Center | open observations, safety / quality issues | Procore | curated summary + deep link | Future (Recommended Practical) |
-| `incident` | `quality_safety` | Field Operations / Action Center | open incidents | Procore | curated summary + deep link | Future (Recommended Practical) |
-| `punch_item` | `quality_safety` | Closeout / Field Operations | punch completion, turnover readiness | Procore | curated summary + deep link | Future (Recommended Practical) |
-| `coordination_issue` | `quality_safety` | Risk / Issues / Decision Log | open coordination issues | Procore | curated summary | Future (Strategic Enterprise) |
-| `commitment`, `commitment_change_order` | `financials` | Procurement & Buyout / Project Controls | subcontract status, change-order status | Procore | canonical + summary | Future (Recommended Practical) |
-| `change_event`, `budget_change` | `financials` | Project Controls | change exposure | Procore | canonical + summary | Future (Recommended Practical) |
-| `budget_view`, `budget_view_snapshot` | `financials` | Project Controls | project financial snapshots | Procore + Sage split (per §25 / §36A.2) | canonical (snapshot rows); summary in SharePoint | Future (Recommended Practical) |
-| `prime_contract`, `prime_change_order`, `requisition`, `direct_cost`, `owner_invoice`, `payment` | `financials` | Project Controls / Closeout | summaries, deep links | Procore | canonical + summary | Future (Recommended Practical) |
-| `workflow_instance`, `workflow_activity`, `action_plan` | `workflow` | Action Center | approval queue, action exceptions | Procore | canonical + summary | Future (Strategic Enterprise) |
+| Canonical Entity                                                                                 | Subject Area            | PCC Module                                | PCC Use                                    | System of Record                                                | Storage Target                                                 | MVP / Future                                                             |
+| ------------------------------------------------------------------------------------------------ | ----------------------- | ----------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `project`                                                                                        | (cross-cutting)         | Project Home / Settings                   | mapping, health, launch                    | Procore                                                         | SharePoint materialized + deep link                            | **MVP** (mapping placeholder)                                            |
+| `company`, `user`, `vendor`                                                                      | (cross-cutting masters) | Team & Access / Project Directory         | directory comparison, contacts             | Procore + PCC split                                             | canonical (backend)                                            | Future (Recommended Practical)                                           |
+| `rfi`                                                                                            | `project_management`    | Action Center / Document Control          | open / overdue summaries, deep links       | Procore                                                         | curated summary + deep link                                    | Future (Recommended Practical)                                           |
+| `submittal`                                                                                      | `project_management`    | Action Center / Document Control          | awaiting action, overdue, closeout gates   | Procore                                                         | curated summary + deep link                                    | Future (Recommended Practical)                                           |
+| `correspondence`, `meeting`, `form`                                                              | `project_management`    | Meeting & Communication                   | summaries, deep links                      | Procore                                                         | canonical + deep link                                          | Future (Recommended Practical)                                           |
+| `drawing`                                                                                        | `documents_design`      | Document Control / Drawing & Model Center | latest set, revision metadata, deep links  | Procore                                                         | metadata summary (no binary mirror)                            | Future (Recommended Practical)                                           |
+| `specification`                                                                                  | `documents_design`      | Document Control / Drawing & Model Center | spec set, deep links                       | Procore                                                         | metadata summary                                               | Future (Recommended Practical)                                           |
+| `daily_log` (header), `timecard_entry`, `production_quantity`, `equipment_usage`                 | `field_execution`       | Field Operations Center                   | completion status, exceptions              | Procore                                                         | canonical (backend); curated header summary in SharePoint only | Future (Recommended Practical for headers; full detail Future Strategic) |
+| `inspection`, `inspection_item`                                                                  | `quality_safety`        | Inspection Readiness / Field Operations   | execution results, failed items            | Procore + PCC split (PCC owns the required-inspection template) | curated summary + deep link                                    | Future (Recommended Practical)                                           |
+| `observation`                                                                                    | `quality_safety`        | Field Operations / Action Center          | open observations, safety / quality issues | Procore                                                         | curated summary + deep link                                    | Future (Recommended Practical)                                           |
+| `incident`                                                                                       | `quality_safety`        | Field Operations / Action Center          | open incidents                             | Procore                                                         | curated summary + deep link                                    | Future (Recommended Practical)                                           |
+| `punch_item`                                                                                     | `quality_safety`        | Closeout / Field Operations               | punch completion, turnover readiness       | Procore                                                         | curated summary + deep link                                    | Future (Recommended Practical)                                           |
+| `coordination_issue`                                                                             | `quality_safety`        | Risk / Issues / Decision Log              | open coordination issues                   | Procore                                                         | curated summary                                                | Future (Strategic Enterprise)                                            |
+| `commitment`, `commitment_change_order`                                                          | `financials`            | Procurement & Buyout / Project Controls   | subcontract status, change-order status    | Procore                                                         | canonical + summary                                            | Future (Recommended Practical)                                           |
+| `change_event`, `budget_change`                                                                  | `financials`            | Project Controls                          | change exposure                            | Procore                                                         | canonical + summary                                            | Future (Recommended Practical)                                           |
+| `budget_view`, `budget_view_snapshot`                                                            | `financials`            | Project Controls                          | project financial snapshots                | Procore + Sage split (per §25 / §36A.2)                         | canonical (snapshot rows); summary in SharePoint               | Future (Recommended Practical)                                           |
+| `prime_contract`, `prime_change_order`, `requisition`, `direct_cost`, `owner_invoice`, `payment` | `financials`            | Project Controls / Closeout               | summaries, deep links                      | Procore                                                         | canonical + summary                                            | Future (Recommended Practical)                                           |
+| `workflow_instance`, `workflow_activity`, `action_plan`                                          | `workflow`              | Action Center                             | approval queue, action exceptions          | Procore                                                         | canonical + summary                                            | Future (Strategic Enterprise)                                            |
 
 ### 36A.18 Terminology Alignment
 
 PCC surface names diverge from the package's snake_case canonical layer.
 
-| Concept | Package (canonical / data layer) | PCC / SharePoint surface |
-|---|---|---|
-| Top-level grouping | `subject area` (six: `financials`, `project_management`, `documents_design`, `quality_safety`, `field_execution`, `workflow`) | "Procore Subject Area"; PCC stores per-project enablement in **Procore Subject Area Registry** |
-| Canonical entity | bare snake_case (`project`, `rfi`, `submittal`, `observation`, `punch_item`, …) | Same names quoted; PCC objects that reference them use PCC field names |
-| Lineage | `procore_company_id`, `procore_project_id`, `source_system_id`, `source_updated_at`, `ingested_at` | Mirror as `ProcoreCompanyId`, `ProcoreProjectId`, `ProcoreObjectType`, `ProcoreObjectId`, `ProcoreObjectUrl`, `ProcoreLastSyncedAt`, `SourceSystem`, `CanonicalEntityId`, `CanonicalEntityType`, `MaterializedRecordId` |
-| Storage layers | Raw landing → Canonical relational → SharePoint / HB Intel materialized → Document/file storage | Same; PCC adds **deep links back to Procore** as an explicit fifth surface |
-| Scope tier | Minimum Viable / **Recommended Practical** (default) / Full Strategic Enterprise | Anchored in §36A.16 |
-| Wave priority | Wave 1–7 from `extraction_priority_matrix.csv` | Mapped to Phase 1–6 in §38 |
-| Auth | DMSA preferred for enterprise sync | DMSA cited as the default backend posture; user-context OAuth deferred |
+| Concept            | Package (canonical / data layer)                                                                                              | PCC / SharePoint surface                                                                                                                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Top-level grouping | `subject area` (six: `financials`, `project_management`, `documents_design`, `quality_safety`, `field_execution`, `workflow`) | "Procore Subject Area"; PCC stores per-project enablement in **Procore Subject Area Registry**                                                                                                                          |
+| Canonical entity   | bare snake_case (`project`, `rfi`, `submittal`, `observation`, `punch_item`, …)                                               | Same names quoted; PCC objects that reference them use PCC field names                                                                                                                                                  |
+| Lineage            | `procore_company_id`, `procore_project_id`, `source_system_id`, `source_updated_at`, `ingested_at`                            | Mirror as `ProcoreCompanyId`, `ProcoreProjectId`, `ProcoreObjectType`, `ProcoreObjectId`, `ProcoreObjectUrl`, `ProcoreLastSyncedAt`, `SourceSystem`, `CanonicalEntityId`, `CanonicalEntityType`, `MaterializedRecordId` |
+| Storage layers     | Raw landing → Canonical relational → SharePoint / HB Intel materialized → Document/file storage                               | Same; PCC adds **deep links back to Procore** as an explicit fifth surface                                                                                                                                              |
+| Scope tier         | Minimum Viable / **Recommended Practical** (default) / Full Strategic Enterprise                                              | Anchored in §36A.16                                                                                                                                                                                                     |
+| Wave priority      | Wave 1–7 from `extraction_priority_matrix.csv`                                                                                | Mapped to Phase 1–6 in §38                                                                                                                                                                                              |
+| Auth               | DMSA preferred for enterprise sync                                                                                            | DMSA cited as the default backend posture; user-context OAuth deferred                                                                                                                                                  |
 
 ---
 
@@ -2807,60 +2801,60 @@ This set directly addresses:
 
 ### 41.0 Status definitions
 
-| Status | Meaning |
-|---|---|
-| `Frozen for MVP` | Architecture decision is closed for the first provisioning release; implementation must follow it unless a later amendment changes it. |
+| Status                  | Meaning                                                                                                                                                  |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Frozen for MVP`        | Architecture decision is closed for the first provisioning release; implementation must follow it unless a later amendment changes it.                   |
 | `Runtime Configuration` | Architecture is closed but the actual value is tenant-, environment-, or project-specific and is captured in configuration during provisioning or setup. |
-| `Deferred` | Intentionally out of MVP scope; must not block MVP implementation. Future implementation requires a new amendment or release plan. |
-| `Proof-Gated` | Target direction known but final implementation depends on technical proof, tenant validation, API capability confirmation, or security review. |
+| `Deferred`              | Intentionally out of MVP scope; must not block MVP implementation. Future implementation requires a new amendment or release plan.                       |
+| `Proof-Gated`           | Target direction known but final implementation depends on technical proof, tenant validation, API capability confirmation, or security review.          |
 
 ### 41.1 Register (one line per decision)
 
 #### Core PCC / SharePoint decisions
 
-| ID | Decision | Status | One-line closure |
-|---|---|---|---|
-| D-01 | Central Entra group object IDs | `Runtime Configuration` | Names frozen; IDs resolved from HBCentral configuration. |
-| D-02 | Project-local SharePoint group IDs | `Runtime Configuration` | Names frozen; IDs generated at provisioning. |
-| D-03 | Custom permission-level role definitions | `Frozen for MVP` | `HB Read`, `HB Contribute No Delete`, `HB Contribute`, `HB Manage Project Content`, `Full Control`. |
-| D-04 | External users (MVP) | `Deferred` | No external users in MVP. |
-| D-05 | External access approval workflow | `Deferred` | Future model captured; not built in MVP. |
-| D-06 | Final app-only permission reduction | `Proof-Gated` | Target `Sites.Create.All` + `Sites.Selected`; reduce after proof. |
-| D-07 | SharePoint REST / PnP residual permissions | `Proof-Gated` | Graph first; REST/PnP only where required. |
-| D-08 | Per-project phase exception URL suffix | `Frozen for MVP` | `/sites/{ProjectBaseNumberNoHyphen}-{PhaseSuffixNoHyphen}` (e.g., `/sites/26000-01`) when an exception is approved. |
-| D-09 | OneDrive sync enforcement | `Runtime Configuration` | PCC governs labels; IT governs device enforcement. |
-| D-10 | Project Access Audit mirror to HBCentral | `Frozen for MVP` | Mirror near-real-time; local audit is source on failure. |
-| D-11 | Site-local → HBCentral promotion workflows | `Frozen for MVP` | PM submits / PX approves / Ops curates (lessons, sub performance, closeout summary). |
-| D-12 | **ProjectType enum** | `Frozen for MVP` | `commercial`, `multifamily`, `municipal`, `luxury_residential`, `environmental`. |
-| D-13 | **ProjectStage enum** | `Frozen for MVP` | `lead`, `estimating`, `preconstruction`, `active_construction`, `closeout`, `warranty`. Archive is `ProjectStatus = Archived`, not a stage. |
-| D-14 | Repair automation edge cases | `Frozen for MVP` | T1 auto / T2 admin / T3 IT / T4 manual; no destructive auto-repair. |
-| D-15 | Default expirations for non-external templates | `Frozen for MVP` | Internal: no fixed expiration; viewer 90d; estimating/precon 30d after `active_construction`. |
-| D-16 | HBI Assistant first-release scope | `Deferred` | Architecture hooks only; no HBI in MVP. |
-| D-17 | Per-project-type list seeding beyond current rules | `Deferred` | Common seed set in MVP; future per-type expansions tracked. |
-| D-18 | HB SharePoint Creator permission grants | `Proof-Gated` | Use minimum Graph app permissions proven by implementation; `GroupMember.ReadWrite.All` only if required. |
-| D-19 | Per-stage / per-status edge behavior | `Frozen for MVP` | Stage drives module visibility; status drives archive behavior; transitions governed and audited. |
+| ID   | Decision                                           | Status                  | One-line closure                                                                                                                            |
+| ---- | -------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-01 | Central Entra group object IDs                     | `Runtime Configuration` | Names frozen; IDs resolved from HBCentral configuration.                                                                                    |
+| D-02 | Project-local SharePoint group IDs                 | `Runtime Configuration` | Names frozen; IDs generated at provisioning.                                                                                                |
+| D-03 | Custom permission-level role definitions           | `Frozen for MVP`        | `HB Read`, `HB Contribute No Delete`, `HB Contribute`, `HB Manage Project Content`, `Full Control`.                                         |
+| D-04 | External users (MVP)                               | `Deferred`              | No external users in MVP.                                                                                                                   |
+| D-05 | External access approval workflow                  | `Deferred`              | Future model captured; not built in MVP.                                                                                                    |
+| D-06 | Final app-only permission reduction                | `Proof-Gated`           | Target `Sites.Create.All` + `Sites.Selected`; reduce after proof.                                                                           |
+| D-07 | SharePoint REST / PnP residual permissions         | `Proof-Gated`           | Graph first; REST/PnP only where required.                                                                                                  |
+| D-08 | Per-project phase exception URL suffix             | `Frozen for MVP`        | `/sites/{ProjectBaseNumberNoHyphen}-{PhaseSuffixNoHyphen}` (e.g., `/sites/26000-01`) when an exception is approved.                         |
+| D-09 | OneDrive sync enforcement                          | `Runtime Configuration` | PCC governs labels; IT governs device enforcement.                                                                                          |
+| D-10 | Project Access Audit mirror to HBCentral           | `Frozen for MVP`        | Mirror near-real-time; local audit is source on failure.                                                                                    |
+| D-11 | Site-local → HBCentral promotion workflows         | `Frozen for MVP`        | PM submits / PX approves / Ops curates (lessons, sub performance, closeout summary).                                                        |
+| D-12 | **ProjectType enum**                               | `Frozen for MVP`        | `commercial`, `multifamily`, `municipal`, `luxury_residential`, `environmental`.                                                            |
+| D-13 | **ProjectStage enum**                              | `Frozen for MVP`        | `lead`, `estimating`, `preconstruction`, `active_construction`, `closeout`, `warranty`. Archive is `ProjectStatus = Archived`, not a stage. |
+| D-14 | Repair automation edge cases                       | `Frozen for MVP`        | T1 auto / T2 admin / T3 IT / T4 manual; no destructive auto-repair.                                                                         |
+| D-15 | Default expirations for non-external templates     | `Frozen for MVP`        | Internal: no fixed expiration; viewer 90d; estimating/precon 30d after `active_construction`.                                               |
+| D-16 | HBI Assistant first-release scope                  | `Deferred`              | Architecture hooks only; no HBI in MVP.                                                                                                     |
+| D-17 | Per-project-type list seeding beyond current rules | `Deferred`              | Common seed set in MVP; future per-type expansions tracked.                                                                                 |
+| D-18 | HB SharePoint Creator permission grants            | `Proof-Gated`           | Use minimum Graph app permissions proven by implementation; `GroupMember.ReadWrite.All` only if required.                                   |
+| D-19 | Per-stage / per-status edge behavior               | `Frozen for MVP`        | Stage drives module visibility; status drives archive behavior; transitions governed and audited.                                           |
 
 #### Procore decisions
 
-| ID | Decision | Status | One-line closure |
-|---|---|---|---|
-| P-01 | Procore authentication model | `Frozen for MVP` | DMSA / backend service account; user-context OAuth deferred. |
-| P-02 | Procore credential storage | `Frozen for MVP` | Azure Key Vault per environment via managed identity. |
-| P-03 | **Procore Company ID** | `Frozen for MVP` | `ProcoreCompanyId = 5280`. Configuration; not a secret. |
-| P-04 | **Procore mapping owner** | `Frozen for MVP` | Primary: PM. Fallback: PX. Repair: IT / Integration Admin. PA excluded. |
-| P-05 | MVP-enabled Procore subject areas | `Frozen for MVP` | None. Mapping + launch links + sync health placeholder only. |
-| P-06 | Sync cadence per subject area | `Deferred` | Adopt package defaults at Recommended Practical. |
-| P-07 | Webhooks vs polling | `Deferred` | Webhooks for `project_management` / `quality_safety`; polling fallback / snapshots for others. |
-| P-08 | Canonical storage target | `Deferred` | Azure SQL (canonical) + Azure Blob (raw landing). |
-| P-09 | Raw payload retention | `Deferred` | 90 days default; longer for replay / legal hold. |
-| P-10 | SharePoint materialization boundaries | `Frozen for MVP` | Mappings / summaries / sync health / audits only; no raw payloads or bulk binaries. |
-| P-11 | Procore vs Sage financial SoR | `Frozen for MVP` | Sage is accounting book of record; Procore = operational state, labeled as Procore-sourced. |
-| P-12 | Procore write-back governance | `Deferred` | No Procore writes from PCC until amendment satisfies §36A.13 gates. |
-| P-13 | Rate-limit / retry thresholds | `Deferred` | Exponential backoff with jitter; ~1/2/4/8/16 min; 5 attempts; escalate after 3 failed runs. |
-| P-14 | Endpoint version review cadence | `Deferred` | Quarterly review; IT / Integration Admin + Architecture sign-off for high risk. |
-| P-15 | Sandbox vs production separation | `Frozen for MVP` | Strict separation of credentials, secrets, storage, config, schedules. |
-| P-16 | Procore data deletion / archive policy | `Deferred` | Soft-delete / tombstone; no immediate hard-delete. |
-| P-17 | External-user / Procore-directory reconciliation | `Frozen for MVP` | Comparison only; no auto-grant of SharePoint access (R6). |
+| ID   | Decision                                         | Status           | One-line closure                                                                               |
+| ---- | ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------- |
+| P-01 | Procore authentication model                     | `Frozen for MVP` | DMSA / backend service account; user-context OAuth deferred.                                   |
+| P-02 | Procore credential storage                       | `Frozen for MVP` | Azure Key Vault per environment via managed identity.                                          |
+| P-03 | **Procore Company ID**                           | `Frozen for MVP` | `ProcoreCompanyId = 5280`. Configuration; not a secret.                                        |
+| P-04 | **Procore mapping owner**                        | `Frozen for MVP` | Primary: PM. Fallback: PX. Repair: IT / Integration Admin. PA excluded.                        |
+| P-05 | MVP-enabled Procore subject areas                | `Frozen for MVP` | None. Mapping + launch links + sync health placeholder only.                                   |
+| P-06 | Sync cadence per subject area                    | `Deferred`       | Adopt package defaults at Recommended Practical.                                               |
+| P-07 | Webhooks vs polling                              | `Deferred`       | Webhooks for `project_management` / `quality_safety`; polling fallback / snapshots for others. |
+| P-08 | Canonical storage target                         | `Deferred`       | Azure SQL (canonical) + Azure Blob (raw landing).                                              |
+| P-09 | Raw payload retention                            | `Deferred`       | 90 days default; longer for replay / legal hold.                                               |
+| P-10 | SharePoint materialization boundaries            | `Frozen for MVP` | Mappings / summaries / sync health / audits only; no raw payloads or bulk binaries.            |
+| P-11 | Procore vs Sage financial SoR                    | `Frozen for MVP` | Sage is accounting book of record; Procore = operational state, labeled as Procore-sourced.    |
+| P-12 | Procore write-back governance                    | `Deferred`       | No Procore writes from PCC until amendment satisfies §36A.13 gates.                            |
+| P-13 | Rate-limit / retry thresholds                    | `Deferred`       | Exponential backoff with jitter; ~1/2/4/8/16 min; 5 attempts; escalate after 3 failed runs.    |
+| P-14 | Endpoint version review cadence                  | `Deferred`       | Quarterly review; IT / Integration Admin + Architecture sign-off for high risk.                |
+| P-15 | Sandbox vs production separation                 | `Frozen for MVP` | Strict separation of credentials, secrets, storage, config, schedules.                         |
+| P-16 | Procore data deletion / archive policy           | `Deferred`       | Soft-delete / tombstone; no immediate hard-delete.                                             |
+| P-17 | External-user / Procore-directory reconciliation | `Frozen for MVP` | Comparison only; no auto-grant of SharePoint access (R6).                                      |
 
 ### 41.2 Historical "Open Decisions" list (superseded)
 

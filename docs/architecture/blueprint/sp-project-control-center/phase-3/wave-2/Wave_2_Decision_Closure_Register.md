@@ -16,16 +16,16 @@ States used:
 
 > Create/use `apps/project-control-center/` as the dedicated PCC shell app target. Use `packages/spfx` only for shared SPFx host/root exports if repo pattern requires it. Do not place PCC shell code in `apps/hb-webparts/` or extend `apps/project-sites/`.
 
-**State:** Closed (superseding prior access-hub-only interpretation tied to D-012 / earlier W2-ODR-013 wording).
-**Audit evidence:** `apps/project-control-center/` does not exist on `main`; no conflicting PCC shell location exists. Documented in `Wave_2_Repo_Truth_Audit.md` §4.
+**State:** Closed.
+**Audit evidence:** `apps/project-control-center/` scaffold is present after Prompt 02, and the locked shell target remains `apps/project-control-center/` with no conflicting PCC shell location introduced.
 **Cross-link:** `Wave_2_Scope_Lock.md` §1.
 
 ## W2-ODR-002 — App Scaffold Authorization
 
 > Wave 2 may create the new app scaffold after Prompt 01 verifies clean repo state and Wave 1 closeout. (Proof-Gated)
 
-**State:** Proof-Gated — released for the next scaffold prompt only.
-**Audit evidence:** Wave 1 closeout verified (`Wave_2_Repo_Truth_Audit.md` §1) and clean Prompt 01 repo state confirmed. Release authorizes a later, explicitly authorized scaffold prompt to create `apps/project-control-center/`. Prompt 01 does **not** itself create the app; `apps/project-control-center/` remains absent by design after Prompt 01.
+**State:** Proof-Gated → Released and executed by Prompt 02.
+**Audit evidence:** Wave 1 closeout and Prompt 01 repo-truth gate released the scaffold authorization, and Prompt 02 executed the scaffold creation. `apps/project-control-center/` is present.
 **Cross-link:** `Wave_2_Scope_Lock.md` §1, §4.
 
 ## W2-ODR-003 — No Initial Manifest/Solution/Package Version Bump
@@ -107,7 +107,7 @@ States used:
 
 ## W2-ODR-013 — Document Control Two-Lane Architecture (Preview-Only in Wave 2)
 
-> Document Control follows a two-lane architecture: (1) Microsoft Files Lane for SharePoint Drive / SharePoint document libraries and OneDrive as a future Microsoft Graph-backed file-management surface rendered as disabled/preview-only affordances in Wave 2; and (2) External Document Systems Lane for Procore Files, Document Crunch, Adobe Sign, and future external systems rendered as launch/deep-link/missing-config/access-issue states. No standalone submittal workflow replacement, no transmittal/revision-routing replacement, no document review/routing workflow execution in Wave 2, and no approval execution in Wave 2.
+> Document Control follows a two-lane architecture: (1) Microsoft Files Lane for SharePoint Drive / SharePoint document libraries and OneDrive as a future Microsoft Graph-backed file-management surface rendered as disabled/preview-only affordances in Wave 2; and (2) External Document Systems Lane for Procore Files, Document Crunch, Adobe Sign, and future external systems rendered as launch/deep-link/missing-config/access-issue states. No standalone submittal workflow replacement, no transmittal/revision-routing replacement, no document review/routing workflow execution in Wave 2, no approval execution in Wave 2, and no live Graph/PnP/API/file operations in Wave 2.
 
 **State:** Closed.
 **Cross-link:** `Wave_2_Wireframe_and_Layout_Contract.md` §3.
@@ -157,9 +157,10 @@ States used:
 
 ---
 
-## Net Wave 2 Posture After Prompt 01
+## Net Wave 2 Posture (Post-Prompt-02 + Document Control Correction)
 
-- All proof gates released by Prompt 01: W2-ODR-002 (released only for the next scaffold prompt), W2-ODR-004 (Vite/local-preview portion only), W2-ODR-011.
-- Proof gate still split open: W2-ODR-004 (dev-harness tab wiring) — Deferred.
-- All other decisions: Closed and binding.
-- Deferred bucket: W2-ODR-012, plus the dev-harness portion of W2-ODR-004.
+- Prompt 01 repo-truth/scope-lock gates were completed and released applicable proof-gated decisions.
+- Prompt 02 executed the app scaffold authorization for `apps/project-control-center/`; scaffold is present and target remains locked.
+- W2-ODR-013 now reflects the corrected two-lane Document Control architecture and supersedes prior access-hub-only language.
+- W2-ODR-004 remains split: Vite/local-preview released; dev-harness tab wiring remains deferred.
+- W2-ODR-012 remains deferred; all other Wave 2 decisions are closed and binding.
