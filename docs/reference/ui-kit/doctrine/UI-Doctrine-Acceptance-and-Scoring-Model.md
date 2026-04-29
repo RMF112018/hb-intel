@@ -52,36 +52,68 @@ Use 0-4 per category:
 - `3`: strong and near benchmark intent
 - `4`: benchmark-grade for the surface purpose
 
-## 3. Acceptance labels and thresholds
+## 3. Scoring thresholds
+
+- Maximum score: `56`.
 
 ### 3.1 Professional SPFx acceptance
 
-- no category below 2 unless explicitly accepted exception
+- no category below `2` unless an explicit written exception is approved
 - no unresolved doctrine violation
 - no unresolved hard-stop failure
 
 ### 3.2 Serious SPFx surface acceptance
 
+- `40+/56`
+- no hard-stop failures
+- hosted/runtime credibility proven where relevant
+- evidence-backed closure
+
+### 3.3 Flagship / benchmark-grade SPFx acceptance
+
+- `48+/56`
+- strong purpose-fit and productized surface identity
+- credible breakpoint/container-fit behavior
+- evidence-backed closure
+- no hard-stop failures
+
+### 3.4 Decision-critical SPFx acceptance
+
+- numeric score alone is insufficient
+- no hard-stop failures
+- explicit data-confidence and failure-mode proof
+- auditable and reproducible closure evidence
+
+## 4. Acceptance labels and thresholds
+
+### 4.1 Professional SPFx acceptance
+
+- no category below 2 unless explicitly accepted exception
+- no unresolved doctrine violation
+- no unresolved hard-stop failure
+
+### 4.2 Serious SPFx surface acceptance
+
 - strong category consistency
 - hosted/runtime credibility proven where relevant
 - evidence-backed closure with clear risk notes
 
-### 3.3 Flagship / benchmark-grade SPFx acceptance
+### 4.3 Flagship / benchmark-grade SPFx acceptance
 
 - high-category consistency with minimal residual exceptions
 - explicit proof of premium operational composition and stability
 - benchmark-grade closure evidence
 
-### 3.4 Decision-critical SPFx acceptance
+### 4.4 Decision-critical SPFx acceptance
 
 - strictest enforcement tier
 - explicit data confidence and failure-mode clarity
 - no tolerated hard-stop failures
 - closure evidence must be auditable and reproducible
 
-## 4. Category framework
+## 5. Category framework
 
-### 4.1 Shared baseline categories
+### 5.1 Shared baseline categories
 
 All SPFx surface types must score:
 
@@ -93,7 +125,7 @@ All SPFx surface types must score:
 6. host/runtime resilience
 7. validation and closure evidence
 
-### 4.2 Homepage conditional categories
+### 5.2 Homepage conditional categories
 
 Apply only to homepage surfaces:
 
@@ -101,7 +133,7 @@ Apply only to homepage surfaces:
 - entry-stack fit
 - homepage-specific composition constraints from overlay
 
-### 4.3 Full-page/PCC/widget conditional categories
+### 5.3 Full-page/PCC/widget conditional categories
 
 Apply only to non-homepage full-page/PCC/widget surfaces:
 
@@ -110,7 +142,9 @@ Apply only to non-homepage full-page/PCC/widget surfaces:
 - breakpoint and container-fit stability in operational layouts
 - KPI/status/command zone clarity and hierarchy
 
-## 5. Hard-stop failures
+Full-page/PCC/widget surfaces must map these equivalent non-homepage categories to the same 56-point rigor model used for doctrine-governed acceptance.
+
+## 6. Hard-stop failures
 
 The following failures block closure regardless of numeric score:
 
@@ -124,9 +158,9 @@ The following failures block closure regardless of numeric score:
 
 High numeric scores cannot override hard-stop failures.
 
-## 6. Evidence obligations
+## 7. Evidence obligations
 
-### 6.1 Required evidence
+### 7.1 Required evidence
 
 - scored category sheet
 - doctrine compliance notes
@@ -134,12 +168,12 @@ High numeric scores cannot override hard-stop failures.
 - explicit hard-stop failure checklist outcome
 - closure statement with residual risk disclosure
 
-### 6.2 Surface-specific evidence emphasis
+### 7.2 Surface-specific evidence emphasis
 
 - homepage: use current homepage checklist/scorecard/evidence artifacts directly
 - full-page/PCC/widget: reuse same benchmark rigor and proof discipline, but map evidence to overlay-specific obligations rather than homepage-only constraints
 
-## 7. Tiered enforcement application
+## 8. Tiered enforcement application
 
 Use stricter enforcement for:
 

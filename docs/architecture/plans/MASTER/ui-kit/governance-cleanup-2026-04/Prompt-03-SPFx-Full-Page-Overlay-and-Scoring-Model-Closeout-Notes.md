@@ -27,3 +27,7 @@ Prompt 03 added doctrine authority for non-homepage SPFx full-page app/widget/PC
 - Prompt 01 scope lock and Prompt 02 governance routing were preserved.
 - `docs/architecture/plans/MASTER/ui-kit/wave-02/**` remained unchanged.
 - No product/runtime/backend/CI-CD/deployment/package version/lockfile/SPFx manifest or brand/font binary changes were made.
+
+## Post-Validation Addendum
+
+- Threshold conventions were clarified after Prompt 03 validation to explicitly preserve the 56-point scoring model (`40+/56` and `48+/56`) and decision-critical closure requirements.
