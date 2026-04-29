@@ -62,8 +62,9 @@ export const PCC_PREVIEW_STATE_SPECS: Record<PccPreviewStateKind, PccPreviewStat
   'unavailable-fixture': {
     tone: 'neutral',
     badge: 'Unavailable',
-    title: 'Fixture not available in this preview',
-    description: 'This module will be wired in a later wave.',
+    title: 'Preview content not available',
+    description:
+      'This surface is included in the Project Control Center shell, but no fixture content is available for the selected preview context.',
   },
   'unauthorized-persona': {
     tone: 'warning',

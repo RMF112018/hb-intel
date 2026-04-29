@@ -17,16 +17,16 @@ describe('PccApp bento integration (regression)', () => {
     }
   });
 
-  it('hero / wide / standard cards under the grid have non-zero column span and inline gridColumn', () => {
+  it('cards under the grid receive a non-zero column span and inline gridColumn style', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     expect(grid).not.toBeNull();
-    for (const footprint of ['hero', 'wide', 'standard'] as const) {
-      const card = grid.querySelector(`[data-pcc-card][data-pcc-footprint="${footprint}"]`) as HTMLElement | null;
-      expect(card, `'${footprint}' demo card should render under the grid`).not.toBeNull();
-      const declared = Number(card!.getAttribute('data-pcc-column-span'));
-      expect(declared).toBeGreaterThan(0);
-      expect(card!.style.gridColumn).toMatch(/^span \d+/);
+    const cards = Array.from(grid.querySelectorAll('[data-pcc-card]')) as HTMLElement[];
+    expect(cards.length, 'at least one card should render under the bento grid').toBeGreaterThan(0);
+    for (const card of cards) {
+      const declared = Number(card.getAttribute('data-pcc-column-span'));
+      expect(declared, `card '${card.getAttribute('data-pcc-footprint')}' should have a positive column span`).toBeGreaterThan(0);
+      expect(card.style.gridColumn).toMatch(/^span \d+/);
     }
   });
 

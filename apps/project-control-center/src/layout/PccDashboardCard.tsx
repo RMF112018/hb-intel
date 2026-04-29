@@ -12,6 +12,13 @@ export interface PccDashboardCardProps {
   children: ReactNode;
   /** Optional `aria-label`-style description for assistive tech. */
   ariaLabel?: string;
+  /**
+   * Optional active-surface marker. When set, the card emits
+   * `data-pcc-active-surface-panel="<id>"` on the same `<article>` so tests
+   * and integration code can locate the active surface panel without an
+   * extra DOM wrapper that would break the bento grid invariant.
+   */
+  dataActiveSurfacePanel?: string;
 }
 
 export const PccDashboardCard: FC<PccDashboardCardProps> = ({
@@ -21,6 +28,7 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
   action,
   children,
   ariaLabel,
+  dataActiveSurfacePanel,
 }) => {
   const { mode } = usePccBentoContext();
   const { ref, rowSpan } = useBentoRowSpan();
@@ -38,6 +46,7 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       data-pcc-footprint={footprint}
       data-pcc-mode={mode}
       data-pcc-column-span={columnSpan}
+      data-pcc-active-surface-panel={dataActiveSurfacePanel}
       style={style}
       aria-label={ariaLabel ?? title}
     >

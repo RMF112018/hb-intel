@@ -68,7 +68,13 @@ export interface PccShellProps {
   subtitle: string;
   dateScope: string;
   pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
-  activeSurfaceId?: PccMvpSurfaceId;
+  /**
+   * Active surface — supplied by `PccApp` from `usePccShellState`. The shell
+   * is stateless about which surface is active.
+   */
+  activeSurfaceId: PccMvpSurfaceId;
+  /** Surface-selection callback wired from `usePccShellState.setActiveSurface`. */
+  onSelectSurface?: (id: PccMvpSurfaceId) => void;
   /** Test override for the responsive mode. */
   forceMode?: PccResponsiveMode;
   /** Optional bottom-of-rail slot. */
@@ -82,7 +88,8 @@ export const PccShell: FC<PccShellProps> = ({
   subtitle,
   dateScope,
   pills,
-  activeSurfaceId = 'project-home',
+  activeSurfaceId,
+  onSelectSurface,
   forceMode,
   railFooter,
   children,
@@ -102,6 +109,7 @@ export const PccShell: FC<PccShellProps> = ({
         <PccNavigationRail
           mode={shellMode}
           activeSurfaceId={activeSurfaceId}
+          onSelectSurface={onSelectSurface}
           footer={railFooter}
         />
         <div className={styles.workArea}>
