@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This registry records the current governance status of UI-kit reference docs without bulk-editing each legacy file.
+This registry records current governance status of UI-kit and related governance references without bulk-editing legacy file headers.
 
 ## Status Definitions
 
@@ -15,18 +15,21 @@ This registry records the current governance status of UI-kit reference docs wit
 
 ## Core Governance Status
 
-| Document                                                                          | Status | Rationale                                                                 |
-| --------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------- |
-| `docs/reference/ui-kit/README.md`                                                 | active | Primary index and routing authority for UI-kit governance docs.           |
-| `docs/reference/ui-kit/doctrine/README.md`                                        | active | Doctrine index and applicability map.                                     |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`           | active | Primary SPFx runtime doctrine authority.                                  |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`             | active | Homepage-specific runtime overlay authority.                              |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Full-Page-App-Widget-Overlay.md` | active | Binding non-homepage SPFx full-page/widget/PCC runtime overlay authority. |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`      | active | Binding SPFx scoring and closure enforcement model.                       |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md`            | active | Primary PWA runtime doctrine authority.                                   |
-| `docs/reference/ui-kit/entry-points.md`                                           | active | Entry-point and import-policy authority.                                  |
-| `docs/reference/ui-kit/GOVERNANCE-MAP.md`                                         | active | Consumer-type governance routing map.                                     |
-| `docs/reference/ui-kit/GOVERNANCE-SUPERSESSION.md`                                | active | Central status map for legacy/current classification.                     |
+| Document                                                                          | Status                    | Rationale                                                                                  |
+| --------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------ |
+| `docs/reference/ui-kit/README.md`                                                 | active                    | Primary index and routing authority for UI-kit governance docs.                            |
+| `docs/reference/ui-kit/doctrine/README.md`                                        | active                    | Runtime doctrine index and applicability map.                                              |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`           | active                    | Primary SPFx runtime doctrine authority.                                                   |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`             | active                    | Homepage-specific runtime overlay authority.                                               |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Full-Page-App-Widget-Overlay.md` | active                    | Binding non-homepage SPFx full-page/widget/PCC runtime overlay authority.                  |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`      | active                    | Binding SPFx scoring and closure enforcement model.                                        |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md`            | active                    | Primary PWA runtime doctrine authority.                                                    |
+| `docs/reference/ui-kit/entry-points.md`                                           | active                    | Entry-point and import-policy authority.                                                   |
+| `docs/reference/ui-kit/GOVERNANCE-MAP.md`                                         | active                    | Consumer-type governance routing map.                                                      |
+| `docs/reference/ui-kit/GOVERNANCE-SUPERSESSION.md`                                | active                    | Central status map for legacy/current classification.                                      |
+| `docs/reference/brand/README.md`                                                  | active (supporting layer) | Source-of-truth/usage governance for brand assets and fonts; not Layer 1 runtime doctrine. |
+| `docs/reference/brand/BRAND-ASSET-INVENTORY.md`                                   | active (supporting layer) | Archive truth, inventory governance, and curation readiness policy; not runtime doctrine.  |
+| `docs/reference/brand/BRAND-USAGE-GOVERNANCE.md`                                  | active (supporting layer) | Binding brand usage policy subordinate to runtime doctrine for behavior/acceptance.        |
 
 ## Layer 3 Reference Status
 
@@ -73,6 +76,6 @@ This registry records the current governance status of UI-kit reference docs wit
 
 ## Supersession Rule
 
-When any Layer 3 reference or historical guidance conflicts with runtime doctrine, runtime doctrine governs.
+When any Layer 3 or supporting governance guidance conflicts with runtime doctrine, runtime doctrine governs for runtime behavior and acceptance.
 
-Prompt 03 keeps supersession centralized in this map and does not bulk-edit every legacy doc header.
+Prompt 04 keeps supersession centralized in this map and does not bulk-edit every legacy doc header.

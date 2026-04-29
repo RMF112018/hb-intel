@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This index defines the current doctrine set, doctrine reading order, and applicability by runtime and surface type.
+This index defines the current runtime doctrine set, reading order, and applicability by runtime and surface type.
+
+Brand governance is cross-linked as a supporting source-of-truth layer and is not runtime doctrine.
 
 ## Doctrine Set
 
@@ -37,4 +39,14 @@ This index defines the current doctrine set, doctrine reading order, and applica
 - Homepage Overlay is scoped to homepage surfaces.
 - Full-Page App and Widget Overlay is scoped to non-homepage full-page/widget/PCC surfaces.
 - Acceptance and Scoring Model defines closure/scoring enforcement across SPFx surface types.
-- Component/pattern/lane docs are references and cannot override doctrine.
+- Component/pattern/lane docs are references and cannot override runtime doctrine.
+
+## Brand Governance Cross-Link
+
+Brand docs are a supporting source-of-truth governance layer for asset/font usage policy and archive handling:
+
+- `docs/reference/brand/README.md`
+- `docs/reference/brand/BRAND-ASSET-INVENTORY.md`
+- `docs/reference/brand/BRAND-USAGE-GOVERNANCE.md`
+
+Brand governance does not replace runtime doctrine authority.

@@ -1,70 +1,173 @@
-# 06-planning-and-proposals
+# 06 — Planning and Proposals
 
-## Intent
+## Purpose
 
-Allow the agent to plan clearly, surface risks, and propose better solutions without becoming trapped by rigid ritual or outdated plan wording.
+Define how Claude Code should prepare plans, proposals, prompt packages, and saved planning artifacts for HB Intel.
 
-## Planning expectations
+---
 
-For multi-step, risky, or cross-cutting work:
-- provide a concise plan,
-- name the key assumptions,
-- identify material risks,
-- note the governing docs actually used,
-- keep the plan proportional to the task.
+## Primary Rule
 
-For small local tasks:
-- do not inflate the response with unnecessary planning ceremony.
+Plans should be actionable, scoped, evidence-based, and approval-gated when risk is material.
 
-## Proposal behavior
+Do not turn a proposal into execution without explicit user approval when the work is risky, cross-cutting, sensitive, or phase/wave-driven.
 
-The agent should propose a better path when:
-- the existing plan is stale,
-- a local implementation would violate package ownership,
-- a simpler approach achieves the same goal cleanly,
-- maintainability would materially improve,
-- verification or documentation would otherwise be weak.
+---
 
-## Do not confuse plans with doctrine
+## When to Plan First
 
-- Scoped task plans guide execution.
-- They do not automatically override present repo truth.
-- They do not prohibit a better implementation path that preserves the architecture.
+Produce a plan before execution when the work touches:
 
-## Canonical plans vs working plans
+- prompt packages;
+- phase/wave work;
+- cross-package changes;
+- architecture;
+- SPFx runtime or hosted parity;
+- backend behavior;
+- provisioning;
+- deployment;
+- Graph/PnP;
+- Procore;
+- permissions;
+- CI/CD;
+- package versions;
+- manifest versions;
+- security/secrets;
+- tenant mutation;
+- broad UI doctrine;
+- broad documentation authority.
 
-Treat these as different classes of artifacts:
+For simple local edits, direct execution may be acceptable if the user clearly requested the change and no gate applies.
 
-- `docs/architecture/plans/**` is the canonical repository plan library.
-- `.claude/plans/**` is the default location for Claude-generated working plans, draft plans, exploratory outlines, and temporary planning artifacts when a file is useful.
-- Inline chat output remains the default for most planning unless persistence adds real value.
+---
 
-Do not write exploratory or working plans into `docs/architecture/plans/**` unless the user explicitly asks to create, revise, or promote a canonical plan document there.
+## Plan Content Standard
 
-## Persistence defaults
+A good implementation plan includes:
 
-When the user asks for planning help but does not explicitly request a canonical repository plan file:
-- keep the plan in chat when that is sufficient,
-- use `.claude/plans/**` when a saved artifact is helpful,
-- avoid writing into `docs/**` by default.
+- objective;
+- current repo-truth sources to inspect;
+- files/directories in scope;
+- files/directories out of scope;
+- implementation steps;
+- guardrails;
+- validation plan;
+- expected deliverables;
+- approval requirement;
+- known risks or assumptions.
 
-When the user explicitly requests a canonical plan artifact in the docs library:
-- write only to the requested canonical location,
-- keep the content documentation-quality,
-- avoid mixing scratch analysis or temporary notes into the canonical file.
+For phase/wave work, also include:
 
-## Best-effort rule
+- governing prompt package;
+- decision register;
+- validation matrix;
+- scope lock;
+- closeout requirements;
+- commit summary/description expectations.
 
-When the user asks to proceed and the task is reasonably clear:
-- proceed with the best grounded approach,
-- state important assumptions,
-- avoid blocking on avoidable clarification,
-- raise questions only when ambiguity would materially change the implementation.
+Use `hb-plan-gate-review` when reviewing a plan.
 
-## Output discipline
+---
 
-- Keep plans concise.
-- Avoid repeating large quotations from governing docs.
-- Reference the source that matters instead of copying it.
-- Keep proposals decision-useful rather than ceremonial.
-- Keep Claude working artifacts out of the canonical docs library unless explicitly promoted.
+## Prompt Package Standard
+
+A prompt package should be copy-ready and non-ambiguous.
+
+It should include:
+
+- title;
+- objective;
+- mandatory repo-truth inspection requirements;
+- allowed changes;
+- forbidden changes;
+- relevant files and directories;
+- guardrails;
+- exact deliverables;
+- validation requirements;
+- reporting requirements;
+- no-deferral language;
+- instruction not to reread files still in current context unless needed;
+- commit summary and description format if execution is expected.
+
+Use `hb-prompt-package-builder` when generating prompt packages.
+
+---
+
+## Better-Path Recommendations
+
+When a user proposes a path that is workable but suboptimal, recommend a better path when:
+
+- it reduces risk;
+- it avoids tenant/deployment exposure;
+- it preserves package boundaries;
+- it avoids documentation authority drift;
+- it improves validation;
+- it avoids over-engineering;
+- it prevents rework.
+
+Keep recommendations decision-useful, not academic.
+
+---
+
+## Saved Planning Artifacts
+
+Default:
+
+- Use inline chat for lightweight plans.
+- Use `.claude/plans/**` for Claude-generated working plans, exploratory outlines, draft implementation plans, or temporary planning files.
+- Use `docs/architecture/plans/**` only for canonical plan library artifacts when explicitly requested.
+- Use project-specific docs only when the plan is being promoted to canonical project documentation.
+
+Do not put scratch planning into canonical docs.
+
+---
+
+## Proposal vs Execution Boundary
+
+A proposal may recommend:
+
+- files to change;
+- validations to run;
+- docs to update;
+- risks to address;
+- prompts to execute.
+
+A proposal must not:
+
+- mutate files unless requested;
+- stage or commit changes;
+- run high-risk commands;
+- deploy;
+- call live tenant systems;
+- broaden scope into adjacent cleanup.
+
+---
+
+## Review Standard
+
+When reviewing an agent plan, check:
+
+- Does it inspect the right repo-truth sources?
+- Does it respect scope?
+- Does it overreach?
+- Does it mutate sensitive systems?
+- Does it alter package/manifests/CI/CD without approval?
+- Does it identify validation?
+- Does it include docs where needed?
+- Does it preserve known guardrails?
+- Does it avoid re-reading unnecessary files while preserving evidence?
+
+Use `hb-plan-gate-review`.
+
+---
+
+## Reporting Standard
+
+Planning output should state:
+
+- recommended path;
+- assumptions;
+- required decisions;
+- risks;
+- validation expectations;
+- next prompt or execution package if requested.

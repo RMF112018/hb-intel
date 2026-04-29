@@ -1,104 +1,190 @@
-# 01-authority-and-reading-order
+# 01 — Authority and Reading Order
 
-## Intent
+## Purpose
 
-Help the agent find the right authoritative source quickly without rereading the entire repository doctrine for every task.
+Define how Claude Code should choose sources of truth in the `hb-intel` repository without over-reading the repo or relying on stale summaries.
 
-## First routing tools
+---
 
-Start with:
-- `docs/reference/developer/agent-authority-map.md` for source routing,
-- `docs/reference/developer/verification-commands.md` for validation routing,
-- `docs/reference/developer/documentation-authoring-standard.md` for documentation quality and placement,
-- `.claude/agents/hb-repo-researcher.md` when the area is unfamiliar or the work is cross-package.
+## Primary Rule
 
-## Specialist routing map
+Use current repo truth first.
 
-Use the smallest specialist that clearly fits the task:
-- `.claude/agents/hb-boundary-auditor.md` for package placement, dependency legality, export ownership, shared-primitive placement, and cross-package coupling questions.
-- `.claude/agents/hb-verification-runner.md` for choosing the right validation scope, running targeted checks, and separating new failures from likely pre-existing failures.
-- `.claude/agents/hb-docs-curator.md` for documentation impact, doc placement, documentation conflicts, and deciding whether a change needs updates to package README, developer reference, explanation, or architecture docs.
-- `.claude/agents/hb-ui-ux-conformance-reviewer.md` for reusable UI ownership, `@hbc/ui-kit` alignment, cross-surface consistency, and fit with HB Intel UX direction.
-- `.claude/agents/hb-repo-researcher.md` for unfamiliar areas, cross-package investigation, or when the right source set is not yet clear.
+Historical plans, old blueprints, previous chat summaries, old implementation reports, and unverified claims are context only. They do not override live files, package manifests, exports, tests, current closeouts, active prompt packages, or current governing docs.
 
-Do not invoke a specialist when the answer is obvious from the current file or current local package context.
-Use specialists automatically when the task clearly fits one of the roles above.
-When multiple specialists could apply, prefer the most specific one first.
+---
 
-## Reading order by question
+## Default Authority Hierarchy
 
-### 1. What exists in the repo right now?
-Read:
-- `docs/architecture/blueprint/current-state-map.md`
-- live code in the touched area
-- package manifests, exports, tests, and configs
+Use the smallest authoritative source set that can answer the task.
 
-### 2. Which package should own this change?
-Read:
-- `docs/architecture/blueprint/package-relationship-map.md`
-- the touched package `README.md`
-- the touched package `package.json`
-- use `.claude/agents/hb-boundary-auditor.md` if ownership is not obvious
+Default order:
 
-### 3. What is the intended target architecture?
-Read:
-- `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md`
+1. live files, package manifests, exports, tests, configs, and nearby README files in the touched area;
+2. active prompt package README, decision register, validation matrix, scope lock, and closeout docs when phase/wave work is involved;
+3. project-specific governing docs when the task names a product area;
+4. `.claude/rules.md` and `.claude/rules/**`;
+5. `.claude/agents/README.md` and `.claude/skills/README.md` for routing;
+6. developer reference docs for source routing, verification, and documentation standards;
+7. broad architecture docs only when local/project truth is insufficient.
 
-### 4. What is the broader product or program doctrine?
-Read:
-- `docs/architecture/blueprint/HB-Intel-Unified-Blueprint.md`
+---
 
-### 5. Where should documentation go and how should it be written?
-Read:
-- `docs/README.md`
-- `docs/architecture/blueprint/current-state-map.md`
-- `docs/reference/developer/documentation-authoring-standard.md`
-- `.claude/rules/04-documentation-standards.md`
-- use `.claude/agents/hb-docs-curator.md` if documentation scope or placement is unclear
+## Start-Here Checklist
 
-### 6. What verification should I run?
-Read:
-- `docs/reference/developer/verification-commands.md`
-- the touched package `README.md`
-- the root or package `package.json` scripts that apply to the change
-- use `.claude/agents/hb-verification-runner.md` if validation scope or result interpretation is unclear
+Before answering or editing:
 
-### 7. What should I do for a specific phase, wave, or feature task?
-Read:
-- only the active scoped plan files relevant to the task
-- not the full planning corpus unless the task is cross-cutting
+1. Identify the task type:
+   - code implementation;
+   - repo-truth audit;
+   - planning/prompt package;
+   - phase/wave work;
+   - UI/SPFx work;
+   - backend/provisioning/deployment work;
+   - docs-only work;
+   - Claude configuration work.
+2. Identify the touched package, app, doc area, or project.
+3. Read the nearest authoritative files first.
+4. Use broader docs only when ownership, boundary, architecture, runtime, deployment, or historical context is actually needed.
+5. State uncertainty when evidence is incomplete.
 
-### 8. Is this a UI ownership or UX consistency question?
-Read:
-- the touched app or package files
-- `docs/architecture/blueprint/package-relationship-map.md`
-- relevant `docs/explanation/design-decisions/*` materials when the question is about interaction quality, UX direction, or mold-breaker intent
-- use `.claude/agents/hb-ui-ux-conformance-reviewer.md` if ownership or consistency is unclear
+---
 
-## Conflict resolution
+## Repo-Truth Audit Standard
+
+For an audit, verify current files and do not rely on memory.
+
+A credible audit should identify:
+
+- files inspected;
+- source-of-truth hierarchy used;
+- findings supported by current files;
+- outdated, missing, contradictory, or stale references;
+- implementation gaps;
+- recommended remediation;
+- validation or proof needed.
+
+Use the `hb-repo-truth-audit` Skill for repeatable repo-truth audits.
+
+Use `hb-repo-researcher` when the audit spans unfamiliar areas or cross-package ownership.
+
+---
+
+## Package or App Reading Order
+
+If the user names a package or app, start with:
+
+1. package/app directory;
+2. package `package.json`;
+3. README;
+4. public exports;
+5. tests and fixtures;
+6. local docs and configs;
+7. consumers only if exports, public contracts, shared behavior, or cross-package ownership are involved.
+
+---
+
+## Phase / Wave / Prompt Package Reading Order
+
+If the user names a phase, wave, prompt package, or implementation step, start with:
+
+1. active prompt package README;
+2. validation matrix;
+3. decision register;
+4. scope lock;
+5. closeout docs;
+6. governing architecture docs named by the prompt package;
+7. affected package/app files.
+
+Do not read the full planning corpus unless the task is cross-cutting or the active prompt package has an unresolved authority gap.
+
+---
+
+## UI / SPFx Reading Order
+
+For UI or SPFx work, read:
+
+1. touched app/package files;
+2. affected component and styling files;
+3. `@hbc/ui-kit` exports and related primitives when shared UI is involved;
+4. `docs/reference/ui-kit/doctrine/`;
+5. `docs/reference/spfx-surfaces/`;
+6. task-specific basis-of-design assets;
+7. app-specific README or surface benchmark docs.
+
+Use `hb-ui-doctrine-conformance` for repeatable UI doctrine review.
+
+Use `hb-spfx-runtime-parity` for source/build/manifest/runtime/hosted parity.
+
+---
+
+## Backend / Provisioning / Deployment Reading Order
+
+For backend, tenant, deployment, provisioning, Graph/PnP, Procore, CI/CD, app catalog, permissions, secrets, package/version, or hosted proof work:
+
+1. read the touched package/app files;
+2. read current closeout docs and runtime boundary docs;
+3. read verification guidance;
+4. read tenant/deployment guardrails;
+5. produce a plan before execution;
+6. wait for explicit approval before mutation or live calls.
+
+Use `hb-sensitive-operation-gate` before proceeding.
+
+---
+
+## Claude Configuration Reading Order
+
+For `.claude`, `CLAUDE.md`, Skills, agents, hooks, settings, or Codex/Claude configuration work:
+
+1. `CLAUDE.md`;
+2. `.claude/rules.md`;
+3. `.claude/rules/README.md`;
+4. affected detailed rule files;
+5. `.claude/agents/README.md`;
+6. affected agent files;
+7. `.claude/skills/README.md`;
+8. affected Skill files;
+9. `.claude/settings*.json`;
+10. hooks and supporting scripts.
+
+Use `hb-claude-config-curator` for specialist review.
+
+Use `hb-skill-author` when creating or revising Skills.
+
+---
+
+## Conflict Resolution
 
 When sources disagree:
-- treat verified live repo state and `current-state-map.md` as present-truth authority,
-- treat `package-relationship-map.md` as dependency and ownership authority,
-- treat Blueprint V4 as target-state architecture,
-- treat the Unified Blueprint as narrative and doctrine,
-- treat historical task plans as scoped execution guidance rather than absolute truth about current state.
 
-## Efficiency rules
+1. verified current file state controls implementation status;
+2. package manifests, exports, tests, and configs control package behavior;
+3. current closeouts control completion evidence;
+4. active prompt packages control approved execution scope;
+5. governing architecture docs control target state;
+6. `.claude` rules control agent behavior;
+7. historical plans and summaries provide context only.
 
-- Do not start by reading every authoritative document.
-- Do not reread files already in current session context unless the file changed, the context is stale, or the task widened.
-- Read the nearest local package or app docs before escalating to broader repo doctrine when the work is local.
-- Prefer the smallest source set that can answer the question accurately.
-- Use the repo-researcher subagent when targeted investigation will reduce main-context noise.
-- Use specialist agents to reduce main-context load, not to add extra ceremony.
+If a conflict affects architecture, package ownership, runtime behavior, deployment posture, security, permissions, tenant state, or user-approved scope, stop and surface the conflict before implementing.
 
-## Escalate when
+---
 
-Escalate from local docs to broader architecture docs when the work:
-- changes package boundaries,
-- adds a new dependency,
-- changes shared primitives,
-- affects multiple apps or features,
-- changes auth, provisioning, runtime model, or deployment doctrine,
-- appears to conflict with an ADR or architecture plan.
+## Evidence Discipline
+
+Do not make completion claims without evidence.
+
+Use precise language:
+
+- “Verified by reading...”
+- “Not verified...”
+- “Assumption...”
+- “Current repo evidence indicates...”
+- “This appears stale because...”
+
+Avoid:
+
+- “should be fine”;
+- “probably” without stating uncertainty;
+- “complete” without validation;
+- citing old plans as present truth.

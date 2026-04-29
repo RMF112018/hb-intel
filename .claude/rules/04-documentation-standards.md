@@ -1,79 +1,170 @@
-# 04-documentation-standards
+# 04 — Documentation Standards
 
-## Intent
+## Purpose
 
-Restore and preserve high-quality documentation without forcing the root `CLAUDE.md` to carry the full docs policy.
+Keep HB Intel documentation authoritative, navigable, current, and separated by purpose.
 
-## Core standard
+---
 
-Documentation is part of the deliverable when the work changes behavior, architecture, public exports, workflows, or expectations for future developers.
-Use `docs/reference/developer/documentation-authoring-standard.md` as the detailed writing and placement standard.
+## Primary Rule
 
-## Use the right document type
+Documentation should clarify authority, not create competing sources of truth.
 
-Use `docs/README.md` and the classification guidance in `current-state-map.md` to place docs correctly.
+Do not place exploratory notes, scratch plans, or one-off analysis inside canonical documentation paths unless the user explicitly asks to promote them.
 
-Default targets:
-- package or app `README.md` for local ownership, public exports, commands, and implementation notes,
-- `docs/how-to/` for procedural guidance,
-- `docs/reference/` for factual or command reference,
-- `docs/explanation/` for rationale or conceptual material,
-- ADRs for durable architecture decisions.
+---
 
-## Canonical docs vs agent artifacts
+## Documentation Type Boundaries
 
-Treat these as different classes of content:
-- `docs/**` contains repository documentation and approved canonical artifacts,
-- `docs/architecture/plans/**` is the canonical development plan library,
-- `.claude/plans/**` contains Claude-generated working plans and temporary planning artifacts by default.
+Use this distinction:
 
-Agent artifacts are not repository documentation unless the user explicitly asks to promote or rewrite them into a canonical docs location.
+| Type | Purpose |
+|---|---|
+| README | Orientation, navigation, source-of-truth hierarchy, how to use a directory. |
+| Blueprint | Architecture doctrine, target architecture, product boundaries. |
+| Roadmap | Sequencing, phase/wave status, acceptance criteria, execution plan. |
+| Contract | Implementable structure, permissions, settings, validation, and MVP boundaries when named as source of truth. |
+| Prompt package README | Scoped execution guidance for a specific prompt/package/wave. |
+| Decision register | Frozen, deferred, runtime-configurable, proof-gated, or open decisions. |
+| Validation matrix | Proof obligations and validation commands/results. |
+| Scope lock | What is in/out of a particular execution step. |
+| Closeout | Historical proof and completion evidence. |
+| ADR | Durable architectural decision and rationale. |
+| Working plan | Temporary or exploratory planning artifact. |
 
-## Quality bar
+---
 
-Documentation should be:
-- accurate,
-- current,
-- concise,
-- specific to the changed scope,
-- written for the intended audience,
-- linked to canonical sources instead of duplicating them.
+## Placement Defaults
 
-## Package README minimums
+Use:
 
-When a mature package changes materially, keep its `README.md` current with:
-- purpose,
-- public exports,
-- dependencies,
-- consumers when relevant,
-- key commands,
-- local implementation notes,
-- related docs or ADRs when useful.
+- `docs/**` for approved repository documentation and canonical artifacts.
+- `docs/architecture/plans/**` for canonical development plan library entries.
+- `.claude/plans/**` for Claude-generated working plans, draft plans, exploratory outlines, and temporary planning artifacts when a file is useful.
+- Inline chat output for most lightweight planning unless persistence adds real value.
+- `.claude/rules/**` for Claude Code behavioral rules.
+- `.claude/skills/**` for reusable workflow playbooks.
+- `.claude/agents/**` for specialist agents.
 
-## When docs updates are required
+Do not write exploratory or working plans into `docs/architecture/plans/**` unless the user explicitly asks to create, revise, or promote a canonical plan there.
 
-Update docs when work changes:
-- public APIs or exports,
-- package responsibility,
-- dependency or ownership boundaries,
-- developer workflow,
-- architecture decisions,
-- user-visible behavior already described in docs,
-- required verification steps or command routing.
+---
 
-## When docs updates are not required
+## Documentation Update Triggers
 
-A docs update is usually not required for:
-- purely internal refactors with no behavior or workflow impact,
-- trivial rename-only changes already covered by existing docs,
-- local implementation detail that stays fully obvious from code and tests,
-- creation or revision of Claude working plans under `.claude/plans/**` unless the user wants them promoted into canonical docs.
+Update documentation when a change affects:
 
-## Writing guidance
+- public behavior;
+- package exports;
+- source-of-truth hierarchy;
+- validation commands;
+- user workflow;
+- setup, build, deployment, or provisioning process;
+- runtime boundaries;
+- app shell behavior;
+- shared UI doctrine;
+- agent/Skill/rule routing;
+- prompt package status;
+- phase/wave completion;
+- architecture or security posture.
 
-- Prefer crisp, plain language.
-- Avoid repeating large blocks of architecture prose from other canonical docs.
-- Link or reference the canonical doc instead.
-- Keep examples runnable and commands accurate.
-- Update the nearest canonical doc rather than scattering the same guidance across multiple files.
-- When verification guidance changes, update `docs/reference/developer/verification-commands.md` if the change affects general developer workflow.
+Do not update documentation just to restate code comments or add noise.
+
+---
+
+## Documentation Quality Standard
+
+Good documentation is:
+
+- current;
+- concise;
+- placed in the right authority layer;
+- explicit about scope;
+- clear about status;
+- linked to governing sources;
+- free of stale aspirational claims;
+- specific enough for the next agent/developer to act.
+
+Avoid:
+
+- duplicating long blocks across docs;
+- conflicting authority statements;
+- mixing target state with completed state;
+- using old summaries as current proof;
+- vague claims like “fully aligned” without evidence;
+- turning scratch notes into doctrine.
+
+---
+
+## Prompt Package Documentation
+
+Prompt package docs should include:
+
+- objective;
+- scope;
+- files to inspect;
+- files allowed to modify;
+- files forbidden to modify;
+- governing docs;
+- guardrails;
+- validation expectations;
+- deliverables;
+- reporting format;
+- commit summary/description requirements when applicable.
+
+Prompt packages should not silently authorize:
+
+- tenant mutation;
+- live Graph/PnP;
+- Procore calls;
+- app catalog deployment;
+- CI/CD edits;
+- package/manifest version changes;
+- dependency installs/upgrades;
+- broad cleanup outside the stated scope.
+
+Use `hb-prompt-package-builder` for repeatable package generation.
+
+---
+
+## Documentation Authority Cleanup
+
+Use `hb-doc-authority-cleanup` or `hb-docs-curator` when:
+
+- docs contradict each other;
+- README points to missing/stale files;
+- rule index points to the wrong file path;
+- blueprint/roadmap/contract authority overlaps;
+- old prompt package guidance conflicts with current closeout;
+- documentation overstates implementation status;
+- new Skills/agents/rules require routing updates.
+
+---
+
+## Formatting and Validation
+
+For docs-only work, default validation is:
+
+- inspect `git diff -- <changed docs>`;
+- inspect `git status --short`;
+- run `pnpm format:check` only when expected by repo convention, when Markdown formatting is material, or when requested.
+
+Do not run broad builds/tests for docs-only work unless documentation affects generated files, command references, package behavior, or repo tooling.
+
+---
+
+## Closeout Documentation
+
+Closeouts should state:
+
+- what changed;
+- files modified;
+- validation run;
+- validation result;
+- guardrails preserved;
+- what was not done;
+- known gaps;
+- commit summary;
+- commit description.
+
+Closeouts are proof of what happened. They are not governing target architecture unless explicitly promoted.

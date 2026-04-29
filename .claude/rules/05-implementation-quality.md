@@ -1,51 +1,159 @@
-# 05-implementation-quality
+# 05 — Implementation Quality
 
-## Intent
+## Purpose
 
-Bias the agent toward maintainable, production-grade code rather than compliance-heavy or overly clever output.
+Define the baseline quality standard for code and configuration changes in HB Intel.
 
-## Code quality priorities
+---
 
-Optimize for:
-- correctness,
-- maintainability,
-- readability,
-- strong typing,
-- testability,
-- clear ownership,
-- minimal accidental complexity.
+## Primary Rule
 
-## Preferred implementation style
+Make the smallest correct change that satisfies the approved scope, preserves architecture, and can be verified.
 
-- Prefer the smallest correct change.
-- Keep functions, modules, and components focused.
-- Reuse healthy existing patterns; avoid copying weak ones without thought.
-- Avoid speculative abstractions unless the current task clearly benefits from them.
-- Prefer explicit interfaces and boundaries over implicit coupling.
-- Keep public surface area narrow.
+---
 
-## Testing and verification
+## Implementation Defaults
 
-- Verify the changed scope before claiming completion.
-- Add or update tests when behavior changes or bug fixes require protection.
-- Prefer targeted package or changed-scope validation before broad workspace runs.
-- State what was verified and what was not.
+Before editing:
 
-## Refactoring guidance
+1. inspect the touched area;
+2. read only relevant authority docs;
+3. identify package ownership and runtime boundary;
+4. choose the smallest safe implementation path;
+5. preserve compatibility unless breakage is explicitly authorized;
+6. plan first when the work is risky, cross-cutting, phase/wave-driven, or sensitive.
 
-Refactor when it materially improves:
-- clarity,
-- reliability,
-- package ownership,
-- testability,
-- future change cost.
+During editing:
 
-Do not broaden the change unnecessarily when the task can be completed safely in a smaller scope.
+- avoid unrelated cleanup;
+- avoid broad rewrites without need;
+- avoid staging unrelated files;
+- avoid changing formatting across untouched files;
+- preserve existing public contracts unless the prompt authorizes changes;
+- prefer type-safe, testable code;
+- preserve accessible UI behavior;
+- preserve fallback/empty/error states;
+- keep fixtures clearly separated from runtime behavior.
 
-## Avoid
+After editing:
 
-- large opportunistic rewrites without a clear payoff,
-- new abstractions with no current consumer pressure,
-- hidden coupling across packages,
-- duplicate UI primitives outside `@hbc/ui-kit`,
-- claims of completion without verification.
+- run the smallest meaningful validation;
+- report what was verified and what was not;
+- state residual risk.
+
+---
+
+## Code Quality Requirements
+
+Implementation should be:
+
+- typed;
+- readable;
+- maintainable;
+- locally cohesive;
+- dependency-aware;
+- tested where meaningful;
+- consistent with package style;
+- explicit about errors and edge cases;
+- respectful of runtime constraints;
+- minimal in scope.
+
+Avoid:
+
+- `any` unless justified and localized;
+- broad catch blocks that hide errors;
+- fragile stringly typed contracts when models exist;
+- duplicated domain logic;
+- copied UI primitives;
+- unbounded side effects;
+- implicit tenant or environment assumptions;
+- direct runtime calls that bypass approved boundaries.
+
+---
+
+## UI Quality Requirements
+
+For UI work:
+
+- preserve responsive behavior;
+- preserve keyboard/focus behavior;
+- avoid color-only meaning;
+- provide meaningful empty, error, loading, and preview states;
+- use current design tokens and primitives where appropriate;
+- do not over-centralize product-specific compositions;
+- do not preserve legacy layout patterns solely because they compile;
+- inspect basis-of-design assets when named by the task;
+- validate SPFx host behavior when the change touches webpart runtime or layout.
+
+Use `hb-ui-doctrine-conformance` when UI doctrine or shared UI ownership is material.
+
+Use `hb-spfx-runtime-parity` when source/build/manifest/runtime/hosted parity is material.
+
+---
+
+## Backend and Data Quality Requirements
+
+For backend or data work:
+
+- keep route/service/repository boundaries clear;
+- validate inputs;
+- classify auth and data-plane failures explicitly;
+- avoid leaking tokens or app settings;
+- preserve request IDs and diagnostic proof seams where present;
+- do not call live services unless explicitly authorized;
+- keep dry-run/proof modes deterministic;
+- redact sensitive output.
+
+Use `hb-sensitive-operation-gate` for live or sensitive operations.
+
+---
+
+## Testing Expectations
+
+When behavior changes, prefer a targeted automated check.
+
+Use this order:
+
+1. changed-file or local package tests;
+2. package-local typecheck/lint/build;
+3. affected consumer tests when public contracts changed;
+4. root workspace checks when cross-package or release-critical;
+5. Playwright/end-to-end when UI/runtime behavior requires it;
+6. hosted/tenant validation only when explicitly authorized.
+
+Use `hb-verification-router` for validation selection.
+
+---
+
+## Change Control
+
+Do not change these without explicit authorization:
+
+- package versions;
+- SPFx manifests;
+- app catalog packages;
+- CI/CD workflows;
+- dependency versions;
+- lockfiles through install/update commands;
+- tenant resources;
+- permission models;
+- live Procore/Graph/PnP behavior.
+
+If such a change appears necessary, stop and ask for approval through the plan gate.
+
+---
+
+## Reporting Standard
+
+For implementation work, report:
+
+- objective;
+- files inspected;
+- files modified;
+- implementation summary;
+- validation commands run;
+- validation results;
+- checks not run;
+- guardrails preserved;
+- residual risk;
+- commit summary and description when applicable.
