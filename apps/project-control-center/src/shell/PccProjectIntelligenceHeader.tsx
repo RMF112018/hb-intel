@@ -1,7 +1,6 @@
 import type { FC } from 'react';
 import { PccStatusPill } from '../ui/PccStatusPill';
 import { PccCommandSearch } from './PccCommandSearch';
-import { usePccBentoContext } from '../layout/PccBentoGrid';
 import type { PccResponsiveMode } from '../layout/footprints';
 import styles from './PccProjectIntelligenceHeader.module.css';
 
@@ -10,10 +9,8 @@ export interface PccProjectIntelligenceHeaderProps {
   subtitle: string;
   dateScope: string;
   pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
-  /**
-   * Optional override for tests; falls back to the active bento responsive mode.
-   */
-  forceMode?: PccResponsiveMode;
+  /** Resolved responsive mode supplied by the shell. */
+  mode: PccResponsiveMode;
 }
 
 export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps> = ({
@@ -21,10 +18,8 @@ export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps>
   subtitle,
   dateScope,
   pills,
-  forceMode,
+  mode,
 }) => {
-  const { mode: contextMode } = usePccBentoContext();
-  const mode = forceMode ?? contextMode;
   const showSearchExpanded = mode === 'wideDesktop' || mode === 'standardDesktop';
   const showPills = mode !== 'phone';
   const showDateScope = mode === 'wideDesktop' || mode === 'standardDesktop';

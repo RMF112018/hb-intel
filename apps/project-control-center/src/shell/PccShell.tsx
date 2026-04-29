@@ -26,6 +26,7 @@ import {
 } from '@hbc/ui-kit/theme';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import type { PccResponsiveMode } from '../layout/footprints';
+import { useContainerBreakpoint } from '../layout/useContainerBreakpoint';
 import { PccNavigationRail } from './PccNavigationRail';
 import { PccProjectIntelligenceHeader } from './PccProjectIntelligenceHeader';
 import styles from './PccShell.module.css';
@@ -85,17 +86,22 @@ export const PccShell: FC<PccShellProps> = ({
   forceMode,
   railFooter,
   children,
-}) => (
-  <div
-    className={styles.shell}
-    style={PCC_THEME_VARS}
-    data-pcc-shell="wave-2"
-  >
-    <PccBentoGrid forceMode={forceMode}>
+}) => {
+  const { ref: shellRef, mode: measuredShellMode } = useContainerBreakpoint();
+  const shellMode = forceMode ?? measuredShellMode;
+
+  return (
+    <div
+      ref={shellRef}
+      className={styles.shell}
+      style={PCC_THEME_VARS}
+      data-pcc-shell="wave-2"
+      data-pcc-shell-mode={shellMode}
+    >
       <div className={styles.layout} data-pcc-layout="">
         <PccNavigationRail
+          mode={shellMode}
           activeSurfaceId={activeSurfaceId}
-          forceMode={forceMode}
           footer={railFooter}
         />
         <div className={styles.workArea}>
@@ -104,15 +110,15 @@ export const PccShell: FC<PccShellProps> = ({
             subtitle={subtitle}
             dateScope={dateScope}
             pills={pills}
-            forceMode={forceMode}
+            mode={shellMode}
           />
           <main className={styles.canvas} data-pcc-canvas="">
-            {children}
+            <PccBentoGrid forceMode={forceMode}>{children}</PccBentoGrid>
           </main>
         </div>
       </div>
-    </PccBentoGrid>
-  </div>
-);
+    </div>
+  );
+};
 
 export default PccShell;

@@ -272,3 +272,161 @@ Subsequent Wave 2 prompts will:
 
 Nothing above the "Forward Look" line constitutes execution beyond
 Prompt 03 scope.
+
+---
+
+## Prompt 03 — Corrective Follow-up
+
+**Date:** 2026-04-29
+**Status:** Complete
+
+### Corrective commit summary
+
+`fix(spfx-project-control-center): wire PccDashboardCard children to PccBentoGrid (Wave 2 / Prompt 03 corrective)`
+
+Wires the integrated PCC shell so that `PccDashboardCard` instances are
+direct children of `[data-pcc-bento-grid]`, restoring the bento layout in
+the live `PccApp`. Also corrects the nav rail posture (no longer renders
+disabled buttons) and gives the bento grid a real container measurement
+inside `<main data-pcc-canvas>`.
+
+### Root cause
+
+`PccShell` wrapped the entire shell layout in `<PccBentoGrid>`, so the
+grid's only direct child was `<div className={styles.layout}>`. CSS Grid
+positions only direct children, so the `gridColumn`/`gridRow` styles set
+by `PccDashboardCard` were inert because the cards lived three nodes
+deeper inside `<main className={styles.canvas}>` (`display: block`).
+A second consequence: `PccBentoGrid`'s `ResizeObserver` measured
+shell-outer width, not canvas width, so the cards were not really
+container-aware.
+
+### Fix shape
+
+```text
+<div data-pcc-shell data-pcc-shell-mode={shellMode}>     // PccShell — own useContainerBreakpoint()
+  <div data-pcc-layout>
+    <PccNavigationRail mode={shellMode} />               // mode by prop (not context)
+    <div .workArea>
+      <PccProjectIntelligenceHeader mode={shellMode} />  // mode by prop (not context)
+      <main data-pcc-canvas>                              // padded; NOT a grid
+        <PccBentoGrid forceMode={forceMode}>              // own useContainerBreakpoint() — measures canvas
+          {children}                                      // PccDashboardCard direct children of grid
+        </PccBentoGrid>
+      </main>
+    </div>
+  </div>
+</div>
+```
+
+`PccDashboardCard` continues to consume `usePccBentoContext()`. The bento
+grid is still its provider — just at the correct DOM position.
+
+### Files modified
+
+| File | Change |
+| --- | --- |
+| `apps/project-control-center/src/shell/PccShell.tsx` | Stopped wrapping the shell layout in `<PccBentoGrid>`. Added a shell-level `useContainerBreakpoint()`; derived `shellMode = forceMode ?? measured`; passes `mode={shellMode}` to rail and header; passes `forceMode={forceMode}` to bento grid. Attached the shell-level `ref` to the shell root. Moved `<PccBentoGrid>{children}</PccBentoGrid>` inside `<main data-pcc-canvas>`. Added `data-pcc-shell-mode={shellMode}` for diagnostic clarity. |
+| `apps/project-control-center/src/shell/PccNavigationRail.tsx` | Replaced `forceMode` prop + `usePccBentoContext()` with required `mode: PccResponsiveMode` prop. Added module-scope `const NAV_NOOP = (): void => undefined;`. Removed `disabled` from surface buttons; added `onClick={NAV_NOOP}`. Kept `type="button"`. Kept `aria-current="page"` only on the active surface. |
+| `apps/project-control-center/src/shell/PccNavigationRail.module.css` | `.surfaceButton` cursor switched from `not-allowed` to `pointer`. Active row keeps its existing emphasis. |
+| `apps/project-control-center/src/shell/PccProjectIntelligenceHeader.tsx` | Replaced `forceMode` prop + `usePccBentoContext()` with required `mode: PccResponsiveMode` prop. Header CSS unchanged. |
+| `apps/project-control-center/src/tests/PccApp.bentoIntegration.test.tsx` | NEW — three-case regression test (verbatim below). |
+
+No other files were modified by this corrective. `PccBentoGrid.tsx`,
+`PccDashboardCard.tsx`, `PccApp.tsx`, `PccShell.module.css`, and all
+other tests are unchanged.
+
+### New regression test (verbatim)
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/react';
+import { PccApp } from '../PccApp';
+
+describe('PccApp bento integration (regression)', () => {
+  it('every dashboard card is a direct child of the bento grid', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid, 'bento grid should render').not.toBeNull();
+    const cards = container.querySelectorAll('[data-pcc-card]');
+    expect(cards.length).toBeGreaterThan(0);
+    for (const card of cards) {
+      expect(
+        card.parentElement === grid,
+        `card '${card.getAttribute('data-pcc-footprint')}' must be a direct child of the bento grid`,
+      ).toBe(true);
+    }
+  });
+
+  it('hero / wide / standard cards under the grid have non-zero column span and inline gridColumn', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const grid = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    expect(grid).not.toBeNull();
+    for (const footprint of ['hero', 'wide', 'standard'] as const) {
+      const card = grid.querySelector(`[data-pcc-card][data-pcc-footprint="${footprint}"]`) as HTMLElement | null;
+      expect(card, `'${footprint}' demo card should render under the grid`).not.toBeNull();
+      const declared = Number(card!.getAttribute('data-pcc-column-span'));
+      expect(declared).toBeGreaterThan(0);
+      expect(card!.style.gridColumn).toMatch(/^span \d+/);
+    }
+  });
+
+  it('renders without forceMode and still mounts the bento grid', () => {
+    const { container } = render(<PccApp />);
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+  });
+});
+```
+
+### Updated test totals
+
+Pre-corrective: **48 passed across 5 files**.
+Post-corrective: **51 passed across 6 files** (3 new bento-integration cases).
+
+### Validation command results
+
+| Command | Result |
+| --- | --- |
+| `git status --short` | Clean for the corrective scope. Pre-existing modifications to `CLAUDE.md` and `.claude/settings.local.json` were already present before this corrective and are not part of the commit. |
+| `pnpm --filter @hbc/spfx-project-control-center check-types` | **PASS** |
+| `pnpm --filter @hbc/spfx-project-control-center build` | **PASS** — `vite v6.4.1`, 2147 modules transformed; emits `dist/project-control-center-app.js` (167.70 kB · gzip 54.00 kB) and `dist/spfx-project-control-center.css` (10.61 kB · gzip 2.27 kB). Bundle was **not** packaged into `.sppkg` and **not** deployed. |
+| `pnpm --filter @hbc/spfx-project-control-center test` | **PASS** — 51/51 across 6 files. |
+| `pnpm --filter @hbc/spfx-project-control-center lint` | **PASS** — eslint clean. |
+
+### Lockfile status
+
+`pnpm-lock.yaml` is **unchanged**. MD5 hash before and after the corrective:
+`c56df7b79986896624536aab74d609f4` (identical). `git diff --stat
+pnpm-lock.yaml` reports no diff. No `pnpm install`, `pnpm add`, or
+`pnpm update` was run during the corrective.
+
+### Container measurement precision
+
+After this corrective:
+
+- The **bento card grid** measures its own DOM container (the `<main
+  data-pcc-canvas>` inline-size) via its own `useContainerBreakpoint()`
+  call. This is the correct container for card layout.
+- The **shell chrome** derives its responsive mode from a separate,
+  shell-level `useContainerBreakpoint()` call attached to the shell root.
+  Rail-variant and header-layout decisions consume this shell-level mode.
+- `forceMode` remains a test-only override that flows from `PccApp` →
+  `PccShell` → `PccBentoGrid`. When set, both the shell chrome and the
+  bento grid resolve to the same forced mode.
+- When `forceMode` is unset, the shell and the bento grid each derive
+  their own mode independently from their own container measurement.
+
+### Explicit no-scope-change confirmations
+
+- **`packages/spfx`:** untouched.
+- **SPFx manifests / `package-solution.json` / `.sppkg` / app-catalog packaging / deployment scripts:** none introduced.
+- **Backend / Azure Functions / provisioning / template packages:** untouched.
+- **Graph / PnP / Procore / auth integrations:** none introduced. `tests/pcc-import-guards.test.ts` continues to assert this.
+- **CI/CD workflow files:** untouched.
+- **Package, solution, or manifest version bumps:** none. `apps/project-control-center/package.json` version remains `0.0.1`.
+- **`pnpm-lock.yaml`:** unchanged (MD5 identical pre/post).
+- **`PCC_FIXTURES` consumption:** none.
+- **Per-surface module UI (Project Home contents, Documents, Approvals execution, etc.):** not implemented; deferred to Prompts 04–08.
+- **Homepage paired-row layout import / copy / adaptation:** none. `tests/pcc-import-guards.test.ts` continues to assert this.
+- **New components:** only the regression test file. No new tokens, dependencies, icons, or `@hbc/ui-kit` API additions.

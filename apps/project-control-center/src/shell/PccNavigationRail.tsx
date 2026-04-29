@@ -10,9 +10,10 @@ import {
   Settings,
   Submittal,
 } from '@hbc/ui-kit/icons';
-import { usePccBentoContext } from '../layout/PccBentoGrid';
 import type { PccResponsiveMode } from '../layout/footprints';
 import styles from './PccNavigationRail.module.css';
+
+const NAV_NOOP = (): void => undefined;
 
 const SURFACE_ICONS: Record<PccMvpSurfaceId, FC<{ size?: 'sm' | 'md' | 'lg'; 'aria-label'?: string }>> = {
   'project-home': Home,
@@ -40,19 +41,18 @@ function railVariantForMode(mode: PccResponsiveMode): 'expanded' | 'iconOnly' | 
 }
 
 export interface PccNavigationRailProps {
+  /** Resolved responsive mode supplied by the shell. */
+  mode: PccResponsiveMode;
   activeSurfaceId?: PccMvpSurfaceId;
-  forceMode?: PccResponsiveMode;
   /** Slot rendered at the bottom of the rail (e.g., user chip). */
   footer?: ReactNode;
 }
 
 export const PccNavigationRail: FC<PccNavigationRailProps> = ({
+  mode,
   activeSurfaceId,
-  forceMode,
   footer,
 }) => {
-  const { mode: contextMode } = usePccBentoContext();
-  const mode = forceMode ?? contextMode;
   const variant = railVariantForMode(mode);
 
   return (
@@ -83,7 +83,7 @@ export const PccNavigationRail: FC<PccNavigationRailProps> = ({
                 data-pcc-surface-id={id}
                 data-pcc-surface-active={active ? 'true' : 'false'}
                 aria-current={active ? 'page' : undefined}
-                disabled
+                onClick={NAV_NOOP}
               >
                 <span className={styles.surfaceIcon} aria-hidden="true">
                   <Icon size="sm" aria-label="" />
