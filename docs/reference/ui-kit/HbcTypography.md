@@ -1,6 +1,18 @@
 # HbcTypography
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcTypography.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Intent-based text component providing semantic typography with automatic style resolution.
+
+## Governance Clarification
+
+- Typography usage remains subject to runtime doctrine.
+- Brand/font usage remains subject to `docs/reference/brand/BRAND-USAGE-GOVERNANCE.md`.
+- Governed custom font placement remains blocked unless `docs/reference/brand/FONT-LICENSE-CLEARANCE.md` is approved.
 
 ## Import
 

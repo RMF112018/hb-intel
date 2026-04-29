@@ -1,5 +1,11 @@
 # HbcPeoplePicker
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcPeoplePicker.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Production-grade people selection with Microsoft Graph live lookup. Replaces the D-PH6-10 textarea stub with a governed combobox + chip pattern.
 
 ## Architecture

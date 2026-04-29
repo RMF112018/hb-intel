@@ -1,5 +1,11 @@
 # HbcCard
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcCard.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Elevated surface container for grouping related content with visual weight differentiation.
 
 ## Import

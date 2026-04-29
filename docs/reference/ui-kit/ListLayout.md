@@ -1,5 +1,11 @@
 # ListLayout
 
+> **Governance Status:** Layer 3 layout reference
+> **Purpose:** API/usage guidance for ListLayout.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 **Phase:** 4b.3 | **Blueprint:** §1f, §2c
 
 Four-zone list page layout with filter toolbar, saved views bar, table zone, and floating bulk action bar. Used when `WorkspacePageShell` has `layout="list"`.

@@ -1,5 +1,11 @@
 # HbcStatusBadge
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcStatusBadge.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Status indicator badge for displaying entity status across tables, lists, and inline content.
 
 ## Import

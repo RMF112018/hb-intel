@@ -1,5 +1,11 @@
 # DashboardLayout
 
+> **Governance Status:** Layer 3 layout reference
+> **Purpose:** API/usage guidance for DashboardLayout.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 **Phase:** 4b.3 | **Blueprint:** §1f, §2c
 
 Responsive dashboard layout with KPI card grid, chart zone, and data zone. Used when `WorkspacePageShell` has `layout="dashboard"`.

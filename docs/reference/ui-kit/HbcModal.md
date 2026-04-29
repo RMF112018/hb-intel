@@ -1,5 +1,11 @@
 # HbcModal
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcModal.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Modal dialog component for critical user interactions and confirmations.
 
 ## Import

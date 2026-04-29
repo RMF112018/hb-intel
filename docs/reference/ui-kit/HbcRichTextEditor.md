@@ -1,5 +1,11 @@
 # HbcRichTextEditor
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcRichTextEditor.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Rich text editor input for formatted notes and narrative content.
 
 ## Import
@@ -40,4 +46,3 @@ Editor chrome and typography adapt through active theme tokens.
 
 Exported from the full entry point: `@hbc/ui-kit`.
 See [entry-points.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/entry-points.md).
-

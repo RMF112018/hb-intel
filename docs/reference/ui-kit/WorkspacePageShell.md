@@ -1,5 +1,11 @@
 # WorkspacePageShell
 
+> **Governance Status:** Layer 3 layout reference
+> **Purpose:** API/usage guidance for WorkspacePageShell.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Mandatory outer container for every page in HB Intel (D-01). Renders breadcrumbs, command bar, banners, and state overlays (loading/empty/error). The `layout` prop enforces D-02 at the type level.
 
 ## Import

@@ -1,5 +1,11 @@
 # HbcErrorBoundary Component Reference
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcErrorBoundary.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 **Version:** 1.0
 **Date:** 2026-03-07
 **Status:** Documented in PH4C.8

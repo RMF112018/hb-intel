@@ -1,5 +1,11 @@
 # HbcDonutChart
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcDonutChart.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Typed convenience wrapper for donut/pie visualizations built on `HbcChart`.
 
 ## Import
@@ -41,4 +47,3 @@ Donut colors and labels adapt automatically to active theme tokens.
 
 Exported from the full entry point: `@hbc/ui-kit`.
 See [entry-points.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/entry-points.md).
-

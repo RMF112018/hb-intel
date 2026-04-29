@@ -1,5 +1,11 @@
 # HbcApprovalStepper
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcApprovalStepper.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Vertical or horizontal approval workflow stepper displaying an approval chain with avatars, decision badges, timestamps, and comments.
 
 ## Import

@@ -1,5 +1,11 @@
 # HbcConfirmDialog
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcConfirmDialog.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Lightweight confirmation dialog for destructive or warning actions, wrapping HbcModal with Cancel/Confirm footer.
 
 ## Import

@@ -1,5 +1,11 @@
 # HbcDrawingViewer
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcDrawingViewer.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 3-layer PDF drawing viewer with markup overlay system. Enables pan/zoom, page navigation, sheet/revision selection, and real-time markup annotations.
 
 ## Import

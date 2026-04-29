@@ -1,5 +1,11 @@
 # HbcDescriptionList
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcDescriptionList.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Semantic key/value metadata display using `<dl>`/`<dt>`/`<dd>` elements in a 2-column grid layout.
 
 ## When to use

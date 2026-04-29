@@ -1,5 +1,11 @@
 # HbcPhotoGrid
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcPhotoGrid.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Responsive photo gallery grid with square thumbnails, hover caption overlays, optional add-photo tile, and "+N more" truncation.
 
 ## Import

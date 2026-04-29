@@ -1,6 +1,18 @@
 # HbcAppShell
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcAppShell.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Application shell layout component providing header, sidebar, and content area structure.
+
+## Governance Clarification
+
+- This is a component/reference doc only.
+- It does not authorize fake SharePoint shell duplication.
+- For SPFx surfaces, shell behavior is governed by SPFx host-runtime doctrine and the full-page/widget overlay.
 
 ## Import
 

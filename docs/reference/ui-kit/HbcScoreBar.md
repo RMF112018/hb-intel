@@ -1,5 +1,11 @@
 # HbcScoreBar
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcScoreBar.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Horizontal score visualization bar with three color segments (red/amber/green) and a positional marker.
 
 ## Import

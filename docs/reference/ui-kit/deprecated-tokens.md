@@ -1,5 +1,11 @@
 # Deprecated Tokens Reference
 
+> **Governance Status:** deprecated reference
+> **Purpose:** Migration/deprecation record only.
+> **Authority Boundary:** This document does not override current token/theme/runtime doctrine.
+> **Routing Note:** See `docs/reference/ui-kit/GOVERNANCE-MAP.md`, `docs/reference/ui-kit/doctrine/README.md`, and current theme/token authorities for active governance.
+
+
 This document tracks deprecated UI Kit tokens and their migration status.
 
 ## Token Deprecation Matrix

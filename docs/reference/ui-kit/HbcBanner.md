@@ -1,5 +1,11 @@
 # HbcBanner
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcBanner.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Page-level notification banner for displaying messages, warnings, errors, or success states.
 
 ## Import

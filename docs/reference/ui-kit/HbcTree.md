@@ -1,5 +1,11 @@
 # HbcTree
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcTree.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Tree view component for displaying hierarchical data with expand/collapse and selection.
 
 ## Import

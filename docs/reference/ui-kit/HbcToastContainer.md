@@ -1,5 +1,11 @@
 # HbcToastContainer
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcToastContainer.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Rendered toast stack UI bound to `HbcToastProvider` context.
 
 ## Import
@@ -35,4 +41,3 @@ Container and toast cards use active light/field theme token surfaces and text c
 Exported from the full entry point: `@hbc/ui-kit`.
 Mount once in shell/root layout; page components should call `useToast` only.
 See [HbcToast.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToast.md) and [entry-points.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/entry-points.md).
-

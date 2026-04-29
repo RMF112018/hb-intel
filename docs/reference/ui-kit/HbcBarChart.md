@@ -1,5 +1,11 @@
 # HbcBarChart
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcBarChart.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Typed convenience wrapper for bar visualizations built on `HbcChart`.
 
 ## Import
@@ -42,4 +48,3 @@ Uses the same theme-aware color and axis token behavior as `HbcChart`.
 
 Exported from the full entry point: `@hbc/ui-kit`.
 See [entry-points.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/entry-points.md).
-

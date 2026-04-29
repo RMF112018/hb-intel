@@ -1,5 +1,11 @@
 # HbcBottomNav
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcBottomNav.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Fixed bottom navigation bar for tablet and mobile viewports with overflow menu and Focus Mode support.
 
 ## Import

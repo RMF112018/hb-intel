@@ -1,5 +1,11 @@
 # HbcToastProvider
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcToastProvider.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Context provider that owns toast queue state and category-based timing rules.
 
 ## Import
@@ -36,4 +42,3 @@ Toast visuals are theme-token driven through the active provider tree.
 Exported from the full entry point: `@hbc/ui-kit`.
 Use only at shell/root composition boundaries; page components should use `useToast`.
 See [HbcToast.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToast.md) and [entry-points.md](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/entry-points.md).
-

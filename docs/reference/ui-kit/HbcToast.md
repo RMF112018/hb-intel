@@ -1,5 +1,11 @@
 # HbcToast
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcToast.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Toast notification system for transient, non-blocking messages. Part of the Phase 4b.9 Notifications & Feedback System (D-08).
 
 **Binding decision D-08:** All transient user feedback MUST be triggered via `useToast()`. Inline feedback components are prohibited. Persistent page-level warnings use `HbcBanner` via the `banner` prop on `WorkspacePageShell`.

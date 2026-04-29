@@ -1,5 +1,11 @@
 # HbcHeader
 
+> **Governance Status:** Layer 3 component reference
+> **Purpose:** API/usage guidance for HbcHeader.
+> **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
+> **Routing Note:** Consuming surfaces must follow runtime doctrine first.
+
+
 Fixed 56px dark header bar with logo, project selector, toolbox, favorites, search, create button, notifications, and user menu.
 
 ## Import
