@@ -1,87 +1,70 @@
-# UI Kit Reference — Doctrine & Entry Points
+# UI Kit Governance Index
 
-## Governing Doctrine
+## Purpose
 
-UI decisions in HB Intel are governed by a layered doctrine stack. Rules are classified as **BINDING** (mandatory) or **DIRECTIONAL** (strong guidance, justified deviation acceptable).
+This file is the authoritative starting point for UI governance routing in HB Intel.
 
-### Doctrine hierarchy
+It defines which documents govern decisions by runtime/surface and what reference material is non-governing.
 
-```
-Layer 1 — Runtime-Specific Governing Standards (top-level authority)
-  ├── SPFx Governing Standard        (all SPFx surfaces)
-  │     └── SPFx Homepage Overlay    (homepage-specific rules and freedoms)
-  └── PWA Governing Standard         (all PWA surfaces)
+## Authority Hierarchy
 
-Layer 2 — Cross-Runtime Shared Obligations
-  └── Accessibility, token discipline, package boundaries, import discipline
+### Layer 1 (Highest Authority)
 
-Layer 3 — Component and Pattern Reference (implementation detail)
-  └── Component API docs, composition guides, field readability, visual language
-      (accurate for usage — do not override Layer 1 doctrine)
-```
+Runtime-specific doctrine governs product behavior and acceptance:
 
-### Governing documents
+- [UI Doctrine — SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md)
+- [UI Doctrine — SPFx Homepage Overlay](./doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md)
+- [UI Doctrine — PWA Governing Standard](./doctrine/UI-Doctrine-PWA-Governing-Standard.md)
 
-| Document | Scope | Classification |
-|----------|-------|----------------|
-| [SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md) | All SharePoint-hosted surfaces | Layer 1 — primary SPFx authority |
-| [SPFx Homepage Overlay](./doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md) | HB Central homepage webparts only | Layer 1 — homepage-specific overlay |
-| [PWA Governing Standard](./doctrine/UI-Doctrine-PWA-Governing-Standard.md) | All PWA surfaces | Layer 1 — primary PWA authority |
+### Layer 2 (Cross-Runtime Obligations)
 
-### Governance model
+Cross-runtime constraints apply in all surfaces:
 
-- Shared design language and component system remain common across all surfaces
-- **PWA doctrine** governs immersive owned-application surfaces
-- **SPFx doctrine** governs SharePoint-hosted and host-aware surfaces
-- **SPFx Homepage Overlay** adds homepage-specific binding and directional rules on top of the SPFx standard
-- Layer 3 docs (component references, composition guides) remain accurate for component API and usage, but do not override Layer 1 doctrine
+- accessibility and interaction safety
+- token and theme discipline
+- package boundary and import discipline
+- host/runtime fit requirements
 
-### Supersession
+### Layer 3 (Reference, Not Governing Authority)
 
-The Layer 1 governing standards supersede any older UI-kit wording that assumed a single universal doctrine applied identically to all runtime surfaces. Specifically:
+Component, lane, pattern, and composition docs support implementation but do not override Layer 1 doctrine.
 
-- Component-level reference docs (HbcChart, HbcInput, etc.) remain accurate for API and usage details
-- Docs such as `UI-Kit-Visual-Language-Guide.md`, `UI-Kit-Usage-and-Composition-Guide.md`, and `UI-Kit-Field-Readability-Standards.md` are Layer 3 implementation reference — they inform but do not override the runtime-specific governing standards
-- When a Layer 3 doc conflicts with a Layer 1 governing standard, the Layer 1 standard governs
+If any Layer 3 guidance conflicts with Layer 1 doctrine, Layer 1 doctrine wins.
 
-## Entry Points
+## Consumer Routing (Current Authority)
 
-See **[entry-points.md](./entry-points.md)** for the authoritative reference on all 8 `@hbc/ui-kit` entry points (W01-P06).
+- Homepage SPFx webparts (`apps/hb-webparts`):
+  - SPFx Governing Standard -> SPFx Homepage Overlay -> [entry-points.md](./entry-points.md)
+- Full-page SPFx app/widget and PCC-style SPFx work:
+  - SPFx Governing Standard (current active authority)
+  - Future overlay for full-page/widget governance is planned for a later prompt and is not active authority yet.
+- PWA surfaces:
+  - PWA Governing Standard
+- Feature packages and shared libraries:
+  - Runtime doctrine for consuming surface + package boundary governance
+- Brand usage:
+  - `docs/reference/brand/README.md`
+  - `docs/reference/brand/BRAND-USAGE-GOVERNANCE.md`
 
-| Entry Point | Layer | Use For |
-|-------------|-------|---------|
-| `@hbc/ui-kit` | All | PWA, dev-harness, non-constrained bundles |
-| `@hbc/ui-kit/theme` | Foundation | Token-only imports |
-| `@hbc/ui-kit/icons` | Foundation | Icon-only imports |
-| `@hbc/ui-kit/branding` | Foundation | Brand asset registry |
-| `@hbc/ui-kit/primitives` | Primitive | Layer 2 building blocks (30 components) |
-| `@hbc/ui-kit/homepage` | Surface | Presentation-lane surface families + tokens |
-| `@hbc/ui-kit/app-shell` | Cross | SPFx domain apps needing shell chrome |
-| `@hbc/ui-kit/fluent` | Adapter | Fluent UI passthroughs (R3 compliance) |
+See [GOVERNANCE-MAP.md](./GOVERNANCE-MAP.md) for the full matrix.
 
-## Two-Lane UI System
+## Entry-Point Governance
 
-The UI system distinguishes two lanes at the surface family level (Layer 3):
+`@hbc/ui-kit` entry-point rules and homepage import policy are governed by:
 
-| Lane | Governs | Key docs |
-|---|---|---|
-| **Productive** | Forms, tables, workflows, dashboards, admin | [Productive-Lane-Standard](./Productive-Lane-Standard.md) |
-| **Presentation** | Homepage heroes, editorial, spotlights, culture | [Presentation-Lane-Standard](./Presentation-Lane-Standard.md) |
+- [entry-points.md](./entry-points.md)
 
-Both lanes share foundations (Layer 1) and primitives (Layer 2). See [UI-System-Layer-Model](./UI-System-Layer-Model.md) and [Why-Two-Lanes](../../explanation/ui-system/Why-Two-Lanes.md).
+## Supersession and Legacy Status
 
-### Documentation governance map
+Legacy, historical, and deprecated UI-kit docs are tracked centrally in:
 
-| Consumer area | Governing docs |
-|---|---|
-| Homepage webparts (`apps/hb-webparts`) | SPFx Homepage Overlay → Presentation-Lane-Standard → entry-points.md |
-| PWA productive apps (`apps/accounting`, `apps/estimating`, `apps/admin`, etc.) | PWA Governing Standard → Productive-Lane-Standard |
-| SPFx domain apps (`apps/project-sites`, `tools/spfx-shell`) | SPFx Governing Standard |
-| Feature packages (`packages/saved-views`, `packages/bulk-actions`, etc.) | Package-Relationship-Map (R1-R3) → Layer Model |
-| New homepage surfaces | [Building-New-Homepage-Surfaces](../../how-to/developer/Building-New-Homepage-Surfaces.md) |
-| Legacy UI migration | [Migrating-Legacy-UI](../../how-to/developer/Migrating-Legacy-UI-to-the-Two-Lane-System.md) |
+- [GOVERNANCE-SUPERSESSION.md](./GOVERNANCE-SUPERSESSION.md)
 
-## Related
+Prompt 02 uses this central supersession map rather than bulk-editing all legacy files.
 
-- [SharePoint Homepage & Shell Boundaries](../sharepoint-homepage-shell-boundaries.md) — Three-lane model and boundary rules
-- [Package Relationship Map — Rule R2](../../architecture/blueprint/package-relationship-map.md) — Entry-point governance rule
+## Related Governance
+
+- [Doctrine Index](./doctrine/README.md)
+- [GOVERNANCE-MAP.md](./GOVERNANCE-MAP.md)
+- [GOVERNANCE-SUPERSESSION.md](./GOVERNANCE-SUPERSESSION.md)
+- [GOVERNANCE-CLEANUP-SCOPE-LOCK.md](./GOVERNANCE-CLEANUP-SCOPE-LOCK.md)
