@@ -25,3 +25,10 @@ Verified prior to curation:
 - No PDF copy.
 - No app-local brand asset placement.
 - No product/runtime/backend/CI-CD/deployment/version/lockfile/manifest changes.
+
+## Option B Corrective Patch
+
+- Applied Option B for Reef Arches SVG safety remediation.
+- Removed `reefArchesLogo` active export and `brandAssets` key from `@hbc/ui-kit/branding`.
+- Deleted `packages/ui-kit/src/branding/assets/reef-arches-logo.svg` from curated implementation assets because the source SVG is not self-contained.
+- Active registry now exposes `reefArchesLogoPng` only for Reef Arches.

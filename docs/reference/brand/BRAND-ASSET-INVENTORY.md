@@ -7,7 +7,7 @@ This file records the contents of the HB brand source package and defines how th
 This inventory is intentionally split between:
 
 - **source package assets** — original files preserved for reference;
-- **curated UI-kit assets** — implementation-ready assets exported through `@hbc/ui-kit/branding` in later authorized prompts.
+- **curated UI-kit assets** — implementation-ready assets exported through `@hbc/ui-kit/branding`.
 
 Application code must not import directly from source package territory.
 
@@ -88,11 +88,11 @@ Curated files should use kebab-case file names and camelCase exports.
 
 ### Reef Arches
 
-| Curated File                       | Export Name                | Intended Use                        |
-| ---------------------------------- | -------------------------- | ----------------------------------- |
-| `reef-arches-logo.svg`             | `reefArchesLogo`           | Preferred scalable Reef Arches mark |
-| `reef-arches-logo.png`             | `reefArchesLogoPng`        | PNG fallback                        |
-| `reef-arches-logo-white-green.png` | `reefArchesLogoWhiteGreen` | Special-use dark variant            |
+| Curated File                       | Export Name           | Intended Use                                       |
+| ---------------------------------- | --------------------- | -------------------------------------------------- |
+| `reef-arches-logo.png`             | `reefArchesLogoPng`   | Active Reef Arches curated asset                   |
+| `reef-arches-logo.svg`             | _deferred (inactive)_ | Source SVG is raster-linked/non-self-contained     |
+| `reef-arches-logo-white-green.png` | _not curated_         | Source variant; curate only with explicit approval |
 
 ## Existing UI-Kit Branding Registry
 
@@ -152,18 +152,18 @@ Archive posture remains:
 
 No fonts, PDFs, or archive relocation were performed.
 
-| Source File in Archive                                    | Target File                                                                     | Registry Key                        | Format | Intended Use                             |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- | ------ | ---------------------------------------- |
-| `Logos/HB Construction/HB Icon only.png`                  | `packages/ui-kit/src/branding/assets/hb-construction-icon.png`                  | `hbConstructionIcon`                | PNG    | Compact app marks and icon frames        |
-| `Logos/HB Construction/HB Icon white.png`                 | `packages/ui-kit/src/branding/assets/hb-construction-icon-white.png`            | `hbConstructionIconWhite`           | PNG    | Dark headers/rails/surfaces              |
-| `Logos/HB Construction/HB_Logo_Left_Icon.png`             | `packages/ui-kit/src/branding/assets/hb-construction-logo-left.png`             | `hbConstructionLogoLeft`            | PNG    | App headers and shell branding           |
-| `Logos/HB Construction/HB_Logo_Left_reverse.png`          | `packages/ui-kit/src/branding/assets/hb-construction-logo-left-reverse.png`     | `hbConstructionLogoLeftReverse`     | PNG    | Dark command headers/rails               |
-| `Logos/HB Construction/HB_Logo_Centered_Icon.png`         | `packages/ui-kit/src/branding/assets/hb-construction-logo-centered.png`         | `hbConstructionLogoCentered`        | PNG    | Large identity moments                   |
-| `Logos/HB Construction/HB_Logo_Centered_Icon_Reverse.png` | `packages/ui-kit/src/branding/assets/hb-construction-logo-centered-reverse.png` | `hbConstructionLogoCenteredReverse` | PNG    | Dark flagship/hero surfaces              |
-| `Logos/HB Development/HBD LOGO.png`                       | `packages/ui-kit/src/branding/assets/hb-development-logo.png`                   | `hbDevelopmentLogo`                 | PNG    | Development-specific identity            |
-| `Logos/HB Development/HBD LOGO-reverse.png`               | `packages/ui-kit/src/branding/assets/hb-development-logo-reverse.png`           | `hbDevelopmentLogoReverse`          | PNG    | Development logo on dark surfaces        |
-| `Logos/HB Environmental/HBE LOGO ICON.png`                | `packages/ui-kit/src/branding/assets/hb-environmental-icon.png`                 | `hbEnvironmentalIcon`               | PNG    | Environmental iconography                |
-| `Logos/HB Environmental/HBE LOGO.png`                     | `packages/ui-kit/src/branding/assets/hb-environmental-logo.png`                 | `hbEnvironmentalLogo`               | PNG    | Environmental identity surfaces          |
-| `Logos/HB Environmental/HBE LOGO reverse.png`             | `packages/ui-kit/src/branding/assets/hb-environmental-logo-reverse.png`         | `hbEnvironmentalLogoReverse`        | PNG    | Environmental logo on dark surfaces      |
-| `Logos/Reef Arches/Reef Arch Logo patent.svg`             | `packages/ui-kit/src/branding/assets/reef-arches-logo.svg`                      | `reefArchesLogo`                    | SVG    | Preferred scalable Reef Arches mark      |
-| `Logos/Reef Arches/Reef Arch Logo patent.png`             | `packages/ui-kit/src/branding/assets/reef-arches-logo.png`                      | `reefArchesLogoPng`                 | PNG    | PNG fallback for contexts needing raster |
+| Source File in Archive                                    | Target File                                                                     | Registry Key                        | Format | Intended Use                                          |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- | ------ | ----------------------------------------------------- |
+| `Logos/HB Construction/HB Icon only.png`                  | `packages/ui-kit/src/branding/assets/hb-construction-icon.png`                  | `hbConstructionIcon`                | PNG    | Compact app marks and icon frames                     |
+| `Logos/HB Construction/HB Icon white.png`                 | `packages/ui-kit/src/branding/assets/hb-construction-icon-white.png`            | `hbConstructionIconWhite`           | PNG    | Dark headers/rails/surfaces                           |
+| `Logos/HB Construction/HB_Logo_Left_Icon.png`             | `packages/ui-kit/src/branding/assets/hb-construction-logo-left.png`             | `hbConstructionLogoLeft`            | PNG    | App headers and shell branding                        |
+| `Logos/HB Construction/HB_Logo_Left_reverse.png`          | `packages/ui-kit/src/branding/assets/hb-construction-logo-left-reverse.png`     | `hbConstructionLogoLeftReverse`     | PNG    | Dark command headers/rails                            |
+| `Logos/HB Construction/HB_Logo_Centered_Icon.png`         | `packages/ui-kit/src/branding/assets/hb-construction-logo-centered.png`         | `hbConstructionLogoCentered`        | PNG    | Large identity moments                                |
+| `Logos/HB Construction/HB_Logo_Centered_Icon_Reverse.png` | `packages/ui-kit/src/branding/assets/hb-construction-logo-centered-reverse.png` | `hbConstructionLogoCenteredReverse` | PNG    | Dark flagship/hero surfaces                           |
+| `Logos/HB Development/HBD LOGO.png`                       | `packages/ui-kit/src/branding/assets/hb-development-logo.png`                   | `hbDevelopmentLogo`                 | PNG    | Development-specific identity                         |
+| `Logos/HB Development/HBD LOGO-reverse.png`               | `packages/ui-kit/src/branding/assets/hb-development-logo-reverse.png`           | `hbDevelopmentLogoReverse`          | PNG    | Development logo on dark surfaces                     |
+| `Logos/HB Environmental/HBE LOGO ICON.png`                | `packages/ui-kit/src/branding/assets/hb-environmental-icon.png`                 | `hbEnvironmentalIcon`               | PNG    | Environmental iconography                             |
+| `Logos/HB Environmental/HBE LOGO.png`                     | `packages/ui-kit/src/branding/assets/hb-environmental-logo.png`                 | `hbEnvironmentalLogo`               | PNG    | Environmental identity surfaces                       |
+| `Logos/HB Environmental/HBE LOGO reverse.png`             | `packages/ui-kit/src/branding/assets/hb-environmental-logo-reverse.png`         | `hbEnvironmentalLogoReverse`        | PNG    | Environmental logo on dark surfaces                   |
+| `Logos/Reef Arches/Reef Arch Logo patent.svg`             | _no active curated target_                                                      | _none_                              | SVG    | Deferred: raster-linked/non-self-contained source SVG |
+| `Logos/Reef Arches/Reef Arch Logo patent.png`             | `packages/ui-kit/src/branding/assets/reef-arches-logo.png`                      | `reefArchesLogoPng`                 | PNG    | PNG fallback for contexts needing raster              |

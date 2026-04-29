@@ -24,7 +24,6 @@ import hbEnvironmentalLogoReverse from './assets/hb-environmental-logo-reverse.p
 import hbIconBlueBg from './assets/hb-icon-blue-bg.jpg';
 import hbLogoIcon from './assets/hb-logo-icon.jpg';
 import hedrickLogo from './assets/hedrick-logo.png';
-import reefArchesLogo from './assets/reef-arches-logo.svg';
 import reefArchesLogoPng from './assets/reef-arches-logo.png';
 
 export {
@@ -43,7 +42,6 @@ export {
   hbIconBlueBg,
   hbLogoIcon,
   hedrickLogo,
-  reefArchesLogo,
   reefArchesLogoPng,
 };
 
@@ -67,7 +65,6 @@ export const brandAssets = {
   hbIconBlueBg,
   hbLogoIcon,
   hedrickLogo,
-  reefArchesLogo,
   reefArchesLogoPng,
 } as const;
 

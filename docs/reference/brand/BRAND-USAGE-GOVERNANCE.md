@@ -18,8 +18,6 @@ Runtime doctrine remains authoritative for product behavior, host fit, accessibi
 - **Target source territory:** `docs/reference/brand/source/`
 - **Future action:** archive relocation/reconciliation is deferred to a later explicitly authorized prompt.
 
-Prompt 05/06 asset/font implementation work has not occurred in Prompt 04 or this corrective patch.
-
 ## Source-of-Truth Boundary
 
 `docs/reference/brand/` is reference/source-of-truth territory, not product import territory.
@@ -176,6 +174,8 @@ Before using a brand asset in product UI:
 ## Prompt 05 Implementation Status Note
 
 Prompt 05 curated stable reusable corporate logo assets into `packages/ui-kit/src/branding/assets/` and exposed them via `@hbc/ui-kit/branding`.
+
+Reef Arches status for corrective Option B: SVG registry export is deferred until a clean self-contained SVG is available, and `reefArchesLogoPng` is the sole active Reef Arches curated registry asset.
 
 Boundaries preserved:
 
