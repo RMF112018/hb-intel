@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import {
+  DOCUMENT_CONTROL_SOURCE_IDS,
   SAMPLE_APPROVAL_CHECKPOINTS,
   SAMPLE_BUSINESS_AUDIT_EVENTS,
-  SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
@@ -140,32 +140,59 @@ describe('Project Home bento dashboard', () => {
 
   // ── Document Control ─────────────────────────────────────────────────
 
-  it('Document Control card renders one tile per SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS entry with posture metadata', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
-    const tiles = container.querySelectorAll('[data-pcc-document-source-id]');
-    expect(tiles).toHaveLength(SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS.length);
-    for (const tile of tiles) {
-      expect(tile.getAttribute('data-pcc-document-posture')).not.toBeNull();
-      expect(tile.getAttribute('data-pcc-document-link-behavior')).not.toBeNull();
-    }
-  });
-
-  it('Document Control card does not render upload, approve, review, retention, permission, or sync-policy affordances', () => {
+  it('Document Control card renders one tile per DOCUMENT_CONTROL_SOURCE_IDS entry with posture metadata, grouped by canonical lane', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const body = container.querySelector('[data-pcc-document-control-body]');
     expect(body).not.toBeNull();
-    const text = (body!.textContent ?? '').toLowerCase();
-    for (const word of ['upload', 'approve', 'review', 'retention', 'permission', 'sync policy']) {
-      expect(text, `Document Control card must not show '${word}' affordance`).not.toContain(word);
+
+    // Two lane sections from the canonical DOCUMENT_CONTROL_LANES, scoped to this card body.
+    const microsoftLane = body!.querySelector('[data-pcc-doc-lane="microsoft-files"]');
+    const externalLane = body!.querySelector('[data-pcc-doc-lane="external-document-systems"]');
+    expect(microsoftLane, 'Microsoft Files lane section should render').not.toBeNull();
+    expect(externalLane, 'External Document Systems lane section should render').not.toBeNull();
+
+    // Tile counts derived from the canonical lane field on DOCUMENT_CONTROL_SOURCES.
+    const tiles = body!.querySelectorAll('[data-pcc-document-source-id]');
+    expect(tiles).toHaveLength(DOCUMENT_CONTROL_SOURCE_IDS.length);
+    for (const tile of tiles) {
+      expect(tile.getAttribute('data-pcc-document-posture')).not.toBeNull();
+      expect(tile.getAttribute('data-pcc-document-link-behavior')).not.toBeNull();
+      expect(tile.getAttribute('data-pcc-doc-lane')).not.toBeNull();
     }
-    // No <button>s with affordance text either
-    const buttons = body!.querySelectorAll('button');
-    for (const b of buttons) {
-      const t = (b.textContent ?? '').toLowerCase();
-      for (const word of ['upload', 'approve', 'review', 'retention']) {
-        expect(t).not.toContain(word);
-      }
+  });
+
+  it('Document Control card Microsoft-lane action chips are disabled buttons with no executable handler or href', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const body = container.querySelector('[data-pcc-document-control-body]');
+    expect(body).not.toBeNull();
+
+    const actionEls = body!.querySelectorAll('[data-pcc-doc-action]');
+    expect(actionEls.length, 'at least one Microsoft-lane action chip should render').toBeGreaterThan(0);
+    for (const el of actionEls) {
+      expect(el.tagName).toBe('BUTTON');
+      const button = el as HTMLButtonElement;
+      expect(button.disabled, `action chip ${button.getAttribute('data-pcc-doc-action')} must be disabled`).toBe(true);
+      expect(button.getAttribute('aria-disabled')).toBe('true');
+      // No inline onclick attribute string.
+      expect(button.getAttribute('onclick')).toBeNull();
+      // executionState marker reflects the canonical preview-disabled posture.
+      expect(button.getAttribute('data-pcc-doc-action-execution-state')).toBe('preview-disabled');
     }
+
+    // No <a href="http(s)://"> launch behavior anywhere in the card body.
+    const anchors = body!.querySelectorAll('a[href]');
+    for (const a of anchors) {
+      const href = a.getAttribute('href') ?? '';
+      expect(href).not.toMatch(/^https?:\/\//);
+    }
+
+    // External-lane rows surface a launch/visibility cue and contain no action buttons.
+    const externalLane = body!.querySelector('[data-pcc-doc-lane="external-document-systems"]');
+    expect(externalLane).not.toBeNull();
+    const externalLaunchCues = externalLane!.querySelectorAll('[data-pcc-doc-launch-cue]');
+    expect(externalLaunchCues.length).toBeGreaterThan(0);
+    const externalActionButtons = externalLane!.querySelectorAll('[data-pcc-doc-action]');
+    expect(externalActionButtons.length).toBe(0);
   });
 
   // ── Project Readiness ────────────────────────────────────────────────

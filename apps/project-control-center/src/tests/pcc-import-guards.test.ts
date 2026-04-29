@@ -33,6 +33,17 @@ const FORBIDDEN_LIVE_INTEGRATIONS = [
   '@microsoft/microsoft-graph-client',
   'procoreApi',
   'procore-sdk',
+  // Wave 2 / Prompt 06 — runtime-construction identifiers / package
+  // specifiers that must never appear in app source. Bare product names
+  // (Graph, Procore, Document Crunch, Adobe Sign) are intentionally NOT
+  // listed: they appear in legitimate product copy in JSX text.
+  'MSGraphClient',
+  'GraphServiceClient',
+  'sp.web',
+  '_api/web',
+  'ProcoreClient',
+  'DocumentCrunchClient',
+  'AdobeSignClient',
 ];
 
 function listSourceFiles(dir: string): string[] {
