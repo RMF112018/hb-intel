@@ -7,6 +7,7 @@ import {
 } from './PccCapabilities.js';
 import { PCC_PERSONAS } from './PccUserRoles.js';
 import { PCC_MVP_SURFACE_IDS } from './PccMvpSurfaces.js';
+import { TEAM_ACCESS_MANAGER_PERSONAS } from './TeamAccess.js';
 
 const SECRET_TOKEN_PATTERNS = /(secret|token|bearer|apikey|api[-_]key|authorization|password)/i;
 
@@ -48,5 +49,31 @@ describe('PCC capabilities', () => {
   it('pcc-admin holds the full capability set', () => {
     const adminCaps = PCC_PERSONA_CAPABILITIES['pcc-admin'];
     expect(adminCaps).toHaveLength(PCC_CAPABILITY_IDS.length);
+  });
+
+  it('manage-team-access is mapped exactly to TEAM_ACCESS_MANAGER_PERSONAS', () => {
+    const managerSet = new Set(TEAM_ACCESS_MANAGER_PERSONAS);
+    for (const persona of PCC_PERSONAS) {
+      const expected = managerSet.has(persona);
+      expect(
+        personaHasCapability(persona, 'manage-team-access'),
+        `${persona} manage-team-access mismatch`,
+      ).toBe(expected);
+    }
+  });
+
+  it('critical non-manager personas do not gain manage-team-access accidentally', () => {
+    const mustNotHave = [
+      'executive-oversight',
+      'superintendent',
+      'project-accounting',
+      'project-team-member',
+      'external-contributor',
+      'viewer',
+      'safety-qaqc',
+    ] as const;
+    for (const persona of mustNotHave) {
+      expect(personaHasCapability(persona, 'manage-team-access')).toBe(false);
+    }
   });
 });

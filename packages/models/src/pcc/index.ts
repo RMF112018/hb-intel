@@ -180,11 +180,19 @@ export {
 export {
   DOCUMENT_CONTROL_SOURCE_IDS,
   DOCUMENT_CONTROL_SOURCES,
+  DOCUMENT_CONTROL_LANES,
+  DOCUMENT_CONTROL_ACTION_IDS,
+  DOCUMENT_CONTROL_ACTIONS,
   type DocumentControlSourceId,
   type DocumentControlSource,
   type DocumentControlSourcePosture,
   type DocumentControlLinkBehavior,
+  type DocumentControlLane,
+  type DocumentControlActionId,
+  type DocumentControlActionExecutionState,
+  type DocumentControlCapabilityPosture,
   type IDocumentControlSource,
+  type IDocumentControlAction,
 } from './DocumentControl.js';
 
 // Site Health
@@ -216,6 +224,28 @@ export {
 } from './PccSettings.js';
 
 // Role-capability matrix (read-model, not auth runtime)
+export {
+  TEAM_ACCESS_MANAGER_PERSONAS,
+  TEAM_ACCESS_LANES,
+  TEAM_ACCESS_AUDIENCE_STATES,
+  TEAM_ACCESS_MEMBER_KINDS,
+  TEAM_ACCESS_REQUEST_STATUSES,
+  TEAM_ACCESS_EXECUTION_STATUSES,
+  type TeamAccessManagerPersona,
+  type TeamAccessLane,
+  type TeamAccessAudienceState,
+  type TeamAccessMemberKind,
+  type TeamAccessRequestStatus,
+  type TeamAccessExecutionStatus,
+  type ITeamAccessMemberRecord,
+  type ITeamAccessCurrentUserContext,
+  type ITeamAccessViewerLaneModel,
+  type ITeamAccessRequestPreview,
+  type ITeamAccessPermissionRequestLaneModel,
+  type ITeamAccessAccessManagerLaneModel,
+  type ITeamAccessPreviewModel,
+} from './TeamAccess.js';
+
 export {
   PCC_CAPABILITY_IDS,
   PCC_CAPABILITIES,

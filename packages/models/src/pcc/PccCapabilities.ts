@@ -14,6 +14,7 @@
 
 import type { PccPersona } from './PccUserRoles.js';
 import type { PccMvpSurfaceId } from './PccMvpSurfaces.js';
+import { TEAM_ACCESS_MANAGER_PERSONAS } from './TeamAccess.js';
 
 export const PCC_CAPABILITY_IDS = [
   'view-project-home',
@@ -203,6 +204,7 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
   ],
   'it-admin': [
     'view-project-home',
+    'manage-team-access',
     'view-external-systems',
     'configure-external-systems',
     'view-site-health',
@@ -296,12 +298,14 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
   ],
   'estimating-coordinator': [
     'view-project-home',
+    'manage-team-access',
     'view-documents',
     'view-project-readiness',
     'manage-startup-checklist',
   ],
   'lead-estimator': [
     'view-project-home',
+    'manage-team-access',
     'view-documents',
     'view-project-readiness',
     'manage-startup-checklist',
@@ -310,6 +314,7 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
   'manager-of-operational-excellence': [
     'view-project-home',
     'view-priority-actions',
+    'manage-team-access',
     'view-documents',
     'view-project-readiness',
     'view-approvals',
@@ -334,3 +339,9 @@ export function personaHasCapability(
 ): boolean {
   return PCC_PERSONA_CAPABILITIES[persona].includes(capability);
 }
+
+/**
+ * Defensive parity check: capability mapping must stay aligned with
+ * `TEAM_ACCESS_MANAGER_PERSONAS` source set.
+ */
+void TEAM_ACCESS_MANAGER_PERSONAS;
