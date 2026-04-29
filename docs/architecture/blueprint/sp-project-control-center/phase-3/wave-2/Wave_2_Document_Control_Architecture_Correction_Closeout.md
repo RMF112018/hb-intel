@@ -87,3 +87,10 @@ Keep `packages/models/src/pcc/DocumentControl.ts` unchanged in this correction. 
 - Roadmap and target architecture scaffold status was corrected to reflect that `apps/project-control-center/` scaffold exists and Wave 2 is active/in-progress preview work.
 - Stale phrase search was completed for: `access hub only`, `currently absent`, `not yet present`, `not yet implemented in runtime app code`, and `released for the next scaffold prompt only`, with relevant in-scope governance-doc hits corrected.
 - No source/runtime/backend/provisioning/Graph/PnP/Procore/package/manifest/CI/lockfile changes were made.
+
+## Final Narrow Governance Cleanup
+
+- README stale Wave 2 scaffold status was corrected to active/in-progress posture with `apps/project-control-center/` scaffold-exists truth.
+- Open Decision Register stale language was corrected for OD-001 (resolved/superseded by Prompt 02 scaffold) and OD-008 (two-lane posture resolved; runtime/model details remain open).
+- Stale-phrase sweep was completed in targeted governance docs (`README.md`, `Register_Open_Decisions.md`, and this closeout).
+- No source/runtime/backend/provisioning/Graph/PnP/Procore/package/manifest/CI/lockfile changes were made.
