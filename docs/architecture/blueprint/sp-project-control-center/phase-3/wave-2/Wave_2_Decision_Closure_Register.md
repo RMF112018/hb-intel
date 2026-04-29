@@ -126,9 +126,9 @@ States used:
 **State:** Closed.
 **Cross-link:** `Wave_2_Wireframe_and_Layout_Contract.md` §3.
 
-## W2-ODR-016 — Team & Access Placeholder Only
+## W2-ODR-016 — Team & Access Lifecycle Preview Only
 
-> Project team summary placeholder and access-request entry placeholder only. No permission mutation, no group mutation, no approval execution.
+> Team & Access is a lifecycle preview in Wave 2: Team Viewer visibility, Permission Request preview, and Access Manager assignment/approval/execution-status preview. It includes request + approval + tracking posture and current role/permission visibility, while automated execution remains backend-gated for later waves. No permission mutation, no group mutation, no Entra/Teams mutation, no Graph/PnP/backend calls, no persistence, and no approval execution in Wave 2.
 
 **State:** Closed.
 **Cross-link:** `Wave_2_Wireframe_and_Layout_Contract.md` §3.
