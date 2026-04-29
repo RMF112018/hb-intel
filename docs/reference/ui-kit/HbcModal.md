@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Modal dialog component for critical user interactions and confirmations.
 
 ## Import
@@ -16,14 +15,14 @@ import { HbcModal } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| open | boolean | required | Controls modal visibility |
-| onDismiss | () => void | required | Callback when modal should close |
-| size | 'small' \| 'medium' \| 'large' \| 'fullscreen' | 'medium' | Modal dimensions |
-| title | string | required | Modal header title |
-| children | ReactNode | required | Modal body content |
-| footer | ReactNode | undefined | Modal footer with actions |
+| Prop      | Type                                           | Default   | Description                      |
+| --------- | ---------------------------------------------- | --------- | -------------------------------- |
+| open      | boolean                                        | required  | Controls modal visibility        |
+| onDismiss | () => void                                     | required  | Callback when modal should close |
+| size      | 'small' \| 'medium' \| 'large' \| 'fullscreen' | 'medium'  | Modal dimensions                 |
+| title     | string                                         | required  | Modal header title               |
+| children  | ReactNode                                      | required  | Modal body content               |
+| footer    | ReactNode                                      | undefined | Modal footer with actions        |
 
 ## Usage
 

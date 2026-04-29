@@ -33,22 +33,22 @@ This registry records current governance status of UI-kit and related governance
 
 ## Layer 3 Reference Status
 
-| Document Group                                                         | Status                       | Rationale                                                                  |
-| ---------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------- |
-| `docs/reference/ui-kit/Hbc*.md`                                        | Layer 3 component reference  | Component API/usage docs; not doctrine authority.                          |
-| `docs/reference/ui-kit/DashboardLayout.md`                             | Layer 3 layout reference     | Layout reference, not runtime governance authority.                        |
-| `docs/reference/ui-kit/ListLayout.md`                                  | Layer 3 layout reference     | Layout reference, not runtime governance authority.                        |
-| `docs/reference/ui-kit/WorkspacePageShell.md`                          | Layer 3 layout reference     | Shell/layout usage reference; runtime doctrine governs fit/behavior.       |
-| `docs/reference/ui-kit/Productive-Lane-Standard.md`                    | Layer 3 reference | Lane-level design/implementation standard subordinate to runtime doctrine. |
-| `docs/reference/ui-kit/Presentation-Lane-Standard.md`                  | Layer 3 reference | Lane-level design/implementation standard subordinate to runtime doctrine. |
-| `docs/reference/ui-kit/UI-System-Layer-Model.md`                       | Layer 3 reference | Structural model reference that supports doctrine routing.                 |
-| `docs/reference/ui-kit/UI-Kit-Usage-and-Composition-Guide.md`          | Layer 3 reference | Composition guidance; not runtime governance authority.                    |
-| `docs/reference/ui-kit/UI-Kit-Visual-Language-Guide.md`                | Layer 3 reference | Visual language guidance; not runtime governance authority.                |
-| `docs/reference/ui-kit/UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` | Layer 3 reference | Implementation-level hierarchy guidance.                                   |
-| `docs/reference/ui-kit/UI-Kit-Field-Readability-Standards.md`          | Layer 3 reference | Implementation-level readability guidance.                                 |
-| `docs/reference/ui-kit/UI-Kit-Adaptive-Data-Surface-Patterns.md`       | Layer 3 reference | Pattern reference guidance.                                                |
-| `docs/reference/ui-kit/UI-Kit-Wave1-Page-Patterns.md`                  | Layer 3 reference | Pattern reference guidance.                                                |
-| `docs/reference/ui-kit/accessibility-patterns.md`                      | Layer 3 reference | Accessibility implementation patterns.                                     |
+| Document Group                                                         | Status                      | Rationale                                                                  |
+| ---------------------------------------------------------------------- | --------------------------- | -------------------------------------------------------------------------- |
+| `docs/reference/ui-kit/Hbc*.md`                                        | Layer 3 component reference | Component API/usage docs; not doctrine authority.                          |
+| `docs/reference/ui-kit/DashboardLayout.md`                             | Layer 3 layout reference    | Layout reference, not runtime governance authority.                        |
+| `docs/reference/ui-kit/ListLayout.md`                                  | Layer 3 layout reference    | Layout reference, not runtime governance authority.                        |
+| `docs/reference/ui-kit/WorkspacePageShell.md`                          | Layer 3 layout reference    | Shell/layout usage reference; runtime doctrine governs fit/behavior.       |
+| `docs/reference/ui-kit/Productive-Lane-Standard.md`                    | Layer 3 reference           | Lane-level design/implementation standard subordinate to runtime doctrine. |
+| `docs/reference/ui-kit/Presentation-Lane-Standard.md`                  | Layer 3 reference           | Lane-level design/implementation standard subordinate to runtime doctrine. |
+| `docs/reference/ui-kit/UI-System-Layer-Model.md`                       | Layer 3 reference           | Structural model reference that supports doctrine routing.                 |
+| `docs/reference/ui-kit/UI-Kit-Usage-and-Composition-Guide.md`          | Layer 3 reference           | Composition guidance; not runtime governance authority.                    |
+| `docs/reference/ui-kit/UI-Kit-Visual-Language-Guide.md`                | Layer 3 reference           | Visual language guidance; not runtime governance authority.                |
+| `docs/reference/ui-kit/UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` | Layer 3 reference           | Implementation-level hierarchy guidance.                                   |
+| `docs/reference/ui-kit/UI-Kit-Field-Readability-Standards.md`          | Layer 3 reference           | Implementation-level readability guidance.                                 |
+| `docs/reference/ui-kit/UI-Kit-Adaptive-Data-Surface-Patterns.md`       | Layer 3 reference           | Pattern reference guidance.                                                |
+| `docs/reference/ui-kit/UI-Kit-Wave1-Page-Patterns.md`                  | Layer 3 reference           | Pattern reference guidance.                                                |
+| `docs/reference/ui-kit/accessibility-patterns.md`                      | Layer 3 reference           | Accessibility implementation patterns.                                     |
 
 ## Historical and Evidence-Oriented Status
 

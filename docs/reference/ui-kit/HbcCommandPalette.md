@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Cmd+K command palette for rapid command discovery and execution.
 
 ## Import
@@ -16,12 +15,12 @@ import { HbcCommandPalette } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| results | CommandPaletteResult[] | required | Array of command results to display |
-| categories | CommandPaletteCategory[] | undefined | Grouped command categories |
-| onSelect | (result: CommandPaletteResult) => void | required | Selection handler |
-| placeholder | string | 'Type a command...' | Placeholder text |
+| Prop        | Type                                   | Default             | Description                         |
+| ----------- | -------------------------------------- | ------------------- | ----------------------------------- |
+| results     | CommandPaletteResult[]                 | required            | Array of command results to display |
+| categories  | CommandPaletteCategory[]               | undefined           | Grouped command categories          |
+| onSelect    | (result: CommandPaletteResult) => void | required            | Selection handler                   |
+| placeholder | string                                 | 'Type a command...' | Placeholder text                    |
 
 ## Usage
 
@@ -47,7 +46,7 @@ useEffect(() => {
     setOpen(false);
   }}
   placeholder="Search commands..."
-/>
+/>;
 ```
 
 ## Field Mode Behavior

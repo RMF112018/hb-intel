@@ -5,16 +5,15 @@
 > **Authority Boundary:** This document does not override current token/theme/runtime doctrine.
 > **Routing Note:** See `docs/reference/ui-kit/GOVERNANCE-MAP.md`, `docs/reference/ui-kit/doctrine/README.md`, and current theme/token authorities for active governance.
 
-
 This document tracks deprecated UI Kit tokens and their migration status.
 
 ## Token Deprecation Matrix
 
-| Token | Status | Usages Found | Removed Date | Replacement | Tracking Issue |
-|-------|--------|--------------|--------------|-------------|-----------------|
-| `hbcColorSurfaceElevated` | Versioned | 45 | N/A | `hbcColorSurface0` | PH4C-DEPRECATED-TOKENS-001 (placeholder) |
-| `hbcColorSurfaceSubtle` | Versioned | 41 | N/A | `hbcColorSurface1` | PH4C-DEPRECATED-TOKENS-002 (placeholder) |
-| `hbcColorTextSubtle` | Versioned | 38 | N/A | `hbcColorTextMuted` | PH4C-DEPRECATED-TOKENS-003 (placeholder) |
+| Token                     | Status    | Usages Found | Removed Date | Replacement         | Tracking Issue                           |
+| ------------------------- | --------- | ------------ | ------------ | ------------------- | ---------------------------------------- |
+| `hbcColorSurfaceElevated` | Versioned | 45           | N/A          | `hbcColorSurface0`  | PH4C-DEPRECATED-TOKENS-001 (placeholder) |
+| `hbcColorSurfaceSubtle`   | Versioned | 41           | N/A          | `hbcColorSurface1`  | PH4C-DEPRECATED-TOKENS-002 (placeholder) |
+| `hbcColorTextSubtle`      | Versioned | 38           | N/A          | `hbcColorTextMuted` | PH4C-DEPRECATED-TOKENS-003 (placeholder) |
 
 ## Migration Policy
 
@@ -30,11 +29,13 @@ HB Intel uses a scan-gated deprecation approach:
 ## Usage Examples
 
 ### Removed Token (Zero Usages)
+
 ```
 hbcColorSurfaceElevated — Removed 2026-03-07 (zero usages found)
 ```
 
 ### Versioned Token (With Usages)
+
 ```typescript
 /**
  * @deprecated [N] usages found. See tracking issue [URL].
@@ -50,6 +51,7 @@ export const hbcColorSurfaceSubtle = '#FAFAFA';
 **Directories Scanned:** packages/, apps/, docs/
 
 ### Summary
+
 - Total deprecated tokens identified: 3
 - Tokens removed: 0
 - Tokens versioned: 3

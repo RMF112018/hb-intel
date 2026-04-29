@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Informational tooltip for providing contextual help or descriptive text on hover or focus.
 
 ## Import
@@ -16,12 +15,12 @@ import { HbcTooltip } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| content | string \| ReactNode | required | Tooltip content text or element |
-| position | TooltipPosition | 'top' | Placement: 'top' \| 'bottom' \| 'left' \| 'right' |
-| delay | number | 200 | Delay before showing tooltip (milliseconds) |
-| children | ReactNode | required | Element that triggers tooltip |
+| Prop     | Type                | Default  | Description                                       |
+| -------- | ------------------- | -------- | ------------------------------------------------- |
+| content  | string \| ReactNode | required | Tooltip content text or element                   |
+| position | TooltipPosition     | 'top'    | Placement: 'top' \| 'bottom' \| 'left' \| 'right' |
+| delay    | number              | 200      | Delay before showing tooltip (milliseconds)       |
+| children | ReactNode           | required | Element that triggers tooltip                     |
 
 ## Usage
 

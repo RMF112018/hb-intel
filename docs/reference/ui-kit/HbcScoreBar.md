@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Horizontal score visualization bar with three color segments (red/amber/green) and a positional marker.
 
 ## Import
@@ -17,12 +16,12 @@ import type { HbcScoreBarProps } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| score | number | required | Score value from 0 to 100 |
-| showLabel | boolean | false | Show numeric label above marker |
-| height | string | '12px' | Bar height |
-| className | string | undefined | Additional CSS class |
+| Prop      | Type    | Default   | Description                     |
+| --------- | ------- | --------- | ------------------------------- |
+| score     | number  | required  | Score value from 0 to 100       |
+| showLabel | boolean | false     | Show numeric label above marker |
+| height    | string  | '12px'    | Bar height                      |
+| className | string  | undefined | Additional CSS class            |
 
 ## Usage
 
@@ -34,10 +33,10 @@ import type { HbcScoreBarProps } from '@hbc/ui-kit';
 
 ## Color Segments
 
-| Range | Color | Meaning |
-|-------|-------|---------|
-| 0 -- 40 | Red | Poor / at risk |
-| 41 -- 69 | Amber | Needs attention |
+| Range     | Color | Meaning         |
+| --------- | ----- | --------------- |
+| 0 -- 40   | Red   | Poor / at risk  |
+| 41 -- 69  | Amber | Needs attention |
 | 70 -- 100 | Green | Good / on track |
 
 The score is clamped to [0, 100]. A black marker is positioned at the score percentage.

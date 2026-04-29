@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Status indicator badge for displaying entity status across tables, lists, and inline content.
 
 ## Import
@@ -16,11 +15,11 @@ import { HbcStatusBadge } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
+| Prop    | Type                                                     | Default  | Description                                    |
+| ------- | -------------------------------------------------------- | -------- | ---------------------------------------------- |
 | variant | 'success' \| 'warning' \| 'error' \| 'info' \| 'neutral' | required | Status variant determining color and semantics |
-| label | string | required | Status text label |
-| size | 'small' \| 'medium' | 'medium' | Badge size |
+| label   | string                                                   | required | Status text label                              |
+| size    | 'small' \| 'medium'                                      | 'medium' | Badge size                                     |
 
 ## Usage
 

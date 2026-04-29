@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Month calendar grid for Daily Log and date selection, displaying status dots, weather icons, and crew count badges.
 
 ## Import
@@ -17,24 +16,24 @@ import type { HbcCalendarGridProps, CalendarDayData } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| year | number | required | Calendar year |
-| month | number | required | Month (0-indexed: 0=January, 11=December) |
-| days | CalendarDayData[] | required | Day data array |
-| onDayClick | (date: string) => void | undefined | Click handler for day cells |
+| Prop          | Type                        | Default   | Description                                     |
+| ------------- | --------------------------- | --------- | ----------------------------------------------- |
+| year          | number                      | required  | Calendar year                                   |
+| month         | number                      | required  | Month (0-indexed: 0=January, 11=December)       |
+| days          | CalendarDayData[]           | required  | Day data array                                  |
+| onDayClick    | (date: string) => void      | undefined | Click handler for day cells                     |
 | onMonthChange | (direction: number) => void | undefined | Month navigation handler (+1 next, -1 previous) |
-| className | string | undefined | Additional CSS class |
+| className     | string                      | undefined | Additional CSS class                            |
 
 ### CalendarDayData
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| date | string | yes | ISO date string (YYYY-MM-DD) |
-| status | 'draft' \| 'submitted' \| 'approved' | no | Day status for color-coded dot |
-| weatherIcon | ReactNode | no | Optional weather icon |
-| crewCount | number | no | Crew count badge value |
-| badges | ReactNode[] | no | Additional badge elements |
+| Field       | Type                                 | Required | Description                    |
+| ----------- | ------------------------------------ | -------- | ------------------------------ |
+| date        | string                               | yes      | ISO date string (YYYY-MM-DD)   |
+| status      | 'draft' \| 'submitted' \| 'approved' | no       | Day status for color-coded dot |
+| weatherIcon | ReactNode                            | no       | Optional weather icon          |
+| crewCount   | number                               | no       | Crew count badge value         |
+| badges      | ReactNode[]                          | no       | Additional badge elements      |
 
 ## Usage
 
@@ -47,7 +46,7 @@ import type { HbcCalendarGridProps, CalendarDayData } from '@hbc/ui-kit';
     { date: '2026-03-02', status: 'draft' },
   ]}
   onDayClick={(date) => navigate(`/daily-log/${date}`)}
-  onMonthChange={(dir) => setMonth(m => m + dir)}
+  onMonthChange={(dir) => setMonth((m) => m + dir)}
 />
 ```
 

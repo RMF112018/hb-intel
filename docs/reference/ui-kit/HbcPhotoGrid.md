@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Responsive photo gallery grid with square thumbnails, hover caption overlays, optional add-photo tile, and "+N more" truncation.
 
 ## Import
@@ -17,25 +16,25 @@ import type { HbcPhotoGridProps, PhotoItem } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| photos | PhotoItem[] | required | Photos to display |
-| columns | 2 \| 3 \| 4 | 3 | Number of grid columns |
-| onPhotoClick | (photo: PhotoItem) => void | undefined | Click handler for individual photos |
-| onAddPhoto | () => void | undefined | Handler for add-photo tile (shows + tile when provided) |
-| maxDisplay | number | undefined | Max photos before "+N more" truncation tile |
-| className | string | undefined | Additional CSS class |
+| Prop         | Type                       | Default   | Description                                             |
+| ------------ | -------------------------- | --------- | ------------------------------------------------------- |
+| photos       | PhotoItem[]                | required  | Photos to display                                       |
+| columns      | 2 \| 3 \| 4                | 3         | Number of grid columns                                  |
+| onPhotoClick | (photo: PhotoItem) => void | undefined | Click handler for individual photos                     |
+| onAddPhoto   | () => void                 | undefined | Handler for add-photo tile (shows + tile when provided) |
+| maxDisplay   | number                     | undefined | Max photos before "+N more" truncation tile             |
+| className    | string                     | undefined | Additional CSS class                                    |
 
 ### PhotoItem
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| id | string | yes | Unique photo identifier |
-| src | string | yes | Full-size image source URL |
-| thumbnailSrc | string | no | Optional thumbnail URL (falls back to src) |
-| alt | string | yes | Alt text for accessibility |
-| caption | string | no | Optional caption text shown on hover |
-| createdAt | string | no | ISO timestamp |
+| Field        | Type   | Required | Description                                |
+| ------------ | ------ | -------- | ------------------------------------------ |
+| id           | string | yes      | Unique photo identifier                    |
+| src          | string | yes      | Full-size image source URL                 |
+| thumbnailSrc | string | no       | Optional thumbnail URL (falls back to src) |
+| alt          | string | yes      | Alt text for accessibility                 |
+| caption      | string | no       | Optional caption text shown on hover       |
+| createdAt    | string | no       | ISO timestamp                              |
 
 ## Usage
 

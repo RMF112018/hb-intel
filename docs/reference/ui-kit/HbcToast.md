@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Toast notification system for transient, non-blocking messages. Part of the Phase 4b.9 Notifications & Feedback System (D-08).
 
 **Binding decision D-08:** All transient user feedback MUST be triggered via `useToast()`. Inline feedback components are prohibited. Persistent page-level warnings use `HbcBanner` via the `banner` prop on `WorkspacePageShell`.
@@ -56,12 +55,12 @@ dismissCategory('info');
 
 ## Toast Categories
 
-| Category | Auto-dismiss | Dismiss mechanism | ARIA role | Icon |
-|----------|-------------|-------------------|-----------|------|
-| `success` | 3 000 ms | Automatic | `status` | StatusCompleteIcon (green) |
-| `error` | Never | Manual close button | `alert` | StatusOverdueIcon (red) |
-| `warning` | 5 000 ms | Automatic | `alert` | StatusAttentionIcon (amber) |
-| `info` | 4 000 ms | Automatic | `status` | StatusInfoIcon (blue) |
+| Category  | Auto-dismiss | Dismiss mechanism   | ARIA role | Icon                        |
+| --------- | ------------ | ------------------- | --------- | --------------------------- |
+| `success` | 3 000 ms     | Automatic           | `status`  | StatusCompleteIcon (green)  |
+| `error`   | Never        | Manual close button | `alert`   | StatusOverdueIcon (red)     |
+| `warning` | 5 000 ms     | Automatic           | `alert`   | StatusAttentionIcon (amber) |
+| `info`    | 4 000 ms     | Automatic           | `status`  | StatusInfoIcon (blue)       |
 
 ## Canonical Mutation Wiring (4b.9.3)
 
@@ -103,38 +102,38 @@ function RiskItemPage() {
 
 ## Banner vs Toast Decision Guide
 
-| Condition | Use |
-|-----------|-----|
-| Transient feedback (save, delete, error) | `useToast()` |
-| Async operation status (export, sync) | `useToast()` with `info` category |
+| Condition                                     | Use                                |
+| --------------------------------------------- | ---------------------------------- |
+| Transient feedback (save, delete, error)      | `useToast()`                       |
+| Async operation status (export, sync)         | `useToast()` with `info` category  |
 | Persistent page-level warning (locked record) | `WorkspacePageShell` `banner` prop |
-| System-wide alert (maintenance window) | `WorkspacePageShell` `banner` prop |
+| System-wide alert (maintenance window)        | `WorkspacePageShell` `banner` prop |
 
 ## Props
 
 ### HbcToastProviderProps
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `ReactNode` | required | Child components |
-| `maxVisible` | `number` | `3` | Maximum simultaneous visible toasts |
+| Prop         | Type        | Default  | Description                         |
+| ------------ | ----------- | -------- | ----------------------------------- |
+| `children`   | `ReactNode` | required | Child components                    |
+| `maxVisible` | `number`    | `3`      | Maximum simultaneous visible toasts |
 
 ### ToastConfig (low-level API)
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `category` | `'success' \| 'error' \| 'warning' \| 'info'` | required | Toast category |
-| `message` | `ReactNode` | required | Toast message content |
-| `icon` | `ReactNode` | — | Override default category icon |
+| Property   | Type                                          | Default  | Description                    |
+| ---------- | --------------------------------------------- | -------- | ------------------------------ |
+| `category` | `'success' \| 'error' \| 'warning' \| 'info'` | required | Toast category                 |
+| `message`  | `ReactNode`                                   | required | Toast message content          |
+| `icon`     | `ReactNode`                                   | —        | Override default category icon |
 
 ### ToastApi (convenience API)
 
-| Method | Signature | Description |
-|--------|-----------|-------------|
+| Method    | Signature                                          | Description                           |
+| --------- | -------------------------------------------------- | ------------------------------------- |
 | `success` | `(message: ReactNode, icon?: ReactNode) => string` | Show success toast (3 s auto-dismiss) |
-| `error` | `(message: ReactNode, icon?: ReactNode) => string` | Show error toast (manual dismiss) |
+| `error`   | `(message: ReactNode, icon?: ReactNode) => string` | Show error toast (manual dismiss)     |
 | `warning` | `(message: ReactNode, icon?: ReactNode) => string` | Show warning toast (5 s auto-dismiss) |
-| `info` | `(message: ReactNode, icon?: ReactNode) => string` | Show info toast (4 s auto-dismiss) |
+| `info`    | `(message: ReactNode, icon?: ReactNode) => string` | Show info toast (4 s auto-dismiss)    |
 
 ## Field Mode Behavior
 

@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Semantic key/value metadata display using `<dl>`/`<dt>`/`<dd>` elements in a 2-column grid layout.
 
 ## When to use
@@ -17,17 +16,17 @@ Semantic key/value metadata display using `<dl>`/`<dt>`/`<dd>` elements in a 2-c
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `items` | `DescriptionListItem[]` | required | Label/value pairs to display |
-| `dense` | `boolean` | `false` | Compact spacing for card contexts |
-| `className` | `string` | — | Additional CSS class |
+| Prop        | Type                    | Default  | Description                       |
+| ----------- | ----------------------- | -------- | --------------------------------- |
+| `items`     | `DescriptionListItem[]` | required | Label/value pairs to display      |
+| `dense`     | `boolean`               | `false`  | Compact spacing for card contexts |
+| `className` | `string`                | —        | Additional CSS class              |
 
 ### DescriptionListItem
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `label` | `string` | Label text (rendered in `<dt>`) |
+| Prop    | Type        | Description                        |
+| ------- | ----------- | ---------------------------------- |
+| `label` | `string`    | Label text (rendered in `<dt>`)    |
 | `value` | `ReactNode` | Value content (rendered in `<dd>`) |
 
 ## Usage
@@ -41,7 +40,7 @@ const items = [
   { label: 'Type', value: 'Commercial Office' },
 ];
 
-<HbcDescriptionList items={items} dense />
+<HbcDescriptionList items={items} dense />;
 ```
 
 ## Accessibility

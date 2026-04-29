@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Loading indicator component for displaying progress or loading state.
 
 ## Import
@@ -16,11 +15,11 @@ import { HbcSpinner } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| size | SpinnerSize | 'medium' | Visual size: 'tiny' \| 'small' \| 'medium' \| 'large' |
-| label | string | - | Accessibility label (required if no aria-label on parent) |
-| appearance | 'primary' \| 'inverted' | 'primary' | Color variant for context |
+| Prop       | Type                    | Default   | Description                                               |
+| ---------- | ----------------------- | --------- | --------------------------------------------------------- |
+| size       | SpinnerSize             | 'medium'  | Visual size: 'tiny' \| 'small' \| 'medium' \| 'large'     |
+| label      | string                  | -         | Accessibility label (required if no aria-label on parent) |
+| appearance | 'primary' \| 'inverted' | 'primary' | Color variant for context                                 |
 
 ## Usage
 

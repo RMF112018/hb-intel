@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Multi-step wizard tearsheet for guided workflows. Provides step-by-step navigation through complex user tasks.
 
 ## Import
@@ -16,14 +15,14 @@ import { HbcTearsheet } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| open | boolean | false | Controls tearsheet visibility |
-| onDismiss | () => void | required | Callback fired when user dismisses tearsheet |
-| steps | TearsheetStep[] | required | Array of step objects with label, content |
-| currentStep | number | 0 | Currently active step index |
-| onStepChange | (stepIndex: number) => void | required | Callback when user navigates to new step |
-| title | string | required | Tearsheet title/heading |
+| Prop         | Type                        | Default  | Description                                  |
+| ------------ | --------------------------- | -------- | -------------------------------------------- |
+| open         | boolean                     | false    | Controls tearsheet visibility                |
+| onDismiss    | () => void                  | required | Callback fired when user dismisses tearsheet |
+| steps        | TearsheetStep[]             | required | Array of step objects with label, content    |
+| currentStep  | number                      | 0        | Currently active step index                  |
+| onStepChange | (stepIndex: number) => void | required | Callback when user navigates to new step     |
+| title        | string                      | required | Tearsheet title/heading                      |
 
 ## Usage
 
@@ -44,7 +43,7 @@ const steps = [
   currentStep={currentStep}
   onStepChange={setCurrentStep}
   title="New Project Wizard"
-/>
+/>;
 ```
 
 ## Field Mode Behavior

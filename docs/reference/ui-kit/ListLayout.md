@@ -5,36 +5,35 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 **Phase:** 4b.3 | **Blueprint:** §1f, §2c
 
 Four-zone list page layout with filter toolbar, saved views bar, table zone, and floating bulk action bar. Used when `WorkspacePageShell` has `layout="list"`.
 
 ## Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `primaryFilters` | `ListFilterDef[]` | No | Primary filter definitions (shown in toolbar) |
-| `advancedFilters` | `ListFilterDef[]` | No | Advanced filters (expandable panel) |
-| `activeFilters` | `Record<string, string \| string[]>` | No | Active filter values (controlled) |
-| `onFilterChange` | `(key, value) => void` | No | Filter change handler |
-| `onClearAllFilters` | `() => void` | No | Clear all filters handler |
-| `searchValue` | `string` | No | Search input value (controlled) |
-| `onSearchChange` | `(value) => void` | No | Search change handler |
-| `searchPlaceholder` | `string` | No | Search placeholder text |
-| `savedViewsEnabled` | `boolean` | No | Enable saved views bar |
-| `savedViews` | `ListSavedViewEntry[]` | No | Saved view entries |
-| `activeViewId` | `string` | No | Active view ID |
-| `onViewSelect` | `(viewId) => void` | No | View selection handler |
-| `onSaveView` | `() => void` | No | Save current view handler |
-| `viewMode` | `'table' \| 'card'` | No | Current view mode (default: `'table'`) |
-| `onViewModeChange` | `(mode) => void` | No | View mode toggle handler |
-| `selectedCount` | `number` | No | Number of selected rows (triggers bulk bar) |
-| `bulkActions` | `ListBulkAction[]` | No | Bulk action definitions |
-| `onClearSelection` | `() => void` | No | Clear selection handler |
-| `showingCount` | `number` | No | Currently shown item count |
-| `totalCount` | `number` | No | Total item count |
-| `children` | `ReactNode` | Yes | Table/card content |
+| Prop                | Type                                 | Required | Description                                   |
+| ------------------- | ------------------------------------ | -------- | --------------------------------------------- |
+| `primaryFilters`    | `ListFilterDef[]`                    | No       | Primary filter definitions (shown in toolbar) |
+| `advancedFilters`   | `ListFilterDef[]`                    | No       | Advanced filters (expandable panel)           |
+| `activeFilters`     | `Record<string, string \| string[]>` | No       | Active filter values (controlled)             |
+| `onFilterChange`    | `(key, value) => void`               | No       | Filter change handler                         |
+| `onClearAllFilters` | `() => void`                         | No       | Clear all filters handler                     |
+| `searchValue`       | `string`                             | No       | Search input value (controlled)               |
+| `onSearchChange`    | `(value) => void`                    | No       | Search change handler                         |
+| `searchPlaceholder` | `string`                             | No       | Search placeholder text                       |
+| `savedViewsEnabled` | `boolean`                            | No       | Enable saved views bar                        |
+| `savedViews`        | `ListSavedViewEntry[]`               | No       | Saved view entries                            |
+| `activeViewId`      | `string`                             | No       | Active view ID                                |
+| `onViewSelect`      | `(viewId) => void`                   | No       | View selection handler                        |
+| `onSaveView`        | `() => void`                         | No       | Save current view handler                     |
+| `viewMode`          | `'table' \| 'card'`                  | No       | Current view mode (default: `'table'`)        |
+| `onViewModeChange`  | `(mode) => void`                     | No       | View mode toggle handler                      |
+| `selectedCount`     | `number`                             | No       | Number of selected rows (triggers bulk bar)   |
+| `bulkActions`       | `ListBulkAction[]`                   | No       | Bulk action definitions                       |
+| `onClearSelection`  | `() => void`                         | No       | Clear selection handler                       |
+| `showingCount`      | `number`                             | No       | Currently shown item count                    |
+| `totalCount`        | `number`                             | No       | Total item count                              |
+| `children`          | `ReactNode`                          | Yes      | Table/card content                            |
 
 ## Zones
 
@@ -78,7 +77,7 @@ import { ListLayout } from '@hbc/ui-kit';
   totalCount={156}
 >
   <HbcDataTable columns={columns} data={data} />
-</ListLayout>
+</ListLayout>;
 ```
 
 ## Design Decisions

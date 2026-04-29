@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Mandatory outer container for every page in HB Intel (D-01). Renders breadcrumbs, command bar, banners, and state overlays (loading/empty/error). The `layout` prop enforces D-02 at the type level.
 
 ## Import
@@ -27,27 +26,27 @@ import type {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| layout | `PageLayout` | **required** | Layout variant: `'dashboard' \| 'list' \| 'form' \| 'detail' \| 'landing'` |
-| title | `string` | **required** | Page title |
-| breadcrumbs | `BreadcrumbItem[]` | `undefined` | Breadcrumb navigation segments |
-| actions | `CommandBarAction[]` | `undefined` | Primary command bar actions |
-| overflowActions | `CommandBarAction[]` | `undefined` | Overflow menu actions |
-| dashboardConfig | `DashboardConfig` | `undefined` | Dashboard layout config (KPIs + chart) — used when `layout='dashboard'` |
-| listConfig | `ListConfig` | `undefined` | List-mode config (filters, bulk actions) — used when `layout='list'` |
-| isLoading | `boolean` | `false` | Show loading spinner overlay |
-| isEmpty | `boolean` | `false` | Show empty state |
-| isError | `boolean` | `false` | Show error state |
-| errorMessage | `string` | `'An unexpected error occurred.'` | Error state message |
-| onRetry | `() => void` | `undefined` | Retry handler for error state — renders "Try Again" button (D-06) |
-| skeletonColumns | `number` | `5` | Number of columns for list skeleton loading state |
-| emptyMessage | `string` | `'No items found.'` | Empty state message |
-| emptyActionLabel | `string` | `undefined` | Empty state CTA label |
-| onEmptyAction | `() => void` | `undefined` | Empty state CTA handler |
-| banner | `BannerConfig` | `undefined` | Page-level banner |
-| supportedModes | `('office' \| 'field')[]` | `undefined` | Supported device modes |
-| children | `ReactNode` | **required** | Page content |
+| Prop             | Type                      | Default                           | Description                                                                |
+| ---------------- | ------------------------- | --------------------------------- | -------------------------------------------------------------------------- |
+| layout           | `PageLayout`              | **required**                      | Layout variant: `'dashboard' \| 'list' \| 'form' \| 'detail' \| 'landing'` |
+| title            | `string`                  | **required**                      | Page title                                                                 |
+| breadcrumbs      | `BreadcrumbItem[]`        | `undefined`                       | Breadcrumb navigation segments                                             |
+| actions          | `CommandBarAction[]`      | `undefined`                       | Primary command bar actions                                                |
+| overflowActions  | `CommandBarAction[]`      | `undefined`                       | Overflow menu actions                                                      |
+| dashboardConfig  | `DashboardConfig`         | `undefined`                       | Dashboard layout config (KPIs + chart) — used when `layout='dashboard'`    |
+| listConfig       | `ListConfig`              | `undefined`                       | List-mode config (filters, bulk actions) — used when `layout='list'`       |
+| isLoading        | `boolean`                 | `false`                           | Show loading spinner overlay                                               |
+| isEmpty          | `boolean`                 | `false`                           | Show empty state                                                           |
+| isError          | `boolean`                 | `false`                           | Show error state                                                           |
+| errorMessage     | `string`                  | `'An unexpected error occurred.'` | Error state message                                                        |
+| onRetry          | `() => void`              | `undefined`                       | Retry handler for error state — renders "Try Again" button (D-06)          |
+| skeletonColumns  | `number`                  | `5`                               | Number of columns for list skeleton loading state                          |
+| emptyMessage     | `string`                  | `'No items found.'`               | Empty state message                                                        |
+| emptyActionLabel | `string`                  | `undefined`                       | Empty state CTA label                                                      |
+| onEmptyAction    | `() => void`              | `undefined`                       | Empty state CTA handler                                                    |
+| banner           | `BannerConfig`            | `undefined`                       | Page-level banner                                                          |
+| supportedModes   | `('office' \| 'field')[]` | `undefined`                       | Supported device modes                                                     |
+| children         | `ReactNode`               | **required**                      | Page content                                                               |
 
 ## PageLayout Type
 
@@ -93,13 +92,13 @@ When `layout='list'`, WPS wraps children in `ListLayout` with the config props. 
 
 ## Layout Variant Behavior (Phase 4b.3 LAYOUT_MAP)
 
-| Layout | WPS Behavior |
-|--------|-------------|
+| Layout      | WPS Behavior                                                     |
+| ----------- | ---------------------------------------------------------------- |
 | `dashboard` | Wraps children in `DashboardLayout` with `dashboardConfig` props |
-| `list` | Wraps children in `ListLayout` with `listConfig` props |
-| `form` | Pass-through — page composes `CreateUpdateLayout` directly |
-| `detail` | Pass-through — page composes `DetailLayout` directly |
-| `landing` | Pass-through — page composes `ToolLandingLayout` directly |
+| `list`      | Wraps children in `ListLayout` with `listConfig` props           |
+| `form`      | Pass-through — page composes `CreateUpdateLayout` directly       |
+| `detail`    | Pass-through — page composes `DetailLayout` directly             |
+| `landing`   | Pass-through — page composes `ToolLandingLayout` directly        |
 
 ## Usage
 
@@ -107,13 +106,8 @@ When `layout='list'`, WPS wraps children in `ListLayout` with the config props. 
 <WorkspacePageShell
   layout="list"
   title="RFIs"
-  breadcrumbs={[
-    { label: 'Home', href: '/' },
-    { label: 'RFIs' },
-  ]}
-  actions={[
-    { key: 'create', label: 'New RFI', onClick: handleCreate, primary: true },
-  ]}
+  breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'RFIs' }]}
+  actions={[{ key: 'create', label: 'New RFI', onClick: handleCreate, primary: true }]}
   banner={{
     variant: 'warning',
     message: '3 overdue RFIs',
@@ -218,11 +212,13 @@ All page actions must flow through WorkspacePageShell's `actions` and `overflowA
 ### Prohibited
 
 ```tsx
-{/* ESLint rule hbc/no-direct-buttons-in-content will warn */}
+{
+  /* ESLint rule hbc/no-direct-buttons-in-content will warn */
+}
 <WorkspacePageShell layout="list" title="RFIs">
   <HbcButton onClick={handleCreate}>New RFI</HbcButton>
   <RFITable />
-</WorkspacePageShell>
+</WorkspacePageShell>;
 ```
 
 ## CommandBarAction Interface
@@ -235,8 +231,8 @@ interface CommandBarAction {
   onClick: () => void;
   disabled?: boolean;
   primary?: boolean;
-  isDestructive?: boolean;  // Renders as danger-styled (red) button
-  tooltip?: string;         // Tooltip text on hover
+  isDestructive?: boolean; // Renders as danger-styled (red) button
+  tooltip?: string; // Tooltip text on hover
 }
 ```
 
@@ -249,12 +245,12 @@ interface CommandBarAction {
 
 When field mode is active (`data-theme="field"`), WorkspacePageShell adapts page actions:
 
-| Element | Office Mode | Field Mode |
-|---------|------------|------------|
-| Command bar zone | Visible | Hidden |
-| Primary action | Button in command bar | 56px FAB (bottom-right, above bottom nav) |
-| Secondary actions | Buttons in command bar | Injected into Cmd+K palette |
-| Overflow actions | "More" menu | Injected into Cmd+K palette |
+| Element           | Office Mode            | Field Mode                                |
+| ----------------- | ---------------------- | ----------------------------------------- |
+| Command bar zone  | Visible                | Hidden                                    |
+| Primary action    | Button in command bar  | 56px FAB (bottom-right, above bottom nav) |
+| Secondary actions | Buttons in command bar | Injected into Cmd+K palette               |
+| Overflow actions  | "More" menu            | Injected into Cmd+K palette               |
 
 The FAB renders with `data-hbc-ui="fab-primary"` and `aria-label={primaryAction.label}`.
 

@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 **Version:** 1.0
 **Date:** 2026-03-07
 **Status:** Documented in PH4C.8
@@ -39,6 +38,7 @@ interface HbcErrorBoundaryProps {
 ## Usage Examples
 
 ### Basic Error Boundary
+
 ```tsx
 import { HbcErrorBoundary } from '@hbc/ui-kit';
 
@@ -50,11 +50,10 @@ export const App = () => (
 ```
 
 ### With Custom Fallback
+
 ```tsx
 <HbcErrorBoundary
-  fallback={
-    <div>Something went wrong. Please refresh the page.</div>
-  }
+  fallback={<div>Something went wrong. Please refresh the page.</div>}
   onError={(error) => logErrorToService(error)}
 >
   <MyComponent />
@@ -62,6 +61,7 @@ export const App = () => (
 ```
 
 ### With Development Details
+
 ```tsx
 <HbcErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
   <MyComponent />
@@ -77,6 +77,7 @@ export const App = () => (
 ## Testing
 
 Test error boundaries using:
+
 ```tsx
 // Test component that throws an error
 const BadComponent = () => {
@@ -86,7 +87,7 @@ const BadComponent = () => {
 // In test:
 <HbcErrorBoundary>
   <BadComponent />
-</HbcErrorBoundary>
+</HbcErrorBoundary>;
 ```
 
 ## Related Components

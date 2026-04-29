@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Collapsible navigation rail with icon-only collapsed mode, expanded label mode, governed active-state system, and live count badges.
 
 ## Import
@@ -17,33 +16,33 @@ import type { SidebarNavItem, SidebarNavGroup } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| groups | SidebarNavGroup[] | required | Navigation groups with items |
-| activeItemId | string | undefined | ID of the currently active nav item |
-| onNavigate | (href: string) => void | undefined | Navigation callback |
-| onToggleFavorite | (id: string) => void | undefined | Favorite toggle callback |
+| Prop             | Type                   | Default   | Description                         |
+| ---------------- | ---------------------- | --------- | ----------------------------------- |
+| groups           | SidebarNavGroup[]      | required  | Navigation groups with items        |
+| activeItemId     | string                 | undefined | ID of the currently active nav item |
+| onNavigate       | (href: string) => void | undefined | Navigation callback                 |
+| onToggleFavorite | (id: string) => void   | undefined | Favorite toggle callback            |
 
 ### SidebarNavItem
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| id | string | required | Unique item identifier |
-| label | string | required | Display label (visible expanded, tooltip collapsed) |
-| icon | ReactNode | required | Icon element for the rail |
-| href | string | required | Navigation target |
-| badge | number | undefined | Live count badge. Hidden at 0. |
-| isFavorite | boolean | undefined | Favorite state |
-| requiredPermission | string | undefined | Permission gate — item hidden if not met |
+| Field              | Type      | Default   | Description                                         |
+| ------------------ | --------- | --------- | --------------------------------------------------- |
+| id                 | string    | required  | Unique item identifier                              |
+| label              | string    | required  | Display label (visible expanded, tooltip collapsed) |
+| icon               | ReactNode | required  | Icon element for the rail                           |
+| href               | string    | required  | Navigation target                                   |
+| badge              | number    | undefined | Live count badge. Hidden at 0.                      |
+| isFavorite         | boolean   | undefined | Favorite state                                      |
+| requiredPermission | string    | undefined | Permission gate — item hidden if not met            |
 
 ## Dimensions
 
-| Property | Value | Token |
-|----------|-------|-------|
-| Collapsed width | 56px | `HBC_SIDEBAR_WIDTH_COLLAPSED` |
-| Expanded width | 240px | `HBC_SIDEBAR_WIDTH_EXPANDED` |
-| Nav item min-height | 36px (desktop), 44px (coarse pointer) | — |
-| Active left border | 3px | `--hbc-nav-item-active-border` |
+| Property            | Value                                 | Token                          |
+| ------------------- | ------------------------------------- | ------------------------------ |
+| Collapsed width     | 56px                                  | `HBC_SIDEBAR_WIDTH_COLLAPSED`  |
+| Expanded width      | 240px                                 | `HBC_SIDEBAR_WIDTH_EXPANDED`   |
+| Nav item min-height | 36px (desktop), 44px (coarse pointer) | —                              |
+| Active left border  | 3px                                   | `--hbc-nav-item-active-border` |
 
 ## Active State
 
@@ -64,6 +63,7 @@ Inactive items use `colorNeutralForeground2` (muted) with `fontWeight: 400`.
 ## Collapsed Mode
 
 When collapsed (56px icon rail):
+
 - Labels hidden; each nav item shows a **Fluent Tooltip** (`relationship="label"`, `positioning="after"`) on hover/focus
 - Active item: orange icon color + orange left border
 - Badge: positioned absolute `top: 4px; right: 8px` near the icon
@@ -71,6 +71,7 @@ When collapsed (56px icon rail):
 ## Expanded Mode
 
 When expanded (240px):
+
 - Full labels visible
 - Badge: inline after label text, flexbox aligned
 - Group labels visible with uppercase header treatment
@@ -89,6 +90,7 @@ Live count badges render when `item.badge > 0`:
 ## Expand/Collapse Toggle
 
 Bottom-pinned button with:
+
 - `aria-expanded={isExpanded}`
 - `aria-controls="hbc-sidebar-nav"` referencing the nav scroll container
 - `aria-label` that changes with state ("Collapse sidebar" / "Expand sidebar")
@@ -99,18 +101,19 @@ Bottom-pinned button with:
 ## Group Semantics
 
 Navigation groups render with:
+
 - `role="group"` on the group container
 - `aria-label={group.label}` for screen reader context
 - Visual group label `aria-hidden` when collapsed
 
 ## Responsive Behavior
 
-| Context | Sidebar | Navigation |
-|---------|---------|------------|
-| Desktop office (≥1024px) | Visible, push model | Sidebar |
-| Tablet/mobile (<1024px) | Hidden | `HbcBottomNav` |
-| Field mode | Hidden | `HbcBottomNav` always |
-| Focus mode | Hidden | N/A |
+| Context                  | Sidebar             | Navigation            |
+| ------------------------ | ------------------- | --------------------- |
+| Desktop office (≥1024px) | Visible, push model | Sidebar               |
+| Tablet/mobile (<1024px)  | Hidden              | `HbcBottomNav`        |
+| Field mode               | Hidden              | `HbcBottomNav` always |
+| Focus mode               | Hidden              | N/A                   |
 
 Desktop uses a **push model** — main content `marginLeft` transitions with `TRANSITION_NORMAL` + cubic-bezier. No overlay/backdrop is used on desktop.
 
@@ -118,20 +121,20 @@ Desktop uses a **push model** — main content `marginLeft` transitions with `TR
 
 Set on the sidebar root element for theme overridability:
 
-| Property | Default value |
-|----------|---------------|
-| `--hbc-sidebar-bg` | `var(--colorNeutralBackground1)` |
-| `--hbc-sidebar-border` | `var(--colorNeutralStroke1)` |
-| `--hbc-nav-item-active-border` | `HBC_ACCENT_ORANGE` |
-| `--hbc-nav-item-active-bg` | `var(--colorBrandBackground2)` |
+| Property                       | Default value                    |
+| ------------------------------ | -------------------------------- |
+| `--hbc-sidebar-bg`             | `var(--colorNeutralBackground1)` |
+| `--hbc-sidebar-border`         | `var(--colorNeutralStroke1)`     |
+| `--hbc-nav-item-active-border` | `HBC_ACCENT_ORANGE`              |
+| `--hbc-nav-item-active-bg`     | `var(--colorBrandBackground2)`   |
 
 ## Data Attributes
 
-| Attribute | Value | Purpose |
-|-----------|-------|---------|
-| `data-hbc-ui` | `"sidebar"` | Component identification |
-| `data-expanded` | `"true"/"false"` | Current expansion state |
-| `data-active` | `"true"` | On active nav item |
+| Attribute       | Value            | Purpose                  |
+| --------------- | ---------------- | ------------------------ |
+| `data-hbc-ui`   | `"sidebar"`      | Component identification |
+| `data-expanded` | `"true"/"false"` | Current expansion state  |
+| `data-active`   | `"true"`         | On active nav item       |
 
 ## Skip Link
 

@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Vertical or horizontal approval workflow stepper displaying an approval chain with avatars, decision badges, timestamps, and comments.
 
 ## Import
@@ -17,30 +16,36 @@ import type { HbcApprovalStepperProps, ApprovalStep } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| steps | ApprovalStep[] | required | Array of approval steps in order |
-| orientation | 'vertical' \| 'horizontal' | 'vertical' | Layout direction of the stepper |
-| className | string | undefined | Additional CSS class |
+| Prop        | Type                       | Default    | Description                      |
+| ----------- | -------------------------- | ---------- | -------------------------------- |
+| steps       | ApprovalStep[]             | required   | Array of approval steps in order |
+| orientation | 'vertical' \| 'horizontal' | 'vertical' | Layout direction of the stepper  |
+| className   | string                     | undefined  | Additional CSS class             |
 
 ### ApprovalStep
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| id | string | yes | Unique step identifier |
-| userName | string | yes | Display name of the approver |
-| userRole | string | yes | Role or title of the approver |
-| avatarUrl | string | no | Avatar image URL (falls back to initials) |
-| decision | 'approved' \| 'rejected' \| 'pending' \| 'skipped' | no | Decision state |
-| timestamp | string | no | ISO timestamp of the decision |
-| comment | string | no | Optional approver comment |
+| Field     | Type                                               | Required | Description                               |
+| --------- | -------------------------------------------------- | -------- | ----------------------------------------- |
+| id        | string                                             | yes      | Unique step identifier                    |
+| userName  | string                                             | yes      | Display name of the approver              |
+| userRole  | string                                             | yes      | Role or title of the approver             |
+| avatarUrl | string                                             | no       | Avatar image URL (falls back to initials) |
+| decision  | 'approved' \| 'rejected' \| 'pending' \| 'skipped' | no       | Decision state                            |
+| timestamp | string                                             | no       | ISO timestamp of the decision             |
+| comment   | string                                             | no       | Optional approver comment                 |
 
 ## Usage
 
 ```tsx
 <HbcApprovalStepper
   steps={[
-    { id: '1', userName: 'Jane Smith', userRole: 'PM', decision: 'approved', timestamp: '2026-03-01T10:00:00Z' },
+    {
+      id: '1',
+      userName: 'Jane Smith',
+      userRole: 'PM',
+      decision: 'approved',
+      timestamp: '2026-03-01T10:00:00Z',
+    },
     { id: '2', userName: 'Bob Lee', userRole: 'Director', decision: 'pending' },
   ]}
   orientation="vertical"

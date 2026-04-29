@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Fixed bottom navigation bar for tablet and mobile viewports with overflow menu and Focus Mode support.
 
 ## Import
@@ -17,21 +16,21 @@ import type { HbcBottomNavProps, BottomNavItem } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| items | BottomNavItem[] | required | Navigation items |
-| activeId | string | undefined | ID of the currently active navigation item |
-| onNavigate | (href: string) => void | undefined | Navigation handler |
-| className | string | undefined | Additional CSS class |
+| Prop       | Type                   | Default   | Description                                |
+| ---------- | ---------------------- | --------- | ------------------------------------------ |
+| items      | BottomNavItem[]        | required  | Navigation items                           |
+| activeId   | string                 | undefined | ID of the currently active navigation item |
+| onNavigate | (href: string) => void | undefined | Navigation handler                         |
+| className  | string                 | undefined | Additional CSS class                       |
 
 ### BottomNavItem
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| id | string | yes | Unique item identifier |
-| label | string | yes | Display label |
-| icon | ReactNode | yes | Icon element |
-| href | string | yes | Navigation target |
+| Field | Type      | Required | Description            |
+| ----- | --------- | -------- | ---------------------- |
+| id    | string    | yes      | Unique item identifier |
+| label | string    | yes      | Display label          |
+| icon  | ReactNode | yes      | Icon element           |
+| href  | string    | yes      | Navigation target      |
 
 ## Usage
 

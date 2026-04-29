@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Intent-based text component providing semantic typography with automatic style resolution.
 
 ## Governance Clarification
@@ -22,12 +21,12 @@ import { HbcTypography } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| intent | TypographyIntent | required | Intent name: 'h1', 'h2', 'h3', 'body', 'caption', 'label', etc. |
-| as | keyof JSX.IntrinsicElements | auto | HTML tag override (h1, h2, p, span, etc.) |
-| children | ReactNode | required | Text content |
-| className | string | undefined | Additional CSS classes for customization |
+| Prop      | Type                        | Default   | Description                                                     |
+| --------- | --------------------------- | --------- | --------------------------------------------------------------- |
+| intent    | TypographyIntent            | required  | Intent name: 'h1', 'h2', 'h3', 'body', 'caption', 'label', etc. |
+| as        | keyof JSX.IntrinsicElements | auto      | HTML tag override (h1, h2, p, span, etc.)                       |
+| children  | ReactNode                   | required  | Text content                                                    |
+| className | string                      | undefined | Additional CSS classes for customization                        |
 
 ## Usage
 

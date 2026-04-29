@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Search input component with support for global and local search variants.
 
 ## Import
@@ -16,14 +15,14 @@ import { HbcSearch } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| variant | HbcSearchVariant | 'local' | Search scope: 'global' \| 'local' |
-| placeholder | string | 'Search...' | Input placeholder text |
-| value | string | required | Current search query |
-| onChange | (value: string) => void | required | Callback on input change |
-| onSearch | (query: string) => void | - | Callback when search is submitted |
-| debounce | number | 300 | Debounce delay in milliseconds |
+| Prop        | Type                    | Default     | Description                       |
+| ----------- | ----------------------- | ----------- | --------------------------------- |
+| variant     | HbcSearchVariant        | 'local'     | Search scope: 'global' \| 'local' |
+| placeholder | string                  | 'Search...' | Input placeholder text            |
+| value       | string                  | required    | Current search query              |
+| onChange    | (value: string) => void | required    | Callback on input change          |
+| onSearch    | (query: string) => void | -           | Callback when search is submitted |
+| debounce    | number                  | 300         | Debounce delay in milliseconds    |
 
 ## Usage
 
@@ -37,7 +36,7 @@ const [searchQuery, setSearchQuery] = useState('');
   onChange={setSearchQuery}
   onSearch={(query) => navigate(`/search?q=${query}`)}
   debounce={300}
-/>
+/>;
 ```
 
 ## Field Mode Behavior

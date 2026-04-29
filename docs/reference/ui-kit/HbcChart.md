@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 ECharts wrapper components for data visualization including bar, donut, and line charts.
 
 ## Import
@@ -16,13 +15,13 @@ import { HbcChart, HbcBarChart, HbcDonutChart, HbcLineChart } from '@hbc/ui-kit'
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| type | 'bar' \| 'donut' \| 'line' \| 'scatter' | required | Chart type |
-| data | unknown[] | required | Data series for chart |
-| options | EChartsOption | undefined | ECharts configuration overrides |
-| height | string \| number | '400px' | Chart container height |
-| loading | boolean | false | Shows loading spinner |
+| Prop    | Type                                    | Default   | Description                     |
+| ------- | --------------------------------------- | --------- | ------------------------------- |
+| type    | 'bar' \| 'donut' \| 'line' \| 'scatter' | required  | Chart type                      |
+| data    | unknown[]                               | required  | Data series for chart           |
+| options | EChartsOption                           | undefined | ECharts configuration overrides |
+| height  | string \| number                        | '400px'   | Chart container height          |
+| loading | boolean                                 | false     | Shows loading spinner           |
 
 ## Usage
 

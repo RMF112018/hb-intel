@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Text input components suite including HbcTextArea, HbcRichTextEditor, and useVoiceDictation hook.
 
 ## Import
@@ -16,15 +15,15 @@ import { HbcTextArea, HbcRichTextEditor, useVoiceDictation } from '@hbc/ui-kit';
 
 ## Props (HbcTextArea)
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| label | string | undefined | Input label text |
-| placeholder | string | undefined | Placeholder text |
-| value | string | required | Current input value |
-| onChange | (value: string) => void | required | Change handler |
-| rows | number | 4 | Number of visible text rows |
-| maxLength | number | undefined | Maximum character count |
-| error | string | undefined | Error message to display |
+| Prop        | Type                    | Default   | Description                 |
+| ----------- | ----------------------- | --------- | --------------------------- |
+| label       | string                  | undefined | Input label text            |
+| placeholder | string                  | undefined | Placeholder text            |
+| value       | string                  | required  | Current input value         |
+| onChange    | (value: string) => void | required  | Change handler              |
+| rows        | number                  | 4         | Number of visible text rows |
+| maxLength   | number                  | undefined | Maximum character count     |
+| error       | string                  | undefined | Error message to display    |
 
 ## Usage
 

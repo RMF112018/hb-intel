@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 3-layer PDF drawing viewer with markup overlay system. Enables pan/zoom, page navigation, sheet/revision selection, and real-time markup annotations.
 
 ## Import
@@ -23,34 +22,34 @@ import type {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| pdfUrl | string | required | URL of the PDF to render |
-| currentSheet | string | undefined | Current sheet identifier |
-| currentRevision | string | undefined | Current revision identifier |
-| markups | DrawingMarkup[] | [] | Existing markup annotations |
-| enableMarkup | boolean | false | Enable markup drawing mode |
-| sheetOptions | SheetOption[] | [] | Available sheets for selector |
-| revisionOptions | RevisionOption[] | [] | Available revisions for selector |
-| onSheetChange | (sheetId: string) => void | undefined | Sheet change handler |
-| onRevisionChange | (revisionId: string) => void | undefined | Revision change handler |
-| onMarkupCreate | (markup: Omit\<DrawingMarkup, 'id'\>) => void | undefined | Markup created handler |
-| onMarkupDelete | (markupId: string) => void | undefined | Markup deleted handler |
-| className | string | undefined | Additional CSS class |
+| Prop             | Type                                          | Default   | Description                      |
+| ---------------- | --------------------------------------------- | --------- | -------------------------------- |
+| pdfUrl           | string                                        | required  | URL of the PDF to render         |
+| currentSheet     | string                                        | undefined | Current sheet identifier         |
+| currentRevision  | string                                        | undefined | Current revision identifier      |
+| markups          | DrawingMarkup[]                               | []        | Existing markup annotations      |
+| enableMarkup     | boolean                                       | false     | Enable markup drawing mode       |
+| sheetOptions     | SheetOption[]                                 | []        | Available sheets for selector    |
+| revisionOptions  | RevisionOption[]                              | []        | Available revisions for selector |
+| onSheetChange    | (sheetId: string) => void                     | undefined | Sheet change handler             |
+| onRevisionChange | (revisionId: string) => void                  | undefined | Revision change handler          |
+| onMarkupCreate   | (markup: Omit\<DrawingMarkup, 'id'\>) => void | undefined | Markup created handler           |
+| onMarkupDelete   | (markupId: string) => void                    | undefined | Markup deleted handler           |
+| className        | string                                        | undefined | Additional CSS class             |
 
 ### DrawingMarkup
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| id | string | yes | Unique markup identifier |
-| type | MarkupShapeType | yes | Shape type |
-| points | Array\<{ x: number; y: number }\> | yes | SVG path points |
-| bounds | { x, y, width, height } | no | Bounding box |
-| text | string | no | Text content for text/measurement markups |
-| color | string | yes | Stroke/fill color |
-| linkedItem | { type, id, label } | no | Optional linked item reference |
-| createdBy | string | no | Creator user ID |
-| createdAt | string | no | ISO timestamp |
+| Field      | Type                              | Required | Description                               |
+| ---------- | --------------------------------- | -------- | ----------------------------------------- |
+| id         | string                            | yes      | Unique markup identifier                  |
+| type       | MarkupShapeType                   | yes      | Shape type                                |
+| points     | Array\<{ x: number; y: number }\> | yes      | SVG path points                           |
+| bounds     | { x, y, width, height }           | no       | Bounding box                              |
+| text       | string                            | no       | Text content for text/measurement markups |
+| color      | string                            | yes      | Stroke/fill color                         |
+| linkedItem | { type, id, label }               | no       | Optional linked item reference            |
+| createdBy  | string                            | no       | Creator user ID                           |
+| createdAt  | string                            | no       | ISO timestamp                             |
 
 ### MarkupShapeType
 

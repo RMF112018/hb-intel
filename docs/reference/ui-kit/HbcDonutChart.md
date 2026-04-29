@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Typed convenience wrapper for donut/pie visualizations built on `HbcChart`.
 
 ## Import
@@ -16,12 +15,12 @@ import { HbcDonutChart } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `data` | `DonutDataItem[]` | Yes | Donut slice data consumed by the chart wrapper. |
-| `height` | `string \| number` | No | Chart container height. Defaults to `400px`. |
-| `options` | `EChartsOption` | No | Optional ECharts overrides. |
-| `loading` | `boolean` | No | Shows loading state while data resolves. |
+| Prop      | Type               | Required | Description                                     |
+| --------- | ------------------ | -------- | ----------------------------------------------- |
+| `data`    | `DonutDataItem[]`  | Yes      | Donut slice data consumed by the chart wrapper. |
+| `height`  | `string \| number` | No       | Chart container height. Defaults to `400px`.    |
+| `options` | `EChartsOption`    | No       | Optional ECharts overrides.                     |
+| `loading` | `boolean`          | No       | Shows loading state while data resolves.        |
 
 ## Usage
 

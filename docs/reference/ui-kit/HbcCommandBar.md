@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Toolbar with actions, filters, and saved views for data manipulation and discovery.
 
 ## Import
@@ -16,13 +15,13 @@ import { HbcCommandBar } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| actions | CommandBarAction[] | required | Array of action items with key, label, icon, onClick |
-| filters | CommandBarFilter[] | undefined | Filterable fields with options |
-| savedViews | SavedView[] | undefined | Pre-configured view configurations |
-| onSearch | (query: string) => void | undefined | Search callback |
-| density | DensityTier | 'default' | Spacing density: 'compact', 'default', 'spacious' |
+| Prop       | Type                    | Default   | Description                                          |
+| ---------- | ----------------------- | --------- | ---------------------------------------------------- |
+| actions    | CommandBarAction[]      | required  | Array of action items with key, label, icon, onClick |
+| filters    | CommandBarFilter[]      | undefined | Filterable fields with options                       |
+| savedViews | SavedView[]             | undefined | Pre-configured view configurations                   |
+| onSearch   | (query: string) => void | undefined | Search callback                                      |
+| density    | DensityTier             | 'default' | Spacing density: 'compact', 'default', 'spacious'    |
 
 ## Usage
 
@@ -30,14 +29,10 @@ import { HbcCommandBar } from '@hbc/ui-kit';
 <HbcCommandBar
   actions={[
     { key: 'create', label: 'New', icon: <PlusIcon />, onClick: handleCreate },
-    { key: 'export', label: 'Export', icon: <DownloadIcon />, onClick: handleExport }
+    { key: 'export', label: 'Export', icon: <DownloadIcon />, onClick: handleExport },
   ]}
-  filters={[
-    { key: 'status', label: 'Status', options: ['Active', 'Inactive'] }
-  ]}
-  savedViews={[
-    { id: 'view1', name: 'My View', config: {} }
-  ]}
+  filters={[{ key: 'status', label: 'Status', options: ['Active', 'Inactive'] }]}
+  savedViews={[{ id: 'view1', name: 'My View', config: {} }]}
   onSearch={(query) => handleSearch(query)}
   density="default"
 />

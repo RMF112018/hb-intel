@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Context provider that owns toast queue state and category-based timing rules.
 
 ## Import
@@ -16,10 +15,10 @@ import { HbcToastProvider } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `children` | `ReactNode` | Yes | Descendant tree receiving toast context. |
-| `maxVisible` | `number` | No | Maximum simultaneous visible toasts (`3` default). |
+| Prop         | Type        | Required | Description                                        |
+| ------------ | ----------- | -------- | -------------------------------------------------- |
+| `children`   | `ReactNode` | Yes      | Descendant tree receiving toast context.           |
+| `maxVisible` | `number`    | No       | Maximum simultaneous visible toasts (`3` default). |
 
 ## Usage
 

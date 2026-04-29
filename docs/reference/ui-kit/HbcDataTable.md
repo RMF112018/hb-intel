@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 **Decision Reference:** D-PH4C-12
 
 Virtualized data table with sorting, pagination, density controls, and lane-grouping support. Used by `HbcMyWorkFeed` for the My Work work-queue surface.
@@ -18,25 +17,25 @@ import { HbcDataTable } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `columns` | `ColumnDef<T>[]` | required | Column definitions with header, cell renderer, and sizing metadata |
-| `data` | `T[]` | required | Row data array |
-| `enableSorting` | `boolean` | `false` | Enables interactive sort headers |
-| `enableColumnConfig` | `boolean` | `false` | Enables internal column sizing and configuration |
-| `height` | `string` | `'auto'` | Table height. `'auto'` = content-driven (no scroll). Pixel value = virtualized scrolling |
-| `estimatedRowHeight` | `number` | density-derived | Row height estimate for virtualizer |
-| `isLoading` | `boolean` | `false` | Shows layout-matched shimmer overlay |
-| `emptyStateConfig` | `DataTableEmptyStateConfig` | `undefined` | Empty-state title/description/action |
-| `savedViewsConfig` | `HbcDataTableSavedViewsConfig` | `undefined` | PH4C config-only saved-views integration |
-| `onRowClick` | `(row: T) => void` | `undefined` | Row click handler for master-detail |
+| Prop                 | Type                           | Default         | Description                                                                              |
+| -------------------- | ------------------------------ | --------------- | ---------------------------------------------------------------------------------------- |
+| `columns`            | `ColumnDef<T>[]`               | required        | Column definitions with header, cell renderer, and sizing metadata                       |
+| `data`               | `T[]`                          | required        | Row data array                                                                           |
+| `enableSorting`      | `boolean`                      | `false`         | Enables interactive sort headers                                                         |
+| `enableColumnConfig` | `boolean`                      | `false`         | Enables internal column sizing and configuration                                         |
+| `height`             | `string`                       | `'auto'`        | Table height. `'auto'` = content-driven (no scroll). Pixel value = virtualized scrolling |
+| `estimatedRowHeight` | `number`                       | density-derived | Row height estimate for virtualizer                                                      |
+| `isLoading`          | `boolean`                      | `false`         | Shows layout-matched shimmer overlay                                                     |
+| `emptyStateConfig`   | `DataTableEmptyStateConfig`    | `undefined`     | Empty-state title/description/action                                                     |
+| `savedViewsConfig`   | `HbcDataTableSavedViewsConfig` | `undefined`     | PH4C config-only saved-views integration                                                 |
+| `onRowClick`         | `(row: T) => void`             | `undefined`     | Row click handler for master-detail                                                      |
 
 ## Height Behavior
 
-| `height` value | Overflow | Virtualizer | Use case |
-|----------------|----------|-------------|----------|
-| `'auto'` (default) | `overflow: visible` | Runs but spacers skipped | Small datasets (2-10 rows per lane) |
-| Pixel value (e.g., `'600px'`) | `overflow: auto` | Active with spacer rows | Large datasets requiring scroll |
+| `height` value                | Overflow            | Virtualizer              | Use case                            |
+| ----------------------------- | ------------------- | ------------------------ | ----------------------------------- |
+| `'auto'` (default)            | `overflow: visible` | Runs but spacers skipped | Small datasets (2-10 rows per lane) |
+| Pixel value (e.g., `'600px'`) | `overflow: auto`    | Active with spacer rows  | Large datasets requiring scroll     |
 
 When `height === 'auto'`, the wrapper expands to fit content without scrollbars. The virtualizer still runs (hooks can't be conditional) but top/bottom spacer rows are skipped for auto-height tables.
 
@@ -44,11 +43,11 @@ When `height === 'auto'`, the wrapper expands to fit content without scrollbars.
 
 Detected automatically via `useAdaptiveDensity`:
 
-| Tier | Row height | Cell padding Y | Cell padding X | Trigger |
-|------|-----------|----------------|----------------|---------|
-| standard (default) | 48px | 8px | 12px | Fine pointer, <1440px |
-| compact | 36px | 4px | 8px | Fine pointer, ≥1440px |
-| touch | 64px | 16px | 16px | Coarse pointer |
+| Tier               | Row height | Cell padding Y | Cell padding X | Trigger               |
+| ------------------ | ---------- | -------------- | -------------- | --------------------- |
+| standard (default) | 48px       | 8px            | 12px           | Fine pointer, <1440px |
+| compact            | 36px       | 4px            | 8px            | Fine pointer, ≥1440px |
+| touch              | 64px       | 16px           | 16px           | Coarse pointer        |
 
 ## Row Hover
 
@@ -62,12 +61,12 @@ When used inside `HbcMyWorkFeed` with lane grouping, each group section gets:
 
 Left-border accent color cascades by grouping type:
 
-| Grouping | Accent source | Fallback |
-|----------|--------------|----------|
-| Priority | `PRIORITY_COLORS` (red/amber/gray) | `DEFAULT_GROUP_ACCENT` |
-| Lane | `LANE_COLORS` (red/amber/gray/info) | `DEFAULT_GROUP_ACCENT` |
-| Module | `MODULE_COLORS` (info/amber/gray per module) | `DEFAULT_GROUP_ACCENT` |
-| Project | — | `DEFAULT_GROUP_ACCENT` (gray) |
+| Grouping | Accent source                                | Fallback                      |
+| -------- | -------------------------------------------- | ----------------------------- |
+| Priority | `PRIORITY_COLORS` (red/amber/gray)           | `DEFAULT_GROUP_ACCENT`        |
+| Lane     | `LANE_COLORS` (red/amber/gray/info)          | `DEFAULT_GROUP_ACCENT`        |
+| Module   | `MODULE_COLORS` (info/amber/gray per module) | `DEFAULT_GROUP_ACCENT`        |
+| Project  | —                                            | `DEFAULT_GROUP_ACCENT` (gray) |
 
 No grouping mode falls to `transparent` — there's always a visible accent.
 
@@ -95,15 +94,15 @@ With `table-layout: fixed` and `width: 100%`, column `size` values are treated a
 
 Status column cells use `HbcStatusBadge` with governed variant mapping:
 
-| Status | Variant |
-|--------|---------|
-| Overdue | `error` |
-| Blocked | `warning` |
-| New | `info` |
+| Status      | Variant      |
+| ----------- | ------------ |
+| Overdue     | `error`      |
+| Blocked     | `warning`    |
+| New         | `info`       |
 | In Progress | `inProgress` |
-| Waiting | `warning` |
-| Deferred | `neutral` |
-| Completed | `completed` |
+| Waiting     | `warning`    |
+| Deferred    | `neutral`    |
+| Completed   | `completed`  |
 
 ## Source Cell Empty-Value Rules
 

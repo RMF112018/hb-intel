@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Page-level notification banner for displaying messages, warnings, errors, or success states.
 
 ## Import
@@ -16,13 +15,13 @@ import { HbcBanner } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| variant | BannerVariant | 'info' | Visual style: 'info' \| 'success' \| 'warning' \| 'error' |
-| message | string | required | Banner message text |
-| dismissible | boolean | false | Allow user to close banner |
-| onDismiss | () => void | - | Callback when banner is dismissed |
-| action | ReactNode | - | Optional action button or link |
+| Prop        | Type          | Default  | Description                                               |
+| ----------- | ------------- | -------- | --------------------------------------------------------- |
+| variant     | BannerVariant | 'info'   | Visual style: 'info' \| 'success' \| 'warning' \| 'error' |
+| message     | string        | required | Banner message text                                       |
+| dismissible | boolean       | false    | Allow user to close banner                                |
+| onDismiss   | () => void    | -        | Callback when banner is dismissed                         |
+| action      | ReactNode     | -        | Optional action button or link                            |
 
 ## Usage
 

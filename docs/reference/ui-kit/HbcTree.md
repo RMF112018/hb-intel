@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Tree view component for displaying hierarchical data with expand/collapse and selection.
 
 ## Import
@@ -16,23 +15,23 @@ import { HbcTree } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| nodes | HbcTreeNode[] | required | Root-level tree nodes |
-| onSelect | (nodeId: string) => void | - | Callback when node is selected |
-| expandedKeys | string[] | [] | IDs of expanded nodes |
-| onExpand | (expandedKeys: string[]) => void | - | Callback when expand state changes |
-| selectable | boolean | true | Allow nodes to be selected |
+| Prop         | Type                             | Default  | Description                        |
+| ------------ | -------------------------------- | -------- | ---------------------------------- |
+| nodes        | HbcTreeNode[]                    | required | Root-level tree nodes              |
+| onSelect     | (nodeId: string) => void         | -        | Callback when node is selected     |
+| expandedKeys | string[]                         | []       | IDs of expanded nodes              |
+| onExpand     | (expandedKeys: string[]) => void | -        | Callback when expand state changes |
+| selectable   | boolean                          | true     | Allow nodes to be selected         |
 
 ### HbcTreeNode
 
-| Property | Type | Description |
-|----------|------|-------------|
-| id | string | Unique node identifier |
-| label | string | Display label |
-| children | HbcTreeNode[] | Nested child nodes |
-| icon | ReactNode | Optional icon element |
-| disabled | boolean | Node cannot be selected or expanded |
+| Property | Type          | Description                         |
+| -------- | ------------- | ----------------------------------- |
+| id       | string        | Unique node identifier              |
+| label    | string        | Display label                       |
+| children | HbcTreeNode[] | Nested child nodes                  |
+| icon     | ReactNode     | Optional icon element               |
+| disabled | boolean       | Node cannot be selected or expanded |
 
 ## Usage
 
@@ -57,7 +56,7 @@ const nodes = [
   onExpand={setExpandedKeys}
   onSelect={setSelectedNode}
   selectable={true}
-/>
+/>;
 ```
 
 ## Field Mode Behavior

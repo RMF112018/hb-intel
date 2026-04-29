@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Pagination control for navigating through multi-page data sets.
 
 ## Import
@@ -16,20 +15,20 @@ import { HbcPagination } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| currentPage | number | required | Currently displayed page (1-indexed) |
-| totalPages | number | required | Total number of pages |
-| onPageChange | (pageNumber: number) => void | required | Callback when user changes page |
-| pageSizeOptions | PageSizeOption[] | [10, 25, 50, 100] | Available items-per-page choices |
-| pageSize | number | 10 | Current number of items displayed per page |
+| Prop            | Type                         | Default           | Description                                |
+| --------------- | ---------------------------- | ----------------- | ------------------------------------------ |
+| currentPage     | number                       | required          | Currently displayed page (1-indexed)       |
+| totalPages      | number                       | required          | Total number of pages                      |
+| onPageChange    | (pageNumber: number) => void | required          | Callback when user changes page            |
+| pageSizeOptions | PageSizeOption[]             | [10, 25, 50, 100] | Available items-per-page choices           |
+| pageSize        | number                       | 10                | Current number of items displayed per page |
 
 ### PageSizeOption
 
-| Property | Type | Description |
-|----------|------|-------------|
-| label | string | Display label (e.g., "10 items") |
-| value | number | Items per page count |
+| Property | Type   | Description                      |
+| -------- | ------ | -------------------------------- |
+| label    | string | Display label (e.g., "10 items") |
+| value    | number | Items per page count             |
 
 ## Usage
 

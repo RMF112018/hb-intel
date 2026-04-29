@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 **Version:** 1.0
 **Date:** 2026-03-07
 **Status:** Documented in PH4C.8
@@ -52,6 +51,7 @@ interface HbcEmptyStateProps {
 ## Usage Examples
 
 ### Basic Empty State
+
 ```tsx
 import { HbcEmptyState } from '@hbc/ui-kit';
 import { SearchIcon } from '@fluentui/react-icons';
@@ -66,6 +66,7 @@ export const MyComponent = () => (
 ```
 
 ### With Actions
+
 ```tsx
 <HbcEmptyState
   title="No Data Available"

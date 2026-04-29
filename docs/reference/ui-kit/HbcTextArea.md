@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Multi-line text input for structured form capture.
 
 ## Import
@@ -16,25 +15,20 @@ import { HbcTextArea } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `value` | `string` | Yes | Current textarea value. |
-| `onChange` | `(value: string) => void` | Yes | Change callback. |
-| `label` | `string` | No | Field label text. |
-| `placeholder` | `string` | No | Placeholder text. |
-| `rows` | `number` | No | Visible row count (`4` default). |
-| `maxLength` | `number` | No | Optional character cap. |
-| `error` | `string` | No | Validation message shown as error text. |
+| Prop          | Type                      | Required | Description                             |
+| ------------- | ------------------------- | -------- | --------------------------------------- |
+| `value`       | `string`                  | Yes      | Current textarea value.                 |
+| `onChange`    | `(value: string) => void` | Yes      | Change callback.                        |
+| `label`       | `string`                  | No       | Field label text.                       |
+| `placeholder` | `string`                  | No       | Placeholder text.                       |
+| `rows`        | `number`                  | No       | Visible row count (`4` default).        |
+| `maxLength`   | `number`                  | No       | Optional character cap.                 |
+| `error`       | `string`                  | No       | Validation message shown as error text. |
 
 ## Usage
 
 ```tsx
-<HbcTextArea
-  label="Notes"
-  value={notes}
-  onChange={setNotes}
-  rows={6}
-/>
+<HbcTextArea label="Notes" value={notes} onChange={setNotes} rows={6} />
 ```
 
 ## Accessibility

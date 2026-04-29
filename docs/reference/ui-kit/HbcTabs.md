@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Tab navigation component for organizing related content into selectable panels.
 
 ## Import
@@ -16,20 +15,20 @@ import { HbcTabs } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| tabs | TabPanel[] | required | Array of tab panel objects with id, label, content |
-| activeTab | string | required | ID of currently active tab |
-| onTabChange | (tabId: string) => void | required | Callback when user selects tab |
-| orientation | 'horizontal' \| 'vertical' | 'horizontal' | Layout direction |
+| Prop        | Type                       | Default      | Description                                        |
+| ----------- | -------------------------- | ------------ | -------------------------------------------------- |
+| tabs        | TabPanel[]                 | required     | Array of tab panel objects with id, label, content |
+| activeTab   | string                     | required     | ID of currently active tab                         |
+| onTabChange | (tabId: string) => void    | required     | Callback when user selects tab                     |
+| orientation | 'horizontal' \| 'vertical' | 'horizontal' | Layout direction                                   |
 
 ### TabPanel
 
-| Property | Type | Description |
-|----------|------|-------------|
-| id | string | Unique tab identifier |
-| label | string | Tab display label |
-| content | ReactNode | Panel content |
+| Property | Type      | Description           |
+| -------- | --------- | --------------------- |
+| id       | string    | Unique tab identifier |
+| label    | string    | Tab display label     |
+| content  | ReactNode | Panel content         |
 
 ## Usage
 
@@ -45,7 +44,7 @@ const [activeTab, setActiveTab] = useState('overview');
   activeTab={activeTab}
   onTabChange={setActiveTab}
   orientation="horizontal"
-/>
+/>;
 ```
 
 ## Field Mode Behavior

@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Governed pill-group selector that composes `HbcButton` pills into an accessible `radiogroup` with full keyboard navigation.
 
 ## When to use
@@ -17,24 +16,24 @@ Governed pill-group selector that composes `HbcButton` pills into an accessible 
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string` | required | Accessible group label (visible by default) |
-| `showLabel` | `boolean` | `true` | Whether to render the label visually |
-| `options` | `SegmentedOption<T>[]` | required | Available options |
-| `value` | `T` | required | Currently selected value |
-| `onChange` | `(value: T) => void` | required | Selection callback |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'sm'` | Button size |
-| `disabled` | `boolean` | `false` | Disable all options |
-| `className` | `string` | — | Additional CSS class |
+| Prop        | Type                   | Default  | Description                                 |
+| ----------- | ---------------------- | -------- | ------------------------------------------- |
+| `label`     | `string`               | required | Accessible group label (visible by default) |
+| `showLabel` | `boolean`              | `true`   | Whether to render the label visually        |
+| `options`   | `SegmentedOption<T>[]` | required | Available options                           |
+| `value`     | `T`                    | required | Currently selected value                    |
+| `onChange`  | `(value: T) => void`   | required | Selection callback                          |
+| `size`      | `'sm' \| 'md' \| 'lg'` | `'sm'`   | Button size                                 |
+| `disabled`  | `boolean`              | `false`  | Disable all options                         |
+| `className` | `string`               | —        | Additional CSS class                        |
 
 ### SegmentedOption
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `value` | `T` | Value passed to `onChange` |
-| `label` | `string` | Display text |
-| `disabled` | `boolean` | Disable individual option |
+| Prop       | Type      | Description                |
+| ---------- | --------- | -------------------------- |
+| `value`    | `T`       | Value passed to `onChange` |
+| `label`    | `string`  | Display text               |
+| `disabled` | `boolean` | Disable individual option  |
 
 ## Usage
 
@@ -52,7 +51,7 @@ const years = [
   options={years}
   value={selectedYear}
   onChange={setSelectedYear}
-/>
+/>;
 ```
 
 ## Accessibility

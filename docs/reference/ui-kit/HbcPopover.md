@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Contextual popover for displaying additional information or actions near a target element.
 
 ## Import
@@ -16,13 +15,13 @@ import { HbcPopover } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| open | boolean | false | Controls popover visibility |
-| onDismiss | () => void | required | Callback when popover closes |
-| target | ReactNode | required | Anchor element that popover positions relative to |
-| size | PopoverSize | 'medium' | Size variant: 'small' \| 'medium' \| 'large' |
-| children | ReactNode | required | Popover content |
+| Prop      | Type        | Default  | Description                                       |
+| --------- | ----------- | -------- | ------------------------------------------------- |
+| open      | boolean     | false    | Controls popover visibility                       |
+| onDismiss | () => void  | required | Callback when popover closes                      |
+| target    | ReactNode   | required | Anchor element that popover positions relative to |
+| size      | PopoverSize | 'medium' | Size variant: 'small' \| 'medium' \| 'large'      |
+| children  | ReactNode   | required | Popover content                                   |
 
 ## Usage
 
@@ -36,7 +35,7 @@ const [open, setOpen] = useState(false);
   size="medium"
 >
   <p>Additional information or actions go here</p>
-</HbcPopover>
+</HbcPopover>;
 ```
 
 ## Field Mode Behavior

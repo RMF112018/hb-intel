@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Primary action button component for initiating user actions across the application.
 
 ## Import
@@ -16,15 +15,15 @@ import { HbcButton } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| variant | 'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'danger' | 'primary' | Visual style variant of the button |
-| size | 'small' \| 'medium' \| 'large' | 'medium' | Button size |
-| icon | ReactNode | undefined | Optional icon element to display before children |
-| loading | boolean | false | Shows loading state with spinner, disables interaction |
-| disabled | boolean | false | Disables the button and prevents clicks |
-| children | ReactNode | required | Button label text |
-| onClick | (event: React.MouseEvent) => void | undefined | Click handler callback |
+| Prop     | Type                                                         | Default   | Description                                            |
+| -------- | ------------------------------------------------------------ | --------- | ------------------------------------------------------ |
+| variant  | 'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'danger' | 'primary' | Visual style variant of the button                     |
+| size     | 'small' \| 'medium' \| 'large'                               | 'medium'  | Button size                                            |
+| icon     | ReactNode                                                    | undefined | Optional icon element to display before children       |
+| loading  | boolean                                                      | false     | Shows loading state with spinner, disables interaction |
+| disabled | boolean                                                      | false     | Disables the button and prevents clicks                |
+| children | ReactNode                                                    | required  | Button label text                                      |
+| onClick  | (event: React.MouseEvent) => void                            | undefined | Click handler callback                                 |
 
 ## Usage
 

@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Production-grade people selection with Microsoft Graph live lookup. Replaces the D-PH6-10 textarea stub with a governed combobox + chip pattern.
 
 ## Architecture
@@ -18,27 +17,27 @@ Three-layer design for cross-surface reuse:
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string` | required | Field label |
-| `value` | `string[] \| PersonEntry[]` | required | Selected people (UPN strings or PersonEntry objects) |
-| `onChange` | `(people: PersonEntry[]) => void` | required | Selection callback |
-| `searchPeople` | `PeopleSearchFn` | — | Search adapter (Graph, static, or custom) |
-| `mode` | `'single' \| 'multi'` | `'single'` | Selection mode |
-| `placeholder` | `string` | auto | Search input placeholder |
-| `required` | `boolean` | `false` | Required field indicator |
-| `disabled` | `boolean` | `false` | Disable the picker |
-| `validationMessage` | `string` | — | Error message |
-| `className` | `string` | — | Additional CSS class |
+| Prop                | Type                              | Default    | Description                                          |
+| ------------------- | --------------------------------- | ---------- | ---------------------------------------------------- |
+| `label`             | `string`                          | required   | Field label                                          |
+| `value`             | `string[] \| PersonEntry[]`       | required   | Selected people (UPN strings or PersonEntry objects) |
+| `onChange`          | `(people: PersonEntry[]) => void` | required   | Selection callback                                   |
+| `searchPeople`      | `PeopleSearchFn`                  | —          | Search adapter (Graph, static, or custom)            |
+| `mode`              | `'single' \| 'multi'`             | `'single'` | Selection mode                                       |
+| `placeholder`       | `string`                          | auto       | Search input placeholder                             |
+| `required`          | `boolean`                         | `false`    | Required field indicator                             |
+| `disabled`          | `boolean`                         | `false`    | Disable the picker                                   |
+| `validationMessage` | `string`                          | —          | Error message                                        |
+| `className`         | `string`                          | —          | Additional CSS class                                 |
 
 ### PersonEntry
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `upn` | `string` | User principal name (email) — primary key |
-| `displayName` | `string` | Display name from directory |
-| `jobTitle` | `string?` | Job title |
-| `department` | `string?` | Department |
+| Field         | Type      | Description                               |
+| ------------- | --------- | ----------------------------------------- |
+| `upn`         | `string`  | User principal name (email) — primary key |
+| `displayName` | `string`  | Display name from directory               |
+| `jobTitle`    | `string?` | Job title                                 |
+| `department`  | `string?` | Department                                |
 
 ## Usage
 
@@ -58,7 +57,7 @@ const searchPeople = useGraphPeopleSearch(getGraphToken);
   searchPeople={searchPeople}
   mode="single"
   required
-/>
+/>;
 ```
 
 ### With static mock search (dev/storybook)
@@ -72,7 +71,13 @@ const mockPeople = [
 ];
 const searchPeople = createStaticPeopleSearch(mockPeople);
 
-<HbcPeoplePicker label="Team Member" value={[]} onChange={setSelected} searchPeople={searchPeople} mode="multi" />
+<HbcPeoplePicker
+  label="Team Member"
+  value={[]}
+  onChange={setSelected}
+  searchPeople={searchPeople}
+  mode="multi"
+/>;
 ```
 
 ### Manual UPN entry (fallback)

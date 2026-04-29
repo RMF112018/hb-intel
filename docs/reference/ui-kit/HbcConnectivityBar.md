@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Canonical top shell-status rail for connectivity and centralized shell-state messaging.
 
 ## Import
@@ -16,11 +15,11 @@ import { HbcConnectivityBar } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| status | ConnectivityStatus | auto-detected | Legacy connectivity override (`online` \| `syncing` \| `offline`) for compatibility |
-| shellStatus | ShellStatusSnapshot | - | Centralized shell-status snapshot from `@hbc/shell` resolver (preferred) |
-| onShellAction | (action) => void | - | Handler for approved actions (`retry`, `sign-in-again`, `learn-more`) |
+| Prop          | Type                | Default       | Description                                                                         |
+| ------------- | ------------------- | ------------- | ----------------------------------------------------------------------------------- |
+| status        | ConnectivityStatus  | auto-detected | Legacy connectivity override (`online` \| `syncing` \| `offline`) for compatibility |
+| shellStatus   | ShellStatusSnapshot | -             | Centralized shell-status snapshot from `@hbc/shell` resolver (preferred)            |
+| onShellAction | (action) => void    | -             | Handler for approved actions (`retry`, `sign-in-again`, `learn-more`)               |
 
 ## Usage
 
@@ -41,7 +40,7 @@ const statusSnapshot = resolveShellStatusSnapshot({
       retryBootstrap();
     }
   }}
-/>
+/>;
 ```
 
 ## Field Mode Behavior

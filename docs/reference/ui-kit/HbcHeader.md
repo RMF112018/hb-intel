@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Fixed 56px dark header bar with logo, project selector, toolbox, favorites, search, create button, notifications, and user menu.
 
 ## Import
@@ -17,16 +16,16 @@ import type { HbcHeaderProps } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| user | { id, displayName, email, avatarUrl?, initials? } | undefined | Current user object |
-| logo | ReactNode | "HB" fallback | Logo element for left section |
-| onSignOut | () => void | undefined | Sign-out handler |
-| onCreateClick | () => void | undefined | Create button click handler |
-| onSearchOpen | () => void | undefined | Search open handler |
-| onNotificationsOpen | () => void | undefined | Notifications open handler |
-| onProjectSelect | (projectId: string) => void | undefined | Project selection handler |
-| onToolboxOpen | () => void | undefined | Toolbox open handler |
+| Prop                | Type                                              | Default       | Description                   |
+| ------------------- | ------------------------------------------------- | ------------- | ----------------------------- |
+| user                | { id, displayName, email, avatarUrl?, initials? } | undefined     | Current user object           |
+| logo                | ReactNode                                         | "HB" fallback | Logo element for left section |
+| onSignOut           | () => void                                        | undefined     | Sign-out handler              |
+| onCreateClick       | () => void                                        | undefined     | Create button click handler   |
+| onSearchOpen        | () => void                                        | undefined     | Search open handler           |
+| onNotificationsOpen | () => void                                        | undefined     | Notifications open handler    |
+| onProjectSelect     | (projectId: string) => void                       | undefined     | Project selection handler     |
+| onToolboxOpen       | () => void                                        | undefined     | Toolbox open handler          |
 
 ## Usage
 
@@ -42,6 +41,7 @@ import type { HbcHeaderProps } from '@hbc/ui-kit';
 ## Layout
 
 3-section flexbox layout:
+
 - **Left:** Logo + HbcProjectSelector
 - **Center:** HbcToolboxFlyout + HbcFavoriteTools + HbcGlobalSearch (hidden on mobile < 1024px)
 - **Right:** HbcCreateButton + HbcNotificationBell + HbcUserMenu

@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Application shell layout component providing header, sidebar, and content area structure.
 
 ## Governance Clarification
@@ -22,37 +21,37 @@ import { HbcAppShell } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| user | ShellUser | required | Current user object with name, role, avatar |
-| navItems | SidebarNavGroup[] | required | Navigation menu structure |
-| children | ReactNode | required | Main content area |
-| onProjectChange | (projectId: string) => void | - | Callback when project selection changes |
+| Prop            | Type                        | Default  | Description                                 |
+| --------------- | --------------------------- | -------- | ------------------------------------------- |
+| user            | ShellUser                   | required | Current user object with name, role, avatar |
+| navItems        | SidebarNavGroup[]           | required | Navigation menu structure                   |
+| children        | ReactNode                   | required | Main content area                           |
+| onProjectChange | (projectId: string) => void | -        | Callback when project selection changes     |
 
 ### ShellUser
 
-| Property | Type | Description |
-|----------|------|-------------|
-| name | string | User display name |
-| role | string | User system role label |
-| avatar | string | Avatar URL or initials |
-| email | string | User email address |
+| Property | Type   | Description            |
+| -------- | ------ | ---------------------- |
+| name     | string | User display name      |
+| role     | string | User system role label |
+| avatar   | string | Avatar URL or initials |
+| email    | string | User email address     |
 
 ### SidebarNavGroup
 
-| Property | Type | Description |
-|----------|------|-------------|
-| label | string | Group heading |
-| items | SidebarNavItem[] | Menu items in group |
+| Property | Type             | Description         |
+| -------- | ---------------- | ------------------- |
+| label    | string           | Group heading       |
+| items    | SidebarNavItem[] | Menu items in group |
 
 ### SidebarNavItem
 
-| Property | Type | Description |
-|----------|------|-------------|
-| label | string | Link text |
-| href | string | Navigation target |
-| icon | ReactNode | Icon element |
-| badge | string | Optional badge (unread count) |
+| Property | Type             | Description                       |
+| -------- | ---------------- | --------------------------------- |
+| label    | string           | Link text                         |
+| href     | string           | Navigation target                 |
+| icon     | ReactNode        | Icon element                      |
+| badge    | string           | Optional badge (unread count)     |
 | children | SidebarNavItem[] | Nested items (collapsible groups) |
 
 ## Usage
@@ -84,10 +83,10 @@ import { HbcAppShell } from '@hbc/ui-kit';
 
 `HbcAppShell` automatically switches chrome based on the resolved `AppMode`:
 
-| Mode | Chrome | Detection |
-|------|--------|-----------|
+| Mode     | Chrome                                            | Detection                                |
+| -------- | ------------------------------------------------- | ---------------------------------------- |
 | `office` | HbcHeader + HbcSidebar + content (sidebar margin) | Viewport > 767px AND not HB Site Control |
-| `field` | HbcHeader + content (no sidebar) + HbcBottomNav | Viewport ≤ 767px OR HB Site Control app |
+| `field`  | HbcHeader + content (no sidebar) + HbcBottomNav   | Viewport ≤ 767px OR HB Site Control app  |
 
 ### useFieldMode Hook
 
@@ -103,6 +102,7 @@ const { isFieldMode, mode, toggleFieldMode, theme } = useFieldMode();
 ```
 
 **Auto-detection priority:**
+
 1. Mobile viewport (≤ 767px) → always `'field'`
 2. HB Site Control app (`data-hbc-app="hb-site-control"`) → always `'field'`
 3. Desktop with no override → `'office'`
@@ -116,7 +116,7 @@ Pages can declare which modes they support via `WorkspacePageShell`:
 <WorkspacePageShell
   layout="form"
   title="Risk Assessment"
-  supportedModes={['office']}  // Only available in office mode
+  supportedModes={['office']} // Only available in office mode
 >
   {/* content */}
 </WorkspacePageShell>

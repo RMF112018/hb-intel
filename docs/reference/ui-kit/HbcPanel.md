@@ -5,7 +5,6 @@
 > **Authority Boundary:** This document does not override Layer 1 runtime doctrine, runtime overlays, acceptance/scoring model, active supporting SPFx standards, or active supporting SPFx patterns.
 > **Routing Note:** Consuming surfaces must follow runtime doctrine first.
 
-
 Side panel overlay for detailed views, editing, and secondary workflows.
 
 ## Import
@@ -16,13 +15,13 @@ import { HbcPanel } from '@hbc/ui-kit';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| open | boolean | required | Controls panel visibility |
-| onDismiss | () => void | required | Callback when panel should close |
-| size | 'small' \| 'medium' \| 'large' \| 'full' | 'medium' | Panel width |
-| title | string | required | Panel header title |
-| children | ReactNode | required | Panel content |
+| Prop      | Type                                     | Default  | Description                      |
+| --------- | ---------------------------------------- | -------- | -------------------------------- |
+| open      | boolean                                  | required | Controls panel visibility        |
+| onDismiss | () => void                               | required | Callback when panel should close |
+| size      | 'small' \| 'medium' \| 'large' \| 'full' | 'medium' | Panel width                      |
+| title     | string                                   | required | Panel header title               |
+| children  | ReactNode                                | required | Panel content                    |
 
 ## Usage
 
