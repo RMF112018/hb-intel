@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@hbc/models": ["../../packages/models/src/index.ts"],
+      "@hbc/models/*": ["../../packages/models/src/*"],
+      "@hbc/ui-kit": ["../../packages/ui-kit/src/index.ts"],
+      "@hbc/ui-kit/app-shell": ["../../packages/ui-kit/src/app-shell.ts"],
+      "@hbc/ui-kit/theme": ["../../packages/ui-kit/src/theme/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}
