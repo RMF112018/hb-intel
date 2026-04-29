@@ -20,7 +20,34 @@ This blueprint assumes the company will continue using best-in-class constructio
 
 The controlling local reference for Procore data modeling is the Procore HB Intel data model package at `docs/architecture/blueprint/sp-project-control-center/procore_hbintel_data_model_package/`. The dedicated Procore Integration Layer is documented in §36A.
 
-The Project Control Center should be implemented as a full-page SPFx shell, similar in strategy to the existing `hb-intel-homepage` application pattern in the repo. Each project site should receive the same template, the same pages, the same libraries, the same baseline lists, the same permission model, and the same Project Control Center app surface. Project-specific configuration should be handled inside the Project Control Center UI, not through native SharePoint edit modes or manual site administration.
+The Project Control Center should be implemented as a full-page SPFx shell, similar in strategy to the existing `hb-intel-homepage` application pattern in the repo. The homepage precedent is host strategy only, not a dashboard layout to copy. Each project site should receive the same template, the same pages, the same libraries, the same baseline lists, the same permission model, and the same Project Control Center app surface. Project-specific configuration should be handled inside the Project Control Center UI, not through native SharePoint edit modes or manual site administration.
+
+## 1A. Current Repo-Truth Status
+
+Verified sources:
+
+- `docs/architecture/blueprint/sp-project-control-center/phase-2/Phase_2_Closeout.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-1/Wave_1_Closeout.md`
+- `packages/project-site-template/package.json` and `packages/project-site-template/README.md`
+- `packages/project-site-provisioning/package.json` and `packages/project-site-provisioning/README.md`
+- `packages/models/src/pcc/index.ts`
+- `packages/models/src/pcc/PccMvpSurfaces.ts`
+- `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png` (present)
+
+Current status:
+
+- Phase 0 is complete (architecture stabilization and schema extraction planning closed).
+- Phase 1 is complete (`@hbc/project-site-template` contract package exists and validation gate is closed).
+- Phase 2 is complete (`@hbc/project-site-provisioning` headless no-mutation boundary package exists).
+- Phase 3 Wave 1 is complete (PCC shared read-model foundations are shipped in `packages/models/src/pcc/`).
+- Phase 3 Wave 2 is the planned/current PCC SPFx shell-frame and UI/UX wave. It is not implemented in repo runtime code yet.
+- `apps/project-control-center/` is the locked Wave 2 target location and is currently absent in repo truth at this time.
+
+## 1B. Document Authority Split
+
+- **Blueprint authority (this document):** architecture doctrine, product boundaries, module/system posture, and non-negotiable governance guardrails.
+- **Roadmap authority:** implementation sequencing, current phase/wave execution status, and immediate execution priorities in [`Project_Control_Center_Development_Roadmap.md`](./Project_Control_Center_Development_Roadmap.md).
+- **Implementation contract authority:** implementation-detail contract in [`Standard_Project_Site_Template_Contract.md`](./Standard_Project_Site_Template_Contract.md).
 
 ---
 
@@ -129,13 +156,20 @@ Users should not manually manage SharePoint groups, Entra groups, or library per
 
 ## 5. Current Repo and Platform Context
 
+### 5.0 Repo-Truth Foundation State
+
+- `packages/project-site-template/` exists and is the machine-readable contract package for PCC template artifacts.
+- `packages/project-site-provisioning/` exists and is the headless provisioning boundary package with no tenant mutation or live API execution.
+- `packages/models/src/pcc/` exists and exports Wave 1 shared PCC vocabulary, fixtures, and navigation-surface identifiers.
+- `apps/project-control-center/` is the locked Wave 2 shell target location and is not yet present.
+
 ### 5.1 Existing Repo Foundations
 
 The repo already contains several relevant architectural foundations:
 
 - `apps/estimating/` — existing Project Setup / New Project Request surface.
 - `apps/accounting/` — accounting/project finalization context.
-- `apps/hb-homepage/` and/or `hb-intel-homepage` strategy — full-page shell pattern with embedded modules.
+- `apps/hb-homepage/` and/or `hb-intel-homepage` strategy — precedent for full-page SPFx host strategy only; not a Project Home layout model.
 - `backend/functions/` — Azure Functions backend integration layer.
 - SPFx/Vite packaging orchestration for multiple app domains.
 - Existing Microsoft Graph token acquisition patterns through SPFx context.
@@ -300,19 +334,19 @@ Each project site should carry a Project Profile record with:
 
 ```text
 apps/project-control-center/
-  Full-page SPFx shell for project team sites
+  Full-page SPFx shell for project team sites (locked Wave 2 target; currently absent)
 
 apps/document-control-center/
   Reusable document/file browser module
 
 packages/project-site-template/
-  Template schema, provisioning contract, list/library/page definitions
+  Existing machine-readable template contract package
 
-packages/project-workflows/
-  Startup, closeout, permits, inspections, responsibilities, scorecards, lessons models
+packages/project-site-provisioning/
+  Existing headless no-mutation provisioning boundary package
 
 backend/functions/
-  Provisioning orchestration, validation, access-control APIs, integrations
+  Future runtime boundary for backend execution and integrations (outside Wave 2)
 ```
 
 ### 8.2 Shell Structure
@@ -344,6 +378,59 @@ The home page should answer:
 - Who has access?
 - What is blocking startup, construction, closeout, or turnover?
 - What project risks need escalation?
+
+### 8.4 Phase 3 Wave 2 Shell Boundary
+
+Includes:
+
+- PCC shell-frame UI/UX in a dedicated `apps/project-control-center/` app target.
+- Command-center header, application navigation rail, and flexible dashboard composition.
+- Preview and fallback experiences sourced from `@hbc/models/pcc` fixtures.
+
+Excludes:
+
+- Backend API route implementation.
+- Provisioning executor implementation.
+- Tenant mutation or live Graph/PnP calls.
+- Procore runtime/API clients, secrets, mirror, or write-back.
+- Workflow execution and Site Health scanning/repair execution.
+- App catalog deployment, production rollout, or CI/CD deployment changes.
+
+### 8.5 Wave 2 UI/UX Basis-of-Design and Layout Lock
+
+Governing visual reference:
+
+- `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`
+
+Wave 2 shell direction:
+
+- dark navy/blue project-intelligence header;
+- HB orange left application navigation rail;
+- large project identity plus command/search zone;
+- floating light operational cards;
+- flexible bento/masonry-style dashboard layout with variable card heights and widths;
+- responsive desktop/tablet/mobile adaptations.
+
+Project Home must not reuse the `hb-intel-homepage` fixed paired-row composition when that model forces equal-height rows or whitespace waste.
+
+The preferred Wave 2 implementation model is CSS Grid with measured row spans and predictable DOM/focus order.
+
+```ts
+type PccWidgetFootprint =
+  | 'hero'
+  | 'wide'
+  | 'standard'
+  | 'compact'
+  | 'tall'
+  | 'full';
+```
+
+Wave 2 layout guardrails:
+
+- prefer CSS Grid with measured row spans;
+- do not use CSS columns as the primary layout path;
+- do not ship uncontrolled drag/resizable dashboard behavior in Wave 2;
+- do not create horizontal overflow or host-chrome conflicts.
 
 ---
 
@@ -431,6 +518,26 @@ The Project Home is the daily landing surface for all project participants. It s
 - Open Risks / Issues
 - External System Links
 - Site Health
+
+### 11.2A Wave 2 Project Home Shell Requirements
+
+Wave 2 Project Home must present:
+
+- a command-center header with project identity, phase/health/action pills, and command/search affordance;
+- an HB orange application navigation rail (application navigation only, not duplicate SharePoint chrome);
+- a floating card layer on a flexible bento/masonry grid with content-driven heights;
+- internal tab/state navigation based on `PCC_MVP_SURFACE_IDS` from `packages/models/src/pcc/PccMvpSurfaces.ts`;
+- fixture-driven preview from `@hbc/models/pcc` with no live backend data dependency.
+
+Wave 2 shell must include states for:
+
+- preview;
+- empty;
+- loading;
+- error;
+- missing-config;
+- unavailable-fixture;
+- unauthorized-persona.
 
 ### 11.3 Example Rollup
 
@@ -2601,121 +2708,21 @@ The Procore subtree is **PCC-side configuration and curation** (contract §15.13
 
 ---
 
-## 38. Recommended Implementation Roadmap
+## 38. Implementation Sequencing Authority
 
-### Phase 0 — Architecture Freeze
+Implementation sequencing and phase/wave execution status are governed by:
 
-- Approve this target architecture.
-- Finalize project site information architecture.
-- Finalize list/library schema baseline.
-- Finalize permission templates.
-- Finalize Control Center Settings requirements.
-- Finalize Team & Access model.
-- Decide how to model project phases.
+- [`Project_Control_Center_Development_Roadmap.md`](./Project_Control_Center_Development_Roadmap.md)
 
-### Phase 1 — Project Site Template Contract
+Current status snapshot (repo-truth aligned):
 
-Build:
+- Phase 0 complete — see [`phase-0/`](./phase-0/)
+- Phase 1 complete — see [`phase-1/`](./phase-1/)
+- Phase 2 complete — see [`phase-2/Phase_2_Closeout.md`](./phase-2/Phase_2_Closeout.md)
+- Phase 3 Wave 1 complete — see [`phase-3/wave-1/Wave_1_Closeout.md`](./phase-3/wave-1/Wave_1_Closeout.md)
+- Phase 3 Wave 2 planned/current shell-frame UI/UX wave (not implemented in runtime app code yet)
 
-- `packages/project-site-template/`
-- schema definitions;
-- list definitions;
-- library definitions;
-- permission group templates;
-- page definitions;
-- module registry;
-- settings seed data;
-- site health validation contract;
-- provisioning audit model.
-
-### Phase 2 — Provisioning Workflow
-
-Build or extend:
-
-- estimating-to-accounting handoff;
-- accounting final approval;
-- backend/functions provisioning endpoint;
-- site creation;
-- template application;
-- permissions and global read-only group;
-- Project Control Center page creation;
-- validation and audit records.
-
-### Phase 3 — Project Control Center Shell
-
-Build:
-
-- `apps/project-control-center/`
-- full-page SPFx shell;
-- project hero;
-- priority actions rail;
-- Today / This Week panel;
-- readiness rollups;
-- module navigation;
-- Control Center Settings entry point;
-- Site Health entry point.
-
-### Phase 4 — Adoption MVP Modules
-
-Build:
-
-- Team & Access Center
-- Document Control Center
-- Startup Center
-- Responsibility Matrix Center
-- Permit & AHJ Center
-- Inspection Readiness Center
-- Action Center
-
-### Phase 5 — Risk and Closeout Modules
-
-Build:
-
-- Contract & Compliance Center
-- Closeout & Warranty Center
-- Subcontractor Performance Center
-- Lessons Learned Center
-- Risk / Issues / Decision Log
-
-### Phase 6 — Integrations
-
-Build:
-
-- project-specific launch links;
-- Procore status cards;
-- Sage project financial summaries;
-- Compass vendor/prequalification links;
-- Document Crunch obligation references;
-- Adobe Sign envelope tracking;
-- Cupix visual capture links.
-
-### Phase 7 — HBI Project Intelligence
-
-Build:
-
-- project-aware assistant;
-- grounded source linking;
-- open items summary;
-- project changes summary;
-- document finding;
-- meeting agenda drafting;
-- closeout readiness explanation;
-- lessons learned retrieval.
-
-### 38.x Procore integration phases
-
-Procore integration is phased independently, anchored to the §36A.16 scope ladder and the package's wave priority (`extraction_priority_matrix.csv` Waves 1–7):
-
-| Phase | Scope | Anchor |
-|---|---|---|
-| **1 — Mapping & launch links (PCC MVP)** | Project Procore Mapping, deep links, Procore Settings, Sync Health placeholder, Object Link pattern. No summaries materialized. | Contract §21.8; §36A.16 PCC MVP |
-| **2 — Operational summaries** | RFIs, submittals, observations, inspections, incidents, punch (Recommended Practical, package Wave 3–4). | §36A.16 Recommended Practical; package Waves 3–4 |
-| **3 — Project controls summaries** | Commitments, change events, requisitions, prime contract status, budget views (Recommended Practical, package Wave 2). | §36A.16 Recommended Practical; package Wave 2 |
-| **4 — Field / quality / safety / productivity summaries** | Daily logs, timecards, production quantities, equipment events, observations rollups (canonical-layer first; SharePoint summaries selective). | §36A.16 Recommended Practical; package Waves 4–5 |
-| **5 — HBI grounding** | Procore-grounded HBI assistant queries (§30.4) once canonical Procore data is available. | §36A.16 Strategic Enterprise; package Wave 7 |
-| **6 — Governed write-back, if approved** | Only if a future architecture amendment satisfies the §36A.13 nine-gate scope. Not on the current roadmap. | §36A.13; future amendment |
-
-Each phase is gated by the prior phase's acceptance and by the Open Decisions in §41 that apply to that phase.
+Architecture doctrine for Procore tiering, write-back gates, and system-of-record boundaries remains authoritative in this blueprint under §36A and related module sections.
 
 ---
 
@@ -2881,4 +2888,3 @@ The Project Control Center is not a SharePoint page. It is a project operations 
 The site template provides the secure, repeatable project container. The Project Control Center provides the daily user experience, business workflows, settings, access management, and project intelligence that make the site useful.
 
 The uploaded example documents should be treated as legacy workflow artifacts to convert into structured, governed project modules — not files to simply store in SharePoint.
-

@@ -46,6 +46,8 @@ The PCC does **not** replace Procore, Sage Intacct, Compass, Document Crunch, Ad
 | Phase 0 — Architecture Stabilization & Schema Extraction Planning | Complete | [`phase-0/`](./phase-0/) |
 | Phase 1 — Machine-Readable Template Contract | Complete (full extraction gate closed) | [`phase-1/`](./phase-1/) |
 | Phase 2 — Provisioning Boundary (no-mutation chain) | **Complete (Steps 1–6).** Final closeout: [`phase-2/Phase_2_Closeout.md`](./phase-2/Phase_2_Closeout.md). Phase 3 planning readiness: Ready. | [`phase-2/`](./phase-2/) |
+| Phase 3 Wave 1 — PCC Shared Foundations | **Complete.** Final closeout: [`phase-3/wave-1/Wave_1_Closeout.md`](./phase-3/wave-1/Wave_1_Closeout.md). | [`phase-3/wave-1/`](./phase-3/wave-1/) |
+| Phase 3 Wave 2 — PCC Shell Frame and UI/UX | Planned/current wave. Not implemented in runtime code yet. | `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/` |
 
 Phase 2 step closeouts (audit & boundary; mapper scaffold; contract-coverage mapper; dry-run proof artifacts; apply-gate scaffold; validation + drift/repair posture + final closeout) live in [`phase-2/`](./phase-2/):
 
@@ -71,9 +73,12 @@ The dated execution-scaffold package — Foleon prompts, audit report, implement
 | Implementable site template, permission model, MVP scope, settings, and validation rules | Standard Project Site Template Contract |
 | Procore canonical model and integration recommendations | `procore_hbintel_data_model_package/` |
 | Sequencing and execution priorities | Development Roadmap |
-| Future machine-readable template artifacts | `packages/project-site-template/` once created |
+| Machine-readable template artifacts | `packages/project-site-template/` |
+| Provisioning boundary artifacts | `packages/project-site-provisioning/` |
+| PCC shared model foundations | `packages/models/src/pcc/` (`@hbc/models/pcc`) |
 | Future provisioning implementation | `backend/functions/` once implemented |
-| Future SPFx PCC shell | `apps/project-control-center/` once implemented |
+| Wave 2 SPFx PCC shell target | `apps/project-control-center/` (locked target; currently absent) |
+| Wave 2 UI/UX basis-of-design asset | `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png` |
 
 Do not create project-site implementation code directly from the blueprint alone. The blueprint provides strategy; the contract governs implementation.
 
@@ -128,9 +133,44 @@ The current architecture is in a documentation-ready state for roadmap planning 
 | Control Center Settings | Defined; implementation pending |
 | Site URL convention | Frozen for MVP |
 | MVP vs future scope | Mostly defined; implementation sequencing now captured in roadmap |
-| Machine-readable schema | Not created; next architecture-to-implementation bridge |
-| Provisioning implementation | Not created for PCC; future `backend/functions/` work |
-| SPFx PCC shell | Not created; future `apps/project-control-center/` work |
+| Machine-readable schema | Created and validated in `packages/project-site-template/` |
+| Provisioning boundary | Created as headless no-mutation package `packages/project-site-provisioning/` |
+| Shared PCC read-model foundations | Created in `packages/models/src/pcc/` |
+| SPFx PCC shell | Wave 2 target locked to `apps/project-control-center/`; app not yet created |
+
+---
+
+## Phase 3 Wave 2 UI/UX Basis of Design
+
+Wave 2 uses the saved reference image:
+
+`docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`
+
+Wave 2 UI/UX direction:
+
+- dark navy/blue project-intelligence header;
+- HB orange left-side application navigation rail;
+- large project identity and command/search zone;
+- KPI/status pills and health/readiness trend context;
+- floating white/light operational cards;
+- flexible bento/masonry dashboard layout with variable card sizes;
+- responsive desktop/tablet/mobile adaptations.
+
+PCC is an operating dashboard and must not reuse fixed paired-row homepage composition patterns when they force equal-height rows or whitespace waste.
+
+---
+
+## Current Frozen Wave 2 Decisions
+
+| Decision | Closed Position |
+|---|---|
+| Shell target path | `apps/project-control-center/` is the locked target location (currently absent). |
+| Data posture | Use `@hbc/models/pcc` fixtures/read-models first; no Wave 2 live backend read-model API. |
+| Navigation posture | Use internal state/tab navigation based on `PCC_MVP_SURFACE_IDS` (8 surfaces). |
+| Persona/capability posture | Display hints only; not authoritative authorization. |
+| Layout posture | Container-aware flexible bento/masonry grid with variable footprints; no fixed paired-row layout reuse. |
+| Required states | preview, empty, loading, error, missing-config, unavailable-fixture, unauthorized-persona. |
+| Forbidden seams | No backend routes/APIs, tenant mutation, live Graph/PnP, Procore runtime/write-back/mirror/secrets, workflow execution, or deployment work in Wave 2. |
 
 ---
 
@@ -199,9 +239,14 @@ Before making PCC changes, read:
 2. `Standard_Project_Site_Template_Contract.md`
 3. `Project_Control_Center_Development_Roadmap.md`
 4. `procore_hbintel_data_model_package/README.md`
-5. `docs/reference/ui-kit/doctrine/` before any SPFx UI work
-6. `docs/reference/spfx-surfaces/` before any SharePoint-hosted surface work
-7. `docs/reference/sharepoint/list-schemas/` before list or provisioning work
+5. `phase-2/Phase_2_Closeout.md`
+6. `phase-3/wave-1/Wave_1_Closeout.md`
+7. `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`
+8. `packages/models/src/pcc/` and `packages/models/src/pcc/PccMvpSurfaces.ts`
+9. `apps/project-sites/` only as a reference pattern for Vite/SPFx mounting
+10. `docs/reference/ui-kit/doctrine/` before any SPFx UI work
+11. `docs/reference/spfx-surfaces/` before any SharePoint-hosted surface work
+12. `docs/reference/sharepoint/list-schemas/` before list or provisioning work
 
 For Procore work, also read the full Procore package before touching integration boundaries.
 
@@ -223,6 +268,11 @@ Do not casually modify:
 - Sage Intacct system-of-record language;
 - Procore materialization boundaries;
 - external-user MVP exclusions.
+- Wave 2 flexible layout decision (no fixed paired-row homepage composition for PCC);
+- Wave 2 basis-of-design image reference path and usage posture;
+- surface-vs-work-center distinction (`PCC_MVP_SURFACE_IDS` vs 21 contract work centers);
+- direct SPFx-to-Procore ban;
+- Wave 2 fixture-first data posture through `@hbc/models/pcc`.
 
 Changes to these areas require an architecture amendment and should update the blueprint, contract, roadmap, and any future machine-readable schema together.
 
@@ -233,6 +283,11 @@ Changes to these areas require an architecture amendment and should update the b
 - Do not create project-site implementation code directly from the blueprint alone; derive from the contract.
 - Do not bypass the Project Control Center UI by requiring users to use native SharePoint settings.
 - Do not introduce direct SPFx-to-Procore API calls.
+- Do not reuse a fixed paired-row homepage layout model for PCC Project Home.
+- Do not treat Wave 2 as backend/runtime implementation.
+- Do not introduce live backend/API/tenant/Procore behavior in Wave 2 shell work.
+- Do not treat persona/capability metadata as authorization authority.
+- Do not bypass `@hbc/models/pcc` for shared PCC vocabulary in shell-frame work.
 - Do not store Procore secrets in SharePoint, SPFx, markdown, repo source, or client configuration.
 - Do not treat Procore as replaced by PCC.
 - Do not treat SharePoint lists as a full mirror of Procore transactional data.

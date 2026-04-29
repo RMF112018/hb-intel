@@ -1,0 +1,152 @@
+# Phase 3 Development Roadmap — Updated With Module Implementation Plan
+
+Generated: 2026-04-28
+
+## Objective
+
+Update the Phase 3 roadmap to reflect the resolved planning decisions and the formal module-by-module implementation plan.
+
+## Phase 3 Status
+
+Phase 3 planning deliverables are locked. Implementation may proceed only after the implementation gate confirms that the required Phase 2 proof, mutation, validation, and closeout conditions are satisfied.
+
+## Updated MVP Direction
+
+The MVP is **Project Home + governed navigation hub + light operational workflows**.
+
+## Phase 3 Implementation Thesis
+
+Phase 3 code work builds the PCC application layer:
+
+- PCC SPFx shell;
+- backend-normalized read models;
+- role-aware work centers;
+- Priority Actions Rail;
+- light operational workflow framework;
+- structured Project Readiness workflow modules;
+- Document Control Center access hub;
+- External Systems launch hub;
+- Site Health visibility and repair request intake;
+- admin/control-plane review surfaces.
+
+Phase 3 does not build the provisioning engine.
+
+## Required Sequencing Rule
+
+Do not begin with individual workflow modules.
+
+Required order:
+
+1. Wave 0 — implementation gate and repo-truth recheck.
+2. Wave 1 — shared foundations.
+3. Wave 2 — SPFx shell frame.
+4. Wave 3 — backend read-model foundation.
+5. Waves 4–19 — module-by-module implementation.
+6. Wave 20 — hardening, doctrine validation, and non-production readiness.
+
+## Wave Plan
+
+| Wave | Module / Workstream | Primary Output | Status |
+|---:|---|---|---|
+| 0 | Implementation Gate & Repo Truth Recheck | Gate review, allowed paths, blocked scope | Required before code |
+| 1 | PCC Shared Foundations | Shared models, enums, role model, fixtures | Implementation wave |
+| 2 | PCC SPFx Shell Frame | Shell/routing/layout/state frame | Implementation wave |
+| 3 | PCC Backend Read-Model Foundation | Read-model endpoints/scaffolds | Implementation wave |
+| 4 | Project Home / Command Center | Hybrid landing page | Module wave |
+| 5 | Priority Actions Rail | Four-category action rail | Module wave |
+| 6 | Team & Access | Request + approval workflow | Module wave |
+| 7 | Documents / Document Control Center | Unified file-access hub | Module wave |
+| 8 | Project Readiness Module Framework | Shared item-level workflow framework | Module wave |
+| 9 | Job Startup Checklist | Item-level startup workflow | Module wave |
+| 10 | Permit Log | Item-level permit workflow | Module wave |
+| 11 | Responsibility Matrix | Item-level responsibility workflow with owner-contract mapping | Module wave |
+| 12 | Constraints Log | Item-level constraints workflow | Module wave |
+| 13 | Buyout Log | Item-level buyout/project-controls workflow | Module wave |
+| 14 | Approvals / Checkpoints | Approval queue and authority logic | Module wave |
+| 15 | External Systems | Launch hub for approved systems | Module wave |
+| 16 | Control Center Settings | Role-gated settings | Module wave |
+| 17 | Site Health | Health visibility and repair request intake | Module wave |
+| 18 | Executive Oversight / Global Read-Only | Executive summary and governed drill-in | Module wave |
+| 19 | Admin / Control Plane Review Surfaces | Admin queues and review surfaces | Module wave |
+| 20 | Hardening, Doctrine Validation, Non-Production Readiness | Validation, accessibility, doctrine, closeout | Closing wave |
+
+## Milestone Grouping
+
+### Milestone 1 — Foundation
+
+- Wave 0 — Implementation Gate
+- Wave 1 — Shared Foundations
+- Wave 2 — SPFx Shell Frame
+- Wave 3 — Backend Read-Model Foundation
+
+### Milestone 2 — Core PCC Experience
+
+- Wave 4 — Project Home
+- Wave 5 — Priority Actions Rail
+- Wave 15 — External Systems
+- Wave 16 — Control Center Settings
+
+### Milestone 3 — Access, Documents, and Health
+
+- Wave 6 — Team & Access
+- Wave 7 — Document Control Center
+- Wave 17 — Site Health
+- Wave 19 — Admin Review Surfaces
+
+### Milestone 4 — Structured Project Readiness
+
+- Wave 8 — Project Readiness Framework
+- Wave 9 — Job Startup Checklist
+- Wave 10 — Permit Log
+- Wave 11 — Responsibility Matrix
+- Wave 12 — Constraints Log
+- Wave 13 — Buyout Log
+- Wave 14 — Approvals / Checkpoints
+
+### Milestone 5 — Executive Experience and Hardening
+
+- Wave 18 — Executive Oversight / Global Read-Only
+- Wave 20 — Hardening, Doctrine Validation, and Non-Production Readiness
+
+## Phase 2 Dependency Map
+
+| Phase 3 Item | Dependency |
+|---|---|
+| SPFx implementation | Prompt 06 gate review and Phase 2 proof/interface stability. |
+| Backend implementation | Phase 2 Step 4/5/6 and Prompt 06 gate review. |
+| Automated access execution | Backend security/provisioning gate; not included in MVP module wave. |
+| Automated Site Health repair | Phase 2 validation/repair posture and backend gate; not included in MVP Site Health wave. |
+| Structured workflow storage/data model | Future backend/data-model decision. |
+| Non-production execution | Phase 2 closeout and explicit non-production authorization. |
+| Production rollout | Non-production proof and production approvals. |
+
+## Per-Wave Closeout Requirement
+
+Every implementation wave must close with:
+
+- files changed;
+- what was implemented;
+- what was intentionally not implemented;
+- validation results;
+- no tenant mutation confirmation;
+- no Procore runtime confirmation;
+- no direct SPFx provisioning confirmation;
+- remaining blockers;
+- recommended next wave.
+
+## Recommended Validation Pattern
+
+Use repo-correct equivalents of:
+
+```bash
+git status --short
+pnpm check-types
+pnpm test --filter <touched package/app/backend target>
+pnpm build --filter <touched package/app target>
+```
+
+## Recommended Commit Summary
+
+```text
+docs(pcc): add phase 3 module implementation plan
+```

@@ -1,0 +1,33 @@
+# Open Decision Register
+
+Generated: 2026-04-28
+
+## Objective
+
+Track decisions that remain unresolved and should not be invented by an implementation agent.
+
+| ID | Decision Needed | Current Interim Position | Required Before | Recommended Owner |
+|---|---|---|---|---|
+| OD-001 | Exact PCC SPFx implementation path. | Likely future `apps/project-control-center/`, but must be repo-verified. | SPFx scaffold prompt | Architecture / SPFx |
+| OD-002 | Backend route namespace and DTO package placement. | Conceptual `/api/pcc/...` and `/api/admin/pcc/...`; no implementation yet. | Backend implementation | Backend / Architecture |
+| OD-003 | Read model storage/source strategy for item-level workflow modules. | Plan item-level model now; defer storage/schema decision. | Workflow implementation | Architecture / Backend |
+| OD-004 | Exact role/permission model for PM/PX business settings. | PM/PX can edit business-facing settings; IT/Admin controls technical settings. | Settings implementation | Operations / IT |
+| OD-005 | Approval authority matrix by checkpoint type. | IT/Admin technical; PM/PX business/readiness. | Approval workflow implementation | Operations / IT |
+| OD-006 | Non-production target site/tenant for first apply/proof. | Not selected. | Non-production rollout | IT / Architecture |
+| OD-007 | Repair authority and execution runbook. | Project users request; IT/Admin executes. | Repair implementation | IT / Backend |
+| OD-008 | Data model for Document Control Center file source registry. | Launch/access hub only; exact registry TBD. | Document Control implementation | Architecture / IT |
+| OD-009 | Launch-link configuration source for external systems. | MVP launch links only; source TBD. | External Systems implementation | Architecture / IT |
+| OD-010 | Whether Workflow Module item history needs immutable evidence for any business workflow. | Business audit trail for MVP; compliance-grade for technical/provisioning/admin. | Workflow implementation | Operations / Compliance |
+| OD-011 | PCC flagship scorecard target acceptance threshold. | Recommend flagship-grade 48+/56. | SPFx shell implementation | UI Doctrine Owner |
+| OD-012 | Which later-phase modules are promoted after MVP. | Estimating Kickoff, Post-Bid Autopsy, Job Closeout Checklist. | Post-MVP roadmap | Operations |
+
+---
+
+# Implementation Plan Open Decisions
+
+| ID | Decision Needed | Interim Position | Required Before |
+|---|---|---|---|
+| OD-013 | Confirm implementation wave authorization after Phase 2 Step 4/5/6. | Wave 0 must decide. | Any code work |
+| OD-014 | Confirm exact validation commands for each touched package/app/backend surface. | Use repo-correct commands per wave. | Wave 1 |
+| OD-015 | Confirm whether admin review surfaces live inside the PCC shell or separate admin app/surface. | Plan as Wave 19; path TBD. | Wave 19 |
+| OD-016 | Confirm fixture/mock data strategy for early SPFx/backend waves. | Use safe fixtures until read models are stable. | Wave 1 |
