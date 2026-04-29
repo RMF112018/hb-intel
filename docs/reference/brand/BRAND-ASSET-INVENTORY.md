@@ -131,6 +131,32 @@ Font binaries are governed assets and require documented license/internal-use re
 
 Prompt 04 and this corrective patch do not inventory font binary contents by filename.
 
+## Prompt 06 Font Placement Gate Status (Path A Blocker)
+
+Path executed: **A (docs-only blocker)**.
+
+Font placement is blocked for Prompt 06 because explicit documented license/internal-use clearance is not currently recorded with sufficient approval metadata in repo governance materials.
+
+Required approval fields before any future font placement:
+
+- approval owner
+- approval date
+- license/source reviewed
+- permitted internal-use scope
+- permitted web/app embedding scope
+- redistribution restrictions
+- approved font formats
+- approved repo placement
+- fallback stack
+- review expiration or revisit trigger
+
+Prompt 06 non-action confirmation:
+
+- no font archive extraction or unzip occurred (including temporary extraction)
+- no font files were copied or moved
+- no font binaries were listed by filename
+- no font contents were exposed
+
 ## Maintenance Rules
 
 Update this file whenever:

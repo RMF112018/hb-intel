@@ -58,7 +58,24 @@ Fonts are governed assets and must be handled with licensing care.
 
 ### Binding Gate
 
-Before any font placement/copying into implementation paths, document:
+Explicit documented approval is required before any font extraction, unzip, copy, move, or placement into implementation paths.
+
+Mandatory clearance record fields:
+
+- approval owner
+- approval date
+- license/source reviewed
+- permitted internal-use scope
+- permitted web/app embedding scope
+- redistribution restrictions
+- approved font formats
+- approved repo placement
+- fallback stack
+- review expiration or revisit trigger
+
+Only after those fields are approved and recorded may font placement proceed.
+
+Before any authorized font placement/copying into implementation paths, document:
 
 - license/internal-use review outcome;
 - approved usage scope;
@@ -184,3 +201,7 @@ Boundaries preserved:
 - no PDFs were copied;
 - no fonts were copied, extracted, or moved;
 - font implementation work remains deferred to later authorized prompts.
+
+## Prompt 06 Font Gate Status Note
+
+Prompt 06 executed Path A (docs-only blocker). Font placement remains deferred because explicit documented license/internal-use clearance with required approval metadata is not yet recorded in repo governance materials.
