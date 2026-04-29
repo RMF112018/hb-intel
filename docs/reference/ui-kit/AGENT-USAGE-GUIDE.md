@@ -71,4 +71,6 @@ For governance/doc updates, include at minimum:
 - Component docs do not override doctrine.
 - Layout references do not override doctrine.
 - Brand docs do not replace runtime doctrine.
-- Font placement is blocked unless `docs/reference/brand/FONT-LICENSE-CLEARANCE.md` has approved, complete clearance metadata.
+- Font usage must follow `docs/reference/brand/FONT-LICENSE-CLEARANCE.md`.
+- Current approved usage is limited to governed UI-kit theme tokens/registry.
+- Raw app imports, app-local placement, external redistribution, and expanded usage remain prohibited unless separately approved.

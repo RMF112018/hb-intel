@@ -32,11 +32,17 @@ Repo-truth verification confirms:
 
 ## Font Governance Posture Verification
 
-Prompt 09 does not expose or move font content.
+Prompt 09 does not expose, move, copy, extract, or place font content.
 
-- No new font extraction, copy, or placement was performed in Prompt 09.
-- `docs/reference/brand/FONT-LICENSE-CLEARANCE.md` remains the documented gate record.
-- Font placement remains blocked unless approval metadata is complete and explicitly valid for governed placement.
+- `docs/reference/brand/FONT-LICENSE-CLEARANCE.md` records approved owner-directed Prompt 06 clearance.
+- Current governed UI-kit theme font placement path is `packages/ui-kit/src/theme/fonts/`.
+- Approved use is constrained to:
+  - internal HB Intel runtime use;
+  - UI-kit theme tokens/registry;
+  - no raw app imports;
+  - no app-local placement;
+  - no external redistribution.
+- Any expanded scope, external distribution, package-publication changes, or license updates require review under the clearance record.
 
 ## Component and Layout Reference Posture Verification
 
@@ -63,5 +69,5 @@ For this Prompt 09 closeout run, the required Prompt 09 validation commands are 
 
 ## Open Decisions and Blockers
 
-- Font placement clearance remains a blocker unless complete approval metadata is formally established and accepted.
+- Any expansion beyond the current approved clearance scope remains blocked until separately reviewed and approved under the clearance record.
 - Any validation failure in this run must be attributed as Prompt 09-related only when evidence indicates direct causality; otherwise treat as pre-existing/unrelated or unresolved/unknown.
