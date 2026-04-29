@@ -139,3 +139,31 @@ Update this file whenever:
 - curated assets are promoted into `packages/ui-kit/src/branding/assets/` (in authorized prompts);
 - export names are added/renamed/deprecated;
 - font usage policy is approved through governed UI-kit theme paths.
+
+## Prompt 05 Curated Status (Implemented)
+
+This prompt curated stable reusable corporate logo assets into `packages/ui-kit/src/branding/assets/` and exposed them through `@hbc/ui-kit/branding`.
+
+Archive posture remains:
+
+- current archive truth: `docs/reference/brand/HB-Brand-Guide.zip`
+- target source territory: `docs/reference/brand/source/`
+- relocation/reconciliation deferred to later explicitly authorized prompt
+
+No fonts, PDFs, or archive relocation were performed.
+
+| Source File in Archive                                    | Target File                                                                     | Registry Key                        | Format | Intended Use                             |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- | ------ | ---------------------------------------- |
+| `Logos/HB Construction/HB Icon only.png`                  | `packages/ui-kit/src/branding/assets/hb-construction-icon.png`                  | `hbConstructionIcon`                | PNG    | Compact app marks and icon frames        |
+| `Logos/HB Construction/HB Icon white.png`                 | `packages/ui-kit/src/branding/assets/hb-construction-icon-white.png`            | `hbConstructionIconWhite`           | PNG    | Dark headers/rails/surfaces              |
+| `Logos/HB Construction/HB_Logo_Left_Icon.png`             | `packages/ui-kit/src/branding/assets/hb-construction-logo-left.png`             | `hbConstructionLogoLeft`            | PNG    | App headers and shell branding           |
+| `Logos/HB Construction/HB_Logo_Left_reverse.png`          | `packages/ui-kit/src/branding/assets/hb-construction-logo-left-reverse.png`     | `hbConstructionLogoLeftReverse`     | PNG    | Dark command headers/rails               |
+| `Logos/HB Construction/HB_Logo_Centered_Icon.png`         | `packages/ui-kit/src/branding/assets/hb-construction-logo-centered.png`         | `hbConstructionLogoCentered`        | PNG    | Large identity moments                   |
+| `Logos/HB Construction/HB_Logo_Centered_Icon_Reverse.png` | `packages/ui-kit/src/branding/assets/hb-construction-logo-centered-reverse.png` | `hbConstructionLogoCenteredReverse` | PNG    | Dark flagship/hero surfaces              |
+| `Logos/HB Development/HBD LOGO.png`                       | `packages/ui-kit/src/branding/assets/hb-development-logo.png`                   | `hbDevelopmentLogo`                 | PNG    | Development-specific identity            |
+| `Logos/HB Development/HBD LOGO-reverse.png`               | `packages/ui-kit/src/branding/assets/hb-development-logo-reverse.png`           | `hbDevelopmentLogoReverse`          | PNG    | Development logo on dark surfaces        |
+| `Logos/HB Environmental/HBE LOGO ICON.png`                | `packages/ui-kit/src/branding/assets/hb-environmental-icon.png`                 | `hbEnvironmentalIcon`               | PNG    | Environmental iconography                |
+| `Logos/HB Environmental/HBE LOGO.png`                     | `packages/ui-kit/src/branding/assets/hb-environmental-logo.png`                 | `hbEnvironmentalLogo`               | PNG    | Environmental identity surfaces          |
+| `Logos/HB Environmental/HBE LOGO reverse.png`             | `packages/ui-kit/src/branding/assets/hb-environmental-logo-reverse.png`         | `hbEnvironmentalLogoReverse`        | PNG    | Environmental logo on dark surfaces      |
+| `Logos/Reef Arches/Reef Arch Logo patent.svg`             | `packages/ui-kit/src/branding/assets/reef-arches-logo.svg`                      | `reefArchesLogo`                    | SVG    | Preferred scalable Reef Arches mark      |
+| `Logos/Reef Arches/Reef Arch Logo patent.png`             | `packages/ui-kit/src/branding/assets/reef-arches-logo.png`                      | `reefArchesLogoPng`                 | PNG    | PNG fallback for contexts needing raster |

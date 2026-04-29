@@ -172,3 +172,15 @@ Before using a brand asset in product UI:
 - [ ] Confirm alt text/decorative semantics are correct.
 - [ ] Confirm font usage goes through governed UI-kit theme/font paths only.
 - [ ] Document any approved exception.
+
+## Prompt 05 Implementation Status Note
+
+Prompt 05 curated stable reusable corporate logo assets into `packages/ui-kit/src/branding/assets/` and exposed them via `@hbc/ui-kit/branding`.
+
+Boundaries preserved:
+
+- no product/runtime source changes were made;
+- no brand archive relocation was performed;
+- no PDFs were copied;
+- no fonts were copied, extracted, or moved;
+- font implementation work remains deferred to later authorized prompts.
