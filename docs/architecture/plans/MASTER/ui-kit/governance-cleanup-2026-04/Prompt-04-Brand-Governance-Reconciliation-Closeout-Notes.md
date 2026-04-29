@@ -30,3 +30,7 @@ Prompt 04 normalized the three-way archive posture across brand docs:
 ## Governance Positioning
 
 Brand docs are recorded as supporting source-of-truth governance and not reclassified as Layer 1 runtime doctrine.
+
+## Corrective Restoration Addendum
+
+This corrective patch preserved Prompt 04 archive/source-territory/doctrine-boundary corrections while restoring detailed brand-governance structure and guidance in the brand docs.
