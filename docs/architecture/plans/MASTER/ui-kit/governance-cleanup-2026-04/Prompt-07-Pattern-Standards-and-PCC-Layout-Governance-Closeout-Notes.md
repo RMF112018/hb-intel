@@ -29,3 +29,7 @@ Prompt 07 added supporting SPFx standards and pattern governance docs for PCC-st
 - Documentation-only changes under allowed Prompt 07 paths.
 - No product/runtime code, backend, CI/CD, deployment, package/version, lockfile, or manifest changes.
 - `docs/architecture/plans/MASTER/ui-kit/wave-02/**` remained unchanged.
+
+## Addendum
+
+Post-validation, `docs/reference/ui-kit/GOVERNANCE-SUPERSESSION.md` was updated to classify the six Prompt 07 standards/pattern docs as active supporting authorities and to restate Layer 1 doctrine precedence.

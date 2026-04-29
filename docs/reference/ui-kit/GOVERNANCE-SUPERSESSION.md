@@ -74,8 +74,23 @@ This registry records current governance status of UI-kit and related governance
 | `docs/reference/ui-kit/deprecated-tokens.md`      | deprecated | Explicit deprecated-token guidance.                                       |
 | `docs/reference/ui-kit/complexity-sensitivity.md` | unknown    | Governance-adjacent file needing targeted classification in later prompt. |
 
+## Active Supporting SPFx Standards and Patterns
+
+| Document                                                                        | Status                       | Rationale                                                                                               |
+| ------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `docs/reference/ui-kit/standards/SPFx-Surface-Quality-Standard.md`              | `active supporting standard` | Operationalizes non-homepage SPFx/PCC surface-quality obligations; does not override runtime doctrine.  |
+| `docs/reference/ui-kit/standards/SPFx-Breakpoint-and-Container-Fit-Standard.md` | `active supporting standard` | Operationalizes container-fit and breakpoint obligations; does not override runtime doctrine.           |
+| `docs/reference/ui-kit/standards/SPFx-State-Model-Standard.md`                  | `active supporting standard` | Operationalizes state-model completeness obligations; does not override runtime doctrine.               |
+| `docs/reference/ui-kit/standards/SPFx-Host-Runtime-Validation-Standard.md`      | `active supporting standard` | Operationalizes hosted runtime validation and evidence obligations; does not override runtime doctrine. |
+| `docs/reference/ui-kit/patterns/SPFx-Widget-and-Bento-Layout-Patterns.md`       | `active supporting pattern`  | Composition guidance for widget/bento layouts; does not override runtime doctrine.                      |
+| `docs/reference/ui-kit/patterns/SPFx-Command-Center-Dashboard-Patterns.md`      | `active supporting pattern`  | Composition guidance for command-center dashboards; does not override runtime doctrine.                 |
+
 ## Supersession Rule
 
-When any Layer 3 or supporting governance guidance conflicts with runtime doctrine, runtime doctrine governs for runtime behavior and acceptance.
+Runtime doctrine remains primary for runtime behavior and acceptance.
+
+Active supporting standards operationalize doctrine, and active supporting patterns guide composition.
+
+Supporting standards and patterns do not override Layer 1 runtime doctrine.
 
 Prompt 04 keeps supersession centralized in this map and does not bulk-edit every legacy doc header.
