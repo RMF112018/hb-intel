@@ -14,6 +14,8 @@ Runtime-specific doctrine governs product behavior and acceptance:
 
 - [UI Doctrine — SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md)
 - [UI Doctrine — SPFx Homepage Overlay](./doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md)
+- [UI Doctrine — SPFx Full-Page App and Widget Overlay](./doctrine/UI-Doctrine-SPFx-Full-Page-App-Widget-Overlay.md)
+- [UI Doctrine — Acceptance and Scoring Model](./doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md)
 - [UI Doctrine — PWA Governing Standard](./doctrine/UI-Doctrine-PWA-Governing-Standard.md)
 
 ### Layer 2 (Cross-Runtime Obligations)
@@ -34,10 +36,9 @@ If any Layer 3 guidance conflicts with Layer 1 doctrine, Layer 1 doctrine wins.
 ## Consumer Routing (Current Authority)
 
 - Homepage SPFx webparts (`apps/hb-webparts`):
-  - SPFx Governing Standard -> SPFx Homepage Overlay -> [entry-points.md](./entry-points.md)
+  - SPFx Governing Standard -> SPFx Homepage Overlay -> Acceptance and Scoring Model -> [entry-points.md](./entry-points.md)
 - Full-page SPFx app/widget and PCC-style SPFx work:
-  - SPFx Governing Standard (current active authority)
-  - Future overlay for full-page/widget governance is planned for a later prompt and is not active authority yet.
+  - SPFx Governing Standard -> SPFx Full-Page App and Widget Overlay -> Acceptance and Scoring Model
 - PWA surfaces:
   - PWA Governing Standard
 - Feature packages and shared libraries:
@@ -59,8 +60,6 @@ See [GOVERNANCE-MAP.md](./GOVERNANCE-MAP.md) for the full matrix.
 Legacy, historical, and deprecated UI-kit docs are tracked centrally in:
 
 - [GOVERNANCE-SUPERSESSION.md](./GOVERNANCE-SUPERSESSION.md)
-
-Prompt 02 uses this central supersession map rather than bulk-editing all legacy files.
 
 ## Related Governance
 

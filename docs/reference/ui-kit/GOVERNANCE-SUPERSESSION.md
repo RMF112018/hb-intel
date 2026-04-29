@@ -15,16 +15,18 @@ This registry records the current governance status of UI-kit reference docs wit
 
 ## Core Governance Status
 
-| Document                                                                | Status | Rationale                                                       |
-| ----------------------------------------------------------------------- | ------ | --------------------------------------------------------------- |
-| `docs/reference/ui-kit/README.md`                                       | active | Primary index and routing authority for UI-kit governance docs. |
-| `docs/reference/ui-kit/doctrine/README.md`                              | active | Doctrine index and applicability map.                           |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md` | active | Primary SPFx runtime doctrine authority.                        |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`   | active | Homepage-specific runtime overlay authority.                    |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md`  | active | Primary PWA runtime doctrine authority.                         |
-| `docs/reference/ui-kit/entry-points.md`                                 | active | Entry-point and import-policy authority.                        |
-| `docs/reference/ui-kit/GOVERNANCE-MAP.md`                               | active | Consumer-type governance routing map.                           |
-| `docs/reference/ui-kit/GOVERNANCE-SUPERSESSION.md`                      | active | Central status map for legacy/current classification.           |
+| Document                                                                          | Status | Rationale                                                                 |
+| --------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------- |
+| `docs/reference/ui-kit/README.md`                                                 | active | Primary index and routing authority for UI-kit governance docs.           |
+| `docs/reference/ui-kit/doctrine/README.md`                                        | active | Doctrine index and applicability map.                                     |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`           | active | Primary SPFx runtime doctrine authority.                                  |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`             | active | Homepage-specific runtime overlay authority.                              |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Full-Page-App-Widget-Overlay.md` | active | Binding non-homepage SPFx full-page/widget/PCC runtime overlay authority. |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`      | active | Binding SPFx scoring and closure enforcement model.                       |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md`            | active | Primary PWA runtime doctrine authority.                                   |
+| `docs/reference/ui-kit/entry-points.md`                                           | active | Entry-point and import-policy authority.                                  |
+| `docs/reference/ui-kit/GOVERNANCE-MAP.md`                                         | active | Consumer-type governance routing map.                                     |
+| `docs/reference/ui-kit/GOVERNANCE-SUPERSESSION.md`                                | active | Central status map for legacy/current classification.                     |
 
 ## Layer 3 Reference Status
 
@@ -73,4 +75,4 @@ This registry records the current governance status of UI-kit reference docs wit
 
 When any Layer 3 reference or historical guidance conflicts with runtime doctrine, runtime doctrine governs.
 
-Prompt 02 intentionally centralizes supersession in this map and does not bulk-edit every legacy doc header.
+Prompt 03 keeps supersession centralized in this map and does not bulk-edit every legacy doc header.
