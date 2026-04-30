@@ -1,12 +1,24 @@
 import type { FC } from 'react';
 import { useId } from 'react';
 import { PRIORITY_ACTION_CATEGORY_LABELS } from '@hbc/models/pcc';
+import type { PccPriorityTone } from './shared.js';
 import type {
   IPccPriorityActionsRailViewModel,
   IPccPriorityRailGroup,
   IPccPriorityRailItem,
 } from './priorityActionsRailViewModel.js';
 import styles from './PccPriorityActionsRail.module.css';
+
+/**
+ * Visible, screen-reader-readable copy for the per-row priority chip.
+ * Tone/status must not be color-only — the visible "Priority: …" text is
+ * the primary signal; tone-tinted color is supplementary.
+ */
+const PRIORITY_TONE_LABELS: Readonly<Record<PccPriorityTone, string>> = {
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+};
 
 /**
  * Wave 5 / Prompt 03 — PCC-local Priority Actions Rail UI.
@@ -44,7 +56,13 @@ const RailRow: FC<RailRowProps> = ({ item }) => (
       <span className={styles.rowTitle}>{item.title}</span>
       {item.summary ? <span className={styles.rowSummary}>{item.summary}</span> : null}
       <span className={styles.rowMeta}>
-        <span>{PRIORITY_ACTION_CATEGORY_LABELS[item.category]}</span>
+        <span
+          className={styles.rowToneLabel}
+          data-pcc-priority-rail-tone-label={item.tone}
+        >
+          Priority: {PRIORITY_TONE_LABELS[item.tone]}
+        </span>
+        <span className={styles.rowMetaSep}>{PRIORITY_ACTION_CATEGORY_LABELS[item.category]}</span>
         {item.dueDate ? (
           <span className={styles.rowMetaSep}>Due {item.dueDate}</span>
         ) : null}

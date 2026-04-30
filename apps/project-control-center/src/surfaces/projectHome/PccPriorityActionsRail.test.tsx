@@ -92,6 +92,56 @@ describe('PccPriorityActionsRail', () => {
     }
   });
 
+  it('renders a visible "Priority: <Tone>" label per row matching the item tone', () => {
+    const { container } = render(<PccPriorityActionsRail viewModel={SAMPLE_VIEW_MODEL} />);
+    const expectedCopy: Record<string, string> = {
+      high: 'Priority: High',
+      medium: 'Priority: Medium',
+      low: 'Priority: Low',
+    };
+    for (const group of SAMPLE_VIEW_MODEL.groups) {
+      const lane = laneEl(container, group.id);
+      for (const item of group.items) {
+        const row = lane.querySelector<HTMLElement>(
+          `[data-pcc-priority-rail-action-id="${item.id}"]`,
+        );
+        expect(row).not.toBeNull();
+        const toneLabel = row!.querySelector<HTMLElement>('[data-pcc-priority-rail-tone-label]');
+        expect(toneLabel).not.toBeNull();
+        expect(toneLabel!.getAttribute('data-pcc-priority-rail-tone-label')).toBe(item.tone);
+        expect(toneLabel!.textContent).toBe(expectedCopy[item.tone]);
+      }
+    }
+  });
+
+  it('tone-label data attribute equals row data-pcc-priority-rail-action-tone', () => {
+    const { container } = render(<PccPriorityActionsRail viewModel={SAMPLE_VIEW_MODEL} />);
+    const rows = container.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-action-id]');
+    expect(rows.length).toBe(SAMPLE_VIEW_MODEL.visibleCount);
+    for (const row of Array.from(rows)) {
+      const rowTone = row.getAttribute('data-pcc-priority-rail-action-tone');
+      const toneLabel = row.querySelector<HTMLElement>('[data-pcc-priority-rail-tone-label]');
+      expect(toneLabel).not.toBeNull();
+      expect(toneLabel!.getAttribute('data-pcc-priority-rail-tone-label')).toBe(rowTone);
+    }
+  });
+
+  it('renders Priority: High / Medium / Low text via synthetic input across all three tones', () => {
+    const synthetic = buildPccPriorityActionsRailViewModel([
+      { id: 'syn-h', category: 'workflow', title: 'h', severity: 'Blocking' },
+      { id: 'syn-m', category: 'workflow', title: 'm' },
+      { id: 'syn-l', category: 'workflow', title: 'l', severity: 'Info' },
+    ]);
+    const { container } = render(<PccPriorityActionsRail viewModel={synthetic} />);
+    const text = container.textContent ?? '';
+    expect(text).toContain('Priority: High');
+    expect(text).toContain('Priority: Medium');
+    expect(text).toContain('Priority: Low');
+    const labels = container.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-tone-label]');
+    const tones = Array.from(labels).map((el) => el.getAttribute('data-pcc-priority-rail-tone-label'));
+    expect(tones.sort()).toEqual(['high', 'low', 'medium']);
+  });
+
   it('empty lane renders the lane-level empty marker with no rows', () => {
     const { container } = render(<PccPriorityActionsRail viewModel={SAMPLE_VIEW_MODEL} />);
     // access-requests has 0 items in the SAMPLE_PRIORITY_ACTIONS view-model

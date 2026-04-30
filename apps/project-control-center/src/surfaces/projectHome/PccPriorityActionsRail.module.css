@@ -131,6 +131,25 @@
   letter-spacing: 0.02em;
 }
 
+/* Visible "Priority: …" chip. Text is the primary signal; tone-tinted
+   color is supplementary so tone/status is never color-only. */
+.rowToneLabel {
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.rowToneLabel[data-pcc-priority-rail-tone-label='high'] {
+  color: var(--pcc-status-danger);
+}
+
+.rowToneLabel[data-pcc-priority-rail-tone-label='medium'] {
+  color: var(--pcc-status-warning);
+}
+
+.rowToneLabel[data-pcc-priority-rail-tone-label='low'] {
+  color: var(--pcc-status-info);
+}
+
 .rowMetaSep::before {
   content: '·';
   margin-right: 6px;
