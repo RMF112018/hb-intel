@@ -66,6 +66,11 @@ apps/project-control-center/
     │   └── usePccShellState.ts
     ├── preview/
     │   └── projectPlaceholder.ts
+    ├── api/                    (Wave 3 / Prompt 06 — dormant read-model client boundary)
+    │   ├── pccReadModelClient.ts
+    │   ├── pccFixtureReadModelClient.ts
+    │   ├── pccReadModelStateMapping.ts
+    │   └── index.ts
     ├── surfaces/
     │   ├── projectHome/        (10 fixture-driven cards — Prompt 05; Document Control card remediated in Prompt 06)
     │   ├── documents/          (header + 2 Microsoft-lane + 3 external-lane cards — Prompt 06)
@@ -177,6 +182,27 @@ and `PccSurfaceRouter`:
 | `external-systems` | Header + one tile per `EXTERNAL_SYSTEM_CATALOG` entry; tri-state (`configured` / `missing` / `unavailable-fixture`) |
 | `control-center-settings` | Prompt 07 placeholder surface |
 | `site-health` | Overview + checks + drift + non-operational repair-requests placeholder |
+
+## Wave 3 Read-Model Client Boundary (Dormant)
+
+Wave 3 / Prompt 06 introduced a typed SPFx read-model client boundary
+under `src/api/`. The boundary is **dormant**: no app entry point,
+mount, shell, or surface imports from it. Surfaces remain
+fixture-driven via direct `@hbc/models/pcc` imports, and the eight
+W2-ODR-009 preview/fallback states are unchanged.
+
+| Module | Purpose |
+| --- | --- |
+| `pccReadModelClient.ts` | `IPccReadModelClient` interface + static route-path templates for the seven Wave 3 backend GET routes. No HTTP execution, no base URL resolution, no auth. |
+| `pccFixtureReadModelClient.ts` | Default fixture implementation. Returns `mode: 'fixture'` envelopes assembled from existing `@hbc/models/pcc` fixtures. `simulateBackendUnavailable` flag returns `sourceStatus: 'backend-unavailable'` envelopes for unit tests. `viewerPersona` is a passthrough; no derivation, no UI gating. |
+| `pccReadModelStateMapping.ts` | Pure helper mapping `PccReadModelSourceStatus` → existing `PccPreviewStateKind`. Not consumed by any surface in this wave. |
+| `index.ts` | Barrel; exports the interface, factory, route metadata, and mapping helper. |
+
+A backend HTTP implementation behind `IPccReadModelClient` is deferred
+to a future prompt and would be an explicit, opt-in mode. The
+runtime-cutover guard test
+(`tests/pcc-api-dormancy.test.ts`) asserts no non-api source file
+imports or references the boundary.
 
 ## Validation
 
