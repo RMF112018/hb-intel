@@ -5,7 +5,9 @@ import {
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_SITE_HEALTH_SUMMARY,
+  type PccPriorityActionsReadModel,
   type PccProjectId,
+  type PccReadModelEnvelope,
 } from '@hbc/models/pcc';
 import { createPccFixtureReadModelClient } from '../../api/pccFixtureReadModelClient';
 import { useProjectHomeReadModel } from './useProjectHomeReadModel';
@@ -65,6 +67,73 @@ describe('useProjectHomeReadModel', () => {
       expect(vm?.[key].state).toBe('error');
       expect(vm?.[key].sourceStatus).toBe('backend-unavailable');
     }
+  });
+
+  it('invokes getProjectHome, getPriorityActions, and getDocumentControl in parallel', async () => {
+    const client = createPccFixtureReadModelClient();
+    const homeSpy = vi.spyOn(client, 'getProjectHome');
+    const prioritySpy = vi.spyOn(client, 'getPriorityActions');
+    const docSpy = vi.spyOn(client, 'getDocumentControl');
+    const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(homeSpy).toHaveBeenCalledTimes(1);
+    expect(prioritySpy).toHaveBeenCalledTimes(1);
+    expect(docSpy).toHaveBeenCalledTimes(1);
+    expect(homeSpy).toHaveBeenCalledWith(PROJECT_ID);
+    expect(prioritySpy).toHaveBeenCalledWith(PROJECT_ID);
+    expect(docSpy).toHaveBeenCalledWith(PROJECT_ID);
+  });
+
+  it('priorityActions slot reflects the standalone priority-actions envelope, not the home envelope', async () => {
+    const baseClient = createPccFixtureReadModelClient();
+    const altActions: PccPriorityActionsReadModel['actions'] = [
+      SAMPLE_PRIORITY_ACTIONS[0]!,
+    ];
+    const altEnvelope: PccReadModelEnvelope<PccPriorityActionsReadModel> = {
+      projectId: PROJECT_ID,
+      mode: 'mock',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      generatedAtUtc: '2026-04-30T00:00:00.000Z',
+      data: { actions: altActions },
+    };
+    const client: IPccProjectHomeReadModelClient = {
+      getProjectHome: (id, persona) => baseClient.getProjectHome(id, persona),
+      getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
+      getPriorityActions: async () => altEnvelope,
+    };
+    const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.viewModel?.priorityActions.data).toEqual(altActions);
+    expect(result.current.viewModel?.priorityActions.sourceStatus).toBe('available');
+  });
+
+  it('priorityActions slot reflects backend-unavailable from the standalone envelope only when home is available', async () => {
+    const baseClient = createPccFixtureReadModelClient();
+    const unavailableEnvelope: PccReadModelEnvelope<PccPriorityActionsReadModel> = {
+      projectId: PROJECT_ID,
+      mode: 'mock',
+      sourceStatus: 'backend-unavailable',
+      readOnly: true,
+      warnings: [],
+      generatedAtUtc: '2026-04-30T00:00:00.000Z',
+      data: { actions: [] },
+    };
+    const client: IPccProjectHomeReadModelClient = {
+      getProjectHome: (id, persona) => baseClient.getProjectHome(id, persona),
+      getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
+      getPriorityActions: async () => unavailableEnvelope,
+    };
+    const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    const vm = result.current.viewModel;
+    expect(vm?.priorityActions.state).toBe('error');
+    expect(vm?.priorityActions.sourceStatus).toBe('backend-unavailable');
+    expect(vm?.intelligence.state).toBe('preview');
+    expect(vm?.siteHealth.state).toBe('preview');
+    expect(vm?.documentControl.state).toBe('preview');
+    expect(vm?.missingConfigurations.state).toBe('preview');
   });
 
   it('refetches when the client identity changes', async () => {

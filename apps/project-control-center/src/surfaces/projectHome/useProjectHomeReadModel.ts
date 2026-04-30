@@ -1,9 +1,10 @@
 /**
- * Project Home read-model hook (Phase 3 / Wave 4 / Prompt 05).
+ * Project Home read-model hook.
  *
- * Pure consumer of `IPccProjectHomeReadModelClient`. Fetches `home`
- * and `documentControl` envelopes in parallel, runs them through
- * `buildPccProjectHomeViewModel`, and exposes a stable view-model.
+ * Pure consumer of `IPccProjectHomeReadModelClient`. Fetches `home`,
+ * `priorityActions`, and `documentControl` envelopes in parallel, runs
+ * them through `buildPccProjectHomeViewModel`, and exposes a stable
+ * view-model.
  *
  * Returns `'loading'` on first render. Wave 4 clients always resolve
  * (Prompt 03 safe-fallback design), so the hook never enters an error
@@ -36,14 +37,19 @@ export function useProjectHomeReadModel(
     let cancelled = false;
     setState({ status: 'loading' });
     void (async () => {
-      const [home, documentControl] = await Promise.all([
+      const [home, priorityActions, documentControl] = await Promise.all([
         client.getProjectHome(projectId),
+        client.getPriorityActions(projectId),
         client.getDocumentControl(projectId),
       ]);
       if (cancelled) return;
       setState({
         status: 'ready',
-        viewModel: buildPccProjectHomeViewModel({ home, documentControl }),
+        viewModel: buildPccProjectHomeViewModel({
+          home,
+          priorityActions,
+          documentControl,
+        }),
       });
     })();
     return () => {

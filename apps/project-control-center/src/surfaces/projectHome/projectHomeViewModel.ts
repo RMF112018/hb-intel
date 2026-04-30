@@ -19,6 +19,7 @@ import type {
   ISiteHealthSummary,
   PccDocumentControlReadModel,
   PccPersona,
+  PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
   PccReadModelEnvelope,
@@ -42,6 +43,11 @@ export interface IPccProjectHomeReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccProjectHomeReadModel>>;
+
+  getPriorityActions(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccPriorityActionsReadModel>>;
 
   getDocumentControl(
     projectId: PccProjectId,

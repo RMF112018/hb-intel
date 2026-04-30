@@ -7,6 +7,7 @@ import {
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_SITE_HEALTH_SUMMARY,
   type PccDocumentControlReadModel,
+  type PccPriorityActionsReadModel,
   type PccProjectHomeReadModel,
   type PccProjectId,
   type PccReadModelEnvelope,
@@ -50,6 +51,21 @@ function docEnvelope(
     warnings: [],
     generatedAtUtc: '2026-04-30T00:00:00.000Z',
     data: { sources: ORDERED_DOC_SOURCES },
+  };
+}
+
+function priorityEnvelope(
+  sourceStatus: PccReadModelSourceStatus,
+  actions: PccPriorityActionsReadModel['actions'] = SAMPLE_PRIORITY_ACTIONS,
+): PccReadModelEnvelope<PccPriorityActionsReadModel> {
+  return {
+    projectId: PROJECT_ID,
+    mode: 'mock',
+    sourceStatus,
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: { actions },
   };
 }
 
@@ -157,6 +173,57 @@ describe('buildPccProjectHomeViewModel — fixture equivalence', () => {
       expect(slot.state, `${key} state`).toBe('error');
       expect(slot.sourceStatus, `${key} sourceStatus`).toBe('backend-unavailable');
     }
+  });
+});
+
+describe('buildPccProjectHomeViewModel — standalone priority-actions envelope', () => {
+  const ALT_ACTIONS: PccPriorityActionsReadModel['actions'] = [
+    SAMPLE_PRIORITY_ACTIONS[0]!,
+  ];
+
+  it('uses standalone envelope data + sourceStatus for the priorityActions slot when supplied', () => {
+    const viewModel = buildPccProjectHomeViewModel({
+      home: homeEnvelope('available'),
+      priorityActions: priorityEnvelope('available', ALT_ACTIONS),
+      documentControl: docEnvelope('available'),
+    });
+    expect(viewModel.priorityActions.data).toEqual(ALT_ACTIONS);
+    expect(viewModel.priorityActions.sourceStatus).toBe('available');
+    expect(viewModel.priorityActions.state).toBe('preview');
+  });
+
+  it('backend-unavailable standalone priority-actions envelope places only the priorityActions slot in error', () => {
+    const viewModel = buildPccProjectHomeViewModel({
+      home: homeEnvelope('available'),
+      priorityActions: priorityEnvelope('backend-unavailable', []),
+      documentControl: docEnvelope('available'),
+    });
+    expect(viewModel.priorityActions.state).toBe('error');
+    expect(viewModel.priorityActions.sourceStatus).toBe('backend-unavailable');
+    expect(viewModel.priorityActions.data).toEqual([]);
+    expect(viewModel.intelligence.state).toBe('preview');
+    expect(viewModel.siteHealth.state).toBe('preview');
+    expect(viewModel.documentControl.state).toBe('preview');
+    expect(viewModel.missingConfigurations.state).toBe('preview');
+  });
+
+  it('absent standalone envelope preserves home-derived priorityActions fallback', () => {
+    const viewModel = buildPccProjectHomeViewModel({
+      home: homeEnvelope('available'),
+      documentControl: docEnvelope('available'),
+    });
+    expect(viewModel.priorityActions.data).toEqual(SAMPLE_PRIORITY_ACTIONS);
+    expect(viewModel.priorityActions.sourceStatus).toBe('available');
+    expect(viewModel.priorityActions.state).toBe('preview');
+  });
+
+  it('absent standalone envelope with home=backend-unavailable still maps the priorityActions slot to error via home', () => {
+    const viewModel = buildPccProjectHomeViewModel({
+      home: homeEnvelope('backend-unavailable'),
+      documentControl: docEnvelope('available'),
+    });
+    expect(viewModel.priorityActions.state).toBe('error');
+    expect(viewModel.priorityActions.sourceStatus).toBe('backend-unavailable');
   });
 });
 

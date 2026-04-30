@@ -21,6 +21,7 @@ import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMap
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState';
 import type {
   PccDocumentControlReadModel,
+  PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
@@ -34,6 +35,7 @@ import type {
 export interface IProjectHomeAdapterInput {
   readonly home: PccReadModelEnvelope<PccProjectHomeReadModel>;
   readonly documentControl: PccReadModelEnvelope<PccDocumentControlReadModel>;
+  readonly priorityActions?: PccReadModelEnvelope<PccPriorityActionsReadModel>;
 }
 
 const PREVIEW_TO_CARD_STATE: Readonly<Record<PccPreviewStateKind, PccCardState>> = {
@@ -70,9 +72,16 @@ export function buildPccProjectHomeViewModel(
   const home = input.home.data;
   const docs = input.documentControl.data;
 
+  const priorityActionsSlot = input.priorityActions
+    ? slot(
+        input.priorityActions.sourceStatus,
+        input.priorityActions.data.actions ?? [],
+      )
+    : slot(homeStatus, home.priorityActions ?? []);
+
   return {
     intelligence: slot(homeStatus, home.profile),
-    priorityActions: slot(homeStatus, home.priorityActions ?? []),
+    priorityActions: priorityActionsSlot,
     siteHealth: slot(homeStatus, home.siteHealth),
     documentControl: slot(docStatus, docs.sources ?? []),
     missingConfigurations: slot(homeStatus, home.missingConfigurations ?? []),

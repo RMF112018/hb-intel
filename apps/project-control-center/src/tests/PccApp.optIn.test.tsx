@@ -16,6 +16,7 @@ import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClien
 
 const ENCODED_ID = encodeURIComponent(SAMPLE_PROJECT_PROFILE.projectId);
 const HOME_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/home`;
+const PRIORITY_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/priority-actions`;
 const DOC_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/document-control`;
 
 function homeOk() {
@@ -46,6 +47,18 @@ function docOk() {
     data: {
       sources: DOCUMENT_CONTROL_SOURCE_IDS.map((id) => DOCUMENT_CONTROL_SOURCES[id]),
     },
+  };
+}
+
+function priorityOk() {
+  return {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'mock',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: { actions: SAMPLE_PRIORITY_ACTIONS },
   };
 }
 
@@ -100,6 +113,7 @@ describe('mount(...) opt-in', () => {
   it('mount(el, ctx, { readModel: { readModelMode: "backend", backendBaseUrl } }) invokes fetch with the canonical URLs (GET only)', async () => {
     fetchSpy.mockImplementation((url: string) => {
       if (url === HOME_URL) return Promise.resolve(jsonResponse({ data: homeOk() }));
+      if (url === PRIORITY_URL) return Promise.resolve(jsonResponse({ data: priorityOk() }));
       if (url === DOC_URL) return Promise.resolve(jsonResponse({ data: docOk() }));
       throw new Error(`unexpected fetch URL: ${url}`);
     });
@@ -112,11 +126,11 @@ describe('mount(...) opt-in', () => {
       });
     });
     await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
     });
     const calls = fetchSpy.mock.calls.map((c) => ({ url: c[0], init: c[1] }));
     const urls = calls.map((c) => c.url).sort();
-    expect(urls).toEqual([DOC_URL, HOME_URL].sort());
+    expect(urls).toEqual([DOC_URL, HOME_URL, PRIORITY_URL].sort());
     for (const c of calls) {
       expect(c.init?.method).toBe('GET');
     }
@@ -153,6 +167,7 @@ describe('PccSurfaceRouter — non-Project-Home surfaces ignore the read-model c
   it('does not invoke client methods for non-project-home surfaces', async () => {
     const client = createPccFixtureReadModelClient();
     const homeSpy = vi.spyOn(client, 'getProjectHome');
+    const prioritySpy = vi.spyOn(client, 'getPriorityActions');
     const docSpy = vi.spyOn(client, 'getDocumentControl');
 
     render(
@@ -163,6 +178,7 @@ describe('PccSurfaceRouter — non-Project-Home surfaces ignore the read-model c
 
     await new Promise((r) => setTimeout(r, 0));
     expect(homeSpy).not.toHaveBeenCalled();
+    expect(prioritySpy).not.toHaveBeenCalled();
     expect(docSpy).not.toHaveBeenCalled();
   });
 });
