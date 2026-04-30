@@ -2,39 +2,45 @@
 
 ## Purpose
 
-Build HB Intel with current repo truth, clean package boundaries, targeted verification, controlled execution, and premium UI quality where UI work is involved.
+Work on HB Intel from current repo truth, with surface-aware routing, narrow validation, controlled execution, and strong guardrails for tenant, deployment, SPFx, backend, documentation, and package-boundary risk.
 
-This file is the root brief only. Do not duplicate detailed indexes, rule bodies, Skill instructions, or agent routing here.
+This file is the root brief only. Detailed routing lives under `.claude/`.
 
 ---
 
 ## Start Here
 
-1. Identify the active scope.
+1. Identify the active scope and repo surface.
 2. Read the smallest authoritative source set.
-3. Use a Skill for repeatable workflows.
+3. Use the relevant Skill for repeatable workflows.
 4. Use a specialist agent only when risk or uncertainty justifies it.
 5. Execute only the requested or approved scope.
-6. Verify before claiming completion.
+6. Validate before claiming completion.
 
-Do not read the whole repo first. Do not search archives, logs, generated outputs, dependency folders, build folders, or old `.claude/plans` material during normal work.
+Do not read the whole repo first.
 
 ---
 
-## Routing Sources
+## Configuration Routing
 
-Use the indexes and routers instead of expanding this file:
+Use:
 
-| Need | Source |
-| --- | --- |
-| Claude configuration map | `.claude/README.md` |
-| Rule routing | `.claude/rules.md` |
-| Detailed rule index | `.claude/rules/README.md` |
-| Skill routing | `.claude/skills/README.md` |
-| Agent routing | `.claude/agents/README.md` |
-| Hook routing | `.claude/hooks/README.md` |
-| Validation commands | `docs/reference/developer/verification-commands.md` |
-| Documentation standards | `docs/reference/developer/documentation-authoring-standard.md` |
+- `.claude/README.md` for the configuration map.
+- `.claude/rules.md` for rule routing.
+- `.claude/skills/README.md` for workflow Skills.
+- `.claude/agents/README.md` for specialist agents.
+- `.claude/hooks/README.md` for deterministic enforcement.
+
+When working in the repo, prefer:
+
+- `pnpm-workspace.yaml`
+- nearest `package.json`
+- nearest app/package README
+- `docs/README.md`
+- `docs/architecture/blueprint/current-state-map.md`
+- `docs/reference/developer/verification-commands.md`
+
+The root `README.md` is not currently a useful implementation authority.
 
 ---
 
@@ -44,60 +50,51 @@ Current repo truth controls.
 
 Default order:
 
-1. live files, manifests, exports, tests, configs, and nearby README files in the touched area;
-2. active prompt package README, decision register, validation matrix, scope lock, and closeout docs for phase/wave work;
-3. project-specific governing docs;
-4. `.claude/rules.md` and `.claude/rules/**`;
-5. `.claude/skills/README.md`, `.claude/agents/README.md`, and `.claude/hooks/README.md`;
-6. developer reference docs;
-7. broad architecture docs only when local/project truth is insufficient.
+1. live files, manifests, exports, tests, configs, and nearest README in the touched area;
+2. workspace/package routing files;
+3. canonical current-state documentation;
+4. active phase/wave/package decision docs where applicable;
+5. ADRs and reference docs;
+6. historical plans only when the user explicitly asks for history or the active task requires them.
 
-Historical plans and old summaries are context only. Old `.claude/plans` material now belongs under `.archive/claude-plans/` and is not normal context.
-
----
-
-## Mandatory Skill Triggers
-
-Use the relevant Skill when the request matches a known workflow:
-
-| Request | Skill |
-| --- | --- |
-| repo-truth audit / exhaustive live repo review | `hb-repo-truth-audit` |
-| fresh-session prompt / prompt package | `hb-prompt-package-builder` |
-| agent plan review / approval check | `hb-plan-gate-review` |
-| post-execution report / commit landed / closure summary | `hb-post-execution-closeout` |
-| validation selection / test adequacy | `hb-verification-router` |
-| tenant, Azure, Graph/PnP, Procore, CI/CD, app catalog, `.sppkg`, live endpoint | `hb-sensitive-operation-gate` |
-| SPFx source/build/manifest/runtime/hosted parity | `hb-spfx-runtime-parity` |
-| UI doctrine / `@hbc/ui-kit` / basis-of-design / premium UI | `hb-ui-doctrine-conformance` |
-| documentation authority / stale docs / source-of-truth cleanup | `hb-doc-authority-cleanup` |
-| Project Control Center / PCC | `hb-pcc-phase-router` |
-| brand assets / logos / fonts / curated web-ready assets | `hb-brand-asset-governance` |
-| create/update Skills | `hb-skill-author` |
-
-If a Skill is unavailable, use the matching rules and agents manually.
+Do not rely on chat memory when current files are available.
 
 ---
 
-## Non-Negotiable Guardrails
+## Surface-Aware Work
 
-Do not do any of the following unless the user explicitly authorizes it and the governing prompt supports it:
+Before implementing, classify the scope as one or more of:
 
-- mutate SharePoint or any tenant resource;
-- call live Graph/PnP;
-- call Procore;
-- add Procore secrets, mirrors, or write-back behavior;
-- introduce direct SPFx-to-Procore calls;
-- deploy to app catalog;
-- generate or upload `.sppkg` packages;
-- edit CI/CD workflows;
-- change package versions or SPFx manifests;
-- run dependency install/update commands;
-- push commits;
-- stage unrelated files;
-- run destructive git or shell commands;
-- run live endpoint probes with `curl`;
-- broaden scope into adjacent cleanup.
+- app or SPFx surface;
+- shared package;
+- feature package;
+- backend Functions;
+- tools/scripts;
+- documentation;
+- Project Control Center;
+- platform primitive adoption;
+- sensitive tenant/deployment operation.
+
+Use the matching Skill or agent from `.claude/skills/README.md` or `.claude/agents/README.md`.
+
+---
+
+## Guardrails
+
+Do not perform these unless the user explicitly authorizes them and the governing prompt supports them:
+
+- tenant mutation;
+- live Graph/PnP/SharePoint/Procore calls;
+- Azure deployment or app settings mutation;
+- app catalog deployment;
+- `.sppkg` generation or upload;
+- CI/CD workflow changes or workflow dispatch;
+- package/manifest version changes;
+- dependency install/update commands;
+- destructive shell or git commands;
+- `git push`;
+- live endpoint probes with `curl`;
+- unrelated cleanup.
 
 Use `hb-sensitive-operation-gate` before sensitive operations.
 
@@ -105,109 +102,39 @@ Use `hb-sensitive-operation-gate` before sensitive operations.
 
 ## Plan Gate
 
-Produce a plan and wait for approval before execution when work is:
-
-- prompt-package-driven;
-- phase/wave-driven;
-- cross-cutting;
-- architecture-affecting;
-- SPFx runtime-sensitive;
-- backend/provisioning/deployment related;
-- tenant, permission, security, or CI/CD related;
-- package/version affecting;
-- broad UI doctrine work;
-- broad documentation authority work.
+Produce a plan and wait for approval before execution when work is prompt-package-driven, phase/wave-driven, cross-cutting, architecture-affecting, SPFx/runtime-sensitive, backend/provisioning/deployment related, tenant/security/permission related, package/version affecting, broad UI doctrine work, or broad documentation authority work.
 
 Execution must stay inside the approved scope.
 
 ---
 
-## Implementation Standard
+## Validation
 
-For implementation work:
+Use the smallest meaningful validation set.
 
-1. inspect the touched area;
-2. read only relevant authority docs;
-3. make the smallest correct change;
-4. preserve public contracts unless breakage is explicitly authorized;
-5. preserve package and runtime boundaries;
-6. preserve error, empty, fallback, and preview states where applicable;
-7. update docs only when behavior, exports, boundaries, workflows, or public expectations change;
-8. validate the changed scope;
-9. report exactly what was verified.
+Default route:
 
-Do not claim completion without proof.
-
----
-
-## Verification Standard
-
-Use the smallest meaningful validation set:
-
-1. changed-file or local checks;
-2. affected package lint/typecheck/tests;
+1. changed-file/local inspection;
+2. package-local scripts from nearest `package.json`;
 3. affected consumer checks when exports/contracts changed;
-4. workspace checks only when cross-cutting, release-critical, or requested;
-5. Playwright/end-to-end only when runtime/UI behavior requires it;
-6. hosted/tenant validation only when explicitly authorized.
+4. workspace checks only when justified;
+5. browser/E2E only for runtime/UI behavior;
+6. hosted/tenant checks only when explicitly authorized.
 
-For docs-only work, default validation is:
-
-- `git diff -- <changed docs>`;
-- `git status --short`;
-- `pnpm format:check` only if expected by repo convention or requested.
-
-Always report verified checks, checks not run, why the set was appropriate, and residual risk.
+Use `docs/reference/developer/verification-commands.md` before inventing validation commands.
 
 ---
 
-## Completion Reporting
+## Completion
 
-For execution work, report:
+Report evidence, not ceremony:
 
 - files inspected;
-- files modified;
-- implementation summary;
-- validation commands run;
-- validation results;
-- validation not run;
+- files changed;
+- validation run and results;
+- validation not run and why;
 - guardrails preserved;
-- known gaps or uncertainty;
-- commit summary;
-- commit description.
+- residual risk;
+- commit summary and description when relevant.
 
-Do not present failed or partial validation as success.
-
----
-
-## Archive and Context Discipline
-
-`.archive/claude-plans/**` is historical material. Do not inspect it during normal work.
-
-Only read archived Claude plans when the user explicitly asks for historical reconstruction, legacy comparison, or archive recovery.
-
-Do not search or read:
-
-- `.archive/claude-plans/**`;
-- `.claude/plans/logs/**`;
-- logs;
-- generated artifacts;
-- dependency folders;
-- build folders;
-- coverage folders;
-- old working plans.
-
----
-
-## Response Standard
-
-Be direct.
-
-- Lead with the answer or decision.
-- Separate evidence from recommendation.
-- State assumptions and uncertainty.
-- Avoid ritualized preambles.
-- Avoid repeating indexes.
-- Provide copy-ready prompts or instructions when corrective action is needed.
-
-If unsure, check `.claude/README.md`, then `.claude/rules.md`, then the relevant Skill or specialist agent.
+Do not present partial or failed validation as success.

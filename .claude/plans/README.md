@@ -2,14 +2,19 @@
 
 This directory is for short-lived active plans only.
 
-Do not store historical plans, logs, JSON evidence, deployment outputs, or run artifacts here.
+Allowed:
 
-Historical material belongs in:
+- one short current working plan;
+- temporary draft plans for the current task;
+- files the user explicitly asks Claude to save here.
 
-```text
-.archive/claude-plans/
-```
+Not allowed:
 
-Normal Claude Code access to the archive is denied by `.claude/settings.json`.
+- historical plans;
+- logs;
+- generated JSON evidence;
+- deployment outputs;
+- run artifacts;
+- archived closeouts.
 
-Use `.claude/plans/` only when the current task needs a temporary working plan file.
+Historical material belongs outside active `.claude/` context, typically under `.archive/claude-plans/`, and is denied during normal work.

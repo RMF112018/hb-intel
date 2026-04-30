@@ -1,11 +1,44 @@
-# Deprecated PCC Phase 3 Rule Path
+# Project Rule — PCC Phase 3
 
-The canonical PCC Phase 3 active rule file is now:
+## Primary Rule
+
+Project Control Center work must be routed through current PCC app truth and active phase/wave docs before implementation.
+
+## Required Starting Sources
+
+Use as applicable:
 
 ```text
-.claude/rules/projects/pcc-phase-3.md
+apps/project-control-center/README.md
+apps/project-control-center/package.json
+docs/architecture/blueprint/sp-project-control-center/
+docs/architecture/plans/MASTER/spfx/pcc/
+docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png
 ```
 
-This file exists only as a compatibility pointer for older references.
+## Current Posture Checks
 
-Do not add new PCC rule content here. Update the canonical file instead.
+Before editing PCC, identify whether the work is:
+
+- preview-shell/UI only;
+- backend read-model planning;
+- backend route/DTO implementation;
+- SPFx host/wrapper work;
+- tenant/provisioning/deployment work;
+- documentation/closeout.
+
+## Guardrails
+
+Preserve no-runtime posture unless explicitly changed by the active wave:
+
+- no live Microsoft Graph/PnP/SharePoint runtime;
+- no Procore/Document Crunch/Adobe Sign runtime;
+- no secrets, sync, mirror, or write-back;
+- no app catalog deployment;
+- no `.sppkg` generation;
+- no auth runtime unless explicitly authorized;
+- no package/manifest version change unless explicitly authorized.
+
+## Validation
+
+Use package-local PCC commands before workspace-wide commands. Preserve no-runtime guard tests when runtime boundaries matter.
