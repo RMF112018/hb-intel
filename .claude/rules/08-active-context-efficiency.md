@@ -2,106 +2,103 @@
 
 ## Purpose
 
-Reduce unnecessary repeated file reads while preserving repo-truth validation and evidence quality.
+Reduce token waste while preserving repo-truth validation.
 
 ---
 
 ## Primary Rule
 
-Do not reread files that are still within active context or memory unless there is a reason to verify them again.
+Read the smallest sufficient source set. Do not re-read files already in active context unless proof, freshness, or expanded scope requires it.
 
 Efficiency must not override repo-truth validation.
 
 ---
 
-## Do Not Reread When
+## Do Not Read During Normal Work
 
-Avoid rereading a file when:
+Do not search or read these unless the user explicitly asks for historical/archive analysis or recovery:
 
-- it was just read in the current task;
-- it is still clearly in active context;
-- the user asks a continuation question about the same file;
-- no change could have occurred;
-- line-level proof is not needed;
-- a summary from the current task is sufficient.
+- `.archive/claude-plans/**`
+- `.claude/plans/logs/**`
+- old `.claude/plans/*.md` files that have been moved to archive
+- `**/*.log`
+- `node_modules/**`
+- `.next/**`
+- `dist/**`
+- `build/**`
+- `coverage/**`
+- `.turbo/**`
+- `.vite/**`
+- `playwright-report/**`
+- `test-results/**`
+- generated zip artifacts
+- generated deployment/runtime proof logs
 
----
-
-## Reread When
-
-Reread or verify the file when:
-
-- the file may have changed;
-- line-level verification is needed;
-- final validation or closeout reporting requires proof;
-- the scope expanded;
-- the user asks for a repo-truth audit;
-- the task involves post-execution validation;
-- the file is a governing source of truth for the current task;
-- current memory conflicts with a repo citation or live file result;
-- an agent report claims a file changed;
-- the file controls a sensitive or gated decision.
+These paths should also be denied in `.claude/settings.json`.
 
 ---
 
-## Efficient Reading Order
+## `.claude/plans/` Policy
 
-Use targeted reads:
+`.claude/plans/` is active-only.
 
-1. nearest package/app files;
-2. relevant public exports;
-3. relevant tests;
-4. relevant README or closeout;
-5. governing docs named by current prompt;
-6. broader architecture docs only when needed.
+Allowed:
 
-Use search before bulk reading when the target is unknown.
+- one short current working plan;
+- temporary draft plans for the current task;
+- files the user explicitly asks Claude to save there.
+
+Not allowed:
+
+- historical plans;
+- logs;
+- generated JSON evidence;
+- long run outputs;
+- deployment evidence;
+- archived closeouts;
+- old prompt execution records.
+
+Historical material belongs in:
+
+```text
+.archive/claude-plans/
+```
 
 ---
 
-## Working From Uploaded or Attached Files
+## Reread Only When Needed
 
-When the user provides a file:
+Reread a file only when:
 
-- use the uploaded file as the immediate baseline for that request;
-- cite it when discussing its contents;
-- compare against live repo truth only if the task asks for repo audit or current alignment;
-- do not assume the uploaded file is current unless the user says so.
+- it may have changed;
+- line-level proof is needed;
+- final validation/closeout requires evidence;
+- scope expanded;
+- the user requested a repo-truth audit;
+- post-execution validation is requested;
+- the file is a governing source for the current task;
+- current memory conflicts with live repo evidence.
 
 ---
 
 ## Repo-Truth Audit Exception
 
-If the user explicitly asks for a repo-truth audit, live repo audit, exhaustive audit, or post-execution validation, re-verify current files even if similar files are in memory.
+For repo-truth audits and post-execution reviews, verify current files. Do not answer from memory alone.
 
-Do not answer an audit from memory alone.
+Use:
 
-Use `hb-repo-truth-audit`.
-
----
-
-## Post-Execution Exception
-
-If the user says:
-
-- “following execution”;
-- “commit landed”;
-- “changes pushed”;
-- “agent’s closure summary”;
-- “all changes have been pushed”;
-
-then verify current repo state before accepting the claim where tooling is available.
-
-Use `hb-post-execution-closeout`.
+- `hb-repo-truth-audit`
+- `hb-post-execution-closeout`
 
 ---
 
-## Reporting Active Context Use
+## Archive Exception
 
-When relevant, state:
+Only inspect `.archive/claude-plans/**` when the user explicitly asks to:
 
-- “I used the current file already in context for X.”
-- “I re-verified Y because the task is a repo-truth audit.”
-- “I did not reread Z because no change was indicated and it remains in active context.”
+- reconstruct historical context;
+- compare old plans to current state;
+- recover a prior plan or log;
+- audit archived execution evidence.
 
-Do not over-explain routine efficiency decisions.
+When archive access is needed, state that archive access is intentional and limited.

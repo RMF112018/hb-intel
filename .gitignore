@@ -37,6 +37,9 @@ yarn-error.log*
 .DS_Store
 *.pem
 
+# Claude archived working plans and run logs (may contain tokens or deployment artifacts)
+.archive/
+
 # SPFx
 lib/
 # Azure Functions notification helpers live under a `lib/` directory (not SPFx output).
