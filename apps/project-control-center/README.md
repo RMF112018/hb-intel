@@ -183,13 +183,14 @@ and `PccSurfaceRouter`:
 | `control-center-settings` | Prompt 07 placeholder surface |
 | `site-health` | Overview + checks + drift + non-operational repair-requests placeholder |
 
-## Wave 3 Read-Model Client Boundary (Dormant)
+## Wave 3 Read-Model Client Boundary (Superseded by Wave 4 Opt-In Below)
+
+> **Wave 4 update.** The boundary is no longer fully dormant. Wave 4 / Prompt 03 introduced a backend HTTP implementation (`pccBackendReadModelClient.ts`) and Prompt 05 wired Project Home as the single opt-in consumer. Default mount/app behavior remains fixture-driven; backend reads occur only when explicit mount config opts in. See **Wave 4 Opt-In Backend Reads (Project Home)** below for the active contract.
 
 Wave 3 / Prompt 06 introduced a typed SPFx read-model client boundary
-under `src/api/`. The boundary is **dormant**: no app entry point,
-mount, shell, or surface imports from it. Surfaces remain
-fixture-driven via direct `@hbc/models/pcc` imports, and the eight
-W2-ODR-009 preview/fallback states are unchanged.
+under `src/api/`. Surfaces remain fixture-driven via direct
+`@hbc/models/pcc` imports for Wave 2/3, and the eight W2-ODR-009
+preview/fallback states are unchanged.
 
 | Module | Purpose |
 | --- | --- |
@@ -198,11 +199,17 @@ W2-ODR-009 preview/fallback states are unchanged.
 | `pccReadModelStateMapping.ts` | Pure helper mapping `PccReadModelSourceStatus` → existing `PccPreviewStateKind`. Not consumed by any surface in this wave. |
 | `index.ts` | Barrel; exports the interface, factory, route metadata, and mapping helper. |
 
-A backend HTTP implementation behind `IPccReadModelClient` is deferred
-to a future prompt and would be an explicit, opt-in mode. The
-runtime-cutover guard test
-(`tests/pcc-api-dormancy.test.ts`) asserts no non-api source file
-imports or references the boundary.
+A backend HTTP implementation behind `IPccReadModelClient` landed in
+Wave 4 / Prompt 03 (`pccBackendReadModelClient.ts`) and is consumed
+only by Project Home in explicit opt-in mode (see "Wave 4 Opt-In
+Backend Reads" below). The Wave 3 dormancy guard was generalized into
+the controlled-consumption guard at `tests/pcc-api-dormancy.test.ts`,
+which now enforces the Wave 4 boundary: a narrow per-file api-import
+allowlist, a recursive `fetch(` allowlist scoped to the backend client
+and its direct test, forbidden-runtime import/token scans across both
+non-api source and `src/api/**`, a source-level GET-only check on the
+backend client, and a single-consumer assertion that `readModelClient`
+is threaded only to Project Home in `PccSurfaceRouter`.
 
 ## Wave 4 Opt-In Backend Reads (Project Home)
 
@@ -239,7 +246,7 @@ Mount config (`IPccMountConfig.readModel`) accepts:
 Behavior contract:
 
 - **Fixture mode** (default or omitted): Project Home renders fixtures from `@hbc/models/pcc`; no `fetch(` calls; no tenant/Graph/PnP runtime.
-- **Backend mode + `backendBaseUrl`**: Project Home requests two GET routes (`/api/pcc/projects/{projectId}/home` and `…/document-control`) and renders envelope-derived state via the Project Home adapter / view-model (`src/surfaces/projectHome/projectHomeAdapter.ts`).
+- **Backend mode + `backendBaseUrl`**: Project Home consumes only two of the seven Wave 3 read-only routes — `GET /api/pcc/projects/{projectId}/home` and `GET /api/pcc/projects/{projectId}/document-control` — and renders envelope-derived state via the Project Home adapter / view-model (`src/surfaces/projectHome/projectHomeAdapter.ts`). The backend HTTP client (`src/api/pccBackendReadModelClient.ts`) supports all seven Wave 3 read-only routes for future surface adoption, but only the two Project Home routes are wired in Wave 4.
 - **Backend mode without `backendBaseUrl`**, malformed config, network error, non-2xx response, or malformed JSON: cards render `state: 'error'` (`sourceStatus: 'backend-unavailable'`) via the safe fixture-fallback path. The app does not crash.
 - **Other surfaces** (Team & Access, Documents, Site Health, External Systems, Project Readiness, Approvals, Control Center Settings) remain fixture/preview-driven; the read-model client is threaded only to Project Home.
 
