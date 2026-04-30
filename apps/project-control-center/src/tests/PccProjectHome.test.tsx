@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
+  PRIORITY_ACTION_CATEGORY_LABELS,
   SAMPLE_APPROVAL_CHECKPOINTS,
   SAMPLE_BUSINESS_AUDIT_EVENTS,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
@@ -14,12 +15,25 @@ import {
   type SiteHealthSeverity,
 } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
+import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccPriorityActionsCard } from '../surfaces/projectHome/PccPriorityActionsCard';
 import { TEAM_SNAPSHOT_PLACEHOLDER } from '../surfaces/projectHome/teamSnapshotPlaceholder';
+import { PCC_PRIORITY_RAIL_GROUP_IDS } from '../surfaces/projectHome/priorityActionsRailViewModel';
 import {
   PCC_CARD_STATES,
   priorityToneForAction,
   type PccPriorityTone,
 } from '../surfaces/projectHome/shared';
+
+const SUPPRESSED_CATEGORY_LABELS = [
+  PRIORITY_ACTION_CATEGORY_LABELS.health,
+  PRIORITY_ACTION_CATEGORY_LABELS.documents,
+  PRIORITY_ACTION_CATEGORY_LABELS.safety,
+] as const;
+
+const SUPPRESSED_FIXTURES = SAMPLE_PRIORITY_ACTIONS.filter((a) =>
+  ['documents', 'health', 'safety'].includes(a.category),
+);
 
 const REQUIRED_CARD_TITLES = [
   'Project Intelligence Header',
@@ -87,20 +101,89 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  // ── Priority Actions ─────────────────────────────────────────────────
+  // ── Priority Actions Rail (Wave 5) ───────────────────────────────────
 
-  it('Priority Actions card renders SAMPLE_PRIORITY_ACTIONS.length rows, each with data-pcc-priority-tone', () => {
+  it('Priority Actions card renders the Wave 5 four-group rail in canonical order', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
-    const rows = container.querySelectorAll('[data-pcc-priority-action-id]');
-    expect(rows).toHaveLength(SAMPLE_PRIORITY_ACTIONS.length);
+    const rails = container.querySelectorAll('[data-pcc-priority-rail]');
+    expect(rails).toHaveLength(1);
+    const rail = rails[0]!;
+    const lanes = rail.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-group]');
+    const ids = Array.from(lanes).map((el) => el.getAttribute('data-pcc-priority-rail-group'));
+    expect(ids).toEqual([...PCC_PRIORITY_RAIL_GROUP_IDS]);
+  });
+
+  it('Priority Actions rail renders 7 visible rows from SAMPLE_PRIORITY_ACTIONS, each with valid tone', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const rail = container.querySelector('[data-pcc-priority-rail]');
+    expect(rail).not.toBeNull();
+    const rows = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-action-id]');
+    expect(rows).toHaveLength(7);
     const tones = new Set<PccPriorityTone>();
-    for (const row of rows) {
-      const tone = row.getAttribute('data-pcc-priority-tone') as PccPriorityTone | null;
+    for (const row of Array.from(rows)) {
+      const tone = row.getAttribute('data-pcc-priority-rail-action-tone') as PccPriorityTone | null;
       expect(tone).not.toBeNull();
       expect(['high', 'medium', 'low']).toContain(tone!);
       tones.add(tone!);
     }
     expect(tones.size).toBeGreaterThan(0);
+  });
+
+  it('Priority Actions rail suppresses documents/health/safety from the user-facing MVP rail (scoped to rail root)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
+    expect(rail).not.toBeNull();
+    const railText = rail!.textContent ?? '';
+    for (const fx of SUPPRESSED_FIXTURES) {
+      expect(
+        rail!.querySelector(`[data-pcc-priority-rail-action-id="${fx.id}"]`),
+        `suppressed action ${fx.id} must not appear in the rail`,
+      ).toBeNull();
+      expect(railText, `suppressed fixture title '${fx.title}' must not appear in the rail`).not.toContain(fx.title);
+    }
+    for (const label of SUPPRESSED_CATEGORY_LABELS) {
+      expect(railText, `suppressed category label '${label}' must not appear in the rail`).not.toContain(label);
+    }
+  });
+
+  it('Priority Actions rail renders inert non-executing affordances (no anchors, no hrefs, no buttons)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
+    expect(rail).not.toBeNull();
+    expect(rail!.querySelectorAll('a')).toHaveLength(0);
+    expect(rail!.querySelectorAll('[href]')).toHaveLength(0);
+    expect(rail!.querySelectorAll('button')).toHaveLength(0);
+    const affordances = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-disabled-action]');
+    expect(affordances.length).toBe(7);
+    for (const el of Array.from(affordances)) {
+      expect(el.tagName).toBe('SPAN');
+      expect(el.textContent).toBe('Preview only');
+    }
+  });
+
+  it('Priority Actions rail renders visible Priority: <Tone> labels matching each row tone', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
+    expect(rail).not.toBeNull();
+    expect(rail!.textContent ?? '').toContain('Priority: ');
+    const rows = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-action-id]');
+    for (const row of Array.from(rows)) {
+      const rowTone = row.getAttribute('data-pcc-priority-rail-action-tone');
+      const toneLabel = row.querySelector<HTMLElement>('[data-pcc-priority-rail-tone-label]');
+      expect(toneLabel).not.toBeNull();
+      expect(toneLabel!.getAttribute('data-pcc-priority-rail-tone-label')).toBe(rowTone);
+    }
+  });
+
+  it('Priority Actions card non-preview state renders PccPreviewState and does NOT render the rail', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccPriorityActionsCard state="error" />
+      </PccBentoGrid>,
+    );
+    expect(container.querySelector('[data-pcc-priority-rail]')).toBeNull();
+    const stateEl = container.querySelector('[data-pcc-state="error"]');
+    expect(stateEl).not.toBeNull();
   });
 
   it('priorityToneForAction maps every SiteHealthSeverity (and undefined) to the correct tone', () => {
