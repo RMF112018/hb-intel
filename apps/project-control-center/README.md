@@ -1,23 +1,34 @@
 # @hbc/spfx-project-control-center
 
-Wave 2 scaffold for the PCC (Project Control Center) SPFx app. Establishes
-the dedicated app target at `apps/project-control-center/` with a Vite-IIFE
-mount entry, a preview-only root component (`PccApp`), and a minimal test
-skeleton.
+PCC (Project Control Center) SPFx app — **Wave 2 complete**. Wave 2
+delivers the dedicated app target at `apps/project-control-center/`,
+the shell visual frame, the flexible bento layout, all eight MVP
+surfaces (Project Home + seven preview surfaces), the eight-state
+W2-ODR-009 preview catalog, and source-level no-runtime guards. Every
+visible region is fixture-driven from `@hbc/models/pcc`. The app is a
+preview frame; it is not a live operational PCC release.
+
+The verbatim Wave 2 readiness statement appears at the bottom of this
+file.
 
 ## Scope
 
-- **Wave 2 / Prompt 02**: safe app scaffold only.
+- **Wave 2 final state.** PCC SPFx app shell + UI/UX basis + flexible
+  bento layout + MVP surface navigation + Project Home dashboard +
+  preview/fallback states + no-runtime guards.
 - **No** SPFx webpart manifest, **no** `package-solution.json`, **no**
-  app-catalog packaging.
-- **No** Graph/PnP, **no** Procore runtime, **no** tenant mutation, **no**
-  backend/provisioning.
-- **No** version bumps.
-- **No** full PCC UI (no bento dashboard, priority actions, launch cards,
-  workflow panels, approvals execution, document workflows, Site Health
-  scanning, or access execution). Those land in subsequent Wave 2 prompts.
-- Fixture-driven preview only. The 8 MVP surface labels render directly from
-  `@hbc/models/pcc` (`PCC_MVP_SURFACES`).
+  app-catalog packaging, **no** deployment.
+- **No** Microsoft Graph / PnP / SharePoint REST runtime.
+- **No** Procore / Document Crunch / Adobe Sign runtime, secrets, sync,
+  mirror, write-back.
+- **No** authentication runtime (no `@hbc/auth` import in this app).
+- **No** backend, provisioning, or tenant mutation.
+- **No** version bumps; package version remains `0.0.1` for the entire
+  Wave 2 sequence.
+- Fixture-driven only. Visible regions read from `@hbc/models/pcc`.
+
+For the master Wave 2 record, see
+[`Wave_2_Closeout.md`](../../docs/architecture/blueprint/sp-project-control-center/phase-3/wave-2/Wave_2_Closeout.md).
 
 ## File Tree
 
@@ -40,7 +51,8 @@ apps/project-control-center/
     │   ├── PccShell.{tsx,module.css}
     │   ├── PccNavigationRail.{tsx,module.css}
     │   ├── PccProjectIntelligenceHeader.{tsx,module.css}
-    │   └── PccCommandSearch.tsx
+    │   ├── PccCommandSearch.tsx
+    │   └── PccSurfaceRouter.tsx
     ├── layout/
     │   ├── PccBentoGrid.{tsx,module.css}
     │   ├── PccDashboardCard.{tsx,module.css}
@@ -50,30 +62,36 @@ apps/project-control-center/
     ├── ui/
     │   ├── PccStatusPill.{tsx,module.css}
     │   └── PccPreviewState.{tsx,module.css}
+    ├── state/
+    │   └── usePccShellState.ts
     ├── preview/
     │   └── projectPlaceholder.ts
+    ├── surfaces/
+    │   ├── projectHome/        (10 fixture-driven cards — Prompt 05; Document Control card remediated in Prompt 06)
+    │   ├── documents/          (header + 2 Microsoft-lane + 3 external-lane cards — Prompt 06)
+    │   ├── externalSystems/    (header + one tile per EXTERNAL_SYSTEM_CATALOG entry — Prompt 06)
+    │   ├── siteHealth/         (overview + checks + drift + non-operational repair-requests — Prompt 06)
+    │   ├── teamAccess/         (header + 3 lane cards — Prompt 07)
+    │   ├── approvals/          (Prompt 07 placeholder surface)
+    │   ├── controlCenterSettings/   (Prompt 07 placeholder surface)
+    │   └── projectReadiness/   (Prompt 07 placeholder surface)
     └── tests/
-        ├── pcc-import-guards.test.ts
-        ├── PccBentoGrid.footprints.test.tsx
-        ├── PccPreviewState.states.test.tsx
-        └── PccShell.responsive.test.tsx
+        (15 test files; see Validation below for live counts)
 ```
 
 ## Visual Direction
 
-The PCC shell visual frame is governed by the saved basis-of-design asset:
+Governed by the saved basis-of-design asset:
 
-- **Basis of design:** [`docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`](../../docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png)
+[`docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`](../../docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png)
 
-This asset is treated as governing visual direction, not a pixel-perfect
-specification. The mapping below shows how the image's cues land in
-Prompt 03 components:
+Treated as governing visual direction, not a pixel-perfect specification.
 
 | Basis-of-design cue | Component | Token bridge |
 | --- | --- | --- |
 | Dark navy "Project Intelligence" header | `PccProjectIntelligenceHeader` | `HBC_DARK_HEADER`, `HBC_HEADER_TEXT`, `HBC_HEADER_ICON_MUTED` |
 | HB-orange application navigation rail | `PccNavigationRail` | `HBC_ACCENT_ORANGE` (+ hover/pressed) |
-| Compact command/search area | `PccCommandSearch` | header surface + `Search` icon from `@hbc/ui-kit/icons` |
+| Compact command/search area | `PccCommandSearch` | header surface tokens + `Search` icon |
 | Floating summary cards | `PccDashboardCard` | `HBC_SURFACE_LIGHT['surface-0']`, `elevationCard`, `HBC_RADIUS_MD` |
 | Tight bento/masonry grid | `PccBentoGrid` + `useBentoRowSpan` + `useContainerBreakpoint` | CSS Grid with measured row spans, no `grid-auto-flow: dense` |
 | Status pills next to project title | `PccStatusPill` | `HBC_STATUS_RAMP_*` ramp tokens |
@@ -84,17 +102,20 @@ Prompt 03 components:
 | Component | Role |
 | --- | --- |
 | `PccShell` | Top-level shell: stamps theme tokens as CSS variables, hosts the bento context, composes rail + header + canvas |
-| `PccNavigationRail` | HB-orange rail listing all 8 `PCC_MVP_SURFACES`; active surface marker; rail variants `expanded`/`iconOnly`/`topStrip`/`hamburger` |
+| `PccNavigationRail` | HB-orange rail listing all 8 `PCC_MVP_SURFACES`; active surface marker; rail variants `expanded` / `iconOnly` / `topStrip` / `hamburger` |
 | `PccProjectIntelligenceHeader` | Dark-navy header band with project title, subtitle, search slot, status pill cluster, date scope |
 | `PccCommandSearch` | Header search affordance (display-only; non-functional in Wave 2) |
-| `PccBentoGrid` | CSS Grid container with `container-type: inline-size`, exposes a context for footprint resolution |
+| `PccSurfaceRouter` | Switches surface content based on `PccShellState.activeSurfaceId` |
+| `PccBentoGrid` | CSS Grid container with `container-type: inline-size`; provides bento context |
 | `PccDashboardCard` | Per-card wrapper that emits `data-pcc-footprint` and applies measured row span via `useBentoRowSpan` |
-| `PccStatusPill` | Small status pill primitive with five tones (info / success / warning / danger / neutral), filled / outline |
-| `PccPreviewState` | All seven W2-ODR-009 region states (preview / empty / loading / error / missing-config / unavailable-fixture / unauthorized-persona) with distinct `data-pcc-state` markers |
+| `PccStatusPill` | Small status pill primitive (info / success / warning / danger / neutral; filled / outline) |
+| `PccPreviewState` | All eight W2-ODR-009 region states with distinct `data-pcc-state` markers |
+| `usePccShellState` | React state hook: `activeSurfaceId`, `previewMode: true`, `selectedProjectId?` |
 
 ## Footprint Contract
 
-Card footprints come from `PCC_CARD_FOOTPRINTS = ['hero', 'wide', 'standard', 'compact', 'tall', 'full']`.
+`PCC_CARD_FOOTPRINTS = ['hero', 'wide', 'standard', 'compact', 'tall', 'full']`.
+
 Column spans per responsive mode:
 
 | Footprint | wideDesktop | standardDesktop | tabletLandscape | tabletPortrait | phone |
@@ -107,14 +128,15 @@ Column spans per responsive mode:
 | `full` | 12 | 8 | 6 | 2 | 1 |
 
 Row span is measured per card via `ResizeObserver` with
-`Math.ceil((measuredHeight + gap) / (rowUnit + gap))` over an 8 px row unit
-and a 16 px gap. No `grid-auto-flow: dense`. CSS columns are not used.
+`Math.ceil((measuredHeight + gap) / (rowUnit + gap))` over an 8 px row
+unit and a 16 px gap. **No** `grid-auto-flow: dense`. **No** CSS columns.
+**No** homepage paired-row layout imports (asserted by the no-runtime
+guard).
 
 ## Responsive Modes
 
 `useContainerBreakpoint` derives the active mode from the bento grid's
-**container** inline-size (not viewport-hardcoded), via `ResizeObserver` and
-container-query positioning:
+**container** inline-size, not viewport width:
 
 | Mode | Container width | Columns | Rail variant | Header behavior |
 | --- | --- | --- | --- | --- |
@@ -126,48 +148,53 @@ container-query positioning:
 
 ## State Catalog (W2-ODR-009)
 
-`PccPreviewState` renders all seven required states; later prompts wire them
-to surface conditions. Each variant emits a unique `data-pcc-state` marker
-plus a `data-pcc-state-tone` for visual contract:
+`PccPreviewState` renders all eight required states. Each variant emits
+a unique `data-pcc-state` marker plus `data-pcc-state-tone`:
 
 | `state` | Tone | Use |
 | --- | --- | --- |
-| `preview` | info | Default for all Wave 2 fixture-driven regions |
+| `preview` | info | Default for fixture-driven regions |
 | `empty` | neutral | No records match scope |
-| `loading` | neutral | Read-model loading; renders `aria-busy` + pulse |
-| `error` | danger | Read-model failure; renders `role="alert"` |
+| `loading` | neutral | Read-model loading (renders `aria-busy` + pulse) |
+| `error` | danger | Read-model failure (renders `role="alert"`) |
 | `missing-config` | warning | Required configuration not set |
-| `unavailable-fixture` | neutral | Module wired in a later wave |
+| `unavailable-fixture` | neutral | Region not yet fixture-backed |
 | `unauthorized-persona` | warning | Persona has no access |
+| `not-yet-implemented-operation` | neutral | Operation deferred to a later wave (added in Prompt 08) |
 
-## Design Decisions
+## MVP Surfaces (Final Wave 2 State)
 
-### PccApp lives in this app, not in `packages/spfx`
+All eight `PCC_MVP_SURFACE_IDS` are wired through `PccNavigationRail`
+and `PccSurfaceRouter`:
 
-Prompt 02 lists `src/PccApp.tsx` explicitly and instructs that
-`packages/spfx/src/webparts/projectControlCenter/` should not be created
-unless necessary. Wave 2 is preview-only with no webpart manifest, so a
-package-level export barrel is not required. The root component therefore
-lives at `src/PccApp.tsx` here. When a real webpart manifest is introduced
-in a later wave, the component may be promoted to `packages/spfx` if
-package-oriented import discipline is required at that point.
+| Surface | Wave 2 implementation |
+| --- | --- |
+| `project-home` | 10-card bento dashboard (Project Intelligence, Priority Actions, Site Health Summary, Document Control, Project Readiness, Approvals & Checkpoints, External Systems, Team Snapshot, Missing Configurations, Recent Activity). Document Control card uses the corrected two-lane model. |
+| `team-and-access` | Header + viewer / permission-request / access-manager lane cards (Prompt 07) |
+| `documents` | Header + 2 Microsoft-lane cards (SharePoint Drive, OneDrive — disabled action chips) + 3 external-lane cards (Procore Files, Document Crunch, Adobe Sign — launch / visibility cues) |
+| `project-readiness` | Prompt 07 placeholder surface |
+| `approvals` | Prompt 07 placeholder surface |
+| `external-systems` | Header + one tile per `EXTERNAL_SYSTEM_CATALOG` entry; tri-state (`configured` / `missing` / `unavailable-fixture`) |
+| `control-center-settings` | Prompt 07 placeholder surface |
+| `site-health` | Overview + checks + drift + non-operational repair-requests placeholder |
 
-### No auth bootstrap, no live runtime
+## Validation
 
-Unlike `apps/project-sites/src/mount.tsx`, this scaffold's `mount()`
-does **not** import `@hbc/auth/spfx`, does **not** call `bootstrapSpfxAuth`
-or `resolveSpfxPermissions`, and does **not** create a `QueryClient`. Those
-concerns belong with the eventual webpart manifest, not with the scaffold.
-`mount(el, spfxContext?, config?)` accepts an optional `spfxContext`
-parameter strictly for forward compatibility; the parameter is unused.
+Live runner output captured during the Wave 2 / Prompt 09 closeout run
+(HEAD `7f26798a1`):
 
-### CSS modules + theme tokens (no Griffel, no hex)
+| Command | Result |
+| --- | --- |
+| `pnpm --filter @hbc/models check-types` | **PASS** |
+| `pnpm --filter @hbc/models test` | **PASS** — `Test Files 30 passed (30)`, `Tests 220 passed (220)` |
+| `pnpm --filter @hbc/spfx-project-control-center check-types` | **PASS** |
+| `pnpm --filter @hbc/spfx-project-control-center build` | **PASS** — emits `dist/project-control-center-app.js` (222.13 kB · gzip 66.22 kB) and `dist/spfx-project-control-center.css` (20.98 kB · gzip 3.82 kB) |
+| `pnpm --filter @hbc/spfx-project-control-center test` | **PASS** — `Test Files 15 passed (15)`, `Tests 173 passed (173)` |
+| `pnpm --filter @hbc/spfx-project-control-center lint` | **PASS** |
 
-Visual cues are expressed in plain CSS modules that consume CSS custom
-properties stamped at the `PccShell` root from `@hbc/ui-kit/theme` exports
-(colors, radii, spacing, elevation, status ramps). Griffel is intentionally
-avoided to keep the dependency surface minimal. No hex literals appear in
-Prompt 03 CSS — every value comes from a verified theme export.
+The IIFE bundle exposes `window.__hbIntel_projectControlCenter.{ mount, unmount }`
+for future SharePoint host wiring. The bundle is **not** packaged into
+`.sppkg` and **not** deployed.
 
 ## Local Preview
 
@@ -175,51 +202,45 @@ Prompt 03 CSS — every value comes from a verified theme export.
 pnpm --filter @hbc/spfx-project-control-center dev
 ```
 
-This starts the Vite dev server, which loads `index.html` → `src/preview.tsx`
-→ `mount()`. The preview reads PCC surface metadata from `@hbc/models/pcc`
-and renders the 8 MVP surface labels. There is no SharePoint context, no
+Starts the Vite dev server. Loads `index.html` → `src/preview.tsx` →
+`mount()`. The preview reads PCC fixtures from `@hbc/models/pcc` and
+renders the Project Home dashboard plus the seven other preview
+surfaces under `PccSurfaceRouter`. There is no SharePoint context, no
 auth, and no network I/O.
 
-## Validation Commands
+## No-Runtime Posture
 
-```bash
-pnpm --filter @hbc/spfx-project-control-center check-types
-pnpm --filter @hbc/spfx-project-control-center build
-pnpm --filter @hbc/spfx-project-control-center test
-pnpm --filter @hbc/spfx-project-control-center lint
-```
+`tests/pcc-import-guards.test.ts` runs in two scanning modes (described
+in detail in [`Wave_2_Closeout.md`](../../docs/architecture/blueprint/sp-project-control-center/phase-3/wave-2/Wave_2_Closeout.md#no-runtime-guard-coverage)):
 
-The `build` script emits an IIFE bundle at
-`dist/project-control-center-app.js` exposing
-`window.__hbIntel_projectControlCenter.{ mount, unmount }` for future
-SPFx host wiring. The bundle is not packaged into an `.sppkg` and is not
-deployed.
+- **Module-specifier extraction** scans `import` / `export … from '…'`
+  specifiers from comment-stripped raw source.
+- **Executable-seam scanning** scans fully stripped executable code
+  (comments + string literals removed) for identifier-level runtime
+  construction patterns.
+
+Asserted absent throughout `apps/project-control-center/src/`: homepage
+paired-row layout, `@hbc/auth`, `@pnp/sp`, `@microsoft/sp-http`,
+`@microsoft/microsoft-graph-client`, `MSGraphClient`, `GraphServiceClient`,
+`sp.web`, `_api/web`, Procore SDKs, Document Crunch SDK, Adobe Sign SDK.
+Bare product names (`Graph`, `Procore`, `Document Crunch`, `Adobe Sign`)
+are intentionally not guarded — they appear in legitimate JSX product
+copy.
 
 ## Governing References
 
 - Wave 2 README:
   `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/README.md`
-- Decision Closure Register:
-  `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/01_Wave_2_Decision_Closure_Register.md`
+- Wave 2 master closeout:
+  [`docs/architecture/blueprint/sp-project-control-center/phase-3/wave-2/Wave_2_Closeout.md`](../../docs/architecture/blueprint/sp-project-control-center/phase-3/wave-2/Wave_2_Closeout.md)
+- Per-prompt closeouts (Prompt 02–08) live alongside the master closeout.
 - UI/UX basis of design:
   `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`
 - Wireframe & layout contract:
   `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/03_PCC_UI_Wireframe_and_Flexible_Layout_Contract.md`
-- Scope lock:
-  `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/04_Wave_2_Scope_Lock_Implementation_Boundaries.md`
 - Wave 1 closeout (PCC shared foundations):
   `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-1/Wave_1_Closeout.md`
 
-## Prerequisites Verified by Wave 2 Governance
+---
 
-Prompt 02 prerequisites are satisfied through the committed Wave 2
-governance docs, which together cover Prompt 01's verification scope:
-
-| Prerequisite | Source |
-| --- | --- |
-| Wave 1 closeout present | `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-1/Wave_1_Closeout.md` |
-| Basis-of-design image exists | `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png` |
-| Target = `apps/project-control-center/` | Decision W2-ODR-001 (frozen), Wave 2 README, scope lock |
-| `apps/project-control-center/` not yet present (correct prerequisite state) | Resolved by this scaffold |
-| Allowed/forbidden file boundaries locked | `04_Wave_2_Scope_Lock_Implementation_Boundaries.md` |
-| `@hbc/models/pcc` exposes `PCC_MVP_SURFACES`, `PCC_MVP_SURFACE_IDS` | `packages/models/src/pcc/PccMvpSurfaces.ts` (Wave 1) |
+Phase 3 Wave 2 is complete when the PCC SPFx shell frame, UI/UX basis, flexible bento layout, MVP surface navigation, preview dashboard cards, fallback states, and no-runtime guard tests are implemented and documented. The shell is ready for Wave 3 backend read-model planning, but it is not a live operational PCC release.
