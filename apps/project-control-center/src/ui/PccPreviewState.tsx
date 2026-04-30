@@ -5,9 +5,9 @@ import styles from './PccPreviewState.module.css';
 /**
  * Wave 2 / Prompt 03 — full W2-ODR-009 state catalog.
  *
- * Every PCC surface region renders one of these seven states. Later prompts
- * wire concrete state resolution to surface conditions; Prompt 03 establishes
- * the reusable visual contract.
+ * Every PCC surface region renders one of these eight states. Prompt 03
+ * established the reusable visual contract; Prompt 08 expanded the catalog
+ * with the deferred-operation preview state.
  */
 export const PCC_PREVIEW_STATES = [
   'preview',
