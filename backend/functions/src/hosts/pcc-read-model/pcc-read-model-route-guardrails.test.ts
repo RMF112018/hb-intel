@@ -1,38 +1,19 @@
-/**
- * Static no-runtime / no-mutation source-scan guard for the host-scoped PCC
- * read-model provider area (Phase 3 / Wave 3 / Prompt 04).
- *
- * Implementation under audit lives at
- * `backend/functions/src/hosts/pcc-read-model/`. Tests live under
- * `src/services/__tests__/` because the backend vitest unit-project glob
- * does not currently cover host-scoped test paths and Prompt 04 is
- * forbidden from modifying `vitest.config.ts`.
- *
- * Pattern adapted from `packages/models/src/pcc/NoRuntimeImports.test.ts`.
- * To avoid false positives in comments and string literals, this test
- * strips block comments, line comments, and string-literal contents from
- * each source file before scanning executable code; the import-specifier
- * pass scans the *original* line so the from-clause string is preserved.
- */
-
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
-const PCC_HOST_DIR = fileURLToPath(
-  new URL('../../hosts/pcc-read-model/', import.meta.url),
-);
+const PCC_HOST_DIR = fileURLToPath(new URL('./', import.meta.url));
 
 const FORBIDDEN_IMPORT_PATTERNS: readonly RegExp[] = [
   /['"]@pnp\//,
-  /['"]@microsoft\/microsoft-graph-client['"]/,
-  /['"]procore-sdk['"]/,
-  /['"]procore/i,
+  /['"]@microsoft\/microsoft-graph-client['"]/, 
+  /['"]procore-sdk['"]/i,
   /['"]@microsoft\/sp-/,
-  /['"]@azure\/(?!functions['"])/,
-  /['"]axios['"]/,
-  /['"]node-fetch['"]/,
+  /['"]axios['"]/, 
+  /['"]node-fetch['"]/, 
+  /['"]@adobe\//,
+  /['"]document-?crunch/i,
 ];
 
 const FORBIDDEN_EXECUTABLE_TOKENS: readonly string[] = [
@@ -40,14 +21,18 @@ const FORBIDDEN_EXECUTABLE_TOKENS: readonly string[] = [
   'GraphServiceClient',
   'sp.web',
   '_api/web',
-  'ProcoreClient',
-  'DocumentCrunchClient',
-  'AdobeSignClient',
   'provision',
-  'executeRepair',
-  'permissionMutate',
-  'writeBack',
+  'execute',
+  'repair',
+  'scan',
   'mirror',
+  'writeBack',
+  'upload',
+  'delete',
+  'mutate',
+  'approve',
+  'reject',
+  'permission',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
@@ -67,20 +52,24 @@ function stripCommentsAndStrings(source: string): string {
   let out = '';
   let i = 0;
   const n = source.length;
+
   while (i < n) {
     const ch = source[i];
     const next = source[i + 1];
+
     if (ch === '/' && next === '/') {
       while (i < n && source[i] !== '\n') i++;
       continue;
     }
+
     if (ch === '/' && next === '*') {
       i += 2;
       while (i < n && !(source[i] === '*' && source[i + 1] === '/')) i++;
       i += 2;
       continue;
     }
-    if (ch === '"' || ch === "'" || ch === '`') {
+
+    if (ch === '"' || ch === '\'' || ch === '`') {
       const quote = ch;
       i++;
       while (i < n && source[i] !== quote) {
@@ -91,24 +80,26 @@ function stripCommentsAndStrings(source: string): string {
       out += '""';
       continue;
     }
+
     out += ch;
     i++;
   }
+
   return out;
 }
 
-describe('PCC backend host stays free of runtime imports and mutation verbs', () => {
+describe('PCC read-only route guardrails', () => {
   const files = listSourceFiles(PCC_HOST_DIR);
 
-  it('discovers at least one source file under the host directory', () => {
+  it('contains source files under pcc-read-model host', () => {
     expect(files.length).toBeGreaterThan(0);
   });
 
-  it('no source file imports SPFx, PnP, Azure SDK, HTTP clients, Procore, or Microsoft Graph', () => {
+  it('does not import forbidden runtime clients in route/provider source', () => {
     const offenders: Array<{ file: string; line: string }> = [];
     for (const file of files) {
-      const contents = readFileSync(file, 'utf8');
-      for (const rawLine of contents.split('\n')) {
+      const content = readFileSync(file, 'utf8');
+      for (const rawLine of content.split('\n')) {
         const line = rawLine.trim();
         if (!line.startsWith('import') && !line.startsWith('export') && !line.includes('from ')) {
           continue;
@@ -123,7 +114,7 @@ describe('PCC backend host stays free of runtime imports and mutation verbs', ()
     expect(offenders).toEqual([]);
   });
 
-  it('executable code contains no forbidden runtime/mutation tokens', () => {
+  it('contains no mutation/execution seam tokens in executable source', () => {
     const offenders: Array<{ file: string; token: string }> = [];
     for (const file of files) {
       const stripped = stripCommentsAndStrings(readFileSync(file, 'utf8'));

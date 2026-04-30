@@ -66,6 +66,7 @@ export default defineConfig({
             'src/services/admin-control-plane/__tests__/*.test.ts',
             'src/services/device-management/**/__tests__/*.test.ts',
             'src/services/white-glove/__tests__/*.test.ts',
+            'src/hosts/pcc-read-model/**/*.test.ts',
             'src/config/*.test.ts',
             'src/validation/*.test.ts',
             'src/validation/schemas/**/*.test.ts',

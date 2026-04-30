@@ -43,3 +43,4 @@ import './functions/contracts/index.js';
 import './functions/risk/index.js';
 import './functions/scorecards/index.js';
 import './functions/pmp/index.js';
+import './hosts/pcc-read-model/pcc-read-model-routes.js';
