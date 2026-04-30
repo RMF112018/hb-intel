@@ -88,35 +88,59 @@ describe('createPccReadModelClient — fixture default', () => {
   });
 });
 
-describe('createPccReadModelClient — backend non-cutover (Wave 4 Prompt 02)', () => {
-  it('returns a fixture-backed client with backend-unavailable envelopes when backend mode is requested', async () => {
-    const client = createPccReadModelClient({
-      readModelMode: 'backend',
-      backendBaseUrl: 'https://example.invalid/api/',
-    });
-    const envelopes = await Promise.all([
-      client.getProjectProfile(KNOWN_PROJECT_ID),
-      client.getModuleRegistry(KNOWN_PROJECT_ID),
-      client.getProjectHome(KNOWN_PROJECT_ID),
-      client.getPriorityActions(KNOWN_PROJECT_ID),
-      client.getDocumentControl(KNOWN_PROJECT_ID),
-      client.getExternalLinks(KNOWN_PROJECT_ID),
-      client.getSiteHealth(KNOWN_PROJECT_ID),
-    ]);
-    for (const env of envelopes) {
-      expect(env.mode).toBe('fixture');
-      expect(env.sourceStatus).toBe('backend-unavailable');
-      expect(env.warnings.length).toBeGreaterThan(0);
-      expect(env.warnings[0]!.code).toBe('backend-unavailable');
-    }
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
-
-  it('does not throw when backend mode is requested without backendBaseUrl', async () => {
+describe('createPccReadModelClient — backend mode config-fallback (no fetch)', () => {
+  it('does not invoke fetch when backendBaseUrl is missing', async () => {
     const client = createPccReadModelClient({ readModelMode: 'backend' });
     const env = await client.getProjectHome(KNOWN_PROJECT_ID);
     expect(env.sourceStatus).toBe('backend-unavailable');
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not invoke fetch when backendBaseUrl is whitespace-only', async () => {
+    const client = createPccReadModelClient({
+      readModelMode: 'backend',
+      backendBaseUrl: '   ',
+    });
+    const env = await client.getProjectHome(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('createPccReadModelClient — backend mode wires the HTTP client', () => {
+  it('invokes the global fetch with the configured base URL when backend mode + base URL are provided', async () => {
+    const okEnvelope = {
+      projectId: KNOWN_PROJECT_ID,
+      mode: 'mock',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      generatedAtUtc: '2026-04-30T00:00:00.000Z',
+      data: {
+        profile: SAMPLE_PROJECT_PROFILES[0]!,
+        priorityActions: [],
+        missingConfigurations: [],
+      },
+    };
+    const okResponse = {
+      ok: true,
+      status: 200,
+      json: async () => ({ data: okEnvelope }),
+    } as unknown as Response;
+    const okFetch = vi.fn().mockResolvedValue(okResponse);
+    vi.stubGlobal('fetch', okFetch);
+
+    const client = createPccReadModelClient({
+      readModelMode: 'backend',
+      backendBaseUrl: 'https://example.invalid',
+    });
+    const env = await client.getProjectHome(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(okFetch).toHaveBeenCalledTimes(1);
+    expect(okFetch).toHaveBeenCalledWith(
+      `https://example.invalid/api/pcc/projects/${encodeURIComponent(KNOWN_PROJECT_ID)}/home`,
+      { method: 'GET' },
+    );
   });
 });
 

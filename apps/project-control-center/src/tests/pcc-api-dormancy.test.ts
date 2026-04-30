@@ -38,7 +38,14 @@ const FORBIDDEN_API_IDENTIFIERS = [
   'createPccFixtureReadModelClient',
   'createPccReadModelClient',
   'resolvePccReadModelConfig',
+  'pccBackendReadModelClient',
+  'createPccBackendReadModelClient',
 ] as const;
+
+const FETCH_CALLSITE_ALLOWLIST = new Set<string>([
+  resolve(__dirname, '..', 'api', 'pccBackendReadModelClient.ts'),
+  resolve(__dirname, '..', 'api', 'pccBackendReadModelClient.test.ts'),
+]);
 
 const FORBIDDEN_RUNTIME_IMPORT_PATHS = [
   '@pnp/sp',
@@ -225,6 +232,29 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompt 02)', () => {
     expect(
       offenders,
       `expected no fetch( offenders, found: ${offenders.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('fetch( callsites in src/api/** are limited to the backend client allowlist', () => {
+    const apiFiles: string[] = [];
+    for (const name of readdirSync(API_DIR)) {
+      const full = join(API_DIR, name);
+      const stat = statSync(full);
+      if (stat.isFile() && /\.(ts|tsx)$/.test(name)) {
+        apiFiles.push(full);
+      }
+    }
+    const offenders: string[] = [];
+    for (const filePath of apiFiles) {
+      const raw = readFileSync(filePath, 'utf8');
+      const tokenStripped = stripCommentsAndStrings(raw);
+      if (/\bfetch\s*\(/.test(tokenStripped) && !FETCH_CALLSITE_ALLOWLIST.has(filePath)) {
+        offenders.push(filePath);
+      }
+    }
+    expect(
+      offenders,
+      `expected fetch( only in backend client allowlist, found offenders:\n${offenders.join('\n')}`,
     ).toEqual([]);
   });
 

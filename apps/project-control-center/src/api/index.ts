@@ -32,3 +32,9 @@ export {
   type IResolvedPccReadModelConfig,
   type PccReadModelMode,
 } from './pccReadModelClientFactory.js';
+
+export {
+  createPccBackendReadModelClient,
+  type PccBackendReadModelClientOptions,
+  type PccReadModelFetch,
+} from './pccBackendReadModelClient.js';
