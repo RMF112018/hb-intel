@@ -254,3 +254,23 @@ export {
   type PccCapabilityId,
   type IPccCapability,
 } from './PccCapabilities.js';
+
+// Wave 3 Prompt 03 read-model envelope contracts
+export {
+  PCC_READ_MODEL_MODES,
+  PCC_READ_MODEL_SOURCE_STATUSES,
+  type PccReadModelMode,
+  type PccReadModelSourceStatus,
+  type PccReadModelWarning,
+  type PccReadModelEnvelope,
+  type PccProjectProfileReadModel,
+  type PccWorkCenterRegistryReadModel,
+  type PccProjectHomeReadModel,
+  type PccPriorityActionsReadModel,
+  type PccDocumentControlReadModel,
+  type PccExternalLinksReadModel,
+  type PccSiteHealthReadModel,
+  type PccTeamAccessReadModel,
+  type PccSettingsReadModel,
+  type PccReadModelResponseMap,
+} from './PccReadModels.js';
