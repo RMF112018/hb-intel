@@ -707,6 +707,41 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     }
   });
 
+  it('no PCC source file imports HbcPriorityRail directly (Wave 5 — no UI-kit priority rail reuse)', () => {
+    const offenders: string[] = [];
+    const allTsFiles = listAllTsFilesRecursive(SRC_ROOT);
+    for (const filePath of allTsFiles) {
+      const raw = readFileSync(filePath, 'utf8');
+      const commentStripped = stripCommentsOnly(raw);
+      const imports = extractImports(commentStripped);
+      for (const imp of imports) {
+        if (imp.path.includes('HbcPriorityRail')) {
+          offenders.push(`${filePath}: ${imp.raw.trim()}`);
+        }
+      }
+    }
+    expect(
+      offenders,
+      `expected no PCC source file to import HbcPriorityRail, found:\n${offenders.join('\n')}`,
+    ).toEqual([]);
+  });
+
+  it('no PCC source file references the HbcPriorityRail identifier in code (Wave 5)', () => {
+    const offenders: string[] = [];
+    const allTsFiles = listAllTsFilesRecursive(SRC_ROOT);
+    for (const filePath of allTsFiles) {
+      const raw = readFileSync(filePath, 'utf8');
+      const tokenStripped = stripCommentsAndStringsRobust(raw);
+      if (/\bHbcPriorityRail\w*/.test(tokenStripped)) {
+        offenders.push(filePath);
+      }
+    }
+    expect(
+      offenders,
+      `expected no PCC source file to reference HbcPriorityRail in code, found:\n${offenders.join('\n')}`,
+    ).toEqual([]);
+  });
+
   it('PccSurfaceRouter threads readModelClient to exactly one surface (Project Home only)', () => {
     expect(existsSync(ROUTER_FILE)).toBe(true);
     const raw = readFileSync(ROUTER_FILE, 'utf8');

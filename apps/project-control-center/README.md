@@ -252,6 +252,22 @@ Behavior contract:
 
 Wave 4 does not introduce auth wiring, write routes, Graph/PnP/SharePoint REST live operations, Procore/Document Crunch/Adobe Sign runtime, packaging, or deployment. See the Wave 4 closeout docs under `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-4/` for the full posture.
 
+### Wave 5 Priority Actions Rail (Project Home)
+
+The Priority Actions card on Project Home renders a PCC-local four-group rail
+(`PccPriorityActionsRail`) — there is **no direct `HbcPriorityRail` reuse**;
+the rail is a fresh component scoped to PCC. The MVP rail suppresses the
+`documents`, `health`, and `safety` priority-action categories, so the
+user-facing rail surfaces only the four canonical groups (`access-requests`,
+`readiness-blockers`, `approval-checkpoints`, `external-system-mapping`).
+All rail row affordances are non-executing — every disabled action renders
+as a `data-pcc-priority-rail-disabled-action` span ("Preview only"), with no
+anchors, no `href`s, no buttons, no `onClick` handlers, and no live launch
+URLs anywhere on Project Home. Non-preview Priority Actions card states
+(`error`, `loading`, `empty`, `missing-config`, `unavailable-fixture`,
+`unauthorized-persona`) render the existing `PccPreviewState` instead of the
+rail, preserving the W2-ODR-009 state catalog.
+
 ## Validation
 
 Live runner output captured during the Wave 2 / Prompt 09 closeout run
