@@ -51,7 +51,7 @@ Required order:
 | 0 | Implementation Gate & Repo Truth Recheck | Gate review, allowed paths, blocked scope | Required before code |
 | 1 | PCC Shared Foundations | Shared models, enums, role model, fixtures | Implementation wave |
 | 2 | PCC SPFx Shell Frame | Shell/routing/layout/state frame | Implementation wave |
-| 3 | PCC Backend Read-Model Foundation | Read-model endpoints/scaffolds | Implementation wave |
+| 3 | PCC Backend Read-Model Foundation | Read-model endpoints/scaffolds | Complete |
 | 4 | Project Home / Command Center | Hybrid landing page | Module wave |
 | 5 | Priority Actions Rail | Four-category action rail | Module wave |
 | 6 | Team & Access | Request + approval workflow | Module wave |

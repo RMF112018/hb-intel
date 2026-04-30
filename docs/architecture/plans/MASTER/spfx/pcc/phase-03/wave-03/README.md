@@ -1,5 +1,7 @@
 # Phase 3 / Wave 3 — PCC Backend Read-Model Foundation
 
+**Status:** Complete (read-model foundation; no live operations). All seven prompts (01–07) closed at HEAD `a72e8ab43`. Closeout: [`Wave_3_Closeout.md`](../../../../../blueprint/sp-project-control-center/phase-3/wave-3/Wave_3_Closeout.md).
+
 ## Objective
 
 Wave 3 establishes the backend-normalized read-model foundation for the Project Control Center (PCC). The goal is to move from Wave 2's fixture-only SPFx preview shell toward controlled backend read models, without introducing tenant mutation, provisioning execution, Procore runtime, deployment, or live operational behavior.
@@ -74,13 +76,13 @@ Wave 3 must not introduce:
 
 ## Prompt Sequence
 
-1. Repo-truth gate and scope lock.
-2. Backend route/DTO architecture lock and backend source placement decision closure (W3-OD-003), documentation only.
-3. PCC read-model contracts.
-4. Backend mock read-model provider.
-5. Read-only backend routes in mock mode.
-6. SPFx client boundary with no default runtime cutover.
-7. Wave 3 closeout, proof, and Wave 4 readiness.
+1. Repo-truth gate and scope lock. **Complete** — `35a09af15`.
+2. Backend route/DTO architecture lock and backend source placement decision closure (W3-OD-003), documentation only. **Complete** — `fde255244`.
+3. PCC read-model contracts. **Complete** — `49b12d48d`.
+4. Backend mock read-model provider. **Complete** — `93cb13a1e`.
+5. Read-only backend routes in mock mode. **Complete** — `511e9c6f2`.
+6. SPFx client boundary with no default runtime cutover. **Complete** — `a72e8ab43`.
+7. Wave 3 closeout, proof, and Wave 4 readiness. **Complete** — see [`Wave_3_Closeout.md`](../../../../../blueprint/sp-project-control-center/phase-3/wave-3/Wave_3_Closeout.md).
 
 ## Required Validation Pattern
 
