@@ -41,8 +41,12 @@ Required order:
 2. Wave 1 — shared foundations.
 3. Wave 2 — SPFx shell frame.
 4. Wave 3 — backend read-model foundation.
-5. Waves 4–19 — module-by-module implementation.
-6. Wave 20 — hardening, doctrine validation, and non-production readiness.
+5. Wave 4 — Project Home / Command Center.
+6. Wave 4A — Controlled Non-Production Tenant SPPKG Visual Validation Gate (first eligible hosted validation point).
+7. Wave 5 — Priority Actions Rail.
+8. Wave 5A — Optional Controlled Tenant Revalidation After Priority Actions Rail.
+9. Waves 6–19 — module-by-module implementation.
+10. Wave 20 — hardening, doctrine validation, and non-production readiness.
 
 ## Wave Plan
 
@@ -53,7 +57,9 @@ Required order:
 | 2 | PCC SPFx Shell Frame | Shell/routing/layout/state frame | Implementation wave |
 | 3 | PCC Backend Read-Model Foundation | Read-model endpoints/scaffolds | Complete |
 | 4 | Project Home / Command Center | Hybrid landing page | Module wave |
+| 4A | Controlled Non-Production Tenant SPPKG Visual Validation Gate | First eligible hosted validation after Wave 4 in controlled non-production tenant scope | Controlled validation gate |
 | 5 | Priority Actions Rail | Four-category action rail | Module wave |
+| 5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5 | Optional controlled validation gate |
 | 6 | Team & Access | Request + approval workflow | Module wave |
 | 7 | Documents / Document Control Center | Unified file-access hub | Module wave |
 | 8 | Project Readiness Module Framework | Shared item-level workflow framework | Module wave |
@@ -82,7 +88,9 @@ Required order:
 ### Milestone 2 — Core PCC Experience
 
 - Wave 4 — Project Home
+- Wave 4A — Controlled Non-Production Tenant SPPKG Visual Validation Gate (first hosted validation point)
 - Wave 5 — Priority Actions Rail
+- Wave 5A — Optional Controlled Tenant Revalidation After Priority Actions Rail
 - Wave 15 — External Systems
 - Wave 16 — Control Center Settings
 
@@ -108,6 +116,17 @@ Required order:
 - Wave 18 — Executive Oversight / Global Read-Only
 - Wave 20 — Hardening, Doctrine Validation, and Non-Production Readiness
 
+## Controlled Tenant Validation Gate Distinction
+
+- **Wave 4A is the first eligible hosted validation point** and occurs only after Wave 4 Project Home / Command Center implementation.
+- Wave 4A is the selected gate; a local/dev-harness-only validation gate is not used for this hosted validation decision.
+- Wave 4A authorizes controlled non-production tenant-hosted visual validation activity only: `.sppkg` build, approved non-production app-catalog or site-collection app-catalog upload/install actions, and controlled validation-page rendering to verify SharePoint host behavior (canvas sizing, theme behavior, responsive layout, asset loading, and Project Home visual quality).
+- No broad tenant mutation is authorized. Tenant activity is limited to approved non-production catalog/install and controlled validation-page actions required for visual validation.
+- Wave 5A is optional, is not the first hosted validation point, and may be used to revalidate the hosted PCC experience after Wave 5 adds Priority Actions Rail.
+- Wave 5A carries the same controlled non-production tenant limits as Wave 4A.
+- Wave 20 remains the formal hardening and non-production readiness gate (doctrine, accessibility, responsive validation, guardrail regression, and documentation closeout).
+- Production rollout remains separately approved and is not implied by Wave 4A, Wave 5A, or Wave 20.
+
 ## Phase 2 Dependency Map
 
 | Phase 3 Item | Dependency |
@@ -128,7 +147,7 @@ Every implementation wave must close with:
 - what was implemented;
 - what was intentionally not implemented;
 - validation results;
-- no tenant mutation confirmation;
+- no broad tenant mutation outside approved gate scope confirmation;
 - no Procore runtime confirmation;
 - no direct SPFx provisioning confirmation;
 - remaining blockers;

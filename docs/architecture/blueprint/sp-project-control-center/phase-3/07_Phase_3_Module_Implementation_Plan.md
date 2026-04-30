@@ -9,7 +9,7 @@ Define the Phase 3 implementation plan for the Project Control Center (PCC) afte
 This plan is implementation-oriented, but still preserves the Phase 3 gate posture:
 
 - no provisioning executor unless Phase 2 explicitly authorizes it;
-- no tenant mutation without approved manifest, dry-run proof, mutation gate, non-production boundary, and validation posture;
+- no broad tenant mutation without approved manifest, dry-run proof, mutation gate, non-production boundary, and validation posture;
 - no direct SPFx provisioning;
 - no direct SPFx-to-Procore path;
 - no Procore runtime, secrets, full mirror, or write-back;
@@ -56,7 +56,9 @@ Then implement each module as its own wave. This prevents every module from inve
 |    2 | PCC SPFx Shell Frame                                         | Create shell/routing/layout foundation without deep module logic.                                                                                | Wave 1                      |
 |    3 | PCC Backend Read-Model Foundation                            | Create backend read-model scaffolds used by shell/modules.                                                                                       | Wave 1                      |
 |    4 | Project Home / Command Center                                | Build hybrid landing page and role-aware project summary.                                                                                        | Waves 2–3                   |
+|   4A | Controlled Non-Production Tenant SPPKG Visual Validation Gate | First eligible hosted validation point after Wave 4 in controlled non-production tenant scope.                                                   | Wave 4                      |
 |    5 | Priority Actions Rail                                        | Build MVP action categories and source aggregation.                                                                                              | Waves 3–4                   |
+|   5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5; not the first hosted validation point.                                                                | Wave 5                      |
 |    6 | Team & Access                                                | Build request + approval workflow; no automated permission execution.                                                                            | Waves 2–3                   |
 |    7 | Documents / Document Control Center                          | Build two-lane model: Microsoft Files Lane (future Graph-backed file-management) + External Document Systems Lane (launch/deep-link/visibility). | Waves 2–3                   |
 |    8 | Project Readiness Module Framework                           | Build shared framework for structured readiness modules.                                                                                         | Waves 2–3                   |
@@ -241,6 +243,47 @@ Build the primary PCC landing page.
 
 ---
 
+# Wave 4A — Controlled Non-Production Tenant SPPKG Visual Validation Gate
+
+## Objective
+
+Run the first eligible hosted PCC validation after Wave 4 by rendering the PCC package in a controlled non-production SharePoint tenant scope for visual host verification.
+
+## Allowed Scope
+
+- Build the PCC `.sppkg`.
+- Perform approved non-production app-catalog or site-collection app-catalog upload/install actions.
+- Add/render PCC on a controlled SharePoint validation page.
+- Validate SharePoint host behavior: canvas sizing, theme behavior, responsive layout, asset loading, and Project Home / Command Center visual quality.
+
+## Guardrails
+
+- No broad tenant mutation is authorized. Tenant activity is limited to approved non-production catalog/install actions and controlled validation-page actions required for visual validation.
+- No production rollout.
+- No production app-catalog deployment.
+- No tenant-wide deployment unless explicitly approved.
+- No unrelated site/page changes.
+- No permission/group mutation.
+- No provisioning execution.
+- No live backend default cutover.
+- No Azure Functions deployment or Azure service setup.
+- No live Graph/PnP operational work beyond package/app validation commands.
+- No Procore runtime.
+- No Document Crunch runtime.
+- No Adobe Sign runtime.
+- No Site Health scan/repair execution.
+- No access execution.
+- No approval execution.
+- No workflow write-through.
+
+## Exit Criteria
+
+- PCC package renders in controlled non-production tenant-hosted SharePoint validation scope.
+- Project Home visual quality and host integration checks pass or are captured as defects.
+- Guardrail exclusions remain intact and explicitly confirmed in closeout.
+
+---
+
 # Wave 5 — Priority Actions Rail
 
 ## Objective
@@ -274,6 +317,32 @@ Build the MVP Priority Actions Rail with the approved four action categories.
 - Rail displays actionable, role-aware items.
 - Actions route to correct module/work center.
 - No action executes unsafe backend behavior.
+
+---
+
+# Wave 5A — Optional Controlled Tenant Revalidation After Priority Actions Rail
+
+## Objective
+
+Optionally revalidate the hosted PCC experience after Wave 5 adds Priority Actions Rail.
+
+## Positioning
+
+- Optional gate.
+- Not the first hosted validation point (Wave 4A remains first).
+- Can be skipped if Wave 4A evidence is sufficient and hosted revalidation is deferred.
+
+## Guardrails
+
+- Same controlled non-production tenant limits as Wave 4A.
+- No broad tenant mutation beyond approved non-production catalog/install and controlled validation-page actions required for visual validation.
+- No production rollout or production app-catalog deployment.
+- No tenant-wide deployment unless explicitly approved.
+
+## Exit Criteria
+
+- Hosted Priority Actions Rail visual behavior is validated in controlled non-production tenant scope or the gate is explicitly deferred.
+- Any hosted regressions are recorded before continuing downstream waves.
 
 ---
 
@@ -715,7 +784,7 @@ Build admin-facing visibility and review queues that support MVP workflows.
 
 ## Objective
 
-Close Phase 3 MVP implementation with validation, documentation, and readiness proof.
+Close Phase 3 MVP implementation with formal validation, documentation, and readiness proof.
 
 ## Code / Quality Work
 
@@ -742,6 +811,8 @@ Close Phase 3 MVP implementation with validation, documentation, and readiness p
 - No Procore runtime or secrets.
 - Documentation reflects actual behavior.
 - Non-production rollout package can be prepared.
+- Wave 20 remains the formal readiness gate and is distinct from early hosted visual validation gates (Wave 4A and optional Wave 5A).
+- Production rollout remains separately approved.
 
 ---
 
@@ -757,7 +828,9 @@ Close Phase 3 MVP implementation with validation, documentation, and readiness p
 ## Milestone 2 — Core PCC Experience
 
 - Wave 4 — Project Home
+- Wave 4A — Controlled Non-Production Tenant SPPKG Visual Validation Gate (first hosted validation point)
 - Wave 5 — Priority Actions Rail
+- Wave 5A — Optional Controlled Tenant Revalidation After Priority Actions Rail
 - Wave 15 — External Systems
 - Wave 16 — Control Center Settings
 
@@ -802,7 +875,7 @@ Each wave closeout must state:
 - what was implemented;
 - what was intentionally not implemented;
 - validation results;
-- no tenant mutation confirmation;
+- no broad tenant mutation outside approved gate scope confirmation;
 - no Procore runtime confirmation;
 - no direct SPFx provisioning confirmation;
 - remaining blockers;
@@ -827,3 +900,4 @@ Phase 3 implementation can be considered complete when:
 11. no direct SPFx-to-Procore path exists;
 12. validation, accessibility, responsive behavior, and doctrine scorecard are complete;
 13. non-production readiness package can be prepared.
+14. early hosted validation gates (Wave 4A and optional Wave 5A) are not treated as production rollout approval.

@@ -247,6 +247,48 @@ Build the PCC shell-frame and operating-dashboard UI/UX foundation only.
 
 ---
 
+## 6A. Controlled Tenant-Hosted Validation Gates (Phase 3)
+
+The first appropriate point to build the PCC `.sppkg` for hosted validation is **after Phase 3 Wave 4**, through:
+
+- **Wave 4A — Controlled Non-Production Tenant SPPKG Visual Validation Gate**
+
+Wave 4A is a controlled non-production tenant-hosted visual-validation gate only. It authorizes:
+
+- PCC `.sppkg` build;
+- approved non-production app-catalog or site-collection app-catalog upload/install actions;
+- controlled SharePoint validation-page rendering to validate host behavior (canvas sizing, theme behavior, responsive layout, asset loading, and Project Home / Command Center visual quality).
+
+Wave 4A does not imply functional completeness, formal readiness, or production rollout.
+
+An optional follow-up gate may be used after Wave 5:
+
+- **Wave 5A — Optional Controlled Tenant Revalidation After Priority Actions Rail**
+
+Wave 5A is optional and is not the first hosted validation point. It exists only to revalidate hosted behavior after Wave 5 changes the landing experience.
+
+For Wave 4A and Wave 5A:
+
+- no broad tenant mutation is authorized; tenant activity is limited to approved non-production catalog/install actions and controlled validation-page actions required for visual validation;
+- no production rollout;
+- no production app-catalog deployment;
+- no tenant-wide deployment unless explicitly approved;
+- no unrelated site/page changes;
+- no permission/group mutation;
+- no provisioning execution;
+- no live backend default cutover;
+- no Azure Functions deployment or Azure service setup;
+- no live Graph/PnP operational work beyond package/app validation commands;
+- no Procore runtime, no Document Crunch runtime, and no Adobe Sign runtime;
+- no Site Health scan/repair execution;
+- no access execution;
+- no approval execution;
+- no workflow write-through.
+
+Wave 20 remains the formal hardening and non-production readiness gate for doctrine validation, accessibility validation, full responsive validation, guardrail regression testing, documentation closeout, and readiness package preparation. Production rollout remains separately approved.
+
+---
+
 ## 7. Recommended Immediate Next Steps
 
 1. Confirm Prompt 01 repo-truth audit and scope lock remain satisfied as Wave 2 continues.
