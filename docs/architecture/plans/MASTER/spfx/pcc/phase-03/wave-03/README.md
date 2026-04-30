@@ -62,9 +62,9 @@ Wave 3 must not introduce:
 | Decision | Status | Adopted Position |
 |---|---|---|
 | Wave title | Frozen for Wave 3 | Phase 3 Wave 3 — PCC Backend Read-Model Foundation |
-| Route namespace | Proposed / proof-gated | `/api/pcc/projects/{projectId}/...` |
-| Shared DTO placement | Proposed / proof-gated | `packages/models/src/pcc/` |
-| Backend implementation placement | Proposed / proof-gated | `backend/functions/src/` using existing backend patterns |
+| Route namespace | Frozen for MVP (Prompt 01 lock) | `/api/pcc/projects/{projectId}/...` |
+| Shared DTO placement | Frozen for MVP (Prompt 01 lock) | `packages/models/src/pcc/` exposed via `@hbc/models/pcc` |
+| Backend implementation placement | Frozen for MVP (Prompt 02 lock) | `backend/functions/src/hosts/pcc-read-model/` (architecture placement only; no source created in Prompt 02) |
 | Initial route behavior | Frozen for Wave 3 | Read-only, mock/local provider first |
 | Write routes | Deferred | Not in Wave 3 unless separately authorized |
 | Graph/PnP calls | Deferred | No live calls or mutation |
@@ -75,7 +75,7 @@ Wave 3 must not introduce:
 ## Prompt Sequence
 
 1. Repo-truth gate and scope lock.
-2. Backend route namespace and DTO placement.
+2. Backend route/DTO architecture lock and backend source placement decision closure (W3-OD-003), documentation only.
 3. PCC read-model contracts.
 4. Backend mock read-model provider.
 5. Read-only backend routes in mock mode.

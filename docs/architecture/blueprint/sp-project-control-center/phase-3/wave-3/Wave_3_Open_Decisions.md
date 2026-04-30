@@ -12,7 +12,6 @@
 | **Runtime Configuration** | Behaviour is configurable at runtime (e.g. via a feature flag). The default and gating posture must be specified. |
 | **Deferred** | Decision is intentionally not made in Wave 3; deferred to a later wave or to a Wave 3 closing prompt. |
 | **Proof-Gated** | Decision is contingent on a piece of repo-truth proof (e.g. a chosen DTO shape, a specific route family scaffolded) that hasn't landed yet. Will be revisited when the proof exists. |
-| **Human Decision Required** | Decision needs explicit human approval before Wave 3 can act on it. |
 
 ## Decision Register
 
@@ -20,7 +19,7 @@
 | --- | --- | --- | --- |
 | W3-OD-001 | **Route namespace.** | **Frozen for MVP** | Locked to `/api/pcc/projects/{projectId}/...`. Alternative namespaces (flat `/api/pcc-read-model/...`, admin-style `/api/admin/pcc/...`) are rejected for Wave 3 absent a separate human override. |
 | W3-OD-002 | **DTO / read-model placement.** | **Frozen for MVP** | Locked to `packages/models/src/pcc/`, exposed through the existing `@hbc/models/pcc` barrel. Alternatives `@hbc/models/pcc-backend` (sub-package or sub-path) and co-located `backend/functions/src/.../dtos/` are rejected for Wave 3 absent a separate human override. |
-| W3-OD-003 | **Backend source placement.** Monolithic functions host (`backend/functions/src/index.ts`) **(A)** vs. new scoped domain host (`backend/functions/src/hosts/pcc-read-model/`) **(B)**. | **Human Decision Required** | Prompt 02 resolves. Recommendation: Candidate B (scoped host) on the strength of the existing roadmap's host-boundary direction, but the decision is not locked until Prompt 02 closes it. Either choice still respects W3-OD-001 (route namespace) and W3-OD-002 (DTO placement). |
+| W3-OD-003 | **Backend source placement.** | **Frozen for MVP** | Locked in Prompt 02 to scoped host placement at `backend/functions/src/hosts/pcc-read-model/`. This closes the Prompt 01 monolithic-vs-scoped host choice for Wave 3 while preserving W3-OD-001 and W3-OD-002 locks. |
 | W3-OD-004 | **Read-only routes may be implemented in Wave 3.** | **Frozen for MVP** | Yes. Wave 3 scope is read-model only; read-only `GET` route scaffolds are the substantive deliverable from Prompt 05 onward. |
 | W3-OD-005 | **Write routes may be implemented in Wave 3.** | **Frozen for MVP** | **No.** Zero `POST` / `PUT` / `PATCH` / `DELETE`. Write routes are deferred to a later wave alongside their per-module approval / authorization model. |
 | W3-OD-006 | **Graph / PnP / SharePoint REST runtime may be called in Wave 3.** | **Frozen for MVP** | **No.** Wave 3 routes return fixture-shaped data from in-memory mocks. No tenant network call appears in any code path. |
@@ -37,21 +36,21 @@
 | W3-OD-017 | **Wave 3 SPFx source modification.** | **Proof-Gated** | Wave 3 modifies `apps/project-control-center/src/**` only in Prompt 06 (the client-boundary seam) and only behind the W3-OD-012 feature flag with default `false`. No other Wave 3 prompt touches SPFx source. The Wave 2 no-runtime guard tests must continue to pass after Prompt 06. |
 | W3-OD-018 | **ADR for the chosen scoped-host pattern.** | **Deferred** | If Wave 3 introduces a new scoped host (W3-OD-003 Candidate B), an ADR is recommended at Wave 3 closing prompt — not at Prompt 02 — so the route family surface is documented before the architectural record lands. |
 
-## Decisions That Prompt 02 Must Resolve
+## Prompt 02 Resolution Outcome
 
-At minimum, Prompt 02 must move the following from **Human Decision
-Required** to **Frozen for MVP**:
+Prompt 02 resolves exactly one substantive decision:
 
-- **W3-OD-003 (backend source placement)** — monolithic functions host vs. new scoped PCC read-model host.
+- **W3-OD-003 (backend source placement)** — now frozen to
+  `backend/functions/src/hosts/pcc-read-model/`.
 
-Prompt 02 is otherwise a documentation / architecture-lock prompt; it
-does not implement route source unless a separate human override
-explicitly reopens that scope.
+Prompt 02 remains documentation / architecture-lock only and does not
+implement route source.
 
 ## Decisions Already Locked Coming Out of Prompt 01
 
 - **W3-OD-001 (route namespace)** — `/api/pcc/projects/{projectId}/...`
 - **W3-OD-002 (DTO / read-model placement)** — `packages/models/src/pcc/` exposed through `@hbc/models/pcc`
+- **W3-OD-003 (backend source placement)** — `backend/functions/src/hosts/pcc-read-model/`
 - **W3-OD-004 (read-only routes allowed)** — yes
 - **W3-OD-005 (write routes)** — no
 - **W3-OD-006 (Graph / PnP / SharePoint REST runtime)** — no
@@ -82,9 +81,7 @@ without a separate human override or an ADR.
 
 ## Closeout Note
 
-This decision register is paired with `Wave_3_Scope_Lock.md` and
-together they are the substantive deliverables of Wave 3 / Prompt 01.
-The next step is **Prompt 02** — a decision / architecture-lock prompt
-that resolves W3-OD-003 (backend source placement). Prompt 02 does not
-implement route source unless a separate human override explicitly
-reopens that scope.
+This decision register is paired with `Wave_3_Scope_Lock.md`. Prompt 02
+has now closed W3-OD-003 as an architecture-lock decision only. The
+next implementation step is Prompt 03 (read-model contracts), with all
+Wave 3 hard exclusions and no-runtime posture preserved.
