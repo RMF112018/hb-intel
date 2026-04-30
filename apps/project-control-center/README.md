@@ -204,6 +204,47 @@ runtime-cutover guard test
 (`tests/pcc-api-dormancy.test.ts`) asserts no non-api source file
 imports or references the boundary.
 
+## Wave 4 Opt-In Backend Reads (Project Home)
+
+Wave 4 wires Project Home / Command Center through the Wave 3 read-model
+seam **only when explicit mount config is supplied**. The default mount
+call remains fixture-driven; backend reads are opt-in.
+
+```ts
+import { mount } from '@hbc/spfx-project-control-center';
+
+// Default — fixture-driven, unchanged from Wave 2:
+mount(el);
+
+// Explicit fixture mode — same default behavior, factory-instantiated:
+mount(el, spfxContext, { readModel: { readModelMode: 'fixture' } });
+
+// Opt-in backend mode — calls the seven Wave 3 read-only routes:
+mount(el, spfxContext, {
+  readModel: {
+    readModelMode: 'backend',
+    backendBaseUrl: 'https://<functions-host>',
+  },
+});
+```
+
+Mount config (`IPccMountConfig.readModel`) accepts:
+
+| Field | Type | Default |
+| --- | --- | --- |
+| `readModelMode` | `'fixture' \| 'backend'` | `'fixture'` |
+| `backendBaseUrl` | `string` | undefined |
+| `simulateBackendUnavailable` | `boolean` | `false` |
+
+Behavior contract:
+
+- **Fixture mode** (default or omitted): Project Home renders fixtures from `@hbc/models/pcc`; no `fetch(` calls; no tenant/Graph/PnP runtime.
+- **Backend mode + `backendBaseUrl`**: Project Home requests two GET routes (`/api/pcc/projects/{projectId}/home` and `…/document-control`) and renders envelope-derived state via the Project Home adapter / view-model (`src/surfaces/projectHome/projectHomeAdapter.ts`).
+- **Backend mode without `backendBaseUrl`**, malformed config, network error, non-2xx response, or malformed JSON: cards render `state: 'error'` (`sourceStatus: 'backend-unavailable'`) via the safe fixture-fallback path. The app does not crash.
+- **Other surfaces** (Team & Access, Documents, Site Health, External Systems, Project Readiness, Approvals, Control Center Settings) remain fixture/preview-driven; the read-model client is threaded only to Project Home.
+
+Wave 4 does not introduce auth wiring, write routes, Graph/PnP/SharePoint REST live operations, Procore/Document Crunch/Adobe Sign runtime, packaging, or deployment. See the Wave 4 closeout docs under `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-4/` for the full posture.
+
 ## Validation
 
 Live runner output captured during the Wave 2 / Prompt 09 closeout run

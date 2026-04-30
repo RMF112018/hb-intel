@@ -17,9 +17,37 @@ import type {
   IPriorityAction,
   IProjectProfile,
   ISiteHealthSummary,
+  PccDocumentControlReadModel,
+  PccPersona,
+  PccProjectHomeReadModel,
+  PccProjectId,
+  PccReadModelEnvelope,
   PccReadModelSourceStatus,
 } from '@hbc/models/pcc';
 import type { PccCardState } from './shared.js';
+
+/**
+ * Wave 4 / Prompt 05 — narrow Project Home consumer interface.
+ *
+ * Lists only the read-model client methods Project Home actually uses.
+ * Defined here (not re-exported from `src/api/`) so non-api consumers
+ * (PccApp, PccSurfaceRouter, PccProjectHome, useProjectHomeReadModel)
+ * can type the client prop without crossing the controlled-consumption
+ * guard for `IPccReadModelClient`. TypeScript structural typing lets
+ * the full `IPccReadModelClient` (returned by `createPccReadModelClient`)
+ * flow into a value typed as `IPccProjectHomeReadModelClient`.
+ */
+export interface IPccProjectHomeReadModelClient {
+  getProjectHome(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectHomeReadModel>>;
+
+  getDocumentControl(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccDocumentControlReadModel>>;
+}
 
 export interface IPccProjectHomeViewModelSlot<TData> {
   readonly state: PccCardState;

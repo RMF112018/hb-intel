@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { PccApp } from './PccApp';
+import { createPccReadModelClient } from './api/pccReadModelClientFactory.js';
 import type { IPccReadModelConfig } from './api/pccReadModelClientFactory.js';
 
 interface IPccMountedInstance {
@@ -50,7 +51,10 @@ export function mount(
   if (!mountedInstance.root) {
     mountedInstance.root = createRoot(el);
   }
-  mountedInstance.root.render(createElement(PccApp));
+  const readModelClient = _config?.readModel
+    ? createPccReadModelClient(_config.readModel)
+    : undefined;
+  mountedInstance.root.render(createElement(PccApp, { readModelClient }));
 }
 
 export function unmount(): void {

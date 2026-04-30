@@ -10,9 +10,15 @@ import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurfac
 import { PccControlCenterSettingsSurface } from '../surfaces/controlCenterSettings/PccControlCenterSettingsSurface';
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
+import type { IPccProjectHomeReadModelClient } from '../surfaces/projectHome/projectHomeViewModel';
 
 export interface PccSurfaceRouterProps {
   activeSurfaceId: PccMvpSurfaceId;
+  /**
+   * Wave 4 / Prompt 05 — opt-in read-model client. Threaded only to
+   * Project Home; other surfaces remain fixture/preview-driven.
+   */
+  readModelClient?: IPccProjectHomeReadModelClient;
 }
 
 /**
@@ -29,10 +35,13 @@ export interface PccSurfaceRouterProps {
  * the rendered tree carries `data-pcc-active-surface-panel`, equal to the
  * active surface id.
  */
-export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({ activeSurfaceId }) => {
+export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
+  activeSurfaceId,
+  readModelClient,
+}) => {
   switch (activeSurfaceId) {
     case 'project-home':
-      return <PccProjectHome />;
+      return <PccProjectHome readModelClient={readModelClient} />;
     case 'team-and-access':
       return <PccTeamAccessSurface />;
     case 'documents':

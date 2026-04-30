@@ -62,11 +62,11 @@ const ALLOWED_MOUNT_API_IMPORT_PATHS = new Set<string>([
   './api/pccReadModelClientFactory.js',
 ]);
 
-interface IApiImportException {
+interface IApiImportRule {
   readonly file: string;
   readonly typeOnly: boolean;
-  readonly allowedSourcePaths: ReadonlySet<string>;
-  readonly allowedNamedSpecifiers: ReadonlySet<string>;
+  readonly sourcePaths: ReadonlySet<string>;
+  readonly namedSpecifiers: ReadonlySet<string>;
   readonly description: string;
 }
 
@@ -77,29 +77,56 @@ const PROJECT_HOME_ADAPTER_FILE = resolve(
   'projectHomeAdapter.ts',
 );
 
-const API_IMPORT_EXCEPTIONS: readonly IApiImportException[] = [
+const API_IMPORT_RULES: readonly IApiImportRule[] = [
   {
     file: MOUNT_FILE,
     typeOnly: true,
-    allowedSourcePaths: new Set(ALLOWED_MOUNT_API_IMPORT_PATHS),
-    allowedNamedSpecifiers: new Set(['IPccReadModelConfig']),
-    description: 'mount.tsx may type-only-import IPccReadModelConfig',
+    sourcePaths: new Set(ALLOWED_MOUNT_API_IMPORT_PATHS),
+    namedSpecifiers: new Set(['IPccReadModelConfig']),
+    description: 'mount.tsx type-only IPccReadModelConfig (Prompt 02)',
+  },
+  {
+    file: MOUNT_FILE,
+    typeOnly: false,
+    sourcePaths: new Set(ALLOWED_MOUNT_API_IMPORT_PATHS),
+    namedSpecifiers: new Set(['createPccReadModelClient']),
+    description: 'mount.tsx value-import createPccReadModelClient (Prompt 05)',
   },
   {
     file: PROJECT_HOME_ADAPTER_FILE,
     typeOnly: false,
-    allowedSourcePaths: new Set([
+    sourcePaths: new Set([
       '../../api/pccReadModelStateMapping',
       '../../api/pccReadModelStateMapping.js',
     ]),
-    allowedNamedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
+    namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
     description:
-      'projectHomeAdapter.ts may import the pure mapPccSourceStatusToPreviewState helper',
+      'projectHomeAdapter.ts value-import mapPccSourceStatusToPreviewState (Prompt 04)',
   },
 ];
 
-function findException(filePath: string): IApiImportException | undefined {
-  return API_IMPORT_EXCEPTIONS.find((entry) => entry.file === filePath);
+function rulesForFile(filePath: string): readonly IApiImportRule[] {
+  return API_IMPORT_RULES.filter((entry) => entry.file === filePath);
+}
+
+interface IIdentifierException {
+  readonly identifier: string;
+  readonly file: string;
+  readonly description: string;
+}
+
+const IDENTIFIER_EXCEPTIONS: readonly IIdentifierException[] = [
+  {
+    identifier: 'createPccReadModelClient',
+    file: MOUNT_FILE,
+    description: 'mount.tsx invokes the factory entry point (Prompt 05)',
+  },
+];
+
+function isIdentifierExceptionAllowed(identifier: string, filePath: string): boolean {
+  return IDENTIFIER_EXCEPTIONS.some(
+    (entry) => entry.identifier === identifier && entry.file === filePath,
+  );
 }
 
 interface IImportStatement {
@@ -210,37 +237,28 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompt 02)', () => {
       for (const imp of file.imports) {
         if (!isApiImportPath(imp.path)) continue;
 
-        const exception = findException(file.path);
-        if (!exception) {
+        const candidates = rulesForFile(file.path);
+        if (candidates.length === 0) {
           offenders.push(
             `${file.path}: api import not allowed → ${imp.raw.trim()}`,
           );
           continue;
         }
 
-        if (exception.typeOnly && !imp.typeOnly) {
-          offenders.push(
-            `${file.path}: ${exception.description} (must be type-only) → ${imp.raw.trim()}`,
-          );
-          continue;
-        }
-
-        if (!exception.allowedSourcePaths.has(imp.path)) {
-          offenders.push(
-            `${file.path}: ${exception.description} (path not on allowlist: ${imp.path})`,
-          );
-          continue;
-        }
-
         const named = namedImportSpecifiers(imp.clauseText);
-        const namedOk =
-          named.length > 0 &&
-          named.every((id) => exception.allowedNamedSpecifiers.has(id));
-        if (!namedOk) {
+        const matched = candidates.some(
+          (rule) =>
+            rule.typeOnly === imp.typeOnly &&
+            rule.sourcePaths.has(imp.path) &&
+            named.length > 0 &&
+            named.every((id) => rule.namedSpecifiers.has(id)),
+        );
+
+        if (!matched) {
+          const ruleSummaries = candidates.map((c) => `  - ${c.description}`).join('\n');
           offenders.push(
-            `${file.path}: ${exception.description} (named specifiers ${JSON.stringify(named)} not on allowlist)`,
+            `${file.path}: api import did not match any allowed rule → ${imp.raw.trim()}\n  typeOnly=${imp.typeOnly}, path=${imp.path}, named=${JSON.stringify(named)}\n${ruleSummaries}`,
           );
-          continue;
         }
       }
     }
@@ -251,12 +269,12 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompt 02)', () => {
   });
 
   for (const identifier of FORBIDDEN_API_IDENTIFIERS) {
-    it(`no non-api/non-test source file references identifier '${identifier}'`, () => {
+    it(`no non-api/non-test source file references identifier '${identifier}' (except narrow allowlist)`, () => {
       const offenders: string[] = [];
       for (const file of files) {
-        if (file.tokenStripped.includes(identifier)) {
-          offenders.push(file.path);
-        }
+        if (!file.tokenStripped.includes(identifier)) continue;
+        if (isIdentifierExceptionAllowed(identifier, file.path)) continue;
+        offenders.push(file.path);
       }
       expect(
         offenders,
@@ -318,15 +336,44 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompt 02)', () => {
     });
   }
 
-  it('mount.tsx does not invoke the factory or any client constructor', () => {
+  it('mount.tsx may invoke only createPccReadModelClient and no other client/factory constructor or fetch (Prompt 05)', () => {
     const mount = files.find((f) => basename(f.path) === 'mount.tsx');
     expect(mount, 'mount.tsx must be in scan scope').toBeDefined();
     if (!mount) return;
-    for (const identifier of FORBIDDEN_API_IDENTIFIERS) {
+
+    expect(
+      mount.tokenStripped.includes('createPccReadModelClient'),
+      'mount.tsx is expected to reference createPccReadModelClient (the factory entry point)',
+    ).toBe(true);
+
+    const mountForbidden = [
+      'IPccReadModelClient',
+      'pccReadModelClient',
+      'pccFixtureReadModelClient',
+      'createPccFixtureReadModelClient',
+      'pccBackendReadModelClient',
+      'createPccBackendReadModelClient',
+      'resolvePccReadModelConfig',
+    ];
+    for (const banned of mountForbidden) {
       expect(
-        mount.tokenStripped.includes(identifier),
-        `mount.tsx must not reference ${identifier} in Prompt 02`,
+        mount.tokenStripped.includes(banned),
+        `mount.tsx must not reference ${banned}`,
       ).toBe(false);
+    }
+
+    expect(
+      /\bfetch\s*\(/.test(mount.tokenStripped),
+      'mount.tsx must not call fetch(',
+    ).toBe(false);
+
+    for (const imp of mount.imports) {
+      for (const forbidden of FORBIDDEN_RUNTIME_IMPORT_PATHS) {
+        expect(
+          imp.path.includes(forbidden),
+          `mount.tsx must not import forbidden runtime '${forbidden}' (got: ${imp.raw.trim()})`,
+        ).toBe(false);
+      }
     }
   });
 });
