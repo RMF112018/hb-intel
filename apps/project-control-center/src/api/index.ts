@@ -24,3 +24,11 @@ export {
   PCC_SOURCE_STATUS_TO_PREVIEW_STATE,
   mapPccSourceStatusToPreviewState,
 } from './pccReadModelStateMapping.js';
+
+export {
+  createPccReadModelClient,
+  resolvePccReadModelConfig,
+  type IPccReadModelConfig,
+  type IResolvedPccReadModelConfig,
+  type PccReadModelMode,
+} from './pccReadModelClientFactory.js';

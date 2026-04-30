@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { PccApp } from './PccApp';
+import type { IPccReadModelConfig } from './api/pccReadModelClientFactory.js';
 
 interface IPccMountedInstance {
   root: Root | null;
@@ -20,6 +21,12 @@ function teardownMountedInstance(): void {
 
 export interface IPccMountConfig {
   readonly previewLabel?: string;
+  /**
+   * Wave 4 / Prompt 02: read-model config carried forward to the API
+   * factory. Not consumed by `mount` or any surface in Prompt 02; UI
+   * wiring is owned by Prompt 05.
+   */
+  readonly readModel?: IPccReadModelConfig;
 }
 
 /**
