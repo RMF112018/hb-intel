@@ -10,7 +10,8 @@ export type PccCardState =
   | 'empty'
   | 'missing-config'
   | 'unavailable-fixture'
-  | 'error';
+  | 'error'
+  | 'unauthorized-persona';
 
 export const PCC_CARD_STATES: readonly PccCardState[] = [
   'preview',
@@ -18,6 +19,7 @@ export const PCC_CARD_STATES: readonly PccCardState[] = [
   'missing-config',
   'unavailable-fixture',
   'error',
+  'unauthorized-persona',
 ] as const;
 
 export interface PccProjectHomeCardProps {

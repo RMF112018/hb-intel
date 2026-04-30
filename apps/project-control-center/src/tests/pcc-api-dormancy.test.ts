@@ -62,6 +62,46 @@ const ALLOWED_MOUNT_API_IMPORT_PATHS = new Set<string>([
   './api/pccReadModelClientFactory.js',
 ]);
 
+interface IApiImportException {
+  readonly file: string;
+  readonly typeOnly: boolean;
+  readonly allowedSourcePaths: ReadonlySet<string>;
+  readonly allowedNamedSpecifiers: ReadonlySet<string>;
+  readonly description: string;
+}
+
+const PROJECT_HOME_ADAPTER_FILE = resolve(
+  SRC_ROOT,
+  'surfaces',
+  'projectHome',
+  'projectHomeAdapter.ts',
+);
+
+const API_IMPORT_EXCEPTIONS: readonly IApiImportException[] = [
+  {
+    file: MOUNT_FILE,
+    typeOnly: true,
+    allowedSourcePaths: new Set(ALLOWED_MOUNT_API_IMPORT_PATHS),
+    allowedNamedSpecifiers: new Set(['IPccReadModelConfig']),
+    description: 'mount.tsx may type-only-import IPccReadModelConfig',
+  },
+  {
+    file: PROJECT_HOME_ADAPTER_FILE,
+    typeOnly: false,
+    allowedSourcePaths: new Set([
+      '../../api/pccReadModelStateMapping',
+      '../../api/pccReadModelStateMapping.js',
+    ]),
+    allowedNamedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
+    description:
+      'projectHomeAdapter.ts may import the pure mapPccSourceStatusToPreviewState helper',
+  },
+];
+
+function findException(filePath: string): IApiImportException | undefined {
+  return API_IMPORT_EXCEPTIONS.find((entry) => entry.file === filePath);
+}
+
 interface IImportStatement {
   readonly raw: string;
   readonly typeOnly: boolean;
@@ -164,38 +204,41 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompt 02)', () => {
     expect(factorySrc.includes('export function createPccReadModelClient')).toBe(true);
   });
 
-  it('only mount.tsx may import from src/api, and only as a type-only IPccReadModelConfig import', () => {
+  it('non-api/non-test src/api imports are limited to the narrow per-file allowlist', () => {
     const offenders: string[] = [];
     for (const file of files) {
       for (const imp of file.imports) {
         if (!isApiImportPath(imp.path)) continue;
 
-        const isMount = file.path === MOUNT_FILE;
-        if (!isMount) {
+        const exception = findException(file.path);
+        if (!exception) {
           offenders.push(
             `${file.path}: api import not allowed → ${imp.raw.trim()}`,
           );
           continue;
         }
 
-        if (!imp.typeOnly) {
+        if (exception.typeOnly && !imp.typeOnly) {
           offenders.push(
-            `${file.path}: api import in mount.tsx must be type-only → ${imp.raw.trim()}`,
+            `${file.path}: ${exception.description} (must be type-only) → ${imp.raw.trim()}`,
           );
           continue;
         }
 
-        if (!ALLOWED_MOUNT_API_IMPORT_PATHS.has(imp.path)) {
+        if (!exception.allowedSourcePaths.has(imp.path)) {
           offenders.push(
-            `${file.path}: mount.tsx api import path not on allowlist → ${imp.path}`,
+            `${file.path}: ${exception.description} (path not on allowlist: ${imp.path})`,
           );
           continue;
         }
 
         const named = namedImportSpecifiers(imp.clauseText);
-        if (named.length !== 1 || named[0] !== 'IPccReadModelConfig') {
+        const namedOk =
+          named.length > 0 &&
+          named.every((id) => exception.allowedNamedSpecifiers.has(id));
+        if (!namedOk) {
           offenders.push(
-            `${file.path}: mount.tsx may import only IPccReadModelConfig as type-only → ${imp.raw.trim()}`,
+            `${file.path}: ${exception.description} (named specifiers ${JSON.stringify(named)} not on allowlist)`,
           );
           continue;
         }

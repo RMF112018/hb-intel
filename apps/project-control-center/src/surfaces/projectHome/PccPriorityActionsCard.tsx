@@ -2,15 +2,21 @@ import type { FC } from 'react';
 import {
   PRIORITY_ACTION_CATEGORY_LABELS,
   SAMPLE_PRIORITY_ACTIONS,
+  type IPriorityAction,
 } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { priorityToneForAction, type PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
-const PriorityActionsBody: FC = () => (
+interface PccPriorityActionsCardProps extends PccProjectHomeCardProps {
+  /** Optional read-model data; when omitted, falls back to SAMPLE_PRIORITY_ACTIONS. */
+  readonly actions?: readonly IPriorityAction[];
+}
+
+const PriorityActionsBody: FC<{ actions: readonly IPriorityAction[] }> = ({ actions }) => (
   <ul className={styles.list} data-pcc-priority-actions-body="">
-    {SAMPLE_PRIORITY_ACTIONS.map((action) => {
+    {actions.map((action) => {
       const tone = priorityToneForAction(action);
       return (
         <li
@@ -41,9 +47,16 @@ const PriorityActionsBody: FC = () => (
   </ul>
 );
 
-export const PccPriorityActionsCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccPriorityActionsCard: FC<PccPriorityActionsCardProps> = ({
+  state = 'preview',
+  actions,
+}) => (
   <PccDashboardCard footprint="tall" eyebrow="Today" title="Priority Actions">
-    {state === 'preview' ? <PriorityActionsBody /> : <PccPreviewState state={state} />}
+    {state === 'preview' ? (
+      <PriorityActionsBody actions={actions ?? SAMPLE_PRIORITY_ACTIONS} />
+    ) : (
+      <PccPreviewState state={state} />
+    )}
   </PccDashboardCard>
 );
 

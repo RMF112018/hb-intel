@@ -271,13 +271,14 @@ describe('Project Home bento dashboard', () => {
 
   // ── Card-state contract sanity ───────────────────────────────────────
 
-  it('PCC_CARD_STATES exposes preview / empty / missing-config / unavailable-fixture / error', () => {
+  it('PCC_CARD_STATES exposes preview / empty / missing-config / unavailable-fixture / error / unauthorized-persona', () => {
     expect(PCC_CARD_STATES).toEqual([
       'preview',
       'empty',
       'missing-config',
       'unavailable-fixture',
       'error',
+      'unauthorized-persona',
     ]);
   });
 });

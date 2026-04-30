@@ -1,10 +1,18 @@
 import type { FC } from 'react';
-import { SAMPLE_SITE_HEALTH_SUMMARY } from '@hbc/models/pcc';
+import {
+  SAMPLE_SITE_HEALTH_SUMMARY,
+  type ISiteHealthSummary,
+} from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
+
+interface PccSiteHealthSummaryCardProps extends PccProjectHomeCardProps {
+  /** Optional read-model data; when omitted, falls back to SAMPLE_SITE_HEALTH_SUMMARY. */
+  readonly summary?: ISiteHealthSummary;
+}
 
 function severityTone(severity: string): 'info' | 'warning' | 'danger' | 'neutral' {
   switch (severity) {
@@ -21,8 +29,7 @@ function severityTone(severity: string): 'info' | 'warning' | 'danger' | 'neutra
   }
 }
 
-const SiteHealthSummaryBody: FC = () => {
-  const summary = SAMPLE_SITE_HEALTH_SUMMARY;
+const SiteHealthSummaryBody: FC<{ summary: ISiteHealthSummary }> = ({ summary }) => {
   return (
     <div className={styles.healthRow} data-pcc-site-health-body="">
       <div className={styles.healthSeverity}>
@@ -48,9 +55,16 @@ const SiteHealthSummaryBody: FC = () => {
   );
 };
 
-export const PccSiteHealthSummaryCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccSiteHealthSummaryCard: FC<PccSiteHealthSummaryCardProps> = ({
+  state = 'preview',
+  summary,
+}) => (
   <PccDashboardCard footprint="standard" eyebrow="Site Health" title="Site Health Summary">
-    {state === 'preview' ? <SiteHealthSummaryBody /> : <PccPreviewState state={state} />}
+    {state === 'preview' ? (
+      <SiteHealthSummaryBody summary={summary ?? SAMPLE_SITE_HEALTH_SUMMARY} />
+    ) : (
+      <PccPreviewState state={state} />
+    )}
   </PccDashboardCard>
 );
 

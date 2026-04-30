@@ -6,12 +6,22 @@ import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   type DocumentControlLane,
   type DocumentControlSourceId,
+  type IDocumentControlSource,
 } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
+
+interface PccDocumentControlCardProps extends PccProjectHomeCardProps {
+  /**
+   * Optional read-model data. When supplied, lane tiles are rendered by
+   * filtering this list with `source.lane === lane`. When omitted, falls
+   * back to the canonical `DOCUMENT_CONTROL_SOURCE_IDS` taxonomy.
+   */
+  readonly sources?: readonly IDocumentControlSource[];
+}
 
 function postureTone(posture: string): 'success' | 'info' | 'warning' | 'neutral' {
   switch (posture) {
@@ -30,8 +40,10 @@ function laneLabel(lane: DocumentControlLane): string {
   return lane === 'microsoft-files' ? 'Microsoft Files' : 'External Document Systems';
 }
 
-function sourceIdsInLane(lane: DocumentControlLane): readonly DocumentControlSourceId[] {
-  return DOCUMENT_CONTROL_SOURCE_IDS.filter((id) => DOCUMENT_CONTROL_SOURCES[id].lane === lane);
+function fixtureSourcesInLane(lane: DocumentControlLane): readonly IDocumentControlSource[] {
+  return DOCUMENT_CONTROL_SOURCE_IDS.filter(
+    (id: DocumentControlSourceId) => DOCUMENT_CONTROL_SOURCES[id].lane === lane,
+  ).map((id) => DOCUMENT_CONTROL_SOURCES[id]);
 }
 
 /**
@@ -43,7 +55,9 @@ function sourceIdsInLane(lane: DocumentControlLane): readonly DocumentControlSou
  * `IDocumentControlSource` lane / capabilityPosture / sourceOfRecordLabel
  * fields). No app-local lane or action duplication.
  */
-const DocumentControlBody: FC = () => (
+const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = ({
+  sources,
+}) => (
   <div className={styles.sourceGrid} data-pcc-document-control-body="">
     {DOCUMENT_CONTROL_LANES.map((lane) => (
       <section key={lane} data-pcc-doc-lane={lane}>
@@ -54,13 +68,13 @@ const DocumentControlBody: FC = () => (
           {laneLabel(lane)}
         </span>
         <div className={styles.sourceGrid}>
-          {sourceIdsInLane(lane).map((id) => {
-            const source = DOCUMENT_CONTROL_SOURCES[id];
-            return (
+          {sources
+            .filter((source) => source.lane === lane)
+            .map((source) => (
               <div
-                key={id}
+                key={source.id}
                 className={styles.sourceTile}
-                data-pcc-document-source-id={id}
+                data-pcc-document-source-id={source.id}
                 data-pcc-document-posture={source.posture}
                 data-pcc-document-link-behavior={source.linkBehavior}
                 data-pcc-doc-lane={source.lane}
@@ -110,21 +124,34 @@ const DocumentControlBody: FC = () => (
                   </span>
                 )}
               </div>
-            );
-          })}
+            ))}
         </div>
       </section>
     ))}
   </div>
 );
 
-export const PccDocumentControlCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+function resolveDocumentControlSources(
+  sources?: readonly IDocumentControlSource[],
+): readonly IDocumentControlSource[] {
+  if (sources !== undefined) return sources;
+  return DOCUMENT_CONTROL_LANES.flatMap((lane) => fixtureSourcesInLane(lane));
+}
+
+export const PccDocumentControlCard: FC<PccDocumentControlCardProps> = ({
+  state = 'preview',
+  sources,
+}) => (
   <PccDashboardCard
     footprint="wide"
     eyebrow="Documents"
     title="Document Control Center"
   >
-    {state === 'preview' ? <DocumentControlBody /> : <PccPreviewState state={state} />}
+    {state === 'preview' ? (
+      <DocumentControlBody sources={resolveDocumentControlSources(sources)} />
+    ) : (
+      <PccPreviewState state={state} />
+    )}
   </PccDashboardCard>
 );
 

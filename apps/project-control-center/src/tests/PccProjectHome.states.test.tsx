@@ -33,6 +33,7 @@ const NON_PREVIEW_STATES: readonly PccCardState[] = [
   'missing-config',
   'unavailable-fixture',
   'error',
+  'unauthorized-persona',
 ];
 
 describe('Project Home card states', () => {

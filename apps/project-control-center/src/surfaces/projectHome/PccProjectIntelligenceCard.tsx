@@ -1,10 +1,19 @@
 import type { FC } from 'react';
-import { PCC_MVP_SURFACES, SAMPLE_PROJECT_PROFILE } from '@hbc/models/pcc';
+import {
+  PCC_MVP_SURFACES,
+  SAMPLE_PROJECT_PROFILE,
+  type IProjectProfile,
+} from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
+
+interface PccProjectIntelligenceCardProps extends PccProjectHomeCardProps {
+  /** Optional read-model data; when omitted, falls back to SAMPLE_PROJECT_PROFILE. */
+  readonly profile?: IProjectProfile;
+}
 
 const PROJECT_HOME_SURFACE = PCC_MVP_SURFACES['project-home'];
 
@@ -14,8 +23,7 @@ const valueFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const ProjectIntelligenceBody: FC = () => {
-  const profile = SAMPLE_PROJECT_PROFILE;
+const ProjectIntelligenceBody: FC<{ profile: IProjectProfile }> = ({ profile }) => {
   return (
     <div className={styles.heroBody} data-pcc-project-intelligence-body="">
       <p className={styles.contextNote} data-pcc-surface-description="">
@@ -64,14 +72,21 @@ const ProjectIntelligenceBody: FC = () => {
   );
 };
 
-export const PccProjectIntelligenceCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccProjectIntelligenceCard: FC<PccProjectIntelligenceCardProps> = ({
+  state = 'preview',
+  profile,
+}) => (
   <PccDashboardCard
     footprint="hero"
     eyebrow={PROJECT_HOME_SURFACE.displayName}
     title="Project Intelligence Header"
     dataActiveSurfacePanel="project-home"
   >
-    {state === 'preview' ? <ProjectIntelligenceBody /> : <PccPreviewState state={state} />}
+    {state === 'preview' ? (
+      <ProjectIntelligenceBody profile={profile ?? SAMPLE_PROJECT_PROFILE} />
+    ) : (
+      <PccPreviewState state={state} />
+    )}
   </PccDashboardCard>
 );
 

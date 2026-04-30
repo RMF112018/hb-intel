@@ -1,10 +1,18 @@
 import type { FC } from 'react';
-import { SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS } from '@hbc/models/pcc';
+import {
+  SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
+  type IExternalSystemMissingConfig,
+} from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
+
+interface PccMissingConfigurationsCardProps extends PccProjectHomeCardProps {
+  /** Optional read-model data; when omitted, falls back to SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS. */
+  readonly missingConfigurations?: readonly IExternalSystemMissingConfig[];
+}
 
 function severityToneFor(severity: string): 'danger' | 'warning' | 'info' | 'neutral' {
   switch (severity) {
@@ -21,9 +29,11 @@ function severityToneFor(severity: string): 'danger' | 'warning' | 'info' | 'neu
   }
 }
 
-const MissingConfigurationsBody: FC = () => (
+const MissingConfigurationsBody: FC<{
+  missingConfigurations: readonly IExternalSystemMissingConfig[];
+}> = ({ missingConfigurations }) => (
   <ul className={styles.list} data-pcc-missing-configurations-body="">
-    {SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS.map((config) => (
+    {missingConfigurations.map((config) => (
       <li
         key={config.systemId}
         className={styles.listRow}
@@ -48,9 +58,18 @@ const MissingConfigurationsBody: FC = () => (
   </ul>
 );
 
-export const PccMissingConfigurationsCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccMissingConfigurationsCard: FC<PccMissingConfigurationsCardProps> = ({
+  state = 'preview',
+  missingConfigurations,
+}) => (
   <PccDashboardCard footprint="compact" eyebrow="Setup" title="Missing Configurations">
-    {state === 'preview' ? <MissingConfigurationsBody /> : <PccPreviewState state={state} />}
+    {state === 'preview' ? (
+      <MissingConfigurationsBody
+        missingConfigurations={missingConfigurations ?? SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS}
+      />
+    ) : (
+      <PccPreviewState state={state} />
+    )}
   </PccDashboardCard>
 );
 
