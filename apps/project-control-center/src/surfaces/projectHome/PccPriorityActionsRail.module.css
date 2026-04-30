@@ -1,0 +1,160 @@
+/* Wave 5 / Prompt 03 — Priority Actions Rail UI styles.
+   Token-disciplined: uses the existing PCC `--pcc-space-*`,
+   `--pcc-color-*`, `--pcc-radius-*`, and `--pcc-status-*` variables.
+   No new tokens, no new dependencies, no hover-only critical meaning. */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-md);
+  min-width: 0;
+}
+
+.railEmpty {
+  margin: 0;
+  padding: var(--pcc-space-sm);
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  background: var(--pcc-color-canvas);
+  border-radius: var(--pcc-radius-sm);
+  border: 1px dashed var(--pcc-color-border);
+  text-align: center;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+  min-width: 0;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pcc-space-xs);
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.2;
+}
+
+.groupCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  background: var(--pcc-color-canvas);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-full);
+  line-height: 1;
+}
+
+.groupEmpty {
+  margin: 0;
+  padding: 2px var(--pcc-space-sm);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pcc-space-sm);
+  padding: var(--pcc-space-sm);
+  border-radius: var(--pcc-radius-sm);
+  background: var(--pcc-color-canvas);
+  border-left: 3px solid var(--pcc-color-border);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.row[data-pcc-priority-rail-action-tone='high'] {
+  border-left-color: var(--pcc-status-danger);
+}
+
+.row[data-pcc-priority-rail-action-tone='medium'] {
+  border-left-color: var(--pcc-status-warning);
+}
+
+.row[data-pcc-priority-rail-action-tone='low'] {
+  border-left-color: var(--pcc-status-info);
+}
+
+.rowMain {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.35;
+}
+
+.rowSummary {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.rowMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.rowMetaSep::before {
+  content: '·';
+  margin-right: 6px;
+  color: var(--pcc-color-text-muted);
+}
+
+/* Inert affordance — non-interactive span. Not a button, no onClick, no
+   anchor, no href. Visual style intentionally communicates "read-only"
+   without implying a future click affordance. No hover-only critical
+   meaning (§5.4 Full-Page Overlay). */
+.rowAffordance {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+  background: transparent;
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-full);
+  line-height: 1.4;
+  user-select: none;
+  flex: 0 0 auto;
+}
