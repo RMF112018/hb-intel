@@ -221,4 +221,22 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     expect(prioritySpy).not.toHaveBeenCalled();
     expect(docSpy).not.toHaveBeenCalled();
   });
+
+  it('renders safe error state for team-and-access when the read-model client is backend-unavailable (Wave 6 / Prompt 07)', async () => {
+    const client = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccSurfaceRouter activeSurfaceId="team-and-access" readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    await waitFor(() => {
+      const marker = container.querySelector('[data-pcc-team-access-read-model-content]');
+      expect(marker?.getAttribute('data-pcc-team-access-read-model-content')).toBe('error');
+    });
+    expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-team-access-lane]')).toBeNull();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });

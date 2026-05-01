@@ -88,6 +88,61 @@ const FORBIDDEN_API_RUNTIME_TOKENS = [
   'AdobeSignClient',
 ] as const;
 
+/**
+ * Wave 6 / Prompt 07 — workspace-wide mutation / execution identifiers.
+ *
+ * The SPFx app must never declare or call any of these identifiers — they
+ * imply imperative side-effects (permission mutation, approval/workflow
+ * execution, SharePoint group mutation, Teams membership mutation,
+ * provisioning, Site Health repair) that the read-model / preview surfaces
+ * are not authorized to perform. The list is **identifier-form only**
+ * (camelCase function/method names) so legitimate UI prose, type names,
+ * and persona names cannot trip the scan after comments+strings stripping.
+ * Generic words like `group`, `team`, `member`, `permission`, `approve`,
+ * `reject` are intentionally excluded.
+ */
+const FORBIDDEN_MUTATION_EXECUTION_IDENTIFIERS = [
+  // Permission mutation
+  'grantPermission',
+  'revokePermission',
+  'mutatePermission',
+  'mutatePermissions',
+  'assignPermission',
+  'removePermission',
+  // Approval / workflow execution
+  'executeApproval',
+  'executeWorkflow',
+  'submitApproval',
+  'persistApproval',
+  'persistRejection',
+  'persistDecision',
+  'runApprovalWorkflow',
+  // SharePoint group mutation
+  'addUserToGroup',
+  'removeUserFromGroup',
+  'addToGroup',
+  'removeFromGroup',
+  'mutateGroup',
+  // Teams membership mutation
+  'addTeamMember',
+  'removeTeamMember',
+  'addChannelMember',
+  'removeChannelMember',
+  'joinTeam',
+  'leaveTeam',
+  // Provisioning execution
+  'provisionSite',
+  'provisionTenant',
+  'applySiteTemplate',
+  'runProvisioning',
+  'executeProvisioning',
+  // Site Health repair execution
+  'runRepair',
+  'executeRepair',
+  'applyRepair',
+  'repairExecutor',
+] as const;
+
 const ALLOWED_MOUNT_API_IMPORT_PATHS = new Set<string>([
   './api/pccReadModelClientFactory',
   './api/pccReadModelClientFactory.js',
@@ -775,6 +830,27 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
       'PccSurfaceRouter readModelClient consumer set must equal exactly [project-home, team-and-access]',
     ).toEqual(['project-home', 'team-and-access']);
   });
+
+  it.each(FORBIDDEN_MUTATION_EXECUTION_IDENTIFIERS)(
+    'no PCC source file declares or calls mutation/execution identifier %s (Wave 6 / Prompt 07)',
+    (identifier) => {
+      const allTsFiles = listAllTsFilesRecursive(SRC_ROOT).filter(
+        (f) => !/\.test\.(ts|tsx)$/.test(f),
+      );
+      const offenders: string[] = [];
+      for (const filePath of allTsFiles) {
+        const raw = readFileSync(filePath, 'utf8');
+        const tokenStripped = stripCommentsAndStringsRobust(raw);
+        if (tokenStripped.includes(identifier)) {
+          offenders.push(filePath);
+        }
+      }
+      expect(
+        offenders,
+        `expected no PCC source file to declare or call mutation/execution identifier '${identifier}', found:\n${offenders.join('\n')}`,
+      ).toEqual([]);
+    },
+  );
 
   it('pccBackendReadModelClient.ts adds zero new direct `fetch(` callsites in Wave 6 / Prompt 06', () => {
     expect(existsSync(BACKEND_CLIENT_FILE)).toBe(true);

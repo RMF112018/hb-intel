@@ -33,6 +33,16 @@ const FORBIDDEN_EXECUTABLE_TOKENS: readonly string[] = [
   'approve',
   'reject',
   'permission',
+  // Wave 6 / Prompt 07 — explicit SharePoint group / Teams membership /
+  // Graph mutation identifiers. Additive to the fragment-based list
+  // above; covers identifiers the fragment list does not catch with
+  // precision (e.g. CamelCase Graph SDK call sites).
+  'addUserToGroup',
+  'removeUserFromGroup',
+  'addTeamMember',
+  'addChannelMember',
+  'joinedTeams',
+  'graphMembers',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {

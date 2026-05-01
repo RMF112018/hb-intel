@@ -285,6 +285,44 @@ into backend mode.
   consumers and asserts `pccBackendReadModelClient.ts` holds exactly
   one `fetch(` callsite.
 
+### Wave 6 Guardrail Hardening (Prompt 07)
+
+Wave 6 / Prompt 07 hardens regression coverage **without changing any
+source** — it adds tests only:
+
+- **Workspace-wide mutation/execution identifier scan** in
+  `apps/project-control-center/src/tests/pcc-api-dormancy.test.ts`. A new
+  constant `FORBIDDEN_MUTATION_EXECUTION_IDENTIFIERS` enumerates
+  identifier-form (camelCase) tokens grouped by category (permission
+  mutation, approval/workflow execution, SharePoint group mutation,
+  Teams membership mutation, provisioning execution, Site Health
+  repair). Every `apps/project-control-center/src/**/*.{ts,tsx}` source
+  file (test files excluded) is scanned with comments+strings stripped;
+  no source file may declare or call any forbidden identifier. Generic
+  fragment words (`group`, `team`, `member`, `permission`, `approve`,
+  `reject`) are intentionally excluded from the scan to avoid false
+  positives in legitimate UI prose, type names, and persona names.
+- **Direct state-rendering coverage** for
+  `PccTeamAccessReadModelContent` in a new
+  `PccTeamAccessReadModelContent.test.tsx`. Stub clients exercise the
+  `'preview'`, `'error'`, `'loading'`, and rejected-promise branches;
+  a `globalThis.fetch` spy stays at zero calls across all four cases.
+- **Backend-unavailable opt-in** scenario for `team-and-access` in
+  `PccApp.optIn.test.tsx`: rendering the surface-router with a
+  `simulateBackendUnavailable: true` fixture client surfaces the safe
+  error state (no lane markers, `[data-pcc-state="error"]`, zero
+  fetch).
+- **Backend route-guardrails extension**: the
+  `pcc-read-model-route-guardrails.test.ts`
+  `FORBIDDEN_EXECUTABLE_TOKENS` list is extended with explicit
+  CamelCase / Graph-API-path identifiers (`addUserToGroup`,
+  `removeUserFromGroup`, `addTeamMember`, `addChannelMember`,
+  `joinedTeams`, `graphMembers`) — additive to the existing
+  fragment-based list.
+
+Wave 4 / Wave 5 / Wave 6 prior-prompt assertions remain green and
+unchanged; the new scans are purely additive.
+
 ### Wave 5 Priority Actions Rail (Project Home)
 
 The Priority Actions card on Project Home renders a PCC-local four-group rail
