@@ -294,28 +294,31 @@ Wave 8 must not duplicate source-module record ownership where a downstream modu
 
 ## Constraints and Exclusions
 
-This Wave 8 scope lock does not authorize:
+This Scope Lock document itself does not authorize any Wave 8 implementation. Bounded Wave 8 implementation scope (shared model and read-model framework contracts, deterministic fixtures, optional GET-only mock read-model route extension, SPFx fixture/client parity, Project Readiness Center shell rendering, inert action affordances, source/degraded-state rendering, and closeout documentation) is governed by `Wave_8_Implementation_Authorization.md`.
 
-- readiness runtime implementation in SPFx;
-- backend route creation;
-- persistence model implementation;
-- scoring engine implementation;
-- approval execution runtime;
-- external integration runtime behavior;
-- tenant/deployment/package operations.
+Independent of any later authorization, the following remain forbidden in Wave 8 and must be explicitly preserved by every downstream prompt:
+
+- live runtime integrations (Microsoft Graph, PnP, SharePoint REST, Procore, Document Crunch, Adobe Sign, Sage);
+- mutations of any kind (Graph file operations, list mutations, permission mutations, secrets, app settings, external-system writeback);
+- workflow execution, scoring engine, approval execution;
+- Wave 9 lifecycle-readiness checklist library implementation;
+- Wave 10 Permit Log, Wave 11 Responsibility Matrix / RACI, Wave 12 Constraints Log, Wave 13 Buyout Log, Wave 14 Approvals / Checkpoints runtime;
+- tenant operations, app catalog operations, `.sppkg` generation/upload, hosted/tenant probes;
+- package version, manifest version, SPFx package, or dependency changes;
+- CI/CD workflow edits and production rollout.
 
 ## Acceptance Criteria
 
-This Prompt 02 documentation update passes when:
+This Scope Lock document is acceptable when:
 
 - Wave 8 is consistently defined as the shared Project Readiness Module Framework.
 - Project Readiness Center is the documented user-facing name.
-- Wave 9 remains a downstream checklist module, not the Wave 8 framework.
 - Wave 9 remains a downstream lifecycle-readiness module, not the Wave 8 framework.
 - Waves 10–14 are clearly downstream modules that plug into Wave 8.
 - Priority Actions, Approvals, Site Health, Team & Access, and Document Control relationships are clear and non-duplicative.
-- Guardrails are explicit.
-- No runtime implementation is claimed.
+- Framework definitions, domains, lifecycle gates, the readiness item model, role/action authority, and guardrails remain governed exclusively by this Scope Lock.
+- Bounded implementation scope is governed by `Wave_8_Implementation_Authorization.md`; this Scope Lock does not authorize implementation directly.
+- No runtime implementation is claimed by this document.
 - No edits are made under `docs/architecture/plans/**`.
 
 ## Recommended Implementation Sequence
