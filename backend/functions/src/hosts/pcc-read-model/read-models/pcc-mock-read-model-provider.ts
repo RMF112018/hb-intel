@@ -16,6 +16,7 @@ import {
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILES,
+  SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
@@ -31,6 +32,7 @@ import type {
   PccProjectId,
   PccProjectNumber,
   PccProjectProfileReadModel,
+  PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
   PccReadModelWarning,
@@ -50,6 +52,16 @@ const DEFAULT_GENERATED_AT = '2026-04-30T00:00:00.000Z';
 // Settings fixture is intentionally absent in @hbc/models/pcc as of Wave 3 /
 // Prompt 03; the mock returns an empty registry rather than synthesize data.
 const SAMPLE_SETTINGS_REFS: readonly IPccSettingsRef[] = [];
+
+const EMPTY_PROJECT_READINESS_SNAPSHOT: PccProjectReadinessFrameworkReadModel = {
+  items: [],
+  domainSummaries: [],
+  gateSummaries: [],
+  ownershipSummaries: [],
+  evidenceSummary: [],
+  blockerSummary: [],
+  sourceHealthSummary: [],
+};
 
 const DOCUMENT_CONTROL_SOURCES_ORDERED: readonly IDocumentControlSource[] =
   DOCUMENT_CONTROL_SOURCE_IDS.map((id) => DOCUMENT_CONTROL_SOURCES[id]);
@@ -585,6 +597,42 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       viewerPersona,
       this.statusForKnownProject(projectId),
       { settings: SAMPLE_SETTINGS_REFS },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getProjectReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_READINESS_SNAPSHOT,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROJECT_READINESS_SNAPSHOT,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
       this.warningsForKnownProject(projectId),
     );
   }

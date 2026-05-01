@@ -16,6 +16,7 @@ import type {
   PccProjectHomeReadModel,
   PccProjectId,
   PccProjectProfileReadModel,
+  PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccSettingsReadModel,
   PccSiteHealthReadModel,
@@ -60,6 +61,10 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccSettingsReadModel>>;
+  getProjectReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {

@@ -79,3 +79,9 @@ registerPccReadRoute(
   'pcc/projects/{projectId}/team-access',
   async (projectId) => provider.getTeamAccess(projectId),
 );
+
+registerPccReadRoute(
+  'getPccProjectReadiness',
+  'pcc/projects/{projectId}/project-readiness',
+  async (projectId) => provider.getProjectReadiness(projectId),
+);
