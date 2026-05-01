@@ -481,8 +481,8 @@ docs/reference/example/
 | `Project_Closeout_Checklist(1).pdf`                       | Closeout & Warranty Center, Document Control, Risk, Action Center      |
 | `Permit_Log_Template.xlsx`                                | Permit & AHJ Center                                                    |
 | `10b_20260220_RequiredInspectionsList(1).xlsx`            | Inspection Readiness Center                                            |
-| `Responsibility Matrix - Template(1).xlsx`                | Responsibility Matrix Center, Team & Access, Action Center             |
-| `Responsibility Matrix - Owner Contract Template(1).xlsx` | Contract & Obligation Center                                           |
+| `Responsibility Matrix - Template.xlsx`                   | Responsibility Matrix Center, Team & Access, Action Center             |
+| `Responsibility Matrix - Owner Contract Template.xlsx`    | Contract & Obligation Center                                           |
 | `06 20260307_SOP_SubScorecard-DRAFT(1).xlsx`              | Subcontractor Performance Center, Procurement & Buyout, Closeout       |
 | `07 20260307_SOP_LessonsLearnedReport-DRAFT(1).xlsx`      | Lessons Learned Center, Best Practices, HBI knowledge base             |
 

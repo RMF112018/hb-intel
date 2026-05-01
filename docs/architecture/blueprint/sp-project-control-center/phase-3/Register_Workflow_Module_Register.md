@@ -86,7 +86,7 @@ All workflow modules live under **Project Readiness** in MVP, with functional cl
 | Project Readiness Module Framework | 8 | Waves 1–3 |
 | Job Startup Checklist | 9 | Wave 8 |
 | Permit Log | 10 | Wave 8 |
-| Responsibility Matrix | 11 | Wave 8 |
+| Responsibility Matrix | 11 | Prior readiness waves |
 | Constraints Log | 12 | Wave 8 |
 | Buyout Log | 13 | Wave 8 |
 | Approvals / Checkpoints | 14 | Waves 6, 8–13 |
