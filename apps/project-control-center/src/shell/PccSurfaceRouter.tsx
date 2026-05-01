@@ -13,24 +13,27 @@ import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProj
 import type { IPccProjectHomeReadModelClient } from '../surfaces/projectHome/projectHomeViewModel';
 import type { IPccTeamAccessReadModelClient } from '../surfaces/teamAccess/useTeamAccessReadModel';
 import type { IPccDocumentsReadModelClient } from '../surfaces/documents/documentControlViewModel';
+import type { IPccProjectReadinessReadModelClient } from '../surfaces/projectReadiness/projectReadinessViewModel';
 
 /**
- * Combined narrow read-model client surface for the router. Lists only
- * the methods consumed by Project Home, Team & Access, and Documents;
- * the full `IPccReadModelClient` returned by `createPccReadModelClient`
- * flows in via TypeScript structural typing.
+ * Combined narrow read-model client surface for the router. Lists the
+ * methods consumed by surfaces that opt into the read-model seam (Project
+ * Home, Team & Access, Documents, Project Readiness). The full
+ * `IPccReadModelClient` returned by `createPccReadModelClient` flows in
+ * via TypeScript structural typing.
  */
 export interface IPccSurfaceRouterReadModelClient
   extends IPccProjectHomeReadModelClient,
     IPccTeamAccessReadModelClient,
-    IPccDocumentsReadModelClient {}
+    IPccDocumentsReadModelClient,
+    IPccProjectReadinessReadModelClient {}
 
 export interface PccSurfaceRouterProps {
   activeSurfaceId: PccMvpSurfaceId;
   /**
-   * Wave 4 / Prompt 05 + Wave 6 / Prompt 06 — opt-in read-model client.
-   * Threaded to exactly two surfaces: Project Home and Team & Access.
-   * Other surfaces remain fixture/preview-driven.
+   * Opt-in read-model client. Threaded to surfaces that consume
+   * envelope-driven read-models. Other surfaces remain fixture/preview
+   * driven.
    */
   readModelClient?: IPccSurfaceRouterReadModelClient;
 }
@@ -63,7 +66,7 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
     case 'documents':
       return <PccDocumentsSurface readModelClient={readModelClient} />;
     case 'project-readiness':
-      return <PccProjectReadinessSurface />;
+      return <PccProjectReadinessSurface readModelClient={readModelClient} />;
     case 'approvals':
       return <PccApprovalsSurface />;
     case 'external-systems':

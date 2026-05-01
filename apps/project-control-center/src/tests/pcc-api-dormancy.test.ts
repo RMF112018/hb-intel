@@ -50,6 +50,11 @@ const PROJECT_HOME_ADAPTER_FILE = resolve(
   'projectHome',
   'projectHomeAdapter.ts',
 );
+const PROJECT_READINESS_ADAPTER_FILE = resolve(
+  SURFACES_DIR,
+  'projectReadiness',
+  'projectReadinessAdapter.ts',
+);
 
 const FORBIDDEN_API_IDENTIFIERS = [
   'IPccReadModelClient',
@@ -181,6 +186,17 @@ const API_IMPORT_RULES: readonly IApiImportRule[] = [
     namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
     description:
       'projectHomeAdapter.ts value-import mapPccSourceStatusToPreviewState (Prompt 04)',
+  },
+  {
+    file: PROJECT_READINESS_ADAPTER_FILE,
+    typeOnly: false,
+    sourcePaths: new Set([
+      '../../api/pccReadModelStateMapping',
+      '../../api/pccReadModelStateMapping.js',
+    ]),
+    namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
+    description:
+      'projectReadinessAdapter.ts value-import mapPccSourceStatusToPreviewState (Wave 8 / Prompt 05)',
   },
 ];
 
@@ -797,11 +813,11 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     ).toEqual([]);
   });
 
-  it('PccSurfaceRouter threads readModelClient to exactly three surfaces (project-home + team-and-access + documents)', () => {
-    // Wave 7 / Prompt 03B added the documents surface as a read-model
-    // consumer (HB Document Control Center three-lane shell driven by
-    // the document-control envelope). The dormancy guard now allows
-    // exactly three JSX prop usages.
+  it('PccSurfaceRouter threads readModelClient to exactly four surfaces (project-home + team-and-access + documents + project-readiness)', () => {
+    // Wave 8 / Prompt 05 added the project-readiness surface as a
+    // read-model consumer (Project Readiness Center framework shell
+    // driven by the project-readiness envelope). The dormancy guard
+    // now allows exactly four JSX prop usages.
     expect(existsSync(ROUTER_FILE)).toBe(true);
     const raw = readFileSync(ROUTER_FILE, 'utf8');
     // Use comments-only stripping. The robust comment+string stripper
@@ -812,21 +828,21 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     const matches = commentStripped.match(/readModelClient\s*=\s*\{/g) ?? [];
     expect(
       matches.length,
-      'expected exactly three JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access + documents)',
-    ).toBe(3);
+      'expected exactly four JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access + documents + project-readiness)',
+    ).toBe(4);
 
     // Set-equality assertion: the surfaces that receive the
-    // readModelClient must equal exactly { 'project-home', 'team-and-access', 'documents' }.
+    // readModelClient must equal exactly { 'project-home', 'team-and-access', 'documents', 'project-readiness' }.
     const consumerCases = Array.from(
       commentStripped.matchAll(
-        /case\s+(['"])(project-home|team-and-access|documents)\1\s*:\s*[\s\S]*?readModelClient\s*=\s*\{/g,
+        /case\s+(['"])(project-home|team-and-access|documents|project-readiness)\1\s*:\s*[\s\S]*?readModelClient\s*=\s*\{/g,
       ),
       (m) => m[2] as string,
     );
     expect(
       consumerCases.slice().sort(),
-      'PccSurfaceRouter readModelClient consumer set must equal exactly [documents, project-home, team-and-access]',
-    ).toEqual(['documents', 'project-home', 'team-and-access']);
+      'PccSurfaceRouter readModelClient consumer set must equal exactly [documents, project-home, project-readiness, team-and-access]',
+    ).toEqual(['documents', 'project-home', 'project-readiness', 'team-and-access']);
   });
 
   it.each(FORBIDDEN_MUTATION_EXECUTION_IDENTIFIERS)(

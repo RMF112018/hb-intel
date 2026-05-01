@@ -13,7 +13,7 @@ const SURFACE_PREVIEW_COPY: Record<(typeof PROMPT_07_SURFACES)[number], string> 
   'team-and-access': 'Preview-only team and access lifecycle',
   'control-center-settings': 'Preview-only settings visibility',
   approvals: 'Preview-only approval tracking',
-  'project-readiness': 'Preview-only readiness rollup',
+  'project-readiness': 'Read-only readiness framework preview',
 };
 
 describe('Prompt 07 routed surface invariants', () => {
