@@ -401,6 +401,8 @@ copy.
   `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-02/03_PCC_UI_Wireframe_and_Flexible_Layout_Contract.md`
 - Wave 1 closeout (PCC shared foundations):
   `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-1/Wave_1_Closeout.md`
+- Wave 7 closeout (HB Document Control Center):
+  [`docs/architecture/blueprint/sp-project-control-center/phase-3/wave-7/Wave_7_Closeout.md`](../../docs/architecture/blueprint/sp-project-control-center/phase-3/wave-7/Wave_7_Closeout.md)
 
 ---
 
