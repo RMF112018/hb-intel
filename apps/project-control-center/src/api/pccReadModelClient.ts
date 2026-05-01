@@ -1,16 +1,16 @@
 /**
- * PCC SPFx read-model client boundary (Phase 3 / Wave 3 / Prompt 06).
+ * PCC SPFx read-model client boundary.
  *
- * Type-only seam describing how the SPFx app would request the seven
- * Wave 3 backend read-model envelopes. The boundary is intentionally
- * dormant: it is not imported by `mount`, `PccApp`, the shell, or any
- * surface in this wave. Surfaces remain fixture-driven via direct
- * `@hbc/models/pcc` imports.
+ * Type-only seam describing how the SPFx app requests PCC backend
+ * read-model envelopes. The boundary is intentionally dormant for
+ * surfaces still rendering pure fixtures: it is not imported by
+ * `mount`, `PccApp`, the shell, or any surface that has not opted in.
+ * Opted-in surfaces remain fixture-first by default and only use the
+ * backend client when explicitly configured.
  *
  * No HTTP execution, base URL resolution, response parsing, or auth
- * behavior is defined here. A future prompt may introduce a backend
- * HTTP implementation behind this same interface as an explicit,
- * opt-in mode.
+ * behavior is defined here. The backend HTTP implementation lives
+ * behind this same interface as an explicit, opt-in mode.
  */
 
 import type {
@@ -21,6 +21,7 @@ import type {
   PccProjectHomeReadModel,
   PccProjectId,
   PccProjectProfileReadModel,
+  PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
@@ -38,13 +39,14 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'external-links',
   'site-health',
   'team-access',
+  'project-readiness',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
 
 /**
- * Static route path templates that mirror the seven GET-only Wave 3
- * Functions routes registered under `/api/pcc/projects/{projectId}/...`.
+ * Static route path templates that mirror the GET-only Functions routes
+ * registered under `/api/pcc/projects/{projectId}/...`.
  *
  * These are inert string templates. They do not perform base URL
  * resolution, request execution, response parsing, or auth handling.
@@ -58,10 +60,11 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'external-links': 'pcc/projects/{projectId}/external-links',
   'site-health': 'pcc/projects/{projectId}/site-health',
   'team-access': 'pcc/projects/{projectId}/team-access',
+  'project-readiness': 'pcc/projects/{projectId}/project-readiness',
 };
 
 /**
- * Typed read-only client boundary for Wave 3 PCC backend envelopes.
+ * Typed read-only client boundary for PCC backend read-model envelopes.
  *
  * Each method returns a `PccReadModelEnvelope<T>` matching the
  * envelope shape produced by the backend mock provider. Implementations
@@ -109,4 +112,9 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccTeamAccessReadModel>>;
+
+  getProjectReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>>;
 }

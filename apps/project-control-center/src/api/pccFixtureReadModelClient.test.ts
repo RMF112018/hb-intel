@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   SAMPLE_PROJECT_PROFILES,
+  SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
@@ -23,8 +24,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getExternalLinks(KNOWN_PROJECT_ID),
       client.getSiteHealth(KNOWN_PROJECT_ID),
       client.getTeamAccess(KNOWN_PROJECT_ID),
+      client.getProjectReadiness(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(8);
+    expect(envelopes).toHaveLength(9);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -78,6 +80,14 @@ describe('createPccFixtureReadModelClient — defaults', () => {
     const teamAccess = await client.getTeamAccess(KNOWN_PROJECT_ID);
     expect(teamAccess.data.preview).toBe(SAMPLE_TEAM_ACCESS_PREVIEW_MODEL);
     expect(teamAccess.sourceStatus).toBe('available');
+
+    const readiness = await client.getProjectReadiness(KNOWN_PROJECT_ID);
+    expect(readiness.mode).toBe('fixture');
+    expect(readiness.readOnly).toBe(true);
+    expect(readiness.sourceStatus).toBe('available');
+    expect(readiness.warnings).toEqual([]);
+    expect(readiness.data).toBe(SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL);
+    expect(readiness.data.items.length).toBeGreaterThan(0);
   });
 });
 
@@ -94,6 +104,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getExternalLinks(KNOWN_PROJECT_ID),
       client.getSiteHealth(KNOWN_PROJECT_ID),
       client.getTeamAccess(KNOWN_PROJECT_ID),
+      client.getProjectReadiness(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -111,6 +122,10 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
 
     const actions = await client.getPriorityActions(KNOWN_PROJECT_ID);
     expect(actions.data.actions).toEqual([]);
+
+    const readiness = await client.getProjectReadiness(KNOWN_PROJECT_ID);
+    expect(readiness.data.items.length).toBe(0);
+    expect(readiness.data.domainSummaries.length).toBe(0);
   });
 });
 

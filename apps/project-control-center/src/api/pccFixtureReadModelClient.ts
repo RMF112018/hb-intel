@@ -1,9 +1,9 @@
 /**
- * PCC SPFx fixture read-model client (Phase 3 / Wave 3 / Prompt 06).
+ * PCC SPFx fixture read-model client.
  *
- * Default, dormant implementation of `IPccReadModelClient` that
- * assembles `PccReadModelEnvelope<T>` values from the same
- * `@hbc/models/pcc` fixtures already consumed by Wave 2 surfaces.
+ * Default implementation of `IPccReadModelClient` that assembles
+ * `PccReadModelEnvelope<T>` values from the same `@hbc/models/pcc`
+ * fixtures already consumed by PCC surfaces.
  *
  * Returns fixture envelopes only. No HTTP execution, no response
  * parsing, no auth behavior. `viewerPersona` is passed straight
@@ -11,7 +11,7 @@
  * is derived from it.
  *
  * `simulateBackendUnavailable` returns `sourceStatus: 'backend-unavailable'`
- * envelopes for all seven methods; this exists so future consumers
+ * envelopes for every client method; this exists so future consumers
  * can unit-test envelope-status → preview-state mapping without
  * introducing an HTTP client.
  */
@@ -24,6 +24,7 @@ import {
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILES,
+  SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
@@ -38,6 +39,7 @@ import type {
   PccProjectId,
   PccProjectNumber,
   PccProjectProfileReadModel,
+  PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
   PccReadModelWarning,
@@ -299,6 +301,16 @@ const BACKEND_UNAVAILABLE_WARNING: PccReadModelWarning = {
 
 const SOURCE_UNAVAILABLE_WARNING_SOURCE = 'pcc-fixture-client';
 
+const EMPTY_PROJECT_READINESS_SNAPSHOT: PccProjectReadinessFrameworkReadModel = {
+  items: [],
+  domainSummaries: [],
+  gateSummaries: [],
+  ownershipSummaries: [],
+  evidenceSummary: [],
+  blockerSummary: [],
+  sourceHealthSummary: [],
+};
+
 class PccFixtureReadModelClient implements IPccReadModelClient {
   private readonly simulateBackendUnavailable: boolean;
   private readonly now: () => string;
@@ -520,6 +532,37 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
       this.statusForKnownProject(projectId),
       { preview: SAMPLE_TEAM_ACCESS_PREVIEW_MODEL },
       this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getProjectReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_READINESS_SNAPSHOT,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROJECT_READINESS_SNAPSHOT,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+      [],
     );
   }
 

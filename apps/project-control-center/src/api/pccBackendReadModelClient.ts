@@ -1,5 +1,5 @@
 /**
- * PCC SPFx backend HTTP read-model client (Phase 3 / Wave 4 / Prompt 03).
+ * PCC SPFx backend HTTP read-model client.
  *
  * Sole `fetch(` callsite in the SPFx app. Selected by the factory only
  * when `readModelMode: 'backend'` and a non-empty `backendBaseUrl`
@@ -7,7 +7,7 @@
  * other mount/config path.
  *
  * Contract:
- *   - GET-only against the seven Wave 3 read-only PCC routes.
+ *   - GET-only against the read-only PCC envelope routes.
  *   - Response body shape: `{ data: PccReadModelEnvelope<T> }`.
  *   - All failure modes (no fetch, network reject, non-2xx, malformed
  *     JSON, missing/non-envelope data, empty base URL) return safe
@@ -136,6 +136,10 @@ export function createPccBackendReadModelClient(
     getTeamAccess: (projectId, viewerPersona) =>
       callBackend('team-access', projectId, () =>
         fallback.getTeamAccess(projectId, viewerPersona),
+      ),
+    getProjectReadiness: (projectId, viewerPersona) =>
+      callBackend('project-readiness', projectId, () =>
+        fallback.getProjectReadiness(projectId, viewerPersona),
       ),
   };
 }
