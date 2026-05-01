@@ -31,6 +31,10 @@ import type {
   PccReadModelSourceStatus,
   PccReadModelWarning,
 } from '@hbc/models/pcc';
+import {
+  resolveLaneEnvelopeMessage,
+  type ISourceStateMessage,
+} from './sourceStateMessaging';
 
 export interface IPccDocumentsReadModelClient {
   getDocumentControl(
@@ -78,6 +82,13 @@ export interface IPccDocumentControlLaneViewModel {
   readonly entries: readonly IProjectDocumentSourceRegistryEntry[];
   readonly health: readonly IProjectDocumentSourceHealth[];
   readonly warningText?: string;
+  /**
+   * Envelope-level degraded cue. Set when `envelope.sourceStatus !== 'available'`.
+   * Carries lane-aware product-safe copy so the lane card renders a stable
+   * `data-pcc-doc-lane-degraded="<laneId>"` element instead of only an empty
+   * fallback. Undefined when the envelope is `available`.
+   */
+  readonly degraded?: ISourceStateMessage;
 }
 
 export interface IPccDocumentControlViewModel {
@@ -207,7 +218,12 @@ export function buildPccDocumentControlViewModel(
   for (const laneId of WAVE7_LANE_ORDER) {
     const laneEntryKeys = new Set(lanes[laneId].entries.map((e) => e.sourceKey));
     const laneHealth = health.filter((h) => laneEntryKeys.has(h.sourceKey));
-    lanes[laneId] = { ...lanes[laneId], health: laneHealth };
+    const degraded = resolveLaneEnvelopeMessage(laneId, sourceStatus);
+    lanes[laneId] = {
+      ...lanes[laneId],
+      health: laneHealth,
+      ...(degraded ? { degraded } : {}),
+    };
   }
 
   return {

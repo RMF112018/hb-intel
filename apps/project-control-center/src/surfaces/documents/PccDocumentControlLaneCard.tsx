@@ -11,12 +11,17 @@
  */
 
 import type { FC } from 'react';
+import type { DocumentControlSourceHealthState } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import styles from './PccDocumentsSurface.module.css';
 import type {
   DocumentControlWave7LaneId,
   IPccDocumentControlLaneViewModel,
 } from './documentControlViewModel';
+import {
+  resolveDisabledMessage,
+  resolveEntryHealthMessage,
+} from './sourceStateMessaging';
 
 export interface PccDocumentControlLaneCardProps {
   readonly laneViewModel: IPccDocumentControlLaneViewModel;
@@ -38,20 +43,29 @@ function bindingPathLabel(entry: IPccDocumentControlLaneViewModel['entries'][num
 function healthState(
   health: IPccDocumentControlLaneViewModel['health'],
   sourceKey: string,
-): string | undefined {
+): DocumentControlSourceHealthState | undefined {
   return health.find((h) => h.sourceKey === sourceKey)?.state;
 }
 
 export const PccDocumentControlLaneCard: FC<PccDocumentControlLaneCardProps> = ({
   laneViewModel,
 }) => {
-  const { laneId, title, description, entries, health, warningText } = laneViewModel;
+  const { laneId, title, description, entries, health, warningText, degraded } = laneViewModel;
   const previewLabels = PREVIEW_ACTION_LABELS[laneId];
 
   return (
     <PccDashboardCard footprint="standard" eyebrow="Lane" title={title}>
       <div className={styles.headerCopy} data-pcc-doc-lane={laneId}>
         <p className={styles.laneDescription}>{description}</p>
+        {degraded ? (
+          <p
+            className={styles.guardrail}
+            data-pcc-doc-lane-degraded={laneId}
+            data-pcc-doc-lane-degraded-tone={degraded.tone}
+          >
+            {degraded.message}
+          </p>
+        ) : null}
         {warningText ? (
           <p
             className={styles.guardrail}
@@ -69,6 +83,9 @@ export const PccDocumentControlLaneCard: FC<PccDocumentControlLaneCardProps> = (
             {entries.map((entry) => {
               const state = healthState(health, entry.sourceKey);
               const path = bindingPathLabel(entry);
+              const stateMessage = state ? resolveEntryHealthMessage(laneId, state) : undefined;
+              const disabledMessage =
+                entry.enabled === false ? resolveDisabledMessage(laneId) : undefined;
               return (
                 <li
                   key={entry.sourceKey}
@@ -79,8 +96,19 @@ export const PccDocumentControlLaneCard: FC<PccDocumentControlLaneCardProps> = (
                 >
                   <span className={styles.metaLabel}>{entry.displayName}</span>
                   {path ? <span data-pcc-doc-source-path={path}>{path}</span> : null}
-                  {state ? <span>· {state}</span> : null}
-                  {entry.enabled === false ? <span>· disabled</span> : null}
+                  {stateMessage && state ? (
+                    <span
+                      data-pcc-doc-source-health-message={state}
+                      data-pcc-doc-source-health-tone={stateMessage.tone}
+                    >
+                      · {stateMessage.label} — {stateMessage.message}
+                    </span>
+                  ) : null}
+                  {disabledMessage ? (
+                    <span data-pcc-doc-source-disabled="true">
+                      · {disabledMessage.message}
+                    </span>
+                  ) : null}
                 </li>
               );
             })}

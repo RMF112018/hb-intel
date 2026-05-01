@@ -719,3 +719,320 @@ describe('PccDocumentsSurface — permissions & guardrails (Wave 7 / Prompt 04)'
     expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-01"]')).not.toBeNull();
   });
 });
+
+// ─── Wave 7 / Prompt 05 — source-state / degraded-state rendering ───
+// User-safe, lane-aware copy for source-health and envelope source-status
+// states. Raw enum strings remain available only as `data-*` attributes;
+// the lane's visible textContent must never include them. No live source
+// repair, retry, folder-creation, or runtime integration is introduced.
+
+const PROJECT_RECORD_LIBRARY_ENTRY: IProjectDocumentSourceRegistryEntry = {
+  sourceKey: 'project-record-primary',
+  displayName: 'Project Record Library',
+  wave7Lane: 'project-record',
+  sourceKind: 'sharepoint-library',
+  enabled: true,
+  binding: {
+    kind: 'sharepoint-library',
+    siteId: 'site-stadium-enclave',
+    webId: 'web-stadium-enclave',
+    listId: 'list-project-record',
+    driveId: 'drive-project-record',
+    rootPath: '/Shared Documents/Project Record',
+  },
+};
+
+const EXTERNAL_PROCORE_ENTRY: IProjectDocumentSourceRegistryEntry = {
+  sourceKey: 'external-procore',
+  displayName: 'Procore',
+  wave7Lane: 'external-systems',
+  sourceKind: 'external-system',
+  enabled: true,
+  binding: {
+    kind: 'external-system',
+    systemId: 'procore',
+    projectRef: 'PROC-2600000',
+  },
+};
+
+const EXTERNAL_ADOBE_SIGN_DISABLED_ENTRY: IProjectDocumentSourceRegistryEntry = {
+  sourceKey: 'external-adobe-sign',
+  displayName: 'Adobe Sign',
+  wave7Lane: 'external-systems',
+  sourceKind: 'external-system',
+  enabled: false,
+  binding: {
+    kind: 'external-system',
+    systemId: 'adobe-sign',
+    projectRef: '26-000-00',
+  },
+};
+
+function envelopeWithHealth(input: {
+  readonly sourceStatus: PccReadModelSourceStatus;
+  readonly registry: readonly IProjectDocumentSourceRegistryEntry[];
+  readonly health: readonly { sourceKey: string; state: string; message: string }[];
+}): PccReadModelEnvelope<PccDocumentControlReadModel> {
+  return {
+    projectId: KNOWN_PROJECT_ID,
+    mode: 'fixture',
+    sourceStatus: input.sourceStatus,
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: {
+      sources: [],
+      wave7LaneVocabulary: ['project-record', 'my-project-files', 'external-systems'],
+      sourceRegistry: input.registry,
+      sourceHealth: input.health as PccDocumentControlReadModel['sourceHealth'],
+    },
+  };
+}
+
+// Only kebab-case raw enum tokens are checked for leakage; plain English words
+// like "unavailable" / "degraded" appear legitimately in product-safe copy.
+const RAW_HEALTH_ENUMS = [
+  'missing-binding',
+  'access-denied',
+  'pending-initialization',
+  'folder-creation-failed',
+] as const;
+
+const RAW_ENVELOPE_ENUMS: readonly Exclude<PccReadModelSourceStatus, 'available'>[] = [
+  'backend-unavailable',
+  'source-unavailable',
+  'missing-config',
+  'stale',
+  'unauthorized',
+  'forbidden',
+];
+
+const RAW_ERROR_LEAK_PATTERNS = [
+  /Microsoft\.Graph\./,
+  /TypeError/,
+  /\bError:\s/,
+  /\bat\s+[A-Z][A-Za-z]*\(/,
+  /OData/,
+];
+
+describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('Project Record: access-denied renders user-safe access-required message; raw enum absent from visible text', async () => {
+    const client = clientReturning(
+      envelopeWithHealth({
+        sourceStatus: 'available',
+        registry: [PROJECT_RECORD_LIBRARY_ENTRY],
+        health: [{ sourceKey: 'project-record-primary', state: 'access-denied', message: 'graph 403' }],
+      }),
+    );
+    const { container } = await renderWithClient(client);
+    const lane = container.querySelector('[data-pcc-doc-lane="project-record"]')!;
+    const entry = lane.querySelector('[data-pcc-document-source-id="project-record-primary"]')!;
+    expect(entry.getAttribute('data-pcc-doc-source-health')).toBe('access-denied');
+    const message = entry.querySelector('[data-pcc-doc-source-health-message="access-denied"]');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toMatch(/access/i);
+    expect(message!.textContent).toMatch(/administrator|request access/i);
+    expect(lane.textContent).not.toContain('access-denied');
+    expect(lane.textContent).not.toContain('graph 403');
+  });
+
+  it('Project Record: throttled renders Microsoft 365 temporarily-limited message; raw enum absent from visible text', async () => {
+    const client = clientReturning(
+      envelopeWithHealth({
+        sourceStatus: 'available',
+        registry: [PROJECT_RECORD_LIBRARY_ENTRY],
+        health: [{ sourceKey: 'project-record-primary', state: 'throttled', message: 'graph 429' }],
+      }),
+    );
+    const { container } = await renderWithClient(client);
+    const lane = container.querySelector('[data-pcc-doc-lane="project-record"]')!;
+    const message = lane.querySelector('[data-pcc-doc-source-health-message="throttled"]');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toMatch(/temporarily limited|temporarily/i);
+    expect(lane.textContent).not.toContain('throttled');
+    expect(lane.textContent).not.toContain('graph 429');
+  });
+
+  it('Project Record: missing-binding renders not-configured copy; raw enum absent from visible text', async () => {
+    const client = clientReturning(
+      envelopeWithHealth({
+        sourceStatus: 'available',
+        registry: [PROJECT_RECORD_LIBRARY_ENTRY],
+        health: [{ sourceKey: 'project-record-primary', state: 'missing-binding', message: 'binding null' }],
+      }),
+    );
+    const { container } = await renderWithClient(client);
+    const lane = container.querySelector('[data-pcc-doc-lane="project-record"]')!;
+    const message = lane.querySelector('[data-pcc-doc-source-health-message="missing-binding"]');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toMatch(/not configured|configured for the current project/i);
+    expect(lane.textContent).not.toContain('missing-binding');
+    expect(lane.textContent).not.toContain('binding null');
+  });
+
+  it('My Project Files: pending-initialization renders being-prepared message; raw enum absent from visible text', async () => {
+    const client = clientReturning(
+      envelopeWithHealth({
+        sourceStatus: 'available',
+        registry: [legitMpfEntry()],
+        health: [
+          { sourceKey: 'my-project-files-current-user', state: 'pending-initialization', message: 'graph drive create pending' },
+        ],
+      }),
+    );
+    const { container } = await renderWithClient(client);
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
+    const message = lane.querySelector('[data-pcc-doc-source-health-message="pending-initialization"]');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toMatch(/being prepared|setting up/i);
+    expect(lane.textContent).not.toContain('pending-initialization');
+    expect(lane.textContent).not.toContain('graph drive create pending');
+  });
+
+  it('My Project Files: folder-creation-failed renders setup-needed message; raw enum absent from visible text', async () => {
+    const client = clientReturning(
+      envelopeWithHealth({
+        sourceStatus: 'available',
+        registry: [legitMpfEntry()],
+        health: [
+          { sourceKey: 'my-project-files-current-user', state: 'folder-creation-failed', message: 'graph 5xx during drive create' },
+        ],
+      }),
+    );
+    const { container } = await renderWithClient(client);
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
+    const message = lane.querySelector('[data-pcc-doc-source-health-message="folder-creation-failed"]');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toMatch(/could not be created|administrator/i);
+    expect(lane.textContent).not.toContain('folder-creation-failed');
+    expect(lane.textContent).not.toContain('graph 5xx');
+  });
+
+  it('External Systems: disabled entry renders product-safe disabled copy via stable marker', async () => {
+    const client = clientReturning(
+      envelopeWithHealth({
+        sourceStatus: 'available',
+        registry: [EXTERNAL_PROCORE_ENTRY, EXTERNAL_ADOBE_SIGN_DISABLED_ENTRY],
+        health: [],
+      }),
+    );
+    const { container } = await renderWithClient(client);
+    const lane = container.querySelector('[data-pcc-doc-lane="external-systems"]')!;
+    const adobe = lane.querySelector('[data-pcc-document-source-id="external-adobe-sign"]')!;
+    const disabledMarker = adobe.querySelector('[data-pcc-doc-source-disabled="true"]');
+    expect(disabledMarker).not.toBeNull();
+    expect(disabledMarker!.textContent).toMatch(/not used|disabled/i);
+    // No "· disabled" raw label leaks into the entry text
+    expect(adobe.textContent).not.toMatch(/·\s*disabled\s*$/);
+  });
+
+  it.each(RAW_ENVELOPE_ENUMS)(
+    'envelope sourceStatus="%s": each lane renders a degraded cue and the raw enum is absent from visible text',
+    async (status) => {
+      const client = clientReturning(
+        envelopeWithHealth({ sourceStatus: status, registry: [], health: [] }),
+      );
+      const { container } = await renderWithClient(client);
+      for (const laneId of ['project-record', 'my-project-files', 'external-systems'] as const) {
+        const lane = container.querySelector(`[data-pcc-doc-lane="${laneId}"]`)!;
+        const cue = lane.querySelector(`[data-pcc-doc-lane-degraded="${laneId}"]`);
+        expect(cue, `lane ${laneId} should render a degraded cue for ${status}`).not.toBeNull();
+        expect(cue!.textContent && cue!.textContent.length).toBeGreaterThan(0);
+        expect(lane.textContent).not.toContain(status);
+      }
+    },
+  );
+
+  it('available envelope renders no lane-degraded cues', async () => {
+    const client = clientReturning(envelopeWithRegistry([legitMpfEntry()]));
+    const { container } = await renderWithClient(client);
+    for (const laneId of ['project-record', 'my-project-files', 'external-systems'] as const) {
+      const lane = container.querySelector(`[data-pcc-doc-lane="${laneId}"]`)!;
+      expect(lane.querySelector(`[data-pcc-doc-lane-degraded="${laneId}"]`)).toBeNull();
+    }
+  });
+
+  it('all degraded envelopes preserve inert preview-disabled action chips (no executable handlers)', async () => {
+    for (const status of RAW_ENVELOPE_ENUMS) {
+      cleanup();
+      const client = clientReturning(
+        envelopeWithHealth({ sourceStatus: status, registry: [], health: [] }),
+      );
+      const { container } = await renderWithClient(client);
+      const chips = container.querySelectorAll(
+        '[data-pcc-doc-action-execution-state="preview-disabled"]',
+      );
+      expect(chips.length).toBeGreaterThan(0);
+      for (const chip of chips) {
+        expect(chip.tagName).toBe('BUTTON');
+        const btn = chip as HTMLButtonElement;
+        expect(btn.disabled).toBe(true);
+        expect(btn.getAttribute('aria-disabled')).toBe('true');
+        expect(btn.getAttribute('onclick')).toBeNull();
+      }
+      const anchors = container.querySelectorAll('a[href]');
+      for (const a of anchors) {
+        const href = a.getAttribute('href') ?? '';
+        expect(href).not.toMatch(/^https?:\/\//);
+      }
+    }
+  });
+
+  it('no raw error / stack-trace style substrings leak in any rendered lane', async () => {
+    for (const status of RAW_ENVELOPE_ENUMS) {
+      cleanup();
+      const client = clientReturning(
+        envelopeWithHealth({
+          sourceStatus: status,
+          registry: [PROJECT_RECORD_LIBRARY_ENTRY],
+          health: [
+            {
+              sourceKey: 'project-record-primary',
+              state: 'unavailable',
+              // Intentionally leak-shaped backend message; UI must not surface it.
+              message: 'TypeError: Cannot read property of undefined at Microsoft.Graph.Client(',
+            },
+          ],
+        }),
+      );
+      const { container } = await renderWithClient(client);
+      for (const laneId of ['project-record', 'my-project-files', 'external-systems'] as const) {
+        const lane = container.querySelector(`[data-pcc-doc-lane="${laneId}"]`)!;
+        const text = lane.textContent ?? '';
+        for (const re of RAW_ERROR_LEAK_PATTERNS) {
+          expect(text, `lane ${laneId} (${status}) leaked: ${re}`).not.toMatch(re);
+        }
+        for (const e of RAW_HEALTH_ENUMS) {
+          expect(text, `lane ${laneId} (${status}) leaked raw health enum: ${e}`).not.toContain(e);
+        }
+      }
+    }
+  });
+
+  it('My Project Files lane renders no entries when envelope is non-available (preserves HN-01/HN-02 fail-closed)', async () => {
+    for (const status of RAW_ENVELOPE_ENUMS) {
+      cleanup();
+      // Even with a "well-formed" MPF entry, a non-available envelope must drop it.
+      const client = clientReturning(
+        envelopeWithHealth({ sourceStatus: status, registry: [legitMpfEntry()], health: [] }),
+      );
+      const { container } = await renderWithClient(client);
+      const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
+      expect(lane.querySelectorAll('[data-pcc-document-source-id]').length).toBe(0);
+      expect(lane.querySelector('[data-pcc-doc-lane-empty="true"]')).not.toBeNull();
+      expect(lane.textContent).not.toContain('99-999-99');
+    }
+  });
+});

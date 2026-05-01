@@ -334,6 +334,8 @@ export const DOCUMENT_CONTROL_SOURCE_HEALTH_STATES = [
   'missing-binding',
   'access-denied',
   'throttled',
+  'pending-initialization',
+  'folder-creation-failed',
 ] as const;
 export type DocumentControlSourceHealthState =
   (typeof DOCUMENT_CONTROL_SOURCE_HEALTH_STATES)[number];

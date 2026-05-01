@@ -244,4 +244,22 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     expect(env.data.sourceRegistry).toEqual([]);
     expect(env.data.roleActionAvailability).toEqual([]);
   });
+
+  // Wave 7 / Prompt 05 — published sourceHealthStates vocabulary must include
+  // the two MPF-specific health states added in this prompt. Backend mock
+  // (`pcc-mock-read-model-provider.ts`) mirrors literal values; both files
+  // publish the same set so SPFx ↔ backend parity holds.
+  it('publishes the Wave 7 source health vocabulary including pending-initialization and folder-creation-failed', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const states = env.data.sourceHealthStates ?? [];
+    expect(states).toContain('healthy');
+    expect(states).toContain('warning');
+    expect(states).toContain('degraded');
+    expect(states).toContain('unavailable');
+    expect(states).toContain('missing-binding');
+    expect(states).toContain('access-denied');
+    expect(states).toContain('throttled');
+    expect(states).toContain('pending-initialization');
+    expect(states).toContain('folder-creation-failed');
+  });
 });

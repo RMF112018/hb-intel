@@ -69,6 +69,8 @@ const WAVE7_SOURCE_HEALTH_STATES = [
   'missing-binding',
   'access-denied',
   'throttled',
+  'pending-initialization',
+  'folder-creation-failed',
 ] as const;
 const WAVE7_REVIEW_STATES = [
   'not-required',
