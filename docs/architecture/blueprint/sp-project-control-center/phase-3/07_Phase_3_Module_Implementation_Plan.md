@@ -63,7 +63,7 @@ Then implement each module as its own wave. This prevents every module from inve
 |    7 | HB Document Control Center                                          | Build three-lane model: Project Record + My Project Files + External Systems, with source binding, review routing, audit, and project-only OneDrive guardrail. | Waves 2–3                   |
 |    8 | Project Readiness Module Framework                                  | Build shared framework for structured readiness modules.                                                                                                       | Waves 2–3                   |
 |    9 | Project Lifecycle Readiness Center                                  | Build lifecycle readiness module seeded by startup, safety, and closeout checklist definition files.                                                           | Wave 8                      |
-|   10 | Permit Log                                                          | Build item-level permit workflow module.                                                                                                                       | Wave 8                      |
+|   10 | Permit & Inspection Control Center                                  | Define unified permit/inspection command-center architecture with internal `permits` and `required-inspections` model families.                              | Wave 8                      |
 |   11 | Responsibility Matrix                                               | Build item-level responsibility workflow, including owner-contract mapping.                                                                                    | Prior readiness waves       |
 |   12 | Constraints Log                                                     | Build item-level constraints workflow module.                                                                                                                  | Wave 8                      |
 |   13 | Buyout Log                                                          | Build item-level buyout/project-controls workflow module.                                                                                                      | Wave 8                      |
@@ -515,32 +515,37 @@ Build the Project Lifecycle Readiness Center as the first lifecycle-readiness mo
 - Lifecycle readiness module supports item-level tracking across startup, safety, and closeout source libraries.
 - Readiness blockers can flow to Priority Actions.
 - PM/PX can review status.
-- Wave 9 remains distinct from Wave 10 Permit Log, Wave 11 Responsibility Matrix, Wave 12 Constraints Log, Wave 13 Buyout Log, and Wave 14 Approvals / Checkpoints implementation ownership.
+- Wave 9 remains distinct from Wave 10 Permit & Inspection Control Center, Wave 11 Responsibility Matrix, Wave 12 Constraints Log, Wave 13 Buyout Log, and Wave 14 Approvals / Checkpoints implementation ownership.
 - Safety coverage remains readiness/workflow posture only (no Safety runtime integration, live inspection execution, incident-management runtime, OSHA engine, or external safety-system mutation).
 
 ---
 
-# Wave 10 — Permit Log
+# Wave 10 — Permit & Inspection Control Center
 
 ## Objective
 
-Build the Permit Log as an item-level workflow module.
+Define the target architecture for a unified Permit & Inspection Control Center as the Wave 10 module surface.
+
+Target architecture authority path:
+`docs/architecture/blueprint/sp-project-control-center/phase-3/wave-10/Permit_Inspection_Control_Center_Target_Architecture.md`
 
 ## Code Work
 
-- Permit item model.
-- Permit status tracking.
-- Authority/jurisdiction fields where applicable.
-- Required date / expiration / inspection-related reference fields.
-- Owner and responsible party.
-- Attachment/reference links.
-- Readiness blocker integration.
+- Unified command-center posture for permits and inspections with exception-first queueing.
+- Internal model-family continuity: preserve `permits` and `required-inspections` source families.
+- AHJ launcher-only posture; no AHJ runtime request/schedule/update behavior.
+- Procore launcher/reference-only posture; no Procore runtime sync/writeback in Wave 10 planning scope.
+- Permit/inspection field posture includes permit `revision`, permit `applicationValue`, permit `permitFee`, and inspection `reInspectionFee` as target-architecture fields.
+- Failed-inspection corrective-action and reinspection lineage model:
+  `parentInspectionId`, `childReinspectionId`, `failedItemSummary`, `correctiveActionOwner`, `correctiveActionDueDate`, `reinspectionRequired`, `reinspectionRequestedDate`, `reinspectionScheduledWindow`, `reInspectionFee`, `reinspectionResult`, `evidenceLinks`, `auditEvents`.
+- Evidence-backed closeout posture with authorized override-by-reason governance for exceptions.
+- Project Readiness, Priority Actions, Approvals / Checkpoints, HB Document Control Center, and External Systems integration seams remain required Wave 10 target posture.
 
 ## Exit Criteria
 
-- Permit Log supports item-level permit tracking.
-- Blocked/overdue permits surface as readiness blockers.
-- Superintendent and PM views are useful.
+- Wave 10 target architecture defines a unified permit/inspection command-center posture without implying runtime shipment.
+- Blocked/overdue permits and failed/reinspection items are defined to surface as readiness blockers and Priority Actions inputs.
+- Wave 10 target architecture remains explicitly linked to Wave 8 framework seams and Wave 14 approvals/checkpoints integration.
 
 ---
 
@@ -884,7 +889,7 @@ Close Phase 3 MVP implementation with formal validation, documentation, and read
 
 - Wave 8 — Project Readiness Module Framework
 - Wave 9 — Project Lifecycle Readiness Center
-- Wave 10 — Permit Log
+- Wave 10 — Permit & Inspection Control Center
 - Wave 11 — Responsibility Matrix
 - Wave 12 — Constraints Log
 - Wave 13 — Buyout Log

@@ -1461,7 +1461,7 @@ This module pulls directly from:
 
 - Project Startup Checklist
 - Required Inspections List
-- Permit Log
+- Permit & Inspection Control Center (internal source families: `permits`, `required-inspections`)
 - Responsibility Matrix - Field
 - Safety / QAQC workflows
 - Procore daily logs, if integrated

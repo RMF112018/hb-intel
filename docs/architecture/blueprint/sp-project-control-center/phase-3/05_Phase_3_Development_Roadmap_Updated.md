@@ -64,7 +64,7 @@ Required order:
 |    7 | HB Document Control Center                                          | Three-lane document architecture (Project Record, My Project Files, External Systems)         | Module wave                         |
 |    8 | Project Readiness Module Framework                                  | Shared item-level workflow framework                                                          | Module wave                         |
 |    9 | Project Lifecycle Readiness Center                                  | Lifecycle readiness module seeded by startup, safety, and closeout checklist definition files | Module wave                         |
-|   10 | Permit Log                                                          | Item-level permit workflow                                                                    | Module wave                         |
+|   10 | Permit & Inspection Control Center                                  | Unified permit/inspection command-center architecture using internal `permits` and `required-inspections` families | Module wave                         |
 |   11 | Responsibility Matrix                                               | Item-level responsibility workflow with owner-contract mapping                                | Module wave                         |
 |   12 | Constraints Log                                                     | Item-level constraints workflow                                                               | Module wave                         |
 |   13 | Buyout Log                                                          | Item-level buyout/project-controls workflow                                                   | Module wave                         |
@@ -105,7 +105,7 @@ Required order:
 
 - Wave 8 — Project Readiness Module Framework
 - Wave 9 — Project Lifecycle Readiness Center
-- Wave 10 — Permit Log
+- Wave 10 — Permit & Inspection Control Center
 - Wave 11 — Responsibility Matrix
 - Wave 12 — Constraints Log
 - Wave 13 — Buyout Log
@@ -114,7 +114,8 @@ Required order:
 Wave relationship lock:
 
 - Wave 8 defines the reusable Project Readiness Module Framework and Project Readiness Center shell definition.
-- Waves 9–14 implement module-specific behavior on that shared framework (Wave 9 Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix / RACI, Constraints Log, Buyout Log, and Approvals / Checkpoints).
+- Waves 9–14 implement module-specific behavior on that shared framework (Wave 9 Project Lifecycle Readiness Center, Wave 10 Permit & Inspection Control Center, Responsibility Matrix / RACI, Constraints Log, Buyout Log, and Approvals / Checkpoints).
+- Wave 10 target architecture authority path: `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-10/Permit_Inspection_Control_Center_Target_Architecture.md`.
 - Wave 9 is seeded by startup, safety, and closeout checklist-definition files in `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
 - Wave 9 surfaces lifecycle readiness signals and cross-module posture but does not assume implementation ownership of Waves 10–14 modules.
 - Wave 8 documentation does not authorize readiness runtime execution, backend routes, persistence, scoring engines, approval execution, or external integrations.
@@ -122,7 +123,7 @@ Wave relationship lock:
 Wave 8 framework planning posture:
 
 - Wave 8 establishes readiness domains, lifecycle gates, readiness item shape, posture/scoring semantics, and integration seams across source modules.
-- Wave 8 does not duplicate module-owned details from Team & Access, Document Control, Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, Approvals / Checkpoints, External Systems, or Site Health.
+- Wave 8 does not duplicate module-owned details from Team & Access, Document Control, Project Lifecycle Readiness Center, Wave 10 Permit & Inspection Control Center, Responsibility Matrix, Constraints Log, Buyout Log, Approvals / Checkpoints, External Systems, or Site Health.
 - Critical blocker posture overrides blended completion summaries; confidence posture remains separate from completion.
 
 ### Milestone 5 — Executive Experience and Hardening
