@@ -262,4 +262,43 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     expect(states).toContain('pending-initialization');
     expect(states).toContain('folder-creation-failed');
   });
+
+  // Wave 7 / Prompt 06 — known-project envelope publishes the canonical
+  // review-type and review-state vocabularies plus the deterministic
+  // two-row queue sample. Backend mock mirrors these values; this assertion
+  // locks SPFx fixture parity for downstream test consumers.
+  it('publishes the Wave 7 review-type vocabulary, review-state vocabulary, and deterministic queue sample for known projects', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    expect(env.data.reviewTypes).toEqual([
+      'chief-estimator-review',
+      'legal-review',
+      'compliance-review',
+      'leadership-review',
+      'project-execution-review',
+    ]);
+    expect(env.data.reviewStates).toEqual([
+      'not-required',
+      'pending',
+      'in-review',
+      'approved',
+      'rejected',
+      'waived',
+    ]);
+    const queue = env.data.reviewQueueSample ?? [];
+    expect(queue).toHaveLength(2);
+    expect(queue[0]).toEqual({
+      itemId: 'rvw-001',
+      fileName: 'Estimate-Backup-April.xlsx',
+      reviewType: 'leadership-review',
+      reviewState: 'pending',
+      assignedRoleCode: 'R19',
+    });
+    expect(queue[1]).toEqual({
+      itemId: 'rvw-002',
+      fileName: 'Compliance-Package-001.pdf',
+      reviewType: 'compliance-review',
+      reviewState: 'in-review',
+      assignedRoleCode: 'R18',
+    });
+  });
 });

@@ -15,6 +15,8 @@
 
 import { DOCUMENT_CONTROL_ROLE_CODES, DOCUMENT_CONTROL_ROLE_VOCABULARY } from '@hbc/models/pcc';
 import type {
+  DocumentControlReviewState,
+  DocumentControlReviewType,
   DocumentControlRoleCode,
   IDocumentControlActionCode,
   IDocumentControlRoleVocabularyEntry,
@@ -102,6 +104,8 @@ export interface IPccDocumentControlViewModel {
   readonly legacySources: readonly IDocumentControlSource[];
   readonly hardNoRules: readonly IDocumentControlUniversalHardNoRule[];
   readonly reviewQueueSample: readonly PccDocumentControlReviewQueueItem[];
+  readonly reviewTypes: readonly DocumentControlReviewType[];
+  readonly reviewStates: readonly DocumentControlReviewState[];
   readonly warnings: readonly PccReadModelWarning[];
   readonly actionCatalog: readonly IDocumentControlActionCode[];
   readonly roleActionAvailability: readonly PccDocumentControlRoleActionAvailability[];
@@ -237,6 +241,8 @@ export function buildPccDocumentControlViewModel(
     legacySources: data.sources,
     hardNoRules: data.hardNoRules ?? [],
     reviewQueueSample: data.reviewQueueSample ?? [],
+    reviewTypes: data.reviewTypes ?? [],
+    reviewStates: data.reviewStates ?? [],
     warnings: envelope.warnings,
     actionCatalog: data.actionCatalog ?? [],
     roleActionAvailability: data.roleActionAvailability ?? [],

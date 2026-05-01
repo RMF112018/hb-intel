@@ -237,8 +237,8 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    // Wave 7 / Prompt 04: 5 cards = header + 3 lanes + permissions card.
-    expect(cards.length).toBe(5);
+    // Wave 7 / Prompt 06: 6 cards = header + 3 lanes + permissions + reviews.
+    expect(cards.length).toBe(6);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
@@ -1034,5 +1034,181 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', ()
       expect(lane.querySelector('[data-pcc-doc-lane-empty="true"]')).not.toBeNull();
       expect(lane.textContent).not.toContain('99-999-99');
     }
+  });
+});
+
+// ─── Wave 7 / Prompt 06 — reviews & approvals summary ───
+// Read-only summary rendering of review type vocabulary, review state
+// legend, and review queue rows from the document-control read model.
+// No buttons, no anchors, no workflow runtime, no live integrations.
+
+describe('PccDocumentsSurface — Wave 7 / Prompt 06 reviews summary', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('renders the reviews card exactly once', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const cards = container.querySelectorAll('[data-pcc-doc-reviews-card="true"]');
+    expect(cards.length).toBe(1);
+  });
+
+  it('renders all 5 review type ids with safe labels', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]')!;
+    const expected: Array<[string, string]> = [
+      ['chief-estimator-review', 'Chief Estimator Review'],
+      ['legal-review', 'Legal Review'],
+      ['compliance-review', 'Compliance Review'],
+      ['leadership-review', 'Leadership Review'],
+      ['project-execution-review', 'Project Execution Review'],
+    ];
+    for (const [id, label] of expected) {
+      const el = card.querySelector(`[data-pcc-doc-review-type="${id}"]`);
+      expect(el, `review type ${id} should render`).not.toBeNull();
+      expect(el!.textContent).toContain(label);
+    }
+  });
+
+  it('renders all 6 review state legend entries with safe labels and tone markers', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]')!;
+    const expected: Array<[string, string, string]> = [
+      ['not-required', 'Not required', 'info'],
+      ['pending', 'Pending', 'warning'],
+      ['in-review', 'In review', 'warning'],
+      ['approved', 'Approved', 'info'],
+      ['rejected', 'Rejected', 'error'],
+      ['waived', 'Waived', 'info'],
+    ];
+    for (const [id, label, tone] of expected) {
+      const el = card.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`);
+      expect(el, `review state ${id} should render`).not.toBeNull();
+      expect(el!.textContent).toContain(label);
+      expect(el!.getAttribute('data-pcc-doc-review-state-tone')).toBe(tone);
+    }
+  });
+
+  it('renders rvw-001 with Estimate-Backup-April.xlsx / Leadership Review / Pending / R19 — Owner Client Viewer', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]')!;
+    const row = card.querySelector('[data-pcc-doc-review-queue-row="rvw-001"]');
+    expect(row).not.toBeNull();
+    expect(row!.querySelector('[data-pcc-doc-review-queue-file="true"]')!.textContent).toContain(
+      'Estimate-Backup-April.xlsx',
+    );
+    const typeEl = row!.querySelector('[data-pcc-doc-review-queue-type="leadership-review"]');
+    expect(typeEl).not.toBeNull();
+    expect(typeEl!.textContent).toContain('Leadership Review');
+    const stateEl = row!.querySelector('[data-pcc-doc-review-queue-state="pending"]');
+    expect(stateEl).not.toBeNull();
+    expect(stateEl!.textContent).toContain('Pending');
+    expect(stateEl!.getAttribute('data-pcc-doc-review-queue-state-tone')).toBe('warning');
+    const roleEl = row!.querySelector('[data-pcc-doc-review-queue-role="R19"]');
+    expect(roleEl).not.toBeNull();
+    expect(roleEl!.textContent).toContain('R19');
+    expect(roleEl!.textContent).toContain('Owner Client Viewer');
+  });
+
+  it('renders rvw-002 with Compliance-Package-001.pdf / Compliance Review / In review / R18 — Contracts Reviewer', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]')!;
+    const row = card.querySelector('[data-pcc-doc-review-queue-row="rvw-002"]');
+    expect(row).not.toBeNull();
+    expect(row!.querySelector('[data-pcc-doc-review-queue-file="true"]')!.textContent).toContain(
+      'Compliance-Package-001.pdf',
+    );
+    const typeEl = row!.querySelector('[data-pcc-doc-review-queue-type="compliance-review"]');
+    expect(typeEl).not.toBeNull();
+    expect(typeEl!.textContent).toContain('Compliance Review');
+    const stateEl = row!.querySelector('[data-pcc-doc-review-queue-state="in-review"]');
+    expect(stateEl).not.toBeNull();
+    expect(stateEl!.textContent).toContain('In review');
+    expect(stateEl!.getAttribute('data-pcc-doc-review-queue-state-tone')).toBe('warning');
+    const roleEl = row!.querySelector('[data-pcc-doc-review-queue-role="R18"]');
+    expect(roleEl).not.toBeNull();
+    expect(roleEl!.textContent).toContain('R18');
+    expect(roleEl!.textContent).toContain('Contracts Reviewer');
+  });
+
+  it('queue contains exactly the two deterministic fixture rows', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]')!;
+    const rows = card.querySelectorAll('[data-pcc-doc-review-queue-row]');
+    expect(rows.length).toBe(2);
+    const ids = Array.from(rows).map((r) => r.getAttribute('data-pcc-doc-review-queue-row'));
+    expect(ids).toEqual(['rvw-001', 'rvw-002']);
+  });
+
+  it('reviews card renders no <button> and no <a href="https?://"> elements', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]')!;
+    expect(card.querySelectorAll('button').length).toBe(0);
+    const anchors = card.querySelectorAll('a[href]');
+    for (const a of anchors) {
+      const href = a.getAttribute('href') ?? '';
+      expect(href).not.toMatch(/^https?:\/\//);
+    }
+  });
+
+  it('backend-unavailable: card renders, types + states still publish, queue empty', async () => {
+    const { container } = await renderWithClient(unavailableClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]');
+    expect(card).not.toBeNull();
+    // Vocabulary + legend are populated by the fixture even when degraded.
+    for (const id of [
+      'chief-estimator-review',
+      'legal-review',
+      'compliance-review',
+      'leadership-review',
+      'project-execution-review',
+    ]) {
+      expect(card!.querySelector(`[data-pcc-doc-review-type="${id}"]`)).not.toBeNull();
+    }
+    for (const id of ['not-required', 'pending', 'in-review', 'approved', 'rejected', 'waived']) {
+      expect(
+        card!.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`),
+      ).not.toBeNull();
+    }
+    expect(card!.querySelector('[data-pcc-doc-review-queue-empty="true"]')).not.toBeNull();
+    expect(card!.querySelectorAll('[data-pcc-doc-review-queue-row]').length).toBe(0);
+  });
+
+  it('source-unavailable: card renders, types + states still publish, queue empty', async () => {
+    const { container } = await renderWithClient(unknownProjectClient());
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]');
+    expect(card).not.toBeNull();
+    for (const id of ['chief-estimator-review', 'project-execution-review']) {
+      expect(card!.querySelector(`[data-pcc-doc-review-type="${id}"]`)).not.toBeNull();
+    }
+    for (const id of ['pending', 'rejected']) {
+      expect(
+        card!.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`),
+      ).not.toBeNull();
+    }
+    expect(card!.querySelector('[data-pcc-doc-review-queue-empty="true"]')).not.toBeNull();
+  });
+
+  it('no readModelClient (fallback path): card renders all three sections empty', async () => {
+    const { container } = await renderWithClient(undefined);
+    const card = container.querySelector('[data-pcc-doc-reviews-card="true"]');
+    expect(card).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-review-types-empty="true"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-review-states-empty="true"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-review-queue-empty="true"]')).not.toBeNull();
+    expect(card!.querySelectorAll('[data-pcc-doc-review-type]').length).toBe(0);
+    expect(card!.querySelectorAll('[data-pcc-doc-review-state-legend-code]').length).toBe(0);
+    expect(card!.querySelectorAll('[data-pcc-doc-review-queue-row]').length).toBe(0);
+    // Card-count parity: fallback path also renders 6 cards.
+    const cards = container.querySelectorAll('[data-pcc-card]');
+    expect(cards.length).toBe(6);
   });
 });
