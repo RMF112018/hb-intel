@@ -165,7 +165,27 @@ describe('mount(...) opt-in', () => {
 });
 
 describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client', () => {
-  it('does not invoke client methods for non-opted surfaces (e.g. documents)', async () => {
+  it('does not invoke any client methods for genuinely non-opted surfaces (e.g. site-health)', async () => {
+    const client = createPccFixtureReadModelClient();
+    const homeSpy = vi.spyOn(client, 'getProjectHome');
+    const prioritySpy = vi.spyOn(client, 'getPriorityActions');
+    const docSpy = vi.spyOn(client, 'getDocumentControl');
+    const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
+
+    render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccSurfaceRouter activeSurfaceId="site-health" readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    await new Promise((r) => setTimeout(r, 0));
+    expect(homeSpy).not.toHaveBeenCalled();
+    expect(prioritySpy).not.toHaveBeenCalled();
+    expect(docSpy).not.toHaveBeenCalled();
+    expect(teamAccessSpy).not.toHaveBeenCalled();
+  });
+
+  it('Wave 7 / Prompt 03B — when activeSurfaceId is documents, only getDocumentControl is called', async () => {
     const client = createPccFixtureReadModelClient();
     const homeSpy = vi.spyOn(client, 'getProjectHome');
     const prioritySpy = vi.spyOn(client, 'getPriorityActions');
@@ -179,9 +199,9 @@ describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client',
     );
 
     await new Promise((r) => setTimeout(r, 0));
+    expect(docSpy).toHaveBeenCalledTimes(1);
     expect(homeSpy).not.toHaveBeenCalled();
     expect(prioritySpy).not.toHaveBeenCalled();
-    expect(docSpy).not.toHaveBeenCalled();
     expect(teamAccessSpy).not.toHaveBeenCalled();
   });
 });

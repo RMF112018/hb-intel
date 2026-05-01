@@ -1,100 +1,300 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import {
-  DOCUMENT_CONTROL_ACTIONS,
-  DOCUMENT_CONTROL_ACTION_IDS,
-  DOCUMENT_CONTROL_SOURCES,
-  DOCUMENT_CONTROL_SOURCE_IDS,
-  PCC_MVP_SURFACES,
+  SAMPLE_PROJECT_PROFILE,
+  type PccDocumentControlReadModel,
+  type PccProjectId,
+  type PccReadModelEnvelope,
+  type PccReadModelSourceStatus,
 } from '@hbc/models/pcc';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
+import {
+  HB_DOCUMENT_CONTROL_CENTER_TITLE,
+  MY_PROJECT_FILES_WARNING_TEXT,
+  type IPccDocumentsReadModelClient,
+} from '../surfaces/documents/documentControlViewModel';
+import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
-const microsoftSourceIds = DOCUMENT_CONTROL_SOURCE_IDS.filter(
-  (id) => DOCUMENT_CONTROL_SOURCES[id].lane === 'microsoft-files',
-);
-const externalSourceIds = DOCUMENT_CONTROL_SOURCE_IDS.filter(
-  (id) => DOCUMENT_CONTROL_SOURCES[id].lane === 'external-document-systems',
-);
+const KNOWN_PROJECT_ID = SAMPLE_PROJECT_PROFILE.projectId;
+const UNKNOWN_PROJECT_ID = '99999999-0000-0000-0000-000000000000' as PccProjectId;
 
-function renderSurface() {
-  return render(
-    <PccBentoGrid forceMode="wideDesktop">
-      <PccDocumentsSurface />
-    </PccBentoGrid>,
-  );
+function fixtureClient(): IPccDocumentsReadModelClient {
+  const base = createPccFixtureReadModelClient();
+  return {
+    getDocumentControl: (id, persona) => base.getDocumentControl(id, persona),
+  };
 }
 
-describe('PccDocumentsSurface (Wave 2 / Prompt 06)', () => {
-  it('renders the header card + one card per Document Control source as direct grid children', () => {
-    const { container } = renderSurface();
-    const grid = container.querySelector('[data-pcc-bento-grid]');
-    expect(grid).not.toBeNull();
-    const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(1 + DOCUMENT_CONTROL_SOURCE_IDS.length);
-    for (const card of cards) {
-      expect(card.parentElement === grid, 'card must be a direct child of the bento grid').toBe(true);
-      const span = Number(card.getAttribute('data-pcc-column-span'));
-      expect(span).toBeGreaterThan(0);
+function unavailableClient(): IPccDocumentsReadModelClient {
+  const base = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+  return {
+    getDocumentControl: (id, persona) => base.getDocumentControl(id, persona),
+  };
+}
+
+function unknownProjectClient(): IPccDocumentsReadModelClient {
+  return {
+    getDocumentControl: (id, persona) => {
+      const base = createPccFixtureReadModelClient();
+      return base.getDocumentControl(UNKNOWN_PROJECT_ID, persona ?? id ? undefined : undefined);
+    },
+  };
+}
+
+async function renderWithClient(client?: IPccDocumentsReadModelClient) {
+  const utils = render(
+    <PccBentoGrid forceMode="wideDesktop">
+      <PccDocumentsSurface readModelClient={client} />
+    </PccBentoGrid>,
+  );
+  if (client) {
+    await waitFor(() => {
+      const lanes = utils.container.querySelectorAll('[data-pcc-doc-lane]');
+      expect(lanes.length).toBeGreaterThanOrEqual(3);
+    });
+  }
+  return utils;
+}
+
+describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('renders the HB Document Control Center header title', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    expect(container.textContent).toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
+  });
+
+  it('renders exactly three lane cards: project-record, my-project-files, external-systems', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const projectRecord = container.querySelectorAll('[data-pcc-doc-lane="project-record"]');
+    const myProjectFiles = container.querySelectorAll('[data-pcc-doc-lane="my-project-files"]');
+    const externalSystems = container.querySelectorAll('[data-pcc-doc-lane="external-systems"]');
+    expect(projectRecord.length).toBe(1);
+    expect(myProjectFiles.length).toBe(1);
+    expect(externalSystems.length).toBe(1);
+    const all = container.querySelectorAll('[data-pcc-doc-lane]');
+    expect(all.length).toBe(3);
+  });
+
+  it('header card does NOT emit any data-pcc-doc-lane marker (only lane cards do)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const headerPanel = container.querySelector('[data-pcc-active-surface-panel="documents"]');
+    expect(headerPanel).not.toBeNull();
+    expect(headerPanel!.querySelector('[data-pcc-doc-lane]')).toBeNull();
+  });
+
+  it('Project Record lane renders the SharePoint project record source displayName', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const lane = container.querySelector('[data-pcc-doc-lane="project-record"]');
+    expect(lane).not.toBeNull();
+    const entries = lane!.querySelectorAll('[data-pcc-document-source-id]');
+    expect(entries.length).toBeGreaterThan(0);
+    const sharepointEntry = lane!.querySelector(
+      '[data-pcc-document-source-id="project-record-primary"]',
+    );
+    expect(sharepointEntry).not.toBeNull();
+    expect(sharepointEntry!.textContent).toContain('Project Record Library');
+  });
+
+  it('My Project Files lane renders the required warning text verbatim', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+    expect(lane).not.toBeNull();
+    const warning = lane!.querySelector('[data-pcc-doc-lane-warning="my-project-files"]');
+    expect(warning).not.toBeNull();
+    expect(warning!.textContent).toBe(MY_PROJECT_FILES_WARNING_TEXT);
+  });
+
+  it('My Project Files lane renders only the current project folder path', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+    expect(lane).not.toBeNull();
+    const pathEls = lane!.querySelectorAll('[data-pcc-doc-source-path]');
+    expect(pathEls.length).toBeGreaterThan(0);
+    for (const el of pathEls) {
+      const path = el.getAttribute('data-pcc-doc-source-path') ?? '';
+      expect(path.startsWith('/My Project Files/26-000-00-')).toBe(true);
+      expect(path).not.toBe('/My Project Files');
+      expect(path).not.toBe('/My Project Files/');
     }
   });
 
-  it('exactly one [data-pcc-active-surface-panel="documents"] exists, on the header card', () => {
-    const { container } = renderSurface();
-    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('documents');
-    expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['documents'].displayName);
-    expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['documents'].description);
+  it('My Project Files lane drops sentinel root paths via the adapter (custom envelope)', async () => {
+    const tamperedClient: IPccDocumentsReadModelClient = {
+      async getDocumentControl(): Promise<PccReadModelEnvelope<PccDocumentControlReadModel>> {
+        return {
+          projectId: KNOWN_PROJECT_ID,
+          mode: 'fixture',
+          sourceStatus: 'available' as PccReadModelSourceStatus,
+          readOnly: true,
+          warnings: [],
+          generatedAtUtc: '2026-04-30T00:00:00.000Z',
+          data: {
+            sources: [],
+            wave7LaneVocabulary: ['project-record', 'my-project-files', 'external-systems'],
+            sourceRegistry: [
+              {
+                sourceKey: 'tampered-mpf-root',
+                displayName: 'Tampered Root',
+                wave7Lane: 'my-project-files',
+                sourceKind: 'my-project-files',
+                enabled: true,
+                binding: {
+                  kind: 'my-project-files',
+                  rootFolderName: 'My Project Files',
+                  userObjectId: 'user-x',
+                  projectId: KNOWN_PROJECT_ID,
+                  projectFolderName: '',
+                  projectFolderPath: '/My Project Files',
+                },
+              },
+              {
+                sourceKey: 'tampered-mpf-cross-project',
+                displayName: 'Other Project Leak',
+                wave7Lane: 'my-project-files',
+                sourceKind: 'my-project-files',
+                enabled: true,
+                binding: {
+                  kind: 'my-project-files',
+                  rootFolderName: 'My Project Files',
+                  userObjectId: 'user-x',
+                  projectId: UNKNOWN_PROJECT_ID,
+                  projectFolderName: '99-999-99-Other Project',
+                  projectFolderPath: '/My Project Files/99-999-99-Other Project',
+                },
+              },
+            ],
+          },
+        };
+      },
+    };
+    const { container } = await renderWithClient(tamperedClient);
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+    expect(lane).not.toBeNull();
+    const entries = lane!.querySelectorAll('[data-pcc-document-source-id]');
+    expect(entries.length).toBe(0);
+    expect(lane!.querySelector('[data-pcc-doc-lane-empty="true"]')).not.toBeNull();
+    expect(container.textContent).not.toContain('99-999-99');
+    expect(container.textContent).not.toContain('Other Project Leak');
   });
 
-  it('renders both lanes from canonical DOCUMENT_CONTROL_LANES', () => {
-    const { container } = renderSurface();
-    const microsoftLaneTiles = container.querySelectorAll('[data-pcc-doc-lane="microsoft-files"][data-pcc-document-source-id]');
-    const externalLaneTiles = container.querySelectorAll('[data-pcc-doc-lane="external-document-systems"][data-pcc-document-source-id]');
-    expect(microsoftLaneTiles).toHaveLength(microsoftSourceIds.length);
-    expect(externalLaneTiles).toHaveLength(externalSourceIds.length);
-  });
-
-  it('every Microsoft-lane source card renders all canonical action chips as disabled buttons', () => {
-    const { container } = renderSurface();
-    for (const sourceId of microsoftSourceIds) {
-      const tile = container.querySelector(`[data-pcc-document-source-id="${sourceId}"][data-pcc-doc-lane="microsoft-files"]`);
-      expect(tile, `Microsoft tile for ${sourceId} should render`).not.toBeNull();
-      const actions = tile!.querySelectorAll('[data-pcc-doc-action]');
-      expect(actions).toHaveLength(DOCUMENT_CONTROL_ACTION_IDS.length);
-      for (const el of actions) {
-        expect(el.tagName).toBe('BUTTON');
-        const button = el as HTMLButtonElement;
-        expect(button.disabled).toBe(true);
-        expect(button.getAttribute('aria-disabled')).toBe('true');
-        expect(button.getAttribute('onclick')).toBeNull();
-        expect(button.getAttribute('data-pcc-doc-action-execution-state')).toBe('preview-disabled');
-        // visible label comes from canonical DOCUMENT_CONTROL_ACTIONS
-        const actionId = button.getAttribute('data-pcc-doc-action') as keyof typeof DOCUMENT_CONTROL_ACTIONS;
-        expect(button.textContent).toContain(DOCUMENT_CONTROL_ACTIONS[actionId].label);
-      }
+  it('External Systems lane renders Procore, Document Crunch, and Adobe Sign as launch/status only', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const lane = container.querySelector('[data-pcc-doc-lane="external-systems"]');
+    expect(lane).not.toBeNull();
+    const procore = lane!.querySelector('[data-pcc-document-source-id="external-procore"]');
+    const docCrunch = lane!.querySelector('[data-pcc-document-source-id="external-document-crunch"]');
+    const adobeSign = lane!.querySelector('[data-pcc-document-source-id="external-adobe-sign"]');
+    expect(procore).not.toBeNull();
+    expect(docCrunch).not.toBeNull();
+    expect(adobeSign).not.toBeNull();
+    const externalAnchors = lane!.querySelectorAll('a[href]');
+    for (const a of externalAnchors) {
+      const href = a.getAttribute('href') ?? '';
+      expect(href).not.toMatch(/^https?:\/\//);
     }
   });
 
-  it('External-lane source cards render launch/visibility cues only and contain no action buttons', () => {
-    const { container } = renderSurface();
-    for (const sourceId of externalSourceIds) {
-      const tile = container.querySelector(`[data-pcc-document-source-id="${sourceId}"][data-pcc-doc-lane="external-document-systems"]`);
-      expect(tile, `External tile for ${sourceId} should render`).not.toBeNull();
-      const launchCues = tile!.querySelectorAll('[data-pcc-doc-launch-cue]');
-      expect(launchCues.length).toBeGreaterThan(0);
-      const actionButtons = tile!.querySelectorAll('[data-pcc-doc-action]');
-      expect(actionButtons.length).toBe(0);
-    }
-  });
-
-  it('renders no <a href="http(s)://"> elements anywhere on the surface', () => {
-    const { container } = renderSurface();
+  it('renders no <a href="http(s)://"> elements anywhere on the surface', async () => {
+    const { container } = await renderWithClient(fixtureClient());
     const anchors = container.querySelectorAll('a[href]');
     for (const a of anchors) {
       const href = a.getAttribute('href') ?? '';
       expect(href).not.toMatch(/^https?:\/\//);
     }
+  });
+
+  it('preview action chips are inert (disabled, aria-disabled, marked preview-disabled)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const chips = container.querySelectorAll(
+      '[data-pcc-doc-action-execution-state="preview-disabled"]',
+    );
+    expect(chips.length).toBeGreaterThan(0);
+    for (const chip of chips) {
+      expect(chip.tagName).toBe('BUTTON');
+      const btn = chip as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+      expect(btn.getAttribute('aria-disabled')).toBe('true');
+      expect(btn.getAttribute('onclick')).toBeNull();
+    }
+  });
+
+  it('preserves bento direct-child invariant (every card is a direct child of the bento grid)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const cards = container.querySelectorAll('[data-pcc-card]');
+    expect(cards.length).toBe(4);
+    for (const card of cards) {
+      expect(card.parentElement === grid).toBe(true);
+    }
+  });
+
+  it('emits exactly one [data-pcc-active-surface-panel="documents"] (on the header card)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(panels.length).toBe(1);
+    expect(panels[0]!.getAttribute('data-pcc-active-surface-panel')).toBe('documents');
+  });
+
+  it('renders the same three-lane shell when no readModelClient is supplied (fallback path)', async () => {
+    const { container } = await renderWithClient(undefined);
+    const lanes = container.querySelectorAll('[data-pcc-doc-lane]');
+    expect(lanes.length).toBe(3);
+    const empty = container.querySelectorAll('[data-pcc-doc-lane-empty="true"]');
+    expect(empty.length).toBe(3);
+    expect(container.textContent).toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
+  });
+
+  it('renders safely when the envelope is backend-unavailable (header + three empty lanes, no crash)', async () => {
+    const { container } = await renderWithClient(unavailableClient());
+    expect(container.textContent).toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
+    const lanes = container.querySelectorAll('[data-pcc-doc-lane]');
+    expect(lanes.length).toBe(3);
+    for (const lane of lanes) {
+      expect(lane.querySelectorAll('[data-pcc-document-source-id]').length).toBe(0);
+    }
+  });
+
+  it('renders safely when the envelope is source-unavailable (unknown project, MPF lane stays empty)', async () => {
+    const { container } = await renderWithClient(unknownProjectClient());
+    const mpfLane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+    expect(mpfLane).not.toBeNull();
+    expect(mpfLane!.querySelectorAll('[data-pcc-document-source-id]').length).toBe(0);
+  });
+
+  it('does not call fetch (read-only / fixture-only)', async () => {
+    await renderWithClient(fixtureClient());
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('legacy sources compatibility: surface still renders three lanes when sourceRegistry is missing', async () => {
+    const legacyOnlyClient: IPccDocumentsReadModelClient = {
+      async getDocumentControl() {
+        return {
+          projectId: KNOWN_PROJECT_ID,
+          mode: 'fixture',
+          sourceStatus: 'available' as PccReadModelSourceStatus,
+          readOnly: true,
+          warnings: [],
+          generatedAtUtc: '2026-04-30T00:00:00.000Z',
+          data: { sources: [] },
+        };
+      },
+    };
+    const { container } = await renderWithClient(legacyOnlyClient);
+    const lanes = container.querySelectorAll('[data-pcc-doc-lane]');
+    expect(lanes.length).toBe(3);
   });
 });

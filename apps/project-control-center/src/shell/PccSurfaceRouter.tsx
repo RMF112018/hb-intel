@@ -12,16 +12,18 @@ import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import type { IPccProjectHomeReadModelClient } from '../surfaces/projectHome/projectHomeViewModel';
 import type { IPccTeamAccessReadModelClient } from '../surfaces/teamAccess/useTeamAccessReadModel';
+import type { IPccDocumentsReadModelClient } from '../surfaces/documents/documentControlViewModel';
 
 /**
- * Wave 6 / Prompt 06 — combined narrow read-model client surface for the
- * router. Lists only the methods consumed by Project Home and Team &
- * Access; the full `IPccReadModelClient` returned by
- * `createPccReadModelClient` flows in via TypeScript structural typing.
+ * Combined narrow read-model client surface for the router. Lists only
+ * the methods consumed by Project Home, Team & Access, and Documents;
+ * the full `IPccReadModelClient` returned by `createPccReadModelClient`
+ * flows in via TypeScript structural typing.
  */
 export interface IPccSurfaceRouterReadModelClient
   extends IPccProjectHomeReadModelClient,
-    IPccTeamAccessReadModelClient {}
+    IPccTeamAccessReadModelClient,
+    IPccDocumentsReadModelClient {}
 
 export interface PccSurfaceRouterProps {
   activeSurfaceId: PccMvpSurfaceId;
@@ -59,7 +61,7 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
     case 'team-and-access':
       return <PccTeamAccessSurface readModelClient={readModelClient} />;
     case 'documents':
-      return <PccDocumentsSurface />;
+      return <PccDocumentsSurface readModelClient={readModelClient} />;
     case 'project-readiness':
       return <PccProjectReadinessSurface />;
     case 'approvals':

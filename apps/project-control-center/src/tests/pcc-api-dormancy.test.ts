@@ -797,38 +797,36 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     ).toEqual([]);
   });
 
-  it('PccSurfaceRouter threads readModelClient to exactly two surfaces (project-home + team-and-access)', () => {
+  it('PccSurfaceRouter threads readModelClient to exactly three surfaces (project-home + team-and-access + documents)', () => {
+    // Wave 7 / Prompt 03B added the documents surface as a read-model
+    // consumer (HB Document Control Center three-lane shell driven by
+    // the document-control envelope). The dormancy guard now allows
+    // exactly three JSX prop usages.
     expect(existsSync(ROUTER_FILE)).toBe(true);
     const raw = readFileSync(ROUTER_FILE, 'utf8');
     // Use comments-only stripping. The robust comment+string stripper
     // treats the JSX self-close `/>` as a regex literal and elides
     // content between the first `/>` and the next `/`, which would hide
-    // the second `readModelClient={...}` JSX prop.
+    // subsequent `readModelClient={...}` JSX props.
     const commentStripped = stripCommentsOnly(raw);
     const matches = commentStripped.match(/readModelClient\s*=\s*\{/g) ?? [];
-    // Three matches in commentStripped: the interface field
-    // `readModelClient?: IPccSurfaceRouterReadModelClient` does NOT match
-    // (regex requires `={`); the destructure `readModelClient,` does NOT
-    // match. The only `={` JSX prop usages are the project-home and
-    // team-and-access branches, plus a hypothetical pattern. Allow
-    // exactly two.
     expect(
       matches.length,
-      'expected exactly two JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access only)',
-    ).toBe(2);
+      'expected exactly three JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access + documents)',
+    ).toBe(3);
 
     // Set-equality assertion: the surfaces that receive the
-    // readModelClient must equal exactly { 'project-home', 'team-and-access' }.
+    // readModelClient must equal exactly { 'project-home', 'team-and-access', 'documents' }.
     const consumerCases = Array.from(
       commentStripped.matchAll(
-        /case\s+(['"])(project-home|team-and-access)\1\s*:\s*[\s\S]*?readModelClient\s*=\s*\{/g,
+        /case\s+(['"])(project-home|team-and-access|documents)\1\s*:\s*[\s\S]*?readModelClient\s*=\s*\{/g,
       ),
       (m) => m[2] as string,
     );
     expect(
       consumerCases.slice().sort(),
-      'PccSurfaceRouter readModelClient consumer set must equal exactly [project-home, team-and-access]',
-    ).toEqual(['project-home', 'team-and-access']);
+      'PccSurfaceRouter readModelClient consumer set must equal exactly [documents, project-home, team-and-access]',
+    ).toEqual(['documents', 'project-home', 'team-and-access']);
   });
 
   it.each(FORBIDDEN_MUTATION_EXECUTION_IDENTIFIERS)(
