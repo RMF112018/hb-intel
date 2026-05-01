@@ -122,3 +122,126 @@ describe('createPccFixtureReadModelClient — now injection', () => {
     expect(env.generatedAtUtc).toBe(fixed);
   });
 });
+
+describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', () => {
+  const client = createPccFixtureReadModelClient();
+
+  it('returns the legacy sources array alongside Wave 7 fields for known projects', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.sources.length).toBeGreaterThan(0);
+  });
+
+  it('returns the three Wave 7 lanes', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    expect(env.data.wave7LaneVocabulary).toEqual([
+      'project-record',
+      'my-project-files',
+      'external-systems',
+    ]);
+  });
+
+  it('source registry includes Project Record, My Project Files, and at least one External Systems entry', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const registry = env.data.sourceRegistry ?? [];
+    const projectRecord = registry.find((r) => r.wave7Lane === 'project-record');
+    const myProjectFiles = registry.find((r) => r.wave7Lane === 'my-project-files');
+    const externalSystems = registry.filter((r) => r.wave7Lane === 'external-systems');
+    expect(projectRecord).toBeDefined();
+    expect(myProjectFiles).toBeDefined();
+    expect(externalSystems.length).toBeGreaterThan(0);
+  });
+
+  it('My Project Files binding exposes only the current project folder', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const registry = env.data.sourceRegistry ?? [];
+    const mpf = registry.find((r) => r.wave7Lane === 'my-project-files');
+    expect(mpf).toBeDefined();
+    expect(mpf!.binding.kind).toBe('my-project-files');
+    if (mpf!.binding.kind === 'my-project-files') {
+      expect(mpf!.binding.projectFolderPath).toBe(
+        '/My Project Files/26-000-00-Stadium Enclave',
+      );
+    }
+  });
+
+  it('My Project Files folder path is not the root and has at least three path segments', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const registry = env.data.sourceRegistry ?? [];
+    const mpf = registry.find((r) => r.wave7Lane === 'my-project-files');
+    expect(mpf).toBeDefined();
+    if (mpf!.binding.kind === 'my-project-files') {
+      const path = mpf!.binding.projectFolderPath;
+      expect(path).not.toBe('/My Project Files');
+      expect(path).not.toBe('/My Project Files/');
+      expect(path.split('/').filter(Boolean).length).toBeGreaterThanOrEqual(2);
+      expect(path.startsWith('/My Project Files/')).toBe(true);
+    }
+  });
+
+  it('does not expose folder paths for any other project', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const registry = env.data.sourceRegistry ?? [];
+    for (const entry of registry) {
+      if (entry.binding.kind === 'my-project-files') {
+        expect(entry.binding.projectFolderPath.startsWith('/My Project Files/26-000-00-')).toBe(
+          true,
+        );
+      }
+    }
+  });
+
+  it('external-systems entries are launch/status only with sourceKind "external-system"', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const registry = env.data.sourceRegistry ?? [];
+    const externals = registry.filter((r) => r.wave7Lane === 'external-systems');
+    expect(externals.length).toBeGreaterThan(0);
+    for (const ext of externals) {
+      expect(ext.sourceKind).toBe('external-system');
+      expect('writeback' in ext).toBe(false);
+      expect('sync' in ext).toBe(false);
+      expect('mirror' in ext).toBe(false);
+    }
+  });
+
+  it('EX04 is never available with "Y" and appears at least once with "N"', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const rows = env.data.roleActionAvailability ?? [];
+    const ex04Rows = rows.filter((r) => r.actionCode === 'EX04');
+    expect(ex04Rows.length).toBeGreaterThan(0);
+    for (const r of ex04Rows) {
+      expect(r.availability).not.toBe('Y');
+    }
+    expect(ex04Rows.some((r) => r.availability === 'N')).toBe(true);
+  });
+
+  it('represents Project Coordinator (R14) in roleActionAvailability', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    const rows = env.data.roleActionAvailability ?? [];
+    expect(rows.some((r) => r.roleCode === 'R14')).toBe(true);
+  });
+
+  it('does not represent Project Engineer in the serialized envelope', async () => {
+    const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
+    expect(JSON.stringify(env)).not.toContain('Project Engineer');
+  });
+
+  it('keeps the backend-unavailable envelope safe and read-only', async () => {
+    const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+    const env = await unavailable.getDocumentControl(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.readOnly).toBe(true);
+    expect(env.data.sources).toEqual([]);
+    expect(env.data.sourceRegistry).toEqual([]);
+    expect(env.data.roleActionAvailability).toEqual([]);
+  });
+
+  it('keeps the unknown-project envelope safe and read-only', async () => {
+    const env = await client.getDocumentControl(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.readOnly).toBe(true);
+    expect(env.data.sources).toEqual([]);
+    expect(env.data.sourceRegistry).toEqual([]);
+    expect(env.data.roleActionAvailability).toEqual([]);
+  });
+});
