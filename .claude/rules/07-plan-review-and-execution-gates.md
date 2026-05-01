@@ -18,7 +18,7 @@ For prompt-package, phase/wave, risky, cross-cutting, architecture, SPFx, backen
 
 When a plan gate is required, present the execution plan in chat / ExitPlanMode for approval.
 
-Do **not** create a `.claude/plans/**` working-plan file unless one of the following is true:
+Do **not** create a `/Users/bobbyfetting/hb-intel/.claude/plans/**` working-plan file unless one of the following is true:
 
 - the user explicitly asks for a saved plan file;
 - the execution is multi-stage and a durable scratch plan materially reduces risk;
@@ -29,18 +29,18 @@ Do **not** create a `.claude/plans/**` working-plan file unless one of the follo
 If a scratch plan is necessary:
 
 - keep it concise;
-- place it under `.claude/plans/**`;
+- place it under `/Users/bobbyfetting/hb-intel/.claude/plans/**`;
 - do not duplicate long prompt text;
 - do not omit useful canonical path references merely to satisfy hooks;
 - delete or archive it when it is no longer active, if the workflow calls for cleanup.
 
-Do **not** write canonical plan-library files under `docs/architecture/plans/**` unless the user explicitly requested a canonical docs-plan, phase/wave plan, prompt package, or architecture-plan update.
+Do **not** write canonical plan-library files under `/Users/bobbyfetting/hb-intel/docs/architecture/plans/**` unless the user explicitly requested a canonical docs-plan, phase/wave plan, prompt package, or architecture-plan update.
 
 Required closeout documents named by the prompt are not scratch plans. Create them only at the required closeout stage and only in the path authorized by the prompt.
 
 ## Canonical Plan Library Guard
 
-`docs/architecture/plans/**` is the canonical repository plan library.
+`/Users/bobbyfetting/hb-intel/docs/architecture/plans/**` is the canonical repository plan library.
 
 Default rule:
 
@@ -48,7 +48,7 @@ Default rule:
 - accidental write/edit/mutation is blocked;
 - canonical writes require explicit user authorization or the override environment variable used by the hook.
 
-The active hook must distinguish actual tool target paths from file content. A scratch plan under `.claude/plans/**` may reference `docs/architecture/plans/**` in its content without being blocked.
+The active hook must distinguish actual tool target paths from file content. A scratch plan under `/Users/bobbyfetting/hb-intel/.claude/plans/**` may reference `/Users/bobbyfetting/hb-intel/docs/architecture/plans/**` in its content without being blocked.
 
 ## Default Flow
 
