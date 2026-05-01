@@ -16,7 +16,7 @@ It is not merely a landing page. It should support a useful project operating ex
 | Priority Actions Rail        | Access requests, readiness blockers, approval/checkpoint prompts, external-system mapping prompts.                                                                                                                                                                                                                                                                                        |
 | Work Center Navigation       | Project Home, Team & Access, Documents / Document Control, Project Readiness, Approvals / Checkpoints, External Systems, Control Center Settings, Site Health.                                                                                                                                                                                                                            |
 | Light workflows              | Access request, readiness blocker resolution, approval/checkpoint response, external-system mapping issue resolution.                                                                                                                                                                                                                                                                     |
-| Structured workflow target   | Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                                                                        |
+| Structured workflow target   | Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                                                                       |
 | Document Control Center      | Two-lane architecture: Microsoft Files Lane (SharePoint Drive / SharePoint document libraries + OneDrive) is a future Microsoft Graph-backed file-management surface; External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, future systems) is access/deep-link/visibility. Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
 | External Systems             | Launch links only for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                                                                                                                                        |
 | Team & Access                | Request + approval + automated execution later.                                                                                                                                                                                                                                                                                                                                           |
@@ -76,21 +76,21 @@ The MVP is successful when a primary user can:
 
 # Implementation Wave Mapping
 
-| MVP Scope Item                | Wave |
-| ----------------------------- | ---: |
-| Project Home / Command Center |    4 |
-| Priority Actions Rail         |    5 |
-| Team & Access                 |    6 |
-| Document Control Center       |    7 |
-| Project Readiness Framework   |    8 |
+| MVP Scope Item                     | Wave |
+| ---------------------------------- | ---: |
+| Project Home / Command Center      |    4 |
+| Priority Actions Rail              |    5 |
+| Team & Access                      |    6 |
+| Document Control Center            |    7 |
+| Project Readiness Framework        |    8 |
 | Project Lifecycle Readiness Center |    9 |
-| Permit Log                    |   10 |
-| Responsibility Matrix         |   11 |
-| Constraints Log               |   12 |
-| Buyout Log                    |   13 |
-| Approvals / Checkpoints       |   14 |
-| External Systems              |   15 |
-| Control Center Settings       |   16 |
-| Site Health                   |   17 |
-| Executive Oversight           |   18 |
-| Admin Review Surfaces         |   19 |
+| Permit Log                         |   10 |
+| Responsibility Matrix              |   11 |
+| Constraints Log                    |   12 |
+| Buyout Log                         |   13 |
+| Approvals / Checkpoints            |   14 |
+| External Systems                   |   15 |
+| Control Center Settings            |   16 |
+| Site Health                        |   17 |
+| Executive Oversight                |   18 |
+| Admin Review Surfaces              |   19 |
