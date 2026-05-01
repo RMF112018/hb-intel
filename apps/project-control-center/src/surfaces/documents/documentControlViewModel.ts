@@ -89,8 +89,19 @@ export interface IPccDocumentControlViewModel {
   readonly warnings: readonly PccReadModelWarning[];
 }
 
-const MPF_ROOT_PATH = '/My Project Files';
-const MPF_ROOT_PATH_TRAILING = '/My Project Files/';
+/**
+ * Deterministic fixture-safe allow value. The Wave 7 fixture/read-model
+ * publishes exactly one legitimate MPF folder path; any other rendered
+ * path would be a leak. Sourced as a constant — NOT derived from the
+ * registry being filtered — so a tampered registry (sentinel root,
+ * wrong-folder, cross-project, or duplicate same-projectId entries)
+ * cannot become its own canonical anchor.
+ *
+ * Future read-models that publish per-project allowed paths via a
+ * trusted out-of-band envelope field can replace this constant with an
+ * out-of-band derivation.
+ */
+const ALLOWED_MY_PROJECT_FILES_PATH = '/My Project Files/26-000-00-Stadium Enclave';
 
 function emptyLane(laneId: DocumentControlWave7LaneId): IPccDocumentControlLaneViewModel {
   return {
@@ -105,15 +116,16 @@ function emptyLane(laneId: DocumentControlWave7LaneId): IPccDocumentControlLaneV
 
 /**
  * Adapter-owned MPF safety filtering. Drops any my-project-files entry
- * that fails any of the Wave 7 hard-no rules:
+ * unless every Wave 7 hard-no rule passes:
  *
- *  - sentinel root path `/My Project Files` or `/My Project Files/`
- *  - cross-project leakage (`binding.projectId` !== current project)
- *  - malformed path that does not start with `/My Project Files/`
+ *  - envelope must be `available` (fail closed for degraded envelopes)
+ *  - envelope must have a defined `projectId`
+ *  - binding `projectId` must match the envelope `projectId` (no cross-project leak)
+ *  - binding `projectFolderPath` must equal `ALLOWED_MY_PROJECT_FILES_PATH`
+ *    exactly. Strict equality covers sentinel root paths, wrong-folder
+ *    same-projectId tampers, and any malformed input in one check.
  *
- * Per Wave 7 hard-no doctrine, also fails closed for unknown-project
- * envelopes: when `sourceStatus !== 'available'`, all MPF entries are
- * dropped regardless of binding contents.
+ * Non-MPF entries pass through unchanged.
  */
 function isSafeMyProjectFilesEntry(
   entry: IProjectDocumentSourceRegistryEntry,
@@ -123,11 +135,8 @@ function isSafeMyProjectFilesEntry(
   if (sourceStatus !== 'available') return false;
   if (envelopeProjectId === undefined) return false;
   if (entry.binding.kind !== 'my-project-files') return true;
-  const path = entry.binding.projectFolderPath;
-  if (typeof path !== 'string' || path.length === 0) return false;
-  if (path === MPF_ROOT_PATH || path === MPF_ROOT_PATH_TRAILING) return false;
-  if (!path.startsWith(MPF_ROOT_PATH_TRAILING)) return false;
   if (entry.binding.projectId !== envelopeProjectId) return false;
+  if (entry.binding.projectFolderPath !== ALLOWED_MY_PROJECT_FILES_PATH) return false;
   return true;
 }
 

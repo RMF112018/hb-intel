@@ -1,12 +1,18 @@
 /**
  * Wave 7 / Prompt 03B — Document Control read-model hook.
  *
- * Pure consumer of `IPccDocumentsReadModelClient`. Mirrors the Team &
- * Access hook posture: `loading | preview | error` with cancellation
- * via a mounted flag. Treats `'available'` envelopes as `'preview'` and
- * any non-available envelope or thrown rejection as `'error'`. The view
- * model is built by `buildPccDocumentControlViewModel` for the
- * `'preview'` case so consumers receive a fully filtered shape.
+ * Pure consumer of `IPccDocumentsReadModelClient`. State machine:
+ *
+ *  - `'loading'` — initial / in-flight
+ *  - `'preview'` — any successfully resolved envelope (`available`,
+ *    `source-unavailable`, `backend-unavailable`). The view model is
+ *    always present; consumers inspect `sourceStatus` for degraded
+ *    cues. The adapter naturally produces empty per-lane entries for
+ *    non-available envelopes, so degraded states render safe-empty.
+ *  - `'error'` — only when the client promise throws / rejects.
+ *
+ * Cancellation flag prevents stale envelope writes after unmount or
+ * client/projectId change.
  */
 
 import { useEffect, useState } from 'react';
@@ -39,20 +45,18 @@ export function useDocumentControlReadModel(
       try {
         const envelope = await client.getDocumentControl(projectId, viewerPersona);
         if (cancelled) return;
-        if (envelope.sourceStatus === 'available') {
-          setState({
-            status: 'preview',
-            viewModel: buildPccDocumentControlViewModel(envelope),
-            sourceStatus: envelope.sourceStatus,
-          });
-        } else {
-          setState({
-            status: 'error',
-            sourceStatus: envelope.sourceStatus,
-          });
-        }
+        // Every successfully resolved envelope flows through 'preview'
+        // with the adapter-built view model. The adapter drops MPF
+        // entries when sourceStatus !== 'available', so degraded
+        // envelopes naturally produce a safe-empty view model.
+        setState({
+          status: 'preview',
+          viewModel: buildPccDocumentControlViewModel(envelope),
+          sourceStatus: envelope.sourceStatus,
+        });
       } catch {
         if (cancelled) return;
+        // Only thrown / rejected promises produce 'error'.
         setState({ status: 'error' });
       }
     })();

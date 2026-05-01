@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, render, renderHook, waitFor } from '@testing-library/react';
 import {
   SAMPLE_PROJECT_PROFILE,
+  type IProjectDocumentSourceRegistryEntry,
   type PccDocumentControlReadModel,
   type PccProjectId,
   type PccReadModelEnvelope,
@@ -14,6 +15,7 @@ import {
   MY_PROJECT_FILES_WARNING_TEXT,
   type IPccDocumentsReadModelClient,
 } from '../surfaces/documents/documentControlViewModel';
+import { useDocumentControlReadModel } from '../surfaces/documents/useDocumentControlReadModel';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
 const KNOWN_PROJECT_ID = SAMPLE_PROJECT_PROFILE.projectId;
@@ -296,5 +298,243 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     const { container } = await renderWithClient(legacyOnlyClient);
     const lanes = container.querySelectorAll('[data-pcc-doc-lane]');
     expect(lanes.length).toBe(3);
+  });
+});
+
+// ─── Wave 7 03B follow-up: deterministic MPF allow-path enforcement ───
+// All three cases use the legitimate Wave 7 fixture path
+// `/My Project Files/26-000-00-Stadium Enclave` and a tampered path
+// `/My Project Files/99-999-99-Other Project`. Both bindings carry the
+// legitimate `binding.projectId` (KNOWN_PROJECT_ID) so cross-project
+// projectId checks alone cannot drop the tamper. The deterministic
+// constant in the adapter is the only barrier.
+
+const LEGIT_MPF_PATH = '/My Project Files/26-000-00-Stadium Enclave';
+const TAMPER_MPF_PATH = '/My Project Files/99-999-99-Other Project';
+
+function legitMpfEntry(): IProjectDocumentSourceRegistryEntry {
+  return {
+    sourceKey: 'my-project-files-current-user',
+    displayName: 'My Project Files',
+    wave7Lane: 'my-project-files',
+    sourceKind: 'my-project-files',
+    enabled: true,
+    binding: {
+      kind: 'my-project-files',
+      rootFolderName: 'My Project Files',
+      userObjectId: 'user-project-manager',
+      projectId: KNOWN_PROJECT_ID,
+      projectFolderName: '26-000-00-Stadium Enclave',
+      projectFolderPath: LEGIT_MPF_PATH,
+    },
+  };
+}
+
+function tamperedSameProjectIdEntry(): IProjectDocumentSourceRegistryEntry {
+  return {
+    sourceKey: 'tampered-mpf-same-projectid-wrong-folder',
+    displayName: 'Other Project Leak',
+    wave7Lane: 'my-project-files',
+    sourceKind: 'my-project-files',
+    enabled: true,
+    binding: {
+      kind: 'my-project-files',
+      rootFolderName: 'My Project Files',
+      userObjectId: 'user-project-manager',
+      projectId: KNOWN_PROJECT_ID,
+      projectFolderName: '99-999-99-Other Project',
+      projectFolderPath: TAMPER_MPF_PATH,
+    },
+  };
+}
+
+function envelopeWithRegistry(
+  registry: readonly IProjectDocumentSourceRegistryEntry[],
+): PccReadModelEnvelope<PccDocumentControlReadModel> {
+  return {
+    projectId: KNOWN_PROJECT_ID,
+    mode: 'fixture',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: {
+      sources: [],
+      wave7LaneVocabulary: ['project-record', 'my-project-files', 'external-systems'],
+      sourceRegistry: registry,
+    },
+  };
+}
+
+function clientReturning(
+  envelope: PccReadModelEnvelope<PccDocumentControlReadModel>,
+): IPccDocumentsReadModelClient {
+  return {
+    async getDocumentControl() {
+      return envelope;
+    },
+  };
+}
+
+describe('PccDocumentsSurface — MPF deterministic allow-path enforcement (Wave 7 03B follow-up)', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('Case 1 — legitimate first, then same-projectId wrong-folder tamper: tamper dropped', async () => {
+    const client = clientReturning(
+      envelopeWithRegistry([legitMpfEntry(), tamperedSameProjectIdEntry()]),
+    );
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccDocumentsSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => {
+      const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+      expect(lane?.querySelectorAll('[data-pcc-document-source-id]').length).toBe(1);
+    });
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
+    const entries = lane.querySelectorAll('[data-pcc-document-source-id]');
+    expect(entries.length).toBe(1);
+    expect(entries[0]!.getAttribute('data-pcc-document-source-id')).toBe(
+      'my-project-files-current-user',
+    );
+    expect(lane.textContent).toContain(LEGIT_MPF_PATH);
+    expect(lane.textContent).not.toContain('99-999-99-Other Project');
+    expect(lane.textContent).not.toContain('Other Project Leak');
+  });
+
+  it('Case 2 — tamper first, then legitimate: tamper dropped, legitimate retained', async () => {
+    const client = clientReturning(
+      envelopeWithRegistry([tamperedSameProjectIdEntry(), legitMpfEntry()]),
+    );
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccDocumentsSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => {
+      const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+      expect(lane?.querySelectorAll('[data-pcc-document-source-id]').length).toBe(1);
+    });
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
+    const entries = lane.querySelectorAll('[data-pcc-document-source-id]');
+    expect(entries.length).toBe(1);
+    expect(entries[0]!.getAttribute('data-pcc-document-source-id')).toBe(
+      'my-project-files-current-user',
+    );
+    expect(lane.textContent).toContain(LEGIT_MPF_PATH);
+    expect(lane.textContent).not.toContain('99-999-99-Other Project');
+    expect(lane.textContent).not.toContain('Other Project Leak');
+  });
+
+  it('Case 3 — tamper-only registry: MPF lane renders empty, tamper text absent', async () => {
+    const client = clientReturning(envelopeWithRegistry([tamperedSameProjectIdEntry()]));
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccDocumentsSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => {
+      const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]');
+      expect(lane?.querySelector('[data-pcc-doc-lane-empty="true"]')).not.toBeNull();
+    });
+    const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
+    expect(lane.querySelectorAll('[data-pcc-document-source-id]').length).toBe(0);
+    expect(lane.querySelector('[data-pcc-doc-lane-empty="true"]')).not.toBeNull();
+    expect(lane.textContent).not.toContain('99-999-99-Other Project');
+    expect(lane.textContent).not.toContain('Other Project Leak');
+  });
+});
+
+// ─── Wave 7 03B follow-up: hook degraded-state posture ───
+// Backend-unavailable and source-unavailable envelopes flow through the
+// 'preview' path with a safe-empty view model. Only thrown rejections
+// yield 'error'. Tested at the hook level (decoupled from DOM) so the
+// preview-vs-error distinction is observable directly on result.status.
+
+function backendUnavailableEnvelope(): PccReadModelEnvelope<PccDocumentControlReadModel> {
+  return {
+    projectId: KNOWN_PROJECT_ID,
+    mode: 'fixture',
+    sourceStatus: 'backend-unavailable',
+    readOnly: true,
+    warnings: [{ code: 'backend-unavailable', message: 'simulated' }],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: {
+      sources: [],
+      wave7LaneVocabulary: ['project-record', 'my-project-files', 'external-systems'],
+      sourceRegistry: [],
+    },
+  };
+}
+
+function sourceUnavailableEnvelope(): PccReadModelEnvelope<PccDocumentControlReadModel> {
+  return {
+    projectId: KNOWN_PROJECT_ID,
+    mode: 'fixture',
+    sourceStatus: 'source-unavailable',
+    readOnly: true,
+    warnings: [{ code: 'source-unavailable', message: 'simulated' }],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: {
+      sources: [],
+      wave7LaneVocabulary: ['project-record', 'my-project-files', 'external-systems'],
+      sourceRegistry: [],
+    },
+  };
+}
+
+describe('useDocumentControlReadModel — degraded-state posture (Wave 7 03B follow-up)', () => {
+  it('available envelope → status "preview" with viewModel and sourceStatus "available"', async () => {
+    const client = clientReturning(envelopeWithRegistry([legitMpfEntry()]));
+    const { result } = renderHook(() => useDocumentControlReadModel(client, KNOWN_PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('preview'));
+    expect(result.current.sourceStatus).toBe('available');
+    expect(result.current.viewModel).toBeDefined();
+    expect(result.current.viewModel!.lanes['my-project-files'].entries.length).toBe(1);
+  });
+
+  it('backend-unavailable envelope → status "preview" with safe-empty viewModel and sourceStatus "backend-unavailable"', async () => {
+    const client = clientReturning(backendUnavailableEnvelope());
+    const { result } = renderHook(() => useDocumentControlReadModel(client, KNOWN_PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('preview'));
+    expect(result.current.sourceStatus).toBe('backend-unavailable');
+    expect(result.current.viewModel).toBeDefined();
+    expect(result.current.viewModel!.lanes['project-record'].entries.length).toBe(0);
+    expect(result.current.viewModel!.lanes['my-project-files'].entries.length).toBe(0);
+    expect(result.current.viewModel!.lanes['external-systems'].entries.length).toBe(0);
+  });
+
+  it('source-unavailable envelope → status "preview" with safe-empty viewModel and sourceStatus "source-unavailable"', async () => {
+    const client = clientReturning(sourceUnavailableEnvelope());
+    const { result } = renderHook(() => useDocumentControlReadModel(client, KNOWN_PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('preview'));
+    expect(result.current.sourceStatus).toBe('source-unavailable');
+    expect(result.current.viewModel).toBeDefined();
+    expect(result.current.viewModel!.lanes['project-record'].entries.length).toBe(0);
+    expect(result.current.viewModel!.lanes['my-project-files'].entries.length).toBe(0);
+    expect(result.current.viewModel!.lanes['external-systems'].entries.length).toBe(0);
+  });
+
+  it('thrown / rejected client → status "error" with no viewModel and no sourceStatus', async () => {
+    const client: IPccDocumentsReadModelClient = {
+      async getDocumentControl() {
+        throw new Error('boom');
+      },
+    };
+    const { result } = renderHook(() => useDocumentControlReadModel(client, KNOWN_PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    expect(result.current.viewModel).toBeUndefined();
+    expect(result.current.sourceStatus).toBeUndefined();
   });
 });
