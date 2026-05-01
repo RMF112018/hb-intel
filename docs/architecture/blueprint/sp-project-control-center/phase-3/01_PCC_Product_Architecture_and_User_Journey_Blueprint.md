@@ -23,9 +23,9 @@ This is a planning deliverable only. It does not authorize SPFx implementation, 
 | D-009 | MVP structured workflow modules        | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                                                                                                                       |
 | D-010 | Later-phase workflow modules           | Estimating Kickoff, Post-Bid Autopsy, Job Closeout Checklist.                                                                                                                                                                                                                                                                                                                                                                |
 | D-011 | Responsibility Matrix scope            | Merge Owner Contract Responsibility Matrix into the single Responsibility Matrix module.                                                                                                                                                                                                                                                                                                                                     |
-| D-012 | Document Control Center                | Two-lane Document Control Center: Microsoft Files Lane for SharePoint Drive / SharePoint document libraries and OneDrive as a future Microsoft Graph-backed file-management surface, plus External Document Systems Lane for Procore Files, Document Crunch, Adobe Sign, and future external systems as access/deep-link/visibility. Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
+| D-012 | HB Document Control Center             | Three-lane HB Document Control Center: Project Record (formal SharePoint record), My Project Files (project-scoped OneDrive working files), and External Systems (Procore/Document Crunch/Adobe Sign launch/deep-link/visibility). Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
 | D-013 | External Systems                       | SharePoint, OneDrive, Procore, Sage, Microsoft Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                                                                                                                                                                                       |
-| D-014 | External Systems MVP behavior          | Launch links only. No mapping health or context summaries required for MVP.                                                                                                                                                                                                                                                                                                                                                  |
+| D-014 | External Systems MVP behavior          | Launch/deep-link/visibility in Wave 7; no writeback/sync/mirror in MVP.                                                                                                                                                                                                                                                                                                                                                  |
 | D-015 | Team & Access                          | Request + approval + automated execution later. MVP plans full lifecycle; automation remains gated.                                                                                                                                                                                                                                                                                                                          |
 | D-016 | Site Health                            | Project-user visibility + repair request workflow; IT/Admin controls repair execution.                                                                                                                                                                                                                                                                                                                                       |
 | D-017 | Control Center Settings authority      | IT/Admin + Project Executive + Project Manager; PM/PX edit approved business-facing settings; IT/Admin controls technical settings.                                                                                                                                                                                                                                                                                          |
@@ -44,7 +44,7 @@ The PCC MVP is a governed project operating surface that combines:
 2. **Governed Work Center Navigation** — structured navigation into the core project work centers.
 3. **Light Operational Workflows** — guided actions for access, readiness, approvals/checkpoints, and external-system mapping issues.
 4. **Structured Workflow Module Direction** — in-app item-level workflow planning for selected high-value project controls.
-5. **Two-Lane Document Control Center** — Microsoft Files Lane plus External Document Systems Lane.
+5. **Three-Lane HB Document Control Center** — Project Record, My Project Files, and External Systems.
 6. **External System Launch Hub** — launch links to the project’s external systems.
 
 The PCC is not a replacement for Procore, Sage, Compass, Document Crunch, Cupix, Teams, Outlook, SharePoint file storage, or native accounting/project-management systems. It is the governed access, coordination, readiness, and project-control layer around those systems.
@@ -56,7 +56,7 @@ The PCC is not a replacement for Procore, Sage, Compass, Document Crunch, Cupix,
 | Project-first                 | PCC starts with a project context, not an application menu.                                                                                         |
 | Role-aware                    | PM, PX, Superintendent, Project Accountant, Estimating users, and Executive Oversight see different emphasis based on role.                         |
 | Actionable but safe           | Users can request, approve, and resolve business-facing items, but unsafe technical execution remains gated.                                        |
-| Document control boundary     | Document Control Center uses a two-lane architecture; it is not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
+| Document control boundary     | HB Document Control Center uses a three-lane architecture and a backend-controlled source registry; it is not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
 | Structured workflow direction | Key spreadsheet/checklist processes become item-level workflows over time.                                                                          |
 | Launch before sync            | External systems are launch-link MVP integrations only.                                                                                             |
 | Admin boundary                | IT/Admin controls technical/provisioning settings and repair execution.                                                                             |
@@ -129,7 +129,7 @@ The MVP keeps eight primary work centers.
 | ---------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Project Home                 | Daily command surface.                            | Identity, current status, health, Priority Actions, readiness rollup.                                                                                                                                                                                    |
 | Team & Access                | Governed project access workflow.                 | Access requests, approval tracking, later backend execution.                                                                                                                                                                                             |
-| Documents / Document Control | Two-lane architecture.                            | Microsoft Files Lane (SharePoint Drive / SharePoint document libraries + OneDrive, preview-only actions in Wave 2); External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, launch/deep-link/missing-config/access-issue in Wave 2). |
+| Documents / Document Control | Three-lane architecture.                          | Project Record (formal SharePoint project record), My Project Files (project-scoped OneDrive working files with hard guardrail), External Systems (Procore/Document Crunch/Adobe Sign launch/deep-link/visibility). |
 | Project Readiness            | Functional project controls and workflow modules. | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, later estimating/closeout modules.                                                                                                                                |
 | Approvals / Checkpoints      | Governed decisions and approval prompts.          | Setup approvals, readiness approvals, access approvals, checkpoint responses.                                                                                                                                                                            |
 | External Systems             | Launch hub.                                       | SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                             |
@@ -154,45 +154,26 @@ The MVP keeps eight primary work centers.
 | Post-Bid Autopsy       | Structured post-bid learning/handoff workflow after MVP. |
 | Job Closeout Checklist | Structured closeout workflow after MVP.                  |
 
-## Document Control Center
+## HB Document Control Center (Current Target Architecture)
 
-The Document Control Center is a **two-lane architecture**. Microsoft Files Lane (SharePoint Drive / SharePoint document libraries and OneDrive) is a future Microsoft Graph-backed file-management surface; External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, and future external systems) is an access/deep-link/visibility hub.
+Current target architecture for Wave 7 is a **three-lane model**:
 
-### Microsoft Files Lane
+- **Project Record**: formal project record in SharePoint project-site libraries.
+- **My Project Files**: project-scoped OneDrive working files at `My Project Files > {ProjectNumber}-{ProjectName}`.
+- **External Systems**: Procore, Document Crunch, Adobe Sign, and future approved systems as linked systems.
 
-- SharePoint project drive / document libraries
-- OneDrive project-linked locations
+Hard guardrail: the project-site module must never expose the user’s full OneDrive `My Project Files` root or folders for other projects.
 
-### External Document Systems Lane
+Wave 7 posture is backend-mediated source binding through a Project Document Source Registry. SPFx surfaces only project-approved bindings and role-allowed actions.
 
-- Procore files
-- Document Crunch
-- Adobe Sign
+Permission model requirements (Wave 7 target):
 
-### Wave 2 Preview Boundary
+- complete role list `R01`–`R23`;
+- action code families `PR`, `MP`, `SB`, `EX`, `WF`;
+- permission legend symbols and universal hard-no rules;
+- use **Project Coordinator** terminology for document-control actor routing (not Project Engineer).
 
-- Microsoft lane actions are disabled/preview-only in Wave 2 (browse, open, upload, download, copy/share link, metadata, permission/access states, approval/status cues).
-- External lane is launch/deep-link/missing-config/access-issue states only in Wave 2.
-- No live Graph/PnP/API calls; no upload/download/copy-link execution; no approval execution; no permission mutation; no external runtime/SDK/secrets; no sync/mirror/write-back/mutation.
-
-### MVP Sources
-
-- SharePoint project drive / document libraries
-- OneDrive project-linked locations
-- Procore files
-
-### MVP Capabilities
-
-- launch/open correct file source
-- source labeling
-- role-aware access behavior
-- missing/broken access prompt
-- no standalone submittal workflow replacement
-- no transmittal/revision-routing replacement
-- no document review/routing workflow execution in Wave 2
-- no approval execution in Wave 2
-- no replacement for Procore, Document Crunch, Adobe Sign, or native external-platform workflows
-- no replacement for Procore or SharePoint libraries
+This section is planning/architecture only and does not assert runtime implementation completion.
 
 ## External Systems
 
@@ -334,7 +315,7 @@ MVP behavior:
 | Risk                                                             | Mitigation                                                           |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
 | MVP over-expands into full workflow platform                     | Keep MVP modules limited and implementation gated.                   |
-| Document Control scope drifts into standalone workflow execution | Preserve two-lane boundary and keep Wave 2 preview-only constraints. |
+| Document Control scope drifts into standalone workflow execution | Preserve three-lane boundary and backend-controlled source-binding guardrails. |
 | External Systems grow into integrations too early                | Launch links only for MVP.                                           |
 | Item-level workflows require storage decisions                   | Capture as open implementation decision.                             |
 | SPFx attempts unsafe execution                                   | Enforce backend-only technical execution boundary.                   |
@@ -357,7 +338,7 @@ The product architecture is implemented through the formal Phase 3 module implem
 | Project Home / Command Center          |              Wave 4 |
 | Priority Actions Rail                  |              Wave 5 |
 | Team & Access                          |              Wave 6 |
-| Documents / Document Control Center    |              Wave 7 |
+| HB Document Control Center             |              Wave 7 |
 | Project Readiness module framework     |              Wave 8 |
 | Job Startup Checklist                  |              Wave 9 |
 | Permit Log                             |             Wave 10 |

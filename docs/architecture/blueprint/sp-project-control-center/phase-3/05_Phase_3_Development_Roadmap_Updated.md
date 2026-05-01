@@ -61,7 +61,7 @@ Required order:
 | 5 | Priority Actions Rail | Four-category action rail | Module wave |
 | 5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5 | Optional controlled validation gate |
 | 6 | Team & Access | Request + approval workflow | Module wave |
-| 7 | Documents / Document Control Center | Unified file-access hub | Module wave |
+| 7 | HB Document Control Center | Three-lane document architecture (Project Record, My Project Files, External Systems) | Module wave |
 | 8 | Project Readiness Module Framework | Shared item-level workflow framework | Module wave |
 | 9 | Job Startup Checklist | Item-level startup workflow | Module wave |
 | 10 | Permit Log | Item-level permit workflow | Module wave |
@@ -97,7 +97,7 @@ Required order:
 ### Milestone 3 — Access, Documents, and Health
 
 - Wave 6 — Team & Access
-- Wave 7 — Document Control Center
+- Wave 7 — HB Document Control Center
 - Wave 17 — Site Health
 - Wave 19 — Admin Review Surfaces
 

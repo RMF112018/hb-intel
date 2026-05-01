@@ -719,44 +719,28 @@ Each template should define:
 
 ### 13.1 Purpose
 
-Provide a single project-aware document surface for project libraries, user OneDrive context, recent project documents, controlled document views, and workflow evidence.
+Provide the **HB Document Control Center** as the project-site document-control module with three lanes: Project Record, My Project Files, and External Systems.
 
-### 13.2 Views
+### 13.2 Lane Model (Current Target Architecture)
 
-- Project Libraries
-- My OneDrive
-- Shared With Me
-- Recent Project Documents
-- Drawings and Specifications
-- Contracts and Compliance
-- Permits and Inspections
-- Field Documentation
-- Meeting Minutes
-- Closeout Documents
-- As-Builts
-- Warranties
-- O&M Manuals
-- Lessons Learned Attachments
+- **Project Record**: formal project record in SharePoint project-site document libraries.
+- **My Project Files**: user-specific OneDrive working files under `My Project Files > {ProjectNumber}-{ProjectName}`.
+- **External Systems**: Procore, Document Crunch, Adobe Sign, and future approved systems as launch/deep-link/visibility sources.
 
-### 13.3 Phase 1 Capabilities
+Hard guardrail: the project-site instance must never expose the user’s full OneDrive `My Project Files` root folder or other project folders.
 
-- Browse project document libraries
-- Browse signed-in user OneDrive
-- Open files
-- Download files
-- Copy safe links
-- View metadata
-- Navigate folders with breadcrumbs
-- Lazy-load children
-- Show permission/access states
-- Show configuration errors
-- Avoid write operations until governance is implemented
+### 13.3 Source Binding and Read-Model Posture
+
+- Every project binds document sources through a backend-controlled **Project Document Source Registry**.
+- SPFx must not hard-code or self-discover source links.
+- Wave 7 uses backend-mediated read-model/API posture for source resolution, permission-aware actions, throttling/resilience states, and audit logging.
+- `procoreProjectId` is part of the project-level metadata model for source binding and external-system context.
 
 ### 13.4 Integration With Other Modules
 
 Checklist items, permit rows, inspection records, subcontractor scorecards, lessons learned entries, contract obligations, and closeout tasks should all support evidence links into project document libraries.
 
-### 13.5 Recommended Graph Posture
+### 13.5 Graph and File-Action Posture
 
 Phase 1 should use delegated permissions and signed-in user context. Candidate read-only Graph permissions should be validated before implementation, but the working model is:
 
@@ -765,7 +749,7 @@ Phase 1 should use delegated permissions and signed-in user context. Candidate r
 - no app-only tenant-wide file crawling;
 - no persistence of temporary download URLs.
 
-### 13.6 Procore deep-link posture
+### 13.6 External-System Deep-Link Posture
 
 When Procore `documents_design` and `project_management` subject areas are enabled (§36A.9), Document Control deep-links to Procore drawings, specifications, and document records rather than mirroring binaries. Posture:
 
@@ -773,6 +757,17 @@ When Procore `documents_design` and `project_management` subject areas are enabl
 - Selective publish of approved PDFs / generated reports to SharePoint is allowed when business explicitly requires the deliverable in M365 (per package §10).
 - Procore-derived records require lineage fields per §36A.11 (`SourceSystem`, `ProcoreObjectType`, `ProcoreObjectId`, `ProcoreObjectUrl`, `ProcoreLastSyncedAt`, etc.).
 - Drawing / spec metadata may be summarized in PCC (current set, latest revision); the binary remains in Procore.
+
+### 13.7 Role/Action Permission Model Requirements (Wave 7 Target)
+
+Wave 7 target documentation must include:
+
+- complete role list `R01`–`R23`;
+- action code families `PR`, `MP`, `SB`, `EX`, `WF`;
+- permission legend and universal hard-no rules;
+- Project Coordinator naming for document-control routing roles (Project Engineer is legacy wording and not used for current target architecture).
+
+The role/action matrix is architecture doctrine for Wave 7 planning and does not claim runtime authorization implementation is already complete.
 
 ---
 

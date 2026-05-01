@@ -25,7 +25,7 @@ Phase 3 code work should build the **PCC application layer**:
 4. Priority action aggregation.
 5. Light operational workflow framework.
 6. Structured Project Readiness workflow modules.
-7. Document Control Center two-lane architecture.
+7. HB Document Control Center three-lane architecture.
 8. External Systems launch hub.
 9. Site Health visibility and repair request intake.
 10. Admin/control-plane review surfaces.
@@ -60,7 +60,7 @@ Then implement each module as its own wave. This prevents every module from inve
 |    5 | Priority Actions Rail                                        | Build MVP action categories and source aggregation.                                                                                              | Waves 3–4                   |
 |   5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5; not the first hosted validation point.                                                                | Wave 5                      |
 |    6 | Team & Access                                                | Build request + approval workflow; no automated permission execution.                                                                            | Waves 2–3                   |
-|    7 | Documents / Document Control Center                          | Build two-lane model: Microsoft Files Lane (future Graph-backed file-management) + External Document Systems Lane (launch/deep-link/visibility). | Waves 2–3                   |
+|    7 | HB Document Control Center                                   | Build three-lane model: Project Record + My Project Files + External Systems, with source binding, review routing, audit, and project-only OneDrive guardrail. | Waves 2–3                   |
 |    8 | Project Readiness Module Framework                           | Build shared framework for structured readiness modules.                                                                                         | Waves 2–3                   |
 |    9 | Job Startup Checklist                                        | Build item-level startup workflow module.                                                                                                        | Wave 8                      |
 |   10 | Permit Log                                                   | Build item-level permit workflow module.                                                                                                         | Wave 8                      |
@@ -379,41 +379,68 @@ Build Team & Access request and approval tracking without automated permission e
 
 ---
 
-# Wave 7 — Documents / Document Control Center
+# Wave 7 — HB Document Control Center
 
 ## Objective
 
-Build the two-lane Document Control architecture.
+Build the three-lane HB Document Control Center architecture.
 
-## Sources
+## Lanes
 
-- Microsoft Files Lane: SharePoint Drive / document libraries and OneDrive.
-- External Document Systems Lane: Procore Files, Document Crunch, Adobe Sign, and future systems.
+- Project Record: formal SharePoint project record.
+- My Project Files: project-scoped OneDrive working-file lane.
+- External Systems: Procore, Document Crunch, Adobe Sign, and future approved systems as linked systems.
 
 ## Code Work
 
-- File source registry read model.
-- Source cards.
-- Launch/open actions.
-- Source-of-record labels.
-- Missing link state.
-- Access issue prompt.
-- Permission-aware visibility.
-- Search/filter only if lightweight and available.
+- Project Document Source Registry read model and project-scoped source binding.
+- Project Record lane UI and formal-file metadata posture.
+- My Project Files lane UI with hard guardrail: never expose full OneDrive root or other projects.
+- External Systems lane cards (launch/deep-link/visibility + mapping/access issue states).
+- Role/action permission model using R01–R23 role codes and PR/MP/SB/EX/WF action codes.
+- Review types/routing model and workflow/audit posture.
+- Search strategy, upload constraints, folder/path constraints, change tracking refresh model.
+- Throttling/resilience states and admin repair/reconciliation posture.
+- Fixture/mock read-model strategy for Wave 7 contract validation.
 
 ## Not Included
 
-- Document workflow management.
-- Review/routing.
-- Submittals.
-- Procore document replacement.
-- SharePoint library workflow replacement.
+- External writeback/sync/mirror (`EX04`) in Wave 7.
+- Procore, Document Crunch, or Adobe Sign system-of-record replacement.
+- Broad OneDrive browsing across projects (architecture HARD-NO).
+- Runtime implementation claims outside Wave 7 scoped documentation planning.
+
+## Permission Legend and Universal Hard-No Rules
+
+Permission symbols follow the architecture legend: `Y`, `A`, `O`, `R`, `C`, `S`, `D`, `N`, `HARD-NO`.
+
+Universal hard-no rules:
+
+- Never expose the full OneDrive `My Project Files` root from the project-site module.
+- Never expose another project's OneDrive working folder.
+- Never perform external writeback/sync/mirror in Wave 7.
+
+## Complete Role Set (R01–R23)
+
+R01 PCC Admin; R02 IT / Tenant Admin; R03 Executive Oversight; R04 Project Executive; R05 Project Manager; R06 Superintendent; R07 Project Accounting; R08 Project Team Member; R09 Project Viewer / Viewer; R10 Safety / QAQC; R11 Manager of Operational Excellence; R12 Estimating Coordinator; R13 Estimator; R14 Lead Estimator; R15 Chief Estimator; R16 Director of Preconstruction; R17 Legal Reviewer; R18 Compliance Reviewer; R19 Leadership Reviewer; R20 External Contributor; R21 External Design Team; R22 Owner / Client Viewer; R23 Subcontractor Limited.
+
+## Action Codes
+
+- Project Record: `PR01`–`PR12`
+- My Project Files: `MP01`–`MP09`
+- Source Binding / Repair: `SB01`–`SB08`
+- External Systems: `EX01`–`EX04`
+- Workflow/Admin: `WF01`–`WF08`
+
+Use Project Coordinator terminology for document-control actor roles. Do not use Project Engineer for current-target Wave 7 permission/routing language.
 
 ## Exit Criteria
 
-- Users can access mapped file sources.
-- Executive Oversight has governed read-only access.
-- Missing/broken links are clear.
+- Three lanes are defined and non-contradictory with Wave 7 scope.
+- Project Document Source Registry binding model is documented.
+- Role/action permission model (R01–R23 and PR/MP/SB/EX/WF) is documented with hard-no rules.
+- Search/upload/path constraints, refresh tracking, throttling/resilience, and audit/reconciliation posture are documented.
+- Wave 7 remains Document Control and Wave 11 remains Responsibility Matrix.
 
 ---
 
@@ -837,7 +864,7 @@ Close Phase 3 MVP implementation with formal validation, documentation, and read
 ## Milestone 3 — Access, Documents, and Health
 
 - Wave 6 — Team & Access
-- Wave 7 — Document Control Center
+- Wave 7 — HB Document Control Center
 - Wave 17 — Site Health
 - Wave 19 — Admin Review Surfaces
 
@@ -891,7 +918,7 @@ Phase 3 implementation can be considered complete when:
 2. backend read models support shell consumption;
 3. the approved MVP light workflows are functional;
 4. all five MVP Project Readiness modules support item-level workflow tracking;
-5. Document Control Center supports the two-lane posture (Microsoft lane preview-only file-management affordances; external lane launch/deep-link/missing-config/access-issue states);
+5. HB Document Control Center supports the three-lane posture (Project Record, My Project Files with project-only guardrail, and External Systems launch/deep-link/missing-config/access-issue states);
 6. External Systems launch hub supports approved MVP systems;
 7. Site Health supports visibility and repair-request intake;
 8. admin review surfaces support MVP queues;
