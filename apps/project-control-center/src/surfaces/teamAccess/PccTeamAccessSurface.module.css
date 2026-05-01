@@ -53,3 +53,61 @@
   font-style: italic;
   color: var(--pcc-color-ink-subtle);
 }
+
+.queue {
+  display: grid;
+  gap: 10px;
+}
+
+.queueRow {
+  display: grid;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--pcc-color-line-soft);
+  border-radius: 8px;
+}
+
+.queueRowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detailPanel {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--pcc-color-line-soft);
+  border-radius: 8px;
+  background: transparent;
+}
+
+.reviewControls {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed var(--pcc-color-line-soft);
+  border-radius: 8px;
+  background: transparent;
+}
+
+.decisionPreviewLine {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pcc-color-ink-muted);
+}
+
+.formLabel {
+  font-size: 12px;
+  color: var(--pcc-color-ink-subtle);
+}
+
+.formTextarea {
+  width: 100%;
+  border: 1px solid var(--pcc-color-line-soft);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font: inherit;
+  color: var(--pcc-color-ink-muted);
+  background: transparent;
+}
