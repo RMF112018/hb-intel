@@ -547,7 +547,7 @@ Control Center Settings is a single governed surface. Sections:
 | External Integrations | Configure Procore/Sage Intacct/Compass/Document Crunch/Adobe Sign/Cupix/Teams/Outlook | Admin | Integration Configuration |
 | Startup / Closeout Templates | Adjust seeded items (within governed allowlist) | Admin, PX, PM | Project Startup Tasks, Project Closeout Tasks |
 | Permits & Inspections | Adjust seeded permits/inspections | Admin, PM, Superintendent | Project Permits, Project Required Inspections |
-| Responsibility Matrix | Adjust matrix rows (governed) | Admin, PX, PM | Project Responsibility Matrix |
+| Responsibility Matrix | Adjust matrix rows and assignment axes (governed) | Admin, PX, PM | Project Responsibility Matrix |
 | Notifications / Escalations | Configure notification rules | Admin | Notification Rules |
 | Data Validation | Run validation manually | Admin | Project Site Health |
 | Site Health / Repair | View health, run repair | Admin, IT | Project Site Health |
@@ -1411,15 +1411,47 @@ Each `docs/reference/example/` source converts into one or more lists' seeded da
 
 **Maps to:** Project Responsibility Matrix, Project Roles, Project Action Items, My Responsibilities, Team & Access Center.
 
-**Per row fields:** `Workstream`, `Task / Responsibility`, `Primary Role`, `Primary Person`, `Support Roles`, `Support People`, `Sign-Off Role`, `Frequency`, `Due Rule`, `Related Module`, `Active`, `Notes`.
+This module is a governed, project-level responsibility system with two explicit assignment axes:
+
+- **Contract-party classification axis:** `Owner`, `Architect / Engineer`, `Contractor`.
+- **Internal RACI assignment axis:** `Responsible`, `Accountable`, `Consulted`, `Informed`.
+
+**Hard semantic rule:** Contract-party `C = Contractor` is a contract-party classification value and is never equivalent to RACI `C = Consulted`.
+
+**Seed source workbooks (repo-resident):**
+
+- `docs/reference/example/Responsibility Matrix - Template.xlsx` (sheets: `PM`, `Field`)
+- `docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx` (sheet: `Template`)
+
+**Seed families:**
+
+- Owner Contract / GMP
+- PM Operations
+- Field Operations
+
+**Per row fields:** `Workstream`, `Task / Responsibility`, `Primary Role`, `Primary Person`, `Support Roles`, `Support People`, `Sign-Off Role`, `Frequency`, `Due Rule`, `Related Module`, `Active`, `Notes`, `ContractPartyClassification`, `RaciAssignments`, `SeedSourceWorkbook`, `SeedSourceSheet`, `SeedSourceRow`, `SeedFamily`, `SeedVersion`.
 
 **Seeded role columns** (from the example workbook): PX, Sr. PM, PM2, PM1, PA, QAQC, Project Accountant.
+
+**Edit authority (governed):** Admin, Project Executive, and Project Manager may add/modify project-level responsibility items and set assignment values on both axes. Other roles consume role-aware views and Action Center/My Responsibilities rollups unless future scope grants broader edit rights.
+
+**Legacy marker normalization policy (governance-required):**
+
+| Legacy marker | Axis | Status | Meaning posture |
+|---|---|---|---|
+| `X` | Internal RACI | Governance-required | Context-dependent; often primary assignment, but final mapping to `Responsible` vs `Accountable` is governance-defined. |
+| `Support` | Internal RACI | Governance-required | Context-dependent; may map to `Consulted`, `Informed`, or secondary `Responsible` by policy. |
+| `Review` | Internal RACI | Governance-required | Context-dependent; may map to `Consulted` or `Accountable` depending on approval authority. |
+| `Sign-Off` | Internal RACI | Governance-required | Context-dependent; may represent `Accountable` or explicit approval-gate semantics. |
+| `O` | Contract-party classification | Defined | `Owner Activity`. |
+| `A/E` | Contract-party classification | Defined | `Architect / Engineer Activity`. |
+| `C` | Contract-party classification | Defined | `Contractor Activity` (not RACI `Consulted`). |
 
 ### 17.6 Owner Contract Responsibility Matrix → seeded
 
 **Maps to:** Contract Obligation Register, Owner Contract Responsibility Matrix, Action Center, Risk Register, Document Crunch Review Tracker.
 
-**Per row fields:** `ContractArticle`, `Page`, `ResponsibleParty` (`Owner` / `Architect-Engineer` / `Contractor`), `Obligation`, `TriggerEvent`, `ResponsibleHbRole`, `EvidenceRequirement`.
+**Per row fields:** `ContractArticle`, `Page`, `ResponsibleParty` (`Owner` / `Architect-Engineer` / `Contractor`), `Obligation`, `TriggerEvent`, `ResponsibleHbRole`, `EvidenceRequirement`, `SeedSourceWorkbook`, `SeedSourceSheet`, `SeedSourceRow`, `SeedFamily`, `SeedVersion`.
 
 ### 17.7 Subcontractor Scorecard → seeded
 
@@ -2109,7 +2141,7 @@ Row format: `ID | Decision | Status | Closure / Resolution | Implementation Impa
 | **3 — Team & Access Center** | Implement governed team & access | Invite workflow; permission template apply; audit; phase-based managers | §11 invite workflow runs end-to-end; audit records every action | Group mapping unknown (Open Decision 12, 13) | Phase 2; group ID resolution |
 | **4 — Document Control Center** | Implement DCC | `apps/document-control-center/` (`@hbc/spfx-document-control-center`); MVP libraries; governed upload + register | Users use DCC for all document workflows on MVP libraries; no native library settings reach | Sync policy enforcement boundary | Phase 2 |
 | **5 — Startup / Permits / Inspections / Closeout MVP Modules** | Implement MVP §21.1 modules | Startup Center, Permit & AHJ, Inspection Readiness, Closeout & Warranty | Seeded data from §17 visible; users complete end-to-end without native admin | Drift between example seed + actual fields | Phase 4 |
-| **6 — Responsibility Matrix and Action Center** | Implement Responsibility Matrix; introduce Action Center | Project Responsibility Matrix; Action rollups | My Responsibilities surface populated | Cross-module rollup logic | Phase 5 |
+| **6 — RACI Responsibility Matrix and Action Center** | Define and implement governed two-axis responsibility model; introduce Action Center planning seam | Project Responsibility Matrix; Action rollups | Governed matrix definition is locked; My Responsibilities and Action Center rollups consume role-aware outputs when implemented | Cross-module rollup logic; governance-required marker normalization policy | Phase 5 |
 | **7 — Contract / Compliance / Procurement / Subcontractor Performance** | Move from MVP into next-tier modules | Contract Obligation Register (with Document Crunch + Adobe Sign), Procurement & Buyout, Subcontractor Performance Center | Integration mappings live; Document Crunch reviews appear; Adobe Sign envelopes track | External system access; mapping decisions | Phase 6; integration approvals |
 | **8 — Lessons Learned / Best Practices / HBI Assistant** | Knowledge capture | Lessons Learned Center; HBI Assistant grounded in project lists | Lessons saved + searchable; HBI returns project-grounded answers | LLM grounding scope | Phase 7 |
 | **9 — External Integration Deepening** | Sync past placeholder | Selective Procore writes; Sage Intacct deeper sync; Cupix deepened | Integrations move from links to interactive surfaces where approved | Tenant policy on writes | Phase 8 |

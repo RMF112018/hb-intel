@@ -813,9 +813,27 @@ Provide fast access to project contacts, responsibilities, companies, and role a
 
 ### 15.1 Purpose
 
-Convert the current PM and field responsibility matrix templates into structured, role-aware, project-specific accountability data.
+Convert the current responsibility-matrix workbooks into a governed, project-level, role-aware responsibility module with explicit assignment semantics.
+
+This is not a static spreadsheet replacement only. It is a governed Responsibility Matrix Center that uses a two-axis model:
+
+- contract-party classification axis (`Owner`, `Architect / Engineer`, `Contractor`);
+- internal RACI assignment axis (`Responsible`, `Accountable`, `Consulted`, `Informed`).
+
+Hard semantic separation applies: contract-party `C = Contractor` is not RACI `C = Consulted`.
 
 ### 15.2 Current Example Coverage
+
+Seed source workbooks (repo-resident):
+
+- `docs/reference/example/Responsibility Matrix - Template.xlsx` (sheets: `PM`, `Field`)
+- `docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx` (sheet: `Template`)
+
+Seed families:
+
+- Owner Contract / GMP
+- PM Operations
+- Field Operations
 
 The PM responsibility matrix includes responsibilities across:
 
@@ -863,13 +881,17 @@ The field responsibility matrix includes responsibilities across:
 - Template-driven responsibility matrix
 - Project-specific role assignment
 - RACI-style view
+- Two-axis assignment model (contract-party classification + internal RACI)
 - Personal “My Responsibilities” view
 - Role-based filtering
 - Support role assignments
 - Sign-off role assignments
 - Recurring responsibility rules
 - Handoff workflow when a staff member changes roles
-- Integration into Action Center
+- Integration into Action Center (planning/target-state; runtime delivery occurs in later phase implementation)
+- Seed traceability metadata (`source workbook`, `source sheet`, `source row`, `seed family`, `seed version`)
+- Governed edit authority for Admin, Project Executive, and Project Manager
+- Governance-required normalization policy for legacy assignment markers (`X`, `Support`, `Review`, `Sign-Off`)
 
 ### 15.4 Data Lists
 
@@ -908,6 +930,8 @@ The field responsibility matrix includes responsibilities across:
 ### 16.1 Purpose
 
 Aggregate all project work requiring attention into one role-aware task surface.
+
+For Responsibility Matrix inputs, Action Center consumes governed responsibility outputs from the two-axis model. This is architecture and planning posture, not a claim that Phase 7 runtime behavior is already delivered.
 
 ### 16.2 Sources
 
@@ -1308,6 +1332,8 @@ The owner contract matrix includes:
   - `O` = Owner Activity
   - `A/E` = Architect / Engineer Activity
   - `C` = Contractor Activity
+
+These are contract-party classification markers and remain separate from internal RACI assignment values.
 
 ### 20.4 Features
 
