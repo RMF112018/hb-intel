@@ -284,6 +284,28 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
     );
   }
 
+  async getTeamAccess(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccTeamAccessReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { preview: SAMPLE_TEAM_ACCESS_PREVIEW_MODEL },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { preview: SAMPLE_TEAM_ACCESS_PREVIEW_MODEL },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
   private statusForKnownProject(projectId: PccProjectId): PccReadModelSourceStatus {
     return this.knownProjects.has(projectId) ? 'available' : 'source-unavailable';
   }

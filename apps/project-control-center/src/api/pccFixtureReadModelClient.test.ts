@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { SAMPLE_PROJECT_PROFILES } from '@hbc/models/pcc';
+import {
+  SAMPLE_PROJECT_PROFILES,
+  SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
+} from '@hbc/models/pcc';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
 import { createPccFixtureReadModelClient } from './pccFixtureReadModelClient.js';
 
@@ -19,8 +22,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getDocumentControl(KNOWN_PROJECT_ID),
       client.getExternalLinks(KNOWN_PROJECT_ID),
       client.getSiteHealth(KNOWN_PROJECT_ID),
+      client.getTeamAccess(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(7);
+    expect(envelopes).toHaveLength(8);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -70,6 +74,10 @@ describe('createPccFixtureReadModelClient — defaults', () => {
 
     const health = await client.getSiteHealth(KNOWN_PROJECT_ID);
     expect(health.data.summary).toBeDefined();
+
+    const teamAccess = await client.getTeamAccess(KNOWN_PROJECT_ID);
+    expect(teamAccess.data.preview).toBe(SAMPLE_TEAM_ACCESS_PREVIEW_MODEL);
+    expect(teamAccess.sourceStatus).toBe('available');
   });
 });
 
@@ -85,6 +93,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getDocumentControl(KNOWN_PROJECT_ID),
       client.getExternalLinks(KNOWN_PROJECT_ID),
       client.getSiteHealth(KNOWN_PROJECT_ID),
+      client.getTeamAccess(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
