@@ -1,9 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import {
+  DOCUMENT_CONTROL_ACTION_CODES,
+  DOCUMENT_CONTROL_ACTION_FAMILIES,
   DOCUMENT_CONTROL_ACTION_IDS,
   DOCUMENT_CONTROL_ACTIONS,
+  DOCUMENT_CONTROL_LEGACY_TO_WAVE7_LANE,
   DOCUMENT_CONTROL_LANES,
+  DOCUMENT_CONTROL_REVIEW_STATES,
+  DOCUMENT_CONTROL_REVIEW_TYPES,
+  DOCUMENT_CONTROL_ROLE_CODES,
+  DOCUMENT_CONTROL_ROLE_VOCABULARY,
   DOCUMENT_CONTROL_SOURCE_IDS,
+  DOCUMENT_CONTROL_SOURCE_HEALTH_STATES,
+  DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES,
+  DOCUMENT_CONTROL_WAVE7_LANES,
+  DOCUMENT_CONTROL_WAVE7_TO_LEGACY_LANE,
   DOCUMENT_CONTROL_SOURCES,
   type DocumentControlLane,
   type IDocumentControlSource,
@@ -115,6 +126,69 @@ describe('Document Control two-lane model (Wave 2 / Prompt 06)', () => {
       const source = DOCUMENT_CONTROL_SOURCES[id];
       expect(source.sourceOfRecordLabel.length).toBeGreaterThan(0);
       expect(source.guardrail.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('Document Control Wave 7 additive doctrine contracts', () => {
+  it('exposes canonical three-lane wave 7 vocabulary', () => {
+    expect(DOCUMENT_CONTROL_WAVE7_LANES).toEqual([
+      'project-record',
+      'my-project-files',
+      'external-systems',
+    ]);
+  });
+
+  it('preserves backward-compatible mapping between legacy and wave 7 lanes', () => {
+    expect(DOCUMENT_CONTROL_LEGACY_TO_WAVE7_LANE['microsoft-files']).toEqual([
+      'project-record',
+      'my-project-files',
+    ]);
+    expect(DOCUMENT_CONTROL_LEGACY_TO_WAVE7_LANE['external-document-systems']).toEqual([
+      'external-systems',
+    ]);
+
+    expect(DOCUMENT_CONTROL_WAVE7_TO_LEGACY_LANE['project-record']).toBe('microsoft-files');
+    expect(DOCUMENT_CONTROL_WAVE7_TO_LEGACY_LANE['my-project-files']).toBe('microsoft-files');
+    expect(DOCUMENT_CONTROL_WAVE7_TO_LEGACY_LANE['external-systems']).toBe(
+      'external-document-systems',
+    );
+  });
+
+  it('defines role vocabulary exactly R01-R23 and includes Project Coordinator but not Project Engineer', () => {
+    expect(DOCUMENT_CONTROL_ROLE_CODES).toHaveLength(23);
+    expect(Object.keys(DOCUMENT_CONTROL_ROLE_VOCABULARY).sort()).toEqual(
+      DOCUMENT_CONTROL_ROLE_CODES.slice().sort(),
+    );
+
+    const labels = DOCUMENT_CONTROL_ROLE_CODES.map((code) => DOCUMENT_CONTROL_ROLE_VOCABULARY[code].label);
+    expect(labels).toContain('Project Coordinator');
+    expect(labels).not.toContain('Project Engineer');
+  });
+
+  it('defines action-family doctrine for PR/MP/SB/EX/WF', () => {
+    expect(DOCUMENT_CONTROL_ACTION_FAMILIES).toEqual(['PR', 'MP', 'SB', 'EX', 'WF']);
+    const familiesInCodes = new Set(DOCUMENT_CONTROL_ACTION_CODES.map((a) => a.family));
+    for (const family of DOCUMENT_CONTROL_ACTION_FAMILIES) {
+      expect(familiesInCodes.has(family)).toBe(true);
+    }
+  });
+
+  it('exports review/source-health doctrine vocabularies', () => {
+    expect(DOCUMENT_CONTROL_SOURCE_HEALTH_STATES.length).toBeGreaterThan(0);
+    expect(DOCUMENT_CONTROL_REVIEW_STATES.length).toBeGreaterThan(0);
+    expect(DOCUMENT_CONTROL_REVIEW_TYPES.length).toBeGreaterThan(0);
+  });
+
+  it('universal hard-no rules remain serializable fixture-friendly contract data', () => {
+    expect(DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES.length).toBeGreaterThan(0);
+    const encoded = JSON.stringify(DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES);
+    const decoded = JSON.parse(encoded) as Array<{ id: string; title: string; description: string }>;
+    expect(decoded).toEqual(DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES);
+    for (const rule of decoded) {
+      expect(rule.id.length).toBeGreaterThan(0);
+      expect(rule.title.length).toBeGreaterThan(0);
+      expect(rule.description.length).toBeGreaterThan(0);
     }
   });
 });

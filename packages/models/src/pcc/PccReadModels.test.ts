@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
+  DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES,
+  DOCUMENT_CONTROL_WAVE7_LANES,
   PCC_READ_MODEL_MODES,
   PCC_READ_MODEL_SOURCE_STATUSES,
   type PccReadModelEnvelope,
@@ -99,7 +101,51 @@ describe('PccReadModels exports and typing', () => {
       sourceStatus: 'backend-unavailable',
       readOnly: true,
       warnings: [{ code: 'backend-unavailable', message: 'Backend unavailable.' }],
-      data: { sources: [] },
+      data: {
+        sources: [],
+        wave7LaneVocabulary: DOCUMENT_CONTROL_WAVE7_LANES,
+        sourceRegistry: [
+          {
+            sourceKey: 'registry-project-record',
+            displayName: 'Project Record Library',
+            wave7Lane: 'project-record',
+            sourceKind: 'sharepoint-library',
+            enabled: true,
+            binding: {
+              kind: 'sharepoint-library',
+              siteId: 'site-1',
+              driveId: 'drive-1',
+              listId: 'list-1',
+            },
+          },
+          {
+            sourceKey: 'registry-my-project-files',
+            displayName: 'My Project Files',
+            wave7Lane: 'my-project-files',
+            sourceKind: 'my-project-files',
+            enabled: true,
+            binding: {
+              kind: 'my-project-files',
+              rootFolderName: 'My Project Files',
+              userObjectId: 'user-1',
+              projectId: 'p-1',
+              projectFolderName: '00-000-00-Project Example',
+              projectFolderPath: '/My Project Files/00-000-00-Project Example',
+            },
+          },
+        ],
+        sourceHealth: [
+          {
+            sourceKey: 'registry-project-record',
+            state: 'healthy',
+            message: 'Source is available',
+          },
+        ],
+        sourceHealthStates: ['healthy'],
+        reviewStates: ['pending'],
+        reviewTypes: ['project-execution-review'],
+        hardNoRules: DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES,
+      },
     };
 
     const linksEnvelope: PccReadModelEnvelope<PccExternalLinksReadModel> = {
@@ -197,6 +243,27 @@ describe('PccReadModels exports and typing', () => {
     expect(map.modules.mode).toBe('mock');
     expect(map.home.sourceStatus).toBe('missing-config');
     expect(map['site-health'].warnings[0]?.code).toBe('unauthorized');
+  });
+
+  it('document-control read-model remains backward compatible and serializable', () => {
+    const legacyOnly: PccDocumentControlReadModel = { sources: [] };
+    expect(legacyOnly.sources).toEqual([]);
+
+    const wave7Additive: PccDocumentControlReadModel = {
+      sources: [],
+      wave7LaneVocabulary: DOCUMENT_CONTROL_WAVE7_LANES,
+      sourceRegistry: [],
+      sourceHealth: [],
+      sourceHealthStates: [],
+      reviewStates: [],
+      reviewTypes: [],
+      hardNoRules: DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES,
+    };
+
+    const encoded = JSON.stringify(wave7Additive);
+    const decoded = JSON.parse(encoded) as PccDocumentControlReadModel;
+    expect(decoded.wave7LaneVocabulary).toEqual(DOCUMENT_CONTROL_WAVE7_LANES);
+    expect(decoded.hardNoRules).toEqual(DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES);
   });
 });
 

@@ -10,7 +10,16 @@ import type { IProjectProfile } from './IProjectProfile.js';
 import type { IPccSettingsRef } from './PccSettings.js';
 import type { IPccMvpSurface, PccMvpSurfaceId } from './PccMvpSurfaces.js';
 import type { IPriorityAction } from './PriorityActions.js';
-import type { IDocumentControlSource } from './DocumentControl.js';
+import type {
+  DocumentControlSourceHealthState,
+  DocumentControlWave7Lane,
+  DocumentControlReviewState,
+  DocumentControlReviewType,
+  IDocumentControlSource,
+  IDocumentControlUniversalHardNoRule,
+  IProjectDocumentSourceHealth,
+  IProjectDocumentSourceRegistryEntry,
+} from './DocumentControl.js';
 import type {
   IExternalSystemLink,
   IExternalSystemMissingConfig,
@@ -78,6 +87,13 @@ export interface PccPriorityActionsReadModel {
 
 export interface PccDocumentControlReadModel {
   sources: readonly IDocumentControlSource[];
+  wave7LaneVocabulary?: readonly DocumentControlWave7Lane[];
+  sourceRegistry?: readonly IProjectDocumentSourceRegistryEntry[];
+  sourceHealth?: readonly IProjectDocumentSourceHealth[];
+  sourceHealthStates?: readonly DocumentControlSourceHealthState[];
+  reviewStates?: readonly DocumentControlReviewState[];
+  reviewTypes?: readonly DocumentControlReviewType[];
+  hardNoRules?: readonly IDocumentControlUniversalHardNoRule[];
 }
 
 export interface PccExternalLinksReadModel {
