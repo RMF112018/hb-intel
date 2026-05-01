@@ -1,0 +1,20 @@
+{
+  "package": "pcc-wave9-target-architecture-doc-update-prompt-package",
+  "target_module": "Project Lifecycle Readiness Center",
+  "repo": "/Users/bobbyfetting/hb-intel",
+  "checklist_definition_path": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/",
+  "files": [
+    "00_Execution_Instructions.md",
+    "01_Target_Architecture_Project_Lifecycle_Readiness_Center.md",
+    "02_Document_Update_Map.md",
+    "03_Checklist_Definition_File_Requirements.md",
+    "04_Prompt_01_Repo_Truth_And_Checklist_Audit.md",
+    "05_Prompt_02_Update_Governing_Blueprint_And_Roadmap.md",
+    "06_Prompt_03_Add_Target_Architecture_File.md",
+    "07_Prompt_04_Add_Item_Library_Crosswalk_Documentation.md",
+    "08_Prompt_05_Add_Role_Evidence_Scoring_And_UX_Details.md",
+    "09_Prompt_06_Validation_Closeout_And_Commit.md",
+    "10_Reviewer_Prompt.md",
+    "README.md"
+  ]
+}
