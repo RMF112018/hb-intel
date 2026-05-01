@@ -148,6 +148,7 @@ export type ProjectReadinessEvidenceState =
 // ---------------------------------------------------------------------------
 
 export interface IProjectReadinessSourceLineage {
+  readonly sourceModuleId: ProjectReadinessSourceModuleId;
   readonly sourceItemId?: string;
   readonly sourceReferenceLabel?: string;
   readonly sourceUrl?: string;
@@ -180,7 +181,7 @@ export interface IProjectReadinessItem {
   readonly confidence: ProjectReadinessConfidenceState;
   readonly sourceHealthStatus: PccReadModelSourceStatus;
   readonly evidenceRequirement?: IProjectReadinessEvidenceRequirement;
-  readonly sourceLineage?: IProjectReadinessSourceLineage;
+  readonly sourceLineage: IProjectReadinessSourceLineage;
   readonly dependencyItemIds: readonly string[];
   readonly escalationPath?: readonly PccPersona[];
   readonly approvalCheckpointReference?: string;

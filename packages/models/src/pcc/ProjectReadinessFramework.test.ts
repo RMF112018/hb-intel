@@ -152,6 +152,30 @@ describe('SAMPLE_PROJECT_READINESS_ITEMS', () => {
       }
     }
   });
+
+  it('every item has a sourceLineage whose sourceModuleId matches the item sourceModuleId', () => {
+    const sourceModuleSet = new Set<string>(PROJECT_READINESS_SOURCE_MODULES);
+    for (const item of SAMPLE_PROJECT_READINESS_ITEMS) {
+      expect(item.sourceLineage, `${item.id} sourceLineage`).toBeDefined();
+      expect(
+        item.sourceLineage.sourceModuleId,
+        `${item.id} sourceLineage.sourceModuleId matches item.sourceModuleId`,
+      ).toBe(item.sourceModuleId);
+      expect(
+        sourceModuleSet.has(item.sourceLineage.sourceModuleId),
+        `${item.id} sourceLineage.sourceModuleId in registry`,
+      ).toBe(true);
+    }
+  });
+
+  it('every sourceLineage.sourceUrl uses only example.invalid', () => {
+    for (const item of SAMPLE_PROJECT_READINESS_ITEMS) {
+      const url = item.sourceLineage.sourceUrl;
+      if (url !== undefined) {
+        expect(url, `${item.id} sourceUrl`).toMatch(/^https:\/\/example\.invalid\//);
+      }
+    }
+  });
 });
 
 describe('Project Readiness summaries', () => {

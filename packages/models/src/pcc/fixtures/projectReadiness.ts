@@ -41,6 +41,11 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
       description: 'Confirm assigned managers for the active project lanes.',
       evidenceState: 'pending',
     },
+    sourceLineage: {
+      sourceModuleId: 'team-access',
+      sourceItemId: 'team-access-lane-001',
+      sourceReferenceLabel: 'Team and Access — viewer lane',
+    },
     dependencyItemIds: [],
     createdAtUtc: '2026-04-15T08:00:00Z',
     updatedAtUtc: '2026-04-20T09:00:00Z',
@@ -71,6 +76,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
       documentControlSourceId: 'document-control-source-pr-001',
     },
     sourceLineage: {
+      sourceModuleId: 'document-control',
       sourceItemId: 'document-control-pr-001',
       sourceReferenceLabel: 'HB Document Control — Project Record',
       sourceUrl: 'https://example.invalid/sites/pcc-readiness/source/document-control/pr-001',
@@ -104,6 +110,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
       evidenceState: 'pending',
     },
     sourceLineage: {
+      sourceModuleId: 'permit-log',
       sourceItemId: 'permit-log-001',
       sourceReferenceLabel: 'Permit Log entry 001',
     },
@@ -133,6 +140,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
     confidence: 'medium',
     sourceHealthStatus: 'available',
     sourceLineage: {
+      sourceModuleId: 'project-lifecycle-readiness',
       sourceItemId: 'lifecycle-readiness-safety-001',
       sourceReferenceLabel: 'Project Lifecycle Readiness — Safety',
     },
@@ -161,6 +169,10 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
       description: 'Reference the buyout package draft.',
       evidenceState: 'pending',
     },
+    sourceLineage: {
+      sourceModuleId: 'buyout-log',
+      sourceReferenceLabel: 'Buyout Log — package draft',
+    },
     dependencyItemIds: ['fixture-pcc-readiness-001'],
     createdAtUtc: '2026-04-18T09:00:00Z',
     updatedAtUtc: '2026-04-20T15:00:00Z',
@@ -181,6 +193,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
     confidence: 'unknown',
     sourceHealthStatus: 'source-unavailable',
     sourceLineage: {
+      sourceModuleId: 'external-systems',
       sourceReferenceLabel: 'External Systems closeout posture',
     },
     dependencyItemIds: ['fixture-pcc-readiness-007'],
@@ -208,6 +221,11 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
       requirementId: 'evidence-site-health-001',
       description: 'Site health baseline reference.',
       evidenceState: 'approved',
+    },
+    sourceLineage: {
+      sourceModuleId: 'site-health',
+      sourceItemId: 'site-health-baseline-001',
+      sourceReferenceLabel: 'Site Health — baseline check',
     },
     dependencyItemIds: [],
     createdAtUtc: '2026-04-19T09:00:00Z',
