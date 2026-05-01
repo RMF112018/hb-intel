@@ -18,6 +18,7 @@ const ENCODED_ID = encodeURIComponent(SAMPLE_PROJECT_PROFILE.projectId);
 const HOME_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/home`;
 const PRIORITY_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/priority-actions`;
 const DOC_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/document-control`;
+const TEAM_ACCESS_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/team-access`;
 
 function homeOk() {
   return {
@@ -163,12 +164,13 @@ describe('mount(...) opt-in', () => {
   });
 });
 
-describe('PccSurfaceRouter — non-Project-Home surfaces ignore the read-model client', () => {
-  it('does not invoke client methods for non-project-home surfaces', async () => {
+describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client', () => {
+  it('does not invoke client methods for non-opted surfaces (e.g. documents)', async () => {
     const client = createPccFixtureReadModelClient();
     const homeSpy = vi.spyOn(client, 'getProjectHome');
     const prioritySpy = vi.spyOn(client, 'getPriorityActions');
     const docSpy = vi.spyOn(client, 'getDocumentControl');
+    const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
     render(
       <PccBentoGrid forceMode="wideDesktop">
@@ -177,6 +179,44 @@ describe('PccSurfaceRouter — non-Project-Home surfaces ignore the read-model c
     );
 
     await new Promise((r) => setTimeout(r, 0));
+    expect(homeSpy).not.toHaveBeenCalled();
+    expect(prioritySpy).not.toHaveBeenCalled();
+    expect(docSpy).not.toHaveBeenCalled();
+    expect(teamAccessSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () => {
+  it('does not invoke getTeamAccess when activeSurfaceId is project-home', async () => {
+    const client = createPccFixtureReadModelClient();
+    const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
+
+    render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccSurfaceRouter activeSurfaceId="project-home" readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    await new Promise((r) => setTimeout(r, 0));
+    expect(teamAccessSpy).not.toHaveBeenCalled();
+  });
+
+  it('invokes getTeamAccess exactly once when activeSurfaceId is team-and-access (no Project Home calls)', async () => {
+    const client = createPccFixtureReadModelClient();
+    const homeSpy = vi.spyOn(client, 'getProjectHome');
+    const prioritySpy = vi.spyOn(client, 'getPriorityActions');
+    const docSpy = vi.spyOn(client, 'getDocumentControl');
+    const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
+
+    render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccSurfaceRouter activeSurfaceId="team-and-access" readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    await new Promise((r) => setTimeout(r, 0));
+    expect(teamAccessSpy).toHaveBeenCalledTimes(1);
+    expect(teamAccessSpy).toHaveBeenCalledWith(SAMPLE_PROJECT_PROFILE.projectId);
     expect(homeSpy).not.toHaveBeenCalled();
     expect(prioritySpy).not.toHaveBeenCalled();
     expect(docSpy).not.toHaveBeenCalled();

@@ -129,6 +129,10 @@ describe('PccMockReadModelProvider — unknown project returns source-unavailabl
 
     const docControl = await provider.getDocumentControl(UNKNOWN_PROJECT_ID);
     expect(docControl.data.sources).toEqual([]);
+    expect(docControl.data.sourceRegistry).toEqual([]);
+    expect(docControl.data.roleActionAvailability).toEqual([]);
+    expect(docControl.data.reviewQueueSample).toEqual([]);
+    expect(docControl.data.sourceHealth?.length).toBeGreaterThan(0);
 
     const priorityActions = await provider.getPriorityActions(UNKNOWN_PROJECT_ID);
     expect(priorityActions.data.actions).toEqual([]);
@@ -246,5 +250,45 @@ describe('PccMockReadModelProvider — determinism', () => {
     const a = await provider.getProjectProfile(KNOWN_PROJECT_ID, VIEWER);
     const b = await provider.getProjectProfile(KNOWN_PROJECT_ID, VIEWER);
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+
+  it('document-control fixture includes wave 7 doctrine and safety guardrails', async () => {
+    const provider = new PccMockReadModelProvider(PROVIDER_OPTS);
+    const env = await provider.getDocumentControl(KNOWN_PROJECT_ID, VIEWER);
+    const data = env.data;
+
+    expect(data.sources.length).toBeGreaterThan(0);
+    expect(data.wave7LaneVocabulary).toEqual([
+      'project-record',
+      'my-project-files',
+      'external-systems',
+    ]);
+    expect(data.sourceRegistry?.length).toBeGreaterThan(0);
+    expect(
+      data.sourceRegistry?.some((entry) => entry.notes?.includes('procoreProjectId=')),
+    ).toBe(true);
+
+    const myProjectFiles = data.sourceRegistry?.find(
+      (entry) => entry.wave7Lane === 'my-project-files',
+    );
+    expect(myProjectFiles).toBeDefined();
+    const mpBinding = myProjectFiles?.binding;
+    expect(mpBinding?.kind).toBe('my-project-files');
+    if (mpBinding?.kind === 'my-project-files') {
+      expect(mpBinding.projectFolderPath.startsWith('/My Project Files/')).toBe(true);
+      expect(mpBinding.projectFolderPath).not.toBe('/My Project Files');
+      expect(mpBinding.projectFolderPath.split('/').length).toBeGreaterThan(2);
+    }
+
+    expect(
+      data.roleActionAvailability?.some((row) => row.actionCode === 'EX04' && row.availability === 'Y'),
+    ).toBe(false);
+    expect(
+      data.roleActionAvailability?.some((row) => row.roleCode === 'R14'),
+    ).toBe(true);
+
+    const serialized = JSON.stringify(data);
+    expect(serialized.includes('Project Engineer')).toBe(false);
+    expect(JSON.parse(serialized)).toBeDefined();
   });
 });

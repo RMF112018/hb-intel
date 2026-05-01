@@ -11,14 +11,26 @@ import { PccControlCenterSettingsSurface } from '../surfaces/controlCenterSettin
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import type { IPccProjectHomeReadModelClient } from '../surfaces/projectHome/projectHomeViewModel';
+import type { IPccTeamAccessReadModelClient } from '../surfaces/teamAccess/useTeamAccessReadModel';
+
+/**
+ * Wave 6 / Prompt 06 — combined narrow read-model client surface for the
+ * router. Lists only the methods consumed by Project Home and Team &
+ * Access; the full `IPccReadModelClient` returned by
+ * `createPccReadModelClient` flows in via TypeScript structural typing.
+ */
+export interface IPccSurfaceRouterReadModelClient
+  extends IPccProjectHomeReadModelClient,
+    IPccTeamAccessReadModelClient {}
 
 export interface PccSurfaceRouterProps {
   activeSurfaceId: PccMvpSurfaceId;
   /**
-   * Wave 4 / Prompt 05 — opt-in read-model client. Threaded only to
-   * Project Home; other surfaces remain fixture/preview-driven.
+   * Wave 4 / Prompt 05 + Wave 6 / Prompt 06 — opt-in read-model client.
+   * Threaded to exactly two surfaces: Project Home and Team & Access.
+   * Other surfaces remain fixture/preview-driven.
    */
-  readModelClient?: IPccProjectHomeReadModelClient;
+  readModelClient?: IPccSurfaceRouterReadModelClient;
 }
 
 /**
@@ -26,6 +38,8 @@ export interface PccSurfaceRouterProps {
  *
  * - `project-home` → full Project Home bento dashboard (10 cards as direct
  *   children of the bento grid via a React fragment).
+ * - `team-and-access` → Team & Access surface; receives the read-model
+ *   client when provided so the seam round-trip is exercised.
  * - Prompt 06/07 preview surfaces route to dedicated fragment surfaces.
  * - Any remaining fallback surface ids route to a single full-width
  *   preview-only card with metadata from `PCC_MVP_SURFACES`.
@@ -43,7 +57,7 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
     case 'project-home':
       return <PccProjectHome readModelClient={readModelClient} />;
     case 'team-and-access':
-      return <PccTeamAccessSurface />;
+      return <PccTeamAccessSurface readModelClient={readModelClient} />;
     case 'documents':
       return <PccDocumentsSurface />;
     case 'project-readiness':

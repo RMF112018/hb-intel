@@ -1,20 +1,20 @@
 import type { FC } from 'react';
 import { PccShell } from './shell/PccShell';
-import { PccSurfaceRouter } from './shell/PccSurfaceRouter';
+import { PccSurfaceRouter, type IPccSurfaceRouterReadModelClient } from './shell/PccSurfaceRouter';
 import { usePccShellState } from './state/usePccShellState';
 import type { PccResponsiveMode } from './layout/footprints';
 import { PCC_PROJECT_PLACEHOLDER } from './preview/projectPlaceholder';
-import type { IPccProjectHomeReadModelClient } from './surfaces/projectHome/projectHomeViewModel';
 
 export interface PccAppProps {
   /** Test override for the responsive mode. */
   forceMode?: PccResponsiveMode;
   /**
-   * Wave 4 / Prompt 05 — optional opt-in read-model client. When supplied,
-   * Project Home consumes envelopes through the seam; default fixture
-   * rendering is preserved when omitted.
+   * Wave 4 / Prompt 05 + Wave 6 / Prompt 06 — optional opt-in read-model
+   * client. When supplied, Project Home and Team & Access consume
+   * envelopes through the seam; default fixture rendering is preserved
+   * when omitted.
    */
-  readModelClient?: IPccProjectHomeReadModelClient;
+  readModelClient?: IPccSurfaceRouterReadModelClient;
 }
 
 export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {

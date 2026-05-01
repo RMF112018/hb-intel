@@ -73,3 +73,9 @@ registerPccReadRoute(
   'pcc/projects/{projectId}/site-health',
   async (projectId) => provider.getSiteHealth(projectId),
 );
+
+registerPccReadRoute(
+  'getPccProjectTeamAccess',
+  'pcc/projects/{projectId}/team-access',
+  async (projectId) => provider.getTeamAccess(projectId),
+);

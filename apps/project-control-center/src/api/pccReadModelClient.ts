@@ -23,6 +23,7 @@ import type {
   PccProjectProfileReadModel,
   PccReadModelEnvelope,
   PccSiteHealthReadModel,
+  PccTeamAccessReadModel,
   PccWorkCenterRegistryReadModel,
 } from '@hbc/models/pcc';
 
@@ -36,6 +37,7 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'document-control',
   'external-links',
   'site-health',
+  'team-access',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -55,6 +57,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'document-control': 'pcc/projects/{projectId}/document-control',
   'external-links': 'pcc/projects/{projectId}/external-links',
   'site-health': 'pcc/projects/{projectId}/site-health',
+  'team-access': 'pcc/projects/{projectId}/team-access',
 };
 
 /**
@@ -101,4 +104,9 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccSiteHealthReadModel>>;
+
+  getTeamAccess(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccTeamAccessReadModel>>;
 }

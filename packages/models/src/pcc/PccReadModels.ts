@@ -11,8 +11,10 @@ import type { IPccSettingsRef } from './PccSettings.js';
 import type { IPccMvpSurface, PccMvpSurfaceId } from './PccMvpSurfaces.js';
 import type { IPriorityAction } from './PriorityActions.js';
 import type {
+  IDocumentControlActionCode,
   DocumentControlSourceHealthState,
   DocumentControlWave7Lane,
+  DocumentControlRoleCode,
   DocumentControlReviewState,
   DocumentControlReviewType,
   IDocumentControlSource,
@@ -94,6 +96,23 @@ export interface PccDocumentControlReadModel {
   reviewStates?: readonly DocumentControlReviewState[];
   reviewTypes?: readonly DocumentControlReviewType[];
   hardNoRules?: readonly IDocumentControlUniversalHardNoRule[];
+  roleActionAvailability?: readonly PccDocumentControlRoleActionAvailability[];
+  actionCatalog?: readonly IDocumentControlActionCode[];
+  reviewQueueSample?: readonly PccDocumentControlReviewQueueItem[];
+}
+
+export interface PccDocumentControlRoleActionAvailability {
+  roleCode: DocumentControlRoleCode;
+  actionCode: string;
+  availability: 'Y' | 'A' | 'O' | 'R' | 'C' | 'S' | 'D' | 'N' | 'HARD-NO';
+}
+
+export interface PccDocumentControlReviewQueueItem {
+  itemId: string;
+  fileName: string;
+  reviewType: DocumentControlReviewType;
+  reviewState: DocumentControlReviewState;
+  assignedRoleCode: DocumentControlRoleCode;
 }
 
 export interface PccExternalLinksReadModel {

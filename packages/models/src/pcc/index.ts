@@ -300,6 +300,8 @@ export {
   type PccProjectHomeReadModel,
   type PccPriorityActionsReadModel,
   type PccDocumentControlReadModel,
+  type PccDocumentControlRoleActionAvailability,
+  type PccDocumentControlReviewQueueItem,
   type PccExternalLinksReadModel,
   type PccSiteHealthReadModel,
   type PccTeamAccessReadModel,

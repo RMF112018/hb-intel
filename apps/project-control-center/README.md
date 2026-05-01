@@ -252,6 +252,39 @@ Behavior contract:
 
 Wave 4 does not introduce auth wiring, write routes, Graph/PnP/SharePoint REST live operations, Procore/Document Crunch/Adobe Sign runtime, packaging, or deployment. See the Wave 4 closeout docs under `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-4/` for the full posture.
 
+### Wave 6 Team & Access Read-Model Opt-In
+
+Wave 6 / Prompt 06 wires Team & Access into the existing PCC read-model
+seam using a single read-only GET route and the same explicit-opt-in
+contract Project Home uses. Default mount/app behavior remains
+fixture-driven; no fetches occur unless the mount config explicitly opts
+into backend mode.
+
+- **Backend route**: `GET /api/pcc/projects/{projectId}/team-access`
+  delegates to `provider.getTeamAccess(projectId)` on the existing
+  `PccMockReadModelProvider`. No write routes; the mock is read-only.
+- **SPFx client method**: `IPccReadModelClient.getTeamAccess(...)` is
+  implemented by both `pccFixtureReadModelClient` (returns the existing
+  `SAMPLE_TEAM_ACCESS_PREVIEW_MODEL` envelope) and
+  `pccBackendReadModelClient` (issues the canonical GET via the
+  **existing** internal fetch wrapper — zero new `fetch(` callsites
+  introduced).
+- **Surface wiring**: `PccSurfaceRouter` now threads `readModelClient`
+  to **exactly two** surfaces — `project-home` and `team-and-access`.
+  Other surfaces remain fixture/preview-driven. Team & Access uses the
+  Wave 4 hook pattern via `useTeamAccessReadModel` +
+  `PccTeamAccessReadModelContent`. A shared `PccTeamAccessLaneShell`
+  presentational component is consumed by both the fixture-default
+  surface path and the read-model content wrapper to avoid any import
+  cycle between `PccTeamAccessSurface` and
+  `PccTeamAccessReadModelContent`.
+- **No new runtime**: no auth wiring, no Graph/PnP/SharePoint REST, no
+  Procore/Document Crunch/Adobe Sign, no write routes, no permission
+  execution, no persistence. The dormancy guard now asserts the
+  set-equality `{project-home, team-and-access}` for `readModelClient`
+  consumers and asserts `pccBackendReadModelClient.ts` holds exactly
+  one `fetch(` callsite.
+
 ### Wave 5 Priority Actions Rail (Project Home)
 
 The Priority Actions card on Project Home renders a PCC-local four-group rail

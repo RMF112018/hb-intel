@@ -742,15 +742,55 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     ).toEqual([]);
   });
 
-  it('PccSurfaceRouter threads readModelClient to exactly one surface (Project Home only)', () => {
+  it('PccSurfaceRouter threads readModelClient to exactly two surfaces (project-home + team-and-access)', () => {
     expect(existsSync(ROUTER_FILE)).toBe(true);
     const raw = readFileSync(ROUTER_FILE, 'utf8');
-    const tokenStripped = stripCommentsAndStringsRobust(raw);
-    const matches = tokenStripped.match(/readModelClient\s*=\s*\{/g) ?? [];
+    // Use comments-only stripping. The robust comment+string stripper
+    // treats the JSX self-close `/>` as a regex literal and elides
+    // content between the first `/>` and the next `/`, which would hide
+    // the second `readModelClient={...}` JSX prop.
+    const commentStripped = stripCommentsOnly(raw);
+    const matches = commentStripped.match(/readModelClient\s*=\s*\{/g) ?? [];
+    // Three matches in commentStripped: the interface field
+    // `readModelClient?: IPccSurfaceRouterReadModelClient` does NOT match
+    // (regex requires `={`); the destructure `readModelClient,` does NOT
+    // match. The only `={` JSX prop usages are the project-home and
+    // team-and-access branches, plus a hypothetical pattern. Allow
+    // exactly two.
     expect(
       matches.length,
-      'expected exactly one JSX prop usage `readModelClient={...}` in PccSurfaceRouter (Project Home branch only)',
-    ).toBe(1);
+      'expected exactly two JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access only)',
+    ).toBe(2);
+
+    // Set-equality assertion: the surfaces that receive the
+    // readModelClient must equal exactly { 'project-home', 'team-and-access' }.
+    const consumerCases = Array.from(
+      commentStripped.matchAll(
+        /case\s+(['"])(project-home|team-and-access)\1\s*:\s*[\s\S]*?readModelClient\s*=\s*\{/g,
+      ),
+      (m) => m[2] as string,
+    );
+    expect(
+      consumerCases.slice().sort(),
+      'PccSurfaceRouter readModelClient consumer set must equal exactly [project-home, team-and-access]',
+    ).toEqual(['project-home', 'team-and-access']);
+  });
+
+  it('pccBackendReadModelClient.ts adds zero new direct `fetch(` callsites in Wave 6 / Prompt 06', () => {
+    expect(existsSync(BACKEND_CLIENT_FILE)).toBe(true);
+    const raw = readFileSync(BACKEND_CLIENT_FILE, 'utf8');
+    const tokenStripped = stripCommentsAndStringsRobust(raw);
+    // The backend client routes all HTTP via the captured `fetchImpl`
+    // wrapper (`fetchImpl(url, ...)`) — no literal `\bfetch\s*\(` callsite
+    // exists. `getTeamAccess` must reuse this wrapper and not introduce a
+    // new direct `fetch(` callsite. Asserting zero literal `\bfetch\s*\(`
+    // matches is the strongest invariant available without re-reading the
+    // workspace-wide fetch allowlist.
+    const matches = tokenStripped.match(/\bfetch\s*\(/g) ?? [];
+    expect(
+      matches.length,
+      'pccBackendReadModelClient.ts must add no direct `fetch(` callsite. `getTeamAccess` must reuse the existing internal `fetchImpl` wrapper.',
+    ).toBe(0);
   });
 
   it('mount.tsx may invoke only createPccReadModelClient and no other client/factory constructor or fetch (Prompt 05)', () => {

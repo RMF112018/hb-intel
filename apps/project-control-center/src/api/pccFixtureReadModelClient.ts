@@ -25,6 +25,7 @@ import {
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_SITE_HEALTH_SUMMARY,
+  SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
@@ -41,6 +42,7 @@ import type {
   PccReadModelSourceStatus,
   PccReadModelWarning,
   PccSiteHealthReadModel,
+  PccTeamAccessReadModel,
   PccWorkCenterRegistryReadModel,
 } from '@hbc/models/pcc';
 

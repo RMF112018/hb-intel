@@ -9,6 +9,7 @@ import type {
   PccProjectProfileReadModel,
   PccReadModelEnvelope,
   PccSiteHealthReadModel,
+  PccTeamAccessReadModel,
   PccWorkCenterRegistryReadModel,
 } from '@hbc/models/pcc';
 import {
@@ -24,7 +25,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the seven Wave 3 backend route ids', () => {
+  it('enumerates exactly the eight backend route ids (Wave 3 seven + Wave 6 team-access)', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -33,6 +34,7 @@ describe('IPccReadModelClient route metadata', () => {
       'document-control',
       'external-links',
       'site-health',
+      'team-access',
     ]);
   });
 
@@ -77,6 +79,9 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getSiteHealth']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccSiteHealthReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getTeamAccess']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccTeamAccessReadModel>>
+    >();
   });
 
   it('accepts optional viewerPersona on every method', () => {
@@ -90,7 +95,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the seven id literals', () => {
+  it('is the union of the eight id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -99,6 +104,7 @@ describe('PccReadModelRouteId', () => {
       'document-control',
       'external-links',
       'site-health',
+      'team-access',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

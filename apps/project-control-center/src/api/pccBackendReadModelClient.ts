@@ -133,5 +133,9 @@ export function createPccBackendReadModelClient(
       callBackend('site-health', projectId, () =>
         fallback.getSiteHealth(projectId, viewerPersona),
       ),
+    getTeamAccess: (projectId, viewerPersona) =>
+      callBackend('team-access', projectId, () =>
+        fallback.getTeamAccess(projectId, viewerPersona),
+      ),
   };
 }

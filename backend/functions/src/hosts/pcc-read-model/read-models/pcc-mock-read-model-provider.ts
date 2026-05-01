@@ -53,6 +53,213 @@ const SAMPLE_SETTINGS_REFS: readonly IPccSettingsRef[] = [];
 
 const DOCUMENT_CONTROL_SOURCES_ORDERED: readonly IDocumentControlSource[] =
   DOCUMENT_CONTROL_SOURCE_IDS.map((id) => DOCUMENT_CONTROL_SOURCES[id]);
+const WAVE7_LANES = ['project-record', 'my-project-files', 'external-systems'] as const;
+const WAVE7_SOURCE_HEALTH_STATES = [
+  'healthy',
+  'warning',
+  'degraded',
+  'unavailable',
+  'missing-binding',
+  'access-denied',
+  'throttled',
+] as const;
+const WAVE7_REVIEW_STATES = [
+  'not-required',
+  'pending',
+  'in-review',
+  'approved',
+  'rejected',
+  'waived',
+] as const;
+const WAVE7_REVIEW_TYPES = [
+  'chief-estimator-review',
+  'legal-review',
+  'compliance-review',
+  'leadership-review',
+  'project-execution-review',
+] as const;
+const WAVE7_HARD_NO_RULES = [
+  {
+    id: 'HN-01',
+    title: 'No My Project Files root browsing in project-site UI',
+    description: "Project-site instances must not expose the full 'My Project Files' root.",
+  },
+  {
+    id: 'HN-02',
+    title: 'No other-project folder browsing in project-site UI',
+    description: 'Project-site instances must not expose folders mapped to other projects.',
+  },
+  {
+    id: 'HN-03',
+    title: 'No external writeback or sync in Wave 7',
+    description: 'External systems remain launch/deep-link visibility only with no mirror/sync/writeback.',
+  },
+] as const;
+const WAVE7_ACTION_CATALOG = [
+  { code: 'PR01', family: 'PR', label: 'Browse Project Record', description: 'Browse project record libraries.' },
+  { code: 'MP01', family: 'MP', label: 'Browse My Project Files Folder', description: 'Browse current user project folder only.' },
+  { code: 'SB01', family: 'SB', label: 'View Source Binding', description: 'View source binding metadata and status.' },
+  { code: 'EX01', family: 'EX', label: 'Open External Source', description: 'Launch configured external source deep link.' },
+  { code: 'EX04', family: 'EX', label: 'External Writeback/Sync/Mirror', description: 'Forbidden in Wave 7 fixture availability.' },
+  { code: 'WF01', family: 'WF', label: 'Set Review State', description: 'Set document review state per workflow posture.' },
+] as const;
+
+const WAVE7_SOURCE_WARNING = Object.freeze({
+  sourceKey: 'registry-bootstrap',
+  state: 'missing-binding',
+  message: 'Source registry not loaded for this project.',
+} as const);
+
+function buildWave7DocumentControlReadModel(
+  projectId: PccProjectId,
+  known: boolean,
+): PccDocumentControlReadModel {
+  if (!known) {
+    return {
+      sources: [],
+      wave7LaneVocabulary: WAVE7_LANES,
+      sourceRegistry: [],
+      sourceHealth: [WAVE7_SOURCE_WARNING],
+      sourceHealthStates: WAVE7_SOURCE_HEALTH_STATES,
+      reviewStates: WAVE7_REVIEW_STATES,
+      reviewTypes: WAVE7_REVIEW_TYPES,
+      hardNoRules: WAVE7_HARD_NO_RULES,
+      roleActionAvailability: [],
+      reviewQueueSample: [],
+    };
+  }
+
+  const projectNumber = '26-000-00';
+  const projectName = 'Stadium Enclave';
+  const procoreProjectId = 'PROC-2600000';
+  const projectFolderName = `${projectNumber}-${projectName}`;
+
+  return {
+    sources: DOCUMENT_CONTROL_SOURCES_ORDERED,
+    wave7LaneVocabulary: WAVE7_LANES,
+    sourceRegistry: [
+      {
+        sourceKey: 'project-record-primary',
+        displayName: 'Project Record Library',
+        wave7Lane: 'project-record',
+        sourceKind: 'sharepoint-library',
+        enabled: true,
+        binding: {
+          kind: 'sharepoint-library',
+          siteId: 'site-stadium-enclave',
+          webId: 'web-stadium-enclave',
+          listId: 'list-project-record',
+          driveId: 'drive-project-record',
+          rootPath: '/Shared Documents/Project Record',
+        },
+      },
+      {
+        sourceKey: 'my-project-files-current-user',
+        displayName: 'My Project Files',
+        wave7Lane: 'my-project-files',
+        sourceKind: 'my-project-files',
+        enabled: true,
+        binding: {
+          kind: 'my-project-files',
+          rootFolderName: 'My Project Files',
+          userObjectId: 'user-project-manager',
+          projectId,
+          projectFolderName,
+          projectFolderPath: `/My Project Files/${projectFolderName}`,
+        },
+      },
+      {
+        sourceKey: 'external-procore',
+        displayName: 'Procore',
+        wave7Lane: 'external-systems',
+        sourceKind: 'external-system',
+        enabled: true,
+        binding: {
+          kind: 'external-system',
+          systemId: 'procore',
+          projectRef: procoreProjectId,
+          launchUrlTemplate: `https://procore.example.invalid/projects/${procoreProjectId}`,
+        },
+        notes: `procoreProjectId=${procoreProjectId}`,
+      },
+      {
+        sourceKey: 'external-document-crunch',
+        displayName: 'Document Crunch',
+        wave7Lane: 'external-systems',
+        sourceKind: 'external-system',
+        enabled: true,
+        binding: {
+          kind: 'external-system',
+          systemId: 'document-crunch',
+          projectRef: projectNumber,
+          launchUrlTemplate: `https://documentcrunch.example.invalid/projects/${projectNumber}`,
+        },
+      },
+      {
+        sourceKey: 'external-adobe-sign',
+        displayName: 'Adobe Sign',
+        wave7Lane: 'external-systems',
+        sourceKind: 'external-system',
+        enabled: false,
+        binding: {
+          kind: 'external-system',
+          systemId: 'adobe-sign',
+          projectRef: projectNumber,
+        },
+      },
+    ],
+    sourceHealth: [
+      {
+        sourceKey: 'project-record-primary',
+        state: 'healthy',
+        message: 'SharePoint binding resolved.',
+        observedAtUtc: DEFAULT_GENERATED_AT,
+      },
+      {
+        sourceKey: 'my-project-files-current-user',
+        state: 'healthy',
+        message: `Resolved current project folder ${projectFolderName}.`,
+        observedAtUtc: DEFAULT_GENERATED_AT,
+      },
+      {
+        sourceKey: 'external-procore',
+        state: 'warning',
+        message: 'Launch-only binding active.',
+        observedAtUtc: DEFAULT_GENERATED_AT,
+      },
+    ],
+    sourceHealthStates: WAVE7_SOURCE_HEALTH_STATES,
+    reviewStates: WAVE7_REVIEW_STATES,
+    reviewTypes: WAVE7_REVIEW_TYPES,
+    hardNoRules: WAVE7_HARD_NO_RULES,
+    roleActionAvailability: [
+      { roleCode: 'R05', actionCode: 'PR01', availability: 'Y' },
+      { roleCode: 'R05', actionCode: 'MP02', availability: 'O' },
+      { roleCode: 'R14', actionCode: 'PR10', availability: 'A' },
+      { roleCode: 'R14', actionCode: 'WF01', availability: 'Y' },
+      { roleCode: 'R01', actionCode: 'SB06', availability: 'Y' },
+      { roleCode: 'R03', actionCode: 'EX02', availability: 'Y' },
+      { roleCode: 'R01', actionCode: 'EX04', availability: 'N' },
+    ],
+    actionCatalog: WAVE7_ACTION_CATALOG,
+    reviewQueueSample: [
+      {
+        itemId: 'rvw-001',
+        fileName: 'Estimate-Backup-April.xlsx',
+        reviewType: 'leadership-review',
+        reviewState: 'pending',
+        assignedRoleCode: 'R19',
+      },
+      {
+        itemId: 'rvw-002',
+        fileName: 'Compliance-Package-001.pdf',
+        reviewType: 'compliance-review',
+        reviewState: 'in-review',
+        assignedRoleCode: 'R18',
+      },
+    ],
+  };
+}
 
 function placeholderProfile(projectId: PccProjectId): IProjectProfile {
   return {
@@ -249,7 +456,7 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
         projectId,
         viewerPersona,
         'backend-unavailable',
-        { sources: [] },
+        buildWave7DocumentControlReadModel(projectId, false),
         [
           {
             code: 'backend-unavailable',
@@ -263,7 +470,7 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       projectId,
       viewerPersona,
       known ? 'available' : 'source-unavailable',
-      { sources: known ? DOCUMENT_CONTROL_SOURCES_ORDERED : [] },
+      buildWave7DocumentControlReadModel(projectId, known),
       this.warningsForKnownProject(projectId),
     );
   }
