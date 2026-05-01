@@ -103,13 +103,18 @@ Required order:
 
 ### Milestone 4 — Structured Project Readiness
 
-- Wave 8 — Project Readiness Framework
+- Wave 8 — Project Readiness Module Framework
 - Wave 9 — Job Startup Checklist
 - Wave 10 — Permit Log
 - Wave 11 — Responsibility Matrix
 - Wave 12 — Constraints Log
 - Wave 13 — Buyout Log
 - Wave 14 — Approvals / Checkpoints
+
+Wave relationship lock:
+- Wave 8 defines the reusable Project Readiness Module Framework and Project Readiness Center shell definition.
+- Waves 9–14 implement module-specific behavior on that shared framework (Job Startup Checklist, Permit Log, Responsibility Matrix / RACI, Constraints Log, Buyout Log, and Approvals / Checkpoints).
+- Wave 8 documentation does not authorize readiness runtime execution, backend routes, persistence, scoring engines, approval execution, or external integrations.
 
 ### Milestone 5 — Executive Experience and Hardening
 

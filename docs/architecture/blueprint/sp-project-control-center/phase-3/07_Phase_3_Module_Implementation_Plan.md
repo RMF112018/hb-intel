@@ -870,7 +870,7 @@ Close Phase 3 MVP implementation with formal validation, documentation, and read
 
 ## Milestone 4 — Structured Project Readiness
 
-- Wave 8 — Project Readiness Framework
+- Wave 8 — Project Readiness Module Framework
 - Wave 9 — Job Startup Checklist
 - Wave 10 — Permit Log
 - Wave 11 — Responsibility Matrix

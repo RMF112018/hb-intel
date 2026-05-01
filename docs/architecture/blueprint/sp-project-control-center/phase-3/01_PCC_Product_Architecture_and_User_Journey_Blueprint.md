@@ -339,7 +339,7 @@ The product architecture is implemented through the formal Phase 3 module implem
 | Priority Actions Rail                  |              Wave 5 |
 | Team & Access                          |              Wave 6 |
 | HB Document Control Center             |              Wave 7 |
-| Project Readiness module framework     |              Wave 8 |
+| Project Readiness Module Framework     |              Wave 8 |
 | Job Startup Checklist                  |              Wave 9 |
 | Permit Log                             |             Wave 10 |
 | Responsibility Matrix                  |             Wave 11 |

@@ -12,6 +12,10 @@ import {
 const PROMPT_03_NEW_PERSONAS: readonly PccPersona[] = [
   'estimating-coordinator',
   'lead-estimator',
+  'estimator',
+  'chief-estimator',
+  'director-of-preconstruction',
+  'project-coordinator',
   'manager-of-operational-excellence',
   'safety-qaqc',
 ];
