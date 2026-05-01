@@ -13,6 +13,7 @@ import { Fragment, type FC } from 'react';
 import { SAMPLE_PROJECT_PROFILE } from '@hbc/models/pcc';
 import { PccDocumentsHeaderCard } from './PccDocumentsHeaderCard';
 import { PccDocumentControlLaneCard } from './PccDocumentControlLaneCard';
+import { PccDocumentControlPermissionsCard } from './PccDocumentControlPermissionsCard';
 import {
   WAVE7_LANE_ORDER,
   WAVE7_LANE_TITLES,
@@ -70,6 +71,9 @@ export const PccDocumentControlReadModelContent: FC<PccDocumentControlReadModelC
           laneViewModel={laneViewModel(result, laneId)}
         />
       ))}
+      <PccDocumentControlPermissionsCard
+        viewModel={result.status === 'preview' ? result.viewModel : undefined}
+      />
     </Fragment>
   );
 };

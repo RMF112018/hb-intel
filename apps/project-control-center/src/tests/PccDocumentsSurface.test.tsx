@@ -237,7 +237,8 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards.length).toBe(4);
+    // Wave 7 / Prompt 04: 5 cards = header + 3 lanes + permissions card.
+    expect(cards.length).toBe(5);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
@@ -536,5 +537,185 @@ describe('useDocumentControlReadModel — degraded-state posture (Wave 7 03B fol
     await waitFor(() => expect(result.current.status).toBe('error'));
     expect(result.current.viewModel).toBeUndefined();
     expect(result.current.sourceStatus).toBeUndefined();
+  });
+});
+
+// ─── Wave 7 / Prompt 04 — Permissions & Guardrails ───
+// Render permission/action availability and hard-no guardrails as
+// read-model rendering only. No runtime authorization, no buttons,
+// no anchors, no persona-driven filtering.
+
+const FIXTURE_ROLE_ACTION_ROWS = [
+  'R05-PR01',
+  'R05-MP02',
+  'R14-PR10',
+  'R14-WF01',
+  'R01-SB06',
+  'R03-EX02',
+  'R01-EX04',
+];
+
+describe('PccDocumentsSurface — permissions & guardrails (Wave 7 / Prompt 04)', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('action catalog renders grouped by family with PR / MP / SB / EX / WF families and all six action codes', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]');
+    expect(card).not.toBeNull();
+    for (const family of ['PR', 'MP', 'SB', 'EX', 'WF']) {
+      expect(
+        card!.querySelector(`[data-pcc-doc-action-family="${family}"]`),
+        `family ${family} group should render`,
+      ).not.toBeNull();
+    }
+    for (const code of ['PR01', 'MP01', 'SB01', 'EX01', 'EX04', 'WF01']) {
+      expect(
+        card!.querySelector(`[data-pcc-doc-action="${code}"]`),
+        `action ${code} should render`,
+      ).not.toBeNull();
+    }
+  });
+
+  it('availability values render with safe labels (Y → Allowed, N → Not allowed)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    const r05Pr01 = card.querySelector('[data-pcc-doc-role-action-row="R05-PR01"]');
+    expect(r05Pr01).not.toBeNull();
+    expect(r05Pr01!.getAttribute('data-pcc-doc-role-action-availability')).toBe('Y');
+    expect(r05Pr01!.textContent).toContain('Allowed');
+
+    const r01Ex04 = card.querySelector('[data-pcc-doc-role-action-row="R01-EX04"]');
+    expect(r01Ex04).not.toBeNull();
+    expect(r01Ex04!.getAttribute('data-pcc-doc-role-action-availability')).toBe('N');
+    expect(r01Ex04!.textContent).toContain('Not allowed');
+  });
+
+  it('availability code legend renders all 9 codes with safe labels', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    for (const code of ['Y', 'A', 'O', 'R', 'C', 'S', 'D', 'N', 'HARD-NO']) {
+      const el = card.querySelector(`[data-pcc-doc-availability-legend-code="${code}"]`);
+      expect(el, `legend code ${code} should render`).not.toBeNull();
+    }
+  });
+
+  it('hard-no rules render: HN-01, HN-02, HN-03 from envelope viewModel', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    for (const id of ['HN-01', 'HN-02', 'HN-03']) {
+      const rule = card.querySelector(`[data-pcc-doc-hard-no-id="${id}"]`);
+      expect(rule, `hard-no rule ${id} should render`).not.toBeNull();
+    }
+  });
+
+  it('EX04 renders as forbidden / not allowed in the action catalog (text + marker; not executable)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    const ex04 = card.querySelector('[data-pcc-doc-action="EX04"]');
+    expect(ex04).not.toBeNull();
+    expect(ex04!.getAttribute('data-pcc-doc-action-forbidden')).toBe('true');
+    expect(ex04!.textContent).toContain('Not allowed');
+    // Not executable: not a button, not an anchor with href.
+    expect(ex04!.tagName).not.toBe('BUTTON');
+    expect(ex04!.querySelector('button')).toBeNull();
+    expect(ex04!.querySelector('a[href]')).toBeNull();
+  });
+
+  it('Project Coordinator (R14) appears in role legend AND in availability rows', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    const r14Legend = card.querySelector('[data-pcc-doc-role-legend-code="R14"]');
+    expect(r14Legend).not.toBeNull();
+    expect(r14Legend!.textContent).toContain('Project Coordinator');
+    expect(card.querySelector('[data-pcc-doc-role-action-row="R14-PR10"]')).not.toBeNull();
+    expect(card.querySelector('[data-pcc-doc-role-action-row="R14-WF01"]')).not.toBeNull();
+  });
+
+  it('R04 Project Executive appears in the role legend (no fixture availability row required)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    const r04 = card.querySelector('[data-pcc-doc-role-legend-code="R04"]');
+    expect(r04).not.toBeNull();
+    expect(r04!.textContent).toContain('Project Executive');
+  });
+
+  it('"Project Engineer" string is absent from the rendered surface', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    expect(container.outerHTML).not.toContain('Project Engineer');
+  });
+
+  it('all 7 fixture roleActionAvailability rows render — proves no local persona / authorization filtering', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    for (const id of FIXTURE_ROLE_ACTION_ROWS) {
+      expect(
+        card.querySelector(`[data-pcc-doc-role-action-row="${id}"]`),
+        `availability row ${id} should render`,
+      ).not.toBeNull();
+    }
+    const allRows = card.querySelectorAll('[data-pcc-doc-role-action-row]');
+    expect(allRows.length).toBe(FIXTURE_ROLE_ACTION_ROWS.length);
+  });
+
+  it('permissions card renders no executable buttons or external launch anchors', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]')!;
+    expect(card.querySelectorAll('button').length).toBe(0);
+    const anchors = card.querySelectorAll('a[href]');
+    for (const a of anchors) {
+      const href = a.getAttribute('href') ?? '';
+      expect(href).not.toMatch(/^https?:\/\//);
+    }
+  });
+
+  it('backend-unavailable: card renders without crash; role + availability legends render; hard-no rules render from viewModel', async () => {
+    const { container } = await renderWithClient(unavailableClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]');
+    expect(card).not.toBeNull();
+    // Static / always-rendered content
+    expect(card!.querySelector('[data-pcc-doc-role-legend-code="R04"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-role-legend-code="R14"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-availability-legend-code="N"]')).not.toBeNull();
+    // Hard-no rules ARE published by the fixture under backend-unavailable
+    // (see backend mock buildWave7DocumentControlReadModel(false)).
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-01"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-02"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-03"]')).not.toBeNull();
+    // Action catalog and availability rows are empty in the unavailable envelope
+    expect(card!.querySelector('[data-pcc-doc-action-catalog-empty="true"]')).not.toBeNull();
+    expect(
+      card!.querySelector('[data-pcc-doc-role-action-availability-empty="true"]'),
+    ).not.toBeNull();
+  });
+
+  it('no readModelClient (fallback): permissions card renders Wave 7-specific hard-no fallback (HN-01..HN-03 only — no HN-04)', async () => {
+    const { container } = await renderWithClient(undefined);
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]');
+    expect(card).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-01"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-02"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-03"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-04"]')).toBeNull();
+    // Static role legend + availability legend still render in the fallback path
+    expect(card!.querySelector('[data-pcc-doc-role-legend-code="R04"]')).not.toBeNull();
+    expect(card!.querySelector('[data-pcc-doc-availability-legend-code="HARD-NO"]')).not.toBeNull();
+  });
+
+  it('source-unavailable (unknown project): permissions card renders without crash', async () => {
+    const { container } = await renderWithClient(unknownProjectClient());
+    const card = container.querySelector('[data-pcc-doc-permissions-card="true"]');
+    expect(card).not.toBeNull();
+    // Hard-no rules still publish under source-unavailable (per backend mock)
+    expect(card!.querySelector('[data-pcc-doc-hard-no-id="HN-01"]')).not.toBeNull();
   });
 });

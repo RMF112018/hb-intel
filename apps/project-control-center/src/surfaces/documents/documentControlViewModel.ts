@@ -13,13 +13,18 @@
  * downstream lane card stays presentational and trusts its props.
  */
 
+import { DOCUMENT_CONTROL_ROLE_CODES, DOCUMENT_CONTROL_ROLE_VOCABULARY } from '@hbc/models/pcc';
 import type {
+  DocumentControlRoleCode,
+  IDocumentControlActionCode,
+  IDocumentControlRoleVocabularyEntry,
   IDocumentControlSource,
   IDocumentControlUniversalHardNoRule,
   IProjectDocumentSourceHealth,
   IProjectDocumentSourceRegistryEntry,
   PccDocumentControlReadModel,
   PccDocumentControlReviewQueueItem,
+  PccDocumentControlRoleActionAvailability,
   PccPersona,
   PccProjectId,
   PccReadModelEnvelope,
@@ -87,7 +92,30 @@ export interface IPccDocumentControlViewModel {
   readonly hardNoRules: readonly IDocumentControlUniversalHardNoRule[];
   readonly reviewQueueSample: readonly PccDocumentControlReviewQueueItem[];
   readonly warnings: readonly PccReadModelWarning[];
+  readonly actionCatalog: readonly IDocumentControlActionCode[];
+  readonly roleActionAvailability: readonly PccDocumentControlRoleActionAvailability[];
+  readonly roleVocabulary: Readonly<Record<DocumentControlRoleCode, IDocumentControlRoleVocabularyEntry>>;
+  readonly roleCodes: readonly DocumentControlRoleCode[];
 }
+
+/**
+ * Presentation-layer legend for availability codes. UI copy, not data —
+ * lives here so cards never invent labels for code values.
+ */
+export const DOCUMENT_CONTROL_AVAILABILITY_LEGEND: ReadonlyArray<{
+  readonly code: 'Y' | 'A' | 'O' | 'R' | 'C' | 'S' | 'D' | 'N' | 'HARD-NO';
+  readonly label: string;
+}> = [
+  { code: 'Y', label: 'Allowed by default if project/source access exists' },
+  { code: 'A', label: 'Assigned only' },
+  { code: 'O', label: 'Own / current-user only' },
+  { code: 'R', label: 'Request only' },
+  { code: 'C', label: 'Configurable' },
+  { code: 'S', label: 'Support / admin repair only' },
+  { code: 'D', label: 'Deferred' },
+  { code: 'N', label: 'Not allowed' },
+  { code: 'HARD-NO', label: 'Forbidden by architecture' },
+];
 
 /**
  * Deterministic fixture-safe allow value. The Wave 7 fixture/read-model
@@ -194,5 +222,9 @@ export function buildPccDocumentControlViewModel(
     hardNoRules: data.hardNoRules ?? [],
     reviewQueueSample: data.reviewQueueSample ?? [],
     warnings: envelope.warnings,
+    actionCatalog: data.actionCatalog ?? [],
+    roleActionAvailability: data.roleActionAvailability ?? [],
+    roleVocabulary: DOCUMENT_CONTROL_ROLE_VOCABULARY,
+    roleCodes: DOCUMENT_CONTROL_ROLE_CODES,
   };
 }

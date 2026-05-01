@@ -1,6 +1,7 @@
 import { Fragment, type FC } from 'react';
 import { PccDocumentsHeaderCard } from './PccDocumentsHeaderCard';
 import { PccDocumentControlLaneCard } from './PccDocumentControlLaneCard';
+import { PccDocumentControlPermissionsCard } from './PccDocumentControlPermissionsCard';
 import { PccDocumentControlReadModelContent } from './PccDocumentControlReadModelContent';
 import {
   WAVE7_LANE_ORDER,
@@ -56,6 +57,7 @@ export const PccDocumentsSurface: FC<PccDocumentsSurfaceProps> = ({ readModelCli
           laneViewModel={safeEmptyLane(laneId)}
         />
       ))}
+      <PccDocumentControlPermissionsCard />
     </Fragment>
   );
 };
