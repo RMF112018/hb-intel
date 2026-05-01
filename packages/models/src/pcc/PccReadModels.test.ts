@@ -19,6 +19,7 @@ import {
   type PccReadModelResponseMap,
   type PccReadModelMode,
   type PccReadModelSourceStatus,
+  type PccProjectReadinessFrameworkReadModel,
 } from './index.js';
 
 describe('PccReadModels exports and typing', () => {
@@ -227,6 +228,22 @@ describe('PccReadModels exports and typing', () => {
       data: { settings: [] },
     };
 
+    const projectReadinessEnvelope: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: {
+        items: [],
+        domainSummaries: [],
+        gateSummaries: [],
+        ownershipSummaries: [],
+        evidenceSummary: [],
+        blockerSummary: [],
+        sourceHealthSummary: [],
+      },
+    };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -237,6 +254,7 @@ describe('PccReadModels exports and typing', () => {
       'site-health': siteHealthEnvelope,
       'team-access': teamAccessEnvelope,
       settings: settingsEnvelope,
+      'project-readiness': projectReadinessEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

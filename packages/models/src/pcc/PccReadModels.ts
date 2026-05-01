@@ -30,6 +30,7 @@ import type { ISiteHealthSummary } from './SiteHealth.js';
 import type { ITeamAccessPreviewModel } from './TeamAccess.js';
 import type { PccPersona } from './PccUserRoles.js';
 import type { PccProjectId } from './types.js';
+import type { PccProjectReadinessFrameworkReadModel } from './ProjectReadinessFramework.js';
 
 export const PCC_READ_MODEL_MODES = ['fixture', 'mock', 'local'] as const;
 export type PccReadModelMode = (typeof PCC_READ_MODEL_MODES)[number];
@@ -142,4 +143,5 @@ export interface PccReadModelResponseMap {
   'site-health': PccReadModelEnvelope<PccSiteHealthReadModel>;
   'team-access': PccReadModelEnvelope<PccTeamAccessReadModel>;
   settings: PccReadModelEnvelope<PccSettingsReadModel>;
+  'project-readiness': PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>;
 }

@@ -70,7 +70,7 @@ export const PCC_MVP_SURFACES: Readonly<Record<PccMvpSurfaceId, IPccMvpSurface>>
     id: 'project-readiness',
     displayName: 'Project Readiness',
     description:
-      'Startup checklist, permits and AHJ, inspection readiness, and responsibility matrix.',
+      'Project Readiness Module Framework shell aggregating readiness posture, blockers, evidence references, and source-health signals across upstream modules; the user-facing Project Readiness Center surface.',
     mvpTier: 'MVP',
     primaryWorkCenterIds: [
       'startup',
