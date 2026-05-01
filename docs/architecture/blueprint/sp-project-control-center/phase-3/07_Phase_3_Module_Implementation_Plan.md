@@ -49,31 +49,31 @@ Then implement each module as its own wave. This prevents every module from inve
 
 # Wave Summary
 
-| Wave | Module / Workstream                                          | Purpose                                                                                                                                          | Dependency                  |
-| ---: | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
-|    0 | Implementation Gate & Repo Truth Recheck                     | Confirm Phase 3 can move from planning to code and lock allowed paths.                                                                           | Phase 2 Step 4/5/6 evidence |
-|    1 | PCC Shared Foundations                                       | Establish shared types, read-model contracts, fixtures, feature flags, role model, status model.                                                 | Wave 0                      |
-|    2 | PCC SPFx Shell Frame                                         | Create shell/routing/layout foundation without deep module logic.                                                                                | Wave 1                      |
-|    3 | PCC Backend Read-Model Foundation                            | Create backend read-model scaffolds used by shell/modules.                                                                                       | Wave 1                      |
-|    4 | Project Home / Command Center                                | Build hybrid landing page and role-aware project summary.                                                                                        | Waves 2–3                   |
-|   4A | Controlled Non-Production Tenant SPPKG Visual Validation Gate | First eligible hosted validation point after Wave 4 in controlled non-production tenant scope.                                                   | Wave 4                      |
-|    5 | Priority Actions Rail                                        | Build MVP action categories and source aggregation.                                                                                              | Waves 3–4                   |
-|   5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5; not the first hosted validation point.                                                                | Wave 5                      |
-|    6 | Team & Access                                                | Build request + approval workflow; no automated permission execution.                                                                            | Waves 2–3                   |
-|    7 | HB Document Control Center                                   | Build three-lane model: Project Record + My Project Files + External Systems, with source binding, review routing, audit, and project-only OneDrive guardrail. | Waves 2–3                   |
-|    8 | Project Readiness Module Framework                           | Build shared framework for structured readiness modules.                                                                                         | Waves 2–3                   |
-|    9 | Job Startup Checklist                                        | Build item-level startup workflow module.                                                                                                        | Wave 8                      |
-|   10 | Permit Log                                                   | Build item-level permit workflow module.                                                                                                         | Wave 8                      |
-|   11 | Responsibility Matrix                                        | Build item-level responsibility workflow, including owner-contract mapping.                                                                      | Prior readiness waves       |
-|   12 | Constraints Log                                              | Build item-level constraints workflow module.                                                                                                    | Wave 8                      |
-|   13 | Buyout Log                                                   | Build item-level buyout/project-controls workflow module.                                                                                        | Wave 8                      |
-|   14 | Approvals / Checkpoints                                      | Build approval/checkpoint queue and authority logic.                                                                                             | Waves 3, 5, 6, 8–13         |
-|   15 | External Systems                                             | Build launch hub for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                | Waves 2–3                   |
-|   16 | Control Center Settings                                      | Build business/technical settings separation and role-gated UI.                                                                                  | Waves 2–3                   |
-|   17 | Site Health                                                  | Build health visibility and repair request workflow; no repair execution.                                                                        | Waves 2–3                   |
-|   18 | Executive Oversight / Global Read-Only                       | Build executive summary and governed drill-in.                                                                                                   | Waves 4–17                  |
-|   19 | Admin / Control Plane Review Surfaces                        | Build admin queues and review surfaces for requests, approvals, repair intake.                                                                   | Waves 6, 14, 17             |
-|   20 | Hardening, Doctrine Validation, and Non-Production Readiness | Close UX, accessibility, tests, guards, documentation, and rollout readiness.                                                                    | All prior waves             |
+| Wave | Module / Workstream                                                 | Purpose                                                                                                                                                        | Dependency                  |
+| ---: | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+|    0 | Implementation Gate & Repo Truth Recheck                            | Confirm Phase 3 can move from planning to code and lock allowed paths.                                                                                         | Phase 2 Step 4/5/6 evidence |
+|    1 | PCC Shared Foundations                                              | Establish shared types, read-model contracts, fixtures, feature flags, role model, status model.                                                               | Wave 0                      |
+|    2 | PCC SPFx Shell Frame                                                | Create shell/routing/layout foundation without deep module logic.                                                                                              | Wave 1                      |
+|    3 | PCC Backend Read-Model Foundation                                   | Create backend read-model scaffolds used by shell/modules.                                                                                                     | Wave 1                      |
+|    4 | Project Home / Command Center                                       | Build hybrid landing page and role-aware project summary.                                                                                                      | Waves 2–3                   |
+|   4A | Controlled Non-Production Tenant SPPKG Visual Validation Gate       | First eligible hosted validation point after Wave 4 in controlled non-production tenant scope.                                                                 | Wave 4                      |
+|    5 | Priority Actions Rail                                               | Build MVP action categories and source aggregation.                                                                                                            | Waves 3–4                   |
+|   5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5; not the first hosted validation point.                                                                              | Wave 5                      |
+|    6 | Team & Access                                                       | Build request + approval workflow; no automated permission execution.                                                                                          | Waves 2–3                   |
+|    7 | HB Document Control Center                                          | Build three-lane model: Project Record + My Project Files + External Systems, with source binding, review routing, audit, and project-only OneDrive guardrail. | Waves 2–3                   |
+|    8 | Project Readiness Module Framework                                  | Build shared framework for structured readiness modules.                                                                                                       | Waves 2–3                   |
+|    9 | Job Startup Checklist                                               | Build item-level startup workflow module.                                                                                                                      | Wave 8                      |
+|   10 | Permit Log                                                          | Build item-level permit workflow module.                                                                                                                       | Wave 8                      |
+|   11 | Responsibility Matrix                                               | Build item-level responsibility workflow, including owner-contract mapping.                                                                                    | Prior readiness waves       |
+|   12 | Constraints Log                                                     | Build item-level constraints workflow module.                                                                                                                  | Wave 8                      |
+|   13 | Buyout Log                                                          | Build item-level buyout/project-controls workflow module.                                                                                                      | Wave 8                      |
+|   14 | Approvals / Checkpoints                                             | Build approval/checkpoint queue and authority logic.                                                                                                           | Waves 3, 5, 6, 8–13         |
+|   15 | External Systems                                                    | Build launch hub for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                              | Waves 2–3                   |
+|   16 | Control Center Settings                                             | Build business/technical settings separation and role-gated UI.                                                                                                | Waves 2–3                   |
+|   17 | Site Health                                                         | Build health visibility and repair request workflow; no repair execution.                                                                                      | Waves 2–3                   |
+|   18 | Executive Oversight / Global Read-Only                              | Build executive summary and governed drill-in.                                                                                                                 | Waves 4–17                  |
+|   19 | Admin / Control Plane Review Surfaces                               | Build admin queues and review surfaces for requests, approvals, repair intake.                                                                                 | Waves 6, 14, 17             |
+|   20 | Hardening, Doctrine Validation, and Non-Production Readiness        | Close UX, accessibility, tests, guards, documentation, and rollout readiness.                                                                                  | All prior waves             |
 
 ---
 
@@ -450,6 +450,12 @@ Use Project Coordinator terminology for document-control actor roles. Do not use
 
 Build the shared framework for item-level structured workflow modules.
 
+Technical/user-facing naming lock:
+
+- Technical wave name: **Project Readiness Module Framework**.
+- User-facing module name: **Project Readiness Center**.
+- Wave 8 is the framework layer that downstream readiness modules plug into; it is not the Wave 9 checklist implementation.
+
 ## Code Work
 
 - Module registry.
@@ -481,6 +487,8 @@ Build the shared framework for item-level structured workflow modules.
 - New workflow modules can plug into the framework.
 - Item-level tracking works with fixture/backend data.
 - Business audit trail records changes.
+- Framework boundaries explicitly prevent duplicate ownership with Waves 6, 7, 9–15, and 17 module detail.
+- Readiness posture is blocker-first and does not hide unresolved critical blockers behind blended completion percentages.
 
 ---
 

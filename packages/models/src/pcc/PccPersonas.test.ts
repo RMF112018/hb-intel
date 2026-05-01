@@ -16,6 +16,9 @@ const PROMPT_03_NEW_PERSONAS: readonly PccPersona[] = [
   'chief-estimator',
   'director-of-preconstruction',
   'project-coordinator',
+  'external-design-team',
+  'owner-client-viewer',
+  'subcontractor-limited',
   'manager-of-operational-excellence',
   'safety-qaqc',
 ];

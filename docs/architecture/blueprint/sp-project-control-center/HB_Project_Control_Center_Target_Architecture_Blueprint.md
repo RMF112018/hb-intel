@@ -475,16 +475,16 @@ The following example documents are assumed to be stored in the repo at:
 docs/reference/example/
 ```
 
-| Example Document                                          | Primary Architecture Use                                               |
-| --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `Project_Startup_Checklist(1).pdf`                        | Startup Center, Contract & Compliance, Field Operations, Action Center |
-| `Project_Closeout_Checklist(1).pdf`                       | Closeout & Warranty Center, Document Control, Risk, Action Center      |
-| `Permit_Log_Template.xlsx`                                | Permit & AHJ Center                                                    |
-| `10b_20260220_RequiredInspectionsList(1).xlsx`            | Inspection Readiness Center                                            |
-| `Responsibility Matrix - Template.xlsx`                   | Responsibility Matrix Center, Team & Access, Action Center             |
-| `Responsibility Matrix - Owner Contract Template.xlsx`    | Contract & Obligation Center                                           |
-| `06 20260307_SOP_SubScorecard-DRAFT(1).xlsx`              | Subcontractor Performance Center, Procurement & Buyout, Closeout       |
-| `07 20260307_SOP_LessonsLearnedReport-DRAFT(1).xlsx`      | Lessons Learned Center, Best Practices, HBI knowledge base             |
+| Example Document                                       | Primary Architecture Use                                               |
+| ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `Project_Startup_Checklist(1).pdf`                     | Startup Center, Contract & Compliance, Field Operations, Action Center |
+| `Project_Closeout_Checklist(1).pdf`                    | Closeout & Warranty Center, Document Control, Risk, Action Center      |
+| `Permit_Log_Template.xlsx`                             | Permit & AHJ Center                                                    |
+| `10b_20260220_RequiredInspectionsList(1).xlsx`         | Inspection Readiness Center                                            |
+| `Responsibility Matrix - Template.xlsx`                | Responsibility Matrix Center, Team & Access, Action Center             |
+| `Responsibility Matrix - Owner Contract Template.xlsx` | Contract & Obligation Center                                           |
+| `06 20260307_SOP_SubScorecard-DRAFT(1).xlsx`           | Subcontractor Performance Center, Procurement & Buyout, Closeout       |
+| `07 20260307_SOP_LessonsLearnedReport-DRAFT(1).xlsx`   | Lessons Learned Center, Best Practices, HBI knowledge base             |
 
 ---
 
@@ -544,6 +544,14 @@ Project Readiness
 ├── Closeout: 18% complete / 9 future requirements
 └── My Responsibilities: 7 assigned / 2 overdue
 ```
+
+### 11.4 Wave 8 Framework vs Surface Naming
+
+- Technical wave/framework name: **Project Readiness Module Framework**.
+- User-facing module/surface name: **Project Readiness Center**.
+- Wave 8 establishes readiness framework taxonomy and posture logic; it is not a standalone checklist page, static dashboard, or duplicate workflow engine.
+- Wave 9–14 remain downstream module implementations that provide module-owned detail consumed by Wave 8 readiness normalization.
+- Wave 8 documentation posture is non-runtime: no backend execution routes, persistence claims, approval execution claims, or external-system mutation claims are implied.
 
 ### 11.x Procore current-state cards (Recommended Practical tier)
 

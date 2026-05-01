@@ -346,6 +346,20 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
     'view-external-systems',
     'view-constraints-log',
   ],
+  'external-design-team': [
+    'view-documents',
+    'view-project-readiness',
+  ],
+  'owner-client-viewer': [
+    'view-project-home',
+    'view-documents',
+    'view-project-readiness',
+    'view-approvals',
+  ],
+  'subcontractor-limited': [
+    'view-documents',
+    'view-project-readiness',
+  ],
   'manager-of-operational-excellence': [
     'view-project-home',
     'view-priority-actions',
