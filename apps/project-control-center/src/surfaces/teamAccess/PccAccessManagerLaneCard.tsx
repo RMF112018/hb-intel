@@ -1,8 +1,10 @@
 import type { FC } from 'react';
+import { TEAM_ACCESS_MANAGER_PERSONAS } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
-import { PccStatusPill } from '../../ui/PccStatusPill';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import type { TeamAccessPreviewModel } from './shared';
+import { PccAccessExecutionQueue } from './PccAccessExecutionQueue';
+import { PccExecutionStatusPanel } from './PccExecutionStatusPanel';
 import styles from './PccTeamAccessSurface.module.css';
 
 export interface PccAccessManagerLaneCardProps {
@@ -37,12 +39,18 @@ export const PccAccessManagerLaneCard: FC<PccAccessManagerLaneCardProps> = ({ mo
           description="Execution remains manual/IT-handled or backend-gated later; no Wave 2 runtime action path exists."
         />
 
-        <div className={styles.metaRow}>
-          <PccStatusPill tone="info">Execution status: {lane.executionStatus}</PccStatusPill>
-          <PccStatusPill tone="warning">{lane.executionStatusLabel}</PccStatusPill>
-        </div>
+        <PccExecutionStatusPanel
+          executionStatus={lane.executionStatus}
+          executionStatusLabel={lane.executionStatusLabel}
+          managerPersonas={TEAM_ACCESS_MANAGER_PERSONAS}
+          auditPreviewLabel={lane.auditPreviewLabel}
+        />
 
-        <div className={styles.metaRow}>Access manager personas: {lane.managerPersonas.join(', ')}</div>
+        <PccAccessExecutionQueue
+          records={model.permissionRequestLane.requestPreviewRecords}
+          laneExecutionStatus={lane.executionStatus}
+        />
+
         <div className={styles.metaRow}>Permission template selector preview:</div>
         {lane.permissionTemplateOptions.length === 0 ? (
           <PccPreviewState state="unavailable-fixture" />
@@ -55,8 +63,6 @@ export const PccAccessManagerLaneCard: FC<PccAccessManagerLaneCardProps> = ({ mo
             ))}
           </div>
         )}
-
-        <div className={styles.metaRow}>Audit preview: {lane.auditPreviewLabel}</div>
       </div>
     </PccDashboardCard>
   );

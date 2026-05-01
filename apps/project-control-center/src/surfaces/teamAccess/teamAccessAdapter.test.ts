@@ -176,7 +176,7 @@ describe('teamAccessAdapter — execution posture', () => {
     const vm = buildDefaultPccTeamAccessViewModel();
     expect(vm.executionPosture.status).toBe('backend-gated-later');
     expect(vm.executionPosture.statusLabel).toBe(EXECUTION_STATUS_LABELS['backend-gated-later']);
-    expect(vm.executionPosture.statusLabel).toBe('Backend-gated later');
+    expect(vm.executionPosture.statusLabel).toBe('Backend-Gated Later');
     expect(vm.executionPosture.backendGatedLater).toBe(true);
     expect(vm.executionPosture.manualItHandled).toBe(false);
     expect(vm.executionPosture.noPermissionChangeNotice).toBe(NO_PERMISSION_CHANGE_NOTICE);

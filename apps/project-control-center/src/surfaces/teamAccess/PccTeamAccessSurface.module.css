@@ -111,3 +111,44 @@
   color: var(--pcc-color-ink-muted);
   background: transparent;
 }
+
+.executionQueue {
+  display: grid;
+  gap: 10px;
+}
+
+.executionQueueSection {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--pcc-color-line-soft);
+  border-radius: 8px;
+}
+
+.executionQueueSectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--pcc-color-ink-muted);
+}
+
+.executionStatusPanel {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--pcc-color-line-soft);
+  border-radius: 8px;
+}
+
+.managerPersonaChips {
+  display: grid;
+  gap: 6px;
+}
+
+.auditPreviewLine {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-ink-subtle);
+}

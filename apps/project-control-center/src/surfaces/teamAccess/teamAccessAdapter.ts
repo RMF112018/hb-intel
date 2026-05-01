@@ -39,9 +39,9 @@ export const REQUEST_STATUS_LABELS: Readonly<Record<TeamAccessRequestStatus, str
 };
 
 export const EXECUTION_STATUS_LABELS: Readonly<Record<TeamAccessExecutionStatus, string>> = {
-  'preview-only': 'Preview only',
+  'preview-only': 'Preview Only',
   'manual-it-handled': 'Manual IT handled',
-  'backend-gated-later': 'Backend-gated later',
+  'backend-gated-later': 'Backend-Gated Later',
 };
 
 export function isTeamAccessManagerPersona(persona: PccPersona): boolean {

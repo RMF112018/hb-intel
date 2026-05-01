@@ -15,7 +15,10 @@ describe('PccTeamAccessSurface preview branches', () => {
     expect(container.querySelector('[data-pcc-team-access-lane="permission-request"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-team-access-lane="access-manager"]')).not.toBeNull();
     expect(container.textContent).toContain('Add/search user (preview-only)');
-    expect(container.textContent).toContain('Execution status: backend-gated-later');
+    expect(
+      container.querySelector('[data-pcc-execution-status="backend-gated-later"]'),
+    ).not.toBeNull();
+    expect(container.textContent).toContain('Backend-Gated Later');
   });
 
   it('renders non-manager with project access as Team Viewer only', () => {
