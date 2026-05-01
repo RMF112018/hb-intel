@@ -46,3 +46,10 @@
   color: var(--pcc-color-ink-subtle);
   font-size: 12px;
 }
+
+.noPermissionChangeNotice {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-ink-subtle);
+}

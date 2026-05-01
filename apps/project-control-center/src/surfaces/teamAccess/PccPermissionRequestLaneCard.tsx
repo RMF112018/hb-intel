@@ -3,6 +3,9 @@ import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import type { TeamAccessPreviewModel } from './shared';
+import { PccAccessRequestForm } from './PccAccessRequestForm';
+import { PccRequestStatusBadge } from './PccRequestStatusBadge';
+import { NO_PERMISSION_CHANGE_NOTICE } from './teamAccessAdapter';
 import styles from './PccTeamAccessSurface.module.css';
 
 export interface PccPermissionRequestLaneCardProps {
@@ -15,23 +18,18 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
   return (
     <PccDashboardCard footprint="wide" eyebrow="Permission Request Lane" title="Request Access Preview">
       <div className={styles.body} data-pcc-team-access-lane="permission-request">
-        <p className={styles.previewCue}>
-          Request intake preview only. Submission, persistence, and approval execution are disabled in Wave
-          2.
-        </p>
-
-        <div className={styles.metaRow}>
-          <button type="button" disabled className={styles.disabledAction}>
-            Request access (preview-only)
-          </button>
-          <button type="button" disabled className={styles.disabledAction}>
-            Request role/permission change (preview-only)
-          </button>
+        <div className={styles.metaRow} data-pcc-permission-request-banner="preview">
+          <PccStatusPill tone="info">Preview only</PccStatusPill>
         </div>
-        <PccPreviewState
-          state="not-yet-implemented-operation"
-          title="Request submission is deferred"
-          description="Request persistence and workflow execution are intentionally disabled for Wave 2 preview."
+
+        <PccAccessRequestForm
+          introText="Request intake preview only. Submission, persistence, and approval execution are disabled in Wave 2."
+          requestAccessButtonLabel="Request access (preview-only)"
+          requestChangeButtonLabel="Request role/permission change (preview-only)"
+          requestAccessEnabled={lane.requestAccessEnabled}
+          requestChangeEnabled={lane.requestChangeEnabled}
+          deferredTitle="Request submission is deferred"
+          deferredDescription="Request persistence and workflow execution are intentionally disabled for Wave 2 preview."
         />
 
         <span className={styles.metaRow}>Requested permission templates:</span>
@@ -51,7 +49,7 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
               <li key={record.requestId}>
                 <div className={styles.metaRow}>
                   <strong>{record.requestedUserLabel}</strong>
-                  <PccStatusPill tone="info">{record.requestStatusLabel}</PccStatusPill>
+                  <PccRequestStatusBadge status={record.requestStatus} />
                 </div>
                 <div className={styles.metaRow}>
                   Requested role: {record.requestedPersona} · Template:{' '}
@@ -69,6 +67,13 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
             ))}
           </ul>
         )}
+
+        <p
+          className={styles.noPermissionChangeNotice}
+          data-pcc-no-permission-change-notice=""
+        >
+          {NO_PERMISSION_CHANGE_NOTICE}
+        </p>
       </div>
     </PccDashboardCard>
   );

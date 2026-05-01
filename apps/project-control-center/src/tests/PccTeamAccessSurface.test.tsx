@@ -42,6 +42,9 @@ describe('PccTeamAccessSurface preview branches', () => {
     expect(container.querySelector('[data-pcc-team-access-lane="team-viewer"]')).toBeNull();
     expect(container.querySelector('[data-pcc-team-access-lane="permission-request"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-team-access-lane="access-manager"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-access-request-form]')).not.toBeNull();
     expect(container.textContent).toContain('Request access (preview-only)');
+    expect(container.querySelector('[data-pcc-no-permission-change-notice]')).not.toBeNull();
+    expect(container.textContent).toContain('No permission change has been executed');
   });
 });
