@@ -1,7 +1,7 @@
 /**
- * Project Readiness Center surface (Phase 3 / Wave 8 / Prompt 05).
+ * Project Readiness Center surface (Phase 3 / Wave 8 / Prompts 05 + 06).
  *
- * Six-region framework shell rendered as a Fragment of direct
+ * Eight-region framework shell rendered as a Fragment of direct
  * `PccDashboardCard` children so each card stays a direct child of
  * `<PccBentoGrid>` (provided by `PccShell`). Exactly one card carries
  * `data-pcc-active-surface-panel="project-readiness"` (the hero).
@@ -44,6 +44,9 @@ import type {
   IPccReadinessEvidenceViewModel,
   IPccReadinessGateViewModel,
   IPccReadinessHeroViewModel,
+  IPccReadinessOwnershipAccountabilityViewModel,
+  IPccReadinessPriorityActionsPreviewViewModel,
+  ProjectReadinessRiskTag,
 } from './projectReadinessViewModel';
 import styles from './PccProjectReadinessSurface.module.css';
 
@@ -169,15 +172,17 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
       <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
       <DomainGridCard domains={viewModel.domains} />
       <BlockersCard blockers={viewModel.blockers} />
+      <OwnershipAccountabilityCard ownership={viewModel.ownershipAccountability} />
+      <PriorityActionsPreviewCard preview={viewModel.priorityActionsPreview} />
       <EvidenceSourceHealthCard evidence={viewModel.evidence} />
       <DownstreamModulesCard modules={viewModel.downstreamModules} />
     </Fragment>
   );
 };
 
-// While loading or in error, still render the five non-hero regions from
-// the fixture snapshot so the bento grid stays populated and tests can
-// locate the structural region markers.
+// While loading or in error, still render the seven non-hero regions
+// from the fixture snapshot so the bento grid stays populated and tests
+// can locate the structural region markers.
 const FixtureScaffoldRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status !== 'preview') return null;
   return (
@@ -185,6 +190,8 @@ const FixtureScaffoldRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
       <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
       <DomainGridCard domains={viewModel.domains} />
       <BlockersCard blockers={viewModel.blockers} />
+      <OwnershipAccountabilityCard ownership={viewModel.ownershipAccountability} />
+      <PriorityActionsPreviewCard preview={viewModel.priorityActionsPreview} />
       <EvidenceSourceHealthCard evidence={viewModel.evidence} />
       <DownstreamModulesCard modules={viewModel.downstreamModules} />
     </Fragment>
@@ -360,10 +367,140 @@ const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
                 Source: {b.sourceModuleLabel} · Severity: {b.severity}
               </span>
               <PccStatusPill tone={postureToTone(b.posture)}>{posturelabel(b.posture)}</PccStatusPill>
+              <span
+                className={`${styles.riskTag} ${riskTagClass(b.riskTag)}`}
+                data-pcc-readiness-risk-tag={b.riskTag}
+                aria-label={`Risk tag: ${b.riskTag}`}
+              >
+                {riskTagLabel(b.riskTag)}
+              </span>
             </li>
           ))}
         </ul>
       )}
+    </div>
+  </PccDashboardCard>
+);
+
+interface OwnershipAccountabilityCardProps {
+  readonly ownership: IPccReadinessOwnershipAccountabilityViewModel;
+}
+
+const OwnershipAccountabilityCard: FC<OwnershipAccountabilityCardProps> = ({ ownership }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Ownership"
+    title="Ownership and accountability"
+  >
+    <div
+      data-pcc-readiness-region="ownership-accountability"
+      className={styles.ownershipList}
+      aria-label="Ownership and accountability"
+    >
+      <p className={styles.ownershipSummary}>{ownership.summaryCaption}</p>
+      {ownership.entries.length === 0 ? (
+        <PccPreviewState
+          state="empty"
+          title="Ownership data unavailable"
+          description="Assignments will appear once the readiness source is available."
+        />
+      ) : (
+        <ul className={styles.ownershipListInner} aria-label="Owner entries">
+          {ownership.entries.map((entry) => {
+            const hasUnassigned = entry.unassignedItemIds.length > 0;
+            return (
+              <li
+                key={entry.ownerPersona}
+                className={styles.ownershipItem}
+                data-pcc-readiness-ownership-persona={entry.ownerPersona}
+                data-pcc-readiness-ownership-unassigned={hasUnassigned ? 'true' : 'false'}
+              >
+                <span className={styles.ownershipPersona}>{entry.ownerPersona}</span>
+                <span className={styles.ownershipMeta}>
+                  {entry.assignedItemIds.length} item
+                  {entry.assignedItemIds.length === 1 ? '' : 's'}
+                  {entry.openBlockerCount > 0
+                    ? ` · ${entry.openBlockerCount} open blocker${
+                        entry.openBlockerCount === 1 ? '' : 's'
+                      }`
+                    : ''}
+                  {entry.nextDueDateUtc ? ` · Next due ${entry.nextDueDateUtc.slice(0, 10)}` : ''}
+                </span>
+                {hasUnassigned ? (
+                  <span
+                    className={styles.ownershipUnassigned}
+                    data-pcc-readiness-ownership-unassigned-count={entry.unassignedItemIds.length}
+                  >
+                    {entry.unassignedItemIds.length} item
+                    {entry.unassignedItemIds.length === 1 ? '' : 's'} unassigned
+                  </span>
+                ) : (
+                  <span className={styles.ownershipMeta}>All items assigned</span>
+                )}
+                {entry.escalationPersonas.length > 0 ? (
+                  <span className={styles.ownershipEscalationRow}>
+                    <span className={styles.ownershipMeta}>Escalation:</span>
+                    {entry.escalationPersonas.map((persona) => (
+                      <span
+                        key={persona}
+                        className={styles.inertChip}
+                        data-pcc-readiness-ownership-escalation={persona}
+                      >
+                        {persona}
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  </PccDashboardCard>
+);
+
+interface PriorityActionsPreviewCardProps {
+  readonly preview: IPccReadinessPriorityActionsPreviewViewModel;
+}
+
+const PriorityActionsPreviewCard: FC<PriorityActionsPreviewCardProps> = ({ preview }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Priority Actions preview"
+    title="Eligible for Priority Actions"
+  >
+    <div
+      data-pcc-readiness-region="priority-actions-preview"
+      className={styles.priorityActionsList}
+      aria-label="Priority Actions eligibility preview"
+    >
+      <p className={styles.priorityActionsCaption}>{preview.previewCaption}</p>
+      {preview.items.length === 0 ? (
+        <PccPreviewState
+          state="empty"
+          title="No Priority Actions eligibility flagged"
+          description={preview.inertActionLabel}
+        />
+      ) : (
+        <ul className={styles.priorityActionsListInner} aria-label="Priority Actions eligible items">
+          {preview.items.map((item) => (
+            <li
+              key={item.relatedPriorityActionId}
+              className={styles.priorityActionItem}
+              data-pcc-readiness-priority-action-id={item.relatedPriorityActionId}
+            >
+              <span className={styles.priorityActionTitle}>{item.itemTitle}</span>
+              <span className={styles.priorityActionMeta}>{item.domainLabel}</span>
+              <span className={styles.priorityActionMeta}>{item.eligibilityCaption}</span>
+              <span className={styles.inertChip} aria-disabled="true">
+                Preview only
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className={styles.priorityActionsFooter}>{preview.inertActionLabel}</p>
     </div>
   </PccDashboardCard>
 );
@@ -514,5 +651,33 @@ function sourceHealthTone(
       return 'danger';
     default:
       return 'neutral';
+  }
+}
+
+function riskTagClass(tag: ProjectReadinessRiskTag): string {
+  switch (tag) {
+    case 'critical-blocker':
+      return styles.riskTagCritical;
+    case 'open-blocker':
+      return styles.riskTagOpen;
+    case 'at-risk-warning':
+      return styles.riskTagWarning;
+    case 'monitor':
+    default:
+      return styles.riskTagMonitor;
+  }
+}
+
+function riskTagLabel(tag: ProjectReadinessRiskTag): string {
+  switch (tag) {
+    case 'critical-blocker':
+      return 'Critical blocker';
+    case 'open-blocker':
+      return 'Open blocker';
+    case 'at-risk-warning':
+      return 'At-risk warning';
+    case 'monitor':
+    default:
+      return 'Monitor';
   }
 }

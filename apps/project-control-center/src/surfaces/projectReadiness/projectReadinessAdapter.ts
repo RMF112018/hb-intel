@@ -25,6 +25,7 @@ import type {
   IProjectReadinessGateSummary,
   IProjectReadinessItem,
   IProjectReadinessSourceHealthSummary,
+  PccPersona,
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
@@ -47,8 +48,13 @@ import type {
   IPccReadinessEvidenceViewModel,
   IPccReadinessGateViewModel,
   IPccReadinessHeroViewModel,
+  IPccReadinessOwnershipAccountabilityViewModel,
+  IPccReadinessOwnershipEntryViewModel,
+  IPccReadinessPriorityActionEligibilityItem,
+  IPccReadinessPriorityActionsPreviewViewModel,
   IPccReadinessSourceHealthBadge,
   IPccReadinessSourceHealthEntry,
+  ProjectReadinessRiskTag,
 } from './projectReadinessViewModel.js';
 
 const PREVIEW_TO_CARD_STATE: Readonly<Record<PccPreviewStateKind, PccCardState>> = {
@@ -242,6 +248,13 @@ function isBlockerCandidate(item: IProjectReadinessItem): boolean {
   return false;
 }
 
+function deriveRiskTag(item: IProjectReadinessItem): ProjectReadinessRiskTag {
+  if (item.severity === 'critical') return 'critical-blocker';
+  if (item.blockerState === 'escalated' || item.blockerState === 'open') return 'open-blocker';
+  if (item.severity === 'high' || item.posture === 'at-risk') return 'at-risk-warning';
+  return 'monitor';
+}
+
 function buildBlockers(
   snapshot: IProjectReadinessFrameworkSnapshot,
 ): readonly IPccReadinessBlockerItemViewModel[] {
@@ -262,7 +275,90 @@ function buildBlockers(
       dueDateUtc: item.dueDateUtc,
       sourceModuleId: item.sourceModuleId,
       sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[item.sourceModuleId].label,
+      riskTag: deriveRiskTag(item),
     }));
+}
+
+function isOpenBlockerItem(item: IProjectReadinessItem): boolean {
+  return item.blockerState === 'open' || item.blockerState === 'escalated';
+}
+
+function buildOwnershipAccountability(
+  snapshot: IProjectReadinessFrameworkSnapshot,
+): IPccReadinessOwnershipAccountabilityViewModel {
+  const personaItems = new Map<PccPersona, IProjectReadinessItem[]>();
+  for (const item of snapshot.items) {
+    const list = personaItems.get(item.ownerPersona) ?? [];
+    list.push(item);
+    personaItems.set(item.ownerPersona, list);
+  }
+
+  const entries: IPccReadinessOwnershipEntryViewModel[] = Array.from(personaItems.entries()).map(
+    ([ownerPersona, items]) => {
+      const assignedItemIds = items.map((i) => i.id);
+      const unassignedItemIds = items
+        .filter((i) => i.assignedUserUpn === undefined)
+        .map((i) => i.id);
+      const openBlockerCount = items.filter(isOpenBlockerItem).length;
+      const dueDates = items
+        .map((i) => i.dueDateUtc)
+        .filter((d): d is string => d !== undefined)
+        .sort();
+      const escalationSet = new Set<PccPersona>();
+      for (const i of items) {
+        for (const persona of i.escalationPath ?? []) escalationSet.add(persona);
+      }
+      return {
+        ownerPersona,
+        assignedItemIds,
+        unassignedItemIds,
+        openBlockerCount,
+        nextDueDateUtc: dueDates[0],
+        escalationPersonas: Array.from(escalationSet),
+      };
+    },
+  );
+
+  const totalUnassignedCount = entries.reduce(
+    (sum, e) => sum + e.unassignedItemIds.length,
+    0,
+  );
+
+  const summaryCaption =
+    totalUnassignedCount > 0
+      ? `${totalUnassignedCount} item${totalUnassignedCount === 1 ? '' : 's'} have no designated user assigned.`
+      : 'All items have a designated user assigned.';
+
+  return {
+    entries,
+    totalUnassignedCount,
+    summaryCaption,
+  };
+}
+
+function buildPriorityActionsPreview(
+  snapshot: IProjectReadinessFrameworkSnapshot,
+): IPccReadinessPriorityActionsPreviewViewModel {
+  const items: IPccReadinessPriorityActionEligibilityItem[] = snapshot.items
+    .filter((i) => i.relatedPriorityActionId !== undefined)
+    .map((i) => ({
+      itemId: i.id,
+      itemTitle: i.title,
+      relatedPriorityActionId: i.relatedPriorityActionId as string,
+      domain: i.domain,
+      domainLabel: DOMAIN_LABELS[i.domain],
+      eligibilityCaption:
+        'Eligible for the Priority Actions surface. Preview only in Wave 8 — no action is created or modified here.',
+    }));
+
+  return {
+    items,
+    previewCaption:
+      items.length === 0
+        ? 'No readiness items are currently flagged as Priority Actions eligible.'
+        : `${items.length} readiness item${items.length === 1 ? '' : 's'} flagged as eligible for the Priority Actions surface.`,
+    inertActionLabel: 'Preview only — Priority Actions remains its own surface.',
+  };
 }
 
 function buildEvidence(
@@ -415,6 +511,18 @@ export function buildPccProjectReadinessViewModel(
         confidence: 'unknown' as ProjectReadinessConfidenceState,
       })),
       blockers: [],
+      ownershipAccountability: {
+        entries: [],
+        totalUnassignedCount: 0,
+        summaryCaption:
+          'Ownership data is unavailable. Assignments will appear when the source is online.',
+      },
+      priorityActionsPreview: {
+        items: [],
+        previewCaption:
+          'Priority Actions eligibility cannot be derived without source data. Preview only.',
+        inertActionLabel: 'Preview only — Priority Actions remains its own surface.',
+      },
       evidence: {
         evidenceBuckets: [],
         sourceHealthEntries: [],
@@ -434,6 +542,8 @@ export function buildPccProjectReadinessViewModel(
     lifecycleGates: buildLifecycleGates(snapshot, derivedActiveGate(snapshot)),
     domains: buildDomains(snapshot),
     blockers,
+    ownershipAccountability: buildOwnershipAccountability(snapshot),
+    priorityActionsPreview: buildPriorityActionsPreview(snapshot),
     evidence: buildEvidence(snapshot),
     downstreamModules: buildDownstreamModules(),
   };

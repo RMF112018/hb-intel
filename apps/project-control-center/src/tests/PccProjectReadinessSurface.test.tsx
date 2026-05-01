@@ -141,3 +141,143 @@ describe('Project Readiness Center surface', () => {
     expect(links.length).toBe(0);
   });
 });
+
+function readinessRegionsAll(container: HTMLElement): readonly HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>('[data-pcc-readiness-region]'),
+  );
+}
+
+describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () => {
+  it('renders the ownership-accountability region with per-persona entries', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const ownership = readinessRegion(container, 'ownership-accountability');
+    expect(ownership).not.toBeNull();
+    const entries = ownership!.querySelectorAll('[data-pcc-readiness-ownership-persona]');
+    expect(entries.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('flags unassigned-gap items in the ownership region', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const unassignedEntries = container.querySelectorAll(
+      '[data-pcc-readiness-ownership-unassigned="true"]',
+    );
+    expect(unassignedEntries.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('flags safety-qaqc as having an unassigned-gap signal (item 004)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const safety = container.querySelector(
+      '[data-pcc-readiness-ownership-persona="safety-qaqc"]',
+    );
+    expect(safety).not.toBeNull();
+    expect(safety!.getAttribute('data-pcc-readiness-ownership-unassigned')).toBe('true');
+  });
+
+  it('renders escalation chips that include project-executive and manager-of-operational-excellence', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const escalations = Array.from(
+      container.querySelectorAll('[data-pcc-readiness-ownership-escalation]'),
+    ).map((el) => el.getAttribute('data-pcc-readiness-ownership-escalation'));
+    expect(escalations).toContain('project-executive');
+    expect(escalations).toContain('manager-of-operational-excellence');
+  });
+
+  it('renders the priority-actions-preview region with the eligible item', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const preview = readinessRegion(container, 'priority-actions-preview');
+    expect(preview).not.toBeNull();
+    const entry = preview!.querySelector(
+      '[data-pcc-readiness-priority-action-id="priority-action-permit-001"]',
+    );
+    expect(entry).not.toBeNull();
+  });
+
+  it('priority-actions-preview region exposes no enabled actions', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const preview = readinessRegion(container, 'priority-actions-preview');
+    expect(preview).not.toBeNull();
+    const buttons = preview!.querySelectorAll('button');
+    for (const button of Array.from(buttons)) {
+      expect(button.hasAttribute('disabled')).toBe(true);
+    }
+    const externalLinks = preview!.querySelectorAll('a[href^="http"]');
+    expect(externalLinks.length).toBe(0);
+  });
+
+  it('renders a risk-tag chip on blocker item 003 as open-blocker', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const blocker = container.querySelector(
+      '[data-pcc-readiness-blocker-id="fixture-pcc-readiness-003"]',
+    );
+    expect(blocker).not.toBeNull();
+    const tag = blocker!.querySelector('[data-pcc-readiness-risk-tag]');
+    expect(tag).not.toBeNull();
+    expect(tag!.getAttribute('data-pcc-readiness-risk-tag')).toBe('open-blocker');
+  });
+
+  it('evidence-source-health region has no upload controls', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = readinessRegion(container, 'evidence-source-health');
+    expect(region).not.toBeNull();
+    const fileInputs = region!.querySelectorAll('input[type="file"]');
+    expect(fileInputs.length).toBe(0);
+    const uploadLabeled = Array.from(region!.querySelectorAll('button')).filter((btn) =>
+      /^upload$/i.test((btn.textContent ?? '').trim()),
+    );
+    expect(uploadLabeled.length).toBe(0);
+  });
+
+  it('readiness panel has no enabled Upload button', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const panel = activateProjectReadiness(container);
+    const enabledUpload = Array.from(panel.querySelectorAll('button')).filter(
+      (btn) =>
+        /^upload$/i.test((btn.textContent ?? '').trim()) && !btn.hasAttribute('disabled'),
+    );
+    expect(enabledUpload.length).toBe(0);
+  });
+
+  it('renders degraded source-health entries for permit-log (stale), buyout-log and external-systems (source-unavailable)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const permit = container.querySelector(
+      '[data-pcc-readiness-source-health="permit-log"]',
+    );
+    const buyout = container.querySelector(
+      '[data-pcc-readiness-source-health="buyout-log"]',
+    );
+    const external = container.querySelector(
+      '[data-pcc-readiness-source-health="external-systems"]',
+    );
+    expect(permit).not.toBeNull();
+    expect(buyout).not.toBeNull();
+    expect(external).not.toBeNull();
+  });
+
+  it('readiness regions expose no executable-label buttons', () => {
+    const forbiddenLabel = /^(submit|approve|upload|run|execute|sync|write\s*back|writeback|complete\s*checklist|run\s*workflow)$/i;
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const regions = readinessRegionsAll(container);
+    expect(regions.length).toBeGreaterThan(0);
+    const offenders: string[] = [];
+    for (const region of regions) {
+      for (const button of Array.from(region.querySelectorAll('button'))) {
+        const label = (button.textContent ?? '').trim();
+        if (forbiddenLabel.test(label)) {
+          offenders.push(label);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});

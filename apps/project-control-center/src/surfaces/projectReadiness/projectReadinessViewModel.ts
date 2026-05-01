@@ -76,6 +76,12 @@ export interface IPccReadinessDomainViewModel {
   readonly confidence: ProjectReadinessConfidenceState;
 }
 
+export type ProjectReadinessRiskTag =
+  | 'critical-blocker'
+  | 'open-blocker'
+  | 'at-risk-warning'
+  | 'monitor';
+
 export interface IPccReadinessBlockerItemViewModel {
   readonly id: string;
   readonly title: string;
@@ -91,6 +97,37 @@ export interface IPccReadinessBlockerItemViewModel {
   readonly dueDateUtc?: string;
   readonly sourceModuleId: ProjectReadinessSourceModuleId;
   readonly sourceModuleLabel: string;
+  readonly riskTag: ProjectReadinessRiskTag;
+}
+
+export interface IPccReadinessOwnershipEntryViewModel {
+  readonly ownerPersona: PccPersona;
+  readonly assignedItemIds: readonly string[];
+  readonly unassignedItemIds: readonly string[];
+  readonly openBlockerCount: number;
+  readonly nextDueDateUtc?: string;
+  readonly escalationPersonas: readonly PccPersona[];
+}
+
+export interface IPccReadinessOwnershipAccountabilityViewModel {
+  readonly entries: readonly IPccReadinessOwnershipEntryViewModel[];
+  readonly totalUnassignedCount: number;
+  readonly summaryCaption: string;
+}
+
+export interface IPccReadinessPriorityActionEligibilityItem {
+  readonly itemId: string;
+  readonly itemTitle: string;
+  readonly relatedPriorityActionId: string;
+  readonly domain: ProjectReadinessDomainId;
+  readonly domainLabel: string;
+  readonly eligibilityCaption: string;
+}
+
+export interface IPccReadinessPriorityActionsPreviewViewModel {
+  readonly items: readonly IPccReadinessPriorityActionEligibilityItem[];
+  readonly previewCaption: string;
+  readonly inertActionLabel: string;
 }
 
 export interface IPccReadinessEvidenceStateBucket {
@@ -136,6 +173,8 @@ export type IPccProjectReadinessViewModel =
       readonly lifecycleGates: readonly IPccReadinessGateViewModel[];
       readonly domains: readonly IPccReadinessDomainViewModel[];
       readonly blockers: readonly IPccReadinessBlockerItemViewModel[];
+      readonly ownershipAccountability: IPccReadinessOwnershipAccountabilityViewModel;
+      readonly priorityActionsPreview: IPccReadinessPriorityActionsPreviewViewModel;
       readonly evidence: IPccReadinessEvidenceViewModel;
       readonly downstreamModules: readonly IPccReadinessDownstreamModuleViewModel[];
     }

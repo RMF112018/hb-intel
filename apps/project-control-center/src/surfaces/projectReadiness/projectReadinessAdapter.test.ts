@@ -147,4 +147,101 @@ describe('buildPccProjectReadinessViewModel — degraded envelopes', () => {
     expect(wave9?.waveStatus).toBe('preview-deferred');
     expect(wave11?.waveStatus).toBe('preview-deferred');
   });
+
+  it('returns safe-empty ownership and priority-actions-preview slots under degraded source', () => {
+    const vm = buildPccProjectReadinessViewModel(envelope('source-unavailable'));
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    expect(vm.ownershipAccountability.entries).toHaveLength(0);
+    expect(vm.ownershipAccountability.totalUnassignedCount).toBe(0);
+    expect(vm.ownershipAccountability.summaryCaption.length).toBeGreaterThan(0);
+    expect(vm.priorityActionsPreview.items).toHaveLength(0);
+    expect(vm.priorityActionsPreview.inertActionLabel).toContain('Preview only');
+  });
+});
+
+describe('buildPccProjectReadinessViewModel — ownership and accountability', () => {
+  const vm = buildPccProjectReadinessViewModel(envelope('available'));
+
+  it('groups items by ownerPersona', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const personas = vm.ownershipAccountability.entries.map((e) => e.ownerPersona).sort();
+    expect(personas).toEqual(
+      ['project-coordinator', 'project-executive', 'project-manager', 'safety-qaqc', 'superintendent'].sort(),
+    );
+  });
+
+  it('reports total unassigned count of 4 (items 002, 004, 005, 006)', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    expect(vm.ownershipAccountability.totalUnassignedCount).toBe(4);
+  });
+
+  it('flags safety-qaqc owner with item 004 as unassigned', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const safety = vm.ownershipAccountability.entries.find(
+      (e) => e.ownerPersona === 'safety-qaqc',
+    );
+    expect(safety).toBeDefined();
+    expect(safety!.unassignedItemIds).toContain('fixture-pcc-readiness-004');
+  });
+
+  it('flags project-manager item 006 as unassigned alongside assigned items 001 and 003', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const pm = vm.ownershipAccountability.entries.find((e) => e.ownerPersona === 'project-manager');
+    expect(pm).toBeDefined();
+    expect([...pm!.assignedItemIds].sort()).toEqual(
+      ['fixture-pcc-readiness-001', 'fixture-pcc-readiness-003', 'fixture-pcc-readiness-006'].sort(),
+    );
+    expect(pm!.unassignedItemIds).toContain('fixture-pcc-readiness-006');
+  });
+
+  it('surfaces escalation personas from item 003 escalationPath on the project-manager entry', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const pm = vm.ownershipAccountability.entries.find((e) => e.ownerPersona === 'project-manager');
+    expect(pm).toBeDefined();
+    expect(pm!.escalationPersonas).toContain('project-executive');
+    expect(pm!.escalationPersonas).toContain('manager-of-operational-excellence');
+  });
+});
+
+describe('buildPccProjectReadinessViewModel — priority-actions preview', () => {
+  const vm = buildPccProjectReadinessViewModel(envelope('available'));
+
+  it('lists exactly the readiness items carrying relatedPriorityActionId', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    expect(vm.priorityActionsPreview.items).toHaveLength(1);
+    const entry = vm.priorityActionsPreview.items[0];
+    expect(entry.itemId).toBe('fixture-pcc-readiness-003');
+    expect(entry.relatedPriorityActionId).toBe('priority-action-permit-001');
+  });
+
+  it('exposes an inert action label and an explanatory preview caption', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    expect(vm.priorityActionsPreview.inertActionLabel).toContain('Preview only');
+    expect(vm.priorityActionsPreview.previewCaption.length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildPccProjectReadinessViewModel — risk tags', () => {
+  const vm = buildPccProjectReadinessViewModel(envelope('available'));
+
+  function blockerRiskTagFor(id: string): string | undefined {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    return vm.blockers.find((b) => b.id === id)?.riskTag;
+  }
+
+  it('tags item 003 (escalated) as open-blocker', () => {
+    expect(blockerRiskTagFor('fixture-pcc-readiness-003')).toBe('open-blocker');
+  });
+
+  it('tags item 002 (open) as open-blocker', () => {
+    expect(blockerRiskTagFor('fixture-pcc-readiness-002')).toBe('open-blocker');
+  });
+
+  it('tags item 001 (at-risk posture, blockerState none) as at-risk-warning', () => {
+    expect(blockerRiskTagFor('fixture-pcc-readiness-001')).toBe('at-risk-warning');
+  });
+
+  it('tags item 004 (at-risk posture, blockerState mitigated) as at-risk-warning', () => {
+    expect(blockerRiskTagFor('fixture-pcc-readiness-004')).toBe('at-risk-warning');
+  });
 });

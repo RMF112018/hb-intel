@@ -257,3 +257,137 @@
   font-size: 11px;
   color: var(--pcc-color-text-muted);
 }
+
+.ownershipList {
+  display: grid;
+  gap: 10px;
+}
+
+.ownershipSummary {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  margin: 0;
+}
+
+.ownershipListInner {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ownershipItem {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-sm);
+  background: var(--pcc-color-canvas);
+}
+
+.ownershipItem[data-pcc-readiness-ownership-unassigned='true'] {
+  border-color: var(--pcc-status-warning);
+}
+
+.ownershipPersona {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.ownershipMeta {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.ownershipUnassigned {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pcc-status-warning);
+}
+
+.ownershipEscalationRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.priorityActionsList {
+  display: grid;
+  gap: 10px;
+}
+
+.priorityActionsCaption {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  margin: 0;
+}
+
+.priorityActionsListInner {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.priorityActionItem {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-sm);
+  background: var(--pcc-color-canvas);
+}
+
+.priorityActionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.priorityActionMeta {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.priorityActionsFooter {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+  margin: 0;
+}
+
+.riskTag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.riskTagCritical {
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-status-danger);
+  border: 1px solid var(--pcc-status-danger);
+}
+
+.riskTagOpen {
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-status-danger);
+  border: 1px solid var(--pcc-status-danger);
+}
+
+.riskTagWarning {
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-status-warning);
+  border: 1px solid var(--pcc-status-warning);
+}
+
+.riskTagMonitor {
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-color-text-muted);
+  border: 1px solid var(--pcc-color-border);
+}
