@@ -16,7 +16,7 @@ It is not merely a landing page. It should support a useful project operating ex
 | Priority Actions Rail        | Access requests, readiness blockers, approval/checkpoint prompts, external-system mapping prompts.                                                                                                                                                                                                                                                                                        |
 | Work Center Navigation       | Project Home, Team & Access, Documents / Document Control, Project Readiness, Approvals / Checkpoints, External Systems, Control Center Settings, Site Health.                                                                                                                                                                                                                            |
 | Light workflows              | Access request, readiness blocker resolution, approval/checkpoint response, external-system mapping issue resolution.                                                                                                                                                                                                                                                                     |
-| Structured workflow target   | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                                                                                    |
+| Structured workflow target   | Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                                                                        |
 | Document Control Center      | Two-lane architecture: Microsoft Files Lane (SharePoint Drive / SharePoint document libraries + OneDrive) is a future Microsoft Graph-backed file-management surface; External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, future systems) is access/deep-link/visibility. Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
 | External Systems             | Launch links only for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                                                                                                                                        |
 | Team & Access                | Request + approval + automated execution later.                                                                                                                                                                                                                                                                                                                                           |
@@ -24,6 +24,11 @@ It is not merely a landing page. It should support a useful project operating ex
 | Settings                     | PM/PX edit approved business-facing settings; IT/Admin controls technical/provisioning settings.                                                                                                                                                                                                                                                                                          |
 | Executive Oversight          | Executive summary with governed drill-in and Document Control Center access.                                                                                                                                                                                                                                                                                                              |
 | Estimating / Preconstruction | Turnover visibility and access in MVP; structured estimating workflows later.                                                                                                                                                                                                                                                                                                             |
+
+Wave 9 source grounding: Project Lifecycle Readiness Center is seeded by startup, safety, and closeout checklist-definition files in `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
+Safety checklist-family inclusion is readiness/workflow posture only; no Safety runtime integration, live inspection execution, incident-management runtime, OSHA engine claims, or safety-system mutation.
+Wave 9 may define evidence requirements and evidence-link fields, but evidence storage ownership remains HB Document Control Center / SharePoint project record; Wave 9 does not upload/sync/store binaries or manage document libraries directly.
+Wave 9 surfaces lifecycle-readiness posture and does not assume implementation ownership of Waves 10–14 modules.
 
 ## Later-Phase Scope
 
@@ -78,7 +83,7 @@ The MVP is successful when a primary user can:
 | Team & Access                 |    6 |
 | Document Control Center       |    7 |
 | Project Readiness Framework   |    8 |
-| Job Startup Checklist         |    9 |
+| Project Lifecycle Readiness Center |    9 |
 | Permit Log                    |   10 |
 | Responsibility Matrix         |   11 |
 | Constraints Log               |   12 |

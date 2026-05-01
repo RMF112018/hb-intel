@@ -20,7 +20,7 @@ This is a planning deliverable only. It does not authorize SPFx implementation, 
 | D-006 | Light operational workflows            | Request access change, resolve readiness blocker, submit approval/checkpoint response, resolve external-system mapping issue.                                                                                                                                                                                              |
 | D-007 | Work Center Navigation                 | Keep eight primary work centers: Project Home, Team & Access, Documents / Document Control, Project Readiness, Approvals / Checkpoints, External Systems, Control Center Settings, Site Health.                                                                                                                            |
 | D-008 | Functional module treatment            | Target structured in-app workflows over time, not template launch only. Template launch/reference is an interim fallback only.                                                                                                                                                                                             |
-| D-009 | MVP structured workflow modules        | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                                     |
+| D-009 | MVP structured workflow modules        | Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                                         |
 | D-010 | Later-phase workflow modules           | Estimating Kickoff, Post-Bid Autopsy, Job Closeout Checklist.                                                                                                                                                                                                                                                              |
 | D-011 | Responsibility Matrix scope            | Merge Owner Contract Responsibility Matrix into the single Responsibility Matrix module.                                                                                                                                                                                                                                   |
 | D-012 | HB Document Control Center             | Three-lane HB Document Control Center: Project Record (formal SharePoint record), My Project Files (project-scoped OneDrive working files), and External Systems (Procore/Document Crunch/Adobe Sign launch/deep-link/visibility). Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
@@ -130,7 +130,7 @@ The MVP keeps eight primary work centers.
 | Project Home                 | Daily command surface.                            | Identity, current status, health, Priority Actions, readiness rollup.                                                                                                                                               |
 | Team & Access                | Governed project access workflow.                 | Access requests, approval tracking, later backend execution.                                                                                                                                                        |
 | Documents / Document Control | Three-lane architecture.                          | Project Record (formal SharePoint project record), My Project Files (project-scoped OneDrive working files with hard guardrail), External Systems (Procore/Document Crunch/Adobe Sign launch/deep-link/visibility). |
-| Project Readiness            | Functional project controls and workflow modules. | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, later estimating/closeout modules.                                                                                           |
+| Project Readiness            | Functional project controls and workflow modules. | Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, later estimating/closeout modules.                                                                                 |
 | Approvals / Checkpoints      | Governed decisions and approval prompts.          | Setup approvals, readiness approvals, access approvals, checkpoint responses.                                                                                                                                       |
 | External Systems             | Launch hub.                                       | SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                                                                                                        |
 | Control Center Settings      | Business and technical configuration.             | PM/PX business-facing settings; IT/Admin technical settings.                                                                                                                                                        |
@@ -140,7 +140,7 @@ The MVP keeps eight primary work centers.
 
 | Module                | Scope                                                                                        |
 | --------------------- | -------------------------------------------------------------------------------------------- |
-| Job Startup Checklist | Item-level startup workflow with owners, due dates, status, comments, history, review state. |
+| Project Lifecycle Readiness Center | Lifecycle-readiness workflow seeded by startup, safety, and closeout checklist-definition files (`docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`), including owners, due dates, status, comments, history, review state, blockers, and evidence-link requirements. |
 | Permit Log            | Item-level permit tracking workflow.                                                         |
 | Responsibility Matrix | Item-level responsibility workflow including owner-contract responsibility mapping.          |
 | Constraints Log       | Item-level constraints workflow.                                                             |
@@ -340,7 +340,7 @@ The product architecture is implemented through the formal Phase 3 module implem
 | Team & Access                          |              Wave 6 |
 | HB Document Control Center             |              Wave 7 |
 | Project Readiness Module Framework     |              Wave 8 |
-| Job Startup Checklist                  |              Wave 9 |
+| Project Lifecycle Readiness Center     |              Wave 9 |
 | Permit Log                             |             Wave 10 |
 | Responsibility Matrix                  |             Wave 11 |
 | Constraints Log                        |             Wave 12 |
@@ -358,7 +358,10 @@ The product architecture is implemented through the formal Phase 3 module implem
 - Technical wave/framework name: **Project Readiness Module Framework**.
 - User-facing module/surface name: **Project Readiness Center**.
 - Wave 8 defines framework taxonomy, readiness posture rules, and module-integration seams.
-- Wave 9 (Job Startup Checklist) remains a downstream module and is not the Wave 8 framework.
+- Wave 9 (Project Lifecycle Readiness Center) remains a downstream module and is not the Wave 8 framework.
+- Wave 9 surfaces lifecycle-readiness posture/signals across startup, safety, and closeout source families, but implementation ownership for Permit Log, Responsibility Matrix, Constraints Log, Buyout Log, and Approvals / Checkpoints remains in Waves 10–14.
+- Safety-family inclusion is readiness/workflow posture only; this document does not imply Safety runtime integration, incident-management runtime, OSHA engine behavior, live inspection execution, or safety-system mutation.
+- Wave 9 may define evidence requirements and evidence-link fields, but evidence storage/ownership remains HB Document Control Center and SharePoint project record; Wave 9 does not upload/sync/store binaries or manage document libraries directly.
 - Waves 10–14 remain downstream modules that plug into Wave 8 framework seams.
 - This document does not authorize readiness runtime workflow execution, backend routes, persistence, approval execution, or external-system mutation in Wave 8.
 

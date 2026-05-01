@@ -28,17 +28,21 @@ Wave 8 defines shared module framework contracts and shell-level readiness compo
   - a static readiness dashboard;
   - a generic checklist page;
   - a duplicate of Priority Actions, Approvals, Site Health, Team & Access, or Document Control;
-  - the Wave 9 Job Startup Checklist module.
+  - the Wave 9 Project Lifecycle Readiness Center module.
 
 ## Wave Relationship (8 ↔ 9–14)
 
 - Wave 8 provides the shared framework boundary and shell definition.
-- Wave 9 implements Job Startup Checklist on the Wave 8 framework.
+- Wave 9 implements Project Lifecycle Readiness Center on the Wave 8 framework as the first lifecycle-readiness module.
+- Wave 9 is seeded by startup, safety, and closeout checklist-definition files at `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
 - Wave 10 implements Permit Log on the Wave 8 framework.
 - Wave 11 implements Responsibility Matrix / RACI on the Wave 8 framework.
 - Wave 12 implements Constraints Log on the Wave 8 framework.
 - Wave 13 implements Buyout Log on the Wave 8 framework.
 - Wave 14 implements Approvals / Checkpoints on the Wave 8 framework.
+- Wave 9 may surface lifecycle-readiness signals, blockers, evidence requirements, and cross-module posture, but does not absorb Waves 10–14 module implementation ownership.
+- Safety-family inclusion in Wave 9 is readiness/workflow posture only; no Safety runtime integration, incident-management runtime, OSHA engine behavior, live inspection execution, or safety-system mutation is implied.
+- Wave 9 evidence posture is requirement/link-level only; evidence storage/ownership remains HB Document Control Center + SharePoint project record (no Wave 9 binary upload/sync/storage/library-management ownership).
 
 ## Readiness Domains (MVP/Future-Aware Taxonomy)
 
@@ -307,6 +311,7 @@ This Prompt 02 documentation update passes when:
 - Wave 8 is consistently defined as the shared Project Readiness Module Framework.
 - Project Readiness Center is the documented user-facing name.
 - Wave 9 remains a downstream checklist module, not the Wave 8 framework.
+- Wave 9 remains a downstream lifecycle-readiness module, not the Wave 8 framework.
 - Waves 10–14 are clearly downstream modules that plug into Wave 8.
 - Priority Actions, Approvals, Site Health, Team & Access, and Document Control relationships are clear and non-duplicative.
 - Guardrails are explicit.
@@ -316,7 +321,7 @@ This Prompt 02 documentation update passes when:
 ## Recommended Implementation Sequence
 
 1. Wave 8 framework contracts and normalization seams.
-2. Wave 9 Job Startup Checklist module.
+2. Wave 9 Project Lifecycle Readiness Center module.
 3. Wave 10 Permit Log module.
 4. Wave 11 Responsibility Matrix / RACI module.
 5. Wave 12 Constraints module.

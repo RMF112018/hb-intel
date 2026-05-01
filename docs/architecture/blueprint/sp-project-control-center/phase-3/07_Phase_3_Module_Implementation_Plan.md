@@ -62,7 +62,7 @@ Then implement each module as its own wave. This prevents every module from inve
 |    6 | Team & Access                                                       | Build request + approval workflow; no automated permission execution.                                                                                          | Waves 2–3                   |
 |    7 | HB Document Control Center                                          | Build three-lane model: Project Record + My Project Files + External Systems, with source binding, review routing, audit, and project-only OneDrive guardrail. | Waves 2–3                   |
 |    8 | Project Readiness Module Framework                                  | Build shared framework for structured readiness modules.                                                                                                       | Waves 2–3                   |
-|    9 | Job Startup Checklist                                               | Build item-level startup workflow module.                                                                                                                      | Wave 8                      |
+|    9 | Project Lifecycle Readiness Center                                 | Build lifecycle readiness module seeded by startup, safety, and closeout checklist definition files.                                                          | Wave 8                      |
 |   10 | Permit Log                                                          | Build item-level permit workflow module.                                                                                                                       | Wave 8                      |
 |   11 | Responsibility Matrix                                               | Build item-level responsibility workflow, including owner-contract mapping.                                                                                    | Prior readiness waves       |
 |   12 | Constraints Log                                                     | Build item-level constraints workflow module.                                                                                                                  | Wave 8                      |
@@ -492,27 +492,31 @@ Technical/user-facing naming lock:
 
 ---
 
-# Wave 9 — Job Startup Checklist
+# Wave 9 — Project Lifecycle Readiness Center
 
 ## Objective
 
-Build the Job Startup Checklist as the first Project Readiness workflow module.
+Build the Project Lifecycle Readiness Center as the first lifecycle-readiness module on the Project Readiness framework, seeded by startup, safety, and closeout checklist definition files in `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
 
 ## Code Work
 
-- Startup checklist module registration.
-- Item seed/template mapping.
+- Lifecycle readiness module registration.
+- Source-library mapping for startup, safety, and closeout checklist families.
 - Owner/status/due date handling.
 - Review states.
-- Completion summary.
+- Readiness posture summary (including lifecycle gate posture and blockers).
 - Blocker surfacing to Priority Actions Rail.
+- Read-model/planning posture for readiness blockers and gate prompts routed to Approvals / Checkpoints.
+- Evidence requirement and evidence-link fields (storage remains HB Document Control Center / SharePoint project record).
 - Business audit history.
 
 ## Exit Criteria
 
-- Checklist supports item-level tracking.
+- Lifecycle readiness module supports item-level tracking across startup, safety, and closeout source libraries.
 - Readiness blockers can flow to Priority Actions.
 - PM/PX can review status.
+- Wave 9 remains distinct from Wave 10 Permit Log, Wave 11 Responsibility Matrix, Wave 12 Constraints Log, Wave 13 Buyout Log, and Wave 14 Approvals / Checkpoints implementation ownership.
+- Safety coverage remains readiness/workflow posture only (no Safety runtime integration, live inspection execution, incident-management runtime, OSHA engine, or external safety-system mutation).
 
 ---
 
@@ -879,7 +883,7 @@ Close Phase 3 MVP implementation with formal validation, documentation, and read
 ## Milestone 4 — Structured Project Readiness
 
 - Wave 8 — Project Readiness Module Framework
-- Wave 9 — Job Startup Checklist
+- Wave 9 — Project Lifecycle Readiness Center
 - Wave 10 — Permit Log
 - Wave 11 — Responsibility Matrix
 - Wave 12 — Constraints Log

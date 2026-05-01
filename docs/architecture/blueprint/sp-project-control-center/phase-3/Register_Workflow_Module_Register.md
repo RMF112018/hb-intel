@@ -10,7 +10,7 @@ Define the structured workflow modules that PCC planning must account for, inclu
 
 | Module | MVP Priority | Work Center | Target Product State | Interim Fallback |
 |---|---:|---|---|---|
-| Job Startup Checklist | Yes | Project Readiness | Structured item-level in-app workflow | Template/reference launch if implementation not ready |
+| Project Lifecycle Readiness Center | Yes | Project Readiness | Structured lifecycle-readiness in-app workflow seeded by startup, safety, and closeout checklist definition files | Template/reference launch if implementation not ready |
 | Permit Log | Yes | Project Readiness | Structured item-level in-app workflow | Template/reference launch if implementation not ready |
 | Responsibility Matrix | Yes | Project Readiness | Structured item-level in-app workflow including owner-contract responsibility mapping | Template/reference launch if implementation not ready |
 | Constraints Log | Yes | Project Readiness | Structured item-level in-app workflow | Template/reference launch if implementation not ready |
@@ -18,6 +18,8 @@ Define the structured workflow modules that PCC planning must account for, inclu
 | Estimating Kickoff | Later | Project Readiness / Preconstruction classification | Structured workflow later | Turnover visibility/access in MVP |
 | Post-Bid Autopsy | Later | Project Readiness / Preconstruction classification | Structured workflow later | Turnover visibility/access in MVP |
 | Job Closeout Checklist | Later | Project Readiness / Closeout classification | Structured workflow later | Template/reference launch if implementation not ready |
+
+Wave 9 grounding source path: `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
 
 ## Item-Level Workflow Model
 
@@ -72,7 +74,7 @@ All workflow modules live under **Project Readiness** in MVP, with functional cl
 
 | Classification | Modules |
 |---|---|
-| Startup | Job Startup Checklist, Permit Log, Responsibility Matrix, Constraints Log |
+| Startup | Project Lifecycle Readiness Center, Permit Log, Responsibility Matrix, Constraints Log |
 | Procurement / Project Controls | Buyout Log |
 | Preconstruction / Estimating | Estimating Kickoff, Post-Bid Autopsy |
 | Closeout | Job Closeout Checklist |
@@ -84,7 +86,7 @@ All workflow modules live under **Project Readiness** in MVP, with functional cl
 | Module | Wave | Depends On |
 |---|---:|---|
 | Project Readiness Module Framework | 8 | Waves 1–3 |
-| Job Startup Checklist | 9 | Wave 8 |
+| Project Lifecycle Readiness Center | 9 | Wave 8 |
 | Permit Log | 10 | Wave 8 |
 | Responsibility Matrix | 11 | Prior readiness waves |
 | Constraints Log | 12 | Wave 8 |
