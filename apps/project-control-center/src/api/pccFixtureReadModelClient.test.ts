@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   LIFECYCLE_READINESS_LIBRARY_METADATA,
   LIFECYCLE_READINESS_STATUSES,
+  PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
@@ -29,8 +30,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getTeamAccess(KNOWN_PROJECT_ID),
       client.getProjectReadiness(KNOWN_PROJECT_ID),
       client.getLifecycleReadiness(KNOWN_PROJECT_ID),
+      client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(10);
+    expect(envelopes).toHaveLength(11);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -118,6 +120,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getTeamAccess(KNOWN_PROJECT_ID),
       client.getProjectReadiness(KNOWN_PROJECT_ID),
       client.getLifecycleReadiness(KNOWN_PROJECT_ID),
+      client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -154,6 +157,47 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
     // Canonical 157 / 55 / 32 / 70 library metadata preserved in degraded mode.
     expect(lifecycle.data.templateLibraryMetadata).toBe(LIFECYCLE_READINESS_LIBRARY_METADATA);
     expect(lifecycle.data.templateLibraryMetadata.total).toBe(157);
+  });
+});
+
+describe('createPccFixtureReadModelClient — permit-inspection-control-center', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns the deterministic Wave 10 fixture with mode="fixture", readOnly=true, sourceStatus="available"', async () => {
+    const env = await client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data).toBe(PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE);
+  });
+
+  it('unknown project returns empty Wave 10 read model with sourceStatus="source-unavailable"', async () => {
+    const env = await client.getPermitInspectionControlCenter(UNKNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+    expect(env.data.permits).toEqual([]);
+    expect(env.data.inspections).toEqual([]);
+    expect(env.data.ahjProfiles).toEqual([]);
+    expect(env.data.summary.permitCount).toBe(0);
+    expect(env.data.summary.ahjLauncherCount).toBe(0);
+  });
+
+  it('simulateBackendUnavailable returns the same empty Wave 10 read model with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getPermitInspectionControlCenter(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.permits).toEqual([]);
+    expect(env.data.inspections).toEqual([]);
+    expect(env.data.summary.inspectionCount).toBe(0);
   });
 });
 
@@ -217,9 +261,7 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     expect(mpf).toBeDefined();
     expect(mpf!.binding.kind).toBe('my-project-files');
     if (mpf!.binding.kind === 'my-project-files') {
-      expect(mpf!.binding.projectFolderPath).toBe(
-        '/My Project Files/26-000-00-Stadium Enclave',
-      );
+      expect(mpf!.binding.projectFolderPath).toBe('/My Project Files/26-000-00-Stadium Enclave');
     }
   });
 

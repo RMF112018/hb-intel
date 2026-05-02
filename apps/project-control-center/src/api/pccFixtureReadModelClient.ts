@@ -22,6 +22,7 @@ import {
   LIFECYCLE_READINESS_LIBRARY_METADATA,
   LIFECYCLE_READINESS_STATUSES,
   PCC_MVP_SURFACES,
+  PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
@@ -38,6 +39,7 @@ import type {
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
+  PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -108,16 +110,47 @@ const WAVE7_HARD_NO_RULES = [
   {
     id: 'HN-03',
     title: 'No external writeback or sync in Wave 7',
-    description: 'External systems remain launch/deep-link visibility only with no mirror/sync/writeback.',
+    description:
+      'External systems remain launch/deep-link visibility only with no mirror/sync/writeback.',
   },
 ] as const;
 const WAVE7_ACTION_CATALOG = [
-  { code: 'PR01', family: 'PR', label: 'Browse Project Record', description: 'Browse project record libraries.' },
-  { code: 'MP01', family: 'MP', label: 'Browse My Project Files Folder', description: 'Browse current user project folder only.' },
-  { code: 'SB01', family: 'SB', label: 'View Source Binding', description: 'View source binding metadata and status.' },
-  { code: 'EX01', family: 'EX', label: 'Open External Source', description: 'Launch configured external source deep link.' },
-  { code: 'EX04', family: 'EX', label: 'External Writeback/Sync/Mirror', description: 'Forbidden in Wave 7 fixture availability.' },
-  { code: 'WF01', family: 'WF', label: 'Set Review State', description: 'Set document review state per workflow posture.' },
+  {
+    code: 'PR01',
+    family: 'PR',
+    label: 'Browse Project Record',
+    description: 'Browse project record libraries.',
+  },
+  {
+    code: 'MP01',
+    family: 'MP',
+    label: 'Browse My Project Files Folder',
+    description: 'Browse current user project folder only.',
+  },
+  {
+    code: 'SB01',
+    family: 'SB',
+    label: 'View Source Binding',
+    description: 'View source binding metadata and status.',
+  },
+  {
+    code: 'EX01',
+    family: 'EX',
+    label: 'Open External Source',
+    description: 'Launch configured external source deep link.',
+  },
+  {
+    code: 'EX04',
+    family: 'EX',
+    label: 'External Writeback/Sync/Mirror',
+    description: 'Forbidden in Wave 7 fixture availability.',
+  },
+  {
+    code: 'WF01',
+    family: 'WF',
+    label: 'Set Review State',
+    description: 'Set document review state per workflow posture.',
+  },
 ] as const;
 
 const WAVE7_SOURCE_WARNING = Object.freeze({
@@ -293,9 +326,7 @@ function placeholderProfile(projectId: PccProjectId): IProjectProfile {
   };
 }
 
-function freezeWarnings(
-  warnings: readonly PccReadModelWarning[],
-): readonly PccReadModelWarning[] {
+function freezeWarnings(warnings: readonly PccReadModelWarning[]): readonly PccReadModelWarning[] {
   return Object.freeze(warnings.map((w) => Object.freeze({ ...w })));
 }
 
@@ -340,6 +371,36 @@ const EMPTY_LIFECYCLE_READINESS_READ_MODEL: PccLifecycleReadinessReadModel = {
   evidenceSummary: [],
   blockerSummary: [],
 };
+
+// Mirrors the backend mock provider's degraded permit-inspection payload
+// (`pcc-mock-read-model-provider.ts` →
+// `EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL`). Used for both
+// `backend-unavailable` and `source-unavailable` envelopes.
+const EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL: PccPermitInspectionControlCenterReadModel =
+  {
+    summary: {
+      permitCount: 0,
+      expiringCount: 0,
+      expiredCount: 0,
+      pendingRevisionCount: 0,
+      inspectionCount: 0,
+      failedInspectionCount: 0,
+      openReinspectionCount: 0,
+      openFeeExposureCount: 0,
+      evidenceMissingCount: 0,
+      ahjLauncherCount: 0,
+    },
+    permits: [],
+    inspections: [],
+    reinspectionLineages: [],
+    ahjProfiles: [],
+    feeExposure: [],
+    priorityActionSignals: [],
+    readinessSignals: [],
+    approvalSignals: [],
+    permitTransitions: [],
+    inspectionTransitions: [],
+  };
 
 class PccFixtureReadModelClient implements IPccReadModelClient {
   private readonly simulateBackendUnavailable: boolean;
@@ -454,13 +515,9 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccPriorityActionsReadModel>> {
     if (this.simulateBackendUnavailable) {
-      return this.envelope(
-        projectId,
-        viewerPersona,
-        'backend-unavailable',
-        { actions: [] },
-        [BACKEND_UNAVAILABLE_WARNING],
-      );
+      return this.envelope(projectId, viewerPersona, 'backend-unavailable', { actions: [] }, [
+        BACKEND_UNAVAILABLE_WARNING,
+      ]);
     }
     const known = this.knownProjects.has(projectId);
     return this.envelope(
@@ -627,20 +684,47 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
     );
   }
 
+  async getPermitInspectionControlCenter(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+      [],
+    );
+  }
+
   private statusForKnownProject(projectId: PccProjectId): PccReadModelSourceStatus {
     return this.knownProjects.has(projectId) ? 'available' : 'source-unavailable';
   }
 
-  private warningsForKnownProject(
-    projectId: PccProjectId,
-  ): readonly PccReadModelWarning[] {
+  private warningsForKnownProject(projectId: PccProjectId): readonly PccReadModelWarning[] {
     if (this.knownProjects.has(projectId)) return [];
     return this.unknownProjectWarnings(projectId);
   }
 
-  private unknownProjectWarnings(
-    projectId: PccProjectId,
-  ): readonly PccReadModelWarning[] {
+  private unknownProjectWarnings(projectId: PccProjectId): readonly PccReadModelWarning[] {
     return [
       {
         code: 'source-unavailable',

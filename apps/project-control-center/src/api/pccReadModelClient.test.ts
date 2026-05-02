@@ -3,6 +3,7 @@ import type {
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
+  PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -27,7 +28,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the ten backend route ids', () => {
+  it('enumerates exactly the eleven backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -39,6 +40,7 @@ describe('IPccReadModelClient route metadata', () => {
       'team-access',
       'project-readiness',
       'lifecycle-readiness',
+      'permit-inspection-control-center',
     ]);
   });
 
@@ -92,6 +94,9 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getLifecycleReadiness']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getPermitInspectionControlCenter']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>>
+    >();
   });
 
   it('accepts optional viewerPersona on every method', () => {
@@ -105,7 +110,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the ten id literals', () => {
+  it('is the union of the eleven id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -117,6 +122,7 @@ describe('PccReadModelRouteId', () => {
       'team-access',
       'project-readiness',
       'lifecycle-readiness',
+      'permit-inspection-control-center',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

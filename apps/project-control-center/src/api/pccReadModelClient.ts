@@ -17,6 +17,7 @@ import type {
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
+  PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -42,6 +43,7 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'team-access',
   'project-readiness',
   'lifecycle-readiness',
+  'permit-inspection-control-center',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -64,6 +66,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'team-access': 'pcc/projects/{projectId}/team-access',
   'project-readiness': 'pcc/projects/{projectId}/project-readiness',
   'lifecycle-readiness': 'pcc/projects/{projectId}/lifecycle-readiness',
+  'permit-inspection-control-center': 'pcc/projects/{projectId}/permit-inspection-control-center',
 };
 
 /**
@@ -125,4 +128,9 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>;
+
+  getPermitInspectionControlCenter(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>>;
 }

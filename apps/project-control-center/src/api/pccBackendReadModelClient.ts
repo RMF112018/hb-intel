@@ -47,9 +47,7 @@ function resolveFetch(injected?: PccReadModelFetch): PccReadModelFetch | undefin
   return undefined;
 }
 
-function isWrappedEnvelope<T>(
-  body: unknown,
-): body is { data: PccReadModelEnvelope<T> } {
+function isWrappedEnvelope<T>(body: unknown): body is { data: PccReadModelEnvelope<T> } {
   if (typeof body !== 'object' || body === null) return false;
   const data = (body as { data?: unknown }).data;
   if (typeof data !== 'object' || data === null) return false;
@@ -106,17 +104,11 @@ export function createPccBackendReadModelClient(
 
   return {
     getProjectProfile: (projectId, viewerPersona) =>
-      callBackend('profile', projectId, () =>
-        fallback.getProjectProfile(projectId, viewerPersona),
-      ),
+      callBackend('profile', projectId, () => fallback.getProjectProfile(projectId, viewerPersona)),
     getModuleRegistry: (projectId, viewerPersona) =>
-      callBackend('modules', projectId, () =>
-        fallback.getModuleRegistry(projectId, viewerPersona),
-      ),
+      callBackend('modules', projectId, () => fallback.getModuleRegistry(projectId, viewerPersona)),
     getProjectHome: (projectId, viewerPersona) =>
-      callBackend('home', projectId, () =>
-        fallback.getProjectHome(projectId, viewerPersona),
-      ),
+      callBackend('home', projectId, () => fallback.getProjectHome(projectId, viewerPersona)),
     getPriorityActions: (projectId, viewerPersona) =>
       callBackend('priority-actions', projectId, () =>
         fallback.getPriorityActions(projectId, viewerPersona),
@@ -130,13 +122,9 @@ export function createPccBackendReadModelClient(
         fallback.getExternalLinks(projectId, viewerPersona),
       ),
     getSiteHealth: (projectId, viewerPersona) =>
-      callBackend('site-health', projectId, () =>
-        fallback.getSiteHealth(projectId, viewerPersona),
-      ),
+      callBackend('site-health', projectId, () => fallback.getSiteHealth(projectId, viewerPersona)),
     getTeamAccess: (projectId, viewerPersona) =>
-      callBackend('team-access', projectId, () =>
-        fallback.getTeamAccess(projectId, viewerPersona),
-      ),
+      callBackend('team-access', projectId, () => fallback.getTeamAccess(projectId, viewerPersona)),
     getProjectReadiness: (projectId, viewerPersona) =>
       callBackend('project-readiness', projectId, () =>
         fallback.getProjectReadiness(projectId, viewerPersona),
@@ -144,6 +132,10 @@ export function createPccBackendReadModelClient(
     getLifecycleReadiness: (projectId, viewerPersona) =>
       callBackend('lifecycle-readiness', projectId, () =>
         fallback.getLifecycleReadiness(projectId, viewerPersona),
+      ),
+    getPermitInspectionControlCenter: (projectId, viewerPersona) =>
+      callBackend('permit-inspection-control-center', projectId, () =>
+        fallback.getPermitInspectionControlCenter(projectId, viewerPersona),
       ),
   };
 }
