@@ -49,12 +49,13 @@ export const PCC_WORKFLOW_MODULES: Readonly<Record<WorkflowModuleId, IWorkflowMo
     mvpTier: 'MVP',
     description: 'Project startup checklist with readiness gates.',
   },
-  'permits': {
+  permits: {
     id: 'permits',
-    displayName: 'Permit Log',
+    displayName: 'Permit & Inspection Control Center',
     workCenterId: 'permit-and-ahj',
     mvpTier: 'MVP',
-    description: 'Project permits, AHJ contacts, and status tracking.',
+    description:
+      'Permit lifecycle, required inspections, AHJ launcher, and fee exposure for the project.',
   },
   'required-inspections': {
     id: 'required-inspections',

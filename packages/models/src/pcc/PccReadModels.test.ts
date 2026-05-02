@@ -21,11 +21,13 @@ import {
   type PccReadModelSourceStatus,
   type PccProjectReadinessFrameworkReadModel,
   type PccLifecycleReadinessReadModel,
+  type PccPermitInspectionControlCenterReadModel,
 } from './index.js';
 import {
   LIFECYCLE_READINESS_LIBRARY_FAMILY_COUNTS,
   LIFECYCLE_READINESS_LIBRARY_TOTAL,
 } from './LifecycleReadiness.js';
+import { PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE } from './fixtures/permitInspectionControlCenter.js';
 
 describe('PccReadModels exports and typing', () => {
   it('exports all required mode and source-status literals', () => {
@@ -288,6 +290,15 @@ describe('PccReadModels exports and typing', () => {
       },
     };
 
+    const permitInspectionControlCenterEnvelope: PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+      };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -300,6 +311,7 @@ describe('PccReadModels exports and typing', () => {
       settings: settingsEnvelope,
       'project-readiness': projectReadinessEnvelope,
       'lifecycle-readiness': lifecycleReadinessEnvelope,
+      'permit-inspection-control-center': permitInspectionControlCenterEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

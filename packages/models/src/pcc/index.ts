@@ -249,11 +249,7 @@ export {
 } from './RepairRequests.js';
 
 // Settings scopes
-export {
-  PCC_SETTINGS_SCOPES,
-  type PccSettingsScope,
-  type IPccSettingsRef,
-} from './PccSettings.js';
+export { PCC_SETTINGS_SCOPES, type PccSettingsScope, type IPccSettingsRef } from './PccSettings.js';
 
 // Role-capability matrix (read-model, not auth runtime)
 export {
@@ -341,6 +337,47 @@ export {
   type IProjectReadinessFrameworkSnapshot,
   type PccProjectReadinessFrameworkReadModel,
 } from './ProjectReadinessFramework.js';
+
+// Wave 10 Prompt 02 — Permit & Inspection Control Center contracts
+export {
+  PERMIT_STATUSES,
+  INSPECTION_STATUSES,
+  INSPECTION_RESULT_STATUSES,
+  FEE_STATUSES,
+  EVIDENCE_STATUSES,
+  JURISDICTION_TYPES,
+  SOURCE_CLASSIFICATIONS,
+  RELATED_RECORD_TYPES,
+  PERMIT_INSPECTION_SOURCE_FAMILIES,
+  PERMIT_INSPECTION_CHECKPOINT_KINDS,
+  PERMIT_INSPECTION_READINESS_POSTURES,
+  type PermitStatus,
+  type InspectionStatus,
+  type InspectionResultStatus,
+  type FeeStatus,
+  type EvidenceStatus,
+  type JurisdictionType,
+  type SourceClassification,
+  type RelatedRecordType,
+  type PermitInspectionSourceFamily,
+  type PermitInspectionCheckpointKind,
+  type PermitInspectionReadinessPosture,
+  type IPermitInspectionSourceLineage,
+  type IPermitInspectionEvidenceLink,
+  type IPermitInspectionAuditEvent,
+  type IPermitInspectionTransition,
+  type IAhjJurisdictionProfile,
+  type IPermitRecord,
+  type IInspectionRecord,
+  type IReinspectionLineage,
+  type IFeeExposureRecord,
+  type IPermitInspectionPriorityActionSignal,
+  type IPermitInspectionReadinessSignal,
+  type IPermitInspectionApprovalSignal,
+  type IPermitInspectionControlCenterSummary,
+  type IPermitInspectionControlCenterReadModel,
+  type PccPermitInspectionControlCenterReadModel,
+} from './PermitInspectionControlCenter.js';
 
 // Wave 9 Prompt 02 — Project Lifecycle Readiness Center contracts
 export {

@@ -22,16 +22,14 @@ import type {
   IProjectDocumentSourceHealth,
   IProjectDocumentSourceRegistryEntry,
 } from './DocumentControl.js';
-import type {
-  IExternalSystemLink,
-  IExternalSystemMissingConfig,
-} from './ExternalSystems.js';
+import type { IExternalSystemLink, IExternalSystemMissingConfig } from './ExternalSystems.js';
 import type { ISiteHealthSummary } from './SiteHealth.js';
 import type { ITeamAccessPreviewModel } from './TeamAccess.js';
 import type { PccPersona } from './PccUserRoles.js';
 import type { PccProjectId } from './types.js';
 import type { PccProjectReadinessFrameworkReadModel } from './ProjectReadinessFramework.js';
 import type { PccLifecycleReadinessReadModel } from './LifecycleReadiness.js';
+import type { PccPermitInspectionControlCenterReadModel } from './PermitInspectionControlCenter.js';
 
 export const PCC_READ_MODEL_MODES = ['fixture', 'mock', 'local'] as const;
 export type PccReadModelMode = (typeof PCC_READ_MODEL_MODES)[number];
@@ -146,4 +144,5 @@ export interface PccReadModelResponseMap {
   settings: PccReadModelEnvelope<PccSettingsReadModel>;
   'project-readiness': PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>;
   'lifecycle-readiness': PccReadModelEnvelope<PccLifecycleReadinessReadModel>;
+  'permit-inspection-control-center': PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>;
 }
