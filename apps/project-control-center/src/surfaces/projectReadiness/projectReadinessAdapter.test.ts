@@ -81,23 +81,30 @@ describe('buildPccProjectReadinessViewModel — available envelope', () => {
 
   it('marks Wave 11 RACI (responsibility-matrix) as preview-deferred', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
-    const wave11 = vm.downstreamModules.find(
-      (m) => m.sourceModuleId === 'responsibility-matrix',
-    );
+    const wave11 = vm.downstreamModules.find((m) => m.sourceModuleId === 'responsibility-matrix');
     expect(wave11).toBeDefined();
     expect(wave11!.waveStatus).toBe('preview-deferred');
     expect(wave11!.waveLabel).toBe('Wave 11');
     expect(wave11!.sourceModuleLabel).toContain('RACI');
   });
 
-  it('marks Wave 10, 12, 13, 14 downstream modules as preview-deferred', () => {
+  it('marks Wave 12, 13, 14 downstream modules as preview-deferred', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
-    const deferredIds = ['permit-log', 'constraints-log', 'buyout-log', 'approvals-checkpoints'] as const;
+    const deferredIds = ['constraints-log', 'buyout-log', 'approvals-checkpoints'] as const;
     for (const id of deferredIds) {
       const entry = vm.downstreamModules.find((m) => m.sourceModuleId === id);
       expect(entry, `expected ${id} entry`).toBeDefined();
       expect(entry!.waveStatus).toBe('preview-deferred');
     }
+  });
+
+  it('marks Wave 10 (permit-log) as implemented with the Permit & Inspection Control Center label', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const entry = vm.downstreamModules.find((m) => m.sourceModuleId === 'permit-log');
+    expect(entry).toBeDefined();
+    expect(entry!.waveStatus).toBe('implemented');
+    expect(entry!.waveLabel).toBe('Wave 10');
+    expect(entry!.sourceModuleLabel).toBe('Permit & Inspection Control Center');
   });
 
   it('hero exposes read-only badge and no-execution caption', () => {
@@ -141,9 +148,7 @@ describe('buildPccProjectReadinessViewModel — degraded envelopes', () => {
     const wave9 = vm.downstreamModules.find(
       (m) => m.sourceModuleId === 'project-lifecycle-readiness',
     );
-    const wave11 = vm.downstreamModules.find(
-      (m) => m.sourceModuleId === 'responsibility-matrix',
-    );
+    const wave11 = vm.downstreamModules.find((m) => m.sourceModuleId === 'responsibility-matrix');
     expect(wave9?.waveStatus).toBe('preview-deferred');
     expect(wave11?.waveStatus).toBe('preview-deferred');
   });
@@ -166,7 +171,13 @@ describe('buildPccProjectReadinessViewModel — ownership and accountability', (
     if (vm.status !== 'preview') throw new Error('expected preview');
     const personas = vm.ownershipAccountability.entries.map((e) => e.ownerPersona).sort();
     expect(personas).toEqual(
-      ['project-coordinator', 'project-executive', 'project-manager', 'safety-qaqc', 'superintendent'].sort(),
+      [
+        'project-coordinator',
+        'project-executive',
+        'project-manager',
+        'safety-qaqc',
+        'superintendent',
+      ].sort(),
     );
   });
 
@@ -177,9 +188,7 @@ describe('buildPccProjectReadinessViewModel — ownership and accountability', (
 
   it('flags safety-qaqc owner with item 004 as unassigned', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
-    const safety = vm.ownershipAccountability.entries.find(
-      (e) => e.ownerPersona === 'safety-qaqc',
-    );
+    const safety = vm.ownershipAccountability.entries.find((e) => e.ownerPersona === 'safety-qaqc');
     expect(safety).toBeDefined();
     expect(safety!.unassignedItemIds).toContain('fixture-pcc-readiness-004');
   });
@@ -189,7 +198,11 @@ describe('buildPccProjectReadinessViewModel — ownership and accountability', (
     const pm = vm.ownershipAccountability.entries.find((e) => e.ownerPersona === 'project-manager');
     expect(pm).toBeDefined();
     expect([...pm!.assignedItemIds].sort()).toEqual(
-      ['fixture-pcc-readiness-001', 'fixture-pcc-readiness-003', 'fixture-pcc-readiness-006'].sort(),
+      [
+        'fixture-pcc-readiness-001',
+        'fixture-pcc-readiness-003',
+        'fixture-pcc-readiness-006',
+      ].sort(),
     );
     expect(pm!.unassignedItemIds).toContain('fixture-pcc-readiness-006');
   });

@@ -23,16 +23,24 @@
 import { Fragment, useEffect, useState, type FC } from 'react';
 import {
   PCC_MVP_SURFACES,
+  PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   PccLifecycleReadinessReadModel,
+  PccPermitInspectionControlCenterReadModel,
   PccProjectId,
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
 } from '@hbc/models/pcc';
+import { PccPermitInspectionControlCenterRegions } from './PccPermitInspectionControlCenterRegions';
+import {
+  buildPermitInspectionControlCenterViewModel,
+  type IPccPermitInspectionControlCenterReadModelClient,
+} from './permitInspectionControlCenterViewModel';
+import { usePermitInspectionControlCenterReadModel } from './usePermitInspectionControlCenterReadModel';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
@@ -69,7 +77,8 @@ import type {
 import styles from './PccProjectReadinessSurface.module.css';
 
 interface PccProjectReadinessSurfaceProps {
-  readonly readModelClient?: IPccProjectReadinessReadModelClient;
+  readonly readModelClient?: IPccProjectReadinessReadModelClient &
+    IPccPermitInspectionControlCenterReadModelClient;
 }
 
 const FIXTURE_ENVELOPE: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel> = {
@@ -98,6 +107,21 @@ const FIXTURE_LIFECYCLE_VIEW_MODEL = buildPccLifecycleReadinessViewModel(
   FIXTURE_LIFECYCLE_ENVELOPE,
 );
 
+const FIXTURE_PERMIT_INSPECTION_ENVELOPE: PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel> =
+  {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'fixture',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  };
+
+const FIXTURE_PERMIT_INSPECTION_VIEW_MODEL = buildPermitInspectionControlCenterViewModel(
+  FIXTURE_PERMIT_INSPECTION_ENVELOPE,
+);
+
 const LIFECYCLE_SECTION_MARKER = 'lifecycle-readiness-center';
 
 export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = ({
@@ -110,6 +134,7 @@ export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = (
     <Fragment>
       <ReadinessRegions viewModel={FIXTURE_VIEW_MODEL} />
       <LifecycleReadinessRegions viewModel={FIXTURE_LIFECYCLE_VIEW_MODEL} />
+      <PccPermitInspectionControlCenterRegions viewModel={FIXTURE_PERMIT_INSPECTION_VIEW_MODEL} />
     </Fragment>
   );
 };
@@ -121,7 +146,8 @@ export default PccProjectReadinessSurface;
 // ─────────────────────────────────────────────────────────────────────
 
 interface ReadModelContentProps {
-  readonly client: IPccProjectReadinessReadModelClient;
+  readonly client: IPccProjectReadinessReadModelClient &
+    IPccPermitInspectionControlCenterReadModelClient;
 }
 
 const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
@@ -130,10 +156,15 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
     client,
     SAMPLE_PROJECT_PROFILE.projectId,
   );
+  const permitInspectionViewModel = usePermitInspectionControlCenterReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
   return (
     <Fragment>
       <ReadinessRegions viewModel={viewModel} />
       <LifecycleReadinessRegions viewModel={lifecycleViewModel} />
+      <PccPermitInspectionControlCenterRegions viewModel={permitInspectionViewModel} />
     </Fragment>
   );
 };
@@ -289,37 +320,23 @@ const HeroCard: FC<HeroCardProps> = ({ hero }) => (
     <div data-pcc-readiness-region="hero" className={styles.heroBody}>
       <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
       <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
-      <p className={styles.heroCaption}>
-        {PCC_MVP_SURFACES['project-readiness'].description}
-      </p>
+      <p className={styles.heroCaption}>{PCC_MVP_SURFACES['project-readiness'].description}</p>
       <div className={styles.heroStats}>
-        <span
-          className={styles.heroStat}
-          data-pcc-readiness-stat="active-gate"
-        >
+        <span className={styles.heroStat} data-pcc-readiness-stat="active-gate">
           <span className={styles.heroStatLabel}>Active gate</span>
           <span className={styles.heroStatValue}>{hero.activeLifecycleGateLabel}</span>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-readiness-stat="overall-posture"
-        >
+        <span className={styles.heroStat} data-pcc-readiness-stat="overall-posture">
           <span className={styles.heroStatLabel}>Overall posture</span>
           <PccStatusPill tone={postureToTone(hero.overallPosture)}>
             {posturelabel(hero.overallPosture)}
           </PccStatusPill>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-readiness-stat="blocker-count"
-        >
+        <span className={styles.heroStat} data-pcc-readiness-stat="blocker-count">
           <span className={styles.heroStatLabel}>Blockers</span>
           <span className={styles.heroStatValue}>{hero.blockerCount}</span>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-readiness-stat="evidence-confidence"
-        >
+        <span className={styles.heroStat} data-pcc-readiness-stat="evidence-confidence">
           <span className={styles.heroStatLabel}>Evidence confidence</span>
           <span className={styles.heroStatValue}>{capitalize(hero.evidenceConfidence)}</span>
         </span>
@@ -359,9 +376,7 @@ const LifecycleGateMapCard: FC<LifecycleGateMapCardProps> = ({ gates }) => (
           data-pcc-readiness-gate-active={g.isActive ? 'true' : 'false'}
         >
           <span className={styles.gateLabel}>{g.label}</span>
-          <PccStatusPill tone={postureToTone(g.posture)}>
-            {posturelabel(g.posture)}
-          </PccStatusPill>
+          <PccStatusPill tone={postureToTone(g.posture)}>{posturelabel(g.posture)}</PccStatusPill>
           <span className={styles.gateMeta}>
             {g.itemCount} item{g.itemCount === 1 ? '' : 's'} · {g.openBlockerCount} blocker
             {g.openBlockerCount === 1 ? '' : 's'} · {g.pendingEvidenceCount} pending evidence
@@ -397,9 +412,7 @@ const DomainGridCard: FC<DomainGridCardProps> = ({ domains }) => (
           <span className={styles.domainMeta}>
             {d.openBlockerCount} blocker{d.openBlockerCount === 1 ? '' : 's'}
           </span>
-          <span className={styles.domainMeta}>
-            {d.pendingEvidenceCount} pending evidence
-          </span>
+          <span className={styles.domainMeta}>{d.pendingEvidenceCount} pending evidence</span>
           <span className={styles.domainMeta}>Confidence: {capitalize(d.confidence)}</span>
         </section>
       ))}
@@ -423,11 +436,7 @@ const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
       ) : (
         <ul className={styles.blockerListInner} aria-label="Blockers and exceptions">
           {blockers.map((b) => (
-            <li
-              key={b.id}
-              className={styles.blockerItem}
-              data-pcc-readiness-blocker-id={b.id}
-            >
+            <li key={b.id} className={styles.blockerItem} data-pcc-readiness-blocker-id={b.id}>
               <span className={styles.blockerTitle}>{b.title}</span>
               <span className={styles.blockerMeta}>
                 {b.domainLabel} · {b.lifecycleGateLabel}
@@ -439,7 +448,9 @@ const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
               <span className={styles.blockerMeta}>
                 Source: {b.sourceModuleLabel} · Severity: {b.severity}
               </span>
-              <PccStatusPill tone={postureToTone(b.posture)}>{posturelabel(b.posture)}</PccStatusPill>
+              <PccStatusPill tone={postureToTone(b.posture)}>
+                {posturelabel(b.posture)}
+              </PccStatusPill>
               <span
                 className={`${styles.riskTag} ${riskTagClass(b.riskTag)}`}
                 data-pcc-readiness-risk-tag={b.riskTag}
@@ -460,11 +471,7 @@ interface OwnershipAccountabilityCardProps {
 }
 
 const OwnershipAccountabilityCard: FC<OwnershipAccountabilityCardProps> = ({ ownership }) => (
-  <PccDashboardCard
-    footprint="wide"
-    eyebrow="Ownership"
-    title="Ownership and accountability"
-  >
+  <PccDashboardCard footprint="wide" eyebrow="Ownership" title="Ownership and accountability">
     <div
       data-pcc-readiness-region="ownership-accountability"
       className={styles.ownershipList}
@@ -556,7 +563,10 @@ const PriorityActionsPreviewCard: FC<PriorityActionsPreviewCardProps> = ({ previ
           description={preview.inertActionLabel}
         />
       ) : (
-        <ul className={styles.priorityActionsListInner} aria-label="Priority Actions eligible items">
+        <ul
+          className={styles.priorityActionsListInner}
+          aria-label="Priority Actions eligible items"
+        >
           {preview.items.map((item) => (
             <li
               key={item.relatedPriorityActionId}
@@ -588,10 +598,7 @@ const EvidenceSourceHealthCard: FC<EvidenceSourceHealthCardProps> = ({ evidence 
     eyebrow="Evidence and source health"
     title="Evidence and source-health posture"
   >
-    <div
-      data-pcc-readiness-region="evidence-source-health"
-      className={styles.evidenceGrid}
-    >
+    <div data-pcc-readiness-region="evidence-source-health" className={styles.evidenceGrid}>
       {evidence.evidenceBuckets.length === 0 ? (
         <PccPreviewState
           state="empty"
@@ -632,8 +639,8 @@ const EvidenceSourceHealthCard: FC<EvidenceSourceHealthCardProps> = ({ evidence 
                   {entry.sourceHealthStatus}
                 </PccStatusPill>
                 <span className={styles.sourceHealthMeta}>
-                  {entry.itemCount} item{entry.itemCount === 1 ? '' : 's'} ·{' '}
-                  {entry.warningCount} warning{entry.warningCount === 1 ? '' : 's'}
+                  {entry.itemCount} item{entry.itemCount === 1 ? '' : 's'} · {entry.warningCount}{' '}
+                  warning{entry.warningCount === 1 ? '' : 's'}
                 </span>
               </li>
             ))}
@@ -708,9 +715,7 @@ function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function sourceHealthTone(
-  status: string,
-): 'info' | 'neutral' | 'warning' | 'danger' {
+function sourceHealthTone(status: string): 'info' | 'neutral' | 'warning' | 'danger' {
   switch (status) {
     case 'available':
       return 'info';
@@ -843,49 +848,31 @@ const LifecycleHeroCard: FC<LifecycleHeroCardProps> = ({ hero }) => (
       <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
       <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
       <div className={styles.heroStats}>
-        <span
-          className={styles.heroStat}
-          data-pcc-lifecycle-stat="headline-posture"
-        >
+        <span className={styles.heroStat} data-pcc-lifecycle-stat="headline-posture">
           <span className={styles.heroStatLabel}>Headline posture</span>
           <PccStatusPill tone={postureToTone(hero.headlinePosture)}>
             {posturelabel(hero.headlinePosture)}
           </PccStatusPill>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-lifecycle-stat="active-gate"
-        >
+        <span className={styles.heroStat} data-pcc-lifecycle-stat="active-gate">
           <span className={styles.heroStatLabel}>Active gate</span>
           <span className={styles.heroStatValue}>{hero.activeGateLabel}</span>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-lifecycle-stat="open-blockers"
-        >
+        <span className={styles.heroStat} data-pcc-lifecycle-stat="open-blockers">
           <span className={styles.heroStatLabel}>Open blockers</span>
           <span className={styles.heroStatValue}>{hero.totalOpenBlockers}</span>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-lifecycle-stat="pending-evidence"
-        >
+        <span className={styles.heroStat} data-pcc-lifecycle-stat="pending-evidence">
           <span className={styles.heroStatLabel}>Pending evidence</span>
           <span className={styles.heroStatValue}>{hero.totalPendingEvidence}</span>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-lifecycle-stat="library-total"
-        >
+        <span className={styles.heroStat} data-pcc-lifecycle-stat="library-total">
           <span className={styles.heroStatLabel}>Library scope</span>
           <span className={styles.heroStatValue}>
             {hero.libraryTotal} item{hero.libraryTotal === 1 ? '' : 's'}
           </span>
         </span>
-        <span
-          className={styles.heroStat}
-          data-pcc-lifecycle-stat="project-items"
-        >
+        <span className={styles.heroStat} data-pcc-lifecycle-stat="project-items">
           <span className={styles.heroStatLabel}>Project items</span>
           <span className={styles.heroStatValue}>{hero.totalProjectItems}</span>
         </span>
@@ -918,9 +905,7 @@ const LifecycleMapCard: FC<LifecycleMapCardProps> = ({ map }) => (
           data-pcc-lifecycle-phase-in-snapshot={p.isInSnapshot ? 'true' : 'false'}
         >
           <span className={styles.gateLabel}>{p.phaseLabel}</span>
-          <PccStatusPill tone={postureToTone(p.posture)}>
-            {posturelabel(p.posture)}
-          </PccStatusPill>
+          <PccStatusPill tone={postureToTone(p.posture)}>{posturelabel(p.posture)}</PccStatusPill>
           <span className={styles.gateMeta}>
             {p.openBlockerCount} blocker{p.openBlockerCount === 1 ? '' : 's'} ·{' '}
             {p.pendingEvidenceCount} pending evidence · {p.criticalCount} critical
@@ -936,9 +921,7 @@ interface LifecycleFamilyDomainsCardProps {
   readonly familyDomains: IPccLifecycleFamilyDomainsViewModel;
 }
 
-const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({
-  familyDomains,
-}) => (
+const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({ familyDomains }) => (
   <PccDashboardCard
     footprint="full"
     eyebrow="Families and domains"
@@ -951,11 +934,7 @@ const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({
     >
       <ul className={styles.domainGrid} aria-label="Lifecycle readiness families">
         {familyDomains.families.map((f) => (
-          <li
-            key={f.family}
-            className={styles.domainCard}
-            data-pcc-lifecycle-family={f.family}
-          >
+          <li key={f.family} className={styles.domainCard} data-pcc-lifecycle-family={f.family}>
             <span className={styles.domainLabel}>{f.familyLabel}</span>
             <PccStatusPill tone={postureToTone(f.headlinePosture)}>
               {posturelabel(f.headlinePosture)}
@@ -976,10 +955,7 @@ const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({
           description="Domain summaries appear once the readiness source is available."
         />
       ) : (
-        <ul
-          className={styles.domainGrid}
-          aria-label="Lifecycle readiness contributing domains"
-        >
+        <ul className={styles.domainGrid} aria-label="Lifecycle readiness contributing domains">
           {familyDomains.domains.map((d) => (
             <li
               key={d.domainId}
@@ -993,12 +969,8 @@ const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({
               <span className={styles.domainMeta}>
                 {d.openBlockerCount} blocker{d.openBlockerCount === 1 ? '' : 's'}
               </span>
-              <span className={styles.domainMeta}>
-                {d.pendingEvidenceCount} pending evidence
-              </span>
-              <span className={styles.domainMeta}>
-                Confidence: {capitalize(d.confidence)}
-              </span>
+              <span className={styles.domainMeta}>{d.pendingEvidenceCount} pending evidence</span>
+              <span className={styles.domainMeta}>Confidence: {capitalize(d.confidence)}</span>
             </li>
           ))}
         </ul>
@@ -1062,19 +1034,12 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
           Safety item state: {detail.status ?? NOT_LISTED}
           {detail.exceptionCode ? ` · Exception: ${detail.exceptionCode}` : ''}
         </span>
-        <span className={styles.priorityActionMeta}>
-          {detail.blockedReason ?? NOT_LISTED}
-        </span>
+        <span className={styles.priorityActionMeta}>{detail.blockedReason ?? NOT_LISTED}</span>
       </div>
     ) : null}
-    <dl
-      className={styles.lifecycleItemDetailDl}
-      aria-label="Item detail fields"
-    >
+    <dl className={styles.lifecycleItemDetailDl} aria-label="Item detail fields">
       <dt>Title</dt>
-      <dd data-pcc-lifecycle-item-detail-field="normalized-title">
-        {detail.normalizedTitle}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="normalized-title">{detail.normalizedTitle}</dd>
 
       <dt>Family</dt>
       <dd data-pcc-lifecycle-item-detail-field="family">{detail.familyLabel}</dd>
@@ -1089,9 +1054,7 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       <dd data-pcc-lifecycle-item-detail-field="item-type">{detail.itemType}</dd>
 
       <dt>Criticality</dt>
-      <dd data-pcc-lifecycle-item-detail-field="criticality">
-        {capitalize(detail.criticality)}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="criticality">{capitalize(detail.criticality)}</dd>
 
       <dt>Risk tags</dt>
       <dd data-pcc-lifecycle-item-detail-field="risk-tags">
@@ -1099,14 +1062,10 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       </dd>
 
       <dt>Source family</dt>
-      <dd data-pcc-lifecycle-item-detail-field="source-family">
-        {detail.sourceFamily}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="source-family">{detail.sourceFamily}</dd>
 
       <dt>Source file</dt>
-      <dd data-pcc-lifecycle-item-detail-field="source-file">
-        {detail.sourceFile}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="source-file">{detail.sourceFile}</dd>
 
       <dt>Source page</dt>
       <dd data-pcc-lifecycle-item-detail-field="source-page">
@@ -1114,14 +1073,10 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       </dd>
 
       <dt>Source section</dt>
-      <dd data-pcc-lifecycle-item-detail-field="source-section">
-        {detail.sourceSection}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="source-section">{detail.sourceSection}</dd>
 
       <dt>Source item key</dt>
-      <dd data-pcc-lifecycle-item-detail-field="source-item-key">
-        {detail.sourceItemKey}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="source-item-key">{detail.sourceItemKey}</dd>
 
       <dt>Source traceability requirement</dt>
       <dd data-pcc-lifecycle-item-detail-field="source-traceability-requirement">
@@ -1131,18 +1086,14 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       {detail.sourceDetails ? (
         <Fragment>
           <dt>Source details</dt>
-          <dd data-pcc-lifecycle-item-detail-field="source-details">
-            {detail.sourceDetails}
-          </dd>
+          <dd data-pcc-lifecycle-item-detail-field="source-details">{detail.sourceDetails}</dd>
         </Fragment>
       ) : null}
 
       {detail.responseOptions ? (
         <Fragment>
           <dt>Response options</dt>
-          <dd data-pcc-lifecycle-item-detail-field="response-options">
-            {detail.responseOptions}
-          </dd>
+          <dd data-pcc-lifecycle-item-detail-field="response-options">{detail.responseOptions}</dd>
         </Fragment>
       ) : null}
 
@@ -1187,14 +1138,10 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       </dd>
 
       <dt>Due date</dt>
-      <dd data-pcc-lifecycle-item-detail-field="due-date">
-        {fmtDate(detail.dueDateUtc)}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="due-date">{fmtDate(detail.dueDateUtc)}</dd>
 
       <dt>Completed</dt>
-      <dd data-pcc-lifecycle-item-detail-field="completed">
-        {fmtDate(detail.completedAtUtc)}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="completed">{fmtDate(detail.completedAtUtc)}</dd>
 
       <dt>Last updated</dt>
       <dd data-pcc-lifecycle-item-detail-field="last-updated">
@@ -1203,9 +1150,7 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
 
       <dt>Default gate impact</dt>
       <dd data-pcc-lifecycle-item-detail-field="default-gate-impact">
-        {detail.defaultGateImpact.length === 0
-          ? NOT_LISTED
-          : detail.defaultGateImpact.join(', ')}
+        {detail.defaultGateImpact.length === 0 ? NOT_LISTED : detail.defaultGateImpact.join(', ')}
       </dd>
 
       <dt>Exception code</dt>
@@ -1229,9 +1174,7 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       </dd>
 
       <dt>Evidence policy</dt>
-      <dd data-pcc-lifecycle-item-detail-field="evidence-policy">
-        {detail.evidencePolicy}
-      </dd>
+      <dd data-pcc-lifecycle-item-detail-field="evidence-policy">{detail.evidencePolicy}</dd>
 
       <dt>Evidence state</dt>
       <dd data-pcc-lifecycle-item-detail-field="evidence-state">
@@ -1279,9 +1222,7 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       <dd data-pcc-lifecycle-item-detail-field="recurrence">
         {detail.recurrenceCadence
           ? `${detail.recurrenceCadence}${
-              detail.recurrenceTriggerEvent
-                ? ` · ${detail.recurrenceTriggerEvent}`
-                : ''
+              detail.recurrenceTriggerEvent ? ` · ${detail.recurrenceTriggerEvent}` : ''
             }`
           : NOT_LISTED}
       </dd>
@@ -1321,10 +1262,7 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
 
 // Renders a degraded preview for list-bearing regions when the envelope's
 // cardState is not `preview`. Returns null when no degradation is needed.
-function lifecycleDegradedPreview(
-  cardState: PccCardState,
-  region: string,
-): JSX.Element | null {
+function lifecycleDegradedPreview(cardState: PccCardState, region: string): JSX.Element | null {
   if (cardState === 'preview') return null;
   const description =
     cardState === 'unavailable-fixture'
@@ -1354,11 +1292,7 @@ interface LifecycleMyActionsCardProps {
 const LifecycleMyActionsCard: FC<LifecycleMyActionsCardProps> = ({ myActions }) => {
   const degraded = lifecycleDegradedPreview(myActions.cardState, 'lifecycle-my-actions');
   return (
-    <PccDashboardCard
-      footprint="wide"
-      eyebrow="My readiness actions"
-      title="Active assignments"
-    >
+    <PccDashboardCard footprint="wide" eyebrow="My readiness actions" title="Active assignments">
       <div
         data-pcc-readiness-region="lifecycle-my-actions"
         data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
@@ -1366,18 +1300,15 @@ const LifecycleMyActionsCard: FC<LifecycleMyActionsCardProps> = ({ myActions }) 
         aria-label="My readiness actions"
       >
         <p className={styles.priorityActionsCaption}>{myActions.captionText}</p>
-        {degraded ?? (
-          myActions.items.length === 0 ? (
+        {degraded ??
+          (myActions.items.length === 0 ? (
             <PccPreviewState
               state="empty"
               title="No active readiness actions"
               description={myActions.inertActionLabel}
             />
           ) : (
-            <ul
-              className={styles.priorityActionsListInner}
-              aria-label="Active readiness items"
-            >
+            <ul className={styles.priorityActionsListInner} aria-label="Active readiness items">
               {myActions.items.map((item) => (
                 <li
                   key={item.projectItemId}
@@ -1412,8 +1343,7 @@ const LifecycleMyActionsCard: FC<LifecycleMyActionsCardProps> = ({ myActions }) 
                 </li>
               ))}
             </ul>
-          )
-        )}
+          ))}
         <p className={styles.priorityActionsFooter}>{myActions.inertActionLabel}</p>
       </div>
     </PccDashboardCard>
@@ -1425,10 +1355,7 @@ interface LifecycleBlockersCardProps {
 }
 
 const LifecycleBlockersCard: FC<LifecycleBlockersCardProps> = ({ blockers }) => {
-  const degraded = lifecycleDegradedPreview(
-    blockers.cardState,
-    'lifecycle-blockers-exceptions',
-  );
+  const degraded = lifecycleDegradedPreview(blockers.cardState, 'lifecycle-blockers-exceptions');
   return (
     <PccDashboardCard
       footprint="wide"
@@ -1450,16 +1377,13 @@ const LifecycleBlockersCard: FC<LifecycleBlockersCardProps> = ({ blockers }) => 
                   className={styles.evidenceItem}
                   data-pcc-lifecycle-blocker-state={b.blockerState}
                 >
-                  <span className={styles.evidenceLabel}>
-                    {capitalize(b.blockerState)}
-                  </span>
+                  <span className={styles.evidenceLabel}>{capitalize(b.blockerState)}</span>
                   <span className={styles.evidenceCount}>
                     {b.itemCount} item{b.itemCount === 1 ? '' : 's'}
                   </span>
                   <span className={styles.evidenceMeta}>
-                    Critical {b.severityCounts.critical} · High{' '}
-                    {b.severityCounts.high} · Medium {b.severityCounts.medium} · Low{' '}
-                    {b.severityCounts.low}
+                    Critical {b.severityCounts.critical} · High {b.severityCounts.high} · Medium{' '}
+                    {b.severityCounts.medium} · Low {b.severityCounts.low}
                   </span>
                 </li>
               ))}
@@ -1478,8 +1402,7 @@ const LifecycleBlockersCard: FC<LifecycleBlockersCardProps> = ({ blockers }) => 
                       {item.familyLabel} · Severity: {capitalize(item.severity)}
                     </span>
                     <span className={styles.blockerMeta}>
-                      State: {capitalize(item.blockerState)} · Status:{' '}
-                      {posturelabel(item.status)}
+                      State: {capitalize(item.blockerState)} · Status: {posturelabel(item.status)}
                       {item.exceptionCode ? ` · Exception: ${item.exceptionCode}` : ''}
                     </span>
                     <details className={styles.lifecycleItemDetails}>
@@ -1507,23 +1430,16 @@ interface LifecycleEvidenceCardProps {
 }
 
 const LifecycleEvidenceCard: FC<LifecycleEvidenceCardProps> = ({ evidence }) => {
-  const degraded = lifecycleDegradedPreview(
-    evidence.cardState,
-    'lifecycle-evidence-readiness',
-  );
+  const degraded = lifecycleDegradedPreview(evidence.cardState, 'lifecycle-evidence-readiness');
   return (
-    <PccDashboardCard
-      footprint="wide"
-      eyebrow="Evidence readiness"
-      title="Evidence-state buckets"
-    >
+    <PccDashboardCard footprint="wide" eyebrow="Evidence readiness" title="Evidence-state buckets">
       <div
         data-pcc-readiness-region="lifecycle-evidence-readiness"
         data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
         className={styles.evidenceGrid}
       >
-        {degraded ?? (
-          evidence.buckets.length === 0 ? (
+        {degraded ??
+          (evidence.buckets.length === 0 ? (
             <PccPreviewState
               state="empty"
               title="No evidence summary available"
@@ -1537,9 +1453,7 @@ const LifecycleEvidenceCard: FC<LifecycleEvidenceCardProps> = ({ evidence }) => 
                   className={styles.evidenceItem}
                   data-pcc-lifecycle-evidence-state={bucket.evidenceState}
                 >
-                  <span className={styles.evidenceLabel}>
-                    {capitalize(bucket.evidenceState)}
-                  </span>
+                  <span className={styles.evidenceLabel}>{capitalize(bucket.evidenceState)}</span>
                   <span className={styles.evidenceCount}>
                     {bucket.itemCount} item{bucket.itemCount === 1 ? '' : 's'}
                   </span>
@@ -1552,11 +1466,8 @@ const LifecycleEvidenceCard: FC<LifecycleEvidenceCardProps> = ({ evidence }) => 
                 </li>
               ))}
             </ul>
-          )
-        )}
-        <p className={styles.evidenceCaption}>
-          {evidence.documentControlReferenceCaption}
-        </p>
+          ))}
+        <p className={styles.evidenceCaption}>{evidence.documentControlReferenceCaption}</p>
       </div>
     </PccDashboardCard>
   );
@@ -1566,13 +1477,8 @@ interface LifecycleFutureCloseoutCardProps {
   readonly futureCloseout: IPccLifecycleFutureCloseoutViewModel;
 }
 
-const LifecycleFutureCloseoutCard: FC<LifecycleFutureCloseoutCardProps> = ({
-  futureCloseout,
-}) => {
-  const degraded = lifecycleDegradedPreview(
-    futureCloseout.cardState,
-    'lifecycle-future-closeout',
-  );
+const LifecycleFutureCloseoutCard: FC<LifecycleFutureCloseoutCardProps> = ({ futureCloseout }) => {
+  const degraded = lifecycleDegradedPreview(futureCloseout.cardState, 'lifecycle-future-closeout');
   return (
     <PccDashboardCard
       footprint="standard"
@@ -1585,18 +1491,15 @@ const LifecycleFutureCloseoutCard: FC<LifecycleFutureCloseoutCardProps> = ({
         className={styles.blockerList}
       >
         <p className={styles.heroCaption}>{futureCloseout.captionText}</p>
-        {degraded ?? (
-          futureCloseout.items.length === 0 ? (
+        {degraded ??
+          (futureCloseout.items.length === 0 ? (
             <PccPreviewState
               state="empty"
               title="No future closeout exposure flagged"
               description="Closeout-risk items will appear once the lifecycle source surfaces them."
             />
           ) : (
-            <ul
-              className={styles.blockerListInner}
-              aria-label="Future closeout exposure items"
-            >
+            <ul className={styles.blockerListInner} aria-label="Future closeout exposure items">
               {futureCloseout.items.map((item) => (
                 <li
                   key={item.templateItemId}
@@ -1627,8 +1530,7 @@ const LifecycleFutureCloseoutCard: FC<LifecycleFutureCloseoutCardProps> = ({
                 </li>
               ))}
             </ul>
-          )
-        )}
+          ))}
       </div>
     </PccDashboardCard>
   );
@@ -1707,13 +1609,8 @@ interface LifecycleReadinessSignalsCardProps {
   readonly signals: IPccLifecycleReadinessSignalsViewModel;
 }
 
-const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
-  signals,
-}) => {
-  const degraded = lifecycleDegradedPreview(
-    signals.cardState,
-    'lifecycle-readiness-signals',
-  );
+const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({ signals }) => {
+  const degraded = lifecycleDegradedPreview(signals.cardState, 'lifecycle-readiness-signals');
   return (
     <PccDashboardCard
       footprint="full"
@@ -1729,10 +1626,7 @@ const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
         <p className={styles.heroCaption}>{signals.noExecutionCaption}</p>
         {degraded ?? (
           <Fragment>
-            <ul
-              className={styles.evidenceList}
-              aria-label="Readiness signal buckets"
-            >
+            <ul className={styles.evidenceList} aria-label="Readiness signal buckets">
               {signals.buckets.map((b) => (
                 <li
                   key={b.kind}
@@ -1746,10 +1640,7 @@ const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
             </ul>
 
             {signals.approvalPosture.length > 0 ? (
-              <ul
-                className={styles.blockerListInner}
-                aria-label="Approval checkpoint posture"
-              >
+              <ul className={styles.blockerListInner} aria-label="Approval checkpoint posture">
                 {signals.approvalPosture.map((a) => (
                   <li
                     key={a.projectItemId}
@@ -1759,8 +1650,8 @@ const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
                   >
                     <span className={styles.blockerTitle}>{a.title}</span>
                     <span className={styles.blockerMeta}>
-                      Checkpoint: {a.approvalCheckpointReference} · Status:{' '}
-                      {posturelabel(a.status)} · {a.family}
+                      Checkpoint: {a.approvalCheckpointReference} · Status: {posturelabel(a.status)}{' '}
+                      · {a.family}
                     </span>
                     <span className={styles.inertChip} aria-disabled="true">
                       Display only
@@ -1771,10 +1662,7 @@ const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
             ) : null}
 
             {signals.priorityActionPromotions.length > 0 ? (
-              <ul
-                className={styles.blockerListInner}
-                aria-label="Priority Actions promotions"
-              >
+              <ul className={styles.blockerListInner} aria-label="Priority Actions promotions">
                 {signals.priorityActionPromotions.map((p) => (
                   <li
                     key={p.projectItemId}

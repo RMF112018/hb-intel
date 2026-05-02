@@ -131,10 +131,10 @@ const DOWNSTREAM_MODULE_REGISTRY: Readonly<
     statusCaption: 'Wave 9 — checklist item libraries begin in Wave 9. Not implemented in Wave 8.',
   },
   'permit-log': {
-    label: 'Permit Log',
+    label: 'Permit & Inspection Control Center',
     waveLabel: 'Wave 10',
-    waveStatus: 'preview-deferred',
-    statusCaption: 'Wave 10 — Permit Log lifecycle is deferred. Not implemented in Wave 8.',
+    waveStatus: 'implemented',
+    statusCaption: 'Permit & Inspection Control Center is live as the Wave 10 module.',
   },
   'responsibility-matrix': {
     label: 'Responsibility Matrix / RACI',
@@ -258,25 +258,23 @@ function deriveRiskTag(item: IProjectReadinessItem): ProjectReadinessRiskTag {
 function buildBlockers(
   snapshot: IProjectReadinessFrameworkSnapshot,
 ): readonly IPccReadinessBlockerItemViewModel[] {
-  return snapshot.items
-    .filter(isBlockerCandidate)
-    .map((item) => ({
-      id: item.id,
-      title: item.title,
-      domain: item.domain,
-      domainLabel: DOMAIN_LABELS[item.domain],
-      lifecycleGate: item.lifecycleGate,
-      lifecycleGateLabel: LIFECYCLE_GATE_LABELS[item.lifecycleGate],
-      status: item.status,
-      severity: item.severity,
-      blockerState: item.blockerState,
-      posture: item.posture,
-      ownerPersona: item.ownerPersona,
-      dueDateUtc: item.dueDateUtc,
-      sourceModuleId: item.sourceModuleId,
-      sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[item.sourceModuleId].label,
-      riskTag: deriveRiskTag(item),
-    }));
+  return snapshot.items.filter(isBlockerCandidate).map((item) => ({
+    id: item.id,
+    title: item.title,
+    domain: item.domain,
+    domainLabel: DOMAIN_LABELS[item.domain],
+    lifecycleGate: item.lifecycleGate,
+    lifecycleGateLabel: LIFECYCLE_GATE_LABELS[item.lifecycleGate],
+    status: item.status,
+    severity: item.severity,
+    blockerState: item.blockerState,
+    posture: item.posture,
+    ownerPersona: item.ownerPersona,
+    dueDateUtc: item.dueDateUtc,
+    sourceModuleId: item.sourceModuleId,
+    sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[item.sourceModuleId].label,
+    riskTag: deriveRiskTag(item),
+  }));
 }
 
 function isOpenBlockerItem(item: IProjectReadinessItem): boolean {
@@ -319,10 +317,7 @@ function buildOwnershipAccountability(
     },
   );
 
-  const totalUnassignedCount = entries.reduce(
-    (sum, e) => sum + e.unassignedItemIds.length,
-    0,
-  );
+  const totalUnassignedCount = entries.reduce((sum, e) => sum + e.unassignedItemIds.length, 0);
 
   const summaryCaption =
     totalUnassignedCount > 0
@@ -364,25 +359,22 @@ function buildPriorityActionsPreview(
 function buildEvidence(
   snapshot: IProjectReadinessFrameworkSnapshot,
 ): IPccReadinessEvidenceViewModel {
-  const evidenceBuckets: readonly IPccReadinessEvidenceStateBucket[] =
-    snapshot.evidenceSummary.map(
-      (s: IProjectReadinessEvidenceSummary) => ({
-        evidenceState: s.evidenceState,
-        itemCount: s.itemIds.length,
-        documentControlSourceIds: s.documentControlSourceIds,
-      }),
-    );
+  const evidenceBuckets: readonly IPccReadinessEvidenceStateBucket[] = snapshot.evidenceSummary.map(
+    (s: IProjectReadinessEvidenceSummary) => ({
+      evidenceState: s.evidenceState,
+      itemCount: s.itemIds.length,
+      documentControlSourceIds: s.documentControlSourceIds,
+    }),
+  );
 
   const sourceHealthEntries: readonly IPccReadinessSourceHealthEntry[] =
-    snapshot.sourceHealthSummary.map(
-      (s: IProjectReadinessSourceHealthSummary) => ({
-        sourceModuleId: s.sourceModuleId,
-        sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[s.sourceModuleId].label,
-        sourceHealthStatus: s.sourceHealthStatus,
-        itemCount: s.itemIds.length,
-        warningCount: s.warningCount,
-      }),
-    );
+    snapshot.sourceHealthSummary.map((s: IProjectReadinessSourceHealthSummary) => ({
+      sourceModuleId: s.sourceModuleId,
+      sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[s.sourceModuleId].label,
+      sourceHealthStatus: s.sourceHealthStatus,
+      itemCount: s.itemIds.length,
+      warningCount: s.warningCount,
+    }));
 
   return {
     evidenceBuckets,
@@ -409,13 +401,9 @@ function buildHero(
   blockerCount: number,
 ): IPccReadinessHeroViewModel {
   const blockerSummaries: readonly IProjectReadinessBlockerSummary[] = snapshot.blockerSummary;
-  const overallPosture: ProjectReadinessPosture = derivedOverallPosture(
-    snapshot,
-    blockerSummaries,
-  );
+  const overallPosture: ProjectReadinessPosture = derivedOverallPosture(snapshot, blockerSummaries);
 
-  const evidenceConfidence: ProjectReadinessConfidenceState =
-    derivedEvidenceConfidence(snapshot);
+  const evidenceConfidence: ProjectReadinessConfidenceState = derivedEvidenceConfidence(snapshot);
 
   const activeGate: ProjectReadinessLifecycleGateId = derivedActiveGate(snapshot);
 
@@ -444,9 +432,7 @@ function derivedOverallPosture(
   blockerSummaries: readonly IProjectReadinessBlockerSummary[],
 ): ProjectReadinessPosture {
   const hasBlocked = blockerSummaries.some(
-    (s) =>
-      (s.blockerState === 'open' || s.blockerState === 'escalated') &&
-      s.itemIds.length > 0,
+    (s) => (s.blockerState === 'open' || s.blockerState === 'escalated') && s.itemIds.length > 0,
   );
   if (hasBlocked) return 'blocked';
   const domainPostures = snapshot.domainSummaries.map((s) => s.posture);

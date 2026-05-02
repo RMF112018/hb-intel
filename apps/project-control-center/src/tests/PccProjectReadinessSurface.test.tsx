@@ -3,14 +3,10 @@ import { fireEvent, render } from '@testing-library/react';
 import { PccApp } from '../PccApp';
 
 function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector(
-    '[data-pcc-surface-id="project-readiness"]',
-  );
+  const button = container.querySelector('[data-pcc-surface-id="project-readiness"]');
   expect(button).not.toBeNull();
   fireEvent.click(button!);
-  const panel = container.querySelector(
-    '[data-pcc-active-surface-panel="project-readiness"]',
-  );
+  const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
   expect(panel).not.toBeNull();
   return panel as HTMLElement;
 }
@@ -25,9 +21,7 @@ describe('Project Readiness Center surface', () => {
     activateProjectReadiness(container);
     const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(markers).toHaveLength(1);
-    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-      'project-readiness',
-    );
+    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
   });
 
   it('renders all six framework regions', () => {
@@ -78,12 +72,8 @@ describe('Project Readiness Center surface', () => {
     activateProjectReadiness(container);
     const region = readinessRegion(container, 'evidence-source-health');
     expect(region).not.toBeNull();
-    const evidenceBuckets = region!.querySelectorAll(
-      '[data-pcc-readiness-evidence-state]',
-    );
-    const sourceHealthEntries = region!.querySelectorAll(
-      '[data-pcc-readiness-source-health]',
-    );
+    const evidenceBuckets = region!.querySelectorAll('[data-pcc-readiness-evidence-state]');
+    const sourceHealthEntries = region!.querySelectorAll('[data-pcc-readiness-source-health]');
     expect(evidenceBuckets.length).toBeGreaterThanOrEqual(1);
     expect(sourceHealthEntries.length).toBeGreaterThanOrEqual(1);
   });
@@ -99,35 +89,32 @@ describe('Project Readiness Center surface', () => {
     );
     expect(wave9).not.toBeNull();
     expect(wave11).not.toBeNull();
-    expect(wave9!.getAttribute('data-pcc-readiness-downstream-status')).toBe(
-      'preview-deferred',
-    );
+    expect(wave9!.getAttribute('data-pcc-readiness-downstream-status')).toBe('preview-deferred');
     expect(wave9!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 9');
-    expect(wave11!.getAttribute('data-pcc-readiness-downstream-status')).toBe(
-      'preview-deferred',
-    );
+    expect(wave11!.getAttribute('data-pcc-readiness-downstream-status')).toBe('preview-deferred');
     expect(wave11!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 11');
     expect(wave11!.textContent).toContain('RACI');
   });
 
-  it('downstream modules region marks Wave 10 / Wave 12 / Wave 13 / Wave 14 as preview-deferred', () => {
+  it('downstream modules region marks Wave 12 / Wave 13 / Wave 14 as preview-deferred', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
-    const downstreamModuleIds = [
-      'permit-log',
-      'constraints-log',
-      'buyout-log',
-      'approvals-checkpoints',
-    ] as const;
+    const downstreamModuleIds = ['constraints-log', 'buyout-log', 'approvals-checkpoints'] as const;
     for (const id of downstreamModuleIds) {
-      const node = container.querySelector(
-        `[data-pcc-readiness-downstream-source="${id}"]`,
-      );
+      const node = container.querySelector(`[data-pcc-readiness-downstream-source="${id}"]`);
       expect(node, `expected downstream module ${id}`).not.toBeNull();
-      expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe(
-        'preview-deferred',
-      );
+      expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe('preview-deferred');
     }
+  });
+
+  it('downstream modules region marks Wave 10 (permit-log) as implemented', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const node = container.querySelector('[data-pcc-readiness-downstream-source="permit-log"]');
+    expect(node).not.toBeNull();
+    expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe('implemented');
+    expect(node!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 10');
+    expect(node!.textContent).toContain('Permit & Inspection Control Center');
   });
 
   it('readiness surface tree exposes no enabled action buttons', () => {
@@ -143,9 +130,7 @@ describe('Project Readiness Center surface', () => {
 });
 
 function readinessRegionsAll(container: HTMLElement): readonly HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>('[data-pcc-readiness-region]'),
-  );
+  return Array.from(container.querySelectorAll<HTMLElement>('[data-pcc-readiness-region]'));
 }
 
 describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () => {
@@ -170,9 +155,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   it('flags safety-qaqc as having an unassigned-gap signal (item 004)', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
-    const safety = container.querySelector(
-      '[data-pcc-readiness-ownership-persona="safety-qaqc"]',
-    );
+    const safety = container.querySelector('[data-pcc-readiness-ownership-persona="safety-qaqc"]');
     expect(safety).not.toBeNull();
     expect(safety!.getAttribute('data-pcc-readiness-ownership-unassigned')).toBe('true');
   });
@@ -240,8 +223,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const panel = activateProjectReadiness(container);
     const enabledUpload = Array.from(panel.querySelectorAll('button')).filter(
-      (btn) =>
-        /^upload$/i.test((btn.textContent ?? '').trim()) && !btn.hasAttribute('disabled'),
+      (btn) => /^upload$/i.test((btn.textContent ?? '').trim()) && !btn.hasAttribute('disabled'),
     );
     expect(enabledUpload.length).toBe(0);
   });
@@ -249,12 +231,8 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   it('renders degraded source-health entries for permit-log (stale), buyout-log and external-systems (source-unavailable)', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
-    const permit = container.querySelector(
-      '[data-pcc-readiness-source-health="permit-log"]',
-    );
-    const buyout = container.querySelector(
-      '[data-pcc-readiness-source-health="buyout-log"]',
-    );
+    const permit = container.querySelector('[data-pcc-readiness-source-health="permit-log"]');
+    const buyout = container.querySelector('[data-pcc-readiness-source-health="buyout-log"]');
     const external = container.querySelector(
       '[data-pcc-readiness-source-health="external-systems"]',
     );
@@ -264,7 +242,8 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('readiness regions expose no executable-label buttons', () => {
-    const forbiddenLabel = /^(submit|approve|upload|run|execute|sync|write\s*back|writeback|complete\s*checklist|run\s*workflow)$/i;
+    const forbiddenLabel =
+      /^(submit|approve|upload|run|execute|sync|write\s*back|writeback|complete\s*checklist|run\s*workflow)$/i;
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     const regions = readinessRegionsAll(container);
@@ -288,9 +267,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   }
 
   function lifecycleSectionRegions(container: HTMLElement): NodeListOf<Element> {
-    return container.querySelectorAll(
-      '[data-pcc-readiness-section="lifecycle-readiness-center"]',
-    );
+    return container.querySelectorAll('[data-pcc-readiness-section="lifecycle-readiness-center"]');
   }
 
   it('still renders exactly one active-surface marker for project-readiness', () => {
@@ -298,9 +275,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
     activateProjectReadiness(container);
     const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(markers).toHaveLength(1);
-    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-      'project-readiness',
-    );
+    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
   });
 
   it('renders all nine lifecycle-readiness regions with their markers', () => {
@@ -430,7 +405,9 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
       expect(region.querySelectorAll('a[href]').length).toBe(0);
       const buttons = region.querySelectorAll('button');
       for (const btn of Array.from(buttons)) {
-        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(true);
+        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
+          true,
+        );
       }
     }
   });
@@ -497,9 +474,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
       '[data-pcc-lifecycle-item-detail-field="completed"]',
     );
     expect(completedCells.length).toBeGreaterThan(0);
-    const hasNotListed = Array.from(completedCells).some(
-      (el) => el.textContent === 'Not listed',
-    );
+    const hasNotListed = Array.from(completedCells).some((el) => el.textContent === 'Not listed');
     expect(hasNotListed).toBe(true);
   });
 
@@ -545,9 +520,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
-    const chips = container.querySelectorAll(
-      '[data-pcc-lifecycle-closeout-from-day-one="true"]',
-    );
+    const chips = container.querySelectorAll('[data-pcc-lifecycle-closeout-from-day-one="true"]');
     expect(chips.length).toBeGreaterThan(0);
   });
 
@@ -561,10 +534,9 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
     for (const region of Array.from(sectioned)) {
       const buttons = region.querySelectorAll('button');
       for (const btn of Array.from(buttons)) {
-        expect(
-          btn.hasAttribute('disabled') ||
-            btn.getAttribute('aria-disabled') === 'true',
-        ).toBe(true);
+        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
+          true,
+        );
       }
     }
   });
@@ -667,9 +639,9 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
     expect(region!.querySelectorAll('a[href]').length).toBe(0);
     const buttons = region!.querySelectorAll('button');
     for (const btn of Array.from(buttons)) {
-      expect(
-        btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true',
-      ).toBe(true);
+      expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
+        true,
+      );
     }
   });
 });
