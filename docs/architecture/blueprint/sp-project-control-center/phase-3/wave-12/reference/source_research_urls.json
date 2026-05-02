@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "wave": 12,
+    "title": "Wave 12 Source Research URLs",
+    "posture": "documentation-reference-only",
+    "runtimeContract": false
+  },
+  "sources": [
+    {
+      "id": "local-workbook",
+      "type": "local-file",
+      "path": "docs/reference/example/HB_ConstraintsLog_Template.xlsx",
+      "purpose": "Primary source workbook taxonomy and traceability"
+    },
+    {
+      "id": "wave12-audit",
+      "type": "local-file",
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-12/Wave_12_Repo_Audit_And_Workbook_Traceability.md",
+      "purpose": "Prompt 01 repo truth and workbook posture"
+    },
+    {
+      "id": "wave12-risk-model",
+      "type": "local-file",
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-12/Wave_12_Risk_And_Constraint_Exposure_Model.md",
+      "purpose": "Wave 12 exposure definitions and scoring posture"
+    }
+  ]
+}

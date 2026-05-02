@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "wave": 12,
+    "module": "constraints-log",
+    "title": "Wave 12 Default Constraints Log Seed Structure",
+    "posture": "documentation-reference-only",
+    "runtimeContract": false,
+    "activeDefaultConstraints": false,
+    "sourceWorkbook": "docs/reference/example/HB_ConstraintsLog_Template.xlsx"
+  },
+  "classification": {
+    "sections": [
+      { "row": 11, "name": "1. PERMITS - OPEN", "type": "constraint-open" },
+      { "row": 111, "name": "1. PERMITS - CLOSED", "type": "constraint-closed" },
+      { "row": 114, "name": "2. AHJ COORDINATION - OPEN", "type": "constraint-open" },
+      { "row": 214, "name": "2. AHJ COORDINATION - CLOSED", "type": "constraint-closed" },
+      { "row": 218, "name": "3. DESIGN DEVELOPMENT", "type": "constraint-open" },
+      { "row": 318, "name": "3. DESIGN DEVELOPMENT - CLOSED", "type": "constraint-closed" },
+      { "row": 321, "name": "4. UTILITY SERVICE PROVIDERS - OPEN", "type": "constraint-open" },
+      { "row": 421, "name": "4. UTILITY SERVICE PROVIDERS - CLOSED", "type": "constraint-closed" },
+      {
+        "row": 424,
+        "name": "5. HEDRICK BROTHERS INTERNAL COORDINATION ITEMS",
+        "type": "constraint-open"
+      },
+      {
+        "row": 524,
+        "name": "5. HEDRICK BROTHERS INTERNAL COORDINATION ITEMS - CLOSED",
+        "type": "constraint-closed"
+      },
+      { "row": 527, "name": "6. CONSTRUCTION PROGRESS - OPEN", "type": "constraint-open" },
+      { "row": 627, "name": "6. CONSTRUCTION PROGRESS - CLOSED", "type": "constraint-closed" },
+      { "row": 630, "name": "7. {NEW SECTION} - OPEN", "type": "placeholder-open" },
+      { "row": 730, "name": "7. {NEW SECTION} - OPEN", "type": "placeholder-open" },
+      { "row": 733, "name": "CHANGE TRACKING", "type": "change-exposure-source" },
+      { "row": 834, "name": "Delay Log", "type": "delay-exposure-source" }
+    ],
+    "fields": [
+      "No #",
+      "DESCRIPTION",
+      "DATE IDENTIFIED",
+      "STATUS",
+      "DAYS ELAPSED",
+      "REFERENCE",
+      "RESPONSIBLE",
+      "B.I.C",
+      "DUE",
+      "COMPLETION DATE",
+      "COMMENTS"
+    ],
+    "sampleRows": [
+      {
+        "row": 836,
+        "id": "DEL-001",
+        "description": "PBC Permit Delay - PDI Claim",
+        "classification": "delay-exposure-source-sample",
+        "isDefault": false
+      }
+    ],
+    "placeholderRows": {
+      "newSectionTemplateStartRows": [630, 730],
+      "hiddenRowsPresent": true,
+      "hiddenRowsCount": 810
+    },
+    "ambiguousItems": [
+      {
+        "key": "section-3-open-label",
+        "note": "Row 218 label lacks explicit OPEN suffix in workbook; treated as open-family section for taxonomy mapping only."
+      },
+      {
+        "key": "new-section-duplicate-open-label",
+        "note": "Rows 630 and 730 both use NEW SECTION OPEN label; treated as template placeholders."
+      }
+    ]
+  },
+  "mappingRules": {
+    "noWorkbookRowBecomesActiveDefaultConstraint": true,
+    "projectSpecificVerificationRequiredForActivation": true,
+    "changeTrackingAndDelayLogAreSourceContextOnly": true
+  }
+}
