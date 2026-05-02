@@ -1,128 +1,130 @@
 # Wave 11 Workbook Source Mapping
 
-Status: Canonical workbook extraction and source-traceability mapping posture for Wave 11
-
-## Purpose
-
-This document preserves workbook-derived repo truth for Wave 11, defines source-row traceability requirements, and prevents misinterpretation of workbook markers as final runtime or legal semantics.
-
-## Source Files
+## 1. Workbook Inventory
 
 - `docs/reference/example/Responsibility Matrix - Template.xlsx`
 - `docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx`
 
-## Verified Workbook Posture
+## 2. Extraction Methodology
 
-### General workbook (`Responsibility Matrix - Template.xlsx`)
+- Read workbook sheets directly from repo source files.
+- Classify rows into active default-item candidates vs ambiguous/schema-only rows.
+- Preserve source workbook, sheet, and row references.
+- Apply conservative normalization: only explicit `R/A/C/I` marks map directly; `X/Support/Review/Sign-Off` remain unresolved and require review.
 
-- Sheets: `PM`, `Field`
-- PM task-text rows: `82`
+## 3. Sheet Summary
+
+- PM sheet: task-text responsibility candidates and role-mark columns.
+- Field sheet: role-marked field responsibility rows.
+- Owner-contract sheet: article/page/party/description scaffold with placeholder posture.
+
+## 4. Used Ranges
+
+- PM: `A1:I86`
+- Field: `A1:H78`
+- Owner-contract Template: `A1:F45`
+
+## 5. Header and Role Columns
+
+- PM header row: row `3`; role columns `C:I`
+- Field header row: row `7`; role columns `D:H`
+- Owner-contract header row: row `1`; structure columns `A:D`
+
+## 6. Section/Grouping Rows
+
+- PM includes section/category values in column `A`.
+- Field includes category/group values in column `B`.
+- Owner-contract includes title/legend rows and placeholder scaffold rows.
+
+## 7. Responsibility Item Row Counts
+
+- PM task-row candidates: `82`
 - Field rows with assignment marks: `27`
-- Workbook-derived task-row posture context: `109`
-- Strict marked assignment rows total: `98` (`71` PM + `27` Field)
+- Workbook-derived task-row context total: `109`
+- Strict marked assignment rows: `98` (`71` PM + `27` Field)
 
-### Owner-contract workbook (`Responsibility Matrix - Owner Contract Template.xlsx`)
+## 8. Ambiguous Row Treatment
 
-- Sheet: `Template`
-- Structure: article/page/responsible-party/description columns with party legend
-- Posture: schema/placeholder template, not populated default obligation-description rows
+- PM task rows without assignment marks are ambiguous and require review.
+- Owner-contract placeholder rows are ambiguous/schema-only and excluded from active defaults.
 
-## 109 vs 98 Clarification Lock
+## 9. Owner-Contract Workbook Interpretation
 
-- `109` must be interpreted as workbook-derived task-row posture context only.
-- `98` is the strict marked-assignment posture.
-- Governing docs must not imply that 109 represents fully assigned active records.
+- Current posture is schema/placeholder only.
+- Active owner-contract default obligations in this pass: `0`.
+- Party legend remains mapping reference (`O`, `A/E`, `C`) and is not activated as obligation rows.
 
-## Row-Type Classification Contract
+## 10. Assignment Mark Normalization
 
-Each imported row must be classified before activation:
+Locked rule:
 
-- responsibility item
-- section/header row
-- instruction/reminder row
-- blank/formatting-only row
-- placeholder row
-- ambiguous row requiring review
+- Do not convert workbook marks directly into final RACI unless explicit mapping rule exists.
+- `X`, `Support`, `Review`, and `Sign-Off` remain unresolved in JSON normalization and set `requiresUserReview=true`.
 
-No automatic activation based only on non-empty cells.
+## 11. Role Alias Mapping
 
-## Source Row Traceability Requirements
+- Preserve source role labels exactly (for example `PX`, `Sr. PM`, `PM2`, `Lead Super`).
+- Canonical role mapping to PCC personas is deferred to governed review policy; source labels are not overwritten.
 
-Every workbook-derived default mapping record must preserve:
+## 12. RACI Normalization Policy
 
-- source workbook file
-- source sheet
-- source row
-- source section/category
-- source task text (exact)
-- source assignment marks by role column
-- normalization status
-- reviewer decision
+- Explicit marks only: `R -> Responsible`, `A -> Accountable`, `C -> Consulted`, `I -> Informed`.
+- Non-explicit source marks remain `Unknown` with review required.
 
-## Source Assignment Mark Interpretation Rules
+## 13. Contract-Party Mapping Policy
 
-Source assignment marks are source references and must be normalized through governance policy:
+- Contract-party mapping is separate from internal RACI.
+- `C` in owner-contract legend means `Contractor`, not RACI `Consulted`.
 
-- `X` = assigned in source; final normalized role requires policy mapping
-- `Support` = support contribution indicator (not automatically `Consulted`)
-- `Review` = review role indicator (not automatically `Approver`)
-- `Sign-Off` = sign-off indicator (may require decision-rights overlay and approval-step mapping)
+## 14. Default Item JSON Structure
 
-Source markers are not self-sufficient final runtime role semantics.
+Top-level JSON structure:
 
-## Role Normalization Policy
+- `metadata`
+- `sources`
+- `defaultItems`
+- `ambiguousItems`
 
-Role normalization must map workbook labels to canonical PCC vocabulary without mutating source text:
+Each item includes stable ID, source location, source marks, normalization fields, classification, review flag, and mapping notes.
 
-- preserve source labels (`PX`, `Sr. PM`, `PM2`, `PM1`, `PA`, `Lead Super`, etc.)
-- map to canonical PCC role/person vocabulary for product behavior
-- preserve explicit normalization notes where mapping is ambiguous
+## 15. Source Traceability Fields
 
-## RACI vs Contract-Party Semantic Separation
+Per item:
 
-The owner-contract legend and internal RACI axis are separate:
+- `id`
+- `sourceWorkbookType`
+- `sourceFile`
+- `sourceSheet`
+- `sourceRow`
+- `sourceSection`
+- `sourceTask`
+- `sourceAssignments`
+- `normalizedAssignments`
+- `recommendedTargetClassification`
+- `requiresUserReview`
+- `mappingNotes`
 
-- contract-party markers (`O`, `A/E`, `C`) classify contract-party context
-- internal RACI values classify internal operating responsibility
+## 16. Human Review Requirements
 
-Hard rule: contract-party `C = Contractor` is not RACI `C = Consulted`.
+Human review is mandatory for:
 
-## Owner-Contract Placeholder Posture
+- all unresolved non-explicit mark mappings
+- PM rows without marks
+- owner-contract placeholder/schema rows
+- any row with semantic ambiguity
 
-Current owner-contract workbook content is schema/placeholder posture and should be treated as:
+## 17. Items Excluded from Activation
 
-- contract-party structure source
-- obligation-reference model scaffold
-- mapping workflow scaffold
+- Owner-contract placeholder rows (`RM-OC-PLACEHOLDER-*`) are excluded from active `defaultItems`.
+- PM unmarked task rows are not excluded from defaults, but flagged as ambiguous review-required records.
 
-It is not treated as populated default contract obligation content.
+## 18. Validation Results
 
-## Human Review and Governance Controls
-
-Human review is required for:
-
-- ambiguous rows
-- conflicting marks
-- multiple-accountability posture
-- role vocabulary mismatches
-- contract-party vs RACI collisions
-
-Governed approval is required before default activation into template library posture.
-
-## Integration Boundary Reminders
-
-- Team & Access owns roster/access state.
-- HB Document Control Center owns evidence binaries.
-- Wave 14 owns approval/checkpoint execution.
-- Wave 8 owns framework seams.
-
-## Legal and Runtime Guardrails
-
-- No legal advice.
-- No automatic creation of legal obligations.
-- No replacement of executed contracts.
-- No runtime external-system mutation/writeback claims in this mapping document.
-
-## Prompt Sequencing Note
-
-`Wave_11_Documentation_Closeout.md` is intentionally deferred to Prompt 05.
+- JSON parse validation executed via `python -m json.tool`.
+- Count checks executed from generated JSON.
+- Output posture:
+  - `defaultItems total = 109`
+  - `defaultItems by workbook type = {'general-responsibility-matrix': 109}`
+  - `defaultItems by sheet = {'PM': 82, 'Field': 27}`
+  - `ambiguousItems total = 47`
+  - `owner-contract active items = 0`

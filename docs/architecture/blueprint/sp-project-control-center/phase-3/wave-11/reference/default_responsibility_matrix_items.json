@@ -1,0 +1,4017 @@
+{
+  "metadata": {
+    "module": "Responsibility Matrix",
+    "phase": "Phase 3",
+    "wave": "Wave 11",
+    "generatedFrom": "Responsibility Matrix workbook source extraction",
+    "sourceFiles": [
+      "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx"
+    ],
+    "classificationPolicy": [
+      "109 is workbook-derived task-row context: 82 PM task-text rows + 27 Field rows with assignment marks.",
+      "Strict marked assignment rows total 98 (71 PM + 27 Field).",
+      "Owner-contract workbook placeholder/schema rows are not active default obligations.",
+      "Do not convert X/Support/Review/Sign-Off directly into final RACI without explicit mapping rule."
+    ]
+  },
+  "sources": [
+    {
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "file": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sheets": [
+        {
+          "name": "PM",
+          "usedRange": "A1:I86",
+          "taskTextRows": 82,
+          "strictMarkedRows": 71,
+          "headerRow": 3,
+          "roleColumns": ["C", "D", "E", "F", "G", "H", "I"]
+        },
+        {
+          "name": "Field",
+          "usedRange": "A1:H78",
+          "taskTextRows": 30,
+          "strictMarkedRows": 27,
+          "headerRow": 7,
+          "roleColumns": ["D", "E", "F", "G", "H"]
+        }
+      ]
+    },
+    {
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "file": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sheets": [
+        {
+          "name": "Template",
+          "usedRange": "A1:F45",
+          "activeDefaultObligationRows": 0,
+          "placeholderRows": 36,
+          "legendRows": [40, 41, 42]
+        }
+      ]
+    }
+  ],
+  "defaultItems": [
+    {
+      "id": "RM-PM-0001",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 4,
+      "sourceSection": "PX",
+      "sourceTask": "Owner Notices (GC/Schedule)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0002",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 5,
+      "sourceSection": "PX",
+      "sourceTask": "Sign all contracts",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0003",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 6,
+      "sourceSection": "PX",
+      "sourceTask": "Sign all Prime contract change orders",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0004",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 7,
+      "sourceSection": "PX",
+      "sourceTask": "Sign all sub change orders above $10,000",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0005",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 8,
+      "sourceSection": "SPM",
+      "sourceTask": "Sign all sub change orders below $10,000",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0006",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 9,
+      "sourceSection": "SPM",
+      "sourceTask": "Review & Approve Subcontractor SOV's",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0007",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 10,
+      "sourceSection": "SPM",
+      "sourceTask": "Review & Get Approved Change Orders (PCO, PCCO, CCO, PO, Inv's)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0008",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 11,
+      "sourceSection": "SPM",
+      "sourceTask": "Timberscan Invoice Approvals",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0009",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 12,
+      "sourceSection": "SPM",
+      "sourceTask": "Credit Card / Expense Report Approvals",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0010",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 13,
+      "sourceSection": "SPM",
+      "sourceTask": "Get OCIP Subcontractor Credits Executed & Enrollment",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0011",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 14,
+      "sourceSection": "SPM",
+      "sourceTask": "Complete Payment Application (Sub PA, Pencil, Final, Signatures)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0012",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 15,
+      "sourceSection": "SPM",
+      "sourceTask": "Confirm Wire Timing & Approve Release of Funds",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0013",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 16,
+      "sourceSection": "SPM",
+      "sourceTask": "Monthly Financial Reports (GC/GR, Draw, Summary, Budget(s), Sage)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0014",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 17,
+      "sourceSection": "SPM",
+      "sourceTask": "Assemble & Update Schedule",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0015",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 18,
+      "sourceSection": "SPM",
+      "sourceTask": "Run Daily Internal Huddle Meeting",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0016",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 19,
+      "sourceSection": "SPM",
+      "sourceTask": "Run Project and collaborate with Team",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0017",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 20,
+      "sourceSection": "PM 2",
+      "sourceTask": "Update Subcontractor Tracking Sheet/Status Log - Buy-Out",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0018",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 21,
+      "sourceSection": "PM 2",
+      "sourceTask": "Subcontract SOW",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Review"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Review'; non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0019",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 22,
+      "sourceSection": "PM 2",
+      "sourceTask": "Subcontractor Contract",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Review"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Review'; non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0020",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 23,
+      "sourceSection": "PM 2",
+      "sourceTask": "Subcontractor OCIP Negotiation",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Review"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Review'; non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0021",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 24,
+      "sourceSection": "PM 2",
+      "sourceTask": "Sub Reccomendation of Award",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Review"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Review'; non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0022",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 25,
+      "sourceSection": "PM 2",
+      "sourceTask": "Allocation & Allowance Design Verification",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0023",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 26,
+      "sourceSection": "PM 2",
+      "sourceTask": "Allocation & Allowance Subcontract Pricing",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Review"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Review'; non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0024",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 27,
+      "sourceSection": "PM 2",
+      "sourceTask": "Allocation & Allowance Subcontract Award or CO",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PX",
+          "sourceMark": "Sign-Off"
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Review"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PX",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Review'; non-explicit source mark 'Sign-Off'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0025",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 28,
+      "sourceSection": "PM 2",
+      "sourceTask": "Manage OAC Meeting (Minutes, Follow-Thru, Meeting)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0026",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 29,
+      "sourceSection": "PM 2",
+      "sourceTask": "Design Center Build-Out",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0027",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 30,
+      "sourceSection": "PM 2",
+      "sourceTask": "PM Building Envelope, Exterior Finishes, Interior Finishes Subcontractors",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0028",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 31,
+      "sourceSection": "PM 1",
+      "sourceTask": "Write, Send, Follow-Up, Distribute RFI's",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0029",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 32,
+      "sourceSection": "PM 1",
+      "sourceTask": "Add Change Events for Cost RFI's not in Bulletin/Dwg Rev",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0030",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 33,
+      "sourceSection": "PM 1",
+      "sourceTask": "Review, Submit, Distribute Submittals",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0031",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 34,
+      "sourceSection": "PM 1",
+      "sourceTask": "Manage BIM Process, Schedule, Deliverables",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0032",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 35,
+      "sourceSection": "PM 1",
+      "sourceTask": "Verify Coordination in Field Being Implemented Weekly",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0033",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 36,
+      "sourceSection": "PM 1",
+      "sourceTask": "Update RFI Log Weekly",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0034",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 37,
+      "sourceSection": "PM 1",
+      "sourceTask": "Update Submittal Log Weekly",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0035",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 38,
+      "sourceSection": "PM 1",
+      "sourceTask": "Provide Full Submittal Requirements Log per Contract/Dwg/Spec",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0036",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 39,
+      "sourceSection": "PM 1",
+      "sourceTask": "Update 12 Week Look-Ahead Schedule - Submittals & Procurement Sections",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0037",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 40,
+      "sourceSection": "PM1",
+      "sourceTask": "Update Procurement Log Monthly (Checked to Schedule Update)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0038",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 41,
+      "sourceSection": "PM1",
+      "sourceTask": "PM Structural, Framing, Drywall, MEP, Utilities, Life Safety",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0039",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 42,
+      "sourceSection": "PA",
+      "sourceTask": "Write, Send, Follow-Up, Distribute RFI's",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0040",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 43,
+      "sourceSection": "PA",
+      "sourceTask": "Update Procurement Log Monthly (Checked to Schedule Update)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0041",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 44,
+      "sourceSection": "PA",
+      "sourceTask": "Solicit, Review, Submit, Distribute Submittals",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0042",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 45,
+      "sourceSection": "PA",
+      "sourceTask": "Assemble Weekly Safety Audits into Monthly Safety Audit Rpt",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0043",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 46,
+      "sourceSection": "PA",
+      "sourceTask": "Print & File RFI's in Field Binder for RP to Post to Drawings (Every 2 weeks)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0044",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 47,
+      "sourceSection": "PA",
+      "sourceTask": "Manage all Permitting w/ County, Town, Site Agencies, Bullletins, Sub Permits (Weekly)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0045",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 48,
+      "sourceSection": "PA",
+      "sourceTask": "Improve & Maintain Permit Log (Monthly); Maintain Field Hardcopies/Binder",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0046",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 49,
+      "sourceSection": "PA",
+      "sourceTask": "Manage Drawing Sets in Procore (As received)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0047",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 50,
+      "sourceSection": "PA",
+      "sourceTask": "Overlay Drawing Sets in Procore, Do Dwg Check For Initial Scope Changes",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0048",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 51,
+      "sourceSection": "PA",
+      "sourceTask": "Distribute Drawings to Subs w/ SPM Worded Pricing Deadline Paragraph",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0049",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 52,
+      "sourceSection": "PA",
+      "sourceTask": "Get from Subs Monthly & Maintain As-Built Drawings",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0050",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 53,
+      "sourceSection": "PA",
+      "sourceTask": "Get Field, 24x36\" Hardcopy Drawing Update Sets (ei Master Permit, Bull 4)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0051",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 54,
+      "sourceSection": "PA",
+      "sourceTask": "Manage Sub Field Paperwork is Compliant (Dalies, 2 WK Look-Aheads, Toolbox..)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0052",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 55,
+      "sourceSection": "PA",
+      "sourceTask": "Maintain SWPPP & Dewatering Log Binders / Reporting",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0053",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 56,
+      "sourceSection": "PA",
+      "sourceTask": "Maintain and Update During Meeting OAC Minutes",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0054",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 57,
+      "sourceSection": "PA",
+      "sourceTask": "Input Subs into OCIP Portal for Enrollment",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0055",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 58,
+      "sourceSection": "PA",
+      "sourceTask": "Maintain and Update During Meeting Sub Minutes",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0056",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 59,
+      "sourceSection": "QAQC",
+      "sourceTask": "Design Doc Coordination (Draft RFI's, Review Submittals, Track Dwg/Spec Req Rev's)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM1",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "QAQC",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM1",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "QAQC",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0057",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 60,
+      "sourceSection": "QAQC",
+      "sourceTask": "Field Verification of Critical QAQC Items",
+      "sourceAssignments": [
+        {
+          "sourceRole": "QAQC",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "QAQC",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0058",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 61,
+      "sourceSection": "QAQC",
+      "sourceTask": "Threshold Inspection Coordination",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "QAQC",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "QAQC",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0059",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 62,
+      "sourceSection": "QAQC",
+      "sourceTask": "Manage Waterproofing Consultant Inspection & Report Closeout Documentation",
+      "sourceAssignments": [
+        {
+          "sourceRole": "QAQC",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "QAQC",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0060",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 63,
+      "sourceSection": "QAQC",
+      "sourceTask": "Quality Built Inspection Coordination & Report Closeout Documentation",
+      "sourceAssignments": [
+        {
+          "sourceRole": "QAQC",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "QAQC",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0061",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 64,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Process Sub Payment Applications & Invoices",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0062",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 65,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Prepare Pencil Copy Payment Application",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0063",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 66,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Prepare Final Payment Application",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0064",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 67,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Send Final HB Signed Pay App to Owners",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0065",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 68,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Verify P&P Bonds Received & Valid; Provide Bond Acct Monthly Report",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0066",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 69,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Receive all Releases Monthly",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0067",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 70,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Verify Weekly Payroll Report Accurate",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0068",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 71,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Verify Subcontractor Award Checklist Complete prior to Procure 'Approval' Status",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PM2",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Sr. PM",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PM2",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0069",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 72,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Request and Maintain COI (GL,Auto, WC, Umbrella, Stored Mat, Add Ins HB/JDL's)",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0070",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 73,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Sync Project COI w/ Procore COI & Main Office Status",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0071",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 74,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "Verify Procore Project Insurance Report Updated Monthly, PDF Sent to MWC",
+      "sourceAssignments": [
+        {
+          "sourceRole": "PA",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "PA",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Proj Acct.",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-PM-0072",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 76,
+      "sourceSection": "PM's",
+      "sourceTask": "Monday by 12 PM - Have all weekly reports updated for OAC Agenda",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0073",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 77,
+      "sourceSection": "All",
+      "sourceTask": "Friday's - Get Payroll Time into HH2 (you verify your time is in, not rely on Tacara)",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0074",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 78,
+      "sourceSection": "All",
+      "sourceTask": "Weekly - Get Personal Expense Reports in",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0075",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 79,
+      "sourceSection": "PM's/Supers",
+      "sourceTask": "5th, Vehicle Reimbursement Due",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0076",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 80,
+      "sourceSection": "PM/Super",
+      "sourceTask": "7th, Get BOA or Speedway Concur Reports submitted",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0077",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 81,
+      "sourceSection": "SPM",
+      "sourceTask": "14th, Financial Reports finalized in folder",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0078",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 82,
+      "sourceSection": "SPM",
+      "sourceTask": "15th, Change Orders submitted to Owner",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0079",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 83,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "24th, Pencil Copy Pay App Due",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0080",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 84,
+      "sourceSection": "All",
+      "sourceTask": "25th, Get Personal Expense Reports in no later than",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0081",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 85,
+      "sourceSection": "Proj Acct",
+      "sourceTask": "3rd, Final Pay App Sent by end of month 28th-31st",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-PM-0082",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 86,
+      "sourceSection": "PM's",
+      "sourceTask": "5th, Financial (& Non Financial) Reports Due",
+      "sourceAssignments": [],
+      "normalizedAssignments": [],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "no assignment marks on source row"
+    },
+    {
+      "id": "RM-FLD-0001",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 8,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Overall Job Lead",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0002",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 9,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Monthly Schedule Updates",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0003",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 10,
+      "sourceSection": "Lead Super",
+      "sourceTask": "3 week look Aheads",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0004",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 11,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Review Sub Pay Apps",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0005",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 12,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Site Work",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0006",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 13,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Landscape",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0007",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 14,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Hardscape",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0008",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 15,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Utilities",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0009",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 16,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Courtyard",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0010",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 17,
+      "sourceSection": "Lead Super",
+      "sourceTask": "Road Work",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0011",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 18,
+      "sourceSection": "MEP Super",
+      "sourceTask": "MEP for Units, Amentities , Exteriors, And Courtyard",
+      "sourceAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0012",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 19,
+      "sourceSection": "MEP Super",
+      "sourceTask": "Interiors of Units until Drywall has been Hung",
+      "sourceAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0013",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 20,
+      "sourceSection": "MEP Super",
+      "sourceTask": "Interior's for all trades Amenities until completion",
+      "sourceAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0014",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 21,
+      "sourceSection": "MEP Super",
+      "sourceTask": "Exterior Lighting",
+      "sourceAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0015",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 22,
+      "sourceSection": "MEP Super",
+      "sourceTask": "Site Logistics",
+      "sourceAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0016",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 26,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Exterior Envelope Stucco, Roof, Windows, Exterior Facades, and Painting",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0017",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 27,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Interiors Once drywall has been hung",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0018",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 28,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Flooring Sub",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0019",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 29,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Painting sub",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0020",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 30,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "MEP Trim Out",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "X"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0021",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 36,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Exterior Envelope Stucco, Roof, Windows, Exterior Facades, and Painting",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0022",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 37,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Interiors Once drywall has been hung",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0023",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 38,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Resi Cabinets Sub",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0024",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 39,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Wood Trim and Doors Sub",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0025",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 40,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "Window Covering Sub",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0026",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 41,
+      "sourceSection": "Interior/ Envelope",
+      "sourceTask": "MEP Trim Out",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    },
+    {
+      "id": "RM-FLD-0027",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "Field",
+      "sourceRow": 52,
+      "sourceSection": "QAQC",
+      "sourceTask": "Review all building envelop Submittals and Details",
+      "sourceAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "MEP Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Interior Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "Asst Super",
+          "sourceMark": "Support"
+        },
+        {
+          "sourceRole": "QaQc",
+          "sourceMark": "X"
+        }
+      ],
+      "normalizedAssignments": [
+        {
+          "sourceRole": "Lead Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "MEP Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Interior Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "Asst Super",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        },
+        {
+          "sourceRole": "QaQc",
+          "normalizedRaciValue": "Unknown",
+          "explicitMappingRule": false
+        }
+      ],
+      "recommendedTargetClassification": "responsibility-item",
+      "requiresUserReview": true,
+      "mappingNotes": "non-explicit source mark 'Support'; non-explicit source mark 'X'"
+    }
+  ],
+  "ambiguousItems": [
+    {
+      "id": "RM-PM-AMB-0001",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 76,
+      "sourceTask": "Monday by 12 PM - Have all weekly reports updated for OAC Agenda",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0002",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 77,
+      "sourceTask": "Friday's - Get Payroll Time into HH2 (you verify your time is in, not rely on Tacara)",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0003",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 78,
+      "sourceTask": "Weekly - Get Personal Expense Reports in",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0004",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 79,
+      "sourceTask": "5th, Vehicle Reimbursement Due",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0005",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 80,
+      "sourceTask": "7th, Get BOA or Speedway Concur Reports submitted",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0006",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 81,
+      "sourceTask": "14th, Financial Reports finalized in folder",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0007",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 82,
+      "sourceTask": "15th, Change Orders submitted to Owner",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0008",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 83,
+      "sourceTask": "24th, Pencil Copy Pay App Due",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0009",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 84,
+      "sourceTask": "25th, Get Personal Expense Reports in no later than",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0010",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 85,
+      "sourceTask": "3rd, Final Pay App Sent by end of month 28th-31st",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-PM-AMB-0011",
+      "sourceWorkbookType": "general-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Template.xlsx",
+      "sourceSheet": "PM",
+      "sourceRow": 86,
+      "sourceTask": "5th, Financial (& Non Financial) Reports Due",
+      "recommendedTargetClassification": "ambiguous-unmarked-task-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Task text present but no assignment marks; do not infer final RACI values."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0001",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 3,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0002",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 4,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0003",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 5,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0004",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 6,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0005",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 7,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0006",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 8,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0007",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 9,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0008",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 10,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0009",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 11,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0010",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 12,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0011",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 13,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0012",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 14,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0013",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 15,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0014",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 16,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0015",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 17,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0016",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 18,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0017",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 19,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0018",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 20,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0019",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 21,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0020",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 22,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0021",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 23,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0022",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 24,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0023",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 25,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0024",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 26,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0025",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 27,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0026",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 28,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0027",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 29,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0028",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 30,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0029",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 31,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0030",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 32,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0031",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 33,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0032",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 34,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0033",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 35,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0034",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 36,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0035",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 37,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    },
+    {
+      "id": "RM-OC-PLACEHOLDER-0036",
+      "sourceWorkbookType": "owner-contract-responsibility-matrix",
+      "sourceFile": "docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx",
+      "sourceSheet": "Template",
+      "sourceRow": 38,
+      "sourceTask": null,
+      "recommendedTargetClassification": "placeholder-schema-row",
+      "requiresUserReview": true,
+      "mappingNotes": "Owner-contract placeholder row; track as schema only, not active default obligation."
+    }
+  ]
+}
