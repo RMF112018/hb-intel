@@ -23,17 +23,31 @@
 import { Fragment, useEffect, useState, type FC } from 'react';
 import {
   PCC_MVP_SURFACES,
+  SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
+  PccLifecycleReadinessReadModel,
   PccProjectId,
-  PccReadModelEnvelope,
   PccProjectReadinessFrameworkReadModel,
+  PccReadModelEnvelope,
 } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { buildPccLifecycleReadinessViewModel } from './lifecycleReadinessAdapter';
+import type {
+  IPccLifecycleBlockersViewModel,
+  IPccLifecycleEvidenceViewModel,
+  IPccLifecycleFamilyDomainsViewModel,
+  IPccLifecycleFutureCloseoutViewModel,
+  IPccLifecycleMapViewModel,
+  IPccLifecycleMyActionsViewModel,
+  IPccLifecycleReadinessHeroViewModel,
+  IPccLifecycleReadinessViewModel,
+  IPccLifecycleSourceTraceabilityViewModel,
+} from './lifecycleReadinessViewModel';
 import { buildPccProjectReadinessViewModel } from './projectReadinessAdapter';
 import type {
   IPccProjectReadinessReadModelClient,
@@ -66,13 +80,34 @@ const FIXTURE_ENVELOPE: PccReadModelEnvelope<PccProjectReadinessFrameworkReadMod
 
 const FIXTURE_VIEW_MODEL = buildPccProjectReadinessViewModel(FIXTURE_ENVELOPE);
 
+const FIXTURE_LIFECYCLE_ENVELOPE: PccReadModelEnvelope<PccLifecycleReadinessReadModel> = {
+  projectId: SAMPLE_PROJECT_PROFILE.projectId,
+  mode: 'fixture',
+  sourceStatus: 'available',
+  readOnly: true,
+  warnings: [],
+  generatedAtUtc: '2026-04-30T00:00:00.000Z',
+  data: SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
+};
+
+const FIXTURE_LIFECYCLE_VIEW_MODEL = buildPccLifecycleReadinessViewModel(
+  FIXTURE_LIFECYCLE_ENVELOPE,
+);
+
+const LIFECYCLE_SECTION_MARKER = 'lifecycle-readiness-center';
+
 export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = ({
   readModelClient,
 }) => {
   if (readModelClient) {
     return <ReadModelContent client={readModelClient} />;
   }
-  return <ReadinessRegions viewModel={FIXTURE_VIEW_MODEL} />;
+  return (
+    <Fragment>
+      <ReadinessRegions viewModel={FIXTURE_VIEW_MODEL} />
+      <LifecycleReadinessRegions viewModel={FIXTURE_LIFECYCLE_VIEW_MODEL} />
+    </Fragment>
+  );
 };
 
 export default PccProjectReadinessSurface;
@@ -87,7 +122,16 @@ interface ReadModelContentProps {
 
 const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
   const viewModel = useProjectReadinessReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  return <ReadinessRegions viewModel={viewModel} />;
+  const lifecycleViewModel = useLifecycleReadinessReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
+  return (
+    <Fragment>
+      <ReadinessRegions viewModel={viewModel} />
+      <LifecycleReadinessRegions viewModel={lifecycleViewModel} />
+    </Fragment>
+  );
 };
 
 function useProjectReadinessReadModel(
@@ -103,6 +147,31 @@ function useProjectReadinessReadModel(
         const env = await client.getProjectReadiness(projectId);
         if (cancelled) return;
         setVm(buildPccProjectReadinessViewModel(env));
+      } catch {
+        if (cancelled) return;
+        setVm({ status: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [client, projectId]);
+  return vm;
+}
+
+function useLifecycleReadinessReadModel(
+  client: IPccProjectReadinessReadModelClient,
+  projectId: PccProjectId,
+): IPccLifecycleReadinessViewModel {
+  const [vm, setVm] = useState<IPccLifecycleReadinessViewModel>({ status: 'loading' });
+  useEffect(() => {
+    let cancelled = false;
+    setVm({ status: 'loading' });
+    void (async () => {
+      try {
+        const env = await client.getLifecycleReadiness(projectId);
+        if (cancelled) return;
+        setVm(buildPccLifecycleReadinessViewModel(env));
       } catch {
         if (cancelled) return;
         setVm({ status: 'error' });
@@ -681,3 +750,532 @@ function riskTagLabel(tag: ProjectReadinessRiskTag): string {
       return 'Monitor';
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 9 — Project Lifecycle Readiness Center regions
+// (Direct Fragment children. Each card carries the section marker
+//  `data-pcc-readiness-section="lifecycle-readiness-center"` so tests
+//  can scope queries to the lifecycle group without wrapping the cards
+//  in an element that breaks bento direct-child layout.)
+// ─────────────────────────────────────────────────────────────────────
+
+interface LifecycleReadinessRegionsProps {
+  readonly viewModel: IPccLifecycleReadinessViewModel;
+}
+
+const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewModel }) => {
+  if (viewModel.status === 'loading') {
+    return (
+      <PccDashboardCard
+        footprint="full"
+        eyebrow="Project Lifecycle Readiness Center"
+        title="Read-only lifecycle readiness preview"
+      >
+        <div
+          data-pcc-readiness-region="lifecycle-hero"
+          data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+          className={styles.heroBody}
+        >
+          <PccPreviewState
+            state="loading"
+            title="Read-only lifecycle readiness preview"
+            description="No workflow execution is enabled in Wave 9."
+          />
+        </div>
+      </PccDashboardCard>
+    );
+  }
+  if (viewModel.status === 'error') {
+    return (
+      <PccDashboardCard
+        footprint="full"
+        eyebrow="Project Lifecycle Readiness Center"
+        title="Read-only lifecycle readiness preview"
+      >
+        <div
+          data-pcc-readiness-region="lifecycle-hero"
+          data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+          className={styles.heroBody}
+        >
+          <PccPreviewState
+            state="error"
+            title="Read-only lifecycle readiness preview"
+            description="No workflow execution is enabled in Wave 9."
+          />
+        </div>
+      </PccDashboardCard>
+    );
+  }
+  return (
+    <Fragment>
+      <LifecycleHeroCard hero={viewModel.hero} />
+      <LifecycleMapCard map={viewModel.lifecycleMap} />
+      <LifecycleFamilyDomainsCard familyDomains={viewModel.familyDomains} />
+      <LifecycleMyActionsCard myActions={viewModel.myActions} />
+      <LifecycleBlockersCard blockers={viewModel.blockers} />
+      <LifecycleEvidenceCard evidence={viewModel.evidence} />
+      <LifecycleFutureCloseoutCard futureCloseout={viewModel.futureCloseout} />
+      <LifecycleSourceTraceabilityCard sourceTraceability={viewModel.sourceTraceability} />
+    </Fragment>
+  );
+};
+
+interface LifecycleHeroCardProps {
+  readonly hero: IPccLifecycleReadinessHeroViewModel;
+}
+
+const LifecycleHeroCard: FC<LifecycleHeroCardProps> = ({ hero }) => (
+  <PccDashboardCard
+    footprint="full"
+    eyebrow="Project Lifecycle Readiness Center"
+    title="Lifecycle readiness — command surface"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-hero"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.heroBody}
+    >
+      <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
+      <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
+      <div className={styles.heroStats}>
+        <span
+          className={styles.heroStat}
+          data-pcc-lifecycle-stat="headline-posture"
+        >
+          <span className={styles.heroStatLabel}>Headline posture</span>
+          <PccStatusPill tone={postureToTone(hero.headlinePosture)}>
+            {posturelabel(hero.headlinePosture)}
+          </PccStatusPill>
+        </span>
+        <span
+          className={styles.heroStat}
+          data-pcc-lifecycle-stat="active-gate"
+        >
+          <span className={styles.heroStatLabel}>Active gate</span>
+          <span className={styles.heroStatValue}>{hero.activeGateLabel}</span>
+        </span>
+        <span
+          className={styles.heroStat}
+          data-pcc-lifecycle-stat="open-blockers"
+        >
+          <span className={styles.heroStatLabel}>Open blockers</span>
+          <span className={styles.heroStatValue}>{hero.totalOpenBlockers}</span>
+        </span>
+        <span
+          className={styles.heroStat}
+          data-pcc-lifecycle-stat="pending-evidence"
+        >
+          <span className={styles.heroStatLabel}>Pending evidence</span>
+          <span className={styles.heroStatValue}>{hero.totalPendingEvidence}</span>
+        </span>
+        <span
+          className={styles.heroStat}
+          data-pcc-lifecycle-stat="library-total"
+        >
+          <span className={styles.heroStatLabel}>Library scope</span>
+          <span className={styles.heroStatValue}>
+            {hero.libraryTotal} item{hero.libraryTotal === 1 ? '' : 's'}
+          </span>
+        </span>
+        <span
+          className={styles.heroStat}
+          data-pcc-lifecycle-stat="project-items"
+        >
+          <span className={styles.heroStatLabel}>Project items</span>
+          <span className={styles.heroStatValue}>{hero.totalProjectItems}</span>
+        </span>
+      </div>
+    </div>
+  </PccDashboardCard>
+);
+
+interface LifecycleMapCardProps {
+  readonly map: IPccLifecycleMapViewModel;
+}
+
+const LifecycleMapCard: FC<LifecycleMapCardProps> = ({ map }) => (
+  <PccDashboardCard
+    footprint="full"
+    eyebrow="Lifecycle map"
+    title="Phases — startup → mobilization → safety → controls → pre-CO → turnover → closeout → warranty"
+  >
+    <ol
+      data-pcc-readiness-region="lifecycle-map"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.gateMapList}
+      aria-label="Project lifecycle map phases"
+    >
+      {map.phases.map((p) => (
+        <li
+          key={p.phaseId}
+          className={styles.gateMapItem}
+          data-pcc-lifecycle-phase-id={p.phaseId}
+          data-pcc-lifecycle-phase-in-snapshot={p.isInSnapshot ? 'true' : 'false'}
+        >
+          <span className={styles.gateLabel}>{p.phaseLabel}</span>
+          <PccStatusPill tone={postureToTone(p.posture)}>
+            {posturelabel(p.posture)}
+          </PccStatusPill>
+          <span className={styles.gateMeta}>
+            {p.openBlockerCount} blocker{p.openBlockerCount === 1 ? '' : 's'} ·{' '}
+            {p.pendingEvidenceCount} pending evidence · {p.criticalCount} critical
+          </span>
+        </li>
+      ))}
+    </ol>
+    <p className={styles.heroCaption}>{map.summaryCaption}</p>
+  </PccDashboardCard>
+);
+
+interface LifecycleFamilyDomainsCardProps {
+  readonly familyDomains: IPccLifecycleFamilyDomainsViewModel;
+}
+
+const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({
+  familyDomains,
+}) => (
+  <PccDashboardCard
+    footprint="full"
+    eyebrow="Families and domains"
+    title="Startup, safety, closeout — and contributing domains"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-family-domains"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.heroBody}
+    >
+      <ul className={styles.domainGrid} aria-label="Lifecycle readiness families">
+        {familyDomains.families.map((f) => (
+          <li
+            key={f.family}
+            className={styles.domainCard}
+            data-pcc-lifecycle-family={f.family}
+          >
+            <span className={styles.domainLabel}>{f.familyLabel}</span>
+            <PccStatusPill tone={postureToTone(f.headlinePosture)}>
+              {posturelabel(f.headlinePosture)}
+            </PccStatusPill>
+            <span className={styles.domainMeta}>
+              {f.libraryCount} library item{f.libraryCount === 1 ? '' : 's'}
+            </span>
+            <span className={styles.domainMeta}>
+              {f.instanceCount} project instance{f.instanceCount === 1 ? '' : 's'}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {familyDomains.domains.length === 0 ? (
+        <PccPreviewState
+          state="empty"
+          title="Domain rollups unavailable"
+          description="Domain summaries appear once the readiness source is available."
+        />
+      ) : (
+        <ul
+          className={styles.domainGrid}
+          aria-label="Lifecycle readiness contributing domains"
+        >
+          {familyDomains.domains.map((d) => (
+            <li
+              key={d.domainId}
+              className={styles.domainCard}
+              data-pcc-lifecycle-domain-id={d.domainId}
+            >
+              <span className={styles.domainLabel}>{d.domainLabel}</span>
+              <PccStatusPill tone={postureToTone(d.posture)}>
+                {posturelabel(d.posture)}
+              </PccStatusPill>
+              <span className={styles.domainMeta}>
+                {d.openBlockerCount} blocker{d.openBlockerCount === 1 ? '' : 's'}
+              </span>
+              <span className={styles.domainMeta}>
+                {d.pendingEvidenceCount} pending evidence
+              </span>
+              <span className={styles.domainMeta}>
+                Confidence: {capitalize(d.confidence)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </PccDashboardCard>
+);
+
+interface LifecycleMyActionsCardProps {
+  readonly myActions: IPccLifecycleMyActionsViewModel;
+}
+
+const LifecycleMyActionsCard: FC<LifecycleMyActionsCardProps> = ({ myActions }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="My readiness actions"
+    title="Active assignments"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-my-actions"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.priorityActionsList}
+      aria-label="My readiness actions"
+    >
+      <p className={styles.priorityActionsCaption}>{myActions.captionText}</p>
+      {myActions.items.length === 0 ? (
+        <PccPreviewState
+          state="empty"
+          title="No active readiness actions"
+          description={myActions.inertActionLabel}
+        />
+      ) : (
+        <ul
+          className={styles.priorityActionsListInner}
+          aria-label="Active readiness items"
+        >
+          {myActions.items.map((item) => (
+            <li
+              key={item.projectItemId}
+              className={styles.priorityActionItem}
+              data-pcc-lifecycle-item-id={item.projectItemId}
+              data-pcc-lifecycle-family={item.family}
+            >
+              <span className={styles.priorityActionTitle}>{item.title}</span>
+              <span className={styles.priorityActionMeta}>
+                {item.familyLabel} · {item.phaseLabel}
+              </span>
+              <span className={styles.priorityActionMeta}>
+                Status: {posturelabel(item.status)} · Criticality:{' '}
+                {capitalize(item.criticality)}
+              </span>
+              <span className={styles.priorityActionMeta}>
+                Owner: {item.ownerPersona}
+                {item.dueDateUtc ? ` · Due ${item.dueDateUtc.slice(0, 10)}` : ''}
+              </span>
+              <span className={styles.inertChip} aria-disabled="true">
+                Preview only
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className={styles.priorityActionsFooter}>{myActions.inertActionLabel}</p>
+    </div>
+  </PccDashboardCard>
+);
+
+interface LifecycleBlockersCardProps {
+  readonly blockers: IPccLifecycleBlockersViewModel;
+}
+
+const LifecycleBlockersCard: FC<LifecycleBlockersCardProps> = ({ blockers }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Blockers and exceptions"
+    title="Blocked, escalated, and at-risk items"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-blockers-exceptions"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.blockerList}
+    >
+      <p className={styles.heroCaption}>{blockers.summaryCaption}</p>
+      <ul className={styles.evidenceList} aria-label="Blocker state buckets">
+        {blockers.buckets.map((b) => (
+          <li
+            key={b.blockerState}
+            className={styles.evidenceItem}
+            data-pcc-lifecycle-blocker-state={b.blockerState}
+          >
+            <span className={styles.evidenceLabel}>{capitalize(b.blockerState)}</span>
+            <span className={styles.evidenceCount}>
+              {b.itemCount} item{b.itemCount === 1 ? '' : 's'}
+            </span>
+            <span className={styles.evidenceMeta}>
+              Critical {b.severityCounts.critical} · High {b.severityCounts.high} ·
+              Medium {b.severityCounts.medium} · Low {b.severityCounts.low}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {blockers.items.length > 0 ? (
+        <ul className={styles.blockerListInner} aria-label="Blocked items">
+          {blockers.items.map((item) => (
+            <li
+              key={item.projectItemId}
+              className={styles.blockerItem}
+              data-pcc-lifecycle-blocker-item-id={item.projectItemId}
+              data-pcc-lifecycle-family={item.family}
+            >
+              <span className={styles.blockerTitle}>{item.title}</span>
+              <span className={styles.blockerMeta}>
+                {item.familyLabel} · Severity: {capitalize(item.severity)}
+              </span>
+              <span className={styles.blockerMeta}>
+                State: {capitalize(item.blockerState)} · Status:{' '}
+                {posturelabel(item.status)}
+                {item.exceptionCode ? ` · Exception: ${item.exceptionCode}` : ''}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  </PccDashboardCard>
+);
+
+interface LifecycleEvidenceCardProps {
+  readonly evidence: IPccLifecycleEvidenceViewModel;
+}
+
+const LifecycleEvidenceCard: FC<LifecycleEvidenceCardProps> = ({ evidence }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Evidence readiness"
+    title="Evidence-state buckets"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-evidence-readiness"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.evidenceGrid}
+    >
+      {evidence.buckets.length === 0 ? (
+        <PccPreviewState
+          state="empty"
+          title="No evidence summary available"
+          description={evidence.documentControlReferenceCaption}
+        />
+      ) : (
+        <ul className={styles.evidenceList} aria-label="Evidence-state buckets">
+          {evidence.buckets.map((bucket) => (
+            <li
+              key={bucket.evidenceState}
+              className={styles.evidenceItem}
+              data-pcc-lifecycle-evidence-state={bucket.evidenceState}
+            >
+              <span className={styles.evidenceLabel}>
+                {capitalize(bucket.evidenceState)}
+              </span>
+              <span className={styles.evidenceCount}>
+                {bucket.itemCount} item{bucket.itemCount === 1 ? '' : 's'}
+              </span>
+              {bucket.documentControlSourceCount > 0 ? (
+                <span className={styles.evidenceMeta}>
+                  {bucket.documentControlSourceCount} document control reference
+                  {bucket.documentControlSourceCount === 1 ? '' : 's'}
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className={styles.evidenceCaption}>{evidence.documentControlReferenceCaption}</p>
+    </div>
+  </PccDashboardCard>
+);
+
+interface LifecycleFutureCloseoutCardProps {
+  readonly futureCloseout: IPccLifecycleFutureCloseoutViewModel;
+}
+
+const LifecycleFutureCloseoutCard: FC<LifecycleFutureCloseoutCardProps> = ({
+  futureCloseout,
+}) => (
+  <PccDashboardCard
+    footprint="standard"
+    eyebrow="Future closeout exposure"
+    title="Early closeout-risk surface"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-future-closeout"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.blockerList}
+    >
+      <p className={styles.heroCaption}>{futureCloseout.captionText}</p>
+      {futureCloseout.items.length === 0 ? (
+        <PccPreviewState
+          state="empty"
+          title="No future closeout exposure flagged"
+          description="Closeout-risk items will appear once the lifecycle source surfaces them."
+        />
+      ) : (
+        <ul
+          className={styles.blockerListInner}
+          aria-label="Future closeout exposure items"
+        >
+          {futureCloseout.items.map((item) => (
+            <li
+              key={item.templateItemId}
+              className={styles.blockerItem}
+              data-pcc-lifecycle-future-closeout-item-id={item.templateItemId}
+              data-pcc-lifecycle-family={item.family}
+            >
+              <span className={styles.blockerTitle}>{item.title}</span>
+              <span className={styles.blockerMeta}>
+                {item.phaseLabel} · Criticality: {capitalize(item.criticality)}
+              </span>
+              <span className={styles.blockerMeta}>
+                {item.hasProjectInstance
+                  ? `Project status: ${item.projectStatus ? posturelabel(item.projectStatus) : '—'}`
+                  : 'No project instance yet'}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </PccDashboardCard>
+);
+
+interface LifecycleSourceTraceabilityCardProps {
+  readonly sourceTraceability: IPccLifecycleSourceTraceabilityViewModel;
+}
+
+const LifecycleSourceTraceabilityCard: FC<LifecycleSourceTraceabilityCardProps> = ({
+  sourceTraceability,
+}) => (
+  <PccDashboardCard
+    footprint="standard"
+    eyebrow="Source traceability"
+    title="Library scope and source documents"
+  >
+    <div
+      data-pcc-readiness-region="lifecycle-source-traceability"
+      data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+      className={styles.heroBody}
+    >
+      <p
+        className={styles.heroLead}
+        data-pcc-lifecycle-library-total={sourceTraceability.libraryTotal}
+      >
+        {sourceTraceability.libraryTotal} canonical lifecycle items tracked
+      </p>
+      <ul className={styles.evidenceList} aria-label="Library family totals">
+        {sourceTraceability.familyTotals.map((f) => (
+          <li
+            key={f.family}
+            className={styles.evidenceItem}
+            data-pcc-lifecycle-source-family={f.family}
+          >
+            <span className={styles.evidenceLabel}>{f.familyLabel}</span>
+            <span className={styles.evidenceCount}>{f.count}</span>
+          </li>
+        ))}
+      </ul>
+      <ul className={styles.blockerListInner} aria-label="Source documents">
+        {sourceTraceability.sourceDocuments.map((doc) => (
+          <li
+            key={doc.sourceFile}
+            className={styles.blockerItem}
+            data-pcc-lifecycle-source-document={doc.sourceFile}
+            data-pcc-lifecycle-source-family={doc.family}
+          >
+            <span className={styles.blockerTitle}>{doc.sourceFile}</span>
+            <span className={styles.blockerMeta}>
+              {doc.familyLabel} · {doc.libraryCount} item
+              {doc.libraryCount === 1 ? '' : 's'}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className={styles.heroCaption}>{sourceTraceability.auditCaption}</p>
+    </div>
+  </PccDashboardCard>
+);

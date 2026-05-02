@@ -340,8 +340,50 @@ The fixture client mirrors the backend mock provider's degraded
 `SAMPLE_LIFECYCLE_READINESS_READ_MODEL`. The narrow
 `IPccProjectReadinessReadModelClient` (consumed by `PccProjectReadinessSurface`)
 is structurally extended so the lifecycle data is reachable from the
-existing Project Readiness surface; surface UX consumption is deferred to
-the next prompt. Fixture remains the default; no live fetch is added.
+existing Project Readiness surface. Fixture remains the default; no live
+fetch is added.
+
+### Wave 9 Project Lifecycle Readiness Center surface
+
+The `project-readiness` surface now renders the Wave 9 **Project Lifecycle
+Readiness Center** as eight additional bento cards appended after the
+Wave 8 Project Readiness Framework regions. Each lifecycle card is a direct
+`PccDashboardCard` Fragment child (no wrapper element — preserves bento
+direct-child grid layout) and carries the marker
+`data-pcc-readiness-section="lifecycle-readiness-center"` so tests can
+scope queries to the lifecycle group.
+
+Region inventory (`data-pcc-readiness-region` values):
+
+| Region | Card | Source |
+| --- | --- | --- |
+| `lifecycle-hero` | full | `summary.headlinePosture`, derived active gate, totals, `templateLibraryMetadata.total` |
+| `lifecycle-map` | full | `phases[]` overlaid on the canonical 10 lifecycle phases (snapshot + not-applicable rows) |
+| `lifecycle-family-domains` | full | 3 family cards (startup / safety / closeout) + per-`domains[]` cards |
+| `lifecycle-my-actions` | wide | active project items, owner-filtered when `viewerPersona` is supplied |
+| `lifecycle-blockers-exceptions` | wide | `blockerSummary[]` buckets + items with `blockerState ∈ {open, escalated}` |
+| `lifecycle-evidence-readiness` | wide | `evidenceSummary[]` buckets with document-control reference counts |
+| `lifecycle-future-closeout` | standard | template items where `itemType === 'future-closeout-exposure'` |
+| `lifecycle-source-traceability` | standard | `templateLibraryMetadata` totals + 3 source documents |
+
+Behavior:
+
+- **Fixture-default** when no `readModelClient` is supplied: the surface
+  hydrates from `SAMPLE_LIFECYCLE_READINESS_READ_MODEL` synchronously.
+- **Read-model-driven** when a client is supplied: the surface calls
+  `client.getLifecycleReadiness(projectId)` and resolves the envelope via
+  `buildPccLifecycleReadinessViewModel`. Loading and error states render an
+  inert preview hero.
+- All controls are inert (`aria-disabled="true"`, no `onClick`, no anchors).
+- Degraded envelopes (`source-unavailable`, `backend-unavailable`) preserve
+  the canonical 157 / 55 / 32 / 70 library scope; per-region item arrays
+  empty out safely.
+
+No live runtime, no mutation, no Graph / PnP / SharePoint REST / Procore /
+Sage / Outlook / Document Crunch / Adobe Sign / Safety platform / approval
+execution / notifications / package / lockfile / manifest / workflow /
+deployment changes are introduced. Hosted / tenant proof of the live
+`lifecycle-readiness` route remains operator-pending.
 
 ### Wave 5 Priority Actions Rail (Project Home)
 

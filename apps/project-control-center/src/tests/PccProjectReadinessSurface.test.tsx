@@ -281,3 +281,156 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
     expect(offenders).toEqual([]);
   });
 });
+
+describe('Wave 9 Lifecycle Readiness Center surface', () => {
+  function lifecycleRegion(container: HTMLElement, region: string): HTMLElement | null {
+    return container.querySelector(`[data-pcc-readiness-region="${region}"]`);
+  }
+
+  function lifecycleSectionRegions(container: HTMLElement): NodeListOf<Element> {
+    return container.querySelectorAll(
+      '[data-pcc-readiness-section="lifecycle-readiness-center"]',
+    );
+  }
+
+  it('still renders exactly one active-surface marker for project-readiness', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(markers).toHaveLength(1);
+    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+      'project-readiness',
+    );
+  });
+
+  it('renders all eight lifecycle-readiness regions with their markers', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    expect(lifecycleRegion(container, 'lifecycle-hero')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-map')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-family-domains')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-my-actions')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-blockers-exceptions')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-evidence-readiness')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-future-closeout')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-source-traceability')).not.toBeNull();
+  });
+
+  it('each lifecycle region carries the lifecycle-readiness-center section marker', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const sectioned = lifecycleSectionRegions(container);
+    expect(sectioned.length).toBe(8);
+  });
+
+  it('lifecycle hero surfaces canonical 157 library scope and read-only copy', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const hero = lifecycleRegion(container, 'lifecycle-hero');
+    expect(hero).not.toBeNull();
+    expect(hero!.textContent).toContain('Read-only lifecycle readiness preview');
+    expect(hero!.textContent).toContain('No workflow execution is enabled in Wave 9.');
+    expect(hero!.textContent).toContain('157');
+  });
+
+  it('lifecycle map renders a row for every canonical phase', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const phases = container.querySelectorAll('[data-pcc-lifecycle-phase-id]');
+    expect(phases.length).toBe(10);
+  });
+
+  it('family region renders 3 family cards with library counts 55 / 32 / 70 (per-lane scoped queries)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const familyRegion = lifecycleRegion(container, 'lifecycle-family-domains');
+    expect(familyRegion).not.toBeNull();
+    const startup = familyRegion!.querySelector('[data-pcc-lifecycle-family="startup"]');
+    const safety = familyRegion!.querySelector('[data-pcc-lifecycle-family="safety"]');
+    const closeout = familyRegion!.querySelector('[data-pcc-lifecycle-family="closeout"]');
+    expect(startup).not.toBeNull();
+    expect(safety).not.toBeNull();
+    expect(closeout).not.toBeNull();
+    expect(startup!.textContent).toContain('55');
+    expect(safety!.textContent).toContain('32');
+    expect(closeout!.textContent).toContain('70');
+  });
+
+  it('my actions region renders at least one assigned readiness item', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const items = container.querySelectorAll('[data-pcc-lifecycle-item-id]');
+    expect(items.length).toBeGreaterThan(0);
+  });
+
+  it('blockers region renders blocker-state buckets and flags the escalated fixture project item', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const blockerRegion = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
+    expect(blockerRegion).not.toBeNull();
+    const buckets = blockerRegion!.querySelectorAll('[data-pcc-lifecycle-blocker-state]');
+    expect(buckets.length).toBeGreaterThanOrEqual(3);
+    const escalated = blockerRegion!.querySelector(
+      '[data-pcc-lifecycle-blocker-item-id="inst-safety-003"]',
+    );
+    expect(escalated).not.toBeNull();
+  });
+
+  it('evidence region renders 4 evidence-state buckets', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const evidence = lifecycleRegion(container, 'lifecycle-evidence-readiness');
+    expect(evidence).not.toBeNull();
+    const buckets = evidence!.querySelectorAll('[data-pcc-lifecycle-evidence-state]');
+    expect(buckets.length).toBe(4);
+  });
+
+  it('future closeout region surfaces the fixture future-closeout item and excludes reference-only', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const future = lifecycleRegion(container, 'lifecycle-future-closeout');
+    expect(future).not.toBeNull();
+    const expected = future!.querySelector(
+      '[data-pcc-lifecycle-future-closeout-item-id="tpl-closeout-002"]',
+    );
+    expect(expected).not.toBeNull();
+    const referenceOnly = future!.querySelector(
+      '[data-pcc-lifecycle-future-closeout-item-id="tpl-closeout-003"]',
+    );
+    expect(referenceOnly).toBeNull();
+  });
+
+  it('source traceability region surfaces 157 total + 3 source documents with family + sourceFile', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const trace = lifecycleRegion(container, 'lifecycle-source-traceability');
+    expect(trace).not.toBeNull();
+    expect(trace!.textContent).toContain('157');
+    const docs = trace!.querySelectorAll('[data-pcc-lifecycle-source-document]');
+    expect(docs.length).toBe(3);
+    const docFiles = Array.from(docs).map((el) =>
+      el.getAttribute('data-pcc-lifecycle-source-document'),
+    );
+    expect(docFiles).toEqual(
+      expect.arrayContaining([
+        'Project_Startup_Checklist(2).pdf',
+        'Project_Safety_Checklist(1).pdf',
+        'Project_Closeout_Checklist(2).pdf',
+      ]),
+    );
+  });
+
+  it('lifecycle regions contain no <a href> links and no enabled buttons (inert by structural assertion)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const sectioned = lifecycleSectionRegions(container);
+    expect(sectioned.length).toBe(8);
+    for (const region of Array.from(sectioned)) {
+      expect(region.querySelectorAll('a[href]').length).toBe(0);
+      const buttons = region.querySelectorAll('button');
+      for (const btn of Array.from(buttons)) {
+        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(true);
+      }
+    }
+  });
+});
