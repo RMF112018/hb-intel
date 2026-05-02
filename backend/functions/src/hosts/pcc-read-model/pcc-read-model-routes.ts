@@ -85,3 +85,9 @@ registerPccReadRoute(
   'pcc/projects/{projectId}/project-readiness',
   async (projectId) => provider.getProjectReadiness(projectId),
 );
+
+registerPccReadRoute(
+  'getPccLifecycleReadiness',
+  'pcc/projects/{projectId}/lifecycle-readiness',
+  async (projectId) => provider.getLifecycleReadiness(projectId),
+);

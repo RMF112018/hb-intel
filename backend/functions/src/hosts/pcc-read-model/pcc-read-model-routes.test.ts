@@ -11,6 +11,7 @@ const provider = {
   getSiteHealth: vi.fn(),
   getTeamAccess: vi.fn(),
   getProjectReadiness: vi.fn(),
+  getLifecycleReadiness: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -54,6 +55,7 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
   { name: 'getPccProjectSiteHealth', route: 'pcc/projects/{projectId}/site-health', method: 'getSiteHealth' },
   { name: 'getPccProjectTeamAccess', route: 'pcc/projects/{projectId}/team-access', method: 'getTeamAccess' },
   { name: 'getPccProjectReadiness', route: 'pcc/projects/{projectId}/project-readiness', method: 'getProjectReadiness' },
+  { name: 'getPccLifecycleReadiness', route: 'pcc/projects/{projectId}/lifecycle-readiness', method: 'getLifecycleReadiness' },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -74,8 +76,8 @@ describe('PCC read-only route registrations', () => {
     await import('./pcc-read-model-routes.js');
   });
 
-  it('registers exactly the nine approved route handlers', () => {
-    expect(registrations).toHaveLength(9);
+  it('registers exactly the ten approved route handlers', () => {
+    expect(registrations).toHaveLength(10);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);

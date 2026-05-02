@@ -65,8 +65,10 @@ describe('PccMockReadModelProvider — known fixture project returns available e
       provider.getSiteHealth(KNOWN_PROJECT_ID),
       provider.getTeamAccess(KNOWN_PROJECT_ID),
       provider.getSettings(KNOWN_PROJECT_ID),
+      provider.getProjectReadiness(KNOWN_PROJECT_ID),
+      provider.getLifecycleReadiness(KNOWN_PROJECT_ID),
     ]);
-    expect(surfaces).toHaveLength(9);
+    expect(surfaces).toHaveLength(11);
     for (const env of surfaces) {
       expect(env.mode).toBe('mock');
       expect(env.readOnly).toBe(true);
@@ -113,6 +115,8 @@ describe('PccMockReadModelProvider — unknown project returns source-unavailabl
       provider.getSiteHealth(UNKNOWN_PROJECT_ID),
       provider.getTeamAccess(UNKNOWN_PROJECT_ID),
       provider.getSettings(UNKNOWN_PROJECT_ID),
+      provider.getProjectReadiness(UNKNOWN_PROJECT_ID),
+      provider.getLifecycleReadiness(UNKNOWN_PROJECT_ID),
     ]);
     for (const env of surfaces) {
       expect(env.sourceStatus).toBe('source-unavailable');
@@ -155,6 +159,8 @@ describe('PccMockReadModelProvider — backend-unavailable simulation', () => {
       provider.getSiteHealth(KNOWN_PROJECT_ID),
       provider.getTeamAccess(KNOWN_PROJECT_ID),
       provider.getSettings(KNOWN_PROJECT_ID),
+      provider.getProjectReadiness(KNOWN_PROJECT_ID),
+      provider.getLifecycleReadiness(KNOWN_PROJECT_ID),
     ]);
     for (const env of surfaces) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -210,7 +216,7 @@ describe('PccMockReadModelProvider — exposes only read-only methods', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('IPccReadModelProvider instances expose exactly the nine getters', () => {
+  it('IPccReadModelProvider instances expose exactly the eleven getters', () => {
     const expected = [
       'getProjectProfile',
       'getModuleRegistry',
@@ -221,6 +227,8 @@ describe('PccMockReadModelProvider — exposes only read-only methods', () => {
       'getSiteHealth',
       'getTeamAccess',
       'getSettings',
+      'getProjectReadiness',
+      'getLifecycleReadiness',
     ];
     const proto = PccMockReadModelProvider.prototype as Record<string, unknown>;
     for (const name of expected) {

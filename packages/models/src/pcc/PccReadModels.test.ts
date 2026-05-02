@@ -20,7 +20,12 @@ import {
   type PccReadModelMode,
   type PccReadModelSourceStatus,
   type PccProjectReadinessFrameworkReadModel,
+  type PccLifecycleReadinessReadModel,
 } from './index.js';
+import {
+  LIFECYCLE_READINESS_LIBRARY_FAMILY_COUNTS,
+  LIFECYCLE_READINESS_LIBRARY_TOTAL,
+} from './LifecycleReadiness.js';
 
 describe('PccReadModels exports and typing', () => {
   it('exports all required mode and source-status literals', () => {
@@ -244,6 +249,45 @@ describe('PccReadModels exports and typing', () => {
       },
     };
 
+    const lifecycleReadinessEnvelope: PccReadModelEnvelope<PccLifecycleReadinessReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: {
+        summary: {
+          totalProjectItems: 0,
+          statusCounts: {
+            'not-started': 0,
+            'in-progress': 0,
+            blocked: 0,
+            'needs-evidence': 0,
+            'needs-review': 0,
+            approved: 0,
+            returned: 0,
+            complete: 0,
+            failed: 0,
+            deferred: 0,
+            'not-applicable': 0,
+            waived: 0,
+          },
+          headlinePosture: 'unknown',
+        },
+        templateLibraryMetadata: {
+          total: LIFECYCLE_READINESS_LIBRARY_TOTAL,
+          familyCounts: LIFECYCLE_READINESS_LIBRARY_FAMILY_COUNTS,
+          sourceDocuments: [],
+        },
+        sampleTemplateItems: [],
+        sampleProjectItems: [],
+        gates: [],
+        domains: [],
+        phases: [],
+        evidenceSummary: [],
+        blockerSummary: [],
+      },
+    };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -255,6 +299,7 @@ describe('PccReadModels exports and typing', () => {
       'team-access': teamAccessEnvelope,
       settings: settingsEnvelope,
       'project-readiness': projectReadinessEnvelope,
+      'lifecycle-readiness': lifecycleReadinessEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

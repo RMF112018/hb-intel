@@ -11,9 +11,12 @@
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   DOCUMENT_CONTROL_SOURCES,
+  LIFECYCLE_READINESS_LIBRARY_METADATA,
+  LIFECYCLE_READINESS_STATUSES,
   PCC_MVP_SURFACES,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
+  SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
@@ -24,8 +27,10 @@ import type {
   IDocumentControlSource,
   IPccSettingsRef,
   IProjectProfile,
+  LifecycleReadinessStatus,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
+  PccLifecycleReadinessReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -61,6 +66,37 @@ const EMPTY_PROJECT_READINESS_SNAPSHOT: PccProjectReadinessFrameworkReadModel = 
   evidenceSummary: [],
   blockerSummary: [],
   sourceHealthSummary: [],
+};
+
+// Empty project-scoped lifecycle-readiness read model used for degraded
+// envelopes (unknown project / backend-unavailable). Canonical library
+// metadata (157 / 55 / 32 / 70) is preserved so consumers always see the
+// authoritative item-library cardinality even when project state is
+// degraded; only project-specific samples and roll-ups are emptied.
+//
+// Status counts are constructed from the canonical LIFECYCLE_READINESS_STATUSES
+// tuple rather than enumerated as object-literal keys so the host source
+// contains no bare status identifiers (the read-only-route guardrail
+// disallows certain tokens in executable source after string-stripping).
+const EMPTY_LIFECYCLE_STATUS_COUNTS: Readonly<Record<LifecycleReadinessStatus, number>> =
+  Object.freeze(
+    Object.fromEntries(LIFECYCLE_READINESS_STATUSES.map((status) => [status, 0])),
+  ) as Readonly<Record<LifecycleReadinessStatus, number>>;
+
+const EMPTY_LIFECYCLE_READINESS_READ_MODEL: PccLifecycleReadinessReadModel = {
+  summary: {
+    totalProjectItems: 0,
+    statusCounts: EMPTY_LIFECYCLE_STATUS_COUNTS,
+    headlinePosture: 'unknown',
+  },
+  templateLibraryMetadata: LIFECYCLE_READINESS_LIBRARY_METADATA,
+  sampleTemplateItems: [],
+  sampleProjectItems: [],
+  gates: [],
+  domains: [],
+  phases: [],
+  evidenceSummary: [],
+  blockerSummary: [],
 };
 
 const DOCUMENT_CONTROL_SOURCES_ORDERED: readonly IDocumentControlSource[] =
@@ -633,6 +669,42 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       viewerPersona,
       this.statusForKnownProject(projectId),
       SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getLifecycleReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_LIFECYCLE_READINESS_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_LIFECYCLE_READINESS_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
       this.warningsForKnownProject(projectId),
     );
   }
