@@ -1,0 +1,146 @@
+{
+  "module": "Constraints Log",
+  "feature": "Risk Assessment Matrix",
+  "version": "1.0.0",
+  "likelihoodScale": [
+    {
+      "score": 1,
+      "label": "Rare",
+      "definition": "Not expected to occur; less than 10% likelihood."
+    },
+    {
+      "score": 2,
+      "label": "Unlikely",
+      "definition": "Could occur, but not expected; 10–30% likelihood."
+    },
+    {
+      "score": 3,
+      "label": "Possible",
+      "definition": "Plausible under current conditions; 31–60% likelihood."
+    },
+    {
+      "score": 4,
+      "label": "Likely",
+      "definition": "Expected unless action is taken; 61–80% likelihood."
+    },
+    {
+      "score": 5,
+      "label": "Almost Certain",
+      "definition": "Expected or already trending toward occurrence; greater than 80% likelihood."
+    }
+  ],
+  "impactScale": [
+    {
+      "score": 1,
+      "label": "Insignificant",
+      "definition": "Minimal impact; absorbed within normal project management."
+    },
+    {
+      "score": 2,
+      "label": "Minor",
+      "definition": "Localized impact; manageable without milestone, budget, safety, quality, or client exposure."
+    },
+    {
+      "score": 3,
+      "label": "Moderate",
+      "definition": "Meaningful project impact; may affect float, rework, cost, client confidence, or coordination."
+    },
+    {
+      "score": 4,
+      "label": "Major",
+      "definition": "Significant exposure; may affect milestone, cost, safety, quality, compliance, or owner commitments."
+    },
+    {
+      "score": 5,
+      "label": "Severe",
+      "definition": "Critical exposure; may affect contractual milestone, life safety, regulatory compliance, major cost, or executive/client relationship."
+    }
+  ],
+  "impactDimensions": [
+    "schedule",
+    "cost",
+    "safety",
+    "quality",
+    "contractCompliance",
+    "clientOwnerImpact",
+    "logisticsAccess",
+    "reputationExecutiveVisibility"
+  ],
+  "governingImpactRule": "governingImpactScore = max(impact dimension scores)",
+  "initialRiskScoreRule": "initialRiskScore = likelihoodScore * governingImpactScore",
+  "residualRiskScoreRule": "residualRiskScore = residualLikelihoodScore * residualGoverningImpactScore",
+  "scoreBands": [
+    {
+      "min": 1,
+      "max": 4,
+      "band": "Low",
+      "requiredPosture": "Monitor through normal review."
+    },
+    {
+      "min": 5,
+      "max": 9,
+      "band": "Moderate",
+      "requiredPosture": "Owner and response plan required."
+    },
+    {
+      "min": 10,
+      "max": 16,
+      "band": "High",
+      "requiredPosture": "Owner, mitigation, due date, review cadence, and PX visibility required."
+    },
+    {
+      "min": 17,
+      "max": 25,
+      "band": "Critical",
+      "requiredPosture": "Immediate escalation, PX review, executive visibility, response plan, and Priority Action candidate required."
+    }
+  ],
+  "severityOverrides": [
+    {
+      "condition": "safety impact = 5",
+      "override": "Critical"
+    },
+    {
+      "condition": "safety impact = 4",
+      "minimumBand": "High"
+    },
+    {
+      "condition": "contract/compliance impact = 5",
+      "override": "Critical"
+    },
+    {
+      "condition": "linked contractual milestone at risk and likelihood >= 3",
+      "minimumBand": "High"
+    },
+    {
+      "condition": "executive/client impact = 5 and likelihood >= 3",
+      "override": "Critical"
+    },
+    {
+      "condition": "residual risk remains High or Critical after mitigation",
+      "requiredActions": [
+        "escalationOwner",
+        "reviewCadence",
+        "PXVisibility"
+      ]
+    }
+  ],
+  "reviewCadenceRules": [
+    {
+      "band": "Low",
+      "cadence": "Monthly or normal project review"
+    },
+    {
+      "band": "Moderate",
+      "cadence": "Biweekly"
+    },
+    {
+      "band": "High",
+      "cadence": "Weekly"
+    },
+    {
+      "band": "Critical",
+      "cadence": "Weekly minimum; immediate escalation until response accepted"
+    }
+  ]
+}

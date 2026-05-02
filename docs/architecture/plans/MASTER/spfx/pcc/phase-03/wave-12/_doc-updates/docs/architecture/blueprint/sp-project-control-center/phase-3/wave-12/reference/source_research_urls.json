@@ -1,0 +1,110 @@
+[
+  {
+    "id": "LCI-LPS",
+    "title": "Lean Construction Institute — Last Planner System",
+    "url": "https://leanconstruction.org/lean-topics/last-planner-system/",
+    "relevance": "Defines LPS should/can/will/did/learn conversations, make-ready planning, constraint management, PPC, reasons for variance."
+  },
+  {
+    "id": "LCI-CONSTRAINT-LOG",
+    "title": "Lean Construction Institute — LPS Constraint Log PDF",
+    "url": "https://leanconstruction.org/wp-content/uploads/2022/08/8_LPS_Constraint_Log.pdf",
+    "relevance": "Defines constraint as item/requirement preventing an activity from starting, advancing, or completing; defines constraint log and 6-week make-ready review posture."
+  },
+  {
+    "id": "ORACLE-TASK-CONSTRAINTS",
+    "title": "Oracle Primavera Cloud — Assign a Constraint to a Task",
+    "url": "https://primavera.oraclecloud.com/help/en/user/221630.htm",
+    "relevance": "Supports linking constraints to tasks and tracking status, responsible owner, promised/needed/delivered dates, overdue and needed-within-7-days indicators."
+  },
+  {
+    "id": "ORACLE-DELIVER-CONSTRAINT",
+    "title": "Oracle Primavera Cloud — Deliver a Constraint",
+    "url": "https://primavera.oraclecloud.com/help/en/user/236432.htm",
+    "relevance": "Supports delivered-date and delivered-status concepts for constraint resolution."
+  },
+  {
+    "id": "ORACLE-CONSTRAINT-API",
+    "title": "Oracle Primavera Cloud REST API — Constraint fields",
+    "url": "https://docs.oracle.com/en/industries/construction-engineering/primavera-cloud/rest-api/op-constraint-post.html",
+    "relevance": "Documents constraint types including access, design issue, documents, equipment, labor/crews, materials, QA/QC."
+  },
+  {
+    "id": "PMI-RISK-ANALYSIS",
+    "title": "PMI — Risk Analysis and Management",
+    "url": "https://www.pmi.org/learning/library/risk-analysis-project-management-7070",
+    "relevance": "Supports probability, impact, risk classification, customer/contract factors, and risk response plan concepts."
+  },
+  {
+    "id": "PMI-QUALITATIVE-RISK",
+    "title": "PMI — Qualitative Risk Assessment",
+    "url": "https://www.pmi.org/learning/library/qualitative-risk-assessment-cheaper-faster-3188",
+    "relevance": "Supports probability-impact matrix, 5x5 arrays, risk bands, and impact-weighted severity."
+  },
+  {
+    "id": "PMI-RISK-RESPONSE",
+    "title": "PMI — Project Risk Management",
+    "url": "https://www.pmi.org/learning/library/project-risk-management-success-tool-6078",
+    "relevance": "Supports risk response strategies, monitoring, re-evaluation, watch lists, and risk register updates."
+  },
+  {
+    "id": "NIST-800-30",
+    "title": "NIST SP 800-30 Rev. 1 — Guide for Conducting Risk Assessments",
+    "url": "https://www.nist.gov/publications/guide-conducting-risk-assessments",
+    "relevance": "Supports identifying, estimating, prioritizing, monitoring, and maintaining risk assessments."
+  },
+  {
+    "id": "ISO-31000",
+    "title": "ISO 31000:2018 Risk management guidelines",
+    "url": "https://www.iso.org/standard/65694.html",
+    "relevance": "Supports integrated, structured, customized, inclusive, dynamic, best-available-information, human/cultural, continual-improvement principles."
+  },
+  {
+    "id": "PROCORE-COORDINATION-DASHBOARD",
+    "title": "Procore — Coordination Issues Dashboard",
+    "url": "https://support.procore.com/products/online/user-guide/project-level/coordination-issues/tutorials/view-the-coordination-issues-dashboard",
+    "relevance": "Supports dashboard charts by status, progress by location, ball-in-court by assignee company, and chart-click filtering."
+  },
+  {
+    "id": "PROCORE-IN-PROGRESS",
+    "title": "Procore — In-Progress status for Coordination Issues",
+    "url": "https://www.procore.com/whats-new/track-coordination-issues-with-in-progress-status",
+    "relevance": "Supports status granularity, accountability, communication, and audit trail for issue resolution lifecycle."
+  },
+  {
+    "id": "AUTODESK-ROOT-CAUSES",
+    "title": "Autodesk Build — Issue Root Causes",
+    "url": "https://help.autodesk.com/cloudhelp/ENU/Build-Issues/files/configure-issues/Issues_Root_Causes.html",
+    "relevance": "Supports root-cause categories, default categories coordination/design/quality/safety, and customizable root causes."
+  },
+  {
+    "id": "AUTODESK-ISSUE-FILTERS",
+    "title": "Autodesk Build — Search, Sort, and Filter Issues",
+    "url": "https://help.autodesk.com/view/BUILD/ENU/?guid=Issues_Search_Filter",
+    "relevance": "Supports issue filtering by ID, category, type, status, location, assignee, watchers, dates, due date, root cause, creator, custom fields."
+  },
+  {
+    "id": "AUTODESK-ISSUE-REPORTS",
+    "title": "Autodesk Build — Issue Reports",
+    "url": "https://help.autodesk.com/view/BUILD/ENU/?guid=Issue_Reports",
+    "relevance": "Supports report fields, XLSX/PDF export posture, grouping, sorting, locations, root causes, comments, and references."
+  },
+  {
+    "id": "CII-AWP",
+    "title": "Construction Industry Institute — Advanced Work Packaging Overview",
+    "url": "https://www.construction-institute.org/awp-overview",
+    "relevance": "Supports linking constraints to work packages and construction-driven planning for predictable execution."
+  },
+  {
+    "id": "CII-AWP-DESIGN-WORKFACE",
+    "title": "CII — Advanced Work Packaging: Design through Workface Execution",
+    "url": "https://www.construction-institute.org/advanced-work-packaging-design-through-workface-execution",
+    "relevance": "Supports work packaging through design, procurement, construction, startup, and turnover for improved productivity and predictability."
+  },
+  {
+    "id": "AACE-29R03",
+    "title": "AACE 29R-03 Forensic Schedule Analysis overview",
+    "url": "https://www.29r-03.com/About29R03",
+    "relevance": "Supports guardrail that Wave 12 may flag delay exposure but must not perform forensic schedule analysis or legal/claim determinations."
+  }
+]

@@ -1,0 +1,96 @@
+{
+  "module": "Constraints Log",
+  "feature": "Constraint Exposure Matrix",
+  "version": "1.0.0",
+  "urgencyScale": [
+    {
+      "score": 1,
+      "label": "Future",
+      "definition": "Need-by date is more than 30 calendar days away."
+    },
+    {
+      "score": 2,
+      "label": "Upcoming",
+      "definition": "Need-by date is 15–30 calendar days away."
+    },
+    {
+      "score": 3,
+      "label": "Near-term",
+      "definition": "Need-by date is 8–14 calendar days away."
+    },
+    {
+      "score": 4,
+      "label": "Immediate",
+      "definition": "Need-by date is 1–7 calendar days away, or linked work is in the active lookahead window."
+    },
+    {
+      "score": 5,
+      "label": "Overdue / blocking now",
+      "definition": "Need-by date has passed, linked work is current-week work, or float is zero/negative."
+    }
+  ],
+  "impactDimensions": [
+    "schedule",
+    "cost",
+    "safety",
+    "quality",
+    "contractCompliance",
+    "clientOwnerImpact",
+    "logisticsAccess",
+    "reputationExecutiveVisibility"
+  ],
+  "governingImpactRule": "governingImpactScore = max(impact dimension scores)",
+  "constraintExposureScoreRule": "constraintExposureScore = urgencyScore * governingImpactScore",
+  "scoreBands": [
+    {
+      "min": 1,
+      "max": 4,
+      "band": "Low",
+      "requiredPosture": "Monitor through normal review."
+    },
+    {
+      "min": 5,
+      "max": 9,
+      "band": "Moderate",
+      "requiredPosture": "Owner and response plan required."
+    },
+    {
+      "min": 10,
+      "max": 16,
+      "band": "High",
+      "requiredPosture": "Owner, mitigation, due date, review cadence, and PX visibility required."
+    },
+    {
+      "min": 17,
+      "max": 25,
+      "band": "Critical",
+      "requiredPosture": "Immediate escalation, PX review, executive visibility, response plan, and Priority Action candidate required."
+    }
+  ],
+  "severityOverrides": [
+    {
+      "condition": "overdue and linked to current-week work",
+      "override": "Critical"
+    },
+    {
+      "condition": "critical-path exposure and urgency >= 4",
+      "override": "Critical"
+    },
+    {
+      "condition": "safety impact >= 4",
+      "minimumBand": "High"
+    },
+    {
+      "condition": "contractual milestone exposure and urgency >= 4",
+      "override": "Critical"
+    },
+    {
+      "condition": "constraint already converted to delay or change event",
+      "minimumBand": "High until linked item is closed"
+    },
+    {
+      "condition": "no owner assigned and urgency >= 3",
+      "minimumBand": "High"
+    }
+  ]
+}
