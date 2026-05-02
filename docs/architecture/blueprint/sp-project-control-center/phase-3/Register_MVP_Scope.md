@@ -16,7 +16,7 @@ It is not merely a landing page. It should support a useful project operating ex
 | Priority Actions Rail        | Access requests, readiness blockers, approval/checkpoint prompts, external-system mapping prompts.                                                                                                                                                                                                                                                                                        |
 | Work Center Navigation       | Project Home, Team & Access, Documents / Document Control, Project Readiness, Approvals / Checkpoints, External Systems, Control Center Settings, Site Health.                                                                                                                                                                                                                            |
 | Light workflows              | Access request, readiness blocker resolution, approval/checkpoint response, external-system mapping issue resolution.                                                                                                                                                                                                                                                                     |
-| Structured workflow target   | Project Lifecycle Readiness Center, Permit & Inspection Control Center (internal `permits` and `required-inspections` families), Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                   |
+| Structured workflow target   | Project Lifecycle Readiness Center, Permit & Inspection Control Center (internal `permits` and `required-inspections` families), Responsibility Matrix, Constraints Log, Buyout Log.                                                                                                                                                                                                      |
 | Document Control Center      | Two-lane architecture: Microsoft Files Lane (SharePoint Drive / SharePoint document libraries + OneDrive) is a future Microsoft Graph-backed file-management surface; External Document Systems Lane (Procore Files, Document Crunch, Adobe Sign, future systems) is access/deep-link/visibility. Not a standalone submittal/transmittal/revision-routing/review-routing workflow engine. |
 | External Systems             | Launch links only for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                                                                                                                                                                                                                                                        |
 | Team & Access                | Request + approval + automated execution later.                                                                                                                                                                                                                                                                                                                                           |
@@ -29,6 +29,17 @@ Wave 9 source grounding: Project Lifecycle Readiness Center is seeded by startup
 Safety checklist-family inclusion is readiness/workflow posture only; no Safety runtime integration, live inspection execution, incident-management runtime, OSHA engine claims, or safety-system mutation.
 Wave 9 may define evidence requirements and evidence-link fields, but evidence storage ownership remains HB Document Control Center / SharePoint project record; Wave 9 does not upload/sync/store binaries or manage document libraries directly.
 Wave 9 surfaces lifecycle-readiness posture and does not assume implementation ownership of Waves 10–14 modules.
+
+Wave 11 Responsibility Matrix MVP planning posture:
+
+- Official module name remains `Responsibility Matrix` (subtitle: `RACI + Owner-Contract Responsibility Control Center`).
+- One unified Project Readiness module (not two spreadsheet launchers).
+- Workbook-source counting posture for planning context: `109` workbook-derived task-row context (82 PM task-text rows plus 27 Field rows with assignment marks); strict marked assignment rows total `98`.
+- Owner-contract workbook remains template/schema-only in current repo sources with no populated default obligation-description rows.
+- Wave 11 planning includes assignment lifecycle/handoffs, current action owner posture, workflow steps, decision-rights overlay, contract-party + internal RACI separation, evidence references, exceptions, and Matrix Health Score posture.
+- Wave 14 remains approval/checkpoint execution owner; Wave 11 does not claim approval runtime execution.
+- HB Document Control Center remains evidence-binary owner; Team & Access remains project roster/access-state owner.
+- Documentation posture only: no legal advice, no automatic creation of legal obligations, and no external-system writeback/runtime mutation claim.
 
 ## Later-Phase Scope
 

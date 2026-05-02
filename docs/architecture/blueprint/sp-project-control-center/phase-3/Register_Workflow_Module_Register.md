@@ -8,19 +8,32 @@ Define the structured workflow modules that PCC planning must account for, inclu
 
 ## Module Priority
 
-| Module                             | MVP Priority | Work Center                                               | Target Product State                                                                                              | Interim Fallback                                      |
-| ---------------------------------- | -----------: | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Project Lifecycle Readiness Center |          Yes | Project Readiness                                         | Structured lifecycle-readiness in-app workflow seeded by startup, safety, and closeout checklist definition files | Template/reference launch if implementation not ready |
+| Module                             | MVP Priority | Work Center                                               | Target Product State                                                                                                | Interim Fallback                                      |
+| ---------------------------------- | -----------: | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Project Lifecycle Readiness Center |          Yes | Project Readiness                                         | Structured lifecycle-readiness in-app workflow seeded by startup, safety, and closeout checklist definition files   | Template/reference launch if implementation not ready |
 | Permit & Inspection Control Center |          Yes | Project Readiness                                         | Unified permit/inspection command-center target posture with internal `permits` and `required-inspections` families | Template/reference launch if implementation not ready |
-| Responsibility Matrix              |          Yes | Project Readiness                                         | Structured item-level in-app workflow including owner-contract responsibility mapping                             | Template/reference launch if implementation not ready |
-| Constraints Log                    |          Yes | Project Readiness                                         | Structured item-level in-app workflow                                                                             | Template/reference launch if implementation not ready |
-| Buyout Log                         |          Yes | Project Readiness, with checkpoint ties where appropriate | Structured item-level in-app workflow                                                                             | Template/reference launch if implementation not ready |
-| Estimating Kickoff                 |        Later | Project Readiness / Preconstruction classification        | Structured workflow later                                                                                         | Turnover visibility/access in MVP                     |
-| Post-Bid Autopsy                   |        Later | Project Readiness / Preconstruction classification        | Structured workflow later                                                                                         | Turnover visibility/access in MVP                     |
-| Job Closeout Checklist             |        Later | Project Readiness / Closeout classification               | Structured workflow later                                                                                         | Template/reference launch if implementation not ready |
+| Responsibility Matrix              |          Yes | Project Readiness                                         | Structured item-level in-app workflow including owner-contract responsibility mapping                               | Template/reference launch if implementation not ready |
+| Constraints Log                    |          Yes | Project Readiness                                         | Structured item-level in-app workflow                                                                               | Template/reference launch if implementation not ready |
+| Buyout Log                         |          Yes | Project Readiness, with checkpoint ties where appropriate | Structured item-level in-app workflow                                                                               | Template/reference launch if implementation not ready |
+| Estimating Kickoff                 |        Later | Project Readiness / Preconstruction classification        | Structured workflow later                                                                                           | Turnover visibility/access in MVP                     |
+| Post-Bid Autopsy                   |        Later | Project Readiness / Preconstruction classification        | Structured workflow later                                                                                           | Turnover visibility/access in MVP                     |
+| Job Closeout Checklist             |        Later | Project Readiness / Closeout classification               | Structured workflow later                                                                                           | Template/reference launch if implementation not ready |
 
 Wave 9 grounding source path: `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
 Wave 10 target architecture authority path: `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-10/Permit_Inspection_Control_Center_Target_Architecture.md`.
+
+Responsibility Matrix governance notes:
+
+- Official module name is `Responsibility Matrix` (subtitle: `RACI + Owner-Contract Responsibility Control Center`).
+- It is one unified Project Readiness module and not separate workbook launchers.
+- Workbook-source counting posture: `109` workbook-derived task-row context (82 PM task-text rows plus 27 Field rows with assignment marks); strict marked assignment rows total `98`.
+- Owner-contract workbook is currently template/schema-only (no populated default obligation-description rows).
+- Responsibility Matrix owns responsibility modeling posture (assignment lifecycle/handoffs, current action owner, workflow steps, decision-rights overlay, exceptions, Matrix Health Score posture) while:
+  - Wave 8 retains framework ownership;
+  - Wave 14 retains approval/checkpoint execution ownership;
+  - HB Document Control Center retains evidence-binary ownership;
+  - Team & Access retains project roster/access-state ownership.
+- Documentation posture only: no legal advice, no automatic creation of legal obligations, and no external-system writeback/runtime mutation claim.
 
 ## Item-Level Workflow Model
 
@@ -73,12 +86,12 @@ Compliance-grade immutable event/evidence logs are reserved for technical, provi
 
 All workflow modules live under **Project Readiness** in MVP, with functional classification:
 
-| Classification                 | Modules                                                                                |
-| ------------------------------ | -------------------------------------------------------------------------------------- |
+| Classification                 | Modules                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | Startup                        | Project Lifecycle Readiness Center, Permit & Inspection Control Center, Responsibility Matrix, Constraints Log |
-| Procurement / Project Controls | Buyout Log                                                                             |
-| Preconstruction / Estimating   | Estimating Kickoff, Post-Bid Autopsy                                                   |
-| Closeout                       | Job Closeout Checklist                                                                 |
+| Procurement / Project Controls | Buyout Log                                                                                                     |
+| Preconstruction / Estimating   | Estimating Kickoff, Post-Bid Autopsy                                                                           |
+| Closeout                       | Job Closeout Checklist                                                                                         |
 
 ---
 

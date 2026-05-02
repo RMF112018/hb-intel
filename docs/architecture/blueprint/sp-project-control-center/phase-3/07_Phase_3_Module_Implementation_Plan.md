@@ -63,7 +63,7 @@ Then implement each module as its own wave. This prevents every module from inve
 |    7 | HB Document Control Center                                          | Build three-lane model: Project Record + My Project Files + External Systems, with source binding, review routing, audit, and project-only OneDrive guardrail. | Waves 2–3                   |
 |    8 | Project Readiness Module Framework                                  | Build shared framework for structured readiness modules.                                                                                                       | Waves 2–3                   |
 |    9 | Project Lifecycle Readiness Center                                  | Build lifecycle readiness module seeded by startup, safety, and closeout checklist definition files.                                                           | Wave 8                      |
-|   10 | Permit & Inspection Control Center                                  | Define unified permit/inspection command-center architecture with internal `permits` and `required-inspections` model families.                              | Wave 8                      |
+|   10 | Permit & Inspection Control Center                                  | Define unified permit/inspection command-center architecture with internal `permits` and `required-inspections` model families.                                | Wave 8                      |
 |   11 | Responsibility Matrix                                               | Build item-level responsibility workflow, including owner-contract mapping.                                                                                    | Prior readiness waves       |
 |   12 | Constraints Log                                                     | Build item-level constraints workflow module.                                                                                                                  | Wave 8                      |
 |   13 | Buyout Log                                                          | Build item-level buyout/project-controls workflow module.                                                                                                      | Wave 8                      |
@@ -555,6 +555,13 @@ Target architecture authority path:
 
 Build the Responsibility Matrix module, including owner-contract responsibility mapping.
 
+Wave 11 scope lock:
+
+- Official module name remains `Responsibility Matrix` (subtitle: `RACI + Owner-Contract Responsibility Control Center`).
+- One unified Project Readiness module; not separate workbook launchers.
+- Source-workbook counting posture: `109` workbook-derived task-row context (82 PM task-text rows plus 27 Field rows with assignment marks); strict marked assignment rows total `98`.
+- Owner-contract workbook remains template/schema-only in current repo source and does not provide populated default obligation-description rows.
+
 ## Code Work
 
 - Responsibility item model.
@@ -563,8 +570,16 @@ Build the Responsibility Matrix module, including owner-contract responsibility 
 - Consulted/informed fields if appropriate.
 - Owner-contract responsibility classification.
 - Role/person assignment.
+- Template-library and template-version traceability for responsibility seeds.
+- Project-instance separation from template definitions.
+- Assignment lifecycle and handoff model.
+- Current action owner / ball-in-court posture.
+- Workflow-step model.
+- Decision-rights overlay for decision-heavy records.
+- Contract clause/article/page obligation-reference linkage (project-controls metadata context).
 - Review/approval status.
 - Matrix/list view toggle if valuable.
+- Matrix Health Score and snapshot/export governance posture.
 - Business audit trail.
 
 ## Exit Criteria
@@ -572,6 +587,10 @@ Build the Responsibility Matrix module, including owner-contract responsibility 
 - Single Responsibility Matrix covers both normal and owner-contract responsibility mapping.
 - PM/PX can review and maintain responsibility records.
 - Assigned users see responsibility items in My Responsibilities.
+- Wave 8 framework ownership remains intact and Wave 14 remains approval/checkpoint execution owner.
+- Evidence links remain reference-only; HB Document Control Center / SharePoint project record retain evidence-binary ownership.
+- Team & Access retains project roster/access-state ownership.
+- Documentation posture does not assert runtime execution, legal advice, automatic legal-obligation creation, or external-system writeback/mutation.
 
 ---
 

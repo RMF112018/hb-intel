@@ -50,31 +50,31 @@ Required order:
 
 ## Wave Plan
 
-| Wave | Module / Workstream                                                 | Primary Output                                                                                | Status                              |
-| ---: | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------- |
-|    0 | Implementation Gate & Repo Truth Recheck                            | Gate review, allowed paths, blocked scope                                                     | Required before code                |
-|    1 | PCC Shared Foundations                                              | Shared models, enums, role model, fixtures                                                    | Implementation wave                 |
-|    2 | PCC SPFx Shell Frame                                                | Shell/routing/layout/state frame                                                              | Implementation wave                 |
-|    3 | PCC Backend Read-Model Foundation                                   | Read-model endpoints/scaffolds                                                                | Complete                            |
-|    4 | Project Home / Command Center                                       | Hybrid landing page                                                                           | Module wave                         |
-|   4A | Controlled Non-Production Tenant SPPKG Visual Validation Gate       | First eligible hosted validation after Wave 4 in controlled non-production tenant scope       | Controlled validation gate          |
-|    5 | Priority Actions Rail                                               | Four-category action rail                                                                     | Module wave                         |
-|   5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5                                                     | Optional controlled validation gate |
-|    6 | Team & Access                                                       | Request + approval workflow                                                                   | Module wave                         |
-|    7 | HB Document Control Center                                          | Three-lane document architecture (Project Record, My Project Files, External Systems)         | Module wave                         |
-|    8 | Project Readiness Module Framework                                  | Shared item-level workflow framework                                                          | Module wave                         |
-|    9 | Project Lifecycle Readiness Center                                  | Lifecycle readiness module seeded by startup, safety, and closeout checklist definition files | Module wave                         |
+| Wave | Module / Workstream                                                 | Primary Output                                                                                                     | Status                              |
+| ---: | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+|    0 | Implementation Gate & Repo Truth Recheck                            | Gate review, allowed paths, blocked scope                                                                          | Required before code                |
+|    1 | PCC Shared Foundations                                              | Shared models, enums, role model, fixtures                                                                         | Implementation wave                 |
+|    2 | PCC SPFx Shell Frame                                                | Shell/routing/layout/state frame                                                                                   | Implementation wave                 |
+|    3 | PCC Backend Read-Model Foundation                                   | Read-model endpoints/scaffolds                                                                                     | Complete                            |
+|    4 | Project Home / Command Center                                       | Hybrid landing page                                                                                                | Module wave                         |
+|   4A | Controlled Non-Production Tenant SPPKG Visual Validation Gate       | First eligible hosted validation after Wave 4 in controlled non-production tenant scope                            | Controlled validation gate          |
+|    5 | Priority Actions Rail                                               | Four-category action rail                                                                                          | Module wave                         |
+|   5A | Optional Controlled Tenant Revalidation After Priority Actions Rail | Optional hosted revalidation after Wave 5                                                                          | Optional controlled validation gate |
+|    6 | Team & Access                                                       | Request + approval workflow                                                                                        | Module wave                         |
+|    7 | HB Document Control Center                                          | Three-lane document architecture (Project Record, My Project Files, External Systems)                              | Module wave                         |
+|    8 | Project Readiness Module Framework                                  | Shared item-level workflow framework                                                                               | Module wave                         |
+|    9 | Project Lifecycle Readiness Center                                  | Lifecycle readiness module seeded by startup, safety, and closeout checklist definition files                      | Module wave                         |
 |   10 | Permit & Inspection Control Center                                  | Unified permit/inspection command-center architecture using internal `permits` and `required-inspections` families | Module wave                         |
-|   11 | Responsibility Matrix                                               | Item-level responsibility workflow with owner-contract mapping                                | Module wave                         |
-|   12 | Constraints Log                                                     | Item-level constraints workflow                                                               | Module wave                         |
-|   13 | Buyout Log                                                          | Item-level buyout/project-controls workflow                                                   | Module wave                         |
-|   14 | Approvals / Checkpoints                                             | Approval queue and authority logic                                                            | Module wave                         |
-|   15 | External Systems                                                    | Launch hub for approved systems                                                               | Module wave                         |
-|   16 | Control Center Settings                                             | Role-gated settings                                                                           | Module wave                         |
-|   17 | Site Health                                                         | Health visibility and repair request intake                                                   | Module wave                         |
-|   18 | Executive Oversight / Global Read-Only                              | Executive summary and governed drill-in                                                       | Module wave                         |
-|   19 | Admin / Control Plane Review Surfaces                               | Admin queues and review surfaces                                                              | Module wave                         |
-|   20 | Hardening, Doctrine Validation, Non-Production Readiness            | Validation, accessibility, doctrine, closeout                                                 | Closing wave                        |
+|   11 | Responsibility Matrix                                               | Item-level responsibility workflow with owner-contract mapping                                                     | Module wave                         |
+|   12 | Constraints Log                                                     | Item-level constraints workflow                                                                                    | Module wave                         |
+|   13 | Buyout Log                                                          | Item-level buyout/project-controls workflow                                                                        | Module wave                         |
+|   14 | Approvals / Checkpoints                                             | Approval queue and authority logic                                                                                 | Module wave                         |
+|   15 | External Systems                                                    | Launch hub for approved systems                                                                                    | Module wave                         |
+|   16 | Control Center Settings                                             | Role-gated settings                                                                                                | Module wave                         |
+|   17 | Site Health                                                         | Health visibility and repair request intake                                                                        | Module wave                         |
+|   18 | Executive Oversight / Global Read-Only                              | Executive summary and governed drill-in                                                                            | Module wave                         |
+|   19 | Admin / Control Plane Review Surfaces                               | Admin queues and review surfaces                                                                                   | Module wave                         |
+|   20 | Hardening, Doctrine Validation, Non-Production Readiness            | Validation, accessibility, doctrine, closeout                                                                      | Closing wave                        |
 
 ## Milestone Grouping
 
@@ -119,6 +119,17 @@ Wave relationship lock:
 - Wave 9 is seeded by startup, safety, and closeout checklist-definition files in `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`.
 - Wave 9 surfaces lifecycle readiness signals and cross-module posture but does not assume implementation ownership of Waves 10–14 modules.
 - Wave 8 documentation does not authorize readiness runtime execution, backend routes, persistence, scoring engines, approval execution, or external integrations.
+
+Wave 11 clarification lock:
+
+- Official module name is `Responsibility Matrix` (subtitle: `RACI + Owner-Contract Responsibility Control Center`).
+- Wave 11 is one unified Project Readiness module, not two workbook launchers.
+- Workbook-source counting posture: `109` workbook-derived task-row context (82 PM task-text rows plus 27 Field rows with assignment marks); strict marked assignment rows total `98`.
+- Owner-contract workbook posture is template/schema-only in current sources (no populated default obligation descriptions).
+- Wave 11 includes assignment lifecycle/handoffs, current action owner posture, workflow steps, decision-rights overlay, contract-party mapping + internal RACI separation, evidence references, exceptions, and Matrix Health Score planning posture.
+- Wave 14 remains approval/checkpoint execution owner; Wave 11 does not claim approval runtime execution.
+- HB Document Control Center remains evidence-binary owner; Team & Access remains roster/access owner.
+- Documentation posture only: no legal advice, no automatic creation of legal obligations, and no external-system writeback/runtime mutation claim.
 
 Wave 8 framework planning posture:
 

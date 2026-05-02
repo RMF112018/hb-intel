@@ -832,6 +832,12 @@ Seed source workbooks (repo-resident):
 - `docs/reference/example/Responsibility Matrix - Template.xlsx` (sheets: `PM`, `Field`)
 - `docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx` (sheet: `Template`)
 
+Workbook-source counting posture used for governance planning:
+
+- `109` is workbook-derived task-row posture context: 82 PM task-text rows plus 27 Field rows with assignment marks.
+- Strict marked assignment rows total `98` (71 PM + 27 Field).
+- Owner-contract workbook is placeholder/schema posture only in current source files; it does not contain populated obligation-description defaults.
+
 Seed families:
 
 - Owner Contract / GMP
@@ -882,6 +888,8 @@ The field responsibility matrix includes responsibilities across:
 ### 15.3 Required Features
 
 - Template-driven responsibility matrix
+- Responsibility Template Library with governed template version references
+- Project-instance responsibility records separated from template definitions
 - Project-specific role assignment
 - RACI-style view
 - Two-axis assignment model (contract-party classification + internal RACI)
@@ -891,6 +899,10 @@ The field responsibility matrix includes responsibilities across:
 - Sign-off role assignments
 - Recurring responsibility rules
 - Handoff workflow when a staff member changes roles
+- Assignment lifecycle history and current action owner / ball-in-court posture
+- Workflow-step model and decision-rights overlay for decision-heavy responsibility items
+- Contract clause / obligation reference model using article/page metadata as project-controls context
+- Matrix Health Score posture and snapshot/export governance
 - Integration into Action Center (planning/target-state; runtime delivery occurs in later phase implementation)
 - Seed traceability metadata (`source workbook`, `source sheet`, `source row`, `seed family`, `seed version`)
 - Governed edit authority for Admin, Project Executive, and Project Manager
@@ -925,6 +937,17 @@ The field responsibility matrix includes responsibilities across:
 - Responsibility Scope
 - Backup Person
 - Assignment Status
+
+### 15.5 Scope and Guardrails
+
+- Responsibility Matrix is a single unified Project Readiness module and is not split into separate spreadsheet launchers.
+- Wave 8 owns Project Readiness framework seams; Wave 11 must not redefine framework ownership.
+- Wave 14 owns approval/checkpoint execution authority; Wave 11 may request or reference approvals but does not execute approval runtime.
+- Evidence links are reference posture only; HB Document Control Center and SharePoint project record remain evidence-binary owners.
+- Team & Access remains owner of project roster/access state; Responsibility Matrix consumes resolved role/person context.
+- This architecture is project-controls metadata posture only and is not legal advice.
+- This architecture does not automatically create legal obligations and does not replace executed contracts.
+- External-system writeback/mutation runtime is out of scope in this Wave 11 architecture definition.
 
 ---
 
