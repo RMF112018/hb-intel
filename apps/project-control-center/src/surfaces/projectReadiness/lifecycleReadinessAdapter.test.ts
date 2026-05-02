@@ -261,3 +261,138 @@ describe('buildPccLifecycleReadinessViewModel — region label maps', () => {
     }
   });
 });
+
+describe('buildPccLifecycleReadinessViewModel — item detail', () => {
+  const vm = buildPccLifecycleReadinessViewModel(
+    makeEnvelope(SAMPLE_LIFECYCLE_READINESS_READ_MODEL),
+  );
+
+  function findMyAction(projectItemId: string) {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const item = vm.myActions.items.find((i) => i.projectItemId === projectItemId);
+    expect(item, `myActions item ${projectItemId}`).toBeDefined();
+    return item!;
+  }
+
+  function findBlocker(projectItemId: string) {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const item = vm.blockers.items.find((i) => i.projectItemId === projectItemId);
+    expect(item, `blocker item ${projectItemId}`).toBeDefined();
+    return item!;
+  }
+
+  it('attaches a record-backed detail to every list-bearing item', () => {
+    if (vm.status !== 'preview') return;
+    for (const i of vm.myActions.items) expect(i.detail).toBeDefined();
+    for (const i of vm.blockers.items) expect(i.detail).toBeDefined();
+    for (const i of vm.futureCloseout.items) expect(i.detail).toBeDefined();
+  });
+
+  it('detail surfaces full source traceability (file/page/section/itemKey/exact text)', () => {
+    const item = findMyAction('inst-startup-001');
+    expect(item.detail.sourceFile).toBe('Project_Startup_Checklist(2).pdf');
+    expect(item.detail.sourcePage).toBeGreaterThan(0);
+    expect(item.detail.sourceSection.length).toBeGreaterThan(0);
+    expect(item.detail.sourceItemKey.length).toBeGreaterThan(0);
+    expect(item.detail.exactItemText.length).toBeGreaterThan(0);
+    expect(item.detail.sourceTraceabilityRequirement.length).toBeGreaterThan(0);
+  });
+
+  it('detail propagates project-instance fields when project item present', () => {
+    const item = findMyAction('inst-startup-002');
+    expect(item.detail.status).toBe('needs-evidence');
+    expect(item.detail.posture).toBe('at-risk');
+    expect(item.detail.exceptionCode).toBe('evidence-missing');
+    expect(item.detail.evidenceState).toBeDefined();
+  });
+
+  it('detail leaves optional fields undefined when fixture omits them (no invented data)', () => {
+    const item = findMyAction('inst-startup-001');
+    expect(item.detail.completedAtUtc).toBeUndefined();
+    expect(item.detail.recurrenceCadence).toBeUndefined();
+    expect(item.detail.exceptionCode).toBeUndefined();
+  });
+
+  it('safety failed-state flag is true for inst-safety-003 and surfaces the exception code only (no compliance editorializing)', () => {
+    const item = findBlocker('inst-safety-003');
+    expect(item.detail.isSafetyFailedState).toBe(true);
+    expect(item.detail.exceptionCode).toBe('failed-safety-check');
+    // Adapter must not invent compliance words.
+    const json = JSON.stringify(item.detail);
+    expect(/compliant|non-compliant|violation/i.test(json)).toBe(false);
+  });
+
+  it('isCloseoutFromDayOne is true for tpl-closeout-001 (closeout family + activeByDefault)', () => {
+    if (vm.status !== 'preview') return;
+    // tpl-closeout-001 is in My Actions as inst-closeout-001 (status=blocked is active)
+    const item = vm.myActions.items.find((i) => i.templateItemId === 'tpl-closeout-001');
+    expect(item).toBeDefined();
+    if (!item) return;
+    expect(item.detail.activeByDefault).toBe(true);
+    expect(item.detail.family).toBe('closeout');
+    expect(item.detail.isCloseoutFromDayOne).toBe(true);
+  });
+
+  it('isFutureCloseoutExposure is true only for itemType=future-closeout-exposure', () => {
+    if (vm.status !== 'preview') return;
+    for (const fc of vm.futureCloseout.items) {
+      expect(fc.detail.isFutureCloseoutExposure).toBe(true);
+    }
+    for (const a of vm.myActions.items) {
+      if (a.detail.itemType !== 'future-closeout-exposure') {
+        expect(a.detail.isFutureCloseoutExposure).toBe(false);
+      }
+    }
+  });
+
+  it('external references are exposed as text-only descriptors (referenceUrlText, never as live URLs)', () => {
+    const item = findMyAction('inst-startup-002');
+    expect(item.detail.externalReferences.length).toBeGreaterThanOrEqual(0);
+    for (const ref of item.detail.externalReferences) {
+      expect(ref.referenceLabel.length).toBeGreaterThan(0);
+      // The optional `referenceUrlText` is a string when present;
+      // surface contract says it must NEVER be rendered as <a href>.
+      if (ref.referenceUrlText !== undefined) {
+        expect(typeof ref.referenceUrlText).toBe('string');
+      }
+    }
+  });
+});
+
+describe('buildPccLifecycleReadinessViewModel — per-region cardState propagation', () => {
+  it('propagates `preview` cardState to every list-bearing region under available envelope', () => {
+    const vm = buildPccLifecycleReadinessViewModel(
+      makeEnvelope(SAMPLE_LIFECYCLE_READINESS_READ_MODEL),
+    );
+    if (vm.status !== 'preview') return;
+    expect(vm.familyDomains.cardState).toBe('preview');
+    expect(vm.myActions.cardState).toBe('preview');
+    expect(vm.blockers.cardState).toBe('preview');
+    expect(vm.evidence.cardState).toBe('preview');
+    expect(vm.futureCloseout.cardState).toBe('preview');
+  });
+
+  it('propagates `unavailable-fixture` to every list-bearing region under source-unavailable envelope', () => {
+    const vm = buildPccLifecycleReadinessViewModel(
+      makeEnvelope(EMPTY_LIFECYCLE_DATA, 'source-unavailable'),
+    );
+    if (vm.status !== 'preview') return;
+    expect(vm.familyDomains.cardState).toBe('unavailable-fixture');
+    expect(vm.myActions.cardState).toBe('unavailable-fixture');
+    expect(vm.blockers.cardState).toBe('unavailable-fixture');
+    expect(vm.evidence.cardState).toBe('unavailable-fixture');
+    expect(vm.futureCloseout.cardState).toBe('unavailable-fixture');
+  });
+
+  it('propagates `error` to every list-bearing region under backend-unavailable envelope', () => {
+    const vm = buildPccLifecycleReadinessViewModel(
+      makeEnvelope(EMPTY_LIFECYCLE_DATA, 'backend-unavailable'),
+    );
+    if (vm.status !== 'preview') return;
+    expect(vm.familyDomains.cardState).toBe('error');
+    expect(vm.myActions.cardState).toBe('error');
+    expect(vm.blockers.cardState).toBe('error');
+    expect(vm.evidence.cardState).toBe('error');
+    expect(vm.futureCloseout.cardState).toBe('error');
+  });
+});

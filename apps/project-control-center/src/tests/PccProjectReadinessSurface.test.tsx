@@ -434,3 +434,137 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
     }
   });
 });
+
+describe('Wave 9 lifecycle item detail and degraded states', () => {
+  function lifecycleRegion(container: HTMLElement, region: string): HTMLElement | null {
+    return container.querySelector(`[data-pcc-readiness-region="${region}"]`);
+  }
+
+  function openAllDetails(container: HTMLElement): void {
+    const elements = container.querySelectorAll('details');
+    for (const el of Array.from(elements)) (el as HTMLDetailsElement).open = true;
+  }
+
+  it('renders <details>/<summary> toggles for each item in My Actions, Blockers, and Future Closeout', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const toggles = container.querySelectorAll('[data-pcc-lifecycle-item-detail-toggle]');
+    expect(toggles.length).toBeGreaterThan(0);
+  });
+
+  it('detail panel reveals source traceability fields (file, page, section, item-key, exact text)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    openAllDetails(container);
+    const myActions = lifecycleRegion(container, 'lifecycle-my-actions');
+    expect(myActions).not.toBeNull();
+    const exactText = myActions!.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="exact-item-text"]',
+    );
+    expect(exactText.length).toBeGreaterThan(0);
+    const sourceFile = myActions!.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="source-file"]',
+    );
+    const sourcePage = myActions!.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="source-page"]',
+    );
+    const sourceSection = myActions!.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="source-section"]',
+    );
+    const sourceItemKey = myActions!.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="source-item-key"]',
+    );
+    expect(sourceFile.length).toBeGreaterThan(0);
+    expect(sourcePage.length).toBeGreaterThan(0);
+    expect(sourceSection.length).toBeGreaterThan(0);
+    expect(sourceItemKey.length).toBeGreaterThan(0);
+    // Exact source text rendered separately from normalized title.
+    const titles = myActions!.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="normalized-title"]',
+    );
+    expect(titles.length).toBeGreaterThan(0);
+    expect(titles[0].textContent).not.toBe(exactText[0].textContent);
+  });
+
+  it('detail panel renders unpopulated optional fields as "Not listed" (honest placeholder)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    openAllDetails(container);
+    // At least some optional fields are unpopulated in fixture, e.g. completedAtUtc
+    // for items still in `not-started`/`in-progress`/`needs-evidence` status.
+    const completedCells = container.querySelectorAll(
+      '[data-pcc-lifecycle-item-detail-field="completed"]',
+    );
+    expect(completedCells.length).toBeGreaterThan(0);
+    const hasNotListed = Array.from(completedCells).some(
+      (el) => el.textContent === 'Not listed',
+    );
+    expect(hasNotListed).toBe(true);
+  });
+
+  it('evidence external reference URL renders as plain text inside the detail panel — no <a href>', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    openAllDetails(container);
+    const myActions = lifecycleRegion(container, 'lifecycle-my-actions');
+    expect(myActions).not.toBeNull();
+    expect(myActions!.querySelectorAll('a[href]').length).toBe(0);
+    const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
+    expect(blockers!.querySelectorAll('a[href]').length).toBe(0);
+    const future = lifecycleRegion(container, 'lifecycle-future-closeout');
+    expect(future!.querySelectorAll('a[href]').length).toBe(0);
+  });
+
+  it('inst-safety-003 detail panel surfaces failed-state marker + exception code without compliance editorializing', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    openAllDetails(container);
+    const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
+    expect(blockers).not.toBeNull();
+    const safetyItem = blockers!.querySelector(
+      '[data-pcc-lifecycle-blocker-item-id="inst-safety-003"]',
+    );
+    expect(safetyItem).not.toBeNull();
+    const failedMarker = safetyItem!.querySelector(
+      '[data-pcc-lifecycle-safety-failed-state="true"]',
+    );
+    expect(failedMarker).not.toBeNull();
+    const exceptionCell = safetyItem!.querySelector(
+      '[data-pcc-lifecycle-item-detail-field="exception-code"]',
+    );
+    expect(exceptionCell).not.toBeNull();
+    expect(exceptionCell!.textContent).toContain('failed-safety-check');
+    // Compliance-language guard is scoped to THIS detail panel only — not
+    // the whole lifecycle section — to avoid colliding with approved copy.
+    const panelText = safetyItem!.textContent ?? '';
+    expect(/compliant|non-compliant|violation|audit pass/i.test(panelText)).toBe(false);
+  });
+
+  it('closeout-from-day-one chip renders for closeout-family items with activeByDefault=true', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    openAllDetails(container);
+    const chips = container.querySelectorAll(
+      '[data-pcc-lifecycle-closeout-from-day-one="true"]',
+    );
+    expect(chips.length).toBeGreaterThan(0);
+  });
+
+  it('all detail-panel buttons (if any) are disabled or aria-disabled', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    openAllDetails(container);
+    const sectioned = container.querySelectorAll(
+      '[data-pcc-readiness-section="lifecycle-readiness-center"]',
+    );
+    for (const region of Array.from(sectioned)) {
+      const buttons = region.querySelectorAll('button');
+      for (const btn of Array.from(buttons)) {
+        expect(
+          btn.hasAttribute('disabled') ||
+            btn.getAttribute('aria-disabled') === 'true',
+        ).toBe(true);
+      }
+    }
+  });
+});

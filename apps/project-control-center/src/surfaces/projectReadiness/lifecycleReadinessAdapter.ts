@@ -42,6 +42,8 @@ import type {
   IPccLifecycleFamilyDomainsViewModel,
   IPccLifecycleFutureCloseoutItemViewModel,
   IPccLifecycleFutureCloseoutViewModel,
+  IPccLifecycleItemDetailViewModel,
+  IPccLifecycleItemExternalReferenceDetailViewModel,
   IPccLifecycleMapPhaseViewModel,
   IPccLifecycleMapViewModel,
   IPccLifecycleMyActionsItemViewModel,
@@ -181,11 +183,11 @@ export function buildPccLifecycleReadinessViewModel(
   };
 
   const lifecycleMap = buildLifecycleMap(data);
-  const familyDomains = buildFamilyDomains(data, projectItems);
-  const myActions = buildMyActions(projectItems, templateMap, viewerPersona);
-  const blockers = buildBlockers(data, projectItems, templateMap);
-  const evidence = buildEvidence(data);
-  const futureCloseout = buildFutureCloseout(templateItems, projectItems);
+  const familyDomains = buildFamilyDomains(data, projectItems, cardState);
+  const myActions = buildMyActions(projectItems, templateMap, viewerPersona, cardState);
+  const blockers = buildBlockers(data, projectItems, templateMap, cardState);
+  const evidence = buildEvidence(data, cardState);
+  const futureCloseout = buildFutureCloseout(templateItems, projectItems, cardState);
   const sourceTraceability = buildSourceTraceability(data);
 
   return {
@@ -263,6 +265,7 @@ function buildLifecycleMap(
 function buildFamilyDomains(
   data: PccLifecycleReadinessReadModel,
   projectItems: readonly ILifecycleReadinessProjectItem[],
+  cardState: PccCardState,
 ): IPccLifecycleFamilyDomainsViewModel {
   const families: IPccLifecycleFamilyCardViewModel[] = LIFECYCLE_READINESS_FAMILIES.map(
     (family) => {
@@ -286,7 +289,7 @@ function buildFamilyDomains(
     confidence: d.confidence,
   }));
 
-  return { families, domains };
+  return { cardState, families, domains };
 }
 
 function deriveFamilyPosture(
@@ -304,6 +307,7 @@ function buildMyActions(
   projectItems: readonly ILifecycleReadinessProjectItem[],
   templateMap: ReadonlyMap<string, ILifecycleReadinessTemplateItem>,
   viewerPersona: PccPersona | undefined,
+  cardState: PccCardState,
 ): IPccLifecycleMyActionsViewModel {
   const filtered = projectItems.filter((p) => {
     if (viewerPersona && p.ownerPersona !== viewerPersona) return false;
@@ -324,6 +328,7 @@ function buildMyActions(
       criticality: tmpl?.criticality ?? 'informational',
       ownerPersona: p.ownerPersona,
       ...(p.dueDateUtc !== undefined ? { dueDateUtc: p.dueDateUtc } : {}),
+      detail: buildItemDetail(tmpl, p),
     };
   });
 
@@ -332,6 +337,7 @@ function buildMyActions(
     : 'Active readiness items across all owners (fixture preview — persona filter not applied).';
 
   return {
+    cardState,
     items,
     captionText,
     inertActionLabel: 'Preview only — workflow execution is not enabled in Wave 9.',
@@ -343,6 +349,7 @@ function buildBlockers(
   data: PccLifecycleReadinessReadModel,
   projectItems: readonly ILifecycleReadinessProjectItem[],
   templateMap: ReadonlyMap<string, ILifecycleReadinessTemplateItem>,
+  cardState: PccCardState,
 ): IPccLifecycleBlockersViewModel {
   const buckets: IPccLifecycleBlockerBucketViewModel[] = data.blockerSummary.map(
     (b) => ({
@@ -370,6 +377,7 @@ function buildBlockers(
       blockerState: p.blockerState,
       status: p.status,
       ...(p.exceptionCode !== undefined ? { exceptionCode: p.exceptionCode } : {}),
+      detail: buildItemDetail(tmpl, p),
     };
   });
 
@@ -379,6 +387,7 @@ function buildBlockers(
       : `${items.length} item${items.length === 1 ? '' : 's'} currently blocked or escalated.`;
 
   return {
+    cardState,
     buckets,
     items,
     summaryCaption,
@@ -388,6 +397,7 @@ function buildBlockers(
 
 function buildEvidence(
   data: PccLifecycleReadinessReadModel,
+  cardState: PccCardState,
 ): IPccLifecycleEvidenceViewModel {
   const buckets: IPccLifecycleEvidenceBucketViewModel[] = data.evidenceSummary.map(
     (e) => ({
@@ -398,6 +408,7 @@ function buildEvidence(
     }),
   );
   return {
+    cardState,
     buckets,
     documentControlReferenceCaption: DOCUMENT_CONTROL_REFERENCE_CAPTION,
     rawEvidenceSummary: data.evidenceSummary,
@@ -407,6 +418,7 @@ function buildEvidence(
 function buildFutureCloseout(
   templateItems: readonly ILifecycleReadinessTemplateItem[],
   projectItems: readonly ILifecycleReadinessProjectItem[],
+  cardState: PccCardState,
 ): IPccLifecycleFutureCloseoutViewModel {
   const futureTemplates = templateItems.filter(
     (t) => t.itemType === 'future-closeout-exposure',
@@ -425,6 +437,7 @@ function buildFutureCloseout(
         criticality: t.criticality,
         hasProjectInstance: inst !== undefined,
         ...(inst?.status !== undefined ? { projectStatus: inst.status } : {}),
+        detail: buildItemDetail(t, inst),
       };
     },
   );
@@ -434,7 +447,7 @@ function buildFutureCloseout(
       ? 'No future closeout exposure flagged in this snapshot.'
       : `${items.length} future closeout exposure item${items.length === 1 ? '' : 's'} surfaced for early visibility.`;
 
-  return { items, captionText };
+  return { cardState, items, captionText };
 }
 
 function buildSourceTraceability(
@@ -460,14 +473,143 @@ function buildSourceTraceability(
   };
 }
 
-// Re-export label maps for the surface layer to reuse, e.g. when rendering
-// fallback chips outside the resolved view-model. Kept module-local; not
-// exported from the package barrel.
-export const LIFECYCLE_FAMILY_LABELS = FAMILY_LABELS;
-export const LIFECYCLE_PHASE_LABELS = PHASE_LABELS;
-export const LIFECYCLE_DOMAIN_LABELS = DOMAIN_LABELS;
-export const LIFECYCLE_GATE_LABELS = GATE_LABELS;
+// Detail view-model builder.
+// `template` and `project` are both optional so the helper can serve the
+// rare degenerate paths (project-only or template-only). When both are
+// present the joined detail uses the template item for classification and
+// source traceability, and the project item for instance state.
+function buildItemDetail(
+  template: ILifecycleReadinessTemplateItem | undefined,
+  project: ILifecycleReadinessProjectItem | undefined,
+): IPccLifecycleItemDetailViewModel {
+  const family = (template?.family ?? project?.family) as LifecycleReadinessFamily;
+  const sourceTrace = template?.sourceTrace;
+  const evidenceLink = project?.evidenceLink ?? template?.evidenceLink;
 
-// Internal — exported only to allow tests to assert blocker-state ↔ severity
-// rollups using the canonical zero baseline.
-export const LIFECYCLE_ZERO_SEVERITY_COUNTS = ZERO_SEVERITY_COUNTS;
+  const externalReferences: IPccLifecycleItemExternalReferenceDetailViewModel[] =
+    (template?.externalReferences ?? []).map((ref) => ({
+      system: ref.system,
+      referenceLabel: ref.referenceLabel,
+      ...(ref.referenceUrl !== undefined ? { referenceUrlText: ref.referenceUrl } : {}),
+    }));
+
+  const status = project?.status;
+  const itemType = template?.itemType ?? 'reference-only';
+  const isCloseoutFromDayOne = family === 'closeout' && template?.activeByDefault === true;
+  const isFutureCloseoutExposure = itemType === 'future-closeout-exposure';
+  const isSafetyFailedState = family === 'safety' && status === 'failed';
+
+  return {
+    templateItemId: template?.templateItemId ?? project?.templateItemId ?? '—',
+    ...(project?.projectItemId !== undefined ? { projectItemId: project.projectItemId } : {}),
+
+    normalizedTitle: template?.normalizedTitle ?? project?.templateItemId ?? '—',
+    family,
+    familyLabel: FAMILY_LABELS[family],
+    itemType,
+    criticality: template?.criticality ?? 'informational',
+    riskTags: template?.riskTags ?? [],
+    activeByDefault: template?.activeByDefault === true,
+    ...(template?.classificationNotes !== undefined
+      ? { classificationNotes: template.classificationNotes }
+      : {}),
+
+    sourceFamily: sourceTrace?.family ?? family,
+    sourceFile: sourceTrace?.sourceFile ?? '—',
+    sourceSection: sourceTrace?.section ?? '—',
+    sourcePage: sourceTrace?.page ?? 0,
+    sourceItemKey: sourceTrace?.itemKey ?? '—',
+    exactItemText: sourceTrace?.exactItemText ?? '—',
+    sourceTraceabilityRequirement: sourceTrace?.sourceTraceabilityRequirement ?? '—',
+    ...(sourceTrace?.details !== undefined ? { sourceDetails: sourceTrace.details } : {}),
+    ...(sourceTrace?.responseOptions !== undefined
+      ? { responseOptions: sourceTrace.responseOptions }
+      : {}),
+
+    lifecyclePhase: template?.lifecyclePhase ?? 'contract-review',
+    phaseLabel: template?.lifecyclePhase
+      ? PHASE_LABELS[template.lifecyclePhase]
+      : '—',
+    readinessDomain: template?.readinessDomain ?? 'contract-commercial',
+    domainLabel: template?.readinessDomain
+      ? DOMAIN_LABELS[template.readinessDomain] ?? template.readinessDomain
+      : '—',
+    defaultGateImpact: template?.defaultGateImpact ?? [],
+
+    defaultOwnerPersona: (template?.defaultOwnerPersona ??
+      project?.ownerPersona ??
+      'project-manager') as PccPersona,
+    ...(template?.defaultReviewerPersona !== undefined
+      ? { defaultReviewerPersona: template.defaultReviewerPersona }
+      : {}),
+    ownershipClassification: template?.ownershipClassification ?? 'owned',
+
+    ...(project?.status !== undefined ? { status: project.status } : {}),
+    ...(project?.posture !== undefined ? { posture: project.posture } : {}),
+    ...(project?.severity !== undefined ? { severity: project.severity } : {}),
+    ...(project?.blockerState !== undefined ? { blockerState: project.blockerState } : {}),
+    ...(project?.confidence !== undefined ? { confidence: project.confidence } : {}),
+    ...(project?.ownerPersona !== undefined ? { ownerPersona: project.ownerPersona } : {}),
+    ...(project?.reviewerPersona !== undefined ? { reviewerPersona: project.reviewerPersona } : {}),
+    ...(project?.dueDateUtc !== undefined ? { dueDateUtc: project.dueDateUtc } : {}),
+    ...(project?.completedAtUtc !== undefined ? { completedAtUtc: project.completedAtUtc } : {}),
+    ...(project?.completedByPersona !== undefined
+      ? { completedByPersona: project.completedByPersona }
+      : {}),
+    ...(project?.lastUpdatedAtUtc !== undefined
+      ? { lastUpdatedAtUtc: project.lastUpdatedAtUtc }
+      : {}),
+    ...(project?.lastActorPersona !== undefined
+      ? { lastActorPersona: project.lastActorPersona }
+      : {}),
+
+    ...(project?.notApplicableReason !== undefined
+      ? { notApplicableReason: project.notApplicableReason }
+      : {}),
+    ...(project?.deferredReason !== undefined
+      ? { deferredReason: project.deferredReason }
+      : {}),
+    ...(project?.blockedReason !== undefined ? { blockedReason: project.blockedReason } : {}),
+    ...(project?.projectOverrideNotes !== undefined
+      ? { projectOverrideNotes: project.projectOverrideNotes }
+      : {}),
+    ...(project?.exceptionCode !== undefined ? { exceptionCode: project.exceptionCode } : {}),
+
+    evidencePolicy: template?.evidencePolicy ?? evidenceLink?.policy ?? 'optional',
+    ...(evidenceLink?.evidenceState !== undefined
+      ? { evidenceState: evidenceLink.evidenceState }
+      : {}),
+    ...(evidenceLink?.referenceLabel !== undefined
+      ? { evidenceReferenceLabel: evidenceLink.referenceLabel }
+      : {}),
+    ...(evidenceLink?.documentControlSourceId !== undefined
+      ? { evidenceDocumentControlSourceId: evidenceLink.documentControlSourceId }
+      : {}),
+    ...(evidenceLink?.externalReferenceLabel !== undefined
+      ? { evidenceExternalReferenceLabel: evidenceLink.externalReferenceLabel }
+      : {}),
+    ...(evidenceLink?.externalReferenceUrl !== undefined
+      ? { evidenceExternalReferenceUrlText: evidenceLink.externalReferenceUrl }
+      : {}),
+
+    externalReferences,
+
+    ...(template?.recurrence?.cadence !== undefined
+      ? { recurrenceCadence: template.recurrence.cadence }
+      : {}),
+    ...(template?.recurrence?.triggerEvent !== undefined
+      ? { recurrenceTriggerEvent: template.recurrence.triggerEvent }
+      : {}),
+
+    ...(project?.approvalCheckpointReference !== undefined
+      ? { approvalCheckpointReference: project.approvalCheckpointReference }
+      : {}),
+    ...(project?.relatedPriorityActionId !== undefined
+      ? { relatedPriorityActionId: project.relatedPriorityActionId }
+      : {}),
+
+    isCloseoutFromDayOne,
+    isFutureCloseoutExposure,
+    isSafetyFailedState,
+  };
+}

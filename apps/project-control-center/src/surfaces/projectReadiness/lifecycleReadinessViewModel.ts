@@ -18,10 +18,15 @@ import type {
   IProjectReadinessEvidenceSummary,
   LifecycleReadinessCriticality,
   LifecycleReadinessDomainId,
+  LifecycleReadinessEvidencePolicy,
   LifecycleReadinessExceptionCode,
+  LifecycleReadinessExternalReferenceSystem,
   LifecycleReadinessFamily,
   LifecycleReadinessGateId,
+  LifecycleReadinessItemTypeId,
+  LifecycleReadinessOwnershipClassification,
   LifecycleReadinessPhaseId,
+  LifecycleReadinessRecurrenceCadence,
   LifecycleReadinessStatus,
   PccPersona,
   PccReadModelSourceStatus,
@@ -90,8 +95,106 @@ export interface IPccLifecycleDomainCardViewModel {
 }
 
 export interface IPccLifecycleFamilyDomainsViewModel {
+  readonly cardState: PccCardState;
   readonly families: readonly IPccLifecycleFamilyCardViewModel[];
   readonly domains: readonly IPccLifecycleDomainCardViewModel[];
+}
+
+// ---------------------------------------------------------------------------
+// Unified item-detail view-model — populated for every list-bearing item
+// (My Actions, Blockers, Future Closeout). Every field is record-backed:
+// `undefined` means the underlying record did not populate the field, and
+// the surface must render an honest placeholder (e.g. `Not listed` / `—`).
+// ---------------------------------------------------------------------------
+
+export interface IPccLifecycleItemExternalReferenceDetailViewModel {
+  readonly system: LifecycleReadinessExternalReferenceSystem;
+  readonly referenceLabel: string;
+  /** Captured for honest text rendering only. Never rendered as a hyperlink. */
+  readonly referenceUrlText?: string;
+}
+
+export interface IPccLifecycleItemDetailViewModel {
+  readonly templateItemId: string;
+  readonly projectItemId?: string;
+
+  // Identity / classification
+  readonly normalizedTitle: string;
+  readonly family: LifecycleReadinessFamily;
+  readonly familyLabel: string;
+  readonly itemType: LifecycleReadinessItemTypeId;
+  readonly criticality: LifecycleReadinessCriticality;
+  readonly riskTags: readonly string[];
+  readonly activeByDefault: boolean;
+  readonly classificationNotes?: string;
+
+  // Source traceability (from `sourceTrace`)
+  readonly sourceFamily: LifecycleReadinessFamily;
+  readonly sourceFile: string;
+  readonly sourceSection: string;
+  readonly sourcePage: number;
+  readonly sourceItemKey: string;
+  readonly exactItemText: string;
+  readonly sourceTraceabilityRequirement: string;
+  readonly sourceDetails?: string;
+  readonly responseOptions?: string;
+
+  // Lifecycle / domain mapping
+  readonly lifecyclePhase: LifecycleReadinessPhaseId;
+  readonly phaseLabel: string;
+  readonly readinessDomain: LifecycleReadinessDomainId;
+  readonly domainLabel: string;
+  readonly defaultGateImpact: readonly LifecycleReadinessGateId[];
+
+  // Ownership / accountability
+  readonly defaultOwnerPersona: PccPersona;
+  readonly defaultReviewerPersona?: PccPersona;
+  readonly ownershipClassification: LifecycleReadinessOwnershipClassification;
+
+  // Project instance state (undefined when no project item exists)
+  readonly status?: LifecycleReadinessStatus;
+  readonly posture?: ProjectReadinessPosture;
+  readonly severity?: ProjectReadinessSeverity;
+  readonly blockerState?: ProjectReadinessBlockerState;
+  readonly confidence?: ProjectReadinessConfidenceState;
+  readonly ownerPersona?: PccPersona;
+  readonly reviewerPersona?: PccPersona;
+  readonly dueDateUtc?: string;
+  readonly completedAtUtc?: string;
+  readonly completedByPersona?: PccPersona;
+  readonly lastUpdatedAtUtc?: string;
+  readonly lastActorPersona?: PccPersona;
+
+  // Reasons (display-only signals)
+  readonly notApplicableReason?: string;
+  readonly deferredReason?: string;
+  readonly blockedReason?: string;
+  readonly projectOverrideNotes?: string;
+  readonly exceptionCode?: LifecycleReadinessExceptionCode;
+
+  // Evidence posture (text-only; URL never rendered as a link)
+  readonly evidencePolicy: LifecycleReadinessEvidencePolicy;
+  readonly evidenceState?: ProjectReadinessEvidenceState;
+  readonly evidenceReferenceLabel?: string;
+  readonly evidenceDocumentControlSourceId?: string;
+  readonly evidenceExternalReferenceLabel?: string;
+  readonly evidenceExternalReferenceUrlText?: string;
+
+  // External references
+  readonly externalReferences: readonly IPccLifecycleItemExternalReferenceDetailViewModel[];
+
+  // Recurrence
+  readonly recurrenceCadence?: LifecycleReadinessRecurrenceCadence;
+  readonly recurrenceTriggerEvent?: string;
+
+  // Approval / priority promotion
+  readonly approvalCheckpointReference?: string;
+  readonly relatedPriorityActionId?: string;
+
+  // Posture markers consumed by the surface
+  readonly isCloseoutFromDayOne: boolean; // family === 'closeout' && activeByDefault
+  readonly isFutureCloseoutExposure: boolean; // itemType === 'future-closeout-exposure'
+  readonly isSafetyFailedState: boolean; // family === 'safety' && status === 'failed'
 }
 
 // ---------------------------------------------------------------------------
@@ -109,9 +212,11 @@ export interface IPccLifecycleMyActionsItemViewModel {
   readonly criticality: LifecycleReadinessCriticality;
   readonly ownerPersona: PccPersona;
   readonly dueDateUtc?: string;
+  readonly detail: IPccLifecycleItemDetailViewModel;
 }
 
 export interface IPccLifecycleMyActionsViewModel {
+  readonly cardState: PccCardState;
   readonly items: readonly IPccLifecycleMyActionsItemViewModel[];
   readonly captionText: string;
   readonly inertActionLabel: string;
@@ -138,9 +243,11 @@ export interface IPccLifecycleBlockerItemViewModel {
   readonly blockerState: ProjectReadinessBlockerState;
   readonly status: LifecycleReadinessStatus;
   readonly exceptionCode?: LifecycleReadinessExceptionCode;
+  readonly detail: IPccLifecycleItemDetailViewModel;
 }
 
 export interface IPccLifecycleBlockersViewModel {
+  readonly cardState: PccCardState;
   readonly buckets: readonly IPccLifecycleBlockerBucketViewModel[];
   readonly items: readonly IPccLifecycleBlockerItemViewModel[];
   readonly summaryCaption: string;
@@ -159,6 +266,7 @@ export interface IPccLifecycleEvidenceBucketViewModel {
 }
 
 export interface IPccLifecycleEvidenceViewModel {
+  readonly cardState: PccCardState;
   readonly buckets: readonly IPccLifecycleEvidenceBucketViewModel[];
   readonly documentControlReferenceCaption: string;
   readonly rawEvidenceSummary: readonly IProjectReadinessEvidenceSummary[];
@@ -176,9 +284,11 @@ export interface IPccLifecycleFutureCloseoutItemViewModel {
   readonly criticality: LifecycleReadinessCriticality;
   readonly hasProjectInstance: boolean;
   readonly projectStatus?: LifecycleReadinessStatus;
+  readonly detail: IPccLifecycleItemDetailViewModel;
 }
 
 export interface IPccLifecycleFutureCloseoutViewModel {
+  readonly cardState: PccCardState;
   readonly items: readonly IPccLifecycleFutureCloseoutItemViewModel[];
   readonly captionText: string;
 }
