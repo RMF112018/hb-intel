@@ -2,6 +2,7 @@ import { describe, it, expect, expectTypeOf } from 'vitest';
 import type {
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
+  PccLifecycleReadinessReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -26,7 +27,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the nine backend route ids', () => {
+  it('enumerates exactly the ten backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -37,6 +38,7 @@ describe('IPccReadModelClient route metadata', () => {
       'site-health',
       'team-access',
       'project-readiness',
+      'lifecycle-readiness',
     ]);
   });
 
@@ -87,6 +89,9 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getProjectReadiness']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getLifecycleReadiness']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>
+    >();
   });
 
   it('accepts optional viewerPersona on every method', () => {
@@ -100,7 +105,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the nine id literals', () => {
+  it('is the union of the ten id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -111,6 +116,7 @@ describe('PccReadModelRouteId', () => {
       'site-health',
       'team-access',
       'project-readiness',
+      'lifecycle-readiness',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

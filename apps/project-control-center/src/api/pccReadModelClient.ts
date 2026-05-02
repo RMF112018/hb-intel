@@ -16,6 +16,7 @@
 import type {
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
+  PccLifecycleReadinessReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -40,6 +41,7 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'site-health',
   'team-access',
   'project-readiness',
+  'lifecycle-readiness',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -61,6 +63,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'site-health': 'pcc/projects/{projectId}/site-health',
   'team-access': 'pcc/projects/{projectId}/team-access',
   'project-readiness': 'pcc/projects/{projectId}/project-readiness',
+  'lifecycle-readiness': 'pcc/projects/{projectId}/lifecycle-readiness',
 };
 
 /**
@@ -117,4 +120,9 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>>;
+
+  getLifecycleReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>;
 }

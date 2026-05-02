@@ -16,6 +16,9 @@ const READ_MODEL_METHODS = [
   'getDocumentControl',
   'getExternalLinks',
   'getSiteHealth',
+  'getTeamAccess',
+  'getProjectReadiness',
+  'getLifecycleReadiness',
 ] as const;
 
 let fetchSpy: ReturnType<typeof vi.fn>;
@@ -86,6 +89,14 @@ describe('createPccReadModelClient — fixture default', () => {
     expect(env.sourceStatus).toBe('backend-unavailable');
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it('returns fixture-mode lifecycle-readiness envelope without invoking fetch', async () => {
+    const client = createPccReadModelClient();
+    const env = await client.getLifecycleReadiness(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.sourceStatus).toBe('available');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('createPccReadModelClient — backend mode config-fallback (no fetch)', () => {
@@ -145,7 +156,7 @@ describe('createPccReadModelClient — backend mode wires the HTTP client', () =
 });
 
 describe('createPccReadModelClient — IPccReadModelClient shape', () => {
-  it('exposes all seven IPccReadModelClient methods returning thenables', () => {
+  it('exposes all ten IPccReadModelClient methods returning thenables', () => {
     const client = createPccReadModelClient();
     for (const method of READ_MODEL_METHODS) {
       expect(typeof (client as unknown as Record<string, unknown>)[method]).toBe(

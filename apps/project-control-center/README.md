@@ -323,6 +323,26 @@ source** — it adds tests only:
 Wave 4 / Wave 5 / Wave 6 prior-prompt assertions remain green and
 unchanged; the new scans are purely additive.
 
+### Wave 9 Lifecycle Readiness Client Seam
+
+`IPccReadModelClient` now exposes **10** read-model methods. Wave 9 / Prompt 04
+adds:
+
+- `getLifecycleReadiness(projectId, viewerPersona?)` →
+  `Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>`
+- Route id `'lifecycle-readiness'` →
+  `pcc/projects/{projectId}/lifecycle-readiness` (GET).
+
+The fixture client mirrors the backend mock provider's degraded
+`EMPTY_LIFECYCLE_READINESS_READ_MODEL` shape — preserving the canonical
+157 / 55 / 32 / 70 `templateLibraryMetadata` in `backend-unavailable` and
+`source-unavailable` envelopes. Known projects return
+`SAMPLE_LIFECYCLE_READINESS_READ_MODEL`. The narrow
+`IPccProjectReadinessReadModelClient` (consumed by `PccProjectReadinessSurface`)
+is structurally extended so the lifecycle data is reachable from the
+existing Project Readiness surface; surface UX consumption is deferred to
+the next prompt. Fixture remains the default; no live fetch is added.
+
 ### Wave 5 Priority Actions Rail (Project Home)
 
 The Priority Actions card on Project Home renders a PCC-local four-group rail

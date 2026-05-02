@@ -19,9 +19,12 @@
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   DOCUMENT_CONTROL_SOURCES,
+  LIFECYCLE_READINESS_LIBRARY_METADATA,
+  LIFECYCLE_READINESS_STATUSES,
   PCC_MVP_SURFACES,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
+  SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
@@ -31,8 +34,10 @@ import {
 import type {
   IDocumentControlSource,
   IProjectProfile,
+  LifecycleReadinessStatus,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
+  PccLifecycleReadinessReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -311,6 +316,31 @@ const EMPTY_PROJECT_READINESS_SNAPSHOT: PccProjectReadinessFrameworkReadModel = 
   sourceHealthSummary: [],
 };
 
+// Mirrors the backend mock provider's degraded lifecycle-readiness payload
+// (`pcc-mock-read-model-provider.ts` → `EMPTY_LIFECYCLE_READINESS_READ_MODEL`).
+// Preserves canonical 157 / 55 / 32 / 70 `templateLibraryMetadata` when the
+// envelope is `backend-unavailable` or `source-unavailable`.
+const EMPTY_LIFECYCLE_STATUS_COUNTS: Readonly<Record<LifecycleReadinessStatus, number>> =
+  Object.freeze(
+    Object.fromEntries(LIFECYCLE_READINESS_STATUSES.map((status) => [status, 0])),
+  ) as Readonly<Record<LifecycleReadinessStatus, number>>;
+
+const EMPTY_LIFECYCLE_READINESS_READ_MODEL: PccLifecycleReadinessReadModel = {
+  summary: {
+    totalProjectItems: 0,
+    statusCounts: EMPTY_LIFECYCLE_STATUS_COUNTS,
+    headlinePosture: 'unknown',
+  },
+  templateLibraryMetadata: LIFECYCLE_READINESS_LIBRARY_METADATA,
+  sampleTemplateItems: [],
+  sampleProjectItems: [],
+  gates: [],
+  domains: [],
+  phases: [],
+  evidenceSummary: [],
+  blockerSummary: [],
+};
+
 class PccFixtureReadModelClient implements IPccReadModelClient {
   private readonly simulateBackendUnavailable: boolean;
   private readonly now: () => string;
@@ -562,6 +592,37 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
       viewerPersona,
       'available',
       SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+      [],
+    );
+  }
+
+  async getLifecycleReadiness(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_LIFECYCLE_READINESS_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_LIFECYCLE_READINESS_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
       [],
     );
   }

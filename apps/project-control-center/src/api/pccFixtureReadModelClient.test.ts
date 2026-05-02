@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
+  LIFECYCLE_READINESS_LIBRARY_METADATA,
+  LIFECYCLE_READINESS_STATUSES,
+  SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
@@ -25,8 +28,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getSiteHealth(KNOWN_PROJECT_ID),
       client.getTeamAccess(KNOWN_PROJECT_ID),
       client.getProjectReadiness(KNOWN_PROJECT_ID),
+      client.getLifecycleReadiness(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(9);
+    expect(envelopes).toHaveLength(10);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -88,6 +92,14 @@ describe('createPccFixtureReadModelClient — defaults', () => {
     expect(readiness.warnings).toEqual([]);
     expect(readiness.data).toBe(SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL);
     expect(readiness.data.items.length).toBeGreaterThan(0);
+
+    const lifecycle = await client.getLifecycleReadiness(KNOWN_PROJECT_ID);
+    expect(lifecycle.mode).toBe('fixture');
+    expect(lifecycle.readOnly).toBe(true);
+    expect(lifecycle.sourceStatus).toBe('available');
+    expect(lifecycle.warnings).toEqual([]);
+    expect(lifecycle.data).toBe(SAMPLE_LIFECYCLE_READINESS_READ_MODEL);
+    expect(lifecycle.data.templateLibraryMetadata).toBe(LIFECYCLE_READINESS_LIBRARY_METADATA);
   });
 });
 
@@ -105,6 +117,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getSiteHealth(KNOWN_PROJECT_ID),
       client.getTeamAccess(KNOWN_PROJECT_ID),
       client.getProjectReadiness(KNOWN_PROJECT_ID),
+      client.getLifecycleReadiness(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -126,6 +139,36 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
     const readiness = await client.getProjectReadiness(KNOWN_PROJECT_ID);
     expect(readiness.data.items.length).toBe(0);
     expect(readiness.data.domainSummaries.length).toBe(0);
+
+    const lifecycle = await client.getLifecycleReadiness(KNOWN_PROJECT_ID);
+    expect(lifecycle.data.sampleProjectItems).toEqual([]);
+    expect(lifecycle.data.sampleTemplateItems).toEqual([]);
+    expect(lifecycle.data.gates).toEqual([]);
+    expect(lifecycle.data.domains).toEqual([]);
+    expect(lifecycle.data.phases).toEqual([]);
+    expect(lifecycle.data.summary.totalProjectItems).toBe(0);
+    expect(lifecycle.data.summary.headlinePosture).toBe('unknown');
+    for (const status of LIFECYCLE_READINESS_STATUSES) {
+      expect(lifecycle.data.summary.statusCounts[status]).toBe(0);
+    }
+    // Canonical 157 / 55 / 32 / 70 library metadata preserved in degraded mode.
+    expect(lifecycle.data.templateLibraryMetadata).toBe(LIFECYCLE_READINESS_LIBRARY_METADATA);
+    expect(lifecycle.data.templateLibraryMetadata.total).toBe(157);
+  });
+});
+
+describe('createPccFixtureReadModelClient — lifecycle-readiness unknown project', () => {
+  const client = createPccFixtureReadModelClient();
+
+  it('returns sourceStatus="source-unavailable" with canonical metadata preserved', async () => {
+    const env = await client.getLifecycleReadiness(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+    expect(env.data.templateLibraryMetadata).toBe(LIFECYCLE_READINESS_LIBRARY_METADATA);
+    expect(env.data.sampleProjectItems).toEqual([]);
   });
 });
 

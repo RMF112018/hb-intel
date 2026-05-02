@@ -141,5 +141,9 @@ export function createPccBackendReadModelClient(
       callBackend('project-readiness', projectId, () =>
         fallback.getProjectReadiness(projectId, viewerPersona),
       ),
+    getLifecycleReadiness: (projectId, viewerPersona) =>
+      callBackend('lifecycle-readiness', projectId, () =>
+        fallback.getLifecycleReadiness(projectId, viewerPersona),
+      ),
   };
 }
