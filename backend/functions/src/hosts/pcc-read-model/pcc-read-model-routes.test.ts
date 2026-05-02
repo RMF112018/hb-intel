@@ -13,6 +13,7 @@ const provider = {
   getProjectReadiness: vi.fn(),
   getLifecycleReadiness: vi.fn(),
   getPermitInspectionControlCenter: vi.fn(),
+  getResponsibilityMatrix: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -100,6 +101,11 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     route: 'pcc/projects/{projectId}/permit-inspection-control-center',
     method: 'getPermitInspectionControlCenter',
   },
+  {
+    name: 'getPccProjectResponsibilityMatrix',
+    route: 'pcc/projects/{projectId}/responsibility-matrix',
+    method: 'getResponsibilityMatrix',
+  },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -120,11 +126,33 @@ describe('PCC read-only route registrations', () => {
     await import('./pcc-read-model-routes.js');
   });
 
-  it('registers exactly the eleven approved route handlers', () => {
-    expect(registrations).toHaveLength(11);
+  it('registers exactly the twelve approved route handlers', () => {
+    expect(registrations).toHaveLength(12);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);
+    }
+  });
+
+  it('exposes the Wave 11 responsibility-matrix path as a single GET-only registration', () => {
+    const wave11Path = 'pcc/projects/{projectId}/responsibility-matrix';
+    const wave11Registrations = registrations.filter((reg) => reg.config.route === wave11Path);
+
+    expect(wave11Registrations).toHaveLength(1);
+
+    const wave11 = wave11Registrations[0]!;
+    expect(wave11.name).toBe('getPccProjectResponsibilityMatrix');
+    expect(wave11.config.methods).toEqual(['GET']);
+
+    const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+    for (const method of writeMethods) {
+      const writeRegistration = registrations.find(
+        (reg) =>
+          reg.config.route === wave11Path &&
+          Array.isArray(reg.config.methods) &&
+          reg.config.methods.includes(method),
+      );
+      expect(writeRegistration).toBeUndefined();
     }
   });
 

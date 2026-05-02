@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import {
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_PROJECT_PROFILES,
+  SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   type PccProjectId,
 } from '@hbc/models/pcc';
 import { PccMockReadModelProvider } from './pcc-mock-read-model-provider.js';
@@ -11,6 +12,8 @@ import { PccMockReadModelProvider } from './pcc-mock-read-model-provider.js';
 const KNOWN_PROJECT_ID: PccProjectId = SAMPLE_PROJECT_PROFILES[0].projectId;
 const UNKNOWN_PROJECT_ID: PccProjectId =
   'project-unknown-permit-inspection-fixture-001' as PccProjectId;
+const UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID: PccProjectId =
+  'project-unknown-responsibility-matrix-001' as PccProjectId;
 
 const PROVIDER_SOURCE_FILE = fileURLToPath(
   new URL('./pcc-mock-read-model-provider.ts', import.meta.url),
@@ -137,6 +140,133 @@ describe('PccMockReadModelProvider.getPermitInspectionControlCenter — backend-
       UNKNOWN_PROJECT_ID,
     );
     expect(unavailable.data).toEqual(unknown.data);
+  });
+});
+
+describe('PccMockReadModelProvider.getResponsibilityMatrix — known project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns a read-only mock envelope with available status and the deterministic fixture', async () => {
+    const envelope = await provider.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('available');
+    expect(envelope.warnings).toHaveLength(0);
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(envelope.data).toBe(SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL);
+  });
+
+  it('preserves the canonical 109 / 82 / 27 / 98 / 47 / 0 workbook posture', async () => {
+    const envelope = await provider.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.templates.length).toBe(4);
+    expect(data.projectInstances.length).toBe(5);
+    expect(data.snapshotHistory.length).toBe(1);
+    expect(data.auditEvents.length).toBe(4);
+    expect(data.workbookSourceSummary.defaultItemsTotal).toBe(109);
+    expect(data.workbookSourceSummary.pmItems).toBe(82);
+    expect(data.workbookSourceSummary.fieldItems).toBe(27);
+    expect(data.workbookSourceSummary.strictMarkedRows).toBe(98);
+    expect(data.workbookSourceSummary.ambiguousItemsTotal).toBe(47);
+    expect(data.workbookSourceSummary.ownerContractActiveDefaultObligations).toBe(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const envelope = await provider.getResponsibilityMatrix(KNOWN_PROJECT_ID, 'project-manager');
+    expect(envelope.viewerPersona).toBe('project-manager');
+  });
+});
+
+describe('PccMockReadModelProvider.getResponsibilityMatrix — unknown project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the empty Responsibility Matrix read model with source-unavailable status', async () => {
+    const envelope = await provider.getResponsibilityMatrix(
+      UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID,
+    );
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('source-unavailable');
+    expect(envelope.projectId).toBe(UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    const warning = envelope.warnings[0];
+    expect(warning.code).toBe('source-unavailable');
+    expect(warning.message).toContain(UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID);
+    expect(warning.source).toBe('pcc-mock-fixtures');
+  });
+
+  it('returns empty arrays, zeroed counts, and insufficient-data health for unknown projects', async () => {
+    const envelope = await provider.getResponsibilityMatrix(
+      UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID,
+    );
+    const data = envelope.data;
+
+    expect(data.templates).toEqual([]);
+    expect(data.projectInstances).toEqual([]);
+    expect(data.exceptions).toEqual([]);
+    expect(data.snapshotHistory).toEqual([]);
+    expect(data.auditEvents).toEqual([]);
+
+    expect(data.healthScore.state).toBe('insufficient-data');
+    if (data.healthScore.state === 'insufficient-data') {
+      expect(typeof data.healthScore.reason).toBe('string');
+    }
+
+    expect(data.workbookSourceSummary.defaultItemsTotal).toBe(0);
+    expect(data.workbookSourceSummary.pmItems).toBe(0);
+    expect(data.workbookSourceSummary.fieldItems).toBe(0);
+    expect(data.workbookSourceSummary.strictMarkedRows).toBe(0);
+    expect(data.workbookSourceSummary.ambiguousItemsTotal).toBe(0);
+    expect(data.workbookSourceSummary.ownerContractActiveDefaultObligations).toBe(0);
+    expect(data.workbookSourceSummary.sourceFiles).toEqual([]);
+
+    expect(data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(data.sourcePosture.pendingHumanReviewCount).toBe(0);
+  });
+});
+
+describe('PccMockReadModelProvider.getResponsibilityMatrix — backend-unavailable simulation', () => {
+  const provider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns the empty read model with backend-unavailable status and warning', async () => {
+    const envelope = await provider.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    expect(envelope.warnings[0].code).toBe('backend-unavailable');
+    expect(envelope.warnings[0].message).toBe(
+      'Mock provider configured to simulate backend-unavailable.',
+    );
+
+    expect(envelope.data.templates).toEqual([]);
+    expect(envelope.data.projectInstances).toEqual([]);
+    expect(envelope.data.workbookSourceSummary.defaultItemsTotal).toBe(0);
+    expect(envelope.data.healthScore.state).toBe('insufficient-data');
+    expect(envelope.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+  });
+
+  it('produces an empty body shape parallel to the unknown-project branch', async () => {
+    const unavailable = await provider.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+    const unknown = await new PccMockReadModelProvider().getResponsibilityMatrix(
+      UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID,
+    );
+
+    expect(unavailable.data.templates).toEqual(unknown.data.templates);
+    expect(unavailable.data.projectInstances).toEqual(unknown.data.projectInstances);
+    expect(unavailable.data.exceptions).toEqual(unknown.data.exceptions);
+    expect(unavailable.data.snapshotHistory).toEqual(unknown.data.snapshotHistory);
+    expect(unavailable.data.auditEvents).toEqual(unknown.data.auditEvents);
+    expect(unavailable.data.workbookSourceSummary).toEqual(unknown.data.workbookSourceSummary);
+    expect(unavailable.data.healthScore).toEqual(unknown.data.healthScore);
   });
 });
 

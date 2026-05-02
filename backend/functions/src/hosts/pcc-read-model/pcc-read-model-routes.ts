@@ -100,3 +100,9 @@ registerPccReadRoute(
   'pcc/projects/{projectId}/permit-inspection-control-center',
   async (projectId) => provider.getPermitInspectionControlCenter(projectId),
 );
+
+registerPccReadRoute(
+  'getPccProjectResponsibilityMatrix',
+  'pcc/projects/{projectId}/responsibility-matrix',
+  async (projectId) => provider.getResponsibilityMatrix(projectId),
+);

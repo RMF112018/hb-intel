@@ -20,6 +20,7 @@ import type {
   PccLifecycleReadinessReadModel,
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
+  PccResponsibilityMatrixReadModel,
   PccSettingsReadModel,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
@@ -75,6 +76,10 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>>;
+  getResponsibilityMatrix(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccResponsibilityMatrixReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {

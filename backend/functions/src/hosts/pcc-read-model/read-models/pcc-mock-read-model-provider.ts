@@ -21,6 +21,7 @@ import {
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+  SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
@@ -43,6 +44,7 @@ import type {
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
   PccReadModelWarning,
+  PccResponsibilityMatrixReadModel,
   PccSettingsReadModel,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
@@ -129,6 +131,45 @@ const EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL: PccPermitInspectionCont
     approvalSignals: [],
     permitTransitions: [],
     inspectionTransitions: [],
+  };
+
+// Empty Responsibility Matrix read model used for degraded envelopes
+// (unknown project / backend-unavailable). Project-specific arrays are
+// emptied, the workbook source summary is zeroed, the source posture
+// reports the degraded status with zero pending review count, and the
+// health score uses the discriminated-union 'insufficient-data' branch.
+const EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL: PccResponsibilityMatrixReadModel = {
+  templates: [],
+  projectInstances: [],
+  exceptions: [],
+  healthScore: {
+    state: 'insufficient-data',
+    reason: 'Responsibility Matrix data unavailable for this project context.',
+  },
+  workbookSourceSummary: {
+    defaultItemsTotal: 0,
+    pmItems: 0,
+    fieldItems: 0,
+    strictMarkedRows: 0,
+    ambiguousItemsTotal: 0,
+    ownerContractActiveDefaultObligations: 0,
+    sourceFiles: [],
+  },
+  sourcePosture: {
+    sourceStatus: 'source-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+  snapshotHistory: [],
+  auditEvents: [],
+};
+
+const EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL_BACKEND_UNAVAILABLE: PccResponsibilityMatrixReadModel =
+  {
+    ...EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL,
+    sourcePosture: {
+      sourceStatus: 'backend-unavailable',
+      pendingHumanReviewCount: 0,
+    },
   };
 
 const DOCUMENT_CONTROL_SOURCES_ORDERED: readonly IDocumentControlSource[] =
@@ -790,6 +831,42 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       viewerPersona,
       this.statusForKnownProject(projectId),
       PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getResponsibilityMatrix(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccResponsibilityMatrixReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL_BACKEND_UNAVAILABLE,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
       this.warningsForKnownProject(projectId),
     );
   }
