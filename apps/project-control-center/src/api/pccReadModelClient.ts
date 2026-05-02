@@ -25,6 +25,7 @@ import type {
   PccProjectProfileReadModel,
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
+  PccResponsibilityMatrixReadModel,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
   PccWorkCenterRegistryReadModel,
@@ -44,6 +45,7 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'project-readiness',
   'lifecycle-readiness',
   'permit-inspection-control-center',
+  'responsibility-matrix',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -67,6 +69,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'project-readiness': 'pcc/projects/{projectId}/project-readiness',
   'lifecycle-readiness': 'pcc/projects/{projectId}/lifecycle-readiness',
   'permit-inspection-control-center': 'pcc/projects/{projectId}/permit-inspection-control-center',
+  'responsibility-matrix': 'pcc/projects/{projectId}/responsibility-matrix',
 };
 
 /**
@@ -133,4 +136,9 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>>;
+
+  getResponsibilityMatrix(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccResponsibilityMatrixReadModel>>;
 }

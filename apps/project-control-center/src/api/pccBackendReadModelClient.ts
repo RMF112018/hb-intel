@@ -137,5 +137,9 @@ export function createPccBackendReadModelClient(
       callBackend('permit-inspection-control-center', projectId, () =>
         fallback.getPermitInspectionControlCenter(projectId, viewerPersona),
       ),
+    getResponsibilityMatrix: (projectId, viewerPersona) =>
+      callBackend('responsibility-matrix', projectId, () =>
+        fallback.getResponsibilityMatrix(projectId, viewerPersona),
+      ),
   };
 }

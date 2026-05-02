@@ -6,6 +6,7 @@ import {
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+  SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
@@ -31,8 +32,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getProjectReadiness(KNOWN_PROJECT_ID),
       client.getLifecycleReadiness(KNOWN_PROJECT_ID),
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
+      client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(11);
+    expect(envelopes).toHaveLength(12);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -121,6 +123,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getProjectReadiness(KNOWN_PROJECT_ID),
       client.getLifecycleReadiness(KNOWN_PROJECT_ID),
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
+      client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -198,6 +201,74 @@ describe('createPccFixtureReadModelClient — permit-inspection-control-center',
     expect(env.data.permits).toEqual([]);
     expect(env.data.inspections).toEqual([]);
     expect(env.data.summary.inspectionCount).toBe(0);
+  });
+});
+
+describe('createPccFixtureReadModelClient — responsibility-matrix', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns the deterministic Wave 11 fixture with sourceStatus="available"', async () => {
+    const env = await client.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data).toBe(SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL);
+  });
+
+  it('preserves the canonical 109 / 82 / 27 / 98 / 47 / 0 workbook posture', async () => {
+    const env = await client.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+    const data = env.data;
+    expect(data.templates.length).toBe(4);
+    expect(data.projectInstances.length).toBe(5);
+    expect(data.snapshotHistory.length).toBe(1);
+    expect(data.auditEvents.length).toBe(4);
+    expect(data.workbookSourceSummary.defaultItemsTotal).toBe(109);
+    expect(data.workbookSourceSummary.pmItems).toBe(82);
+    expect(data.workbookSourceSummary.fieldItems).toBe(27);
+    expect(data.workbookSourceSummary.strictMarkedRows).toBe(98);
+    expect(data.workbookSourceSummary.ambiguousItemsTotal).toBe(47);
+    expect(data.workbookSourceSummary.ownerContractActiveDefaultObligations).toBe(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const env = await client.getResponsibilityMatrix(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+  });
+
+  it('unknown project returns empty Wave 11 read model with sourceStatus="source-unavailable"', async () => {
+    const env = await client.getResponsibilityMatrix(UNKNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+    expect(env.data.templates).toEqual([]);
+    expect(env.data.projectInstances).toEqual([]);
+    expect(env.data.exceptions).toEqual([]);
+    expect(env.data.snapshotHistory).toEqual([]);
+    expect(env.data.auditEvents).toEqual([]);
+    expect(env.data.healthScore.state).toBe('insufficient-data');
+    expect(env.data.workbookSourceSummary.defaultItemsTotal).toBe(0);
+    expect(env.data.workbookSourceSummary.ownerContractActiveDefaultObligations).toBe(0);
+    expect(env.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(env.data.sourcePosture.pendingHumanReviewCount).toBe(0);
+  });
+
+  it('simulateBackendUnavailable returns the empty Wave 11 read model with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getResponsibilityMatrix(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.templates).toEqual([]);
+    expect(env.data.projectInstances).toEqual([]);
+    expect(env.data.healthScore.state).toBe('insufficient-data');
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
   });
 });
 
