@@ -22,7 +22,9 @@ function laneEl(container: HTMLElement, groupId: PccPriorityRailGroupId): HTMLEl
 
 describe('PccPriorityActionsRail', () => {
   it('renders a single rail root with default aria-label', () => {
-    const { container, getByRole } = render(<PccPriorityActionsRail viewModel={SAMPLE_VIEW_MODEL} />);
+    const { container, getByRole } = render(
+      <PccPriorityActionsRail viewModel={SAMPLE_VIEW_MODEL} />,
+    );
     const rails = container.querySelectorAll('[data-pcc-priority-rail]');
     expect(rails).toHaveLength(1);
     expect(getByRole('region', { name: 'Priority Actions' })).toBe(rails[0]);
@@ -138,7 +140,9 @@ describe('PccPriorityActionsRail', () => {
     expect(text).toContain('Priority: Medium');
     expect(text).toContain('Priority: Low');
     const labels = container.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-tone-label]');
-    const tones = Array.from(labels).map((el) => el.getAttribute('data-pcc-priority-rail-tone-label'));
+    const tones = Array.from(labels).map((el) =>
+      el.getAttribute('data-pcc-priority-rail-tone-label'),
+    );
     expect(tones.sort()).toEqual(['high', 'low', 'medium']);
   });
 
@@ -250,15 +254,13 @@ describe('PccPriorityActionsRail', () => {
     for (const groupId of PCC_PRIORITY_RAIL_GROUP_IDS) {
       const lane = laneEl(container, groupId);
       for (const id of suppressedIds) {
-        expect(
-          lane.querySelector(`[data-pcc-priority-rail-action-id="${id}"]`),
-        ).toBeNull();
+        expect(lane.querySelector(`[data-pcc-priority-rail-action-id="${id}"]`)).toBeNull();
       }
     }
   });
 
-  it('end-to-end: SAMPLE_PRIORITY_ACTIONS renders 7 visible rows total', () => {
+  it('end-to-end: SAMPLE_PRIORITY_ACTIONS renders 15 visible rows total', () => {
     const { container } = render(<PccPriorityActionsRail viewModel={SAMPLE_VIEW_MODEL} />);
-    expect(container.querySelectorAll('[data-pcc-priority-rail-action-id]')).toHaveLength(7);
+    expect(container.querySelectorAll('[data-pcc-priority-rail-action-id]')).toHaveLength(15);
   });
 });

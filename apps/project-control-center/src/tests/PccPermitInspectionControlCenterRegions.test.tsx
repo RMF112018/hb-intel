@@ -16,6 +16,9 @@ const REQUIRED_REGIONS: readonly string[] = [
   'closeout-exposure',
   'ahj-launcher-panel',
   'record-detail',
+  'priority-action-signals',
+  'readiness-signals',
+  'approval-signals',
 ];
 
 function activateProjectReadiness(container: HTMLElement): HTMLElement {
@@ -182,5 +185,125 @@ describe('Wave 10 Permit & Inspection Control Center surface — hero counts', (
     expect(text).toContain(String(s.failedInspectionCount));
     expect(text).toContain(String(s.openReinspectionCount));
     expect(text).toContain(String(s.ahjLauncherCount));
+  });
+});
+
+describe('Wave 10 Permit & Inspection Control Center surface — Prompt 06 integrated signal lanes', () => {
+  it('priority-action-signals lane renders Wave 10 expired-permit signal', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = permitRegion(container, 'priority-action-signals');
+    expect(region).not.toBeNull();
+    expect(region!.textContent).toContain('Plumbing permit expired');
+    const signals = region!.querySelectorAll('[data-pcc-permit-priority-signal-id]');
+    expect(signals.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('readiness-signals lane preserves the locked permit-log source-module identifier', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = permitRegion(container, 'readiness-signals');
+    expect(region).not.toBeNull();
+    const sourceModuleMarkers = region!.querySelectorAll(
+      '[data-pcc-permit-readiness-source-module="permit-log"]',
+    );
+    expect(sourceModuleMarkers.length).toBeGreaterThanOrEqual(1);
+    expect(region!.textContent).toContain('closeout / TCO / CO');
+  });
+
+  it('approval-signals lane renders all four required checkpoint trigger concepts', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = permitRegion(container, 'approval-signals');
+    expect(region).not.toBeNull();
+    const kindMarkers = Array.from(
+      region!.querySelectorAll<HTMLElement>('[data-pcc-permit-approval-checkpoint-kind]'),
+    ).map((el) => el.getAttribute('data-pcc-permit-approval-checkpoint-kind'));
+    const kinds = new Set(kindMarkers);
+    expect(kinds.has('closeout-authorization')).toBe(true);
+    expect(kinds.has('no-reinspection-exception')).toBe(true);
+    expect(kinds.has('evidence-override-by-reason')).toBe(true);
+    expect(kinds.has('transition-exception-override')).toBe(true);
+  });
+
+  it('approval-signals lane is metadata-only — no buttons, no forms', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = permitRegion(container, 'approval-signals');
+    expect(region).not.toBeNull();
+    expect(region!.querySelectorAll('button').length).toBe(0);
+    expect(region!.querySelectorAll('form').length).toBe(0);
+    expect(region!.querySelectorAll('input').length).toBe(0);
+  });
+});
+
+describe('Wave 10 Permit & Inspection Control Center surface — Procore / external runtime structural guard', () => {
+  const FORBIDDEN_RUNTIME_TOKENS: readonly string[] = [
+    'ProcoreClient',
+    'syncProcore',
+    'writeBack',
+    'MSGraphClient',
+    'GraphServiceClient',
+    'sp.web',
+    '_api/web',
+  ];
+  const FORBIDDEN_BUTTON_LABELS =
+    /^(launch|sync|write\s*back|writeback|upload|submit|approve|schedule|request)$/i;
+
+  it('Wave 10 surface renders no anchors at all (AHJ portal URLs are spans)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const sectioned = container.querySelectorAll(
+      `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
+    );
+    expect(sectioned.length).toBeGreaterThanOrEqual(REQUIRED_REGIONS.length);
+    for (const region of Array.from(sectioned)) {
+      expect(region.querySelectorAll('a[href]').length).toBe(0);
+    }
+  });
+
+  it('Wave 10 surface renders no forms, no file inputs, no enabled buttons', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const sectioned = container.querySelectorAll(
+      `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
+    );
+    for (const region of Array.from(sectioned)) {
+      expect(region.querySelectorAll('input[type="file"]').length).toBe(0);
+      expect(region.querySelectorAll('form').length).toBe(0);
+      for (const btn of Array.from(region.querySelectorAll('button'))) {
+        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
+          true,
+        );
+      }
+    }
+  });
+
+  it('Wave 10 rendered DOM does not contain forbidden runtime tokens (Procore/Graph/SharePoint)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const sectioned = container.querySelectorAll(
+      `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
+    );
+    for (const region of Array.from(sectioned)) {
+      const text = region.textContent ?? '';
+      for (const token of FORBIDDEN_RUNTIME_TOKENS) {
+        expect(text, `Wave 10 region should not contain "${token}"`).not.toContain(token);
+      }
+    }
+  });
+
+  it('Wave 10 surface has no buttons labeled with executable verbs', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const sectioned = container.querySelectorAll(
+      `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
+    );
+    for (const region of Array.from(sectioned)) {
+      const offenders = Array.from(region.querySelectorAll('button')).filter((b) =>
+        FORBIDDEN_BUTTON_LABELS.test((b.textContent ?? '').trim()),
+      );
+      expect(offenders.length).toBe(0);
+    }
   });
 });

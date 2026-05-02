@@ -205,6 +205,28 @@ export const SAMPLE_PERMITS: readonly IPermitRecord[] = [
     sourceFamily: 'permits',
   },
   {
+    permitId: 'permit-expired-001',
+    permitNumber: 'BLD-2025-150',
+    permitType: 'Plumbing — Site Service',
+    status: 'expired',
+    location: 'Site — Utility yard',
+    description: 'Site service plumbing permit expired before construction restart.',
+    responsibleParty: 'project-coordinator',
+    ahjId: 'ahj-example-county-001',
+    dateRequired: '2025-08-01',
+    dateSubmitted: '2025-08-15',
+    dateReceived: '2025-09-10',
+    dateExpires: '2026-03-15',
+    revision: 0,
+    applicationValue: 95_000,
+    permitFee: 1_425,
+    comments: 'Expired before construction restart; renewal needed before tie-in.',
+    evidenceLinks: [PERMIT_EVIDENCE_PRESENT],
+    auditEvents: PERMIT_AUDIT_BASE,
+    sourceLineage: PERMIT_SOURCE,
+    sourceFamily: 'permits',
+  },
+  {
     permitId: 'permit-pending-revision-001',
     permitNumber: 'BLD-2026-115',
     permitType: 'Electrical — Service Upgrade',
@@ -287,6 +309,22 @@ export const SAMPLE_INSPECTIONS: readonly IInspectionRecord[] = [
     sourceFamily: 'required-inspections',
   },
   {
+    inspectionId: 'inspection-ready-001',
+    inspectionNumber: 'INS-2026-035',
+    inspectionType: 'Underground — Water Service',
+    inspectionCode: 'UND-WS',
+    relatedPermitId: 'permit-active-001',
+    status: 'ready-to-request',
+    dateCalledIn: '2026-05-04',
+    comment: 'Underground water service ready to request inspection at AHJ portal.',
+    verifiedOnline: false,
+    reinspectionRequired: false,
+    evidenceLinks: [INSPECTION_EVIDENCE_PRESENT],
+    auditEvents: INSPECTION_AUDIT_BASE,
+    sourceLineage: INSPECTION_SOURCE,
+    sourceFamily: 'required-inspections',
+  },
+  {
     inspectionId: 'inspection-reinspection-001',
     inspectionNumber: 'INS-2026-027R',
     inspectionType: 'Framing — Rough-in (Reinspection)',
@@ -351,6 +389,29 @@ export const SAMPLE_FEE_EXPOSURE: readonly IFeeExposureRecord[] = [
     notes: 'Awaiting accounting to capture receipt in Document Control.',
   },
   {
+    feeRecordId: 'fee-permit-renewal-001',
+    relatedRecordType: 'permit',
+    relatedRecordId: 'permit-expired-001',
+    applicationValue: 95_000,
+    permitFee: 1_425,
+    feeStatus: 'open',
+    invoiceReference: 'INV-2026-PERMIT-150-RENEWAL',
+    receiptEvidenceLinks: [],
+    notes:
+      'Renewal fee invoice issued; awaiting AHJ acknowledgment. No upload behavior — Document Control owns evidence.',
+  },
+  {
+    feeRecordId: 'fee-reinspection-open-001',
+    relatedRecordType: 'reinspection',
+    relatedRecordId: 'inspection-reinspection-001',
+    reInspectionFee: 250,
+    feeStatus: 'pending-receipt',
+    invoiceReference: 'INV-2026-REINSP-027-FOLLOWUP',
+    receiptEvidenceLinks: [],
+    notes:
+      'Reinspection fee invoiced for the framing follow-up; awaiting AHJ acknowledgment. No payment runtime, no upload affordance.',
+  },
+  {
     feeRecordId: 'fee-reinspection-disputed-001',
     relatedRecordType: 'reinspection',
     relatedRecordId: 'inspection-reinspection-001',
@@ -382,6 +443,33 @@ export const SAMPLE_PERMIT_INSPECTION_PRIORITY_ACTION_SIGNALS: readonly IPermitI
       summary: 'Framing reinspection scheduled — confirm corrective work complete.',
       dueDate: '2026-05-06',
     },
+    {
+      signalId: 'pa-signal-permit-expired-001',
+      sourceFamily: 'permits',
+      sourceRecordId: 'permit-expired-001',
+      priorityActionCategory: 'permit',
+      severity: 'Blocking',
+      summary: 'Plumbing permit expired — initiate renewal before construction tie-in.',
+      dueDate: '2026-05-09',
+    },
+    {
+      signalId: 'pa-signal-inspection-ready-001',
+      sourceFamily: 'required-inspections',
+      sourceRecordId: 'inspection-ready-001',
+      priorityActionCategory: 'inspection',
+      severity: 'Warning',
+      summary: 'Underground water service inspection ready to request at AHJ portal.',
+      dueDate: '2026-05-07',
+    },
+    {
+      signalId: 'pa-signal-closeout-exposure-001',
+      sourceFamily: 'permits',
+      sourceRecordId: 'permit-expired-001',
+      priorityActionCategory: 'closeout',
+      severity: 'Blocking',
+      summary: 'Expired plumbing permit creates closeout / TCO / CO exposure until renewal closes.',
+      dueDate: '2026-05-15',
+    },
   ];
 
 export const SAMPLE_PERMIT_INSPECTION_READINESS_SIGNALS: readonly IPermitInspectionReadinessSignal[] =
@@ -403,6 +491,23 @@ export const SAMPLE_PERMIT_INSPECTION_READINESS_SIGNALS: readonly IPermitInspect
       summary:
         'Failed framing inspection; reinspection in flight — readiness will recover after pass.',
     },
+    {
+      signalId: 'rd-signal-inspection-not-scheduled-001',
+      readinessSourceModuleId: 'permit-log',
+      sourceFamily: 'required-inspections',
+      sourceRecordId: 'inspection-ready-001',
+      posture: 'attention',
+      summary:
+        'Underground water service ready to request — not scheduled within target inspection window.',
+    },
+    {
+      signalId: 'rd-signal-closeout-exposure-001',
+      readinessSourceModuleId: 'permit-log',
+      sourceFamily: 'permits',
+      sourceRecordId: 'permit-expired-001',
+      posture: 'blocker',
+      summary: 'Expired plumbing permit blocks closeout / TCO / CO until renewal is approved.',
+    },
   ];
 
 export const SAMPLE_PERMIT_INSPECTION_APPROVAL_SIGNALS: readonly IPermitInspectionApprovalSignal[] =
@@ -413,6 +518,28 @@ export const SAMPLE_PERMIT_INSPECTION_APPROVAL_SIGNALS: readonly IPermitInspecti
       sourceRecordId: 'inspection-failed-001',
       checkpointKind: 'no-reinspection-exception',
       summary: 'No-reinspection exception draft for documentary clarification; not yet authorized.',
+    },
+    {
+      signalId: 'apr-signal-evidence-override-001',
+      sourceFamily: 'required-inspections',
+      sourceRecordId: 'inspection-failed-001',
+      checkpointKind: 'evidence-override-by-reason',
+      summary:
+        'Evidence override draft for failed inspection — corrective action photo log pending verification.',
+    },
+    {
+      signalId: 'apr-signal-transition-exception-001',
+      sourceFamily: 'permits',
+      sourceRecordId: 'permit-expired-001',
+      checkpointKind: 'transition-exception-override',
+      summary: 'Transition exception draft for expired → void path; not yet authorized.',
+    },
+    {
+      signalId: 'apr-signal-closeout-authorization-001',
+      sourceFamily: 'permits',
+      sourceRecordId: 'permit-expired-001',
+      checkpointKind: 'closeout-authorization',
+      summary: 'Closeout authorization draft pending all permit renewals and inspections.',
     },
   ];
 
@@ -482,7 +609,8 @@ export const SAMPLE_PERMIT_INSPECTION_SUMMARY: IPermitInspectionControlCenterSum
   openReinspectionCount: SAMPLE_INSPECTIONS.filter((i) => i.status === 'reinspection-scheduled')
     .length,
   openFeeExposureCount: SAMPLE_FEE_EXPOSURE.filter(
-    (f) => f.feeStatus === 'pending-receipt' || f.feeStatus === 'disputed',
+    (f) =>
+      f.feeStatus === 'open' || f.feeStatus === 'pending-receipt' || f.feeStatus === 'disputed',
   ).length,
   evidenceMissingCount:
     SAMPLE_PERMITS.flatMap((p) => p.evidenceLinks).filter((e) => e.status === 'required-missing')

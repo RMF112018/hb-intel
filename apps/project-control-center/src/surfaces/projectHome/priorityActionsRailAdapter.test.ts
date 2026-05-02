@@ -12,7 +12,9 @@ import {
 
 const SUPPRESSED: readonly PriorityActionCategory[] = ['documents', 'health', 'safety'];
 
-function action(overrides: Partial<IPriorityAction> & Pick<IPriorityAction, 'id' | 'category' | 'title'>): IPriorityAction {
+function action(
+  overrides: Partial<IPriorityAction> & Pick<IPriorityAction, 'id' | 'category' | 'title'>,
+): IPriorityAction {
   return { ...overrides };
 }
 
@@ -54,7 +56,13 @@ describe('buildPccPriorityActionsRailViewModel', () => {
   });
 
   it('routes workflow/compliance/inspection/permit/closeout to readiness-blockers', () => {
-    const cats: readonly PriorityActionCategory[] = ['workflow', 'compliance', 'inspection', 'permit', 'closeout'];
+    const cats: readonly PriorityActionCategory[] = [
+      'workflow',
+      'compliance',
+      'inspection',
+      'permit',
+      'closeout',
+    ];
     const vm = buildPccPriorityActionsRailViewModel(
       cats.map((c, i) => action({ id: `r${i}`, category: c, title: `Item ${i}` })),
     );
@@ -107,7 +115,7 @@ describe('buildPccPriorityActionsRailViewModel', () => {
     const vm = buildPccPriorityActionsRailViewModel(original);
     expect(original.length).toBe(lengthBefore);
     expect(JSON.parse(JSON.stringify(original))).toEqual(snapshot);
-    expect(vm.visibleCount).toBe(7);
+    expect(vm.visibleCount).toBe(15);
     expect(vm.suppressedCount).toBe(3);
   });
 
@@ -116,11 +124,21 @@ describe('buildPccPriorityActionsRailViewModel', () => {
       action({ id: 'rb-c-late', category: 'compliance', title: 'late', dueDate: '2026-12-01' }),
       action({ id: 'rb-c-early', category: 'compliance', title: 'early', dueDate: '2026-05-05' }),
       action({ id: 'rb-c-undated', category: 'compliance', title: 'undated' }),
-      action({ id: 'rb-c-high', category: 'compliance', title: 'high tone', severity: 'Repair Required' }),
+      action({
+        id: 'rb-c-high',
+        category: 'compliance',
+        title: 'high tone',
+        severity: 'Repair Required',
+      }),
     ];
     const vm = buildPccPriorityActionsRailViewModel(input);
     const items = vm.groups.find((g) => g.id === 'readiness-blockers')!.items;
-    expect(items.map((i) => i.id)).toEqual(['rb-c-high', 'rb-c-early', 'rb-c-late', 'rb-c-undated']);
+    expect(items.map((i) => i.id)).toEqual([
+      'rb-c-high',
+      'rb-c-early',
+      'rb-c-late',
+      'rb-c-undated',
+    ]);
   });
 
   it('treats invalid dueDate strings as undated and never produces NaN ordering', () => {
@@ -132,7 +150,12 @@ describe('buildPccPriorityActionsRailViewModel', () => {
     const vm = buildPccPriorityActionsRailViewModel(input);
     const items = vm.groups.find((g) => g.id === 'readiness-blockers')!.items;
     expect(items[0].id).toBe('val-1');
-    expect(items.slice(1).map((i) => i.id).sort()).toEqual(['inv-1', 'inv-2']);
+    expect(
+      items
+        .slice(1)
+        .map((i) => i.id)
+        .sort(),
+    ).toEqual(['inv-1', 'inv-2']);
   });
 
   it('places high-tone items ahead of medium and low across the same group', () => {
@@ -183,14 +206,14 @@ describe('buildPccPriorityActionsRailViewModel', () => {
     }
   });
 
-  it('produces 7 visible / 3 suppressed for the canonical SAMPLE_PRIORITY_ACTIONS fixture', () => {
+  it('produces 15 visible / 3 suppressed for the canonical SAMPLE_PRIORITY_ACTIONS fixture', () => {
     const vm = buildPccPriorityActionsRailViewModel(SAMPLE_PRIORITY_ACTIONS);
-    expect(vm.visibleCount).toBe(7);
+    expect(vm.visibleCount).toBe(15);
     expect(vm.suppressedCount).toBe(3);
     const counts = Object.fromEntries(vm.groups.map((g) => [g.id, g.count]));
     expect(counts).toEqual({
       'access-requests': 0,
-      'readiness-blockers': 5,
+      'readiness-blockers': 13,
       'approval-checkpoints': 1,
       'external-system-mapping': 1,
     });

@@ -92,7 +92,7 @@ describe('Permit & Inspection Control Center vocabularies', () => {
     expect(SOURCE_CLASSIFICATIONS.length).toBe(5);
     expect(RELATED_RECORD_TYPES.length).toBe(3);
     expect(PERMIT_INSPECTION_SOURCE_FAMILIES.length).toBe(2);
-    expect(PERMIT_INSPECTION_CHECKPOINT_KINDS.length).toBe(3);
+    expect(PERMIT_INSPECTION_CHECKPOINT_KINDS.length).toBe(5);
     expect(PERMIT_INSPECTION_READINESS_POSTURES.length).toBe(4);
   });
 
@@ -282,7 +282,8 @@ describe('Summary counts match fixture content', () => {
       (i) => i.status === 'reinspection-scheduled',
     ).length;
     const expectedOpenFee = SAMPLE_FEE_EXPOSURE.filter(
-      (f) => f.feeStatus === 'pending-receipt' || f.feeStatus === 'disputed',
+      (f) =>
+        f.feeStatus === 'open' || f.feeStatus === 'pending-receipt' || f.feeStatus === 'disputed',
     ).length;
 
     expect(SAMPLE_PERMIT_INSPECTION_SUMMARY.permitCount).toBe(SAMPLE_PERMITS.length);
@@ -341,6 +342,72 @@ describe('Contract source has no runtime/import boundary leakage', () => {
     ];
     for (const pattern of forbidden) {
       expect(stripped, `matched ${pattern}`).not.toMatch(pattern);
+    }
+  });
+});
+
+describe('Wave 10 Prompt 06 signal coverage', () => {
+  it('fixture includes an expired permit', () => {
+    expect(SAMPLE_PERMITS.some((p) => p.status === 'expired')).toBe(true);
+  });
+
+  it('fixture includes a ready-to-request inspection', () => {
+    expect(SAMPLE_INSPECTIONS.some((i) => i.status === 'ready-to-request')).toBe(true);
+  });
+
+  it('fixture includes at least one open fee record', () => {
+    expect(SAMPLE_FEE_EXPOSURE.some((f) => f.feeStatus === 'open')).toBe(true);
+  });
+
+  it('fixture includes at least one pending-receipt fee record', () => {
+    expect(SAMPLE_FEE_EXPOSURE.some((f) => f.feeStatus === 'pending-receipt')).toBe(true);
+  });
+
+  it('reinspection-fee record uses relatedRecordType="reinspection" with reInspectionFee and a non-disputed status', () => {
+    const reinspectionFees = SAMPLE_FEE_EXPOSURE.filter(
+      (f) =>
+        f.relatedRecordType === 'reinspection' &&
+        typeof f.reInspectionFee === 'number' &&
+        f.feeStatus !== 'disputed',
+    );
+    expect(reinspectionFees.length).toBeGreaterThan(0);
+  });
+
+  it('readiness signals include "not scheduled within target inspection window" coverage', () => {
+    const matched = SAMPLE_PERMIT_INSPECTION_READINESS_SIGNALS.filter((s) =>
+      s.summary.includes('not scheduled within target inspection window'),
+    );
+    expect(matched.length).toBeGreaterThan(0);
+  });
+
+  it('readiness signals include closeout / TCO / CO exposure coverage', () => {
+    const matched = SAMPLE_PERMIT_INSPECTION_READINESS_SIGNALS.filter((s) =>
+      s.summary.includes('closeout / TCO / CO'),
+    );
+    expect(matched.length).toBeGreaterThan(0);
+  });
+
+  it('approval signals cover all four required checkpoint trigger concepts', () => {
+    const kinds = new Set(SAMPLE_PERMIT_INSPECTION_APPROVAL_SIGNALS.map((s) => s.checkpointKind));
+    expect(kinds.has('closeout-authorization')).toBe(true);
+    expect(kinds.has('no-reinspection-exception')).toBe(true);
+    expect(kinds.has('evidence-override-by-reason')).toBe(true);
+    expect(kinds.has('transition-exception-override')).toBe(true);
+  });
+
+  it('every priority-action signal uses an existing PriorityActionCategory (no new category)', () => {
+    const categories = new Set<string>(PRIORITY_ACTION_CATEGORIES);
+    for (const s of SAMPLE_PERMIT_INSPECTION_PRIORITY_ACTION_SIGNALS) {
+      expect(
+        categories.has(s.priorityActionCategory),
+        `${s.signalId} category ${s.priorityActionCategory}`,
+      ).toBe(true);
+    }
+  });
+
+  it('every readiness signal preserves readinessSourceModuleId="permit-log"', () => {
+    for (const s of SAMPLE_PERMIT_INSPECTION_READINESS_SIGNALS) {
+      expect(s.readinessSourceModuleId).toBe('permit-log');
     }
   });
 });

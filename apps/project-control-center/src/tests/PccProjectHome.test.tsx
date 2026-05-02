@@ -68,7 +68,9 @@ describe('Project Home bento dashboard', () => {
     const cards = container.querySelectorAll('[data-pcc-card]');
     expect(cards.length).toBe(REQUIRED_CARD_TITLES.length);
     for (const card of cards) {
-      expect(card.parentElement === grid, 'card must be a direct child of the bento grid').toBe(true);
+      expect(card.parentElement === grid, 'card must be a direct child of the bento grid').toBe(
+        true,
+      );
       const footprint = card.getAttribute('data-pcc-footprint');
       expect(footprint, 'card must emit data-pcc-footprint').not.toBeNull();
       expect(footprint!.length).toBeGreaterThan(0);
@@ -97,7 +99,9 @@ describe('Project Home bento dashboard', () => {
     const anchors = container.querySelectorAll('a[href]');
     for (const a of anchors) {
       const href = a.getAttribute('href') ?? '';
-      expect(href, `anchor href '${href}' must not be a live launch URL`).not.toMatch(/^https?:\/\//);
+      expect(href, `anchor href '${href}' must not be a live launch URL`).not.toMatch(
+        /^https?:\/\//,
+      );
     }
   });
 
@@ -113,12 +117,12 @@ describe('Project Home bento dashboard', () => {
     expect(ids).toEqual([...PCC_PRIORITY_RAIL_GROUP_IDS]);
   });
 
-  it('Priority Actions rail renders 7 visible rows from SAMPLE_PRIORITY_ACTIONS, each with valid tone', () => {
+  it('Priority Actions rail renders 15 visible rows from SAMPLE_PRIORITY_ACTIONS, each with valid tone', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const rail = container.querySelector('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     const rows = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-action-id]');
-    expect(rows).toHaveLength(7);
+    expect(rows).toHaveLength(15);
     const tones = new Set<PccPriorityTone>();
     for (const row of Array.from(rows)) {
       const tone = row.getAttribute('data-pcc-priority-rail-action-tone') as PccPriorityTone | null;
@@ -139,10 +143,16 @@ describe('Project Home bento dashboard', () => {
         rail!.querySelector(`[data-pcc-priority-rail-action-id="${fx.id}"]`),
         `suppressed action ${fx.id} must not appear in the rail`,
       ).toBeNull();
-      expect(railText, `suppressed fixture title '${fx.title}' must not appear in the rail`).not.toContain(fx.title);
+      expect(
+        railText,
+        `suppressed fixture title '${fx.title}' must not appear in the rail`,
+      ).not.toContain(fx.title);
     }
     for (const label of SUPPRESSED_CATEGORY_LABELS) {
-      expect(railText, `suppressed category label '${label}' must not appear in the rail`).not.toContain(label);
+      expect(
+        railText,
+        `suppressed category label '${label}' must not appear in the rail`,
+      ).not.toContain(label);
     }
   });
 
@@ -153,8 +163,10 @@ describe('Project Home bento dashboard', () => {
     expect(rail!.querySelectorAll('a')).toHaveLength(0);
     expect(rail!.querySelectorAll('[href]')).toHaveLength(0);
     expect(rail!.querySelectorAll('button')).toHaveLength(0);
-    const affordances = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-disabled-action]');
-    expect(affordances.length).toBe(7);
+    const affordances = rail!.querySelectorAll<HTMLElement>(
+      '[data-pcc-priority-rail-disabled-action]',
+    );
+    expect(affordances.length).toBe(15);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
       expect(el.textContent).toBe('Preview only');
@@ -187,7 +199,10 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('priorityToneForAction maps every SiteHealthSeverity (and undefined) to the correct tone', () => {
-    const cases: ReadonlyArray<{ severity: SiteHealthSeverity | undefined; tone: PccPriorityTone }> = [
+    const cases: ReadonlyArray<{
+      severity: SiteHealthSeverity | undefined;
+      tone: PccPriorityTone;
+    }> = [
       { severity: 'Blocking', tone: 'high' },
       { severity: 'Security Risk', tone: 'high' },
       { severity: 'Repair Required', tone: 'high' },
@@ -250,11 +265,17 @@ describe('Project Home bento dashboard', () => {
     expect(body).not.toBeNull();
 
     const actionEls = body!.querySelectorAll('[data-pcc-doc-action]');
-    expect(actionEls.length, 'at least one Microsoft-lane action chip should render').toBeGreaterThan(0);
+    expect(
+      actionEls.length,
+      'at least one Microsoft-lane action chip should render',
+    ).toBeGreaterThan(0);
     for (const el of actionEls) {
       expect(el.tagName).toBe('BUTTON');
       const button = el as HTMLButtonElement;
-      expect(button.disabled, `action chip ${button.getAttribute('data-pcc-doc-action')} must be disabled`).toBe(true);
+      expect(
+        button.disabled,
+        `action chip ${button.getAttribute('data-pcc-doc-action')} must be disabled`,
+      ).toBe(true);
       expect(button.getAttribute('aria-disabled')).toBe('true');
       // No inline onclick attribute string.
       expect(button.getAttribute('onclick')).toBeNull();

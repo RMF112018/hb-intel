@@ -21,7 +21,10 @@ import type {
   IAhjJurisdictionProfile,
   IFeeExposureRecord,
   IInspectionRecord,
+  IPermitInspectionApprovalSignal,
   IPermitInspectionEvidenceLink,
+  IPermitInspectionPriorityActionSignal,
+  IPermitInspectionReadinessSignal,
   IPermitRecord,
   IReinspectionLineage,
 } from '@hbc/models/pcc';
@@ -84,6 +87,9 @@ export const PccPermitInspectionControlCenterRegions: FC<
       <CloseoutExposureCard fees={snapshot.closeoutExposure} />
       <AhjLauncherPanelCard profiles={snapshot.ahjLauncherPanel} />
       <RecordDetailRegionCard permits={snapshot.recordDetailRows} />
+      <PriorityActionSignalsCard signals={snapshot.priorityActionSignals} />
+      <ReadinessSignalsCard signals={snapshot.readinessSignals} />
+      <ApprovalSignalsCard signals={snapshot.approvalSignals} />
     </Fragment>
   );
 };
@@ -502,6 +508,106 @@ const RecordDetailRegionCard: FC<{ permits: readonly IPermitRecord[] }> = ({ per
               ) : null}
             </div>
           </details>
+        ))
+      )}
+    </div>
+  </PccDashboardCard>
+);
+
+const PriorityActionSignalsCard: FC<{
+  signals: readonly IPermitInspectionPriorityActionSignal[];
+}> = ({ signals }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Permit & Inspection Control Center"
+    title="Priority action signals"
+  >
+    <div
+      data-pcc-readiness-section={SECTION_MARKER}
+      data-pcc-permit-region="priority-action-signals"
+      className={styles.laneList}
+    >
+      {signals.length === 0 ? (
+        <EmptyLaneNote message="No Wave 10 priority action signals." />
+      ) : (
+        signals.map((s) => (
+          <div
+            key={s.signalId}
+            data-pcc-permit-priority-signal-id={s.signalId}
+            data-pcc-permit-priority-category={s.priorityActionCategory}
+            className={styles.row}
+          >
+            <span className={styles.chip}>{s.priorityActionCategory}</span>
+            {s.severity ? <StatusPill label={s.severity} /> : null}
+            <span className={styles.rowDescription}>{s.summary}</span>
+            {s.dueDate ? <span className={styles.chipMuted}>Due: {s.dueDate}</span> : null}
+          </div>
+        ))
+      )}
+    </div>
+  </PccDashboardCard>
+);
+
+const ReadinessSignalsCard: FC<{
+  signals: readonly IPermitInspectionReadinessSignal[];
+}> = ({ signals }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Permit & Inspection Control Center"
+    title="Readiness signals"
+  >
+    <div
+      data-pcc-readiness-section={SECTION_MARKER}
+      data-pcc-permit-region="readiness-signals"
+      className={styles.laneList}
+    >
+      {signals.length === 0 ? (
+        <EmptyLaneNote message="No Wave 10 readiness signals." />
+      ) : (
+        signals.map((s) => (
+          <div
+            key={s.signalId}
+            data-pcc-permit-readiness-signal-id={s.signalId}
+            data-pcc-permit-readiness-source-module={s.readinessSourceModuleId}
+            className={styles.row}
+          >
+            <StatusPill label={s.posture} />
+            <span className={styles.chipMuted}>{s.sourceFamily}</span>
+            <span className={styles.rowDescription}>{s.summary}</span>
+          </div>
+        ))
+      )}
+    </div>
+  </PccDashboardCard>
+);
+
+const ApprovalSignalsCard: FC<{
+  signals: readonly IPermitInspectionApprovalSignal[];
+}> = ({ signals }) => (
+  <PccDashboardCard
+    footprint="wide"
+    eyebrow="Permit & Inspection Control Center"
+    title="Approvals and checkpoints metadata"
+  >
+    <div
+      data-pcc-readiness-section={SECTION_MARKER}
+      data-pcc-permit-region="approval-signals"
+      className={styles.laneList}
+    >
+      {signals.length === 0 ? (
+        <EmptyLaneNote message="No Wave 10 approval / checkpoint signals." />
+      ) : (
+        signals.map((s) => (
+          <div
+            key={s.signalId}
+            data-pcc-permit-approval-signal-id={s.signalId}
+            data-pcc-permit-approval-checkpoint-kind={s.checkpointKind}
+            className={styles.row}
+          >
+            <span className={styles.chip}>{s.checkpointKind}</span>
+            <span className={styles.chipMuted}>{s.sourceFamily}</span>
+            <span className={styles.rowDescription}>{s.summary}</span>
+          </div>
         ))
       )}
     </div>

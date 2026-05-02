@@ -173,6 +173,8 @@ export const PERMIT_INSPECTION_CHECKPOINT_KINDS = [
   'closeout-authorization',
   'no-reinspection-exception',
   'override-by-reason',
+  'evidence-override-by-reason',
+  'transition-exception-override',
 ] as const;
 export type PermitInspectionCheckpointKind = (typeof PERMIT_INSPECTION_CHECKPOINT_KINDS)[number];
 
