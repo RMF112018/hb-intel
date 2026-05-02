@@ -239,16 +239,17 @@ Before making PCC changes, read:
 
 1. `HB_Project_Control_Center_Target_Architecture_Blueprint.md`
 2. `Standard_Project_Site_Template_Contract.md`
-3. `Project_Control_Center_Development_Roadmap.md`
-4. `procore_hbintel_data_model_package/README.md`
-5. `phase-2/Phase_2_Closeout.md`
-6. `phase-3/wave-1/Wave_1_Closeout.md`
-7. `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`
-8. `packages/models/src/pcc/` and `packages/models/src/pcc/PccMvpSurfaces.ts`
-9. `apps/project-sites/` only as a reference pattern for Vite/SPFx mounting
-10. `docs/reference/ui-kit/doctrine/` before any SPFx UI work
-11. `docs/reference/spfx-surfaces/` before any SharePoint-hosted surface work
-12. `docs/reference/sharepoint/list-schemas/` before list or provisioning work
+3. `System_of_Record_Matrix.md`
+4. `Project_Control_Center_Development_Roadmap.md`
+5. `procore_hbintel_data_model_package/README.md`
+6. `phase-2/Phase_2_Closeout.md`
+7. `phase-3/wave-1/Wave_1_Closeout.md`
+8. `docs/reference/ui-kit/dashboard/dashboard-basis-of-design.png`
+9. `packages/models/src/pcc/` and `packages/models/src/pcc/PccMvpSurfaces.ts`
+10. `apps/project-sites/` only as a reference pattern for Vite/SPFx mounting
+11. `docs/reference/ui-kit/doctrine/` before any SPFx UI work
+12. `docs/reference/spfx-surfaces/` before any SharePoint-hosted surface work
+13. `docs/reference/sharepoint/list-schemas/` before list or provisioning work
 
 For Procore work, also read the full Procore package before touching integration boundaries.
 
