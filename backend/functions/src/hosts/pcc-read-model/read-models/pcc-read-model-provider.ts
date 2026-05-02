@@ -11,6 +11,7 @@
 import type {
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
+  PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
@@ -70,6 +71,10 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>;
+  getPermitInspectionControlCenter(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {

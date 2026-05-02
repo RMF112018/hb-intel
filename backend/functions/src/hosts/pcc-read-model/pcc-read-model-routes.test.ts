@@ -12,6 +12,7 @@ const provider = {
   getTeamAccess: vi.fn(),
   getProjectReadiness: vi.fn(),
   getLifecycleReadiness: vi.fn(),
+  getPermitInspectionControlCenter: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -32,10 +33,12 @@ vi.mock('../../utils/withTelemetry.js', () => ({
 
 vi.mock('../../middleware/auth.js', () => ({
   withAuth: (handler: any) => {
-    const wrapped = vi.fn((request: any, context: any) => handler(request, context, {
-      userToken: 'token',
-      claims: { oid: 'oid-1', upn: 'user@hbc.test', roles: [] },
-    }));
+    const wrapped = vi.fn((request: any, context: any) =>
+      handler(request, context, {
+        userToken: 'token',
+        claims: { oid: 'oid-1', upn: 'user@hbc.test', roles: [] },
+      }),
+    );
     (wrapped as any).__withAuth = true;
     return wrapped;
   },
@@ -46,16 +49,57 @@ vi.mock('./read-models/pcc-mock-read-model-provider.js', () => ({
 }));
 
 const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: string }> = [
-  { name: 'getPccProjectProfile', route: 'pcc/projects/{projectId}/profile', method: 'getProjectProfile' },
-  { name: 'getPccProjectModules', route: 'pcc/projects/{projectId}/modules', method: 'getModuleRegistry' },
+  {
+    name: 'getPccProjectProfile',
+    route: 'pcc/projects/{projectId}/profile',
+    method: 'getProjectProfile',
+  },
+  {
+    name: 'getPccProjectModules',
+    route: 'pcc/projects/{projectId}/modules',
+    method: 'getModuleRegistry',
+  },
   { name: 'getPccProjectHome', route: 'pcc/projects/{projectId}/home', method: 'getProjectHome' },
-  { name: 'getPccProjectPriorityActions', route: 'pcc/projects/{projectId}/priority-actions', method: 'getPriorityActions' },
-  { name: 'getPccProjectDocumentControl', route: 'pcc/projects/{projectId}/document-control', method: 'getDocumentControl' },
-  { name: 'getPccProjectExternalLinks', route: 'pcc/projects/{projectId}/external-links', method: 'getExternalLinks' },
-  { name: 'getPccProjectSiteHealth', route: 'pcc/projects/{projectId}/site-health', method: 'getSiteHealth' },
-  { name: 'getPccProjectTeamAccess', route: 'pcc/projects/{projectId}/team-access', method: 'getTeamAccess' },
-  { name: 'getPccProjectReadiness', route: 'pcc/projects/{projectId}/project-readiness', method: 'getProjectReadiness' },
-  { name: 'getPccLifecycleReadiness', route: 'pcc/projects/{projectId}/lifecycle-readiness', method: 'getLifecycleReadiness' },
+  {
+    name: 'getPccProjectPriorityActions',
+    route: 'pcc/projects/{projectId}/priority-actions',
+    method: 'getPriorityActions',
+  },
+  {
+    name: 'getPccProjectDocumentControl',
+    route: 'pcc/projects/{projectId}/document-control',
+    method: 'getDocumentControl',
+  },
+  {
+    name: 'getPccProjectExternalLinks',
+    route: 'pcc/projects/{projectId}/external-links',
+    method: 'getExternalLinks',
+  },
+  {
+    name: 'getPccProjectSiteHealth',
+    route: 'pcc/projects/{projectId}/site-health',
+    method: 'getSiteHealth',
+  },
+  {
+    name: 'getPccProjectTeamAccess',
+    route: 'pcc/projects/{projectId}/team-access',
+    method: 'getTeamAccess',
+  },
+  {
+    name: 'getPccProjectReadiness',
+    route: 'pcc/projects/{projectId}/project-readiness',
+    method: 'getProjectReadiness',
+  },
+  {
+    name: 'getPccLifecycleReadiness',
+    route: 'pcc/projects/{projectId}/lifecycle-readiness',
+    method: 'getLifecycleReadiness',
+  },
+  {
+    name: 'getPccPermitInspectionControlCenter',
+    route: 'pcc/projects/{projectId}/permit-inspection-control-center',
+    method: 'getPermitInspectionControlCenter',
+  },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -76,8 +120,8 @@ describe('PCC read-only route registrations', () => {
     await import('./pcc-read-model-routes.js');
   });
 
-  it('registers exactly the ten approved route handlers', () => {
-    expect(registrations).toHaveLength(10);
+  it('registers exactly the eleven approved route handlers', () => {
+    expect(registrations).toHaveLength(11);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);

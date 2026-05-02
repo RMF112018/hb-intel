@@ -15,20 +15,25 @@ function registerPccReadRoute(name: string, route: string, load: RouteLoader): v
     methods: ['GET'],
     authLevel: 'anonymous',
     route,
-    handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
-      const requestId = extractOrGenerateRequestId(request);
-      const projectId = request.params.projectId;
-      if (!projectId) {
-        return errorResponse(400, 'VALIDATION_ERROR', 'projectId is required', requestId);
-      }
+    handler: withAuth(
+      withTelemetry(
+        async (request: HttpRequest): Promise<HttpResponseInit> => {
+          const requestId = extractOrGenerateRequestId(request);
+          const projectId = request.params.projectId;
+          if (!projectId) {
+            return errorResponse(400, 'VALIDATION_ERROR', 'projectId is required', requestId);
+          }
 
-      try {
-        const envelope = await load(projectId as PccProjectId);
-        return successResponse(envelope);
-      } catch {
-        return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
-      }
-    }, { domain: 'pcc-read-model', operation: name })),
+          try {
+            const envelope = await load(projectId as PccProjectId);
+            return successResponse(envelope);
+          } catch {
+            return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
+          }
+        },
+        { domain: 'pcc-read-model', operation: name },
+      ),
+    ),
   });
 }
 
@@ -44,10 +49,8 @@ registerPccReadRoute(
   async (projectId) => provider.getModuleRegistry(projectId),
 );
 
-registerPccReadRoute(
-  'getPccProjectHome',
-  'pcc/projects/{projectId}/home',
-  async (projectId) => provider.getProjectHome(projectId),
+registerPccReadRoute('getPccProjectHome', 'pcc/projects/{projectId}/home', async (projectId) =>
+  provider.getProjectHome(projectId),
 );
 
 registerPccReadRoute(
@@ -90,4 +93,10 @@ registerPccReadRoute(
   'getPccLifecycleReadiness',
   'pcc/projects/{projectId}/lifecycle-readiness',
   async (projectId) => provider.getLifecycleReadiness(projectId),
+);
+
+registerPccReadRoute(
+  'getPccPermitInspectionControlCenter',
+  'pcc/projects/{projectId}/permit-inspection-control-center',
+  async (projectId) => provider.getPermitInspectionControlCenter(projectId),
 );
