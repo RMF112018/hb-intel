@@ -1,27 +1,37 @@
 /**
  * PCC Permit & Inspection Control Center — deterministic sample fixtures.
  *
- * Phase 3 / Wave 10 / Prompt 02. Read-model only. No tenant URLs, no
- * secrets, no live UPNs, no non-deterministic identifiers, no runtime
+ * Phase 3 / Wave 10 / Prompts 02 + 06. Read-model only. No tenant URLs,
+ * no secrets, no live UPNs, no non-deterministic identifiers, no runtime
  * AHJ/Procore/Graph/SharePoint calls. AHJ posture is launcher-only;
  * evidence is references-only; receipts are reference labels (no
  * blob/upload/sync field).
  *
- * Fixture coverage (per Wave 10 Prompt 02):
+ * Fixture coverage (Prompt 02 baseline + Prompt 06 additions):
  *   - one expiring permit, one pending-revision permit, one active
- *     permit with both `applicationValue` and `permitFee`;
+ *     permit with both `applicationValue` and `permitFee`, and one
+ *     expired permit driving renewal/closeout exposure;
  *   - one passed inspection, one failed inspection (with required
  *     reinspection), one reinspection-scheduled inspection (with
- *     `reInspectionFee`);
+ *     `reInspectionFee`), and one ready-to-request inspection;
  *   - one reinspection lineage chain linking the failed parent to the
  *     reinspection child with full corrective-action metadata;
  *   - one AHJ profile with `launcherOnly: true`;
  *   - one evidence-missing record (a permit with a `required-missing`
  *     evidence link);
- *   - one fee exposure in `pending-receipt` and one in `disputed`;
- *   - one priority-action signal, one readiness signal targeting the
- *     preserved `permit-log` source-module identifier, one approval
- *     signal.
+ *   - permit fee exposures in `pending-receipt` and `open` states; and
+ *     reinspection fee exposures in `pending-receipt` and `disputed`
+ *     states (`relatedRecordType: 'reinspection'`, `reInspectionFee`);
+ *   - readiness signals covering inspection-not-scheduled and
+ *     closeout / TCO / CO exposure, all preserving the
+ *     `permit-log` source-module identifier;
+ *   - priority-action signals using existing rail categories only
+ *     (no new category introduced);
+ *   - approval signals exercising all five
+ *     `PERMIT_INSPECTION_CHECKPOINT_KINDS` and the four trigger
+ *     concepts (closeout authorization, no-reinspection exception,
+ *     evidence override-by-reason, transition exception override);
+ *     `override-by-reason` is preserved for backward compatibility.
  */
 
 import type {

@@ -281,7 +281,7 @@ Priority Actions outputs will feed Project Home rail categories and downstream r
 Wave 10 will provide normalized readiness signals into Wave 8 framework seams:
 
 - permit blockers
-  n- inspection blockers
+- inspection blockers
 - evidence blockers
 - fee-risk posture
 - confidence/supporting source lineage signals

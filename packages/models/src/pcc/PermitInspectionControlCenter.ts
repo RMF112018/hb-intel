@@ -163,7 +163,7 @@ export const PERMIT_INSPECTION_SOURCE_FAMILIES = ['permits', 'required-inspectio
 export type PermitInspectionSourceFamily = (typeof PERMIT_INSPECTION_SOURCE_FAMILIES)[number];
 
 // ---------------------------------------------------------------------------
-// Approval/checkpoint signal kind (3). Wave 10 publishes these as
+// Approval/checkpoint signal kind (5). Wave 10 publishes these as
 // read-only metadata; Wave 14 owns the canonical Approvals/Checkpoints
 // vocabulary and will define the authoritative mapping when its work
 // lands.

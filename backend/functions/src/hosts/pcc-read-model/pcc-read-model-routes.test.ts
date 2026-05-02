@@ -138,6 +138,28 @@ describe('PCC read-only route registrations', () => {
     }
   });
 
+  it('exposes the Wave 10 permit-inspection-control-center path as a single GET-only registration', () => {
+    const wave10Path = 'pcc/projects/{projectId}/permit-inspection-control-center';
+    const wave10Registrations = registrations.filter((reg) => reg.config.route === wave10Path);
+
+    expect(wave10Registrations).toHaveLength(1);
+
+    const wave10 = wave10Registrations[0]!;
+    expect(wave10.name).toBe('getPccPermitInspectionControlCenter');
+    expect(wave10.config.methods).toEqual(['GET']);
+
+    const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+    for (const method of writeMethods) {
+      const writeRegistration = registrations.find(
+        (reg) =>
+          reg.config.route === wave10Path &&
+          Array.isArray(reg.config.methods) &&
+          reg.config.methods.includes(method),
+      );
+      expect(writeRegistration).toBeUndefined();
+    }
+  });
+
   it('applies withAuth posture to each route handler', () => {
     for (const reg of registrations) {
       expect((reg.config.handler as any).__withAuth).toBe(true);
