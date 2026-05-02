@@ -1,0 +1,1739 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "subtitle": "Buyout Control Center",
+    "phase": "Phase 3",
+    "wave": "Wave 13",
+    "bindingWorkbookTruth": {
+      "sourceSheet": "Sheet1",
+      "usedRange": "A1:N88",
+      "headerRow": 6,
+      "candidateBuyoutRows": "8-85",
+      "summaryRows": "86-88",
+      "hiddenRows": 0,
+      "hiddenColumns": 0,
+      "dataValidations": 0,
+      "conditionalFormattingRules": 0,
+      "definedNames": 0
+    },
+    "nonInferenceGuardrail": "Do not infer requiredness, dropdown options, validations, or conditional business rules from workbook formatting alone."
+  },
+  "sources": [
+    {
+      "sourceFile": "docs/reference/example/financial/Buyout Log_Template 2025.xlsx",
+      "sourceSheet": "Sheet1",
+      "sourceType": "workbook-seed-taxonomy"
+    }
+  ],
+  "projectHeaderFields": [
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 3,
+      "sourceLabel": "PROJECT NAME:",
+      "normalizedField": "projectName"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 4,
+      "sourceLabel": "PROJECT #:",
+      "normalizedField": "projectNumber"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 5,
+      "sourceLabel": "LOCATION:",
+      "normalizedField": "projectLocation"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 3,
+      "sourceLabel": "DATE:",
+      "normalizedField": "templateDate"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 4,
+      "sourceLabel": "BY:",
+      "normalizedField": "preparedBy"
+    }
+  ],
+  "recordFields": [
+    {
+      "id": "BL-FIELD-0001",
+      "sourceColumn": "DIVISION # / DESCRIPTION",
+      "normalizedField": "scopeDescription",
+      "targetFieldType": "text",
+      "mappingNotes": "Mapped from workbook header row 6 column A."
+    },
+    {
+      "id": "BL-FIELD-0002",
+      "sourceColumn": "SUBCONTRACTOR / VENDOR",
+      "normalizedField": "selectedVendorName",
+      "targetFieldType": "company",
+      "mappingNotes": "Mapped from workbook header row 6 column B."
+    },
+    {
+      "id": "BL-FIELD-0003",
+      "sourceColumn": "CONTRACT AMOUNT",
+      "normalizedField": "pccAwardAmount",
+      "targetFieldType": "currency",
+      "mappingNotes": "Mapped from workbook header row 6 column C."
+    },
+    {
+      "id": "BL-FIELD-0004",
+      "sourceColumn": "ORIGINAL BUDGET",
+      "normalizedField": "originalBudgetAmount",
+      "targetFieldType": "currency",
+      "mappingNotes": "Mapped from workbook header row 6 column D."
+    },
+    {
+      "id": "BL-FIELD-0005",
+      "sourceColumn": "OVER/UNDER",
+      "normalizedField": "overUnderOriginalBudget",
+      "targetFieldType": "calculated",
+      "mappingNotes": "Mapped from workbook header row 6 column E."
+    },
+    {
+      "id": "BL-FIELD-0006",
+      "sourceColumn": "LOI DATE TO BE SENT",
+      "normalizedField": "loiSendTargetDate",
+      "targetFieldType": "date",
+      "mappingNotes": "Mapped from workbook header row 6 column F."
+    },
+    {
+      "id": "BL-FIELD-0007",
+      "sourceColumn": "LOI Returned Executed",
+      "normalizedField": "loiExecutedDate",
+      "targetFieldType": "date",
+      "mappingNotes": "Mapped from workbook header row 6 column G."
+    },
+    {
+      "id": "BL-FIELD-0008",
+      "sourceColumn": "Submittal Dates",
+      "normalizedField": "submittalDateSummary",
+      "targetFieldType": "text",
+      "mappingNotes": "Mapped from workbook header row 6 column H."
+    },
+    {
+      "id": "BL-FIELD-0009",
+      "sourceColumn": "Lead Times",
+      "normalizedField": "leadTimeDays",
+      "targetFieldType": "number",
+      "mappingNotes": "Mapped from workbook header row 6 column I."
+    },
+    {
+      "id": "BL-FIELD-0010",
+      "sourceColumn": "Sub Name",
+      "normalizedField": "derivedSubName",
+      "targetFieldType": "company",
+      "mappingNotes": "Mapped from workbook header row 6 column J."
+    },
+    {
+      "id": "BL-FIELD-0011",
+      "sourceColumn": "BALL IN COURT",
+      "normalizedField": "ballInCourtPersonOrRole",
+      "targetFieldType": "person",
+      "mappingNotes": "Mapped from workbook header row 6 column K."
+    },
+    {
+      "id": "BL-FIELD-0012",
+      "sourceColumn": "Enrolled in SDI [Yes/No]",
+      "normalizedField": "sdiEnrollmentStatus",
+      "targetFieldType": "enum",
+      "mappingNotes": "Mapped from workbook header row 6 column L."
+    },
+    {
+      "id": "BL-FIELD-0013",
+      "sourceColumn": "Bond Required [Yes/No]",
+      "normalizedField": "bondRequirementStatus",
+      "targetFieldType": "enum",
+      "mappingNotes": "Mapped from workbook header row 6 column M."
+    },
+    {
+      "id": "BL-FIELD-0014",
+      "sourceColumn": "COMMENTS",
+      "normalizedField": "comments",
+      "targetFieldType": "rich-text",
+      "mappingNotes": "Mapped from workbook header row 6 column N."
+    }
+  ],
+  "defaultBuyoutLineItems": [
+    {
+      "id": "BL-LINE-0001",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 8,
+      "sourceLabel": "02-300 Staking and Layout",
+      "normalizedScope": "Staking and Layout",
+      "csiDivision": "02",
+      "costCode": "300",
+      "costCodeDescription": "Staking and Layout",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "300",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 8; not active until activated/imported. Over/Under formula at E8: =C8-D8. Sub Name formula at J8: =B8."
+    },
+    {
+      "id": "BL-LINE-0002",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 9,
+      "sourceLabel": "Soil Stabilization",
+      "normalizedScope": "Soil Stabilization",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "Soil Stabilization",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 9; not active until activated/imported. Over/Under formula at E9: =C9-D9. Sub Name formula at J9: =B9."
+    },
+    {
+      "id": "BL-LINE-0003",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 10,
+      "sourceLabel": "02-310 Earthwork and Grading",
+      "normalizedScope": "Earthwork and Grading",
+      "csiDivision": "02",
+      "costCode": "310",
+      "costCodeDescription": "Earthwork and Grading",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "310",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 10; not active until activated/imported. Over/Under formula at E10: =C10-D10. Sub Name formula at J10: =B10."
+    },
+    {
+      "id": "BL-LINE-0004",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 11,
+      "sourceLabel": "02-360 Soil Treatment",
+      "normalizedScope": "Soil Treatment",
+      "csiDivision": "02",
+      "costCode": "360",
+      "costCodeDescription": "Soil Treatment",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "360",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 11; not active until activated/imported. Over/Under formula at E11: =C11-D11. Sub Name formula at J11: =B11."
+    },
+    {
+      "id": "BL-LINE-0005",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 12,
+      "sourceLabel": "02-370 Erosion Control",
+      "normalizedScope": "Erosion Control",
+      "csiDivision": "02",
+      "costCode": "370",
+      "costCodeDescription": "Erosion Control",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "370",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 12; not active until activated/imported. Over/Under formula at E12: =C12-D12. Sub Name formula at J12: =B12."
+    },
+    {
+      "id": "BL-LINE-0006",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 13,
+      "sourceLabel": "Concrete Pavement/ Sidewalks",
+      "normalizedScope": "Concrete Pavement/ Sidewalks",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "Concrete Pavement/ Sidewalks",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 13; not active until activated/imported. Over/Under formula at E13: =C13-D13. Sub Name formula at J13: =B13."
+    },
+    {
+      "id": "BL-LINE-0007",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 14,
+      "sourceLabel": "02-760 Pavemark Markings",
+      "normalizedScope": "Pavemark Markings",
+      "csiDivision": "02",
+      "costCode": "760",
+      "costCodeDescription": "Pavemark Markings",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "760",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 14; not active until activated/imported. Over/Under formula at E14: =C14-D14. Sub Name formula at J14: =B14."
+    },
+    {
+      "id": "BL-LINE-0008",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 15,
+      "sourceLabel": "02-780 Hardscape",
+      "normalizedScope": "Hardscape",
+      "csiDivision": "02",
+      "costCode": "780",
+      "costCodeDescription": "Hardscape",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "780",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 15; not active until activated/imported. Over/Under formula at E15: =C15-D15. Sub Name formula at J15: =B15."
+    },
+    {
+      "id": "BL-LINE-0009",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 16,
+      "sourceLabel": "Landscaping",
+      "normalizedScope": "Landscaping",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "Landscaping",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 16; not active until activated/imported. Over/Under formula at E16: =C16-D16. Sub Name formula at J16: =B16."
+    },
+    {
+      "id": "BL-LINE-0010",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 17,
+      "sourceLabel": "03-000 Concrete",
+      "normalizedScope": "Concrete",
+      "csiDivision": "03",
+      "costCode": "000",
+      "costCodeDescription": "Concrete",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 17; not active until activated/imported. Over/Under formula at E17: =C17-D17. Sub Name formula at J17: =B17."
+    },
+    {
+      "id": "BL-LINE-0011",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 18,
+      "sourceLabel": "03-380 Cast in Place Concrete",
+      "normalizedScope": "Cast in Place Concrete",
+      "csiDivision": "03",
+      "costCode": "380",
+      "costCodeDescription": "Cast in Place Concrete",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "380",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 18; not active until activated/imported. Over/Under formula at E18: =C18-D18. Sub Name formula at J18: =B18."
+    },
+    {
+      "id": "BL-LINE-0012",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 19,
+      "sourceLabel": "Concrete - Villa and Garage",
+      "normalizedScope": "Concrete - Villa and Garage",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "Concrete - Villa and Garage",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 19; not active until activated/imported. Over/Under formula at E19: =C19-D19. Sub Name formula at J19: =B19."
+    },
+    {
+      "id": "BL-LINE-0013",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 20,
+      "sourceLabel": "04-000 Masonry",
+      "normalizedScope": "Masonry",
+      "csiDivision": "04",
+      "costCode": "000",
+      "costCodeDescription": "Masonry",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 20; not active until activated/imported. Over/Under formula at E20: =C20-D20. Sub Name formula at J20: =B20."
+    },
+    {
+      "id": "BL-LINE-0014",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 21,
+      "sourceLabel": "04-220 Concrete Block Masonry",
+      "normalizedScope": "Concrete Block Masonry",
+      "csiDivision": "04",
+      "costCode": "220",
+      "costCodeDescription": "Concrete Block Masonry",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "220",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 21; not active until activated/imported. Over/Under formula at E21: =C21-D21. Sub Name formula at J21: =B21."
+    },
+    {
+      "id": "BL-LINE-0015",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 22,
+      "sourceLabel": "",
+      "normalizedScope": "",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "",
+      "lineType": "ambiguous-review-row",
+      "activationPosture": "not-active-until-reviewed",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 22; not active until activated/imported. Over/Under formula at E22: =C22-D22. Sub Name formula at J22: =B22."
+    },
+    {
+      "id": "BL-LINE-0016",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 23,
+      "sourceLabel": "05-000 Metals",
+      "normalizedScope": "Metals",
+      "csiDivision": "05",
+      "costCode": "000",
+      "costCodeDescription": "Metals",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 23; not active until activated/imported. Over/Under formula at E23: =C23-D23. Sub Name formula at J23: =B23."
+    },
+    {
+      "id": "BL-LINE-0017",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 24,
+      "sourceLabel": "05-120 Structural Steel",
+      "normalizedScope": "Structural Steel",
+      "csiDivision": "05",
+      "costCode": "120",
+      "costCodeDescription": "Structural Steel",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "120",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 24; not active until activated/imported. Over/Under formula at E24: =C24-D24. Sub Name formula at J24: =B24."
+    },
+    {
+      "id": "BL-LINE-0018",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 25,
+      "sourceLabel": "05-500 Metal Stairs  & Misc.",
+      "normalizedScope": "Metal Stairs  & Misc.",
+      "csiDivision": "05",
+      "costCode": "500",
+      "costCodeDescription": "Metal Stairs  & Misc.",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "500",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 25; not active until activated/imported. Over/Under formula at E25: =C25-D25. Sub Name formula at J25: =B25."
+    },
+    {
+      "id": "BL-LINE-0019",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 26,
+      "sourceLabel": "05-520 Aluminum Railings",
+      "normalizedScope": "Aluminum Railings",
+      "csiDivision": "05",
+      "costCode": "520",
+      "costCodeDescription": "Aluminum Railings",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "520",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 26; not active until activated/imported. Over/Under formula at E26: =C26-D26. Sub Name formula at J26: =B26."
+    },
+    {
+      "id": "BL-LINE-0020",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 27,
+      "sourceLabel": "05-700 Metal Awnings",
+      "normalizedScope": "Metal Awnings",
+      "csiDivision": "05",
+      "costCode": "700",
+      "costCodeDescription": "Metal Awnings",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "700",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 27; not active until activated/imported. Over/Under formula at E27: =C27-D27. Sub Name formula at J27: =B27."
+    },
+    {
+      "id": "BL-LINE-0021",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 28,
+      "sourceLabel": "06-000 Wood & Plastic",
+      "normalizedScope": "Wood & Plastic",
+      "csiDivision": "06",
+      "costCode": "000",
+      "costCodeDescription": "Wood & Plastic",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 28; not active until activated/imported. Over/Under formula at E28: =C28-D28. Sub Name formula at J28: =B28."
+    },
+    {
+      "id": "BL-LINE-0022",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 29,
+      "sourceLabel": "06-170 Pre-Engineered Trusses",
+      "normalizedScope": "Pre-Engineered Trusses",
+      "csiDivision": "06",
+      "costCode": "170",
+      "costCodeDescription": "Pre-Engineered Trusses",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "170",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 29; not active until activated/imported. Over/Under formula at E29: =C29-D29. Sub Name formula at J29: =B29."
+    },
+    {
+      "id": "BL-LINE-0023",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 30,
+      "sourceLabel": "06-200   Finish Carpentry (Sub)",
+      "normalizedScope": "Finish Carpentry (Sub)",
+      "csiDivision": "06",
+      "costCode": "200",
+      "costCodeDescription": "Finish Carpentry (Sub)",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "200",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 30; not active until activated/imported. Over/Under formula at E30: =C30-D30. Sub Name formula at J30: =B30."
+    },
+    {
+      "id": "BL-LINE-0024",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 31,
+      "sourceLabel": "06-210 Finish Carpentry (Material)",
+      "normalizedScope": "Finish Carpentry (Material)",
+      "csiDivision": "06",
+      "costCode": "210",
+      "costCodeDescription": "Finish Carpentry (Material)",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "210",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 31; not active until activated/imported. Over/Under formula at E31: =C31-D31. Sub Name formula at J31: =B31."
+    },
+    {
+      "id": "BL-LINE-0025",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 32,
+      "sourceLabel": "07-000 Thermal & Moisture",
+      "normalizedScope": "Thermal & Moisture",
+      "csiDivision": "07",
+      "costCode": "000",
+      "costCodeDescription": "Thermal & Moisture",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 32; not active until activated/imported. Over/Under formula at E32: =C32-D32. Sub Name formula at J32: =B32."
+    },
+    {
+      "id": "BL-LINE-0026",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 33,
+      "sourceLabel": "07-210 Building Insulation",
+      "normalizedScope": "Building Insulation",
+      "csiDivision": "07",
+      "costCode": "210",
+      "costCodeDescription": "Building Insulation",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "210",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 33; not active until activated/imported. Over/Under formula at E33: =C33-D33. Sub Name formula at J33: =B33."
+    },
+    {
+      "id": "BL-LINE-0027",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 34,
+      "sourceLabel": "07-240 Stucco",
+      "normalizedScope": "Stucco",
+      "csiDivision": "07",
+      "costCode": "240",
+      "costCodeDescription": "Stucco",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "240",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 34; not active until activated/imported. Over/Under formula at E34: =C34-D34. Sub Name formula at J34: =B34."
+    },
+    {
+      "id": "BL-LINE-0028",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 35,
+      "sourceLabel": "",
+      "normalizedScope": "",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "",
+      "lineType": "ambiguous-review-row",
+      "activationPosture": "not-active-until-reviewed",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 35; not active until activated/imported. Over/Under formula at E35: =C35-D35. Sub Name formula at J35: =B35."
+    },
+    {
+      "id": "BL-LINE-0029",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 36,
+      "sourceLabel": "Metal Roofing",
+      "normalizedScope": "Metal Roofing",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "Metal Roofing",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 36; not active until activated/imported. Over/Under formula at E36: =C36-D36. Sub Name formula at J36: =B36."
+    },
+    {
+      "id": "BL-LINE-0030",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 37,
+      "sourceLabel": "07-500 Membrane Flat Roofing",
+      "normalizedScope": "Membrane Flat Roofing",
+      "csiDivision": "07",
+      "costCode": "500",
+      "costCodeDescription": "Membrane Flat Roofing",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "500",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 37; not active until activated/imported. Over/Under formula at E37: =C37-D37. Sub Name formula at J37: =B37."
+    },
+    {
+      "id": "BL-LINE-0031",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 38,
+      "sourceLabel": "07-710 Guters & Downspouts",
+      "normalizedScope": "Guters & Downspouts",
+      "csiDivision": "07",
+      "costCode": "710",
+      "costCodeDescription": "Guters & Downspouts",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "710",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 38; not active until activated/imported. Over/Under formula at E38: =C38-D38. Sub Name formula at J38: =B38."
+    },
+    {
+      "id": "BL-LINE-0032",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 39,
+      "sourceLabel": "08-000 Doors and Windows",
+      "normalizedScope": "Doors and Windows",
+      "csiDivision": "08",
+      "costCode": "000",
+      "costCodeDescription": "Doors and Windows",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 39; not active until activated/imported. Over/Under formula at E39: =C39-D39. Sub Name formula at J39: =B39."
+    },
+    {
+      "id": "BL-LINE-0033",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 40,
+      "sourceLabel": "08-100 Exterior Doors",
+      "normalizedScope": "Exterior Doors",
+      "csiDivision": "08",
+      "costCode": "100",
+      "costCodeDescription": "Exterior Doors",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "100",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 40; not active until activated/imported. Over/Under formula at E40: =C40-D40. Sub Name formula at J40: =B40."
+    },
+    {
+      "id": "BL-LINE-0034",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 41,
+      "sourceLabel": "08-200 Interior Doors",
+      "normalizedScope": "Interior Doors",
+      "csiDivision": "08",
+      "costCode": "200",
+      "costCodeDescription": "Interior Doors",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "200",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 41; not active until activated/imported. Over/Under formula at E41: =C41-D41. Sub Name formula at J41: =B41."
+    },
+    {
+      "id": "BL-LINE-0035",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 42,
+      "sourceLabel": "08-310 Access Doors & Panels",
+      "normalizedScope": "Access Doors & Panels",
+      "csiDivision": "08",
+      "costCode": "310",
+      "costCodeDescription": "Access Doors & Panels",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "310",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 42; not active until activated/imported. Over/Under formula at E42: =C42-D42. Sub Name formula at J42: =B42."
+    },
+    {
+      "id": "BL-LINE-0036",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 43,
+      "sourceLabel": "08-360 Overhead Doors",
+      "normalizedScope": "Overhead Doors",
+      "csiDivision": "08",
+      "costCode": "360",
+      "costCodeDescription": "Overhead Doors",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "360",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 43; not active until activated/imported. Over/Under formula at E43: =C43-D43. Sub Name formula at J43: =B43."
+    },
+    {
+      "id": "BL-LINE-0037",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 44,
+      "sourceLabel": "08-400 Entrances nd Storefronts",
+      "normalizedScope": "Entrances nd Storefronts",
+      "csiDivision": "08",
+      "costCode": "400",
+      "costCodeDescription": "Entrances nd Storefronts",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "400",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 44; not active until activated/imported. Over/Under formula at E44: =C44-D44. Sub Name formula at J44: =B44."
+    },
+    {
+      "id": "BL-LINE-0038",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 45,
+      "sourceLabel": "08-500 Windows",
+      "normalizedScope": "Windows",
+      "csiDivision": "08",
+      "costCode": "500",
+      "costCodeDescription": "Windows",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "500",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 45; not active until activated/imported. Over/Under formula at E45: =C45-D45. Sub Name formula at J45: =B45."
+    },
+    {
+      "id": "BL-LINE-0039",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 46,
+      "sourceLabel": "08-700 Hardware",
+      "normalizedScope": "Hardware",
+      "csiDivision": "08",
+      "costCode": "700",
+      "costCodeDescription": "Hardware",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "700",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 46; not active until activated/imported. Over/Under formula at E46: =C46-D46. Sub Name formula at J46: =B46."
+    },
+    {
+      "id": "BL-LINE-0040",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 47,
+      "sourceLabel": "08-830 Mirrors",
+      "normalizedScope": "Mirrors",
+      "csiDivision": "08",
+      "costCode": "830",
+      "costCodeDescription": "Mirrors",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "830",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 47; not active until activated/imported. Over/Under formula at E47: =C47-D47. Sub Name formula at J47: =B47."
+    },
+    {
+      "id": "BL-LINE-0041",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 48,
+      "sourceLabel": "09-000 Finishes",
+      "normalizedScope": "Finishes",
+      "csiDivision": "09",
+      "costCode": "000",
+      "costCodeDescription": "Finishes",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 48; not active until activated/imported. Over/Under formula at E48: =C48-D48. Sub Name formula at J48: =B48."
+    },
+    {
+      "id": "BL-LINE-0042",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 49,
+      "sourceLabel": "09-200 Drywall",
+      "normalizedScope": "Drywall",
+      "csiDivision": "09",
+      "costCode": "200",
+      "costCodeDescription": "Drywall",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "200",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 49; not active until activated/imported. Over/Under formula at E49: =C49-D49. Sub Name formula at J49: =B49."
+    },
+    {
+      "id": "BL-LINE-0043",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 50,
+      "sourceLabel": "09-310 Ceramic Tile",
+      "normalizedScope": "Ceramic Tile",
+      "csiDivision": "09",
+      "costCode": "310",
+      "costCodeDescription": "Ceramic Tile",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "310",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 50; not active until activated/imported. Over/Under formula at E50: =C50-D50. Sub Name formula at J50: =B50."
+    },
+    {
+      "id": "BL-LINE-0044",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 51,
+      "sourceLabel": "09-650 Flooring: Vinyl Plank",
+      "normalizedScope": "Flooring: Vinyl Plank",
+      "csiDivision": "09",
+      "costCode": "650",
+      "costCodeDescription": "Flooring: Vinyl Plank",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "650",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 51; not active until activated/imported. Over/Under formula at E51: =C51-D51. Sub Name formula at J51: =B51."
+    },
+    {
+      "id": "BL-LINE-0045",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 52,
+      "sourceLabel": "09-680 Carpet",
+      "normalizedScope": "Carpet",
+      "csiDivision": "09",
+      "costCode": "680",
+      "costCodeDescription": "Carpet",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "680",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 52; not active until activated/imported. Over/Under formula at E52: =C52-D52. Sub Name formula at J52: =B52."
+    },
+    {
+      "id": "BL-LINE-0046",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 53,
+      "sourceLabel": "09-900 Paint and Coating",
+      "normalizedScope": "Paint and Coating",
+      "csiDivision": "09",
+      "costCode": "900",
+      "costCodeDescription": "Paint and Coating",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "900",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 53; not active until activated/imported. Over/Under formula at E53: =C53-D53. Sub Name formula at J53: =B53."
+    },
+    {
+      "id": "BL-LINE-0047",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 54,
+      "sourceLabel": "09-990 Final Cleaning",
+      "normalizedScope": "Final Cleaning",
+      "csiDivision": "09",
+      "costCode": "990",
+      "costCodeDescription": "Final Cleaning",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "990",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 54; not active until activated/imported. Over/Under formula at E54: =C54-D54. Sub Name formula at J54: =B54."
+    },
+    {
+      "id": "BL-LINE-0048",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 55,
+      "sourceLabel": "10-000 Specialties",
+      "normalizedScope": "Specialties",
+      "csiDivision": "10",
+      "costCode": "000",
+      "costCodeDescription": "Specialties",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 55; not active until activated/imported. Over/Under formula at E55: =C55-D55. Sub Name formula at J55: =B55."
+    },
+    {
+      "id": "BL-LINE-0049",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 56,
+      "sourceLabel": "10-400 Identification Signs",
+      "normalizedScope": "Identification Signs",
+      "csiDivision": "10",
+      "costCode": "400",
+      "costCodeDescription": "Identification Signs",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "400",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 56; not active until activated/imported. Over/Under formula at E56: =C56-D56. Sub Name formula at J56: =B56."
+    },
+    {
+      "id": "BL-LINE-0050",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 57,
+      "sourceLabel": "10-520 Fire Extinguishers & Cabinets",
+      "normalizedScope": "Fire Extinguishers & Cabinets",
+      "csiDivision": "10",
+      "costCode": "520",
+      "costCodeDescription": "Fire Extinguishers & Cabinets",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "520",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 57; not active until activated/imported. Over/Under formula at E57: =C57-D57. Sub Name formula at J57: =B57."
+    },
+    {
+      "id": "BL-LINE-0051",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 58,
+      "sourceLabel": "10-550 Mail Boxes",
+      "normalizedScope": "Mail Boxes",
+      "csiDivision": "10",
+      "costCode": "550",
+      "costCodeDescription": "Mail Boxes",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "550",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 58; not active until activated/imported. Over/Under formula at E58: =C58-D58. Sub Name formula at J58: =B58."
+    },
+    {
+      "id": "BL-LINE-0052",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 59,
+      "sourceLabel": "10-670 Storage Shelves",
+      "normalizedScope": "Storage Shelves",
+      "csiDivision": "10",
+      "costCode": "670",
+      "costCodeDescription": "Storage Shelves",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "670",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 59; not active until activated/imported. Over/Under formula at E59: =C59-D59. Sub Name formula at J59: =B59."
+    },
+    {
+      "id": "BL-LINE-0053",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 60,
+      "sourceLabel": "10-800 Toilet & Bath Accessories",
+      "normalizedScope": "Toilet & Bath Accessories",
+      "csiDivision": "10",
+      "costCode": "800",
+      "costCodeDescription": "Toilet & Bath Accessories",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "800",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 60; not active until activated/imported. Over/Under formula at E60: =C60-D60. Sub Name formula at J60: =B60."
+    },
+    {
+      "id": "BL-LINE-0054",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 61,
+      "sourceLabel": "11-000 Equipment",
+      "normalizedScope": "Equipment",
+      "csiDivision": "11",
+      "costCode": "000",
+      "costCodeDescription": "Equipment",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 61; not active until activated/imported. Over/Under formula at E61: =C61-D61. Sub Name formula at J61: =B61."
+    },
+    {
+      "id": "BL-LINE-0055",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 62,
+      "sourceLabel": "11-150 Vehicular Gates",
+      "normalizedScope": "Vehicular Gates",
+      "csiDivision": "11",
+      "costCode": "150",
+      "costCodeDescription": "Vehicular Gates",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "150",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 62; not active until activated/imported. Over/Under formula at E62: =C62-D62. Sub Name formula at J62: =B62."
+    },
+    {
+      "id": "BL-LINE-0056",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 63,
+      "sourceLabel": "11-450 Appliances Supplier",
+      "normalizedScope": "Appliances Supplier",
+      "csiDivision": "11",
+      "costCode": "450",
+      "costCodeDescription": "Appliances Supplier",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "450",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 63; not active until activated/imported. Over/Under formula at E63: =C63-D63. Sub Name formula at J63: =B63."
+    },
+    {
+      "id": "BL-LINE-0057",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 64,
+      "sourceLabel": "12-000 Furnishings",
+      "normalizedScope": "Furnishings",
+      "csiDivision": "12",
+      "costCode": "000",
+      "costCodeDescription": "Furnishings",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 64; not active until activated/imported. Over/Under formula at E64: =C64-D64. Sub Name formula at J64: =B64."
+    },
+    {
+      "id": "BL-LINE-0058",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 65,
+      "sourceLabel": "12-350 Manufactured Cabinets",
+      "normalizedScope": "Manufactured Cabinets",
+      "csiDivision": "12",
+      "costCode": "350",
+      "costCodeDescription": "Manufactured Cabinets",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "350",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 65; not active until activated/imported. Over/Under formula at E65: =C65-D65. Sub Name formula at J65: =B65."
+    },
+    {
+      "id": "BL-LINE-0059",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 66,
+      "sourceLabel": "12-360 Coutertops",
+      "normalizedScope": "Coutertops",
+      "csiDivision": "12",
+      "costCode": "360",
+      "costCodeDescription": "Coutertops",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "360",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 66; not active until activated/imported. Over/Under formula at E66: =C66-D66. Sub Name formula at J66: =B66."
+    },
+    {
+      "id": "BL-LINE-0060",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 67,
+      "sourceLabel": "12-490 Window Treatment",
+      "normalizedScope": "Window Treatment",
+      "csiDivision": "12",
+      "costCode": "490",
+      "costCodeDescription": "Window Treatment",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "490",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 67; not active until activated/imported. Over/Under formula at E67: =C67-D67. Sub Name formula at J67: =B67."
+    },
+    {
+      "id": "BL-LINE-0061",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 68,
+      "sourceLabel": "13-000 Special Construction",
+      "normalizedScope": "Special Construction",
+      "csiDivision": "13",
+      "costCode": "000",
+      "costCodeDescription": "Special Construction",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 68; not active until activated/imported. Over/Under formula at E68: =C68-D68. Sub Name formula at J68: =B68."
+    },
+    {
+      "id": "BL-LINE-0062",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 69,
+      "sourceLabel": "",
+      "normalizedScope": "",
+      "csiDivision": "",
+      "costCode": "",
+      "costCodeDescription": "",
+      "lineType": "ambiguous-review-row",
+      "activationPosture": "not-active-until-reviewed",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 69; not active until activated/imported. Over/Under formula at E69: =C69-D69. Sub Name formula at J69: =B69."
+    },
+    {
+      "id": "BL-LINE-0063",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 70,
+      "sourceLabel": "14-000 Conveying Systems",
+      "normalizedScope": "Conveying Systems",
+      "csiDivision": "14",
+      "costCode": "000",
+      "costCodeDescription": "Conveying Systems",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 70; not active until activated/imported. Over/Under formula at E70: =C70-D70. Sub Name formula at J70: =B70."
+    },
+    {
+      "id": "BL-LINE-0064",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 71,
+      "sourceLabel": "14-200 Elevators",
+      "normalizedScope": "Elevators",
+      "csiDivision": "14",
+      "costCode": "200",
+      "costCodeDescription": "Elevators",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "200",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 71; not active until activated/imported. Over/Under formula at E71: =C71-D71. Sub Name formula at J71: =B71."
+    },
+    {
+      "id": "BL-LINE-0065",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 72,
+      "sourceLabel": "15-000 Mechanical",
+      "normalizedScope": "Mechanical",
+      "csiDivision": "15",
+      "costCode": "000",
+      "costCodeDescription": "Mechanical",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 72; not active until activated/imported. Over/Under formula at E72: =C72-D72. Sub Name formula at J72: =B72."
+    },
+    {
+      "id": "BL-LINE-0066",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 73,
+      "sourceLabel": "15-300 Fire Sprinkler System",
+      "normalizedScope": "Fire Sprinkler System",
+      "csiDivision": "15",
+      "costCode": "300",
+      "costCodeDescription": "Fire Sprinkler System",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "300",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 73; not active until activated/imported. Over/Under formula at E73: =C73-D73. Sub Name formula at J73: =B73."
+    },
+    {
+      "id": "BL-LINE-0067",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 74,
+      "sourceLabel": "15-400 Plumbing",
+      "normalizedScope": "Plumbing",
+      "csiDivision": "15",
+      "costCode": "400",
+      "costCodeDescription": "Plumbing",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "400",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 74; not active until activated/imported. Over/Under formula at E74: =C74-D74. Sub Name formula at J74: =B74."
+    },
+    {
+      "id": "BL-LINE-0068",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 75,
+      "sourceLabel": "15-700 HVAC",
+      "normalizedScope": "HVAC",
+      "csiDivision": "15",
+      "costCode": "700",
+      "costCodeDescription": "HVAC",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "700",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 75; not active until activated/imported. Over/Under formula at E75: =C75-D75. Sub Name formula at J75: =B75."
+    },
+    {
+      "id": "BL-LINE-0069",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 76,
+      "sourceLabel": "16-000 Electrical",
+      "normalizedScope": "Electrical",
+      "csiDivision": "16",
+      "costCode": "000",
+      "costCodeDescription": "Electrical",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "000",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 76; not active until activated/imported. Over/Under formula at E76: =C76-D76. Sub Name formula at J76: =B76."
+    },
+    {
+      "id": "BL-LINE-0070",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 77,
+      "sourceLabel": "16-100 Electrical",
+      "normalizedScope": "Electrical",
+      "csiDivision": "16",
+      "costCode": "100",
+      "costCodeDescription": "Electrical",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "100",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 77; not active until activated/imported. Over/Under formula at E77: =C77-D77. Sub Name formula at J77: =B77."
+    },
+    {
+      "id": "BL-LINE-0071",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 78,
+      "sourceLabel": "16-110 Fire Alarm System",
+      "normalizedScope": "Fire Alarm System",
+      "csiDivision": "16",
+      "costCode": "110",
+      "costCodeDescription": "Fire Alarm System",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "110",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 78; not active until activated/imported. Over/Under formula at E78: =C78-D78. Sub Name formula at J78: =B78."
+    },
+    {
+      "id": "BL-LINE-0072",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 79,
+      "sourceLabel": "16-400 Voice/Data/Coax",
+      "normalizedScope": "Voice/Data/Coax",
+      "csiDivision": "16",
+      "costCode": "400",
+      "costCodeDescription": "Voice/Data/Coax",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "400",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 79; not active until activated/imported. Over/Under formula at E79: =C79-D79. Sub Name formula at J79: =B79."
+    },
+    {
+      "id": "BL-LINE-0073",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 80,
+      "sourceLabel": "16-410 CCTV",
+      "normalizedScope": "CCTV",
+      "csiDivision": "16",
+      "costCode": "410",
+      "costCodeDescription": "CCTV",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "410",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 80; not active until activated/imported. Over/Under formula at E80: =C80-D80. Sub Name formula at J80: =B80."
+    },
+    {
+      "id": "BL-LINE-0074",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 81,
+      "sourceLabel": "16-420 Access Control",
+      "normalizedScope": "Access Control",
+      "csiDivision": "16",
+      "costCode": "420",
+      "costCodeDescription": "Access Control",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "420",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 81; not active until activated/imported. Over/Under formula at E81: =C81-D81. Sub Name formula at J81: =B81."
+    },
+    {
+      "id": "BL-LINE-0075",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 82,
+      "sourceLabel": "16-430 Audio/Visual",
+      "normalizedScope": "Audio/Visual",
+      "csiDivision": "16",
+      "costCode": "430",
+      "costCodeDescription": "Audio/Visual",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "430",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 82; not active until activated/imported. Over/Under formula at E82: =C82-D82. Sub Name formula at J82: =B82."
+    },
+    {
+      "id": "BL-LINE-0076",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 83,
+      "sourceLabel": "16-440 Security Systems",
+      "normalizedScope": "Security Systems",
+      "csiDivision": "16",
+      "costCode": "440",
+      "costCodeDescription": "Security Systems",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "440",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 83; not active until activated/imported. Over/Under formula at E83: =C83-D83. Sub Name formula at J83: =B83."
+    },
+    {
+      "id": "BL-LINE-0077",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 84,
+      "sourceLabel": "16-510 Interior Light Fixtures",
+      "normalizedScope": "Interior Light Fixtures",
+      "csiDivision": "16",
+      "costCode": "510",
+      "costCodeDescription": "Interior Light Fixtures",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "510",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 84; not active until activated/imported. Over/Under formula at E84: =C84-D84. Sub Name formula at J84: =B84."
+    },
+    {
+      "id": "BL-LINE-0078",
+      "sourceSheet": "Sheet1",
+      "sourceRow": 85,
+      "sourceLabel": "16-520 Exterior Light Fixtures",
+      "normalizedScope": "Exterior Light Fixtures",
+      "csiDivision": "16",
+      "costCode": "520",
+      "costCodeDescription": "Exterior Light Fixtures",
+      "lineType": "candidate-buyout-package",
+      "activationPosture": "candidate-active-line",
+      "procoreBudgetMappingCandidate": {
+        "budgetCodeCandidate": "",
+        "costCodeCandidate": "520",
+        "costTypeCandidate": "",
+        "mappingConfidence": "unknown"
+      },
+      "mappingNotes": "Seeded from workbook row 85; not active until activated/imported. Over/Under formula at E85: =C85-D85. Sub Name formula at J85: =B85."
+    }
+  ],
+  "summaryAndFormulaRows": [
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRange": "E7:E85",
+      "formulaPattern": "C{r}-D{r}",
+      "posture": "calculated variance; non-active support formula range"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRange": "J8:J85",
+      "formulaPattern": "B{r}",
+      "posture": "derived sub-name mirror; non-active support formula range"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "J86",
+      "formula": "=B86",
+      "posture": "summary support formula"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "C86",
+      "formula": "=SUM(C7:C85)",
+      "posture": "summary total; non-active"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "D86",
+      "formula": "=SUM(D8:D85)",
+      "posture": "summary total; non-active"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "E86",
+      "formula": "=SUM(E7:E85)",
+      "posture": "summary total; non-active"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "D87",
+      "formula": "=C87",
+      "posture": "summary support formula; non-active"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "C88",
+      "formula": "=C86/C87",
+      "posture": "percent complete summary formula; non-active"
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceCell": "E88",
+      "formula": "=E86-E87",
+      "posture": "summary variance formula; non-active"
+    }
+  ],
+  "excludedRows": [
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 1,
+      "reason": "Workbook title row (BUYOUT SCHEDULE); not a data record."
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 2,
+      "reason": "Merged spacer/title continuation row; not a data record."
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 6,
+      "reason": "Table header row; field-definition source only."
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRows": "86-88",
+      "reason": "Summary rows and formulas; non-active by rule."
+    }
+  ],
+  "ambiguousItems": [
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 22,
+      "reason": "Row in 8\u201385 has formula posture but missing scope label in column A; requires human mapping review before activation."
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 35,
+      "reason": "Row in 8\u201385 has formula posture but missing scope label in column A; requires human mapping review before activation."
+    },
+    {
+      "sourceSheet": "Sheet1",
+      "sourceRow": 69,
+      "reason": "Row in 8\u201385 has formula posture but missing scope label in column A; requires human mapping review before activation."
+    }
+  ]
+}
