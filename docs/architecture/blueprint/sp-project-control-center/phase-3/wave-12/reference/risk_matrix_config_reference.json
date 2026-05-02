@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "wave": 12,
+    "module": "constraints-log",
+    "title": "Wave 12 Risk Matrix Config Reference",
+    "posture": "documentation-reference-only",
+    "runtimeContract": false
+  },
+  "governingImpactRule": "max-impact-dimension",
+  "impactDimensions": [
+    "schedule",
+    "cost",
+    "safety",
+    "quality",
+    "contract-compliance",
+    "client-owner-impact",
+    "logistics-access",
+    "reputation-executive-visibility"
+  ],
+  "likelihoodScale": [
+    { "score": 1, "key": "rare", "label": "Rare" },
+    { "score": 2, "key": "unlikely", "label": "Unlikely" },
+    { "score": 3, "key": "possible", "label": "Possible" },
+    { "score": 4, "key": "likely", "label": "Likely" },
+    { "score": 5, "key": "almost-certain", "label": "Almost Certain" }
+  ],
+  "impactScale": [
+    { "score": 1, "key": "negligible", "label": "Negligible" },
+    { "score": 2, "key": "minor", "label": "Minor" },
+    { "score": 3, "key": "moderate", "label": "Moderate" },
+    { "score": 4, "key": "major", "label": "Major" },
+    { "score": 5, "key": "severe", "label": "Severe" }
+  ],
+  "bands": [
+    { "key": "low", "min": 1, "max": 4 },
+    { "key": "moderate", "min": 5, "max": 9 },
+    { "key": "high", "min": 10, "max": 14 },
+    { "key": "very-high", "min": 15, "max": 19 },
+    { "key": "critical", "min": 20, "max": 25 }
+  ],
+  "stateMachine": {
+    "states": [
+      "draft",
+      "identified",
+      "assessed",
+      "response-planned",
+      "monitoring",
+      "triggered",
+      "converted",
+      "closed",
+      "retired"
+    ],
+    "terminalStates": ["converted", "closed", "retired"]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "wave": 12,
+    "module": "constraints-log",
+    "title": "Wave 12 Constraint Exposure Scoring Reference",
+    "posture": "documentation-reference-only",
+    "runtimeContract": false
+  },
+  "formula": "urgency * governingImpactScore",
+  "urgencyScale": [
+    { "score": 1, "key": "watchlist", "label": "Watchlist" },
+    { "score": 2, "key": "near-term", "label": "Near-term" },
+    { "score": 3, "key": "active-planning-pressure", "label": "Active planning pressure" },
+    { "score": 4, "key": "imminent-blocker", "label": "Imminent blocker" },
+    { "score": 5, "key": "critical-blocker", "label": "Critical blocker" }
+  ],
+  "bands": [
+    {
+      "key": "low",
+      "min": 1,
+      "max": 4,
+      "requiredAction": "assign owner and monitor on cadence"
+    },
+    {
+      "key": "moderate",
+      "min": 5,
+      "max": 9,
+      "requiredAction": "assign owner and due date, review weekly"
+    },
+    {
+      "key": "high",
+      "min": 10,
+      "max": 14,
+      "requiredAction": "escalate to Priority Actions and review twice weekly"
+    },
+    {
+      "key": "very-high",
+      "min": 15,
+      "max": 19,
+      "requiredAction": "leadership review and daily tracking"
+    },
+    {
+      "key": "critical",
+      "min": 20,
+      "max": 25,
+      "requiredAction": "executive escalation and active blocker command review"
+    }
+  ],
+  "severityOverrideRules": [
+    {
+      "code": "REGULATORY_DEADLINE",
+      "minBand": "high",
+      "description": "Regulatory/permitting deadline jeopardy"
+    },
+    {
+      "code": "CONTRACT_MILESTONE",
+      "minBand": "high",
+      "description": "Contractual milestone exposure with immediate delivery risk"
+    },
+    {
+      "code": "MULTI_PATH_BLOCK",
+      "minBand": "very-high",
+      "description": "Dependency block affecting multiple crews/trades"
+    },
+    {
+      "code": "REPEATED_ESCALATION",
+      "minBand": "very-high",
+      "description": "Repeated unresolved escalation beyond SLA window"
+    },
+    {
+      "code": "SAFETY_EXPOSURE",
+      "minBand": "critical",
+      "description": "Explicit safety exposure requiring immediate command attention"
+    }
+  ],
+  "constraintStateMachine": {
+    "states": [
+      "draft",
+      "identified",
+      "accepted",
+      "action-planned",
+      "in-progress",
+      "awaiting-external-party",
+      "at-risk",
+      "overdue",
+      "resolved-pending-validation",
+      "resolved"
+    ],
+    "terminalStates": ["resolved"]
+  }
+}
