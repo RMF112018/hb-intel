@@ -78,7 +78,7 @@ describe('Project Readiness Center surface', () => {
     expect(sourceHealthEntries.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('downstream modules region marks Wave 9 and Wave 11 RACI as preview-deferred', () => {
+  it('downstream modules region marks Wave 9 as preview-deferred and Wave 11 RACI as implemented', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     const wave9 = container.querySelector(
@@ -91,7 +91,7 @@ describe('Project Readiness Center surface', () => {
     expect(wave11).not.toBeNull();
     expect(wave9!.getAttribute('data-pcc-readiness-downstream-status')).toBe('preview-deferred');
     expect(wave9!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 9');
-    expect(wave11!.getAttribute('data-pcc-readiness-downstream-status')).toBe('preview-deferred');
+    expect(wave11!.getAttribute('data-pcc-readiness-downstream-status')).toBe('implemented');
     expect(wave11!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 11');
     expect(wave11!.textContent).toContain('RACI');
   });

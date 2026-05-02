@@ -22,6 +22,7 @@ import { Fragment, type FC } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
+import { PccResponsibilityMatrixIntegrationCard } from './PccResponsibilityMatrixIntegrationCard';
 import type {
   IPccResponsibilityMatrixViewModel,
   IPccRmExceptionGroupViewModel,
@@ -82,6 +83,7 @@ export const PccResponsibilityMatrixRegions: FC<PccResponsibilityMatrixRegionsPr
       <GapsConflictsCard gaps={viewModel.gapsConflicts} />
       <HandoffsCard handoffs={viewModel.handoffs} />
       <TemplateAdminCard templateAdmin={viewModel.templateAdmin} />
+      <PccResponsibilityMatrixIntegrationCard integration={viewModel.integrationSignals} />
     </Fragment>
   );
 };

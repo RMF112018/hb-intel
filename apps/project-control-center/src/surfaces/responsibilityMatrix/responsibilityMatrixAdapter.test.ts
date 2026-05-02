@@ -73,6 +73,16 @@ describe('buildPccResponsibilityMatrixViewModel — happy path (available)', () 
     expect(vm.templateAdmin).toBeDefined();
   });
 
+  it('exposes the integration signals view-model on the ready variant', () => {
+    if (vm.status !== 'ready') return;
+    expect(vm.integrationSignals).toBeDefined();
+    expect(vm.integrationSignals.priorityActions).toBeDefined();
+    expect(vm.integrationSignals.readinessSignals).toBeDefined();
+    expect(vm.integrationSignals.approvalsReferences).toBeDefined();
+    expect(vm.integrationSignals.teamAccessReferences).toBeDefined();
+    expect(vm.integrationSignals.documentControlReferences).toBeDefined();
+  });
+
   it('overview count posture surfaces 109 / 98 / 0 numerics from workbookSourceSummary', () => {
     if (vm.status !== 'ready') return;
     const cp = vm.overview.countPosture;

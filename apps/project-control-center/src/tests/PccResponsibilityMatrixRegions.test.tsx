@@ -348,25 +348,43 @@ describe('Wave 11 Responsibility Matrix — narrow client wired through hook', (
 });
 
 // ---------------------------------------------------------------------------
-// No-runtime import-specifier scan (stripped comments + string literals so
-// the scan reads only code, per memory feedback_source_scan_guards_strip_comments).
+// No-runtime import-specifier scan (Phase 3 / Wave 11 / Prompt 06).
+//
+// Hardened against the Prompt 05 implementation, which stripped string
+// literals before the substring check and so silently neutralized the
+// scan: by the time a `from '@microsoft/sp-core-library'` literal reached
+// `.includes(...)`, the literal had been removed.
+//
+// Correct approach:
+//   1. Strip line/block comments only — preserve string literals intact.
+//   2. Extract actual import specifiers via regex matching the static and
+//      dynamic import grammar.
+//   3. Assert no extracted specifier starts with a forbidden prefix.
 // ---------------------------------------------------------------------------
 
 const RM_SOURCE_FILES = [
   '../surfaces/responsibilityMatrix/PccResponsibilityMatrixRegions.tsx',
+  '../surfaces/responsibilityMatrix/PccResponsibilityMatrixIntegrationCard.tsx',
   '../surfaces/responsibilityMatrix/responsibilityMatrixAdapter.ts',
   '../surfaces/responsibilityMatrix/responsibilityMatrixViewModel.ts',
   '../surfaces/responsibilityMatrix/useResponsibilityMatrixReadModel.ts',
+  '../surfaces/responsibilityMatrix/integrationSignals.ts',
 ];
 
-const FORBIDDEN_IMPORTS: readonly string[] = [
+const FORBIDDEN_IMPORT_PREFIXES: readonly string[] = [
   '@microsoft/sp-',
   '@pnp/',
   '@microsoft/microsoft-graph',
   'axios',
+  'fetch-',
+  'node-fetch',
 ];
 
-function stripCommentsAndStrings(src: string): string {
+function stripCommentsOnly(src: string): string {
+  // Remove `// ...` line comments and `/* ... */` block comments WITHOUT
+  // touching string literals. Walks the source, switching to a string
+  // mode on quote characters so comment markers inside strings are
+  // ignored.
   let out = '';
   let i = 0;
   while (i < src.length) {
@@ -386,12 +404,21 @@ function stripCommentsAndStrings(src: string): string {
       const quote = ch;
       out += ch;
       i += 1;
+      // Preserve the entire string literal (including its content).
       while (i < src.length && src[i] !== quote) {
-        if (src[i] === '\\') i += 2;
-        else i += 1;
+        if (src[i] === '\\') {
+          out += src[i];
+          out += src[i + 1] ?? '';
+          i += 2;
+          continue;
+        }
+        out += src[i];
+        i += 1;
       }
-      out += quote;
-      i += 1;
+      if (i < src.length) {
+        out += src[i];
+        i += 1;
+      }
       continue;
     }
     out += ch;
@@ -400,26 +427,58 @@ function stripCommentsAndStrings(src: string): string {
   return out;
 }
 
+const STATIC_FROM_RE = /\bfrom\s*['"]([^'"]+)['"]/g;
+const SIDE_EFFECT_IMPORT_RE = /(^|[\n;])\s*import\s*['"]([^'"]+)['"]\s*;?/g;
+const DYNAMIC_IMPORT_RE = /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+
+function extractImportSpecifiers(src: string): readonly string[] {
+  const text = stripCommentsOnly(src);
+  const out = new Set<string>();
+  let m: RegExpExecArray | null;
+  STATIC_FROM_RE.lastIndex = 0;
+  while ((m = STATIC_FROM_RE.exec(text))) out.add(m[1]);
+  SIDE_EFFECT_IMPORT_RE.lastIndex = 0;
+  while ((m = SIDE_EFFECT_IMPORT_RE.exec(text))) out.add(m[2]);
+  DYNAMIC_IMPORT_RE.lastIndex = 0;
+  while ((m = DYNAMIC_IMPORT_RE.exec(text))) out.add(m[1]);
+  return Array.from(out);
+}
+
+function findForbiddenSpecifier(specifiers: readonly string[]): string | undefined {
+  for (const spec of specifiers) {
+    for (const prefix of FORBIDDEN_IMPORT_PREFIXES) {
+      if (spec.startsWith(prefix)) return spec;
+    }
+  }
+  return undefined;
+}
+
 describe('Wave 11 Responsibility Matrix — no forbidden runtime imports', () => {
   for (const file of RM_SOURCE_FILES) {
     it(`source ${file} contains no forbidden import specifiers`, () => {
       const path = fileURLToPath(new URL(file, import.meta.url));
       const raw = readFileSync(path, 'utf-8');
-      const stripped = stripCommentsAndStrings(raw);
-      // Only inspect import-spec lines — strings have been stripped, so
-      // remaining occurrences in code would be in identifiers, which is
-      // not how these libs are referenced.
-      const importLines = stripped
-        .split('\n')
-        .filter((line) => /^\s*import\b/.test(line) || /^\s*import\(/.test(line))
-        .join('\n');
-      // The scan looks at all identifiers in import positions. Since strings
-      // were removed, forbidden specifiers can no longer appear — assert.
-      for (const forbidden of FORBIDDEN_IMPORTS) {
-        expect(importLines.includes(forbidden), `${file} should not import ${forbidden}`).toBe(
-          false,
-        );
-      }
+      const specs = extractImportSpecifiers(raw);
+      const offender = findForbiddenSpecifier(specs);
+      expect(offender, `${file} should not import ${offender ?? '<none>'}`).toBeUndefined();
     });
   }
+
+  it('self-meta sanity: extractor detects @microsoft/sp-core-library as forbidden when present', () => {
+    // Synthetic source with a forbidden import — proves the extractor +
+    // forbidden-prefix check actually trigger, so the scan is no longer
+    // neutralized by string stripping.
+    const synthetic = [
+      "import { foo } from './bar';",
+      "import { SPHttpClient } from '@microsoft/sp-core-library';",
+      "import * as graph from '@microsoft/microsoft-graph-client';",
+      "const lib = await import('axios');",
+    ].join('\n');
+    const specs = extractImportSpecifiers(synthetic);
+    expect(specs).toContain('@microsoft/sp-core-library');
+    expect(specs).toContain('@microsoft/microsoft-graph-client');
+    expect(specs).toContain('axios');
+    const offender = findForbiddenSpecifier(specs);
+    expect(offender).toBeDefined();
+  });
 });

@@ -139,8 +139,9 @@ const DOWNSTREAM_MODULE_REGISTRY: Readonly<
   'responsibility-matrix': {
     label: 'Responsibility Matrix / RACI',
     waveLabel: 'Wave 11',
-    waveStatus: 'preview-deferred',
-    statusCaption: 'Wave 11 — RACI remains Wave 11. Not implemented in Wave 8.',
+    waveStatus: 'implemented',
+    statusCaption:
+      'Wave 11 — Responsibility Matrix is live as the embedded module under Project Readiness.',
   },
   'constraints-log': {
     label: 'Constraints Log',

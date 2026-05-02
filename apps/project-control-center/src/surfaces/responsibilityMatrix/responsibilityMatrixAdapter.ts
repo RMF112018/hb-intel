@@ -40,6 +40,7 @@ import {
 import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMapping.js';
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState.js';
 import type { PccCardState } from '../projectHome/shared.js';
+import { buildPccRmIntegrationSignalsViewModel } from './integrationSignals.js';
 import type {
   IPccResponsibilityMatrixViewModel,
   IPccRmAuditEventRowViewModel,
@@ -679,6 +680,7 @@ export function buildPccResponsibilityMatrixViewModel(
     gapsConflicts: buildGapsConflicts(data),
     handoffs: buildHandoffs(data.projectInstances),
     templateAdmin: buildTemplateAdmin(data),
+    integrationSignals: buildPccRmIntegrationSignalsViewModel(data, viewerPersona),
   };
 }
 

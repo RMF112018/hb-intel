@@ -34,6 +34,7 @@ import type {
   ResponsibilityMatrixHealthScore,
 } from '@hbc/models/pcc';
 import type { PccCardState } from '../projectHome/shared.js';
+import type { IPccRmIntegrationSignalsViewModel } from './integrationSignals.js';
 
 export interface IPccResponsibilityMatrixReadModelClient {
   getResponsibilityMatrix(
@@ -324,6 +325,7 @@ export type IPccResponsibilityMatrixViewModel =
       readonly gapsConflicts: IPccRmGapsConflictsViewModel;
       readonly handoffs: IPccRmHandoffsViewModel;
       readonly templateAdmin: IPccRmTemplateAdminViewModel;
+      readonly integrationSignals: IPccRmIntegrationSignalsViewModel;
     };
 
 // ---------------------------------------------------------------------------

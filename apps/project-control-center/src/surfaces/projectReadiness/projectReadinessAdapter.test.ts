@@ -79,11 +79,11 @@ describe('buildPccProjectReadinessViewModel — available envelope', () => {
     expect(wave9!.waveLabel).toBe('Wave 9');
   });
 
-  it('marks Wave 11 RACI (responsibility-matrix) as preview-deferred', () => {
+  it('marks Wave 11 RACI (responsibility-matrix) as implemented', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
     const wave11 = vm.downstreamModules.find((m) => m.sourceModuleId === 'responsibility-matrix');
     expect(wave11).toBeDefined();
-    expect(wave11!.waveStatus).toBe('preview-deferred');
+    expect(wave11!.waveStatus).toBe('implemented');
     expect(wave11!.waveLabel).toBe('Wave 11');
     expect(wave11!.sourceModuleLabel).toContain('RACI');
   });
@@ -142,7 +142,7 @@ describe('buildPccProjectReadinessViewModel — degraded envelopes', () => {
     expect(vm.cardState).toBe('error');
   });
 
-  it('still preserves downstream module Wave 9 and Wave 11 RACI as preview-deferred under degraded sources', () => {
+  it('preserves Wave 9 as preview-deferred and Wave 11 RACI as implemented under degraded sources', () => {
     const vm = buildPccProjectReadinessViewModel(envelope('source-unavailable'));
     if (vm.status !== 'preview') throw new Error('expected preview');
     const wave9 = vm.downstreamModules.find(
@@ -150,7 +150,7 @@ describe('buildPccProjectReadinessViewModel — degraded envelopes', () => {
     );
     const wave11 = vm.downstreamModules.find((m) => m.sourceModuleId === 'responsibility-matrix');
     expect(wave9?.waveStatus).toBe('preview-deferred');
-    expect(wave11?.waveStatus).toBe('preview-deferred');
+    expect(wave11?.waveStatus).toBe('implemented');
   });
 
   it('returns safe-empty ownership and priority-actions-preview slots under degraded source', () => {
