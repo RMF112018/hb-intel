@@ -66,7 +66,7 @@ Required order:
 |    9 | Project Lifecycle Readiness Center                                  | Lifecycle readiness module seeded by startup, safety, and closeout checklist definition files                      | Module wave                         |
 |   10 | Permit & Inspection Control Center                                  | Unified permit/inspection command-center architecture using internal `permits` and `required-inspections` families | Module wave                         |
 |   11 | Responsibility Matrix                                               | Item-level responsibility workflow with owner-contract mapping                                                     | Module wave                         |
-|   12 | Constraints Log                                                     | Item-level constraints workflow                                                                                    | Module wave                         |
+|   12 | Constraints Log                                                     | Make-Ready Constraint & Risk Exposure Center (Project Readiness governance module)                                 | Module wave                         |
 |   13 | Buyout Log                                                          | Item-level buyout/project-controls workflow                                                                        | Module wave                         |
 |   14 | Approvals / Checkpoints                                             | Approval queue and authority logic                                                                                 | Module wave                         |
 |   15 | External Systems                                                    | Launch hub for approved systems                                                                                    | Module wave                         |
@@ -130,6 +130,14 @@ Wave 11 clarification lock:
 - Wave 14 remains approval/checkpoint execution owner; Wave 11 does not claim approval runtime execution.
 - HB Document Control Center remains evidence-binary owner; Team & Access remains roster/access owner.
 - Documentation posture only: no legal advice, no automatic creation of legal obligations, and no external-system writeback/runtime mutation claim.
+
+Wave 12 clarification lock:
+
+- Official module name remains `Constraints Log` (subtitle: `Make-Ready Constraint & Risk Exposure Center`).
+- Governing docs place Wave 12 under Project Readiness; current source-model mapping (`constraints-log`) to `risk-issues-decision` is an alignment item and is not changed in this prompt.
+- Wave 12 governance posture distinguishes risk (uncertain future), constraint (known blocker), issue (active problem), delay exposure (schedule-impact condition for review), and change exposure (scope/cost/contract impact condition for review).
+- Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
+- External-system posture remains launcher/reference-only; no writeback or runtime mutation is introduced.
 
 Wave 8 framework planning posture:
 

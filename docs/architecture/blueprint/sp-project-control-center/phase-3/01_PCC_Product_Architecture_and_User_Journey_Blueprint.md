@@ -143,7 +143,7 @@ The MVP keeps eight primary work centers.
 | Project Lifecycle Readiness Center | Lifecycle-readiness workflow seeded by startup, safety, and closeout checklist-definition files (`docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-09/checklist-definition-files/`), including owners, due dates, status, comments, history, review state, blockers, and evidence-link requirements. |
 | Permit & Inspection Control Center | Unified permit/inspection command-center target posture with internal `permits` and `required-inspections` source families.                                                                                                                                                                               |
 | Responsibility Matrix              | Item-level responsibility workflow including owner-contract responsibility mapping.                                                                                                                                                                                                                       |
-| Constraints Log                    | Item-level constraints workflow.                                                                                                                                                                                                                                                                          |
+| Constraints Log                    | Make-Ready Constraint & Risk Exposure Center (`Constraints Log` official name) with Project Readiness governance boundaries.                                                                                                                                                                              |
 | Buyout Log                         | Item-level procurement/project-control workflow.                                                                                                                                                                                                                                                          |
 
 Wave 11 Responsibility Matrix posture lock:
@@ -155,6 +155,14 @@ Wave 11 Responsibility Matrix posture lock:
 - Wave 8 framework ownership and Wave 14 approval execution ownership remain unchanged.
 - Evidence binary ownership remains HB Document Control Center / SharePoint project record; Team & Access remains roster/access owner.
 - Planning posture only: no runtime execution claim, no legal advice, no automatic legal-obligation creation, and no external-system writeback claim.
+
+Wave 12 Constraints Log posture lock:
+
+- Official module name remains `Constraints Log` (subtitle: `Make-Ready Constraint & Risk Exposure Center`).
+- Governing docs place Wave 12 under Project Readiness; current source-model mapping (`constraints-log`) to `risk-issues-decision` remains a tracked alignment item and is not changed in this prompt.
+- Boundary terms: risk (uncertain future), constraint (known blocker), issue (active problem), delay exposure (schedule-impact condition for review), and change exposure (scope/cost/contract impact condition for review).
+- Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
+- External-system posture remains launcher/reference-only with no writeback/runtime mutation.
 
 ## Later-Phase Workflow Modules
 

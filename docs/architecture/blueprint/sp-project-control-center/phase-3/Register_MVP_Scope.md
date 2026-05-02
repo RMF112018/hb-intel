@@ -41,6 +41,14 @@ Wave 11 Responsibility Matrix MVP planning posture:
 - HB Document Control Center remains evidence-binary owner; Team & Access remains project roster/access-state owner.
 - Documentation posture only: no legal advice, no automatic creation of legal obligations, and no external-system writeback/runtime mutation claim.
 
+Wave 12 Constraints Log MVP planning posture:
+
+- Official module name remains `Constraints Log` (subtitle: `Make-Ready Constraint & Risk Exposure Center`).
+- Wave 12 remains a Project Readiness governance module and aligns with Priority Actions escalation, Document Control evidence-reference posture, Scheduler/Look Ahead coordination posture, and External Systems launcher/reference-only posture.
+- Governing docs place Wave 12 under Project Readiness; current source-model mapping (`constraints-log`) to `risk-issues-decision` remains a documentation alignment item only in this prompt.
+- Boundary terms: risk (uncertain future), constraint (known blocker), issue (active problem), delay exposure (schedule-impact condition for review), and change exposure (scope/cost/contract impact condition for review).
+- Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
+
 ## Later-Phase Scope
 
 | Area                                   | Later-Phase Scope                                                                                                                                                                                                                                                            |

@@ -65,7 +65,7 @@ Then implement each module as its own wave. This prevents every module from inve
 |    9 | Project Lifecycle Readiness Center                                  | Build lifecycle readiness module seeded by startup, safety, and closeout checklist definition files.                                                           | Wave 8                      |
 |   10 | Permit & Inspection Control Center                                  | Define unified permit/inspection command-center architecture with internal `permits` and `required-inspections` model families.                                | Wave 8                      |
 |   11 | Responsibility Matrix                                               | Build item-level responsibility workflow, including owner-contract mapping.                                                                                    | Prior readiness waves       |
-|   12 | Constraints Log                                                     | Build item-level constraints workflow module.                                                                                                                  | Wave 8                      |
+|   12 | Constraints Log                                                     | Build Make-Ready Constraint & Risk Exposure Center as a Project Readiness governance module.                                                                   | Wave 8                      |
 |   13 | Buyout Log                                                          | Build item-level buyout/project-controls workflow module.                                                                                                      | Wave 8                      |
 |   14 | Approvals / Checkpoints                                             | Build approval/checkpoint queue and authority logic.                                                                                                           | Waves 3, 5, 6, 8–13         |
 |   15 | External Systems                                                    | Build launch hub for SharePoint, OneDrive, Procore, Sage, Teams, Compass, Document Crunch, Cupix.                                                              | Waves 2–3                   |
@@ -598,7 +598,7 @@ Wave 11 scope lock:
 
 ## Objective
 
-Build the Constraints Log as an item-level workflow module.
+Build the Constraints Log as a Project Readiness make-ready constraint and exposure-governance module.
 
 ## Code Work
 
@@ -611,6 +611,11 @@ Build the Constraints Log as an item-level workflow module.
 - Comments/history.
 - Escalation flag.
 - Priority Actions integration for blockers.
+- User-facing subtitle: `Make-Ready Constraint & Risk Exposure Center` (official module name remains `Constraints Log`).
+- Governance boundaries: risk (uncertain future), constraint (known blocker), issue (active problem), delay exposure (schedule-impact condition for review), and change exposure (scope/cost/contract impact condition for review).
+- Alignment note: governing docs place Wave 12 under Project Readiness; current source-model mapping (`constraints-log`) to `risk-issues-decision` remains unchanged in this prompt.
+- Dependency/seam alignment: Wave 8 framework, Waves 9/10/11 readiness context, Wave 14 approvals/checkpoints, Priority Actions escalation, HB Document Control Center evidence-reference posture, Scheduler/Look Ahead coordination posture, and External Systems launcher/reference-only posture.
+- Guardrails: embedded risk/exposure views do not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems; no external-system writeback/runtime mutation.
 
 ## Exit Criteria
 

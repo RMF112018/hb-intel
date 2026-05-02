@@ -948,6 +948,10 @@ The field responsibility matrix includes responsibilities across:
 - This architecture is project-controls metadata posture only and is not legal advice.
 - This architecture does not automatically create legal obligations and does not replace executed contracts.
 - External-system writeback/mutation runtime is out of scope in this Wave 11 architecture definition.
+- Wave 12 `Constraints Log` remains under Project Readiness with subtitle `Make-Ready Constraint & Risk Exposure Center`; governing posture distinguishes risk, constraint, issue, delay exposure, and change exposure for project-controls review only.
+- Governing docs place Wave 12 in Project Readiness while current source-model mapping (`constraints-log`) to `risk-issues-decision` remains a tracked alignment item and is not changed in this prompt.
+- Wave 12 embedded risk/exposure views do not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
+- External-system posture for Wave 12 remains launcher/reference-only with no writeback/runtime mutation.
 
 ---
 

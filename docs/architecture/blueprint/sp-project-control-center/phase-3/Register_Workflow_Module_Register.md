@@ -13,7 +13,7 @@ Define the structured workflow modules that PCC planning must account for, inclu
 | Project Lifecycle Readiness Center |          Yes | Project Readiness                                         | Structured lifecycle-readiness in-app workflow seeded by startup, safety, and closeout checklist definition files   | Template/reference launch if implementation not ready |
 | Permit & Inspection Control Center |          Yes | Project Readiness                                         | Unified permit/inspection command-center target posture with internal `permits` and `required-inspections` families | Template/reference launch if implementation not ready |
 | Responsibility Matrix              |          Yes | Project Readiness                                         | Structured item-level in-app workflow including owner-contract responsibility mapping                               | Template/reference launch if implementation not ready |
-| Constraints Log                    |          Yes | Project Readiness                                         | Structured item-level in-app workflow                                                                               | Template/reference launch if implementation not ready |
+| Constraints Log                    |          Yes | Project Readiness                                         | Make-Ready Constraint & Risk Exposure Center (`Constraints Log` official name)                                      | Template/reference launch if implementation not ready |
 | Buyout Log                         |          Yes | Project Readiness, with checkpoint ties where appropriate | Structured item-level in-app workflow                                                                               | Template/reference launch if implementation not ready |
 | Estimating Kickoff                 |        Later | Project Readiness / Preconstruction classification        | Structured workflow later                                                                                           | Turnover visibility/access in MVP                     |
 | Post-Bid Autopsy                   |        Later | Project Readiness / Preconstruction classification        | Structured workflow later                                                                                           | Turnover visibility/access in MVP                     |
@@ -34,6 +34,14 @@ Responsibility Matrix governance notes:
   - HB Document Control Center retains evidence-binary ownership;
   - Team & Access retains project roster/access-state ownership.
 - Documentation posture only: no legal advice, no automatic creation of legal obligations, and no external-system writeback/runtime mutation claim.
+
+Constraints Log governance notes:
+
+- Official module name remains `Constraints Log` (subtitle: `Make-Ready Constraint & Risk Exposure Center`).
+- Governing docs place Wave 12 under Project Readiness; current source-model mapping (`constraints-log`) to `risk-issues-decision` is a tracked alignment item and is not changed here.
+- Governance boundary terms: risk (uncertain future), constraint (known blocker), issue (active problem), delay exposure (schedule-impact condition for review), and change exposure (scope/cost/contract impact condition for review).
+- Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
+- External-system posture remains launcher/reference-only; no writeback/runtime mutation.
 
 ## Item-Level Workflow Model
 
