@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "generatedAt": "2026-05-02",
+    "purpose": "Current research source index for Wave 13 architecture patterns."
+  },
+  "sources": [
+    {
+      "title": "Procore Commitments User Guide",
+      "url": "https://support.procore.com/products/online/user-guide/project-level/commitments",
+      "useInArchitecture": "Commitments, purchase orders, subcontracts, SOV, commitment status and current value."
+    },
+    {
+      "title": "Procore Create a Commitment Change Order",
+      "url": "https://support.procore.com/products/online/user-guide/project-level/commitments/tutorials/create-a-commitment-change-order-cco",
+      "useInArchitecture": "Commitment change orders, SOV lines, budget codes, and ERP/accounting acceptance boundary."
+    },
+    {
+      "title": "BuildingConnected Bid Leveling Overview",
+      "url": "https://support.buildingconnected.com/hc/en-us/articles/47949854611219-Bid-Leveling-Overview",
+      "useInArchitecture": "Bid leveling, proposals, apparent low, bid adjustments, notes, and award context."
+    },
+    {
+      "title": "BuildingConnected Inclusions in Bid Leveling",
+      "url": "https://support.buildingconnected.com/hc/en-us/articles/360010954473-How-to-manage-Inclusions-in-Bid-Leveling",
+      "useInArchitecture": "Inclusion adjustments and leveling notes."
+    },
+    {
+      "title": "Procore Construction Procurement Log Template",
+      "url": "https://www.procore.com/library/construction-procurement-log-template",
+      "useInArchitecture": "Lead time, order date, expected delivery, actual delivery, required-on-site date, and procurement/submittal linkage."
+    },
+    {
+      "title": "CMiC Subcontract Management",
+      "url": "https://docs.cmicglobal.com/portal/Content/F_Onboarding/Docs/Project_Controls/Subcontract_Management/SubcontractManagement.htm",
+      "useInArchitecture": "Subcontract SOV, bonding, insurance, lien waivers, and compliance requirements."
+    },
+    {
+      "title": "CMiC Subcontract Schedule of Values",
+      "url": "https://docs.cmicglobal.com/portal/Content/E_Reference_Material/CMiC_Field/Reference/Budget___Cost_Management/Subcontract_Schedule_of_Values.htm",
+      "useInArchitecture": "SOV line cost-code/category associations and post/lock behavior."
+    },
+    {
+      "title": "Kahua Construction Cost Management Software",
+      "url": "https://www.kahua.com/product/cost-management-for-owners/",
+      "useInArchitecture": "Budget-centric cost, commitments, change-order lifecycle visibility."
+    },
+    {
+      "title": "Sage Intacct Construction",
+      "url": "https://www.sage.com/en-us/products/sage-intacct-construction/",
+      "useInArchitecture": "Accounting/job-costing truth and committed/actual cost references."
+    }
+  ]
+}

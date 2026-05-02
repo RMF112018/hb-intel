@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "stateMachine": "BuyoutPackage lifecycle",
+    "generatedAt": "2026-05-02"
+  },
+  "statuses": [
+    "not-started",
+    "scope-defined",
+    "bid-coverage-needed",
+    "bids-received",
+    "leveling",
+    "award-recommended",
+    "award-approved",
+    "loi-pending",
+    "loi-executed",
+    "contract-drafting",
+    "contract-executed",
+    "procore-commitment-pending",
+    "procore-commitment-created",
+    "compliance-pending",
+    "procurement-tracking",
+    "complete",
+    "blocked",
+    "deferred",
+    "not-applicable"
+  ],
+  "primaryPath": [
+    ["not-started", "scope-defined"],
+    ["scope-defined", "bid-coverage-needed"],
+    ["bid-coverage-needed", "bids-received"],
+    ["bids-received", "leveling"],
+    ["leveling", "award-recommended"],
+    ["award-recommended", "award-approved"],
+    ["award-approved", "loi-pending"],
+    ["loi-pending", "loi-executed"],
+    ["loi-executed", "contract-drafting"],
+    ["contract-drafting", "contract-executed"],
+    ["contract-executed", "procore-commitment-pending"],
+    ["procore-commitment-pending", "procore-commitment-created"],
+    ["procore-commitment-created", "compliance-pending"],
+    ["compliance-pending", "procurement-tracking"],
+    ["procurement-tracking", "complete"]
+  ],
+  "exceptionTransitions": {
+    "anyActiveStateMayMoveTo": ["blocked", "deferred", "not-applicable"],
+    "blockedReturnRule": "blocked must return to prior active state or later active state after blocker resolution",
+    "deferredRule": "deferred requires deferredUntil date and reason",
+    "terminalStates": ["complete", "not-applicable"]
+  },
+  "completionGate": [
+    "selected vendor exists",
+    "final award / contract amount exists",
+    "LOI is executed or explicitly not required",
+    "subcontract or PO is executed or explicitly not required",
+    "Procore commitment is linked or explicitly not required",
+    "required SDI is enrolled or waived with reason",
+    "required bond is received or waived with reason",
+    "required insurance/compliance is satisfied or waived with reason",
+    "required submittals are linked or transferred to procurement tracking",
+    "required lead-time / ROJ risk is resolved or transferred",
+    "no unresolved amount mismatch exists",
+    "no unresolved vendor mismatch exists",
+    "no unresolved budget-code mismatch exists",
+    "source lineage exists for budget and commitment values"
+  ]
+}

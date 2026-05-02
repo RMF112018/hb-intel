@@ -1,0 +1,297 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "subtitle": "Buyout Control Center",
+    "phase": "Phase 3",
+    "wave": "Wave 13",
+    "purpose": "Closed-decision developer contract for Buyout Log target implementation.",
+    "generatedAt": "2026-05-02",
+    "posture": "documentation-update package; no runtime implementation"
+  },
+  "decisions": {
+    "primaryRecord": "BuyoutPackage",
+    "mvpHost": "Project Readiness framework",
+    "functionalClassification": "Procurement / Project Controls",
+    "futureAffinityWorkCenter": "Procurement & Buyout Center",
+    "workbookRole": "source field inventory and seed taxonomy, not UX contract",
+    "procoreRole": "read-only operational financial source",
+    "sageRole": "read-only accounting truth source",
+    "pccRole": "workflow/status/BIC/exceptions/reconciliation/source-lineage owner",
+    "sharePointRole": "evidence/document storage and source-link target",
+    "externalWriteback": "prohibited"
+  },
+  "recordCreationSources": [
+    "workbook-seed",
+    "manual-pcc",
+    "procore-budget-line",
+    "procore-commitment-gap",
+    "estimate-handoff",
+    "bid-leveling-import-future"
+  ],
+  "entities": {
+    "BuyoutPackage": {
+      "description": "Primary PCC-managed buyout scope unit.",
+      "requiredFields": [
+        "projectId",
+        "buyoutPackageId",
+        "packageTitle",
+        "scopeDescription",
+        "status",
+        "ballInCourtPersonOrRole",
+        "sourceLineage"
+      ],
+      "childCollections": [
+        "BuyoutScopeLine",
+        "BudgetAllocation",
+        "CommitmentLink",
+        "ComplianceRequirement",
+        "ProcurementMilestone",
+        "EvidenceLink",
+        "ReconciliationIssue",
+        "AuditEvent",
+        "PriorityActionCandidate"
+      ]
+    },
+    "BudgetAllocation": {
+      "description": "Many-to-many allocation between buyout package and budget/cost-code/SOV lines.",
+      "fields": [
+        "budgetAllocationId",
+        "buyoutPackageId",
+        "sourceSystem",
+        "sourceObjectId",
+        "costCode",
+        "costType",
+        "budgetCode",
+        "allocationAmount",
+        "allocationPercent",
+        "allocationBasis",
+        "mappingConfidence",
+        "mappingStatus"
+      ]
+    },
+    "CommitmentLink": {
+      "description": "Read-only source link to Procore commitment/subcontract/PO/SOV or future source.",
+      "fields": [
+        "commitmentLinkId",
+        "buyoutPackageId",
+        "sourceSystem",
+        "procoreCommitmentId",
+        "procoreCommitmentNumber",
+        "procoreCommitmentSovLineId",
+        "procoreCompanyId",
+        "procoreCurrentCommitmentAmount",
+        "procoreOriginalCommitmentAmount",
+        "sourceLineageId",
+        "reconciliationStatus"
+      ]
+    },
+    "ComplianceRequirement": {
+      "description": "SDI, bond, insurance, lien waiver, prequalification, license, W-9, and related compliance gates.",
+      "fields": [
+        "complianceRequirementId",
+        "buyoutPackageId",
+        "requirementType",
+        "required",
+        "status",
+        "dueDate",
+        "receivedDate",
+        "expirationDate",
+        "waiverRequired",
+        "waiverReason",
+        "waiverApprovedBy",
+        "waiverApprovedAt",
+        "evidenceLinkIds",
+        "sourceSystem",
+        "sourceLineageId"
+      ]
+    },
+    "ProcurementMilestone": {
+      "description": "Procurement, submittal, lead-time, ROJ, and delivery milestone tracking.",
+      "fields": [
+        "procurementMilestoneId",
+        "buyoutPackageId",
+        "milestoneType",
+        "requiredDate",
+        "forecastDate",
+        "actualDate",
+        "status",
+        "sourceSystem",
+        "sourceLineageId",
+        "scheduleActivityId",
+        "procoreSubmittalId",
+        "riskLevel",
+        "notes"
+      ]
+    }
+  },
+  "fieldSurvival": [
+    {
+      "id": "BL-FIELD-0001",
+      "sourceColumn": "DIVISION # / DESCRIPTION",
+      "normalizedField": "scopeDescription",
+      "displayLabel": "Scope / Division Description",
+      "fieldPurpose": "Identifies the buyout scope, CSI division, cost-code description, or template taxonomy row.",
+      "targetFieldType": "text",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-after-activation",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "May be split into csiDivision, costCode, and costCodeDescription during import. Division header rows remain taxonomy only."
+    },
+    {
+      "id": "BL-FIELD-0002",
+      "sourceColumn": "SUBCONTRACTOR / VENDOR",
+      "normalizedField": "selectedVendorName",
+      "displayLabel": "Selected Subcontractor / Vendor",
+      "fieldPurpose": "Stores the selected vendor/subcontractor name before or alongside Procore/Sage vendor linkage.",
+      "targetFieldType": "company",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-until-source-linked",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "If linked to Procore, store procoreCompanyId. If linked to Sage, store sageVendorId. Conflicts create PROCORE_VENDOR_MISMATCH or SAGE_ACCOUNTING_MISMATCH."
+    },
+    {
+      "id": "BL-FIELD-0003",
+      "sourceColumn": "CONTRACT AMOUNT",
+      "normalizedField": "pccAwardAmount",
+      "displayLabel": "PCC Award / Contract Amount",
+      "fieldPurpose": "PCC buyout amount used for buyout workflow until replaced or reconciled against Procore commitment amount.",
+      "targetFieldType": "currency",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Once linked to Procore commitment, Procore amount is read-only source value; PCC amount remains workflow/planning value unless closed by reconciliation."
+    },
+    {
+      "id": "BL-FIELD-0004",
+      "sourceColumn": "ORIGINAL BUDGET",
+      "normalizedField": "originalBudgetAmount",
+      "displayLabel": "Original Budget",
+      "fieldPurpose": "Original budget value used to compare award/contract amount to starting budget baseline.",
+      "targetFieldType": "currency",
+      "systemOfRecord": "Procore | Sage | workbook-template | PCC",
+      "mutability": "source-readonly-except-admin-seed-correction",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Source must be labeled. If Sage is integrated, Sage is accounting truth. If Procore is the source, label as operational budget context."
+    },
+    {
+      "id": "BL-FIELD-0005",
+      "sourceColumn": "OVER/UNDER",
+      "normalizedField": "overUnderOriginalBudget",
+      "displayLabel": "Over / Under",
+      "fieldPurpose": "Calculated variance between PCC award/contract amount and original budget.",
+      "targetFieldType": "calculated",
+      "systemOfRecord": "derived",
+      "mutability": "calculated-readonly",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Formula: pccAwardAmount - originalBudgetAmount. Dashboard default should also include buyoutVsCurrentBudget."
+    },
+    {
+      "id": "BL-FIELD-0006",
+      "sourceColumn": "LOI DATE TO BE SENT",
+      "normalizedField": "loiSendTargetDate",
+      "displayLabel": "LOI Target Send Date",
+      "fieldPurpose": "Target date for sending letter of intent / notice to proceed.",
+      "targetFieldType": "date",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Used for stale/late LOI Priority Action generation."
+    },
+    {
+      "id": "BL-FIELD-0007",
+      "sourceColumn": "LOI Returned Executed",
+      "normalizedField": "loiExecutedDate",
+      "displayLabel": "LOI Executed Date",
+      "fieldPurpose": "Date the LOI is returned executed.",
+      "targetFieldType": "date",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "May be paired with loiExecutionStatus."
+    },
+    {
+      "id": "BL-FIELD-0008",
+      "sourceColumn": "Submittal Dates",
+      "normalizedField": "submittalDateSummary",
+      "displayLabel": "Submittal Dates",
+      "fieldPurpose": "Summary of submittal dates supporting procurement readiness.",
+      "targetFieldType": "text",
+      "systemOfRecord": "PCC | Procore | derived",
+      "mutability": "source-labeled",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Detailed implementation should normalize into ProcurementMilestone records and Procore submittal links where available."
+    },
+    {
+      "id": "BL-FIELD-0009",
+      "sourceColumn": "Lead Times",
+      "normalizedField": "leadTimeDays",
+      "displayLabel": "Lead Time",
+      "fieldPurpose": "Captures procurement or fabrication lead time used to determine order-by and ROJ risk.",
+      "targetFieldType": "number",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "May be represented as leadTimeDays plus leadTimeNotes."
+    },
+    {
+      "id": "BL-FIELD-0010",
+      "sourceColumn": "Sub Name",
+      "normalizedField": "derivedSubName",
+      "displayLabel": "Sub Name",
+      "fieldPurpose": "Workbook convenience/duplicate subcontractor field.",
+      "targetFieldType": "company",
+      "systemOfRecord": "derived",
+      "mutability": "derived-readonly-unless-workbook-verification-proves-separate",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Default to derived from selectedVendorName; local extraction must verify if this column has distinct workbook usage."
+    },
+    {
+      "id": "BL-FIELD-0011",
+      "sourceColumn": "BALL IN COURT",
+      "normalizedField": "ballInCourtPersonOrRole",
+      "displayLabel": "Ball in Court",
+      "fieldPurpose": "Current person or role responsible for next action.",
+      "targetFieldType": "person",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Primary source for Priority Action ownership and stale BIC signal."
+    },
+    {
+      "id": "BL-FIELD-0012",
+      "sourceColumn": "Enrolled in SDI [Yes/No]",
+      "normalizedField": "sdiEnrollmentStatus",
+      "displayLabel": "SDI Enrollment",
+      "fieldPurpose": "Tracks subcontractor default insurance requirement/enrollment posture.",
+      "targetFieldType": "enum",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-waiver-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Normalize into ComplianceRequirement when SDI is required."
+    },
+    {
+      "id": "BL-FIELD-0013",
+      "sourceColumn": "Bond Required [Yes/No]",
+      "normalizedField": "bondRequirementStatus",
+      "displayLabel": "Bond Required",
+      "fieldPurpose": "Tracks whether bond is required and whether missing bond should block buyout completion.",
+      "targetFieldType": "enum",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-waiver-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Normalize into ComplianceRequirement when bond is required."
+    },
+    {
+      "id": "BL-FIELD-0014",
+      "sourceColumn": "COMMENTS",
+      "normalizedField": "comments",
+      "displayLabel": "Comments",
+      "fieldPurpose": "Freeform project-team comments.",
+      "targetFieldType": "rich-text",
+      "systemOfRecord": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "includedBecause": "workbook-column-header",
+      "mappingNotes": "Comments should not replace structured exception or reconciliation fields."
+    }
+  ]
+}
