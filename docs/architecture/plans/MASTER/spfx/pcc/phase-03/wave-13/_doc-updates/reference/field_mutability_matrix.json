@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "generatedAt": "2026-05-02"
+  },
+  "mutabilityClasses": [
+    "pcc-editable",
+    "pcc-editable-with-audit",
+    "pcc-editable-with-waiver-audit",
+    "pcc-system-derived",
+    "procore-readonly",
+    "sage-readonly",
+    "sharepoint-reference",
+    "calculated-readonly",
+    "template-source",
+    "admin-only"
+  ],
+  "fields": [
+    {
+      "field": "status",
+      "owner": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "rule": "Must follow state machine and completion gate."
+    },
+    {
+      "field": "ballInCourtPersonOrRole",
+      "owner": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "rule": "Drives action owner and stale BIC signal."
+    },
+    {
+      "field": "selectedVendorName",
+      "owner": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "rule": "Can be linked to Procore/Sage vendor IDs."
+    },
+    {
+      "field": "procoreCompanyId",
+      "owner": "Procore",
+      "mutability": "procore-readonly",
+      "rule": "Admin may link mapping, but source value is not edited."
+    },
+    {
+      "field": "pccAwardAmount",
+      "owner": "PCC",
+      "mutability": "pcc-editable-with-audit",
+      "rule": "Planning/workflow amount. Reconciled against Procore commitment amount."
+    },
+    {
+      "field": "procoreCurrentCommitmentAmount",
+      "owner": "Procore",
+      "mutability": "procore-readonly",
+      "rule": "Operational financial source; not accounting truth."
+    },
+    {
+      "field": "sageCommittedCostAmount",
+      "owner": "Sage",
+      "mutability": "sage-readonly",
+      "rule": "Accounting truth when available."
+    },
+    {
+      "field": "originalBudgetAmount",
+      "owner": "source-labeled",
+      "mutability": "source-readonly-except-admin-seed-correction",
+      "rule": "Must show source system."
+    },
+    {
+      "field": "currentBudgetAmount",
+      "owner": "source-labeled",
+      "mutability": "source-readonly",
+      "rule": "Must show source system."
+    },
+    {
+      "field": "overUnderOriginalBudget",
+      "owner": "derived",
+      "mutability": "calculated-readonly",
+      "rule": "pccAwardAmount - originalBudgetAmount."
+    },
+    {
+      "field": "buyoutVsCurrentBudget",
+      "owner": "derived",
+      "mutability": "calculated-readonly",
+      "rule": "pccAwardAmount - currentBudgetAmount."
+    },
+    {
+      "field": "sdiEnrollmentStatus",
+      "owner": "PCC",
+      "mutability": "pcc-editable-with-waiver-audit",
+      "rule": "Waiver requires PX approval."
+    },
+    {
+      "field": "bondRequirementStatus",
+      "owner": "PCC",
+      "mutability": "pcc-editable-with-waiver-audit",
+      "rule": "Waiver requires PX approval."
+    },
+    {
+      "field": "evidenceLinks",
+      "owner": "PCC link record / source system content",
+      "mutability": "pcc-editable-with-audit",
+      "rule": "PCC stores link and classification; source owns binary content."
+    }
+  ]
+}

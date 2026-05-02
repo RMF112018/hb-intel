@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "generatedAt": "2026-05-02"
+  },
+  "reasonCodes": [
+    "UNBOUGHT_SCOPE",
+    "PARTIALLY_BOUGHT_SCOPE",
+    "OVER_BUDGET",
+    "NO_SELECTED_VENDOR",
+    "LOI_NOT_SENT",
+    "LOI_NOT_EXECUTED",
+    "SUBCONTRACT_NOT_EXECUTED",
+    "PROCORE_COMMITMENT_MISSING",
+    "PROCORE_AMOUNT_MISMATCH",
+    "PROCORE_VENDOR_MISMATCH",
+    "BUDGET_CODE_MISMATCH",
+    "SAGE_ACCOUNTING_MISMATCH",
+    "SDI_MISSING",
+    "BOND_MISSING",
+    "INSURANCE_NONCOMPLIANT",
+    "SUBMITTAL_BLOCKER",
+    "LONG_LEAD_RISK",
+    "STALE_BIC",
+    "NO_OWNER",
+    "MISSING_EVIDENCE"
+  ],
+  "dedupeRule": "projectId + buyoutPackageId + reasonCode",
+  "priorityActionCategories": [
+    "readiness-blocker",
+    "approval-checkpoint",
+    "financial-reconciliation",
+    "compliance-risk",
+    "procurement-risk",
+    "external-system-mapping"
+  ]
+}

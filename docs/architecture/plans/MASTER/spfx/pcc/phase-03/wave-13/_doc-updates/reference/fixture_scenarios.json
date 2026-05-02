@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "generatedAt": "2026-05-02"
+  },
+  "requiredFixtureScenarios": [
+    {
+      "id": "BL-FIX-001",
+      "name": "Workbook seed line not activated",
+      "mustProve": "Template rows do not become active records automatically."
+    },
+    {
+      "id": "BL-FIX-002",
+      "name": "Active package from workbook seed",
+      "mustProve": "Workbook field lineage preserved."
+    },
+    {
+      "id": "BL-FIX-003",
+      "name": "Active package from Procore budget line",
+      "mustProve": "Procore budget value is read-only and source-labeled."
+    },
+    {
+      "id": "BL-FIX-004",
+      "name": "Unbought scope with budget",
+      "mustProve": "UNBOUGHT_SCOPE action generated."
+    },
+    {
+      "id": "BL-FIX-005",
+      "name": "Selected vendor but no LOI",
+      "mustProve": "LOI_NOT_SENT or LOI_NOT_EXECUTED signal generated."
+    },
+    {
+      "id": "BL-FIX-006",
+      "name": "LOI executed but no subcontract",
+      "mustProve": "SUBCONTRACT_NOT_EXECUTED signal generated."
+    },
+    {
+      "id": "BL-FIX-007",
+      "name": "Subcontract executed but no Procore commitment",
+      "mustProve": "PROCORE_COMMITMENT_MISSING signal generated."
+    },
+    {
+      "id": "BL-FIX-008",
+      "name": "Procore commitment linked and matched",
+      "mustProve": "Reconciliation status matched."
+    },
+    {
+      "id": "BL-FIX-009",
+      "name": "Procore amount mismatch",
+      "mustProve": "PROCORE_AMOUNT_MISMATCH signal generated."
+    },
+    {
+      "id": "BL-FIX-010",
+      "name": "Procore vendor mismatch",
+      "mustProve": "PROCORE_VENDOR_MISMATCH signal generated."
+    },
+    {
+      "id": "BL-FIX-011",
+      "name": "SOV split across multiple cost codes",
+      "mustProve": "Many-to-many allocation supported."
+    },
+    {
+      "id": "BL-FIX-012",
+      "name": "Sage accounting mismatch",
+      "mustProve": "Sage source remains accounting truth and mismatch is source-labeled."
+    },
+    {
+      "id": "BL-FIX-013",
+      "name": "SDI required but missing",
+      "mustProve": "SDI_MISSING blocks completion."
+    },
+    {
+      "id": "BL-FIX-014",
+      "name": "Bond required but waived",
+      "mustProve": "Waiver reason, approver, timestamp, evidence required."
+    },
+    {
+      "id": "BL-FIX-015",
+      "name": "Insurance expired",
+      "mustProve": "INSURANCE_NONCOMPLIANT signal generated."
+    },
+    {
+      "id": "BL-FIX-016",
+      "name": "Long-lead item with negative procurement float",
+      "mustProve": "LONG_LEAD_RISK critical signal generated."
+    },
+    {
+      "id": "BL-FIX-017",
+      "name": "Stale BIC",
+      "mustProve": "STALE_BIC action generated after seven calendar days."
+    },
+    {
+      "id": "BL-FIX-018",
+      "name": "No owner",
+      "mustProve": "NO_OWNER action generated."
+    },
+    {
+      "id": "BL-FIX-019",
+      "name": "Package marked complete successfully",
+      "mustProve": "Completion gate satisfied."
+    },
+    {
+      "id": "BL-FIX-020",
+      "name": "Package blocked from completion",
+      "mustProve": "Missing commitment/compliance/reconciliation gate prevents completion."
+    }
+  ]
+}

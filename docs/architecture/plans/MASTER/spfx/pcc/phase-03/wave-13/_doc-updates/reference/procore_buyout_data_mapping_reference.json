@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "module": "Buyout Log",
+    "generatedAt": "2026-05-02",
+    "integrationPosture": "backend-mediated read-only target architecture; no runtime implementation in documentation wave"
+  },
+  "candidateObjects": [
+    {
+      "sourceSystem": "Procore",
+      "object": "Commitment",
+      "ownership": "Procore operational record",
+      "pccUse": "Read status, vendor, commitment number, original/current amount, deep link, source lineage.",
+      "writeBehavior": "No PCC write-back"
+    },
+    {
+      "sourceSystem": "Procore",
+      "object": "Commitment SOV",
+      "ownership": "Procore operational record",
+      "pccUse": "Read SOV lines, cost codes, budget codes, amounts, and allocation candidates.",
+      "writeBehavior": "No PCC write-back"
+    },
+    {
+      "sourceSystem": "Procore",
+      "object": "Purchase Order / Subcontract",
+      "ownership": "Procore operational record",
+      "pccUse": "Display contract/PO status and link to source.",
+      "writeBehavior": "No automatic creation or edits"
+    },
+    {
+      "sourceSystem": "Procore",
+      "object": "Commitment Change Order",
+      "ownership": "Procore operational record",
+      "pccUse": "Read and summarize impact on current commitment amount and exposure.",
+      "writeBehavior": "No PCC write-back"
+    },
+    {
+      "sourceSystem": "Procore",
+      "object": "Budget View / Budget Line Item",
+      "ownership": "Procore operational financial context",
+      "pccUse": "Read budget codes and budget amounts for operational buyout visibility.",
+      "writeBehavior": "No PCC write-back"
+    },
+    {
+      "sourceSystem": "Procore",
+      "object": "Company / Vendor",
+      "ownership": "Procore directory record",
+      "pccUse": "Candidate vendor identity source and mismatch comparison.",
+      "writeBehavior": "No PCC write-back"
+    },
+    {
+      "sourceSystem": "Procore",
+      "object": "Submittal",
+      "ownership": "Procore project-management record",
+      "pccUse": "Read submittal status and dates when tied to procurement readiness.",
+      "writeBehavior": "No PCC write-back"
+    }
+  ],
+  "matchingOrder": [
+    "explicit manual link",
+    "procore commitment ID",
+    "procore commitment number",
+    "vendor + cost code + budget code",
+    "vendor + amount within tolerance",
+    "budget line + SOV allocation",
+    "manual review"
+  ],
+  "amountTolerance": {
+    "accountingFacingValues": "$0 exact match",
+    "operationalWarningThreshold": "$500 or 0.5%, whichever is lower"
+  }
+}
