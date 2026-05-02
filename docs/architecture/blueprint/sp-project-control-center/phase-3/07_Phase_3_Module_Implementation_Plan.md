@@ -630,6 +630,11 @@ Build the Constraints Log as a Project Readiness make-ready constraint and expos
 
 Build the Buyout Log as an item-level project-controls workflow module.
 
+Wave 13 governance alignment:
+
+- Official module name remains `Buyout Log` (subtitle: `Buyout Control Center`).
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+
 ## Code Work
 
 - Buyout package/item model.

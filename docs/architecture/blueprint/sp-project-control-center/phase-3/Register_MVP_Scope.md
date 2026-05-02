@@ -49,6 +49,11 @@ Wave 12 Constraints Log MVP planning posture:
 - Boundary terms: risk (uncertain future), constraint (known blocker), issue (active problem), delay exposure (schedule-impact condition for review), and change exposure (scope/cost/contract impact condition for review).
 - Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
 
+Wave 13 Buyout Log MVP planning posture:
+
+- Official module name remains `Buyout Log` (subtitle: `Buyout Control Center`).
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+
 ## Later-Phase Scope
 
 | Area                                   | Later-Phase Scope                                                                                                                                                                                                                                                            |

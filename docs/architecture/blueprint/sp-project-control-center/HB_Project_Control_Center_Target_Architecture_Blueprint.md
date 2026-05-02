@@ -1712,6 +1712,11 @@ Manage subcontract buyout, procurement priorities, vendor qualification, long-le
 
 #### Buyout Log
 
+Wave 13 governance alignment:
+
+- Official module name remains `Buyout Log` (subtitle: `Buyout Control Center`).
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+
 - Project ID
 - Package
 - Trade

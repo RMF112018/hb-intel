@@ -139,6 +139,11 @@ Wave 12 clarification lock:
 - Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
 - External-system posture remains launcher/reference-only; no writeback or runtime mutation is introduced.
 
+Wave 13 clarification lock:
+
+- Official module name remains `Buyout Log` (subtitle: `Buyout Control Center`).
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+
 Wave 8 framework planning posture:
 
 - Wave 8 establishes readiness domains, lifecycle gates, readiness item shape, posture/scoring semantics, and integration seams across source modules.

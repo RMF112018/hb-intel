@@ -43,6 +43,11 @@ Constraints Log governance notes:
 - Embedded risk/exposure posture does not replace claims handling, formal delay analysis, enterprise change-management systems, or enterprise risk systems.
 - External-system posture remains launcher/reference-only; no writeback/runtime mutation.
 
+Buyout Log governance notes:
+
+- Official module name remains `Buyout Log` (subtitle: `Buyout Control Center`).
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+
 ## Item-Level Workflow Model
 
 Each MVP workflow module should be planned to support item-level tracking:
