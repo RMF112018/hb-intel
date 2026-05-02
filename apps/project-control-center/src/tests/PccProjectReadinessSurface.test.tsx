@@ -303,7 +303,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
     );
   });
 
-  it('renders all eight lifecycle-readiness regions with their markers', () => {
+  it('renders all nine lifecycle-readiness regions with their markers', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     expect(lifecycleRegion(container, 'lifecycle-hero')).not.toBeNull();
@@ -314,13 +314,14 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
     expect(lifecycleRegion(container, 'lifecycle-evidence-readiness')).not.toBeNull();
     expect(lifecycleRegion(container, 'lifecycle-future-closeout')).not.toBeNull();
     expect(lifecycleRegion(container, 'lifecycle-source-traceability')).not.toBeNull();
+    expect(lifecycleRegion(container, 'lifecycle-readiness-signals')).not.toBeNull();
   });
 
   it('each lifecycle region carries the lifecycle-readiness-center section marker', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     const sectioned = lifecycleSectionRegions(container);
-    expect(sectioned.length).toBe(8);
+    expect(sectioned.length).toBe(9);
   });
 
   it('lifecycle hero surfaces canonical 157 library scope and read-only copy', () => {
@@ -424,7 +425,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     const sectioned = lifecycleSectionRegions(container);
-    expect(sectioned.length).toBe(8);
+    expect(sectioned.length).toBe(9);
     for (const region of Array.from(sectioned)) {
       expect(region.querySelectorAll('a[href]').length).toBe(0);
       const buttons = region.querySelectorAll('button');
@@ -565,6 +566,110 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
             btn.getAttribute('aria-disabled') === 'true',
         ).toBe(true);
       }
+    }
+  });
+});
+
+describe('Wave 9 readiness signals (Prompt 07)', () => {
+  function lifecycleRegion(container: HTMLElement, region: string): HTMLElement | null {
+    return container.querySelector(`[data-pcc-readiness-region="${region}"]`);
+  }
+
+  it('renders 7 signal-bucket markers inside the signals region', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
+    expect(region).not.toBeNull();
+    const buckets = region!.querySelectorAll('[data-pcc-lifecycle-signal-kind]');
+    expect(buckets.length).toBe(7);
+    const kinds = Array.from(buckets).map((el) =>
+      el.getAttribute('data-pcc-lifecycle-signal-kind'),
+    );
+    expect(kinds).toEqual([
+      'blocked',
+      'overdue',
+      'missing-evidence',
+      'failed-safety',
+      'gate-blocking',
+      'awaiting-approval',
+      'external-reference-issue',
+    ]);
+  });
+
+  it('renders the seeded approval-posture entries with their checkpoint references', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
+    expect(region).not.toBeNull();
+    const startup = region!.querySelector(
+      '[data-pcc-lifecycle-approval-posture-item-id="inst-startup-002"]',
+    );
+    const safety = region!.querySelector(
+      '[data-pcc-lifecycle-approval-posture-item-id="inst-safety-002"]',
+    );
+    expect(startup).not.toBeNull();
+    expect(safety).not.toBeNull();
+    expect(startup!.getAttribute('data-pcc-lifecycle-approval-checkpoint')).toBe(
+      'apc-startup-insurance-coi-001',
+    );
+    expect(safety!.getAttribute('data-pcc-lifecycle-approval-checkpoint')).toBe(
+      'apc-safety-hot-work-permits-001',
+    );
+  });
+
+  it('renders the seeded priority-action promotion entries with their related ids', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
+    expect(region).not.toBeNull();
+    const startup = region!.querySelector(
+      '[data-pcc-lifecycle-priority-action-item-id="inst-startup-003"]',
+    );
+    const closeout = region!.querySelector(
+      '[data-pcc-lifecycle-priority-action-item-id="inst-closeout-001"]',
+    );
+    expect(startup).not.toBeNull();
+    expect(closeout).not.toBeNull();
+    expect(startup!.getAttribute('data-pcc-lifecycle-priority-action-promotion-id')).toBe(
+      'pa-startup-systems-setup-003',
+    );
+    expect(closeout!.getAttribute('data-pcc-lifecycle-priority-action-promotion-id')).toBe(
+      'pa-closeout-owner-utility-setup-001',
+    );
+  });
+
+  it('renders per-item signal chips inside the detail panel after opening <details>', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const elements = container.querySelectorAll('details');
+    for (const el of Array.from(elements)) (el as HTMLDetailsElement).open = true;
+    const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
+    expect(blockers).not.toBeNull();
+    const safetyItem = blockers!.querySelector(
+      '[data-pcc-lifecycle-blocker-item-id="inst-safety-003"]',
+    );
+    expect(safetyItem).not.toBeNull();
+    const failedSafetyChip = safetyItem!.querySelector(
+      '[data-pcc-lifecycle-item-signal-kind="failed-safety"]',
+    );
+    expect(failedSafetyChip).not.toBeNull();
+    const blockedChip = safetyItem!.querySelector(
+      '[data-pcc-lifecycle-item-signal-kind="blocked"]',
+    );
+    expect(blockedChip).not.toBeNull();
+  });
+
+  it('signals region contains no <a href> and no enabled buttons (display-only / inert)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
+    expect(region).not.toBeNull();
+    expect(region!.querySelectorAll('a[href]').length).toBe(0);
+    const buttons = region!.querySelectorAll('button');
+    for (const btn of Array.from(buttons)) {
+      expect(
+        btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true',
+      ).toBe(true);
     }
   });
 });

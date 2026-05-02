@@ -476,3 +476,22 @@
   display: grid;
   gap: 2px;
 }
+
+.lifecycleSignalChipRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lifecycleSignalChip {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-color-text-primary);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-sm);
+}

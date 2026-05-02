@@ -46,8 +46,10 @@ import type {
   IPccLifecycleMapViewModel,
   IPccLifecycleMyActionsViewModel,
   IPccLifecycleReadinessHeroViewModel,
+  IPccLifecycleReadinessSignalsViewModel,
   IPccLifecycleReadinessViewModel,
   IPccLifecycleSourceTraceabilityViewModel,
+  PccLifecycleReadinessSignalKind,
 } from './lifecycleReadinessViewModel';
 import type { PccCardState } from '../projectHome/shared';
 import { buildPccProjectReadinessViewModel } from './projectReadinessAdapter';
@@ -818,6 +820,7 @@ const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewMod
       <LifecycleEvidenceCard evidence={viewModel.evidence} />
       <LifecycleFutureCloseoutCard futureCloseout={viewModel.futureCloseout} />
       <LifecycleSourceTraceabilityCard sourceTraceability={viewModel.sourceTraceability} />
+      <LifecycleReadinessSignalsCard signals={viewModel.signals} />
     </Fragment>
   );
 };
@@ -1292,6 +1295,26 @@ const LifecycleItemDetailPanel: FC<LifecycleItemDetailPanelProps> = ({ detail })
       <dd data-pcc-lifecycle-item-detail-field="related-priority-action">
         {detail.relatedPriorityActionId ?? NOT_LISTED}
       </dd>
+
+      <dt>Readiness signals</dt>
+      <dd data-pcc-lifecycle-item-detail-field="signals">
+        {detail.signals.length === 0 ? (
+          NOT_LISTED
+        ) : (
+          <span className={styles.lifecycleSignalChipRow}>
+            {detail.signals.map((kind) => (
+              <span
+                key={kind}
+                className={styles.lifecycleSignalChip}
+                data-pcc-lifecycle-item-signal-kind={kind}
+                aria-disabled="true"
+              >
+                {LIFECYCLE_SIGNAL_LABEL_LOOKUP[kind]}
+              </span>
+            ))}
+          </span>
+        )}
+      </dd>
     </dl>
   </div>
 );
@@ -1666,3 +1689,113 @@ const LifecycleSourceTraceabilityCard: FC<LifecycleSourceTraceabilityCardProps> 
     </div>
   </PccDashboardCard>
 );
+
+// Surface-local label lookup for the 7 canonical readiness-signal kinds.
+// Mirrors the adapter's module-local `SIGNAL_LABELS`. Tests assert the
+// surface render output, not this map (per the test-adapter-output rule).
+const LIFECYCLE_SIGNAL_LABEL_LOOKUP: Readonly<Record<PccLifecycleReadinessSignalKind, string>> = {
+  blocked: 'Blocked',
+  overdue: 'Overdue',
+  'missing-evidence': 'Missing evidence',
+  'failed-safety': 'Failed safety',
+  'gate-blocking': 'Gate-blocking',
+  'awaiting-approval': 'Awaiting approval',
+  'external-reference-issue': 'External setup or reference issue',
+};
+
+interface LifecycleReadinessSignalsCardProps {
+  readonly signals: IPccLifecycleReadinessSignalsViewModel;
+}
+
+const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
+  signals,
+}) => {
+  const degraded = lifecycleDegradedPreview(
+    signals.cardState,
+    'lifecycle-readiness-signals',
+  );
+  return (
+    <PccDashboardCard
+      footprint="full"
+      eyebrow="Readiness signals"
+      title="Posture for future Priority Actions and Approvals integration"
+    >
+      <div
+        data-pcc-readiness-region="lifecycle-readiness-signals"
+        data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
+        className={styles.heroBody}
+      >
+        <p className={styles.heroCaption}>{signals.handoffCaption}</p>
+        <p className={styles.heroCaption}>{signals.noExecutionCaption}</p>
+        {degraded ?? (
+          <Fragment>
+            <ul
+              className={styles.evidenceList}
+              aria-label="Readiness signal buckets"
+            >
+              {signals.buckets.map((b) => (
+                <li
+                  key={b.kind}
+                  className={styles.evidenceItem}
+                  data-pcc-lifecycle-signal-kind={b.kind}
+                >
+                  <span className={styles.evidenceLabel}>{b.label}</span>
+                  <span className={styles.evidenceCount}>{b.itemCount}</span>
+                </li>
+              ))}
+            </ul>
+
+            {signals.approvalPosture.length > 0 ? (
+              <ul
+                className={styles.blockerListInner}
+                aria-label="Approval checkpoint posture"
+              >
+                {signals.approvalPosture.map((a) => (
+                  <li
+                    key={a.projectItemId}
+                    className={styles.blockerItem}
+                    data-pcc-lifecycle-approval-posture-item-id={a.projectItemId}
+                    data-pcc-lifecycle-approval-checkpoint={a.approvalCheckpointReference}
+                  >
+                    <span className={styles.blockerTitle}>{a.title}</span>
+                    <span className={styles.blockerMeta}>
+                      Checkpoint: {a.approvalCheckpointReference} · Status:{' '}
+                      {posturelabel(a.status)} · {a.family}
+                    </span>
+                    <span className={styles.inertChip} aria-disabled="true">
+                      Display only
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            {signals.priorityActionPromotions.length > 0 ? (
+              <ul
+                className={styles.blockerListInner}
+                aria-label="Priority Actions promotions"
+              >
+                {signals.priorityActionPromotions.map((p) => (
+                  <li
+                    key={p.projectItemId}
+                    className={styles.blockerItem}
+                    data-pcc-lifecycle-priority-action-promotion-id={p.relatedPriorityActionId}
+                    data-pcc-lifecycle-priority-action-item-id={p.projectItemId}
+                  >
+                    <span className={styles.blockerTitle}>{p.title}</span>
+                    <span className={styles.blockerMeta}>
+                      Priority Action: {p.relatedPriorityActionId} · {p.family}
+                    </span>
+                    <span className={styles.inertChip} aria-disabled="true">
+                      Display only
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </Fragment>
+        )}
+      </div>
+    </PccDashboardCard>
+  );
+};

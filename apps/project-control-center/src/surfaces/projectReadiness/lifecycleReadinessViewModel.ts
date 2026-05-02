@@ -101,6 +101,57 @@ export interface IPccLifecycleFamilyDomainsViewModel {
 }
 
 // ---------------------------------------------------------------------------
+// Readiness signals — display-only posture markers derived purely from
+// existing record-backed fields (status, posture, blockerState, severity,
+// dueDateUtc, evidenceLink, evidencePolicy, exceptionCode, family,
+// approvalCheckpointReference, relatedPriorityActionId, defaultGateImpact,
+// externalReferences). The 7 kinds prepare future Priority Actions and
+// Approvals/Checkpoints integration without authorizing any execution.
+// ---------------------------------------------------------------------------
+
+export type PccLifecycleReadinessSignalKind =
+  | 'blocked'
+  | 'overdue'
+  | 'missing-evidence'
+  | 'failed-safety'
+  | 'gate-blocking'
+  | 'awaiting-approval'
+  | 'external-reference-issue';
+
+export interface IPccLifecycleSignalBucketViewModel {
+  readonly kind: PccLifecycleReadinessSignalKind;
+  readonly label: string;
+  readonly itemCount: number;
+  readonly itemIds: readonly string[];
+}
+
+export interface IPccLifecycleApprovalPostureViewModel {
+  readonly projectItemId: string;
+  readonly templateItemId: string;
+  readonly title: string;
+  readonly approvalCheckpointReference: string;
+  readonly status: LifecycleReadinessStatus;
+  readonly family: LifecycleReadinessFamily;
+}
+
+export interface IPccLifecyclePriorityActionPromotionViewModel {
+  readonly projectItemId: string;
+  readonly templateItemId: string;
+  readonly relatedPriorityActionId: string;
+  readonly title: string;
+  readonly family: LifecycleReadinessFamily;
+}
+
+export interface IPccLifecycleReadinessSignalsViewModel {
+  readonly cardState: PccCardState;
+  readonly buckets: readonly IPccLifecycleSignalBucketViewModel[];
+  readonly approvalPosture: readonly IPccLifecycleApprovalPostureViewModel[];
+  readonly priorityActionPromotions: readonly IPccLifecyclePriorityActionPromotionViewModel[];
+  readonly handoffCaption: string;
+  readonly noExecutionCaption: string;
+}
+
+// ---------------------------------------------------------------------------
 // Unified item-detail view-model — populated for every list-bearing item
 // (My Actions, Blockers, Future Closeout). Every field is record-backed:
 // `undefined` means the underlying record did not populate the field, and
@@ -195,6 +246,9 @@ export interface IPccLifecycleItemDetailViewModel {
   readonly isCloseoutFromDayOne: boolean; // family === 'closeout' && activeByDefault
   readonly isFutureCloseoutExposure: boolean; // itemType === 'future-closeout-exposure'
   readonly isSafetyFailedState: boolean; // family === 'safety' && status === 'failed'
+
+  // Readiness signals derived from this item's records (display-only).
+  readonly signals: readonly PccLifecycleReadinessSignalKind[];
 }
 
 // ---------------------------------------------------------------------------
@@ -333,5 +387,6 @@ export type IPccLifecycleReadinessViewModel =
       readonly evidence: IPccLifecycleEvidenceViewModel;
       readonly futureCloseout: IPccLifecycleFutureCloseoutViewModel;
       readonly sourceTraceability: IPccLifecycleSourceTraceabilityViewModel;
+      readonly signals: IPccLifecycleReadinessSignalsViewModel;
     }
   | { readonly status: 'error' };

@@ -394,5 +394,139 @@ describe('buildPccLifecycleReadinessViewModel — per-region cardState propagati
     expect(vm.blockers.cardState).toBe('error');
     expect(vm.evidence.cardState).toBe('error');
     expect(vm.futureCloseout.cardState).toBe('error');
+    expect(vm.signals.cardState).toBe('error');
+  });
+});
+
+describe('buildPccLifecycleReadinessViewModel — readiness signals derivation', () => {
+  const vm = buildPccLifecycleReadinessViewModel(
+    makeEnvelope(SAMPLE_LIFECYCLE_READINESS_READ_MODEL),
+  );
+
+  function findItemSignals(projectItemId: string): readonly string[] {
+    if (vm.status !== 'preview') return [];
+    const all = [
+      ...vm.myActions.items,
+      ...vm.blockers.items,
+      ...vm.futureCloseout.items,
+    ];
+    const item = all.find((i) => i.detail.projectItemId === projectItemId);
+    return item?.detail.signals ?? [];
+  }
+
+  it('exposes 7 canonical signal buckets in the union state', () => {
+    if (vm.status !== 'preview') return;
+    expect(vm.signals.buckets).toHaveLength(7);
+    expect(vm.signals.buckets.map((b) => b.kind)).toEqual([
+      'blocked',
+      'overdue',
+      'missing-evidence',
+      'failed-safety',
+      'gate-blocking',
+      'awaiting-approval',
+      'external-reference-issue',
+    ]);
+  });
+
+  it('blocked signal includes inst-safety-003 (escalated/critical/blocked)', () => {
+    if (vm.status !== 'preview') return;
+    const blocked = vm.signals.buckets.find((b) => b.kind === 'blocked');
+    expect(blocked?.itemIds).toContain('inst-safety-003');
+  });
+
+  it('failed-safety signal includes inst-safety-003 only', () => {
+    if (vm.status !== 'preview') return;
+    const failed = vm.signals.buckets.find((b) => b.kind === 'failed-safety');
+    expect(failed?.itemIds).toEqual(['inst-safety-003']);
+  });
+
+  it('awaiting-approval bucket includes the two seeded items with approvalCheckpointReference', () => {
+    if (vm.status !== 'preview') return;
+    const awaiting = vm.signals.buckets.find((b) => b.kind === 'awaiting-approval');
+    expect(awaiting?.itemIds).toEqual(
+      expect.arrayContaining(['inst-startup-002', 'inst-safety-002']),
+    );
+  });
+
+  it('approvalPosture list reflects the seeded items verbatim', () => {
+    if (vm.status !== 'preview') return;
+    const ids = vm.signals.approvalPosture.map((a) => a.projectItemId).sort();
+    expect(ids).toEqual(['inst-safety-002', 'inst-startup-002']);
+    const startup = vm.signals.approvalPosture.find(
+      (a) => a.projectItemId === 'inst-startup-002',
+    );
+    expect(startup?.approvalCheckpointReference).toBe('apc-startup-insurance-coi-001');
+  });
+
+  it('priorityActionPromotions list reflects the seeded items verbatim', () => {
+    if (vm.status !== 'preview') return;
+    const ids = vm.signals.priorityActionPromotions.map((p) => p.projectItemId).sort();
+    expect(ids).toEqual(['inst-closeout-001', 'inst-startup-003']);
+    const closeout = vm.signals.priorityActionPromotions.find(
+      (p) => p.projectItemId === 'inst-closeout-001',
+    );
+    expect(closeout?.relatedPriorityActionId).toBe(
+      'pa-closeout-owner-utility-setup-001',
+    );
+  });
+
+  it('missing-evidence applies to required-before-complete items with unsatisfied evidence and active status', () => {
+    // inst-startup-002: required-before-complete + pending + needs-evidence ✓
+    expect(findItemSignals('inst-startup-002')).toContain('missing-evidence');
+    // inst-safety-001: required-before-approval + approved + status=approved ✗
+    expect(findItemSignals('inst-safety-001')).not.toContain('missing-evidence');
+    // inst-safety-003: required-before-approval + rejected + status=failed
+    // (failed is in ACTIVE_STATUSES; not in EVIDENCE_INACTIVE_STATUSES) ✓
+    expect(findItemSignals('inst-safety-003')).toContain('missing-evidence');
+  });
+
+  it('missing-evidence applies to conditional policy only when an evidenceLink record activates it', () => {
+    // inst-safety-002: conditional + submitted (record-activated, unsatisfied) ✓
+    expect(findItemSignals('inst-safety-002')).toContain('missing-evidence');
+    // inst-startup-001: no evidenceLink at all ✗
+    expect(findItemSignals('inst-startup-001')).not.toContain('missing-evidence');
+  });
+
+  it('overdue uses envelope.generatedAtUtc as the deterministic clock', () => {
+    // The fixture envelope helper passes generatedAtUtc='2026-04-30T00:00:00.000Z'.
+    // inst-startup-002 dueDateUtc '2026-05-08' is AFTER generatedAt → not overdue.
+    expect(findItemSignals('inst-startup-002')).not.toContain('overdue');
+    // Re-build with a future-dated envelope where the same dueDate IS overdue.
+    const overdueEnvelope = makeEnvelope(SAMPLE_LIFECYCLE_READINESS_READ_MODEL);
+    const overdueVm = buildPccLifecycleReadinessViewModel({
+      ...overdueEnvelope,
+      generatedAtUtc: '2026-06-01T00:00:00.000Z',
+    });
+    if (overdueVm.status !== 'preview') return;
+    const overdueBucket = overdueVm.signals.buckets.find((b) => b.kind === 'overdue');
+    expect(overdueBucket?.itemIds).toContain('inst-startup-002');
+  });
+
+  it('external-reference-issue applies to inst-closeout-001 (awaiting-external-system-setup)', () => {
+    expect(findItemSignals('inst-closeout-001')).toContain('external-reference-issue');
+  });
+
+  it('detail.signals is record-backed and stable per call', () => {
+    const a = findItemSignals('inst-safety-003');
+    const b = findItemSignals('inst-safety-003');
+    expect(a).toEqual(b);
+  });
+
+  it('does not expose any executable identifier on the readiness signals view-model (display-only)', () => {
+    if (vm.status !== 'preview') return;
+    const json = JSON.stringify(vm.signals);
+    const forbidden = [
+      'executeApproval',
+      'submitApproval',
+      'enqueueApproval',
+      'mutateApproval',
+      'runWorkflow',
+      'approveItem',
+      'waiveItem',
+      'returnItem',
+    ];
+    for (const id of forbidden) {
+      expect(json).not.toContain(id);
+    }
   });
 });

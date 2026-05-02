@@ -32,6 +32,7 @@ import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMap
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState';
 import type { PccCardState } from '../projectHome/shared.js';
 import type {
+  IPccLifecycleApprovalPostureViewModel,
   IPccLifecycleBlockerBucketViewModel,
   IPccLifecycleBlockerItemViewModel,
   IPccLifecycleBlockersViewModel,
@@ -48,9 +49,13 @@ import type {
   IPccLifecycleMapViewModel,
   IPccLifecycleMyActionsItemViewModel,
   IPccLifecycleMyActionsViewModel,
+  IPccLifecyclePriorityActionPromotionViewModel,
   IPccLifecycleReadinessHeroViewModel,
+  IPccLifecycleReadinessSignalsViewModel,
   IPccLifecycleReadinessViewModel,
+  IPccLifecycleSignalBucketViewModel,
   IPccLifecycleSourceTraceabilityViewModel,
+  PccLifecycleReadinessSignalKind,
 } from './lifecycleReadinessViewModel.js';
 
 // ---------------------------------------------------------------------------
@@ -137,6 +142,52 @@ const ACTIVE_STATUSES: ReadonlySet<LifecycleReadinessStatus> = new Set([
   'failed',
 ]);
 
+// Statuses where evidence is no longer relevant for the missing-evidence
+// signal — record-backed terminal/approved states. (Verified against
+// LIFECYCLE_READINESS_STATUSES literals.)
+const EVIDENCE_INACTIVE_STATUSES: ReadonlySet<LifecycleReadinessStatus> = new Set([
+  'complete',
+  'approved',
+  'waived',
+  'not-applicable',
+  'deferred',
+]);
+
+// Statuses where awaiting-approval is no longer pending — the workflow
+// reached a terminal/decided state.
+const APPROVAL_INACTIVE_STATUSES: ReadonlySet<LifecycleReadinessStatus> = new Set([
+  'complete',
+  'approved',
+  'waived',
+  'not-applicable',
+]);
+
+// Stable canonical order matches the union declaration in the view-model.
+const SIGNAL_KINDS: readonly PccLifecycleReadinessSignalKind[] = [
+  'blocked',
+  'overdue',
+  'missing-evidence',
+  'failed-safety',
+  'gate-blocking',
+  'awaiting-approval',
+  'external-reference-issue',
+];
+
+const SIGNAL_LABELS: Readonly<Record<PccLifecycleReadinessSignalKind, string>> = {
+  blocked: 'Blocked',
+  overdue: 'Overdue',
+  'missing-evidence': 'Missing evidence',
+  'failed-safety': 'Failed safety',
+  'gate-blocking': 'Gate-blocking',
+  'awaiting-approval': 'Awaiting approval',
+  'external-reference-issue': 'External setup or reference issue',
+};
+
+const HANDOFF_CAPTION =
+  'Display-only posture for future Priority Actions and Approvals/Checkpoints integration.';
+const SIGNALS_NO_EXECUTION_CAPTION =
+  'No queue mutation, approval execution, or workflow run is enabled in Wave 9.';
+
 const READ_ONLY_BADGE_TEXT = 'Read-only lifecycle readiness preview';
 const NO_EXECUTION_CAPTION =
   'No workflow execution is enabled in Wave 9. Live tenant runtime is operator-pending.';
@@ -182,13 +233,37 @@ export function buildPccLifecycleReadinessViewModel(
     noExecutionCaption: NO_EXECUTION_CAPTION,
   };
 
+  const generatedAtUtc = envelope.generatedAtUtc;
   const lifecycleMap = buildLifecycleMap(data);
   const familyDomains = buildFamilyDomains(data, projectItems, cardState);
-  const myActions = buildMyActions(projectItems, templateMap, viewerPersona, cardState);
-  const blockers = buildBlockers(data, projectItems, templateMap, cardState);
+  const myActions = buildMyActions(
+    projectItems,
+    templateMap,
+    viewerPersona,
+    cardState,
+    generatedAtUtc,
+  );
+  const blockers = buildBlockers(
+    data,
+    projectItems,
+    templateMap,
+    cardState,
+    generatedAtUtc,
+  );
   const evidence = buildEvidence(data, cardState);
-  const futureCloseout = buildFutureCloseout(templateItems, projectItems, cardState);
+  const futureCloseout = buildFutureCloseout(
+    templateItems,
+    projectItems,
+    cardState,
+    generatedAtUtc,
+  );
   const sourceTraceability = buildSourceTraceability(data);
+  const signals = buildReadinessSignals(
+    projectItems,
+    templateMap,
+    cardState,
+    generatedAtUtc,
+  );
 
   return {
     status: 'preview',
@@ -202,6 +277,7 @@ export function buildPccLifecycleReadinessViewModel(
     evidence,
     futureCloseout,
     sourceTraceability,
+    signals,
   };
 }
 
@@ -308,6 +384,7 @@ function buildMyActions(
   templateMap: ReadonlyMap<string, ILifecycleReadinessTemplateItem>,
   viewerPersona: PccPersona | undefined,
   cardState: PccCardState,
+  generatedAtUtc: string | undefined,
 ): IPccLifecycleMyActionsViewModel {
   const filtered = projectItems.filter((p) => {
     if (viewerPersona && p.ownerPersona !== viewerPersona) return false;
@@ -328,7 +405,7 @@ function buildMyActions(
       criticality: tmpl?.criticality ?? 'informational',
       ownerPersona: p.ownerPersona,
       ...(p.dueDateUtc !== undefined ? { dueDateUtc: p.dueDateUtc } : {}),
-      detail: buildItemDetail(tmpl, p),
+      detail: buildItemDetail(tmpl, p, generatedAtUtc),
     };
   });
 
@@ -350,6 +427,7 @@ function buildBlockers(
   projectItems: readonly ILifecycleReadinessProjectItem[],
   templateMap: ReadonlyMap<string, ILifecycleReadinessTemplateItem>,
   cardState: PccCardState,
+  generatedAtUtc: string | undefined,
 ): IPccLifecycleBlockersViewModel {
   const buckets: IPccLifecycleBlockerBucketViewModel[] = data.blockerSummary.map(
     (b) => ({
@@ -377,7 +455,7 @@ function buildBlockers(
       blockerState: p.blockerState,
       status: p.status,
       ...(p.exceptionCode !== undefined ? { exceptionCode: p.exceptionCode } : {}),
-      detail: buildItemDetail(tmpl, p),
+      detail: buildItemDetail(tmpl, p, generatedAtUtc),
     };
   });
 
@@ -419,6 +497,7 @@ function buildFutureCloseout(
   templateItems: readonly ILifecycleReadinessTemplateItem[],
   projectItems: readonly ILifecycleReadinessProjectItem[],
   cardState: PccCardState,
+  generatedAtUtc: string | undefined,
 ): IPccLifecycleFutureCloseoutViewModel {
   const futureTemplates = templateItems.filter(
     (t) => t.itemType === 'future-closeout-exposure',
@@ -437,7 +516,7 @@ function buildFutureCloseout(
         criticality: t.criticality,
         hasProjectInstance: inst !== undefined,
         ...(inst?.status !== undefined ? { projectStatus: inst.status } : {}),
-        detail: buildItemDetail(t, inst),
+        detail: buildItemDetail(t, inst, generatedAtUtc),
       };
     },
   );
@@ -481,6 +560,7 @@ function buildSourceTraceability(
 function buildItemDetail(
   template: ILifecycleReadinessTemplateItem | undefined,
   project: ILifecycleReadinessProjectItem | undefined,
+  generatedAtUtc: string | undefined,
 ): IPccLifecycleItemDetailViewModel {
   const family = (template?.family ?? project?.family) as LifecycleReadinessFamily;
   const sourceTrace = template?.sourceTrace;
@@ -611,5 +691,176 @@ function buildItemDetail(
     isCloseoutFromDayOne,
     isFutureCloseoutExposure,
     isSafetyFailedState,
+
+    signals: deriveSignals(template, project, generatedAtUtc),
+  };
+}
+
+// Display-only signal derivation. Returns the signals canonical-ordered.
+// All inputs are record-backed. `generatedAtUtc` is provided by the
+// envelope, so the function remains pure and deterministic in tests.
+function deriveSignals(
+  template: ILifecycleReadinessTemplateItem | undefined,
+  project: ILifecycleReadinessProjectItem | undefined,
+  generatedAtUtc: string | undefined,
+): readonly PccLifecycleReadinessSignalKind[] {
+  const result: PccLifecycleReadinessSignalKind[] = [];
+  if (!project && !template) return result;
+
+  const status = project?.status;
+  const posture = project?.posture;
+  const blockerState = project?.blockerState;
+  const family = template?.family ?? project?.family;
+  const evidencePolicy = template?.evidencePolicy;
+  const evidenceState = project?.evidenceLink?.evidenceState;
+
+  // 1. blocked
+  if (
+    posture === 'blocked' ||
+    blockerState === 'open' ||
+    blockerState === 'escalated'
+  ) {
+    result.push('blocked');
+  }
+
+  // 2. overdue — strict record-backed check using the envelope clock.
+  if (
+    project?.dueDateUtc !== undefined &&
+    generatedAtUtc !== undefined &&
+    project.dueDateUtc < generatedAtUtc &&
+    status !== undefined &&
+    ACTIVE_STATUSES.has(status)
+  ) {
+    result.push('overdue');
+  }
+
+  // 3. missing-evidence — uses the actual LIFECYCLE_READINESS_EVIDENCE_POLICIES
+  // literals (`required-before-complete`, `required-before-approval`,
+  // `conditional`). `conditional` only counts when the record activates it
+  // (an evidenceLink exists with an unsatisfied evidence state).
+  if (status !== undefined && !EVIDENCE_INACTIVE_STATUSES.has(status)) {
+    const requiredPolicy =
+      evidencePolicy === 'required-before-complete' ||
+      evidencePolicy === 'required-before-approval';
+    const conditionalActivated =
+      evidencePolicy === 'conditional' &&
+      project?.evidenceLink !== undefined;
+    const evidenceUnsatisfied =
+      evidenceState === undefined ||
+      evidenceState === 'pending' ||
+      evidenceState === 'rejected' ||
+      evidenceState === 'submitted';
+    if ((requiredPolicy || conditionalActivated) && evidenceUnsatisfied) {
+      result.push('missing-evidence');
+    }
+  }
+
+  // 4. failed-safety — record-backed only.
+  if (family === 'safety' && status === 'failed') {
+    result.push('failed-safety');
+  }
+
+  // 5. gate-blocking — template advertises gate impact and the project
+  // instance is active and not yet ready.
+  if (
+    template?.defaultGateImpact !== undefined &&
+    template.defaultGateImpact.length > 0 &&
+    status !== undefined &&
+    ACTIVE_STATUSES.has(status) &&
+    (posture === 'blocked' || posture === 'at-risk')
+  ) {
+    result.push('gate-blocking');
+  }
+
+  // 6. awaiting-approval — record-backed checkpoint reference, not yet
+  // terminal-decided.
+  if (
+    project?.approvalCheckpointReference !== undefined &&
+    status !== undefined &&
+    !APPROVAL_INACTIVE_STATUSES.has(status)
+  ) {
+    result.push('awaiting-approval');
+  }
+
+  // 7. external-reference-issue — exception code OR external references
+  // present and the item is currently blocked.
+  const hasExternalReferences =
+    template?.externalReferences !== undefined &&
+    template.externalReferences.length > 0;
+  if (
+    project?.exceptionCode === 'awaiting-external-system-setup' ||
+    (hasExternalReferences &&
+      (posture === 'blocked' || blockerState === 'open'))
+  ) {
+    result.push('external-reference-issue');
+  }
+
+  return result;
+}
+
+// Aggregates signals across all project items into 7 buckets, plus the
+// approval-posture and priority-action-promotion lists.
+function buildReadinessSignals(
+  projectItems: readonly ILifecycleReadinessProjectItem[],
+  templateMap: ReadonlyMap<string, ILifecycleReadinessTemplateItem>,
+  cardState: PccCardState,
+  generatedAtUtc: string | undefined,
+): IPccLifecycleReadinessSignalsViewModel {
+  const bucketIds: Record<PccLifecycleReadinessSignalKind, string[]> = {
+    blocked: [],
+    overdue: [],
+    'missing-evidence': [],
+    'failed-safety': [],
+    'gate-blocking': [],
+    'awaiting-approval': [],
+    'external-reference-issue': [],
+  };
+
+  const approvalPosture: IPccLifecycleApprovalPostureViewModel[] = [];
+  const priorityActionPromotions: IPccLifecyclePriorityActionPromotionViewModel[] = [];
+
+  for (const project of projectItems) {
+    const template = templateMap.get(project.templateItemId);
+    const itemSignals = deriveSignals(template, project, generatedAtUtc);
+    for (const kind of itemSignals) {
+      bucketIds[kind].push(project.projectItemId);
+    }
+
+    if (project.approvalCheckpointReference !== undefined) {
+      approvalPosture.push({
+        projectItemId: project.projectItemId,
+        templateItemId: project.templateItemId,
+        title: template?.normalizedTitle ?? project.templateItemId,
+        approvalCheckpointReference: project.approvalCheckpointReference,
+        status: project.status,
+        family: project.family,
+      });
+    }
+
+    if (project.relatedPriorityActionId !== undefined) {
+      priorityActionPromotions.push({
+        projectItemId: project.projectItemId,
+        templateItemId: project.templateItemId,
+        relatedPriorityActionId: project.relatedPriorityActionId,
+        title: template?.normalizedTitle ?? project.templateItemId,
+        family: project.family,
+      });
+    }
+  }
+
+  const buckets: IPccLifecycleSignalBucketViewModel[] = SIGNAL_KINDS.map((kind) => ({
+    kind,
+    label: SIGNAL_LABELS[kind],
+    itemCount: bucketIds[kind].length,
+    itemIds: bucketIds[kind],
+  }));
+
+  return {
+    cardState,
+    buckets,
+    approvalPosture,
+    priorityActionPromotions,
+    handoffCaption: HANDOFF_CAPTION,
+    noExecutionCaption: SIGNALS_NO_EXECUTION_CAPTION,
   };
 }
