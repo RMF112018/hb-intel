@@ -137,18 +137,19 @@ The following dependencies must be resolved or designed before implementation:
 
 ## 4. Development Principles
 
-| Principle                             | Meaning                                                                             |
-| ------------------------------------- | ----------------------------------------------------------------------------------- |
-| Contract-first                        | Implementation derives from the Standard Project Site Template Contract.            |
-| One governed template family          | Do not create uncontrolled project-type-specific templates.                         |
-| Conditional seeding, not forks        | ProjectType and ProjectStage drive rules inside the same template family.           |
-| No native SharePoint admin dependency | Normal users operate through PCC UI.                                                |
-| Least privilege                       | Access is template-governed and audited.                                            |
-| Backend-routed integrations           | External APIs, including Procore, are routed through backend/functions.             |
-| No secrets in docs or client surfaces | Secrets do not belong in markdown, SPFx, SharePoint, repo source, or client config. |
-| Systems of record remain intact       | PCC summarizes and links; it does not silently replace Procore or Sage.             |
-| Validate and repair                   | Provisioning must include site health, drift detection, audit, and repair paths.    |
-| Adoption is a feature                 | Build for daily project-team use, not just technical compliance.                    |
+| Principle                              | Meaning                                                                             |
+| -------------------------------------- | ----------------------------------------------------------------------------------- |
+| Contract-first                         | Implementation derives from the Standard Project Site Template Contract.            |
+| One governed template family           | Do not create uncontrolled project-type-specific templates.                         |
+| Conditional seeding, not forks         | ProjectType and ProjectStage drive rules inside the same template family.           |
+| No native SharePoint admin dependency  | Normal users operate through PCC UI.                                                |
+| Least privilege                        | Access is template-governed and audited.                                            |
+| Backend-routed integrations            | External APIs, including Procore, are routed through backend/functions.             |
+| Field-level system-of-record ownership | Every module must explicitly declare record ownership, lineage, and conflict rules. |
+| No secrets in docs or client surfaces  | Secrets do not belong in markdown, SPFx, SharePoint, repo source, or client config. |
+| Systems of record remain intact        | PCC summarizes and links; it does not silently replace Procore or Sage.             |
+| Validate and repair                    | Provisioning must include site health, drift detection, audit, and repair paths.    |
+| Adoption is a feature                  | Build for daily project-team use, not just technical compliance.                    |
 
 ---
 
@@ -187,7 +188,7 @@ The following dependencies must be resolved or designed before implementation:
 | Phase 6 — Startup / Permits / Inspections / Closeout MVP Modules    | P1       | High           | Phase 1 / Phase 3    | Medium | High       | Product + SPFx                | Workflow seed models                                                                                                  | Core workflow modules render seeded project records and readiness rollups                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Phase 7 — RACI Responsibility Matrix and Action Center              | P2       | High           | Phase 6              | Medium | High       | Product + SPFx + Backend      | Responsibility schema; seed normalization policy; contract-party classification model; internal RACI assignment model | Definition-complete governed matrix: seeded project-level RACI from `docs/reference/example/Responsibility Matrix - Template.xlsx` and `docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx`; governance-required legacy marker normalization (`X`, `Support`, `Review`, `Sign-Off`); Admin/PX/PM edit authority; role-aware responsibility/action views and traceable seed metadata (`workbook`, `sheet`, `row`, `family`, `version`) for later implementation planning. |
 | Phase 8 — Procore MVP Integration                                   | P1       | High           | Phase 2 / Phase 3    | Medium | Medium     | Backend + SPFx                | Procore mapping schema                                                                                                | Procore mapping, launch links, sync health placeholder operate without direct SPFx API calls                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Phase 9 — Procore Recommended Practical Model                       | P2       | Very High      | Phase 8              | High   | Very High  | Backend + Data                | Key Vault; canonical store; subject area plan                                                                         | Curated summaries and lineage records support operational dashboards                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Phase 9 — Procore Recommended Practical Model                       | P2       | Very High      | Phase 8              | High   | Very High  | Backend + Data                | Key Vault; canonical store; subject area plan                                                                         | Curated summaries and lineage records support operational dashboards while preserving Procore ownership of Procore-native records                                                                                                                                                                                                                                                                                                                                                                 |
 | Phase 10 — Governance, Adoption, and Expansion                      | P2 / P3  | High           | MVP release          | Medium | High       | Operations + IT + Engineering | Pilot feedback                                                                                                        | Rollout model, training, support, analytics, future modules defined                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ---
@@ -199,6 +200,7 @@ The following dependencies must be resolved or designed before implementation:
 - Wave 8 defines shared readiness framework seams: domains, lifecycle gates, readiness item model, posture semantics, and cross-module normalization.
 - Wave 9–14 implement module-specific detail on top of Wave 8 seams and must not be duplicated by Wave 8.
 - Wave 8 documentation does not imply runtime workflow execution, backend persistence, approval execution, SPFx readiness runtime wiring, or external-system mutations.
+- Wave 8+ modules must declare field-level system-of-record ownership before implementation.
 
 ### Phase 3 Wave 2 — PCC SPFx Shell Frame and UI/UX Foundation
 

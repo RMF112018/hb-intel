@@ -35,7 +35,8 @@ The PCC does **not** replace Procore, Sage Intacct, Compass, Document Crunch, Ad
 | [`HB_Project_Control_Center_Target_Architecture_Blueprint.md`](./HB_Project_Control_Center_Target_Architecture_Blueprint.md) | Strategic target architecture, north-star operating model, module map, and enterprise direction.                                                                  |          1 |
 | [`Standard_Project_Site_Template_Contract.md`](./Standard_Project_Site_Template_Contract.md)                                 | Human-readable implementation source of truth for project site structure, permissions, settings, modules, provisioning, validation, and MVP scope.                |          2 |
 | [`Project_Control_Center_Development_Roadmap.md`](./Project_Control_Center_Development_Roadmap.md)                           | Prioritized implementation roadmap derived from the blueprint and contract.                                                                                       |          3 |
-| [`procore_hbintel_data_model_package/`](./procore_hbintel_data_model_package/)                                               | Procore data-model and integration reference package for canonical modeling, extraction priorities, SharePoint materialization boundaries, and analytics posture. |          4 |
+| [`System_of_Record_Matrix.md`](./System_of_Record_Matrix.md)                                                                 | Canonical field-level system-of-record ownership authority across Procore-native, PCC-native, Sage, SharePoint/M365, and external-system records.                 |          4 |
+| [`procore_hbintel_data_model_package/`](./procore_hbintel_data_model_package/)                                               | Procore data-model and integration reference package for canonical modeling, extraction priorities, SharePoint materialization boundaries, and analytics posture. |          5 |
 
 ---
 
@@ -72,6 +73,7 @@ The dated execution-scaffold package — Foleon prompts, audit report, implement
 | Strategic intent and architectural north star                                            | Target Architecture Blueprint                                   |
 | Implementable site template, permission model, MVP scope, settings, and validation rules | Standard Project Site Template Contract                         |
 | Procore canonical model and integration recommendations                                  | `procore_hbintel_data_model_package/`                           |
+| Field-level system-of-record ownership boundaries                                        | `System_of_Record_Matrix.md`                                    |
 | Sequencing and execution priorities                                                      | Development Roadmap                                             |
 | Machine-readable template artifacts                                                      | `packages/project-site-template/`                               |
 | Provisioning boundary artifacts                                                          | `packages/project-site-provisioning/`                           |

@@ -14,6 +14,8 @@ Status: Canonical Wave 11 architecture definition (documentation-only)
 
 Define a governed, template-driven, project-instance-based responsibility control system that preserves workbook source traceability while enabling operational ownership, workflow, escalation, and audit posture.
 
+System-of-record ownership for responsibility records, linked evidence, and external references is governed by `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`.
+
 ## 3. Source Workbook Grounding
 
 Source references:

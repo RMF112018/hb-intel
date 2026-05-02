@@ -9,6 +9,8 @@ User-facing subtitle: `Make-Ready Constraint & Risk Exposure Center`
 
 Define the Wave 12 Project Readiness architecture for managing make-ready constraints and exposure posture with clear governance boundaries.
 
+System-of-record ownership for constraints, linked evidence, and derived exposure signals is governed by `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`.
+
 ## Product Pillars
 
 1. Make-ready execution posture for known blockers.

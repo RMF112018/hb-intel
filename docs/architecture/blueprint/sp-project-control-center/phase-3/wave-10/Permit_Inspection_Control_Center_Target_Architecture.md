@@ -38,6 +38,7 @@ Wave 10 will define a governed project-control surface for permit lifecycle trac
 - PCC remains internal workflow/accountability/readiness/audit source of record.
 - Procore remains external system context/launcher/reference in Wave 10 target posture.
 - No direct AHJ or Procore mutation behavior is authorized by this architecture.
+- Field-level ownership and conflict rules are governed by `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`.
 
 ## 5. Command-Center UX Model
 

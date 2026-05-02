@@ -43,6 +43,7 @@ Wave 8 defines shared module framework contracts and shell-level readiness compo
 - Wave 9 may surface lifecycle-readiness signals, blockers, evidence requirements, and cross-module posture, but does not absorb Waves 10–14 module implementation ownership.
 - Safety-family inclusion in Wave 9 is readiness/workflow posture only; no Safety runtime integration, incident-management runtime, OSHA engine behavior, live inspection execution, or safety-system mutation is implied.
 - Wave 9 evidence posture is requirement/link-level only; evidence storage/ownership remains HB Document Control Center + SharePoint project record (no Wave 9 binary upload/sync/storage/library-management ownership).
+- System-of-record ownership for downstream wave modules is governed by `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`; module implementation docs must declare field-level ownership before runtime work.
 
 ## Readiness Domains (MVP/Future-Aware Taxonomy)
 

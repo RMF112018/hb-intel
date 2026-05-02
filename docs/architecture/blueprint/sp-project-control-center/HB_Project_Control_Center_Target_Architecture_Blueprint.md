@@ -48,6 +48,19 @@ Current status:
 - **Blueprint authority (this document):** architecture doctrine, product boundaries, module/system posture, and non-negotiable governance guardrails.
 - **Roadmap authority:** implementation sequencing, current phase/wave execution status, and immediate execution priorities in [`Project_Control_Center_Development_Roadmap.md`](./Project_Control_Center_Development_Roadmap.md).
 - **Implementation contract authority:** implementation-detail contract in [`Standard_Project_Site_Template_Contract.md`](./Standard_Project_Site_Template_Contract.md).
+- **Canonical system-of-record authority:** field-level ownership boundaries in [`System_of_Record_Matrix.md`](./System_of_Record_Matrix.md).
+
+## 1C. PCC / Procore / Sage System-of-Record Boundaries
+
+PCC is the unified project operating layer and source-lineage layer. It may be the system of record for PCC-native legacy workflow replacements that are not generated or maintained in Procore.
+
+Procore is the system of record for Procore-native records generated, owned, and maintained in Procore tools.
+
+Sage Intacct remains the accounting book of record.
+
+SharePoint/Microsoft 365 is the controlled document/collaboration substrate and hosting layer, but is not automatically the system of record for every process hosted in PCC.
+
+For authoritative field-level ownership and conflict handling, use [`System_of_Record_Matrix.md`](./System_of_Record_Matrix.md).
 
 ---
 
@@ -2540,9 +2553,11 @@ Surface Procore current-state summaries, readiness checks, exception queues, pro
 
 ### 36A.2 System-of-record posture
 
-Procore is the system of record for: RFIs, submittals, drawings, specifications, daily logs, inspections, observations, incidents, punch items, commitments, change events, prime contracts, budget views, requisitions / subcontractor invoices, direct costs, directory / companies / users, meetings, correspondence, photos / field media (when used).
+Procore is the system of record for Procore-native records generated and maintained in Procore, including: RFIs, submittals, drawings, specifications, daily logs, inspections, observations, incidents, punch items, commitments, change events, prime contracts, budget views, requisitions / subcontractor invoices, direct costs, directory / companies / users, meetings, correspondence, and photos / field media (when used).
 
 Sage Intacct remains the accounting book of record. Procore project-management-domain financial state (commitments, change events, requisitions, prime contract status, project-level budget views) is exposed in PCC as **Procore-sourced operational / project-management financial summaries** — not as accounting figures (see §25).
+
+PCC owns PCC-native records that replace legacy manual methods, including Responsibility Matrix, Permit Log, Required Inspection Log where not generated in Procore, Constraints Log, Project Readiness records, PCC evidence links, PCC priority actions, and PCC risk/exposure signals. Linked Procore records remain Procore-owned source objects.
 
 ### 36A.3 SPFx boundary (hard rule)
 

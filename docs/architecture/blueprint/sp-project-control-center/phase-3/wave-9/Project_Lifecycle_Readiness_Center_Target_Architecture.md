@@ -722,6 +722,8 @@ This allows PM/PX/Superintendent/Project Coordinator to see future closeout risk
 
 Procore remains an external project-management system. Wave 9 must not clone Procore forms or use Procore as the source of truth for lifecycle readiness completion state.
 
+System-of-record ownership boundaries for lifecycle readiness, linked Procore records, and derived readiness posture are governed by `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`.
+
 Allowed architecture posture:
 
 - deep link to relevant Procore records;

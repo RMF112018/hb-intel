@@ -67,6 +67,18 @@ It does **not** specify:
 - SPFx module code (lives in `apps/project-control-center/` and `apps/document-control-center/` when those apps are created),
 - specific Entra group object IDs or SharePoint group IDs (those are tenant configuration and recorded in §22 as Open Decisions where unresolved).
 
+### 2.4 System-of-record authority binding
+
+Field-level system-of-record ownership for PCC is governed by [`System_of_Record_Matrix.md`](./System_of_Record_Matrix.md).
+
+Binding rules:
+
+- Procore-native records remain Procore-owned.
+- PCC-native legacy workflow replacement records are PCC-owned.
+- Sage Intacct remains the accounting book of record.
+- PCC evidence links are PCC-owned reference/classification records; linked source objects remain source-owned.
+- PCC-derived records and signals must preserve source lineage and must not relabel source ownership.
+
 ---
 
 ## 3. Project Site Lifecycle Context
@@ -1527,6 +1539,16 @@ Surface current-state summaries, readiness checks, exception queues, project-con
 Procore remains the system of record for Procore-owned project-management workflows: RFIs, submittals, drawings, specifications, daily logs, inspections, observations, incidents, punch items, commitments, change events, prime contracts, budget views, requisitions / subcontractor invoices, direct costs, directory / companies / users, meetings, correspondence, photos / field media (when used).
 
 **Sage Intacct remains the accounting book of record.** Procore may provide project-management-domain financial state — commitments, change events, requisitions, prime contract status, and project-level budget views — but PCC must label these as **Procore-sourced operational / project-management financial summaries**. PCC must never reposition Procore figures as accounting figures or use Procore values for general-ledger purposes.
+
+PCC is the system of record for PCC-native legacy workflow replacements not generated or maintained by Procore, including Responsibility Matrix, Permit Log, Required Inspection Log where not generated in Procore, Constraints Log, Project Readiness records, PCC evidence links, PCC priority actions, and PCC risk/exposure signals.
+
+For authoritative field-level ownership, sync direction, and conflict handling across all systems, see [`System_of_Record_Matrix.md`](./System_of_Record_Matrix.md).
+
+Record owner vs evidence source rule:
+
+- Procore-owned records may be linked as evidence/supporting context for PCC-native records.
+- The PCC-native record remains PCC-owned.
+- The linked Procore object remains Procore-owned.
 
 #### 18.1.3 SPFx boundary
 
