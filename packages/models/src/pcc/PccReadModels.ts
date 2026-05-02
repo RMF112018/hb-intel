@@ -30,6 +30,17 @@ import type { PccProjectId } from './types.js';
 import type { PccProjectReadinessFrameworkReadModel } from './ProjectReadinessFramework.js';
 import type { PccLifecycleReadinessReadModel } from './LifecycleReadiness.js';
 import type { PccPermitInspectionControlCenterReadModel } from './PermitInspectionControlCenter.js';
+import type {
+  IResponsibilityAuditEvent,
+  IResponsibilityException,
+  IResponsibilityMatrixSnapshot,
+  IResponsibilityMatrixSourcePosture,
+  IResponsibilityProjectInstanceRecord,
+  IResponsibilityTemplateLibraryRecord,
+  IResponsibilityWorkbookSourceSummary,
+  ResponsibilityMatrixHealthScore,
+  ResponsibilityMatrixLane,
+} from './ResponsibilityMatrix.js';
 
 export const PCC_READ_MODEL_MODES = ['fixture', 'mock', 'local'] as const;
 export type PccReadModelMode = (typeof PCC_READ_MODEL_MODES)[number];
@@ -132,6 +143,18 @@ export interface PccSettingsReadModel {
   settings: readonly IPccSettingsRef[];
 }
 
+export interface PccResponsibilityMatrixReadModel {
+  templates: readonly IResponsibilityTemplateLibraryRecord[];
+  projectInstances: readonly IResponsibilityProjectInstanceRecord[];
+  exceptions: readonly IResponsibilityException[];
+  healthScore: ResponsibilityMatrixHealthScore;
+  workbookSourceSummary: IResponsibilityWorkbookSourceSummary;
+  sourcePosture: IResponsibilityMatrixSourcePosture;
+  snapshotHistory: readonly IResponsibilityMatrixSnapshot[];
+  auditEvents: readonly IResponsibilityAuditEvent[];
+  laneVocabulary?: readonly ResponsibilityMatrixLane[];
+}
+
 export interface PccReadModelResponseMap {
   profile: PccReadModelEnvelope<PccProjectProfileReadModel>;
   modules: PccReadModelEnvelope<PccWorkCenterRegistryReadModel>;
@@ -145,4 +168,5 @@ export interface PccReadModelResponseMap {
   'project-readiness': PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>;
   'lifecycle-readiness': PccReadModelEnvelope<PccLifecycleReadinessReadModel>;
   'permit-inspection-control-center': PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>;
+  'responsibility-matrix': PccReadModelEnvelope<PccResponsibilityMatrixReadModel>;
 }
