@@ -15,14 +15,15 @@ import type { IPccTeamAccessReadModelClient } from '../surfaces/teamAccess/useTe
 import type { IPccDocumentsReadModelClient } from '../surfaces/documents/documentControlViewModel';
 import type { IPccProjectReadinessReadModelClient } from '../surfaces/projectReadiness/projectReadinessViewModel';
 import type { IPccPermitInspectionControlCenterReadModelClient } from '../surfaces/projectReadiness/permitInspectionControlCenterViewModel';
+import type { IPccResponsibilityMatrixReadModelClient } from '../surfaces/responsibilityMatrix/responsibilityMatrixViewModel';
 
 /**
  * Combined narrow read-model client surface for the router. Lists the
  * methods consumed by surfaces that opt into the read-model seam (Project
  * Home, Team & Access, Documents, Project Readiness — the latter also
- * hosts Wave 9 Lifecycle and Wave 10 Permit & Inspection regions). The
- * full `IPccReadModelClient` returned by `createPccReadModelClient` flows
- * in via TypeScript structural typing.
+ * hosts Wave 9 Lifecycle, Wave 10 Permit & Inspection, and Wave 11
+ * Responsibility Matrix regions). The full `IPccReadModelClient` returned
+ * by `createPccReadModelClient` flows in via TypeScript structural typing.
  */
 export interface IPccSurfaceRouterReadModelClient
   extends
@@ -30,7 +31,8 @@ export interface IPccSurfaceRouterReadModelClient
     IPccTeamAccessReadModelClient,
     IPccDocumentsReadModelClient,
     IPccProjectReadinessReadModelClient,
-    IPccPermitInspectionControlCenterReadModelClient {}
+    IPccPermitInspectionControlCenterReadModelClient,
+    IPccResponsibilityMatrixReadModelClient {}
 
 export interface PccSurfaceRouterProps {
   activeSurfaceId: PccMvpSurfaceId;

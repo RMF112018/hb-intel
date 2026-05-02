@@ -645,3 +645,48 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Wave 11 — Responsibility Matrix region group is mounted inside the
+// Project Readiness surface (not its own router case). These additive
+// assertions confirm the embedding without duplicating the comprehensive
+// coverage in `PccResponsibilityMatrixRegions.test.tsx`.
+// ---------------------------------------------------------------------------
+
+describe('Project Readiness surface — Wave 11 Responsibility Matrix embedding', () => {
+  const RM_LANES: readonly string[] = [
+    'overview',
+    'matrix',
+    'register',
+    'owner-contract-mapping',
+    'my-responsibilities',
+    'gaps-and-conflicts',
+    'handoffs',
+    'template-and-admin',
+  ];
+
+  it('renders all 8 Responsibility Matrix lane markers within the project-readiness surface output', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    for (const lane of RM_LANES) {
+      expect(
+        container.querySelector(`[data-pcc-rm-lane="${lane}"]`),
+        `missing Responsibility Matrix lane "${lane}"`,
+      ).not.toBeNull();
+    }
+  });
+
+  it('Responsibility Matrix region cards remain direct children of the bento grid', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const markers = container.querySelectorAll(
+      '[data-pcc-readiness-section="responsibility-matrix"]',
+    );
+    expect(markers.length).toBeGreaterThanOrEqual(RM_LANES.length);
+    for (const marker of Array.from(markers)) {
+      const card = marker.closest('[data-pcc-card]');
+      expect(card).not.toBeNull();
+      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
+    }
+  });
+});

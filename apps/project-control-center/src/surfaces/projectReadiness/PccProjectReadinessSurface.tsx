@@ -27,6 +27,7 @@ import {
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+  SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   PccLifecycleReadinessReadModel,
@@ -34,6 +35,7 @@ import type {
   PccProjectId,
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
+  PccResponsibilityMatrixReadModel,
 } from '@hbc/models/pcc';
 import { PccPermitInspectionControlCenterRegions } from './PccPermitInspectionControlCenterRegions';
 import {
@@ -41,6 +43,13 @@ import {
   type IPccPermitInspectionControlCenterReadModelClient,
 } from './permitInspectionControlCenterViewModel';
 import { usePermitInspectionControlCenterReadModel } from './usePermitInspectionControlCenterReadModel';
+import { PccResponsibilityMatrixRegions } from '../responsibilityMatrix/PccResponsibilityMatrixRegions';
+import { buildPccResponsibilityMatrixViewModel } from '../responsibilityMatrix/responsibilityMatrixAdapter';
+import { useResponsibilityMatrixReadModel } from '../responsibilityMatrix/useResponsibilityMatrixReadModel';
+import type {
+  IPccResponsibilityMatrixReadModelClient,
+  IPccResponsibilityMatrixViewModel,
+} from '../responsibilityMatrix/responsibilityMatrixViewModel';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
@@ -78,7 +87,8 @@ import styles from './PccProjectReadinessSurface.module.css';
 
 interface PccProjectReadinessSurfaceProps {
   readonly readModelClient?: IPccProjectReadinessReadModelClient &
-    IPccPermitInspectionControlCenterReadModelClient;
+    IPccPermitInspectionControlCenterReadModelClient &
+    IPccResponsibilityMatrixReadModelClient;
 }
 
 const FIXTURE_ENVELOPE: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel> = {
@@ -122,6 +132,20 @@ const FIXTURE_PERMIT_INSPECTION_VIEW_MODEL = buildPermitInspectionControlCenterV
   FIXTURE_PERMIT_INSPECTION_ENVELOPE,
 );
 
+const FIXTURE_RESPONSIBILITY_MATRIX_ENVELOPE: PccReadModelEnvelope<PccResponsibilityMatrixReadModel> =
+  {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'fixture',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
+  };
+
+const FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL: IPccResponsibilityMatrixViewModel =
+  buildPccResponsibilityMatrixViewModel(FIXTURE_RESPONSIBILITY_MATRIX_ENVELOPE);
+
 const LIFECYCLE_SECTION_MARKER = 'lifecycle-readiness-center';
 
 export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = ({
@@ -135,6 +159,7 @@ export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = (
       <ReadinessRegions viewModel={FIXTURE_VIEW_MODEL} />
       <LifecycleReadinessRegions viewModel={FIXTURE_LIFECYCLE_VIEW_MODEL} />
       <PccPermitInspectionControlCenterRegions viewModel={FIXTURE_PERMIT_INSPECTION_VIEW_MODEL} />
+      <PccResponsibilityMatrixRegions viewModel={FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL} />
     </Fragment>
   );
 };
@@ -147,7 +172,8 @@ export default PccProjectReadinessSurface;
 
 interface ReadModelContentProps {
   readonly client: IPccProjectReadinessReadModelClient &
-    IPccPermitInspectionControlCenterReadModelClient;
+    IPccPermitInspectionControlCenterReadModelClient &
+    IPccResponsibilityMatrixReadModelClient;
 }
 
 const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
@@ -160,11 +186,16 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
     client,
     SAMPLE_PROJECT_PROFILE.projectId,
   );
+  const responsibilityMatrixViewModel = useResponsibilityMatrixReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
   return (
     <Fragment>
       <ReadinessRegions viewModel={viewModel} />
       <LifecycleReadinessRegions viewModel={lifecycleViewModel} />
       <PccPermitInspectionControlCenterRegions viewModel={permitInspectionViewModel} />
+      <PccResponsibilityMatrixRegions viewModel={responsibilityMatrixViewModel} />
     </Fragment>
   );
 };
