@@ -1,6 +1,7 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type {
   PccConstraintsLogReadModel,
+  PccCrossProjectKnowledgeReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -9,12 +10,18 @@ import type {
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
+  PccProjectLensesReadModel,
+  PccProjectMemoryReadModel,
   PccProjectProfileReadModel,
   PccProjectReadinessFrameworkReadModel,
+  PccProjectTraceabilityReadModel,
   PccReadModelEnvelope,
   PccResponsibilityMatrixReadModel,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
+  PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
+  PccWarrantyTraceReadModel,
   PccWorkCenterRegistryReadModel,
 } from '@hbc/models/pcc';
 import {
@@ -30,7 +37,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the thirteen backend route ids', () => {
+  it('enumerates exactly the twenty backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -45,7 +52,31 @@ describe('IPccReadModelClient route metadata', () => {
       'permit-inspection-control-center',
       'responsibility-matrix',
       'constraints-log',
+      'unified-lifecycle',
+      'project-memory',
+      'project-lenses',
+      'project-traceability',
+      'warranty-trace',
+      'cross-project-knowledge',
+      'unified-search',
     ]);
+  });
+
+  // Wave 99 / Prompt 04A — guard against drift toward older non-canonical
+  // route names. These are internal read-model substructures only and must
+  // never appear as canonical route ids or templates.
+  it('does not expose any non-canonical legacy route ids or paths', () => {
+    const forbidden = ['lifecycle-timeline', 'traceability-graph', 'closed-project-references'];
+    for (const id of PCC_READ_MODEL_ROUTE_IDS) {
+      for (const f of forbidden) {
+        expect(id).not.toBe(f);
+      }
+    }
+    for (const path of Object.values(PCC_READ_MODEL_ROUTE_PATHS)) {
+      for (const f of forbidden) {
+        expect(path).not.toContain(f);
+      }
+    }
   });
 
   it('exposes a static route-path template for every route id', () => {
@@ -107,6 +138,33 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getConstraintsLog']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getUnifiedLifecycle']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getProjectMemory']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccProjectMemoryReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getProjectLenses']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccProjectLensesReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getProjectTraceability']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccProjectTraceabilityReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getWarrantyTrace']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccWarrantyTraceReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getCrossProjectKnowledge']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getUnifiedSearch']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>
+    >();
+  });
+
+  it('exposes optional query as the third positional arg on getUnifiedSearch only', () => {
+    expectTypeOf<IPccReadModelClient['getUnifiedSearch']>().parameters.toEqualTypeOf<
+      [PccProjectId, (PccPersona | undefined)?, (string | undefined)?]
+    >();
   });
 
   it('accepts optional viewerPersona on every method', () => {
@@ -120,7 +178,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the thirteen id literals', () => {
+  it('is the union of the twenty id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -135,6 +193,13 @@ describe('PccReadModelRouteId', () => {
       'permit-inspection-control-center',
       'responsibility-matrix',
       'constraints-log',
+      'unified-lifecycle',
+      'project-memory',
+      'project-lenses',
+      'project-traceability',
+      'warranty-trace',
+      'cross-project-knowledge',
+      'unified-search',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

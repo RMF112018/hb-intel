@@ -15,6 +15,7 @@
 
 import type {
   PccConstraintsLogReadModel,
+  PccCrossProjectKnowledgeReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -23,12 +24,18 @@ import type {
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
+  PccProjectLensesReadModel,
+  PccProjectMemoryReadModel,
   PccProjectProfileReadModel,
   PccProjectReadinessFrameworkReadModel,
+  PccProjectTraceabilityReadModel,
   PccReadModelEnvelope,
   PccResponsibilityMatrixReadModel,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
+  PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
+  PccWarrantyTraceReadModel,
   PccWorkCenterRegistryReadModel,
 } from '@hbc/models/pcc';
 
@@ -48,6 +55,13 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'permit-inspection-control-center',
   'responsibility-matrix',
   'constraints-log',
+  'unified-lifecycle',
+  'project-memory',
+  'project-lenses',
+  'project-traceability',
+  'warranty-trace',
+  'cross-project-knowledge',
+  'unified-search',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -73,6 +87,13 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'permit-inspection-control-center': 'pcc/projects/{projectId}/permit-inspection-control-center',
   'responsibility-matrix': 'pcc/projects/{projectId}/responsibility-matrix',
   'constraints-log': 'pcc/projects/{projectId}/constraints-log',
+  'unified-lifecycle': 'pcc/projects/{projectId}/unified-lifecycle',
+  'project-memory': 'pcc/projects/{projectId}/project-memory',
+  'project-lenses': 'pcc/projects/{projectId}/project-lenses',
+  'project-traceability': 'pcc/projects/{projectId}/project-traceability',
+  'warranty-trace': 'pcc/projects/{projectId}/warranty-trace',
+  'cross-project-knowledge': 'pcc/projects/{projectId}/cross-project-knowledge',
+  'unified-search': 'pcc/projects/{projectId}/unified-search',
 };
 
 /**
@@ -149,4 +170,46 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>;
+
+  getUnifiedLifecycle(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
+
+  getProjectMemory(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectMemoryReadModel>>;
+
+  getProjectLenses(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectLensesReadModel>>;
+
+  getProjectTraceability(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectTraceabilityReadModel>>;
+
+  getWarrantyTrace(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccWarrantyTraceReadModel>>;
+
+  getCrossProjectKnowledge(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel>>;
+
+  /**
+   * Mirrors backend route `pcc/projects/{projectId}/unified-search`.
+   * `query` maps to URL query parameter `q`. Blank/undefined `query`
+   * MUST NOT add `q` to the URL. `viewerPersona` is a passthrough only;
+   * it is never serialized to the URL.
+   */
+  getUnifiedSearch(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+    query?: string,
+  ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
 }

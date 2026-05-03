@@ -7,8 +7,15 @@ import {
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+  SAMPLE_PROJECT_LENSES_READ_MODEL,
+  SAMPLE_PROJECT_MEMORY_READ_MODEL,
+  SAMPLE_PROJECT_TRACEABILITY_READ_MODEL,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
+  SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+  SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+  SAMPLE_WARRANTY_TRACE_READ_MODEL,
 } from '@hbc/models/pcc';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
 import { createPccFixtureReadModelClient } from './pccFixtureReadModelClient.js';
@@ -35,8 +42,15 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
       client.getConstraintsLog(KNOWN_PROJECT_ID),
+      client.getUnifiedLifecycle(KNOWN_PROJECT_ID),
+      client.getProjectMemory(KNOWN_PROJECT_ID),
+      client.getProjectLenses(KNOWN_PROJECT_ID),
+      client.getProjectTraceability(KNOWN_PROJECT_ID),
+      client.getWarrantyTrace(KNOWN_PROJECT_ID),
+      client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
+      client.getUnifiedSearch(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(13);
+    expect(envelopes).toHaveLength(20);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -127,6 +141,13 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
       client.getConstraintsLog(KNOWN_PROJECT_ID),
+      client.getUnifiedLifecycle(KNOWN_PROJECT_ID),
+      client.getProjectMemory(KNOWN_PROJECT_ID),
+      client.getProjectLenses(KNOWN_PROJECT_ID),
+      client.getProjectTraceability(KNOWN_PROJECT_ID),
+      client.getWarrantyTrace(KNOWN_PROJECT_ID),
+      client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
+      client.getUnifiedSearch(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -553,6 +574,191 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
       reviewType: 'compliance-review',
       reviewState: 'in-review',
       assignedRoleCode: 'R18',
+    });
+  });
+});
+
+// Wave 99 / Prompt 04A — unified-lifecycle parity (seven methods)
+describe('createPccFixtureReadModelClient — unified-lifecycle parity (Wave 99)', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  describe('getUnifiedLifecycle', () => {
+    it('known project returns canonical sample with sourceStatus="available"', async () => {
+      const env = await client.getUnifiedLifecycle(KNOWN_PROJECT_ID);
+      expect(env.mode).toBe('fixture');
+      expect(env.readOnly).toBe(true);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.warnings).toEqual([]);
+      expect(env.projectId).toBe(KNOWN_PROJECT_ID);
+      expect(env.data).toBe(SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL);
+    });
+
+    it('unknown project returns empty aggregate with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getUnifiedLifecycle(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.warnings[0]!.code).toBe('source-unavailable');
+      expect(env.data.lifecycleTimeline.events).toEqual([]);
+      expect(env.data.lifecycleTimeline.checkpoints).toEqual([]);
+      expect(env.data.projectMemory.records).toEqual([]);
+      expect(env.data.projectLenses.stageLenses).toEqual([]);
+      expect(env.data.projectTraceability.edges).toEqual([]);
+      expect(env.data.projectTraceability.graph.edges).toEqual([]);
+      expect(env.data.warrantyTrace.traces).toEqual([]);
+      expect(env.data.crossProjectKnowledge.crossProjectReferences).toEqual([]);
+      expect(env.data.unifiedSearch.responses).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty aggregate with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getUnifiedLifecycle(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.warnings[0]!.code).toBe('backend-unavailable');
+      expect(env.data.lifecycleTimeline.events).toEqual([]);
+      expect(env.data.unifiedSearch.responses).toEqual([]);
+    });
+  });
+
+  describe('getProjectMemory', () => {
+    it('known project returns canonical sample with sourceStatus="available"', async () => {
+      const env = await client.getProjectMemory(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.data).toBe(SAMPLE_PROJECT_MEMORY_READ_MODEL);
+    });
+
+    it('unknown project returns empty memory with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getProjectMemory(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.data.records).toEqual([]);
+      expect(env.data.decisions).toEqual([]);
+      expect(env.data.assumptions).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty memory with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getProjectMemory(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.data.records).toEqual([]);
+    });
+  });
+
+  describe('getProjectLenses', () => {
+    it('known project returns canonical sample with sourceStatus="available"', async () => {
+      const env = await client.getProjectLenses(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.data).toBe(SAMPLE_PROJECT_LENSES_READ_MODEL);
+    });
+
+    it('unknown project returns empty lenses with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getProjectLenses(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.data.stageLenses).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty lenses with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getProjectLenses(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.data.stageLenses).toEqual([]);
+    });
+  });
+
+  describe('getProjectTraceability', () => {
+    it('known project returns canonical sample with sourceStatus="available"', async () => {
+      const env = await client.getProjectTraceability(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.data).toBe(SAMPLE_PROJECT_TRACEABILITY_READ_MODEL);
+    });
+
+    it('unknown project returns empty traceability with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getProjectTraceability(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.data.edges).toEqual([]);
+      expect(env.data.clusters).toEqual([]);
+      expect(env.data.graph.edges).toEqual([]);
+      expect(env.data.graph.clusters).toEqual([]);
+      expect(env.data.relatedLifecycleEvents).toEqual([]);
+      expect(env.data.relatedMemoryRecords).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty traceability with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getProjectTraceability(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.data.edges).toEqual([]);
+    });
+  });
+
+  describe('getWarrantyTrace', () => {
+    it('known project returns canonical sample with sourceStatus="available"', async () => {
+      const env = await client.getWarrantyTrace(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.data).toBe(SAMPLE_WARRANTY_TRACE_READ_MODEL);
+    });
+
+    it('unknown project returns empty traces with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getWarrantyTrace(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.data.traces).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty traces with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getWarrantyTrace(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.data.traces).toEqual([]);
+    });
+  });
+
+  describe('getCrossProjectKnowledge', () => {
+    it('known project returns canonical sample with sourceStatus="available"', async () => {
+      const env = await client.getCrossProjectKnowledge(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.data).toBe(SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL);
+    });
+
+    it('unknown project returns empty cross-project knowledge with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getCrossProjectKnowledge(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.data.crossProjectReferences).toEqual([]);
+      expect(env.data.knowledgeReferences).toEqual([]);
+      expect(env.data.closedProjectReferences.references).toEqual([]);
+      expect(env.data.closedProjectReferences.futurePursuitReferences).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty cross-project knowledge with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getCrossProjectKnowledge(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.data.crossProjectReferences).toEqual([]);
+    });
+  });
+
+  describe('getUnifiedSearch', () => {
+    it('known project returns canonical sample with sourceStatus="available" (no live search, fully cited)', async () => {
+      const env = await client.getUnifiedSearch(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.data).toBe(SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL);
+    });
+
+    it('returns deterministic output regardless of query value (no fabrication)', async () => {
+      const a = await client.getUnifiedSearch(KNOWN_PROJECT_ID, undefined, 'foo');
+      const b = await client.getUnifiedSearch(KNOWN_PROJECT_ID, undefined, 'bar');
+      const c = await client.getUnifiedSearch(KNOWN_PROJECT_ID);
+      expect(a.data).toBe(SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL);
+      expect(b.data).toBe(SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL);
+      expect(c.data).toBe(SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL);
+    });
+
+    it('echoes optional viewerPersona on the envelope when provided (passthrough only)', async () => {
+      const env = await client.getUnifiedSearch(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+      expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+    });
+
+    it('unknown project returns empty responses with sourceStatus="source-unavailable"', async () => {
+      const env = await client.getUnifiedSearch(UNKNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(env.data.responses).toEqual([]);
+    });
+
+    it('simulateBackendUnavailable returns empty responses with sourceStatus="backend-unavailable"', async () => {
+      const env = await unavailable.getUnifiedSearch(KNOWN_PROJECT_ID);
+      expect(env.sourceStatus).toBe('backend-unavailable');
+      expect(env.data.responses).toEqual([]);
     });
   });
 });

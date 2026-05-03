@@ -39,6 +39,13 @@ const ROUTE_METHOD_TUPLES: readonly IRouteMethodTuple[] = [
   },
   { routeId: 'responsibility-matrix', clientMethod: 'getResponsibilityMatrix' },
   { routeId: 'constraints-log', clientMethod: 'getConstraintsLog' },
+  { routeId: 'unified-lifecycle', clientMethod: 'getUnifiedLifecycle' },
+  { routeId: 'project-memory', clientMethod: 'getProjectMemory' },
+  { routeId: 'project-lenses', clientMethod: 'getProjectLenses' },
+  { routeId: 'project-traceability', clientMethod: 'getProjectTraceability' },
+  { routeId: 'warranty-trace', clientMethod: 'getWarrantyTrace' },
+  { routeId: 'cross-project-knowledge', clientMethod: 'getCrossProjectKnowledge' },
+  { routeId: 'unified-search', clientMethod: 'getUnifiedSearch' },
 ];
 
 function buildOkEnvelope(): PccReadModelEnvelope<PccProjectHomeReadModel> {
@@ -84,7 +91,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('createPccBackendReadModelClient — URL & method (all 13 routes)', () => {
+describe('createPccBackendReadModelClient — URL & method (all 20 routes)', () => {
   for (const tuple of ROUTE_METHOD_TUPLES) {
     it(`builds GET ${PCC_READ_MODEL_ROUTE_PATHS[tuple.routeId]}`, async () => {
       const okEnvelope: PccReadModelEnvelope<unknown> = {
@@ -115,7 +122,7 @@ describe('createPccBackendReadModelClient — URL & method (all 13 routes)', () 
     });
   }
 
-  it('never generates POST/PUT/PATCH/DELETE requests across all 13 methods', async () => {
+  it('never generates POST/PUT/PATCH/DELETE requests across all 20 methods', async () => {
     const fetchImpl: PccReadModelFetch = vi
       .fn<PccReadModelFetch>()
       .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
@@ -320,6 +327,96 @@ describe('createPccBackendReadModelClient — constraints-log success path', () 
   });
 });
 
+describe('createPccBackendReadModelClient — getUnifiedSearch q-param wiring', () => {
+  const baseUrl = 'https://example.invalid';
+  const basePath = `${baseUrl}/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/unified-search`;
+
+  function makeClient(): {
+    client: ReturnType<typeof createPccBackendReadModelClient>;
+    fetchImpl: PccReadModelFetch;
+  } {
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: baseUrl,
+      fetch: fetchImpl,
+    });
+    return { client, fetchImpl };
+  }
+
+  it('appends ?q=<encoded> when query is provided (viewerPersona omitted)', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID, undefined, 'risk register');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledWith(`${basePath}?q=risk%20register`, { method: 'GET' });
+  });
+
+  it('URL-encodes special characters in q', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID, undefined, 'foo&bar=baz?qux/zap');
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `${basePath}?q=${encodeURIComponent('foo&bar=baz?qux/zap')}`,
+      { method: 'GET' },
+    );
+  });
+
+  it('omits ?q= entirely when query is undefined (no third arg passed)', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID);
+    expect(fetchImpl).toHaveBeenCalledWith(basePath, { method: 'GET' });
+    expect(((fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock
+      .calls[0]![0] as string)).not.toContain('?q=');
+  });
+
+  it('omits ?q= when query is the empty string', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID, undefined, '');
+    expect(fetchImpl).toHaveBeenCalledWith(basePath, { method: 'GET' });
+  });
+
+  it('omits ?q= when query is whitespace only', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID, undefined, '   ');
+    expect(fetchImpl).toHaveBeenCalledWith(basePath, { method: 'GET' });
+  });
+
+  // Position-proof: viewerPersona must NOT be serialized to the URL or
+  // mistaken for the query arg. With only (projectId, viewerPersona) passed,
+  // the URL must be the bare unified-search path with no query string.
+  it('does not treat viewerPersona as a query (no ?q=, persona absent from URL)', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const calledWith = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock
+      .calls[0]![0] as string;
+    expect(calledWith).toBe(basePath);
+    expect(calledWith).not.toContain('?');
+    expect(calledWith).not.toContain(SAMPLE_PERSONA);
+    expect(calledWith).not.toContain('q=');
+  });
+
+  it('passes both viewerPersona (passthrough only) and query (q-param) when both provided', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getUnifiedSearch(KNOWN_PROJECT_ID, SAMPLE_PERSONA, 'memory');
+    const calledWith = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock
+      .calls[0]![0] as string;
+    expect(calledWith).toBe(`${basePath}?q=memory`);
+    expect(calledWith).not.toContain(SAMPLE_PERSONA);
+  });
+
+  it('no other route receives a ?q= query string under the same usage', async () => {
+    const { client, fetchImpl } = makeClient();
+    await client.getProjectMemory(KNOWN_PROJECT_ID);
+    await client.getCrossProjectKnowledge(KNOWN_PROJECT_ID);
+    await client.getProjectTraceability(KNOWN_PROJECT_ID);
+    const calls = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls;
+    for (const [url] of calls) {
+      expect(url as string).not.toContain('?q=');
+    }
+  });
+});
+
 describe('createPccBackendReadModelClient — failure paths return backend-unavailable', () => {
   async function expectBackendUnavailable(fetchMock: PccReadModelFetch): Promise<void> {
     const client = createPccBackendReadModelClient({
@@ -367,7 +464,7 @@ describe('createPccBackendReadModelClient — failure paths return backend-unava
 });
 
 describe('createPccBackendReadModelClient — config-fallback paths', () => {
-  it('empty backendBaseUrl → all 13 methods return backend-unavailable, no fetch invoked', async () => {
+  it('empty backendBaseUrl → all 20 methods return backend-unavailable, no fetch invoked', async () => {
     const fetchImpl = vi.fn<PccReadModelFetch>();
     const client = createPccBackendReadModelClient({
       backendBaseUrl: '',
@@ -383,7 +480,7 @@ describe('createPccBackendReadModelClient — config-fallback paths', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('whitespace-only backendBaseUrl → all 13 methods return backend-unavailable, no fetch invoked', async () => {
+  it('whitespace-only backendBaseUrl → all 20 methods return backend-unavailable, no fetch invoked', async () => {
     const fetchImpl = vi.fn<PccReadModelFetch>();
     const client = createPccBackendReadModelClient({
       backendBaseUrl: '   ',
@@ -399,7 +496,7 @@ describe('createPccBackendReadModelClient — config-fallback paths', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('no global fetch and no options.fetch → constructor does not throw; all 13 methods return backend-unavailable', async () => {
+  it('no global fetch and no options.fetch → constructor does not throw; all 20 methods return backend-unavailable', async () => {
     delete (globalThis as { fetch?: unknown }).fetch;
     const client = createPccBackendReadModelClient({
       backendBaseUrl: 'https://example.invalid',

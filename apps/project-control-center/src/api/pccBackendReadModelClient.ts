@@ -74,6 +74,7 @@ export function createPccBackendReadModelClient(
     routeId: PccReadModelRouteId,
     projectId: PccProjectId,
     fallbackEnvelope: () => Promise<PccReadModelEnvelope<T>>,
+    query?: string,
   ): Promise<PccReadModelEnvelope<T>> {
     if (!apiBaseUrl) return fallbackEnvelope();
     if (!fetchImpl) return fallbackEnvelope();
@@ -82,7 +83,12 @@ export function createPccBackendReadModelClient(
       '{projectId}',
       encodeURIComponent(projectId),
     );
-    const url = `${apiBaseUrl}/${path}`;
+    // Only `unified-search` accepts a `q` query param. Blank/whitespace/undefined
+    // `query` MUST NOT add `?q=` to the URL. `viewerPersona` (handled at the
+    // method layer) is never serialized into the URL.
+    const trimmedQuery = typeof query === 'string' ? query.trim() : '';
+    const search = trimmedQuery ? `?q=${encodeURIComponent(trimmedQuery)}` : '';
+    const url = `${apiBaseUrl}/${path}${search}`;
 
     let response: Response;
     try {
@@ -144,6 +150,37 @@ export function createPccBackendReadModelClient(
     getConstraintsLog: (projectId, viewerPersona) =>
       callBackend('constraints-log', projectId, () =>
         fallback.getConstraintsLog(projectId, viewerPersona),
+      ),
+    getUnifiedLifecycle: (projectId, viewerPersona) =>
+      callBackend('unified-lifecycle', projectId, () =>
+        fallback.getUnifiedLifecycle(projectId, viewerPersona),
+      ),
+    getProjectMemory: (projectId, viewerPersona) =>
+      callBackend('project-memory', projectId, () =>
+        fallback.getProjectMemory(projectId, viewerPersona),
+      ),
+    getProjectLenses: (projectId, viewerPersona) =>
+      callBackend('project-lenses', projectId, () =>
+        fallback.getProjectLenses(projectId, viewerPersona),
+      ),
+    getProjectTraceability: (projectId, viewerPersona) =>
+      callBackend('project-traceability', projectId, () =>
+        fallback.getProjectTraceability(projectId, viewerPersona),
+      ),
+    getWarrantyTrace: (projectId, viewerPersona) =>
+      callBackend('warranty-trace', projectId, () =>
+        fallback.getWarrantyTrace(projectId, viewerPersona),
+      ),
+    getCrossProjectKnowledge: (projectId, viewerPersona) =>
+      callBackend('cross-project-knowledge', projectId, () =>
+        fallback.getCrossProjectKnowledge(projectId, viewerPersona),
+      ),
+    getUnifiedSearch: (projectId, viewerPersona, query) =>
+      callBackend(
+        'unified-search',
+        projectId,
+        () => fallback.getUnifiedSearch(projectId, viewerPersona, query),
+        query,
       ),
   };
 }

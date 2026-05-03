@@ -28,15 +28,22 @@ import {
   PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PRIORITY_ACTIONS,
+  SAMPLE_PROJECT_LENSES_READ_MODEL,
+  SAMPLE_PROJECT_MEMORY_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+  SAMPLE_PROJECT_TRACEABILITY_READ_MODEL,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
+  SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+  SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+  SAMPLE_WARRANTY_TRACE_READ_MODEL,
   SEVERITY_OVERRIDE_RULES,
   URGENCY_LABELS,
 } from '@hbc/models/pcc';
@@ -45,6 +52,7 @@ import type {
   IProjectProfile,
   LifecycleReadinessStatus,
   PccConstraintsLogReadModel,
+  PccCrossProjectKnowledgeReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -53,15 +61,21 @@ import type {
   PccPriorityActionsReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
+  PccProjectLensesReadModel,
+  PccProjectMemoryReadModel,
   PccProjectNumber,
   PccProjectProfileReadModel,
   PccProjectReadinessFrameworkReadModel,
+  PccProjectTraceabilityReadModel,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
   PccReadModelWarning,
   PccResponsibilityMatrixReadModel,
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
+  PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
+  PccWarrantyTraceReadModel,
   PccWorkCenterRegistryReadModel,
   SeverityBandKey,
 } from '@hbc/models/pcc';
@@ -507,6 +521,58 @@ const EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccConstraintsLogRea
   },
 };
 
+// Wave 99 unified lifecycle empty/degraded shapes. Used for both
+// `source-unavailable` (unknown project) and `backend-unavailable`
+// (simulator) envelopes; the envelope-level `sourceStatus` carries the
+// distinction. Shapes mirror the canonical `@hbc/models/pcc`
+// interfaces — no invented fields.
+const EMPTY_PROJECT_MEMORY_READ_MODEL: PccProjectMemoryReadModel = {
+  records: [],
+  decisions: [],
+  assumptions: [],
+};
+
+const EMPTY_PROJECT_LENSES_READ_MODEL: PccProjectLensesReadModel = {
+  stageLenses: [],
+};
+
+const EMPTY_PROJECT_TRACEABILITY_READ_MODEL: PccProjectTraceabilityReadModel = {
+  edges: [],
+  clusters: [],
+  graph: { edges: [], clusters: [] },
+  relatedLifecycleEvents: [],
+  relatedMemoryRecords: [],
+};
+
+const EMPTY_WARRANTY_TRACE_READ_MODEL: PccWarrantyTraceReadModel = {
+  traces: [],
+};
+
+const EMPTY_CROSS_PROJECT_KNOWLEDGE_READ_MODEL: PccCrossProjectKnowledgeReadModel = {
+  crossProjectReferences: [],
+  knowledgeReferences: [],
+  closedProjectReferences: { references: [], futurePursuitReferences: [] },
+};
+
+const EMPTY_UNIFIED_SEARCH_ASK_HBI_READ_MODEL: PccUnifiedSearchAskHbiReadModel = {
+  responses: [],
+};
+
+const EMPTY_UNIFIED_LIFECYCLE_READ_MODEL: PccUnifiedLifecycleReadModel = {
+  lifecycleTimeline: {
+    events: [],
+    checkpoints: [],
+    gateSignals: [],
+    contextReferences: [],
+  },
+  projectMemory: EMPTY_PROJECT_MEMORY_READ_MODEL,
+  projectLenses: EMPTY_PROJECT_LENSES_READ_MODEL,
+  projectTraceability: EMPTY_PROJECT_TRACEABILITY_READ_MODEL,
+  warrantyTrace: EMPTY_WARRANTY_TRACE_READ_MODEL,
+  crossProjectKnowledge: EMPTY_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+  unifiedSearch: EMPTY_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+};
+
 class PccFixtureReadModelClient implements IPccReadModelClient {
   private readonly simulateBackendUnavailable: boolean;
   private readonly now: () => string;
@@ -878,6 +944,228 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
       viewerPersona,
       'available',
       SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+      [],
+    );
+  }
+
+  async getUnifiedLifecycle(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_UNIFIED_LIFECYCLE_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_UNIFIED_LIFECYCLE_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+      [],
+    );
+  }
+
+  async getProjectMemory(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectMemoryReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_MEMORY_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROJECT_MEMORY_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_PROJECT_MEMORY_READ_MODEL,
+      [],
+    );
+  }
+
+  async getProjectLenses(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectLensesReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_LENSES_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROJECT_LENSES_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_PROJECT_LENSES_READ_MODEL,
+      [],
+    );
+  }
+
+  async getProjectTraceability(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectTraceabilityReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_TRACEABILITY_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROJECT_TRACEABILITY_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_PROJECT_TRACEABILITY_READ_MODEL,
+      [],
+    );
+  }
+
+  async getWarrantyTrace(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccWarrantyTraceReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_WARRANTY_TRACE_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_WARRANTY_TRACE_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_WARRANTY_TRACE_READ_MODEL,
+      [],
+    );
+  }
+
+  async getCrossProjectKnowledge(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+      [],
+    );
+  }
+
+  // Fixture client returns the deterministic, fully-cited canonical sample
+  // regardless of `query`; no live search, no fabrication, no background work.
+  // `query` is part of the contract so backend-mode requests can append `?q=`.
+  async getUnifiedSearch(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+    _query?: string,
+  ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>> {
+    void _query;
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
       [],
     );
   }
