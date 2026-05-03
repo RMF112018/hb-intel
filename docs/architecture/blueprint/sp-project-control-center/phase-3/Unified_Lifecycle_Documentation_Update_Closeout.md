@@ -57,7 +57,7 @@ Pre-existing user-owned runtime modifications were present before documentation 
 - PCC is one unified project operating layer, not departmental workspace segmentation.
 - Surfaces/work centers/workflow modules/lenses are explicitly separated as architecture concepts.
 - Lifecycle continuity, project memory, traceability, warranty evidence lineage, and grounded HBI behavior are documented as governing doctrine.
-- Wave 12 baseline corrected to reflect backend Constraints Log route/provider existence at `HEAD 9f67df78...` while preserving distinction from SPFx integration completeness.
+- Wave 12 Constraints Log has shared model contracts, backend read-model/provider route, and SPFx read-model client seam. Remaining implementation gap is end-user UI/surface integration into Project Readiness and/or the applicable PCC shell route/navigation pattern.
 
 ## 7. Guardrails Added
 
@@ -133,5 +133,5 @@ Recommended description:
 - Adds governing doctrine for unified lifecycle PCC architecture.
 - Adds lifecycle spine, memory layer, lens model, traceability, knowledge reuse, warranty traceability, and HBI grounding docs.
 - Aligns existing blueprint and Phase 3 docs/registers.
-- Corrects Wave 12 baseline posture to include backend route/provider existence while distinguishing remaining integration scope.
+- States the precise Wave 12 baseline: shared model contracts, backend read-model/provider route, and SPFx read-model client seam are in place; remaining gap is end-user UI/surface integration into Project Readiness and/or applicable PCC shell route/navigation pattern.
 - Confirms documentation-only change set with unchanged lockfile MD5.

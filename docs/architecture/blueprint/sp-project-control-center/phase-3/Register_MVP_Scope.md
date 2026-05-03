@@ -132,5 +132,6 @@ Reference doctrine:
 MVP scope interpretation updates:
 
 - Unified PCC context remains mandatory; role/stage/task lenses do not create departmental workspaces.
-- Wave 12 baseline includes backend Constraints Log route/provider existence at `HEAD 9f67df78...`; end-to-end SPFx/surface integration remains wave-dependent.
+- Wave 12 Constraints Log has shared model contracts, backend read-model/provider route, and SPFx read-model client seam.
+- Remaining implementation gap is end-user UI/surface integration into Project Readiness and/or the applicable PCC shell route/navigation pattern.
 - Readiness signal rollups from Constraints Log and Buyout Log preserve source ownership and lineage.

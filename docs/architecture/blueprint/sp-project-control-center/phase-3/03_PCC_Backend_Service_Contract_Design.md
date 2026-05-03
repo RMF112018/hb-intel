@@ -293,5 +293,5 @@ Doctrine references:
 
 Wave 12 baseline correction:
 
-- Constraints Log backend read-model route/provider exists at `HEAD 9f67df78...`.
-- This does not imply SPFx module/surface completeness.
+- Wave 12 Constraints Log has shared model contracts, backend read-model/provider route, and SPFx read-model client seam.
+- Remaining implementation gap is end-user UI/surface integration into Project Readiness and/or the applicable PCC shell route/navigation pattern.

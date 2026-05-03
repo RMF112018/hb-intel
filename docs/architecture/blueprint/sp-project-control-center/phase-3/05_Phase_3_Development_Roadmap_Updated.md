@@ -220,8 +220,8 @@ Roadmap execution should be interpreted with unified lifecycle doctrine authorit
 
 Wave 12 baseline correction:
 
-- At `HEAD 9f67df78...`, Constraints Log backend read-model route/provider exists.
-- Remaining wave execution should distinguish backend availability from SPFx integration completeness.
+- Wave 12 Constraints Log has shared model contracts, backend read-model/provider route, and SPFx read-model client seam.
+- Remaining implementation gap is end-user UI/surface integration into Project Readiness and/or the applicable PCC shell route/navigation pattern.
 
 Readiness aggregation clarification:
 
