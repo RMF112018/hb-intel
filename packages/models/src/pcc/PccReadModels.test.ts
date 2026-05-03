@@ -23,6 +23,7 @@ import {
   type PccLifecycleReadinessReadModel,
   type PccPermitInspectionControlCenterReadModel,
   type PccResponsibilityMatrixReadModel,
+  type PccConstraintsLogReadModel,
 } from './index.js';
 import {
   LIFECYCLE_READINESS_LIBRARY_FAMILY_COUNTS,
@@ -30,6 +31,7 @@ import {
 } from './LifecycleReadiness.js';
 import { PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE } from './fixtures/permitInspectionControlCenter.js';
 import { SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL } from './fixtures/responsibilityMatrix.js';
+import { SAMPLE_CONSTRAINTS_LOG_READ_MODEL } from './fixtures/constraintsLog.js';
 
 describe('PccReadModels exports and typing', () => {
   it('exports all required mode and source-status literals', () => {
@@ -309,6 +311,14 @@ describe('PccReadModels exports and typing', () => {
         data: PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
       };
 
+    const constraintsLogEnvelope: PccReadModelEnvelope<PccConstraintsLogReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+    };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -323,6 +333,7 @@ describe('PccReadModels exports and typing', () => {
       'lifecycle-readiness': lifecycleReadinessEnvelope,
       'permit-inspection-control-center': permitInspectionControlCenterEnvelope,
       'responsibility-matrix': responsibilityMatrixEnvelope,
+      'constraints-log': constraintsLogEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

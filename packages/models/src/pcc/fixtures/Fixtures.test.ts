@@ -31,7 +31,11 @@ import {
   SAMPLE_DRIFT_INDICATORS,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_REPAIR_REQUESTS,
+  SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  SAMPLE_CONSTRAINTS_LOG_RISKS,
+  SAMPLE_CONSTRAINTS_LOG_CONSTRAINTS,
 } from './index.js';
+import { SEVERITY_BAND_KEYS } from '../ConstraintsLog.js';
 import { REPAIR_REQUEST_STATES } from '../RepairRequests.js';
 import { LAUNCH_LINK_STATES } from '../ExternalSystems.js';
 import { BUSINESS_AUDIT_SOURCE_CONTEXT_TYPES } from '../BusinessAuditEvent.js';
@@ -65,6 +69,7 @@ const NAMED_FIXTURES: ReadonlyArray<readonly [string, unknown]> = [
   ['SAMPLE_DRIFT_INDICATORS', SAMPLE_DRIFT_INDICATORS],
   ['SAMPLE_SITE_HEALTH_SUMMARY', SAMPLE_SITE_HEALTH_SUMMARY],
   ['SAMPLE_REPAIR_REQUESTS', SAMPLE_REPAIR_REQUESTS],
+  ['SAMPLE_CONSTRAINTS_LOG_READ_MODEL', SAMPLE_CONSTRAINTS_LOG_READ_MODEL],
 ];
 
 const TENANT_LIVE_URL_PATTERN = /https?:\/\/(?!example\.invalid)[^\s'"`]+/g;
@@ -155,5 +160,18 @@ describe('PCC fixtures', () => {
     for (const state of ['pass', 'fail', 'warning', 'not-run'] as const) {
       expect(observed.has(state)).toBe(true);
     }
+  });
+
+  it('SAMPLE_CONSTRAINTS_LOG_READ_MODEL covers every severity band on both risks and constraints', () => {
+    // Risk band coverage uses the initial assessment so the residual-
+    // reduction scenario (high → moderate with mitigation rationale) is
+    // independent from the band-coverage requirement.
+    const riskBands = new Set(SAMPLE_CONSTRAINTS_LOG_RISKS.map((r) => r.initial.band));
+    const constraintBands = new Set(SAMPLE_CONSTRAINTS_LOG_CONSTRAINTS.map((c) => c.exposure.band));
+    for (const band of SEVERITY_BAND_KEYS) {
+      expect(riskBands.has(band), `risk band coverage missing: ${band}`).toBe(true);
+      expect(constraintBands.has(band), `constraint band coverage missing: ${band}`).toBe(true);
+    }
+    expect(SAMPLE_CONSTRAINTS_LOG_READ_MODEL.moduleIdentity.moduleId).toBe('constraints-log');
   });
 });

@@ -252,6 +252,17 @@ describe('PccReadModelResponseMap registration', () => {
     expect(slot.readOnly).toBe(true);
     expect(slot.data.items.length).toBe(SAMPLE_PROJECT_READINESS_ITEMS.length);
   });
+
+  // Wave 12 Prompt 02 — Path B (record intentional dual posture).
+  // Constraints Log is registered as a Project Readiness source module
+  // here AND as a workflow module under work-center `risk-issues-decision`
+  // in WorkflowModules.ts. No `project-readiness` / `make-ready` /
+  // `constraints-log` work-center id exists in PCC_WORK_CENTER_IDS, so
+  // Wave 12 records the dual posture as intentional rather than inventing
+  // a new center.
+  it('Project Readiness source modules include constraints-log (Wave 12 Path B)', () => {
+    expect(PROJECT_READINESS_SOURCE_MODULES).toContain('constraints-log');
+  });
 });
 
 describe('Project Readiness source-scan guards', () => {

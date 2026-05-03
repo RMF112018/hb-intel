@@ -41,6 +41,7 @@ import type {
   ResponsibilityMatrixHealthScore,
   ResponsibilityMatrixLane,
 } from './ResponsibilityMatrix.js';
+import type { PccConstraintsLogReadModel } from './ConstraintsLog.js';
 
 export const PCC_READ_MODEL_MODES = ['fixture', 'mock', 'local'] as const;
 export type PccReadModelMode = (typeof PCC_READ_MODEL_MODES)[number];
@@ -169,4 +170,5 @@ export interface PccReadModelResponseMap {
   'lifecycle-readiness': PccReadModelEnvelope<PccLifecycleReadinessReadModel>;
   'permit-inspection-control-center': PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>;
   'responsibility-matrix': PccReadModelEnvelope<PccResponsibilityMatrixReadModel>;
+  'constraints-log': PccReadModelEnvelope<PccConstraintsLogReadModel>;
 }

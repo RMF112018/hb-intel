@@ -14,6 +14,18 @@ const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'mapPccPersonaToProjectRole',
   'personaHasCapability',
   'findForbiddenFixtureKeys',
+  // Wave 12 Prompt 02 — pure scoring / band / override / transition helpers
+  // for the Constraints Log model. All functions are deterministic, side-
+  // effect-free, and read-only-by-design.
+  'computeGoverningImpactScore',
+  'computeRiskScore',
+  'computeResidualRiskScore',
+  'computeConstraintExposureScore',
+  'mapSeverityBand',
+  'applySeverityOverride',
+  'assertResidualReductionAllowed',
+  'isRiskTransitionAllowed',
+  'isConstraintTransitionAllowed',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
