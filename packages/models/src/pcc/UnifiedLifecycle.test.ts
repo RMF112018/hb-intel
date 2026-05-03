@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   PCC_CROSS_PROJECT_REFERENCE_STATUSES,
   PCC_HBI_REFUSAL_REASONS,
@@ -22,8 +22,10 @@ import {
   PCC_TRACEABILITY_EDGE_TYPES,
   PCC_WARRANTY_TRACE_STATUSES,
   type PccCrossProjectReference,
+  type PccHbiRefusalReason,
   type PccProjectKnowledgeReference,
   type UnifiedSearchAskHbiResponse,
+  type UnifiedSearchRefusal,
 } from './UnifiedLifecycle.js';
 import { PCC_PERSONAS } from './PccUserRoles.js';
 import {
@@ -274,6 +276,10 @@ describe('UnifiedLifecycle security posture invariants', () => {
         SAMPLE_UNIFIED_SEARCH_REFUSAL_RESPONSE.refusalReason,
       );
     }
+  });
+
+  it('narrows UnifiedSearchRefusal.refusalReason to the canonical PccHbiRefusalReason taxonomy', () => {
+    expectTypeOf<UnifiedSearchRefusal['refusalReason']>().toEqualTypeOf<PccHbiRefusalReason>();
   });
 
   it('keeps executive-note memory records restricted and blocks cross-project reuse', () => {

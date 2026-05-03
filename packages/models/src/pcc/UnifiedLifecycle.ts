@@ -520,7 +520,7 @@ export interface UnifiedSearchRefusal {
   readonly grounded: false;
   readonly citations: readonly [];
   readonly refused: true;
-  readonly refusalReason: string;
+  readonly refusalReason: PccHbiRefusalReason;
 }
 
 export type UnifiedSearchAskHbiResponse = UnifiedSearchGroundedAnswer | UnifiedSearchRefusal;
