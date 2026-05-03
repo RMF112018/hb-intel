@@ -1,0 +1,87 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-md);
+}
+
+.events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+}
+
+.event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--pcc-space-sm);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-md);
+  background: var(--pcc-color-card);
+}
+
+.eventHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--pcc-space-xs);
+  flex-wrap: wrap;
+}
+
+.eventStage {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.eventSummary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pcc-color-text-primary);
+}
+
+.eventMeta {
+  margin: 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.chipRow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pcc-space-xs);
+}
+
+.chipLabel {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}

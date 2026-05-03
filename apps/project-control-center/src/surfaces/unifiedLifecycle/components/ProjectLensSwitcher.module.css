@@ -1,0 +1,57 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+}
+
+.lensRow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+}
+
+.lensItem {
+  display: inline-flex;
+}
+
+.lensButton {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: var(--pcc-space-xs) var(--pcc-space-sm);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-md);
+  background: var(--pcc-color-card);
+  color: var(--pcc-color-text-primary);
+  font: inherit;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.lensButtonActive {
+  border-color: var(--pcc-status-info);
+  opacity: 1;
+}
+
+.lensType {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.lensMeta {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.caption {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--pcc-color-text-muted);
+}

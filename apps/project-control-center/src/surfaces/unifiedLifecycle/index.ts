@@ -18,6 +18,22 @@ export { buildPccCrossProjectKnowledgeViewModel } from './crossProjectKnowledgeA
 export { buildPccUnifiedSearchViewModel } from './unifiedSearchAdapter.js';
 export { buildPccUnifiedLifecycleViewModel } from './unifiedLifecycleAdapter.js';
 export { summarizeLensVisibility, type ILensVisibilityRecord, type LensRecordKind } from './lensState.js';
+export {
+  LifecycleTimelinePreview,
+  type ILifecycleTimelinePreviewProps,
+  ProjectMemoryPanel,
+  type IProjectMemoryPanelProps,
+  ProjectLensSwitcher,
+  type IProjectLensSwitcherProps,
+  RelatedRecordsPanel,
+  type IRelatedRecordsPanelProps,
+  WarrantyTracePreview,
+  type IWarrantyTracePreviewProps,
+  ClosedProjectReferencePreview,
+  type IClosedProjectReferencePreviewProps,
+  UnifiedProjectSearchPreview,
+  type IUnifiedProjectSearchPreviewProps,
+} from './components/index.js';
 export type {
   IPccLifecyclePostureView,
   IPccRedactionView,
