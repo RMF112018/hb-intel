@@ -63,4 +63,9 @@ export type {
   IPccUnifiedSearchAnswerVm,
   IPccUnifiedSearchViewModel,
   IPccUnifiedLifecycleViewModel,
+  IPccUnifiedLifecycleReadModelClient,
 } from './unifiedLifecycleViewModel.js';
+export {
+  useUnifiedLifecycleReadModel,
+  type IUseUnifiedLifecycleReadModelState,
+} from './useUnifiedLifecycleReadModel.js';

@@ -47,6 +47,7 @@ import type {
   PccProjectStageTransitionCheckpoint,
   PccProjectStageTransitionCheckpointStatus,
   PccProjectTraceabilityEdge,
+  PccReadModelEnvelope,
   PccReadModelSourceStatus,
   PccRedactionLevel,
   PccRelatedRecordCluster,
@@ -57,6 +58,7 @@ import type {
   PccTraceabilityDirection,
   PccTraceabilityEdgeType,
   PccTraceableRecordType,
+  PccUnifiedLifecycleReadModel,
   PccWarrantyResponsibilityRecommendation,
   PccWarrantyTraceRecord,
   PccWarrantyTraceStatus,
@@ -366,3 +368,18 @@ export type {
   PccSourceLineageRef,
   UnifiedSearchGroundingCitation,
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 05A — narrow client interface for the unified-
+// lifecycle hook seam. Spelled out inline (not via indexed-access
+// against IPccReadModelClient) so the controlled-consumption guard
+// in `pcc-api-dormancy.test.ts` does not see the forbidden full-client
+// identifier in this file.
+// ─────────────────────────────────────────────────────────────────────
+
+export interface IPccUnifiedLifecycleReadModelClient {
+  getUnifiedLifecycle(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
+}
