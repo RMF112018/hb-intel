@@ -1,5 +1,6 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type {
+  PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -29,7 +30,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the twelve backend route ids', () => {
+  it('enumerates exactly the thirteen backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -43,6 +44,7 @@ describe('IPccReadModelClient route metadata', () => {
       'lifecycle-readiness',
       'permit-inspection-control-center',
       'responsibility-matrix',
+      'constraints-log',
     ]);
   });
 
@@ -102,6 +104,9 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getResponsibilityMatrix']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccResponsibilityMatrixReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getConstraintsLog']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>
+    >();
   });
 
   it('accepts optional viewerPersona on every method', () => {
@@ -115,7 +120,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the twelve id literals', () => {
+  it('is the union of the thirteen id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -129,6 +134,7 @@ describe('PccReadModelRouteId', () => {
       'lifecycle-readiness',
       'permit-inspection-control-center',
       'responsibility-matrix',
+      'constraints-log',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

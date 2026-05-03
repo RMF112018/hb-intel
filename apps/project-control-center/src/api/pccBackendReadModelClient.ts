@@ -141,5 +141,9 @@ export function createPccBackendReadModelClient(
       callBackend('responsibility-matrix', projectId, () =>
         fallback.getResponsibilityMatrix(projectId, viewerPersona),
       ),
+    getConstraintsLog: (projectId, viewerPersona) =>
+      callBackend('constraints-log', projectId, () =>
+        fallback.getConstraintsLog(projectId, viewerPersona),
+      ),
   };
 }

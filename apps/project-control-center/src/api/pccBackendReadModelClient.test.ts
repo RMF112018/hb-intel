@@ -38,6 +38,7 @@ const ROUTE_METHOD_TUPLES: readonly IRouteMethodTuple[] = [
     clientMethod: 'getPermitInspectionControlCenter',
   },
   { routeId: 'responsibility-matrix', clientMethod: 'getResponsibilityMatrix' },
+  { routeId: 'constraints-log', clientMethod: 'getConstraintsLog' },
 ];
 
 function buildOkEnvelope(): PccReadModelEnvelope<PccProjectHomeReadModel> {
@@ -83,7 +84,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('createPccBackendReadModelClient — URL & method (all 12 routes)', () => {
+describe('createPccBackendReadModelClient — URL & method (all 13 routes)', () => {
   for (const tuple of ROUTE_METHOD_TUPLES) {
     it(`builds GET ${PCC_READ_MODEL_ROUTE_PATHS[tuple.routeId]}`, async () => {
       const okEnvelope: PccReadModelEnvelope<unknown> = {
@@ -114,7 +115,7 @@ describe('createPccBackendReadModelClient — URL & method (all 12 routes)', () 
     });
   }
 
-  it('never generates POST/PUT/PATCH/DELETE requests across all 12 methods', async () => {
+  it('never generates POST/PUT/PATCH/DELETE requests across all 13 methods', async () => {
     const fetchImpl: PccReadModelFetch = vi
       .fn<PccReadModelFetch>()
       .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
@@ -247,6 +248,78 @@ describe('createPccBackendReadModelClient — responsibility-matrix success path
   });
 });
 
+describe('createPccBackendReadModelClient — constraints-log success path', () => {
+  it('builds GET pcc/projects/{projectId}/constraints-log and passes envelope through', async () => {
+    const envelope: PccReadModelEnvelope<unknown> = {
+      ...buildOkEnvelope(),
+      data: {
+        moduleIdentity: {
+          moduleId: 'constraints-log',
+          displayName: 'Constraints Log',
+          subtitle: 'Make-Ready Constraint & Risk Exposure Center',
+          governance: 'project-readiness',
+          workCenterId: 'risk-issues-decision',
+        },
+        riskMatrixConfig: {
+          likelihoodLabels: [],
+          impactLabels: [],
+          urgencyLabels: [],
+          impactDimensions: [],
+        },
+        exposureBands: [],
+        overrideRules: {},
+        seedCategories: [],
+        riskItems: [],
+        constraintItems: [],
+        exposureSummary: {
+          riskCountsByBand: {},
+          constraintCountsByBand: {},
+          overdueConstraintCount: 0,
+          awaitingExternalPartyCount: 0,
+          delayExposureReviewQueueCount: 0,
+          changeExposureReviewQueueCount: 0,
+          priorityActionsCandidateCount: 0,
+        },
+        sourcePosture: {
+          sourceStatus: 'available',
+          pendingHumanReviewCount: 0,
+        },
+        snapshotHistory: [],
+        auditEvents: [],
+      } as never,
+    };
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: envelope }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    const result = await client.getConstraintsLog(KNOWN_PROJECT_ID);
+    expect(result).toEqual(envelope);
+    const expectedUrl = `https://example.invalid/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/constraints-log`;
+    expect(fetchImpl).toHaveBeenCalledWith(expectedUrl, { method: 'GET' });
+  });
+
+  it('fetch reject → fixture fallback envelope with sourceStatus="backend-unavailable"', async () => {
+    const fetchImpl = vi.fn<PccReadModelFetch>().mockRejectedValue(new TypeError('network'));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    const env = await client.getConstraintsLog(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.mode).toBe('fixture');
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.riskItems).toEqual([]);
+    expect(env.data.constraintItems).toEqual([]);
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.moduleIdentity.moduleId).toBe('constraints-log');
+  });
+});
+
 describe('createPccBackendReadModelClient — failure paths return backend-unavailable', () => {
   async function expectBackendUnavailable(fetchMock: PccReadModelFetch): Promise<void> {
     const client = createPccBackendReadModelClient({
@@ -294,7 +367,7 @@ describe('createPccBackendReadModelClient — failure paths return backend-unava
 });
 
 describe('createPccBackendReadModelClient — config-fallback paths', () => {
-  it('empty backendBaseUrl → all 12 methods return backend-unavailable, no fetch invoked', async () => {
+  it('empty backendBaseUrl → all 13 methods return backend-unavailable, no fetch invoked', async () => {
     const fetchImpl = vi.fn<PccReadModelFetch>();
     const client = createPccBackendReadModelClient({
       backendBaseUrl: '',
@@ -310,7 +383,7 @@ describe('createPccBackendReadModelClient — config-fallback paths', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('whitespace-only backendBaseUrl → all 12 methods return backend-unavailable, no fetch invoked', async () => {
+  it('whitespace-only backendBaseUrl → all 13 methods return backend-unavailable, no fetch invoked', async () => {
     const fetchImpl = vi.fn<PccReadModelFetch>();
     const client = createPccBackendReadModelClient({
       backendBaseUrl: '   ',
@@ -326,7 +399,7 @@ describe('createPccBackendReadModelClient — config-fallback paths', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('no global fetch and no options.fetch → constructor does not throw; all 12 methods return backend-unavailable', async () => {
+  it('no global fetch and no options.fetch → constructor does not throw; all 13 methods return backend-unavailable', async () => {
     delete (globalThis as { fetch?: unknown }).fetch;
     const client = createPccBackendReadModelClient({
       backendBaseUrl: 'https://example.invalid',

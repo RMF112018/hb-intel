@@ -14,6 +14,7 @@
  */
 
 import type {
+  PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -46,6 +47,7 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'lifecycle-readiness',
   'permit-inspection-control-center',
   'responsibility-matrix',
+  'constraints-log',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -70,6 +72,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'lifecycle-readiness': 'pcc/projects/{projectId}/lifecycle-readiness',
   'permit-inspection-control-center': 'pcc/projects/{projectId}/permit-inspection-control-center',
   'responsibility-matrix': 'pcc/projects/{projectId}/responsibility-matrix',
+  'constraints-log': 'pcc/projects/{projectId}/constraints-log',
 };
 
 /**
@@ -141,4 +144,9 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccResponsibilityMatrixReadModel>>;
+
+  getConstraintsLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>;
 }

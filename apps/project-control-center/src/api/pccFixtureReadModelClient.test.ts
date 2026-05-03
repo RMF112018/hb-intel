@@ -6,6 +6,7 @@ import {
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+  SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
 } from '@hbc/models/pcc';
@@ -33,8 +34,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getLifecycleReadiness(KNOWN_PROJECT_ID),
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
+      client.getConstraintsLog(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(12);
+    expect(envelopes).toHaveLength(13);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -124,6 +126,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getLifecycleReadiness(KNOWN_PROJECT_ID),
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
+      client.getConstraintsLog(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -268,6 +271,86 @@ describe('createPccFixtureReadModelClient — responsibility-matrix', () => {
     expect(env.data.templates).toEqual([]);
     expect(env.data.projectInstances).toEqual([]);
     expect(env.data.healthScore.state).toBe('insufficient-data');
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+  });
+});
+
+describe('createPccFixtureReadModelClient — constraints-log', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns the deterministic Wave 12 fixture with sourceStatus="available"', async () => {
+    const env = await client.getConstraintsLog(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data).toBe(SAMPLE_CONSTRAINTS_LOG_READ_MODEL);
+  });
+
+  it('preserves canonical Constraints Log module identity, vocabularies, and item coverage', async () => {
+    const env = await client.getConstraintsLog(KNOWN_PROJECT_ID);
+    const data = env.data;
+    expect(data.moduleIdentity.moduleId).toBe('constraints-log');
+    expect(data.moduleIdentity.governance).toBe('project-readiness');
+    expect(data.moduleIdentity.workCenterId).toBe('risk-issues-decision');
+    expect(data.exposureBands.length).toBeGreaterThan(0);
+    expect(data.seedCategories.length).toBeGreaterThan(0);
+    expect(data.riskItems.length).toBeGreaterThan(0);
+    expect(data.constraintItems.length).toBeGreaterThan(0);
+    expect(data.snapshotHistory.length).toBeGreaterThan(0);
+    expect(data.auditEvents.length).toBeGreaterThan(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const env = await client.getConstraintsLog(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+  });
+
+  it('unknown project returns empty Wave 12 read model with sourceStatus="source-unavailable"', async () => {
+    const env = await client.getConstraintsLog(UNKNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+    expect(env.data.riskItems).toEqual([]);
+    expect(env.data.constraintItems).toEqual([]);
+    expect(env.data.seedCategories).toEqual([]);
+    expect(env.data.snapshotHistory).toEqual([]);
+    expect(env.data.auditEvents).toEqual([]);
+    expect(env.data.exposureSummary.overdueConstraintCount).toBe(0);
+    expect(env.data.exposureSummary.awaitingExternalPartyCount).toBe(0);
+    expect(env.data.exposureSummary.delayExposureReviewQueueCount).toBe(0);
+    expect(env.data.exposureSummary.changeExposureReviewQueueCount).toBe(0);
+    expect(env.data.exposureSummary.priorityActionsCandidateCount).toBe(0);
+    for (const count of Object.values(env.data.exposureSummary.riskCountsByBand)) {
+      expect(count).toBe(0);
+    }
+    for (const count of Object.values(env.data.exposureSummary.constraintCountsByBand)) {
+      expect(count).toBe(0);
+    }
+    expect(env.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(env.data.sourcePosture.pendingHumanReviewCount).toBe(0);
+    // Vocabulary and module identity remain authoritative on degraded envelopes.
+    expect(env.data.moduleIdentity.moduleId).toBe('constraints-log');
+    expect(env.data.exposureBands.length).toBeGreaterThan(0);
+    expect(env.data.riskMatrixConfig.impactDimensions.length).toBeGreaterThan(0);
+  });
+
+  it('simulateBackendUnavailable returns the empty Wave 12 read model with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getConstraintsLog(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.riskItems).toEqual([]);
+    expect(env.data.constraintItems).toEqual([]);
+    expect(env.data.snapshotHistory).toEqual([]);
+    expect(env.data.auditEvents).toEqual([]);
     expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
   });
 });

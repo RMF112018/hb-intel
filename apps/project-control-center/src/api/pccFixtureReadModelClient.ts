@@ -19,10 +19,15 @@
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   DOCUMENT_CONTROL_SOURCES,
+  EXPOSURE_BANDS,
+  IMPACT_DIMENSION_IDS,
+  IMPACT_LABELS,
   LIFECYCLE_READINESS_LIBRARY_METADATA,
   LIFECYCLE_READINESS_STATUSES,
+  LIKELIHOOD_LABELS,
   PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
@@ -32,11 +37,14 @@ import {
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
+  SEVERITY_OVERRIDE_RULES,
+  URGENCY_LABELS,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
   IProjectProfile,
   LifecycleReadinessStatus,
+  PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -55,6 +63,7 @@ import type {
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
   PccWorkCenterRegistryReadModel,
+  SeverityBandKey,
 } from '@hbc/models/pcc';
 
 import type { IPccReadModelClient } from './pccReadModelClient.js';
@@ -444,6 +453,60 @@ const EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL: PccPermitInspectionCont
     inspectionTransitions: [],
   };
 
+// Mirrors the backend mock provider's degraded Constraints Log payload
+// (`pcc-mock-read-model-provider.ts` →
+// `EMPTY_CONSTRAINTS_LOG_READ_MODEL`). Project-independent vocabulary
+// (module identity, risk-matrix labels, exposure bands, override-rule
+// catalog) is preserved; project-scoped arrays are emptied; exposure
+// summary counts are zeroed; sourcePosture reports the degraded status.
+const EMPTY_CONSTRAINTS_LOG_EXPOSURE_SUMMARY = {
+  riskCountsByBand: Object.freeze(
+    Object.fromEntries(
+      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
+    ) as Record<SeverityBandKey, number>,
+  ),
+  constraintCountsByBand: Object.freeze(
+    Object.fromEntries(
+      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
+    ) as Record<SeverityBandKey, number>,
+  ),
+  overdueConstraintCount: 0,
+  awaitingExternalPartyCount: 0,
+  delayExposureReviewQueueCount: 0,
+  changeExposureReviewQueueCount: 0,
+  priorityActionsCandidateCount: 0,
+} as const;
+
+const EMPTY_CONSTRAINTS_LOG_READ_MODEL: PccConstraintsLogReadModel = {
+  moduleIdentity: SAMPLE_CONSTRAINTS_LOG_READ_MODEL.moduleIdentity,
+  riskMatrixConfig: {
+    likelihoodLabels: LIKELIHOOD_LABELS,
+    impactLabels: IMPACT_LABELS,
+    urgencyLabels: URGENCY_LABELS,
+    impactDimensions: IMPACT_DIMENSION_IDS,
+  },
+  exposureBands: EXPOSURE_BANDS,
+  overrideRules: SEVERITY_OVERRIDE_RULES,
+  seedCategories: [],
+  riskItems: [],
+  constraintItems: [],
+  exposureSummary: EMPTY_CONSTRAINTS_LOG_EXPOSURE_SUMMARY,
+  sourcePosture: {
+    sourceStatus: 'source-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+  snapshotHistory: [],
+  auditEvents: [],
+};
+
+const EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccConstraintsLogReadModel = {
+  ...EMPTY_CONSTRAINTS_LOG_READ_MODEL,
+  sourcePosture: {
+    sourceStatus: 'backend-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+};
+
 class PccFixtureReadModelClient implements IPccReadModelClient {
   private readonly simulateBackendUnavailable: boolean;
   private readonly now: () => string;
@@ -784,6 +847,37 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
       viewerPersona,
       'available',
       SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
+      [],
+    );
+  }
+
+  async getConstraintsLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_CONSTRAINTS_LOG_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
       [],
     );
   }
