@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Source-system integration posture"
+  },
+  "systems": [
+    {
+      "system": "Microsoft Graph / SharePoint / HB Central",
+      "mvpMode": "launcher/reference and fixture-backed read models",
+      "futureReadMode": "backend-mediated read; prefer delta query and change notifications for sync candidates",
+      "futureWriteMode": "blocked until explicit Graph mutation gate",
+      "auth": "delegated first for user-context reads; app-only only for approved service scenarios with least privilege",
+      "cache": "allowed for metadata with TTL + source last-modified + delta token",
+      "throttling": "honor 429 Retry-After; exponential backoff; avoid frequent polling",
+      "evidenceUse": "files/list metadata/source URLs; PCC owns evidence link metadata only"
+    },
+    {
+      "system": "Procore",
+      "mvpMode": "launcher/reference and mock read models",
+      "futureReadMode": "backend-mediated read-only selected project records",
+      "futureWriteMode": "blocked; no writeback in PCC MVP",
+      "auth": "OAuth/service integration TBD; no direct SPFx-to-Procore",
+      "cache": "short TTL summaries with source timestamp",
+      "throttling": "API-specific retry/backoff contract required before live",
+      "evidenceUse": "RFIs, submittals, commitments, observations, punch, daily logs, change events as source-owned evidence"
+    },
+    {
+      "system": "Sage Intacct",
+      "mvpMode": "accounting-truth reference only",
+      "futureReadMode": "backend-mediated accounting summary read after finance/security gate",
+      "futureWriteMode": "blocked; no accounting postings",
+      "auth": "service integration TBD with finance approval",
+      "cache": "daily/batch acceptable with as-of date",
+      "throttling": "batch/off-hours where possible",
+      "evidenceUse": "accounting/job-cost summary references only"
+    },
+    {
+      "system": "Autodesk",
+      "mvpMode": "reference/launcher only",
+      "futureReadMode": "design/model/sheet/takeoff reference read/export after gate",
+      "futureWriteMode": "blocked",
+      "auth": "Autodesk integration TBD",
+      "cache": "indexed metadata allowed with source version",
+      "throttling": "async extraction, no UI blocking",
+      "evidenceUse": "design/model/sheet references, issue/model metadata"
+    },
+    {
+      "system": "Document Crunch / Adobe Sign / DocuSign",
+      "mvpMode": "launcher/reference only",
+      "futureReadMode": "backend-mediated evidence/read status after legal/admin gate",
+      "futureWriteMode": "blocked unless explicit signature/document workflow gate",
+      "auth": "vendor-specific service integration TBD",
+      "cache": "limited status metadata only",
+      "throttling": "vendor-specific",
+      "evidenceUse": "contract review, executed agreements, signature evidence"
+    },
+    {
+      "system": "Compass / CRM / BD systems",
+      "mvpMode": "reference only",
+      "futureReadMode": "authorized pursuit metadata and outcome context only",
+      "futureWriteMode": "blocked",
+      "auth": "TBD",
+      "cache": "restricted; summary-safe only",
+      "throttling": "TBD",
+      "evidenceUse": "pursuit context and comparable-project basis only"
+    }
+  ]
+}

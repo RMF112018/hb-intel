@@ -2985,3 +2985,9 @@ Alignment clarifications:
 - Estimating assumptions and handoff context remain accessible to authorized operations users, and operations outcomes remain governed reference context for authorized future estimating/pursuit users.
 - Warranty traceability must support lineage from claim back to scope, estimate reference, vendor/subcontractor, commitment, submittal/product, field evidence, closeout records, obligation context, and lessons.
 - HBI is not source-of-record and must provide source-lineage-grounded answers with permission filtering and refusal/qualification when evidence is insufficient.
+
+## Unified Lifecycle Developer Contracts Cross-Reference
+
+Implementation and future changes for unified lifecycle behavior MUST align with the developer contracts in `docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/`, including bounded-context ownership, route taxonomy and forbidden routes, record state machines, field-level dictionary, permission/redaction resolution, HBI citation/refusal contract, source-system integration contracts, audit-event model, degraded-state matrix, module onboarding template, and validation/test gates.
+
+This reference is documentation governance only. It does not assert production/live tenant readiness and does not authorize runtime/source-system mutations.

@@ -1,0 +1,146 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Canonical state machines for unified lifecycle developer docs"
+  },
+  "stateMachines": {
+    "ProjectLifecycleEvent": {
+      "initial": "draft",
+      "states": [
+        "draft",
+        "active",
+        "pending-review",
+        "accepted",
+        "superseded",
+        "archived",
+        "rejected"
+      ],
+      "transitions": [
+        ["draft", "active"],
+        ["draft", "rejected"],
+        ["active", "pending-review"],
+        ["pending-review", "accepted"],
+        ["pending-review", "rejected"],
+        ["accepted", "superseded"],
+        ["accepted", "archived"],
+        ["superseded", "archived"]
+      ],
+      "guards": [
+        "accepted requires at least one evidence link unless eventType is external-system-milestone with sourceLineage",
+        "archived is terminal",
+        "superseded requires supersedingEventId in future persistence model"
+      ]
+    },
+    "ProjectMemoryRecord": {
+      "initial": "open",
+      "states": [
+        "open",
+        "validated",
+        "invalidated",
+        "superseded",
+        "converted-to-action",
+        "archived"
+      ],
+      "transitions": [
+        ["open", "validated"],
+        ["open", "invalidated"],
+        ["validated", "superseded"],
+        ["validated", "converted-to-action"],
+        ["validated", "archived"],
+        ["superseded", "archived"],
+        ["converted-to-action", "archived"],
+        ["invalidated", "archived"]
+      ],
+      "guards": [
+        "validated requires sourceLineage or evidenceLinks",
+        "converted-to-action requires target workflow/action reference",
+        "archived is terminal"
+      ]
+    },
+    "ProjectTraceabilityEdge": {
+      "initial": "candidate",
+      "states": ["candidate", "probable", "verified", "rejected", "superseded", "archived"],
+      "transitions": [
+        ["candidate", "probable"],
+        ["candidate", "rejected"],
+        ["probable", "verified"],
+        ["probable", "rejected"],
+        ["verified", "superseded"],
+        ["verified", "archived"],
+        ["rejected", "archived"],
+        ["superseded", "archived"]
+      ],
+      "guards": [
+        "verified requires evidence reference and sourceLineage",
+        "warranty responsibility edges cannot be verified without obligation + execution + closeout/field evidence"
+      ]
+    },
+    "WarrantyTraceRecord": {
+      "initial": "insufficient-evidence",
+      "states": [
+        "insufficient-evidence",
+        "pending-evidence",
+        "unresolved-responsibility",
+        "responsibility-recommended",
+        "responsibility-confirmed",
+        "resolved",
+        "closed",
+        "closed-without-determination"
+      ],
+      "transitions": [
+        ["insufficient-evidence", "pending-evidence"],
+        ["pending-evidence", "unresolved-responsibility"],
+        ["pending-evidence", "responsibility-recommended"],
+        ["unresolved-responsibility", "pending-evidence"],
+        ["responsibility-recommended", "responsibility-confirmed"],
+        ["responsibility-confirmed", "resolved"],
+        ["resolved", "closed"],
+        ["insufficient-evidence", "closed-without-determination"],
+        ["pending-evidence", "closed-without-determination"],
+        ["unresolved-responsibility", "closed-without-determination"]
+      ],
+      "guards": [
+        "responsibility-recommended requires evidence threshold",
+        "responsibility-confirmed requires human review/approval in future runtime",
+        "closed and closed-without-determination are terminal"
+      ]
+    },
+    "CrossProjectReference": {
+      "initial": "candidate",
+      "states": ["candidate", "approved", "restricted", "redacted", "rejected", "archived"],
+      "transitions": [
+        ["candidate", "approved"],
+        ["candidate", "restricted"],
+        ["candidate", "redacted"],
+        ["candidate", "rejected"],
+        ["approved", "archived"],
+        ["restricted", "redacted"],
+        ["restricted", "archived"],
+        ["redacted", "archived"],
+        ["rejected", "archived"]
+      ],
+      "guards": [
+        "approved requires no reuse blockers",
+        "restricted requires named audience",
+        "redacted output must be summary-safe"
+      ]
+    },
+    "UnifiedSearchAskHbiResponse": {
+      "initial": "not-issued",
+      "states": ["not-issued", "grounded", "refused", "degraded", "audit-pending"],
+      "transitions": [
+        ["not-issued", "grounded"],
+        ["not-issued", "refused"],
+        ["not-issued", "degraded"],
+        ["grounded", "audit-pending"],
+        ["refused", "audit-pending"],
+        ["degraded", "audit-pending"]
+      ],
+      "guards": [
+        "grounded requires at least one citation",
+        "refused must use canonical PccHbiRefusalReason",
+        "degraded may not render answer rows"
+      ]
+    }
+  }
+}

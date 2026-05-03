@@ -990,3 +990,9 @@ Wave 12 baseline correction:
 
 - Constraints Log backend read-model route/provider exists at `HEAD 9f67df78...`.
 - Wave 12 remaining work should focus on client/surface integration and broader lifecycle alignment seams where not yet complete.
+
+## Unified Lifecycle Developer Contracts Cross-Reference
+
+Implementation and future changes for unified lifecycle behavior MUST align with the developer contracts in `docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/`, including bounded-context ownership, route taxonomy and forbidden routes, record state machines, field-level dictionary, permission/redaction resolution, HBI citation/refusal contract, source-system integration contracts, audit-event model, degraded-state matrix, module onboarding template, and validation/test gates.
+
+This reference is documentation governance only. It does not assert production/live tenant readiness and does not authorize runtime/source-system mutations.

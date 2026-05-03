@@ -328,3 +328,9 @@ This document is the canonical source for PCC security, redaction, persona-permi
 - `HB_Project_Control_Center_Target_Architecture_Blueprint.md` — target architecture (referenced at section level).
 
 Wave 99 closeout (Prompt 07D) is responsible for any cross-reference and index updates in surrounding docs. This document does not edit those docs.
+
+## Unified Lifecycle Developer Contracts Cross-Reference
+
+Implementation and future changes for unified lifecycle behavior MUST align with the developer contracts in `docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/`, including bounded-context ownership, route taxonomy and forbidden routes, record state machines, field-level dictionary, permission/redaction resolution, HBI citation/refusal contract, source-system integration contracts, audit-event model, degraded-state matrix, module onboarding template, and validation/test gates.
+
+This reference is documentation governance only. It does not assert production/live tenant readiness and does not authorize runtime/source-system mutations.

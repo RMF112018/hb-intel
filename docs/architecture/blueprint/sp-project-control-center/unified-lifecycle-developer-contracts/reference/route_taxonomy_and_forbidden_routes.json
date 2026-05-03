@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Canonical approved/forbidden route taxonomy"
+  },
+  "approvedShellRoutes": [
+    "project-home",
+    "team-and-access",
+    "documents",
+    "project-readiness",
+    "approvals",
+    "external-systems",
+    "control-center-settings",
+    "site-health"
+  ],
+  "approvedBackendReadModelRouteFamilies": [
+    "profile",
+    "modules",
+    "home",
+    "priority-actions",
+    "document-control",
+    "external-links",
+    "site-health",
+    "team-access",
+    "project-readiness",
+    "lifecycle-readiness",
+    "permit-inspection-control-center",
+    "responsibility-matrix",
+    "constraints-log",
+    "unified-lifecycle",
+    "project-memory",
+    "project-lenses",
+    "project-traceability",
+    "warranty-trace",
+    "cross-project-knowledge",
+    "unified-search"
+  ],
+  "forbiddenShellRoutesAndWorkspaceIds": [
+    "estimating-workspace",
+    "preconstruction-workspace",
+    "operations-workspace",
+    "project-controls-workspace",
+    "accounting-workspace",
+    "closeout-workspace",
+    "warranty-workspace",
+    "executive-oversight-workspace",
+    "it-admin-workspace",
+    "ask-hbi",
+    "hbi-search",
+    "unified-search-workspace",
+    "lifecycle-timeline",
+    "traceability-graph",
+    "closed-project-references",
+    "warranty-trace-workspace",
+    "cross-project-knowledge-workspace"
+  ],
+  "rules": [
+    "Unified lifecycle route families are backend read-model routes, not shell routes.",
+    "Ask-HBI must not be a standalone shell route in this package.",
+    "Future route changes require tests and architecture docs."
+  ]
+}

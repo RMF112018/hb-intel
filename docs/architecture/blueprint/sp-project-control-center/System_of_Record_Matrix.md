@@ -199,3 +199,9 @@ Additional interpretation rules:
 - Work centers and workflow modules define governance placement and signal-rollup behavior, not departmental workspace boundaries.
 - Constraints Log and Buyout Log may have governance affinity in risk/issues/decision and procurement/buyout contexts while contributing Project Readiness signals; this is a lineage-preserving rollup pattern, not ownership duplication.
 - Cross-stage traceability and cross-project knowledge reuse remain permission-filtered and must not leak restricted information.
+
+## Unified Lifecycle Developer Contracts Cross-Reference
+
+Implementation and future changes for unified lifecycle behavior MUST align with the developer contracts in `docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/`, including bounded-context ownership, route taxonomy and forbidden routes, record state machines, field-level dictionary, permission/redaction resolution, HBI citation/refusal contract, source-system integration contracts, audit-event model, degraded-state matrix, module onboarding template, and validation/test gates.
+
+This reference is documentation governance only. It does not assert production/live tenant readiness and does not authorize runtime/source-system mutations.

@@ -134,3 +134,9 @@ All future PCC architecture, roadmap, register, wave, and implementation docs mu
 - Warranty can trace a claim through estimate, scope, vendor, commitment, submittal, field, closeout, and lessons context.
 - Executive oversight can review lifecycle continuity posture from pursuit through warranty.
 - HBI can answer project questions only with source citations and lineage-backed evidence.
+
+## Unified Lifecycle Developer Contracts Cross-Reference
+
+Implementation and future changes for unified lifecycle behavior MUST align with the developer contracts in `docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/`, including bounded-context ownership, route taxonomy and forbidden routes, record state machines, field-level dictionary, permission/redaction resolution, HBI citation/refusal contract, source-system integration contracts, audit-event model, degraded-state matrix, module onboarding template, and validation/test gates.
+
+This reference is documentation governance only. It does not assert production/live tenant readiness and does not authorize runtime/source-system mutations.

@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "package": "PCC unified lifecycle developer documentation update",
+    "generatedAt": "2026-05-03",
+    "purpose": "Research source index for implementation-readiness docs"
+  },
+  "sources": [
+    {
+      "title": "ISO 19650 Series Overview",
+      "url": "https://www.iso19650.org/",
+      "useInArchitecture": "Lifecycle information management, delivery/operation continuity, CDE-like posture."
+    },
+    {
+      "title": "Microsoft Graph permissions overview",
+      "url": "https://learn.microsoft.com/en-us/graph/permissions-overview",
+      "useInArchitecture": "Delegated vs application permissions and least-privilege boundaries."
+    },
+    {
+      "title": "Microsoft Graph best practices",
+      "url": "https://learn.microsoft.com/en-us/graph/best-practices-concept",
+      "useInArchitecture": "Delta query, webhooks, batching, and performance/reliability guidance."
+    },
+    {
+      "title": "Microsoft Graph throttling guidance",
+      "url": "https://learn.microsoft.com/en-us/graph/throttling",
+      "useInArchitecture": "Retry-After, backoff, and avoiding excessive polling."
+    },
+    {
+      "title": "Microsoft Graph change notifications overview",
+      "url": "https://learn.microsoft.com/en-us/graph/change-notifications-overview",
+      "useInArchitecture": "Event-driven updates to reduce polling."
+    },
+    {
+      "title": "Microsoft Graph delta query overview",
+      "url": "https://learn.microsoft.com/en-gb/graph/delta-query-overview",
+      "useInArchitecture": "Incremental sync and cache freshness strategy."
+    },
+    {
+      "title": "NIST AI Risk Management Framework",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "useInArchitecture": "HBI governance, trustworthiness, risk management."
+    },
+    {
+      "title": "NIST Cybersecurity Framework 2.0",
+      "url": "https://www.nist.gov/node/1840561",
+      "useInArchitecture": "Govern/Identify/Protect/Detect/Respond/Recover control posture."
+    },
+    {
+      "title": "W3C PROV Data Model",
+      "url": "https://www.w3.org/TR/prov-dm/",
+      "useInArchitecture": "Source lineage/provenance model for entities, activities, agents, derivations."
+    },
+    {
+      "title": "AWS Prescriptive Guidance mapping to OWASP Top 10 for LLM Applications",
+      "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/agentic-ai-security/owasp-top-ten.html",
+      "useInArchitecture": "Prompt injection, sensitive disclosure, excessive agency, vector/embedding, misinformation, consumption controls."
+    }
+  ]
+}
