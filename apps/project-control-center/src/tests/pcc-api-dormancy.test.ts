@@ -55,6 +55,14 @@ const PROJECT_READINESS_ADAPTER_FILE = resolve(
   'projectReadiness',
   'projectReadinessAdapter.ts',
 );
+// Wave 99 / Prompt 04B — unified lifecycle adapter seam shares a single
+// internal cardState helper so the api/ pure-helper allowlist only needs
+// ONE narrow entry for this directory's eight adapters.
+const UNIFIED_LIFECYCLE_CARDSTATE_FILE = resolve(
+  SURFACES_DIR,
+  'unifiedLifecycle',
+  'unifiedLifecycleCardState.ts',
+);
 
 const FORBIDDEN_API_IDENTIFIERS = [
   'IPccReadModelClient',
@@ -197,6 +205,17 @@ const API_IMPORT_RULES: readonly IApiImportRule[] = [
     namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
     description:
       'projectReadinessAdapter.ts value-import mapPccSourceStatusToPreviewState (Wave 8 / Prompt 05)',
+  },
+  {
+    file: UNIFIED_LIFECYCLE_CARDSTATE_FILE,
+    typeOnly: false,
+    sourcePaths: new Set([
+      '../../api/pccReadModelStateMapping',
+      '../../api/pccReadModelStateMapping.js',
+    ]),
+    namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
+    description:
+      'unifiedLifecycleCardState.ts value-import mapPccSourceStatusToPreviewState (Wave 99 / Prompt 04B) — single helper for the unified lifecycle adapter seam',
   },
 ];
 
