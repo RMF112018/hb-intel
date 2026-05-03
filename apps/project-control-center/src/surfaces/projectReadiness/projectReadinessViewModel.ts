@@ -20,6 +20,7 @@ import type {
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
+  PccUnifiedLifecycleReadModel,
   ProjectReadinessBlockerState,
   ProjectReadinessConfidenceState,
   ProjectReadinessDomainId,
@@ -41,6 +42,19 @@ export interface IPccProjectReadinessReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>;
+
+  /**
+   * Wave 99 / Prompt 05C — supplemental unified-lifecycle context
+   * (timeline, memory, traceability) consumed exclusively by
+   * `PccProjectReadinessUnifiedLifecycleSection` via
+   * `useUnifiedLifecycleReadModel`. None of the existing five
+   * Project Readiness region hooks call this method (locked by
+   * `PccProjectReadinessSurface.test.tsx`).
+   */
+  getUnifiedLifecycle(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
 }
 
 export interface IPccReadinessHeroViewModel {

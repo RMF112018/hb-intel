@@ -59,6 +59,7 @@ import type {
   IPccConstraintsLogReadModelClient,
   IPccConstraintsLogViewModel,
 } from '../constraintsLog/constraintsLogViewModel';
+import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadinessUnifiedLifecycleSection';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
@@ -226,6 +227,10 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
       <PccPermitInspectionControlCenterRegions viewModel={permitInspectionViewModel} />
       <PccResponsibilityMatrixRegions viewModel={responsibilityMatrixViewModel} />
       <PccConstraintsLogRegions viewModel={constraintsLogViewModel} />
+      <PccProjectReadinessUnifiedLifecycleSection
+        client={client}
+        projectId={SAMPLE_PROJECT_PROFILE.projectId}
+      />
     </Fragment>
   );
 };

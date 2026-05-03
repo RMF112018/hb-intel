@@ -1,6 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { PccApp } from '../PccApp';
+import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
+import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
 function activateProjectReadiness(container: HTMLElement): HTMLElement {
   const button = container.querySelector('[data-pcc-surface-id="project-readiness"]');
@@ -688,5 +691,249 @@ describe('Project Readiness surface — Wave 11 Responsibility Matrix embedding'
       expect(card).not.toBeNull();
       expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
     }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 05C — Constraints Log surface-level integration
+//
+// PccConstraintsLogRegions has its own 18-case test file
+// (PccConstraintsLogRegions.test.tsx). The two checks below verify
+// the integration AT THE SURFACE LEVEL — that the constraints-log
+// section appears under the project-readiness panel and does not
+// stand up a separate route or active-surface workspace. No
+// duplication of lane-content assertions.
+// ─────────────────────────────────────────────────────────────────────
+
+describe('Project Readiness Center surface — Constraints Log surface-level integration', () => {
+  it('Constraints Log appears as a readiness input on the project-readiness surface; each card is a direct child of the bento grid', () => {
+    // The "panel" returned by activateProjectReadiness is the hero
+    // card; the constraints-log cards are siblings in the bento grid,
+    // so scope the marker query to `container` (matching the existing
+    // Responsibility Matrix embedding test pattern).
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const markers = container.querySelectorAll(
+      '[data-pcc-readiness-section="constraints-log"]',
+    );
+    expect(markers.length).toBeGreaterThan(0);
+    for (const marker of Array.from(markers)) {
+      const card = marker.closest('[data-pcc-card]');
+      expect(card).not.toBeNull();
+      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
+    }
+  });
+
+  it('Constraints Log is not a separate route or active-surface workspace', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    expect(
+      container.querySelector('[data-pcc-surface-id="constraints-log"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="constraints-log"]'),
+    ).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 05C — Project Readiness fixture-only fallback
+//
+// When no readModelClient is supplied, the surface renders the five
+// existing region groups but does NOT mount the new unified-
+// lifecycle section. This locks the unchanged fixture-only path
+// per feedback_subsection_integration_non_gating.
+// ─────────────────────────────────────────────────────────────────────
+
+describe('Project Readiness Center surface — fixture-only fallback excludes unified lifecycle section', () => {
+  it('renders the surface without unified-lifecycle body markers when no readModelClient is supplied', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccProjectReadinessSurface />
+      </PccBentoGrid>,
+    );
+    expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
+    expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
+    // The existing five region groups must still render at least one
+    // card from each lifecycle-readiness / constraints-log section.
+    expect(
+      container.querySelector('[data-pcc-readiness-section="lifecycle-readiness-center"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-pcc-readiness-section="constraints-log"]'),
+    ).not.toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 05C — Project Readiness unified lifecycle integration
+//
+// Tests in this block mount <PccApp readModelClient={…} /> and use
+// waitFor to allow the new section's hook microtask to resolve.
+// `afterEach(cleanup)` is scoped to this block (per
+// feedback_subsection_integration_non_gating: read-model-driven async
+// renders accumulate document.body DOM otherwise; the existing 47
+// synchronous tests above don't need cleanup and aren't affected).
+// ─────────────────────────────────────────────────────────────────────
+
+describe('Project Readiness Center surface — unified lifecycle integration (read-model-driven)', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('read-model-driven path renders three unified-lifecycle direct-child cards with the three body markers; warranty / closed-project / lens / search markers are NOT rendered', async () => {
+    const { container } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    activateProjectReadiness(container);
+    // Marker queries scoped to `container` (the new section's cards are
+    // siblings of the project-readiness hero in the bento grid).
+    await waitFor(() =>
+      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
+    );
+    // Three expected body markers, each inside a card that is a
+    // direct child of the bento grid.
+    for (const marker of [
+      'data-pcc-lifecycle-timeline',
+      'data-pcc-project-memory',
+      'data-pcc-related-records',
+    ] as const) {
+      const node = container.querySelector(`[${marker}]`);
+      expect(node, `expected [${marker}] to render`).not.toBeNull();
+      const card = node!.closest('[data-pcc-card]');
+      expect(card).not.toBeNull();
+      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
+    }
+    // Four other 04C component markers are NOT integrated on Project
+    // Readiness in 05C.
+    expect(container.querySelector('[data-pcc-project-lens-switcher]')).toBeNull();
+    expect(container.querySelector('[data-pcc-warranty-trace]')).toBeNull();
+    expect(container.querySelector('[data-pcc-closed-project-reference]')).toBeNull();
+    expect(container.querySelector('[data-pcc-unified-search]')).toBeNull();
+  });
+
+  it('related-records panel renders source-lineage chips and adds no anchors', async () => {
+    const { container } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    activateProjectReadiness(container);
+    await waitFor(() =>
+      expect(container.querySelector('[data-pcc-related-records]')).not.toBeNull(),
+    );
+    const relatedRecords = container.querySelector('[data-pcc-related-records]');
+    expect(relatedRecords).not.toBeNull();
+    // The 04C RelatedRecordsPanel renders source-lineage chips for
+    // unredacted edges via the existing PccStatusPill primitive
+    // (data-pcc-pill-tone="info" inside [data-pcc-trace-edge-id]).
+    const traceEdges = relatedRecords!.querySelectorAll('[data-pcc-trace-edge-id]');
+    expect(traceEdges.length).toBeGreaterThan(0);
+    expect(relatedRecords!.querySelectorAll('a[href]').length).toBe(0);
+  });
+
+  it('does not introduce a unified-lifecycle route or workspace marker, and adds no forbidden anchor href in the new section', async () => {
+    const { container } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    activateProjectReadiness(container);
+    await waitFor(() =>
+      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
+    );
+    expect(
+      container.querySelector('[data-pcc-surface-id="unified-lifecycle"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
+    ).toBeNull();
+    // Scope anchor scan to the three new section cards (each card body
+    // marker's nearest ancestor card). Existing PCC surfaces may legit-
+    // imately render anchors elsewhere (e.g., Recent Activity in
+    // Project Home) — those are not introduced by this prompt and
+    // must not be re-asserted here.
+    const sectionCards: HTMLElement[] = [];
+    for (const marker of [
+      'data-pcc-lifecycle-timeline',
+      'data-pcc-project-memory',
+      'data-pcc-related-records',
+    ] as const) {
+      const node = container.querySelector(`[${marker}]`);
+      const card = node?.closest('[data-pcc-card]') as HTMLElement | null;
+      if (card) sectionCards.push(card);
+    }
+    expect(sectionCards.length).toBe(3);
+    for (const card of sectionCards) {
+      const anchors = card.querySelectorAll<HTMLAnchorElement>('a[href]');
+      for (const anchor of Array.from(anchors)) {
+        const href = anchor.getAttribute('href') ?? '';
+        for (const forbidden of [
+          'unified-lifecycle',
+          'lifecycle-timeline',
+          'traceability-graph',
+          'closed-project-references',
+        ]) {
+          expect(href.includes(forbidden)).toBe(false);
+        }
+      }
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 05C — non-call architectural lock
+//
+// The new getUnifiedLifecycle method is consumed exclusively by
+// PccProjectReadinessUnifiedLifecycleSection through
+// useUnifiedLifecycleReadModel. None of the five existing Project
+// Readiness region hooks call it; they each call only their own
+// canonical method exactly once.
+// ─────────────────────────────────────────────────────────────────────
+
+describe('Project Readiness Center surface — non-call architectural lock', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('mounting the surface invokes each existing region method exactly once and getUnifiedLifecycle exactly once (consumed only by the new section)', async () => {
+    // Mount the surface directly (not through PccApp navigation) so the
+    // call counts reflect ONLY project-readiness-side hooks. Mounting
+    // through PccApp would also activate Project Home first, whose
+    // unified-lifecycle section also calls getUnifiedLifecycle —
+    // doubling the count and obscuring the architectural contract.
+    const client = createPccFixtureReadModelClient();
+    const projectReadinessSpy = vi.spyOn(client, 'getProjectReadiness');
+    const lifecycleReadinessSpy = vi.spyOn(client, 'getLifecycleReadiness');
+    const permitInspectionSpy = vi.spyOn(client, 'getPermitInspectionControlCenter');
+    const responsibilityMatrixSpy = vi.spyOn(client, 'getResponsibilityMatrix');
+    const constraintsLogSpy = vi.spyOn(client, 'getConstraintsLog');
+    const unifiedLifecycleSpy = vi.spyOn(client, 'getUnifiedLifecycle');
+
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() =>
+      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
+    );
+
+    // Each existing region hook calls its own method exactly once.
+    expect(projectReadinessSpy).toHaveBeenCalledTimes(1);
+    expect(lifecycleReadinessSpy).toHaveBeenCalledTimes(1);
+    expect(permitInspectionSpy).toHaveBeenCalledTimes(1);
+    expect(responsibilityMatrixSpy).toHaveBeenCalledTimes(1);
+    expect(constraintsLogSpy).toHaveBeenCalledTimes(1);
+    // The new method is invoked exactly once — by the new section
+    // via useUnifiedLifecycleReadModel — NOT by any existing region
+    // hook.
+    expect(unifiedLifecycleSpy).toHaveBeenCalledTimes(1);
   });
 });
