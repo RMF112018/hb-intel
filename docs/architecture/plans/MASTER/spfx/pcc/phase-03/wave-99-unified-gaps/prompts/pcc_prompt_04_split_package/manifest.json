@@ -1,0 +1,22 @@
+{
+  "package": "pcc_prompt_04_split_package",
+  "created_utc": "2026-05-03T11:09:42Z",
+  "source_objective": "Split Prompt 04 into manageable SPFx client, adapter, preview component, and hardening prompts.",
+  "canonical_backend_commit": "8d55565bd91ec9f67bf11bbd9e245452327e3113",
+  "canonical_route_ids": [
+    "unified-lifecycle",
+    "project-memory",
+    "project-lenses",
+    "project-traceability",
+    "warranty-trace",
+    "cross-project-knowledge",
+    "unified-search"
+  ],
+  "files": [
+    "README.md",
+    "04A_SPFX_UNIFIED_LIFECYCLE_CLIENT_PARITY.md",
+    "04B_SPFX_UNIFIED_LIFECYCLE_ADAPTERS_VIEW_MODELS.md",
+    "04C_SPFX_UNIFIED_LIFECYCLE_PREVIEW_COMPONENTS.md",
+    "04D_SPFX_UNIFIED_LIFECYCLE_SEAM_HARDENING_CLOSEOUT.md"
+  ]
+}
