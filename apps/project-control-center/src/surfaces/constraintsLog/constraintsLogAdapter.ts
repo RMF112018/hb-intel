@@ -46,34 +46,41 @@ import {
 import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMapping.js';
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState.js';
 import type { PccCardState } from '../projectHome/shared.js';
-import type {
-  IPccClAuditEventRow,
-  IPccClBandCount,
-  IPccClBoardCardEntry,
-  IPccClCategoryTrendRow,
-  IPccClCommandCenterViewModel,
-  IPccClConstraintExposureMatrixViewModel,
-  IPccClConstraintPlotEntry,
-  IPccClDetailPanelEntry,
-  IPccClDetailPanelViewModel,
-  IPccClExecutiveBandRow,
-  IPccClExecutiveExposureSummaryViewModel,
-  IPccClHuddleEntry,
-  IPccClLogRow,
-  IPccClLogTableViewModel,
-  IPccClMakeReadyBoardColumn,
-  IPccClMakeReadyBoardViewModel,
-  IPccClMatrixCell,
-  IPccClOverrideUsageRow,
-  IPccClReferenceSeamRow,
-  IPccClResidualDeltaRow,
-  IPccClRiskMatrixViewModel,
-  IPccClRiskPlotEntry,
-  IPccClRootCauseLessonsLearnedViewModel,
-  IPccClSourcePostureViewModel,
-  IPccClWeeklyHuddleSection,
-  IPccClWeeklyHuddleViewModel,
-  IPccConstraintsLogViewModel,
+import {
+  PCC_CL_BOUNDARY_KEYS,
+  PCC_CL_INTEGRATION_TARGET_IDS,
+  type IPccClAuditEventRow,
+  type IPccClBandCount,
+  type IPccClBoardCardEntry,
+  type IPccClBoundaryNotice,
+  type IPccClCategoryTrendRow,
+  type IPccClCommandCenterViewModel,
+  type IPccClConstraintExposureMatrixViewModel,
+  type IPccClConstraintPlotEntry,
+  type IPccClDetailPanelEntry,
+  type IPccClDetailPanelViewModel,
+  type IPccClExecutiveBandRow,
+  type IPccClExecutiveExposureSummaryViewModel,
+  type IPccClHuddleEntry,
+  type IPccClIntegrationPostureRow,
+  type IPccClLogRow,
+  type IPccClLogTableViewModel,
+  type IPccClMakeReadyBoardColumn,
+  type IPccClMakeReadyBoardViewModel,
+  type IPccClMatrixCell,
+  type IPccClOverrideUsageRow,
+  type IPccClReferenceSeamRow,
+  type IPccClResidualDeltaRow,
+  type IPccClRiskMatrixViewModel,
+  type IPccClRiskPlotEntry,
+  type IPccClRootCauseLessonsLearnedViewModel,
+  type IPccClSourcePostureViewModel,
+  type IPccClWeeklyHuddleSection,
+  type IPccClWeeklyHuddleViewModel,
+  type IPccConstraintsLogViewModel,
+  type PccClBoundaryKey,
+  type PccClIntegrationTargetId,
+  type PccClSeamKind,
 } from './constraintsLogViewModel.js';
 
 // ---------------------------------------------------------------------------
@@ -93,6 +100,145 @@ const EXEC_HEADLINE_CAPTION =
   'Executive exposure posture summary derived from the latest read-model envelope.';
 const LEGAL_BOUNDARY_CAPTION =
   'Reference-only review surface. No claim entitlement, no compensability determination, no delay-damages calculation, no forensic schedule analysis.';
+
+// Four canonical boundary notices surfaced in the Command Center lane.
+// Phrased as posture statements (not legal/forensic conclusions) so the
+// surface stays product-safe and stage-agnostic.
+const BOUNDARY_NOTICE_CAPTIONS: Readonly<Record<PccClBoundaryKey, string>> = {
+  'delay-exposure':
+    'Delay exposure is a project-controls review flag. Forensic schedule-analysis conclusions are not enabled here.',
+  'change-exposure':
+    'Change exposure is a review flag. Change-order entitlement and compensability determinations are not enabled here.',
+  'evidence-link':
+    'Evidence links reference Document Control. Evidence file ownership is not enabled here.',
+  'approval-checkpoint':
+    'Approval and checkpoint execution is not enabled here; ownership stays with the approvals surface.',
+};
+
+// Always-present integration posture rows, one per receiving target.
+// These render even when the current envelope contains no items so the
+// reference-only boundary is structurally legible regardless of content.
+const INTEGRATION_POSTURE_ROWS: readonly IPccClIntegrationPostureRow[] = [
+  {
+    targetId: 'project-readiness',
+    targetLabel: 'Project Readiness Center',
+    postureCaption:
+      'Reference only — Project Readiness owns the framework view and source-module registry.',
+  },
+  {
+    targetId: 'priority-actions',
+    targetLabel: 'Priority Actions',
+    postureCaption:
+      'Reference only — candidate references; the Priority Actions queue is not mutated here.',
+  },
+  {
+    targetId: 'lifecycle-readiness',
+    targetLabel: 'Lifecycle Readiness',
+    postureCaption:
+      'Reference only — lifecycle gate evaluation is owned by the lifecycle readiness surface.',
+  },
+  {
+    targetId: 'permit-inspection',
+    targetLabel: 'Permit & Inspection',
+    postureCaption:
+      'Reference only — permit and inspection lifecycle is owned by the permit & inspection surface.',
+  },
+  {
+    targetId: 'responsibility-matrix',
+    targetLabel: 'Responsibility Matrix',
+    postureCaption:
+      'Reference only — role assignment is owned by the responsibility matrix surface.',
+  },
+  {
+    targetId: 'approvals-checkpoints',
+    targetLabel: 'Approvals & Checkpoints',
+    postureCaption: 'Reference only — approval and checkpoint execution is not enabled here.',
+  },
+  {
+    targetId: 'document-control',
+    targetLabel: 'Document Control',
+    postureCaption: 'Reference only — evidence file ownership stays with Document Control.',
+  },
+  {
+    targetId: 'scheduler-look-ahead',
+    targetLabel: 'Scheduler & Look-Ahead',
+    postureCaption: 'Reference only — scheduler and look-ahead data is not mutated here.',
+  },
+  {
+    targetId: 'external-systems',
+    targetLabel: 'External Systems',
+    postureCaption:
+      'Reference only — external system launchers; no runtime calls are made from here.',
+  },
+  {
+    targetId: 'team-access',
+    targetLabel: 'Team & Access',
+    postureCaption: 'Reference only — Team & Access roster ownership stays with that surface.',
+  },
+];
+
+// Per-seam-kind reference-only label rendered next to each populated seam
+// row in the detail panel. Stable kind keys (PccClSeamKind) drive both the
+// DOM marker (data-pcc-cl-detail-seam-kind="<kind>") and the label copy.
+const SEAM_KIND_LABELS: Readonly<Record<PccClSeamKind, string>> = {
+  'priority-actions-candidate': 'Reference only — Priority Actions queue is not mutated here.',
+  'document-control-evidence':
+    'Reference only — evidence file ownership stays with Document Control.',
+  'lifecycle-readiness-gate':
+    'Reference only — lifecycle gate evaluation is owned by the lifecycle readiness surface.',
+  'permit-inspection':
+    'Reference only — permit/inspection lifecycle is owned by the permit & inspection surface.',
+  'responsibility-role':
+    'Reference only — role assignment is owned by the responsibility matrix surface.',
+  'approval-checkpoint': 'Reference only — approval/checkpoint execution is not enabled here.',
+  'external-system-launcher':
+    'Reference only — external system launcher; no runtime call is made here.',
+  'scheduler-look-ahead': 'Reference only — scheduler/look-ahead data is not mutated here.',
+  'team-access-role': 'Reference only — Team & Access roster ownership stays with that surface.',
+  'project-readiness-source-module':
+    'Reference only — declares this item as a Project Readiness source module signal.',
+  'converted-to-constraint': 'Reference only — names the constraint id this risk converted into.',
+  'external-party-reference':
+    'Reference only — names the external party blocking this constraint; no external runtime call from here.',
+};
+
+// Public-facing seam row labels (the human-readable name of the seam).
+// Stage-agnostic; no Wave references in user-facing copy.
+const SEAM_KIND_DISPLAY_LABELS: Readonly<Record<PccClSeamKind, string>> = {
+  'priority-actions-candidate': 'Priority Actions candidate',
+  'document-control-evidence': 'Document Control evidence reference',
+  'lifecycle-readiness-gate': 'Lifecycle Readiness gate',
+  'permit-inspection': 'Permit / inspection record',
+  'responsibility-role': 'Responsibility role',
+  'approval-checkpoint': 'Approval / checkpoint',
+  'external-system-launcher': 'External system launcher',
+  'scheduler-look-ahead': 'Scheduler look-ahead',
+  'team-access-role': 'Team & Access role',
+  'project-readiness-source-module': 'Project Readiness source module',
+  'converted-to-constraint': 'Converted to constraint',
+  'external-party-reference': 'External party reference',
+};
+
+function buildBoundaryNotices(): readonly IPccClBoundaryNotice[] {
+  return PCC_CL_BOUNDARY_KEYS.map((key) => ({
+    key,
+    caption: BOUNDARY_NOTICE_CAPTIONS[key],
+  }));
+}
+
+function buildIntegrationPosture(): readonly IPccClIntegrationPostureRow[] {
+  // Validate (at runtime) that the registry covers every target id in the
+  // tuple. Throws fast in tests if a new target id is added without a row.
+  const present = new Set(INTEGRATION_POSTURE_ROWS.map((r) => r.targetId));
+  for (const targetId of PCC_CL_INTEGRATION_TARGET_IDS) {
+    if (!present.has(targetId)) {
+      throw new Error(
+        `INTEGRATION_POSTURE_ROWS missing entry for target ${targetId satisfies PccClIntegrationTargetId}`,
+      );
+    }
+  }
+  return INTEGRATION_POSTURE_ROWS;
+}
 
 // ---------------------------------------------------------------------------
 // Internal label maps (module-local; tests assert adapter outputs, not the
@@ -233,6 +379,8 @@ function buildCommandCenter(data: PccConstraintsLogReadModel): IPccClCommandCent
     latestSnapshotDisplay: latestSnapshot
       ? `Snapshot ${latestSnapshot.snapshotId} · ${formatDateDisplay(latestSnapshot.generatedAtUtc) ?? ''}`
       : undefined,
+    boundaryNotices: buildBoundaryNotices(),
+    integrationPosture: buildIntegrationPosture(),
   };
 }
 
@@ -461,28 +609,37 @@ function buildLogTable(data: PccConstraintsLogReadModel): IPccClLogTableViewMode
 // Lane: 6 — Detail Panel entries (driven by local selection state)
 // ---------------------------------------------------------------------------
 
+function makeSeamRow(seamKind: PccClSeamKind, reference: string): IPccClReferenceSeamRow {
+  return {
+    seamKind,
+    label: SEAM_KIND_DISPLAY_LABELS[seamKind],
+    reference,
+    referenceOnlyLabel: SEAM_KIND_LABELS[seamKind],
+  };
+}
+
 function referenceSeamRows(
   seams: ConstraintsLogReferenceSeams,
-  extra: Partial<Record<string, string>> = {},
+  stateExtras: readonly { readonly seamKind: PccClSeamKind; readonly reference: string }[] = [],
 ): readonly IPccClReferenceSeamRow[] {
   const rows: IPccClReferenceSeamRow[] = [];
-  const push = (label: string, ref: string | undefined): void => {
-    if (ref) rows.push({ label, reference: ref });
+  const push = (seamKind: PccClSeamKind, ref: string | undefined): void => {
+    if (ref) rows.push(makeSeamRow(seamKind, ref));
   };
-  push('Priority Actions candidate', seams.priorityActionsCandidateRef);
+  push('priority-actions-candidate', seams.priorityActionsCandidateRef);
   for (const evidenceRef of seams.documentControlEvidenceRefs ?? []) {
-    rows.push({ label: 'Document Control evidence reference', reference: evidenceRef });
+    rows.push(makeSeamRow('document-control-evidence', evidenceRef));
   }
-  push('Lifecycle Readiness gate', seams.lifecycleReadinessGateRef);
-  push('Permit / inspection record', seams.permitInspectionRef);
-  push('Responsibility role', seams.responsibilityRoleRef);
-  push('Wave 14 approval checkpoint', seams.wave14ApprovalCheckpointRef);
-  push('External system launcher', seams.externalSystemReferenceRef);
-  push('Scheduler look-ahead', seams.schedulerLookAheadRef);
-  push('Team & Access role', seams.teamAccessRoleRef);
-  push('Project Readiness source module', seams.projectReadinessSourceModuleRef);
-  for (const [label, ref] of Object.entries(extra)) {
-    if (ref) rows.push({ label, reference: ref });
+  push('lifecycle-readiness-gate', seams.lifecycleReadinessGateRef);
+  push('permit-inspection', seams.permitInspectionRef);
+  push('responsibility-role', seams.responsibilityRoleRef);
+  push('approval-checkpoint', seams.wave14ApprovalCheckpointRef);
+  push('external-system-launcher', seams.externalSystemReferenceRef);
+  push('scheduler-look-ahead', seams.schedulerLookAheadRef);
+  push('team-access-role', seams.teamAccessRoleRef);
+  push('project-readiness-source-module', seams.projectReadinessSourceModuleRef);
+  for (const extra of stateExtras) {
+    rows.push(makeSeamRow(extra.seamKind, extra.reference));
   }
   return rows;
 }
@@ -509,8 +666,10 @@ function riskDetail(
   const initial = r.initial;
   const effectiveBand = r.residual?.band ?? initial.band;
   const sourceLineageDisplay = `${r.sourceLineage.workbook} · ${r.sourceLineage.sheetSection} · ${r.sourceLineage.rowReference}`;
-  const seamsExtra: Partial<Record<string, string>> =
-    r.state === 'converted' ? { 'Converted to constraint': r.convertedToConstraintId } : {};
+  const seamsExtra: { readonly seamKind: PccClSeamKind; readonly reference: string }[] =
+    r.state === 'converted'
+      ? [{ seamKind: 'converted-to-constraint', reference: r.convertedToConstraintId }]
+      : [];
   return {
     id: r.id,
     kind: 'risk',
@@ -556,10 +715,10 @@ function constraintDetail(
   events: readonly ConstraintsLogAuditEvent[],
 ): IPccClDetailPanelEntry {
   const sourceLineageDisplay = `${c.sourceLineage.workbook} · ${c.sourceLineage.sheetSection} · ${c.sourceLineage.rowReference}`;
-  const seamsExtra: Partial<Record<string, string>> =
+  const seamsExtra: { readonly seamKind: PccClSeamKind; readonly reference: string }[] =
     c.state === 'awaiting-external-party'
-      ? { 'External party reference': c.externalPartyReference }
-      : {};
+      ? [{ seamKind: 'external-party-reference', reference: c.externalPartyReference }]
+      : [];
   return {
     id: c.id,
     kind: 'constraint',

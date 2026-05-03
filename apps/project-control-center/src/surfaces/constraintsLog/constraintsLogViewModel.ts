@@ -64,6 +64,39 @@ export interface IPccClSourcePostureViewModel {
   readonly captionLine: string;
 }
 
+export const PCC_CL_BOUNDARY_KEYS = [
+  'delay-exposure',
+  'change-exposure',
+  'evidence-link',
+  'approval-checkpoint',
+] as const;
+export type PccClBoundaryKey = (typeof PCC_CL_BOUNDARY_KEYS)[number];
+
+export interface IPccClBoundaryNotice {
+  readonly key: PccClBoundaryKey;
+  readonly caption: string;
+}
+
+export const PCC_CL_INTEGRATION_TARGET_IDS = [
+  'project-readiness',
+  'priority-actions',
+  'lifecycle-readiness',
+  'permit-inspection',
+  'responsibility-matrix',
+  'approvals-checkpoints',
+  'document-control',
+  'scheduler-look-ahead',
+  'external-systems',
+  'team-access',
+] as const;
+export type PccClIntegrationTargetId = (typeof PCC_CL_INTEGRATION_TARGET_IDS)[number];
+
+export interface IPccClIntegrationPostureRow {
+  readonly targetId: PccClIntegrationTargetId;
+  readonly targetLabel: string;
+  readonly postureCaption: string;
+}
+
 export interface IPccClCommandCenterViewModel {
   readonly readOnlyCaption: string;
   readonly noExecutionCaption: string;
@@ -76,6 +109,8 @@ export interface IPccClCommandCenterViewModel {
   readonly priorityActionsCandidateCount: number;
   readonly sourcePosture: IPccClSourcePostureViewModel;
   readonly latestSnapshotDisplay?: string;
+  readonly boundaryNotices: readonly IPccClBoundaryNotice[];
+  readonly integrationPosture: readonly IPccClIntegrationPostureRow[];
 }
 
 // ---------------------------------------------------------------------------
@@ -247,9 +282,27 @@ export interface IPccClDetailPanelEntry {
   readonly boundaryCaption: string;
 }
 
+export const PCC_CL_SEAM_KINDS = [
+  'priority-actions-candidate',
+  'document-control-evidence',
+  'lifecycle-readiness-gate',
+  'permit-inspection',
+  'responsibility-role',
+  'approval-checkpoint',
+  'external-system-launcher',
+  'scheduler-look-ahead',
+  'team-access-role',
+  'project-readiness-source-module',
+  'converted-to-constraint',
+  'external-party-reference',
+] as const;
+export type PccClSeamKind = (typeof PCC_CL_SEAM_KINDS)[number];
+
 export interface IPccClReferenceSeamRow {
+  readonly seamKind: PccClSeamKind;
   readonly label: string;
   readonly reference: string;
+  readonly referenceOnlyLabel: string;
 }
 
 export interface IPccClAuditEventRow {

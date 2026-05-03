@@ -261,6 +261,126 @@ describe('Wave 12 Constraints Log — narrow client wired through adapter', () =
 });
 
 // ---------------------------------------------------------------------------
+// Wave 12 Prompt 06 — boundary notices, integration posture, per-seam labels
+// ---------------------------------------------------------------------------
+
+const REQUIRED_BOUNDARY_KEYS: readonly string[] = [
+  'delay-exposure',
+  'change-exposure',
+  'evidence-link',
+  'approval-checkpoint',
+];
+
+const REQUIRED_INTEGRATION_TARGETS: readonly string[] = [
+  'project-readiness',
+  'priority-actions',
+  'lifecycle-readiness',
+  'permit-inspection',
+  'responsibility-matrix',
+  'approvals-checkpoints',
+  'document-control',
+  'scheduler-look-ahead',
+  'external-systems',
+  'team-access',
+];
+
+describe('Wave 12 Constraints Log — boundary notices in command center', () => {
+  it('renders one boundary-notice marker per canonical key inside the command-center lane', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const lane = clLane(container, 'command-center');
+    expect(lane).not.toBeNull();
+    for (const key of REQUIRED_BOUNDARY_KEYS) {
+      const notice = lane!.querySelector(`[data-pcc-cl-boundary-notice="${key}"]`);
+      expect(notice, `missing boundary notice ${key}`).not.toBeNull();
+      const text = notice!.textContent ?? '';
+      expect(text.toLowerCase()).toContain('not enabled here');
+    }
+  });
+
+  it('boundary notices live within the command-center boundary-notices region', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = container.querySelector(
+      '[data-pcc-cl-region="command-center-boundary-notices"]',
+    );
+    expect(region).not.toBeNull();
+    expect(region!.querySelectorAll('[data-pcc-cl-boundary-notice]').length).toBe(
+      REQUIRED_BOUNDARY_KEYS.length,
+    );
+  });
+});
+
+describe('Wave 12 Constraints Log — integration posture in command center', () => {
+  it('renders one integration-posture marker per canonical target in the command-center lane', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const lane = clLane(container, 'command-center');
+    expect(lane).not.toBeNull();
+    for (const targetId of REQUIRED_INTEGRATION_TARGETS) {
+      const row = lane!.querySelector(`[data-pcc-cl-integration-posture="${targetId}"]`);
+      expect(row, `missing integration posture row ${targetId}`).not.toBeNull();
+      expect(row!.textContent?.toLowerCase()).toContain('reference only');
+    }
+  });
+
+  it('integration posture rows are inert (no anchors, no buttons, no inputs)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = container.querySelector(
+      '[data-pcc-cl-region="command-center-integration-posture"]',
+    );
+    expect(region).not.toBeNull();
+    expect(region!.querySelector('a')).toBeNull();
+    expect(region!.querySelector('button')).toBeNull();
+    expect(region!.querySelector('input')).toBeNull();
+    expect(region!.querySelector('form')).toBeNull();
+  });
+});
+
+describe('Wave 12 Constraints Log — per-seam reference-only labels in detail panel', () => {
+  // Map each fixture-populated seam kind to a row id in the log table whose
+  // detail entry surfaces that kind. The fixture does not populate
+  // `scheduler-look-ahead` or `team-access-role`, so those kinds are not
+  // asserted here.
+  const KIND_TO_ROW_ID: ReadonlyArray<readonly [string, string]> = [
+    ['document-control-evidence', 'risk-w12-001'],
+    ['project-readiness-source-module', 'risk-w12-001'],
+    ['permit-inspection', 'risk-w12-002'],
+    ['external-system-launcher', 'risk-w12-002'],
+    ['priority-actions-candidate', 'risk-w12-003'],
+    ['responsibility-role', 'risk-w12-003'],
+    ['approval-checkpoint', 'risk-w12-004'],
+    ['lifecycle-readiness-gate', 'risk-w12-004'],
+    ['converted-to-constraint', 'risk-w12-006'],
+    ['external-party-reference', 'constraint-w12-005'],
+  ];
+
+  it('each fixture-populated seam kind renders a data-pcc-cl-detail-seam-kind marker with a reference-only label', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    for (const [kind, rowId] of KIND_TO_ROW_ID) {
+      const selectButton = container.querySelector(`[data-pcc-cl-log-select="${rowId}"]`);
+      expect(selectButton, `missing log row for ${rowId}`).not.toBeNull();
+      fireEvent.click(selectButton!);
+
+      const detailLane = clLane(container, 'detail-panel');
+      expect(detailLane, `missing detail-panel lane after selecting ${rowId}`).not.toBeNull();
+
+      const seamRow = detailLane!.querySelector(`[data-pcc-cl-detail-seam-kind="${kind}"]`);
+      expect(seamRow, `missing seam kind ${kind} on detail entry ${rowId}`).not.toBeNull();
+
+      const refOnlyLabel = seamRow!.querySelector(
+        `[data-pcc-cl-detail-seam-reference-only="${kind}"]`,
+      );
+      expect(refOnlyLabel, `missing reference-only label for ${kind}`).not.toBeNull();
+      expect(refOnlyLabel!.textContent?.toLowerCase()).toContain('reference only');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // No-runtime import-specifier scan (mirrors Wave 11 implementation)
 // ---------------------------------------------------------------------------
 

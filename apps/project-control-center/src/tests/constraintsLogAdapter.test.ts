@@ -9,7 +9,11 @@ import {
   type PccReadModelSourceStatus,
 } from '@hbc/models/pcc';
 import { buildPccConstraintsLogViewModel } from '../surfaces/constraintsLog/constraintsLogAdapter';
-import type { IPccConstraintsLogViewModel } from '../surfaces/constraintsLog/constraintsLogViewModel';
+import {
+  PCC_CL_BOUNDARY_KEYS,
+  PCC_CL_INTEGRATION_TARGET_IDS,
+  type IPccConstraintsLogViewModel,
+} from '../surfaces/constraintsLog/constraintsLogViewModel';
 
 const PROJECT_ID = 'p-w12-cl-test' as PccProjectId;
 
@@ -315,5 +319,137 @@ describe('buildPccConstraintsLogViewModel — executive exposure summary', () =>
     expect(vm.executiveExposureSummary.boundaryCaption.toLowerCase()).toContain(
       'no compensability determination',
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Wave 12 Prompt 06 — boundary notices, integration posture, per-seam labels
+// ---------------------------------------------------------------------------
+
+const EMPTY_DATA: PccConstraintsLogReadModel = {
+  ...SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  riskItems: [],
+  constraintItems: [],
+  exposureSummary: {
+    riskCountsByBand: { low: 0, moderate: 0, high: 0, 'very-high': 0, critical: 0 },
+    constraintCountsByBand: { low: 0, moderate: 0, high: 0, 'very-high': 0, critical: 0 },
+    overdueConstraintCount: 0,
+    awaitingExternalPartyCount: 0,
+    delayExposureReviewQueueCount: 0,
+    changeExposureReviewQueueCount: 0,
+    priorityActionsCandidateCount: 0,
+  },
+  snapshotHistory: [],
+  auditEvents: [],
+};
+
+describe('buildPccConstraintsLogViewModel — boundary notices', () => {
+  it('emits all four canonical boundary notices in registry order', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    expect(vm.commandCenter.boundaryNotices.map((n) => n.key)).toEqual([
+      'delay-exposure',
+      'change-exposure',
+      'evidence-link',
+      'approval-checkpoint',
+    ]);
+    expect(vm.commandCenter.boundaryNotices.map((n) => n.key)).toEqual(
+      Array.from(PCC_CL_BOUNDARY_KEYS),
+    );
+  });
+
+  it('boundary captions match the canonical posture wording', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    const byKey = Object.fromEntries(
+      vm.commandCenter.boundaryNotices.map((n) => [n.key, n.caption]),
+    );
+    expect(byKey['delay-exposure']).toContain('project-controls review flag');
+    expect(byKey['delay-exposure']).toContain('not enabled here');
+    expect(byKey['change-exposure']).toContain('review flag');
+    expect(byKey['change-exposure']).toContain('Change-order entitlement');
+    expect(byKey['change-exposure']).toContain('not enabled here');
+    expect(byKey['evidence-link']).toContain('Document Control');
+    expect(byKey['evidence-link']).toContain('not enabled here');
+    expect(byKey['approval-checkpoint']).toContain('Approval');
+    expect(byKey['approval-checkpoint']).toContain('not enabled here');
+  });
+
+  it('emits boundary notices even on empty/degraded envelopes', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('source-unavailable', EMPTY_DATA)));
+    expect(vm.commandCenter.boundaryNotices.map((n) => n.key)).toEqual(
+      Array.from(PCC_CL_BOUNDARY_KEYS),
+    );
+  });
+});
+
+describe('buildPccConstraintsLogViewModel — integration posture', () => {
+  it('emits one row per registered integration target id', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    expect(vm.commandCenter.integrationPosture.map((r) => r.targetId)).toEqual(
+      Array.from(PCC_CL_INTEGRATION_TARGET_IDS),
+    );
+  });
+
+  it('every integration row has a non-empty target label and reference-only posture caption', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    for (const row of vm.commandCenter.integrationPosture) {
+      expect(row.targetLabel.length).toBeGreaterThan(0);
+      expect(row.postureCaption.toLowerCase()).toContain('reference only');
+    }
+  });
+
+  it('integration posture remains present on backend-unavailable / empty envelopes', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('backend-unavailable', EMPTY_DATA)));
+    expect(vm.commandCenter.integrationPosture.map((r) => r.targetId)).toEqual(
+      Array.from(PCC_CL_INTEGRATION_TARGET_IDS),
+    );
+  });
+});
+
+describe('buildPccConstraintsLogViewModel — per-seam reference-only labels', () => {
+  it('every populated detail-panel seam row carries a stable seamKind and a reference-only label', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    let totalSeams = 0;
+    for (const entry of vm.detailPanel.entries.values()) {
+      for (const seam of entry.referenceSeams) {
+        totalSeams += 1;
+        expect(seam.seamKind.length).toBeGreaterThan(0);
+        expect(seam.referenceOnlyLabel.toLowerCase()).toContain('reference only');
+        expect(seam.reference.length).toBeGreaterThan(0);
+        expect(seam.label.length).toBeGreaterThan(0);
+      }
+    }
+    expect(totalSeams).toBeGreaterThan(0);
+  });
+
+  it('covers the eight primary fixture-populated seam kinds across all detail entries', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    const kindsSeen = new Set<string>();
+    for (const entry of vm.detailPanel.entries.values()) {
+      for (const seam of entry.referenceSeams) kindsSeen.add(seam.seamKind);
+    }
+    for (const kind of [
+      'priority-actions-candidate',
+      'document-control-evidence',
+      'lifecycle-readiness-gate',
+      'permit-inspection',
+      'responsibility-role',
+      'approval-checkpoint',
+      'external-system-launcher',
+      'project-readiness-source-module',
+    ]) {
+      expect(kindsSeen, `expected seam kind ${kind} to be present`).toContain(kind);
+    }
+  });
+
+  it('state-conditional seam kinds appear on the matching items', () => {
+    const vm = ready(buildPccConstraintsLogViewModel(envelope('available')));
+    const convertedRisk = vm.detailPanel.entries.get('risk-w12-006');
+    expect(
+      convertedRisk?.referenceSeams.some((s) => s.seamKind === 'converted-to-constraint'),
+    ).toBe(true);
+    const awaitingConstraint = vm.detailPanel.entries.get('constraint-w12-005');
+    expect(
+      awaitingConstraint?.referenceSeams.some((s) => s.seamKind === 'external-party-reference'),
+    ).toBe(true);
   });
 });

@@ -192,6 +192,38 @@ const CommandCenterCard: FC<CommandCenterCardProps> = ({ commandCenter, moduleSu
           <span className={styles.rowMeta}>{commandCenter.latestSnapshotDisplay}</span>
         ) : null}
       </div>
+
+      <ul
+        className={styles.list}
+        aria-label="Boundary notices"
+        data-pcc-cl-region="command-center-boundary-notices"
+      >
+        {commandCenter.boundaryNotices.map((notice) => (
+          <li key={notice.key} className={styles.row} data-pcc-cl-boundary-notice={notice.key}>
+            <span className={styles.captionLine}>{notice.caption}</span>
+          </li>
+        ))}
+      </ul>
+
+      <ul
+        className={styles.list}
+        aria-label="Integration posture"
+        data-pcc-cl-region="command-center-integration-posture"
+      >
+        {commandCenter.integrationPosture.map((row) => (
+          <li
+            key={row.targetId}
+            className={styles.row}
+            data-pcc-cl-integration-posture={row.targetId}
+          >
+            <div className={styles.rowHeader}>
+              <span className={styles.rowTitle}>{row.targetLabel}</span>
+              <span className={styles.chip}>Reference only</span>
+            </div>
+            <span className={styles.rowMeta}>{row.postureCaption}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   </PccDashboardCard>
 );
@@ -565,12 +597,16 @@ const DetailEntry: FC<DetailEntryProps> = ({ entry }) => (
       >
         {entry.referenceSeams.map((seam, idx) => (
           <li
-            key={`${seam.label}:${idx}`}
+            key={`${seam.seamKind}:${seam.reference}:${idx}`}
             className={styles.row}
             data-pcc-cl-detail-seam={seam.reference}
+            data-pcc-cl-detail-seam-kind={seam.seamKind}
           >
             <span className={styles.rowMeta}>
               {seam.label}: {seam.reference}
+            </span>
+            <span className={styles.rowMeta} data-pcc-cl-detail-seam-reference-only={seam.seamKind}>
+              {seam.referenceOnlyLabel}
             </span>
           </li>
         ))}
