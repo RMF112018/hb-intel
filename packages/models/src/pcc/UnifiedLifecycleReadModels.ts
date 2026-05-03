@@ -8,51 +8,57 @@
  */
 
 import type {
-  CrossProjectReference,
-  LifecycleContextReference,
-  LifecycleGateSignal,
-  ProjectAssumptionRecord,
-  ProjectDecisionRecord,
-  ProjectKnowledgeReference,
-  ProjectLifecycleEvent,
-  ProjectMemoryRecord,
-  ProjectStageLens,
-  ProjectStageTransitionCheckpoint,
-  ProjectTraceabilityEdge,
+  PccClosedProjectReferenceReadModel,
+  PccCrossProjectReference,
+  PccLifecycleContextReference,
+  PccLifecycleGateSignal,
+  PccProjectAssumptionRecord,
+  PccProjectDecisionRecord,
+  PccProjectKnowledgeReference,
+  PccProjectLifecycleEvent,
+  PccProjectMemoryRecord,
+  PccProjectStageLens,
+  PccProjectStageTransitionCheckpoint,
+  PccProjectTraceabilityEdge,
+  PccRelatedRecordCluster,
+  PccTraceabilityGraphReadModel,
   UnifiedSearchAskHbiResponse,
-  WarrantyTraceRecord,
+  PccWarrantyTraceRecord,
 } from './UnifiedLifecycle.js';
 
 export interface PccProjectLifecycleTimelineReadModel {
-  readonly events: readonly ProjectLifecycleEvent[];
-  readonly checkpoints: readonly ProjectStageTransitionCheckpoint[];
-  readonly gateSignals: readonly LifecycleGateSignal[];
-  readonly contextReferences: readonly LifecycleContextReference[];
+  readonly events: readonly PccProjectLifecycleEvent[];
+  readonly checkpoints: readonly PccProjectStageTransitionCheckpoint[];
+  readonly gateSignals: readonly PccLifecycleGateSignal[];
+  readonly contextReferences: readonly PccLifecycleContextReference[];
 }
 
 export interface PccProjectMemoryReadModel {
-  readonly records: readonly ProjectMemoryRecord[];
-  readonly decisions: readonly ProjectDecisionRecord[];
-  readonly assumptions: readonly ProjectAssumptionRecord[];
+  readonly records: readonly PccProjectMemoryRecord[];
+  readonly decisions: readonly PccProjectDecisionRecord[];
+  readonly assumptions: readonly PccProjectAssumptionRecord[];
 }
 
 export interface PccProjectLensesReadModel {
-  readonly stageLenses: readonly ProjectStageLens[];
+  readonly stageLenses: readonly PccProjectStageLens[];
 }
 
 export interface PccProjectTraceabilityReadModel {
-  readonly edges: readonly ProjectTraceabilityEdge[];
-  readonly relatedLifecycleEvents: readonly ProjectLifecycleEvent[];
-  readonly relatedMemoryRecords: readonly ProjectMemoryRecord[];
+  readonly edges: readonly PccProjectTraceabilityEdge[];
+  readonly clusters: readonly PccRelatedRecordCluster[];
+  readonly graph: PccTraceabilityGraphReadModel;
+  readonly relatedLifecycleEvents: readonly PccProjectLifecycleEvent[];
+  readonly relatedMemoryRecords: readonly PccProjectMemoryRecord[];
 }
 
 export interface PccWarrantyTraceReadModel {
-  readonly traces: readonly WarrantyTraceRecord[];
+  readonly traces: readonly PccWarrantyTraceRecord[];
 }
 
 export interface PccCrossProjectKnowledgeReadModel {
-  readonly crossProjectReferences: readonly CrossProjectReference[];
-  readonly knowledgeReferences: readonly ProjectKnowledgeReference[];
+  readonly crossProjectReferences: readonly PccCrossProjectReference[];
+  readonly knowledgeReferences: readonly PccProjectKnowledgeReference[];
+  readonly closedProjectReferences: PccClosedProjectReferenceReadModel;
 }
 
 export interface PccUnifiedSearchAskHbiReadModel {

@@ -92,6 +92,22 @@ describe('Unified lifecycle read-model fixtures', () => {
     }
   });
 
+  it('traceability read model exposes graph clusters with non-orphan edge references', () => {
+    const edges = new Set(SAMPLE_PROJECT_TRACEABILITY_ENVELOPE.data.edges.map((e) => e.edgeId));
+    expect(SAMPLE_PROJECT_TRACEABILITY_ENVELOPE.data.clusters.length).toBeGreaterThan(0);
+    for (const cluster of SAMPLE_PROJECT_TRACEABILITY_ENVELOPE.data.clusters) {
+      for (const edgeId of cluster.edgeIds) {
+        expect(edges.has(edgeId)).toBe(true);
+      }
+    }
+  });
+
+  it('closed-project knowledge includes future pursuit references', () => {
+    const closed = SAMPLE_CROSS_PROJECT_KNOWLEDGE_ENVELOPE.data.closedProjectReferences;
+    expect(closed.references.length).toBeGreaterThan(0);
+    expect(closed.futurePursuitReferences.length).toBeGreaterThan(0);
+  });
+
   it('fixture responses do not claim PCC is the system of record', () => {
     const payloads = [
       SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
