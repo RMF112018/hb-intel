@@ -24,12 +24,14 @@ import { Fragment, useEffect, useState, type FC } from 'react';
 import {
   PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
+  PccConstraintsLogReadModel,
   PccLifecycleReadinessReadModel,
   PccPermitInspectionControlCenterReadModel,
   PccProjectId,
@@ -50,6 +52,13 @@ import type {
   IPccResponsibilityMatrixReadModelClient,
   IPccResponsibilityMatrixViewModel,
 } from '../responsibilityMatrix/responsibilityMatrixViewModel';
+import { PccConstraintsLogRegions } from '../constraintsLog/PccConstraintsLogRegions';
+import { buildPccConstraintsLogViewModel } from '../constraintsLog/constraintsLogAdapter';
+import { useConstraintsLogReadModel } from '../constraintsLog/useConstraintsLogReadModel';
+import type {
+  IPccConstraintsLogReadModelClient,
+  IPccConstraintsLogViewModel,
+} from '../constraintsLog/constraintsLogViewModel';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
@@ -88,7 +97,8 @@ import styles from './PccProjectReadinessSurface.module.css';
 interface PccProjectReadinessSurfaceProps {
   readonly readModelClient?: IPccProjectReadinessReadModelClient &
     IPccPermitInspectionControlCenterReadModelClient &
-    IPccResponsibilityMatrixReadModelClient;
+    IPccResponsibilityMatrixReadModelClient &
+    IPccConstraintsLogReadModelClient;
 }
 
 const FIXTURE_ENVELOPE: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel> = {
@@ -146,6 +156,19 @@ const FIXTURE_RESPONSIBILITY_MATRIX_ENVELOPE: PccReadModelEnvelope<PccResponsibi
 const FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL: IPccResponsibilityMatrixViewModel =
   buildPccResponsibilityMatrixViewModel(FIXTURE_RESPONSIBILITY_MATRIX_ENVELOPE);
 
+const FIXTURE_CONSTRAINTS_LOG_ENVELOPE: PccReadModelEnvelope<PccConstraintsLogReadModel> = {
+  projectId: SAMPLE_PROJECT_PROFILE.projectId,
+  mode: 'fixture',
+  sourceStatus: 'available',
+  readOnly: true,
+  warnings: [],
+  generatedAtUtc: '2026-04-30T00:00:00.000Z',
+  data: SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+};
+
+const FIXTURE_CONSTRAINTS_LOG_VIEW_MODEL: IPccConstraintsLogViewModel =
+  buildPccConstraintsLogViewModel(FIXTURE_CONSTRAINTS_LOG_ENVELOPE);
+
 const LIFECYCLE_SECTION_MARKER = 'lifecycle-readiness-center';
 
 export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = ({
@@ -160,6 +183,7 @@ export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = (
       <LifecycleReadinessRegions viewModel={FIXTURE_LIFECYCLE_VIEW_MODEL} />
       <PccPermitInspectionControlCenterRegions viewModel={FIXTURE_PERMIT_INSPECTION_VIEW_MODEL} />
       <PccResponsibilityMatrixRegions viewModel={FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL} />
+      <PccConstraintsLogRegions viewModel={FIXTURE_CONSTRAINTS_LOG_VIEW_MODEL} />
     </Fragment>
   );
 };
@@ -173,7 +197,8 @@ export default PccProjectReadinessSurface;
 interface ReadModelContentProps {
   readonly client: IPccProjectReadinessReadModelClient &
     IPccPermitInspectionControlCenterReadModelClient &
-    IPccResponsibilityMatrixReadModelClient;
+    IPccResponsibilityMatrixReadModelClient &
+    IPccConstraintsLogReadModelClient;
 }
 
 const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
@@ -190,12 +215,17 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
     client,
     SAMPLE_PROJECT_PROFILE.projectId,
   );
+  const constraintsLogViewModel = useConstraintsLogReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
   return (
     <Fragment>
       <ReadinessRegions viewModel={viewModel} />
       <LifecycleReadinessRegions viewModel={lifecycleViewModel} />
       <PccPermitInspectionControlCenterRegions viewModel={permitInspectionViewModel} />
       <PccResponsibilityMatrixRegions viewModel={responsibilityMatrixViewModel} />
+      <PccConstraintsLogRegions viewModel={constraintsLogViewModel} />
     </Fragment>
   );
 };
