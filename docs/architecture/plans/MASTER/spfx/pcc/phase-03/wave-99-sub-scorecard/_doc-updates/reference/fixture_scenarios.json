@@ -1,0 +1,98 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "scenarios": [
+    {
+      "id": "SC-FIX-001",
+      "name": "no-scorecards-assigned",
+      "requiredState": "empty register with no action leakage"
+    },
+    {
+      "id": "SC-FIX-002",
+      "name": "not-started-scorecard",
+      "requiredState": "scorecard expected but not started"
+    },
+    {
+      "id": "SC-FIX-003",
+      "name": "draft-missing-superintendent-input",
+      "requiredState": "status needs-superintendent-input; submit blocked"
+    },
+    {
+      "id": "SC-FIX-004",
+      "name": "draft-na-valid-justification",
+      "requiredState": "N/A redistribution works"
+    },
+    {
+      "id": "SC-FIX-005",
+      "name": "draft-na-missing-justification",
+      "requiredState": "submit blocked"
+    },
+    {
+      "id": "SC-FIX-006",
+      "name": "ready-for-px-review",
+      "requiredState": "approval actions available to PX only"
+    },
+    {
+      "id": "SC-FIX-007",
+      "name": "returned-for-revision",
+      "requiredState": "return reason visible to PM/Super/PX"
+    },
+    {
+      "id": "SC-FIX-008",
+      "name": "approved-restricted-unpublished",
+      "requiredState": "not visible to estimating/procurement rollup"
+    },
+    {
+      "id": "SC-FIX-009",
+      "name": "published-exceptional-performer",
+      "requiredState": "included in portfolio rollups"
+    },
+    {
+      "id": "SC-FIX-010",
+      "name": "published-low-score-risk-controls",
+      "requiredState": "risk control plan visible in procurement summary"
+    },
+    {
+      "id": "SC-FIX-011",
+      "name": "disputed-scorecard",
+      "requiredState": "excluded from analytics"
+    },
+    {
+      "id": "SC-FIX-012",
+      "name": "under-correction-supersedes-version",
+      "requiredState": "prior approved version immutable; new revision requires approval"
+    },
+    {
+      "id": "SC-FIX-013",
+      "name": "vendor-portfolio-multiple-projects",
+      "requiredState": "trend and recurring issue calculations"
+    },
+    {
+      "id": "SC-FIX-014",
+      "name": "backend-unavailable",
+      "requiredState": "safe envelope warning, no raw crash"
+    },
+    {
+      "id": "SC-FIX-015",
+      "name": "source-unavailable-procore",
+      "requiredState": "Procore source warning, PCC record still loads if permitted"
+    },
+    {
+      "id": "SC-FIX-016",
+      "name": "unauthorized-estimating-draft-viewer",
+      "requiredState": "draft restricted; published summaries only"
+    },
+    {
+      "id": "SC-FIX-017",
+      "name": "executive-read-only-viewer",
+      "requiredState": "no edit/approve/publish actions"
+    },
+    {
+      "id": "SC-FIX-018",
+      "name": "hbi-suggestion-requires-human-acceptance",
+      "requiredState": "generated text cannot publish until accepted"
+    }
+  ]
+}

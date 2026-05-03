@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "roles": [
+    "project-manager",
+    "superintendent",
+    "project-executive",
+    "project-accountant",
+    "estimating",
+    "procurement-buyout",
+    "executive-oversight",
+    "pcc-admin",
+    "hbi-assistant"
+  ],
+  "fields": {
+    "projectMetadata": {
+      "createEdit": [
+        "project-manager"
+      ],
+      "review": [
+        "project-executive"
+      ],
+      "publishedView": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ],
+      "lockedAfterApproval": true
+    },
+    "subcontractorMetadata": {
+      "createEdit": [
+        "project-manager"
+      ],
+      "review": [
+        "project-executive"
+      ],
+      "publishedView": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ],
+      "lockedAfterApproval": true
+    },
+    "safetyScore": {
+      "createEdit": [
+        "project-manager",
+        "superintendent"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "lockedAfterApproval": true
+    },
+    "qualityScore": {
+      "createEdit": [
+        "project-manager",
+        "superintendent"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "lockedAfterApproval": true
+    },
+    "scheduleScore": {
+      "createEdit": [
+        "project-manager",
+        "superintendent"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "lockedAfterApproval": true
+    },
+    "costScore": {
+      "createEdit": [
+        "project-manager"
+      ],
+      "comment": [
+        "project-accountant"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "lockedAfterApproval": true,
+      "restricted": true
+    },
+    "communicationScore": {
+      "createEdit": [
+        "project-manager",
+        "superintendent"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "lockedAfterApproval": true
+    },
+    "workforceScore": {
+      "createEdit": [
+        "project-manager",
+        "superintendent"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "lockedAfterApproval": true
+    },
+    "futureWorkRecommendation": {
+      "createEdit": [
+        "project-manager"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "publishedView": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ],
+      "lockedAfterApproval": true
+    },
+    "riskControlPlan": {
+      "createEdit": [
+        "project-manager",
+        "procurement-buyout"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "publishedView": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ],
+      "lockedAfterApproval": true
+    },
+    "rawReviewerComments": {
+      "createEdit": [
+        "project-manager",
+        "superintendent",
+        "project-executive"
+      ],
+      "view": [
+        "project-manager",
+        "superintendent",
+        "project-executive"
+      ],
+      "publishedView": [],
+      "restricted": true
+    },
+    "publishedSummary": {
+      "createEdit": [
+        "project-manager"
+      ],
+      "approve": [
+        "project-executive"
+      ],
+      "publishedView": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ],
+      "lockedAfterApproval": false
+    },
+    "sourceLineage": {
+      "createEdit": [
+        "project-manager"
+      ],
+      "review": [
+        "project-executive"
+      ],
+      "technicalView": [
+        "pcc-admin"
+      ],
+      "lockedAfterApproval": true
+    },
+    "auditEvents": {
+      "systemOnly": true,
+      "view": [
+        "project-manager",
+        "superintendent",
+        "project-executive",
+        "pcc-admin"
+      ]
+    }
+  }
+}

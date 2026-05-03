@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "actions": {
+    "createScorecard": {
+      "allow": [
+        "project-manager",
+        "project-executive"
+      ],
+      "deny": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight",
+        "hbi-assistant"
+      ]
+    },
+    "editDraft": {
+      "allow": [
+        "project-manager"
+      ],
+      "limitedAllow": {
+        "superintendent": [
+          "fieldInputSections"
+        ],
+        "project-accountant": [
+          "financialContextCommentOnly"
+        ]
+      }
+    },
+    "submitForPxReview": {
+      "allow": [
+        "project-manager"
+      ],
+      "requires": [
+        "validationPass"
+      ]
+    },
+    "returnForRevision": {
+      "allow": [
+        "project-executive"
+      ],
+      "requires": [
+        "returnReason"
+      ]
+    },
+    "approve": {
+      "allow": [
+        "project-executive"
+      ],
+      "requires": [
+        "readyForPxReview",
+        "validationPass"
+      ]
+    },
+    "publishInternal": {
+      "allow": [
+        "project-executive"
+      ],
+      "requires": [
+        "approvedRestricted",
+        "publicationSummary"
+      ]
+    },
+    "viewDraft": {
+      "allow": [
+        "project-manager",
+        "superintendent",
+        "project-executive"
+      ],
+      "deny": [
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ]
+    },
+    "viewPublishedSummary": {
+      "allow": [
+        "project-manager",
+        "superintendent",
+        "project-executive",
+        "estimating",
+        "procurement-buyout",
+        "executive-oversight"
+      ],
+      "requires": [
+        "publishedInternal"
+      ]
+    },
+    "viewCostSensitiveFields": {
+      "allow": [
+        "project-manager",
+        "project-executive",
+        "project-accountant"
+      ],
+      "conditionalAllow": {
+        "procurement-buyout": "published summary only if specifically allowed"
+      }
+    },
+    "generateHbiDraft": {
+      "allow": [
+        "project-manager",
+        "superintendent",
+        "project-executive"
+      ],
+      "requires": [
+        "viewerPermissionScope"
+      ]
+    },
+    "acceptHbiDraft": {
+      "allow": [
+        "project-manager",
+        "project-executive"
+      ],
+      "requires": [
+        "humanReview"
+      ]
+    }
+  }
+}

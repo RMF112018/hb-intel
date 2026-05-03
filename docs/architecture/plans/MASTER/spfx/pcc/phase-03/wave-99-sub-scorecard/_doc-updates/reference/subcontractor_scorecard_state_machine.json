@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "stateMachine": "SubcontractorScorecardProjectInstance lifecycle",
+    "generatedAt": "2026-05-03"
+  },
+  "statuses": [
+    "not-started",
+    "draft",
+    "needs-superintendent-input",
+    "needs-pm-review",
+    "evidence-review-required",
+    "ready-for-px-review",
+    "returned-for-revision",
+    "approved-restricted",
+    "published-internal",
+    "under-correction",
+    "disputed",
+    "superseded",
+    "archived"
+  ],
+  "primaryPath": [
+    [
+      "not-started",
+      "draft"
+    ],
+    [
+      "draft",
+      "needs-superintendent-input"
+    ],
+    [
+      "draft",
+      "needs-pm-review"
+    ],
+    [
+      "needs-superintendent-input",
+      "needs-pm-review"
+    ],
+    [
+      "needs-pm-review",
+      "evidence-review-required"
+    ],
+    [
+      "needs-pm-review",
+      "ready-for-px-review"
+    ],
+    [
+      "evidence-review-required",
+      "ready-for-px-review"
+    ],
+    [
+      "ready-for-px-review",
+      "approved-restricted"
+    ],
+    [
+      "approved-restricted",
+      "published-internal"
+    ]
+  ],
+  "returnTransitions": [
+    [
+      "ready-for-px-review",
+      "returned-for-revision"
+    ],
+    [
+      "approved-restricted",
+      "under-correction"
+    ],
+    [
+      "published-internal",
+      "under-correction"
+    ],
+    [
+      "under-correction",
+      "ready-for-px-review"
+    ],
+    [
+      "returned-for-revision",
+      "draft"
+    ]
+  ],
+  "exceptionTransitions": {
+    "dispute": [
+      [
+        "approved-restricted",
+        "disputed"
+      ],
+      [
+        "published-internal",
+        "disputed"
+      ]
+    ],
+    "supersede": [
+      [
+        "approved-restricted",
+        "superseded"
+      ],
+      [
+        "published-internal",
+        "superseded"
+      ]
+    ],
+    "archive": [
+      [
+        "published-internal",
+        "archived"
+      ],
+      [
+        "superseded",
+        "archived"
+      ]
+    ]
+  },
+  "terminalStates": [
+    "archived"
+  ],
+  "transitionRequirements": {
+    "draft->ready-for-px-review": [
+      "all required metadata present",
+      "required scores complete",
+      "na justifications complete",
+      "overall narrative complete",
+      "future work recommendation selected",
+      "source lineage summary present",
+      "superintendent input complete or explicitly not required"
+    ],
+    "ready-for-px-review->approved-restricted": [
+      "actor is project-executive",
+      "no unresolved evidence-review-required flags",
+      "restricted comment classifications complete",
+      "score has not changed after submit"
+    ],
+    "approved-restricted->published-internal": [
+      "actor is project-executive or delegated authorized publisher",
+      "published summary complete",
+      "publication tier selected",
+      "restricted content excluded from broad summary"
+    ],
+    "published-internal->under-correction": [
+      "actor is project-executive",
+      "correction reason required",
+      "prior approved version remains immutable"
+    ],
+    "under-correction->ready-for-px-review": [
+      "correction summary complete",
+      "changed fields identified",
+      "reapproval required"
+    ]
+  }
+}

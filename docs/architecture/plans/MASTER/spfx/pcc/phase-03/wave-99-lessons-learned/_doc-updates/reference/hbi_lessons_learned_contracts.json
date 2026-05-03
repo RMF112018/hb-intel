@@ -1,0 +1,47 @@
+{
+  "module": "lessons-learned-center",
+  "allowedTasks": [
+    "suggestTitle",
+    "suggestCategory",
+    "suggestTags",
+    "identifyMissingFields",
+    "summarizeDraft",
+    "suggestNeutralPublishedSummary",
+    "detectPotentialDuplicate",
+    "suggestRelatedEvidence",
+    "suggestImprovementAction",
+    "flagSensitivityWarnings",
+    "suggestReuseTargets"
+  ],
+  "prohibitedTasks": [
+    "approveLesson",
+    "publishLesson",
+    "suppressLesson",
+    "exposeRestrictedContent",
+    "determineLegalLiability",
+    "determineWarrantyResponsibility",
+    "determineVendorBlacklist",
+    "determineEmploymentAction",
+    "determineDelayDamages"
+  ],
+  "requestShape": [
+    "lessonDraft",
+    "userRole",
+    "visibilityContext",
+    "allowedEvidence",
+    "sourceLineage",
+    "redactionContext"
+  ],
+  "responseShape": [
+    "suggestedTitle",
+    "suggestedCategory",
+    "suggestedTags",
+    "missingFields",
+    "sensitivityWarnings",
+    "suggestedPublicationScope",
+    "rationale",
+    "sourceReferences",
+    "confidence"
+  ],
+  "auditRule": "Every HBI suggestion must be stored as advisory output with request context, allowed-source references, confidence, timestamp, and user context."
+}

@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "reasonCodes": [
+    {
+      "code": "MISSING_SUPER_INPUT",
+      "label": "Missing Superintendent Input",
+      "severity": "medium"
+    },
+    {
+      "code": "MISSING_PM_REVIEW",
+      "label": "Missing PM Review",
+      "severity": "medium"
+    },
+    {
+      "code": "MISSING_EVIDENCE",
+      "label": "Missing Required Evidence",
+      "severity": "medium"
+    },
+    {
+      "code": "LOW_CONFIDENCE_EVIDENCE",
+      "label": "Low Confidence Evidence",
+      "severity": "medium"
+    },
+    {
+      "code": "NA_WITHOUT_JUSTIFICATION",
+      "label": "N/A Without Justification",
+      "severity": "high"
+    },
+    {
+      "code": "SAFETY_NA_OVERRIDE_REQUIRED",
+      "label": "Safety N/A Requires PX Override",
+      "severity": "high"
+    },
+    {
+      "code": "RESTRICTED_COMMENT_PUBLICATION_RISK",
+      "label": "Restricted Comment Publication Risk",
+      "severity": "high"
+    },
+    {
+      "code": "VENDOR_DISPUTE",
+      "label": "Vendor / Internal Dispute",
+      "severity": "high"
+    },
+    {
+      "code": "SCORE_CHANGED_AFTER_SUBMIT",
+      "label": "Score Changed After Submit",
+      "severity": "high"
+    },
+    {
+      "code": "SOURCE_CONFLICT",
+      "label": "Source Conflict",
+      "severity": "medium"
+    },
+    {
+      "code": "HBI_UNVERIFIED_OUTPUT",
+      "label": "HBI Output Not Human Accepted",
+      "severity": "medium"
+    }
+  ]
+}

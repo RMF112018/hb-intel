@@ -1,0 +1,50 @@
+{
+  "module": "lessons-learned-center",
+  "metrics": [
+    {
+      "metricId": "totalLessons",
+      "formula": "count(records where status != suppressed unless viewer is governance)",
+      "visibility": "role-filtered"
+    },
+    {
+      "metricId": "openReviewCount",
+      "formula": "count(status in submitted-for-review, under-review)",
+      "visibility": "reviewers and leadership"
+    },
+    {
+      "metricId": "criticalLessonCount",
+      "formula": "count(impactMagnitude = critical and viewer can see record or redacted summary)",
+      "visibility": "role-filtered"
+    },
+    {
+      "metricId": "publicationRate",
+      "formula": "published-company-lesson / approved-project-record where denominator > 0",
+      "visibility": "leadership"
+    },
+    {
+      "metricId": "averageReviewDurationDays",
+      "formula": "average(days between submittedAt and approvedAt for approved records)",
+      "visibility": "leadership"
+    },
+    {
+      "metricId": "reuseCount",
+      "formula": "sum(reuse.reuseCount for visible published lessons)",
+      "visibility": "role-filtered"
+    },
+    {
+      "metricId": "improvementActionClosureRate",
+      "formula": "complete actions / total actions where total > 0",
+      "visibility": "leadership"
+    },
+    {
+      "metricId": "repeatRootCauseCount",
+      "formula": "count rootCauseGroup occurrences above configured threshold",
+      "visibility": "leadership"
+    },
+    {
+      "metricId": "sensitiveLessonRatio",
+      "formula": "sensitive lessons / total lessons",
+      "visibility": "aggregated only"
+    }
+  ]
+}

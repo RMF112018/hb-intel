@@ -1,0 +1,52 @@
+{
+  "module": "lessons-learned-center",
+  "draftCreateRequires": [
+    "projectId",
+    "titleOrWorkingTitle"
+  ],
+  "submitForReviewRequires": [
+    "title",
+    "category",
+    "phaseEncountered",
+    "situation",
+    "impactSummary",
+    "rootCause",
+    "recommendation",
+    "applicabilityRating",
+    "sensitivity",
+    "evidenceOrNoEvidenceReason"
+  ],
+  "approveProjectRecordRequires": [
+    "pmValidation",
+    "pxSensitivityDecision",
+    "sourceLineageReviewed",
+    "reviewComment"
+  ],
+  "publishCompanyLessonRequires": [
+    "approved-project-record",
+    "neutralPublishedSummary",
+    "publicationScope",
+    "tags",
+    "targetReuseModules",
+    "sensitivityClearance",
+    "noOpenLegalHold"
+  ],
+  "convertToBestPracticeRequires": [
+    "published-company-lesson",
+    "departmentOwner",
+    "improvementActionOrStandardReference",
+    "rolloutRecommendation"
+  ],
+  "suppressRequires": [
+    "suppressionReason",
+    "authorizedSuppressor",
+    "auditComment"
+  ],
+  "fieldLimits": {
+    "titleMaxChars": 160,
+    "summaryMaxChars": 600,
+    "tagMaxCount": 25,
+    "recommendationMaxChars": 4000
+  },
+  "evidenceRule": "At least one evidence link is required for publication, or a no-evidence reason must be recorded for project-only archive."
+}

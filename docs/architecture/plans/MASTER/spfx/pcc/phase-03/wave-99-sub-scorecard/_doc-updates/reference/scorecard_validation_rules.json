@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "saveDraft": {
+    "blocks": [
+      "missing projectId",
+      "missing subcontractor identifier",
+      "invalid score outside 1-5",
+      "invalid N/A token",
+      "invalid date format"
+    ],
+    "warnings": [
+      "missing evidence link",
+      "low evidence confidence",
+      "missing contract/final cost"
+    ]
+  },
+  "submitForPxReview": {
+    "blocks": [
+      "required metadata missing",
+      "required factor score missing",
+      "N/A justification missing",
+      "Safety & Compliance fully N/A without PX override",
+      "overall narrative blank",
+      "future work recommendation blank",
+      "superintendent input missing where required",
+      "source lineage summary missing",
+      "restricted comment visibility unclassified"
+    ]
+  },
+  "approve": {
+    "blocks": [
+      "actor is not project-executive",
+      "status is not ready-for-px-review",
+      "unresolved evidence review flag",
+      "score changed after PM submit",
+      "required sections incomplete",
+      "missing audit trail"
+    ]
+  },
+  "publishInternal": {
+    "blocks": [
+      "status is not approved-restricted",
+      "published summary blank",
+      "publication tier missing",
+      "restricted comments included in broad summary",
+      "scorecard disputed",
+      "scorecard under correction",
+      "scorecard insufficient data",
+      "source lineage minimum not met"
+    ]
+  },
+  "scoreCalculation": {
+    "factorScoreAllowedValues": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "naRequiresJustification": true,
+    "naFactorExcludedFromCategoryDenominator": true,
+    "naCategoryExcludedFromOverallDenominator": true,
+    "overallFormula": "SUM(categoryScore * categoryWeight) / SUM(applicableCategoryWeights)",
+    "storedPrecision": 4,
+    "displayPrecision": 1
+  },
+  "ratingBandThresholds": [
+    {
+      "id": "exceptional",
+      "label": "Exceptional",
+      "minInclusive": 4.5,
+      "maxInclusive": 5.0,
+      "meaning": "Strong candidate for future similar work; still requires project-specific risk review."
+    },
+    {
+      "id": "above-average",
+      "label": "Above Average",
+      "minInclusive": 3.5,
+      "maxExclusive": 4.5,
+      "meaning": "Generally strong performer with limited controls or monitoring."
+    },
+    {
+      "id": "satisfactory",
+      "label": "Satisfactory",
+      "minInclusive": 2.5,
+      "maxExclusive": 3.5,
+      "meaning": "Acceptable performance; normal procurement and project controls apply."
+    },
+    {
+      "id": "below-average",
+      "label": "Below Average",
+      "minInclusive": 1.5,
+      "maxExclusive": 2.5,
+      "meaning": "Use caution; future award requires PM/PX/procurement review and defined controls."
+    },
+    {
+      "id": "unsatisfactory",
+      "label": "Unsatisfactory",
+      "minInclusive": 1.0,
+      "maxExclusive": 1.5,
+      "meaning": "Not recommended for similar scope without executive/procurement review and documented risk-control plan."
+    },
+    {
+      "id": "insufficient-data",
+      "label": "Insufficient Data",
+      "meaning": "Not enough reliable project evidence to publish a score."
+    }
+  ]
+}

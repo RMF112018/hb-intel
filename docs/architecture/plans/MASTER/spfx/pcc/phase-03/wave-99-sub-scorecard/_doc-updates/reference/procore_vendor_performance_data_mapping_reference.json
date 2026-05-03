@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03",
+    "posture": "read-only source mapping; no Procore writeback"
+  },
+  "sourceObjects": [
+    {
+      "procoreTool": "Commitments",
+      "scorecardUse": [
+        "contract value context",
+        "scope context",
+        "commitment change exposure",
+        "vendor identity"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "Submittals",
+      "scorecardUse": [
+        "submittal completeness",
+        "timeliness",
+        "resubmittal rate",
+        "technical coordination"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "RFIs",
+      "scorecardUse": [
+        "responsiveness",
+        "coordination quality",
+        "dropped/late items",
+        "design coordination context"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "Punch List / Deficiency List",
+      "scorecardUse": [
+        "quality",
+        "closeout responsiveness",
+        "defect density",
+        "completion discipline"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "Observations",
+      "scorecardUse": [
+        "safety/quality corrective action context"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "Inspections",
+      "scorecardUse": [
+        "first-time pass rate where generated in Procore",
+        "quality/safety evidence"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "Daily Log",
+      "scorecardUse": [
+        "manpower trend",
+        "coordination and field execution context"
+      ],
+      "ownedBy": "Procore"
+    },
+    {
+      "procoreTool": "Directory / Companies",
+      "scorecardUse": [
+        "company identity and Procore company id"
+      ],
+      "ownedBy": "Procore"
+    }
+  ],
+  "hardNo": [
+    "do not write back scores to Procore",
+    "do not update commitments/submittals/RFIs/punch from PCC",
+    "do not full-mirror Procore records",
+    "do not call Procore directly from SPFx"
+  ]
+}

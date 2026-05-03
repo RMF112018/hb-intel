@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "inclusionRules": {
+    "includeStatuses": [
+      "published-internal"
+    ],
+    "excludeStatuses": [
+      "not-started",
+      "draft",
+      "needs-superintendent-input",
+      "needs-pm-review",
+      "evidence-review-required",
+      "ready-for-px-review",
+      "returned-for-revision",
+      "approved-restricted",
+      "under-correction",
+      "disputed",
+      "superseded",
+      "archived"
+    ],
+    "excludeRatingBands": [
+      "insufficient-data"
+    ],
+    "contractValueWeighting": "disabled in v1"
+  },
+  "definitions": {
+    "vendorAverageScore": "arithmetic average of overallScore.calculatedScore for published-internal records only; no contract-value weighting in v1",
+    "tradeAverageScore": "arithmetic average of published-internal records grouped by normalized trade/scope",
+    "vendorTrend": "requires at least two published-internal records for same vendor; display direction only, not predictive claim",
+    "preferredPerformer": "at least two published-internal scorecards >= 4.50 and no unresolved severe negative category",
+    "highRiskPerformer": "one published scorecard below 2.50 or two published records with same category score below 2.50",
+    "inconsistentPerformer": "published scorecards vary by >= 1.25 points across comparable projects/trades",
+    "recurringIssue": "same category below 3.00 in two or more published records for same vendor or trade",
+    "portfolioConfidence": "high if >=3 records and all have high/medium evidence confidence; medium if 2 records; low otherwise"
+  }
+}

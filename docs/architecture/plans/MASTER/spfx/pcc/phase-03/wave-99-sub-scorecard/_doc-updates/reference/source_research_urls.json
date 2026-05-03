@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "generatedAt": "2026-05-03"
+  },
+  "sources": [
+    {
+      "id": "SRC-PROCORE-VPR",
+      "title": "Procore Vendor Performance Report",
+      "url": "https://support.procore.com/products/online/user-guide/company-level/analytics/reports-subpage/vendor-performance-report",
+      "architectureUse": "Confirms vendor/subcontractor performance analytics can leverage Commitments, Submittals, Punch List, and RFIs as source context while preserving Procore ownership."
+    },
+    {
+      "id": "SRC-PROCORE-PREQ-REVIEW",
+      "title": "Procore Review a Submitted Prequalification Form",
+      "url": "https://support.procore.com/products/online/user-guide/company-level/prequalifications/tutorials/review-a-submitted-prequalification-form",
+      "architectureUse": "Supports reviewer/comment/status patterns and financial-category visibility separation."
+    },
+    {
+      "id": "SRC-PROCORE-PREQ-PERMS",
+      "title": "Procore Prequalifications Permissions",
+      "url": "https://support.procore.com/products/online/user-guide/company-level/prequalifications/permissions",
+      "architectureUse": "Supports explicit permission/action matrix for sensitive subcontractor risk data."
+    },
+    {
+      "id": "SRC-AUTODESK-PREQ",
+      "title": "Autodesk Subcontractor Qualification Best Practices",
+      "url": "https://www.autodesk.com/blogs/construction/subcontractor-prequalification-best-practices/",
+      "architectureUse": "Supports project-based, comprehensive, practical, yes-but risk-control posture instead of absolute blacklist outputs."
+    },
+    {
+      "id": "SRC-MS-GRAPH-LISTITEM",
+      "title": "Microsoft Graph listItem resource",
+      "url": "https://learn.microsoft.com/en-us/graph/api/resources/listitem?view=graph-rest-1.0",
+      "architectureUse": "Supports SharePoint list-backed target record planning, fieldValueSet mapping, list item versions, and delta posture."
+    },
+    {
+      "id": "SRC-MS-SP-APPROVALS",
+      "title": "Require approval of items in a list or library",
+      "url": "https://support.microsoft.com/en-us/office/require-approval-of-items-in-a-list-or-library-cd0761c4-8c3f-4ea2-9435-13c28aa23d08",
+      "architectureUse": "Supports draft visibility, approval status, and versioning concepts for sensitive scorecard publication rules."
+    },
+    {
+      "id": "SRC-OWASP-ASVS",
+      "title": "OWASP Application Security Verification Standard",
+      "url": "https://devguide.owasp.org/en/11-security-gap-analysis/01-guides/02-asvs/",
+      "architectureUse": "Supports explicit verification requirements for access control, validation, logging, API security, and sensitive data protection."
+    },
+    {
+      "id": "SRC-WCAG22",
+      "title": "WCAG 2.2 New Guidelines",
+      "url": "https://accessibility.psu.edu/guidelines/wcag2update/",
+      "architectureUse": "Supports keyboard/focus/target-size/redundant-entry acceptance requirements for scorecard forms and detail drawers."
+    }
+  ]
+}

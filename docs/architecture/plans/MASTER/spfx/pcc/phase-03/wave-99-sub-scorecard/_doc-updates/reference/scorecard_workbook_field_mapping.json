@@ -1,0 +1,263 @@
+{
+  "metadata": {
+    "module": "Subcontractor Scorecard",
+    "sourceWorkbook": "docs/reference/example/06 20260307_SOP_SubScorecard-DRAFT.xlsx",
+    "generatedAt": "2026-05-03"
+  },
+  "fieldSurvivalRule": "Every workbook field survives as persisted, calculated, source-lineage, evidence-link, display-only derived, or deprecated/source-only field.",
+  "projectFields": [
+    "Project Name",
+    "Project Number",
+    "Project Location",
+    "Project Type",
+    "Subcontractor Name",
+    "Trade / Scope",
+    "Contract Value ($)",
+    "Final Cost ($)",
+    "Scheduled Completion",
+    "Actual Completion",
+    "Evaluator Name",
+    "Evaluator Title",
+    "Evaluation Date"
+  ],
+  "scoreCategories": [
+    {
+      "categoryId": "safety-compliance",
+      "label": "Safety & Compliance",
+      "weight": 0.2,
+      "sourceRows": "Scorecard!21:28",
+      "factors": [
+        {
+          "factorId": "SAF-001",
+          "criterion": "Adherence to site safety plan and OSHA standards",
+          "sourceEvidenceHint": "Incidents, near-misses, safety observations"
+        },
+        {
+          "factorId": "SAF-002",
+          "criterion": "PPE compliance and toolbox-talk participation",
+          "sourceEvidenceHint": "Attendance records, field observations"
+        },
+        {
+          "factorId": "SAF-003",
+          "criterion": "Housekeeping and site cleanliness",
+          "sourceEvidenceHint": "Daily clean, lay-down areas, debris removal"
+        },
+        {
+          "factorId": "SAF-004",
+          "criterion": "Incident/injury rate on this project",
+          "sourceEvidenceHint": "TRIR, recordables, first-aid events"
+        },
+        {
+          "factorId": "SAF-005",
+          "criterion": "Corrective action response to safety issues",
+          "sourceEvidenceHint": "Time to close NCRs / safety violations"
+        }
+      ]
+    },
+    {
+      "categoryId": "quality-work",
+      "label": "Quality of Work",
+      "weight": 0.2,
+      "sourceRows": "Scorecard!30:37",
+      "factors": [
+        {
+          "factorId": "QLT-001",
+          "criterion": "Workmanship quality and craftsmanship",
+          "sourceEvidenceHint": "Punch list density, rework required"
+        },
+        {
+          "factorId": "QLT-002",
+          "criterion": "Compliance with plans, specs & submittals",
+          "sourceEvidenceHint": "RFI clarity, revision compliance"
+        },
+        {
+          "factorId": "QLT-003",
+          "criterion": "First-time inspection pass rate",
+          "sourceEvidenceHint": "AHJ / third-party inspection results"
+        },
+        {
+          "factorId": "QLT-004",
+          "criterion": "Materials and equipment quality",
+          "sourceEvidenceHint": "Substitutions, as-specified compliance"
+        },
+        {
+          "factorId": "QLT-005",
+          "criterion": "Closeout documentation completeness",
+          "sourceEvidenceHint": "O&Ms, warranties, as-builts, attic stock"
+        }
+      ]
+    },
+    {
+      "categoryId": "schedule-performance",
+      "label": "Schedule Performance",
+      "weight": 0.2,
+      "sourceRows": "Scorecard!39:46",
+      "factors": [
+        {
+          "factorId": "SCH-001",
+          "criterion": "On-time mobilization",
+          "sourceEvidenceHint": "Actual vs. planned start date"
+        },
+        {
+          "factorId": "SCH-002",
+          "criterion": "3-week look-ahead participation & reliability",
+          "sourceEvidenceHint": "% commitments kept on Last Planner / pull plan"
+        },
+        {
+          "factorId": "SCH-003",
+          "criterion": "Progress relative to baseline schedule",
+          "sourceEvidenceHint": "Float consumption, milestone compliance"
+        },
+        {
+          "factorId": "SCH-004",
+          "criterion": "Recovery effort when behind schedule",
+          "sourceEvidenceHint": "Added crew, extended hours, phasing coordination"
+        },
+        {
+          "factorId": "SCH-005",
+          "criterion": "Coordination with other trades",
+          "sourceEvidenceHint": "BIM / pre-construction coordination, conflicts"
+        }
+      ]
+    },
+    {
+      "categoryId": "cost-management",
+      "label": "Cost Management",
+      "weight": 0.15,
+      "sourceRows": "Scorecard!48:55",
+      "factors": [
+        {
+          "factorId": "CST-001",
+          "criterion": "Budget adherence (no unwarranted overruns)",
+          "sourceEvidenceHint": "Change order volume vs. scope growth"
+        },
+        {
+          "factorId": "CST-002",
+          "criterion": "Change order pricing accuracy & timeliness",
+          "sourceEvidenceHint": "Days to submit COs, fair pricing"
+        },
+        {
+          "factorId": "CST-003",
+          "criterion": "Back-charge exposure created",
+          "sourceEvidenceHint": "Back-charges assessed by GC"
+        },
+        {
+          "factorId": "CST-004",
+          "criterion": "Material procurement & financial stability",
+          "sourceEvidenceHint": "No stoppages due to unpaid suppliers"
+        },
+        {
+          "factorId": "CST-005",
+          "criterion": "Billing accuracy and schedule of values quality",
+          "sourceEvidenceHint": "Overbilling, retainage disputes"
+        }
+      ]
+    },
+    {
+      "categoryId": "communication-management",
+      "label": "Communication & Management",
+      "weight": 0.15,
+      "sourceRows": "Scorecard!57:64",
+      "factors": [
+        {
+          "factorId": "COM-001",
+          "criterion": "Responsiveness to RFIs, emails, and calls",
+          "sourceEvidenceHint": "Avg response time, dropped items"
+        },
+        {
+          "factorId": "COM-002",
+          "criterion": "Quality of superintendent / foreman leadership",
+          "sourceEvidenceHint": "Decision authority, problem ownership"
+        },
+        {
+          "factorId": "COM-003",
+          "criterion": "Submittals: accuracy, completeness, timeliness",
+          "sourceEvidenceHint": "Resubmittal rate, lead times met"
+        },
+        {
+          "factorId": "COM-004",
+          "criterion": "Participation in OAC and coordination meetings",
+          "sourceEvidenceHint": "Attendance, action item closure"
+        },
+        {
+          "factorId": "COM-005",
+          "criterion": "Issue escalation and conflict resolution",
+          "sourceEvidenceHint": "Transparent communication vs. avoidance"
+        }
+      ]
+    },
+    {
+      "categoryId": "workforce-labor",
+      "label": "Workforce & Labor",
+      "weight": 0.1,
+      "sourceRows": "Scorecard!66:72",
+      "factors": [
+        {
+          "factorId": "LAB-001",
+          "criterion": "Adequate and consistent crew staffing",
+          "sourceEvidenceHint": "Planned vs. actual headcount"
+        },
+        {
+          "factorId": "LAB-002",
+          "criterion": "Workforce skill level and supervision ratio",
+          "sourceEvidenceHint": "Journeyman/apprentice mix, field leadership"
+        },
+        {
+          "factorId": "LAB-003",
+          "criterion": "Compliance with labor requirements (certified payroll, etc.)",
+          "sourceEvidenceHint": "MBE/DBE, prevailing wage, union rules if applicable"
+        },
+        {
+          "factorId": "LAB-004",
+          "criterion": "Subcontractor to sub-tier management",
+          "sourceEvidenceHint": "Sub-tier oversight, insurance, payments"
+        }
+      ]
+    }
+  ],
+  "calculatedFields": [
+    {
+      "sourceCell": "G74",
+      "sourceLabel": "OVERALL WEIGHTED SCORE",
+      "targetField": "overallScore.calculatedScore",
+      "rule": "weighted average of category scores"
+    },
+    {
+      "sourceCell": "G75",
+      "sourceLabel": "PERFORMANCE RATING",
+      "targetField": "overallScore.ratingBand",
+      "rule": "rating band thresholds"
+    }
+  ],
+  "narrativeFields": [
+    "Key Strengths",
+    "Areas for Improvement",
+    "Notable Incidents or Issues",
+    "Future Work Recommendation",
+    "Overall Narrative Summary"
+  ],
+  "approvalFields": [
+    "Project Manager Signature / Date",
+    "Superintendent Signature / Date",
+    "Project Executive Approval / Date"
+  ],
+  "aggregationDashboard": {
+    "role": "sample reporting/demo source only",
+    "columns": [
+      "#",
+      "Subcontractor Name",
+      "Trade / Scope",
+      "Project Name",
+      "Eval Date",
+      "Contract ($)",
+      "Safety (20%)",
+      "Quality (20%)",
+      "Schedule (20%)",
+      "Cost Mgmt (15%)",
+      "Communication (15%)",
+      "Workforce (10%)",
+      "Overall Wtd Score",
+      "Rating Band"
+    ]
+  }
+}

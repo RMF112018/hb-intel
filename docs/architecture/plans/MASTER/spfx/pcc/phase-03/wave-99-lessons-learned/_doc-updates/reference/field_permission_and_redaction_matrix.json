@@ -1,0 +1,110 @@
+{
+  "module": "lessons-learned-center",
+  "redactionPolicy": "Redaction must occur before API/read-model response is returned to unauthorized users.",
+  "roles": [
+    "creator",
+    "project-team",
+    "superintendent",
+    "project-manager",
+    "project-executive",
+    "department-reviewer",
+    "executive-readonly",
+    "governance-reviewer",
+    "legal-reviewer",
+    "it-admin"
+  ],
+  "actions": {
+    "createDraft": {
+      "allow": [
+        "creator",
+        "project-team",
+        "superintendent",
+        "project-manager",
+        "project-executive"
+      ]
+    },
+    "editDraft": {
+      "allow": [
+        "creator-own",
+        "project-manager",
+        "project-executive"
+      ]
+    },
+    "submitForReview": {
+      "allow": [
+        "creator-own",
+        "project-manager",
+        "project-executive"
+      ]
+    },
+    "approveProjectRecord": {
+      "allow": [
+        "project-manager",
+        "project-executive"
+      ]
+    },
+    "publishCompanyLesson": {
+      "allow": [
+        "project-executive",
+        "governance-reviewer"
+      ]
+    },
+    "suppress": {
+      "allow": [
+        "project-executive",
+        "legal-reviewer",
+        "governance-reviewer"
+      ]
+    },
+    "viewRestrictedNarrative": {
+      "allow": [
+        "project-manager",
+        "project-executive",
+        "assigned-department-reviewer",
+        "legal-reviewer",
+        "governance-reviewer"
+      ],
+      "deny": [
+        "executive-readonly",
+        "project-team-unassigned"
+      ]
+    },
+    "viewExecutiveSummary": {
+      "allow": [
+        "executive-readonly",
+        "project-manager",
+        "project-executive",
+        "governance-reviewer"
+      ]
+    }
+  },
+  "redactionClasses": {
+    "standard": {
+      "broadVisibility": "approved full record"
+    },
+    "internal": {
+      "broadVisibility": "role-limited summary"
+    },
+    "vendor-sensitive": {
+      "broadVisibility": "redacted summary; vendor details restricted"
+    },
+    "personnel-sensitive": {
+      "broadVisibility": "aggregated/redacted only"
+    },
+    "client-sensitive": {
+      "broadVisibility": "role-limited summary"
+    },
+    "legal-claims": {
+      "broadVisibility": "restricted governance/legal only"
+    },
+    "safety-sensitive": {
+      "broadVisibility": "safety/governance summary only"
+    },
+    "financial-dispute": {
+      "broadVisibility": "role-limited financial summary"
+    },
+    "warranty-defect": {
+      "broadVisibility": "role-limited warranty/governance summary"
+    }
+  }
+}
