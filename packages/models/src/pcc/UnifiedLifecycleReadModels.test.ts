@@ -108,6 +108,20 @@ describe('Unified lifecycle read-model fixtures', () => {
     expect(closed.futurePursuitReferences.length).toBeGreaterThan(0);
   });
 
+  it('future-pursuit knowledge references render as summary-safe with the future-pursuit lens', () => {
+    const closed = SAMPLE_CROSS_PROJECT_KNOWLEDGE_ENVELOPE.data.closedProjectReferences;
+    expect(closed.futurePursuitReferences.length).toBeGreaterThan(0);
+    for (const knowledge of closed.futurePursuitReferences) {
+      expect(knowledge.security.classification).not.toBe('project-internal');
+      expect(['masked', 'withheld']).toContain(knowledge.security.redactionLevel);
+      expect(knowledge.security.allowedPersonas.length).toBeGreaterThan(0);
+      const refs = knowledge.relatedCrossProjectReferences;
+      expect(refs.length).toBeGreaterThan(0);
+      const lensTypes = new Set(refs.flatMap((ref) => [...ref.eligibleLensTypes]));
+      expect(lensTypes.has('future-pursuit-reference')).toBe(true);
+    }
+  });
+
   it('fixture responses do not claim PCC is the system of record', () => {
     const payloads = [
       SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,

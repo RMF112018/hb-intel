@@ -178,12 +178,7 @@ export type PccTraceabilityEdgeType = (typeof PCC_TRACEABILITY_EDGE_TYPES)[numbe
 export const PCC_TRACEABILITY_DIRECTIONS = ['forward', 'backward', 'bidirectional'] as const;
 export type PccTraceabilityDirection = (typeof PCC_TRACEABILITY_DIRECTIONS)[number];
 
-export const PCC_TRACEABILITY_CONFIDENCE = [
-  'low',
-  'medium',
-  'high',
-  'verified',
-] as const;
+export const PCC_TRACEABILITY_CONFIDENCE = ['low', 'medium', 'high', 'verified'] as const;
 export type PccTraceabilityConfidence = (typeof PCC_TRACEABILITY_CONFIDENCE)[number];
 
 export const PCC_WARRANTY_TRACE_STATUSES = [
@@ -220,8 +215,7 @@ export const PCC_CROSS_PROJECT_REFERENCE_STATUSES = [
   'archived',
   'rejected',
 ] as const;
-export type PccCrossProjectReferenceStatus =
-  (typeof PCC_CROSS_PROJECT_REFERENCE_STATUSES)[number];
+export type PccCrossProjectReferenceStatus = (typeof PCC_CROSS_PROJECT_REFERENCE_STATUSES)[number];
 
 export const PCC_REFERENCE_CLASSIFICATIONS = [
   'project-local',
@@ -241,11 +235,17 @@ export const PCC_SECURITY_CLASSIFICATIONS = [
 ] as const;
 export type PccSecurityClassification = (typeof PCC_SECURITY_CLASSIFICATIONS)[number];
 
-export const PCC_RECORD_OWNERSHIP_POSTURES = [
-  'source-system-reference',
-  'pcc-native',
-] as const;
+export const PCC_RECORD_OWNERSHIP_POSTURES = ['source-system-reference', 'pcc-native'] as const;
 export type PccRecordOwnershipPosture = (typeof PCC_RECORD_OWNERSHIP_POSTURES)[number];
+
+export const PCC_HBI_REFUSAL_REASONS = [
+  'insufficient-evidence',
+  'permission-restricted',
+  'out-of-scope',
+  'cross-project-not-authorized',
+  'responsibility-conclusion-not-supported',
+] as const;
+export type PccHbiRefusalReason = (typeof PCC_HBI_REFUSAL_REASONS)[number];
 
 export interface PccSourceLineageRef {
   readonly sourceSystem: string;

@@ -581,6 +581,7 @@ export {
   PCC_REDACTION_LEVELS,
   PCC_SECURITY_CLASSIFICATIONS,
   PCC_RECORD_OWNERSHIP_POSTURES,
+  PCC_HBI_REFUSAL_REASONS,
   type PccProjectLifecycleStage,
   type PccProjectLifecycleEventType,
   type PccProjectLifecycleEventStatus,
@@ -647,4 +648,5 @@ export {
   type UnifiedSearchGroundedAnswer,
   type UnifiedSearchRefusal,
   type UnifiedSearchAskHbiResponse,
+  type PccHbiRefusalReason,
 } from './UnifiedLifecycle.js';

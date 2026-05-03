@@ -96,6 +96,26 @@ const SECURITY_EXEC: PccSecurityPosture = {
   crossProjectAllowed: false,
 };
 
+const SECURITY_EXEC_NOTE: PccSecurityPosture = {
+  classification: 'restricted',
+  allowedPersonas: ['project-executive', 'executive-oversight', 'pcc-admin'],
+  redactionLevel: 'masked',
+  crossProjectAllowed: false,
+};
+
+const SECURITY_PURSUIT_NOTE: PccSecurityPosture = {
+  classification: 'need-to-know',
+  allowedPersonas: [
+    'estimating-coordinator',
+    'lead-estimator',
+    'estimator',
+    'chief-estimator',
+    'director-of-preconstruction',
+  ],
+  redactionLevel: 'masked',
+  crossProjectAllowed: false,
+};
+
 export const SAMPLE_LIFECYCLE_CONTEXT_REFERENCE: PccLifecycleContextReference = {
   contextId: 'CTX-1001',
   lifecycleStage: 'closeout',
@@ -260,6 +280,36 @@ export const SAMPLE_PROJECT_ASSUMPTION_RECORDS: readonly PccProjectAssumptionRec
 
 export const SAMPLE_PROJECT_ASSUMPTION_RECORD = SAMPLE_PROJECT_ASSUMPTION_RECORDS[0]!;
 
+export const SAMPLE_EXECUTIVE_NOTE_RECORD: PccProjectMemoryRecord = {
+  memoryId: 'MEM-EXEC-1001',
+  projectId: SAMPLE_PROJECT_ID,
+  recordType: 'executive-note',
+  status: 'open',
+  summary: 'Executive context note for closeout posture review.',
+  lifecycleStage: 'closeout',
+  projectStage: 'closeout',
+  recordedAtUtc: '2026-05-04T08:00:00Z',
+  authorPersona: 'project-executive',
+  ownershipPosture: 'pcc-native',
+  evidenceLinks: [EVIDENCE_WARRANTY],
+  security: SECURITY_EXEC_NOTE,
+};
+
+export const SAMPLE_PURSUIT_NOTE_RECORD: PccProjectMemoryRecord = {
+  memoryId: 'MEM-PURSUIT-1001',
+  projectId: SAMPLE_PROJECT_ID,
+  recordType: 'pursuit-note',
+  status: 'open',
+  summary: 'Pursuit assumption note tied to estimating handoff.',
+  lifecycleStage: 'estimating',
+  projectStage: 'estimating',
+  recordedAtUtc: '2026-02-15T10:30:00Z',
+  authorPersona: 'lead-estimator',
+  ownershipPosture: 'pcc-native',
+  evidenceLinks: [EVIDENCE_ESTIMATE],
+  security: SECURITY_PURSUIT_NOTE,
+};
+
 export const SAMPLE_PROJECT_STAGE_LENS: PccProjectStageLens = {
   lensId: 'LENS-1001',
   lensType: 'operations',
@@ -268,7 +318,10 @@ export const SAMPLE_PROJECT_STAGE_LENS: PccProjectStageLens = {
   projectStage: 'active_construction',
   role: 'project-manager',
   taskFocus: ['cost controls', 'quality verification', 'handoff continuity'],
-  includedMemoryIds: [SAMPLE_PROJECT_MEMORY_RECORD.memoryId, SAMPLE_PROJECT_DECISION_RECORD.memoryId],
+  includedMemoryIds: [
+    SAMPLE_PROJECT_MEMORY_RECORD.memoryId,
+    SAMPLE_PROJECT_DECISION_RECORD.memoryId,
+  ],
   includedEventIds: SAMPLE_PROJECT_LIFECYCLE_EVENTS.map((e) => e.eventId),
   includedTraceEdgeIds: ['TRACE-EST-1', 'TRACE-WARR-1'],
 };
@@ -349,7 +402,10 @@ export const SAMPLE_WARRANTY_TRACE_RECORD: PccWarrantyTraceRecord = {
   obligationTrace: SAMPLE_OBLIGATION_TRACE_RECORD,
   vendorProductTrace: SAMPLE_VENDOR_PRODUCT_TRACE_RECORD,
   relatedLifecycleEventIds: ['LCE-1002'],
-  relatedMemoryIds: [SAMPLE_PROJECT_DECISION_RECORD.memoryId, SAMPLE_PROJECT_ASSUMPTION_RECORD.memoryId],
+  relatedMemoryIds: [
+    SAMPLE_PROJECT_DECISION_RECORD.memoryId,
+    SAMPLE_PROJECT_ASSUMPTION_RECORD.memoryId,
+  ],
   traceabilityEdges: SAMPLE_PROJECT_TRACEABILITY_EDGES,
   evidenceLinks: [EVIDENCE_INSTALL, EVIDENCE_WARRANTY],
   recommendation: {
@@ -405,7 +461,10 @@ export const SAMPLE_PROJECT_KNOWLEDGE_REFERENCE: PccProjectKnowledgeReference = 
   title: 'Facade transition sealant lessons',
   summary: 'Capture turnover-to-warranty sealant verification requirements.',
   tags: ['warranty', 'closeout', 'facade'],
-  relatedCrossProjectReferences: [SAMPLE_CROSS_PROJECT_REFERENCE, SAMPLE_RESTRICTED_CROSS_PROJECT_REFERENCE],
+  relatedCrossProjectReferences: [
+    SAMPLE_CROSS_PROJECT_REFERENCE,
+    SAMPLE_RESTRICTED_CROSS_PROJECT_REFERENCE,
+  ],
   sourceLineage: [LINEAGE_SCOPE, LINEAGE_SUBMITTAL],
   security: SAMPLE_CROSS_PROJECT_REFERENCE.security,
 };
@@ -444,5 +503,5 @@ export const SAMPLE_UNIFIED_SEARCH_REFUSAL_RESPONSE: UnifiedSearchAskHbiResponse
   grounded: false,
   citations: [],
   refused: true,
-  refusalReason: 'missing-grounded-lineage',
+  refusalReason: 'insufficient-evidence',
 };

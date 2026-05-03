@@ -3,6 +3,8 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { findForbiddenFixtureKeys } from '../PccFixtureGuards.js';
+import { PCC_PERSONAS } from '../PccUserRoles.js';
+import { PCC_REDACTION_LEVELS, PCC_SECURITY_CLASSIFICATIONS } from '../UnifiedLifecycle.js';
 import {
   PCC_FIXTURES,
   SAMPLE_PROJECT_PROFILE,
@@ -40,6 +42,8 @@ import {
   SAMPLE_PROJECT_DECISION_RECORD,
   SAMPLE_PROJECT_ASSUMPTION_RECORDS,
   SAMPLE_PROJECT_ASSUMPTION_RECORD,
+  SAMPLE_EXECUTIVE_NOTE_RECORD,
+  SAMPLE_PURSUIT_NOTE_RECORD,
   SAMPLE_PROJECT_STAGE_LENS,
   SAMPLE_PROJECT_TRACEABILITY_EDGES,
   SAMPLE_RELATED_RECORD_CLUSTER,
@@ -112,6 +116,8 @@ const NAMED_FIXTURES: ReadonlyArray<readonly [string, unknown]> = [
   ['SAMPLE_PROJECT_DECISION_RECORD', SAMPLE_PROJECT_DECISION_RECORD],
   ['SAMPLE_PROJECT_ASSUMPTION_RECORDS', SAMPLE_PROJECT_ASSUMPTION_RECORDS],
   ['SAMPLE_PROJECT_ASSUMPTION_RECORD', SAMPLE_PROJECT_ASSUMPTION_RECORD],
+  ['SAMPLE_EXECUTIVE_NOTE_RECORD', SAMPLE_EXECUTIVE_NOTE_RECORD],
+  ['SAMPLE_PURSUIT_NOTE_RECORD', SAMPLE_PURSUIT_NOTE_RECORD],
   ['SAMPLE_PROJECT_STAGE_LENS', SAMPLE_PROJECT_STAGE_LENS],
   ['SAMPLE_PROJECT_TRACEABILITY_EDGES', SAMPLE_PROJECT_TRACEABILITY_EDGES],
   ['SAMPLE_RELATED_RECORD_CLUSTER', SAMPLE_RELATED_RECORD_CLUSTER],
@@ -193,7 +199,10 @@ describe('PCC fixtures', () => {
     for (const sourcePath of listFixtureSources(FIXTURES_DIR)) {
       const contents = readFileSync(sourcePath, 'utf8');
       const urls = contents.match(TENANT_LIVE_URL_PATTERN) ?? [];
-      expect(urls, `${sourcePath} contained non-example.invalid URL(s): ${urls.join(', ')}`).toEqual([]);
+      expect(
+        urls,
+        `${sourcePath} contained non-example.invalid URL(s): ${urls.join(', ')}`,
+      ).toEqual([]);
     }
   });
 
@@ -201,7 +210,9 @@ describe('PCC fixtures', () => {
     for (const sourcePath of listFixtureSources(FIXTURES_DIR)) {
       const contents = readFileSync(sourcePath, 'utf8');
       const upns = contents.match(SUSPICIOUS_UPN_PATTERN) ?? [];
-      expect(upns, `${sourcePath} contained non-example.com UPN(s): ${upns.join(', ')}`).toEqual([]);
+      expect(upns, `${sourcePath} contained non-example.com UPN(s): ${upns.join(', ')}`).toEqual(
+        [],
+      );
     }
   });
 
@@ -235,6 +246,58 @@ describe('PCC fixtures', () => {
     for (const state of ['pass', 'fail', 'warning', 'not-run'] as const) {
       expect(observed.has(state)).toBe(true);
     }
+  });
+
+  it('every fixture record carrying security posture has a valid PccSecurityPosture', () => {
+    let recordsChecked = 0;
+    function checkPosture(record: unknown, label: string): void {
+      if (record === null || typeof record !== 'object') return;
+      const security = (record as { security?: unknown }).security;
+      if (security === undefined || security === null) return;
+      if (typeof security !== 'object') {
+        throw new Error(`${label} has non-object security`);
+      }
+      const posture = security as {
+        readonly classification?: unknown;
+        readonly redactionLevel?: unknown;
+        readonly allowedPersonas?: unknown;
+        readonly crossProjectAllowed?: unknown;
+      };
+      expect(PCC_SECURITY_CLASSIFICATIONS, `${label} classification`).toContain(
+        posture.classification as never,
+      );
+      expect(PCC_REDACTION_LEVELS, `${label} redactionLevel`).toContain(
+        posture.redactionLevel as never,
+      );
+      expect(Array.isArray(posture.allowedPersonas), `${label} allowedPersonas`).toBe(true);
+      const personas = posture.allowedPersonas as readonly unknown[];
+      expect(personas.length, `${label} allowedPersonas length`).toBeGreaterThan(0);
+      for (const persona of personas) {
+        expect(PCC_PERSONAS, `${label} persona ${String(persona)}`).toContain(persona as never);
+      }
+      expect(typeof posture.crossProjectAllowed, `${label} crossProjectAllowed`).toBe('boolean');
+      if (posture.classification === 'privileged') {
+        expect(posture.crossProjectAllowed, `${label} privileged blocks cross-project`).toBe(false);
+      }
+      recordsChecked += 1;
+    }
+    function walk(value: unknown, label: string): void {
+      if (value === null || typeof value !== 'object') return;
+      checkPosture(value, label);
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i += 1) {
+          walk(value[i], `${label}[${i}]`);
+        }
+        return;
+      }
+      for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+        walk(child, `${label}.${key}`);
+      }
+    }
+    for (const [name, fixture] of NAMED_FIXTURES) {
+      walk(fixture, name);
+    }
+    expect(recordsChecked).toBeGreaterThan(0);
   });
 
   it('SAMPLE_CONSTRAINTS_LOG_READ_MODEL covers every severity band on both risks and constraints', () => {

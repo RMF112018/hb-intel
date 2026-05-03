@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   PCC_CROSS_PROJECT_REFERENCE_STATUSES,
+  PCC_HBI_REFUSAL_REASONS,
   PCC_LIFECYCLE_EVENT_STATUSES,
   PCC_MEMORY_RECORD_STATUSES,
   PCC_MEMORY_RECORD_TYPES,
@@ -20,8 +21,11 @@ import {
   PCC_SECURITY_CLASSIFICATIONS,
   PCC_TRACEABILITY_EDGE_TYPES,
   PCC_WARRANTY_TRACE_STATUSES,
+  type PccCrossProjectReference,
+  type PccProjectKnowledgeReference,
   type UnifiedSearchAskHbiResponse,
 } from './UnifiedLifecycle.js';
+import { PCC_PERSONAS } from './PccUserRoles.js';
 import {
   SAMPLE_PROJECT_LIFECYCLE_EVENTS,
   SAMPLE_PROJECT_DECISION_RECORD,
@@ -33,7 +37,11 @@ import {
   SAMPLE_PROJECT_TRACEABILITY_EDGES,
   SAMPLE_RELATED_RECORD_CLUSTER,
   SAMPLE_CROSS_PROJECT_REFERENCE,
+  SAMPLE_RESTRICTED_CROSS_PROJECT_REFERENCE,
   SAMPLE_PROJECT_KNOWLEDGE_REFERENCE,
+  SAMPLE_FUTURE_PURSUIT_KNOWLEDGE_REFERENCE,
+  SAMPLE_EXECUTIVE_NOTE_RECORD,
+  SAMPLE_PURSUIT_NOTE_RECORD,
   SAMPLE_UNIFIED_SEARCH_GROUNDED_RESPONSE,
   SAMPLE_UNIFIED_SEARCH_REFUSAL_RESPONSE,
 } from './fixtures/unifiedLifecycle.js';
@@ -84,7 +92,8 @@ describe('UnifiedLifecycle vocabularies', () => {
       'archive',
       'future-reference',
     ] as const;
-    for (const token of mustHaveLifecycle) expect(PCC_PROJECT_LIFECYCLE_STAGES.includes(token)).toBe(true);
+    for (const token of mustHaveLifecycle)
+      expect(PCC_PROJECT_LIFECYCLE_STAGES.includes(token)).toBe(true);
 
     const mustHaveMemory = [
       'decision',
@@ -144,7 +153,8 @@ describe('UnifiedLifecycle vocabularies', () => {
       'project-memory-record',
       'lifecycle-event',
     ] as const;
-    for (const token of mustHaveTraceable) expect(PCC_TRACEABLE_RECORD_TYPES.includes(token)).toBe(true);
+    for (const token of mustHaveTraceable)
+      expect(PCC_TRACEABLE_RECORD_TYPES.includes(token)).toBe(true);
   });
 
   it('keeps PccProjectStage as frozen six-value MVP enum and maps lifecycle stages explicitly', () => {
@@ -164,17 +174,25 @@ describe('UnifiedLifecycle vocabularies', () => {
 
 describe('UnifiedLifecycle doctrine invariants', () => {
   it('keeps records anchored to one project operating layer', () => {
-    expect(SAMPLE_PROJECT_DECISION_RECORD.projectId).toBe(SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.projectId);
+    expect(SAMPLE_PROJECT_DECISION_RECORD.projectId).toBe(
+      SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.projectId,
+    );
     expect(SAMPLE_PROJECT_ASSUMPTION_RECORD.projectId).toBe(
       SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.projectId,
     );
-    expect(SAMPLE_WARRANTY_TRACE_RECORD.projectId).toBe(SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.projectId);
+    expect(SAMPLE_WARRANTY_TRACE_RECORD.projectId).toBe(
+      SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.projectId,
+    );
   });
 
   it('uses role-stage-task lenses over shared lifecycle records', () => {
     expect(SAMPLE_PROJECT_STAGE_LENS.lifecycleStage).toBe('active-construction');
-    expect(SAMPLE_PROJECT_STAGE_LENS.includedEventIds).toContain(SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.eventId);
-    expect(SAMPLE_PROJECT_STAGE_LENS.includedMemoryIds).toContain(SAMPLE_PROJECT_DECISION_RECORD.memoryId);
+    expect(SAMPLE_PROJECT_STAGE_LENS.includedEventIds).toContain(
+      SAMPLE_PROJECT_LIFECYCLE_EVENTS[0]?.eventId,
+    );
+    expect(SAMPLE_PROJECT_STAGE_LENS.includedMemoryIds).toContain(
+      SAMPLE_PROJECT_DECISION_RECORD.memoryId,
+    );
   });
 
   it('requires grounded answers to include lineage citations', () => {
@@ -213,7 +231,9 @@ describe('UnifiedLifecycle doctrine invariants', () => {
 
   it('enforces evidence-backed warranty recommendations and unresolved posture', () => {
     expect(SAMPLE_WARRANTY_TRACE_RECORD.recommendation?.confidence).toBeDefined();
-    expect((SAMPLE_WARRANTY_TRACE_RECORD.recommendation?.evidenceLinkIds.length ?? 0) > 0).toBe(true);
+    expect((SAMPLE_WARRANTY_TRACE_RECORD.recommendation?.evidenceLinkIds.length ?? 0) > 0).toBe(
+      true,
+    );
     expect(SAMPLE_WARRANTY_TRACE_INSUFFICIENT_EVIDENCE_RECORD.status).toBe('insufficient-evidence');
     expect(SAMPLE_WARRANTY_TRACE_INSUFFICIENT_EVIDENCE_RECORD.recommendation).toBeUndefined();
   });
@@ -236,6 +256,76 @@ describe('UnifiedLifecycle doctrine invariants', () => {
     ];
     for (const response of responses) {
       expect(response.response.toLowerCase()).not.toContain('system of record');
+    }
+  });
+});
+
+describe('UnifiedLifecycle security posture invariants', () => {
+  it('locks the canonical Ask-HBI refusal-reason taxonomy', () => {
+    expect(PCC_HBI_REFUSAL_REASONS).toEqual([
+      'insufficient-evidence',
+      'permission-restricted',
+      'out-of-scope',
+      'cross-project-not-authorized',
+      'responsibility-conclusion-not-supported',
+    ]);
+    if (!SAMPLE_UNIFIED_SEARCH_REFUSAL_RESPONSE.grounded) {
+      expect(PCC_HBI_REFUSAL_REASONS).toContain(
+        SAMPLE_UNIFIED_SEARCH_REFUSAL_RESPONSE.refusalReason,
+      );
+    }
+  });
+
+  it('keeps executive-note memory records restricted and blocks cross-project reuse', () => {
+    expect(SAMPLE_EXECUTIVE_NOTE_RECORD.recordType).toBe('executive-note');
+    expect(['restricted', 'privileged']).toContain(
+      SAMPLE_EXECUTIVE_NOTE_RECORD.security.classification,
+    );
+    expect(['masked', 'withheld']).toContain(SAMPLE_EXECUTIVE_NOTE_RECORD.security.redactionLevel);
+    expect(SAMPLE_EXECUTIVE_NOTE_RECORD.security.allowedPersonas).toContain('project-executive');
+    expect(SAMPLE_EXECUTIVE_NOTE_RECORD.security.crossProjectAllowed).toBe(false);
+    for (const persona of SAMPLE_EXECUTIVE_NOTE_RECORD.security.allowedPersonas) {
+      expect(PCC_PERSONAS).toContain(persona);
+    }
+  });
+
+  it('keeps pursuit-note memory records need-to-know with cross-project reuse blocked', () => {
+    expect(SAMPLE_PURSUIT_NOTE_RECORD.recordType).toBe('pursuit-note');
+    expect(['need-to-know', 'restricted', 'privileged']).toContain(
+      SAMPLE_PURSUIT_NOTE_RECORD.security.classification,
+    );
+    expect(SAMPLE_PURSUIT_NOTE_RECORD.security.crossProjectAllowed).toBe(false);
+    const personas = SAMPLE_PURSUIT_NOTE_RECORD.security.allowedPersonas;
+    expect(personas.length).toBeGreaterThan(0);
+    expect(
+      personas.some((p) =>
+        (
+          [
+            'estimating-coordinator',
+            'lead-estimator',
+            'estimator',
+            'chief-estimator',
+            'director-of-preconstruction',
+          ] as const
+        ).includes(p as never),
+      ),
+    ).toBe(true);
+    for (const persona of personas) {
+      expect(PCC_PERSONAS).toContain(persona);
+    }
+  });
+
+  it('never allows crossProjectAllowed=true on privileged-class references', () => {
+    const refs: ReadonlyArray<PccCrossProjectReference | PccProjectKnowledgeReference> = [
+      SAMPLE_CROSS_PROJECT_REFERENCE,
+      SAMPLE_RESTRICTED_CROSS_PROJECT_REFERENCE,
+      SAMPLE_PROJECT_KNOWLEDGE_REFERENCE,
+      SAMPLE_FUTURE_PURSUIT_KNOWLEDGE_REFERENCE,
+    ];
+    for (const ref of refs) {
+      if (ref.security.classification === 'privileged') {
+        expect(ref.security.crossProjectAllowed).toBe(false);
+      }
     }
   });
 });
