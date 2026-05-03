@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Permission/redaction algorithm for PCC unified lifecycle"
+  },
+  "decisionOrder": [
+    "resolveAuthenticatedUser",
+    "resolveProjectAccess",
+    "resolveSourceSystemAccess",
+    "resolvePersona",
+    "resolveRequestedLens",
+    "resolveRecordSecurityClassification",
+    "resolveCrossProjectAuthorization",
+    "applyReuseBlockers",
+    "applyRedactionLevel",
+    "evaluateHbiEvidenceThreshold",
+    "returnRenderDecision"
+  ],
+  "renderDecisions": [
+    "full",
+    "summary-safe",
+    "masked",
+    "withheld",
+    "refusal",
+    "degraded"
+  ],
+  "refusalReasons": [
+    "insufficient-evidence",
+    "permission-restricted",
+    "out-of-scope",
+    "cross-project-not-authorized",
+    "responsibility-conclusion-not-supported"
+  ],
+  "rules": [
+    {
+      "id": "PERM-001",
+      "rule": "If user lacks project access, return refusal: permission-restricted; render no record data."
+    },
+    {
+      "id": "PERM-002",
+      "rule": "If source-owned record is not accessible through the user or approved app permission boundary, return withheld; do not summarize hidden content."
+    },
+    {
+      "id": "PERM-003",
+      "rule": "If record classification is privileged and user is not legal/admin named audience, return withheld and block HBI summarization."
+    },
+    {
+      "id": "PERM-004",
+      "rule": "If record redactionLevel is masked, render structural placeholder only and preserve audit marker."
+    },
+    {
+      "id": "PERM-005",
+      "rule": "If cross-project query is requested without future-pursuit-reference or executive/admin grant, refuse as cross-project-not-authorized."
+    },
+    {
+      "id": "PERM-006",
+      "rule": "If reuse blocker exists, return refusal or omit with blocker reason; never silently expose partial raw data."
+    },
+    {
+      "id": "PERM-007",
+      "rule": "If HBI has visible evidence but citations are all withheld, refuse as permission-restricted."
+    },
+    {
+      "id": "PERM-008",
+      "rule": "If warranty responsibility evidence threshold is not met, refuse as responsibility-conclusion-not-supported or insufficient-evidence."
+    }
+  ]
+}

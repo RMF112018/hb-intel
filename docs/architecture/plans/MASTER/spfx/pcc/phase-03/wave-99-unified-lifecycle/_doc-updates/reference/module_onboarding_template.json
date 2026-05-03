@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Required template for future PCC modules"
+  },
+  "template": {
+    "moduleName": "<Official module name>",
+    "primarySurface": "project-readiness | project-home | documents | approvals | site-health | etc.",
+    "primaryWorkCenter": "<PccWorkCenterId>",
+    "secondaryAffinities": [
+      "<optional work center or surface affinity>"
+    ],
+    "readinessSignalBehavior": "Describe signals emitted to Project Readiness without transferring source ownership.",
+    "priorityActionBehavior": "Describe candidate actions; no external execution unless future gate.",
+    "projectMemoryContribution": "Define memory records created/consumed.",
+    "traceabilityEdgesProduced": [
+      "<edge type and record families>"
+    ],
+    "traceabilityEdgesConsumed": [
+      "<edge type and record families>"
+    ],
+    "sourceOwnedRecordsReferenced": [
+      "Procore/Sage/SharePoint/Graph/etc."
+    ],
+    "pccNativeRecordsOwned": [
+      "<record family>"
+    ],
+    "securityClasses": [
+      "project-internal",
+      "need-to-know",
+      "restricted",
+      "privileged"
+    ],
+    "redactionRules": "Define full/masked/withheld examples by persona.",
+    "hbiEligibility": "eligible | summary-only | not-eligible with evidence/citation rules",
+    "approvalCheckpointRelationship": "Describe stage/checkpoint/approval relationship.",
+    "auditEvents": [
+      "<eventType>"
+    ],
+    "previewState": "fixture-backed/read-only/inert by default",
+    "liveIntegrationGates": [
+      "tenant permission validation",
+      "audit logging",
+      "source API contract tests",
+      "security review"
+    ],
+    "testRequirements": [
+      "model invariants",
+      "backend GET-only tests",
+      "SPFx no-route tests",
+      "security/redaction tests"
+    ],
+    "forbiddenBehaviors": [
+      "standalone departmental route",
+      "source-system writeback",
+      "uncited HBI output",
+      "permission bypass"
+    ]
+  }
+}

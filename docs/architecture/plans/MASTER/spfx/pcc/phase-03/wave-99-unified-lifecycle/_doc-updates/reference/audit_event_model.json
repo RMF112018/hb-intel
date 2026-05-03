@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Audit event model for future runtime"
+  },
+  "events": [
+    {
+      "eventType": "pcc.record.viewed",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "recordType",
+        "recordId",
+        "viewerPersona",
+        "lensType",
+        "timestampUtc",
+        "sourceStatus"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": false
+    },
+    {
+      "eventType": "pcc.record.redacted",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "recordType",
+        "recordId",
+        "redactionLevel",
+        "viewerPersona",
+        "reason",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": true
+    },
+    {
+      "eventType": "pcc.lens.switched",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "fromLens",
+        "toLens",
+        "viewerPersona",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": false
+    },
+    {
+      "eventType": "pcc.crossProject.search.executed",
+      "requiredFields": [
+        "eventId",
+        "queryHash",
+        "viewerPersona",
+        "sourceProjectIds",
+        "destinationContext",
+        "authorizationBasis",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": true
+    },
+    {
+      "eventType": "pcc.hbi.query.submitted",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "queryHash",
+        "viewerPersona",
+        "lensType",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": true
+    },
+    {
+      "eventType": "pcc.hbi.answer.generated",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "answerId",
+        "grounded",
+        "citationCount",
+        "refusalReason",
+        "sourceStatus",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": true
+    },
+    {
+      "eventType": "pcc.warranty.recommendation.viewed",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "warrantyTraceId",
+        "viewerPersona",
+        "evidenceThresholdStatus",
+        "timestampUtc"
+      ],
+      "retention": "warranty-period retention + audit-log retained",
+      "sensitive": true
+    },
+    {
+      "eventType": "pcc.sourceLink.launched",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "sourceSystem",
+        "sourceEntityType",
+        "sourceRecordId",
+        "viewerPersona",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": false
+    },
+    {
+      "eventType": "pcc.classification.changed",
+      "requiredFields": [
+        "eventId",
+        "projectId",
+        "recordType",
+        "recordId",
+        "fromClass",
+        "toClass",
+        "changedBy",
+        "approvalBasis",
+        "timestampUtc"
+      ],
+      "retention": "audit-log retained",
+      "sensitive": true
+    }
+  ]
+}

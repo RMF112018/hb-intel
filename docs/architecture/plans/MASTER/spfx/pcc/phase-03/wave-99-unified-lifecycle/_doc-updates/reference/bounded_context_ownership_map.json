@@ -1,0 +1,181 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Canonical PCC bounded context and ownership map"
+  },
+  "contexts": [
+    {
+      "contextId": "project-home",
+      "owner": "PCC shell / Project Home surface",
+      "owns": [
+        "project command-center composition",
+        "project summary card placement",
+        "Priority Actions visibility",
+        "Project Home Ask-HBI placement"
+      ],
+      "reads": [
+        "project profile",
+        "priority actions",
+        "document-control read model",
+        "site health",
+        "unified lifecycle aggregate",
+        "unified search after user query"
+      ],
+      "writesPreview": "none",
+      "futureWrites": [
+        "user card preferences only after settings gate"
+      ],
+      "neverTouches": [
+        "source-system mutation",
+        "department workspace routing",
+        "source-owned data overwrite"
+      ]
+    },
+    {
+      "contextId": "project-readiness",
+      "owner": "PCC Project Readiness surface",
+      "owns": [
+        "readiness rollup presentation",
+        "make-ready control surface",
+        "source-health display",
+        "readiness signal aggregation"
+      ],
+      "reads": [
+        "lifecycle readiness",
+        "permits/inspections",
+        "responsibility matrix",
+        "constraints log",
+        "buyout log later",
+        "unified lifecycle aggregate"
+      ],
+      "writesPreview": "none",
+      "futureWrites": [
+        "PCC-native readiness item state after workflow gate"
+      ],
+      "neverTouches": [
+        "Procore commitments",
+        "Sage accounting records",
+        "Graph file writes",
+        "scheduler mutation"
+      ]
+    },
+    {
+      "contextId": "project-memory",
+      "owner": "PCC derived/reference layer",
+      "owns": [
+        "ProjectMemoryRecord",
+        "ProjectDecisionRecord",
+        "ProjectAssumptionRecord",
+        "memory source-lineage index"
+      ],
+      "reads": [
+        "source-owned records with permission",
+        "PCC-native workflow records",
+        "lifecycle events"
+      ],
+      "writesPreview": "fixtures only",
+      "futureWrites": [
+        "PCC-native memory records after persistence/audit gate"
+      ],
+      "neverTouches": [
+        "source-owned raw records",
+        "privileged content summarization without legal gate"
+      ]
+    },
+    {
+      "contextId": "traceability",
+      "owner": "PCC traceability layer",
+      "owns": [
+        "ProjectTraceabilityEdge",
+        "RelatedRecordCluster",
+        "TraceabilityConfidence",
+        "evidence references"
+      ],
+      "reads": [
+        "estimate references",
+        "scope records",
+        "commitments",
+        "submittals",
+        "field evidence",
+        "closeout",
+        "warranty"
+      ],
+      "writesPreview": "fixtures only",
+      "futureWrites": [
+        "PCC-native trace edges after evidence/audit gate"
+      ],
+      "neverTouches": [
+        "source-system ownership",
+        "automatic legal/warranty responsibility conclusions"
+      ]
+    },
+    {
+      "contextId": "hbi-search",
+      "owner": "PCC HBI grounding layer",
+      "owns": [
+        "UnifiedSearchAskHbiResponse",
+        "refusal taxonomy",
+        "citation rendering contract",
+        "query/audit policy later"
+      ],
+      "reads": [
+        "permission-filtered retrieval candidates",
+        "evidence links",
+        "source lineage",
+        "project memory"
+      ],
+      "writesPreview": "none",
+      "futureWrites": [
+        "query audit log and stored answer records after AI governance gate"
+      ],
+      "neverTouches": [
+        "live LLM/vector runtime before gate",
+        "uncited answer rendering",
+        "cross-project leakage"
+      ]
+    },
+    {
+      "contextId": "team-access",
+      "owner": "PCC Team & Access surface",
+      "owns": [
+        "access request posture",
+        "project roster view",
+        "permission request workflow later"
+      ],
+      "reads": [
+        "project team/member records",
+        "M365 permission posture later"
+      ],
+      "writesPreview": "none",
+      "futureWrites": [
+        "backend-mediated access requests and executions after admin gate"
+      ],
+      "neverTouches": [
+        "direct SPFx Graph mutation",
+        "unreviewed M365 group changes"
+      ]
+    },
+    {
+      "contextId": "external-systems",
+      "owner": "PCC External Systems surface",
+      "owns": [
+        "project launch registry",
+        "missing configuration state",
+        "integration health display"
+      ],
+      "reads": [
+        "external-system config",
+        "link registry",
+        "mapping status"
+      ],
+      "writesPreview": "none",
+      "futureWrites": [
+        "admin-approved mapping metadata only"
+      ],
+      "neverTouches": [
+        "source-system records",
+        "external-system writeback"
+      ]
+    }
+  ]
+}

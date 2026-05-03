@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "HBI retrieval/citation/refusal contract"
+  },
+  "queryPosture": "project-scoped by default; cross-project only through explicitly authorized lens",
+  "groundedAnswerRules": [
+    "grounded=true requires citations.length >= 1",
+    "each citation must include recordType, recordId, sourceLineage, and excerpt",
+    "no live source URL is shown if source security withholds it",
+    "answer must include as-of/capturedAtUtc when source freshness matters",
+    "uncited grounded answers must be dropped or refused"
+  ],
+  "refusalRules": [
+    "refusals carry zero citations",
+    "refusalReason is PccHbiRefusalReason only",
+    "refusal copy must distinguish evidence insufficiency vs permission restriction vs out-of-scope",
+    "responsibility conclusions require warranty evidence threshold"
+  ],
+  "forbiddenBehaviors": [
+    "free-text answer without citations",
+    "source-of-truth claims",
+    "vendor/sub/manufacturer blame from inference alone",
+    "cross-project retrieval without grant",
+    "tool calls or live vector/LLM runtime before future gate",
+    "summarizing privileged records"
+  ],
+  "citationShape": {
+    "citationId": "string",
+    "recordType": "lifecycle-event|memory|decision|assumption|warranty-trace|knowledge-reference",
+    "recordId": "string",
+    "sourceLineage": "PccSourceLineageRef",
+    "evidenceLinkId": "string?",
+    "excerpt": "redaction-safe string"
+  },
+  "auditEvents": [
+    "hbi.query.submitted",
+    "hbi.answer.grounded",
+    "hbi.answer.refused",
+    "hbi.citation.opened",
+    "hbi.restricted-context-withheld"
+  ]
+}

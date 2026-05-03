@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Validation and acceptance gates"
+  },
+  "commands": [
+    "git status --short",
+    "git branch --show-current",
+    "git rev-parse HEAD",
+    "git log --oneline -12",
+    "md5 pnpm-lock.yaml",
+    "git diff --check",
+    "pnpm --filter @hbc/models check-types",
+    "pnpm --filter @hbc/models test",
+    "pnpm --filter @hbc/functions check-types",
+    "pnpm --filter @hbc/functions test",
+    "pnpm --filter @hbc/spfx-project-control-center check-types",
+    "pnpm --filter @hbc/spfx-project-control-center test",
+    "pnpm exec prettier --check <touched markdown/json files>",
+    "python3 -m json.tool <each touched json file>"
+  ],
+  "acceptanceCriteria": [
+    "no runtime source changes in documentation prompts",
+    "no package or lockfile change",
+    "no new shell route outside approved list",
+    "no forbidden route tokens",
+    "no direct SPFx-to-source-system imports",
+    "all JSON valid",
+    "all touched markdown formatted",
+    "closeout records validation evidence"
+  ]
+}

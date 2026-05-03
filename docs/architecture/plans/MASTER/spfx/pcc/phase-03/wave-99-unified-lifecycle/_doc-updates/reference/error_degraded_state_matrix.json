@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "generatedAt": "2026-05-03",
+    "purpose": "Standard UI/HBI degraded states"
+  },
+  "states": [
+    {
+      "state": "loading",
+      "surfaceBehavior": "Render skeleton or PccPreviewState loading inside card only",
+      "hbiBehavior": "Do not answer",
+      "audit": false,
+      "cta": "none"
+    },
+    {
+      "state": "empty",
+      "surfaceBehavior": "Render empty state with source and next action guidance",
+      "hbiBehavior": "Refuse or qualify as insufficient-evidence",
+      "audit": false,
+      "cta": "safe launcher or request data if available"
+    },
+    {
+      "state": "source-unavailable",
+      "surfaceBehavior": "Render degraded state; keep fixture-safe copy",
+      "hbiBehavior": "No grounded answer unless alternate visible evidence exists",
+      "audit": true,
+      "cta": "show source health / contact admin"
+    },
+    {
+      "state": "backend-unavailable",
+      "surfaceBehavior": "Render unavailable/error state, no record rows",
+      "hbiBehavior": "Refuse or unavailable",
+      "audit": true,
+      "cta": "retry later"
+    },
+    {
+      "state": "missing-config",
+      "surfaceBehavior": "Render configuration warning",
+      "hbiBehavior": "Refuse source-dependent answers",
+      "audit": true,
+      "cta": "admin config request"
+    },
+    {
+      "state": "stale",
+      "surfaceBehavior": "Render data with stale badge and as-of timestamp",
+      "hbiBehavior": "May answer with stale qualifier unless warranty/responsibility conclusion",
+      "audit": true,
+      "cta": "refresh/sync status"
+    },
+    {
+      "state": "unauthorized",
+      "surfaceBehavior": "Render access-limited card; no record detail",
+      "hbiBehavior": "permission-restricted refusal",
+      "audit": true,
+      "cta": "request access"
+    },
+    {
+      "state": "forbidden",
+      "surfaceBehavior": "Render forbidden state; no record detail",
+      "hbiBehavior": "permission-restricted refusal",
+      "audit": true,
+      "cta": "none or access request per policy"
+    },
+    {
+      "state": "permission-restricted",
+      "surfaceBehavior": "Show masked/withheld marker only",
+      "hbiBehavior": "permission-restricted refusal if needed evidence withheld",
+      "audit": true,
+      "cta": "request access if supported"
+    },
+    {
+      "state": "insufficient-evidence",
+      "surfaceBehavior": "Show no-blame/insufficient-evidence posture",
+      "hbiBehavior": "insufficient-evidence or responsibility-conclusion-not-supported refusal",
+      "audit": true,
+      "cta": "add/review evidence later"
+    },
+    {
+      "state": "feature-disabled",
+      "surfaceBehavior": "Render preview-disabled copy and inert affordances",
+      "hbiBehavior": "Do not call runtime",
+      "audit": false,
+      "cta": "none"
+    },
+    {
+      "state": "tenant-gate-not-cleared",
+      "surfaceBehavior": "Render future-gated copy",
+      "hbiBehavior": "Refuse live behavior; fixture only",
+      "audit": true,
+      "cta": "admin readiness gate"
+    }
+  ]
+}
