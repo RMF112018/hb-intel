@@ -104,6 +104,8 @@ describe('useProjectHomeReadModel', () => {
       getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
       getPriorityActions: async () => altEnvelope,
       getUnifiedLifecycle: async () => SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
+      getUnifiedSearch: (id, persona, query) =>
+        baseClient.getUnifiedSearch(id, persona, query),
     };
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));
@@ -127,6 +129,8 @@ describe('useProjectHomeReadModel', () => {
       getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
       getPriorityActions: async () => unavailableEnvelope,
       getUnifiedLifecycle: async () => SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
+      getUnifiedSearch: (id, persona, query) =>
+        baseClient.getUnifiedSearch(id, persona, query),
     };
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));
@@ -139,23 +143,28 @@ describe('useProjectHomeReadModel', () => {
     expect(vm?.missingConfigurations.state).toBe('preview');
   });
 
-  it('does not call getUnifiedLifecycle (Wave 99 / Prompt 05B architectural lock)', async () => {
+  it('does not call getUnifiedLifecycle or getUnifiedSearch (Wave 99 / Prompts 05B + 06C architectural lock)', async () => {
     // The unified-lifecycle aggregate envelope is consumed exclusively by
     // PccProjectHomeUnifiedLifecycleSection via useUnifiedLifecycleReadModel.
-    // useProjectHomeReadModel must continue to call only its three existing
-    // methods (getProjectHome, getPriorityActions, getDocumentControl) and
-    // must NEVER call getUnifiedLifecycle.
+    // The unified-search (Ask HBI) envelope is consumed exclusively by
+    // PccProjectHomeAskHbiSection via useUnifiedSearchReadModel inside the
+    // panel. useProjectHomeReadModel must continue to call only its three
+    // existing methods (getProjectHome, getPriorityActions,
+    // getDocumentControl) and must NEVER call getUnifiedLifecycle or
+    // getUnifiedSearch.
     const client = createPccFixtureReadModelClient();
     const homeSpy = vi.spyOn(client, 'getProjectHome');
     const prioritySpy = vi.spyOn(client, 'getPriorityActions');
     const docSpy = vi.spyOn(client, 'getDocumentControl');
     const unifiedSpy = vi.spyOn(client, 'getUnifiedLifecycle');
+    const unifiedSearchSpy = vi.spyOn(client, 'getUnifiedSearch');
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));
     expect(homeSpy).toHaveBeenCalledTimes(1);
     expect(prioritySpy).toHaveBeenCalledTimes(1);
     expect(docSpy).toHaveBeenCalledTimes(1);
     expect(unifiedSpy).not.toHaveBeenCalled();
+    expect(unifiedSearchSpy).not.toHaveBeenCalled();
   });
 
   it('refetches when the client identity changes', async () => {

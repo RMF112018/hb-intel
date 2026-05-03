@@ -62,6 +62,11 @@ const UNIFIED_LIFECYCLE_CARD_TITLES = [
   'Related Records',
 ] as const;
 
+// Wave 99 / Prompt 06C — Ask HBI is integrated as one additional card on
+// the read-model-driven path only. Read-model-driven Project Home goes
+// 14 → 15; fixture-only path stays at 10.
+const ASK_HBI_CARD_TITLES = ['Ask HBI — Grounded Project Answers'] as const;
+
 const READINESS_MODULES = new Set(['startup-tasks', 'permits', 'required-inspections']);
 
 describe('Project Home bento dashboard', () => {
@@ -454,9 +459,15 @@ describe('Project Home bento dashboard', () => {
         `fixture-only fallback must NOT include unified-lifecycle title '${title}'`,
       ).not.toContain(title);
     }
+    for (const title of ASK_HBI_CARD_TITLES) {
+      expect(
+        headingTexts,
+        `fixture-only fallback must NOT include Ask-HBI title '${title}'`,
+      ).not.toContain(title);
+    }
   });
 
-  it('read-model-driven path renders 14 cards (10 existing + 4 unified lifecycle) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
+  it('read-model-driven path renders 15 cards (10 existing + 4 unified lifecycle + 1 Ask HBI) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
     const { container, findByText } = render(
       <PccApp
         forceMode="wideDesktop"
@@ -470,7 +481,9 @@ describe('Project Home bento dashboard', () => {
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
     expect(cards.length).toBe(
-      REQUIRED_CARD_TITLES.length + UNIFIED_LIFECYCLE_CARD_TITLES.length,
+      REQUIRED_CARD_TITLES.length +
+        UNIFIED_LIFECYCLE_CARD_TITLES.length +
+        ASK_HBI_CARD_TITLES.length,
     );
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
@@ -480,7 +493,11 @@ describe('Project Home bento dashboard', () => {
     const headingTexts = Array.from(
       grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
     ).map((el) => el.textContent?.trim() ?? '');
-    for (const title of [...REQUIRED_CARD_TITLES, ...UNIFIED_LIFECYCLE_CARD_TITLES]) {
+    for (const title of [
+      ...REQUIRED_CARD_TITLES,
+      ...UNIFIED_LIFECYCLE_CARD_TITLES,
+      ...ASK_HBI_CARD_TITLES,
+    ]) {
       expect(headingTexts).toContain(title);
     }
     const bodyMarkers = [
@@ -522,7 +539,7 @@ describe('Project Home bento dashboard', () => {
     expect(lensSwitcher!.querySelectorAll('a[href]').length).toBe(0);
   });
 
-  it('read-model-driven path: Project Home does not introduce a unified-lifecycle route or workspace marker', async () => {
+  it('read-model-driven path: Project Home does not introduce a unified-lifecycle, unified-search, or ask-hbi route or workspace marker', async () => {
     const { container, findByText } = render(
       <PccApp
         forceMode="wideDesktop"
@@ -530,12 +547,17 @@ describe('Project Home bento dashboard', () => {
       />,
     );
     await findByText('Lifecycle Timeline');
-    expect(
-      container.querySelector('[data-pcc-surface-id="unified-lifecycle"]'),
-    ).toBeNull();
-    expect(
-      container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
-    ).toBeNull();
+    await findByText('Ask HBI — Grounded Project Answers');
+    for (const id of ['unified-lifecycle', 'unified-search', 'ask-hbi'] as const) {
+      expect(
+        container.querySelector(`[data-pcc-surface-id="${id}"]`),
+        `read-model-driven Project Home must not register a [data-pcc-surface-id="${id}"]`,
+      ).toBeNull();
+      expect(
+        container.querySelector(`[data-pcc-active-surface-panel="${id}"]`),
+        `read-model-driven Project Home must not register a [data-pcc-active-surface-panel="${id}"]`,
+      ).toBeNull();
+    }
     const anchors = container.querySelectorAll<HTMLAnchorElement>('a[href]');
     for (const anchor of Array.from(anchors)) {
       const href = anchor.getAttribute('href') ?? '';
@@ -544,6 +566,8 @@ describe('Project Home bento dashboard', () => {
         'lifecycle-timeline',
         'traceability-graph',
         'closed-project-references',
+        'unified-search',
+        'ask-hbi',
       ]) {
         expect(
           href.includes(forbidden),
@@ -551,5 +575,31 @@ describe('Project Home bento dashboard', () => {
         ).toBe(false);
       }
     }
+  });
+
+  // Wave 99 / Prompt 06C — Ask-HBI section integration.
+  // The integrated card uses idle-on-mount posture (initialQuery={null}),
+  // so the panel renders the idle PccPreviewState and does NOT auto-fire
+  // a getUnifiedSearch fetch. Sample-query click behavior is covered by
+  // the focused PccProjectHomeAskHbiSection test file.
+  it('read-model-driven path: Ask HBI card mounts in idle posture inside a wide PccDashboardCard, with the panel disclaimer', async () => {
+    const { container, findByText } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    const askHbiHeading = await findByText('Ask HBI — Grounded Project Answers');
+    const card = askHbiHeading.closest('[data-pcc-card]');
+    expect(card, 'Ask HBI heading must live inside a PccDashboardCard').not.toBeNull();
+    expect(card!.getAttribute('data-pcc-footprint')).toBe('wide');
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(card!.parentElement === grid).toBe(true);
+    const panel = card!.querySelector('[data-pcc-ask-hbi-panel]');
+    expect(panel, 'Ask HBI panel marker must render inside the card').not.toBeNull();
+    expect(panel!.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('idle');
+    const disclaimer = card!.querySelector('[data-pcc-ask-hbi-disclaimer]');
+    expect(disclaimer, 'panel disclaimer must render inside the card').not.toBeNull();
+    expect(disclaimer!.textContent ?? '').toContain('not the source of truth');
   });
 });

@@ -25,6 +25,7 @@ import type {
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
   PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
 } from '@hbc/models/pcc';
 import type { PccCardState } from './shared.js';
 
@@ -65,6 +66,21 @@ export interface IPccProjectHomeReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
+
+  /**
+   * Wave 99 / Prompt 06C — unified search (Ask HBI) envelope. Consumed
+   * exclusively by `PccProjectHomeAskHbiSection` via the
+   * `useUnifiedSearchReadModel` hook inside `AskHbiGroundingPreviewPanel`.
+   * `useProjectHomeReadModel` does NOT call this method (asserted in
+   * `useProjectHomeReadModel.test.ts`). Project Home integration starts
+   * the panel in idle posture (`initialQuery={null}`), so this method
+   * is invoked only when the user selects a sample query.
+   */
+  getUnifiedSearch(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+    query?: string,
+  ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
 }
 
 export interface IPccProjectHomeViewModelSlot<TData> {

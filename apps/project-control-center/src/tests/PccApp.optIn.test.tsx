@@ -120,9 +120,12 @@ describe('mount(...) opt-in', () => {
     });
     await waitFor(() => {
       const cards = host.querySelectorAll('[data-pcc-card]');
-      // Wave 99 / Prompt 05B — read-model-driven Project Home renders
-      // 10 existing cards + 4 unified-lifecycle cards = 14.
-      expect(cards.length).toBe(14);
+      // Wave 99 / Prompts 05B + 06C — read-model-driven Project Home
+      // renders 10 existing cards + 4 unified-lifecycle cards + 1
+      // Ask-HBI card = 15. The Ask-HBI card mounts in idle posture
+      // (initialQuery={null}), so its presence does not introduce a
+      // getUnifiedSearch fetch on initial mount.
+      expect(cards.length).toBe(15);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -159,7 +162,11 @@ describe('mount(...) opt-in', () => {
     }
 
     const cards = host.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(14);
+    // Wave 99 / Prompts 05B + 06C — 10 existing + 4 unified-lifecycle
+    // + 1 Ask-HBI = 15. Ask-HBI mounts in idle posture, so the canonical
+    // backend-mode URL set above is unchanged (no extra unified-search
+    // request added until the user clicks a sample query).
+    expect(cards).toHaveLength(15);
     const grid = host.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     for (const card of cards) {
@@ -182,7 +189,7 @@ describe('mount(...) opt-in', () => {
       expect(errorMarkers.length).toBeGreaterThan(0);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(14);
+    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(15);
   });
 });
 
