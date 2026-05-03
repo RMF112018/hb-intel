@@ -300,3 +300,18 @@ During all SPFx waves:
 - SPFx must not expose Procore secrets.
 - SPFx must preserve read-only behavior for Executive Oversight / Global Read-Only.
 - SPFx must include complete loading, empty, partial, access-denied, backend-unavailable, stale, drift, and archived states.
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+SPFx shell must enforce one unified PCC project context with role/stage/task lenses over shared project truth. Shell surface navigation must not be treated as departmental workspace segmentation.
+
+Doctrine references:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Role_And_Stage_Lens_Model.md`](../PCC_Role_And_Stage_Lens_Model.md)
+- [`../PCC_Project_Memory_Layer.md`](../PCC_Project_Memory_Layer.md)
+
+Wave 12 clarification:
+
+- Backend Constraints Log read-model route/provider exists at `HEAD 9f67df78...`.
+- Shell/surface integration completeness remains subject to SPFx wave implementation and should not be inferred from backend existence alone.

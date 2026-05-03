@@ -208,3 +208,23 @@ pnpm build --filter <touched package/app target>
 ```text
 docs(pcc): add phase 3 module implementation plan
 ```
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+Roadmap execution should be interpreted with unified lifecycle doctrine authority:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Project_Lifecycle_Spine.md`](../PCC_Project_Lifecycle_Spine.md)
+- [`../PCC_Project_Memory_Layer.md`](../PCC_Project_Memory_Layer.md)
+- [`../PCC_Role_And_Stage_Lens_Model.md`](../PCC_Role_And_Stage_Lens_Model.md)
+
+Wave 12 baseline correction:
+
+- At `HEAD 9f67df78...`, Constraints Log backend read-model route/provider exists.
+- Remaining wave execution should distinguish backend availability from SPFx integration completeness.
+
+Readiness aggregation clarification:
+
+- Constraints Log may retain risk/issues/decision governance affinity while rolling readiness signals.
+- Buyout Log may retain procurement/buyout governance affinity while rolling readiness and startup/make-ready signals.
+- This is a source-lineage rollup pattern, not duplicate ownership.

@@ -273,3 +273,25 @@ Backend waves must preserve:
 - no Procore runtime, secrets, mirror, or write-back;
 - no backend re-derivation of provisioning plans outside approved Phase 2 artifacts;
 - clear separation between business audit trail and compliance/technical evidence.
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+Backend contracts align to unified lifecycle doctrine and must preserve:
+
+- source-of-record boundaries,
+- source lineage for derived signals,
+- readiness rollup semantics without ownership reassignment,
+- permission-aware retrieval posture for future memory/traceability/search/HBI layers.
+
+Doctrine references:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Project_Lifecycle_Spine.md`](../PCC_Project_Lifecycle_Spine.md)
+- [`../PCC_Project_Memory_Layer.md`](../PCC_Project_Memory_Layer.md)
+- [`../PCC_Cross_Stage_Traceability_Model.md`](../PCC_Cross_Stage_Traceability_Model.md)
+- [`../PCC_Unified_Search_And_HBI_Grounding_Model.md`](../PCC_Unified_Search_And_HBI_Grounding_Model.md)
+
+Wave 12 baseline correction:
+
+- Constraints Log backend read-model route/provider exists at `HEAD 9f67df78...`.
+- This does not imply SPFx module/surface completeness.

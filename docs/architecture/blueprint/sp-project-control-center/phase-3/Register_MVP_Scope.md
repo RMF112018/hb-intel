@@ -118,3 +118,19 @@ The MVP is successful when a primary user can:
 | Site Health                        |   17 |
 | Executive Oversight                |   18 |
 | Admin Review Surfaces              |   19 |
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+Reference doctrine:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Project_Memory_Layer.md`](../PCC_Project_Memory_Layer.md)
+- [`../PCC_Cross_Stage_Traceability_Model.md`](../PCC_Cross_Stage_Traceability_Model.md)
+- [`../PCC_Warranty_Traceability_Model.md`](../PCC_Warranty_Traceability_Model.md)
+- [`../PCC_Unified_Search_And_HBI_Grounding_Model.md`](../PCC_Unified_Search_And_HBI_Grounding_Model.md)
+
+MVP scope interpretation updates:
+
+- Unified PCC context remains mandatory; role/stage/task lenses do not create departmental workspaces.
+- Wave 12 baseline includes backend Constraints Log route/provider existence at `HEAD 9f67df78...`; end-to-end SPFx/surface integration remains wave-dependent.
+- Readiness signal rollups from Constraints Log and Buyout Log preserve source ownership and lineage.

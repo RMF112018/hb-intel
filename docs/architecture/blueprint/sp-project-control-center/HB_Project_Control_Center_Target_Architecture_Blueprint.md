@@ -40,7 +40,7 @@ Current status:
 - Phase 1 is complete (`@hbc/project-site-template` contract package exists and validation gate is closed).
 - Phase 2 is complete (`@hbc/project-site-provisioning` headless no-mutation boundary package exists).
 - Phase 3 Wave 1 is complete (PCC shared read-model foundations are shipped in `packages/models/src/pcc/`).
-- Phase 3 Wave 2 is the active/current PCC SPFx shell-frame and UI/UX wave, with fixture-driven preview implementation in progress.
+- Phase implementation status is tracked in the Phase 3 roadmap and wave closeout artifacts. This blueprint remains target-architecture authority and must be read together with the latest phase/wave documentation.
 - `apps/project-control-center/` is the locked Wave 2 target location and scaffold exists in repo truth.
 
 ## 1B. Document Authority Split
@@ -2958,3 +2958,30 @@ The Project Control Center is not a SharePoint page. It is a project operations 
 The site template provides the secure, repeatable project container. The Project Control Center provides the daily user experience, business workflows, settings, access management, and project intelligence that make the site useful.
 
 The uploaded example documents should be treated as legacy workflow artifacts to convert into structured, governed project modules — not files to simply store in SharePoint.
+
+---
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+Primary doctrine reference: [`Unified_PCC_Lifecycle_Objective_Architecture.md`](./Unified_PCC_Lifecycle_Objective_Architecture.md)
+
+Supporting doctrine references:
+
+- [`PCC_Project_Lifecycle_Spine.md`](./PCC_Project_Lifecycle_Spine.md)
+- [`PCC_Project_Memory_Layer.md`](./PCC_Project_Memory_Layer.md)
+- [`PCC_Role_And_Stage_Lens_Model.md`](./PCC_Role_And_Stage_Lens_Model.md)
+- [`PCC_Cross_Stage_Traceability_Model.md`](./PCC_Cross_Stage_Traceability_Model.md)
+- [`PCC_Company_Knowledge_Reuse_Model.md`](./PCC_Company_Knowledge_Reuse_Model.md)
+- [`PCC_Warranty_Traceability_Model.md`](./PCC_Warranty_Traceability_Model.md)
+- [`PCC_Unified_Search_And_HBI_Grounding_Model.md`](./PCC_Unified_Search_And_HBI_Grounding_Model.md)
+
+Alignment clarifications:
+
+- Surfaces are shell-level navigable destinations.
+- Work centers are governed capability domains and are not departmental workspaces.
+- Workflow modules are structured control patterns with primary governance locations and possible secondary surface affinity.
+- Lenses are role/stage/task contextual views over the same project truth.
+- PCC must not split into separate workspaces for Business Development, Estimating, Preconstruction, Operations, Project Controls, Accounting, Closeout, Warranty, Executive Oversight, or IT/Admin.
+- Estimating assumptions and handoff context remain accessible to authorized operations users, and operations outcomes remain governed reference context for authorized future estimating/pursuit users.
+- Warranty traceability must support lineage from claim back to scope, estimate reference, vendor/subcontractor, commitment, submittal/product, field evidence, closeout records, obligation context, and lessons.
+- HBI is not source-of-record and must provide source-lineage-grounded answers with permission filtering and refusal/qualification when evidence is insufficient.

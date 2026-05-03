@@ -189,3 +189,13 @@ Any PCC-derived signal from Procore must store:
 ## Supersession Note
 
 This matrix supersedes broad prior wording in older planning/closeout docs unless an approved exception is documented. Historical closeouts do not need to be rewritten unless they are actively misleading.
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+This matrix is aligned to [`Unified_PCC_Lifecycle_Objective_Architecture.md`](./Unified_PCC_Lifecycle_Objective_Architecture.md) and supporting doctrine documents for lifecycle spine, memory, lenses, traceability, warranty trace mode, and HBI grounding.
+
+Additional interpretation rules:
+
+- Work centers and workflow modules define governance placement and signal-rollup behavior, not departmental workspace boundaries.
+- Constraints Log and Buyout Log may have governance affinity in risk/issues/decision and procurement/buyout contexts while contributing Project Readiness signals; this is a lineage-preserving rollup pattern, not ownership duplication.
+- Cross-stage traceability and cross-project knowledge reuse remain permission-filtered and must not leak restricted information.

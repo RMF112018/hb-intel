@@ -974,3 +974,19 @@ Phase 3 implementation can be considered complete when:
 12. validation, accessibility, responsive behavior, and doctrine scorecard are complete;
 13. non-production readiness package can be prepared.
 14. early hosted validation gates (Wave 4A and optional Wave 5A) are not treated as production rollout approval.
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+This plan aligns to unified lifecycle doctrine and related models:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Project_Lifecycle_Spine.md`](../PCC_Project_Lifecycle_Spine.md)
+- [`../PCC_Project_Memory_Layer.md`](../PCC_Project_Memory_Layer.md)
+- [`../PCC_Role_And_Stage_Lens_Model.md`](../PCC_Role_And_Stage_Lens_Model.md)
+- [`../PCC_Cross_Stage_Traceability_Model.md`](../PCC_Cross_Stage_Traceability_Model.md)
+- [`../PCC_Warranty_Traceability_Model.md`](../PCC_Warranty_Traceability_Model.md)
+
+Wave 12 baseline correction:
+
+- Constraints Log backend read-model route/provider exists at `HEAD 9f67df78...`.
+- Wave 12 remaining work should focus on client/surface integration and broader lifecycle alignment seams where not yet complete.

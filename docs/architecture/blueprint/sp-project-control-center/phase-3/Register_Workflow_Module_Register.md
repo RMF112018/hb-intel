@@ -122,3 +122,19 @@ All workflow modules live under **Project Readiness** in MVP, with functional cl
 | Estimating Kickoff                 | Later phase | Post-MVP decision     |
 | Post-Bid Autopsy                   | Later phase | Post-MVP decision     |
 | Job Closeout Checklist             | Later phase | Post-MVP decision     |
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+Module register aligns to:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Role_And_Stage_Lens_Model.md`](../PCC_Role_And_Stage_Lens_Model.md)
+- [`../PCC_Cross_Stage_Traceability_Model.md`](../PCC_Cross_Stage_Traceability_Model.md)
+- [`../PCC_Warranty_Traceability_Model.md`](../PCC_Warranty_Traceability_Model.md)
+
+Clarifications:
+
+- Workflow modules remain structured control patterns in one unified project context.
+- Constraints Log can hold risk/issues/decision governance affinity and still feed Project Readiness signals.
+- Buyout Log can hold procurement/buyout affinity and still feed Project Readiness signals.
+- These affinity and rollup relationships are lineage-governed architecture and do not duplicate source ownership.

@@ -386,3 +386,22 @@ The product architecture is implemented through the formal Phase 3 module implem
 ## Product Implementation Rule
 
 The product layer must not begin with individual workflow modules. The first implementation waves must establish the gate review, shared foundations, shell frame, and backend read-model foundation. This ensures that all modules use the same role model, status model, audit model, approval model, and backend read-model structure.
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+Reference doctrine:
+
+- [`../Unified_PCC_Lifecycle_Objective_Architecture.md`](../Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`../PCC_Project_Lifecycle_Spine.md`](../PCC_Project_Lifecycle_Spine.md)
+- [`../PCC_Project_Memory_Layer.md`](../PCC_Project_Memory_Layer.md)
+- [`../PCC_Role_And_Stage_Lens_Model.md`](../PCC_Role_And_Stage_Lens_Model.md)
+- [`../PCC_Cross_Stage_Traceability_Model.md`](../PCC_Cross_Stage_Traceability_Model.md)
+- [`../PCC_Company_Knowledge_Reuse_Model.md`](../PCC_Company_Knowledge_Reuse_Model.md)
+- [`../PCC_Warranty_Traceability_Model.md`](../PCC_Warranty_Traceability_Model.md)
+- [`../PCC_Unified_Search_And_HBI_Grounding_Model.md`](../PCC_Unified_Search_And_HBI_Grounding_Model.md)
+
+Product clarifications:
+
+- Surfaces are shell destinations; work centers are governance domains; workflow modules are control patterns; lenses are contextual views over one project truth.
+- Constraints Log governance affinity and Buyout Log procurement affinity may coexist with Project Readiness signal rollups without ownership duplication.
+- Wave 12 baseline at `HEAD 9f67df78...` includes backend read-model route/provider existence; SPFx client/surface integration posture remains implementation-wave dependent.

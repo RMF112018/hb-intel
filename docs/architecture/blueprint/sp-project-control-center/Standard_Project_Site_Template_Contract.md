@@ -2245,3 +2245,22 @@ No schema, JSON, or code is produced in this prompt. Schema extraction is a sepa
 ---
 
 _End of Standard Project Site Template Contract._
+
+## Unified Lifecycle Doctrine Alignment (2026-05-03)
+
+This contract is aligned to:
+
+- [`Unified_PCC_Lifecycle_Objective_Architecture.md`](./Unified_PCC_Lifecycle_Objective_Architecture.md)
+- [`PCC_Project_Lifecycle_Spine.md`](./PCC_Project_Lifecycle_Spine.md)
+- [`PCC_Project_Memory_Layer.md`](./PCC_Project_Memory_Layer.md)
+- [`PCC_Role_And_Stage_Lens_Model.md`](./PCC_Role_And_Stage_Lens_Model.md)
+- [`PCC_Cross_Stage_Traceability_Model.md`](./PCC_Cross_Stage_Traceability_Model.md)
+- [`PCC_Company_Knowledge_Reuse_Model.md`](./PCC_Company_Knowledge_Reuse_Model.md)
+- [`PCC_Warranty_Traceability_Model.md`](./PCC_Warranty_Traceability_Model.md)
+- [`PCC_Unified_Search_And_HBI_Grounding_Model.md`](./PCC_Unified_Search_And_HBI_Grounding_Model.md)
+
+Contract-level clarifications:
+
+- Surface/work-center/module/lens distinctions remain mandatory and must not be implemented as departmental workspace forks.
+- Project Readiness rollups may aggregate readiness signals from modules with distinct governance affinity while preserving source ownership and lineage.
+- HBI-grounded retrieval must remain citation-based, permission-filtered, and evidence-qualified.
