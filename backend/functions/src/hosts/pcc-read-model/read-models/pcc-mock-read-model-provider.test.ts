@@ -3,9 +3,16 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  SAMPLE_PROJECT_LENSES_READ_MODEL,
+  SAMPLE_PROJECT_MEMORY_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
+  SAMPLE_PROJECT_TRACEABILITY_READ_MODEL,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
+  SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+  SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+  SAMPLE_WARRANTY_TRACE_READ_MODEL,
   type PccProjectId,
 } from '@hbc/models/pcc';
 import { PccMockReadModelProvider } from './pcc-mock-read-model-provider.js';
@@ -17,6 +24,8 @@ const UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID: PccProjectId =
   'project-unknown-responsibility-matrix-001' as PccProjectId;
 const UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID: PccProjectId =
   'project-unknown-constraints-log-001' as PccProjectId;
+const UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID: PccProjectId =
+  'project-unknown-unified-lifecycle-001' as PccProjectId;
 
 const PROVIDER_SOURCE_FILE = fileURLToPath(
   new URL('./pcc-mock-read-model-provider.ts', import.meta.url),
@@ -399,6 +408,115 @@ describe('PccMockReadModelProvider.getConstraintsLog — backend-unavailable sim
     expect(unavailable.data.auditEvents).toEqual(unknown.data.auditEvents);
     expect(unavailable.data.exposureSummary).toEqual(unknown.data.exposureSummary);
     expect(unavailable.data.moduleIdentity).toEqual(unknown.data.moduleIdentity);
+  });
+});
+
+describe('PccMockReadModelProvider unified lifecycle canonical read models', () => {
+  const provider = new PccMockReadModelProvider();
+  const unavailableProvider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns known-project deterministic fixtures for canonical unified lifecycle methods', async () => {
+    const unifiedLifecycle = await provider.getUnifiedLifecycle(KNOWN_PROJECT_ID);
+    const projectMemory = await provider.getProjectMemory(KNOWN_PROJECT_ID);
+    const projectLenses = await provider.getProjectLenses(KNOWN_PROJECT_ID);
+    const projectTraceability = await provider.getProjectTraceability(KNOWN_PROJECT_ID);
+    const warrantyTrace = await provider.getWarrantyTrace(KNOWN_PROJECT_ID);
+    const crossProjectKnowledge = await provider.getCrossProjectKnowledge(KNOWN_PROJECT_ID);
+    const unifiedSearch = await provider.getUnifiedSearch(KNOWN_PROJECT_ID);
+
+    expect(unifiedLifecycle.data).toBe(SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL);
+    expect(projectMemory.data).toBe(SAMPLE_PROJECT_MEMORY_READ_MODEL);
+    expect(projectLenses.data).toBe(SAMPLE_PROJECT_LENSES_READ_MODEL);
+    expect(projectTraceability.data).toBe(SAMPLE_PROJECT_TRACEABILITY_READ_MODEL);
+    expect(warrantyTrace.data).toBe(SAMPLE_WARRANTY_TRACE_READ_MODEL);
+    expect(crossProjectKnowledge.data).toBe(SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL);
+    expect(unifiedSearch.data).toBe(SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL);
+
+    for (const envelope of [
+      unifiedLifecycle,
+      projectMemory,
+      projectLenses,
+      projectTraceability,
+      warrantyTrace,
+      crossProjectKnowledge,
+      unifiedSearch,
+    ]) {
+      expect(envelope.readOnly).toBe(true);
+      expect(envelope.mode).toBe('mock');
+      expect(envelope.sourceStatus).toBe('available');
+    }
+  });
+
+  it('returns source-unavailable degraded envelopes for unknown project', async () => {
+    const unknown = await provider.getUnifiedLifecycle(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID);
+    expect(unknown.sourceStatus).toBe('source-unavailable');
+    expect(unknown.warnings).toHaveLength(1);
+
+    const methods = [
+      provider.getProjectMemory(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID),
+      provider.getProjectLenses(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID),
+      provider.getProjectTraceability(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID),
+      provider.getWarrantyTrace(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID),
+      provider.getCrossProjectKnowledge(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID),
+      provider.getUnifiedSearch(UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID),
+    ];
+    const envelopes = await Promise.all(methods);
+    for (const envelope of envelopes) {
+      expect(envelope.sourceStatus).toBe('source-unavailable');
+      expect(envelope.warnings).toHaveLength(1);
+    }
+  });
+
+  it('returns backend-unavailable degraded envelopes when simulation is enabled', async () => {
+    const methods = [
+      unavailableProvider.getUnifiedLifecycle(KNOWN_PROJECT_ID),
+      unavailableProvider.getProjectMemory(KNOWN_PROJECT_ID),
+      unavailableProvider.getProjectLenses(KNOWN_PROJECT_ID),
+      unavailableProvider.getProjectTraceability(KNOWN_PROJECT_ID),
+      unavailableProvider.getWarrantyTrace(KNOWN_PROJECT_ID),
+      unavailableProvider.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
+      unavailableProvider.getUnifiedSearch(KNOWN_PROJECT_ID),
+    ];
+    const envelopes = await Promise.all(methods);
+    for (const envelope of envelopes) {
+      expect(envelope.sourceStatus).toBe('backend-unavailable');
+      expect(envelope.warnings[0]?.code).toBe('backend-unavailable');
+      expect(envelope.readOnly).toBe(true);
+    }
+  });
+
+  it('unified search grounded responses remain cited and refusal responses explicit', async () => {
+    const envelope = await provider.getUnifiedSearch(KNOWN_PROJECT_ID);
+    const grounded = envelope.data.responses.filter((r) => r.grounded);
+    const refusals = envelope.data.responses.filter((r) => r.refused);
+
+    expect(grounded.length).toBeGreaterThan(0);
+    for (const item of grounded) {
+      if (!item.grounded) continue;
+      expect(item.citations.length).toBeGreaterThan(0);
+    }
+    expect(refusals.length).toBeGreaterThan(0);
+    for (const item of refusals) {
+      if (!item.refused) continue;
+      expect(item.citations).toEqual([]);
+      expect(item.refusalReason.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('warranty trace does not assign responsibility when status is insufficient-evidence', async () => {
+    const envelope = await provider.getWarrantyTrace(KNOWN_PROJECT_ID);
+    const insufficient = envelope.data.traces.find((trace) => trace.status === 'insufficient-evidence');
+    expect(insufficient).toBeDefined();
+    expect(insufficient?.recommendation).toBeUndefined();
+  });
+
+  it('cross-project knowledge includes security/redaction posture', async () => {
+    const envelope = await provider.getCrossProjectKnowledge(KNOWN_PROJECT_ID);
+    expect(envelope.data.crossProjectReferences.length).toBeGreaterThan(0);
+    for (const ref of envelope.data.crossProjectReferences) {
+      expect(ref.security.classification.length).toBeGreaterThan(0);
+      expect(ref.security.redactionLevel.length).toBeGreaterThan(0);
+    }
   });
 });
 

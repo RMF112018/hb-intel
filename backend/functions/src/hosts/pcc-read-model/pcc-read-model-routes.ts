@@ -8,7 +8,7 @@ import type { PccProjectId } from '@hbc/models/pcc';
 
 const provider = new PccMockReadModelProvider();
 
-type RouteLoader = (projectId: PccProjectId) => Promise<unknown>;
+type RouteLoader = (projectId: PccProjectId, request: HttpRequest) => Promise<unknown>;
 
 function registerPccReadRoute(name: string, route: string, load: RouteLoader): void {
   app.http(name, {
@@ -25,7 +25,7 @@ function registerPccReadRoute(name: string, route: string, load: RouteLoader): v
           }
 
           try {
-            const envelope = await load(projectId as PccProjectId);
+            const envelope = await load(projectId as PccProjectId, request);
             return successResponse(envelope);
           } catch {
             return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
@@ -111,4 +111,47 @@ registerPccReadRoute(
   'getPccProjectConstraintsLog',
   'pcc/projects/{projectId}/constraints-log',
   async (projectId) => provider.getConstraintsLog(projectId),
+);
+
+registerPccReadRoute(
+  'getPccUnifiedLifecycle',
+  'pcc/projects/{projectId}/unified-lifecycle',
+  async (projectId) => provider.getUnifiedLifecycle(projectId),
+);
+
+registerPccReadRoute(
+  'getPccProjectMemory',
+  'pcc/projects/{projectId}/project-memory',
+  async (projectId) => provider.getProjectMemory(projectId),
+);
+
+registerPccReadRoute(
+  'getPccProjectLenses',
+  'pcc/projects/{projectId}/project-lenses',
+  async (projectId) => provider.getProjectLenses(projectId),
+);
+
+registerPccReadRoute(
+  'getPccProjectTraceability',
+  'pcc/projects/{projectId}/project-traceability',
+  async (projectId) => provider.getProjectTraceability(projectId),
+);
+
+registerPccReadRoute(
+  'getPccWarrantyTrace',
+  'pcc/projects/{projectId}/warranty-trace',
+  async (projectId) => provider.getWarrantyTrace(projectId),
+);
+
+registerPccReadRoute(
+  'getPccCrossProjectKnowledge',
+  'pcc/projects/{projectId}/cross-project-knowledge',
+  async (projectId) => provider.getCrossProjectKnowledge(projectId),
+);
+
+registerPccReadRoute(
+  'getPccUnifiedSearch',
+  'pcc/projects/{projectId}/unified-search',
+  async (projectId, request) =>
+    provider.getUnifiedSearch(projectId, undefined, request.query?.get('q') ?? undefined),
 );

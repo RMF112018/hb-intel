@@ -20,6 +20,13 @@ import type {
   PccProjectProfileReadModel,
   PccLifecycleReadinessReadModel,
   PccProjectReadinessFrameworkReadModel,
+  PccProjectMemoryReadModel,
+  PccProjectLensesReadModel,
+  PccProjectTraceabilityReadModel,
+  PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
+  PccCrossProjectKnowledgeReadModel,
+  PccWarrantyTraceReadModel,
   PccReadModelEnvelope,
   PccResponsibilityMatrixReadModel,
   PccSettingsReadModel,
@@ -85,6 +92,35 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>;
+  getUnifiedLifecycle(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
+  getProjectMemory(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectMemoryReadModel>>;
+  getProjectLenses(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectLensesReadModel>>;
+  getProjectTraceability(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProjectTraceabilityReadModel>>;
+  getWarrantyTrace(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccWarrantyTraceReadModel>>;
+  getCrossProjectKnowledge(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel>>;
+  getUnifiedSearch(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+    query?: string,
+  ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {

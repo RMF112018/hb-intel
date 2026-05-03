@@ -15,6 +15,13 @@ const provider = {
   getPermitInspectionControlCenter: vi.fn(),
   getResponsibilityMatrix: vi.fn(),
   getConstraintsLog: vi.fn(),
+  getUnifiedLifecycle: vi.fn(),
+  getProjectMemory: vi.fn(),
+  getProjectLenses: vi.fn(),
+  getProjectTraceability: vi.fn(),
+  getWarrantyTrace: vi.fn(),
+  getCrossProjectKnowledge: vi.fn(),
+  getUnifiedSearch: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -112,6 +119,41 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     route: 'pcc/projects/{projectId}/constraints-log',
     method: 'getConstraintsLog',
   },
+  {
+    name: 'getPccUnifiedLifecycle',
+    route: 'pcc/projects/{projectId}/unified-lifecycle',
+    method: 'getUnifiedLifecycle',
+  },
+  {
+    name: 'getPccProjectMemory',
+    route: 'pcc/projects/{projectId}/project-memory',
+    method: 'getProjectMemory',
+  },
+  {
+    name: 'getPccProjectLenses',
+    route: 'pcc/projects/{projectId}/project-lenses',
+    method: 'getProjectLenses',
+  },
+  {
+    name: 'getPccProjectTraceability',
+    route: 'pcc/projects/{projectId}/project-traceability',
+    method: 'getProjectTraceability',
+  },
+  {
+    name: 'getPccWarrantyTrace',
+    route: 'pcc/projects/{projectId}/warranty-trace',
+    method: 'getWarrantyTrace',
+  },
+  {
+    name: 'getPccCrossProjectKnowledge',
+    route: 'pcc/projects/{projectId}/cross-project-knowledge',
+    method: 'getCrossProjectKnowledge',
+  },
+  {
+    name: 'getPccUnifiedSearch',
+    route: 'pcc/projects/{projectId}/unified-search',
+    method: 'getUnifiedSearch',
+  },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -132,8 +174,8 @@ describe('PCC read-only route registrations', () => {
     await import('./pcc-read-model-routes.js');
   });
 
-  it('registers exactly the thirteen approved route handlers', () => {
-    expect(registrations).toHaveLength(13);
+  it('registers exactly the canonical route handlers', () => {
+    expect(registrations).toHaveLength(20);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);
@@ -216,6 +258,30 @@ describe('PCC read-only route registrations', () => {
     }
   });
 
+  it('exposes canonical unified lifecycle route IDs and does not register non-canonical aliases', () => {
+    const canonical = [
+      'pcc/projects/{projectId}/unified-lifecycle',
+      'pcc/projects/{projectId}/project-memory',
+      'pcc/projects/{projectId}/project-lenses',
+      'pcc/projects/{projectId}/project-traceability',
+      'pcc/projects/{projectId}/warranty-trace',
+      'pcc/projects/{projectId}/cross-project-knowledge',
+      'pcc/projects/{projectId}/unified-search',
+    ];
+    for (const route of canonical) {
+      expect(registrations.some((reg) => reg.config.route === route)).toBe(true);
+    }
+
+    const forbidden = [
+      'pcc/projects/{projectId}/lifecycle-timeline',
+      'pcc/projects/{projectId}/traceability-graph',
+      'pcc/projects/{projectId}/closed-project-references',
+    ];
+    for (const route of forbidden) {
+      expect(registrations.some((reg) => reg.config.route === route)).toBe(false);
+    }
+  });
+
   it('applies withAuth posture to each route handler', () => {
     for (const reg of registrations) {
       expect((reg.config.handler as any).__withAuth).toBe(true);
@@ -241,10 +307,41 @@ describe('PCC read-only route registrations', () => {
         {},
       );
 
-      expect((provider as any)[expected.method]).toHaveBeenCalledWith('project-known');
+      if (expected.method === 'getUnifiedSearch') {
+        expect((provider as any)[expected.method]).toHaveBeenCalledWith(
+          'project-known',
+          undefined,
+          undefined,
+        );
+      } else {
+        expect((provider as any)[expected.method]).toHaveBeenCalledWith('project-known');
+      }
       expect(response.status).toBe(200);
       expect(response.jsonBody).toEqual({ data: envelope });
     }
+  });
+
+  it('passes optional q parameter to unified-search provider method', async () => {
+    const reg = findRegistration('getPccUnifiedSearch');
+    const envelope = {
+      projectId: 'project-known',
+      sourceStatus: 'available',
+      generatedAt: '2026-04-30T00:00:00.000Z',
+    };
+    provider.getUnifiedSearch.mockResolvedValueOnce(envelope);
+
+    const response = await reg.config.handler(
+      {
+        params: { projectId: 'project-known' },
+        query: new URLSearchParams('q=warranty%20product'),
+        headers: new Headers(),
+      },
+      {},
+    );
+
+    expect(provider.getUnifiedSearch).toHaveBeenCalledWith('project-known', undefined, 'warranty product');
+    expect(response.status).toBe(200);
+    expect(response.jsonBody).toEqual({ data: envelope });
   });
 
   it('returns provider source-unavailable envelope for unknown projectId', async () => {
