@@ -11,10 +11,15 @@
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   DOCUMENT_CONTROL_SOURCES,
+  EXPOSURE_BANDS,
+  IMPACT_DIMENSION_IDS,
+  IMPACT_LABELS,
   LIFECYCLE_READINESS_LIBRARY_METADATA,
   LIFECYCLE_READINESS_STATUSES,
+  LIKELIHOOD_LABELS,
   PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
@@ -24,12 +29,15 @@ import {
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
+  SEVERITY_OVERRIDE_RULES,
+  URGENCY_LABELS,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
   IPccSettingsRef,
   IProjectProfile,
   LifecycleReadinessStatus,
+  PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccLifecycleReadinessReadModel,
@@ -49,6 +57,7 @@ import type {
   PccSiteHealthReadModel,
   PccTeamAccessReadModel,
   PccWorkCenterRegistryReadModel,
+  SeverityBandKey,
 } from '@hbc/models/pcc';
 
 import type {
@@ -171,6 +180,61 @@ const EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL_BACKEND_UNAVAILABLE: PccResponsibil
       pendingHumanReviewCount: 0,
     },
   };
+
+// Empty Constraints Log read model used for degraded envelopes
+// (unknown project / backend-unavailable). Project-specific arrays are
+// emptied; module identity, risk-matrix vocabulary, exposure bands, and
+// override-rule catalog are preserved because they are project-
+// independent (analogous to Wave 11 preserving the workbook-source
+// summary contract shape and Wave 10 preserving permit summary shape).
+// Exposure summary counts are zeroed.
+const EMPTY_CONSTRAINTS_LOG_EXPOSURE_SUMMARY = {
+  riskCountsByBand: Object.freeze(
+    Object.fromEntries(
+      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
+    ) as Record<SeverityBandKey, number>,
+  ),
+  constraintCountsByBand: Object.freeze(
+    Object.fromEntries(
+      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
+    ) as Record<SeverityBandKey, number>,
+  ),
+  overdueConstraintCount: 0,
+  awaitingExternalPartyCount: 0,
+  delayExposureReviewQueueCount: 0,
+  changeExposureReviewQueueCount: 0,
+  priorityActionsCandidateCount: 0,
+} as const;
+
+const EMPTY_CONSTRAINTS_LOG_READ_MODEL: PccConstraintsLogReadModel = {
+  moduleIdentity: SAMPLE_CONSTRAINTS_LOG_READ_MODEL.moduleIdentity,
+  riskMatrixConfig: {
+    likelihoodLabels: LIKELIHOOD_LABELS,
+    impactLabels: IMPACT_LABELS,
+    urgencyLabels: URGENCY_LABELS,
+    impactDimensions: IMPACT_DIMENSION_IDS,
+  },
+  exposureBands: EXPOSURE_BANDS,
+  overrideRules: SEVERITY_OVERRIDE_RULES,
+  seedCategories: [],
+  riskItems: [],
+  constraintItems: [],
+  exposureSummary: EMPTY_CONSTRAINTS_LOG_EXPOSURE_SUMMARY,
+  sourcePosture: {
+    sourceStatus: 'source-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+  snapshotHistory: [],
+  auditEvents: [],
+};
+
+const EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccConstraintsLogReadModel = {
+  ...EMPTY_CONSTRAINTS_LOG_READ_MODEL,
+  sourcePosture: {
+    sourceStatus: 'backend-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+};
 
 const DOCUMENT_CONTROL_SOURCES_ORDERED: readonly IDocumentControlSource[] =
   DOCUMENT_CONTROL_SOURCE_IDS.map((id) => DOCUMENT_CONTROL_SOURCES[id]);
@@ -867,6 +931,42 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       viewerPersona,
       this.statusForKnownProject(projectId),
       SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getConstraintsLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_CONSTRAINTS_LOG_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
       this.warningsForKnownProject(projectId),
     );
   }

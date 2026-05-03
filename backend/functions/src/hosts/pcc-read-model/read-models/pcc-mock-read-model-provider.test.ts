@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
   type PccProjectId,
@@ -14,6 +15,8 @@ const UNKNOWN_PROJECT_ID: PccProjectId =
   'project-unknown-permit-inspection-fixture-001' as PccProjectId;
 const UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID: PccProjectId =
   'project-unknown-responsibility-matrix-001' as PccProjectId;
+const UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID: PccProjectId =
+  'project-unknown-constraints-log-001' as PccProjectId;
 
 const PROVIDER_SOURCE_FILE = fileURLToPath(
   new URL('./pcc-mock-read-model-provider.ts', import.meta.url),
@@ -267,6 +270,135 @@ describe('PccMockReadModelProvider.getResponsibilityMatrix — backend-unavailab
     expect(unavailable.data.auditEvents).toEqual(unknown.data.auditEvents);
     expect(unavailable.data.workbookSourceSummary).toEqual(unknown.data.workbookSourceSummary);
     expect(unavailable.data.healthScore).toEqual(unknown.data.healthScore);
+  });
+});
+
+describe('PccMockReadModelProvider.getConstraintsLog — known project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns a read-only mock envelope with available status and the deterministic fixture', async () => {
+    const envelope = await provider.getConstraintsLog(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('available');
+    expect(envelope.warnings).toHaveLength(0);
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(envelope.data).toBe(SAMPLE_CONSTRAINTS_LOG_READ_MODEL);
+  });
+
+  it('preserves canonical Constraints Log module identity, vocabularies, and item coverage', async () => {
+    const envelope = await provider.getConstraintsLog(KNOWN_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.moduleIdentity.moduleId).toBe('constraints-log');
+    expect(data.moduleIdentity.governance).toBe('project-readiness');
+    expect(data.moduleIdentity.workCenterId).toBe('risk-issues-decision');
+
+    expect(data.exposureBands.length).toBeGreaterThan(0);
+    expect(data.seedCategories.length).toBeGreaterThan(0);
+    expect(data.riskItems.length).toBeGreaterThan(0);
+    expect(data.constraintItems.length).toBeGreaterThan(0);
+    expect(data.snapshotHistory.length).toBeGreaterThan(0);
+    expect(data.auditEvents.length).toBeGreaterThan(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const envelope = await provider.getConstraintsLog(KNOWN_PROJECT_ID, 'project-manager');
+    expect(envelope.viewerPersona).toBe('project-manager');
+  });
+});
+
+describe('PccMockReadModelProvider.getConstraintsLog — unknown project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the empty Constraints Log read model with source-unavailable status', async () => {
+    const envelope = await provider.getConstraintsLog(UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('source-unavailable');
+    expect(envelope.projectId).toBe(UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    const warning = envelope.warnings[0];
+    expect(warning.code).toBe('source-unavailable');
+    expect(warning.message).toContain(UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID);
+    expect(warning.source).toBe('pcc-mock-fixtures');
+  });
+
+  it('returns empty arrays, zeroed counts, and source-unavailable source posture for unknown projects', async () => {
+    const envelope = await provider.getConstraintsLog(UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.riskItems).toEqual([]);
+    expect(data.constraintItems).toEqual([]);
+    expect(data.seedCategories).toEqual([]);
+    expect(data.snapshotHistory).toEqual([]);
+    expect(data.auditEvents).toEqual([]);
+
+    expect(data.exposureSummary.overdueConstraintCount).toBe(0);
+    expect(data.exposureSummary.awaitingExternalPartyCount).toBe(0);
+    expect(data.exposureSummary.delayExposureReviewQueueCount).toBe(0);
+    expect(data.exposureSummary.changeExposureReviewQueueCount).toBe(0);
+    expect(data.exposureSummary.priorityActionsCandidateCount).toBe(0);
+    for (const band of Object.values(data.exposureSummary.riskCountsByBand)) {
+      expect(band).toBe(0);
+    }
+    for (const band of Object.values(data.exposureSummary.constraintCountsByBand)) {
+      expect(band).toBe(0);
+    }
+
+    expect(data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(data.sourcePosture.pendingHumanReviewCount).toBe(0);
+
+    // Module identity and vocabulary are preserved on the degraded envelope
+    // so consumers always see the authoritative module name and scoring
+    // catalog even when project state is unavailable.
+    expect(data.moduleIdentity.moduleId).toBe('constraints-log');
+    expect(data.exposureBands.length).toBeGreaterThan(0);
+    expect(data.riskMatrixConfig.impactDimensions.length).toBeGreaterThan(0);
+  });
+});
+
+describe('PccMockReadModelProvider.getConstraintsLog — backend-unavailable simulation', () => {
+  const provider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns the empty read model with backend-unavailable status and warning', async () => {
+    const envelope = await provider.getConstraintsLog(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    expect(envelope.warnings[0].code).toBe('backend-unavailable');
+    expect(envelope.warnings[0].message).toBe(
+      'Mock provider configured to simulate backend-unavailable.',
+    );
+
+    expect(envelope.data.riskItems).toEqual([]);
+    expect(envelope.data.constraintItems).toEqual([]);
+    expect(envelope.data.snapshotHistory).toEqual([]);
+    expect(envelope.data.auditEvents).toEqual([]);
+    expect(envelope.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+  });
+
+  it('produces an empty body shape parallel to the unknown-project branch', async () => {
+    const unavailable = await provider.getConstraintsLog(KNOWN_PROJECT_ID);
+    const unknown = await new PccMockReadModelProvider().getConstraintsLog(
+      UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID,
+    );
+
+    expect(unavailable.data.riskItems).toEqual(unknown.data.riskItems);
+    expect(unavailable.data.constraintItems).toEqual(unknown.data.constraintItems);
+    expect(unavailable.data.seedCategories).toEqual(unknown.data.seedCategories);
+    expect(unavailable.data.snapshotHistory).toEqual(unknown.data.snapshotHistory);
+    expect(unavailable.data.auditEvents).toEqual(unknown.data.auditEvents);
+    expect(unavailable.data.exposureSummary).toEqual(unknown.data.exposureSummary);
+    expect(unavailable.data.moduleIdentity).toEqual(unknown.data.moduleIdentity);
   });
 });
 

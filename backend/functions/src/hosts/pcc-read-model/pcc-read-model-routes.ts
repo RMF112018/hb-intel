@@ -106,3 +106,9 @@ registerPccReadRoute(
   'pcc/projects/{projectId}/responsibility-matrix',
   async (projectId) => provider.getResponsibilityMatrix(projectId),
 );
+
+registerPccReadRoute(
+  'getPccProjectConstraintsLog',
+  'pcc/projects/{projectId}/constraints-log',
+  async (projectId) => provider.getConstraintsLog(projectId),
+);

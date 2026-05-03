@@ -14,6 +14,7 @@ const provider = {
   getLifecycleReadiness: vi.fn(),
   getPermitInspectionControlCenter: vi.fn(),
   getResponsibilityMatrix: vi.fn(),
+  getConstraintsLog: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -106,6 +107,11 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     route: 'pcc/projects/{projectId}/responsibility-matrix',
     method: 'getResponsibilityMatrix',
   },
+  {
+    name: 'getPccProjectConstraintsLog',
+    route: 'pcc/projects/{projectId}/constraints-log',
+    method: 'getConstraintsLog',
+  },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -126,8 +132,8 @@ describe('PCC read-only route registrations', () => {
     await import('./pcc-read-model-routes.js');
   });
 
-  it('registers exactly the twelve approved route handlers', () => {
-    expect(registrations).toHaveLength(12);
+  it('registers exactly the thirteen approved route handlers', () => {
+    expect(registrations).toHaveLength(13);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);
@@ -181,6 +187,28 @@ describe('PCC read-only route registrations', () => {
       const writeRegistration = registrations.find(
         (reg) =>
           reg.config.route === wave10Path &&
+          Array.isArray(reg.config.methods) &&
+          reg.config.methods.includes(method),
+      );
+      expect(writeRegistration).toBeUndefined();
+    }
+  });
+
+  it('exposes the Wave 12 constraints-log path as a single GET-only registration', () => {
+    const wave12Path = 'pcc/projects/{projectId}/constraints-log';
+    const wave12Registrations = registrations.filter((reg) => reg.config.route === wave12Path);
+
+    expect(wave12Registrations).toHaveLength(1);
+
+    const wave12 = wave12Registrations[0]!;
+    expect(wave12.name).toBe('getPccProjectConstraintsLog');
+    expect(wave12.config.methods).toEqual(['GET']);
+
+    const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+    for (const method of writeMethods) {
+      const writeRegistration = registrations.find(
+        (reg) =>
+          reg.config.route === wave12Path &&
           Array.isArray(reg.config.methods) &&
           reg.config.methods.includes(method),
       );

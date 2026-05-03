@@ -9,6 +9,7 @@
  */
 
 import type {
+  PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
   PccPermitInspectionControlCenterReadModel,
@@ -80,6 +81,10 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccResponsibilityMatrixReadModel>>;
+  getConstraintsLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {
