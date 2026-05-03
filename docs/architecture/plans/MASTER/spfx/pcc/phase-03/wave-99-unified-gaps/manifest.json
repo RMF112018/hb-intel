@@ -1,0 +1,26 @@
+{
+  "package_name": "pcc_unified_lifecycle_gap_prompt_package",
+  "repo": "/Users/bobbyfetting/hb-intel",
+  "purpose": "Prompt package for local code agent to address remaining PCC unified lifecycle implementation/detail gaps after repo-truth audit.",
+  "execution_order": [
+    "prompts/00_repo_truth_revalidation.md",
+    "prompts/01_lifecycle_memory_lens_contracts.md",
+    "prompts/02_traceability_warranty_cross_project_contracts.md",
+    "prompts/03_backend_read_model_routes_and_tests.md",
+    "prompts/04_spfx_clients_fixtures_and_surface_seams.md",
+    "prompts/05_project_home_readiness_and_constraints_ui_integration.md",
+    "prompts/06_unified_search_hbi_grounding_preview.md",
+    "prompts/07_security_retention_permission_model_hardening.md",
+    "prompts/08_validation_closeout_and_commit.md"
+  ],
+  "hard_guardrails": [
+    "No separate departmental PCC workspaces.",
+    "No duplicate source-of-record claims.",
+    "No live external-system writes.",
+    "No tenant mutation.",
+    "No dependency or lockfile changes unless explicitly authorized.",
+    "No HBI answer without source citation or insufficient-evidence posture.",
+    "No warranty responsibility conclusion without source evidence.",
+    "No push unless explicitly instructed."
+  ]
+}
