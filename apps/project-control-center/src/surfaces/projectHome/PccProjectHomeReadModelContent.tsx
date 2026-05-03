@@ -21,6 +21,7 @@ import { PccMissingConfigurationsCard } from './PccMissingConfigurationsCard';
 import { PccPriorityActionsCard } from './PccPriorityActionsCard';
 import { PccProjectIntelligenceCard } from './PccProjectIntelligenceCard';
 import { PccProjectReadinessCard } from './PccProjectReadinessCard';
+import { PccProjectHomeUnifiedLifecycleSection } from './PccProjectHomeUnifiedLifecycleSection';
 import { PccRecentActivityCard } from './PccRecentActivityCard';
 import { PccSiteHealthSummaryCard } from './PccSiteHealthSummaryCard';
 import { PccTeamSnapshotCard } from './PccTeamSnapshotCard';
@@ -66,6 +67,10 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         missingConfigurations={viewModel?.missingConfigurations.data}
       />
       <PccRecentActivityCard />
+      <PccProjectHomeUnifiedLifecycleSection
+        client={client}
+        projectId={SAMPLE_PROJECT_PROFILE.projectId}
+      />
     </>
   );
 };

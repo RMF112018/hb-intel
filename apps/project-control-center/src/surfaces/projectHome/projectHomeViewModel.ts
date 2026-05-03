@@ -24,6 +24,7 @@ import type {
   PccProjectId,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
+  PccUnifiedLifecycleReadModel,
 } from '@hbc/models/pcc';
 import type { PccCardState } from './shared.js';
 
@@ -53,6 +54,17 @@ export interface IPccProjectHomeReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccDocumentControlReadModel>>;
+
+  /**
+   * Wave 99 / Prompt 05B — unified lifecycle aggregate envelope. Consumed
+   * exclusively by `PccProjectHomeUnifiedLifecycleSection` via
+   * `useUnifiedLifecycleReadModel`. `useProjectHomeReadModel` does NOT
+   * call this method (asserted in `useProjectHomeReadModel.test.ts`).
+   */
+  getUnifiedLifecycle(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
 }
 
 export interface IPccProjectHomeViewModelSlot<TData> {

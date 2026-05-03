@@ -7,6 +7,7 @@ import {
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_SITE_HEALTH_SUMMARY,
+  SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
 } from '@hbc/models/pcc';
 import { mount as mountPcc, unmount as unmountPcc } from '../mount';
 import { PccApp } from '../PccApp';
@@ -19,6 +20,19 @@ const HOME_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/home`;
 const PRIORITY_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/priority-actions`;
 const DOC_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/document-control`;
 const TEAM_ACCESS_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/team-access`;
+const UNIFIED_LIFECYCLE_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/unified-lifecycle`;
+
+function unifiedLifecycleOk() {
+  return {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'mock',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+  };
+}
 
 function homeOk() {
   return {
@@ -106,7 +120,9 @@ describe('mount(...) opt-in', () => {
     });
     await waitFor(() => {
       const cards = host.querySelectorAll('[data-pcc-card]');
-      expect(cards.length).toBe(10);
+      // Wave 99 / Prompt 05B — read-model-driven Project Home renders
+      // 10 existing cards + 4 unified-lifecycle cards = 14.
+      expect(cards.length).toBe(14);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -116,6 +132,10 @@ describe('mount(...) opt-in', () => {
       if (url === HOME_URL) return Promise.resolve(jsonResponse({ data: homeOk() }));
       if (url === PRIORITY_URL) return Promise.resolve(jsonResponse({ data: priorityOk() }));
       if (url === DOC_URL) return Promise.resolve(jsonResponse({ data: docOk() }));
+      // Wave 99 / Prompt 05B — Project Home now also drives a
+      // getUnifiedLifecycle call via PccProjectHomeUnifiedLifecycleSection.
+      if (url === UNIFIED_LIFECYCLE_URL)
+        return Promise.resolve(jsonResponse({ data: unifiedLifecycleOk() }));
       throw new Error(`unexpected fetch URL: ${url}`);
     });
     await act(async () => {
@@ -127,17 +147,19 @@ describe('mount(...) opt-in', () => {
       });
     });
     await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(fetchSpy).toHaveBeenCalledTimes(4);
     });
     const calls = fetchSpy.mock.calls.map((c) => ({ url: c[0], init: c[1] }));
     const urls = calls.map((c) => c.url).sort();
-    expect(urls).toEqual([DOC_URL, HOME_URL, PRIORITY_URL].sort());
+    expect(urls).toEqual(
+      [DOC_URL, HOME_URL, PRIORITY_URL, UNIFIED_LIFECYCLE_URL].sort(),
+    );
     for (const c of calls) {
       expect(c.init?.method).toBe('GET');
     }
 
     const cards = host.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(10);
+    expect(cards).toHaveLength(14);
     const grid = host.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     for (const card of cards) {
@@ -160,7 +182,7 @@ describe('mount(...) opt-in', () => {
       expect(errorMarkers.length).toBeGreaterThan(0);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(10);
+    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(14);
   });
 });
 

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { afterEach, describe, it, expect } from 'vitest';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   PRIORITY_ACTION_CATEGORY_LABELS,
@@ -15,7 +15,9 @@ import {
   type SiteHealthSeverity,
 } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
+import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
 import { PccPriorityActionsCard } from '../surfaces/projectHome/PccPriorityActionsCard';
 import { TEAM_SNAPSHOT_PLACEHOLDER } from '../surfaces/projectHome/teamSnapshotPlaceholder';
 import { PCC_PRIORITY_RAIL_GROUP_IDS } from '../surfaces/projectHome/priorityActionsRailViewModel';
@@ -48,16 +50,49 @@ const REQUIRED_CARD_TITLES = [
   'Recent Activity',
 ] as const;
 
+// Wave 99 / Prompt 05B — unified lifecycle cards are appended to the
+// read-model-driven path only. `<PccApp forceMode="wideDesktop" />`
+// without a `readModelClient` renders the fixture-only fallback (10
+// cards); to render the read-model-driven path, supply a fixture
+// client via `readModelClient={createPccFixtureReadModelClient()}`.
+const UNIFIED_LIFECYCLE_CARD_TITLES = [
+  'Lifecycle Timeline',
+  'Project Memory',
+  'Project Lens',
+  'Related Records',
+] as const;
+
 const READINESS_MODULES = new Set(['startup-tasks', 'permits', 'required-inspections']);
 
 describe('Project Home bento dashboard', () => {
+  // Wave 99 / Prompt 05B — explicit cleanup between renders so the
+  // unified-lifecycle integration tests' read-model-driven `<PccApp />`
+  // renders do not pollute one another via accumulated `document.body`
+  // DOM. The test-setup file does not enable RTL auto-cleanup
+  // workspace-wide, so the previous renders' content otherwise lingers
+  // and `waitFor` polling on a fresh hook microtask resolves slowly.
+  afterEach(() => {
+    cleanup();
+  });
+
   it('renders all 10 required Project Home card titles inside the active panel', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
-    const visible = grid!.textContent ?? '';
+    // Card-scoped title check: query each card's heading slot rather
+    // than scanning grid.textContent, so phrases like "Project Memory"
+    // or "Project Lens" appearing inside body copy elsewhere never
+    // satisfy a card-title assertion (per
+    // feedback_per_lane_marker_assertions /
+    // feedback_per_component_marker_scoping).
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
+    ).map((el) => el.textContent?.trim() ?? '');
     for (const title of REQUIRED_CARD_TITLES) {
-      expect(visible, `card title '${title}' should render`).toContain(title);
+      expect(
+        headingTexts,
+        `card title '${title}' should render as a card heading`,
+      ).toContain(title);
     }
   });
 
@@ -384,5 +419,137 @@ describe('Project Home bento dashboard', () => {
       'error',
       'unauthorized-persona',
     ]);
+  });
+
+  // ── Wave 99 / Prompt 05B — unified lifecycle integration ─────────────
+  //
+  // Project Home has two render paths: fixture-only (no readModelClient,
+  // 10 cards) and read-model-driven (readModelClient supplied, 10
+  // existing cards + 4 unified-lifecycle cards from the new section).
+  // Each test below names which path it exercises and asserts the
+  // path-specific cardinality / content invariants.
+
+  it('fixture-only fallback (no readModelClient) preserves the original 10-card baseline and renders no unified-lifecycle titles', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccProjectHome />
+      </PccBentoGrid>,
+    );
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const cards = container.querySelectorAll('[data-pcc-card]');
+    expect(
+      cards.length,
+      'fixture-only fallback must render exactly the original 10 cards (no unified-lifecycle section)',
+    ).toBe(REQUIRED_CARD_TITLES.length);
+    for (const card of cards) {
+      expect(card.parentElement === grid).toBe(true);
+    }
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
+    ).map((el) => el.textContent?.trim() ?? '');
+    for (const title of UNIFIED_LIFECYCLE_CARD_TITLES) {
+      expect(
+        headingTexts,
+        `fixture-only fallback must NOT include unified-lifecycle title '${title}'`,
+      ).not.toContain(title);
+    }
+  });
+
+  it('read-model-driven path renders 14 cards (10 existing + 4 unified lifecycle) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
+    const { container, findByText } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    // Wait for the read-model-driven hook to resolve so the section
+    // renders body markers (rather than the loading PccPreviewState).
+    await findByText('Lifecycle Timeline');
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const cards = container.querySelectorAll('[data-pcc-card]');
+    expect(cards.length).toBe(
+      REQUIRED_CARD_TITLES.length + UNIFIED_LIFECYCLE_CARD_TITLES.length,
+    );
+    for (const card of cards) {
+      expect(card.parentElement === grid).toBe(true);
+      const span = Number(card.getAttribute('data-pcc-column-span'));
+      expect(span).toBeGreaterThan(0);
+    }
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
+    ).map((el) => el.textContent?.trim() ?? '');
+    for (const title of [...REQUIRED_CARD_TITLES, ...UNIFIED_LIFECYCLE_CARD_TITLES]) {
+      expect(headingTexts).toContain(title);
+    }
+    const bodyMarkers = [
+      'data-pcc-lifecycle-timeline',
+      'data-pcc-project-memory',
+      'data-pcc-project-lens-switcher',
+      'data-pcc-related-records',
+    ] as const;
+    for (const marker of bodyMarkers) {
+      const node = container.querySelector(`[${marker}]`);
+      expect(node, `unified-lifecycle body marker [${marker}] should render`).not.toBeNull();
+      const card = node!.closest('[data-pcc-card]');
+      expect(card, `body marker [${marker}] must be inside a PccDashboardCard`).not.toBeNull();
+      expect(
+        card!.parentElement === grid,
+        `card containing [${marker}] must be a direct child of the bento grid`,
+      ).toBe(true);
+    }
+  });
+
+  it('read-model-driven path: unified lifecycle lens switcher renders only preview-disabled buttons and no anchors', async () => {
+    const { container, findByText } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    await findByText('Project Lens');
+    const lensSwitcher = container.querySelector('[data-pcc-project-lens-switcher]');
+    expect(lensSwitcher).not.toBeNull();
+    const lensButtons = lensSwitcher!.querySelectorAll<HTMLButtonElement>(
+      '[data-pcc-lens-id]',
+    );
+    expect(lensButtons.length).toBeGreaterThan(0);
+    for (const button of Array.from(lensButtons)) {
+      expect(button.disabled).toBe(true);
+      expect(button.getAttribute('data-pcc-action-state')).toBe('preview-disabled');
+    }
+    expect(lensSwitcher!.querySelectorAll('a[href]').length).toBe(0);
+  });
+
+  it('read-model-driven path: Project Home does not introduce a unified-lifecycle route or workspace marker', async () => {
+    const { container, findByText } = render(
+      <PccApp
+        forceMode="wideDesktop"
+        readModelClient={createPccFixtureReadModelClient()}
+      />,
+    );
+    await findByText('Lifecycle Timeline');
+    expect(
+      container.querySelector('[data-pcc-surface-id="unified-lifecycle"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
+    ).toBeNull();
+    const anchors = container.querySelectorAll<HTMLAnchorElement>('a[href]');
+    for (const anchor of Array.from(anchors)) {
+      const href = anchor.getAttribute('href') ?? '';
+      for (const forbidden of [
+        'unified-lifecycle',
+        'lifecycle-timeline',
+        'traceability-graph',
+        'closed-project-references',
+      ]) {
+        expect(
+          href.includes(forbidden),
+          `anchor href '${href}' must not reference '${forbidden}'`,
+        ).toBe(false);
+      }
+    }
   });
 });
