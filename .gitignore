@@ -36,6 +36,8 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+# Microsoft Office lock files (e.g. ~$Workbook.xlsx while file is open)
+~$*
 
 # Claude archived working plans and run logs (may contain tokens or deployment artifacts)
 .archive/
