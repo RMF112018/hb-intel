@@ -35,3 +35,12 @@ export {
   UnifiedProjectSearchPreview,
   type IUnifiedProjectSearchPreviewProps,
 } from './UnifiedProjectSearchPreview.js';
+export {
+  AskHbiGroundingPreviewPanel,
+  ASK_HBI_SAMPLE_QUERIES,
+  ASK_HBI_PANEL_TITLE,
+  ASK_HBI_PANEL_DISCLAIMER,
+  ASK_HBI_IDLE_TITLE,
+  ASK_HBI_IDLE_DESCRIPTION,
+  type IAskHbiGroundingPreviewPanelProps,
+} from './AskHbiGroundingPreviewPanel.js';

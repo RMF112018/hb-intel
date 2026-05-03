@@ -33,6 +33,13 @@ export {
   type IClosedProjectReferencePreviewProps,
   UnifiedProjectSearchPreview,
   type IUnifiedProjectSearchPreviewProps,
+  AskHbiGroundingPreviewPanel,
+  ASK_HBI_SAMPLE_QUERIES,
+  ASK_HBI_PANEL_TITLE,
+  ASK_HBI_PANEL_DISCLAIMER,
+  ASK_HBI_IDLE_TITLE,
+  ASK_HBI_IDLE_DESCRIPTION,
+  type IAskHbiGroundingPreviewPanelProps,
 } from './components/index.js';
 export type {
   IPccLifecyclePostureView,
