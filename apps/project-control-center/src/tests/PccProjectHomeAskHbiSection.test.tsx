@@ -11,11 +11,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import {
-  SAMPLE_PROJECT_PROFILE,
-  type PccPersona,
-  type PccProjectId,
-} from '@hbc/models/pcc';
+import { SAMPLE_PROJECT_PROFILE, type PccPersona, type PccProjectId } from '@hbc/models/pcc';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccProjectHomeAskHbiSection } from '../surfaces/projectHome/PccProjectHomeAskHbiSection';
@@ -88,9 +84,9 @@ describe('PccProjectHomeAskHbiSection — card chrome and idle-on-mount posture'
     expect(disclaimer?.textContent ?? '').toBe(ASK_HBI_PANEL_DISCLAIMER);
     const buttons = container.querySelectorAll('[data-pcc-ask-hbi-sample-query]');
     expect(buttons).toHaveLength(ASK_HBI_SAMPLE_QUERIES.length);
-    expect(
-      container.querySelectorAll('[data-pcc-ask-hbi-sample-query-active="true"]').length,
-    ).toBe(0);
+    expect(container.querySelectorAll('[data-pcc-ask-hbi-sample-query-active="true"]').length).toBe(
+      0,
+    );
   });
 });
 
@@ -104,10 +100,7 @@ describe('PccProjectHomeAskHbiSection — sample-query click triggers getUnified
       void args;
       // Delegate to the canonical fixture so the panel transitions to ready
       // and renders grounded + refusal answers.
-      return createPccFixtureReadModelClient().getUnifiedSearch(
-        PROJECT_ID,
-        'project-manager',
-      );
+      return createPccFixtureReadModelClient().getUnifiedSearch(PROJECT_ID, 'project-manager');
     });
     const client: IPccUnifiedSearchReadModelClient = { getUnifiedSearch: spy };
     const { container } = renderSection(client, 'project-executive');
@@ -123,14 +116,12 @@ describe('PccProjectHomeAskHbiSection — sample-query click triggers getUnified
       const panel = container.querySelector('[data-pcc-ask-hbi-panel]');
       expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('ready');
     });
-    const grounded = container.querySelectorAll(
-      '[data-pcc-unified-search-answer-kind="grounded"]',
-    );
+    const grounded = container.querySelectorAll('[data-pcc-unified-search-answer-kind="grounded"]');
     expect(grounded.length).toBeGreaterThan(0);
     for (const row of grounded) {
-      expect(
-        row.querySelectorAll('[data-pcc-unified-search-citation-id]').length,
-      ).toBeGreaterThan(0);
+      expect(row.querySelectorAll('[data-pcc-unified-search-citation-id]').length).toBeGreaterThan(
+        0,
+      );
     }
   });
 
@@ -201,5 +192,66 @@ describe('PccProjectHomeAskHbiSection — non-routing posture and no live extern
     });
     const anchors = container.querySelectorAll<HTMLAnchorElement>('a[href]');
     expect(anchors.length).toBe(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// No source-of-truth claim language in rendered output (Ask-HBI card scope)
+// ─────────────────────────────────────────────────────────────────────
+
+const FORBIDDEN_SOURCE_TRUTH_CLAIM_PATTERNS: readonly RegExp[] = [
+  /\bHBI is the source of truth\b/i,
+  /\bsystem of record\b/i,
+  /\breplaces (?:Procore|Sage|SharePoint|Microsoft Graph|Graph)\b/i,
+  /\bauthoritative (?:source|system)\b/i,
+  /\bprimary (?:source|system) (?:of|for)\b/i,
+  /\bsource of record\b/i,
+];
+
+describe('PccProjectHomeAskHbiSection — no source-of-truth claim language in rendered output', () => {
+  it('preserves the positive disclaimer phrase "HBI is not the source of truth" in the Ask-HBI card output', async () => {
+    const client = createPccFixtureReadModelClient();
+    const { container } = renderSection(client);
+    const card = container.querySelector('[data-pcc-card]');
+    expect(card).not.toBeNull();
+    const cardText = card?.textContent ?? '';
+    expect(cardText).toContain('HBI is not the source of truth');
+    const button = container.querySelector<HTMLButtonElement>(
+      `[data-pcc-ask-hbi-sample-query="${ASK_HBI_SAMPLE_QUERIES[0]}"]`,
+    );
+    fireEvent.click(button!);
+    await waitFor(() => {
+      const panel = container.querySelector('[data-pcc-ask-hbi-panel]');
+      expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('ready');
+    });
+    const cardTextReady = container.querySelector('[data-pcc-card]')?.textContent ?? '';
+    expect(cardTextReady).toContain('HBI is not the source of truth');
+  });
+
+  it('rejects qualified positive source-of-truth claim phrasings in the Ask-HBI card output (idle and ready)', async () => {
+    const client = createPccFixtureReadModelClient();
+    const { container } = renderSection(client);
+
+    function assertNoForbiddenClaims(label: string): void {
+      const cardText = container.querySelector('[data-pcc-card]')?.textContent ?? '';
+      for (const pattern of FORBIDDEN_SOURCE_TRUTH_CLAIM_PATTERNS) {
+        expect(
+          pattern.test(cardText),
+          `${label}: forbidden source-truth claim ${pattern} matched: ${cardText}`,
+        ).toBe(false);
+      }
+    }
+
+    assertNoForbiddenClaims('idle');
+
+    const button = container.querySelector<HTMLButtonElement>(
+      `[data-pcc-ask-hbi-sample-query="${ASK_HBI_SAMPLE_QUERIES[0]}"]`,
+    );
+    fireEvent.click(button!);
+    await waitFor(() => {
+      const panel = container.querySelector('[data-pcc-ask-hbi-panel]');
+      expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('ready');
+    });
+    assertNoForbiddenClaims('ready');
   });
 });

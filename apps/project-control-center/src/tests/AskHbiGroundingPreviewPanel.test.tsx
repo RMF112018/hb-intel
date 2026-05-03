@@ -13,6 +13,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import {
+  PCC_HBI_REFUSAL_REASONS,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
   type PccPersona,
@@ -123,13 +124,9 @@ describe('AskHbiGroundingPreviewPanel — sample-query buttons', () => {
         viewerPersona="project-manager"
       />,
     );
-    const active = container.querySelectorAll(
-      '[data-pcc-ask-hbi-sample-query-active="true"]',
-    );
+    const active = container.querySelectorAll('[data-pcc-ask-hbi-sample-query-active="true"]');
     expect(active.length).toBe(1);
-    expect(active[0].getAttribute('data-pcc-ask-hbi-sample-query')).toBe(
-      ASK_HBI_SAMPLE_QUERIES[0],
-    );
+    expect(active[0].getAttribute('data-pcc-ask-hbi-sample-query')).toBe(ASK_HBI_SAMPLE_QUERIES[0]);
   });
 });
 
@@ -153,7 +150,9 @@ describe('AskHbiGroundingPreviewPanel — selecting a sample query triggers the 
     const panel = container.querySelector('[data-pcc-ask-hbi-panel]');
     expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('idle');
     expect(spy).not.toHaveBeenCalled();
-    expect(container.querySelectorAll('[data-pcc-ask-hbi-sample-query-active="true"]').length).toBe(0);
+    expect(container.querySelectorAll('[data-pcc-ask-hbi-sample-query-active="true"]').length).toBe(
+      0,
+    );
 
     const btn = container.querySelector<HTMLButtonElement>(
       `[data-pcc-ask-hbi-sample-query="${target}"]`,
@@ -162,9 +161,7 @@ describe('AskHbiGroundingPreviewPanel — selecting a sample query triggers the 
     fireEvent.click(btn!);
     await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
     expect(spy).toHaveBeenCalledWith(PROJECT_ID, 'project-executive', target);
-    await waitFor(() =>
-      expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('ready'),
-    );
+    await waitFor(() => expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('ready'));
   });
 });
 
@@ -193,9 +190,7 @@ describe('AskHbiGroundingPreviewPanel — ready state preserves grounded + refus
           ?.getAttribute('data-pcc-ask-hbi-panel-state'),
       ).toBe('ready'),
     );
-    const grounded = container.querySelectorAll(
-      '[data-pcc-unified-search-answer-kind="grounded"]',
-    );
+    const grounded = container.querySelectorAll('[data-pcc-unified-search-answer-kind="grounded"]');
     expect(grounded.length).toBeGreaterThan(0);
     for (const row of grounded) {
       const chips = row.querySelectorAll('[data-pcc-unified-search-citation-id]');
@@ -218,8 +213,7 @@ describe('AskHbiGroundingPreviewPanel — ready state preserves grounded + refus
     );
     await waitFor(() =>
       expect(
-        container.querySelectorAll('[data-pcc-unified-search-answer-kind="refusal"]')
-          .length,
+        container.querySelectorAll('[data-pcc-unified-search-answer-kind="refusal"]').length,
       ).toBeGreaterThan(0),
     );
     const refusalSample = SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL.responses.find(
@@ -231,12 +225,8 @@ describe('AskHbiGroundingPreviewPanel — ready state preserves grounded + refus
         `[data-pcc-unified-search-answer-id="${refusalSample.answerId}"]`,
       );
       expect(refusalRow).not.toBeNull();
-      expect(refusalRow?.getAttribute('data-pcc-unified-search-answer-kind')).toBe(
-        'refusal',
-      );
-      expect(
-        refusalRow?.querySelectorAll('[data-pcc-unified-search-citation-id]').length,
-      ).toBe(0);
+      expect(refusalRow?.getAttribute('data-pcc-unified-search-answer-kind')).toBe('refusal');
+      expect(refusalRow?.querySelectorAll('[data-pcc-unified-search-citation-id]').length).toBe(0);
       expect(refusalRow?.textContent ?? '').toContain(refusalSample.refusalReason);
     }
   });
@@ -267,7 +257,7 @@ describe('AskHbiGroundingPreviewPanel — defensive grounding sanitizer', () => 
             response: 'refusal-response',
             grounded: false,
             refused: true,
-            refusalReason: 'no-grounding-evidence-available',
+            refusalReason: 'insufficient-evidence',
             citations: [],
           },
         ],
@@ -301,6 +291,71 @@ describe('AskHbiGroundingPreviewPanel — defensive grounding sanitizer', () => 
       container.querySelector('[data-pcc-unified-search-answer-id="ans-refusal-kept"]'),
     ).not.toBeNull();
   });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Canonical refusal taxonomy — every PCC_HBI_REFUSAL_REASONS value
+// renders without leaking citation chips and the synthetic literals
+// stay aligned with the 07B canonical 5-tuple.
+// ─────────────────────────────────────────────────────────────────────
+
+describe('AskHbiGroundingPreviewPanel — canonical refusal taxonomy', () => {
+  it('locks PCC_HBI_REFUSAL_REASONS to the 07B canonical 5-tuple', () => {
+    expect(PCC_HBI_REFUSAL_REASONS).toEqual([
+      'insufficient-evidence',
+      'permission-restricted',
+      'out-of-scope',
+      'cross-project-not-authorized',
+      'responsibility-conclusion-not-supported',
+    ]);
+  });
+
+  for (const reason of PCC_HBI_REFUSAL_REASONS) {
+    it(`renders refusal row for canonical reason '${reason}' with zero citations`, async () => {
+      const refusalEnvelope: PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel> = {
+        ...envelope('available'),
+        data: {
+          responses: [
+            {
+              answerId: `ans-${reason}`,
+              query: 'taxonomy-coverage-query',
+              response: 'taxonomy-coverage-response',
+              grounded: false,
+              refused: true,
+              refusalReason: reason,
+              citations: [],
+            },
+          ],
+        },
+      };
+      const client: IPccUnifiedSearchReadModelClient = {
+        async getUnifiedSearch() {
+          return refusalEnvelope;
+        },
+      };
+      const { container } = render(
+        <AskHbiGroundingPreviewPanel
+          client={client}
+          projectId={PROJECT_ID}
+          viewerPersona="project-manager"
+        />,
+      );
+      await waitFor(() =>
+        expect(
+          container
+            .querySelector('[data-pcc-ask-hbi-panel]')
+            ?.getAttribute('data-pcc-ask-hbi-panel-state'),
+        ).toBe('ready'),
+      );
+      const refusalRow = container.querySelector(
+        `[data-pcc-unified-search-answer-id="ans-${reason}"]`,
+      );
+      expect(refusalRow).not.toBeNull();
+      expect(refusalRow?.getAttribute('data-pcc-unified-search-answer-kind')).toBe('refusal');
+      expect(refusalRow?.textContent ?? '').toContain(reason);
+      expect(refusalRow?.querySelectorAll('[data-pcc-unified-search-citation-id]').length).toBe(0);
+    });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────
@@ -349,6 +404,59 @@ describe('AskHbiGroundingPreviewPanel — restricted/redacted posture does not l
     expect(container.textContent ?? '').not.toContain(SECRET_RESPONSE);
     expect(container.textContent ?? '').not.toContain(SECRET_QUERY);
   });
+
+  const NON_AVAILABLE_STATUSES: readonly PccReadModelSourceStatus[] = [
+    'backend-unavailable',
+    'source-unavailable',
+    'missing-config',
+    'stale',
+    'unauthorized',
+    'forbidden',
+  ];
+
+  for (const status of NON_AVAILABLE_STATUSES) {
+    it(`'${status}' envelope never renders answer rows and never leaks synthetic secret fields`, async () => {
+      const SECRET_RESPONSE = `secret-response-${status}-must-not-leak`;
+      const SECRET_QUERY = `secret-query-${status}-must-not-leak`;
+      const restrictedEnvelope: PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel> = {
+        ...envelope(status),
+        data: {
+          responses: [
+            {
+              answerId: `ans-restricted-${status}`,
+              query: SECRET_QUERY,
+              response: SECRET_RESPONSE,
+              grounded: true,
+              refused: false,
+              citations: [],
+            },
+          ],
+        },
+      };
+      const client: IPccUnifiedSearchReadModelClient = {
+        async getUnifiedSearch() {
+          return restrictedEnvelope;
+        },
+      };
+      const { container } = render(
+        <AskHbiGroundingPreviewPanel
+          client={client}
+          projectId={PROJECT_ID}
+          viewerPersona="project-manager"
+        />,
+      );
+      await waitFor(() =>
+        expect(
+          container
+            .querySelector('[data-pcc-ask-hbi-panel]')
+            ?.getAttribute('data-pcc-ask-hbi-panel-state'),
+        ).toBe('ready'),
+      );
+      expect(container.querySelectorAll('[data-pcc-unified-search-answer-id]').length).toBe(0);
+      expect(container.textContent ?? '').not.toContain(SECRET_RESPONSE);
+      expect(container.textContent ?? '').not.toContain(SECRET_QUERY);
+    });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────

@@ -21,6 +21,30 @@ const FORBIDDEN_MODULE_SPECIFIERS = [
   'backend/routes',
   'backend/client',
   'paired-row',
+  // LLM SDKs — Ask-HBI / unified-search must not introduce live model inference.
+  'openai',
+  '@anthropic-ai/',
+  'cohere-ai',
+  '@google-ai/generativelanguage',
+  '@azure/openai',
+  'langchain',
+  '@langchain/',
+  // Vector / embedding stores — no live retrieval against a live index.
+  '@pinecone-database/',
+  'pinecone-client',
+  'chromadb',
+  'weaviate',
+  '@qdrant/',
+  '@elastic/elasticsearch',
+  // Brand SDKs not previously listed — must remain unimported in SPFx PCC.
+  'docusign',
+  '@docusign/',
+  '@adobe/',
+  'autodesk',
+  '@autodesk/',
+  'salesforce',
+  'jsforce',
+  '@sage/',
 ] as const;
 
 const FORBIDDEN_EXECUTABLE_SEAMS = [
@@ -34,6 +58,9 @@ const FORBIDDEN_EXECUTABLE_SEAMS = [
   'AdobeSignClient',
   'fetch(',
   'XMLHttpRequest',
+  'WebSocket',
+  'EventSource',
+  'navigator.sendBeacon',
   'navigator.clipboard',
   'localStorage',
   'sessionStorage',
@@ -239,6 +266,98 @@ describe('PCC import guards', () => {
       expect(
         offenders,
         `expected no executable seam offenders for '${forbidden}', found: ${offenders.join(', ')}`,
+      ).toEqual([]);
+    });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Ask-HBI / unified-lifecycle scoped no-runtime guards
+//
+// Scoped scan limited to the unified-lifecycle preview surfaces and the
+// two Project Home sections that mount them. Excludes src/api/** and
+// excludes co-located *.test.{ts,tsx} files. Provides clear failure
+// attribution if these surfaces specifically introduce a live LLM,
+// vector store, or browser-network seam — independent of (and additive
+// to) the workspace-wide guards above.
+// ─────────────────────────────────────────────────────────────────────
+
+const ASK_HBI_SCOPED_FORBIDDEN_MODULES = [
+  'openai',
+  '@anthropic-ai/',
+  'cohere-ai',
+  '@google-ai/generativelanguage',
+  '@azure/openai',
+  'langchain',
+  '@langchain/',
+  '@pinecone-database/',
+  'pinecone-client',
+  'chromadb',
+  'weaviate',
+  '@qdrant/',
+  '@elastic/elasticsearch',
+] as const;
+
+const ASK_HBI_SCOPED_FORBIDDEN_SEAMS = [
+  'WebSocket',
+  'EventSource',
+  'navigator.sendBeacon',
+] as const;
+
+function listAskHbiScopedFiles(): string[] {
+  const unifiedLifecycleRoot = resolve(SRC_ROOT, 'surfaces/unifiedLifecycle');
+  const projectHomeAskHbi = resolve(
+    SRC_ROOT,
+    'surfaces/projectHome/PccProjectHomeAskHbiSection.tsx',
+  );
+  const projectHomeReadModelContent = resolve(
+    SRC_ROOT,
+    'surfaces/projectHome/PccProjectHomeReadModelContent.tsx',
+  );
+  const all: string[] = [
+    ...listSourceFiles(unifiedLifecycleRoot),
+    projectHomeAskHbi,
+    projectHomeReadModelContent,
+  ];
+  return all.filter((file) => !/\.test\.tsx?$/.test(file));
+}
+
+describe('Ask-HBI / unified-lifecycle scoped no-runtime guards', () => {
+  const scopedFiles = listAskHbiScopedFiles();
+
+  it('finds Ask-HBI scoped source files to scan', () => {
+    expect(scopedFiles.length).toBeGreaterThan(0);
+  });
+
+  for (const forbidden of ASK_HBI_SCOPED_FORBIDDEN_MODULES) {
+    it(`Ask-HBI surfaces do not import module specifier containing '${forbidden}'`, () => {
+      const offenders: string[] = [];
+      for (const file of scopedFiles) {
+        const source = readFileSync(file, 'utf8');
+        const specifiers = getModuleSpecifiers(source);
+        if (specifiers.some((specifier) => specifier.includes(forbidden))) {
+          offenders.push(file);
+        }
+      }
+      expect(
+        offenders,
+        `expected no Ask-HBI scoped module offenders for '${forbidden}', found: ${offenders.join(', ')}`,
+      ).toEqual([]);
+    });
+  }
+
+  for (const forbidden of ASK_HBI_SCOPED_FORBIDDEN_SEAMS) {
+    it(`Ask-HBI surfaces do not include forbidden executable seam '${forbidden}'`, () => {
+      const offenders: string[] = [];
+      for (const file of scopedFiles) {
+        const stripped = stripCommentsAndStrings(readFileSync(file, 'utf8'));
+        if (stripped.includes(forbidden)) {
+          offenders.push(file);
+        }
+      }
+      expect(
+        offenders,
+        `expected no Ask-HBI scoped executable seam offenders for '${forbidden}', found: ${offenders.join(', ')}`,
       ).toEqual([]);
     });
   }
