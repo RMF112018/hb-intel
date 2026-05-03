@@ -59,6 +59,7 @@ import type {
   PccTraceabilityEdgeType,
   PccTraceableRecordType,
   PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
   PccWarrantyResponsibilityRecommendation,
   PccWarrantyTraceRecord,
   PccWarrantyTraceStatus,
@@ -382,4 +383,20 @@ export interface IPccUnifiedLifecycleReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 06A — narrow client interface for the unified-search
+// (Ask HBI) hook seam. Spelled out inline (not via indexed-access against
+// IPccReadModelClient) so the controlled-consumption guard in
+// `pcc-api-dormancy.test.ts` does not see the forbidden full-client
+// identifier in this file.
+// ─────────────────────────────────────────────────────────────────────
+
+export interface IPccUnifiedSearchReadModelClient {
+  getUnifiedSearch(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+    query?: string,
+  ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
 }

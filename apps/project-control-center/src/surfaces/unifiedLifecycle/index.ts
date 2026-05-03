@@ -64,8 +64,13 @@ export type {
   IPccUnifiedSearchViewModel,
   IPccUnifiedLifecycleViewModel,
   IPccUnifiedLifecycleReadModelClient,
+  IPccUnifiedSearchReadModelClient,
 } from './unifiedLifecycleViewModel.js';
 export {
   useUnifiedLifecycleReadModel,
   type IUseUnifiedLifecycleReadModelState,
 } from './useUnifiedLifecycleReadModel.js';
+export {
+  useUnifiedSearchReadModel,
+  type IUseUnifiedSearchReadModelState,
+} from './useUnifiedSearchReadModel.js';
