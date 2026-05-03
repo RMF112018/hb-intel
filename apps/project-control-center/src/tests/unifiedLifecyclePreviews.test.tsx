@@ -522,3 +522,161 @@ describe('UnifiedProjectSearchPreview', () => {
     expect(container.querySelector('[data-pcc-unified-search-answer-id]')).toBeNull();
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 99 / Prompt 04D — error-state a11y hardening
+//
+// `backend-unavailable` source-status maps via
+// `unifiedLifecycleCardState.ts` → `mapPccSourceStatusToPreviewState`
+// → 'error' → `PccCardState: 'error'`, which `PccPreviewState`
+// renders with `role="alert"`. Each leaf preview component must NOT
+// wrap that error in a duplicate `role="alert"` ancestor and must NOT
+// leak its own per-row markers in the degraded path.
+// ─────────────────────────────────────────────────────────────────────
+
+interface IErrorStateCase {
+  readonly name: string;
+  readonly containerMarker: string;
+  readonly ownRowMarker: string;
+  readonly render: () => ReturnType<typeof render>;
+}
+
+const ERROR_STATE_CASES: readonly IErrorStateCase[] = [
+  {
+    name: 'LifecycleTimelinePreview',
+    containerMarker: 'data-pcc-lifecycle-timeline',
+    ownRowMarker: 'data-pcc-lifecycle-event-id',
+    render: () => {
+      const vm = buildPccLifecycleTimelineViewModel(
+        envelope<PccProjectLifecycleTimelineReadModel>(
+          SAMPLE_PROJECT_LIFECYCLE_TIMELINE_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<LifecycleTimelinePreview viewModel={vm} />);
+    },
+  },
+  {
+    name: 'ProjectMemoryPanel',
+    containerMarker: 'data-pcc-project-memory',
+    ownRowMarker: 'data-pcc-memory-record-id',
+    render: () => {
+      const vm = buildPccProjectMemoryViewModel(
+        envelope<PccProjectMemoryReadModel>(
+          SAMPLE_PROJECT_MEMORY_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<ProjectMemoryPanel viewModel={vm} />);
+    },
+  },
+  {
+    name: 'ProjectLensSwitcher',
+    containerMarker: 'data-pcc-project-lens-switcher',
+    ownRowMarker: 'data-pcc-lens-id',
+    render: () => {
+      const vm = buildPccProjectLensesViewModel(
+        envelope<PccProjectLensesReadModel>(
+          SAMPLE_PROJECT_LENSES_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<ProjectLensSwitcher viewModel={vm} />);
+    },
+  },
+  {
+    name: 'RelatedRecordsPanel',
+    containerMarker: 'data-pcc-related-records',
+    ownRowMarker: 'data-pcc-related-records-cluster-id',
+    render: () => {
+      const vm = buildPccProjectTraceabilityViewModel(
+        envelope<PccProjectTraceabilityReadModel>(
+          SAMPLE_PROJECT_TRACEABILITY_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<RelatedRecordsPanel viewModel={vm} />);
+    },
+  },
+  {
+    name: 'WarrantyTracePreview',
+    containerMarker: 'data-pcc-warranty-trace',
+    ownRowMarker: 'data-pcc-warranty-trace-id',
+    render: () => {
+      const vm = buildPccWarrantyTraceViewModel(
+        envelope<PccWarrantyTraceReadModel>(
+          SAMPLE_WARRANTY_TRACE_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<WarrantyTracePreview viewModel={vm} />);
+    },
+  },
+  {
+    name: 'ClosedProjectReferencePreview',
+    containerMarker: 'data-pcc-closed-project-reference',
+    ownRowMarker: 'data-pcc-cross-project-reference-id',
+    render: () => {
+      const vm = buildPccCrossProjectKnowledgeViewModel(
+        envelope<PccCrossProjectKnowledgeReadModel>(
+          SAMPLE_CROSS_PROJECT_KNOWLEDGE_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<ClosedProjectReferencePreview viewModel={vm} />);
+    },
+  },
+  {
+    name: 'UnifiedProjectSearchPreview',
+    containerMarker: 'data-pcc-unified-search',
+    ownRowMarker: 'data-pcc-unified-search-answer-id',
+    render: () => {
+      const vm = buildPccUnifiedSearchViewModel(
+        envelope<PccUnifiedSearchAskHbiReadModel>(
+          SAMPLE_UNIFIED_SEARCH_ENVELOPE.data,
+          'backend-unavailable',
+        ),
+      );
+      return render(<UnifiedProjectSearchPreview viewModel={vm} />);
+    },
+  },
+];
+
+describe('Preview component error-state a11y (backend-unavailable)', () => {
+  it.each(ERROR_STATE_CASES)(
+    '$name renders exactly one role=alert owned by PccPreviewState and no own row markers',
+    ({ containerMarker, ownRowMarker, render: renderCase }) => {
+      const { container } = renderCase();
+
+      // Container marker still present in the degraded path.
+      expect(container.querySelector(`[${containerMarker}]`)).not.toBeNull();
+
+      // Exactly one PccPreviewState instance.
+      const stateNodes = container.querySelectorAll('[data-pcc-state]');
+      expect(stateNodes.length).toBe(1);
+      const previewStateNode = stateNodes[0]!;
+      expect(previewStateNode.getAttribute('data-pcc-state')).toBe('error');
+
+      // Exactly one role=alert and it is the PccPreviewState root itself —
+      // not an ancestor wrapper added by the leaf component.
+      const alertNodes = container.querySelectorAll('[role="alert"]');
+      expect(alertNodes.length).toBe(1);
+      expect(alertNodes[0]).toBe(previewStateNode);
+
+      // No own per-row markers leak in the degraded path. Each component
+      // only checks its OWN row marker, never a shared list of all
+      // sibling components' markers.
+      expect(container.querySelectorAll(`[${ownRowMarker}]`).length).toBe(0);
+    },
+  );
+});
+
+describe('ProjectLensSwitcher copy semantics', () => {
+  it('caption explicitly states lenses filter shared project truth and are not separate workspaces', () => {
+    const vm = buildPccProjectLensesViewModel(SAMPLE_PROJECT_LENSES_ENVELOPE);
+    const { container } = render(<ProjectLensSwitcher viewModel={vm} />);
+    const text = container.textContent ?? '';
+    expect(text).toContain('shared project truth');
+    expect(text).toContain('not separate workspaces');
+  });
+});
