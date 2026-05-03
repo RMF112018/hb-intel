@@ -24,6 +24,13 @@ import {
   type PccPermitInspectionControlCenterReadModel,
   type PccResponsibilityMatrixReadModel,
   type PccConstraintsLogReadModel,
+  type PccUnifiedLifecycleReadModel,
+  type PccProjectMemoryReadModel,
+  type PccProjectLensesReadModel,
+  type PccProjectTraceabilityReadModel,
+  type PccWarrantyTraceReadModel,
+  type PccCrossProjectKnowledgeReadModel,
+  type PccUnifiedSearchAskHbiReadModel,
 } from './index.js';
 import {
   LIFECYCLE_READINESS_LIBRARY_FAMILY_COUNTS,
@@ -32,6 +39,15 @@ import {
 import { PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE } from './fixtures/permitInspectionControlCenter.js';
 import { SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL } from './fixtures/responsibilityMatrix.js';
 import { SAMPLE_CONSTRAINTS_LOG_READ_MODEL } from './fixtures/constraintsLog.js';
+import {
+  SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+  SAMPLE_PROJECT_LENSES_READ_MODEL,
+  SAMPLE_PROJECT_MEMORY_READ_MODEL,
+  SAMPLE_PROJECT_TRACEABILITY_READ_MODEL,
+  SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+  SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+  SAMPLE_WARRANTY_TRACE_READ_MODEL,
+} from './fixtures/unifiedLifecycleReadModels.js';
 
 describe('PccReadModels exports and typing', () => {
   it('exports all required mode and source-status literals', () => {
@@ -319,6 +335,62 @@ describe('PccReadModels exports and typing', () => {
       data: SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
     };
 
+    const unifiedLifecycleEnvelope: PccReadModelEnvelope<PccUnifiedLifecycleReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+    };
+
+    const projectMemoryEnvelope: PccReadModelEnvelope<PccProjectMemoryReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_PROJECT_MEMORY_READ_MODEL,
+    };
+
+    const projectLensesEnvelope: PccReadModelEnvelope<PccProjectLensesReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_PROJECT_LENSES_READ_MODEL,
+    };
+
+    const projectTraceabilityEnvelope: PccReadModelEnvelope<PccProjectTraceabilityReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_PROJECT_TRACEABILITY_READ_MODEL,
+    };
+
+    const warrantyTraceEnvelope: PccReadModelEnvelope<PccWarrantyTraceReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_WARRANTY_TRACE_READ_MODEL,
+    };
+
+    const crossProjectKnowledgeEnvelope: PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
+    };
+
+    const unifiedSearchEnvelope: PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+    };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -334,6 +406,13 @@ describe('PccReadModels exports and typing', () => {
       'permit-inspection-control-center': permitInspectionControlCenterEnvelope,
       'responsibility-matrix': responsibilityMatrixEnvelope,
       'constraints-log': constraintsLogEnvelope,
+      'unified-lifecycle': unifiedLifecycleEnvelope,
+      'project-memory': projectMemoryEnvelope,
+      'project-lenses': projectLensesEnvelope,
+      'project-traceability': projectTraceabilityEnvelope,
+      'warranty-trace': warrantyTraceEnvelope,
+      'cross-project-knowledge': crossProjectKnowledgeEnvelope,
+      'unified-search': unifiedSearchEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

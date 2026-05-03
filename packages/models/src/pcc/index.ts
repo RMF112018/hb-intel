@@ -306,6 +306,17 @@ export {
   type PccReadModelResponseMap,
 } from './PccReadModels.js';
 
+export {
+  type PccUnifiedLifecycleReadModel,
+  type PccProjectLifecycleTimelineReadModel,
+  type PccProjectMemoryReadModel,
+  type PccProjectLensesReadModel,
+  type PccProjectTraceabilityReadModel,
+  type PccWarrantyTraceReadModel,
+  type PccCrossProjectKnowledgeReadModel,
+  type PccUnifiedSearchAskHbiReadModel,
+} from './UnifiedLifecycleReadModels.js';
+
 // Wave 12 Prompt 02 — Constraints Log shared model contracts
 export {
   CONSTRAINTS_LOG_ITEM_TYPES,

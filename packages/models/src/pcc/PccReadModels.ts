@@ -42,6 +42,15 @@ import type {
   ResponsibilityMatrixLane,
 } from './ResponsibilityMatrix.js';
 import type { PccConstraintsLogReadModel } from './ConstraintsLog.js';
+import type {
+  PccCrossProjectKnowledgeReadModel,
+  PccProjectLensesReadModel,
+  PccProjectMemoryReadModel,
+  PccProjectTraceabilityReadModel,
+  PccUnifiedLifecycleReadModel,
+  PccUnifiedSearchAskHbiReadModel,
+  PccWarrantyTraceReadModel,
+} from './UnifiedLifecycleReadModels.js';
 
 export const PCC_READ_MODEL_MODES = ['fixture', 'mock', 'local'] as const;
 export type PccReadModelMode = (typeof PCC_READ_MODEL_MODES)[number];
@@ -171,4 +180,11 @@ export interface PccReadModelResponseMap {
   'permit-inspection-control-center': PccReadModelEnvelope<PccPermitInspectionControlCenterReadModel>;
   'responsibility-matrix': PccReadModelEnvelope<PccResponsibilityMatrixReadModel>;
   'constraints-log': PccReadModelEnvelope<PccConstraintsLogReadModel>;
+  'unified-lifecycle': PccReadModelEnvelope<PccUnifiedLifecycleReadModel>;
+  'project-memory': PccReadModelEnvelope<PccProjectMemoryReadModel>;
+  'project-lenses': PccReadModelEnvelope<PccProjectLensesReadModel>;
+  'project-traceability': PccReadModelEnvelope<PccProjectTraceabilityReadModel>;
+  'warranty-trace': PccReadModelEnvelope<PccWarrantyTraceReadModel>;
+  'cross-project-knowledge': PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel>;
+  'unified-search': PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>;
 }
