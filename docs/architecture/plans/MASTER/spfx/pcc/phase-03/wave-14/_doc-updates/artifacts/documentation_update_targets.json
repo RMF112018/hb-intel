@@ -1,0 +1,76 @@
+{
+  "targets": [
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-14/",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-14/",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/Unified_PCC_Lifecycle_Objective_Architecture.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/PCC_Project_Lifecycle_Spine.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/PCC_Project_Memory_Layer.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/PCC_Cross_Stage_Traceability_Model.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/PCC_Unified_Search_And_HBI_Grounding_Model.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/05_Phase_3_Development_Roadmap_Updated.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/07_Phase_3_Module_Implementation_Plan.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/Register_MVP_Scope.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/Register_Workflow_Module_Register.md",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    },
+    {
+      "path": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+      "updatePurpose": "align Phase 14 Approvals / Checkpoints documentation and cross-references"
+    }
+  ],
+  "newWave14Docs": [
+    "Wave_14_Approvals_Checkpoints_Target_Architecture.md",
+    "Wave_14_Domain_Model_And_State_Machine.md",
+    "Wave_14_Routing_And_Permission_Matrix.md",
+    "Wave_14_Source_Module_Integration_Contract.md",
+    "Wave_14_Wave13G_Estimating_Checkpoint_Contract.md",
+    "Wave_14_SPFX_UX_And_Wireframes.md",
+    "Wave_14_SharePoint_Read_Model_And_Storage_Posture.md",
+    "Wave_14_HBI_Guardrails_And_Audit_Model.md",
+    "Wave_14_Test_And_Acceptance_Gates.md",
+    "Wave_14_Documentation_Closeout.md"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "_authority": {
+    "authorityWave": "13G",
+    "featureId": "estimating-workbench",
+    "authorityRoot": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+    "wireframesPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/",
+    "developerContractsPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/",
+    "referencePath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/",
+    "scope": [
+      "ux_wireframes",
+      "documentation_contracts",
+      "dependency_evaluation",
+      "model_contracts",
+      "sharepoint_schema_contracts",
+      "spfx_surface_contracts",
+      "read_model_command_contracts",
+      "validation_test_gates",
+      "runtime_implementation_prompts"
+    ],
+    "interpretationRules": [
+      "all Estimating Workbench work remains under Wave 13G",
+      "runtime implementation may be split into Wave 13G sub-prompts but not separate waves",
+      "wireframes are UX framing authority for MVP unless superseded by later Wave 13G decision",
+      "developer contracts must live under the Wave 13G developer-contracts path",
+      "no top-level estimating-workbench-developer-contracts folder outside phase-3/wave-13G"
+    ],
+    "blockedWithoutSeparateGate": [
+      "production rollout",
+      "tenant mutation",
+      "package installation",
+      "lockfile mutation",
+      "Procore writeback",
+      "Sage writeback",
+      "active project workbook import",
+      "HBI pricing authority",
+      "HBI award authority"
+    ],
+    "closeoutRequirements": [
+      "branch/head/worktree status",
+      "pnpm-lock.yaml MD5 before and after when package files are in scope",
+      "files changed",
+      "validation commands and results",
+      "no unauthorized package install",
+      "no tenant mutation",
+      "no source-system writeback",
+      "no active project workbook import",
+      "within Wave 13G authority confirmation"
+    ]
+  },
+  "dataAccessDecision": "SharePoint-first through SPFx; use SPHttpClient for no-new-dependency baseline and evaluate PnPjs @pnp/sp for typed fluent batching after dependency gate",
+  "readModels": [
+    "EstimateHomeReadModel",
+    "EstimateBuilderReadModel",
+    "BidLevelingReadModel",
+    "AssumptionsQualificationsReadModel",
+    "TemplateAdminReadModel",
+    "HandoffPreviewReadModel"
+  ],
+  "commands": [
+    "CreateEstimate",
+    "CreateEstimateVersion",
+    "UpsertLineItemsBatch",
+    "CreateBidPackage",
+    "UpsertVendorBid",
+    "CreateBidLevelingAdjustment",
+    "PromoteScratchpadToCanonical",
+    "RunHandoffValidation",
+    "CreateHandoffSnapshot",
+    "FreezeHandoffBaseline",
+    "ExportEstimateSummary"
+  ],
+  "conflictPolicy": "optimistic concurrency using SharePoint eTag/version when available; section-level soft locks for editor experience; frozen versions immutable"
+}

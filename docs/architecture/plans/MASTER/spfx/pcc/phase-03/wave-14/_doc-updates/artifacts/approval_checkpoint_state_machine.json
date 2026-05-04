@@ -1,0 +1,551 @@
+{
+  "states": [
+    "draft",
+    "requested",
+    "pending-review",
+    "in-review",
+    "revision-requested",
+    "approved",
+    "rejected-returned",
+    "deferred",
+    "waived",
+    "overridden",
+    "escalated",
+    "cancelled",
+    "superseded",
+    "expired",
+    "execution-pending",
+    "manually-closed",
+    "archived"
+  ],
+  "terminalStates": [
+    "approved",
+    "rejected-returned",
+    "deferred",
+    "waived",
+    "overridden",
+    "cancelled",
+    "superseded",
+    "expired",
+    "manually-closed",
+    "archived"
+  ],
+  "nonTerminalStates": [
+    "draft",
+    "requested",
+    "pending-review",
+    "in-review",
+    "revision-requested",
+    "escalated",
+    "execution-pending"
+  ],
+  "transitions": [
+    {
+      "from": "draft",
+      "to": "requested",
+      "actions": [
+        "request"
+      ],
+      "allowedRoles": [
+        "source-module-owner",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "sourceReferences",
+        "approvalPolicyId",
+        "routeId"
+      ],
+      "auditEvent": "approval.requested",
+      "terminal": false,
+      "priorityAction": "none",
+      "sourceModuleNotification": "requested",
+      "blocksDownstreamWorkflow": "policy-defined"
+    },
+    {
+      "from": "requested",
+      "to": "pending-review",
+      "actions": [
+        "queue"
+      ],
+      "allowedRoles": [
+        "system/backend",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "currentStepId",
+        "assignedRole"
+      ],
+      "auditEvent": "approval.queued",
+      "terminal": false,
+      "priorityAction": "create",
+      "sourceModuleNotification": "queued",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "pending-review",
+      "to": "in-review",
+      "actions": [
+        "start-review"
+      ],
+      "allowedRoles": [
+        "assigned reviewer",
+        "assigned approver"
+      ],
+      "requiredFields": [
+        "actorPrincipalKey"
+      ],
+      "auditEvent": "approval.review-started",
+      "terminal": false,
+      "priorityAction": "update",
+      "sourceModuleNotification": "in-review",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "pending-review",
+      "to": "revision-requested",
+      "actions": [
+        "request-revision"
+      ],
+      "allowedRoles": [
+        "authorized approver",
+        "reviewer if policy allows"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "comment"
+      ],
+      "auditEvent": "approval.revision-requested",
+      "terminal": false,
+      "priorityAction": "resolve-and-create-source-action",
+      "sourceModuleNotification": "revision-requested",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "in-review",
+      "to": "revision-requested",
+      "actions": [
+        "request-revision"
+      ],
+      "allowedRoles": [
+        "authorized approver",
+        "reviewer if policy allows"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "comment"
+      ],
+      "auditEvent": "approval.revision-requested",
+      "terminal": false,
+      "priorityAction": "resolve-and-create-source-action",
+      "sourceModuleNotification": "revision-requested",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "pending-review",
+      "to": "approved",
+      "actions": [
+        "approve"
+      ],
+      "allowedRoles": [
+        "authorized approver"
+      ],
+      "requiredFields": [
+        "decisionAction"
+      ],
+      "auditEvent": "approval.approved",
+      "terminal": true,
+      "priorityAction": "resolve",
+      "sourceModuleNotification": "approved",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "in-review",
+      "to": "approved",
+      "actions": [
+        "approve"
+      ],
+      "allowedRoles": [
+        "authorized approver"
+      ],
+      "requiredFields": [
+        "decisionAction"
+      ],
+      "auditEvent": "approval.approved",
+      "terminal": true,
+      "priorityAction": "resolve",
+      "sourceModuleNotification": "approved",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "pending-review",
+      "to": "rejected-returned",
+      "actions": [
+        "reject-return"
+      ],
+      "allowedRoles": [
+        "authorized approver"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "comment"
+      ],
+      "auditEvent": "approval.rejected-returned",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-revision-action",
+      "sourceModuleNotification": "rejected-returned",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "in-review",
+      "to": "rejected-returned",
+      "actions": [
+        "reject-return"
+      ],
+      "allowedRoles": [
+        "authorized approver"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "comment"
+      ],
+      "auditEvent": "approval.rejected-returned",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-revision-action",
+      "sourceModuleNotification": "rejected-returned",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "pending-review",
+      "to": "deferred",
+      "actions": [
+        "defer"
+      ],
+      "allowedRoles": [
+        "authorized approver",
+        "Project Executive",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "deferUntilUtc",
+        "followUpOwner"
+      ],
+      "auditEvent": "approval.deferred",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-deferred-followup",
+      "sourceModuleNotification": "deferred",
+      "blocksDownstreamWorkflow": "policy-defined"
+    },
+    {
+      "from": "in-review",
+      "to": "deferred",
+      "actions": [
+        "defer"
+      ],
+      "allowedRoles": [
+        "authorized approver",
+        "Project Executive",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "deferUntilUtc",
+        "followUpOwner"
+      ],
+      "auditEvent": "approval.deferred",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-deferred-followup",
+      "sourceModuleNotification": "deferred",
+      "blocksDownstreamWorkflow": "policy-defined"
+    },
+    {
+      "from": "pending-review",
+      "to": "waived",
+      "actions": [
+        "waive-with-reason"
+      ],
+      "allowedRoles": [
+        "Project Executive",
+        "Executive Oversight",
+        "PCC Admin when technical"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "evidenceRefs",
+        "riskAcknowledgement"
+      ],
+      "auditEvent": "approval.waived",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-risk-followup",
+      "sourceModuleNotification": "waived",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "in-review",
+      "to": "waived",
+      "actions": [
+        "waive-with-reason"
+      ],
+      "allowedRoles": [
+        "Project Executive",
+        "Executive Oversight",
+        "PCC Admin when technical"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "evidenceRefs",
+        "riskAcknowledgement"
+      ],
+      "auditEvent": "approval.waived",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-risk-followup",
+      "sourceModuleNotification": "waived",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "pending-review",
+      "to": "overridden",
+      "actions": [
+        "override-with-reason"
+      ],
+      "allowedRoles": [
+        "Executive Oversight",
+        "Project Executive where policy allows"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "evidenceRefs",
+        "consequenceAcknowledgement"
+      ],
+      "auditEvent": "approval.overridden",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-executive-followup",
+      "sourceModuleNotification": "overridden",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "in-review",
+      "to": "overridden",
+      "actions": [
+        "override-with-reason"
+      ],
+      "allowedRoles": [
+        "Executive Oversight",
+        "Project Executive where policy allows"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "evidenceRefs",
+        "consequenceAcknowledgement"
+      ],
+      "auditEvent": "approval.overridden",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-executive-followup",
+      "sourceModuleNotification": "overridden",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "pending-review",
+      "to": "escalated",
+      "actions": [
+        "escalate"
+      ],
+      "allowedRoles": [
+        "assigned approver",
+        "source owner",
+        "PCC Admin",
+        "SLA policy"
+      ],
+      "requiredFields": [
+        "escalationReason",
+        "escalationTargetRole"
+      ],
+      "auditEvent": "approval.escalated",
+      "terminal": false,
+      "priorityAction": "create-escalation",
+      "sourceModuleNotification": "escalated",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "in-review",
+      "to": "escalated",
+      "actions": [
+        "escalate"
+      ],
+      "allowedRoles": [
+        "assigned approver",
+        "source owner",
+        "PCC Admin",
+        "SLA policy"
+      ],
+      "requiredFields": [
+        "escalationReason",
+        "escalationTargetRole"
+      ],
+      "auditEvent": "approval.escalated",
+      "terminal": false,
+      "priorityAction": "create-escalation",
+      "sourceModuleNotification": "escalated",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "requested",
+      "to": "cancelled",
+      "actions": [
+        "cancel"
+      ],
+      "allowedRoles": [
+        "requestor",
+        "source owner",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "reasonCode"
+      ],
+      "auditEvent": "approval.cancelled",
+      "terminal": true,
+      "priorityAction": "resolve",
+      "sourceModuleNotification": "cancelled",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "pending-review",
+      "to": "cancelled",
+      "actions": [
+        "cancel"
+      ],
+      "allowedRoles": [
+        "requestor if not reviewed",
+        "source owner",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "reasonCode"
+      ],
+      "auditEvent": "approval.cancelled",
+      "terminal": true,
+      "priorityAction": "resolve",
+      "sourceModuleNotification": "cancelled",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "requested",
+      "to": "superseded",
+      "actions": [
+        "supersede"
+      ],
+      "allowedRoles": [
+        "source owner",
+        "PCC Admin",
+        "policy engine"
+      ],
+      "requiredFields": [
+        "replacementSourceReference"
+      ],
+      "auditEvent": "approval.superseded",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-replacement",
+      "sourceModuleNotification": "superseded",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "pending-review",
+      "to": "superseded",
+      "actions": [
+        "supersede"
+      ],
+      "allowedRoles": [
+        "source owner",
+        "PCC Admin",
+        "policy engine"
+      ],
+      "requiredFields": [
+        "replacementSourceReference"
+      ],
+      "auditEvent": "approval.superseded",
+      "terminal": true,
+      "priorityAction": "resolve-and-create-replacement",
+      "sourceModuleNotification": "superseded",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "pending-review",
+      "to": "expired",
+      "actions": [
+        "expire"
+      ],
+      "allowedRoles": [
+        "SLA policy",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "expirationReason"
+      ],
+      "auditEvent": "approval.expired",
+      "terminal": true,
+      "priorityAction": "resolve-and-optionally-escalate",
+      "sourceModuleNotification": "expired",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "approved",
+      "to": "execution-pending",
+      "actions": [
+        "mark-execution-pending"
+      ],
+      "allowedRoles": [
+        "policy engine",
+        "PCC Admin"
+      ],
+      "requiredFields": [
+        "executionTarget",
+        "executorRole"
+      ],
+      "auditEvent": "approval.execution-pending",
+      "terminal": false,
+      "priorityAction": "create-execution-pending",
+      "sourceModuleNotification": "execution-pending",
+      "blocksDownstreamWorkflow": true
+    },
+    {
+      "from": "execution-pending",
+      "to": "manually-closed",
+      "actions": [
+        "manual-close"
+      ],
+      "allowedRoles": [
+        "PCC Admin",
+        "IT / Tenant Admin",
+        "Integration Admin"
+      ],
+      "requiredFields": [
+        "reasonCode",
+        "evidenceRefs"
+      ],
+      "auditEvent": "approval.manually-closed",
+      "terminal": true,
+      "priorityAction": "resolve",
+      "sourceModuleNotification": "manually-closed",
+      "blocksDownstreamWorkflow": false
+    },
+    {
+      "from": "terminal",
+      "to": "archived",
+      "actions": [
+        "archive"
+      ],
+      "allowedRoles": [
+        "PCC Admin",
+        "retention policy"
+      ],
+      "requiredFields": [
+        "archiveReason"
+      ],
+      "auditEvent": "approval.archived",
+      "terminal": true,
+      "priorityAction": "none",
+      "sourceModuleNotification": "archived",
+      "blocksDownstreamWorkflow": false
+    }
+  ]
+}

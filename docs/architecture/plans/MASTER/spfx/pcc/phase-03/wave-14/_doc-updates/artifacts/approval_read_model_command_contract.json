@@ -1,0 +1,36 @@
+{
+  "readModels": [
+    "ApprovalQueueReadModel",
+    "MyApprovalsReadModel",
+    "ApprovalDetailReadModel",
+    "CheckpointRegistryReadModel",
+    "DecisionHistoryReadModel",
+    "EscalationQueueReadModel",
+    "AdminVerificationQueueReadModel",
+    "ApprovalPolicyReadModel",
+    "ApprovalAnalyticsReadModel"
+  ],
+  "commandModelsBlockedUntilFutureGate": [
+    "SubmitApprovalDecisionCommand",
+    "RequestRevisionCommand",
+    "DeferCheckpointCommand",
+    "WaiveCheckpointCommand",
+    "OverrideCheckpointCommand",
+    "EscalateCheckpointCommand",
+    "CancelCheckpointCommand",
+    "SupersedeCheckpointCommand",
+    "ManualCloseCheckpointCommand",
+    "AcknowledgeCheckpointCommand",
+    "AdminVerifyCheckpointCommand"
+  ],
+  "degradedStates": [
+    "backend-unavailable",
+    "source-unavailable",
+    "missing-config",
+    "stale",
+    "unauthorized",
+    "forbidden",
+    "redacted"
+  ],
+  "rule": "SPFx consumes read models only until future backend command routes are explicitly authorized"
+}

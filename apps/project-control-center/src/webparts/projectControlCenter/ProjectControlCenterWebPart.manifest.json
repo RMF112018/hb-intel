@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27",
+  "alias": "ProjectControlCenterWebPart",
+  "componentType": "WebPart",
+  "version": "1.0.0.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Intel Project Control Center"
+      },
+      "description": {
+        "default": "Unified project operating layer for Project Control Center."
+      },
+      "officeFabricIconFontName": "Page",
+      "hiddenFromToolbox": false,
+      "properties": {}
+    }
+  ]
+}

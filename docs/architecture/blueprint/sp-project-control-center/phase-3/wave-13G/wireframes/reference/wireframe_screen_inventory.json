@@ -1,0 +1,101 @@
+{
+  "feature": "pcc-estimating-workbench",
+  "lockedDecisions": {
+    "mvp": true,
+    "implementation": "SharePoint/SPFx",
+    "pccPlacement": "Project Readiness > Estimating Workbench",
+    "costCodeHierarchy": "HB internal cost codes first; Sage later",
+    "dayOneTemplates": [
+      "commercial",
+      "multifamily"
+    ],
+    "workbookImport": "template migration only"
+  },
+  "screenGroups": [
+    {
+      "id": "global-shell",
+      "doc": "screens/01_global_shell_and_navigation.md",
+      "screens": [
+        "PCC Shell",
+        "Project Readiness Tabs"
+      ]
+    },
+    {
+      "id": "entry-template",
+      "doc": "screens/02_entry_home_and_template_selector.md",
+      "screens": [
+        "Estimate Home",
+        "Template Selector",
+        "My Active Estimates",
+        "Template Source"
+      ]
+    },
+    {
+      "id": "builder-summary",
+      "doc": "screens/03_estimate_builder_and_cost_summary.md",
+      "screens": [
+        "Estimate Builder",
+        "Cost Summary",
+        "GC/GR",
+        "Allowances",
+        "Alternates",
+        "Assumptions",
+        "Scratchpad"
+      ]
+    },
+    {
+      "id": "bid-leveling",
+      "doc": "screens/04_bid_leveling_and_scope_normalization.md",
+      "screens": [
+        "Bid Leveling Workbench",
+        "Vendor Summary",
+        "Adjustments & Clarifications"
+      ]
+    },
+    {
+      "id": "handoff",
+      "doc": "screens/05_handoff_preview_freeze_and_exports.md",
+      "screens": [
+        "Handoff Preview",
+        "Approvals & Freeze",
+        "Snapshot & Export"
+      ]
+    },
+    {
+      "id": "template-admin",
+      "doc": "screens/06_template_admin_and_migration.md",
+      "screens": [
+        "Template Admin",
+        "Workbook Template Migration Review",
+        "Section Mapping Review"
+      ]
+    },
+    {
+      "id": "validation",
+      "doc": "screens/07_validation_review_and_issue_drawers.md",
+      "screens": [
+        "Validation Issue Drawer",
+        "Cost Code Mapping Drawer",
+        "Scratchpad Promotion Drawer",
+        "Formula Review Drawer"
+      ]
+    },
+    {
+      "id": "states-accessibility",
+      "doc": "screens/08_shared_states_responsive_and_accessibility.md",
+      "screens": [
+        "Shared States",
+        "Responsive Breakpoints",
+        "Keyboard/Accessibility"
+      ]
+    },
+    {
+      "id": "prototype-acceptance",
+      "doc": "screens/09_prototype_acceptance_scorecard.md",
+      "screens": [
+        "Prototype Review",
+        "Acceptance Scorecard"
+      ]
+    }
+  ]
+}

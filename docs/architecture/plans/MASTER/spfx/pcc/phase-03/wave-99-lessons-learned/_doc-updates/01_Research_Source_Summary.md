@@ -1,87 +1,40 @@
-# 01 — Research Source Summary
+# Research Source Summary — Estimating Workbench
+## Wave 13G Authority Lock
 
-## Research Direction
+All Estimating Workbench documentation, UX/wireframe framing, dependency evaluation, model contracts, SharePoint schema contracts, SPFx surface contracts, read-model/command contracts, test gates, and subsequent runtime implementation prompts are governed under:
 
-The target architecture is informed by lessons learned program research, construction knowledge-management practices, Microsoft approval/versioning patterns, secure-by-design principles, least-privilege evidence-link access patterns, and HBI/AI risk-management guidance.
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
+```
 
-## Key Findings
+The wireframe authority path is:
 
-### NASA lessons learned lifecycle
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/
+```
 
-NASA frames lessons learned as a lifecycle: collect, record, disseminate, and apply. Lessons may be captured through discussions, write-ups, repositories, reports, publications, case studies, and other knowledge-sharing mechanisms.
+The developer-contract target path is:
 
-Architecture impact:
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
 
-- PCC must capture lessons continuously, not only at project closeout.
-- PCC must separate draft capture from reviewed record and published/disseminated knowledge.
-- PCC must measure whether lessons are applied back into checklists, templates, standards, training, and future project planning.
+This Wave 13G authority supersedes any earlier implication that Estimating Workbench implementation work should move to a separate future wave. Future implementation may be split into 13G sub-prompts or phases, but it remains under Wave 13G unless a later approved architecture decision explicitly supersedes this path.
 
-### NASA reviewed lesson repository and retrieval model
+Wave 13G documentation and prompts do not, by themselves, authorize production rollout, tenant mutation, package installation, lockfile mutation, Procore/Sage writeback, or active project workbook import.
 
-NASA's public Lessons Learned system contains official, reviewed lessons, indexed for retrieval through simple or complex search criteria. It also supports profile-based notification concepts.
+## Platform Research Applied
 
-Architecture impact:
+- Microsoft SPFx is the recommended SharePoint customization/extensibility model and supports client-side SharePoint development, SharePoint data integration, Teams/Viva extension, automatic hosting, responsive components, and standard web tooling.
+- Microsoft SPFx provides `SPHttpClient` for SharePoint REST. Microsoft documents that raw REST becomes cumbersome/error-prone for complex GET/POST/batching and identifies PnPjs as a type-safer fluent alternative, while noting PnPjs is open-source/community-supported and adds dependency/bundle considerations.
+- SharePoint Online supports very large lists in theory, but list view threshold/query design requires indexed columns and filtered views. Estimating line-item and bid-leveling data must be partitioned, indexed, paginated, and virtualized.
+- TanStack Table is headless and works with virtualization libraries; TanStack's docs show virtualized rows and 50,000-row examples using TanStack Virtual. This fits estimate-builder grids better than a monolithic spreadsheet clone.
+- Fluent UI React components are Microsoft-aligned and MIT licensed, but the repo already has `@hbc/ui-kit`; direct Fluent dependency should be introduced only through/wrapped by UI-kit architecture.
+- Ajv supports JSON Schema validation and TypeScript utility types. It is a suitable dev/tooling validator for the reference JSON artifacts if JSON Schema is introduced.
+- SheetJS CE can parse workbook data and is suitable only for template migration/tooling after security/staleness review; active project workbook import is explicitly not MVP scope.
+- HyperFormula is a headless spreadsheet formula engine, but it requires GPLv3 or proprietary licensing. It is deferred unless HB approves a license posture.
+- fast-check supports property-based testing with seeded random input generation and shrinking. It is useful as a dev dependency for validating line-item/handoff invariants if implementation adds calculation utilities.
 
-- Lessons Learned Center must define review states and publication states.
-- Search/filter/relevance design is part of architecture, not an optional UI feature.
-- Approved lessons must support reuse targeting, related lesson matching, and future notification/alert seams.
-
-### Construction Industry Institute lessons learned program research
-
-CII research identifies leadership, lesson collection, lesson analysis, lesson implementation, resources, maintenance/improvement, and culture as key characteristics of effective construction lessons learned programs.
-
-Architecture impact:
-
-- The module must include improvement actions and program-health metrics.
-- Executive/operations leadership workflows are required.
-- Lessons must be analyzed and implemented, not simply stored.
-
-### Microsoft approval and versioning patterns
-
-Microsoft SharePoint/List versioning and approval patterns support draft, pending, approved, rejected, and visibility-controlled content states.
-
-Architecture impact:
-
-- Lessons require explicit workflow states, approval gates, version/audit history, and draft visibility controls.
-- Redacted/approved views must be role-sensitive.
-
-### Microsoft Graph least-privilege posture
-
-Microsoft Graph guidance reinforces least-privileged permissions for app access, including increasingly granular selected permission models for files and SharePoint content.
-
-Architecture impact:
-
-- Evidence links must be reference-based and permission-aware.
-- Future Graph integration must be backend-mediated and least-privilege.
-- PCC must not rely on broad file/library access for this module.
-
-### NIST AI Risk Management Framework
-
-NIST AI RMF and Playbook establish govern, map, measure, and manage functions for trustworthy AI design, development, deployment, and use.
-
-Architecture impact:
-
-- HBI functions need explicit prompt contracts, source restrictions, confidence handling, refusal cases, audit events, and human approval gates.
-- HBI must not approve, publish, expose restricted content, or make business/legal/vendor conclusions.
-
-### OWASP Secure by Design
-
-OWASP Secure by Design emphasizes architecture-time decisions around data classification, access control, monitoring, resilience, and evidence of security decisions.
-
-Architecture impact:
-
-- Lessons Learned requires field-level redaction, role-aware search filtering, audit logs, evidence-link permission checks, and secure degraded/error behavior.
-
-### Procore vendor-performance source patterns
-
-Procore Vendor Performance reporting uses source data from tools such as Commitments, Submittals, Punch List, and RFIs.
-
-Architecture impact:
-
-- PCC may reference Procore-native facts as source lineage and evidence.
-- PCC must not duplicate Procore records or treat source-system facts as PCC-owned lessons.
-- Subcontractor-performance lessons must be curated and approved before reuse.
-
-## Source URLs
+## Source URL Artifact
 
 See `reference/source_research_urls.json`.

@@ -1,0 +1,89 @@
+{
+  "components": [
+    {
+      "id": "pcc-shell-header",
+      "type": "layout",
+      "usedBy": "all screens"
+    },
+    {
+      "id": "pcc-left-rail",
+      "type": "navigation",
+      "usedBy": "all screens"
+    },
+    {
+      "id": "estimating-secondary-tabs",
+      "type": "navigation",
+      "usedBy": "all estimating screens"
+    },
+    {
+      "id": "estimate-kpi-card",
+      "type": "card",
+      "usedBy": "estimate home"
+    },
+    {
+      "id": "readiness-summary",
+      "type": "progress/checklist",
+      "usedBy": "estimate home,handoff preview"
+    },
+    {
+      "id": "estimate-grid",
+      "type": "editable virtualized grid",
+      "usedBy": "estimate builder,cost summary"
+    },
+    {
+      "id": "section-navigator",
+      "type": "sidebar navigation",
+      "usedBy": "estimate builder"
+    },
+    {
+      "id": "section-details-panel",
+      "type": "side panel",
+      "usedBy": "estimate builder"
+    },
+    {
+      "id": "validation-panel",
+      "type": "issue list",
+      "usedBy": "estimate builder,handoff preview"
+    },
+    {
+      "id": "bid-leveling-matrix",
+      "type": "comparison matrix",
+      "usedBy": "bid leveling"
+    },
+    {
+      "id": "vendor-summary",
+      "type": "side panel",
+      "usedBy": "bid leveling"
+    },
+    {
+      "id": "handoff-package-card",
+      "type": "checklist card",
+      "usedBy": "handoff preview"
+    },
+    {
+      "id": "downstream-mapping-table",
+      "type": "table",
+      "usedBy": "handoff preview"
+    },
+    {
+      "id": "approvals-freeze-panel",
+      "type": "review/action panel",
+      "usedBy": "handoff preview"
+    },
+    {
+      "id": "template-card",
+      "type": "selection card",
+      "usedBy": "template selector,template admin"
+    },
+    {
+      "id": "migration-review-table",
+      "type": "mapping review table",
+      "usedBy": "template admin"
+    },
+    {
+      "id": "validation-issue-drawer",
+      "type": "drawer",
+      "usedBy": "all validation entry points"
+    }
+  ]
+}

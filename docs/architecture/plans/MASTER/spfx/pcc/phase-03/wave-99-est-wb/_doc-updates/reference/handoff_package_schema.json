@@ -1,0 +1,44 @@
+{
+  "HandoffPackage": {
+    "required": [
+      "handoffPackageId",
+      "estimateId",
+      "estimateVersionId",
+      "snapshotId",
+      "projectId",
+      "projectNumber",
+      "templateType",
+      "acceptedBy",
+      "acceptedAtUtc",
+      "validationStatus"
+    ],
+    "sections": [
+      "estimateSummary",
+      "budgetSeed",
+      "buyoutSeeds",
+      "gcGrSummary",
+      "alternates",
+      "allowances",
+      "assumptions",
+      "inclusions",
+      "exclusions",
+      "qualifications",
+      "riskFlags",
+      "sourceLineage",
+      "auditSummary"
+    ]
+  },
+  "downstreamConsumers": [
+    "Project Home",
+    "Project Readiness",
+    "Buyout Log",
+    "Project Controls",
+    "Document Control",
+    "Constraints Log",
+    "Responsibility Matrix",
+    "Closeout/Warranty",
+    "Lessons Learned",
+    "Future Estimating Reference"
+  ],
+  "immutability": "accepted/frozen handoff package is immutable; correction requires new correction snapshot linked to prior package"
+}

@@ -1,0 +1,13 @@
+{
+  "microsoft_spfx_overview": "https://learn.microsoft.com/en-us/sharepoint/dev/spfx/sharepoint-framework-overview",
+  "microsoft_connect_to_sharepoint_apis": "https://learn.microsoft.com/en-us/sharepoint/dev/spfx/connect-to-sharepoint",
+  "sharepoint_online_limits": "https://learn.microsoft.com/en-us/office365/servicedescriptions/sharepoint-online-service-description/sharepoint-online-limits",
+  "sharepoint_list_view_threshold": "https://support.microsoft.com/en-us/office/working-with-the-list-view-threshold-limit-for-all-versions-of-sharepoint-4a40bbdc-c5f8-4bbd-b9b6-745daf71c132",
+  "tanstack_table_virtualization": "https://tanstack.com/table/latest/docs/guide/virtualization",
+  "tanstack_virtualized_rows": "https://tanstack.com/table/latest/docs/framework/react/examples/virtualized-rows",
+  "fluent_ui_react_components_npm": "https://www.npmjs.com/package/@fluentui/react-components",
+  "ajv_typescript": "https://ajv.js.org/guide/typescript.html",
+  "sheetjs_reading_files": "https://docs.sheetjs.com/docs/api/parse-options",
+  "hyperformula_licensing": "https://hyperformula.handsontable.com/guide/licensing.html",
+  "fast_check_intro": "https://fast-check.dev/docs/introduction/what-is-property-based-testing/"
+}

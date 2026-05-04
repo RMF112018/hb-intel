@@ -1,0 +1,181 @@
+{
+  "_authority": {
+    "authorityWave": "13G",
+    "featureId": "estimating-workbench",
+    "authorityRoot": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+    "wireframesPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/",
+    "developerContractsPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/",
+    "referencePath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/",
+    "scope": [
+      "ux_wireframes",
+      "documentation_contracts",
+      "dependency_evaluation",
+      "model_contracts",
+      "sharepoint_schema_contracts",
+      "spfx_surface_contracts",
+      "read_model_command_contracts",
+      "validation_test_gates",
+      "runtime_implementation_prompts"
+    ],
+    "interpretationRules": [
+      "all Estimating Workbench work remains under Wave 13G",
+      "runtime implementation may be split into Wave 13G sub-prompts but not separate waves",
+      "wireframes are UX framing authority for MVP unless superseded by later Wave 13G decision",
+      "developer contracts must live under the Wave 13G developer-contracts path",
+      "no top-level estimating-workbench-developer-contracts folder outside phase-3/wave-13G"
+    ],
+    "blockedWithoutSeparateGate": [
+      "production rollout",
+      "tenant mutation",
+      "package installation",
+      "lockfile mutation",
+      "Procore writeback",
+      "Sage writeback",
+      "active project workbook import",
+      "HBI pricing authority",
+      "HBI award authority"
+    ],
+    "closeoutRequirements": [
+      "branch/head/worktree status",
+      "pnpm-lock.yaml MD5 before and after when package files are in scope",
+      "files changed",
+      "validation commands and results",
+      "no unauthorized package install",
+      "no tenant mutation",
+      "no source-system writeback",
+      "no active project workbook import",
+      "within Wave 13G authority confirmation"
+    ]
+  },
+  "storageDecision": "central SharePoint/PCC estimating data site lists with PCC project-site projection; do not create isolated departmental workspace",
+  "siteCollection": "HB Central / PCC Estimating Workbench data site (exact URL resolved by tenant implementation, not by this doc package)",
+  "lists": [
+    {
+      "name": "EW_Estimates",
+      "purpose": "estimate header registry",
+      "indexedColumns": [
+        "ProjectId",
+        "ProjectNumber",
+        "Status",
+        "ProjectTypeTemplateId",
+        "CurrentVersionId"
+      ]
+    },
+    {
+      "name": "EW_EstimateVersions",
+      "purpose": "version and milestone state",
+      "indexedColumns": [
+        "EstimateId",
+        "Status",
+        "VersionNumber",
+        "SnapshotId"
+      ]
+    },
+    {
+      "name": "EW_EstimateSections",
+      "purpose": "section registry and display order",
+      "indexedColumns": [
+        "EstimateId",
+        "EstimateVersionId",
+        "SectionType",
+        "TemplateId"
+      ]
+    },
+    {
+      "name": "EW_EstimateLineItems",
+      "purpose": "canonical line items",
+      "indexedColumns": [
+        "EstimateId",
+        "EstimateVersionId",
+        "SectionId",
+        "HbCostCode",
+        "BidPackageId"
+      ]
+    },
+    {
+      "name": "EW_BidPackages",
+      "purpose": "scope/bid package registry",
+      "indexedColumns": [
+        "EstimateId",
+        "EstimateVersionId",
+        "Status",
+        "OwnerRole"
+      ]
+    },
+    {
+      "name": "EW_VendorBids",
+      "purpose": "vendor/subcontractor bid responses",
+      "indexedColumns": [
+        "BidPackageId",
+        "Status",
+        "VendorName"
+      ]
+    },
+    {
+      "name": "EW_BidLevelingAdjustments",
+      "purpose": "apples-to-apples leveling adjustments",
+      "indexedColumns": [
+        "BidPackageId",
+        "VendorBidId",
+        "AdjustmentType"
+      ]
+    },
+    {
+      "name": "EW_AssumptionsQualifications",
+      "purpose": "assumptions inclusions exclusions qualifications clarifications risk flags",
+      "indexedColumns": [
+        "EstimateId",
+        "EstimateVersionId",
+        "RecordType",
+        "Status"
+      ]
+    },
+    {
+      "name": "EW_HandoffPackages",
+      "purpose": "frozen handoff package metadata",
+      "indexedColumns": [
+        "EstimateId",
+        "EstimateVersionId",
+        "ValidationStatus",
+        "AcceptedAtUtc"
+      ]
+    },
+    {
+      "name": "EW_TemplateDefinitions",
+      "purpose": "Commercial and Multifamily template definitions",
+      "indexedColumns": [
+        "TemplateId",
+        "TemplateType",
+        "Status",
+        "Version"
+      ]
+    },
+    {
+      "name": "EW_AuditEvents",
+      "purpose": "business audit trail",
+      "indexedColumns": [
+        "EstimateId",
+        "EntityType",
+        "EntityId",
+        "ActorUpn",
+        "CreatedAtUtc"
+      ]
+    }
+  ],
+  "libraries": [
+    {
+      "name": "EW_SourceWorkbooks",
+      "purpose": "template migration source workbooks only; preserve originals"
+    },
+    {
+      "name": "EW_SnapshotsAndExports",
+      "purpose": "PDF/XLSX/export snapshots; metadata linked to EstimateSnapshot"
+    }
+  ],
+  "thresholdGuardrails": [
+    "all list queries must include indexed ProjectId or EstimateId filter",
+    "no unfiltered all-items views",
+    "line-item views must paginate/virtualize",
+    "bulk reads/writes require batching strategy"
+  ]
+}

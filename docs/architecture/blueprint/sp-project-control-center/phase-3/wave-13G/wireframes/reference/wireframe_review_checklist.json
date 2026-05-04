@@ -1,0 +1,24 @@
+{
+  "reviewChecklist": [
+    "Does the feature feel like a governed evolution of the workbook rather than raw SharePoint list editing?",
+    "Can an estimator identify how to start, resume, validate, and hand off an estimate?",
+    "Are Commercial and Multifamily clearly the only MVP templates?",
+    "Is template migration clearly different from active project workbook import?",
+    "Are scratchpad items allowed but prevented from silently flowing downstream?",
+    "Does the bid leveling screen show decision support without implying award authority?",
+    "Does Handoff Preview clearly show blocking issues before freeze?",
+    "Are HB internal cost-code mappings visible and enforceable?",
+    "Are validation signals actionable from the source screen?",
+    "Are key screens compatible with SPFx/PCC shell constraints?",
+    "Can the grid workflow be planned for keyboard-heavy estimator use?",
+    "Are unauthorized/read-only/frozen states explicit?"
+  ],
+  "hardStops": [
+    "Active project workbook import introduced in MVP",
+    "Sage or Procore writeback implied or implemented",
+    "HBI treated as pricing or award authority",
+    "Unresolved handoff errors allowed to freeze baseline",
+    "Browser-level horizontal overflow in SharePoint host",
+    "Required workflow only available through native SharePoint list editing"
+  ]
+}

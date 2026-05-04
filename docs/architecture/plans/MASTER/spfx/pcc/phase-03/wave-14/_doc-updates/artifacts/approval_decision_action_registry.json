@@ -1,0 +1,163 @@
+{
+  "actions": [
+    {
+      "id": "approve",
+      "requiredData": [
+        "actorPrincipalKey",
+        "actorRole",
+        "decisionAction"
+      ],
+      "terminalTarget": "approved",
+      "riskLevel": "medium"
+    },
+    {
+      "id": "reject-return",
+      "requiredData": [
+        "reasonCode",
+        "comment"
+      ],
+      "terminalTarget": "rejected-returned",
+      "riskLevel": "medium"
+    },
+    {
+      "id": "request-revision",
+      "requiredData": [
+        "reasonCode",
+        "comment"
+      ],
+      "terminalTarget": null,
+      "riskLevel": "medium"
+    },
+    {
+      "id": "acknowledge",
+      "requiredData": [
+        "actorPrincipalKey",
+        "actorRole"
+      ],
+      "terminalTarget": "approved if acknowledgement-only final step",
+      "riskLevel": "low"
+    },
+    {
+      "id": "defer",
+      "requiredData": [
+        "reasonCode",
+        "deferUntilUtc",
+        "followUpOwner"
+      ],
+      "terminalTarget": "deferred",
+      "riskLevel": "medium"
+    },
+    {
+      "id": "waive-with-reason",
+      "requiredData": [
+        "reasonCode",
+        "evidenceRefs",
+        "riskAcknowledgement"
+      ],
+      "terminalTarget": "waived",
+      "riskLevel": "high"
+    },
+    {
+      "id": "override-with-reason",
+      "requiredData": [
+        "reasonCode",
+        "evidenceRefs",
+        "consequenceAcknowledgement"
+      ],
+      "terminalTarget": "overridden",
+      "riskLevel": "high"
+    },
+    {
+      "id": "escalate",
+      "requiredData": [
+        "escalationReason",
+        "escalationTargetRole"
+      ],
+      "terminalTarget": null,
+      "riskLevel": "medium-high"
+    },
+    {
+      "id": "cancel",
+      "requiredData": [
+        "reasonCode"
+      ],
+      "terminalTarget": "cancelled",
+      "riskLevel": "high"
+    },
+    {
+      "id": "supersede",
+      "requiredData": [
+        "replacementSourceReference"
+      ],
+      "terminalTarget": "superseded",
+      "riskLevel": "high"
+    },
+    {
+      "id": "manual-close",
+      "requiredData": [
+        "reasonCode",
+        "evidenceRefs"
+      ],
+      "terminalTarget": "manually-closed",
+      "riskLevel": "high"
+    }
+  ],
+  "reasonCodeFamilies": {
+    "reject-return": [
+      "incomplete-evidence",
+      "incorrect-source",
+      "missing-authority",
+      "conflicting-data",
+      "scope-unclear"
+    ],
+    "request-revision": [
+      "missing-field",
+      "evidence-update-required",
+      "source-item-change-required",
+      "routing-correction"
+    ],
+    "defer": [
+      "external-dependency",
+      "owner-delay",
+      "client-input-pending",
+      "authority-review-pending"
+    ],
+    "waive-with-reason": [
+      "low-risk-exception",
+      "time-sensitive-business-need",
+      "non-applicable-condition",
+      "documented-alternate-control"
+    ],
+    "override-with-reason": [
+      "executive-direction",
+      "emergency-condition",
+      "governance-approved-exception",
+      "project-critical-path-impact"
+    ],
+    "escalate": [
+      "overdue",
+      "high-risk",
+      "high-cost",
+      "disputed-decision",
+      "authority-conflict"
+    ],
+    "cancel": [
+      "source-cancelled",
+      "duplicate-request",
+      "created-in-error",
+      "no-longer-applicable"
+    ],
+    "supersede": [
+      "source-version-changed",
+      "snapshot-replaced",
+      "policy-version-replaced",
+      "route-rebuilt"
+    ],
+    "manual-close": [
+      "admin-cleanup",
+      "historical-reconciliation",
+      "migrated-record",
+      "duplicate-terminal-record"
+    ]
+  }
+}

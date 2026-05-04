@@ -1,51 +1,47 @@
-# 02 — Closed Decisions Register
+# Closed Decisions Register — Estimating Workbench
+## Wave 13G Authority Lock
 
-## Core Product Decisions
+All Estimating Workbench documentation, UX/wireframe framing, dependency evaluation, model contracts, SharePoint schema contracts, SPFx surface contracts, read-model/command contracts, test gates, and subsequent runtime implementation prompts are governed under:
 
-| Decision Area | Closed Decision |
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
+```
+
+The wireframe authority path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/
+```
+
+The developer-contract target path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
+
+This Wave 13G authority supersedes any earlier implication that Estimating Workbench implementation work should move to a separate future wave. Future implementation may be split into 13G sub-prompts or phases, but it remains under Wave 13G unless a later approved architecture decision explicitly supersedes this path.
+
+Wave 13G documentation and prompts do not, by themselves, authorize production rollout, tenant mutation, package installation, lockfile mutation, Procore/Sage writeback, or active project workbook import.
+
+## Product / Scope Decisions
+
+| Decision | Closed Position |
 |---|---|
-| Official module name | Lessons Learned Center |
-| User-facing subtitle | Project Knowledge & Continuous Improvement |
-| PCC posture | PCC-native lifecycle intelligence and knowledge reuse module |
-| Current roadmap posture | Future workstream / Later work center unless repo truth shows formal MVP promotion |
-| Documentation location | `docs/architecture/blueprint/sp-project-control-center/future-workstreams/lessons-learned/` |
-| Primary record | `PccLessonLearnedRecord` |
-| Workbook role | Source field inventory, seed taxonomy, import/mapping reference, and baseline closeout form evidence |
-| PCC role | System of record for lessons, classifications, review state, publication state, sensitivity/redaction, recommendations, improvement actions, reuse events, HBI summaries, audit, and source-lineage interpretation |
-| Procore role | Source of Procore-native facts only: RFIs, submittals, observations, punch items, commitments, daily logs, quality/safety records, and related source links |
-| Sage role | Accounting truth for job-cost and accounting values only |
-| SharePoint/HB Central role | Evidence/document binary storage and source links |
-| HBI role | Assistive drafting, classification, summarization, duplication detection, missing-field detection, and reuse recommendations; never authoritative approval/publishing |
-| Primary UX posture | Guided lifecycle knowledge system, not spreadsheet clone and not closeout-only form |
-| External writes | Prohibited in documentation/MVP preview posture |
-| Publication rule | No company-wide publication without PM validation, PX approval, sensitivity review, and neutral/publishable language |
-| Sensitive-content default | Redact by default outside authorized roles when vendor, personnel, legal/claims, safety incident, warranty defect, client-conflict, or financial dispute sensitivity exists |
+| MVP inclusion | Estimating Workbench is in MVP scope as an approved scope amendment. |
+| First implementation | SharePoint/SPFx first. |
+| Top-level routing | No new top-level PCC shell route in MVP. Mount under existing `project-readiness` surface. |
+| Work center posture | Primary work center affinity: `startup`; secondary affinities: procurement/buyout, project controls, document control, lessons learned. |
+| Workspace posture | Not a departmental Estimating workspace. It is a role/stage lens and workflow module within unified PCC. |
+| Storage | Central SharePoint/PCC estimating data lists with project-site projection. This allows pre-site estimating continuity without creating a silo. |
+| Day-one templates | Commercial and Multifamily only. |
+| Cost-code hierarchy | Internal HB cost codes first; Sage mapping in future phase. CSI/MasterFormat and Procore WBS are reference/mapping fields only in MVP. |
+| Workbook import | Template migration only. Active project workbook import is deferred. |
+| Grid behavior | Familiar grid-like UX, but not full Excel parity. Formula support is constrained. |
+| Formula authority | Formula outputs are working values; canonical downstream data stores resolved values + source lineage. |
+| HBI authority | HBI may review/summarize/cite; it may not authoritatively price work or recommend awards. |
+| Source-system writeback | No Sage, Procore, Autodesk, BuildingConnected, or external-system writeback in MVP. |
+| Dependency installation | This package documents compatible dependencies; it does not install them or mutate lockfiles. |
 
-## Data Decisions
+## No Open Decisions
 
-- `PccLessonLearnedRecord` is the canonical PCC record.
-- A project may contain unlimited lessons; the six-lesson workbook structure is not a limit.
-- Every workbook field survives as a mapped PCC field, source-lineage field, taxonomy seed, review field, or archived legacy field.
-- The workbook database rows are example/source rows only until explicitly activated by a future governed import process.
-- Every source-derived value or evidence link requires `PccSourceLineageReference`.
-- Every lesson requires category, phase, situation, impact, root cause, recommendation, applicability, sensitivity, and evidence-or-no-evidence reason before submission.
-- Lessons are searchable and reusable only after approval/publication rules are satisfied.
-- Improvement actions are owned by Lessons Learned in documentation scope but may later be consolidated into a shared PCC action model; this package closes the current decision as `PccLessonImprovementAction` owned by the Lessons Learned module until a shared action service exists.
-
-## Workflow Decisions
-
-- Use the closed state machine in `reference/lessons_learned_state_machine.json`.
-- Draft capture is open to authorized project team users.
-- PM review validates factual accuracy, evidence, and project context.
-- PX review validates business sensitivity, publication scope, and improvement-action need.
-- Department review is mandatory for safety, legal/claims, HR/personnel, warranty/defect, accounting, estimating, preconstruction, technology, and owner/client-sensitive lessons.
-- Company-wide publication requires an explicit `publish_company_lesson` transition.
-- `suppressed` and `superseded` are final visibility-control states with audit trail requirements.
-
-## Integration Decisions
-
-- No direct SPFx-to-Procore, Sage, SharePoint REST/PnP, or Microsoft Graph runtime mutation.
-- Evidence links are references only in documentation scope; no file upload/sync/storage behavior is created.
-- PCC Project Home, Project Readiness, Buyout/Procurement, Scheduler, Quality/Warranty, Closeout, Subcontractor Performance, and Executive Oversight consume approved/read-model Lessons Learned signals only.
-- HBI may use only authorized, redaction-compliant payloads.
-- Lessons may inform decisions but may not automatically determine legal liability, vendor exclusion, employment action, bid list status, claim entitlement, delay damages, or warranty responsibility.
+Future implementation gates may require approvals, but this package does not leave architectural decisions open.

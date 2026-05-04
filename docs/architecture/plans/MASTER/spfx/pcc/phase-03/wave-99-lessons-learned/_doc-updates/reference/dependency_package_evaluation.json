@@ -1,0 +1,178 @@
+{
+  "_authority": {
+    "authorityWave": "13G",
+    "featureId": "estimating-workbench",
+    "authorityRoot": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+    "wireframesPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/",
+    "developerContractsPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/",
+    "referencePath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/",
+    "scope": [
+      "ux_wireframes",
+      "documentation_contracts",
+      "dependency_evaluation",
+      "model_contracts",
+      "sharepoint_schema_contracts",
+      "spfx_surface_contracts",
+      "read_model_command_contracts",
+      "validation_test_gates",
+      "runtime_implementation_prompts"
+    ],
+    "interpretationRules": [
+      "all Estimating Workbench work remains under Wave 13G",
+      "runtime implementation may be split into Wave 13G sub-prompts but not separate waves",
+      "wireframes are UX framing authority for MVP unless superseded by later Wave 13G decision",
+      "developer contracts must live under the Wave 13G developer-contracts path",
+      "no top-level estimating-workbench-developer-contracts folder outside phase-3/wave-13G"
+    ],
+    "blockedWithoutSeparateGate": [
+      "production rollout",
+      "tenant mutation",
+      "package installation",
+      "lockfile mutation",
+      "Procore writeback",
+      "Sage writeback",
+      "active project workbook import",
+      "HBI pricing authority",
+      "HBI award authority"
+    ],
+    "closeoutRequirements": [
+      "branch/head/worktree status",
+      "pnpm-lock.yaml MD5 before and after when package files are in scope",
+      "files changed",
+      "validation commands and results",
+      "no unauthorized package install",
+      "no tenant mutation",
+      "no source-system writeback",
+      "no active project workbook import",
+      "within Wave 13G authority confirmation"
+    ]
+  },
+  "decision": "documentation package includes compatible dependency candidates, but documentation update prompts must not install packages or mutate pnpm-lock.yaml",
+  "repoConfirmedExisting": [
+    {
+      "package": "@pnp/queryable",
+      "repoStatus": "present in root devDependencies",
+      "use": "PnP ecosystem foundation for future SharePoint fluent API"
+    },
+    {
+      "package": "@playwright/test",
+      "repoStatus": "present",
+      "use": "hosted/visual/e2e validation"
+    },
+    {
+      "package": "vitest",
+      "repoStatus": "present root and PCC app",
+      "use": "unit and contract tests"
+    },
+    {
+      "package": "@testing-library/react",
+      "repoStatus": "present in apps/project-control-center",
+      "use": "component tests"
+    },
+    {
+      "package": "typescript",
+      "repoStatus": "present",
+      "use": "strict model contracts"
+    },
+    {
+      "package": "prettier",
+      "repoStatus": "present",
+      "use": "doc/json formatting gate"
+    }
+  ],
+  "candidatePackages": [
+    {
+      "package": "@pnp/sp",
+      "status": "adopt_after_dependency_gate",
+      "why": "type-safer fluent SharePoint list API and batching; pairs with existing @pnp/queryable",
+      "guardrails": [
+        "selective imports only",
+        "document no-SLA/open-source support caveat",
+        "bundle impact review"
+      ]
+    },
+    {
+      "package": "@tanstack/react-table",
+      "status": "adopt_after_ui_prototype_gate",
+      "why": "headless table/grid model, strong TypeScript support, works with React 18",
+      "guardrails": [
+        "must pair with virtualization",
+        "not a spreadsheet engine",
+        "wrap in HB UI components"
+      ]
+    },
+    {
+      "package": "@tanstack/react-virtual",
+      "status": "adopt_with_react_table",
+      "why": "virtualized rows/columns for large estimate line-item grids",
+      "guardrails": [
+        "required for line-item grids over 500 rows",
+        "test scroll/focus/accessibility"
+      ]
+    },
+    {
+      "package": "@fluentui/react-components",
+      "status": "use_only_through_ui_kit_or_after_ui_architecture_approval",
+      "why": "Microsoft Fluent UI React components; compatible with SharePoint/M365 visual language",
+      "guardrails": [
+        "prefer @hbc/ui-kit wrappers",
+        "avoid direct duplicate design-system dependency if ui-kit already owns components"
+      ]
+    },
+    {
+      "package": "zod",
+      "status": "optional_after_model_validation_gate",
+      "why": "runtime validation and type inference for command payloads/forms",
+      "guardrails": [
+        "do not duplicate package-model contracts",
+        "lock patch/minor strategy"
+      ]
+    },
+    {
+      "package": "ajv",
+      "status": "adopt_for_reference_json_validation_tooling_if_json_schema_added",
+      "why": "JSON Schema validation with TypeScript utilities",
+      "guardrails": [
+        "dev/tooling first, not UI runtime"
+      ]
+    },
+    {
+      "package": "exceljs",
+      "status": "adopt_for_server_or_tooling_exports_after_export_poc",
+      "why": "Excel workbook generation/export and workbook management",
+      "guardrails": [
+        "do not use for active workbook import MVP",
+        "validate browser bundle impact"
+      ]
+    },
+    {
+      "package": "xlsx",
+      "status": "evaluate_for_template_migration_tooling_only",
+      "why": "SheetJS CE can parse spreadsheet data for template migration; Apache-2.0",
+      "guardrails": [
+        "security/staleness review",
+        "no active-project import",
+        "do not rely on formula evaluation"
+      ]
+    },
+    {
+      "package": "hyperformula",
+      "status": "defer_license_gate",
+      "why": "headless spreadsheet formula engine with Excel-like functions",
+      "guardrails": [
+        "GPLv3/proprietary license decision required",
+        "not MVP default",
+        "no install until legal/license approval"
+      ]
+    },
+    {
+      "package": "fast-check",
+      "status": "adopt_as_dev_dependency_for_property_tests_if_implementation_adds_new validation utilities",
+      "why": "property-based testing can stress line-item calculations and handoff invariants",
+      "guardrails": [
+        "devDependency only",
+        "seeded deterministic tests"
+      ]
+    }
+  ]
+}

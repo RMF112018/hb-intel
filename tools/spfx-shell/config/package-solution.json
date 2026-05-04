@@ -1,25 +1,25 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-homepage",
-    "id": "b7d3f8a1-4c62-4e9b-a851-2d6f0e3c7a49",
-    "version": "1.1.94.0",
+    "name": "hb-intel-project-control-center",
+    "id": "1bfcc4f0-d947-42d2-81c7-c6c2f2ab5923",
+    "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "developer": {
-      "name": "HB Caldwell",
-      "websiteUrl": "https://hbcaldwell.com",
+      "name": "Hedrick Brothers",
+      "websiteUrl": "https://hedrickbrothers.com",
       "privacyUrl": "",
       "termsOfUseUrl": "",
       "mpnId": ""
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Homepage"
+        "default": "HB Intel Project Control Center"
       },
       "longDescription": {
-        "default": "Governed homepage shell with a dedicated launcher, orchestrating Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos through the entry-stack contract."
+        "default": "HB Intel Project Control Center — unified project operating layer for Project Control Center."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,17 +27,17 @@
     },
     "features": [
       {
-        "title": "hb-intel-homepage Feature",
-        "description": "Deploys HB Intel Homepage webpart assets.",
-        "id": "c4e91f7d-8a23-4b56-9d0e-1f3c5a7b2d84",
-        "version": "1.1.94.0",
+        "title": "Project Control Center",
+        "description": "Deploys the Project Control Center webpart assets to HBCentral.",
+        "id": "0ef9e6c6-89b6-48a9-bb8f-7e7163d83f2a",
+        "version": "1.0.0.0",
         "componentIds": [
-          "e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf"
+          "6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27"
         ]
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-homepage.sppkg"
+    "zippedPackage": "solution/hb-intel-project-control-center.sppkg"
   }
 }

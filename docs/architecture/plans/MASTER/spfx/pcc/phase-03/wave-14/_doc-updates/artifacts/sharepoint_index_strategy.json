@@ -1,0 +1,40 @@
+{
+  "candidateLists": [
+    "PCC Approval Requests",
+    "PCC Approval Steps",
+    "PCC Approval Participants",
+    "PCC Approval Decisions",
+    "PCC Checkpoint Definitions",
+    "PCC Approval Policies",
+    "PCC Checkpoint Evidence Links",
+    "PCC Checkpoint Audit Events",
+    "PCC Approval Comments",
+    "PCC Approval Priority Action Links"
+  ],
+  "requiredIndexedColumns": [
+    "ProjectId",
+    "ApprovalRequestId",
+    "CheckpointInstanceId",
+    "AssignedToPrincipalKey",
+    "AssignedRole",
+    "State",
+    "DueDate",
+    "Priority",
+    "EscalationState",
+    "SourceModule",
+    "CheckpointFamily",
+    "CurrentStepId",
+    "CreatedUtc",
+    "UpdatedUtc",
+    "ArchivedFlag"
+  ],
+  "queryRules": [
+    "never fetch all approval records",
+    "page every queue read",
+    "server-side filters before client-side filtering",
+    "avoid first-order filtering on large multi-person/lookup/managed metadata columns",
+    "denormalize display values for queue rendering",
+    "archive terminal records out of active views"
+  ],
+  "permissionStrategy": "Use inherited storage permissions plus backend read-model filtering and redaction; do not use item-level unique permissions as the default queue security model."
+}

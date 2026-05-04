@@ -1,0 +1,130 @@
+{
+  "_authority": {
+    "authorityWave": "13G",
+    "featureId": "estimating-workbench",
+    "authorityRoot": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+    "wireframesPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/",
+    "developerContractsPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/",
+    "referencePath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/",
+    "scope": [
+      "ux_wireframes",
+      "documentation_contracts",
+      "dependency_evaluation",
+      "model_contracts",
+      "sharepoint_schema_contracts",
+      "spfx_surface_contracts",
+      "read_model_command_contracts",
+      "validation_test_gates",
+      "runtime_implementation_prompts"
+    ],
+    "interpretationRules": [
+      "all Estimating Workbench work remains under Wave 13G",
+      "runtime implementation may be split into Wave 13G sub-prompts but not separate waves",
+      "wireframes are UX framing authority for MVP unless superseded by later Wave 13G decision",
+      "developer contracts must live under the Wave 13G developer-contracts path",
+      "no top-level estimating-workbench-developer-contracts folder outside phase-3/wave-13G"
+    ],
+    "blockedWithoutSeparateGate": [
+      "production rollout",
+      "tenant mutation",
+      "package installation",
+      "lockfile mutation",
+      "Procore writeback",
+      "Sage writeback",
+      "active project workbook import",
+      "HBI pricing authority",
+      "HBI award authority"
+    ],
+    "closeoutRequirements": [
+      "branch/head/worktree status",
+      "pnpm-lock.yaml MD5 before and after when package files are in scope",
+      "files changed",
+      "validation commands and results",
+      "no unauthorized package install",
+      "no tenant mutation",
+      "no source-system writeback",
+      "no active project workbook import",
+      "within Wave 13G authority confirmation"
+    ]
+  },
+  "roles": [
+    "estimating-coordinator",
+    "estimator",
+    "lead-estimator",
+    "chief-estimator",
+    "director-of-preconstruction",
+    "project-executive",
+    "project-manager",
+    "project-accountant",
+    "buyout-procurement",
+    "executive-oversight",
+    "pcc-admin",
+    "it-admin"
+  ],
+  "actions": {
+    "create-estimate": [
+      "estimating-coordinator",
+      "lead-estimator",
+      "chief-estimator",
+      "director-of-preconstruction",
+      "pcc-admin"
+    ],
+    "edit-draft-line-items": [
+      "estimator",
+      "lead-estimator",
+      "chief-estimator"
+    ],
+    "edit-template": [
+      "chief-estimator",
+      "director-of-preconstruction",
+      "pcc-admin"
+    ],
+    "create-custom-section": [
+      "estimator",
+      "lead-estimator",
+      "chief-estimator"
+    ],
+    "promote-scratchpad-data": [
+      "lead-estimator",
+      "chief-estimator"
+    ],
+    "create-bid-package": [
+      "estimator",
+      "lead-estimator",
+      "chief-estimator"
+    ],
+    "view-vendor-pricing": [
+      "estimator",
+      "lead-estimator",
+      "chief-estimator",
+      "director-of-preconstruction",
+      "project-executive"
+    ],
+    "freeze-handoff-baseline": [
+      "lead-estimator",
+      "chief-estimator",
+      "director-of-preconstruction"
+    ],
+    "accept-handoff": [
+      "project-executive",
+      "project-manager"
+    ],
+    "export-proposal": [
+      "lead-estimator",
+      "chief-estimator",
+      "director-of-preconstruction"
+    ],
+    "admin-repair": [
+      "pcc-admin",
+      "it-admin"
+    ]
+  },
+  "sensitiveFields": [
+    "vendor pricing",
+    "estimator notes",
+    "internal recommendations",
+    "fee/markup",
+    "contingency",
+    "owner strategy"
+  ]
+}

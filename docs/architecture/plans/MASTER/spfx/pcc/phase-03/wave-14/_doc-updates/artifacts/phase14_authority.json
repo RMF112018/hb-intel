@@ -1,0 +1,45 @@
+{
+  "phase": "Phase 14",
+  "wave": "Wave 14",
+  "moduleName": "Approvals / Checkpoints",
+  "surfaceId": "approvals",
+  "primaryWorkCenterAffinity": "action-center",
+  "authorityPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-14/",
+  "scope": [
+    "PCC-native approval/checkpoint queue semantics",
+    "checkpoint policy and route documentation",
+    "decision state machine documentation",
+    "source lineage and audit event documentation",
+    "read-model and future command-model contracts",
+    "SPFx UX and wireframes",
+    "Priority Actions and Project Readiness integration",
+    "Wave 13G estimating checkpoint integration"
+  ],
+  "blockedScope": [
+    "runtime implementation",
+    "source-code implementation outside documentation and JSON planning artifacts",
+    "package.json or pnpm-lock.yaml mutation",
+    "SPFx-to-Procore, SPFx-to-Sage, SPFx-to-Graph write execution",
+    "Power Automate runtime dependency",
+    "tenant/list/group/security mutation",
+    "Procore write-back",
+    "Sage write-back",
+    "approval execution into external systems",
+    "production rollout or deployment"
+  ],
+  "dependencies": [
+    "Waves 6, 8, 9, 10, 11, 12, 13",
+    "Wave 13G Estimating Workbench authority",
+    "Unified lifecycle developer contracts",
+    "PCC read-model envelope posture"
+  ],
+  "wave13GRelationship": {
+    "featureAuthority": "Wave 13G owns Estimating Workbench feature contracts and UX",
+    "phase14Authority": "Phase 14 owns checkpoint queue, routing, decision, audit, and Priority Actions semantics for estimating-related approval prompts",
+    "blocked": [
+      "routing estimating approvals into separate workflow authority",
+      "HBI pricing or award authority",
+      "automatic freeze/handoff approval"
+    ]
+  }
+}

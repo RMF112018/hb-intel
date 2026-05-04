@@ -1,106 +1,76 @@
-# 04 — Developer Implementation Contracts
+# Developer Implementation Contracts — Estimating Workbench
+## Wave 13G Authority Lock
 
-## Non-Negotiable Contracts
+All Estimating Workbench documentation, UX/wireframe framing, dependency evaluation, model contracts, SharePoint schema contracts, SPFx surface contracts, read-model/command contracts, test gates, and subsequent runtime implementation prompts are governed under:
 
-1. Primary object is `PccLessonLearnedRecord`.
-2. Every workbook field survives as a mapped target field or explicit legacy/source field.
-3. The workbook's six-lesson layout is not a target limit.
-4. PCC owns lesson governance; source systems own their native facts.
-5. Every evidence/source value requires source lineage.
-6. No Procore/Sage/Graph/SharePoint runtime mutation exists in documentation scope.
-7. Publication is gate-based, not status-text-based.
-8. Redaction is enforced in read models, not only in UI.
-9. HBI is advisory only and must honor permission/redaction context.
-10. Improvement actions are linked to lessons and auditable.
-11. Lessons may inform future work but cannot automatically decide vendor, employee, legal, claims, or warranty outcomes.
-12. All module responses use existing PCC envelope/source-status/warning posture when implemented.
-
-## Required TypeScript Contracts for Future Implementation
-
-```ts
-export interface PccLessonLearnedRecord {
-  lessonId: string
-  projectId: string
-  projectNumber: string
-  projectName: string
-  title: string
-  status: PccLessonStatus
-  visibilityTier: PccLessonVisibilityTier
-  sensitivity: PccLessonSensitivityClassification
-  category: PccLessonCategory
-  subcategory?: string
-  phaseEncountered: PccProjectLifecyclePhase
-  marketSector?: string
-  deliveryMethod?: string
-  projectSizeBand?: string
-  complexityRating?: number
-  tradeScope?: string
-  discipline?: string
-  tags: string[]
-  content: PccLessonContent
-  impact: PccLessonImpactProfile
-  evidence: PccLessonEvidenceReference[]
-  sourceLineage: PccSourceLineageReference[]
-  review: PccLessonReviewState
-  redaction: PccLessonRedactionProfile
-  reuse: PccLessonReuseProfile
-  audit: PccLessonAuditEvent[]
-}
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
 ```
 
-## Required Enums
+The wireframe authority path is:
 
-- `PccLessonStatus`
-- `PccLessonCategory`
-- `PccLessonSensitivityClassification`
-- `PccLessonVisibilityTier`
-- `PccLessonImpactMagnitude`
-- `PccLessonPublicationDecision`
-- `PccLessonReviewOutcome`
-- `PccLessonReuseTargetModule`
-- `PccLessonEvidenceType`
-- `PccLessonSourceSystem`
-- `PccLessonAuditEventType`
-- `PccLessonRedactionReason`
-
-## Required Read Models
-
-```ts
-PccLessonsLearnedSummaryReadModel
-PccLessonCandidateReadModel
-PccLessonRecordCardReadModel
-PccLessonDetailReadModel
-PccLessonReviewQueueReadModel
-PccLessonKnowledgeLibraryReadModel
-PccLessonImprovementActionReadModel
-PccLessonsLearnedMetricsReadModel
-PccLessonRedactedRecordReadModel
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/
 ```
 
-## Required Reference JSONs
+The developer-contract target path is:
 
-- `reference/lessons_learned_module_data_contract.json`
-- `reference/lessons_learned_state_machine.json`
-- `reference/field_permission_and_redaction_matrix.json`
-- `reference/lessons_learned_validation_rules.json`
-- `reference/default_lessons_learned_seed_structure.json`
-- `reference/workbook_field_mapping_reference.json`
-- `reference/hbi_lessons_learned_contracts.json`
-- `reference/metric_dictionary.json`
-- `reference/fixture_scenarios.json`
-- `reference/source_research_urls.json`
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
 
-## Required Future Tests
+This Wave 13G authority supersedes any earlier implication that Estimating Workbench implementation work should move to a separate future wave. Future implementation may be split into 13G sub-prompts or phases, but it remains under Wave 13G unless a later approved architecture decision explicitly supersedes this path.
 
-- state transition tests;
-- submit/approve/publish validation tests;
-- permission/action matrix tests;
-- redaction-shape tests;
-- HBI suggestion schema tests;
-- source-lineage schema tests;
-- metric dictionary tests;
-- workbook field mapping completeness tests;
-- fixture scenario tests;
-- read-model envelope tests;
-- no external writeback tests;
-- no direct SPFx-to-source-system tests.
+Wave 13G documentation and prompts do not, by themselves, authorize production rollout, tenant mutation, package installation, lockfile mutation, Procore/Sage writeback, or active project workbook import.
+
+## Wave 13G Target Paths
+
+| Artifact Family | Required Repo Path |
+| --- | --- |
+| Wave authority root | `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/` |
+| Wireframes | `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/` |
+| Developer contracts | `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/` |
+| Machine-readable references | `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/` |
+| Prompt closeouts | `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/closeouts/` |
+
+All generated documentation and implementation prompts must use these paths. Do not create a parallel `wave-99-estimating-workbench`, top-level `estimating-workbench-developer-contracts`, or separate future wave for Estimating Workbench unless a later approved authority update supersedes Wave 13G.
+
+
+## Required Developer Contracts
+
+The local agent must create or update the following target docs under:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
+
+Required docs are supplied in this package under `docs/estimating-workbench/`.
+
+## Machine-Readable Artifacts
+
+The local agent must also add the corresponding JSON artifacts under:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/
+```
+
+The JSON artifacts in this package are the content basis. Adapt path references to repo truth, but do not change closed decisions.
+
+## Contract Families
+
+- Scope and routing.
+- SharePoint physical schema.
+- Read models and command contracts.
+- State machines.
+- Field dictionary.
+- Validation catalog.
+- Role/action/permission matrix.
+- Grid and formula behavior.
+- Dependency-package evaluation.
+- Commercial and Multifamily templates.
+- HB cost-code dictionary contract.
+- Workbook template migration mapping.
+- Downstream handoff schema.
+- HBI grounding/search behavior.
+- Error/degraded states.
+- Test and acceptance gates.

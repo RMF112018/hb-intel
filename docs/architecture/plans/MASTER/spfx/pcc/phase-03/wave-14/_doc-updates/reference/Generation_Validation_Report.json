@@ -1,0 +1,31 @@
+{
+  "generated": "2026-05-04",
+  "packageId": "pcc_phase14_approvals_checkpoints_comprehensive_documentation_update_package",
+  "fileCount": 50,
+  "jsonFiles": [
+    "artifacts/agent_execution_rules.json",
+    "artifacts/approval_checkpoint_state_machine.json",
+    "artifacts/approval_decision_action_registry.json",
+    "artifacts/approval_mode_registry.json",
+    "artifacts/approval_read_model_command_contract.json",
+    "artifacts/approval_role_action_matrix.json",
+    "artifacts/approval_source_module_integration_matrix.json",
+    "artifacts/approval_validation_rules.json",
+    "artifacts/dependency_package_evaluation.json",
+    "artifacts/documentation_update_targets.json",
+    "artifacts/manifest.json",
+    "artifacts/phase14_authority.json",
+    "artifacts/sharepoint_index_strategy.json",
+    "artifacts/ux_wireframe_inventory.json",
+    "artifacts/validation_gates.json"
+  ],
+  "jsonValidation": "pass",
+  "manifestMatchesActualFiles": true,
+  "blockedScopeScan": "pass",
+  "notes": [
+    "No package/lockfile/runtime/tenant mutation performed.",
+    "This package is generated in /mnt/data only.",
+    "Local repo-truth validation remains required before applying docs updates."
+  ],
+  "reservedTermScan": "pass"
+}

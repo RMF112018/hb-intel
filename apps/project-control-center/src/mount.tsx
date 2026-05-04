@@ -9,6 +9,9 @@ interface IPccMountedInstance {
   hostElement: HTMLElement | null;
 }
 
+// Packaging runtime marker used by the SPFx package-truth verifier.
+const PCC_RUNTIME_MARKER_WEBPART_ID = '6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27';
+
 const mountedInstance: IPccMountedInstance = {
   root: null,
   hostElement: null,
@@ -61,7 +64,11 @@ export function unmount(): void {
   teardownMountedInstance();
 }
 
-const api = { mount, unmount };
+const api = {
+  mount,
+  unmount,
+  runtimeMarkerId: PCC_RUNTIME_MARKER_WEBPART_ID,
+};
 (globalThis as unknown as { __hbIntel_projectControlCenter?: typeof api }).__hbIntel_projectControlCenter = api;
 if (typeof window !== 'undefined' && globalThis !== window) {
   (window as unknown as { __hbIntel_projectControlCenter?: typeof api }).__hbIntel_projectControlCenter = api;

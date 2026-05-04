@@ -1,0 +1,28 @@
+{
+  "repoTruthCommands": [
+    "git status --short",
+    "git branch --show-current",
+    "git rev-parse HEAD",
+    "git log --oneline -12",
+    "md5 pnpm-lock.yaml"
+  ],
+  "jsonValidation": "python3 -m json.tool <file>",
+  "formatValidation": "pnpm exec prettier --check <touched-files>",
+  "lockfileGuard": "pnpm-lock.yaml MD5 must remain unchanged",
+  "requiredAttestations": [
+    "no runtime implementation",
+    "no package/lockfile mutation",
+    "no tenant/list/group/security mutation",
+    "no Procore/Sage writeback",
+    "no Power Automate runtime dependency",
+    "no HBI decision authority",
+    "Wave 13G relationship preserved"
+  ],
+  "hardStops": [
+    "dirty worktree unrelated to task",
+    "expected PCC docs missing",
+    "package or lockfile mutation needed",
+    "Wave 13G authority path missing when direct edits are required",
+    "runtime code required to satisfy documentation task"
+  ]
+}

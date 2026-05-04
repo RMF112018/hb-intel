@@ -1,0 +1,60 @@
+{
+  "dependencies": [
+    {
+      "package": "@fluentui/react-components",
+      "posture": "existing",
+      "guidance": "use where already installed and consistent with UI-kit doctrine"
+    },
+    {
+      "package": "@tanstack/react-table",
+      "posture": "adopt-when-gated",
+      "guidance": "strong candidate for queue sorting/filtering if adopted through dependency decision"
+    },
+    {
+      "package": "@tanstack/react-virtual",
+      "posture": "adopt-when-gated",
+      "guidance": "use only if queue scale requires virtualization"
+    },
+    {
+      "package": "@pnp/sp",
+      "posture": "defer",
+      "guidance": "do not use for Phase 14 MVP direct mutation"
+    },
+    {
+      "package": "@pnp/queryable",
+      "posture": "existing/defer",
+      "guidance": "evaluate only behind approved SharePoint data boundary"
+    },
+    {
+      "package": "zod",
+      "posture": "defer",
+      "guidance": "defer unless repo standardizes schema validation"
+    },
+    {
+      "package": "ajv",
+      "posture": "adopt-when-gated",
+      "guidance": "candidate for JSON Schema and future command validation"
+    },
+    {
+      "package": "xstate",
+      "posture": "defer",
+      "guidance": "consider only if runtime statecharts/actors become necessary"
+    },
+    {
+      "package": "@testing-library/react",
+      "posture": "existing",
+      "guidance": "use for component and interaction tests"
+    },
+    {
+      "package": "@playwright/test",
+      "posture": "existing",
+      "guidance": "use for keyboard/responsive/e2e smoke tests"
+    },
+    {
+      "package": "vitest",
+      "posture": "existing",
+      "guidance": "use for model/state/contract tests"
+    }
+  ],
+  "guardrail": "No package installation or lockfile mutation is authorized by this package."
+}

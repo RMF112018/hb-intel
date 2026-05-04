@@ -1,83 +1,102 @@
-# PCC Lessons Learned Center — Enhanced Documentation Update Package
+# PCC Estimating Workbench — Developer Documentation Update Package
+## Wave 13G Authority Lock
 
-Generated: 2026-05-03
+All Estimating Workbench documentation, UX/wireframe framing, dependency evaluation, model contracts, SharePoint schema contracts, SPFx surface contracts, read-model/command contracts, test gates, and subsequent runtime implementation prompts are governed under:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
+```
+
+The wireframe authority path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/
+```
+
+The developer-contract target path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
+
+This Wave 13G authority supersedes any earlier implication that Estimating Workbench implementation work should move to a separate future wave. Future implementation may be split into 13G sub-prompts or phases, but it remains under Wave 13G unless a later approved architecture decision explicitly supersedes this path.
+
+Wave 13G documentation and prompts do not, by themselves, authorize production rollout, tenant mutation, package installation, lockfile mutation, Procore/Sage writeback, or active project workbook import.
+
+Generated: 2026-05-04
 
 ## Purpose
 
-This package provides a comprehensive documentation-update plan and ready-to-adapt documentation drafts for the **Lessons Learned Center**, using the enhanced closed-decision target architecture.
+This package instructs a local code agent working in `/Users/bobbyfetting/hb-intel` to update PCC documentation so the **Estimating Workbench** is developer-ready for MVP implementation under **Wave 13G** authority.
 
-It is designed for a local code agent working in:
+The package uses the attached unified lifecycle documentation-update package as the structural template. It is documentation-only and converts the approved target architecture into build contracts: SharePoint list schemas, SPFx surface placement, read models, commands, state machines, validation rules, role/action permissions, grid/formula behavior, Commercial and Multifamily template contracts, HB cost-code posture, template migration mapping, handoff schema, dependency-package evaluation, and acceptance gates.
 
-`/Users/bobbyfetting/hb-intel`
+## Resolved Decisions
 
-## What This Package Does
-
-- Defines Lessons Learned as a PCC-native lifecycle knowledge and continuous-improvement module.
-- Converts all previously missing developer implementation details into closed decisions.
-- Preserves the current company workbook as source field inventory and seed taxonomy, not the target UX.
-- Establishes developer-ready architecture for data model, state machine, permissions, redaction, source lineage, HBI guardrails, search/retrieval, metrics, fixtures, validation, and guardrails.
-- Provides staged prompts for updating documentation only.
-
-## What This Package Does Not Do
-
-- It does not implement runtime source code.
-- It does not add backend routes.
-- It does not add SPFx screens.
-- It does not call Procore, Sage, Microsoft Graph, SharePoint REST/PnP, or any external system.
-- It does not upload, sync, move, classify, or mutate evidence files.
-- It does not create legal, claims, warranty, employment, vendor exclusion, or delay-damages determinations.
-- It does not publish sensitive lessons automatically.
-- It does not regenerate production deployment artifacts.
+- Authority: **Wave 13G** — all Estimating Workbench UX, documentation, contracts, and implementation work remain under `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/`.
+- MVP: **Yes** — Estimating Workbench is an MVP scope amendment.
+- First implementation: **SharePoint/SPFx**.
+- Mounting: existing PCC **Project Readiness** surface; no new top-level PCC shell route in MVP.
+- Storage: central SharePoint/PCC estimating data lists with project-site projection; this is a unified PCC data substrate, not a departmental workspace.
+- Cost-code hierarchy: MVP uses **internal HB cost codes**; Sage mapping follows in a future phase.
+- Day-one templates: **Commercial** and **Multifamily**.
+- Workbook import: **template migration only**; active project workbook import is deferred.
+- Runtime posture: no implementation, no package install, no lockfile mutation, no tenant mutation, no source-system writeback.
 
 ## Package Structure
 
 ```text
-pcc_lessons_learned_enhanced_documentation_update_package/
+pcc_estimating_workbench_developer_documentation_update_package/
   README.md
   00_Repo_Truth_Context.md
   01_Research_Source_Summary.md
   02_Closed_Decisions_Register.md
-  03_Enhanced_Target_Architecture.md
+  03_Comprehensive_Target_Implementation_Architecture.md
   04_Developer_Implementation_Contracts.md
   05_Documentation_Update_Map.md
-  06_Workbook_Source_Mapping_Policy.md
-  docs/lessons-learned/
-    Lessons_Learned_Target_Architecture.md
-    Lessons_Learned_Scope_Lock.md
-    Lessons_Learned_System_Of_Record_And_Integration_Model.md
-    Lessons_Learned_Developer_Implementation_Decisions_And_Contracts.md
-    Lessons_Learned_Workbook_Source_Mapping.md
-    Lessons_Learned_Documentation_Closeout_Template.md
+  06_Live_Integration_And_Security_Gates.md
+  07_Dependency_Package_Evaluation.md
+  08_Wave_13G_Authority_And_Implementation_Path_Lock.md
+  docs/estimating-workbench/
+    Estimating_Workbench_Developer_Target_Architecture.md
+    Estimating_Workbench_MVP_Scope_Lock.md
+    Estimating_Workbench_SPFx_Surface_Contract.md
+    Estimating_Workbench_SharePoint_List_Schema.md
+    Estimating_Workbench_Read_Model_And_Command_Contract.md
+    Estimating_Workbench_State_Machines.md
+    Estimating_Workbench_Field_Level_Data_Dictionary.md
+    Estimating_Workbench_Validation_Rule_Catalog.md
+    Estimating_Workbench_Role_Action_Permission_Matrix.md
+    Estimating_Workbench_Grid_And_Formula_Engine_Decision.md
+    Estimating_Workbench_Dependency_Package_Evaluation.md
+    Estimating_Commercial_Template_Contract.md
+    Estimating_Multifamily_Template_Contract.md
+    Estimating_HB_Cost_Code_Dictionary_Contract.md
+    Estimating_Workbook_Template_Migration_Map.md
+    Estimating_To_Downstream_Handoff_Package_Schema.md
+    Estimating_Workbench_HBI_Grounding_And_Search_Contract.md
+    Estimating_Workbench_Error_Degraded_State_Matrix.md
+    Estimating_Workbench_Test_Acceptance_Gates.md
+    Estimating_Workbench_Implementation_Roadmap_Update.md
+    Estimating_Workbench_Documentation_Closeout_Template.md
   prompts/
-    Prompt_01_Repo_Audit_Workbook_Extraction_And_Source_Truth.md
-    Prompt_02_Governing_Docs_Alignment.md
-    Prompt_03_Target_Architecture_Documentation.md
+    Prompt_01_Repo_Truth_Revalidation.md
+    Prompt_02_Governing_Docs_And_Register_Alignment.md
+    Prompt_03_Target_Architecture_And_MVP_Scope_Lock.md
     Prompt_04_Developer_Contracts_And_Reference_JSONs.md
-    Prompt_05_Workbook_Source_Mapping_And_Seed_JSON_Finalization.md
-    Prompt_06_Closeout_Validation_And_Commit.md
-    Fresh_Session_Reviewer_Prompt_Lessons_Learned_Enhanced.md
-  reference/
-    lessons_learned_module_data_contract.json
-    lessons_learned_state_machine.json
-    field_permission_and_redaction_matrix.json
-    lessons_learned_validation_rules.json
-    default_lessons_learned_seed_structure.json
-    workbook_field_mapping_reference.json
-    hbi_lessons_learned_contracts.json
-    metric_dictionary.json
-    fixture_scenarios.json
-    source_research_urls.json
+    Prompt_05_Template_Cost_Code_Migration_And_Handoff_Contracts.md
+    Prompt_06_Dependency_Evaluation_And_Test_Gates.md
+    Prompt_07_Roadmap_Closeout_And_Validation.md
+    Fresh_Session_Reviewer_Prompt_Estimating_Workbench_Developer_Docs.md
+  reference/*.json
 ```
 
-## Canonical Closed Decisions
+## Non-Negotiable Guardrails
 
-1. Primary object is `PccLessonLearnedRecord`.
-2. The module is a future PCC workstream / Later work center unless repo truth proves formal promotion.
-3. Workbook sheets are not active records; they are source field inventory, taxonomy seed, and legacy workflow evidence.
-4. Every workbook field survives as a traceable target field, taxonomy seed, metric seed, or legacy source field.
-5. PCC owns lesson record, workflow state, classification, sensitivity, publication state, redaction, improvement actions, HBI suggestions, reuse history, and audit trail.
-6. Procore, Sage, and SharePoint/HB Central retain ownership of native records and evidence binaries.
-7. All external integrations are backend-mediated and read-only in future MVP posture.
-8. Publication is gate-based and role-approved.
-9. Redaction is enforced at read-model/API shape, not only in the UI.
-10. HBI is advisory and cannot approve, publish, suppress, expose restricted content, or make legal/vendor/employment/warranty conclusions.
+- Documentation-only package.
+- Do not implement runtime source code.
+- Do not install dependency packages.
+- Do not mutate `package.json`, `pnpm-lock.yaml`, SPFx manifests, CI, deployment files, tenant settings, SharePoint lists, Procore, Sage, Autodesk, BuildingConnected, or HBI services.
+- Do not create a departmental estimating silo.
+- Do not grant HBI pricing authority or award-recommendation authority.
+- Do not import active project workbooks in MVP.

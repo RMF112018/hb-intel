@@ -1,0 +1,68 @@
+{
+  "package": "pcc_estimating_workbench_developer_documentation_update_package",
+  "generatedAt": "2026-05-04",
+  "purpose": "Developer-ready documentation update package for PCC Estimating Workbench MVP",
+  "entrypoint": "README.md",
+  "documentationOnly": true,
+  "prompts": [
+    "Prompt_01_Repo_Truth_Revalidation.md",
+    "Prompt_02_Governing_Docs_And_Register_Alignment.md",
+    "Prompt_03_Target_Architecture_And_MVP_Scope_Lock.md",
+    "Prompt_04_Developer_Contracts_And_Reference_JSONs.md",
+    "Prompt_05_Template_Cost_Code_Migration_And_Handoff_Contracts.md",
+    "Prompt_06_Dependency_Evaluation_And_Test_Gates.md",
+    "Prompt_07_Roadmap_Closeout_And_Validation.md"
+  ],
+  "referenceJsonCount": 13,
+  "resolvedDecisions": {
+    "featureId": "estimating-workbench",
+    "status": "mvp_amendment_locked",
+    "implementationVehicle": "SharePoint/SPFx-first",
+    "topLevelRouteDecision": "no_new_top_level_pcc_shell_route_in_mvp",
+    "mountingSurface": "project-readiness",
+    "primaryWorkCenterId": "startup",
+    "secondaryAffinities": [
+      "procurement-and-buyout",
+      "project-controls",
+      "document-control",
+      "lessons-learned"
+    ],
+    "mvpTemplates": [
+      "commercial",
+      "multifamily"
+    ],
+    "costCodeHierarchy": {
+      "mvpPrimary": "HB internal cost codes",
+      "futureMapping": [
+        "Sage cost codes",
+        "CSI/MasterFormat references",
+        "Procore WBS/budget code references"
+      ]
+    },
+    "workbookImportScope": "template_migration_only",
+    "explicitlyDeferred": [
+      "active project workbook import",
+      "Sage writeback",
+      "Procore writeback",
+      "full Excel formula parity",
+      "automated pricing recommendations",
+      "award recommendations by HBI",
+      "cross-project historical cost analytics beyond curated references"
+    ],
+    "dayOneCapabilities": [
+      "estimate home",
+      "template selector",
+      "estimate builder",
+      "cost summary",
+      "GC/GR",
+      "allowances",
+      "alternates",
+      "bid leveling workbench",
+      "assumptions/inclusions/exclusions/qualifications register",
+      "handoff preview",
+      "snapshot/freeze",
+      "Excel/PDF export",
+      "template admin"
+    ]
+  }
+}

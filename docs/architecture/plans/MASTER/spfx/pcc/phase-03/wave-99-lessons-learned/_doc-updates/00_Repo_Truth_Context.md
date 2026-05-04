@@ -1,21 +1,31 @@
-# 00 — Repo Truth Context
+# Repo Truth Context — Estimating Workbench
+## Wave 13G Authority Lock
 
-## Known Repo Truth From Prior Inspection
+All Estimating Workbench documentation, UX/wireframe framing, dependency evaluation, model contracts, SharePoint schema contracts, SPFx surface contracts, read-model/command contracts, test gates, and subsequent runtime implementation prompts are governed under:
 
-The package assumes the following repo-truth baseline, which the local agent must re-verify before making documentation changes:
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
+```
 
-- `subcontractor-performance` and `lessons-learned` already exist as PCC work centers.
-- Both are currently treated as **Later** / future scope, not current Phase 3 MVP runtime surfaces.
-- Current PCC MVP navigation/read-model families do not expose a full Lessons Learned module.
-- Existing workflow module registry references only narrow lessons-related scope, such as `post-bid-autopsy`, and does not define the comprehensive Lessons Learned Center target architecture.
-- The canonical `System_of_Record_Matrix.md` governs Procore, Sage, PCC, SharePoint/Microsoft 365, evidence link, and source-lineage ownership.
-- The repo-resident workbook path is expected to be:
-  `docs/reference/example/07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx`
-- A related source workbook for Subcontractor Scorecard exists at:
-  `docs/reference/example/06 20260307_SOP_SubScorecard-DRAFT.xlsx`
-- The Lessons Learned Center should reference Subcontractor Performance only through approved cross-module read-model signals, not by merging the modules.
+The wireframe authority path is:
 
-## Required Local Re-Verification Commands
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/
+```
+
+The developer-contract target path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
+
+This Wave 13G authority supersedes any earlier implication that Estimating Workbench implementation work should move to a separate future wave. Future implementation may be split into 13G sub-prompts or phases, but it remains under Wave 13G unless a later approved architecture decision explicitly supersedes this path.
+
+Wave 13G documentation and prompts do not, by themselves, authorize production rollout, tenant mutation, package installation, lockfile mutation, Procore/Sage writeback, or active project workbook import.
+
+## Required First Step
+
+Start every local execution with read-only repo truth:
 
 ```bash
 git status --short
@@ -25,33 +35,35 @@ git log --oneline -12
 md5 pnpm-lock.yaml
 ```
 
-## Required Files to Inspect
+## Fallback Context From Prior Evaluation
 
-```text
-docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md
-docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md
-docs/architecture/blueprint/sp-project-control-center/phase-3/05_Phase_3_Development_Roadmap_Updated.md
-docs/architecture/blueprint/sp-project-control-center/phase-3/07_Phase_3_Module_Implementation_Plan.md
-docs/architecture/blueprint/sp-project-control-center/phase-3/Register_Workflow_Module_Register.md
-docs/architecture/blueprint/sp-project-control-center/phase-3/Register_MVP_Scope.md
-packages/models/src/pcc/PccWorkCenters.ts
-packages/models/src/pcc/WorkflowModules.ts
-docs/reference/example/07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx
-docs/reference/example/06 20260307_SOP_SubScorecard-DRAFT.xlsx
-```
+Local shell access was unavailable during package creation. GitHub fallback confirmed:
 
-## Repo-Truth Resolution Required
+- Repository: `RMF112018/hb-intel`
+- Default branch: `main`
+- Inspected remote HEAD: `8d53bd67b9074bf6efdcf9d29041cb5f1dfb0cde`
+- Latest inspected commit message reported `pnpm-lock.yaml` MD5 unchanged at `c56df7b79986896624536aab74d609f4`.
+- Root `package.json` uses `pnpm@10.13.1`, Node `>=20`, Turbo, TypeScript, Vitest, Playwright, Prettier, `tsx`, and `@pnp/queryable`.
+- `apps/project-control-center/package.json` uses React `^18.3.1`, `@hbc/models`, `@hbc/ui-kit`, Vite, Vitest, and Testing Library.
 
-Use this closed decision unless repo truth has already changed through an accepted commit:
+## Required Repo Paths To Inspect
 
-> Lessons Learned Center is a future PCC workstream and Later work center that must be documented now as a PCC-native lifecycle knowledge and continuous-improvement system. It is not a Phase 3 MVP runtime implementation unless the roadmap has been formally updated.
+- `docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md`
+- `docs/architecture/blueprint/sp-project-control-center/Unified_PCC_Lifecycle_Objective_Architecture.md`
+- `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`
+- `docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/Register_MVP_Scope.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/Register_Workflow_Module_Register.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/05_Phase_3_Development_Roadmap_Updated.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/07_Phase_3_Module_Implementation_Plan.md`
+- `packages/models/src/pcc/WorkflowModules.ts`
+- `packages/models/src/pcc/PccModuleFlags.ts`
+- `packages/models/src/pcc/PccMvpSurfaces.ts`
+- `packages/models/src/pcc/PccWorkCenters.ts`
+- `apps/project-control-center/package.json`
+- `package.json`
+- `docs/reference/example/est-workbooks/`
 
-## Documentation Location Decision
+## Guardrail
 
-Create the new architecture package under:
-
-```text
-docs/architecture/blueprint/sp-project-control-center/future-workstreams/lessons-learned/
-```
-
-Do not create a Phase 3 wave directory for Lessons Learned unless repo truth already contains a formal wave assignment.
+Do not re-read files still in current context unless needed to verify stale, missing, or contradictory repo truth.

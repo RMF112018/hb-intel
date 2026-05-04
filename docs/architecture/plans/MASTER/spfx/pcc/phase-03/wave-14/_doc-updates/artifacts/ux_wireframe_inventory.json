@@ -1,0 +1,44 @@
+{
+  "wireframes": [
+    {
+      "id": "approvals-home",
+      "file": "docs/wireframes/01_Approvals_Home.md",
+      "primaryUserNeed": "understand all approval/checkpoint work"
+    },
+    {
+      "id": "my-approvals",
+      "file": "docs/wireframes/02_My_Approvals.md",
+      "primaryUserNeed": "act on assignments"
+    },
+    {
+      "id": "approval-detail",
+      "file": "docs/wireframes/03_Approval_Detail.md",
+      "primaryUserNeed": "make evidence-backed decision"
+    },
+    {
+      "id": "checkpoint-registry",
+      "file": "docs/wireframes/04_Checkpoint_Registry.md",
+      "primaryUserNeed": "inspect policies/templates"
+    },
+    {
+      "id": "decision-history",
+      "file": "docs/wireframes/05_Decision_History.md",
+      "primaryUserNeed": "audit chronology"
+    },
+    {
+      "id": "escalation-queue",
+      "file": "docs/wireframes/06_Escalation_Queue.md",
+      "primaryUserNeed": "resolve escalated/high-risk approvals"
+    },
+    {
+      "id": "admin-verification-queue",
+      "file": "docs/wireframes/07_Admin_Verification_Queue.md",
+      "primaryUserNeed": "review technical/security/governance checkpoints"
+    },
+    {
+      "id": "module-integration-panels",
+      "file": "docs/wireframes/08_Module_Integration_Panels.md",
+      "primaryUserNeed": "show checkpoint posture in source modules"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+# Estimating Workbench MVP Scope Lock
+
+```json
+{
+  "featureId": "estimating-workbench",
+  "status": "mvp_amendment_locked",
+  "implementationVehicle": "SharePoint/SPFx-first",
+  "topLevelRouteDecision": "no_new_top_level_pcc_shell_route_in_mvp",
+  "mountingSurface": "project-readiness",
+  "primaryWorkCenterId": "startup",
+  "secondaryAffinities": [
+    "procurement-and-buyout",
+    "project-controls",
+    "document-control",
+    "lessons-learned"
+  ],
+  "mvpTemplates": [
+    "commercial",
+    "multifamily"
+  ],
+  "costCodeHierarchy": {
+    "mvpPrimary": "HB internal cost codes",
+    "futureMapping": [
+      "Sage cost codes",
+      "CSI/MasterFormat references",
+      "Procore WBS/budget code references"
+    ]
+  },
+  "workbookImportScope": "template_migration_only",
+  "explicitlyDeferred": [
+    "active project workbook import",
+    "Sage writeback",
+    "Procore writeback",
+    "full Excel formula parity",
+    "automated pricing recommendations",
+    "award recommendations by HBI",
+    "cross-project historical cost analytics beyond curated references"
+  ],
+  "dayOneCapabilities": [
+    "estimate home",
+    "template selector",
+    "estimate builder",
+    "cost summary",
+    "GC/GR",
+    "allowances",
+    "alternates",
+    "bid leveling workbench",
+    "assumptions/inclusions/exclusions/qualifications register",
+    "handoff preview",
+    "snapshot/freeze",
+    "Excel/PDF export",
+    "template admin"
+  ]
+}
+```

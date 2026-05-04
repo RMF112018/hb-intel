@@ -1,0 +1,332 @@
+{
+  "_authority": {
+    "authorityWave": "13G",
+    "featureId": "estimating-workbench",
+    "authorityRoot": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+    "wireframesPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/",
+    "developerContractsPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/",
+    "referencePath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/",
+    "scope": [
+      "ux_wireframes",
+      "documentation_contracts",
+      "dependency_evaluation",
+      "model_contracts",
+      "sharepoint_schema_contracts",
+      "spfx_surface_contracts",
+      "read_model_command_contracts",
+      "validation_test_gates",
+      "runtime_implementation_prompts"
+    ],
+    "interpretationRules": [
+      "all Estimating Workbench work remains under Wave 13G",
+      "runtime implementation may be split into Wave 13G sub-prompts but not separate waves",
+      "wireframes are UX framing authority for MVP unless superseded by later Wave 13G decision",
+      "developer contracts must live under the Wave 13G developer-contracts path",
+      "no top-level estimating-workbench-developer-contracts folder outside phase-3/wave-13G"
+    ],
+    "blockedWithoutSeparateGate": [
+      "production rollout",
+      "tenant mutation",
+      "package installation",
+      "lockfile mutation",
+      "Procore writeback",
+      "Sage writeback",
+      "active project workbook import",
+      "HBI pricing authority",
+      "HBI award authority"
+    ],
+    "closeoutRequirements": [
+      "branch/head/worktree status",
+      "pnpm-lock.yaml MD5 before and after when package files are in scope",
+      "files changed",
+      "validation commands and results",
+      "no unauthorized package install",
+      "no tenant mutation",
+      "no source-system writeback",
+      "no active project workbook import",
+      "within Wave 13G authority confirmation"
+    ]
+  },
+  "Estimate": {
+    "initial": "draft",
+    "terminal": [
+      "archived"
+    ],
+    "states": [
+      "draft",
+      "internal-review",
+      "lead-estimator-review",
+      "submitted",
+      "handoff-candidate",
+      "frozen-handoff-baseline",
+      "superseded",
+      "archived"
+    ],
+    "transitions": [
+      [
+        "draft",
+        "internal-review"
+      ],
+      [
+        "internal-review",
+        "draft"
+      ],
+      [
+        "internal-review",
+        "lead-estimator-review"
+      ],
+      [
+        "lead-estimator-review",
+        "draft"
+      ],
+      [
+        "lead-estimator-review",
+        "submitted"
+      ],
+      [
+        "submitted",
+        "handoff-candidate"
+      ],
+      [
+        "handoff-candidate",
+        "frozen-handoff-baseline"
+      ],
+      [
+        "frozen-handoff-baseline",
+        "superseded"
+      ],
+      [
+        "superseded",
+        "archived"
+      ]
+    ],
+    "locks": {
+      "frozen-handoff-baseline": "line items, bid leveling, cost summary, assumptions, alternates, allowances immutable except correction snapshot"
+    }
+  },
+  "EstimateVersion": {
+    "initial": "draft",
+    "states": [
+      "draft",
+      "snapshot",
+      "frozen",
+      "superseded",
+      "archived"
+    ],
+    "transitions": [
+      [
+        "draft",
+        "snapshot"
+      ],
+      [
+        "snapshot",
+        "frozen"
+      ],
+      [
+        "frozen",
+        "superseded"
+      ],
+      [
+        "superseded",
+        "archived"
+      ]
+    ]
+  },
+  "BidPackage": {
+    "initial": "planned",
+    "states": [
+      "planned",
+      "bidding",
+      "leveling",
+      "award-recommended",
+      "buyout-seeded",
+      "deferred",
+      "cancelled"
+    ],
+    "transitions": [
+      [
+        "planned",
+        "bidding"
+      ],
+      [
+        "bidding",
+        "leveling"
+      ],
+      [
+        "leveling",
+        "award-recommended"
+      ],
+      [
+        "award-recommended",
+        "buyout-seeded"
+      ],
+      [
+        "planned",
+        "deferred"
+      ],
+      [
+        "bidding",
+        "cancelled"
+      ],
+      [
+        "leveling",
+        "deferred"
+      ]
+    ]
+  },
+  "VendorBid": {
+    "initial": "invited",
+    "states": [
+      "invited",
+      "received",
+      "incomplete",
+      "leveled",
+      "excluded",
+      "carried",
+      "selected-for-award",
+      "archived"
+    ],
+    "transitions": [
+      [
+        "invited",
+        "received"
+      ],
+      [
+        "received",
+        "incomplete"
+      ],
+      [
+        "received",
+        "leveled"
+      ],
+      [
+        "leveled",
+        "excluded"
+      ],
+      [
+        "leveled",
+        "carried"
+      ],
+      [
+        "carried",
+        "selected-for-award"
+      ],
+      [
+        "excluded",
+        "archived"
+      ]
+    ]
+  },
+  "HandoffPackage": {
+    "initial": "draft",
+    "states": [
+      "draft",
+      "validation-failed",
+      "ready-for-review",
+      "operations-review",
+      "accepted",
+      "returned",
+      "frozen",
+      "archived"
+    ],
+    "transitions": [
+      [
+        "draft",
+        "validation-failed"
+      ],
+      [
+        "draft",
+        "ready-for-review"
+      ],
+      [
+        "validation-failed",
+        "draft"
+      ],
+      [
+        "ready-for-review",
+        "operations-review"
+      ],
+      [
+        "operations-review",
+        "accepted"
+      ],
+      [
+        "operations-review",
+        "returned"
+      ],
+      [
+        "returned",
+        "draft"
+      ],
+      [
+        "accepted",
+        "frozen"
+      ],
+      [
+        "frozen",
+        "archived"
+      ]
+    ]
+  },
+  "EstimateTemplate": {
+    "initial": "draft",
+    "states": [
+      "draft",
+      "review",
+      "approved",
+      "active",
+      "retired"
+    ],
+    "transitions": [
+      [
+        "draft",
+        "review"
+      ],
+      [
+        "review",
+        "approved"
+      ],
+      [
+        "approved",
+        "active"
+      ],
+      [
+        "active",
+        "retired"
+      ]
+    ]
+  },
+  "EstimateScratchpad": {
+    "initial": "private-working",
+    "states": [
+      "private-working",
+      "shared-working",
+      "promotion-candidate",
+      "promoted-to-canonical",
+      "reference-only",
+      "discarded"
+    ],
+    "transitions": [
+      [
+        "private-working",
+        "shared-working"
+      ],
+      [
+        "shared-working",
+        "promotion-candidate"
+      ],
+      [
+        "promotion-candidate",
+        "promoted-to-canonical"
+      ],
+      [
+        "promotion-candidate",
+        "reference-only"
+      ],
+      [
+        "private-working",
+        "discarded"
+      ]
+    ]
+  }
+}

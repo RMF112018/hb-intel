@@ -1,50 +1,61 @@
 {
-  "generatedDate": "2026-05-03",
-  "sources": [
-    {
-      "name": "NASA APPEL Lessons Learned Lifecycle",
-      "url": "https://www.nasa.gov/learning-resources/for-professionals/appel-lessons-learned/",
-      "use": "Collect, record, disseminate, apply lifecycle model."
-    },
-    {
-      "name": "NASA Lessons Learned System",
-      "url": "https://www.nasa.gov/nasa-lessons-learned/",
-      "use": "Reviewed lessons, indexing, retrieval, stored profiles, recommendations."
-    },
-    {
-      "name": "Construction Industry Institute RR230-11",
-      "url": "https://www.construction-institute.org/an-analysis-of-lessons-learned-programs-in-the-construction-industry-second-edition",
-      "use": "Construction-specific lessons learned program characteristics."
-    },
-    {
-      "name": "Microsoft SharePoint/List content approval and versioning",
-      "url": "https://support.microsoft.com/en-us/office/how-versioning-works-in-lists-and-libraries-0f6cd105-974f-44a4-aadb-43ac5bdfd247",
-      "use": "Draft, pending, approved, version history, visibility posture."
-    },
-    {
-      "name": "Microsoft Graph permissions reference",
-      "url": "https://learn.microsoft.com/en-us/graph/permissions-reference?view=graph-rest-1.0",
-      "use": "Least-privilege Graph permission posture for evidence links and future integration."
-    },
-    {
-      "name": "NIST AI Risk Management Framework",
-      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
-      "use": "Govern, map, measure, manage controls for HBI assistance."
-    },
-    {
-      "name": "NIST AI RMF Playbook",
-      "url": "https://www.nist.gov/itl/ai-risk-management-framework/nist-ai-rmf-playbook",
-      "use": "Operational AI trustworthiness and lifecycle risk controls."
-    },
-    {
-      "name": "OWASP Secure by Design Framework",
-      "url": "https://owasp.org/www-project-secure-by-design-framework/",
-      "use": "Design-time access control, data protection, monitoring, and security evidence requirements."
-    },
-    {
-      "name": "Procore Vendor Performance Report",
-      "url": "https://support.procore.com/products/online/user-guide/company-level/analytics/reports-subpage/vendor-performance-report",
-      "use": "Source-system performance inputs including Commitments, Submittals, Punch List, and RFIs."
-    }
-  ]
+  "_authority": {
+    "authorityWave": "13G",
+    "featureId": "estimating-workbench",
+    "authorityRoot": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/",
+    "wireframesPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/",
+    "developerContractsPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/",
+    "referencePath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/reference/",
+    "scope": [
+      "ux_wireframes",
+      "documentation_contracts",
+      "dependency_evaluation",
+      "model_contracts",
+      "sharepoint_schema_contracts",
+      "spfx_surface_contracts",
+      "read_model_command_contracts",
+      "validation_test_gates",
+      "runtime_implementation_prompts"
+    ],
+    "interpretationRules": [
+      "all Estimating Workbench work remains under Wave 13G",
+      "runtime implementation may be split into Wave 13G sub-prompts but not separate waves",
+      "wireframes are UX framing authority for MVP unless superseded by later Wave 13G decision",
+      "developer contracts must live under the Wave 13G developer-contracts path",
+      "no top-level estimating-workbench-developer-contracts folder outside phase-3/wave-13G"
+    ],
+    "blockedWithoutSeparateGate": [
+      "production rollout",
+      "tenant mutation",
+      "package installation",
+      "lockfile mutation",
+      "Procore writeback",
+      "Sage writeback",
+      "active project workbook import",
+      "HBI pricing authority",
+      "HBI award authority"
+    ],
+    "closeoutRequirements": [
+      "branch/head/worktree status",
+      "pnpm-lock.yaml MD5 before and after when package files are in scope",
+      "files changed",
+      "validation commands and results",
+      "no unauthorized package install",
+      "no tenant mutation",
+      "no source-system writeback",
+      "no active project workbook import",
+      "within Wave 13G authority confirmation"
+    ]
+  },
+  "microsoft_spfx_overview": "https://learn.microsoft.com/en-us/sharepoint/dev/spfx/sharepoint-framework-overview",
+  "microsoft_connect_to_sharepoint_apis": "https://learn.microsoft.com/en-us/sharepoint/dev/spfx/connect-to-sharepoint",
+  "sharepoint_online_limits": "https://learn.microsoft.com/en-us/office365/servicedescriptions/sharepoint-online-service-description/sharepoint-online-limits",
+  "sharepoint_list_view_threshold": "https://support.microsoft.com/en-us/office/working-with-the-list-view-threshold-limit-for-all-versions-of-sharepoint-4a40bbdc-c5f8-4bbd-b9b6-745daf71c132",
+  "tanstack_table_virtualization": "https://tanstack.com/table/latest/docs/guide/virtualization",
+  "tanstack_virtualized_rows": "https://tanstack.com/table/latest/docs/framework/react/examples/virtualized-rows",
+  "fluent_ui_react_components_npm": "https://www.npmjs.com/package/@fluentui/react-components",
+  "ajv_typescript": "https://ajv.js.org/guide/typescript.html",
+  "sheetjs_reading_files": "https://docs.sheetjs.com/docs/api/parse-options",
+  "hyperformula_licensing": "https://hyperformula.handsontable.com/guide/licensing.html",
+  "fast_check_intro": "https://fast-check.dev/docs/introduction/what-is-property-based-testing/"
 }

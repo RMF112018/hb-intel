@@ -1,0 +1,154 @@
+{
+  "Estimate": {
+    "required": [
+      "estimateId",
+      "projectId",
+      "projectNumber",
+      "estimateName",
+      "projectTypeTemplateId",
+      "status",
+      "createdBy",
+      "createdAtUtc",
+      "currentVersionId"
+    ],
+    "optional": [
+      "ownerName",
+      "clientName",
+      "deliveryMethod",
+      "contractType",
+      "sourceNewProjectRequestId",
+      "notes"
+    ],
+    "indexes": [
+      "projectId",
+      "projectNumber",
+      "status",
+      "projectTypeTemplateId",
+      "currentVersionId"
+    ]
+  },
+  "EstimateLineItem": {
+    "required": [
+      "lineItemId",
+      "estimateId",
+      "estimateVersionId",
+      "sectionId",
+      "sortKey",
+      "description",
+      "hbCostCode",
+      "quantity",
+      "unitOfMeasure",
+      "unitCost",
+      "extendedCost",
+      "lineItemType",
+      "sourceType"
+    ],
+    "optional": [
+      "csiCode",
+      "sageFutureCostCode",
+      "bidPackageId",
+      "scopePackageId",
+      "formulaText",
+      "formulaResult",
+      "notes",
+      "confidenceScore"
+    ],
+    "indexes": [
+      "estimateId",
+      "estimateVersionId",
+      "sectionId",
+      "hbCostCode",
+      "bidPackageId"
+    ]
+  },
+  "BidPackage": {
+    "required": [
+      "bidPackageId",
+      "estimateId",
+      "estimateVersionId",
+      "packageName",
+      "hbCostCodeFamily",
+      "status",
+      "ownerRole",
+      "dueDate"
+    ],
+    "indexes": [
+      "estimateId",
+      "estimateVersionId",
+      "status",
+      "ownerRole"
+    ]
+  },
+  "VendorBid": {
+    "required": [
+      "vendorBidId",
+      "bidPackageId",
+      "vendorName",
+      "status",
+      "baseBidAmount",
+      "receivedDate",
+      "scopeStatus"
+    ],
+    "sensitiveFields": [
+      "baseBidAmount",
+      "levelingAdjustments",
+      "internalRecommendation",
+      "estimatorNotes"
+    ]
+  },
+  "BidLevelingAdjustment": {
+    "required": [
+      "adjustmentId",
+      "bidPackageId",
+      "vendorBidId",
+      "adjustmentType",
+      "amount",
+      "reason",
+      "createdBy",
+      "createdAtUtc"
+    ],
+    "indexes": [
+      "bidPackageId",
+      "vendorBidId",
+      "adjustmentType"
+    ]
+  },
+  "AssumptionQualificationRecord": {
+    "required": [
+      "recordId",
+      "estimateId",
+      "estimateVersionId",
+      "recordType",
+      "text",
+      "status",
+      "ownerRole",
+      "downstreamVisibility"
+    ],
+    "recordTypeValues": [
+      "assumption",
+      "inclusion",
+      "exclusion",
+      "qualification",
+      "clarification",
+      "risk-flag"
+    ]
+  },
+  "HandoffPackage": {
+    "required": [
+      "handoffPackageId",
+      "estimateId",
+      "estimateVersionId",
+      "snapshotId",
+      "budgetSeedStatus",
+      "buyoutSeedStatus",
+      "validationStatus",
+      "acceptedBy",
+      "acceptedAtUtc"
+    ],
+    "indexes": [
+      "estimateId",
+      "estimateVersionId",
+      "validationStatus"
+    ]
+  }
+}

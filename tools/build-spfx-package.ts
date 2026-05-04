@@ -31,11 +31,11 @@ import { createHash } from 'node:crypto';
 // ── Domain registry ────────────────────────────────────────────────────────
 
 interface DomainConfig {
-  dir: string;        // directory name under apps/
-  camel: string;      // camelCase for global name segment
-  pascal: string;     // PascalCase for manifest lookups
+  dir: string; // directory name under apps/
+  camel: string; // camelCase for global name segment
+  pascal: string; // PascalCase for manifest lookups
   packagingModel?: 'single' | 'multi';
-  extensionType?: 'ApplicationCustomizer';  // set for SPFx extension domains (Lane B)
+  extensionType?: 'ApplicationCustomizer'; // set for SPFx extension domains (Lane B)
   // When true, the orchestrator hard-cleans the app's dist/ directory and
   // forces a fresh Vite build before packaging, then captures SHA-256
   // evidence of the source bundle and verifies the packaged bundle matches
@@ -94,11 +94,14 @@ interface ManifestSemanticComparison {
     actual: string;
     matches: boolean;
   };
-  fields: Record<string, {
-    expected: unknown;
-    actual: unknown;
-    matches: boolean;
-  }>;
+  fields: Record<
+    string,
+    {
+      expected: unknown;
+      actual: unknown;
+      matches: boolean;
+    }
+  >;
   allMatched: boolean;
 }
 
@@ -178,20 +181,52 @@ interface BuildHbPackageTruthProofResult {
 const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'accounting', camel: 'accounting', pascal: 'Accounting' },
   { dir: 'estimating', camel: 'projectSetup', pascal: 'ProjectSetup' },
+  {
+    dir: 'project-control-center',
+    camel: 'projectControlCenter',
+    pascal: 'ProjectControlCenter',
+    packagingModel: 'single',
+    freshBuildRequired: true,
+  },
   { dir: 'project-hub', camel: 'projectHub', pascal: 'ProjectHub' },
   { dir: 'leadership', camel: 'leadership', pascal: 'Leadership' },
   { dir: 'business-development', camel: 'businessDevelopment', pascal: 'BusinessDevelopment' },
   { dir: 'admin', camel: 'admin', pascal: 'Admin' },
   { dir: 'safety', camel: 'safety', pascal: 'Safety', freshBuildRequired: true },
-  { dir: 'quality-control-warranty', camel: 'qualityControlWarranty', pascal: 'QualityControlWarranty' },
+  {
+    dir: 'quality-control-warranty',
+    camel: 'qualityControlWarranty',
+    pascal: 'QualityControlWarranty',
+  },
   { dir: 'risk-management', camel: 'riskManagement', pascal: 'RiskManagement' },
-  { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
+  {
+    dir: 'operational-excellence',
+    camel: 'operationalExcellence',
+    pascal: 'OperationalExcellence',
+  },
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
   { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage', freshBuildRequired: true },
-  { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
-  { dir: 'hb-intel-foleon', camel: 'foleon', pascal: 'Foleon', packagingModel: 'single', freshBuildRequired: true },
-  { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
+  {
+    dir: 'hb-publisher',
+    camel: 'hbPublisher',
+    pascal: 'HbPublisher',
+    packagingModel: 'single',
+    freshBuildRequired: true,
+  },
+  {
+    dir: 'hb-intel-foleon',
+    camel: 'foleon',
+    pascal: 'Foleon',
+    packagingModel: 'single',
+    freshBuildRequired: true,
+  },
+  {
+    dir: 'hb-shell-extension',
+    camel: 'hbShellExtension',
+    pascal: 'HbShellExtension',
+    extensionType: 'ApplicationCustomizer',
+  },
 ];
 
 const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
@@ -215,6 +250,7 @@ const HB_PUBLISHER_ARTICLE_WEBPART_ID = '1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10';
 const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
 const SAFETY_WEBPART_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
 const HB_INTEL_FOLEON_WEBPART_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
+const PROJECT_CONTROL_CENTER_WEBPART_ID = '6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27';
 const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
 
 // Critical runtime source files whose SHA-256 fingerprints anchor the
@@ -303,6 +339,15 @@ const HB_INTEL_FOLEON_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   'apps/hb-intel-foleon/src/components/FoleonIframeHost.tsx',
   'apps/hb-intel-foleon/src/pages/ReaderPage.tsx',
 ];
+const PROJECT_CONTROL_CENTER_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/project-control-center/src/mount.tsx',
+  'apps/project-control-center/src/PccApp.tsx',
+  'apps/project-control-center/src/shell/PccSurfaceRouter.tsx',
+  'apps/project-control-center/src/api/pccReadModelClientFactory.ts',
+  'apps/project-control-center/src/api/pccReadModelClient.ts',
+  'apps/project-control-center/vite.config.ts',
+  'apps/project-control-center/package.json',
+];
 
 const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   safety: SAFETY_CRITICAL_RUNTIME_PATHS,
@@ -310,6 +355,7 @@ const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   'hb-publisher': HB_PUBLISHER_CRITICAL_RUNTIME_PATHS,
   'hb-homepage': HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
   'hb-intel-foleon': HB_INTEL_FOLEON_CRITICAL_RUNTIME_PATHS,
+  'project-control-center': PROJECT_CONTROL_CENTER_CRITICAL_RUNTIME_PATHS,
 };
 
 const HB_HOMEPAGE_CANONICAL_BANNER_FILES = [
@@ -324,7 +370,9 @@ const SAFETY_PACKAGED_ROUTE_MARKERS = [
   { key: 'ingest command route', needle: '/api/safety-records/ingest' },
   { key: 'replay command route', needle: '/api/safety-records/replay' },
 ] as const;
-function safetyPackagedConfigMarkers(packageVersion: string): ReadonlyArray<{ key: string; needle: string }> {
+function safetyPackagedConfigMarkers(
+  packageVersion: string,
+): ReadonlyArray<{ key: string; needle: string }> {
   return [
     { key: 'token audience property key', needle: 'apiAudience' },
     { key: 'token acquisition failure code', needle: 'TOKEN_ACQUISITION_FAILED' },
@@ -351,6 +399,10 @@ const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
   'hb-publisher': { id: HB_PUBLISHER_ARTICLE_WEBPART_ID, label: 'Article Publisher webpart' },
   'hb-homepage': { id: HB_HOMEPAGE_WEBPART_ID, label: 'HB Homepage webpart' },
   'hb-intel-foleon': { id: HB_INTEL_FOLEON_WEBPART_ID, label: 'Foleon webpart' },
+  'project-control-center': {
+    id: PROJECT_CONTROL_CENTER_WEBPART_ID,
+    label: 'Project Control Center webpart',
+  },
 };
 // ── SPFx version baselines (governed, see docs/reference/developer/spfx-baseline.md) ──
 //
@@ -408,9 +460,7 @@ const args = process.argv.slice(2);
 const domainIdx = args.indexOf('--domain');
 const targetDomain = domainIdx !== -1 ? args[domainIdx + 1] : null;
 
-const domains = targetDomain
-  ? ALL_DOMAINS.filter((d) => d.dir === targetDomain)
-  : ALL_DOMAINS;
+const domains = targetDomain ? ALL_DOMAINS.filter((d) => d.dir === targetDomain) : ALL_DOMAINS;
 
 if (targetDomain && domains.length === 0) {
   console.error(`Unknown domain: ${targetDomain}`);
@@ -431,7 +481,10 @@ let NODE18_BIN = '';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function run(cmd: string, opts?: { cwd?: string; env?: Record<string, string>; useNode18?: boolean }): void {
+function run(
+  cmd: string,
+  opts?: { cwd?: string; env?: Record<string, string>; useNode18?: boolean },
+): void {
   console.log(`  → ${cmd}`);
   // SPFx 1.18 requires Node 18. Invoke the Node 18 binary directly instead
   // of relying on shell-local nvm state, which can silently fall back to the
@@ -439,9 +492,7 @@ function run(cmd: string, opts?: { cwd?: string; env?: Record<string, string>; u
   if (opts?.useNode18 && !NODE18_BIN) {
     throw new Error('useNode18 requested but Node 18 resolver did not run');
   }
-  const finalCmd = opts?.useNode18
-    ? cmd.replace(/^node\b/, `"${NODE18_BIN}"`)
-    : cmd;
+  const finalCmd = opts?.useNode18 ? cmd.replace(/^node\b/, `"${NODE18_BIN}"`) : cmd;
   execSync(finalCmd, {
     cwd: opts?.cwd ?? ROOT,
     stdio: 'inherit',
@@ -474,8 +525,8 @@ function resolveDefaultBackendMode(domainDir: string): string {
   if (domainDir) {
     console.warn(
       `[build-spfx-package] BACKEND_MODE is not set for domain "${domainDir}". ` +
-      'The packaged app will use its own runtime default (production). ' +
-      'Set BACKEND_MODE explicitly in CI/CD to avoid ambiguity.',
+        'The packaged app will use its own runtime default (production). ' +
+        'Set BACKEND_MODE explicitly in CI/CD to avoid ambiguity.',
     );
   }
 
@@ -492,7 +543,13 @@ function cleanShellTemp(): void {
   fs.mkdirSync(path.join(SHELL_DIR, 'assets'), { recursive: true });
   // Remove stale extension manifest from previous builds so only the
   // currently-intended shell type's manifest is active.
-  const staleExtensionManifest = path.join(SHELL_DIR, 'src', 'extensions', 'customizer', 'ShellExtensionCustomizer.manifest.json');
+  const staleExtensionManifest = path.join(
+    SHELL_DIR,
+    'src',
+    'extensions',
+    'customizer',
+    'ShellExtensionCustomizer.manifest.json',
+  );
   if (fs.existsSync(staleExtensionManifest)) {
     fs.rmSync(staleExtensionManifest, { force: true });
   }
@@ -500,20 +557,26 @@ function cleanShellTemp(): void {
   // iteration do not leak into the next domain (or into manual gulp runs).
   fs.writeFileSync(
     path.join(SHELL_DIR, 'config', 'config.json'),
-    JSON.stringify({
-      $schema: 'https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json',
-      version: '2.0',
-      bundles: {
-        'shell-web-part': {
-          components: [{
-            entrypoint: './lib/webparts/shell/ShellWebPart.js',
-            manifest: './src/webparts/shell/ShellWebPart.manifest.json',
-          }],
+    JSON.stringify(
+      {
+        $schema: 'https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json',
+        version: '2.0',
+        bundles: {
+          'shell-web-part': {
+            components: [
+              {
+                entrypoint: './lib/webparts/shell/ShellWebPart.js',
+                manifest: './src/webparts/shell/ShellWebPart.manifest.json',
+              },
+            ],
+          },
         },
+        externals: {},
+        localizedResources: {},
       },
-      externals: {},
-      localizedResources: {},
-    }, null, 2) + '\n',
+      null,
+      2,
+    ) + '\n',
   );
 }
 
@@ -581,8 +644,7 @@ function collectPackagedClientSideAssetsByBasename(
   return basenames.map((fileName) => {
     const archivePath = archivePaths.find(
       (entry) =>
-        entry === `ClientSideAssets/${fileName}` ||
-        entry.endsWith(`/ClientSideAssets/${fileName}`),
+        entry === `ClientSideAssets/${fileName}` || entry.endsWith(`/ClientSideAssets/${fileName}`),
     );
     if (!archivePath) {
       return { fileName, archivePath: null, present: false };
@@ -856,7 +918,9 @@ function buildHbPackageTruthProof(
 
   for (const expectedShim of expectedShimEntries) {
     const shimArchivePath = archivePaths.find(
-      (entry) => entry === `ClientSideAssets/${expectedShim.fileName}` || entry.endsWith(`/ClientSideAssets/${expectedShim.fileName}`),
+      (entry) =>
+        entry === `ClientSideAssets/${expectedShim.fileName}` ||
+        entry.endsWith(`/ClientSideAssets/${expectedShim.fileName}`),
     );
     if (!shimArchivePath) {
       structuralPass = false;
@@ -864,7 +928,9 @@ function buildHbPackageTruthProof(
       semanticPass = false;
       structuralDetails.push(`Missing packaged shim asset ${expectedShim.fileName}`);
       freshnessDetails.push(`Cannot verify shim hash because ${expectedShim.fileName} is missing`);
-      semanticDetails.push(`Manifest linkage cannot be trusted because shim ${expectedShim.fileName} is missing`);
+      semanticDetails.push(
+        `Manifest linkage cannot be trusted because shim ${expectedShim.fileName} is missing`,
+      );
       continue;
     }
 
@@ -903,17 +969,24 @@ function buildHbPackageTruthProof(
 
   const shimByManifestId = new Map(expectedShimEntries.map((entry) => [entry.manifestId, entry]));
   for (const sourceManifest of targetManifests) {
-    const packaged = parsePackagedComponentManifestById(sppkgPath, archivePaths, sourceManifest.json.id);
+    const packaged = parsePackagedComponentManifestById(
+      sppkgPath,
+      archivePaths,
+      sourceManifest.json.id,
+    );
     if (!packaged) {
       structuralPass = false;
       semanticPass = false;
-      structuralDetails.push(`Missing packaged WebPart XML or ComponentManifest for ${sourceManifest.json.id}`);
+      structuralDetails.push(
+        `Missing packaged WebPart XML or ComponentManifest for ${sourceManifest.json.id}`,
+      );
       semanticDetails.push(`Missing packaged manifest linkage for ${sourceManifest.json.id}`);
       continue;
     }
 
     const expectedShim = shimByManifestId.get(sourceManifest.json.id);
-    const expectedEntryModuleId = expectedShim?.entryModuleId ?? `${sourceManifest.json.id}_${packaged.manifest.version}`;
+    const expectedEntryModuleId =
+      expectedShim?.entryModuleId ?? `${sourceManifest.json.id}_${packaged.manifest.version}`;
     const actualEntryModuleId = String(packaged.manifest.loaderConfig?.entryModuleId ?? '');
     const fieldResults: ManifestSemanticComparison['fields'] = {};
     let allMatched = actualEntryModuleId === expectedEntryModuleId;
@@ -934,7 +1007,8 @@ function buildHbPackageTruthProof(
 
     const expectedScriptPath = expectedShim?.fileName;
     if (expectedScriptPath) {
-      const scriptResource = packaged.manifest.loaderConfig?.scriptResources?.[expectedEntryModuleId];
+      const scriptResource =
+        packaged.manifest.loaderConfig?.scriptResources?.[expectedEntryModuleId];
       const actualPath = typeof scriptResource?.path === 'string' ? scriptResource.path : '';
       const pathMatches = actualPath === expectedScriptPath;
       if (!pathMatches) {
@@ -967,14 +1041,20 @@ function buildHbPackageTruthProof(
     }
   }
 
-  const markerManifest = manifestComparisons.find((comparison) => comparison.manifestId === runtimeMarker.id);
+  const markerManifest = manifestComparisons.find(
+    (comparison) => comparison.manifestId === runtimeMarker.id,
+  );
   if (!markerManifest) {
     structuralPass = false;
     semanticPass = false;
     runtimePass = false;
-    structuralDetails.push(`${runtimeMarker.label} manifest ${runtimeMarker.id} not found in packaged XML`);
+    structuralDetails.push(
+      `${runtimeMarker.label} manifest ${runtimeMarker.id} not found in packaged XML`,
+    );
     semanticDetails.push(`${runtimeMarker.label} linkage missing for ${runtimeMarker.id}`);
-    runtimeDetails.push(`Cannot prove ${runtimeMarker.label} manifest linkage without packaged XML for ${runtimeMarker.id}`);
+    runtimeDetails.push(
+      `Cannot prove ${runtimeMarker.label} manifest linkage without packaged XML for ${runtimeMarker.id}`,
+    );
   } else {
     const markerShim = shimByManifestId.get(runtimeMarker.id);
     const markerScriptPath = markerManifest.fields.scriptResourcePath;
@@ -982,9 +1062,13 @@ function buildHbPackageTruthProof(
       semanticPass = false;
       runtimePass = false;
       semanticDetails.push(`${runtimeMarker.label} shim linkage mismatch for ${runtimeMarker.id}`);
-      runtimeDetails.push(`${runtimeMarker.label} entry mapping does not resolve to expected shell-entry shim`);
+      runtimeDetails.push(
+        `${runtimeMarker.label} entry mapping does not resolve to expected shell-entry shim`,
+      );
     } else {
-      runtimeDetails.push(`${runtimeMarker.label} linkage verified: ${runtimeMarker.id} -> ${markerShim.fileName}`);
+      runtimeDetails.push(
+        `${runtimeMarker.label} linkage verified: ${runtimeMarker.id} -> ${markerShim.fileName}`,
+      );
     }
   }
 
@@ -1018,7 +1102,9 @@ function buildHbPackageTruthProof(
       appManifestAttrs = extractPackagedAppManifestAttrs(sppkgPath);
     } catch (err) {
       deploymentPosturePass = false;
-      postureDetails.push(`A1/A2: cannot read packaged AppManifest.xml — ${(err as Error).message}`);
+      postureDetails.push(
+        `A1/A2: cannot read packaged AppManifest.xml — ${(err as Error).message}`,
+      );
     }
 
     // A1: solution version (source package-solution.json) vs packaged AppManifest.xml Version attribute
@@ -1036,7 +1122,9 @@ function buildHbPackageTruthProof(
     // A2: solution ID (source) vs packaged AppManifest.xml ProductID attribute (case-insensitive)
     if (appManifestAttrs) {
       if (appManifestAttrs.productId.toLowerCase() === solutionId.toLowerCase()) {
-        postureDetails.push(`A2: packaged AppManifest ProductID matches source solution.id (${solutionId})`);
+        postureDetails.push(
+          `A2: packaged AppManifest ProductID matches source solution.id (${solutionId})`,
+        );
       } else {
         deploymentPosturePass = false;
         postureDetails.push(
@@ -1049,7 +1137,9 @@ function buildHbPackageTruthProof(
     const expectedFeatureXml = `feature_${featureId}.xml`;
     const hasFeatureXml = archivePaths.some((entry) => entry.endsWith(expectedFeatureXml));
     if (featureId && hasFeatureXml) {
-      postureDetails.push(`A3: packaged archive contains ${expectedFeatureXml} for source feature ID`);
+      postureDetails.push(
+        `A3: packaged archive contains ${expectedFeatureXml} for source feature ID`,
+      );
     } else {
       deploymentPosturePass = false;
       postureDetails.push(
@@ -1073,10 +1163,16 @@ function buildHbPackageTruthProof(
     // A5: source preconfiguredEntries[0].hiddenFromToolbox matches packaged preconfiguredEntries[0].hiddenFromToolbox
     const packagedWebpart = manifestComparisons.find((c) => c.manifestId === webPartId);
     const packagedPreconfigured = packagedWebpart?.fields?.preconfiguredEntries?.actual as unknown;
-    const packagedFirstEntry = Array.isArray(packagedPreconfigured) ? packagedPreconfigured[0] : undefined;
+    const packagedFirstEntry = Array.isArray(packagedPreconfigured)
+      ? packagedPreconfigured[0]
+      : undefined;
     const packagedHidden =
-      (packagedFirstEntry as { hiddenFromToolbox?: unknown } | undefined)?.hiddenFromToolbox === true;
-    if (sourceDiscovery.hiddenFromToolbox === packagedHidden && emittedHiddenFromToolbox === sourceDiscovery.hiddenFromToolbox) {
+      (packagedFirstEntry as { hiddenFromToolbox?: unknown } | undefined)?.hiddenFromToolbox ===
+      true;
+    if (
+      sourceDiscovery.hiddenFromToolbox === packagedHidden &&
+      emittedHiddenFromToolbox === sourceDiscovery.hiddenFromToolbox
+    ) {
       postureDetails.push(
         `A5: discovery posture aligned (source=${sourceDiscovery.hiddenFromToolbox}, packaged=${packagedHidden}, emitted-plan=${emittedHiddenFromToolbox})`,
       );
@@ -1163,7 +1259,9 @@ function buildHbPackageTruthProof(
     checks: {
       structuralValidity: {
         pass: structuralPass,
-        details: structuralDetails.length ? structuralDetails : ['All required package structures and assets are present'],
+        details: structuralDetails.length
+          ? structuralDetails
+          : ['All required package structures and assets are present'],
       },
       freshness: {
         pass: freshnessPass,
@@ -1171,13 +1269,17 @@ function buildHbPackageTruthProof(
       },
       sourcePackageSemanticAlignment: {
         pass: semanticPass,
-        details: semanticDetails.length ? semanticDetails : ['Source/package semantic alignment checks passed'],
+        details: semanticDetails.length
+          ? semanticDetails
+          : ['Source/package semantic alignment checks passed'],
       },
       liveRuntimeProof: {
         pass: runtimePass,
         details: runtimeDetails.length
           ? runtimeDetails
-          : ['Static runtime guards passed; SharePoint page-hosted runtime still requires live validation'],
+          : [
+              'Static runtime guards passed; SharePoint page-hosted runtime still requires live validation',
+            ],
       },
       ...(deploymentPostureAlignment ? { deploymentPostureAlignment } : {}),
     },
@@ -1224,7 +1326,7 @@ function generatePerWebpartShellCopy(
     if (!sourceJs.includes(defineReplacement)) {
       throw new Error(
         `[generatePerWebpartShellCopy] Identity shim for ${targetManifestId}: ` +
-        `source shell JS does not contain expected ${defineReplacement}.`,
+          `source shell JS does not contain expected ${defineReplacement}.`,
       );
     }
     shimJs = sourceJs;
@@ -1233,14 +1335,14 @@ function generatePerWebpartShellCopy(
     if (!sourceJs.includes(definePattern)) {
       throw new Error(
         `[generatePerWebpartShellCopy] Source shell JS does not contain expected ` +
-        `${definePattern}. Cannot generate per-webpart copy for ${targetManifestId}.`,
+          `${definePattern}. Cannot generate per-webpart copy for ${targetManifestId}.`,
       );
     }
     shimJs = sourceJs.replace(definePattern, defineReplacement);
     if (!shimJs.includes(defineReplacement)) {
       throw new Error(
         `[generatePerWebpartShellCopy] Post-patch verification failed: ` +
-        `${defineReplacement} not found after replacement for ${targetManifestId}.`,
+          `${defineReplacement} not found after replacement for ${targetManifestId}.`,
       );
     }
   }
@@ -1302,7 +1404,9 @@ function inspectCompiledShellAsset(
   }
 
   if (errors.length > 0) {
-    console.error(`  ❌ ${domainDir}: compiled shell asset inspection failed — ${errors.join('; ')}`);
+    console.error(
+      `  ❌ ${domainDir}: compiled shell asset inspection failed — ${errors.join('; ')}`,
+    );
     return false;
   }
 
@@ -1327,9 +1431,10 @@ function inspectPackagedShellAsset(
     const shellAssetPath = listOutput
       .split('\n')
       .map((entry) => entry.trim())
-      .find((entry) =>
-        /^ClientSideAssets\/shell-(web-part|extension-customizer).*\.js$/.test(entry) ||
-        /^ClientSideAssets\/shell-entry-[0-9a-f-]{36}-[a-f0-9]{8}\.js$/i.test(entry),
+      .find(
+        (entry) =>
+          /^ClientSideAssets\/shell-(web-part|extension-customizer).*\.js$/.test(entry) ||
+          /^ClientSideAssets\/shell-entry-[0-9a-f-]{36}-[a-f0-9]{8}\.js$/i.test(entry),
       );
 
     if (!shellAssetPath) {
@@ -1337,10 +1442,10 @@ function inspectPackagedShellAsset(
       return false;
     }
 
-    const shellJs = execSync(
-      `unzip -p "${sppkgPath}" "${shellAssetPath}"`,
-      { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
-    );
+    const shellJs = execSync(`unzip -p "${sppkgPath}" "${shellAssetPath}"`, {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+    });
     const errors: string[] = [];
 
     if (!shellJs.includes(bundleName)) {
@@ -1366,14 +1471,18 @@ function inspectPackagedShellAsset(
     }
 
     if (errors.length > 0) {
-      console.error(`  ❌ ${domainDir}: packaged shell asset inspection failed — ${errors.join('; ')}`);
+      console.error(
+        `  ❌ ${domainDir}: packaged shell asset inspection failed — ${errors.join('; ')}`,
+      );
       return false;
     }
 
     console.log(`  ✓ Packaged shell asset references ${bundleName} and ${globalName}`);
     return true;
   } catch (err) {
-    console.error(`  ❌ ${domainDir}: failed to inspect packaged shell asset — ${(err as Error).message}`);
+    console.error(
+      `  ❌ ${domainDir}: failed to inspect packaged shell asset — ${(err as Error).message}`,
+    );
     return false;
   }
 }
@@ -1430,14 +1539,18 @@ function verifySppkg(
     // shell-extension-customizer bundle. Per-webpart shell-entry-*.js shims
     // are manifest linkage assets and DO NOT satisfy this requirement — a
     // shell-entry-only package is not a valid SPFx shell package shape.
-    const hasCanonicalShellJs = entries.some((e) =>
-      /shell-web-part.*\.js/.test(e) || /ShellWebPart.*\.js/.test(e) ||
-      /shell-extension-customizer.*\.js/.test(e) || /ShellExtensionCustomizer.*\.js/.test(e));
+    const hasCanonicalShellJs = entries.some(
+      (e) =>
+        /shell-web-part.*\.js/.test(e) ||
+        /ShellWebPart.*\.js/.test(e) ||
+        /shell-extension-customizer.*\.js/.test(e) ||
+        /ShellExtensionCustomizer.*\.js/.test(e),
+    );
     if (!hasCanonicalShellJs) {
       console.error(
         `  ❌ ${domainDir}: .sppkg missing canonical compiled shell JS ` +
-        `(expected shell-web-part_*.js / ShellWebPart.*.js / shell-extension-customizer.*.js). ` +
-        `shell-entry-*.js shims alone are not sufficient.`,
+          `(expected shell-web-part_*.js / ShellWebPart.*.js / shell-extension-customizer.*.js). ` +
+          `shell-entry-*.js shims alone are not sufficient.`,
       );
       ok = false;
     }
@@ -1451,10 +1564,14 @@ function verifySppkg(
       if (manifestJson) {
         for (const expectedId of expectedIds) {
           if (!manifestJson.includes(expectedId)) {
-            console.error(`  ❌ ${domainDir}: component ID ${expectedId} not found in .sppkg manifest`);
+            console.error(
+              `  ❌ ${domainDir}: component ID ${expectedId} not found in .sppkg manifest`,
+            );
             ok = false;
           } else {
-            console.log(`  ✓ Component ID ${expectedId.substring(0, 8)}... found in .sppkg manifest`);
+            console.log(
+              `  ✓ Component ID ${expectedId.substring(0, 8)}... found in .sppkg manifest`,
+            );
           }
         }
       }
@@ -1471,16 +1588,20 @@ function verifySppkg(
         ok = false;
       } else {
         try {
-          const instanceXml = execSync(
-            `unzip -p "${sppkgPath}" "${clientSideInstancePath}"`,
-            { encoding: 'utf8', maxBuffer: 1024 * 1024 },
-          );
+          const instanceXml = execSync(`unzip -p "${sppkgPath}" "${clientSideInstancePath}"`, {
+            encoding: 'utf8',
+            maxBuffer: 1024 * 1024,
+          });
           if (!instanceXml.includes('Location="ClientSideExtension.ApplicationCustomizer"')) {
-            console.error(`  ❌ ${domainDir}: ClientSideInstance.xml missing Location="ClientSideExtension.ApplicationCustomizer"`);
+            console.error(
+              `  ❌ ${domainDir}: ClientSideInstance.xml missing Location="ClientSideExtension.ApplicationCustomizer"`,
+            );
             ok = false;
           }
           if (!instanceXml.includes(`ComponentId="${expectedIds[0]}"`)) {
-            console.error(`  ❌ ${domainDir}: ClientSideInstance.xml ComponentId does not match expected ${expectedIds[0]}`);
+            console.error(
+              `  ❌ ${domainDir}: ClientSideInstance.xml ComponentId does not match expected ${expectedIds[0]}`,
+            );
             ok = false;
           }
           if (!instanceXml.includes('Properties=')) {
@@ -1488,17 +1609,23 @@ function verifySppkg(
             ok = false;
           }
           if (ok) {
-            console.log(`  ✓ ClientSideInstance.xml verified: Location, ComponentId, Properties correct`);
+            console.log(
+              `  ✓ ClientSideInstance.xml verified: Location, ComponentId, Properties correct`,
+            );
           }
         } catch (err) {
-          console.error(`  ❌ ${domainDir}: failed to extract ClientSideInstance.xml — ${(err as Error).message}`);
+          console.error(
+            `  ❌ ${domainDir}: failed to extract ClientSideInstance.xml — ${(err as Error).message}`,
+          );
           ok = false;
         }
       }
       // Verify no WebPart_*.xml files are present in extension packages
       const webPartXmls = archivePaths.filter((e) => /WebPart_[0-9a-f-]+\.xml$/i.test(e));
       if (webPartXmls.length > 0) {
-        console.error(`  ❌ ${domainDir}: extension .sppkg should not contain WebPart XML files: ${webPartXmls.join(', ')}`);
+        console.error(
+          `  ❌ ${domainDir}: extension .sppkg should not contain WebPart XML files: ${webPartXmls.join(', ')}`,
+        );
         ok = false;
       }
     }
@@ -1509,19 +1636,23 @@ function verifySppkg(
       const availablePackagedShimFiles = new Set<string>();
 
       for (const manifestId of expectedIds) {
-        const manifestXmlPath = archivePaths.find((entry) => entry.endsWith(`/WebPart_${manifestId}.xml`));
+        const manifestXmlPath = archivePaths.find((entry) =>
+          entry.endsWith(`/WebPart_${manifestId}.xml`),
+        );
         if (!manifestXmlPath) {
           console.error(`  ❌ ${domainDir}: webpart xml for ${manifestId} missing from .sppkg`);
           ok = false;
           continue;
         }
-        const manifestXml = execSync(
-          `unzip -p "${sppkgPath}" "${manifestXmlPath}"`,
-          { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
-        );
+        const manifestXml = execSync(`unzip -p "${sppkgPath}" "${manifestXmlPath}"`, {
+          encoding: 'utf8',
+          maxBuffer: 10 * 1024 * 1024,
+        });
         const componentManifestMatch = manifestXml.match(/ComponentManifest="([^"]+)"/);
         if (!componentManifestMatch) {
-          console.error(`  ❌ ${domainDir}: ComponentManifest payload missing in ${manifestXmlPath}`);
+          console.error(
+            `  ❌ ${domainDir}: ComponentManifest payload missing in ${manifestXmlPath}`,
+          );
           ok = false;
           continue;
         }
@@ -1545,16 +1676,20 @@ function verifySppkg(
         if (loaderConfig.entryModuleId !== shimExpectation.entryModuleId) {
           console.error(
             `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} entryModuleId mismatch ` +
-            `(expected ${shimExpectation.entryModuleId}, got ${String(loaderConfig.entryModuleId)})`,
+              `(expected ${shimExpectation.entryModuleId}, got ${String(loaderConfig.entryModuleId)})`,
           );
           ok = false;
         }
 
         const scriptResource = loaderConfig.scriptResources?.[shimExpectation.entryModuleId];
-        if (!scriptResource || scriptResource.type !== 'path' || typeof scriptResource.path !== 'string') {
+        if (
+          !scriptResource ||
+          scriptResource.type !== 'path' ||
+          typeof scriptResource.path !== 'string'
+        ) {
           console.error(
             `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} missing path scriptResource for ` +
-            `${shimExpectation.entryModuleId}`,
+              `${shimExpectation.entryModuleId}`,
           );
           ok = false;
           continue;
@@ -1563,7 +1698,7 @@ function verifySppkg(
         if (scriptResource.path !== shimExpectation.shimFileName) {
           console.error(
             `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} scriptResources path mismatch ` +
-            `(expected ${shimExpectation.shimFileName}, got ${scriptResource.path})`,
+              `(expected ${shimExpectation.shimFileName}, got ${scriptResource.path})`,
           );
           ok = false;
         }
@@ -1575,7 +1710,9 @@ function verifySppkg(
           ok = false;
         }
 
-        const shimArchivePath = archivePaths.find((entry) => entry.endsWith(`/${scriptResource.path}`));
+        const shimArchivePath = archivePaths.find((entry) =>
+          entry.endsWith(`/${scriptResource.path}`),
+        );
         if (!shimArchivePath) {
           console.error(`  ❌ ${domainDir}: shim asset ${scriptResource.path} missing from .sppkg`);
           ok = false;
@@ -1583,10 +1720,10 @@ function verifySppkg(
         }
         availablePackagedShimFiles.add(scriptResource.path);
 
-        const shimSource = execSync(
-          `unzip -p "${sppkgPath}" "${shimArchivePath}"`,
-          { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
-        );
+        const shimSource = execSync(`unzip -p "${sppkgPath}" "${shimArchivePath}"`, {
+          encoding: 'utf8',
+          maxBuffer: 10 * 1024 * 1024,
+        });
         const expectedDefine = `define("${shimExpectation.entryModuleId}"`;
         const neutralDefine = `define("${shimExpectation.baseModuleId}"`;
         const isIdentityShim = shimExpectation.baseModuleId === shimExpectation.entryModuleId;
@@ -1604,26 +1741,36 @@ function verifySppkg(
         if (!isIdentityShim && shimSource.includes(neutralDefine)) {
           console.error(
             `  ❌ ${domainDir}: shell entry ${scriptResource.path} still contains neutral define ` +
-            `${shimExpectation.baseModuleId} — patching failed`,
+              `${shimExpectation.baseModuleId} — patching failed`,
           );
           ok = false;
         }
       }
 
-      const allManifestRaw = Array.from(manifestById.values()).map((record) => record.raw).join('\n');
+      const allManifestRaw = Array.from(manifestById.values())
+        .map((record) => record.raw)
+        .join('\n');
       const hasLegacyStableShimRef = /shell-entry-[0-9a-f-]{36}\.js\b/i.test(allManifestRaw);
       if (hasLegacyStableShimRef) {
-        console.error(`  ❌ ${domainDir}: found legacy non-versioned shim path reference in packaged manifest`);
+        console.error(
+          `  ❌ ${domainDir}: found legacy non-versioned shim path reference in packaged manifest`,
+        );
         ok = false;
       }
 
-      const expectedPackagedShimFiles = hbExpectations.shimExpectations.map((expectation) => expectation.shimFileName).sort();
+      const expectedPackagedShimFiles = hbExpectations.shimExpectations
+        .map((expectation) => expectation.shimFileName)
+        .sort();
       const packagedShimFiles = Array.from(availablePackagedShimFiles).sort();
-      console.log(`  ✓ Packaged shim files (${packagedShimFiles.length}): ${packagedShimFiles.join(', ')}`);
+      console.log(
+        `  ✓ Packaged shim files (${packagedShimFiles.length}): ${packagedShimFiles.join(', ')}`,
+      );
       console.log(`  ✓ Neutral shared shell module identity: ${hbExpectations.baseModuleId}`);
 
       if (expectedPackagedShimFiles.join('|') !== packagedShimFiles.join('|')) {
-        console.error(`  ❌ ${domainDir}: packaged shim set does not match expected manifest-to-shim mapping`);
+        console.error(
+          `  ❌ ${domainDir}: packaged shim set does not match expected manifest-to-shim mapping`,
+        );
         ok = false;
       }
     }
@@ -1635,7 +1782,10 @@ function verifySppkg(
         if (!manifestById.has(fbId)) {
           const xmlPath = archivePaths.find((e) => e.endsWith(`/WebPart_${fbId}.xml`));
           if (xmlPath) {
-            const xml = execSync(`unzip -p "${sppkgPath}" "${xmlPath}"`, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+            const xml = execSync(`unzip -p "${sppkgPath}" "${xmlPath}"`, {
+              encoding: 'utf8',
+              maxBuffer: 10 * 1024 * 1024,
+            });
             const match = xml.match(/ComponentManifest="([^"]+)"/);
             if (match) {
               const raw = decodeXmlAttribute(match[1]);
@@ -1645,10 +1795,14 @@ function verifySppkg(
         }
         const record = manifestById.get(fbId);
         if (!record) {
-          console.error(`  ❌ ${domainDir}: supportsFullBleed webpart ${fbId} not found in packaged manifests`);
+          console.error(
+            `  ❌ ${domainDir}: supportsFullBleed webpart ${fbId} not found in packaged manifests`,
+          );
           ok = false;
         } else if (record.manifest.supportsFullBleed !== true) {
-          console.error(`  ❌ ${domainDir}: packaged manifest ${fbId} missing supportsFullBleed: true`);
+          console.error(
+            `  ❌ ${domainDir}: packaged manifest ${fbId} missing supportsFullBleed: true`,
+          );
           ok = false;
         } else {
           console.log(`  ✓ ${fbId.substring(0, 8)}... supportsFullBleed: true preserved`);
@@ -1682,7 +1836,9 @@ function verifyPackagedBundleFreshness(
       (entry) => entry === expectedBundlePath || entry.endsWith(`/${expectedBundlePath}`),
     );
     if (!bundleArchivePath) {
-      console.error(`  ❌ ${domainDir}: packaged bundle ${bundleName} not found for freshness verification`);
+      console.error(
+        `  ❌ ${domainDir}: packaged bundle ${bundleName} not found for freshness verification`,
+      );
       return false;
     }
 
@@ -1693,15 +1849,19 @@ function verifyPackagedBundleFreshness(
     if (packagedSha !== evidence.sourceBundleSha256) {
       console.error(
         `  ❌ ${domainDir}: packaged bundle hash mismatch for ${bundleName}\n` +
-        `     source:   ${evidence.sourceBundleSha256}\n` +
-        `     packaged: ${packagedSha}`,
+          `     source:   ${evidence.sourceBundleSha256}\n` +
+          `     packaged: ${packagedSha}`,
       );
       return false;
     }
-    console.log(`  ✓ Packaged bundle freshness verified (${bundleName}, sha256:${packagedSha.slice(0, 12)}...)`);
+    console.log(
+      `  ✓ Packaged bundle freshness verified (${bundleName}, sha256:${packagedSha.slice(0, 12)}...)`,
+    );
     return true;
   } catch (err) {
-    console.error(`  ❌ ${domainDir}: failed packaged freshness verification — ${(err as Error).message}`);
+    console.error(
+      `  ❌ ${domainDir}: failed packaged freshness verification — ${(err as Error).message}`,
+    );
     return false;
   }
 }
@@ -1715,7 +1875,10 @@ interface Node18Candidate {
   version?: string;
 }
 
-function probeNode18Candidate(binary: string | null | undefined, strategy: string): Node18Candidate {
+function probeNode18Candidate(
+  binary: string | null | undefined,
+  strategy: string,
+): Node18Candidate {
   if (!binary) {
     return { strategy, binary: null, rejection: 'not found' };
   }
@@ -1738,7 +1901,12 @@ function probeNode18Candidate(binary: string | null | undefined, strategy: strin
   const major = Number(match[1]);
   const minor = Number(match[2]);
   if (major !== 18 || minor < 17) {
-    return { strategy, binary, version: versionOut, rejection: `reports ${versionOut}, need v18.17.x..<v19` };
+    return {
+      strategy,
+      binary,
+      version: versionOut,
+      rejection: `reports ${versionOut}, need v18.17.x..<v19`,
+    };
   }
   return { strategy, binary, version: versionOut };
 }
@@ -1816,10 +1984,10 @@ function resolveNode18Binary(): Node18Candidate {
     console.error('\n❌ SPFx packaging preflight: HB_INTEL_NODE18_BIN is set but rejected.\n');
     console.error(
       `  - HB_INTEL_NODE18_BIN env var: ${envOverride} — ${result.rejection}\n\n` +
-      'Because HB_INTEL_NODE18_BIN is an explicit operator override, other\n' +
-      'resolution strategies were skipped. Fix the path (it must be a Node\n' +
-      '18.17.x..<19 binary) or unset the variable to let the resolver search.\n' +
-      '\nSee docs/reference/developer/spfx-packaging-toolchain.md for details.',
+        'Because HB_INTEL_NODE18_BIN is an explicit operator override, other\n' +
+        'resolution strategies were skipped. Fix the path (it must be a Node\n' +
+        '18.17.x..<19 binary) or unset the variable to let the resolver search.\n' +
+        '\nSee docs/reference/developer/spfx-packaging-toolchain.md for details.',
     );
     process.exit(1);
   }
@@ -1840,10 +2008,7 @@ function resolveNode18Binary(): Node18Candidate {
   attempts.push(nvmResult);
   if (!nvmResult.rejection) return nvmResult;
 
-  const homebrewPaths = [
-    '/opt/homebrew/opt/node@18/bin/node',
-    '/usr/local/opt/node@18/bin/node',
-  ];
+  const homebrewPaths = ['/opt/homebrew/opt/node@18/bin/node', '/usr/local/opt/node@18/bin/node'];
   for (const candidate of homebrewPaths) {
     const result = probeNode18Candidate(candidate, candidate);
     attempts.push(result);
@@ -1858,7 +2023,7 @@ function resolveNode18Binary(): Node18Candidate {
   console.error('\n❌ SPFx packaging preflight: Node 18 binary not found.\n');
   console.error(
     'The SPFx shell toolchain (@microsoft/sp-build-web@1.18.0) requires\n' +
-    'Node 18.17.1 <19. The orchestrator searched the following locations:\n',
+      'Node 18.17.1 <19. The orchestrator searched the following locations:\n',
   );
   for (const attempt of attempts) {
     const label = attempt.binary ?? '(unset)';
@@ -1866,10 +2031,10 @@ function resolveNode18Binary(): Node18Candidate {
   }
   console.error(
     '\nRemediation:\n' +
-    '  • `nvm install 18 && nvm use 18` then re-run.\n' +
-    '  • Or `brew install node@18` then re-run.\n' +
-    '  • Or set HB_INTEL_NODE18_BIN=/path/to/node (must report v18.x).\n' +
-    '\nSee docs/reference/developer/spfx-packaging-toolchain.md for details.',
+      '  • `nvm install 18 && nvm use 18` then re-run.\n' +
+      '  • Or `brew install node@18` then re-run.\n' +
+      '  • Or set HB_INTEL_NODE18_BIN=/path/to/node (must report v18.x).\n' +
+      '\nSee docs/reference/developer/spfx-packaging-toolchain.md for details.',
   );
   process.exit(1);
 }
@@ -1895,7 +2060,7 @@ function assertSpfxBaselines(root: string): void {
     if (declared !== SHELL_SPFX_EXACT_VERSION) {
       violations.push(
         `tools/spfx-shell/package.json: ${name} declared as "${declared ?? '(missing)'}" — ` +
-        `governed baseline is "${SHELL_SPFX_EXACT_VERSION}" exact.`,
+          `governed baseline is "${SHELL_SPFX_EXACT_VERSION}" exact.`,
       );
     }
   }
@@ -1916,7 +2081,7 @@ function assertSpfxBaselines(root: string): void {
       if (declared !== APP_SPFX_EXPECTED_RANGE) {
         violations.push(
           `apps/${appDir}/package.json: ${name} declared as "${declared ?? '(missing)'}" — ` +
-          `governed baseline is "${APP_SPFX_EXPECTED_RANGE}".`,
+            `governed baseline is "${APP_SPFX_EXPECTED_RANGE}".`,
         );
       }
     }
@@ -1929,13 +2094,13 @@ function assertSpfxBaselines(root: string): void {
     }
     console.error(
       '\nSee docs/reference/developer/spfx-baseline.md for the governed shell ' +
-      'toolchain + app-layer types baselines. Raising either is an explicit ADR decision.',
+        'toolchain + app-layer types baselines. Raising either is an explicit ADR decision.',
     );
     process.exit(1);
   }
   console.log(
     `✓ SPFx baselines: shell=${SHELL_SPFX_EXACT_VERSION} exact (${SHELL_SPFX_PACKAGES.length} pkgs), ` +
-    `apps=${APP_SPFX_EXPECTED_RANGE} (${APP_SPFX_GOVERNED_APP_DIRS.join(', ')})`,
+      `apps=${APP_SPFX_EXPECTED_RANGE} (${APP_SPFX_GOVERNED_APP_DIRS.join(', ')})`,
   );
 }
 
@@ -1947,7 +2112,7 @@ const node18 = resolveNode18Binary();
 NODE18_BIN = node18.binary!;
 console.log(
   `✓ SPFx packaging toolchain: Node ${node18.version} at ${node18.binary} ` +
-  `(source: ${node18.strategy})`,
+    `(source: ${node18.strategy})`,
 );
 
 assertSpfxBaselines(ROOT);
@@ -2005,9 +2170,7 @@ for (const domain of domains) {
   }
 
   let targetManifests =
-    domain.packagingModel === 'multi'
-      ? sourceManifests
-      : sourceManifests.slice(0, 1);
+    domain.packagingModel === 'multi' ? sourceManifests : sourceManifests.slice(0, 1);
 
   // Proof-case scope lock: restrict hb-webparts to only the proof-case
   // webpart IDs until each has been validated in the first-class loader model.
@@ -2042,9 +2205,7 @@ for (const domain of domains) {
       solution?: { version?: unknown; features?: Array<{ version?: unknown }> };
     };
     const solutionVersion = String(homepagePkgSolution?.solution?.version ?? '');
-    const featureVersion = String(
-      homepagePkgSolution?.solution?.features?.[0]?.version ?? '',
-    );
+    const featureVersion = String(homepagePkgSolution?.solution?.features?.[0]?.version ?? '');
     const webpartManifestVersion = String(primarySourceManifest.version ?? '');
     const versionMismatches: string[] = [];
     if (!solutionVersion) {
@@ -2089,14 +2250,21 @@ for (const domain of domains) {
   // The entry file is resolved from HB_WEBPARTS_PROOF_CASE_ENTRY_MAP by
   // manifest ID so future proof-case migrations do not require ad hoc
   // hardcoded entry-file replacements.
-  const isProofCase = domain.dir === 'hb-webparts' && HB_WEBPARTS_PROOF_CASE_IDS.size > 0 && targetManifests.length === 1;
+  const isProofCase =
+    domain.dir === 'hb-webparts' &&
+    HB_WEBPARTS_PROOF_CASE_IDS.size > 0 &&
+    targetManifests.length === 1;
   const proofCaseBuildEnv: Record<string, string> = {};
   if (isProofCase) {
     const proofCaseId = targetManifests[0].json.id;
     const proofCaseEntry = HB_WEBPARTS_PROOF_CASE_ENTRY_MAP[proofCaseId];
     if (!proofCaseEntry) {
-      console.error(`  ❌ ${domain.dir}: no proof-case entry mapped for manifest ID ${proofCaseId}`);
-      console.error(`     Add an entry to HB_WEBPARTS_PROOF_CASE_ENTRY_MAP in build-spfx-package.ts`);
+      console.error(
+        `  ❌ ${domain.dir}: no proof-case entry mapped for manifest ID ${proofCaseId}`,
+      );
+      console.error(
+        `     Add an entry to HB_WEBPARTS_PROOF_CASE_ENTRY_MAP in build-spfx-package.ts`,
+      );
       allPassed = false;
       continue;
     }
@@ -2107,7 +2275,9 @@ for (const domain of domains) {
   if (enforceFreshBuild) {
     if (fs.existsSync(distDir)) {
       fs.rmSync(distDir, { recursive: true, force: true });
-      console.log(`  ✓ Freshness gate: removed stale dist directory ${path.relative(ROOT, distDir)}`);
+      console.log(
+        `  ✓ Freshness gate: removed stale dist directory ${path.relative(ROOT, distDir)}`,
+      );
     }
     console.log('  Building app with Vite (fresh build enforced)...');
     run(`pnpm --filter @hbc/spfx-${domain.dir} build`, { env: proofCaseBuildEnv });
@@ -2117,7 +2287,9 @@ for (const domain of domains) {
   }
 
   if (!fs.existsSync(bundlePath)) {
-    console.error(`  ❌ ${domain.dir}: expected ${bundleName} in dist/ after build${enforceFreshBuild ? ' (fresh build gate active)' : ''}`);
+    console.error(
+      `  ❌ ${domain.dir}: expected ${bundleName} in dist/ after build${enforceFreshBuild ? ' (fresh build gate active)' : ''}`,
+    );
     allPassed = false;
     continue;
   }
@@ -2132,14 +2304,18 @@ for (const domain of domains) {
     };
     console.log(
       `  ✓ Freshness evidence captured: ${bundleName} ` +
-      `(sha256:${freshnessEvidence.sourceBundleSha256.slice(0, 12)}..., ` +
-      `mtime:${freshnessEvidence.sourceBundleMtimeIso}, bytes:${freshnessEvidence.sourceBundleSizeBytes})`,
+        `(sha256:${freshnessEvidence.sourceBundleSha256.slice(0, 12)}..., ` +
+        `mtime:${freshnessEvidence.sourceBundleMtimeIso}, bytes:${freshnessEvidence.sourceBundleSizeBytes})`,
     );
   }
 
   // Verify IIFE format (no ES module exports)
   const bundleHead = fs.readFileSync(bundlePath, 'utf8').slice(0, 500);
-  if (bundleHead.includes('export default') || bundleHead.includes('export {') || bundleHead.startsWith('import ')) {
+  if (
+    bundleHead.includes('export default') ||
+    bundleHead.includes('export {') ||
+    bundleHead.startsWith('import ')
+  ) {
     console.error(`  ❌ ${domain.dir}: bundle is ES module format, expected IIFE`);
     allPassed = false;
     continue;
@@ -2221,14 +2397,47 @@ for (const domain of domains) {
       setInterval,
       clearInterval,
       queueMicrotask,
-      Object, Array, Map, Set, WeakMap, WeakSet, Promise, Symbol, Error,
-      TypeError, RangeError, JSON, Math, Date, RegExp, parseInt, parseFloat,
-      isNaN, isFinite, undefined, NaN, Infinity, encodeURIComponent,
-      decodeURIComponent, encodeURI, decodeURI, btoa: (s: string) => Buffer.from(s).toString('base64'),
+      Object,
+      Array,
+      Map,
+      Set,
+      WeakMap,
+      WeakSet,
+      Promise,
+      Symbol,
+      Error,
+      TypeError,
+      RangeError,
+      JSON,
+      Math,
+      Date,
+      RegExp,
+      parseInt,
+      parseFloat,
+      isNaN,
+      isFinite,
+      undefined,
+      NaN,
+      Infinity,
+      encodeURIComponent,
+      decodeURIComponent,
+      encodeURI,
+      decodeURI,
+      btoa: (s: string) => Buffer.from(s).toString('base64'),
       atob: (s: string) => Buffer.from(s, 'base64').toString(),
-      URL, URLSearchParams, TextEncoder, TextDecoder,
-      ArrayBuffer, Uint8Array, Int8Array, Float64Array, DataView,
-      Proxy, Reflect, WeakRef, FinalizationRegistry,
+      URL,
+      URLSearchParams,
+      TextEncoder,
+      TextDecoder,
+      ArrayBuffer,
+      Uint8Array,
+      Int8Array,
+      Float64Array,
+      DataView,
+      Proxy,
+      Reflect,
+      WeakRef,
+      FinalizationRegistry,
     };
     const ctx = createContext(sandbox);
     try {
@@ -2256,21 +2465,39 @@ for (const domain of domains) {
       : ['mount', 'unmount'];
     const missingFns = requiredFns.filter((fn) => typeof resolved?.[fn] !== 'function');
     if (!resolved || missingFns.length > 0) {
-      console.error(`  ❌ ${domain.dir}: runtime smoke test failed — ${globalName} missing: ${missingFns.join(', ')}`);
-      console.error(`     fromGlobalThis:`, typeof fromGlobalThis, fromGlobalThis ? Object.keys(fromGlobalThis) : 'n/a');
-      console.error(`     fromWindow:`, typeof fromWindow, fromWindow ? Object.keys(fromWindow) : 'n/a');
-      console.error(`     fromVarScope:`, typeof fromVarScope, fromVarScope ? Object.keys(fromVarScope) : 'n/a');
+      console.error(
+        `  ❌ ${domain.dir}: runtime smoke test failed — ${globalName} missing: ${missingFns.join(', ')}`,
+      );
+      console.error(
+        `     fromGlobalThis:`,
+        typeof fromGlobalThis,
+        fromGlobalThis ? Object.keys(fromGlobalThis) : 'n/a',
+      );
+      console.error(
+        `     fromWindow:`,
+        typeof fromWindow,
+        fromWindow ? Object.keys(fromWindow) : 'n/a',
+      );
+      console.error(
+        `     fromVarScope:`,
+        typeof fromVarScope,
+        fromVarScope ? Object.keys(fromVarScope) : 'n/a',
+      );
       allPassed = false;
       continue;
     }
-    console.log(`  ✓ Runtime smoke test passed: ${globalName}.${requiredFns.join('() + .')}() present (globalThis + window verified independently)`);
+    console.log(
+      `  ✓ Runtime smoke test passed: ${globalName}.${requiredFns.join('() + .')}() present (globalThis + window verified independently)`,
+    );
   }
 
   if (domain.dir === 'hb-homepage') {
     try {
       stageHomepageBannerAssets(distDir);
     } catch (err) {
-      console.error(`  ❌ ${domain.dir}: failed to stage canonical homepage banners — ${(err as Error).message}`);
+      console.error(
+        `  ❌ ${domain.dir}: failed to stage canonical homepage banners — ${(err as Error).message}`,
+      );
       allPassed = false;
       continue;
     }
@@ -2284,20 +2511,26 @@ for (const domain of domains) {
   if (isExtension) {
     fs.writeFileSync(
       path.join(SHELL_DIR, 'config', 'config.json'),
-      JSON.stringify({
-        $schema: 'https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json',
-        version: '2.0',
-        bundles: {
-          'shell-extension-customizer': {
-            components: [{
-              entrypoint: './lib/extensions/customizer/ShellExtensionCustomizer.js',
-              manifest: './src/extensions/customizer/ShellExtensionCustomizer.manifest.json',
-            }],
+      JSON.stringify(
+        {
+          $schema: 'https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json',
+          version: '2.0',
+          bundles: {
+            'shell-extension-customizer': {
+              components: [
+                {
+                  entrypoint: './lib/extensions/customizer/ShellExtensionCustomizer.js',
+                  manifest: './src/extensions/customizer/ShellExtensionCustomizer.manifest.json',
+                },
+              ],
+            },
           },
+          externals: {},
+          localizedResources: {},
         },
-        externals: {},
-        localizedResources: {},
-      }, null, 2) + '\n',
+        null,
+        2,
+      ) + '\n',
     );
     console.log('  ✓ config.json set to extension bundle (shell-extension-customizer)');
   }
@@ -2342,9 +2575,7 @@ for (const domain of domains) {
     const hashedCssPath = path.join(cssAssetsDir, hashedCssName);
     fs.copyFileSync(baseCssPath, hashedCssPath);
     fs.unlinkSync(baseCssPath);
-    console.log(
-      `  ✓ CSS content hash applied: ${cssHash} → ${hashedCssName} (was ${baseCssName})`,
-    );
+    console.log(`  ✓ CSS content hash applied: ${cssHash} → ${hashedCssName} (was ${baseCssName})`);
   }
 
   // Write domain-specific package-solution.json
@@ -2429,9 +2660,13 @@ for (const domain of domains) {
   const sourceFeatureAssets = domainPkgSolution.solution?.features?.[0]?.assets;
   if (sourceFeatureAssets && typeof sourceFeatureAssets === 'object') {
     const declaredFiles = [
-      ...(Array.isArray(sourceFeatureAssets.elementManifests) ? sourceFeatureAssets.elementManifests : []),
+      ...(Array.isArray(sourceFeatureAssets.elementManifests)
+        ? sourceFeatureAssets.elementManifests
+        : []),
       ...(Array.isArray(sourceFeatureAssets.elementFiles) ? sourceFeatureAssets.elementFiles : []),
-      ...(Array.isArray(sourceFeatureAssets.upgradeActions) ? sourceFeatureAssets.upgradeActions : []),
+      ...(Array.isArray(sourceFeatureAssets.upgradeActions)
+        ? sourceFeatureAssets.upgradeActions
+        : []),
     ] as string[];
     const sourceAssetsDir = path.join(ROOT, 'apps', domain.dir, 'sharepoint', 'assets');
     if (declaredFiles.length > 0 && !fs.existsSync(sourceAssetsDir)) {
@@ -2476,7 +2711,8 @@ for (const domain of domains) {
   // WebPart domains: write a WebPart manifest to the webpart entry path (existing behavior).
   if (isExtension) {
     const shellManifest = {
-      $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json',
+      $schema:
+        'https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json',
       id: shellManifestId,
       alias: 'ShellExtensionCustomizer',
       componentType: 'Extension',
@@ -2485,21 +2721,33 @@ for (const domain of domains) {
       manifestVersion: 2,
     };
     fs.writeFileSync(
-      path.join(SHELL_DIR, 'src', 'extensions', 'customizer', 'ShellExtensionCustomizer.manifest.json'),
+      path.join(
+        SHELL_DIR,
+        'src',
+        'extensions',
+        'customizer',
+        'ShellExtensionCustomizer.manifest.json',
+      ),
       JSON.stringify(shellManifest, null, 2),
     );
   } else {
     const shellManifest = {
-      $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
+      $schema:
+        'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
       id: shellManifestId,
       alias: 'ShellWebPart',
       componentType: 'WebPart',
       version: '*',
       manifestVersion: 2,
       requiresCustomScript: false,
-      supportedHosts: primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp'],
+      supportedHosts: primarySourceManifest.supportedHosts || [
+        'SharePointWebPart',
+        'TeamsPersonalApp',
+      ],
       supportsThemeVariants: true,
-      ...(primarySourceManifest.supportsFullBleed !== undefined && { supportsFullBleed: primarySourceManifest.supportsFullBleed }),
+      ...(primarySourceManifest.supportsFullBleed !== undefined && {
+        supportsFullBleed: primarySourceManifest.supportsFullBleed,
+      }),
       preconfiguredEntries: primarySourceManifest.preconfiguredEntries,
     };
     fs.writeFileSync(
@@ -2585,7 +2833,11 @@ for (const domain of domains) {
   };
 
   console.log('  Running gulp bundle --ship...');
-  run('node node_modules/gulp-cli/bin/gulp.js bundle --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
+  run('node node_modules/gulp-cli/bin/gulp.js bundle --ship', {
+    cwd: SHELL_DIR,
+    env: shellEnv,
+    useNode18: true,
+  });
 
   const compiledShellAssetPath = path.join(SHELL_DIR, 'release', 'assets');
   const shellAssetPattern = isExtension
@@ -2595,19 +2847,23 @@ for (const domain of domains) {
     ? fs.readdirSync(compiledShellAssetPath).find((file) => shellAssetPattern.test(file))
     : undefined;
   if (!compiledShellAsset) {
-    console.error(`  ❌ ${domain.dir}: compiled shell asset not found after gulp bundle (pattern: ${shellAssetPattern})`);
+    console.error(
+      `  ❌ ${domain.dir}: compiled shell asset not found after gulp bundle (pattern: ${shellAssetPattern})`,
+    );
     allPassed = false;
     continue;
   }
-  if (!inspectCompiledShellAsset(
-    path.join(compiledShellAssetPath, compiledShellAsset),
-    bundleName,
-    globalName,
-    domain.dir,
-    shellEnv.BACKEND_MODE || undefined,
-    shellEnv.API_AUDIENCE || undefined,
-    shellEnv.FUNCTION_APP_URL || undefined,
-  )) {
+  if (
+    !inspectCompiledShellAsset(
+      path.join(compiledShellAssetPath, compiledShellAsset),
+      bundleName,
+      globalName,
+      domain.dir,
+      shellEnv.BACKEND_MODE || undefined,
+      shellEnv.API_AUDIENCE || undefined,
+      shellEnv.FUNCTION_APP_URL || undefined,
+    )
+  ) {
     allPassed = false;
     continue;
   }
@@ -2633,7 +2889,9 @@ for (const domain of domains) {
     ? path.join(compiledManifestDir, `${HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID}.manifest.json`)
     : path.join(compiledManifestDir, compiledManifestFiles[0]);
   if (!fs.existsSync(compiledBaseManifestPath)) {
-    console.error(`  ❌ ${domain.dir}: compiled base manifest not found at ${compiledBaseManifestPath}`);
+    console.error(
+      `  ❌ ${domain.dir}: compiled base manifest not found at ${compiledBaseManifestPath}`,
+    );
     allPassed = false;
     continue;
   }
@@ -2643,7 +2901,9 @@ for (const domain of domains) {
   const shellBundleKey = isExtension ? 'shell-extension-customizer' : 'shell-web-part';
   const legacyScriptResource = compiledScriptResources[shellBundleKey];
   if (!legacyScriptResource) {
-    console.error(`  ❌ ${domain.dir}: compiled shell manifest missing ${shellBundleKey} script resource`);
+    console.error(
+      `  ❌ ${domain.dir}: compiled shell manifest missing ${shellBundleKey} script resource`,
+    );
     allPassed = false;
     continue;
   }
@@ -2700,10 +2960,13 @@ for (const domain of domains) {
       ...compiledBaseManifest,
       id: target.json.id,
       alias: target.json.alias ?? compiledBaseManifest.alias,
-      requiresCustomScript: target.json.requiresCustomScript ?? compiledBaseManifest.requiresCustomScript,
+      requiresCustomScript:
+        target.json.requiresCustomScript ?? compiledBaseManifest.requiresCustomScript,
       supportedHosts: target.json.supportedHosts ?? compiledBaseManifest.supportedHosts,
-      supportsThemeVariants: target.json.supportsThemeVariants ?? compiledBaseManifest.supportsThemeVariants,
-      preconfiguredEntries: target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
+      supportsThemeVariants:
+        target.json.supportsThemeVariants ?? compiledBaseManifest.supportsThemeVariants,
+      preconfiguredEntries:
+        target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
       loaderConfig: {
         ...compiledBaseManifest.loaderConfig,
         entryModuleId: targetEntryModuleId,
@@ -2720,7 +2983,9 @@ for (const domain of domains) {
       JSON.stringify(composed, null, 2),
     );
 
-    console.log(`  ✓ ${target.json.id}: shell copy ${perWebpartFileName} (define → ${targetEntryModuleId})`);
+    console.log(
+      `  ✓ ${target.json.id}: shell copy ${perWebpartFileName} (define → ${targetEntryModuleId})`,
+    );
   }
   if (useNeutralShellManifestId) {
     fs.rmSync(compiledBaseManifestPath, { force: true });
@@ -2728,7 +2993,9 @@ for (const domain of domains) {
   console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
   console.log(`  ✓ Base shell module identity: ${compiledEntryModuleId}`);
   if (generatedShimExpectations.length > 0) {
-    console.log(`  ✓ Generated ${generatedShimExpectations.length} per-webpart shell entry module(s)`);
+    console.log(
+      `  ✓ Generated ${generatedShimExpectations.length} per-webpart shell entry module(s)`,
+    );
     for (const shim of generatedShimExpectations) {
       console.log(
         `    - ${shim.manifestId} -> ${shim.shimFileName} (entry ${shim.entryModuleId}, sha256:${shim.shimFileHash})`,
@@ -2742,10 +3009,7 @@ for (const domain of domains) {
     fs.mkdirSync(deployDir, { recursive: true });
   }
   for (const file of fs.readdirSync(path.join(SHELL_DIR, 'assets'))) {
-    fs.copyFileSync(
-      path.join(SHELL_DIR, 'assets', file),
-      path.join(deployDir, file),
-    );
+    fs.copyFileSync(path.join(SHELL_DIR, 'assets', file), path.join(deployDir, file));
   }
   console.log(`  ✓ Vite assets copied to temp/deploy/`);
 
@@ -2758,7 +3022,9 @@ for (const domain of domains) {
     }
   }
   if (generatedShimExpectations.length > 0) {
-    console.log(`  ✓ ${generatedShimExpectations.length} per-webpart shell entry file(s) copied to temp/deploy/`);
+    console.log(
+      `  ✓ ${generatedShimExpectations.length} per-webpart shell entry file(s) copied to temp/deploy/`,
+    );
   }
 
   // ── Step 5: Run gulp package-solution ───────────────────────────────
@@ -2766,7 +3032,11 @@ for (const domain of domains) {
   // during gulp bundle, so gulp package-solution now includes the Vite bundle
   // as a first-class client-side asset — no post-hoc zip injection required.
   console.log('  Running gulp package-solution --ship...');
-  run('node node_modules/gulp-cli/bin/gulp.js package-solution --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
+  run('node node_modules/gulp-cli/bin/gulp.js package-solution --ship', {
+    cwd: SHELL_DIR,
+    env: shellEnv,
+    useNode18: true,
+  });
 
   const sppkgSource = path.join(SHELL_DIR, 'sharepoint', 'solution', sppkgName);
   if (!fs.existsSync(sppkgSource)) {
@@ -2791,28 +3061,45 @@ for (const domain of domains) {
   fs.copyFileSync(sppkgSource, sppkgDest);
 
   // Post-packaging verification: inspect .sppkg contents (OPC/ZIP archive)
-  const emittedLocalShimFiles = generatedShimExpectations.map((expectation) => expectation.shimFileName).sort();
+  const emittedLocalShimFiles = generatedShimExpectations
+    .map((expectation) => expectation.shimFileName)
+    .sort();
   // Any domain that generated per-webpart shell-entry shims gets structural
   // shim verification and, when under the freshness gate, the full package-
   // truth proof. This covers hb-webparts today and hb-publisher (which also
   // produces a shell-entry shim per single-manifest webpart).
-  const hbExpectations: HbVerificationExpectations | undefined = generatedShimExpectations.length > 0
-    ? {
-      baseModuleId: compiledEntryModuleId,
-      shimExpectations: generatedShimExpectations,
-      emittedLocalShimFiles,
-    }
-    : undefined;
+  const hbExpectations: HbVerificationExpectations | undefined =
+    generatedShimExpectations.length > 0
+      ? {
+          baseModuleId: compiledEntryModuleId,
+          shimExpectations: generatedShimExpectations,
+          emittedLocalShimFiles,
+        }
+      : undefined;
   const fullBleedManifestIds = new Set(
     targetManifests.filter((m) => m.json.supportsFullBleed === true).map((m) => m.json.id),
   );
-  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir, hbExpectations, isExtension, fullBleedManifestIds);
+  const verified = verifySppkg(
+    sppkgDest,
+    bundleName,
+    targetManifestIds,
+    domain.dir,
+    hbExpectations,
+    isExtension,
+    fullBleedManifestIds,
+  );
   if (!verified) {
     allPassed = false;
     continue;
   }
   if (domain.dir === 'hb-homepage') {
-    if (!verifyPackagedClientSideAssetsByBasename(sppkgDest, domain.dir, HB_HOMEPAGE_CANONICAL_BANNER_FILES)) {
+    if (
+      !verifyPackagedClientSideAssetsByBasename(
+        sppkgDest,
+        domain.dir,
+        HB_HOMEPAGE_CANONICAL_BANNER_FILES,
+      )
+    ) {
       allPassed = false;
       continue;
     }
@@ -2823,15 +3110,17 @@ for (const domain of domains) {
       continue;
     }
   }
-  if (!inspectPackagedShellAsset(
-    sppkgDest,
-    bundleName,
-    globalName,
-    domain.dir,
-    shellEnv.BACKEND_MODE || undefined,
-    shellEnv.API_AUDIENCE || undefined,
-    shellEnv.FUNCTION_APP_URL || undefined,
-  )) {
+  if (
+    !inspectPackagedShellAsset(
+      sppkgDest,
+      bundleName,
+      globalName,
+      domain.dir,
+      shellEnv.BACKEND_MODE || undefined,
+      shellEnv.API_AUDIENCE || undefined,
+      shellEnv.FUNCTION_APP_URL || undefined,
+    )
+  ) {
     allPassed = false;
     continue;
   }
@@ -2858,9 +3147,10 @@ for (const domain of domains) {
       .map((entry) => entry.trim())
       .filter(Boolean);
     const shimArchiveBasenames = shimArchivePaths.map((p) => path.basename(p));
-    const canonicalShellAsset = shimArchiveBasenames.find((name) =>
-      /^shell-web-part.*\.js$/i.test(name) || /^ShellWebPart.*\.js$/i.test(name),
-    ) ?? null;
+    const canonicalShellAsset =
+      shimArchiveBasenames.find(
+        (name) => /^shell-web-part.*\.js$/i.test(name) || /^ShellWebPart.*\.js$/i.test(name),
+      ) ?? null;
     const expectedShellEntryNames = new Set(
       hbExpectations.shimExpectations.map((expectation) => expectation.shimFileName),
     );
@@ -2875,9 +3165,9 @@ for (const domain of domains) {
     if (!allRequiredAssetsPresent) {
       console.error(
         `  ❌ ${domain.dir}: package-truth trio incomplete — ` +
-        `canonicalShellAsset=${canonicalShellAsset ?? 'MISSING'}, ` +
-        `shellEntryAssets=${shellEntryAssets.length}/${hbExpectations.shimExpectations.length}, ` +
-        `appBundle=${appBundleAsset ?? 'MISSING'}`,
+          `canonicalShellAsset=${canonicalShellAsset ?? 'MISSING'}, ` +
+          `shellEntryAssets=${shellEntryAssets.length}/${hbExpectations.shimExpectations.length}, ` +
+          `appBundle=${appBundleAsset ?? 'MISSING'}`,
       );
       allPassed = false;
       continue;
@@ -2886,41 +3176,49 @@ for (const domain of domains) {
     const proofOutputPath = path.join(OUTPUT_DIR, `${domain.dir}-shim-proof.json`);
     fs.writeFileSync(
       proofOutputPath,
-      `${JSON.stringify({
-        domain: domain.dir,
-        sppkgFile: path.basename(sppkgDest),
-        packagingRunId: freshnessEvidence?.runId ?? null,
-        sourceBundle: freshnessEvidence
-          ? {
-            fileName: baseBundleName,
-            sha256: freshnessEvidence.sourceBundleSha256,
-            mtimeIso: freshnessEvidence.sourceBundleMtimeIso,
-            sizeBytes: freshnessEvidence.sourceBundleSizeBytes,
-          }
-          : null,
-        packagedBundleName: bundleName,
-        baseModuleId: hbExpectations.baseModuleId,
-        emittedLocalShimFiles: hbExpectations.emittedLocalShimFiles,
-        packagedShimMappings: packagedShimSummary,
-        packageShapeAssets: {
-          canonicalShellAsset,
-          shellEntryAssets,
-          appBundle: appBundleAsset,
-          allRequiredAssetsPresent,
+      `${JSON.stringify(
+        {
+          domain: domain.dir,
+          sppkgFile: path.basename(sppkgDest),
+          packagingRunId: freshnessEvidence?.runId ?? null,
+          sourceBundle: freshnessEvidence
+            ? {
+                fileName: baseBundleName,
+                sha256: freshnessEvidence.sourceBundleSha256,
+                mtimeIso: freshnessEvidence.sourceBundleMtimeIso,
+                sizeBytes: freshnessEvidence.sourceBundleSizeBytes,
+              }
+            : null,
+          packagedBundleName: bundleName,
+          baseModuleId: hbExpectations.baseModuleId,
+          emittedLocalShimFiles: hbExpectations.emittedLocalShimFiles,
+          packagedShimMappings: packagedShimSummary,
+          packageShapeAssets: {
+            canonicalShellAsset,
+            shellEntryAssets,
+            appBundle: appBundleAsset,
+            allRequiredAssetsPresent,
+          },
         },
-      }, null, 2)}\n`,
+        null,
+        2,
+      )}\n`,
     );
     console.log(`  ✓ Shim proof written: ${proofOutputPath}`);
 
     if (!freshnessEvidence) {
-      console.error(`  ❌ ${domain.dir}: missing freshness evidence required for package-truth proof`);
+      console.error(
+        `  ❌ ${domain.dir}: missing freshness evidence required for package-truth proof`,
+      );
       allPassed = false;
       continue;
     }
     const runtimeMarker = RUNTIME_MARKERS_BY_DOMAIN[domain.dir];
     const criticalRuntimePaths = CRITICAL_RUNTIME_PATHS_BY_DOMAIN[domain.dir] ?? [];
     if (!runtimeMarker) {
-      console.error(`  ❌ ${domain.dir}: no RUNTIME_MARKERS_BY_DOMAIN entry — cannot build package-truth proof`);
+      console.error(
+        `  ❌ ${domain.dir}: no RUNTIME_MARKERS_BY_DOMAIN entry — cannot build package-truth proof`,
+      );
       allPassed = false;
       continue;
     }
@@ -2933,37 +3231,41 @@ for (const domain of domains) {
       const targetManifest = targetManifests[0]?.json;
       const publisherShim = generatedShimExpectations[0];
       if (!targetManifest || !publisherShim) {
-        console.error(`  ❌ ${domain.dir}: missing target manifest or shim expectation for deployment plan`);
+        console.error(
+          `  ❌ ${domain.dir}: missing target manifest or shim expectation for deployment plan`,
+        );
         allPassed = false;
         continue;
       }
       const deploymentModelKind = deriveDeploymentModelKind(domainPkgSolution);
       const discoveryPosture = derivePublisherDiscoveryPosture(targetManifest);
-      const installBlock = deploymentModelKind === 'site-scoped-webpart'
-        ? {
-          scope: 'Site',
-          command:
-            'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Site -Overwrite -Publish',
-        }
-        : {
-          scope: 'Tenant',
-          command:
-            'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Tenant -Overwrite -Publish',
-        };
-      const discoveryBlock = deploymentModelKind === 'site-scoped-webpart'
-        ? {
-          path: 'modern-page-webpart-picker',
-          note:
-            'After site-scoped install, page authors insert the Article Publisher via the ' +
-            'standard modern page web part picker (Edit page → + → search "Article Publisher").',
-        }
-        : {
-          path: 'tenant-toolbox-discovery',
-          note:
-            'Tenant-scoped deployment: the Article Publisher is available to every site in the ' +
-            'tenant without per-site install. Page authors insert it via the standard modern page ' +
-            'web part picker on any modern page.',
-        };
+      const installBlock =
+        deploymentModelKind === 'site-scoped-webpart'
+          ? {
+              scope: 'Site',
+              command:
+                'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Site -Overwrite -Publish',
+            }
+          : {
+              scope: 'Tenant',
+              command:
+                'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Tenant -Overwrite -Publish',
+            };
+      const discoveryBlock =
+        deploymentModelKind === 'site-scoped-webpart'
+          ? {
+              path: 'modern-page-webpart-picker',
+              note:
+                'After site-scoped install, page authors insert the Article Publisher via the ' +
+                'standard modern page web part picker (Edit page → + → search "Article Publisher").',
+            }
+          : {
+              path: 'tenant-toolbox-discovery',
+              note:
+                'Tenant-scoped deployment: the Article Publisher is available to every site in the ' +
+                'tenant without per-site install. Page authors insert it via the standard modern page ' +
+                'web part picker on any modern page.',
+            };
       hbPublisherDeploymentPlan = {
         domain: domain.dir,
         generatedAt: new Date().toISOString(),
@@ -3027,7 +3329,9 @@ for (const domain of domains) {
     fs.writeFileSync(packageTruthPath, `${JSON.stringify(packageTruth.proof, null, 2)}\n`);
     console.log(`  ✓ Package-truth proof written: ${packageTruthPath}`);
     if (!packageTruth.ok) {
-      console.error(`  ❌ ${domain.dir}: package-truth verification failed; see ${packageTruthPath}`);
+      console.error(
+        `  ❌ ${domain.dir}: package-truth verification failed; see ${packageTruthPath}`,
+      );
       allPassed = false;
       continue;
     }
@@ -3060,7 +3364,10 @@ for (const domain of domains) {
         { key: 'homepage-launcher surface id', needle: 'homepage-launcher' },
         { key: 'entry-stack wrapper root marker', needle: 'data-hb-homepage-entry-stack' },
         { key: 'homepage-launcher version marker', needle: 'data-hbc-homepage-launcher-version' },
-        { key: 'homepage-launcher device-class marker', needle: 'data-hbc-homepage-launcher-device-class' },
+        {
+          key: 'homepage-launcher device-class marker',
+          needle: 'data-hbc-homepage-launcher-device-class',
+        },
         { key: 'homepage-launcher surface attribute', needle: 'data-hbc-homepage-launcher' },
       ];
       const markerResults = flagshipMarkers.map((m) => ({
@@ -3132,12 +3439,13 @@ for (const domain of domains) {
         OUTPUT_DIR,
         'hb-intel-homepage-effectiveness-proof.json',
       );
-      fs.writeFileSync(
-        effectivenessProofPath,
-        `${JSON.stringify(effectivenessProof, null, 2)}\n`,
-      );
+      fs.writeFileSync(effectivenessProofPath, `${JSON.stringify(effectivenessProof, null, 2)}\n`);
       console.log(`  ✓ Homepage effectiveness proof written: ${effectivenessProofPath}`);
-      if (!versionAuthority.aligned || missingMarkers.length > 0 || missingBannerAssets.length > 0) {
+      if (
+        !versionAuthority.aligned ||
+        missingMarkers.length > 0 ||
+        missingBannerAssets.length > 0
+      ) {
         console.error(
           `  ❌ hb-intel-homepage effectiveness proof failed; see ${effectivenessProofPath}`,
         );
@@ -3168,7 +3476,9 @@ for (const domain of domains) {
       }));
       const missingRouteMarkers = routeMarkerChecks.filter((marker) => !marker.present);
       const missingConfigMarkers = configMarkerChecks.filter((marker) => !marker.present);
-      const permissionRequests = Array.isArray(domainPkgSolution?.solution?.webApiPermissionRequests)
+      const permissionRequests = Array.isArray(
+        domainPkgSolution?.solution?.webApiPermissionRequests,
+      )
         ? domainPkgSolution.solution.webApiPermissionRequests
         : [];
       const hasAccessAsUserPermission = permissionRequests.some(
@@ -3239,7 +3549,11 @@ for (const domain of domains) {
       fs.writeFileSync(runtimeConfigProofPath, `${JSON.stringify(runtimeConfigProof, null, 2)}\n`);
       console.log(`  ✓ Safety route/auth proof written: ${routeAuthProofPath}`);
       console.log(`  ✓ Safety runtime config proof written: ${runtimeConfigProofPath}`);
-      if (!hasAccessAsUserPermission || missingRouteMarkers.length > 0 || missingConfigMarkers.length > 0) {
+      if (
+        !hasAccessAsUserPermission ||
+        missingRouteMarkers.length > 0 ||
+        missingConfigMarkers.length > 0
+      ) {
         console.error(`  ❌ safety: route/auth proof failed; see ${routeAuthProofPath}`);
         allPassed = false;
         continue;
@@ -3249,18 +3563,27 @@ for (const domain of domains) {
     if (domain.dir === 'hb-publisher' && hbPublisherDeploymentPlan) {
       const targetManifest = targetManifests[0]?.json;
       const deploymentPlanPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-deployment-plan.json`);
-      fs.writeFileSync(deploymentPlanPath, `${JSON.stringify(hbPublisherDeploymentPlan, null, 2)}\n`);
+      fs.writeFileSync(
+        deploymentPlanPath,
+        `${JSON.stringify(hbPublisherDeploymentPlan, null, 2)}\n`,
+      );
       console.log(`  ✓ Hosted deployment plan written: ${deploymentPlanPath}`);
 
       const hostedLoadProofPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-load-proof.json`);
       const proofScriptPath = path.join(ROOT, 'tools', 'hb-publisher-hosted-load-proof.mjs');
       const proofArgs = [
-        '--bundle', bundlePath,
-        '--output', hostedLoadProofPath,
-        '--globalName', `__hbIntel_${domain.camel}`,
-        '--runId', freshnessEvidence.runId,
-        '--bundleName', bundleName,
-        '--manifestId', targetManifest.id,
+        '--bundle',
+        bundlePath,
+        '--output',
+        hostedLoadProofPath,
+        '--globalName',
+        `__hbIntel_${domain.camel}`,
+        '--runId',
+        freshnessEvidence.runId,
+        '--bundleName',
+        bundleName,
+        '--manifestId',
+        targetManifest.id,
       ];
       try {
         execSync(`node "${proofScriptPath}" ${proofArgs.map((a) => `"${a}"`).join(' ')}`, {

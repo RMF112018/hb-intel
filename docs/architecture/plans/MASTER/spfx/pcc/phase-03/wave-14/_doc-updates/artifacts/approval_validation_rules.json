@@ -1,0 +1,184 @@
+{
+  "rules": [
+    {
+      "id": "APR-VAL-001",
+      "severity": "error",
+      "description": "missing approver",
+      "appliesTo": "ApprovalRoute/ApprovalStep",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "assign required approver role or principal"
+    },
+    {
+      "id": "APR-VAL-002",
+      "severity": "error",
+      "description": "invalid actor role",
+      "appliesTo": "Command",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "resolve actor PCC role before command"
+    },
+    {
+      "id": "APR-VAL-003",
+      "severity": "error",
+      "description": "invalid state transition",
+      "appliesTo": "StateMachine",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "use canonical transition table"
+    },
+    {
+      "id": "APR-VAL-004",
+      "severity": "error",
+      "description": "missing reason for waiver/override",
+      "appliesTo": "Decision",
+      "blocksRelease": true,
+      "ownerRole": "Approver",
+      "remediation": "provide required reason code"
+    },
+    {
+      "id": "APR-VAL-005",
+      "severity": "error",
+      "description": "missing evidence link where required",
+      "appliesTo": "Decision",
+      "blocksRelease": true,
+      "ownerRole": "Approver",
+      "remediation": "attach or reference required evidence"
+    },
+    {
+      "id": "APR-VAL-006",
+      "severity": "error",
+      "description": "stale source item reference",
+      "appliesTo": "SourceReference",
+      "blocksRelease": true,
+      "ownerRole": "Source Owner",
+      "remediation": "revalidate or supersede checkpoint"
+    },
+    {
+      "id": "APR-VAL-007",
+      "severity": "error",
+      "description": "superseded source item reference",
+      "appliesTo": "SourceReference",
+      "blocksRelease": true,
+      "ownerRole": "Source Owner",
+      "remediation": "link replacement approval request"
+    },
+    {
+      "id": "APR-VAL-008",
+      "severity": "error",
+      "description": "unresolved blocker before gate approval",
+      "appliesTo": "ReadinessGate",
+      "blocksRelease": true,
+      "ownerRole": "Project Executive",
+      "remediation": "resolve, defer, waive, or override with reason"
+    },
+    {
+      "id": "APR-VAL-009",
+      "severity": "error",
+      "description": "approval mode mismatch",
+      "appliesTo": "ApprovalRoute",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "correct route mode/step completion rule"
+    },
+    {
+      "id": "APR-VAL-010",
+      "severity": "error",
+      "description": "missing downstream target",
+      "appliesTo": "Handoff/Freeze",
+      "blocksRelease": true,
+      "ownerRole": "Source Owner",
+      "remediation": "define downstream target"
+    },
+    {
+      "id": "APR-VAL-011",
+      "severity": "error",
+      "description": "decision attempted by unauthorized role",
+      "appliesTo": "Command",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "deny and audit"
+    },
+    {
+      "id": "APR-VAL-012",
+      "severity": "critical",
+      "description": "HBI attempted decision",
+      "appliesTo": "Command/HBI",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "refuse and audit"
+    },
+    {
+      "id": "APR-VAL-013",
+      "severity": "critical",
+      "description": "external-system writeback attempted",
+      "appliesTo": "Command/Integration",
+      "blocksRelease": true,
+      "ownerRole": "Integration Admin",
+      "remediation": "block command and audit"
+    },
+    {
+      "id": "APR-VAL-014",
+      "severity": "critical",
+      "description": "direct tenant mutation attempted",
+      "appliesTo": "Command/Admin",
+      "blocksRelease": true,
+      "ownerRole": "IT / Tenant Admin",
+      "remediation": "block command and audit"
+    },
+    {
+      "id": "APR-VAL-015",
+      "severity": "critical",
+      "description": "package/dependency mutation attempted",
+      "appliesTo": "Execution",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "revert package/lockfile mutation"
+    },
+    {
+      "id": "APR-VAL-016",
+      "severity": "error",
+      "description": "invalid Wave 13G handoff/freeze checkpoint",
+      "appliesTo": "Estimating",
+      "blocksRelease": true,
+      "ownerRole": "Director of Preconstruction",
+      "remediation": "align with Wave 13G authority and Phase 14 semantics"
+    },
+    {
+      "id": "APR-VAL-017",
+      "severity": "warning",
+      "description": "missing disabled action reason",
+      "appliesTo": "UX",
+      "blocksRelease": true,
+      "ownerRole": "UX Owner",
+      "remediation": "add disabled action reason"
+    },
+    {
+      "id": "APR-VAL-018",
+      "severity": "warning",
+      "description": "missing aria-sort for sortable queue",
+      "appliesTo": "Accessibility",
+      "blocksRelease": true,
+      "ownerRole": "UX Owner",
+      "remediation": "add accessible sort semantics"
+    },
+    {
+      "id": "APR-VAL-019",
+      "severity": "error",
+      "description": "default unique permission strategy detected",
+      "appliesTo": "Storage/Security",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "use role-filtered read models/redaction instead"
+    },
+    {
+      "id": "APR-VAL-020",
+      "severity": "error",
+      "description": "unpaged queue read",
+      "appliesTo": "Storage/ReadModel",
+      "blocksRelease": true,
+      "ownerRole": "PCC Admin",
+      "remediation": "add server-side paging/filtering"
+    }
+  ]
+}

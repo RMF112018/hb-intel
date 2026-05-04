@@ -1,76 +1,59 @@
 # Prompt 04 — Developer Contracts and Reference JSONs
+## Wave 13G Authority Lock
+
+All Estimating Workbench documentation, UX/wireframe framing, dependency evaluation, model contracts, SharePoint schema contracts, SPFx surface contracts, read-model/command contracts, test gates, and subsequent runtime implementation prompts are governed under:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
+```
+
+The wireframe authority path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/wireframes/
+```
+
+The developer-contract target path is:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/estimating-workbench-developer-contracts/
+```
+
+This Wave 13G authority supersedes any earlier implication that Estimating Workbench implementation work should move to a separate future wave. Future implementation may be split into 13G sub-prompts or phases, but it remains under Wave 13G unless a later approved architecture decision explicitly supersedes this path.
+
+Wave 13G documentation and prompts do not, by themselves, authorize production rollout, tenant mutation, package installation, lockfile mutation, Procore/Sage writeback, or active project workbook import.
+
+
+## Wave 13G Execution Requirement
+
+Before making any edits, confirm that all Estimating Workbench documentation and implementation references resolve under:
+
+```text
+docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13G/
+```
+
+Do not create a separate future wave, `wave-99-estimating-workbench`, or top-level `estimating-workbench-developer-contracts` path. Any future runtime implementation prompts generated from this package must remain Wave 13G sub-prompts unless a later approved authority update supersedes this decision.
+
 
 ## Universal Instructions
 
 Do not re-read files that are still within your current context or memory unless you need to verify stale, missing, or contradictory repo truth.
 
-This is a documentation-only task. Do not make runtime/source-code changes unless the prompt explicitly allows them.
+This is a documentation-only task. Do not make runtime/source-code changes unless the prompt explicitly allows them. This package does not allow runtime/source-code changes.
 
 ## Prohibited Scope
 
-- Editing `docs/architecture/plans/**` unless separately authorized.
-- Broad repo formatting.
-- Source/runtime code changes.
+- Runtime/source code changes.
+- TypeScript model/package changes.
 - Backend route changes.
-- SPFx surface changes.
-- Package/dependency changes.
-- Lockfile changes.
-- Manifest changes.
-- Workflow/CI changes.
-- SPFx packaging/deployment.
-- Tenant mutation.
-- Procore API/runtime integration.
-- Direct SPFx-to-Procore behavior.
-- Procore write-back.
-- Procore full mirror.
-- Sage write-back or accounting postings.
-- Microsoft Graph runtime integration.
-- SharePoint REST/PnP runtime operations.
-- External-system writeback/sync/mirror.
-- Evidence file upload/sync/storage behavior.
-- Automatic employment, vendor blacklist, legal, claim, entitlement, compensability, defect-liability, warranty-liability, or delay-damages determinations.
-- Automatic publication of sensitive Lessons Learned content.
+- SPFx components, routes, clients, hooks, adapters, CSS, manifests, or package changes.
+- Package/dependency installation.
+- `package.json` or `pnpm-lock.yaml` mutation.
+- CI/workflow/deployment changes.
+- Tenant mutation or SharePoint list creation.
+- Procore, Sage, Autodesk, BuildingConnected, Graph, SharePoint REST, or HBI runtime calls.
+- Active project workbook import.
 - Production rollout.
-
-## Objective
-
-Create developer implementation contracts and reference JSON files for the Lessons Learned Center.
-
-## Required Docs
-
-- `Lessons_Learned_Developer_Implementation_Decisions_And_Contracts.md`
-
-## Required Reference Files
-
-- `lessons_learned_module_data_contract.json`
-- `lessons_learned_state_machine.json`
-- `field_permission_and_redaction_matrix.json`
-- `lessons_learned_validation_rules.json`
-- `hbi_lessons_learned_contracts.json`
-- `metric_dictionary.json`
-- `fixture_scenarios.json`
-- `source_research_urls.json`
-
-## Required Contract Topics
-
-- primary record and child records;
-- enums;
-- read-model envelopes;
-- state machine;
-- action/field-level permission matrix;
-- redaction shapes and reason codes;
-- validation rules by workflow state;
-- source-lineage contract;
-- HBI request/response contracts;
-- improvement action contract;
-- audit events;
-- metric formulas;
-- fixture scenarios;
-- external integration guardrails.
-
-## Commit Summary
-
-`docs(pcc): add lessons learned implementation contracts`
 
 ## Required Validation
 
@@ -84,19 +67,17 @@ git log --oneline -12
 md5 pnpm-lock.yaml
 git diff --check
 pnpm exec prettier --check <touched markdown/json files>
-git diff --cached --name-only
-git diff --name-only
+python3 -m json.tool <each touched json file>
 ```
-
-For JSON files touched, run `python3 -m json.tool` against each file.
 
 ## Final Output Requirements
 
-Return:
+Return files inspected, files changed, validation results, lockfile MD5 before/after, no-runtime/no-tenant/no-source-system-mutation confirmation, and commit summary/description if committing.
 
-- summary of files inspected;
-- summary of files changed, if this prompt permits edits;
-- validation results;
-- staged-file proof before commit, if committing;
-- commit summary and commit description, if committing;
-- explicit guardrail confirmation.
+## Objective
+
+Create the developer contract docs and machine-readable JSON artifacts for SharePoint schema, SPFx surface, read models, commands, state machines, field dictionary, validation, role/action matrix, grid/formula behavior, HBI grounding, error states, and acceptance gates.
+
+## Required Source
+
+Use this package's `docs/estimating-workbench/` and `reference/` files as source content. Adapt paths to repo truth, but do not reopen closed decisions.

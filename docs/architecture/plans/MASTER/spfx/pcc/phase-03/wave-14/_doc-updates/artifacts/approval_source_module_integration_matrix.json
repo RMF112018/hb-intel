@@ -1,0 +1,183 @@
+{
+  "sourceModules": [
+    {
+      "sourceModule": "Team & Access",
+      "checkpointFamilies": [
+        "access-security-approval",
+        "technical-admin-checkpoint"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.executionPending",
+        "checkpoint.manuallyClosed"
+      ],
+      "blockedWriteback": "no direct tenant/Graph mutation"
+    },
+    {
+      "sourceModule": "Document Control",
+      "checkpointFamilies": [
+        "workflow-item-review",
+        "external-system-mapping-correction"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.revisionRequested",
+        "checkpoint.superseded"
+      ],
+      "blockedWriteback": "no file mutation"
+    },
+    {
+      "sourceModule": "Project Lifecycle Readiness Center",
+      "checkpointFamilies": [
+        "readiness-gate-checkpoint",
+        "exception-waiver-override"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.deferred",
+        "checkpoint.waived",
+        "checkpoint.overridden"
+      ],
+      "blockedWriteback": "no duplicate readiness ownership"
+    },
+    {
+      "sourceModule": "Permit & Inspection Control Center",
+      "checkpointFamilies": [
+        "workflow-item-review",
+        "exception-waiver-override"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.waived",
+        "checkpoint.rejectedReturned"
+      ],
+      "blockedWriteback": "no AHJ/system execution"
+    },
+    {
+      "sourceModule": "Responsibility Matrix",
+      "checkpointFamilies": [
+        "workflow-item-review",
+        "executive-escalation"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.revisionRequested",
+        "checkpoint.escalated"
+      ],
+      "blockedWriteback": "no legal obligation creation"
+    },
+    {
+      "sourceModule": "Constraints Log",
+      "checkpointFamilies": [
+        "readiness-gate-checkpoint",
+        "exception-waiver-override"
+      ],
+      "events": [
+        "checkpoint.deferred",
+        "checkpoint.waived",
+        "checkpoint.overridden"
+      ],
+      "blockedWriteback": "no claims/delay analysis replacement"
+    },
+    {
+      "sourceModule": "Buyout Log",
+      "checkpointFamilies": [
+        "handoff-freeze-checkpoint",
+        "workflow-item-review"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.rejectedReturned"
+      ],
+      "blockedWriteback": "no procurement execution"
+    },
+    {
+      "sourceModule": "Estimating Workbench / Wave 13G",
+      "checkpointFamilies": [
+        "estimating-workbench-checkpoint",
+        "handoff-freeze-checkpoint",
+        "external-system-mapping-correction",
+        "exception-waiver-override"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.superseded",
+        "checkpoint.revisionRequested"
+      ],
+      "blockedWriteback": "Wave 13G feature ownership retained"
+    },
+    {
+      "sourceModule": "External Systems",
+      "checkpointFamilies": [
+        "external-system-mapping-correction",
+        "technical-admin-checkpoint"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.executionPending"
+      ],
+      "blockedWriteback": "no Procore/Sage/etc writeback"
+    },
+    {
+      "sourceModule": "Site Health",
+      "checkpointFamilies": [
+        "site-health-repair-request-review",
+        "technical-admin-checkpoint"
+      ],
+      "events": [
+        "checkpoint.executionPending",
+        "checkpoint.manuallyClosed"
+      ],
+      "blockedWriteback": "no automated repair"
+    },
+    {
+      "sourceModule": "Priority Actions",
+      "checkpointFamilies": [
+        "access-security-approval",
+        "workflow-item-review",
+        "readiness-gate-checkpoint",
+        "handoff-freeze-checkpoint",
+        "exception-waiver-override",
+        "external-system-mapping-correction",
+        "site-health-repair-request-review",
+        "executive-escalation",
+        "technical-admin-checkpoint",
+        "estimating-workbench-checkpoint"
+      ],
+      "events": [
+        "checkpoint.*"
+      ],
+      "blockedWriteback": "source ownership retained"
+    },
+    {
+      "sourceModule": "Project Readiness",
+      "checkpointFamilies": [
+        "readiness-gate-checkpoint",
+        "exception-waiver-override"
+      ],
+      "events": [
+        "checkpoint.approved",
+        "checkpoint.deferred",
+        "checkpoint.waived",
+        "checkpoint.overridden"
+      ],
+      "blockedWriteback": "no duplicate readiness ownership"
+    },
+    {
+      "sourceModule": "Executive Oversight",
+      "checkpointFamilies": [],
+      "events": [
+        "checkpoint.*"
+      ],
+      "blockedWriteback": "source ownership retained"
+    },
+    {
+      "sourceModule": "Admin Review Surfaces",
+      "checkpointFamilies": [],
+      "events": [
+        "checkpoint.*"
+      ],
+      "blockedWriteback": "source ownership retained"
+    }
+  ]
+}

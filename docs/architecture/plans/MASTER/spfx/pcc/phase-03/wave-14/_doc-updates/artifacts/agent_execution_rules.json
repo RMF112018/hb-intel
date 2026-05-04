@@ -1,0 +1,23 @@
+{
+  "must": [
+    "run repo-truth commands first",
+    "do not re-read files still in context unless repo changed or context is stale",
+    "make documentation-only changes",
+    "validate JSON",
+    "run Prettier checks on touched markdown/json",
+    "capture pnpm-lock.yaml MD5 before and after",
+    "produce commit summary and description"
+  ],
+  "mustNot": [
+    "runtime implementation",
+    "source-code implementation outside documentation and JSON planning artifacts",
+    "package.json or pnpm-lock.yaml mutation",
+    "SPFx-to-Procore, SPFx-to-Sage, SPFx-to-Graph write execution",
+    "Power Automate runtime dependency",
+    "tenant/list/group/security mutation",
+    "Procore write-back",
+    "Sage write-back",
+    "approval execution into external systems",
+    "production rollout or deployment"
+  ]
+}

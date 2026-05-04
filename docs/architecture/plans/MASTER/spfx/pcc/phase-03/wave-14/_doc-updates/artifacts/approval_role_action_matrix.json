@@ -1,0 +1,358 @@
+{
+  "roles": [
+    {
+      "role": "PCC Admin",
+      "decisionRights": [
+        "approve technical",
+        "request-revision",
+        "defer",
+        "waive technical",
+        "escalate",
+        "cancel",
+        "supersede",
+        "manual-close",
+        "admin-verify"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": true,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "IT / Tenant Admin",
+      "decisionRights": [
+        "admin-verify",
+        "manual-close execution-pending",
+        "request-revision",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Executive Oversight",
+      "decisionRights": [
+        "approve",
+        "waive-with-reason",
+        "override-with-reason",
+        "escalate",
+        "manual-close executive"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": true,
+      "canOverride": true,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Project Executive",
+      "decisionRights": [
+        "approve",
+        "reject-return",
+        "request-revision",
+        "defer",
+        "waive-with-reason",
+        "override-with-reason when policy allows",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": true,
+      "canOverride": true,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Project Manager",
+      "decisionRights": [
+        "approve assigned",
+        "reject-return assigned",
+        "request-revision",
+        "defer when policy allows",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Superintendent",
+      "decisionRights": [
+        "review",
+        "acknowledge",
+        "request-revision field checkpoints"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Project Accountant",
+      "decisionRights": [
+        "approve accounting/cost-code/budget seed",
+        "reject-return",
+        "request-revision",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Project Team Member",
+      "decisionRights": [
+        "review",
+        "comment",
+        "acknowledge"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Project Viewer",
+      "decisionRights": [
+        "view authorized history only"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": true,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Safety / QAQC",
+      "decisionRights": [
+        "review safety/qaqc checkpoints",
+        "approve if policy assigns",
+        "request-revision",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Manager of Operational Excellence",
+      "decisionRights": [
+        "review governance checkpoints",
+        "admin-verification where assigned",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Estimating Coordinator",
+      "decisionRights": [
+        "review estimating checkpoints",
+        "request-revision",
+        "acknowledge",
+        "prepare handoff checkpoint"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Estimator",
+      "decisionRights": [
+        "review/comment estimating checkpoints",
+        "acknowledge"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Lead Estimator",
+      "decisionRights": [
+        "approve assigned estimating review",
+        "request-revision",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Chief Estimator",
+      "decisionRights": [
+        "approve estimate freeze",
+        "reject-return",
+        "waive estimating validation when policy allows",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": true,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Director of Preconstruction",
+      "decisionRights": [
+        "approve freeze/handoff",
+        "override estimating when policy allows",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": true,
+      "canWaive": false,
+      "canOverride": true,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Legal Reviewer",
+      "decisionRights": [
+        "advisory-review",
+        "request-revision legal fields",
+        "no business approval unless policy assigns"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Compliance Reviewer",
+      "decisionRights": [
+        "advisory-review",
+        "admin-verification compliance",
+        "request-revision"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Leadership Reviewer",
+      "decisionRights": [
+        "advisory-review",
+        "escalation-review if assigned"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "External Contributor",
+      "decisionRights": [
+        "comment/respond only on shared items"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": true,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "External Design Team",
+      "decisionRights": [
+        "comment/respond only on shared design items"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": true,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Owner / Client Viewer",
+      "decisionRights": [
+        "view shared/redacted history only",
+        "acknowledge if policy explicitly allows"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": true,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Subcontractor Limited",
+      "decisionRights": [
+        "respond/comment only on assigned external-facing items"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": true,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "Integration Admin",
+      "decisionRights": [
+        "admin-verification",
+        "manual-close execution-pending mapping items",
+        "escalate"
+      ],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": false,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": null
+    },
+    {
+      "role": "HBI Assistant",
+      "decisionRights": [],
+      "fieldVisibility": "role-filtered and redaction-aware",
+      "sensitiveDataRedaction": true,
+      "canApprove": false,
+      "canWaive": false,
+      "canOverride": false,
+      "hbiAuthority": false
+    }
+  ]
+}

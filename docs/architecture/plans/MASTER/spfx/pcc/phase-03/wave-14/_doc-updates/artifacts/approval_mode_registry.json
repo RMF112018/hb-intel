@@ -1,0 +1,62 @@
+{
+  "modes": [
+    {
+      "id": "single-approver",
+      "completionRule": "one authorized approver terminal decision resolves the step",
+      "edgeCases": [
+        "delegation only if policy allows",
+        "rejection policy controls return/termination"
+      ]
+    },
+    {
+      "id": "sequential",
+      "completionRule": "steps open in order and each required step must resolve before the next opens",
+      "edgeCases": [
+        "source supersession invalidates uncompleted steps",
+        "revision request returns to source owner"
+      ]
+    },
+    {
+      "id": "parallel-all",
+      "completionRule": "all required approvers must decide",
+      "edgeCases": [
+        "fail-fast rejection or collect-all-responses determined by policy"
+      ]
+    },
+    {
+      "id": "parallel-any",
+      "completionRule": "first authorized terminal decision resolves the step",
+      "edgeCases": [
+        "remaining participants marked not-needed-after-resolution"
+      ]
+    },
+    {
+      "id": "advisory-review",
+      "completionRule": "advisory participants provide comments/recommendations only",
+      "edgeCases": [
+        "cannot approve, waive, override, cancel, or manual-close"
+      ]
+    },
+    {
+      "id": "acknowledgement-only",
+      "completionRule": "recipient confirms awareness",
+      "edgeCases": [
+        "does not imply approval authority"
+      ]
+    },
+    {
+      "id": "escalation-review",
+      "completionRule": "escalated owner reviews while original route history is preserved",
+      "edgeCases": [
+        "original route may pause or remain visible by policy"
+      ]
+    },
+    {
+      "id": "admin-verification",
+      "completionRule": "technical/governance actor verifies required controls",
+      "edgeCases": [
+        "may produce execution-pending but not external execution"
+      ]
+    }
+  ]
+}
