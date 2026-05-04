@@ -1,0 +1,16 @@
+{
+  "packageId": "pcc_procore_data_layer_wave13_execution_artifacts",
+  "generated": "2026-05-04",
+  "type": "documentation_prompt_package",
+  "phase": "Phase 3",
+  "currentWave": "Wave 13",
+  "primaryObjective": "Update documentation prompt package with machine-readable Procore data-layer implementation roadmap.",
+  "runtimeAllowed": false,
+  "expectedTopLevelFolders": ["docs", "artifacts", "prompts", "reference"],
+  "authority": {
+    "activeExecutionAuthorityPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/",
+    "activeExecutionAuthorityWave": "wave-13",
+    "priorPlanningContextPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/_doc-updates/",
+    "priorPlanningContextStatus": "historical_context_only_non_authoritative"
+  }
+}

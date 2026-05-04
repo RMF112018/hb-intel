@@ -1,0 +1,95 @@
+{
+  "authority": {
+    "activeExecutionAuthorityPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/",
+    "activeExecutionAuthorityWave": "wave-13",
+    "priorPlanningContextPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/_doc-updates/",
+    "priorPlanningContextStatus": "historical_context_only_non_authoritative"
+  },
+  "items": [
+    {
+      "id": "13A",
+      "name": "Procore Data Layer Remediation Gate",
+      "type": "audit_and_scope_lock",
+      "purpose": "Audit Waves 1-13 against Procore data-layer doctrine and create a remediation scope lock.",
+      "runtimeAllowed": false,
+      "primaryOutputs": [
+        "repo-truth audit",
+        "Wave 13-aware Procore remediation scope lock",
+        "open/closed decision delta",
+        "module remediation target matrix"
+      ],
+      "blocks": ["13B", "13C", "13D", "13E", "13F"]
+    },
+    {
+      "id": "13B",
+      "name": "HB Central Projects Registry + Procore Mapping Contract",
+      "type": "model_contract_and_reference",
+      "purpose": "Define canonical project-to-Procore mapping using HB Central Projects as registry context, without overloading Projects.procoreProject.",
+      "runtimeAllowed": false,
+      "primaryOutputs": [
+        "PccProcoreProjectMapping contract",
+        "Projects-list field mapping",
+        "query/index recommendations",
+        "mapping ownership and repair model"
+      ],
+      "dependsOn": ["13A"]
+    },
+    {
+      "id": "13C",
+      "name": "Shared Procore Data Layer Models and Fixtures",
+      "type": "models",
+      "purpose": "Add shared TypeScript contracts and deterministic fixtures for object links, curated summaries, sync health, source lineage, derived signals, and freshness bands.",
+      "runtimeAllowed": false,
+      "primaryOutputs": [
+        "@hbc/models/pcc Procore data-layer contracts",
+        "deterministic sanitized fixtures",
+        "no-mutation/no-runtime tests",
+        "PccReadModelResponseMap additions only where justified"
+      ],
+      "dependsOn": ["13A", "13B"]
+    },
+    {
+      "id": "13D",
+      "name": "Backend Mock Adapter Boundary",
+      "type": "backend_mock_only",
+      "purpose": "Introduce backend Procore data-layer provider interfaces and mock-only read-model boundaries with no external calls.",
+      "runtimeAllowed": false,
+      "primaryOutputs": [
+        "IProcoreDataProvider-style interfaces",
+        "mock provider",
+        "GET-only PCC read-model route(s) if needed",
+        "sync-health mock envelopes",
+        "runtime guard tests proving no Procore I/O"
+      ],
+      "dependsOn": ["13C"]
+    },
+    {
+      "id": "13E",
+      "name": "SPFx Fixture Integration Into Core Surfaces",
+      "type": "spfx_fixture_read_model_integration",
+      "purpose": "Wire Procore-derived fixture signals into Project Home, Priority Actions, Project Readiness, External Systems, and Site Health surfaces through existing read-model seams.",
+      "runtimeAllowed": false,
+      "primaryOutputs": [
+        "Procore sync/mapping/status cards",
+        "Procore-derived Priority Action candidates",
+        "freshness/degraded-state display",
+        "object-link/source-lineage labels"
+      ],
+      "dependsOn": ["13D"]
+    },
+    {
+      "id": "13F",
+      "name": "Module Remediation and Closeout",
+      "type": "cross_module_remediation_and_closeout",
+      "purpose": "Patch existing module docs/surfaces/tests for Procore source-lineage posture and close the remediation wave.",
+      "runtimeAllowed": false,
+      "primaryOutputs": [
+        "Waves 6-13 remediation evidence",
+        "module-specific source-lineage and evidence-link posture",
+        "validation closeout",
+        "live-read readiness gate recommendation"
+      ],
+      "dependsOn": ["13E"]
+    }
+  ]
+}
