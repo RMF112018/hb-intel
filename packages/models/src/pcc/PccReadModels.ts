@@ -44,6 +44,7 @@ import type {
 import type { PccConstraintsLogReadModel } from './ConstraintsLog.js';
 import type { PccBuyoutLogReadModel } from './BuyoutLog.js';
 import type { PccProcoreProjectMappingReadModel } from './PccProcoreProjectMapping.js';
+import type { PccProcoreSyncHealthReadModel } from './PccProcoreDataLayer.js';
 import type {
   PccCrossProjectKnowledgeReadModel,
   PccProjectLensesReadModel,
@@ -184,6 +185,7 @@ export interface PccReadModelResponseMap {
   'constraints-log': PccReadModelEnvelope<PccConstraintsLogReadModel>;
   'buyout-log': PccReadModelEnvelope<PccBuyoutLogReadModel>;
   'procore-project-mapping': PccReadModelEnvelope<PccProcoreProjectMappingReadModel>;
+  'procore-sync-health': PccReadModelEnvelope<PccProcoreSyncHealthReadModel>;
   'unified-lifecycle': PccReadModelEnvelope<PccUnifiedLifecycleReadModel>;
   'project-memory': PccReadModelEnvelope<PccProjectMemoryReadModel>;
   'project-lenses': PccReadModelEnvelope<PccProjectLensesReadModel>;

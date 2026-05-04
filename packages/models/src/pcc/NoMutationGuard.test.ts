@@ -46,6 +46,17 @@ const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'assertPccProcoreProjectMappingTransition',
   'derivePccProcoreMappingFreshnessBand',
   'validatePccProcoreProjectMappingLegacyHintBoundary',
+  // Wave 13 Prompt 13C — pure cross-cutting Procore data-layer helpers
+  // (freshness-band wrapper, derived-signal actionable predicate,
+  // object-link dedupe-key builder, source-status mapper, defense-in-
+  // depth display/fixture-safety redactor). All functions are
+  // deterministic, side-effect-free, read-only-by-design, and clock-
+  // injected.
+  'deriveProcoreFreshnessBand',
+  'isProcoreSignalActionable',
+  'buildProcoreObjectLinkDedupeKey',
+  'mapProcoreSourceStatusToPccPreviewState',
+  'redactProcoreSyncErrorMessage',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {

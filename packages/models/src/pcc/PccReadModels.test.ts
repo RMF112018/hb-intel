@@ -26,6 +26,7 @@ import {
   type PccConstraintsLogReadModel,
   type PccBuyoutLogReadModel,
   type PccProcoreProjectMappingReadModel,
+  type PccProcoreSyncHealthReadModel,
   type PccUnifiedLifecycleReadModel,
   type PccProjectMemoryReadModel,
   type PccProjectLensesReadModel,
@@ -43,6 +44,7 @@ import { SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL } from './fixtures/responsibili
 import { SAMPLE_CONSTRAINTS_LOG_READ_MODEL } from './fixtures/constraintsLog.js';
 import { SAMPLE_BUYOUT_LOG_READ_MODEL } from './fixtures/buyoutLog.js';
 import { SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL } from './fixtures/procoreProjectMapping.js';
+import { SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL } from './fixtures/procoreDataLayer.js';
 import {
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
@@ -355,6 +357,14 @@ describe('PccReadModels exports and typing', () => {
       data: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
     };
 
+    const procoreSyncHealthEnvelope: PccReadModelEnvelope<PccProcoreSyncHealthReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
+    };
+
     const unifiedLifecycleEnvelope: PccReadModelEnvelope<PccUnifiedLifecycleReadModel> = {
       mode: 'fixture',
       sourceStatus: 'available',
@@ -428,6 +438,7 @@ describe('PccReadModels exports and typing', () => {
       'constraints-log': constraintsLogEnvelope,
       'buyout-log': buyoutLogEnvelope,
       'procore-project-mapping': procoreProjectMappingEnvelope,
+      'procore-sync-health': procoreSyncHealthEnvelope,
       'unified-lifecycle': unifiedLifecycleEnvelope,
       'project-memory': projectMemoryEnvelope,
       'project-lenses': projectLensesEnvelope,
