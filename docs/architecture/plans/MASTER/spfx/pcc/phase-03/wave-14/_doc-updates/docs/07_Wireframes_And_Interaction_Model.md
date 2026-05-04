@@ -6,15 +6,15 @@ This document indexes the screen-level wireframes in `docs/wireframes/` and defi
 
 ## Wireframe Inventory
 
-| Wireframe | File |
-| --- | --- |
-| Approvals Home | `docs/wireframes/01_Approvals_Home.md` |
-| My Approvals | `docs/wireframes/02_My_Approvals.md` |
-| Approval Detail | `docs/wireframes/03_Approval_Detail.md` |
-| Checkpoint Registry | `docs/wireframes/04_Checkpoint_Registry.md` |
-| Decision History | `docs/wireframes/05_Decision_History.md` |
-| Escalation Queue | `docs/wireframes/06_Escalation_Queue.md` |
-| Admin Verification Queue | `docs/wireframes/07_Admin_Verification_Queue.md` |
+| Wireframe                 | File                                              |
+| ------------------------- | ------------------------------------------------- |
+| Approvals Home            | `docs/wireframes/01_Approvals_Home.md`            |
+| My Approvals              | `docs/wireframes/02_My_Approvals.md`              |
+| Approval Detail           | `docs/wireframes/03_Approval_Detail.md`           |
+| Checkpoint Registry       | `docs/wireframes/04_Checkpoint_Registry.md`       |
+| Decision History          | `docs/wireframes/05_Decision_History.md`          |
+| Escalation Queue          | `docs/wireframes/06_Escalation_Queue.md`          |
+| Admin Verification Queue  | `docs/wireframes/07_Admin_Verification_Queue.md`  |
 | Module Integration Panels | `docs/wireframes/08_Module_Integration_Panels.md` |
 
 ## Shared Layout Principles
@@ -56,19 +56,19 @@ Approval Detail must answer:
 
 ## Persona Defaults
 
-| Persona | Default View |
-| --- | --- |
-| Project Executive | Escalated + high-risk + readiness gates |
-| Project Manager | My project approvals + returned items |
-| Superintendent | field readiness / inspection checkpoints |
-| Project Accountant | budget seed, cost-code, buyout handoff |
-| Estimating Coordinator | estimate freeze/handoff/mapping exceptions |
-| Lead/Chief Estimator | estimate freeze and bid-leveling reviews |
+| Persona                     | Default View                                |
+| --------------------------- | ------------------------------------------- |
+| Project Executive           | Escalated + high-risk + readiness gates     |
+| Project Manager             | My project approvals + returned items       |
+| Superintendent              | field readiness / inspection checkpoints    |
+| Project Accountant          | budget seed, cost-code, buyout handoff      |
+| Estimating Coordinator      | estimate freeze/handoff/mapping exceptions  |
+| Lead/Chief Estimator        | estimate freeze and bid-leveling reviews    |
 | Director of Preconstruction | estimating freeze/handoff executive posture |
-| PCC Admin | admin verification and policy registry |
-| IT / Tenant Admin | access/security execution-pending |
-| Executive Oversight | high-impact escalations and overrides |
-| Project Viewer | read-only decision history where authorized |
+| PCC Admin                   | admin verification and policy registry      |
+| IT / Tenant Admin           | access/security execution-pending           |
+| Executive Oversight         | high-impact escalations and overrides       |
+| Project Viewer              | read-only decision history where authorized |
 
 ## Interaction Rules
 

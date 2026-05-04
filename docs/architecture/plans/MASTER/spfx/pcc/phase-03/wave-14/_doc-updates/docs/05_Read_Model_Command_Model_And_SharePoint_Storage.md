@@ -127,18 +127,18 @@ Every command must include:
 
 Storage is documentation-planned only. Future implementation should validate against tenant list strategy and backend boundary.
 
-| Candidate List | Purpose | Notes |
-| --- | --- | --- |
-| `PCC Approval Requests` | request/control header | high-volume queue list |
-| `PCC Approval Steps` | route step records | indexed by request/current step |
-| `PCC Approval Participants` | participants/assignments | avoid high-cardinality person-field filtering as first filter |
-| `PCC Approval Decisions` | decision records | append-only business audit |
-| `PCC Checkpoint Definitions` | module checkpoint registry | low-volume configuration |
-| `PCC Approval Policies` | policy versions | versioned configuration |
-| `PCC Checkpoint Evidence Links` | source evidence references | references only |
-| `PCC Checkpoint Audit Events` | append-only event stream | business/security audit separation |
-| `PCC Approval Comments` | comment threads | redaction-aware |
-| `PCC Approval Priority Action Links` | action linkage/dedupe | deterministic dedupe keys |
+| Candidate List                       | Purpose                    | Notes                                                         |
+| ------------------------------------ | -------------------------- | ------------------------------------------------------------- |
+| `PCC Approval Requests`              | request/control header     | high-volume queue list                                        |
+| `PCC Approval Steps`                 | route step records         | indexed by request/current step                               |
+| `PCC Approval Participants`          | participants/assignments   | avoid high-cardinality person-field filtering as first filter |
+| `PCC Approval Decisions`             | decision records           | append-only business audit                                    |
+| `PCC Checkpoint Definitions`         | module checkpoint registry | low-volume configuration                                      |
+| `PCC Approval Policies`              | policy versions            | versioned configuration                                       |
+| `PCC Checkpoint Evidence Links`      | source evidence references | references only                                               |
+| `PCC Checkpoint Audit Events`        | append-only event stream   | business/security audit separation                            |
+| `PCC Approval Comments`              | comment threads            | redaction-aware                                               |
+| `PCC Approval Priority Action Links` | action linkage/dedupe      | deterministic dedupe keys                                     |
 
 ## Queue Index Strategy
 

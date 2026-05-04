@@ -411,31 +411,31 @@ Every active request must expose:
 
 ## Evidence Requirements by Checkpoint Family
 
-| Checkpoint Family | Required Evidence |
-| --- | --- |
-| Access / Security | requestor, target role, permission template, business justification, external-user flag |
-| Workflow Item Review | source item reference, source status, owner, due date, comment/evidence if exception exists |
-| Readiness Gate | blocker summary, required checklist evidence, unresolved constraints, deferral list |
-| Handoff / Freeze | snapshot/version ID, variance summary, downstream target, handoff owner |
-| Exception / Waiver / Override | reason code, evidence, risk/exposure acknowledgement, elevated authority |
-| External Mapping Correction | source system, object ID, mapping issue, proposed correction, owner |
-| Site Health / Repair | finding, severity, repair request summary, admin verification requirement |
-| Executive Escalation | escalation reason, exposure summary, decision history, recommended next action |
-| Technical / Admin | technical finding, governance exception, verification checklist |
-| Estimating Workbench | estimate snapshot, freeze version, cost-code map, bid leveling summary, downstream seed |
+| Checkpoint Family             | Required Evidence                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------- |
+| Access / Security             | requestor, target role, permission template, business justification, external-user flag     |
+| Workflow Item Review          | source item reference, source status, owner, due date, comment/evidence if exception exists |
+| Readiness Gate                | blocker summary, required checklist evidence, unresolved constraints, deferral list         |
+| Handoff / Freeze              | snapshot/version ID, variance summary, downstream target, handoff owner                     |
+| Exception / Waiver / Override | reason code, evidence, risk/exposure acknowledgement, elevated authority                    |
+| External Mapping Correction   | source system, object ID, mapping issue, proposed correction, owner                         |
+| Site Health / Repair          | finding, severity, repair request summary, admin verification requirement                   |
+| Executive Escalation          | escalation reason, exposure summary, decision history, recommended next action              |
+| Technical / Admin             | technical finding, governance exception, verification checklist                             |
+| Estimating Workbench          | estimate snapshot, freeze version, cost-code map, bid leveling summary, downstream seed     |
 
 ## Reason Code Catalog
 
 Reason codes must be structured, not free text only.
 
-| Action | Required Reason Code Families |
-| --- | --- |
-| `reject-return` | incomplete-evidence, incorrect-source, missing-authority, conflicting-data, scope-unclear |
-| `request-revision` | missing-field, evidence-update-required, source-item-change-required, routing-correction |
-| `defer` | external-dependency, owner-delay, client-input-pending, authority-review-pending |
-| `waive-with-reason` | low-risk-exception, time-sensitive-business-need, non-applicable-condition, documented-alternate-control |
-| `override-with-reason` | executive-direction, emergency-condition, governance-approved-exception, project-critical-path-impact |
-| `escalate` | overdue, high-risk, high-cost, disputed-decision, authority-conflict |
-| `cancel` | source-cancelled, duplicate-request, created-in-error, no-longer-applicable |
-| `supersede` | source-version-changed, snapshot-replaced, policy-version-replaced, route-rebuilt |
-| `manual-close` | admin-cleanup, historical-reconciliation, migrated-record, duplicate-terminal-record |
+| Action                 | Required Reason Code Families                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `reject-return`        | incomplete-evidence, incorrect-source, missing-authority, conflicting-data, scope-unclear                |
+| `request-revision`     | missing-field, evidence-update-required, source-item-change-required, routing-correction                 |
+| `defer`                | external-dependency, owner-delay, client-input-pending, authority-review-pending                         |
+| `waive-with-reason`    | low-risk-exception, time-sensitive-business-need, non-applicable-condition, documented-alternate-control |
+| `override-with-reason` | executive-direction, emergency-condition, governance-approved-exception, project-critical-path-impact    |
+| `escalate`             | overdue, high-risk, high-cost, disputed-decision, authority-conflict                                     |
+| `cancel`               | source-cancelled, duplicate-request, created-in-error, no-longer-applicable                              |
+| `supersede`            | source-version-changed, snapshot-replaced, policy-version-replaced, route-rebuilt                        |
+| `manual-close`         | admin-cleanup, historical-reconciliation, migrated-record, duplicate-terminal-record                     |

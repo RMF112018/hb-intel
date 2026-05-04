@@ -121,6 +121,7 @@ The local agent must evaluate and amend the following target docs where applicab
 - `prompts/Prompt_07_Closeout_And_Auditor_Prompt.md`
 - `reference/Architecture_Delta_Summary.md`
 - `reference/Generation_Validation_Report.json`
+- `reference/Prompt_01_Repo_Truth_And_Scope_Lock_Closeout.md`
 - `reference/Repo_Truth_Findings_To_Verify.md`
 - `reference/Research_Basis.md`
 - `reference/Source_Inputs_Summary.md`
