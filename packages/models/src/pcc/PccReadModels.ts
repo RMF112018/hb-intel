@@ -43,6 +43,7 @@ import type {
 } from './ResponsibilityMatrix.js';
 import type { PccConstraintsLogReadModel } from './ConstraintsLog.js';
 import type { PccBuyoutLogReadModel } from './BuyoutLog.js';
+import type { PccProcoreProjectMappingReadModel } from './PccProcoreProjectMapping.js';
 import type {
   PccCrossProjectKnowledgeReadModel,
   PccProjectLensesReadModel,
@@ -182,6 +183,7 @@ export interface PccReadModelResponseMap {
   'responsibility-matrix': PccReadModelEnvelope<PccResponsibilityMatrixReadModel>;
   'constraints-log': PccReadModelEnvelope<PccConstraintsLogReadModel>;
   'buyout-log': PccReadModelEnvelope<PccBuyoutLogReadModel>;
+  'procore-project-mapping': PccReadModelEnvelope<PccProcoreProjectMappingReadModel>;
   'unified-lifecycle': PccReadModelEnvelope<PccUnifiedLifecycleReadModel>;
   'project-memory': PccReadModelEnvelope<PccProjectMemoryReadModel>;
   'project-lenses': PccReadModelEnvelope<PccProjectLensesReadModel>;

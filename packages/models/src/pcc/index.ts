@@ -306,6 +306,52 @@ export {
   type PccReadModelResponseMap,
 } from './PccReadModels.js';
 
+// Wave 13 Prompt 13B — HB Central Projects Registry + Procore Mapping contract
+export {
+  PCC_HBCENTRAL_PROJECTS_REGISTRY_FIELD_INTERNAL_NAMES,
+  PCC_PROCORE_PROJECT_MAPPING_ALLOWED_TRANSITIONS,
+  PCC_PROCORE_PROJECT_MAPPING_DEFAULT_FRESHNESS_BOUNDS_DAYS,
+  PCC_PROCORE_PROJECT_MAPPING_FIELD_MUTABILITY,
+  PCC_PROCORE_PROJECT_MAPPING_FIELD_MUTABILITY_CLASSES,
+  PCC_PROCORE_PROJECT_MAPPING_FRESHNESS_BANDS,
+  PCC_PROCORE_PROJECT_MAPPING_OWNER_ROLES,
+  PCC_PROCORE_PROJECT_MAPPING_QUERY_CARDINALITY_HINTS,
+  PCC_PROCORE_PROJECT_MAPPING_QUERY_FILTER_SHAPES,
+  PCC_PROCORE_PROJECT_MAPPING_REMEDIATION_HINTS,
+  PCC_PROCORE_PROJECT_MAPPING_STATES,
+  PCC_PROCORE_PROJECT_MAPPING_TERMINAL_STATES,
+  assertPccProcoreProjectMappingTransition,
+  derivePccProcoreMappingFreshnessBand,
+  isPccProcoreProjectMappingTransitionAllowed,
+  validatePccProcoreProjectMappingLegacyHintBoundary,
+  type PccHbCentralProjectsRegistryContext,
+  type PccHbCentralProjectsRegistryFieldInternalName,
+  type PccHbCentralProjectsRegistryLogicalFieldName,
+  type PccHbCentralProjectsRegistryQueryRecommendation,
+  type PccProcoreProjectMapping,
+  type PccProcoreProjectMappingArchived,
+  type PccProcoreProjectMappingCommonFields,
+  type PccProcoreProjectMappingConfirmed,
+  type PccProcoreProjectMappingConflict,
+  type PccProcoreProjectMappingFieldMutabilityClass,
+  type PccProcoreProjectMappingFieldName,
+  type PccProcoreProjectMappingFreshnessBand,
+  type PccProcoreProjectMappingFreshnessBoundsDays,
+  type PccProcoreProjectMappingModuleIdentity,
+  type PccProcoreProjectMappingOwnerRole,
+  type PccProcoreProjectMappingProposed,
+  type PccProcoreProjectMappingQueryCardinalityHint,
+  type PccProcoreProjectMappingQueryFilterShape,
+  type PccProcoreProjectMappingReadModel,
+  type PccProcoreProjectMappingRemediationHint,
+  type PccProcoreProjectMappingSourcePosture,
+  type PccProcoreProjectMappingStale,
+  type PccProcoreProjectMappingState,
+  type PccProcoreProjectMappingTerminalState,
+  type PccProcoreProjectMappingTransitionGuardOptions,
+  type PccProcoreProjectMappingUnmapped,
+} from './PccProcoreProjectMapping.js';
+
 // Re-export the buyout-log read-model union member type alias under the
 // PccReadModels barrel so consumers can import it alongside other read-model
 // envelope types. The concrete contract lives in BuyoutLog.ts.

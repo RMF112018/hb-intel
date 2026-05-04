@@ -38,6 +38,14 @@ const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'requireBuyoutSourceLineage',
   'isBuyoutHbiEligible',
   'buyoutPriorityActionDedupeKey',
+  // Wave 13 Prompt 13B — pure transition / freshness-derivation /
+  // legacy-procore-hint-boundary helpers for the HB Central Projects
+  // Registry + Procore Mapping contract. All functions are deterministic,
+  // side-effect-free, read-only-by-design, and clock-injected.
+  'isPccProcoreProjectMappingTransitionAllowed',
+  'assertPccProcoreProjectMappingTransition',
+  'derivePccProcoreMappingFreshnessBand',
+  'validatePccProcoreProjectMappingLegacyHintBoundary',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
