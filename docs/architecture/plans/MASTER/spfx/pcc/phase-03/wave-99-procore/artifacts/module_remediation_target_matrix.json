@@ -1,0 +1,189 @@
+{
+  "matrixId": "wave-13a-module-remediation-target-matrix",
+  "promptId": "13A",
+  "package": "pcc_procore_data_layer_wave13a_13f_remediation_implementation_package",
+  "generated": "2026-05-04",
+  "generatedAtHeadSha": "5e677d996080e829194cc820284de2bc12cd34bd",
+  "scope": "Wave 1-13 Procore data-layer current-vs-target posture and primary remediation prompt assignment.",
+  "sourceContract": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/module_remediation_contract.json",
+  "runtimeAllowed": false,
+  "matrix": [
+    {
+      "wave": "01-03",
+      "moduleOrWave": "PCC Shared Foundations / SPFx Shell Frame / Backend Read-Model Foundation",
+      "primaryPaths": [
+        "packages/models/src/pcc/**",
+        "apps/project-control-center/src/shell/**",
+        "backend/functions/src/hosts/pcc-read-model/**"
+      ],
+      "currentProcorePosture": "fixture-first; no Procore-derived signals in core read models; sourceStatus vocabulary in place but not Procore-specific",
+      "targetProcorePosture": "Procore-aware source-lineage and degraded-state vocabulary; envelope/sourceStatus handling for mapping-missing, permission-denied, tool-disabled, stale, rate-limited, endpoint-deprecated, object-inaccessible; no live Procore runtime",
+      "primaryRemediationPrompts": ["13C"],
+      "remediationActions": [
+        "Add Procore-aware source-lineage and degraded-state vocabulary where read models can later consume Procore-derived signals",
+        "Add envelope/sourceStatus handling for mapping-missing, permission-denied, tool-disabled, stale, rate-limited, endpoint-deprecated, object-inaccessible",
+        "Do not introduce live Procore runtime"
+      ]
+    },
+    {
+      "wave": "04",
+      "moduleOrWave": "Project Home / Command Center",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/projectHome/**",
+        "apps/project-control-center/src/api/**"
+      ],
+      "currentProcorePosture": "fixture-first; partial Procore awareness in priority-actions adapter; no mapping/sync surface",
+      "targetProcorePosture": "fixture-backed Procore mapping status and sync-health cards; operational-signal card for open/overdue RFIs, submittals, observations, punch, daily-log completeness, drawing/spec currency; source-of-record and freshness labels",
+      "primaryRemediationPrompts": ["13E"],
+      "remediationActions": [
+        "Add fixture-backed Procore mapping status and sync-health cards",
+        "Add operational-signal card for open/overdue RFIs, submittals, observations, punch, daily-log completeness, and drawing/spec currency",
+        "Add source-of-record and freshness labels"
+      ]
+    },
+    {
+      "wave": "05",
+      "moduleOrWave": "Priority Actions Rail",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/projectHome/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "rail lanes and metadata in place; no Procore-derived priority candidates",
+      "targetProcorePosture": "Procore-derived priority action candidates with source-lineage and auto-close/stale behavior; Procore object remains Procore-owned; PCC action is derived",
+      "primaryRemediationPrompts": ["13C", "13E"],
+      "remediationActions": [
+        "Add Procore-derived priority action candidates with source-lineage and auto-close/stale behavior",
+        "Maintain no source mutation; Procore object remains Procore-owned while PCC action is derived"
+      ]
+    },
+    {
+      "wave": "06",
+      "moduleOrWave": "Team & Access",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/teamAccess/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "preview/read-only; partial Procore-bound test fixture references; no directory comparison surface",
+      "targetProcorePosture": "read-only Procore Directory Comparison posture with mismatch categories (in Procore not PCC, in PCC not Procore, inactive, company/role mismatch); no auto-grant of SharePoint access from Procore directory data",
+      "primaryRemediationPrompts": ["13E"],
+      "remediationActions": [
+        "Add read-only Procore Directory Comparison posture",
+        "No auto-granting SharePoint access from Procore directory data",
+        "Add mismatch categories: in Procore not PCC, in PCC not Procore, inactive, company/role mismatch"
+      ]
+    },
+    {
+      "wave": "07",
+      "moduleOrWave": "HB Document Control Center",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/documents/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "three-lane fixture-backed surface; no Procore document/drawing/spec/photo metadata seam; no document-currency signal",
+      "targetProcorePosture": "Procore documents/drawings/specs/photos represented as metadata, object links, and evidence only; no recursive file mirror, no binary replication, no SharePoint copy of Procore file tree; document-currency signal contract in place",
+      "primaryRemediationPrompts": ["13C", "13E"],
+      "remediationActions": [
+        "Represent Procore documents/drawings/specs/photos as metadata/object links/evidence only",
+        "No recursive file mirror, no binary replication, no SharePoint copy of Procore file tree",
+        "Add document-currency signal contract"
+      ]
+    },
+    {
+      "wave": "08",
+      "moduleOrWave": "Project Readiness Module Framework",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/projectReadiness/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "framework contracts and readiness domains in place; no Procore-derived readiness impacts; no stale-Procore guard on readiness posture",
+      "targetProcorePosture": "Procore-derived readiness impacts (unresolved RFI, overdue submittal, open observation, open punch, missing daily log, stale drawing/spec, unmapped Procore project); stale Procore data cannot silently support green readiness posture",
+      "primaryRemediationPrompts": ["13C", "13E"],
+      "remediationActions": [
+        "Add Procore-derived readiness impacts: unresolved RFI, overdue submittal, open observation, open punch, missing daily log, stale drawing/spec, unmapped Procore project",
+        "Stale Procore data cannot silently support green readiness posture"
+      ]
+    },
+    {
+      "wave": "09",
+      "moduleOrWave": "Project Lifecycle Readiness Center",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/projectReadiness/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "startup/safety/closeout module in place; no source-confidence scoring tied to Procore mapping/sync/freshness",
+      "targetProcorePosture": "startup/safety/closeout readiness bound to Procore supporting context through fixtures only; source-confidence scoring based on mapping/sync health/freshness",
+      "primaryRemediationPrompts": ["13C", "13E"],
+      "remediationActions": [
+        "Bind startup/safety/closeout readiness to Procore supporting context through fixtures only",
+        "Add source-confidence scoring based on mapping/sync health/freshness"
+      ]
+    },
+    {
+      "wave": "10",
+      "moduleOrWave": "Permit & Inspection Control Center",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/projectReadiness/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "permit lifecycle and AHJ launcher fixture-driven; no Procore object-link evidence",
+      "targetProcorePosture": "Procore object-link evidence for drawings/specs/photos/daily logs/observations/RFIs/Procore inspections; PCC ownership preserved for Permit Log and Required Inspection Log unless the specific inspection object is generated in Procore",
+      "primaryRemediationPrompts": ["13E"],
+      "remediationActions": [
+        "Add Procore object-link evidence for drawings/specs/photos/daily logs/observations/RFIs/Procore inspections",
+        "Preserve PCC ownership of Permit Log and Required Inspection Log unless the specific inspection object is generated in Procore"
+      ]
+    },
+    {
+      "wave": "11",
+      "moduleOrWave": "Responsibility Matrix",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/responsibilityMatrix/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "fixture-driven; no comparison against Procore actual workflow ownership",
+      "targetProcorePosture": "comparison of PCC planned responsibility against Procore actual workflow ownership; Procore assignments do not overwrite PCC responsibility-matrix records",
+      "primaryRemediationPrompts": ["13E"],
+      "remediationActions": [
+        "Compare PCC planned responsibility against Procore actual workflow ownership",
+        "Do not allow Procore assignments to overwrite PCC responsibility matrix records"
+      ]
+    },
+    {
+      "wave": "12",
+      "moduleOrWave": "Constraints Log (Make-Ready Constraint & Risk Exposure Center)",
+      "primaryPaths": [
+        "apps/project-control-center/src/surfaces/constraintsLog/**",
+        "packages/models/src/pcc/**"
+      ],
+      "currentProcorePosture": "fixture-first constraints/risk surface; no Procore-derived candidates; no human-acceptance gate for derived constraints",
+      "targetProcorePosture": "Procore-derived constraint/risk/exposure candidate examples; human acceptance required before a Procore-derived candidate becomes a PCC-owned constraint; legal/claim/delay boundary preserved",
+      "primaryRemediationPrompts": ["13C", "13E"],
+      "remediationActions": [
+        "Add Procore-derived constraint/risk/exposure candidate examples",
+        "Human acceptance required before a Procore-derived candidate becomes a PCC-owned constraint",
+        "Preserve legal/claim/delay boundary"
+      ]
+    },
+    {
+      "wave": "13",
+      "moduleOrWave": "Buyout Log",
+      "primaryPaths": [
+        "packages/models/src/pcc/BuyoutLog.ts",
+        "packages/models/src/pcc/fixtures/buyoutLog.ts",
+        "backend/functions/src/hosts/pcc-read-model/**",
+        "apps/project-control-center/src/surfaces/buyoutLog/**",
+        "apps/project-control-center/src/tests/buyoutLog*.test.{ts,tsx}",
+        "apps/project-control-center/src/tests/buyoutLogGuardrails.test.ts"
+      ],
+      "currentProcorePosture": "closed at HEAD 5e677d996080e829194cc820284de2bc12cd34bd; imported-lineage / reference-only Procore states (procore-commitment-pending, procore-commitment-created); no live Procore HTTP, write-back, SDK adoption, or commitment authoring; guardrail tests assert structural absence of write-verbs, source-of-truth claims, and SPFx-to-Procore call surface",
+      "targetProcorePosture": "use Procore commitments / change events / submittals / vendors only as object links, curated summaries, reconciliation evidence, or derived signals; no Procore commitment / PO / subcontract / SOV / CCO / invoice / payment write-back; no Sage posting or accounting truth derived from Procore; verify shared 13C-13E contracts are reused without divergence (no parallel local Procore type definitions)",
+      "primaryRemediationPrompts": ["13F"],
+      "remediationActions": [
+        "Use Procore commitments/change events/submittals/vendors only as object links, curated summaries, reconciliation evidence, or derived signals",
+        "No Procore commitment/PO/subcontract/SOV/CCO/invoice/payment write-back",
+        "No Sage posting or accounting truth derived from Procore",
+        "Patch existing Wave 13 contracts/tests if current repo truth lacks the common Procore data-layer contract references"
+      ]
+    }
+  ]
+}

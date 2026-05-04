@@ -1,0 +1,151 @@
+{
+  "auditId": "wave-13a-repo-truth-audit",
+  "promptId": "13A",
+  "package": "pcc_procore_data_layer_wave13a_13f_remediation_implementation_package",
+  "phase": "Phase 3",
+  "generated": "2026-05-04",
+  "outputKind": "audit-and-remediation-gate",
+  "runtimeAllowed": false,
+  "repoTruth": {
+    "branch": "main",
+    "headSha": "5e677d996080e829194cc820284de2bc12cd34bd",
+    "headSubject": "docs(pcc): close wave 13 buyout log implementation",
+    "worktreeStatus": "clean",
+    "pnpmLockMd5": "c56df7b79986896624536aab74d609f4",
+    "captureCommands": [
+      "git rev-parse --abbrev-ref HEAD",
+      "git rev-parse HEAD",
+      "git status --porcelain",
+      "md5 pnpm-lock.yaml",
+      "git log -1 --pretty='%H %s'"
+    ]
+  },
+  "wave13Status": {
+    "state": "closed",
+    "closeoutDoc": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/Wave_13_Buyout_Log_Implementation_Closeout.md",
+    "closeoutCommitSha": "5e677d996080e829194cc820284de2bc12cd34bd",
+    "implementationChain": [
+      {
+        "promptId": "01",
+        "stage": "implementation-readiness-audit",
+        "sha": null,
+        "subject": "no commit; decisions locked in wave-13/README.md and blueprint reference set"
+      },
+      {
+        "promptId": "02",
+        "stage": "shared-models-fixtures-state-machine-contracts",
+        "sha": "fa5012d2e",
+        "subject": "feat(models-pcc): add wave 13 buyout log contracts"
+      },
+      {
+        "promptId": "03",
+        "stage": "backend-get-only-mock-read-model",
+        "sha": "f7c8abbfb",
+        "subject": "feat(functions-pcc): add buyout log read model route"
+      },
+      {
+        "promptId": "04",
+        "stage": "spfx-read-model-client-seam",
+        "sha": "fc28fa0a3",
+        "subject": "feat(spfx-pcc): add buyout log read model client seam"
+      },
+      {
+        "promptId": "05",
+        "stage": "spfx-buyout-log-project-readiness-surface",
+        "sha": "937cd8d85",
+        "subject": "feat(spfx-pcc): add buyout log project readiness surface"
+      },
+      {
+        "promptId": "06",
+        "stage": "unified-lifecycle-integration-seams",
+        "sha": "0286c7d97",
+        "subject": "feat(spfx-pcc): wire buyout log lifecycle integration seams"
+      },
+      {
+        "promptId": "07",
+        "stage": "tests-guardrails-and-implementation-closeout",
+        "sha": "5e677d996",
+        "subject": "docs(pcc): close wave 13 buyout log implementation"
+      }
+    ],
+    "lockfileMd5UnchangedAcrossWave": true,
+    "procorePosture": "imported-lineage / reference-only",
+    "alignedWithWave99Doctrine": true
+  },
+  "governingDocs": {
+    "systemOfRecordMatrix": "docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md",
+    "sourceSystemIntegrationContracts": "docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/reference/source_system_integration_contracts.json",
+    "hbCentralProjectsSchemaReference": "docs/reference/sharepoint/list-schemas/hbcentral/** and uploaded Projects schema",
+    "hbCentralProjectsMappingContract": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/hbcentral_projects_mapping_contract.json",
+    "wave99ScopeLock": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/02_Scope_Lock_And_Guardrails.md",
+    "wave99AllowedFileTouches": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/04_Allowed_File_Touches_By_Prompt.md",
+    "wave99AllowedPaths": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/allowed_paths.json",
+    "wave99ModuleRemediationContract": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/module_remediation_contract.json",
+    "wave99Manifest": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/manifest.json",
+    "wave13ClosedBlueprint": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/Wave_13_Buyout_Log_Implementation_Closeout.md"
+  },
+  "scopeLockRatification": {
+    "scopeLockSourcePath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/02_Scope_Lock_And_Guardrails.md",
+    "ratifiedAt": "2026-05-04",
+    "ratifiedAtHeadSha": "5e677d996080e829194cc820284de2bc12cd34bd",
+    "edited": false,
+    "allowedFamilies": [
+      "packages/models/src/pcc/**",
+      "packages/models/src/pcc/fixtures/**",
+      "backend/functions/src/hosts/pcc-read-model/**",
+      "apps/project-control-center/src/api/**",
+      "apps/project-control-center/src/surfaces/**",
+      "apps/project-control-center/src/tests/**",
+      "docs/architecture/blueprint/sp-project-control-center/**",
+      "docs/architecture/plans/MASTER/spfx/pcc/**",
+      "packages/project-site-template/** (docs/schema-description alignment only; no tenant mutation)"
+    ],
+    "forbidden": [
+      "Procore SDK dependency adoption",
+      "Live Procore HTTP calls",
+      "Direct SPFx-to-Procore",
+      "Procore write-back",
+      "Sage write-back",
+      "External-system mutation",
+      "Binary/file mirror",
+      "Tenant/deployment/app-catalog changes",
+      "Secrets or credential-like placeholders",
+      "Package/lockfile mutation unless specifically authorized by the prompt"
+    ],
+    "perPromptAllowedTouches": {
+      "13A": ["docs only (this prompt)"],
+      "13B": ["packages/models/src/pcc/**", "docs/architecture/**"],
+      "13C": ["packages/models/src/pcc/**"],
+      "13D": ["backend/functions/src/hosts/pcc-read-model/**"],
+      "13E": [
+        "apps/project-control-center/src/api/**",
+        "apps/project-control-center/src/surfaces/**",
+        "apps/project-control-center/src/tests/**"
+      ],
+      "13F": [
+        "docs/architecture/**",
+        "apps/project-control-center/src/tests/**",
+        "apps/project-control-center/src/surfaces/**"
+      ]
+    }
+  },
+  "remediationGate": {
+    "decision": "GO for 13B",
+    "conditionsMet": [
+      "Wave 13 Buyout Log closed at HEAD 5e677d996080e829194cc820284de2bc12cd34bd",
+      "Worktree clean",
+      "pnpm-lock.yaml MD5 unchanged across Wave 13 implementation chain",
+      "System of Record Matrix in place and unchanged",
+      "Source-System Integration Contracts in place and unchanged",
+      "HB Central Projects mapping contract in place",
+      "Wave 99 scope lock, allowed-file-touches doc, and allowed-paths JSON in place and ratified",
+      "Module remediation contract in place; expanded target matrix produced alongside"
+    ],
+    "blockers": []
+  },
+  "outputs": [
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/07_Repo_Truth_Audit_And_Remediation_Gate.md",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/repo_truth_audit.json",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/module_remediation_target_matrix.json"
+  ]
+}
