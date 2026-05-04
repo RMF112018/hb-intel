@@ -38,7 +38,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the twenty-one backend route ids', () => {
+  it('enumerates exactly the twenty-three backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -54,6 +54,8 @@ describe('IPccReadModelClient route metadata', () => {
       'responsibility-matrix',
       'constraints-log',
       'buyout-log',
+      'procore-project-mapping',
+      'procore-sync-health',
       'unified-lifecycle',
       'project-memory',
       'project-lenses',
@@ -72,9 +74,7 @@ describe('IPccReadModelClient route metadata', () => {
   });
 
   it('exposes the exact buyout-log route path template', () => {
-    expect(PCC_READ_MODEL_ROUTE_PATHS['buyout-log']).toBe(
-      'pcc/projects/{projectId}/buyout-log',
-    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['buyout-log']).toBe('pcc/projects/{projectId}/buyout-log');
   });
 
   // Wave 99 / Prompt 04A — guard against drift toward older non-canonical
@@ -196,7 +196,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the twenty-one id literals', () => {
+  it('is the union of the twenty-three id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -212,6 +212,8 @@ describe('PccReadModelRouteId', () => {
       'responsibility-matrix',
       'constraints-log',
       'buyout-log',
+      'procore-project-mapping',
+      'procore-sync-health',
       'unified-lifecycle',
       'project-memory',
       'project-lenses',

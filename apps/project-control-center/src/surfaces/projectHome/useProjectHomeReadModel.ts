@@ -37,18 +37,24 @@ export function useProjectHomeReadModel(
     let cancelled = false;
     setState({ status: 'loading' });
     void (async () => {
-      const [home, priorityActions, documentControl] = await Promise.all([
-        client.getProjectHome(projectId),
-        client.getPriorityActions(projectId),
-        client.getDocumentControl(projectId),
-      ]);
+      const [home, priorityActions, documentControl, procoreProjectMapping, procoreSyncHealth] =
+        await Promise.all([
+          client.getProjectHome(projectId),
+          client.getPriorityActions(projectId),
+          client.getDocumentControl(projectId),
+          client.getProcoreProjectMapping(projectId),
+          client.getProcoreSyncHealth(projectId),
+        ]);
       if (cancelled) return;
       setState({
         status: 'ready',
         viewModel: buildPccProjectHomeViewModel({
+          projectId,
           home,
           priorityActions,
           documentControl,
+          procoreProjectMapping,
+          procoreSyncHealth,
         }),
       });
     })();

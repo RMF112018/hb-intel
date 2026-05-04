@@ -67,6 +67,11 @@ const UNIFIED_LIFECYCLE_CARD_TITLES = [
 // 14 → 15; fixture-only path stays at 10.
 const ASK_HBI_CARD_TITLES = ['Ask HBI — Grounded Project Answers'] as const;
 
+// Wave 13 / Prompt 13E — Procore snapshot card is integrated as one
+// additional card on the read-model-driven path only (15 → 16). The
+// fixture-only path is unaffected and stays at 10.
+const PROCORE_CARD_TITLES = ['Procore snapshot'] as const;
+
 const READINESS_MODULES = new Set(['startup-tasks', 'permits', 'required-inspections']);
 
 describe('Project Home bento dashboard', () => {
@@ -90,14 +95,13 @@ describe('Project Home bento dashboard', () => {
     // satisfy a card-title assertion (per
     // feedback_per_lane_marker_assertions /
     // feedback_per_component_marker_scoping).
-    const headingTexts = Array.from(
-      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
-    ).map((el) => el.textContent?.trim() ?? '');
+    const headingTexts = Array.from(grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3')).map(
+      (el) => el.textContent?.trim() ?? '',
+    );
     for (const title of REQUIRED_CARD_TITLES) {
-      expect(
-        headingTexts,
-        `card title '${title}' should render as a card heading`,
-      ).toContain(title);
+      expect(headingTexts, `card title '${title}' should render as a card heading`).toContain(
+        title,
+      );
     }
   });
 
@@ -450,9 +454,9 @@ describe('Project Home bento dashboard', () => {
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
-    const headingTexts = Array.from(
-      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
-    ).map((el) => el.textContent?.trim() ?? '');
+    const headingTexts = Array.from(grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3')).map(
+      (el) => el.textContent?.trim() ?? '',
+    );
     for (const title of UNIFIED_LIFECYCLE_CARD_TITLES) {
       expect(
         headingTexts,
@@ -467,12 +471,9 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('read-model-driven path renders 15 cards (10 existing + 4 unified lifecycle + 1 Ask HBI) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
+  it('read-model-driven path renders 16 cards (10 existing + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     // Wait for the read-model-driven hook to resolve so the section
     // renders body markers (rather than the loading PccPreviewState).
@@ -483,20 +484,22 @@ describe('Project Home bento dashboard', () => {
     expect(cards.length).toBe(
       REQUIRED_CARD_TITLES.length +
         UNIFIED_LIFECYCLE_CARD_TITLES.length +
-        ASK_HBI_CARD_TITLES.length,
+        ASK_HBI_CARD_TITLES.length +
+        PROCORE_CARD_TITLES.length,
     );
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
       const span = Number(card.getAttribute('data-pcc-column-span'));
       expect(span).toBeGreaterThan(0);
     }
-    const headingTexts = Array.from(
-      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3'),
-    ).map((el) => el.textContent?.trim() ?? '');
+    const headingTexts = Array.from(grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3')).map(
+      (el) => el.textContent?.trim() ?? '',
+    );
     for (const title of [
       ...REQUIRED_CARD_TITLES,
       ...UNIFIED_LIFECYCLE_CARD_TITLES,
       ...ASK_HBI_CARD_TITLES,
+      ...PROCORE_CARD_TITLES,
     ]) {
       expect(headingTexts).toContain(title);
     }
@@ -520,17 +523,12 @@ describe('Project Home bento dashboard', () => {
 
   it('read-model-driven path: unified lifecycle lens switcher renders only preview-disabled buttons and no anchors', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Project Lens');
     const lensSwitcher = container.querySelector('[data-pcc-project-lens-switcher]');
     expect(lensSwitcher).not.toBeNull();
-    const lensButtons = lensSwitcher!.querySelectorAll<HTMLButtonElement>(
-      '[data-pcc-lens-id]',
-    );
+    const lensButtons = lensSwitcher!.querySelectorAll<HTMLButtonElement>('[data-pcc-lens-id]');
     expect(lensButtons.length).toBeGreaterThan(0);
     for (const button of Array.from(lensButtons)) {
       expect(button.disabled).toBe(true);
@@ -541,10 +539,7 @@ describe('Project Home bento dashboard', () => {
 
   it('read-model-driven path: Project Home does not introduce a unified-lifecycle, unified-search, or ask-hbi route or workspace marker', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Lifecycle Timeline');
     await findByText('Ask HBI — Grounded Project Answers');
@@ -584,10 +579,7 @@ describe('Project Home bento dashboard', () => {
   // the focused PccProjectHomeAskHbiSection test file.
   it('read-model-driven path: Ask HBI card mounts in idle posture inside a wide PccDashboardCard, with the panel disclaimer', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     const askHbiHeading = await findByText('Ask HBI — Grounded Project Answers');
     const card = askHbiHeading.closest('[data-pcc-card]');

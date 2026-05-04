@@ -34,6 +34,8 @@ import {
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PRIORITY_ACTIONS,
+  SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+  SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
   SAMPLE_PROJECT_MEMORY_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
@@ -61,6 +63,8 @@ import type {
   PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
+  PccProcoreProjectMappingReadModel,
+  PccProcoreSyncHealthReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
   PccProjectLensesReadModel,
@@ -477,14 +481,16 @@ const EMPTY_PERMIT_INSPECTION_CONTROL_CENTER_READ_MODEL: PccPermitInspectionCont
 // summary counts are zeroed; sourcePosture reports the degraded status.
 const EMPTY_CONSTRAINTS_LOG_EXPOSURE_SUMMARY = {
   riskCountsByBand: Object.freeze(
-    Object.fromEntries(
-      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
-    ) as Record<SeverityBandKey, number>,
+    Object.fromEntries(EXPOSURE_BANDS.map((band) => [band.key, 0] as const)) as Record<
+      SeverityBandKey,
+      number
+    >,
   ),
   constraintCountsByBand: Object.freeze(
-    Object.fromEntries(
-      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
-    ) as Record<SeverityBandKey, number>,
+    Object.fromEntries(EXPOSURE_BANDS.map((band) => [band.key, 0] as const)) as Record<
+      SeverityBandKey,
+      number
+    >,
   ),
   overdueConstraintCount: 0,
   awaitingExternalPartyCount: 0,
@@ -545,6 +551,46 @@ const EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccConstraintsLogRea
     sourceStatus: 'backend-unavailable',
     pendingHumanReviewCount: 0,
   },
+};
+
+// Wave 13 Prompt 13E — Procore degraded payload shapes. Static reference
+// data (`moduleIdentity`, `subjectAreas`, `registryFieldInternalNames`,
+// `queryRecommendations`, `ownershipNote`) is preserved from the canonical
+// 13B/13C samples; only project-specific arrays are emptied so callers can
+// distinguish "no data for this project" from "data missing entirely".
+// `sourcePosture.sourceStatus` carries the degraded posture; the envelope
+// `sourceStatus` carries the same fact at the read-model boundary.
+const EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL: PccProcoreProjectMappingReadModel = {
+  moduleIdentity: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.moduleIdentity,
+  mappings: [],
+  registryContexts: [],
+  registryFieldInternalNames: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.registryFieldInternalNames,
+  queryRecommendations: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.queryRecommendations,
+  ownershipNote: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.ownershipNote,
+  sourcePosture: { sourceStatus: 'source-unavailable', pendingHumanReviewCount: 0 },
+};
+
+const EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL_BACKEND_UNAVAILABLE: PccProcoreProjectMappingReadModel =
+  {
+    ...EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL,
+    sourcePosture: { sourceStatus: 'backend-unavailable', pendingHumanReviewCount: 0 },
+  };
+
+const EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL: PccProcoreSyncHealthReadModel = {
+  moduleIdentity: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.moduleIdentity,
+  subjectAreas: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.subjectAreas,
+  syncHealthEntries: [],
+  sourceLineages: [],
+  objectLinks: [],
+  curatedSummaries: [],
+  derivedSignals: [],
+  ownershipNote: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.ownershipNote,
+  sourcePosture: { sourceStatus: 'source-unavailable', pendingHumanReviewCount: 0 },
+};
+
+const EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL_BACKEND_UNAVAILABLE: PccProcoreSyncHealthReadModel = {
+  ...EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL,
+  sourcePosture: { sourceStatus: 'backend-unavailable', pendingHumanReviewCount: 0 },
 };
 
 // Wave 99 unified lifecycle empty/degraded shapes. Used for both
@@ -996,11 +1042,67 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
         this.unknownProjectWarnings(projectId),
       );
     }
+    return this.envelope(projectId, viewerPersona, 'available', SAMPLE_BUYOUT_LOG_READ_MODEL, []);
+  }
+
+  async getProcoreProjectMapping(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreProjectMappingReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL_BACKEND_UNAVAILABLE,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
     return this.envelope(
       projectId,
       viewerPersona,
       'available',
-      SAMPLE_BUYOUT_LOG_READ_MODEL,
+      SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+      [],
+    );
+  }
+
+  async getProcoreSyncHealth(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreSyncHealthReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL_BACKEND_UNAVAILABLE,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
       [],
     );
   }

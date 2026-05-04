@@ -42,7 +42,9 @@ beforeEach(() => {
   vi.stubGlobal(
     'fetch',
     vi.fn(() => {
-      throw new Error('fetch must not be called by the closeout integrated render with the fixture client');
+      throw new Error(
+        'fetch must not be called by the closeout integrated render with the fixture client',
+      );
     }),
   );
 });
@@ -56,9 +58,7 @@ afterEach(() => {
 // 06A `useUnifiedLifecycleReadModel.test.ts:290-301` pattern; no shared
 // util introduced in 06D scope).
 function stripCommentsOnly(src: string): string {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/(^|[^:\\])\/\/[^\n]*/g, '$1');
+  return src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/[^\n]*/g, '$1');
 }
 
 function stripCommentsAndStrings(src: string): string {
@@ -98,18 +98,15 @@ const SURFACE_ROUTER_FILE = resolve(__dirname, '..', 'shell', 'PccSurfaceRouter.
 // ─────────────────────────────────────────────────────────────────────
 
 describe('Ask-HBI closeout — integrated Project Home idle posture and bento invariants', () => {
-  it('renders 15 cards, the Ask-HBI card mounts in idle posture, no answer rows are visible, no card is nested inside another card, and the panel disclaimer is present', async () => {
+  it('renders 16 cards (15 + Wave 13E Procore snapshot), the Ask-HBI card mounts in idle posture, no answer rows are visible, no card is nested inside another card, and the panel disclaimer is present', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Ask HBI — Grounded Project Answers');
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(15);
+    expect(cards).toHaveLength(16);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
@@ -143,10 +140,7 @@ describe('Ask-HBI closeout — integrated Project Home idle posture and bento in
 describe('Ask-HBI closeout — integrated sample-query click renders grounded chips with source identity', () => {
   it('clicking a sample query in the integrated Ask-HBI card transitions to ready, renders citation chips that carry the canonical recordType + recordId, and renders refusal rows with refusal reason and zero citations', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Ask HBI — Grounded Project Answers');
     const target = ASK_HBI_SAMPLE_QUERIES[0];

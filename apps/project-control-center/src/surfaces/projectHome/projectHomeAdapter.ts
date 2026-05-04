@@ -22,10 +22,17 @@ import type { PccPreviewStateKind } from '../../ui/PccPreviewState';
 import type {
   PccDocumentControlReadModel,
   PccPriorityActionsReadModel,
+  PccProcoreProjectMappingReadModel,
+  PccProcoreSyncHealthReadModel,
   PccProjectHomeReadModel,
+  PccProjectId,
   PccReadModelEnvelope,
   PccReadModelSourceStatus,
 } from '@hbc/models/pcc';
+import {
+  buildPccProcoreSurfaceViewModel,
+  buildProcorePriorityActionsForRail,
+} from '../../viewModels/procoreSurfaceAdapter.js';
 import type { PccCardState } from './shared.js';
 import type {
   IPccProjectHomeViewModel,
@@ -33,9 +40,12 @@ import type {
 } from './projectHomeViewModel.js';
 
 export interface IProjectHomeAdapterInput {
+  readonly projectId: PccProjectId;
   readonly home: PccReadModelEnvelope<PccProjectHomeReadModel>;
   readonly documentControl: PccReadModelEnvelope<PccDocumentControlReadModel>;
   readonly priorityActions?: PccReadModelEnvelope<PccPriorityActionsReadModel>;
+  readonly procoreProjectMapping: PccReadModelEnvelope<PccProcoreProjectMappingReadModel>;
+  readonly procoreSyncHealth: PccReadModelEnvelope<PccProcoreSyncHealthReadModel>;
 }
 
 const PREVIEW_TO_CARD_STATE: Readonly<Record<PccPreviewStateKind, PccCardState>> = {
@@ -72,12 +82,31 @@ export function buildPccProjectHomeViewModel(
   const home = input.home.data;
   const docs = input.documentControl.data;
 
-  const priorityActionsSlot = input.priorityActions
-    ? slot(
-        input.priorityActions.sourceStatus,
-        input.priorityActions.data.actions ?? [],
-      )
-    : slot(homeStatus, home.priorityActions ?? []);
+  const procoreSnapshotData = buildPccProcoreSurfaceViewModel({
+    projectId: input.projectId,
+    mapping: input.procoreProjectMapping,
+    syncHealth: input.procoreSyncHealth,
+  });
+  // Wave 13 Prompt 13E — Procore priority-action signals flow into the
+  // existing Priority Actions Rail via category 'procore-sync', which the
+  // rail adapter already routes to 'external-system-mapping'. No new lane.
+  const procoreRailActions = buildProcorePriorityActionsForRail(
+    procoreSnapshotData.priorityActionCandidates,
+  );
+  const baseActions = input.priorityActions
+    ? (input.priorityActions.data.actions ?? [])
+    : (home.priorityActions ?? []);
+  const priorityActionsSourceStatus = input.priorityActions
+    ? input.priorityActions.sourceStatus
+    : homeStatus;
+  const priorityActionsSlot = slot(priorityActionsSourceStatus, [
+    ...baseActions,
+    ...procoreRailActions,
+  ]);
+  // Use the procore-mapping envelope's status as the canonical slot
+  // sourceStatus; the adapter's `chooseEnvelopeStatus` already encodes
+  // fail-closed precedence across both envelopes.
+  const procoreSlotStatus: PccReadModelSourceStatus = input.procoreProjectMapping.sourceStatus;
 
   return {
     intelligence: slot(homeStatus, home.profile),
@@ -85,5 +114,6 @@ export function buildPccProjectHomeViewModel(
     siteHealth: slot(homeStatus, home.siteHealth),
     documentControl: slot(docStatus, docs.sources ?? []),
     missingConfigurations: slot(homeStatus, home.missingConfigurations ?? []),
+    procoreSnapshot: slot(procoreSlotStatus, procoreSnapshotData),
   };
 }

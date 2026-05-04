@@ -68,10 +68,14 @@ import type {
   IPccBuyoutLogReadModelClient,
   IPccBuyoutLogViewModel,
 } from '../buyoutLog/buyoutLogViewModel';
+import { PccProjectReadinessProcoreSourceConfidenceCard } from './PccProjectReadinessProcoreSourceConfidenceCard';
 import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadinessUnifiedLifecycleSection';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { FIXTURE_PROCORE_SURFACE_VIEW_MODEL } from '../../viewModels/procoreSurfaceFixture';
+import type { IPccProcoreSurfaceClient } from '../../viewModels/procoreSurfaceAdapter';
+import { useProcoreSurfaceReadModel } from '../../viewModels/useProcoreSurfaceReadModel';
 import { buildPccLifecycleReadinessViewModel } from './lifecycleReadinessAdapter';
 import type {
   IPccLifecycleBlockersViewModel,
@@ -109,7 +113,8 @@ interface PccProjectReadinessSurfaceProps {
     IPccPermitInspectionControlCenterReadModelClient &
     IPccResponsibilityMatrixReadModelClient &
     IPccConstraintsLogReadModelClient &
-    IPccBuyoutLogReadModelClient;
+    IPccBuyoutLogReadModelClient &
+    IPccProcoreSurfaceClient;
 }
 
 const FIXTURE_ENVELOPE: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel> = {
@@ -210,6 +215,9 @@ export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = (
       <PccResponsibilityMatrixRegions viewModel={FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL} />
       <PccConstraintsLogRegions viewModel={FIXTURE_CONSTRAINTS_LOG_VIEW_MODEL} />
       <PccBuyoutLogRegions viewModel={FIXTURE_BUYOUT_LOG_VIEW_MODEL} />
+      <PccProjectReadinessProcoreSourceConfidenceCard
+        viewModel={FIXTURE_PROCORE_SURFACE_VIEW_MODEL}
+      />
     </Fragment>
   );
 };
@@ -225,7 +233,8 @@ interface ReadModelContentProps {
     IPccPermitInspectionControlCenterReadModelClient &
     IPccResponsibilityMatrixReadModelClient &
     IPccConstraintsLogReadModelClient &
-    IPccBuyoutLogReadModelClient;
+    IPccBuyoutLogReadModelClient &
+    IPccProcoreSurfaceClient;
 }
 
 const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
@@ -247,6 +256,7 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
     SAMPLE_PROJECT_PROFILE.projectId,
   );
   const buyoutLogViewModel = useBuyoutLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  const procoreViewModel = useProcoreSurfaceReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
   return (
     <Fragment>
       <ReadinessRegions viewModel={viewModel} />
@@ -255,6 +265,7 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
       <PccResponsibilityMatrixRegions viewModel={responsibilityMatrixViewModel} />
       <PccConstraintsLogRegions viewModel={constraintsLogViewModel} />
       <PccBuyoutLogRegions viewModel={buyoutLogViewModel} />
+      <PccProjectReadinessProcoreSourceConfidenceCard viewModel={procoreViewModel} />
       <PccProjectReadinessUnifiedLifecycleSection
         client={client}
         projectId={SAMPLE_PROJECT_PROFILE.projectId}

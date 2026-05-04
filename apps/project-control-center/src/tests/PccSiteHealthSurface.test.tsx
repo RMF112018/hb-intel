@@ -19,12 +19,12 @@ function renderSurface() {
 }
 
 describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
-  it('renders 4 cards as direct children of the bento grid', () => {
+  it('renders 5 cards as direct children of the bento grid (4 site-health + 1 Procore sync & repair posture, Wave 13 / Prompt 13E)', () => {
     const { container } = renderSurface();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(4);
+    expect(cards).toHaveLength(5);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }

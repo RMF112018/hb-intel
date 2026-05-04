@@ -46,7 +46,15 @@ describe('useProjectHomeReadModel', () => {
     expect(vm?.intelligence.state).toBe('preview');
     expect(vm?.intelligence.sourceStatus).toBe('available');
     expect(vm?.intelligence.data?.projectId).toBe(SAMPLE_PROJECT_PROFILE.projectId);
-    expect(vm?.priorityActions.data).toEqual(SAMPLE_PRIORITY_ACTIONS);
+    // Wave 13E — Procore-derived candidates may append after the home
+    // envelope's priorityActions. Assert prefix-equality plus
+    // category='procore-sync' on every appended item.
+    expect(vm?.priorityActions.data.slice(0, SAMPLE_PRIORITY_ACTIONS.length)).toEqual(
+      SAMPLE_PRIORITY_ACTIONS,
+    );
+    for (const appended of vm?.priorityActions.data.slice(SAMPLE_PRIORITY_ACTIONS.length) ?? []) {
+      expect(appended.category).toBe('procore-sync');
+    }
     expect(vm?.siteHealth.data).toEqual(SAMPLE_SITE_HEALTH_SUMMARY);
     expect(vm?.missingConfigurations.data).toEqual(SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS);
     expect(vm?.documentControl.state).toBe('preview');
@@ -70,26 +78,30 @@ describe('useProjectHomeReadModel', () => {
     }
   });
 
-  it('invokes getProjectHome, getPriorityActions, and getDocumentControl in parallel', async () => {
+  it('invokes getProjectHome, getPriorityActions, getDocumentControl, and the two Procore methods in parallel', async () => {
     const client = createPccFixtureReadModelClient();
     const homeSpy = vi.spyOn(client, 'getProjectHome');
     const prioritySpy = vi.spyOn(client, 'getPriorityActions');
     const docSpy = vi.spyOn(client, 'getDocumentControl');
+    const procoreMappingSpy = vi.spyOn(client, 'getProcoreProjectMapping');
+    const procoreSyncSpy = vi.spyOn(client, 'getProcoreSyncHealth');
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));
     expect(homeSpy).toHaveBeenCalledTimes(1);
     expect(prioritySpy).toHaveBeenCalledTimes(1);
     expect(docSpy).toHaveBeenCalledTimes(1);
+    expect(procoreMappingSpy).toHaveBeenCalledTimes(1);
+    expect(procoreSyncSpy).toHaveBeenCalledTimes(1);
     expect(homeSpy).toHaveBeenCalledWith(PROJECT_ID);
     expect(prioritySpy).toHaveBeenCalledWith(PROJECT_ID);
     expect(docSpy).toHaveBeenCalledWith(PROJECT_ID);
+    expect(procoreMappingSpy).toHaveBeenCalledWith(PROJECT_ID);
+    expect(procoreSyncSpy).toHaveBeenCalledWith(PROJECT_ID);
   });
 
   it('priorityActions slot reflects the standalone priority-actions envelope, not the home envelope', async () => {
     const baseClient = createPccFixtureReadModelClient();
-    const altActions: PccPriorityActionsReadModel['actions'] = [
-      SAMPLE_PRIORITY_ACTIONS[0]!,
-    ];
+    const altActions: PccPriorityActionsReadModel['actions'] = [SAMPLE_PRIORITY_ACTIONS[0]!];
     const altEnvelope: PccReadModelEnvelope<PccPriorityActionsReadModel> = {
       projectId: PROJECT_ID,
       mode: 'mock',
@@ -103,13 +115,20 @@ describe('useProjectHomeReadModel', () => {
       getProjectHome: (id, persona) => baseClient.getProjectHome(id, persona),
       getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
       getPriorityActions: async () => altEnvelope,
+      getProcoreProjectMapping: (id, persona) => baseClient.getProcoreProjectMapping(id, persona),
+      getProcoreSyncHealth: (id, persona) => baseClient.getProcoreSyncHealth(id, persona),
       getUnifiedLifecycle: async () => SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
-      getUnifiedSearch: (id, persona, query) =>
-        baseClient.getUnifiedSearch(id, persona, query),
+      getUnifiedSearch: (id, persona, query) => baseClient.getUnifiedSearch(id, persona, query),
     };
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));
-    expect(result.current.viewModel?.priorityActions.data).toEqual(altActions);
+    // Wave 13E — Procore-derived candidates flow through `category:'procore-sync'`
+    // (existing rail seam). Filter them out to keep the standalone-envelope
+    // assertion focused on the supplied envelope contents.
+    const nonProcoreActions = result.current.viewModel?.priorityActions.data?.filter(
+      (action) => action.category !== 'procore-sync',
+    );
+    expect(nonProcoreActions).toEqual(altActions);
     expect(result.current.viewModel?.priorityActions.sourceStatus).toBe('available');
   });
 
@@ -128,9 +147,10 @@ describe('useProjectHomeReadModel', () => {
       getProjectHome: (id, persona) => baseClient.getProjectHome(id, persona),
       getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
       getPriorityActions: async () => unavailableEnvelope,
+      getProcoreProjectMapping: (id, persona) => baseClient.getProcoreProjectMapping(id, persona),
+      getProcoreSyncHealth: (id, persona) => baseClient.getProcoreSyncHealth(id, persona),
       getUnifiedLifecycle: async () => SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
-      getUnifiedSearch: (id, persona, query) =>
-        baseClient.getUnifiedSearch(id, persona, query),
+      getUnifiedSearch: (id, persona, query) => baseClient.getUnifiedSearch(id, persona, query),
     };
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));

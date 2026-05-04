@@ -45,16 +45,15 @@ const FACTORY_FILE = resolve(API_DIR, 'pccReadModelClientFactory.ts');
 const BACKEND_CLIENT_FILE = resolve(API_DIR, 'pccBackendReadModelClient.ts');
 const BACKEND_CLIENT_TEST_FILE = resolve(API_DIR, 'pccBackendReadModelClient.test.ts');
 const ROUTER_FILE = resolve(SHELL_DIR, 'PccSurfaceRouter.tsx');
-const PROJECT_HOME_ADAPTER_FILE = resolve(
-  SURFACES_DIR,
-  'projectHome',
-  'projectHomeAdapter.ts',
-);
+const PROJECT_HOME_ADAPTER_FILE = resolve(SURFACES_DIR, 'projectHome', 'projectHomeAdapter.ts');
 const PROJECT_READINESS_ADAPTER_FILE = resolve(
   SURFACES_DIR,
   'projectReadiness',
   'projectReadinessAdapter.ts',
 );
+// Wave 13 / Prompt 13E — shared Procore surface adapter consumed by
+// every PCC core surface that surfaces Procore-derived signals.
+const PROCORE_SURFACE_ADAPTER_FILE = resolve(SRC_ROOT, 'viewModels', 'procoreSurfaceAdapter.ts');
 // Wave 99 / Prompt 04B — unified lifecycle adapter seam shares a single
 // internal cardState helper so the api/ pure-helper allowlist only needs
 // ONE narrow entry for this directory's eight adapters.
@@ -75,10 +74,7 @@ const FORBIDDEN_API_IDENTIFIERS = [
   'createPccBackendReadModelClient',
 ] as const;
 
-const FETCH_CALLSITE_ALLOWLIST = new Set<string>([
-  BACKEND_CLIENT_FILE,
-  BACKEND_CLIENT_TEST_FILE,
-]);
+const FETCH_CALLSITE_ALLOWLIST = new Set<string>([BACKEND_CLIENT_FILE, BACKEND_CLIENT_TEST_FILE]);
 
 const FORBIDDEN_RUNTIME_IMPORT_PATHS = [
   '@pnp/sp',
@@ -192,8 +188,7 @@ const API_IMPORT_RULES: readonly IApiImportRule[] = [
       '../../api/pccReadModelStateMapping.js',
     ]),
     namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
-    description:
-      'projectHomeAdapter.ts value-import mapPccSourceStatusToPreviewState (Prompt 04)',
+    description: 'projectHomeAdapter.ts value-import mapPccSourceStatusToPreviewState (Prompt 04)',
   },
   {
     file: PROJECT_READINESS_ADAPTER_FILE,
@@ -216,6 +211,14 @@ const API_IMPORT_RULES: readonly IApiImportRule[] = [
     namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
     description:
       'unifiedLifecycleCardState.ts value-import mapPccSourceStatusToPreviewState (Wave 99 / Prompt 04B) — single helper for the unified lifecycle adapter seam',
+  },
+  {
+    file: PROCORE_SURFACE_ADAPTER_FILE,
+    typeOnly: false,
+    sourcePaths: new Set(['../api/pccReadModelStateMapping', '../api/pccReadModelStateMapping.js']),
+    namedSpecifiers: new Set(['mapPccSourceStatusToPreviewState']),
+    description:
+      'procoreSurfaceAdapter.ts value-import mapPccSourceStatusToPreviewState (Wave 13 / Prompt 13E) — pure preview-state mapping helper',
   },
 ];
 
@@ -293,9 +296,7 @@ function listAllTsFilesRecursive(dir: string): string[] {
  * paths and other quoted content remain visible.
  */
 function stripCommentsOnly(src: string): string {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/(^|[^:\\])\/\/[^\n]*/g, '$1');
+  return src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/[^\n]*/g, '$1');
 }
 
 /**
@@ -515,8 +516,7 @@ function stripExpressionBody(src: string, start: number, end: number): IStripRes
 
 function extractImports(commentStripped: string): readonly IImportStatement[] {
   const out: IImportStatement[] = [];
-  const re =
-    /import\s+(type\s+)?([\s\S]*?)\s+from\s+(['"])([^'"]+)\3\s*;?/g;
+  const re = /import\s+(type\s+)?([\s\S]*?)\s+from\s+(['"])([^'"]+)\3\s*;?/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(commentStripped)) !== null) {
     out.push({
@@ -661,9 +661,7 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
 
         const candidates = rulesForFile(file.path);
         if (candidates.length === 0) {
-          offenders.push(
-            `${file.path}: api import not allowed → ${imp.raw.trim()}`,
-          );
+          offenders.push(`${file.path}: api import not allowed → ${imp.raw.trim()}`);
           continue;
         }
 
@@ -684,10 +682,9 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
         }
       }
     }
-    expect(
-      offenders,
-      `expected no api-import offenders, found:\n${offenders.join('\n')}`,
-    ).toEqual([]);
+    expect(offenders, `expected no api-import offenders, found:\n${offenders.join('\n')}`).toEqual(
+      [],
+    );
   });
 
   for (const identifier of FORBIDDEN_API_IDENTIFIERS) {
@@ -726,6 +723,14 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
       const offenders: string[] = [];
       for (const file of files) {
         for (const imp of file.imports) {
+          // Wave 13 / Prompt 13E — anchored vendor-token guard. Forbidden
+          // runtime paths are external package specifiers; relative
+          // imports (`./` / `../`) and root-anchored imports (`/`) point
+          // at internal modules and must not match a vendor substring
+          // (e.g., the local `viewModels/procoreSurfaceAdapter` module).
+          if (imp.path.startsWith('./') || imp.path.startsWith('../') || imp.path.startsWith('/')) {
+            continue;
+          }
           if (imp.path.includes(forbiddenPath)) {
             offenders.push(`${file.path}: ${imp.raw.trim()}`);
           }
@@ -739,9 +744,7 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
   }
 
   it('no src/api/** runtime file imports a forbidden runtime path', () => {
-    const apiTsFiles = listAllTsFilesRecursive(API_DIR).filter(
-      (f) => !/\.test\.(ts|tsx)$/.test(f),
-    );
+    const apiTsFiles = listAllTsFilesRecursive(API_DIR).filter((f) => !/\.test\.(ts|tsx)$/.test(f));
     const offenders: string[] = [];
     for (const filePath of apiTsFiles) {
       const raw = readFileSync(filePath, 'utf8');
@@ -762,9 +765,7 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
   });
 
   it('no src/api/** runtime file references a forbidden runtime token', () => {
-    const apiTsFiles = listAllTsFilesRecursive(API_DIR).filter(
-      (f) => !/\.test\.(ts|tsx)$/.test(f),
-    );
+    const apiTsFiles = listAllTsFilesRecursive(API_DIR).filter((f) => !/\.test\.(ts|tsx)$/.test(f));
     const offenders: string[] = [];
     for (const filePath of apiTsFiles) {
       const raw = readFileSync(filePath, 'utf8');
@@ -922,16 +923,12 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
       'resolvePccReadModelConfig',
     ];
     for (const banned of mountForbidden) {
-      expect(
-        mount.tokenStripped.includes(banned),
-        `mount.tsx must not reference ${banned}`,
-      ).toBe(false);
+      expect(mount.tokenStripped.includes(banned), `mount.tsx must not reference ${banned}`).toBe(
+        false,
+      );
     }
 
-    expect(
-      /\bfetch\s*\(/.test(mount.tokenStripped),
-      'mount.tsx must not call fetch(',
-    ).toBe(false);
+    expect(/\bfetch\s*\(/.test(mount.tokenStripped), 'mount.tsx must not call fetch(').toBe(false);
 
     for (const imp of mount.imports) {
       for (const forbidden of FORBIDDEN_RUNTIME_IMPORT_PATHS) {

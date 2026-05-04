@@ -5,6 +5,8 @@ import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
+  SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+  SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
@@ -21,6 +23,8 @@ const PRIORITY_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/pri
 const DOC_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/document-control`;
 const TEAM_ACCESS_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/team-access`;
 const UNIFIED_LIFECYCLE_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/unified-lifecycle`;
+const PROCORE_MAPPING_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/procore-project-mapping`;
+const PROCORE_SYNC_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/procore-sync-health`;
 
 function unifiedLifecycleOk() {
   return {
@@ -77,6 +81,30 @@ function priorityOk() {
   };
 }
 
+function procoreMappingOk() {
+  return {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'mock',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+  };
+}
+
+function procoreSyncOk() {
+  return {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'mock',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
+  };
+}
+
 function jsonResponse(body: unknown): Response {
   return {
     ok: true,
@@ -122,10 +150,11 @@ describe('mount(...) opt-in', () => {
       const cards = host.querySelectorAll('[data-pcc-card]');
       // Wave 99 / Prompts 05B + 06C — read-model-driven Project Home
       // renders 10 existing cards + 4 unified-lifecycle cards + 1
-      // Ask-HBI card = 15. The Ask-HBI card mounts in idle posture
-      // (initialQuery={null}), so its presence does not introduce a
-      // getUnifiedSearch fetch on initial mount.
-      expect(cards.length).toBe(15);
+      // Ask-HBI card = 15. Wave 13 / Prompt 13E — adds 1 Procore
+      // snapshot card (16 total). The Ask-HBI card mounts in idle
+      // posture (initialQuery={null}), so its presence does not
+      // introduce a getUnifiedSearch fetch on initial mount.
+      expect(cards.length).toBe(16);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -139,6 +168,12 @@ describe('mount(...) opt-in', () => {
       // getUnifiedLifecycle call via PccProjectHomeUnifiedLifecycleSection.
       if (url === UNIFIED_LIFECYCLE_URL)
         return Promise.resolve(jsonResponse({ data: unifiedLifecycleOk() }));
+      // Wave 13 / Prompt 13E — Project Home drives two additional
+      // calls (procore-project-mapping, procore-sync-health) for the
+      // Procore snapshot card.
+      if (url === PROCORE_MAPPING_URL)
+        return Promise.resolve(jsonResponse({ data: procoreMappingOk() }));
+      if (url === PROCORE_SYNC_URL) return Promise.resolve(jsonResponse({ data: procoreSyncOk() }));
       throw new Error(`unexpected fetch URL: ${url}`);
     });
     await act(async () => {
@@ -150,12 +185,19 @@ describe('mount(...) opt-in', () => {
       });
     });
     await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalledTimes(4);
+      expect(fetchSpy).toHaveBeenCalledTimes(6);
     });
     const calls = fetchSpy.mock.calls.map((c) => ({ url: c[0], init: c[1] }));
     const urls = calls.map((c) => c.url).sort();
     expect(urls).toEqual(
-      [DOC_URL, HOME_URL, PRIORITY_URL, UNIFIED_LIFECYCLE_URL].sort(),
+      [
+        DOC_URL,
+        HOME_URL,
+        PRIORITY_URL,
+        UNIFIED_LIFECYCLE_URL,
+        PROCORE_MAPPING_URL,
+        PROCORE_SYNC_URL,
+      ].sort(),
     );
     for (const c of calls) {
       expect(c.init?.method).toBe('GET');
@@ -163,10 +205,11 @@ describe('mount(...) opt-in', () => {
 
     const cards = host.querySelectorAll('[data-pcc-card]');
     // Wave 99 / Prompts 05B + 06C — 10 existing + 4 unified-lifecycle
-    // + 1 Ask-HBI = 15. Ask-HBI mounts in idle posture, so the canonical
+    // + 1 Ask-HBI = 15. Wave 13 / Prompt 13E — +1 Procore snapshot
+    // = 16. Ask-HBI mounts in idle posture, so the canonical
     // backend-mode URL set above is unchanged (no extra unified-search
     // request added until the user clicks a sample query).
-    expect(cards).toHaveLength(15);
+    expect(cards).toHaveLength(16);
     const grid = host.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     for (const card of cards) {
@@ -189,7 +232,8 @@ describe('mount(...) opt-in', () => {
       expect(errorMarkers.length).toBeGreaterThan(0);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(15);
+    // Wave 13 / Prompt 13E — Procore snapshot card adds 1 (15 → 16).
+    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(16);
   });
 });
 

@@ -26,12 +26,12 @@ function expectedState(id: ExternalSystemId): 'configured' | 'missing' | 'unavai
 }
 
 describe('PccExternalSystemsSurface (Wave 2 / Prompt 06)', () => {
-  it('renders the header + one tile per EXTERNAL_SYSTEM_CATALOG entry as direct grid children', () => {
+  it('renders the header + one tile per EXTERNAL_SYSTEM_CATALOG entry + Procore configuration & status card as direct grid children (Wave 13 / Prompt 13E)', () => {
     const { container } = renderSurface();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(1 + Object.keys(EXTERNAL_SYSTEM_CATALOG).length);
+    expect(cards).toHaveLength(1 + Object.keys(EXTERNAL_SYSTEM_CATALOG).length + 1);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }

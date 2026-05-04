@@ -152,8 +152,14 @@ export function createPccBackendReadModelClient(
         fallback.getConstraintsLog(projectId, viewerPersona),
       ),
     getBuyoutLog: (projectId, viewerPersona) =>
-      callBackend('buyout-log', projectId, () =>
-        fallback.getBuyoutLog(projectId, viewerPersona),
+      callBackend('buyout-log', projectId, () => fallback.getBuyoutLog(projectId, viewerPersona)),
+    getProcoreProjectMapping: (projectId, viewerPersona) =>
+      callBackend('procore-project-mapping', projectId, () =>
+        fallback.getProcoreProjectMapping(projectId, viewerPersona),
+      ),
+    getProcoreSyncHealth: (projectId, viewerPersona) =>
+      callBackend('procore-sync-health', projectId, () =>
+        fallback.getProcoreSyncHealth(projectId, viewerPersona),
       ),
     getUnifiedLifecycle: (projectId, viewerPersona) =>
       callBackend('unified-lifecycle', projectId, () =>

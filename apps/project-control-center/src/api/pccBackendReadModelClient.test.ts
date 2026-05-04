@@ -40,6 +40,8 @@ const ROUTE_METHOD_TUPLES: readonly IRouteMethodTuple[] = [
   { routeId: 'responsibility-matrix', clientMethod: 'getResponsibilityMatrix' },
   { routeId: 'constraints-log', clientMethod: 'getConstraintsLog' },
   { routeId: 'buyout-log', clientMethod: 'getBuyoutLog' },
+  { routeId: 'procore-project-mapping', clientMethod: 'getProcoreProjectMapping' },
+  { routeId: 'procore-sync-health', clientMethod: 'getProcoreSyncHealth' },
   { routeId: 'unified-lifecycle', clientMethod: 'getUnifiedLifecycle' },
   { routeId: 'project-memory', clientMethod: 'getProjectMemory' },
   { routeId: 'project-lenses', clientMethod: 'getProjectLenses' },
@@ -92,7 +94,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('createPccBackendReadModelClient — URL & method (all 21 routes)', () => {
+describe('createPccBackendReadModelClient — URL & method (all 23 routes)', () => {
   for (const tuple of ROUTE_METHOD_TUPLES) {
     it(`builds GET ${PCC_READ_MODEL_ROUTE_PATHS[tuple.routeId]}`, async () => {
       const okEnvelope: PccReadModelEnvelope<unknown> = {
@@ -123,7 +125,7 @@ describe('createPccBackendReadModelClient — URL & method (all 21 routes)', () 
     });
   }
 
-  it('never generates POST/PUT/PATCH/DELETE requests across all 20 methods', async () => {
+  it('never generates POST/PUT/PATCH/DELETE requests across all 22 methods', async () => {
     const fetchImpl: PccReadModelFetch = vi
       .fn<PccReadModelFetch>()
       .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
@@ -441,8 +443,10 @@ describe('createPccBackendReadModelClient — getUnifiedSearch q-param wiring', 
     const { client, fetchImpl } = makeClient();
     await client.getUnifiedSearch(KNOWN_PROJECT_ID);
     expect(fetchImpl).toHaveBeenCalledWith(basePath, { method: 'GET' });
-    expect(((fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock
-      .calls[0]![0] as string)).not.toContain('?q=');
+    expect(
+      (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock
+        .calls[0]![0] as string,
+    ).not.toContain('?q=');
   });
 
   it('omits ?q= when query is the empty string', async () => {
@@ -540,7 +544,7 @@ describe('createPccBackendReadModelClient — failure paths return backend-unava
 });
 
 describe('createPccBackendReadModelClient — config-fallback paths', () => {
-  it('empty backendBaseUrl → all 20 methods return backend-unavailable, no fetch invoked', async () => {
+  it('empty backendBaseUrl → all 22 methods return backend-unavailable, no fetch invoked', async () => {
     const fetchImpl = vi.fn<PccReadModelFetch>();
     const client = createPccBackendReadModelClient({
       backendBaseUrl: '',
@@ -556,7 +560,7 @@ describe('createPccBackendReadModelClient — config-fallback paths', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('whitespace-only backendBaseUrl → all 20 methods return backend-unavailable, no fetch invoked', async () => {
+  it('whitespace-only backendBaseUrl → all 22 methods return backend-unavailable, no fetch invoked', async () => {
     const fetchImpl = vi.fn<PccReadModelFetch>();
     const client = createPccBackendReadModelClient({
       backendBaseUrl: '   ',
@@ -572,7 +576,7 @@ describe('createPccBackendReadModelClient — config-fallback paths', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('no global fetch and no options.fetch → constructor does not throw; all 20 methods return backend-unavailable', async () => {
+  it('no global fetch and no options.fetch → constructor does not throw; all 22 methods return backend-unavailable', async () => {
     delete (globalThis as { fetch?: unknown }).fetch;
     const client = createPccBackendReadModelClient({
       backendBaseUrl: 'https://example.invalid',

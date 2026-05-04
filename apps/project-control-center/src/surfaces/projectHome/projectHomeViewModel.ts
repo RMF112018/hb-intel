@@ -20,6 +20,8 @@ import type {
   PccDocumentControlReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
+  PccProcoreProjectMappingReadModel,
+  PccProcoreSyncHealthReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
   PccReadModelEnvelope,
@@ -27,6 +29,7 @@ import type {
   PccUnifiedLifecycleReadModel,
   PccUnifiedSearchAskHbiReadModel,
 } from '@hbc/models/pcc';
+import type { IPccProcoreSurfaceViewModel } from '../../viewModels/procoreSurfaceAdapter.js';
 import type { PccCardState } from './shared.js';
 
 /**
@@ -55,6 +58,27 @@ export interface IPccProjectHomeReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccDocumentControlReadModel>>;
+
+  /**
+   * Wave 13 / Prompt 13E — Procore project-mapping envelope. Consumed by
+   * `useProjectHomeReadModel` to populate the Procore snapshot slot.
+   * Display-only; PCC owns the mapping. Returns a `PccReadModelEnvelope`
+   * whose `sourceStatus` drives the card's degraded posture.
+   */
+  getProcoreProjectMapping(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreProjectMappingReadModel>>;
+
+  /**
+   * Wave 13 / Prompt 13E — Procore sync-health envelope. Consumed by
+   * `useProjectHomeReadModel` to populate the Procore snapshot slot.
+   * Display-only; no live Procore SDK and no write-back.
+   */
+  getProcoreSyncHealth(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreSyncHealthReadModel>>;
 
   /**
    * Wave 99 / Prompt 05B — unified lifecycle aggregate envelope. Consumed
@@ -97,4 +121,5 @@ export interface IPccProjectHomeViewModel {
   readonly missingConfigurations: IPccProjectHomeViewModelSlot<
     readonly IExternalSystemMissingConfig[]
   >;
+  readonly procoreSnapshot: IPccProjectHomeViewModelSlot<IPccProcoreSurfaceViewModel>;
 }

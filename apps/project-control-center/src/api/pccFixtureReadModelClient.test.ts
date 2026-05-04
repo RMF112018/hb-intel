@@ -4,6 +4,8 @@ import {
   LIFECYCLE_READINESS_STATUSES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
+  SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+  SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_BUYOUT_LOG_READ_MODEL,
@@ -44,6 +46,8 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
       client.getConstraintsLog(KNOWN_PROJECT_ID),
       client.getBuyoutLog(KNOWN_PROJECT_ID),
+      client.getProcoreProjectMapping(KNOWN_PROJECT_ID),
+      client.getProcoreSyncHealth(KNOWN_PROJECT_ID),
       client.getUnifiedLifecycle(KNOWN_PROJECT_ID),
       client.getProjectMemory(KNOWN_PROJECT_ID),
       client.getProjectLenses(KNOWN_PROJECT_ID),
@@ -52,7 +56,7 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
       client.getUnifiedSearch(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(21);
+    expect(envelopes).toHaveLength(23);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -144,6 +148,8 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
       client.getConstraintsLog(KNOWN_PROJECT_ID),
       client.getBuyoutLog(KNOWN_PROJECT_ID),
+      client.getProcoreProjectMapping(KNOWN_PROJECT_ID),
+      client.getProcoreSyncHealth(KNOWN_PROJECT_ID),
       client.getUnifiedLifecycle(KNOWN_PROJECT_ID),
       client.getProjectMemory(KNOWN_PROJECT_ID),
       client.getProjectLenses(KNOWN_PROJECT_ID),
@@ -458,6 +464,84 @@ describe('createPccFixtureReadModelClient — buyout-log', () => {
     expect(env.data.priorityActionCandidates).toEqual([]);
     expect(env.data.snapshotHistory).toEqual([]);
     expect(env.data.auditEvents).toEqual([]);
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+  });
+});
+
+describe('createPccFixtureReadModelClient — procore-project-mapping (Wave 13 / Prompt 13E)', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns the canonical 13B sample with sourceStatus="available"', async () => {
+    const env = await client.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.data).toBe(SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL);
+  });
+
+  it('unknown project preserves static context and empties project-specific arrays', async () => {
+    const env = await client.getProcoreProjectMapping(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.mappings).toEqual([]);
+    expect(env.data.registryContexts).toEqual([]);
+    // Static / project-independent reference data preserved.
+    expect(env.data.moduleIdentity).toBe(SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.moduleIdentity);
+    expect(env.data.queryRecommendations).toBe(
+      SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.queryRecommendations,
+    );
+    expect(env.data.ownershipNote).toBe(SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.ownershipNote);
+    expect(env.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+  });
+
+  it('simulateBackendUnavailable returns an empty payload with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.mappings).toEqual([]);
+    expect(env.data.registryContexts).toEqual([]);
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided and omits it otherwise', async () => {
+    const withPersona = await client.getProcoreProjectMapping(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(withPersona.viewerPersona).toBe(SAMPLE_PERSONA);
+    const withoutPersona = await client.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+    expect(withoutPersona.viewerPersona).toBeUndefined();
+  });
+});
+
+describe('createPccFixtureReadModelClient — procore-sync-health (Wave 13 / Prompt 13E)', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns the canonical 13C sample with sourceStatus="available"', async () => {
+    const env = await client.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL);
+  });
+
+  it('unknown project preserves subjectAreas registry and empties project-specific arrays', async () => {
+    const env = await client.getProcoreSyncHealth(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.syncHealthEntries).toEqual([]);
+    expect(env.data.sourceLineages).toEqual([]);
+    expect(env.data.objectLinks).toEqual([]);
+    expect(env.data.curatedSummaries).toEqual([]);
+    expect(env.data.derivedSignals).toEqual([]);
+    // Project-independent registry preserved.
+    expect(env.data.subjectAreas).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.subjectAreas);
+    expect(env.data.moduleIdentity).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.moduleIdentity);
+    expect(env.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+  });
+
+  it('simulateBackendUnavailable returns the empty payload with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.syncHealthEntries).toEqual([]);
+    expect(env.data.derivedSignals).toEqual([]);
     expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
   });
 });

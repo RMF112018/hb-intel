@@ -22,6 +22,7 @@ import { PccPriorityActionsCard } from './PccPriorityActionsCard';
 import { PccProjectIntelligenceCard } from './PccProjectIntelligenceCard';
 import { PccProjectReadinessCard } from './PccProjectReadinessCard';
 import { PccProjectHomeAskHbiSection } from './PccProjectHomeAskHbiSection';
+import { PccProjectHomeProcoreSnapshotCard } from './PccProjectHomeProcoreSnapshotCard';
 import { PccProjectHomeUnifiedLifecycleSection } from './PccProjectHomeUnifiedLifecycleSection';
 import { PccRecentActivityCard } from './PccRecentActivityCard';
 import { PccSiteHealthSummaryCard } from './PccSiteHealthSummaryCard';
@@ -36,10 +37,7 @@ interface PccProjectHomeReadModelContentProps {
 export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentProps> = ({
   client,
 }) => {
-  const { viewModel } = useProjectHomeReadModel(
-    client,
-    SAMPLE_PROJECT_PROFILE.projectId,
-  );
+  const { viewModel } = useProjectHomeReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
 
   return (
     <>
@@ -67,15 +65,16 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         state={viewModel?.missingConfigurations.state ?? 'preview'}
         missingConfigurations={viewModel?.missingConfigurations.data}
       />
+      <PccProjectHomeProcoreSnapshotCard
+        state={viewModel?.procoreSnapshot.state ?? 'preview'}
+        snapshot={viewModel?.procoreSnapshot.data}
+      />
       <PccRecentActivityCard />
       <PccProjectHomeUnifiedLifecycleSection
         client={client}
         projectId={SAMPLE_PROJECT_PROFILE.projectId}
       />
-      <PccProjectHomeAskHbiSection
-        client={client}
-        projectId={SAMPLE_PROJECT_PROFILE.projectId}
-      />
+      <PccProjectHomeAskHbiSection client={client} projectId={SAMPLE_PROJECT_PROFILE.projectId} />
     </>
   );
 };

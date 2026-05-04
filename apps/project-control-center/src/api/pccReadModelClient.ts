@@ -23,6 +23,8 @@ import type {
   PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
+  PccProcoreProjectMappingReadModel,
+  PccProcoreSyncHealthReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
   PccProjectLensesReadModel,
@@ -57,6 +59,8 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'responsibility-matrix',
   'constraints-log',
   'buyout-log',
+  'procore-project-mapping',
+  'procore-sync-health',
   'unified-lifecycle',
   'project-memory',
   'project-lenses',
@@ -90,6 +94,8 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'responsibility-matrix': 'pcc/projects/{projectId}/responsibility-matrix',
   'constraints-log': 'pcc/projects/{projectId}/constraints-log',
   'buyout-log': 'pcc/projects/{projectId}/buyout-log',
+  'procore-project-mapping': 'pcc/projects/{projectId}/procore-project-mapping',
+  'procore-sync-health': 'pcc/projects/{projectId}/procore-sync-health',
   'unified-lifecycle': 'pcc/projects/{projectId}/unified-lifecycle',
   'project-memory': 'pcc/projects/{projectId}/project-memory',
   'project-lenses': 'pcc/projects/{projectId}/project-lenses',
@@ -178,6 +184,28 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>>;
+
+  /**
+   * Wave 13 Prompt 13E — Procore project-mapping read model. Mirrors
+   * backend route `pcc/projects/{projectId}/procore-project-mapping`.
+   * Display-only; PCC owns the mapping. `viewerPersona` is a passthrough
+   * parameter, never serialized to the URL.
+   */
+  getProcoreProjectMapping(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreProjectMappingReadModel>>;
+
+  /**
+   * Wave 13 Prompt 13E — Procore sync-health read model. Mirrors backend
+   * route `pcc/projects/{projectId}/procore-sync-health`. Display-only;
+   * no write-back, no live Procore SDK. `viewerPersona` is a passthrough
+   * parameter, never serialized to the URL.
+   */
+  getProcoreSyncHealth(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreSyncHealthReadModel>>;
 
   getUnifiedLifecycle(
     projectId: PccProjectId,
