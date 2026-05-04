@@ -151,6 +151,10 @@ export function createPccBackendReadModelClient(
       callBackend('constraints-log', projectId, () =>
         fallback.getConstraintsLog(projectId, viewerPersona),
       ),
+    getBuyoutLog: (projectId, viewerPersona) =>
+      callBackend('buyout-log', projectId, () =>
+        fallback.getBuyoutLog(projectId, viewerPersona),
+      ),
     getUnifiedLifecycle: (projectId, viewerPersona) =>
       callBackend('unified-lifecycle', projectId, () =>
         fallback.getUnifiedLifecycle(projectId, viewerPersona),

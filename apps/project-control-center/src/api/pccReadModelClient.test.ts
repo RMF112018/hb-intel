@@ -1,5 +1,6 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type {
+  PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccCrossProjectKnowledgeReadModel,
   PccDocumentControlReadModel,
@@ -37,7 +38,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the twenty backend route ids', () => {
+  it('enumerates exactly the twenty-one backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -52,6 +53,7 @@ describe('IPccReadModelClient route metadata', () => {
       'permit-inspection-control-center',
       'responsibility-matrix',
       'constraints-log',
+      'buyout-log',
       'unified-lifecycle',
       'project-memory',
       'project-lenses',
@@ -60,6 +62,19 @@ describe('IPccReadModelClient route metadata', () => {
       'cross-project-knowledge',
       'unified-search',
     ]);
+  });
+
+  it('orders buyout-log immediately after constraints-log', () => {
+    const ids: readonly string[] = PCC_READ_MODEL_ROUTE_IDS;
+    const buyoutLogIndex = ids.indexOf('buyout-log');
+    expect(buyoutLogIndex).toBeGreaterThan(-1);
+    expect(ids[buyoutLogIndex - 1]).toBe('constraints-log');
+  });
+
+  it('exposes the exact buyout-log route path template', () => {
+    expect(PCC_READ_MODEL_ROUTE_PATHS['buyout-log']).toBe(
+      'pcc/projects/{projectId}/buyout-log',
+    );
   });
 
   // Wave 99 / Prompt 04A — guard against drift toward older non-canonical
@@ -138,6 +153,9 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getConstraintsLog']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getBuyoutLog']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>>
+    >();
     expectTypeOf<IPccReadModelClient['getUnifiedLifecycle']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>
     >();
@@ -178,7 +196,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the twenty id literals', () => {
+  it('is the union of the twenty-one id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -193,6 +211,7 @@ describe('PccReadModelRouteId', () => {
       'permit-inspection-control-center',
       'responsibility-matrix',
       'constraints-log',
+      'buyout-log',
       'unified-lifecycle',
       'project-memory',
       'project-lenses',

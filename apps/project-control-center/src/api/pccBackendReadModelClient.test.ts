@@ -39,6 +39,7 @@ const ROUTE_METHOD_TUPLES: readonly IRouteMethodTuple[] = [
   },
   { routeId: 'responsibility-matrix', clientMethod: 'getResponsibilityMatrix' },
   { routeId: 'constraints-log', clientMethod: 'getConstraintsLog' },
+  { routeId: 'buyout-log', clientMethod: 'getBuyoutLog' },
   { routeId: 'unified-lifecycle', clientMethod: 'getUnifiedLifecycle' },
   { routeId: 'project-memory', clientMethod: 'getProjectMemory' },
   { routeId: 'project-lenses', clientMethod: 'getProjectLenses' },
@@ -91,7 +92,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('createPccBackendReadModelClient — URL & method (all 20 routes)', () => {
+describe('createPccBackendReadModelClient — URL & method (all 21 routes)', () => {
   for (const tuple of ROUTE_METHOD_TUPLES) {
     it(`builds GET ${PCC_READ_MODEL_ROUTE_PATHS[tuple.routeId]}`, async () => {
       const okEnvelope: PccReadModelEnvelope<unknown> = {
@@ -324,6 +325,81 @@ describe('createPccBackendReadModelClient — constraints-log success path', () 
     expect(env.data.constraintItems).toEqual([]);
     expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
     expect(env.data.moduleIdentity.moduleId).toBe('constraints-log');
+  });
+});
+
+describe('createPccBackendReadModelClient — buyout-log success path', () => {
+  it('builds GET pcc/projects/{projectId}/buyout-log and passes envelope through', async () => {
+    const envelope: PccReadModelEnvelope<unknown> = {
+      ...buildOkEnvelope(),
+      data: {
+        moduleIdentity: {
+          moduleId: 'buyout-log',
+          displayName: 'Buyout Log',
+          subtitle: 'Buyout Control Center',
+          governance: 'project-readiness',
+          workCenterId: 'procurement-and-buyout',
+          mvpTier: 'MVP',
+          futureAffinityWorkCenter: 'procurement-and-buyout-center',
+        },
+        packages: [],
+        scopeLines: [],
+        budgetAllocations: [],
+        commitmentLinks: [],
+        complianceRequirements: [],
+        procurementMilestones: [],
+        evidenceLinks: [],
+        reconciliationIssues: [],
+        priorityActionCandidates: [],
+        auditEvents: [],
+        projectMemoryContributions: [],
+        traceabilityEdgeContributions: [],
+        hbiEligibilityMarkers: [],
+        sourcePosture: {
+          sourceStatus: 'available',
+          pendingHumanReviewCount: 0,
+        },
+        snapshotHistory: [],
+      } as never,
+    };
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: envelope }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    const result = await client.getBuyoutLog(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(result).toEqual(envelope);
+    const expectedUrl = `https://example.invalid/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/buyout-log`;
+    expect(fetchImpl).toHaveBeenCalledWith(expectedUrl, { method: 'GET' });
+    // viewerPersona must NOT be serialized into URL or query string.
+    const calledUrl = vi.mocked(fetchImpl).mock.calls[0]![0] as string;
+    expect(calledUrl).not.toContain(SAMPLE_PERSONA);
+    expect(calledUrl).not.toContain('viewerPersona');
+  });
+
+  it('fetch reject → fixture fallback envelope with sourceStatus="backend-unavailable" and viewerPersona passed through', async () => {
+    const fetchImpl = vi.fn<PccReadModelFetch>().mockRejectedValue(new TypeError('network'));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    const env = await client.getBuyoutLog(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.mode).toBe('fixture');
+    // viewerPersona is passed through to the fixture-fallback unchanged on
+    // fetch failure (proves the persona reaches the fallback even though it
+    // is never serialized into the request URL).
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.packages).toEqual([]);
+    expect(env.data.commitmentLinks).toEqual([]);
+    expect(env.data.priorityActionCandidates).toEqual([]);
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.moduleIdentity.moduleId).toBe('buyout-log');
+    expect(env.data.moduleIdentity.subtitle).toBe('Buyout Control Center');
   });
 });
 

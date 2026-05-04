@@ -27,6 +27,7 @@ import {
   LIKELIHOOD_LABELS,
   PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
@@ -51,6 +52,7 @@ import type {
   IDocumentControlSource,
   IProjectProfile,
   LifecycleReadinessStatus,
+  PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccCrossProjectKnowledgeReadModel,
   PccDocumentControlReadModel,
@@ -513,6 +515,30 @@ const EMPTY_CONSTRAINTS_LOG_READ_MODEL: PccConstraintsLogReadModel = {
   auditEvents: [],
 };
 
+const EMPTY_BUYOUT_LOG_READ_MODEL: PccBuyoutLogReadModel = {
+  moduleIdentity: SAMPLE_BUYOUT_LOG_READ_MODEL.moduleIdentity,
+  packages: [],
+  scopeLines: [],
+  budgetAllocations: [],
+  commitmentLinks: [],
+  complianceRequirements: [],
+  procurementMilestones: [],
+  evidenceLinks: [],
+  reconciliationIssues: [],
+  priorityActionCandidates: [],
+  auditEvents: [],
+  projectMemoryContributions: [],
+  traceabilityEdgeContributions: [],
+  hbiEligibilityMarkers: [],
+  sourcePosture: { sourceStatus: 'source-unavailable', pendingHumanReviewCount: 0 },
+  snapshotHistory: [],
+};
+
+const EMPTY_BUYOUT_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccBuyoutLogReadModel = {
+  ...EMPTY_BUYOUT_LOG_READ_MODEL,
+  sourcePosture: { sourceStatus: 'backend-unavailable', pendingHumanReviewCount: 0 },
+};
+
 const EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccConstraintsLogReadModel = {
   ...EMPTY_CONSTRAINTS_LOG_READ_MODEL,
   sourcePosture: {
@@ -944,6 +970,37 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
       viewerPersona,
       'available',
       SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+      [],
+    );
+  }
+
+  async getBuyoutLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_BUYOUT_LOG_READ_MODEL_BACKEND_UNAVAILABLE,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_BUYOUT_LOG_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_BUYOUT_LOG_READ_MODEL,
       [],
     );
   }

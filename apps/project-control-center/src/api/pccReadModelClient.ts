@@ -14,6 +14,7 @@
  */
 
 import type {
+  PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccCrossProjectKnowledgeReadModel,
   PccDocumentControlReadModel,
@@ -55,6 +56,7 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'permit-inspection-control-center',
   'responsibility-matrix',
   'constraints-log',
+  'buyout-log',
   'unified-lifecycle',
   'project-memory',
   'project-lenses',
@@ -87,6 +89,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'permit-inspection-control-center': 'pcc/projects/{projectId}/permit-inspection-control-center',
   'responsibility-matrix': 'pcc/projects/{projectId}/responsibility-matrix',
   'constraints-log': 'pcc/projects/{projectId}/constraints-log',
+  'buyout-log': 'pcc/projects/{projectId}/buyout-log',
   'unified-lifecycle': 'pcc/projects/{projectId}/unified-lifecycle',
   'project-memory': 'pcc/projects/{projectId}/project-memory',
   'project-lenses': 'pcc/projects/{projectId}/project-lenses',
@@ -170,6 +173,11 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>;
+
+  getBuyoutLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>>;
 
   getUnifiedLifecycle(
     projectId: PccProjectId,

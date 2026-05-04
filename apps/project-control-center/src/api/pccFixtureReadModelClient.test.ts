@@ -6,6 +6,7 @@ import {
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
+  SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
@@ -42,6 +43,7 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
       client.getConstraintsLog(KNOWN_PROJECT_ID),
+      client.getBuyoutLog(KNOWN_PROJECT_ID),
       client.getUnifiedLifecycle(KNOWN_PROJECT_ID),
       client.getProjectMemory(KNOWN_PROJECT_ID),
       client.getProjectLenses(KNOWN_PROJECT_ID),
@@ -50,7 +52,7 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
       client.getUnifiedSearch(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(20);
+    expect(envelopes).toHaveLength(21);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -141,6 +143,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getPermitInspectionControlCenter(KNOWN_PROJECT_ID),
       client.getResponsibilityMatrix(KNOWN_PROJECT_ID),
       client.getConstraintsLog(KNOWN_PROJECT_ID),
+      client.getBuyoutLog(KNOWN_PROJECT_ID),
       client.getUnifiedLifecycle(KNOWN_PROJECT_ID),
       client.getProjectMemory(KNOWN_PROJECT_ID),
       client.getProjectLenses(KNOWN_PROJECT_ID),
@@ -370,6 +373,89 @@ describe('createPccFixtureReadModelClient — constraints-log', () => {
     expect(env.warnings[0]!.code).toBe('backend-unavailable');
     expect(env.data.riskItems).toEqual([]);
     expect(env.data.constraintItems).toEqual([]);
+    expect(env.data.snapshotHistory).toEqual([]);
+    expect(env.data.auditEvents).toEqual([]);
+    expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+  });
+});
+
+describe('createPccFixtureReadModelClient — buyout-log', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns the deterministic Wave 13 fixture with sourceStatus="available"', async () => {
+    const env = await client.getBuyoutLog(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data).toBe(SAMPLE_BUYOUT_LOG_READ_MODEL);
+  });
+
+  it('preserves canonical Buyout Log module identity verbatim', async () => {
+    const env = await client.getBuyoutLog(KNOWN_PROJECT_ID);
+    const data = env.data;
+    expect(data.moduleIdentity.moduleId).toBe('buyout-log');
+    expect(data.moduleIdentity.displayName).toBe('Buyout Log');
+    expect(data.moduleIdentity.subtitle).toBe('Buyout Control Center');
+    expect(data.moduleIdentity.governance).toBe('project-readiness');
+    expect(data.moduleIdentity.workCenterId).toBe('procurement-and-buyout');
+    expect(data.moduleIdentity.mvpTier).toBe('MVP');
+    expect(data.packages.length).toBeGreaterThan(0);
+    expect(data.priorityActionCandidates.length).toBeGreaterThan(0);
+    expect(data.snapshotHistory.length).toBeGreaterThan(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const env = await client.getBuyoutLog(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+  });
+
+  it('omits viewerPersona on the envelope when not provided', async () => {
+    const env = await client.getBuyoutLog(KNOWN_PROJECT_ID);
+    expect(env.viewerPersona).toBeUndefined();
+  });
+
+  it('unknown project returns empty Wave 13 read model with sourceStatus="source-unavailable"', async () => {
+    const env = await client.getBuyoutLog(UNKNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+    expect(env.data.packages).toEqual([]);
+    expect(env.data.scopeLines).toEqual([]);
+    expect(env.data.budgetAllocations).toEqual([]);
+    expect(env.data.commitmentLinks).toEqual([]);
+    expect(env.data.complianceRequirements).toEqual([]);
+    expect(env.data.procurementMilestones).toEqual([]);
+    expect(env.data.evidenceLinks).toEqual([]);
+    expect(env.data.reconciliationIssues).toEqual([]);
+    expect(env.data.priorityActionCandidates).toEqual([]);
+    expect(env.data.auditEvents).toEqual([]);
+    expect(env.data.projectMemoryContributions).toEqual([]);
+    expect(env.data.traceabilityEdgeContributions).toEqual([]);
+    expect(env.data.hbiEligibilityMarkers).toEqual([]);
+    expect(env.data.snapshotHistory).toEqual([]);
+    expect(env.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(env.data.sourcePosture.pendingHumanReviewCount).toBe(0);
+    // Module identity preserved on the degraded envelope.
+    expect(env.data.moduleIdentity.moduleId).toBe('buyout-log');
+    expect(env.data.moduleIdentity.subtitle).toBe('Buyout Control Center');
+  });
+
+  it('simulateBackendUnavailable returns the empty Wave 13 read model with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getBuyoutLog(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.packages).toEqual([]);
+    expect(env.data.commitmentLinks).toEqual([]);
+    expect(env.data.priorityActionCandidates).toEqual([]);
     expect(env.data.snapshotHistory).toEqual([]);
     expect(env.data.auditEvents).toEqual([]);
     expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
