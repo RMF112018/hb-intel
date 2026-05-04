@@ -2264,3 +2264,18 @@ Contract-level clarifications:
 - Surface/work-center/module/lens distinctions remain mandatory and must not be implemented as departmental workspace forks.
 - Project Readiness rollups may aggregate readiness signals from modules with distinct governance affinity while preserving source ownership and lineage.
 - HBI-grounded retrieval must remain citation-based, permission-filtered, and evidence-qualified.
+
+## Authority and Execution Overlay (Wave 13 Procore Data Layer)
+
+Active machine-readable execution authority path:
+`docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/`
+
+Execution distinction lock:
+
+- Wave 13 `Buyout Log` remains the active module wave sequence reference for Phase 3 implementation planning.
+- Wave `13A-13F` is a cross-cutting Procore data-layer execution overlay; it supplements governance and integration posture without altering existing template contract commitments.
+- `wave-99-procore/_doc-updates` is prior planning context only and is non-authoritative for active execution.
+
+Runtime gate lock:
+
+- This contract addendum does not authorize live Procore runtime before 13A-13F completion and a separately approved live-read proof gate.

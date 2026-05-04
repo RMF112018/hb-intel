@@ -2991,3 +2991,18 @@ Alignment clarifications:
 Implementation and future changes for unified lifecycle behavior MUST align with the developer contracts in `docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/`, including bounded-context ownership, route taxonomy and forbidden routes, record state machines, field-level dictionary, permission/redaction resolution, HBI citation/refusal contract, source-system integration contracts, audit-event model, degraded-state matrix, module onboarding template, and validation/test gates.
 
 This reference is documentation governance only. It does not assert production/live tenant readiness and does not authorize runtime/source-system mutations.
+
+## Authority and Execution Overlay (Wave 13 Procore Data Layer)
+
+Active machine-readable execution authority path:
+`docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/`
+
+Execution distinction lock:
+
+- Wave 13 `Buyout Log` remains the active module wave in the current Phase 3 architecture sequence.
+- Wave `13A-13F` is a cross-cutting Procore data-layer execution overlay and does not replace or reclassify the Buyout Log module wave.
+- `wave-99-procore/_doc-updates` is prior planning context only and is non-authoritative for active execution.
+
+Runtime gate lock:
+
+- This overlay reference does not authorize live Procore runtime before 13A-13F completion and a separately approved live-read proof gate.
