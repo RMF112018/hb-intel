@@ -1,0 +1,65 @@
+{
+  "contractName": "Estimating Kickoff Data Contract",
+  "posture": "later-phase Project Readiness / Preconstruction workflow module",
+  "shellRouteAuthorized": false,
+  "stateMachine": [
+    "not-started",
+    "scheduled",
+    "active",
+    "blocked",
+    "handoff-ready",
+    "returned-for-rework",
+    "handoff-accepted",
+    "cancelled",
+    "archived"
+  ],
+  "requiredRecordFields": [
+    "kickoffId",
+    "projectId",
+    "status",
+    "sourceLineage",
+    "deliverables",
+    "readinessSignals",
+    "evidenceLinks",
+    "securityClassification"
+  ],
+  "deliverableFields": [
+    "deliverableId",
+    "kickoffId",
+    "discipline",
+    "title",
+    "description",
+    "sourceTemplateRef",
+    "owner",
+    "dueDate",
+    "status",
+    "criticality",
+    "evidenceRequirement",
+    "evidenceLinks",
+    "waiverReason",
+    "sourceLineage",
+    "readinessImpact",
+    "priorityActionReason",
+    "projectMemoryContribution",
+    "traceabilityEdgeCandidate",
+    "hbiEligibility",
+    "securityClassification",
+    "auditEvents"
+  ],
+  "handoffReadyGates": [
+    "critical-deliverables-complete-or-waived",
+    "critical-owners-assigned",
+    "dates-recorded-or-waived",
+    "evidence-links-present-or-waived",
+    "restricted-assumptions-classified",
+    "source-lineage-complete",
+    "blockers-closed-or-accepted",
+    "handoff-summary-present"
+  ],
+  "forbiddenInterpretations": [
+    "hr-staffing-commitment",
+    "legal-obligation",
+    "accounting-posting",
+    "approval-execution"
+  ]
+}

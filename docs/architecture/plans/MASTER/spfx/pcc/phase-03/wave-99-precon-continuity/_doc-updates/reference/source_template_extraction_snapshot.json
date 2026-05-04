@@ -1,0 +1,11 @@
+{
+  "contractName": "Preconstruction Source Template Extraction Snapshot",
+  "status": "placeholder-to-be-populated-by-local-prompt-01-and-prompt-05",
+  "extractionRules": {
+    "useOpenpyxl": true,
+    "doNotUnprotectWorkbooks": true,
+    "doNotModifySourceFiles": true,
+    "doNotInventValues": true
+  },
+  "templates": []
+}

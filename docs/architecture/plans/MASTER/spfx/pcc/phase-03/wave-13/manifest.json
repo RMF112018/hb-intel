@@ -1,0 +1,15 @@
+{
+  "package_name": "pcc_wave13_buyout_log_unified_lifecycle_implementation_prompt_set",
+  "generated_at": "2026-05-03",
+  "observed_repo_head": "58f53d49d59f8c70683725c999e8f55e2bc2dfef",
+  "lockfile_md5_expected": "c56df7b79986896624536aab74d609f4",
+  "file_count": 20,
+  "controlling_objective": "Adapt Wave 13 Buyout Log implementation prompts to the PCC unified lifecycle developer-contract layer.",
+  "guardrails": [
+    "No external-system runtime integration",
+    "No standalone departmental workspace",
+    "No Procore/Sage/Graph writeback",
+    "No legal/claim/accounting determinations",
+    "No package/lockfile/manifest/workflow changes expected"
+  ]
+}

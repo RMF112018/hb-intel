@@ -1,0 +1,41 @@
+{
+  "contractName": "Preconstruction Priority Action Reason Codes",
+  "reasonCodes": [
+    {
+      "id": "go-carry-forward-missing",
+      "label": "GO carry-forward context missing",
+      "surface": "project-readiness"
+    },
+    {
+      "id": "kickoff-not-scheduled",
+      "label": "Estimating kickoff not scheduled",
+      "surface": "project-readiness"
+    },
+    {
+      "id": "kickoff-deliverable-overdue",
+      "label": "Kickoff deliverable overdue",
+      "surface": "project-readiness"
+    },
+    {
+      "id": "kickoff-owner-missing",
+      "label": "Kickoff owner missing",
+      "surface": "project-readiness"
+    },
+    {
+      "id": "handoff-evidence-missing",
+      "label": "Handoff evidence missing",
+      "surface": "document-control"
+    },
+    {
+      "id": "assumption-validation-pending",
+      "label": "Preconstruction assumption validation pending",
+      "surface": "project-readiness"
+    },
+    {
+      "id": "restricted-context-review-needed",
+      "label": "Restricted preconstruction context requires authorized review",
+      "surface": "executive-oversight"
+    }
+  ],
+  "executionPosture": "candidate-only-no-external-mutation"
+}

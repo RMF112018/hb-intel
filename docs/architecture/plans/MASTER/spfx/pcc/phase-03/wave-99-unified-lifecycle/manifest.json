@@ -1,0 +1,32 @@
+{
+  "package_name": "pcc_unified_lifecycle_implementation_prompt_set",
+  "generated_for": "HB Intel / Project Control Center unified lifecycle implementation",
+  "working_directory": "/Users/bobbyfetting/hb-intel",
+  "known_baseline_commit": "58f53d49d59f8c70683725c999e8f55e2bc2dfef",
+  "known_lockfile_md5": "c56df7b79986896624536aab74d609f4",
+  "required_instruction": "Do not re-read files that are still within your current context or memory unless you need to verify stale, missing, or contradictory repo truth.",
+  "prompt_count": 8,
+  "docs_count": 3,
+  "reference_count": 6,
+  "files": [
+    "PACKAGE_MANIFEST.md",
+    "README.md",
+    "docs/00_EXISTING_UNIFIED_LIFECYCLE_DOCUMENTATION_MAP.md",
+    "docs/01_REPO_TRUTH_AUDIT_SUMMARY.md",
+    "docs/02_IMPLEMENTATION_SEQUENCE_OVERVIEW.md",
+    "prompts/01_Unified_Lifecycle_Implementation_Readiness_Audit.md",
+    "prompts/02_Model_Contracts_Fixtures_State_Machines_And_Security_Invariants.md",
+    "prompts/03_Backend_GET_Only_Read_Model_Provider_And_Routes.md",
+    "prompts/04_SPFX_Client_Fixtures_Adapters_And_Hooks.md",
+    "prompts/05_Project_Home_Project_Readiness_Surface_Integration.md",
+    "prompts/06_Ask_HBI_Search_Knowledge_Reuse_And_Warranty_Guards.md",
+    "prompts/07_Tests_Guardrails_And_Implementation_Closeout.md",
+    "prompts/08_Fresh_Reviewer_Prompt.md",
+    "reference/00_CONTROLLING_OBJECTIVE.md",
+    "reference/01_REQUIRED_REPO_TRUTH_FILES.md",
+    "reference/02_REQUIRED_CONTRACTS_STATE_AND_GUARDRAILS.md",
+    "reference/03_HARD_GUARDRAILS.md",
+    "reference/04_VALIDATION_COMMAND_REFERENCE.md",
+    "reference/05_RESEARCH_PATTERN_REFERENCE.md"
+  ]
+}

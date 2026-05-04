@@ -1,47 +1,24 @@
-# Repo-Truth Audit Summary for Package Generation
+# 01 — Repo Truth Audit Summary
 
-## Baseline
+## Generation-Time Context
 
-Latest known Wave 13 closeout baseline:
+Latest observed GitHub PCC commit during package generation:
+
+```text
+58f53d49d59f8c70683725c999e8f55e2bc2dfef
+docs(pcc): close unified lifecycle developer documentation
+```
+
+The prompt package attached by the user identifies Wave 13 planning closeout as:
 
 ```text
 5bb2cbbfeaffddad59d785542677d58914e6f61b
 docs(pcc): close wave 13 buyout log planning
 ```
 
-Known Wave 13 lineage:
+Local agent must verify current local HEAD because repo state may have advanced.
 
-```text
-316549c628c014ec0107eac6afe28eee7efab458 docs(pcc): align wave 13 buyout log governance
-bd7e45766a605c06924f78f2f7f1c3e1c9c97a79 docs(pcc): define wave 13 buyout log architecture
-04f63d6f0870a01713a645876579568f60139398 docs(pcc): add wave 13 buyout implementation contracts
-ebf09f420741a084d9a38a352324a70dfc4eec76 docs(pcc): map wave 13 buyout workbook sources
-5bb2cbbfeaffddad59d785542677d58914e6f61b docs(pcc): close wave 13 buyout log planning
-```
-
-## What Was Verified from Observable Pushed Repo Truth
-
-- GitHub repo: `RMF112018/hb-intel`.
-- Default branch observed: `main`.
-- Wave 13 closeout doc exists under blueprint path.
-- Wave 13 closeout records 6 markdown docs and 8 reference JSONs, 14 files total.
-- Wave 13 target architecture includes the required governance sentence.
-- Wave 13 target architecture and developer contracts prohibit Procore writeback, Sage writeback, external mutation, accounting posting, automatic commitment/PO/subcontract creation, and production rollout.
-- `WorkflowModules.ts` includes `buyout-log`.
-- `WorkflowModules.ts` maps `buyout-log` to `procurement-and-buyout`.
-- `PccWorkCenters.ts` marks `procurement-and-buyout` as `Later`, creating a placement/affinity issue that implementation must resolve or explicitly bridge.
-- Existing backend read-model host uses GET-only route registration and deterministic mock provider patterns.
-- Existing SPFx read-model clients support fixture-first default behavior and backend opt-in/fallback patterns.
-
-## What Could Not Be Verified Here
-
-This package generator did not run local workspace commands against:
-
-```text
-/Users/bobbyfetting/hb-intel
-```
-
-Prompt 01 must run and report:
+## Required Local Audit Commands
 
 ```bash
 git status --short
@@ -51,36 +28,39 @@ git log --oneline -12
 md5 pnpm-lock.yaml
 ```
 
-Prompt 01 must also run local JSON validation and local Prettier check for the Wave 13 documentation set.
+## Required Wave 13 Questions
 
-## Observed Repo-Truth Questions and Answers
+Prompt 01 must answer:
 
-| Question | Package-Generation Answer | Prompt 01 Local Revalidation |
-| --- | --- | --- |
-| Latest local HEAD? | Unknown here. Pushed baseline observed: `5bb2cbbfeaffddad59d785542677d58914e6f61b`. | Required. |
-| Local branch clean? | Unknown here. | Required. |
-| Wave 13 closeout doc exists? | Yes in pushed repo. | Required. |
-| All 14 Wave 13 artifacts exist? | Closeout claims yes; key docs/refs observed. | Required via `find`. |
-| Eight JSON files validate? | Closeout claims validation passed. | Required via `python3 -m json.tool`. |
-| `Buyout Log` name consistent? | Observed in target/closeout/contracts. | Required by grep. |
-| `Buyout Control Center` subtitle consistent? | Observed in target/closeout/contracts. | Required by grep. |
-| Governance sentence present? | Observed in target architecture. | Required by grep. |
-| `buyout-log` registered? | Yes. | Required by source inspection and tests. |
-| `buyout-log` mapped to `procurement-and-buyout`? | Yes. | Required by source inspection. |
-| Mapping resolved? | No. Must be resolved/bridged during implementation. | Prompt 01/02 decision gate. |
-| Backend GET-only seams exist? | Yes. | Required before Prompt 03 edits. |
-| SPFx fixture/backend client seams exist? | Yes. | Required before Prompt 04 edits. |
+1. What is current HEAD?
+2. Is working tree clean?
+3. Does Wave 13 closeout exist?
+4. Do all six Wave 13 root markdown docs exist?
+5. Do all eight Wave 13 reference JSONs exist and validate?
+6. Is `Buyout Log` consistently named?
+7. Is `Buyout Control Center` consistently used as subtitle?
+8. Is required governance sentence present?
+9. Does current unified lifecycle developer contract set exist?
+10. Does the route taxonomy prohibit a standalone buyout workspace?
+11. Does `WorkflowModules.ts` include `buyout-log`?
+12. Does `buyout-log` map to `procurement-and-buyout`?
+13. What bridge/correction is safest under current repo truth?
+14. Which backend read-model provider/route patterns exist?
+15. Which SPFx client/fixture patterns exist?
+16. Which Project Readiness region patterns exist?
+17. Which tests/guards should be extended?
+18. Which exact package commands are supported?
+19. Which files can be edited per implementation prompt?
+20. Which docs must receive closeout updates?
 
-## Source-Model Placement / Work-Center Bridge
+## Current Implementation-Readiness Gaps to Resolve in Prompt 01
 
-The package does not force a mapping change. It forces a local decision gate:
+- Confirm whether Buyout Log should appear only as a Project Readiness embedded region or has an existing repo-standard module surface pattern.
+- Confirm how `buyout-log` readiness-source behavior is represented in Project Readiness framework source modules.
+- Confirm how unified lifecycle Project Memory / traceability references should be added without overbuilding persistence.
+- Confirm package scripts and exact test files.
+- Confirm no live integration is authorized.
 
-1. Inspect Project Readiness framework and module registry.
-2. Inspect work-center taxonomy.
-3. Inspect UI navigation and surface placement.
-4. Decide the smallest safe correction:
-   - explicit Project Readiness module placement with future `procurement-and-buyout` affinity, or
-   - bridge metadata preserving current work-center id, or
-   - mapping correction only if repo docs/tests prove it is required.
+## Expected Outcome
 
-No runtime surface work should proceed until this is answered and covered by tests.
+Prompt 01 is read-only and commits nothing. It produces a repo-truth report and a precise execution map for Prompts 02–07.

@@ -1,6 +1,9 @@
-# Validation Command Reference
+# 04 — Validation Command Reference
 
-## Required Baseline Commands
+
+## Required Repo Truth / Validation Commands
+
+Run and record before edits:
 
 ```bash
 git status --short
@@ -10,64 +13,54 @@ git log --oneline -12
 md5 pnpm-lock.yaml
 ```
 
-## Required General Validation Commands
+Expected lockfile MD5 unless explicitly justified and authorized:
+
+```text
+c56df7b79986896624536aab74d609f4
+```
+
+Run before commit:
 
 ```bash
-git status --short
 git diff --check
+git diff --stat
 git diff --name-only
 git diff --cached --name-only
-pnpm exec prettier --check <touched markdown/json files only>
 ```
 
-## JSON Validation for Wave 13 Reference Files
+For touched markdown/json files:
 
 ```bash
-for f in \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/default_buyout_log_seed_structure.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/buyout_module_data_contract.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/buyout_state_machine.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/field_mutability_matrix.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/buyout_exception_reason_codes.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/fixture_scenarios.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/procore_buyout_data_mapping_reference.json \
-  docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/source_research_urls.json
-do
-  python3 -m json.tool "$f" > /tmp/"$(basename "$f")".validated
-done
+pnpm exec prettier --check <touched markdown/json files>
 ```
 
-## Repo-Observed Package Scripts
+For touched JSON files:
 
-Prompt 01 must re-open package scripts locally before using these.
+```bash
+python3 -m json.tool <each touched json file> >/dev/null
+```
+
+For source implementation prompts, inspect the relevant `package.json` files before selecting package commands. Do not guess package scripts. Use repo-confirmed equivalents of:
 
 ```bash
 pnpm --filter @hbc/models check-types
 pnpm --filter @hbc/models test
-
 pnpm --filter @hbc/functions check-types
 pnpm --filter @hbc/functions test
-
 pnpm --filter @hbc/spfx-project-control-center check-types
 pnpm --filter @hbc/spfx-project-control-center test
 ```
 
-## Optional Targeted Lint
 
-Only run if prompt scope and repo state make it appropriate:
+## Additional Static Guard Searches
+
+Use repo-appropriate search tools to prove no forbidden runtime/external behavior was added. Examples, scoped to touched files where possible:
 
 ```bash
-pnpm --filter @hbc/models lint
-pnpm --filter @hbc/functions lint
-pnpm --filter @hbc/spfx-project-control-center lint
+rg "fetch\(|XMLHttpRequest|EventSource|WebSocket|navigator\.sendBeacon" <touched source files>
+rg "procore|sage|graph\.microsoft|@microsoft/sp-|@pnp|autodesk|docusign|adobe|document-crunch" <touched source files>
+rg "POST|PUT|PATCH|DELETE" backend/functions/src/hosts/pcc-read-model
+rg "buyout-workspace|procurement-workspace|external-writeback|accounting-posting" apps/project-control-center/src packages/models/src
 ```
 
-Do not fail the implementation solely on known unrelated pre-existing lint warnings/errors; report them explicitly with evidence.
-
-## Forbidden Validation Shortcuts
-
-- Do not run broad `pnpm format`.
-- Do not run broad `prettier --write`.
-- Do not use uninspected scripts.
-- Do not stage validation artifacts under `/tmp`.
-- Do not commit if validation creates unexpected repo changes.
+Do not use broad destructive commands. Do not run broad Prettier write.

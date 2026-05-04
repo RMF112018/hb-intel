@@ -1,0 +1,51 @@
+{
+  "contractName": "Go / No-Go Carry-Forward Data Contract",
+  "sourceOwnership": "BD/Pursuit source workflow or approved source template",
+  "pccOwnership": "read-only carry-forward projection after GO",
+  "projectedOnlyAfter": "source-final-go",
+  "noGoPosture": "archived-source-only unless future reference policy authorizes redacted use",
+  "stateMachine": [
+    "source-draft",
+    "source-under-review",
+    "source-final-go",
+    "projected-to-pcc",
+    "accepted-carry-forward",
+    "superseded",
+    "archived"
+  ],
+  "requiredFields": [
+    "carryForwardId",
+    "projectId",
+    "sourceDecisionId",
+    "sourceSystem",
+    "decision",
+    "decisionDate",
+    "scoreSummary",
+    "scoreBand",
+    "whyPursuedSummary",
+    "winStrategySummary",
+    "differentiators",
+    "assumptions",
+    "riskFlags",
+    "executiveOverride",
+    "sourceLineage",
+    "evidenceLinks",
+    "securityClassification",
+    "redactionLevel",
+    "hbiEligibility",
+    "auditEvents",
+    "traceabilityEdges"
+  ],
+  "immutableAfterProjection": [
+    "decision",
+    "decisionDate",
+    "sourceDecisionId",
+    "sourceScoreValues",
+    "executiveOverride"
+  ],
+  "hbiRules": {
+    "groundedAnswersRequireCitations": true,
+    "restrictedFieldsRequireRefusalOrRedaction": true,
+    "sourceOfTruthClaimForbidden": true
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "contractName": "Preconstruction Visibility Matrix",
+  "visibilityModes": [
+    "full",
+    "summary-safe",
+    "masked",
+    "withheld",
+    "refusal",
+    "degraded"
+  ],
+  "personas": {
+    "executive": {
+      "goNoGoScore": "full",
+      "executiveOverride": "full",
+      "marginStrategy": "full",
+      "hbi": "citation-required"
+    },
+    "project-executive": {
+      "goNoGoScore": "summary-safe",
+      "executiveOverride": "summary-safe",
+      "marginStrategy": "masked",
+      "hbi": "citation-required"
+    },
+    "project-manager": {
+      "goNoGoScore": "summary-safe",
+      "executiveOverride": "masked",
+      "marginStrategy": "withheld",
+      "hbi": "citation-required"
+    },
+    "estimator": {
+      "goNoGoScore": "full-if-source-access",
+      "executiveOverride": "masked",
+      "marginStrategy": "masked",
+      "hbi": "citation-required"
+    },
+    "warranty": {
+      "goNoGoScore": "withheld",
+      "executiveOverride": "withheld",
+      "marginStrategy": "withheld",
+      "hbi": "refusal-unless-authorized"
+    },
+    "it-admin": {
+      "goNoGoScore": "withheld-by-default",
+      "executiveOverride": "withheld-by-default",
+      "marginStrategy": "withheld-by-default",
+      "hbi": "no-sensitive-content"
+    }
+  },
+  "restrictedFieldFamilies": [
+    "margin",
+    "fee",
+    "executiveComments",
+    "clientSensitivity",
+    "strategy",
+    "committeeNotes",
+    "staffingAssumptions"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "contractName": "PCC Preconstruction Continuity Data Contract",
+  "version": "unified-lifecycle-aligned-1.0.0",
+  "posture": "documentation-only",
+  "moduleFamily": "preconstruction-continuity",
+  "shellRouteAuthorized": false,
+  "governanceSentence": "Preconstruction Continuity is a unified lifecycle carry-forward layer that preserves pursuit, estimating, kickoff, assumptions, evidence, and handoff context as permission-filtered Project Memory, lifecycle events, readiness signals, traceability edges, and future-reference knowledge without creating a separate departmental workspace or replacing source systems.",
+  "recordFamilies": [
+    {
+      "id": "pcc-preconstruction-continuity-summary",
+      "owner": "PCC",
+      "posture": "PCC-derived",
+      "requiredFields": [
+        "projectId",
+        "lifecycleStage",
+        "summaryStatus",
+        "sourceLineage",
+        "securityClassification",
+        "updatedAtUtc"
+      ]
+    },
+    {
+      "id": "pcc-pursuit-decision-carry-forward",
+      "owner": "PCC projection of source-owned decision",
+      "posture": "PCC-derived",
+      "requiredFields": [
+        "carryForwardId",
+        "projectId",
+        "decision",
+        "decisionDate",
+        "sourceDecisionId",
+        "sourceLineage",
+        "evidenceLinks",
+        "securityClassification",
+        "redactionLevel"
+      ]
+    },
+    {
+      "id": "pcc-estimating-kickoff-record",
+      "owner": "PCC future workflow",
+      "posture": "future PCC-native",
+      "requiredFields": [
+        "kickoffId",
+        "projectId",
+        "status",
+        "deliverables",
+        "sourceLineage",
+        "readinessSignals",
+        "securityClassification"
+      ]
+    },
+    {
+      "id": "pcc-preconstruction-project-memory-contribution",
+      "owner": "PCC",
+      "posture": "PCC-derived",
+      "requiredFields": [
+        "memoryContributionId",
+        "recordType",
+        "summary",
+        "sourceLineage",
+        "eligibleLensTypes",
+        "securityClassification",
+        "hbiEligibility"
+      ]
+    },
+    {
+      "id": "pcc-preconstruction-traceability-edge",
+      "owner": "PCC",
+      "posture": "PCC-native relationship metadata",
+      "requiredFields": [
+        "edgeId",
+        "fromRecord",
+        "toRecord",
+        "edgeType",
+        "confidence",
+        "sourceLineage",
+        "securityClassification"
+      ]
+    }
+  ],
+  "forbiddenBehaviors": [
+    "standalone-shell-route",
+    "source-workbook-mutation",
+    "external-system-runtime-call",
+    "source-system-writeback",
+    "uncited-hbi-answer",
+    "restricted-content-leak",
+    "legal-accounting-profit-guarantee",
+    "staffing-commitment-claim"
+  ]
+}

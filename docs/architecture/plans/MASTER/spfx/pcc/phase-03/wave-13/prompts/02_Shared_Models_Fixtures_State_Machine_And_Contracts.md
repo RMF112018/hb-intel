@@ -2,7 +2,7 @@
 
 ## Objective
 
-Implement Wave 13 shared TypeScript model contracts, deterministic fixtures, lifecycle/state-machine utilities, completion gates, waiver validation posture, reconciliation status values, priority action reason codes, and the smallest safe source-model placement bridge/correction supported by Prompt 01 repo truth.
+Implement the Wave 13 model-layer contracts, deterministic fixtures, state machines, completion-gate utilities, source-lineage posture, Project Memory / traceability contributions, HBI eligibility markers, and tests for Buyout Log. Resolve or bridge the `buyout-log` placement issue using Prompt 01 repo truth.
 
 ## Required Instruction Phrase
 
@@ -16,117 +16,148 @@ Do not re-read files that are still within your current context or memory unless
 /Users/bobbyfetting/hb-intel
 ```
 
-## Global Guardrails
 
-- Do not edit `docs/architecture/plans/**` unless separately authorized.
-- Do not run broad formatting or broad Prettier writes across the repo.
-- Do not change package dependencies, `pnpm-lock.yaml`, manifests, workflows, CI, deployment files, or tenant configuration unless the prompt explicitly authorizes and justifies it.
-- Do not add backend write routes or mutation endpoints.
-- Do not add Procore, Sage, Microsoft Graph, SharePoint REST/PnP, Autodesk, AHJ portal, utility portal, scraping, polling, sync, mirror, or write-back runtime behavior.
-- Do not create, update, approve, post, or transmit commitments, purchase orders, subcontracts, SOVs, CCOs, invoices, payments, accounting entries, legal notices, claims, or entitlement determinations.
-- Do not implement evidence-binary upload/download/sync/storage ownership in Wave 13; store/display references only.
-- Do not execute Wave 14 approval/checkpoint behavior; create only reference prompts, signals, or candidate records.
-- Stage only files authorized by the active prompt.
-- Keep backend Wave 13 read model GET-only.
-- Keep SPFx fixture-first unless backend opt-in is already repo-standard and explicitly configured.
-- Preserve source-lineage for every source-derived value.
+## Global Hard Guardrails
 
+- Keep Wave 13 as a safe PCC Project Readiness workflow module.
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+- Do not create a standalone `buyout-log` shell route unless current repo route taxonomy already explicitly authorizes it. Current unified lifecycle route taxonomy treats Buyout Log as a workflow/module region under approved PCC surfaces, not as a new shell workspace.
+- Do not implement Procore, Sage, Microsoft Graph, Autodesk, Document Crunch, Adobe Sign, DocuSign, AHJ, utility, vendor-portal, or external-system runtime calls.
+- Do not implement writeback, mirroring, scraping, sync, polling, production rollout, or tenant mutation.
+- Do not create Procore commitments, purchase orders, subcontracts, SOVs, CCOs, invoices, or payments.
+- Do not post to Sage or make accounting determinations.
+- Do not make legal, claim, entitlement, compensability, delay-damages, or forensic schedule-analysis determinations.
+- Do not create legal/contractual obligations automatically.
+- Do not own evidence binaries in Wave 13; use Document Control / SharePoint evidence references only.
+- Do not execute approvals/checkpoints; Wave 14 owns approval/checkpoint execution.
+- Do not edit `docs/architecture/plans/**` unless the prompt explicitly authorizes it. This package does not authorize it.
+- Do not change package dependencies, `pnpm-lock.yaml`, SharePoint manifests, workflows/CI, or deployment artifacts unless a prompt explicitly authorizes and justifies it. These prompts do not authorize them.
+- Use fixture-first and read-only posture unless a prompt explicitly authorizes a repo-standard backend opt-in seam.
+- Stage only files authorized by the current prompt.
 
 
 ## Allowed Files / Likely Files
 
-- `packages/models/src/pcc/BuyoutLog.ts`
-- `packages/models/src/pcc/BuyoutLog.test.ts`
-- `packages/models/src/pcc/fixtures/buyoutLog.ts`
-- `packages/models/src/pcc/fixtures/index.ts`
-- `packages/models/src/pcc/index.ts`
-- `packages/models/src/index.ts`
-- `packages/models/src/pcc/WorkflowModules.ts`
-- `packages/models/src/pcc/WorkflowModules.test.ts`
-- `packages/models/src/pcc/ProjectReadinessFramework.ts`
-- `packages/models/src/pcc/ProjectReadinessFramework.test.ts`
+Likely edit scope, subject to Prompt 01 repo truth:
+- `packages/models/src/pcc/BuyoutLog.ts` or repo-consistent equivalent.
+- `packages/models/src/pcc/fixtures/buyoutLog.ts` or repo-consistent equivalent.
+- `packages/models/src/pcc/WorkflowModules.ts` only if Prompt 01 confirms a minimal safe bridge/correction.
+- `packages/models/src/pcc/ProjectReadinessFramework.ts` only if Prompt 01 confirms needed source-module bridge.
+- `packages/models/src/pcc/index.ts`.
+- `packages/models/src/pcc/*.test.ts`.
+- `packages/models/src/pcc/fixtures/index.ts`.
+
 
 ## Prohibited Scope
 
-- Any file not needed for this prompt’s objective.
-- Any unrelated refactor.
-- Any broad formatting pass.
-- Any lockfile/package/manifest/workflow/deployment change unless this prompt explicitly authorizes it.
-- Any external-system runtime behavior, writeback, sync, or mutation.
+No backend/SPFx/docs changes except extremely narrow doc closeout notes if Prompt 01 explicitly requires them. No package/lockfile changes.
 
-## Repo-Truth Files to Inspect
 
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/Buyout_Log_Target_Architecture.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/Wave_13_Developer_Implementation_Decisions_And_Contracts.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/*.json`
-- `packages/models/src/pcc/WorkflowModules.ts`
-- `packages/models/src/pcc/PccWorkCenters.ts`
-- `packages/models/src/pcc/ProjectReadinessFramework.ts`
-- `packages/models/src/pcc/fixtures/projectReadiness.ts`
-- `packages/models/package.json`
+## Required Repo Truth / Validation Commands
 
-## Implementation Steps
-
-1. Re-read Prompt 01 final report and do not repeat already-current file reads unless repo truth needs verification.
-2. Inspect Wave 13 JSON contracts and convert stable values into repo-compatible TypeScript literal unions/interfaces.
-3. Add `BuyoutPackage` and required child record contracts: `BuyoutScopeLine`, `BudgetAllocation`, `CommitmentLink`, `ComplianceRequirement`, `ProcurementMilestone`, `EvidenceLink`, `ReconciliationIssue`, `AuditEvent`, `PriorityActionCandidate`.
-4. Add field mutability model preserving PCC-owned, source-derived, calculated, waived, and read-only semantics.
-5. Add lifecycle/state transition utilities from `buyout_state_machine.json`.
-6. Add completion-gate utilities that cannot return complete without vendor, amount, LOI/subcontract/PO, commitment, compliance, procurement risk, reconciliation, and source-lineage posture.
-7. Add waiver validation requiring reason, approver, timestamp, and evidence.
-8. Add deterministic fixture data reflecting happy path, over/under budget variance, missing commitment link, compliance waiver, reconciliation mismatch, and blocked/deferred scenarios.
-9. Export models and fixtures through existing repo export barrels.
-10. Resolve or preserve the `buyout-log -> procurement-and-buyout` placement issue using the smallest safe repo-consistent bridge identified by Prompt 01. Do not invent a new architecture. Add regression tests for the selected posture.
-11. Add model tests for exports, fixture determinism, state transitions, completion gates, waiver validation, lineage, and placement/bridge behavior.
-
-## Validation Commands
+Run and record before edits:
 
 ```bash
 git status --short
+git branch --show-current
+git rev-parse HEAD
+git log --oneline -12
 md5 pnpm-lock.yaml
-pnpm --filter @hbc/models check-types
-pnpm --filter @hbc/models test
-git diff --check
-pnpm exec prettier --check packages/models/src/pcc/**/*.ts packages/models/src/index.ts
 ```
 
-## Staged-File Proof Before Commit
+Expected lockfile MD5 unless explicitly justified and authorized:
 
-Before committing, run and report:
+```text
+c56df7b79986896624536aab74d609f4
+```
+
+Run before commit:
 
 ```bash
-git status --short
+git diff --check
+git diff --stat
 git diff --name-only
 git diff --cached --name-only
-md5 pnpm-lock.yaml
 ```
 
-Stage only files authorized by this prompt. Then run:
+For touched markdown/json files:
 
 ```bash
-git diff --cached --name-only
-git diff --cached --stat
+pnpm exec prettier --check <touched markdown/json files>
 ```
 
-## Commit Summary and Commit Description
+For touched JSON files:
 
-Use this commit summary:
+```bash
+python3 -m json.tool <each touched json file> >/dev/null
+```
+
+For source implementation prompts, inspect the relevant `package.json` files before selecting package commands. Do not guess package scripts. Use repo-confirmed equivalents of:
+
+```bash
+pnpm --filter @hbc/models check-types
+pnpm --filter @hbc/models test
+pnpm --filter @hbc/functions check-types
+pnpm --filter @hbc/functions test
+pnpm --filter @hbc/spfx-project-control-center check-types
+pnpm --filter @hbc/spfx-project-control-center test
+```
+
+
+
+## Commit Discipline
+
+- Commit only after all validation gates pass.
+- Do not push unless explicitly instructed.
+- The final response must include:
+  - branch and HEAD before/after;
+  - files inspected;
+  - files changed;
+  - validation commands/results;
+  - lockfile MD5 before/after;
+  - guardrail confirmation;
+  - commit hash, title, and description if committed;
+  - explicit note that push was not performed unless instructed.
+
+
+## Recommended Commit Title
 
 ```text
-feat(pcc): add wave 13 buyout log shared contracts
+feat(models-pcc): add wave 13 buyout log contracts
 ```
 
-Commit description:
+## Required Deliverables
 
-```text
-Adds Wave 13 Buyout Log shared model contracts, deterministic fixtures, state-machine/completion-gate utilities, waiver/reconciliation posture, priority-action candidate vocabulary, and repo-consistent module placement bridge/correction while preserving source-lineage and no-writeback guardrails.
-```
-
-## Final Output Requirements
-
-Return:
-- files changed;
-- placement/bridge decision and why;
-- validation output;
-- lockfile MD5 before/after;
-- any residual risks for backend Prompt 03.
+- `BuyoutPackage` primary record contract.
+- Child record contracts:
+  - `BuyoutScopeLine`
+  - `BudgetAllocation`
+  - `CommitmentLink`
+  - `ComplianceRequirement`
+  - `ProcurementMilestone`
+  - `EvidenceLink`
+  - `ReconciliationIssue`
+  - `AuditEvent`
+  - `PriorityActionCandidate`
+  - `ProjectMemoryContribution`
+  - `TraceabilityEdgeContribution`
+  - `HbiEligibilityMarker`
+- Closed status vocabularies.
+- State transition map and transition guard utilities.
+- Completion gate utility.
+- Waiver validation utility.
+- Budget vs commitment reconciliation utility.
+- Field mutability vocabulary.
+- Source-lineage / evidence-link requirement helpers.
+- HBI eligibility predicate that requires source lineage and permission-safe posture.
+- Deterministic fixtures for ready, blocked, compliance-hold, over-budget, missing-lineage, unknown/degraded cases.
+- Tests for:
+  - exports;
+  - enum/status exhaustiveness;
+  - state transitions;
+  - completion gates;
+  - waiver rules;
+  - source-lineage requirements;
+  - HBI eligibility;
+  - fixture determinism;
+  - `buyout-log` bridge/correction.

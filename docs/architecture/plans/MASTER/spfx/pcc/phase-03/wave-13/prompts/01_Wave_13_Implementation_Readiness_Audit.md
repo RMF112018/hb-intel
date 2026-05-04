@@ -2,7 +2,7 @@
 
 ## Objective
 
-Conduct a read-only local repo-truth audit for PCC Phase 3 Wave 13 `Buyout Log` / `Buyout Control Center`. Do not edit files. Produce a decision-ready report that confirms implementation seams, package scripts, Wave 13 artifact completeness, and the repo-consistent answer to the `buyout-log` placement / future `procurement-and-buyout` affinity issue.
+Conduct a read-only audit before any Wave 13 implementation. Confirm current repo truth, Wave 13 planning artifacts, unified lifecycle developer contracts, source-model placement, route taxonomy, package scripts, model/backend/SPFx seams, and the exact implementation sequence for Prompts 02–07. Do not edit files and do not commit.
 
 ## Required Instruction Phrase
 
@@ -16,68 +16,46 @@ Do not re-read files that are still within your current context or memory unless
 /Users/bobbyfetting/hb-intel
 ```
 
-## Global Guardrails
 
-- Do not edit `docs/architecture/plans/**` unless separately authorized.
-- Do not run broad formatting or broad Prettier writes across the repo.
-- Do not change package dependencies, `pnpm-lock.yaml`, manifests, workflows, CI, deployment files, or tenant configuration unless the prompt explicitly authorizes and justifies it.
-- Do not add backend write routes or mutation endpoints.
-- Do not add Procore, Sage, Microsoft Graph, SharePoint REST/PnP, Autodesk, AHJ portal, utility portal, scraping, polling, sync, mirror, or write-back runtime behavior.
-- Do not create, update, approve, post, or transmit commitments, purchase orders, subcontracts, SOVs, CCOs, invoices, payments, accounting entries, legal notices, claims, or entitlement determinations.
-- Do not implement evidence-binary upload/download/sync/storage ownership in Wave 13; store/display references only.
-- Do not execute Wave 14 approval/checkpoint behavior; create only reference prompts, signals, or candidate records.
-- Stage only files authorized by the active prompt.
-- Keep backend Wave 13 read model GET-only.
-- Keep SPFx fixture-first unless backend opt-in is already repo-standard and explicitly configured.
-- Preserve source-lineage for every source-derived value.
+## Global Hard Guardrails
+
+- Keep Wave 13 as a safe PCC Project Readiness workflow module.
+- Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
+- Do not create a standalone `buyout-log` shell route unless current repo route taxonomy already explicitly authorizes it. Current unified lifecycle route taxonomy treats Buyout Log as a workflow/module region under approved PCC surfaces, not as a new shell workspace.
+- Do not implement Procore, Sage, Microsoft Graph, Autodesk, Document Crunch, Adobe Sign, DocuSign, AHJ, utility, vendor-portal, or external-system runtime calls.
+- Do not implement writeback, mirroring, scraping, sync, polling, production rollout, or tenant mutation.
+- Do not create Procore commitments, purchase orders, subcontracts, SOVs, CCOs, invoices, or payments.
+- Do not post to Sage or make accounting determinations.
+- Do not make legal, claim, entitlement, compensability, delay-damages, or forensic schedule-analysis determinations.
+- Do not create legal/contractual obligations automatically.
+- Do not own evidence binaries in Wave 13; use Document Control / SharePoint evidence references only.
+- Do not execute approvals/checkpoints; Wave 14 owns approval/checkpoint execution.
+- Do not edit `docs/architecture/plans/**` unless the prompt explicitly authorizes it. This package does not authorize it.
+- Do not change package dependencies, `pnpm-lock.yaml`, SharePoint manifests, workflows/CI, or deployment artifacts unless a prompt explicitly authorizes and justifies it. These prompts do not authorize them.
+- Use fixture-first and read-only posture unless a prompt explicitly authorizes a repo-standard backend opt-in seam.
+- Stage only files authorized by the current prompt.
+
 
 ## Allowed Files / Likely Files
 
-Read-only only. No files may be edited, created, staged, or committed.
+Read-only inspection only. Likely files/directories:
+- Governing PCC docs and unified lifecycle developer contracts.
+- `phase-3/wave-13/**`.
+- `packages/models/src/pcc/**`.
+- `backend/functions/src/hosts/pcc-read-model/**`.
+- `apps/project-control-center/src/api/**`.
+- `apps/project-control-center/src/surfaces/**`.
+- package manifests.
+
 
 ## Prohibited Scope
 
-- Do not edit source, docs, JSON, package files, lockfiles, manifests, workflows, or generated artifacts.
-- Do not run formatting write commands.
-- Do not stage or commit.
-- Do not implement Wave 13.
+No edits. No staged files. No commit.
 
-## Repo-Truth Files to Inspect
 
-Use `reference/01_REQUIRED_REPO_TRUTH_FILES.md` from this package as the checklist.
+## Required Repo Truth / Validation Commands
 
-At minimum inspect:
-
-- `docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md`
-- `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/01_PCC_Product_Architecture_and_User_Journey_Blueprint.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/05_Phase_3_Development_Roadmap_Updated.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/07_Phase_3_Module_Implementation_Plan.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/Register_MVP_Scope.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/Register_Workflow_Module_Register.md`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-8/`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-9/`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-10/`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-11/`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-12/`
-- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/`
-- `packages/models/src/pcc/`
-- `packages/models/src/pcc/fixtures/`
-- `packages/models/src/index.ts`
-- `backend/functions/src/hosts/pcc-read-model/`
-- `backend/functions/src/services/__tests__/`
-- `apps/project-control-center/src/surfaces/`
-- `apps/project-control-center/src/api/`
-- `apps/project-control-center/src/fixtures/`
-- `apps/project-control-center/src/tests/`
-- `apps/project-control-center/package.json`
-- `packages/models/package.json`
-- `backend/functions/package.json`
-- `package.json`
-
-## Required Local Commands
-
-Run and report exact output:
+Run and record before edits:
 
 ```bash
 git status --short
@@ -87,90 +65,102 @@ git log --oneline -12
 md5 pnpm-lock.yaml
 ```
 
-Also run:
+Expected lockfile MD5 unless explicitly justified and authorized:
 
-```bash
-find docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13 -maxdepth 2 -type f | sort
-find docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13 -maxdepth 2 -type f | wc -l
+```text
+c56df7b79986896624536aab74d609f4
 ```
 
-## Wave 13 Artifact Validation
-
-1. Confirm all six root markdown files exist.
-2. Confirm all eight reference JSON files exist.
-3. Validate all eight JSON files with `python3 -m json.tool`.
-4. Run targeted Prettier check on Wave 13 markdown/json files only:
+Run before commit:
 
 ```bash
-pnpm exec prettier --check docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/*.md docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/reference/*.json
-```
-
-## Repo-Truth Questions to Answer
-
-Answer all 25 questions from `reference/01_REQUIRED_REPO_TRUTH_FILES.md`.
-
-Pay special attention to:
-
-- Whether `WorkflowModules.ts` includes `buyout-log`.
-- Whether `WorkflowModules.ts` maps `buyout-log` to `procurement-and-buyout`.
-- Whether `procurement-and-buyout` is still `Later`.
-- Whether Project Readiness has a source-module/workflow-module seam that can host Buyout Log while preserving future Procurement & Buyout Center affinity.
-- Which files Prompt 02 should edit to resolve or bridge the placement issue.
-
-## Web Research Refresh
-
-Perform a current web-search refresh before generating the audit report. Summarize only product-pattern findings relevant to:
-
-- construction buyout;
-- bid leveling;
-- Procore commitments / SOV / CCO / vendors / insurance compliance;
-- Sage committed/actual job-cost posture;
-- compliance / SDI / bonds / lien-waiver tracking;
-- long-lead procurement and submittal schedule exposure;
-- comparable command-center UX patterns.
-
-Do not treat research as authority to clone external tools or violate repo guardrails.
-
-## Validation Commands
-
-No implementation validation is required because this is read-only.
-
-Still run and report:
-
-```bash
-git status --short
-git diff --name-only
-git diff --cached --name-only
-md5 pnpm-lock.yaml
-```
-
-Expected result: no new changes from this prompt.
-
-## Staged-File Proof Before Commit
-
-No commit. Confirm:
-
-```bash
+git diff --check
+git diff --stat
 git diff --name-only
 git diff --cached --name-only
 ```
 
-Both should be empty or should contain only pre-existing user-owned changes not caused by this audit.
+For touched markdown/json files:
 
-## Commit Summary and Commit Description
+```bash
+pnpm exec prettier --check <touched markdown/json files>
+```
 
-No commit. This is read-only.
+For touched JSON files:
 
-## Final Output Requirements
+```bash
+python3 -m json.tool <each touched json file> >/dev/null
+```
 
-Return a structured report with:
+For source implementation prompts, inspect the relevant `package.json` files before selecting package commands. Do not guess package scripts. Use repo-confirmed equivalents of:
 
-1. Local HEAD, branch, status, and lockfile MD5.
-2. Wave 13 artifact completeness and JSON validation status.
-3. Naming/governance sentence validation.
-4. `buyout-log` source-model placement finding.
-5. Recommended implementation path for the placement/bridge issue.
-6. Confirmed model/backend/SPFx seams.
-7. Confirmed package scripts.
-8. Prompt-by-prompt file edit recommendations.
-9. Any stop conditions before Prompt 02.
+```bash
+pnpm --filter @hbc/models check-types
+pnpm --filter @hbc/models test
+pnpm --filter @hbc/functions check-types
+pnpm --filter @hbc/functions test
+pnpm --filter @hbc/spfx-project-control-center check-types
+pnpm --filter @hbc/spfx-project-control-center test
+```
+
+
+
+## Commit Discipline
+
+- Commit only after all validation gates pass.
+- Do not push unless explicitly instructed.
+- The final response must include:
+  - branch and HEAD before/after;
+  - files inspected;
+  - files changed;
+  - validation commands/results;
+  - lockfile MD5 before/after;
+  - guardrail confirmation;
+  - commit hash, title, and description if committed;
+  - explicit note that push was not performed unless instructed.
+
+
+## Recommended Commit Title
+
+```text
+no commit — read-only audit
+```
+
+## Implementation Steps
+
+1. Run repo-truth commands.
+2. Validate the Wave 13 artifact inventory:
+   - six root markdown docs;
+   - eight reference JSON files;
+   - workbook source path exists.
+3. Validate all Wave 13 reference JSONs with `python3 -m json.tool`.
+4. Inspect unified lifecycle developer contracts:
+   - route taxonomy;
+   - bounded contexts;
+   - state machines;
+   - field dictionary;
+   - permission/redaction;
+   - HBI citation/refusal;
+   - source integration;
+   - audit/degraded states;
+   - module onboarding;
+   - validation gates.
+5. Inspect `WorkflowModules.ts` and any Project Readiness source-module taxonomy to determine the current `buyout-log` placement.
+6. Decide one of:
+   - Preserve `buyout-log -> procurement-and-buyout` as affinity and add a Project Readiness/source-module bridge; or
+   - Make a minimal model metadata correction if repo truth explicitly supports it.
+7. Inspect package scripts and record exact validation commands for models/backend/SPFx.
+8. Inspect existing read-model route/provider and SPFx client patterns.
+9. Inspect Project Readiness surface conventions for embedded module regions.
+10. Produce a read-only report.
+
+## Required Final Output
+
+- Branch/HEAD/status.
+- Lockfile MD5.
+- Wave 13 artifact validation.
+- Unified lifecycle contract readiness.
+- `buyout-log` placement recommendation.
+- Exact prompt-by-prompt file plan.
+- Exact validation commands confirmed by package scripts.
+- No commit confirmation.

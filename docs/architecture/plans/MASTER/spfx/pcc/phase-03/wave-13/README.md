@@ -1,64 +1,67 @@
-# PCC Phase 3 Wave 13 — Buyout Log Implementation Prompt Set
+# PCC Phase 3 Wave 13 Buyout Log — Unified Lifecycle Implementation Prompt Set
 
 ## Purpose
 
-This package instructs a local code agent to implement Wave 13 `Buyout Log` / `Buyout Control Center` safely and incrementally after a fresh local repo-truth audit.
+This package adapts the attached Wave 13 Buyout Log implementation prompt package to the newly published PCC unified lifecycle developer-contract layer.
 
-## Controlling Objective
+The original package remains the structural baseline, but this version treats the unified lifecycle developer contracts as a controlling implementation authority. It preserves the Wave 13 module intent while adding hard requirements for bounded contexts, route taxonomy, state machines, field dictionary, permission/redaction, HBI citation/refusal, source-system integration contracts, audit events, degraded states, module onboarding, validation gates, source-lineage, Project Memory, traceability, and no-workspace-fragmentation controls.
 
-Implement `Buyout Log` as a PCC Project Readiness workflow module that surfaces buyout posture, budget-vs-commitment exposure, unbought scope, Procore/Sage reconciliation, compliance/SDI/bond posture, procurement timing, evidence links, audit history, source lineage, and Priority Action candidates.
+## Environment
 
-Required governance sentence:
-
-```text
-Buyout Log is an MVP Project Readiness workflow module with Procurement / Project Controls classification and future Procurement & Buyout Center affinity.
-```
-
-## Environment Note
-
-Working directory for every prompt:
+Repo path:
 
 ```text
 /Users/bobbyfetting/hb-intel
 ```
 
-This package was generated from observable pushed repo truth and public research. The local agent must revalidate branch, HEAD, workspace cleanliness, lockfile MD5, scripts, and file paths before editing.
+Latest observed GitHub PCC commit during package generation:
+
+```text
+58f53d49d59f8c70683725c999e8f55e2bc2dfef
+docs(pcc): close unified lifecycle developer documentation
+```
+
+Local agents must re-run repo-truth commands before each implementation prompt. This package was generated from connected GitHub/repo context and the attached Wave 13 package, but it cannot prove the current local working tree.
 
 ## Required Exact Phrase in Every Prompt
+
+Every local-code-agent prompt includes:
 
 ```text
 Do not re-read files that are still within your current context or memory unless you need to verify stale, missing, or contradictory repo truth.
 ```
 
+## Controlling Objective
+
+Implement Wave 13 Buyout Log as a source-lineage-aware Project Readiness / Project Controls workflow module that contributes to the unified lifecycle layer without creating a disconnected buyout workspace, external-system clone, accounting tool, procurement marketplace, claims tool, or production integration.
+
 ## Prompt Sequence
 
-1. `01_Wave_13_Implementation_Readiness_Audit.md` — read-only repo audit and implementation plan.
-2. `02_Shared_Models_Fixtures_State_Machine_And_Contracts.md` — shared models, fixtures, state machine, completion gates, and source-model bridge/correction if repo truth supports it.
-3. `03_Backend_GET_Only_Mock_Read_Model.md` — GET-only backend mock read model.
-4. `04_SPFX_Read_Model_Client_And_Fixture_Parity.md` — SPFx read-model client, fixture fallback, and parity tests.
-5. `05_SPFX_Buyout_Log_Surface_Shell.md` — user-facing read-only/safe-local surface shell.
-6. `06_Priority_Readiness_Approvals_Document_Control_External_Seams.md` — safe references to readiness, priority actions, approvals, document control, and external launchers.
-7. `07_Tests_Guardrails_And_Implementation_Closeout.md` — complete validation, guardrail checks, and implementation closeout.
-8. `08_Fresh_Reviewer_Prompt.md` — fresh-session reviewer prompt.
+1. `01_Wave_13_Implementation_Readiness_Audit.md` — read-only audit and updated repo-truth plan.
+2. `02_Shared_Models_Fixtures_State_Machine_And_Contracts.md` — models, fixtures, state machines, completion gates, source-lineage contracts.
+3. `03_Backend_GET_Only_Mock_Read_Model.md` — GET-only fixture-backed backend read-model route/provider.
+4. `04_SPFX_Read_Model_Client_And_Fixture_Parity.md` — SPFx client seam, fixture fallback, backend parity tests.
+5. `05_SPFX_Buyout_Log_Project_Readiness_Surface.md` — Project Readiness embedded Buyout Log command-center UI region.
+6. `06_Unified_Lifecycle_Integration_Seams.md` — Priority Actions, readiness, memory, traceability, HBI-eligibility, Document Control, External Systems launcher-only seams.
+7. `07_Tests_Guardrails_And_Implementation_Closeout.md` — hardening, tests, closeout evidence.
+8. `08_Fresh_Reviewer_Prompt.md` — independent implementation review prompt.
 
 ## Execution Rule
 
-Run one prompt at a time. Do not proceed to the next prompt until the current prompt’s final output, validation evidence, and staged-file proof are reviewed.
+Run the prompts in order. Do not skip Prompt 01. Do not begin Prompt 02 until Prompt 01 confirms the exact package names, scripts, route taxonomy, model exports, backend read-model conventions, SPFx conventions, and any `buyout-log` mapping correction/bridge decision.
 
 ## Guardrail Summary
 
-- GET-only backend.
-- Fixture-first SPFx.
-- No external-system runtime behavior.
-- No Procore/Sage writeback.
-- No accounting posting.
+- No external-system runtime integration.
+- No Procore/Sage/Microsoft Graph writeback or mirror.
+- No standalone Buyout workspace unless current route taxonomy explicitly permits it.
+- No evidence binary ownership.
 - No legal/claim/accounting determinations.
-- No evidence-binary ownership.
-- No Wave 14 approval execution.
-- No `docs/architecture/plans/**` mutation.
-- No broad Prettier write.
-- No lockfile/package/manifest/workflow changes unless explicitly authorized and justified.
+- No approval execution.
+- No broad formatting.
+- No package/lockfile/manifest/workflow changes.
+- Preserve unified lifecycle doctrine and developer contracts.
 
-## Post-Execution Review Instruction
+## Post-Execution Review
 
-After Prompt 07 is complete and committed, run Prompt 08 in a fresh session. The reviewer must audit repo truth, actual changed files, test evidence, guardrails, and alignment with Wave 13 target architecture before Wave 14 or hardening work proceeds.
+After Prompt 07 is complete and committed, run Prompt 08 in a fresh session to audit implementation correctness, guardrails, tests, and readiness for Wave 14 / hardening.

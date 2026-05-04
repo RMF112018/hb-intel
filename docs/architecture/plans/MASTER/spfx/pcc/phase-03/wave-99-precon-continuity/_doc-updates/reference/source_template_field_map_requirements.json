@@ -1,0 +1,36 @@
+{
+  "contractName": "Preconstruction Source Template Field Map Requirements",
+  "requiredMetadataPerField": [
+    "sourceTemplatePath",
+    "sourceDocumentType",
+    "sourceSheetOrPage",
+    "sourceRow",
+    "sourceColumn",
+    "sourceCell",
+    "sourceLabel",
+    "targetRecordFamily",
+    "targetFieldName",
+    "sourceOwner",
+    "ownershipPosture",
+    "mutability",
+    "visibilityClassification",
+    "redactionLevel",
+    "hbiReadability",
+    "projectMemoryEligibility",
+    "traceabilityEdgeEligibility",
+    "priorityActionEligibility",
+    "auditRequired",
+    "notes"
+  ],
+  "targetUseCategories": [
+    "lifecycle-event",
+    "project-memory",
+    "readiness-signal",
+    "traceability-edge",
+    "priority-action-candidate",
+    "hbi-evidence",
+    "future-reference",
+    "source-only"
+  ],
+  "unverifiedValuePolicy": "mark-unverified-source-mapping-and-do-not-invent-values"
+}

@@ -1,0 +1,29 @@
+{
+  "contractName": "Preconstruction Continuity Fixture Scenarios",
+  "scenarios": [
+    {
+      "id": "full-go-carry-forward",
+      "description": "GO decision projected with summary-safe fields and restricted details hidden"
+    },
+    {
+      "id": "restricted-executive-override",
+      "description": "Executive override exists but non-executive personas see masked/withheld posture"
+    },
+    {
+      "id": "kickoff-overdue-deliverable",
+      "description": "Estimating Kickoff has overdue deliverable producing Priority Action candidate"
+    },
+    {
+      "id": "missing-source-evidence",
+      "description": "Carry-forward summary exists but source evidence link missing/degraded"
+    },
+    {
+      "id": "hbi-refusal-restricted",
+      "description": "HBI refuses because all supporting citations are restricted"
+    },
+    {
+      "id": "future-reference-redacted",
+      "description": "Closed-project preconstruction lesson is summary-safe but restricted source comments withheld"
+    }
+  ]
+}

@@ -1,108 +1,60 @@
-# Implementation Sequence Overview
+# 02 — Implementation Sequence Overview
 
-## Staged Plan
+## Purpose
 
-| Stage | Prompt | Purpose | Commit? |
-| --- | --- | --- | --- |
-| 1 | Prompt 01 | Read-only local readiness audit. | No |
-| 2 | Prompt 02 | Shared models, fixtures, state machine, completion gates, source-model bridge. | Yes |
-| 3 | Prompt 03 | Backend GET-only mock read model. | Yes |
-| 4 | Prompt 04 | SPFx read-model client and fixture/backend parity. | Yes |
-| 5 | Prompt 05 | SPFx Buyout Log surface shell. | Yes |
-| 6 | Prompt 06 | Integration seams with readiness, priority actions, approvals references, document control, external launchers. | Yes |
-| 7 | Prompt 07 | Tests, guardrails, implementation closeout. | Yes |
-| 8 | Prompt 08 | Fresh-session implementation review. | No by default |
+Define the staged Wave 13 implementation sequence after adapting Buyout Log to the unified lifecycle developer-contract layer.
 
-## Dependencies
+## Sequence
 
-- Prompt 02 depends on Prompt 01 answering the `buyout-log` placement/bridge issue.
-- Prompt 03 depends on Prompt 02 exporting shared read-model types and fixtures.
-- Prompt 04 depends on Prompt 03 route and envelope shape.
-- Prompt 05 depends on Prompt 04 client/fixture stability.
-- Prompt 06 depends on Prompt 05 surface shell and Prompt 02 priority action candidate model.
-- Prompt 07 depends on all prior implementation prompts and must validate the entire Wave 13 change set.
-- Prompt 08 depends on the final implementation commit sequence.
+### Prompt 01 — Implementation Readiness Audit
 
-## Expected Deliverables by Prompt
+Read-only. Confirms repo truth, local state, Wave 13 docs, unified lifecycle contract docs, source-model mapping, scripts, seams, and safe implementation order.
 
-### Prompt 01
+### Prompt 02 — Shared Models, Fixtures, State Machine, and Contracts
 
-- Read-only repo audit.
-- Local HEAD/branch/status/lockfile evidence.
-- Wave 13 artifact and JSON validation.
-- Source-model placement recommendation.
-- Confirmed scripts and paths.
+Adds model contracts, state machines, fixtures, utilities, source-lineage posture, HBI eligibility, Project Memory / traceability references, and tests.
 
-### Prompt 02
+### Prompt 03 — Backend GET-Only Mock Read Model
 
-- `BuyoutPackage` and child records.
-- State and reconciliation vocabularies.
-- Field mutability and waiver posture.
-- Completion-gate utilities.
-- Deterministic fixtures.
-- Model exports and tests.
-- Minimal source-model placement bridge/correction with tests if required.
+Adds a GET-only backend read-model route/provider using deterministic fixtures and degraded responses. No write routes or external calls.
 
-### Prompt 03
+### Prompt 04 — SPFx Read-Model Client and Fixture Parity
 
-- Provider interface method.
-- Mock provider implementation.
-- GET-only route.
-- Known/unknown/degraded envelope behavior.
-- Backend tests and guardrails.
+Adds client route template/method, fixture fallback, backend opt-in parity if repo-standard, and tests.
 
-### Prompt 04
+### Prompt 05 — SPFx Buyout Log Project Readiness Surface
 
-- SPFx read-model route id/path.
-- Client interface method.
-- Fixture client implementation.
-- Backend opt-in client implementation.
-- Fixture/backend parity tests.
+Adds read-only/fixture-safe Buyout Log command-center UI as a Project Readiness module region, not a standalone routed shell workspace.
 
-### Prompt 05
+### Prompt 06 — Unified Lifecycle Integration Seams
 
-- Buyout Log surface shell.
-- Command center, table, budget/commitment matrix, unbought queue, reconciliation, detail drawer, compliance, procurement, evidence, and audit sections.
-- Safe states: loading, empty, degraded, access-display, read-only.
+Adds safe references to Priority Actions, Project Readiness, Project Memory, traceability, Document Control evidence references, External Systems launcher-only posture, and future Approvals/Checkpoints prompts.
 
-### Prompt 06
+### Prompt 07 — Tests, Guardrails, and Implementation Closeout
 
-- Priority Action candidate references.
-- Project Readiness placement/linking.
-- References to Wave 9–14 modules.
-- Document Control evidence-link references.
-- External Systems launch-only posture.
-- No external writes or approval execution.
+Runs full targeted validation, adds closeout doc, confirms guardrails, and records validation evidence.
 
-### Prompt 07
+### Prompt 08 — Fresh Reviewer Prompt
 
-- Full targeted validation.
-- Guardrail tests/grep.
-- Closeout doc.
-- Final commit summary/body.
+Independent reviewer prompt for after implementation.
 
-### Prompt 08
+## Dependency Rules
 
-- Fresh-session reviewer prompt.
-
-## Validation Expectations
-
-- Validate only touched packages unless the prompt requires broader checks.
-- Always inspect package scripts before running package validation.
-- Always run `git diff --check`.
-- Always run targeted Prettier checks for touched markdown/json.
-- Always report lockfile status.
-- Never run broad `pnpm format` or `prettier --write` across the repo.
+- Prompt 02 must not proceed until Prompt 01 resolves or bridges the `buyout-log` model placement issue.
+- Prompt 03 depends on exported model/read-model contracts from Prompt 02.
+- Prompt 04 depends on backend/read-model route names from Prompt 03 and model exports from Prompt 02.
+- Prompt 05 depends on SPFx client/fixture seam from Prompt 04.
+- Prompt 06 depends on UI components/VM from Prompt 05.
+- Prompt 07 depends on all previous implementation prompts.
 
 ## Rollback / Stop Conditions
 
-Stop and report without committing if:
+Stop immediately if:
 
-- `pnpm-lock.yaml` changes unexpectedly.
-- Any package manifest, workflow, CI, deployment, tenant, or SPFx packaging file changes unexpectedly.
-- Any file under `docs/architecture/plans/**` changes.
-- Any implementation introduces external-system runtime calls or writeback.
-- Any backend route permits non-GET methods.
-- Any source-derived field lacks lineage.
-- The local repo has unrelated user-owned changes that overlap with the prompt scope.
-- Validation failures cannot be clearly attributed to pre-existing unrelated issues.
+- local worktree has unrelated user-owned changes that overlap prompt scope;
+- lockfile changes unexpectedly;
+- package script names cannot be confirmed;
+- model mapping cannot be resolved safely;
+- route taxonomy would be violated;
+- implementation would require live external-system integration;
+- tests fail from agent-authored changes and cannot be fixed within scope.

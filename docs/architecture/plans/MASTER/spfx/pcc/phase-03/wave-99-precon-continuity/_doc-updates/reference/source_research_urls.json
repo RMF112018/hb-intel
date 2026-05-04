@@ -1,0 +1,55 @@
+{
+  "contractName": "Preconstruction Continuity Research URLs",
+  "sources": [
+    {
+      "label": "ISO 19650 overview",
+      "url": "https://www.iso19650.org/",
+      "usage": "lifecycle information management and CDE posture"
+    },
+    {
+      "label": "Lean Construction Institute Last Planner System",
+      "url": "https://leanconstruction.org/lean-topics/last-planner-system/",
+      "usage": "commitment planning, make-ready, constraints, learn cycle"
+    },
+    {
+      "label": "Lean Construction Institute Last Planner System for Design",
+      "url": "https://leanconstruction.org/lean-topics/last-planner-system-for-design/",
+      "usage": "preconstruction/design decisions, handoffs, information flow"
+    },
+    {
+      "label": "Procore Preconstruction",
+      "url": "https://www.procore.com/preconstruction",
+      "usage": "connected preconstruction, handoff, learning patterns"
+    },
+    {
+      "label": "BuildingConnected Bid Leveling Overview",
+      "url": "https://support.buildingconnected.com/hc/en-us/articles/47949854611219-Bid-Leveling-Overview",
+      "usage": "bid leveling pattern reference"
+    },
+    {
+      "label": "Microsoft Graph Permissions Overview",
+      "url": "https://learn.microsoft.com/graph/permissions-overview",
+      "usage": "delegated/app-only and least-privilege posture"
+    },
+    {
+      "label": "Microsoft Graph Throttling",
+      "url": "https://learn.microsoft.com/graph/throttling",
+      "usage": "future live integration throttling/backoff posture"
+    },
+    {
+      "label": "NIST AI RMF",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "usage": "HBI trustworthy/risk-managed AI posture"
+    },
+    {
+      "label": "OWASP Top 10 for LLM Applications",
+      "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "usage": "prompt injection, sensitive information disclosure, excessive agency"
+    },
+    {
+      "label": "W3C PROV Overview",
+      "url": "https://www.w3.org/TR/prov-overview/",
+      "usage": "provenance/source-lineage model"
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "contractName": "Preconstruction Continuity State Machines",
+  "stateMachines": {
+    "PursuitDecisionCarryForward": {
+      "states": [
+        "source-draft",
+        "source-under-review",
+        "source-final-go",
+        "source-final-no-go",
+        "projected-to-pcc",
+        "accepted-carry-forward",
+        "superseded",
+        "archived-source-only",
+        "archived"
+      ],
+      "allowedTransitions": [
+        [
+          "source-draft",
+          "source-under-review"
+        ],
+        [
+          "source-under-review",
+          "source-final-go"
+        ],
+        [
+          "source-under-review",
+          "source-final-no-go"
+        ],
+        [
+          "source-final-go",
+          "projected-to-pcc"
+        ],
+        [
+          "projected-to-pcc",
+          "accepted-carry-forward"
+        ],
+        [
+          "accepted-carry-forward",
+          "superseded"
+        ],
+        [
+          "accepted-carry-forward",
+          "archived"
+        ],
+        [
+          "source-final-no-go",
+          "archived-source-only"
+        ]
+      ]
+    },
+    "EstimatingKickoffRecord": {
+      "states": [
+        "not-started",
+        "scheduled",
+        "active",
+        "blocked",
+        "handoff-ready",
+        "returned-for-rework",
+        "handoff-accepted",
+        "cancelled",
+        "archived"
+      ],
+      "allowedTransitions": [
+        [
+          "not-started",
+          "scheduled"
+        ],
+        [
+          "scheduled",
+          "active"
+        ],
+        [
+          "scheduled",
+          "cancelled"
+        ],
+        [
+          "active",
+          "blocked"
+        ],
+        [
+          "blocked",
+          "active"
+        ],
+        [
+          "blocked",
+          "cancelled"
+        ],
+        [
+          "active",
+          "handoff-ready"
+        ],
+        [
+          "handoff-ready",
+          "returned-for-rework"
+        ],
+        [
+          "returned-for-rework",
+          "active"
+        ],
+        [
+          "handoff-ready",
+          "handoff-accepted"
+        ],
+        [
+          "handoff-accepted",
+          "archived"
+        ]
+      ]
+    },
+    "PreconstructionTraceabilityEdge": {
+      "states": [
+        "candidate",
+        "probable",
+        "verified",
+        "rejected",
+        "superseded",
+        "archived"
+      ],
+      "allowedTransitions": [
+        [
+          "candidate",
+          "probable"
+        ],
+        [
+          "probable",
+          "verified"
+        ],
+        [
+          "candidate",
+          "rejected"
+        ],
+        [
+          "verified",
+          "superseded"
+        ],
+        [
+          "verified",
+          "archived"
+        ]
+      ]
+    }
+  }
+}
