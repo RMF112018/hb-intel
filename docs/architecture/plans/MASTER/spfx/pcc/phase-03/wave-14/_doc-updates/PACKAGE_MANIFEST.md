@@ -123,6 +123,7 @@ The local agent must evaluate and amend the following target docs where applicab
 - `reference/Generation_Validation_Report.json`
 - `reference/Prompt_01_Repo_Truth_And_Scope_Lock_Closeout.md`
 - `reference/Prompt_02_Governing_Docs_And_Authority_Updates_Closeout.md`
+- `reference/Prompt_03_Target_Architecture_Domain_State_Routing_Closeout.md`
 - `reference/Repo_Truth_Findings_To_Verify.md`
 - `reference/Research_Basis.md`
 - `reference/Source_Inputs_Summary.md`
