@@ -125,6 +125,7 @@ The local agent must evaluate and amend the following target docs where applicab
 - `reference/Prompt_02_Governing_Docs_And_Authority_Updates_Closeout.md`
 - `reference/Prompt_03_Target_Architecture_Domain_State_Routing_Closeout.md`
 - `reference/Prompt_04_Module_Integration_And_Wave13G_Alignment_Closeout.md`
+- `reference/Prompt_05_Read_Model_SPFX_UX_Wireframes_Closeout.md`
 - `reference/Repo_Truth_Findings_To_Verify.md`
 - `reference/Research_Basis.md`
 - `reference/Source_Inputs_Summary.md`
