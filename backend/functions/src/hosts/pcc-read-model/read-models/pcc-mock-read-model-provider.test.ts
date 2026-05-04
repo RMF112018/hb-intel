@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
@@ -24,6 +25,8 @@ const UNKNOWN_RESPONSIBILITY_MATRIX_PROJECT_ID: PccProjectId =
   'project-unknown-responsibility-matrix-001' as PccProjectId;
 const UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID: PccProjectId =
   'project-unknown-constraints-log-001' as PccProjectId;
+const UNKNOWN_BUYOUT_LOG_PROJECT_ID: PccProjectId =
+  'project-unknown-buyout-log-001' as PccProjectId;
 const UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID: PccProjectId =
   'project-unknown-unified-lifecycle-001' as PccProjectId;
 
@@ -407,6 +410,137 @@ describe('PccMockReadModelProvider.getConstraintsLog — backend-unavailable sim
     expect(unavailable.data.snapshotHistory).toEqual(unknown.data.snapshotHistory);
     expect(unavailable.data.auditEvents).toEqual(unknown.data.auditEvents);
     expect(unavailable.data.exposureSummary).toEqual(unknown.data.exposureSummary);
+    expect(unavailable.data.moduleIdentity).toEqual(unknown.data.moduleIdentity);
+  });
+});
+
+describe('PccMockReadModelProvider.getBuyoutLog — known project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns a read-only mock envelope with available status and the deterministic fixture', async () => {
+    const envelope = await provider.getBuyoutLog(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('available');
+    expect(envelope.warnings).toHaveLength(0);
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(envelope.data).toBe(SAMPLE_BUYOUT_LOG_READ_MODEL);
+  });
+
+  it('preserves canonical Buyout Log module identity verbatim', async () => {
+    const envelope = await provider.getBuyoutLog(KNOWN_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.moduleIdentity.moduleId).toBe('buyout-log');
+    expect(data.moduleIdentity.displayName).toBe('Buyout Log');
+    expect(data.moduleIdentity.subtitle).toBe('Buyout Control Center');
+    expect(data.moduleIdentity.governance).toBe('project-readiness');
+    expect(data.moduleIdentity.workCenterId).toBe('procurement-and-buyout');
+    expect(data.moduleIdentity.mvpTier).toBe('MVP');
+
+    expect(data.packages.length).toBeGreaterThan(0);
+    expect(data.priorityActionCandidates.length).toBeGreaterThan(0);
+    expect(data.snapshotHistory.length).toBeGreaterThan(0);
+    expect(data.auditEvents.length).toBeGreaterThan(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const envelope = await provider.getBuyoutLog(KNOWN_PROJECT_ID, 'project-manager');
+    expect(envelope.viewerPersona).toBe('project-manager');
+  });
+
+  it('omits viewerPersona on the envelope when not provided', async () => {
+    const envelope = await provider.getBuyoutLog(KNOWN_PROJECT_ID);
+    expect(envelope.viewerPersona).toBeUndefined();
+  });
+});
+
+describe('PccMockReadModelProvider.getBuyoutLog — unknown project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the empty Buyout Log read model with source-unavailable status', async () => {
+    const envelope = await provider.getBuyoutLog(UNKNOWN_BUYOUT_LOG_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('source-unavailable');
+    expect(envelope.projectId).toBe(UNKNOWN_BUYOUT_LOG_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    const warning = envelope.warnings[0];
+    expect(warning.code).toBe('source-unavailable');
+    expect(warning.message).toContain(UNKNOWN_BUYOUT_LOG_PROJECT_ID);
+    expect(warning.source).toBe('pcc-mock-fixtures');
+  });
+
+  it('returns empty arrays and source-unavailable source posture for unknown projects', async () => {
+    const envelope = await provider.getBuyoutLog(UNKNOWN_BUYOUT_LOG_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.packages).toEqual([]);
+    expect(data.scopeLines).toEqual([]);
+    expect(data.budgetAllocations).toEqual([]);
+    expect(data.commitmentLinks).toEqual([]);
+    expect(data.complianceRequirements).toEqual([]);
+    expect(data.procurementMilestones).toEqual([]);
+    expect(data.evidenceLinks).toEqual([]);
+    expect(data.reconciliationIssues).toEqual([]);
+    expect(data.priorityActionCandidates).toEqual([]);
+    expect(data.auditEvents).toEqual([]);
+    expect(data.projectMemoryContributions).toEqual([]);
+    expect(data.traceabilityEdgeContributions).toEqual([]);
+    expect(data.hbiEligibilityMarkers).toEqual([]);
+    expect(data.snapshotHistory).toEqual([]);
+
+    expect(data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(data.sourcePosture.pendingHumanReviewCount).toBe(0);
+
+    // Module identity preserved on the degraded envelope.
+    expect(data.moduleIdentity.moduleId).toBe('buyout-log');
+    expect(data.moduleIdentity.subtitle).toBe('Buyout Control Center');
+  });
+});
+
+describe('PccMockReadModelProvider.getBuyoutLog — backend-unavailable simulation', () => {
+  const provider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns the empty read model with backend-unavailable status and warning', async () => {
+    const envelope = await provider.getBuyoutLog(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    expect(envelope.warnings[0].code).toBe('backend-unavailable');
+    expect(envelope.warnings[0].message).toBe(
+      'Mock provider configured to simulate backend-unavailable.',
+    );
+
+    expect(envelope.data.packages).toEqual([]);
+    expect(envelope.data.priorityActionCandidates).toEqual([]);
+    expect(envelope.data.snapshotHistory).toEqual([]);
+    expect(envelope.data.auditEvents).toEqual([]);
+    expect(envelope.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+  });
+
+  it('produces an empty body shape parallel to the unknown-project branch', async () => {
+    const unavailable = await provider.getBuyoutLog(KNOWN_PROJECT_ID);
+    const unknown = await new PccMockReadModelProvider().getBuyoutLog(
+      UNKNOWN_BUYOUT_LOG_PROJECT_ID,
+    );
+
+    expect(unavailable.data.packages).toEqual(unknown.data.packages);
+    expect(unavailable.data.commitmentLinks).toEqual(unknown.data.commitmentLinks);
+    expect(unavailable.data.complianceRequirements).toEqual(unknown.data.complianceRequirements);
+    expect(unavailable.data.priorityActionCandidates).toEqual(
+      unknown.data.priorityActionCandidates,
+    );
+    expect(unavailable.data.snapshotHistory).toEqual(unknown.data.snapshotHistory);
+    expect(unavailable.data.auditEvents).toEqual(unknown.data.auditEvents);
     expect(unavailable.data.moduleIdentity).toEqual(unknown.data.moduleIdentity);
   });
 });

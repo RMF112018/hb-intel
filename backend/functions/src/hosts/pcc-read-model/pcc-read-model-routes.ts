@@ -114,6 +114,12 @@ registerPccReadRoute(
 );
 
 registerPccReadRoute(
+  'getPccProjectBuyoutLog',
+  'pcc/projects/{projectId}/buyout-log',
+  async (projectId) => provider.getBuyoutLog(projectId),
+);
+
+registerPccReadRoute(
   'getPccUnifiedLifecycle',
   'pcc/projects/{projectId}/unified-lifecycle',
   async (projectId) => provider.getUnifiedLifecycle(projectId),

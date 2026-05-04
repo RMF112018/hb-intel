@@ -15,6 +15,7 @@ const provider = {
   getPermitInspectionControlCenter: vi.fn(),
   getResponsibilityMatrix: vi.fn(),
   getConstraintsLog: vi.fn(),
+  getBuyoutLog: vi.fn(),
   getUnifiedLifecycle: vi.fn(),
   getProjectMemory: vi.fn(),
   getProjectLenses: vi.fn(),
@@ -120,6 +121,11 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     method: 'getConstraintsLog',
   },
   {
+    name: 'getPccProjectBuyoutLog',
+    route: 'pcc/projects/{projectId}/buyout-log',
+    method: 'getBuyoutLog',
+  },
+  {
     name: 'getPccUnifiedLifecycle',
     route: 'pcc/projects/{projectId}/unified-lifecycle',
     method: 'getUnifiedLifecycle',
@@ -175,7 +181,7 @@ describe('PCC read-only route registrations', () => {
   });
 
   it('registers exactly the canonical route handlers', () => {
-    expect(registrations).toHaveLength(20);
+    expect(registrations).toHaveLength(21);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);
@@ -256,6 +262,40 @@ describe('PCC read-only route registrations', () => {
       );
       expect(writeRegistration).toBeUndefined();
     }
+  });
+
+  it('exposes the Wave 13 buyout-log path as a single GET-only registration', () => {
+    const wave13Path = 'pcc/projects/{projectId}/buyout-log';
+    const wave13Registrations = registrations.filter((reg) => reg.config.route === wave13Path);
+
+    expect(wave13Registrations).toHaveLength(1);
+
+    const wave13 = wave13Registrations[0]!;
+    expect(wave13.name).toBe('getPccProjectBuyoutLog');
+    expect(wave13.config.methods).toEqual(['GET']);
+
+    const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+    for (const method of writeMethods) {
+      const writeRegistration = registrations.find(
+        (reg) =>
+          reg.config.route === wave13Path &&
+          Array.isArray(reg.config.methods) &&
+          reg.config.methods.includes(method),
+      );
+      expect(writeRegistration).toBeUndefined();
+    }
+  });
+
+  it('does not register any POST/PUT/PATCH/DELETE route whose path contains buyout-log', () => {
+    const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+    const buyoutLogWriteRegistrations = registrations.filter(
+      (reg) =>
+        typeof reg.config.route === 'string' &&
+        reg.config.route.includes('buyout-log') &&
+        Array.isArray(reg.config.methods) &&
+        reg.config.methods.some((m: string) => writeMethods.includes(m as (typeof writeMethods)[number])),
+    );
+    expect(buyoutLogWriteRegistrations).toEqual([]);
   });
 
   it('exposes canonical unified lifecycle route IDs and does not register non-canonical aliases', () => {

@@ -19,6 +19,7 @@ import {
   LIKELIHOOD_LABELS,
   PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
@@ -44,6 +45,7 @@ import type {
   IPccSettingsRef,
   IProjectProfile,
   LifecycleReadinessStatus,
+  PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
@@ -244,6 +246,41 @@ const EMPTY_CONSTRAINTS_LOG_READ_MODEL: PccConstraintsLogReadModel = {
 
 const EMPTY_CONSTRAINTS_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccConstraintsLogReadModel = {
   ...EMPTY_CONSTRAINTS_LOG_READ_MODEL,
+  sourcePosture: {
+    sourceStatus: 'backend-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+};
+
+// Empty Buyout Log read model used for degraded envelopes (unknown
+// project / backend-unavailable). Module identity is preserved so the
+// degraded envelope still identifies the surface; project-specific
+// arrays are emptied; sourcePosture reports the degraded status with
+// zero pending review count.
+const EMPTY_BUYOUT_LOG_READ_MODEL: PccBuyoutLogReadModel = {
+  moduleIdentity: SAMPLE_BUYOUT_LOG_READ_MODEL.moduleIdentity,
+  packages: [],
+  scopeLines: [],
+  budgetAllocations: [],
+  commitmentLinks: [],
+  complianceRequirements: [],
+  procurementMilestones: [],
+  evidenceLinks: [],
+  reconciliationIssues: [],
+  priorityActionCandidates: [],
+  auditEvents: [],
+  projectMemoryContributions: [],
+  traceabilityEdgeContributions: [],
+  hbiEligibilityMarkers: [],
+  sourcePosture: {
+    sourceStatus: 'source-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+  snapshotHistory: [],
+};
+
+const EMPTY_BUYOUT_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccBuyoutLogReadModel = {
+  ...EMPTY_BUYOUT_LOG_READ_MODEL,
   sourcePosture: {
     sourceStatus: 'backend-unavailable',
     pendingHumanReviewCount: 0,
@@ -1070,6 +1107,42 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       viewerPersona,
       this.statusForKnownProject(projectId),
       SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getBuyoutLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_BUYOUT_LOG_READ_MODEL_BACKEND_UNAVAILABLE,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_BUYOUT_LOG_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_BUYOUT_LOG_READ_MODEL,
       this.warningsForKnownProject(projectId),
     );
   }

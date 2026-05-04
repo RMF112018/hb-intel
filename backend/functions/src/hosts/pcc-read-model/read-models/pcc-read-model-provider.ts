@@ -9,6 +9,7 @@
  */
 
 import type {
+  PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
   PccExternalLinksReadModel,
@@ -92,6 +93,10 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccConstraintsLogReadModel>>;
+  getBuyoutLog(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>>;
   getUnifiedLifecycle(
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
