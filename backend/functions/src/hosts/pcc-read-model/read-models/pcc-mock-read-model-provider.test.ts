@@ -6,6 +6,8 @@ import {
   SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+  SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
   SAMPLE_PROJECT_MEMORY_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
@@ -27,6 +29,10 @@ const UNKNOWN_CONSTRAINTS_LOG_PROJECT_ID: PccProjectId =
   'project-unknown-constraints-log-001' as PccProjectId;
 const UNKNOWN_BUYOUT_LOG_PROJECT_ID: PccProjectId =
   'project-unknown-buyout-log-001' as PccProjectId;
+const UNKNOWN_PROCORE_PROJECT_MAPPING_PROJECT_ID: PccProjectId =
+  'project-unknown-procore-project-mapping-001' as PccProjectId;
+const UNKNOWN_PROCORE_SYNC_HEALTH_PROJECT_ID: PccProjectId =
+  'project-unknown-procore-sync-health-001' as PccProjectId;
 const UNKNOWN_UNIFIED_LIFECYCLE_PROJECT_ID: PccProjectId =
   'project-unknown-unified-lifecycle-001' as PccProjectId;
 
@@ -545,6 +551,260 @@ describe('PccMockReadModelProvider.getBuyoutLog — backend-unavailable simulati
   });
 });
 
+describe('PccMockReadModelProvider.getProcoreProjectMapping — known project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns a read-only mock envelope with available status and the deterministic fixture', async () => {
+    const envelope = await provider.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('available');
+    expect(envelope.warnings).toHaveLength(0);
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(envelope.data).toBe(SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL);
+  });
+
+  it('preserves canonical Procore Project Mapping module identity, registry-field names, and ownership note', async () => {
+    const envelope = await provider.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.moduleIdentity.moduleId).toBe('procore-project-mapping');
+    expect(data.moduleIdentity.governance).toBe('pcc-mapping-authority');
+    expect(data.registryFieldInternalNames.pccProjectId).toBe('field_1');
+    expect(data.registryFieldInternalNames.legacyProcoreHint).toBe('procoreProject');
+    expect(data.queryRecommendations.length).toBeGreaterThan(0);
+    expect(data.ownershipNote).toBe(
+      'PCC owns mapping; legacyProcoreHint is informative only and never canonical.',
+    );
+    expect(data.mappings.length).toBeGreaterThan(0);
+    expect(data.registryContexts.length).toBeGreaterThan(0);
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const envelope = await provider.getProcoreProjectMapping(KNOWN_PROJECT_ID, 'project-manager');
+    expect(envelope.viewerPersona).toBe('project-manager');
+  });
+
+  it('omits viewerPersona on the envelope when not provided', async () => {
+    const envelope = await provider.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+    expect(envelope.viewerPersona).toBeUndefined();
+  });
+});
+
+describe('PccMockReadModelProvider.getProcoreProjectMapping — unknown project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the empty Procore Project Mapping read model with source-unavailable status', async () => {
+    const envelope = await provider.getProcoreProjectMapping(
+      UNKNOWN_PROCORE_PROJECT_MAPPING_PROJECT_ID,
+    );
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('source-unavailable');
+    expect(envelope.projectId).toBe(UNKNOWN_PROCORE_PROJECT_MAPPING_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    const warning = envelope.warnings[0];
+    expect(warning.code).toBe('source-unavailable');
+    expect(warning.message).toContain(UNKNOWN_PROCORE_PROJECT_MAPPING_PROJECT_ID);
+    expect(warning.source).toBe('pcc-mock-fixtures');
+  });
+
+  it('returns empty mappings + registryContexts and source-unavailable source posture; preserves static registry/query/ownership context', async () => {
+    const envelope = await provider.getProcoreProjectMapping(
+      UNKNOWN_PROCORE_PROJECT_MAPPING_PROJECT_ID,
+    );
+    const data = envelope.data;
+
+    expect(data.mappings).toEqual([]);
+    expect(data.registryContexts).toEqual([]);
+
+    expect(data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(data.sourcePosture.pendingHumanReviewCount).toBe(0);
+
+    // Module identity, registry field-name registry, query recommendations,
+    // and ownership note are preserved on the degraded envelope so consumers
+    // always see the authoritative scope and posture.
+    expect(data.moduleIdentity.moduleId).toBe('procore-project-mapping');
+    expect(data.registryFieldInternalNames).toBe(
+      SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.registryFieldInternalNames,
+    );
+    expect(data.queryRecommendations).toBe(
+      SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.queryRecommendations,
+    );
+    expect(data.ownershipNote).toBe(SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.ownershipNote);
+  });
+});
+
+describe('PccMockReadModelProvider.getProcoreProjectMapping — backend-unavailable simulation', () => {
+  const provider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns the empty read model with backend-unavailable status and warning', async () => {
+    const envelope = await provider.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    expect(envelope.warnings[0].code).toBe('backend-unavailable');
+    expect(envelope.warnings[0].message).toBe(
+      'Mock provider configured to simulate backend-unavailable.',
+    );
+
+    expect(envelope.data.mappings).toEqual([]);
+    expect(envelope.data.registryContexts).toEqual([]);
+    expect(envelope.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.data.ownershipNote).toBe(
+      SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.ownershipNote,
+    );
+  });
+
+  it('produces an empty body shape parallel to the unknown-project branch (except sourcePosture)', async () => {
+    const unavailable = await provider.getProcoreProjectMapping(KNOWN_PROJECT_ID);
+    const unknown = await new PccMockReadModelProvider().getProcoreProjectMapping(
+      UNKNOWN_PROCORE_PROJECT_MAPPING_PROJECT_ID,
+    );
+
+    expect(unavailable.data.mappings).toEqual(unknown.data.mappings);
+    expect(unavailable.data.registryContexts).toEqual(unknown.data.registryContexts);
+    expect(unavailable.data.moduleIdentity).toEqual(unknown.data.moduleIdentity);
+    expect(unavailable.data.queryRecommendations).toBe(unknown.data.queryRecommendations);
+    expect(unavailable.data.ownershipNote).toBe(unknown.data.ownershipNote);
+    expect(unavailable.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(unknown.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+  });
+});
+
+describe('PccMockReadModelProvider.getProcoreSyncHealth — known project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns a read-only mock envelope with available status and the deterministic fixture', async () => {
+    const envelope = await provider.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('available');
+    expect(envelope.warnings).toHaveLength(0);
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(envelope.data).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL);
+  });
+
+  it('preserves canonical Procore Sync Health module identity, subject-area registry, and ownership note', async () => {
+    const envelope = await provider.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.moduleIdentity.moduleId).toBe('procore-sync-health');
+    expect(data.moduleIdentity.governance).toBe('pcc-procore-data-layer-authority');
+    expect(data.subjectAreas.length).toBeGreaterThan(0);
+    expect(data.syncHealthEntries.length).toBeGreaterThan(0);
+    expect(data.objectLinks.length).toBeGreaterThan(0);
+    expect(data.curatedSummaries.length).toBeGreaterThan(0);
+    expect(data.derivedSignals.length).toBeGreaterThan(0);
+    expect(data.sourceLineages.length).toBeGreaterThan(0);
+    expect(data.ownershipNote).toContain('No write-back');
+    expect(data.sourcePosture.sourceStatus).toBe('available');
+  });
+
+  it('echoes optional viewerPersona on the envelope when provided', async () => {
+    const envelope = await provider.getProcoreSyncHealth(KNOWN_PROJECT_ID, 'project-manager');
+    expect(envelope.viewerPersona).toBe('project-manager');
+  });
+
+  it('omits viewerPersona on the envelope when not provided', async () => {
+    const envelope = await provider.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+    expect(envelope.viewerPersona).toBeUndefined();
+  });
+});
+
+describe('PccMockReadModelProvider.getProcoreSyncHealth — unknown project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the empty Procore Sync Health read model with source-unavailable status', async () => {
+    const envelope = await provider.getProcoreSyncHealth(UNKNOWN_PROCORE_SYNC_HEALTH_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('source-unavailable');
+    expect(envelope.projectId).toBe(UNKNOWN_PROCORE_SYNC_HEALTH_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    const warning = envelope.warnings[0];
+    expect(warning.code).toBe('source-unavailable');
+    expect(warning.message).toContain(UNKNOWN_PROCORE_SYNC_HEALTH_PROJECT_ID);
+    expect(warning.source).toBe('pcc-mock-fixtures');
+  });
+
+  it('returns empty per-area arrays and source-unavailable source posture; preserves static subject-area registry and ownership note', async () => {
+    const envelope = await provider.getProcoreSyncHealth(UNKNOWN_PROCORE_SYNC_HEALTH_PROJECT_ID);
+    const data = envelope.data;
+
+    expect(data.syncHealthEntries).toEqual([]);
+    expect(data.sourceLineages).toEqual([]);
+    expect(data.objectLinks).toEqual([]);
+    expect(data.curatedSummaries).toEqual([]);
+    expect(data.derivedSignals).toEqual([]);
+
+    expect(data.sourcePosture.sourceStatus).toBe('source-unavailable');
+    expect(data.sourcePosture.pendingHumanReviewCount).toBe(0);
+
+    // Module identity, subject-area registry list, and ownership note are
+    // preserved on the degraded envelope.
+    expect(data.moduleIdentity.moduleId).toBe('procore-sync-health');
+    expect(data.subjectAreas).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.subjectAreas);
+    expect(data.ownershipNote).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.ownershipNote);
+  });
+});
+
+describe('PccMockReadModelProvider.getProcoreSyncHealth — backend-unavailable simulation', () => {
+  const provider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns the empty read model with backend-unavailable status and warning', async () => {
+    const envelope = await provider.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+
+    expect(envelope.readOnly).toBe(true);
+    expect(envelope.mode).toBe('mock');
+    expect(envelope.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.projectId).toBe(KNOWN_PROJECT_ID);
+
+    expect(envelope.warnings).toHaveLength(1);
+    expect(envelope.warnings[0].code).toBe('backend-unavailable');
+    expect(envelope.warnings[0].message).toBe(
+      'Mock provider configured to simulate backend-unavailable.',
+    );
+
+    expect(envelope.data.syncHealthEntries).toEqual([]);
+    expect(envelope.data.objectLinks).toEqual([]);
+    expect(envelope.data.curatedSummaries).toEqual([]);
+    expect(envelope.data.derivedSignals).toEqual([]);
+    expect(envelope.data.sourceLineages).toEqual([]);
+    expect(envelope.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(envelope.data.ownershipNote).toBe(SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.ownershipNote);
+  });
+
+  it('produces an empty body shape parallel to the unknown-project branch (except sourcePosture)', async () => {
+    const unavailable = await provider.getProcoreSyncHealth(KNOWN_PROJECT_ID);
+    const unknown = await new PccMockReadModelProvider().getProcoreSyncHealth(
+      UNKNOWN_PROCORE_SYNC_HEALTH_PROJECT_ID,
+    );
+
+    expect(unavailable.data.syncHealthEntries).toEqual(unknown.data.syncHealthEntries);
+    expect(unavailable.data.objectLinks).toEqual(unknown.data.objectLinks);
+    expect(unavailable.data.curatedSummaries).toEqual(unknown.data.curatedSummaries);
+    expect(unavailable.data.derivedSignals).toEqual(unknown.data.derivedSignals);
+    expect(unavailable.data.sourceLineages).toEqual(unknown.data.sourceLineages);
+    expect(unavailable.data.moduleIdentity).toEqual(unknown.data.moduleIdentity);
+    expect(unavailable.data.subjectAreas).toBe(unknown.data.subjectAreas);
+    expect(unavailable.data.ownershipNote).toBe(unknown.data.ownershipNote);
+    expect(unavailable.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
+    expect(unknown.data.sourcePosture.sourceStatus).toBe('source-unavailable');
+  });
+});
+
 describe('PccMockReadModelProvider unified lifecycle canonical read models', () => {
   const provider = new PccMockReadModelProvider();
   const unavailableProvider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
@@ -639,7 +899,9 @@ describe('PccMockReadModelProvider unified lifecycle canonical read models', () 
 
   it('warranty trace does not assign responsibility when status is insufficient-evidence', async () => {
     const envelope = await provider.getWarrantyTrace(KNOWN_PROJECT_ID);
-    const insufficient = envelope.data.traces.find((trace) => trace.status === 'insufficient-evidence');
+    const insufficient = envelope.data.traces.find(
+      (trace) => trace.status === 'insufficient-evidence',
+    );
     expect(insufficient).toBeDefined();
     expect(insufficient?.recommendation).toBeUndefined();
   });

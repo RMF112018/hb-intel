@@ -16,6 +16,8 @@ import type {
   PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
+  PccProcoreProjectMappingReadModel,
+  PccProcoreSyncHealthReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
   PccProjectProfileReadModel,
@@ -97,6 +99,14 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccBuyoutLogReadModel>>;
+  getProcoreProjectMapping(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreProjectMappingReadModel>>;
+  getProcoreSyncHealth(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreSyncHealthReadModel>>;
   getUnifiedLifecycle(
     projectId: PccProjectId,
     viewerPersona?: PccPersona,

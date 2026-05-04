@@ -16,6 +16,8 @@ const provider = {
   getResponsibilityMatrix: vi.fn(),
   getConstraintsLog: vi.fn(),
   getBuyoutLog: vi.fn(),
+  getProcoreProjectMapping: vi.fn(),
+  getProcoreSyncHealth: vi.fn(),
   getUnifiedLifecycle: vi.fn(),
   getProjectMemory: vi.fn(),
   getProjectLenses: vi.fn(),
@@ -126,6 +128,16 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     method: 'getBuyoutLog',
   },
   {
+    name: 'getPccProcoreProjectMapping',
+    route: 'pcc/projects/{projectId}/procore-project-mapping',
+    method: 'getProcoreProjectMapping',
+  },
+  {
+    name: 'getPccProcoreSyncHealth',
+    route: 'pcc/projects/{projectId}/procore-sync-health',
+    method: 'getProcoreSyncHealth',
+  },
+  {
     name: 'getPccUnifiedLifecycle',
     route: 'pcc/projects/{projectId}/unified-lifecycle',
     method: 'getUnifiedLifecycle',
@@ -181,10 +193,33 @@ describe('PCC read-only route registrations', () => {
   });
 
   it('registers exactly the canonical route handlers', () => {
-    expect(registrations).toHaveLength(21);
+    expect(registrations).toHaveLength(23);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);
+    }
+  });
+
+  it('exposes the Wave 13 procore data layer paths as single GET-only registrations', () => {
+    const wave13DPaths = [
+      'pcc/projects/{projectId}/procore-project-mapping',
+      'pcc/projects/{projectId}/procore-sync-health',
+    ] as const;
+    for (const path of wave13DPaths) {
+      const matches = registrations.filter((reg) => reg.config.route === path);
+      expect(matches).toHaveLength(1);
+      expect(matches[0]!.config.methods).toEqual(['GET']);
+
+      const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+      for (const method of writeMethods) {
+        const writeRegistration = registrations.find(
+          (reg) =>
+            reg.config.route === path &&
+            Array.isArray(reg.config.methods) &&
+            reg.config.methods.includes(method),
+        );
+        expect(writeRegistration).toBeUndefined();
+      }
     }
   });
 
@@ -293,7 +328,9 @@ describe('PCC read-only route registrations', () => {
         typeof reg.config.route === 'string' &&
         reg.config.route.includes('buyout-log') &&
         Array.isArray(reg.config.methods) &&
-        reg.config.methods.some((m: string) => writeMethods.includes(m as (typeof writeMethods)[number])),
+        reg.config.methods.some((m: string) =>
+          writeMethods.includes(m as (typeof writeMethods)[number]),
+        ),
     );
     expect(buyoutLogWriteRegistrations).toEqual([]);
   });
@@ -379,7 +416,11 @@ describe('PCC read-only route registrations', () => {
       {},
     );
 
-    expect(provider.getUnifiedSearch).toHaveBeenCalledWith('project-known', undefined, 'warranty product');
+    expect(provider.getUnifiedSearch).toHaveBeenCalledWith(
+      'project-known',
+      undefined,
+      'warranty product',
+    );
     expect(response.status).toBe(200);
     expect(response.jsonBody).toEqual({ data: envelope });
   });

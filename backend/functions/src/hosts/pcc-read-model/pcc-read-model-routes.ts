@@ -120,6 +120,18 @@ registerPccReadRoute(
 );
 
 registerPccReadRoute(
+  'getPccProcoreProjectMapping',
+  'pcc/projects/{projectId}/procore-project-mapping',
+  async (projectId) => provider.getProcoreProjectMapping(projectId),
+);
+
+registerPccReadRoute(
+  'getPccProcoreSyncHealth',
+  'pcc/projects/{projectId}/procore-sync-health',
+  async (projectId) => provider.getProcoreSyncHealth(projectId),
+);
+
+registerPccReadRoute(
   'getPccUnifiedLifecycle',
   'pcc/projects/{projectId}/unified-lifecycle',
   async (projectId) => provider.getUnifiedLifecycle(projectId),

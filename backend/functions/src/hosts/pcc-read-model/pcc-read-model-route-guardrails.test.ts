@@ -7,11 +7,11 @@ const PCC_HOST_DIR = fileURLToPath(new URL('./', import.meta.url));
 
 const FORBIDDEN_IMPORT_PATTERNS: readonly RegExp[] = [
   /['"]@pnp\//,
-  /['"]@microsoft\/microsoft-graph-client['"]/, 
+  /['"]@microsoft\/microsoft-graph-client['"]/,
   /['"]procore-sdk['"]/i,
   /['"]@microsoft\/sp-/,
-  /['"]axios['"]/, 
-  /['"]node-fetch['"]/, 
+  /['"]axios['"]/,
+  /['"]node-fetch['"]/,
   /['"]@adobe\//,
   /['"]document-?crunch/i,
 ];
@@ -43,6 +43,19 @@ const FORBIDDEN_EXECUTABLE_TOKENS: readonly string[] = [
   'addChannelMember',
   'joinedTeams',
   'graphMembers',
+];
+
+// Wave 13 / Prompt 13D — Procore runtime adoption identifiers. Word-
+// boundary regex form so legitimate field identifiers like
+// `procoreCompanyId`, `procoreObjectId`, and `procoreProjectId` are NOT
+// blocked, while exact runtime tokens (`procoreSdk`, `procoreClient`,
+// `procoreFetch`, `procoreApiCall`, `procoreAuth`) are caught.
+const FORBIDDEN_PROCORE_RUNTIME_PATTERNS: readonly RegExp[] = [
+  /\bprocoreSdk\b/,
+  /\bprocoreClient\b/,
+  /\bprocoreFetch\b/,
+  /\bprocoreApiCall\b/,
+  /\bprocoreAuth\b/,
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
@@ -79,7 +92,7 @@ function stripCommentsAndStrings(source: string): string {
       continue;
     }
 
-    if (ch === '"' || ch === '\'' || ch === '`') {
+    if (ch === '"' || ch === "'" || ch === '`') {
       const quote = ch;
       i++;
       while (i < n && source[i] !== quote) {
@@ -135,5 +148,29 @@ describe('PCC read-only route guardrails', () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it('contains no Procore runtime adoption tokens (Wave 13D)', () => {
+    const offenders: Array<{ file: string; pattern: string }> = [];
+    for (const file of files) {
+      const stripped = stripCommentsAndStrings(readFileSync(file, 'utf8'));
+      for (const pattern of FORBIDDEN_PROCORE_RUNTIME_PATTERNS) {
+        if (pattern.test(stripped)) {
+          offenders.push({ file, pattern: pattern.source });
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('does not block legitimate Procore field identifiers used by 13B/13C contracts', () => {
+    // Sanity check: the Wave 13D forbidden-pattern regexes must NOT match
+    // legitimate field identifiers that appear elsewhere in the codebase.
+    const legitimate = ['procoreCompanyId', 'procoreObjectId', 'procoreProjectId'];
+    for (const identifier of legitimate) {
+      for (const pattern of FORBIDDEN_PROCORE_RUNTIME_PATTERNS) {
+        expect(pattern.test(identifier)).toBe(false);
+      }
+    }
   });
 });

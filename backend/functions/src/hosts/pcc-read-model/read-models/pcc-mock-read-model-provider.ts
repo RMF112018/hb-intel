@@ -25,6 +25,8 @@ import {
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
   SAMPLE_PRIORITY_ACTIONS,
+  SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+  SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
@@ -53,6 +55,8 @@ import type {
   PccPermitInspectionControlCenterReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
+  PccProcoreProjectMappingReadModel,
+  PccProcoreSyncHealthReadModel,
   PccProjectHomeReadModel,
   PccProjectId,
   PccProjectNumber,
@@ -206,14 +210,16 @@ const EMPTY_RESPONSIBILITY_MATRIX_READ_MODEL_BACKEND_UNAVAILABLE: PccResponsibil
 // Exposure summary counts are zeroed.
 const EMPTY_CONSTRAINTS_LOG_EXPOSURE_SUMMARY = {
   riskCountsByBand: Object.freeze(
-    Object.fromEntries(
-      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
-    ) as Record<SeverityBandKey, number>,
+    Object.fromEntries(EXPOSURE_BANDS.map((band) => [band.key, 0] as const)) as Record<
+      SeverityBandKey,
+      number
+    >,
   ),
   constraintCountsByBand: Object.freeze(
-    Object.fromEntries(
-      EXPOSURE_BANDS.map((band) => [band.key, 0] as const),
-    ) as Record<SeverityBandKey, number>,
+    Object.fromEntries(EXPOSURE_BANDS.map((band) => [band.key, 0] as const)) as Record<
+      SeverityBandKey,
+      number
+    >,
   ),
   overdueConstraintCount: 0,
   awaitingExternalPartyCount: 0,
@@ -281,6 +287,63 @@ const EMPTY_BUYOUT_LOG_READ_MODEL: PccBuyoutLogReadModel = {
 
 const EMPTY_BUYOUT_LOG_READ_MODEL_BACKEND_UNAVAILABLE: PccBuyoutLogReadModel = {
   ...EMPTY_BUYOUT_LOG_READ_MODEL,
+  sourcePosture: {
+    sourceStatus: 'backend-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+};
+
+// Empty Procore Project Mapping read model used for degraded envelopes
+// (unknown project / backend-unavailable). Module identity, registry
+// field-name registry, query recommendations, and ownership-note literal
+// are preserved because they are project-independent. Project-specific
+// arrays (mappings, registryContexts) are emptied; pendingHumanReviewCount
+// is zeroed.
+const EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL: PccProcoreProjectMappingReadModel = {
+  moduleIdentity: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.moduleIdentity,
+  mappings: [],
+  registryContexts: [],
+  registryFieldInternalNames: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.registryFieldInternalNames,
+  queryRecommendations: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.queryRecommendations,
+  ownershipNote: SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL.ownershipNote,
+  sourcePosture: {
+    sourceStatus: 'source-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+};
+
+const EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL_BACKEND_UNAVAILABLE: PccProcoreProjectMappingReadModel =
+  {
+    ...EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL,
+    sourcePosture: {
+      sourceStatus: 'backend-unavailable',
+      pendingHumanReviewCount: 0,
+    },
+  };
+
+// Empty Procore Sync Health read model used for degraded envelopes
+// (unknown project / backend-unavailable). Module identity, the
+// canonical subject-area registry list, and the ownership-note literal
+// are preserved because they are project-independent. Per-area
+// syncHealthEntries, sourceLineages, objectLinks, curatedSummaries, and
+// derivedSignals are emptied; pendingHumanReviewCount is zeroed.
+const EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL: PccProcoreSyncHealthReadModel = {
+  moduleIdentity: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.moduleIdentity,
+  subjectAreas: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.subjectAreas,
+  syncHealthEntries: [],
+  sourceLineages: [],
+  objectLinks: [],
+  curatedSummaries: [],
+  derivedSignals: [],
+  ownershipNote: SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL.ownershipNote,
+  sourcePosture: {
+    sourceStatus: 'source-unavailable',
+    pendingHumanReviewCount: 0,
+  },
+};
+
+const EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL_BACKEND_UNAVAILABLE: PccProcoreSyncHealthReadModel = {
+  ...EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL,
   sourcePosture: {
     sourceStatus: 'backend-unavailable',
     pendingHumanReviewCount: 0,
@@ -1147,17 +1210,95 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
     );
   }
 
+  async getProcoreProjectMapping(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreProjectMappingReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL_BACKEND_UNAVAILABLE,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROCORE_PROJECT_MAPPING_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getProcoreSyncHealth(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccProcoreSyncHealthReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL_BACKEND_UNAVAILABLE,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_PROCORE_SYNC_HEALTH_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
   async getUnifiedLifecycle(
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>> {
     if (this.simulateBackendUnavailable) {
-      return this.envelope(projectId, viewerPersona, 'backend-unavailable', EMPTY_UNIFIED_LIFECYCLE_READ_MODEL, [
-        {
-          code: 'backend-unavailable',
-          message: 'Mock provider configured to simulate backend-unavailable.',
-        },
-      ]);
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_UNIFIED_LIFECYCLE_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
     }
     if (!this.knownProjects.has(projectId)) {
       return this.envelope(
@@ -1182,12 +1323,18 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccProjectMemoryReadModel>> {
     if (this.simulateBackendUnavailable) {
-      return this.envelope(projectId, viewerPersona, 'backend-unavailable', EMPTY_PROJECT_MEMORY_READ_MODEL, [
-        {
-          code: 'backend-unavailable',
-          message: 'Mock provider configured to simulate backend-unavailable.',
-        },
-      ]);
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_MEMORY_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
     }
     if (!this.knownProjects.has(projectId)) {
       return this.envelope(
@@ -1212,12 +1359,18 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccProjectLensesReadModel>> {
     if (this.simulateBackendUnavailable) {
-      return this.envelope(projectId, viewerPersona, 'backend-unavailable', EMPTY_PROJECT_LENSES_READ_MODEL, [
-        {
-          code: 'backend-unavailable',
-          message: 'Mock provider configured to simulate backend-unavailable.',
-        },
-      ]);
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_PROJECT_LENSES_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
     }
     if (!this.knownProjects.has(projectId)) {
       return this.envelope(
@@ -1278,12 +1431,18 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccWarrantyTraceReadModel>> {
     if (this.simulateBackendUnavailable) {
-      return this.envelope(projectId, viewerPersona, 'backend-unavailable', EMPTY_WARRANTY_TRACE_READ_MODEL, [
-        {
-          code: 'backend-unavailable',
-          message: 'Mock provider configured to simulate backend-unavailable.',
-        },
-      ]);
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_WARRANTY_TRACE_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
     }
     if (!this.knownProjects.has(projectId)) {
       return this.envelope(
@@ -1345,12 +1504,18 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
     query?: string,
   ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>> {
     if (this.simulateBackendUnavailable) {
-      return this.envelope(projectId, viewerPersona, 'backend-unavailable', EMPTY_UNIFIED_SEARCH_READ_MODEL, [
-        {
-          code: 'backend-unavailable',
-          message: 'Mock provider configured to simulate backend-unavailable.',
-        },
-      ]);
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_UNIFIED_SEARCH_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
     }
     if (!this.knownProjects.has(projectId)) {
       return this.envelope(
@@ -1374,8 +1539,10 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
     }
 
     const filtered = {
-      responses: base.responses.filter((r) =>
-        r.query.toLowerCase().includes(normalizedQuery) || r.response.toLowerCase().includes(normalizedQuery),
+      responses: base.responses.filter(
+        (r) =>
+          r.query.toLowerCase().includes(normalizedQuery) ||
+          r.response.toLowerCase().includes(normalizedQuery),
       ),
     };
 
@@ -1392,7 +1559,13 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
             } as const,
           ];
 
-    return this.envelope(projectId, viewerPersona, this.statusForKnownProject(projectId), data, warnings);
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      data,
+      warnings,
+    );
   }
 
   private statusForKnownProject(projectId: PccProjectId): PccReadModelSourceStatus {
