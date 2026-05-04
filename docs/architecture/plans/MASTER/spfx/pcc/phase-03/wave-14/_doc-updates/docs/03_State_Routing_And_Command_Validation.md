@@ -21,35 +21,35 @@
 
 ## Transition Rules
 
-| Source State | Target State | Actor Roles | Required Fields | Audit Event | Terminal | Priority Action Impact | Source Module Impact | Blocks Downstream |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `draft` | `requested` | source module owner, PCC Admin | source reference, policy, route | `approval.requested` | No | create/update | notify owner module | policy-defined |
-| `requested` | `pending-review` | system/backend, PCC Admin | current step, assigned role | `approval.queued` | No | create | queue source prompt | Yes if gate |
-| `pending-review` | `in-review` | assigned reviewer/approver | actor identity | `approval.review-started` | No | update | mark in review | Yes |
-| `pending-review` | `revision-requested` | approver, reviewer if policy allows | comment, reason | `approval.revision-requested` | No | update/resolve assigned action | return to source | Yes |
-| `in-review` | `revision-requested` | approver, reviewer if policy allows | comment, reason | `approval.revision-requested` | No | update/resolve assigned action | return to source | Yes |
-| `pending-review` | `approved` | authorized approver | decision, optional comment, evidence if required | `approval.approved` | Yes | resolve | emit approved | No |
-| `in-review` | `approved` | authorized approver | decision, optional comment, evidence if required | `approval.approved` | Yes | resolve | emit approved | No |
-| `pending-review` | `rejected-returned` | authorized approver | reason, comment | `approval.rejected-returned` | Yes | resolve/create source revision action | emit rejected-returned | Yes |
-| `in-review` | `rejected-returned` | authorized approver | reason, comment | `approval.rejected-returned` | Yes | resolve/create source revision action | emit rejected-returned | Yes |
-| `pending-review` | `deferred` | authorized approver, Project Executive, PCC Admin | reason, defer-until date, owner | `approval.deferred` | Yes | resolve/create deferred follow-up | emit deferred | policy-defined |
-| `in-review` | `deferred` | authorized approver, Project Executive, PCC Admin | reason, defer-until date, owner | `approval.deferred` | Yes | resolve/create deferred follow-up | emit deferred | policy-defined |
-| `pending-review` | `waived` | Project Executive, Executive Oversight, PCC Admin if technical | waiver reason, evidence, risk acknowledgement | `approval.waived` | Yes | resolve/create risk follow-up | emit waived | No unless policy says |
-| `in-review` | `waived` | Project Executive, Executive Oversight, PCC Admin if technical | waiver reason, evidence, risk acknowledgement | `approval.waived` | Yes | resolve/create risk follow-up | emit waived | No unless policy says |
-| `pending-review` | `overridden` | Executive Oversight, Project Executive where policy allows | override reason, evidence, consequence acknowledgement | `approval.overridden` | Yes | resolve/create executive follow-up | emit overridden | No unless policy says |
-| `in-review` | `overridden` | Executive Oversight, Project Executive where policy allows | override reason, evidence, consequence acknowledgement | `approval.overridden` | Yes | resolve/create executive follow-up | emit overridden | No unless policy says |
-| `pending-review` | `escalated` | assigned approver, source owner, PCC Admin, SLA policy | escalation reason, escalation target | `approval.escalated` | No | create escalation action | notify source owner | Yes |
-| `in-review` | `escalated` | assigned approver, source owner, PCC Admin, SLA policy | escalation reason, escalation target | `approval.escalated` | No | create escalation action | notify source owner | Yes |
-| `escalated` | `approved` | escalation approver | decision, evidence if required | `approval.escalation-approved` | Yes | resolve escalation | emit approved | No |
-| `escalated` | `rejected-returned` | escalation approver | reason, comment | `approval.escalation-rejected` | Yes | resolve/create revision action | emit rejected-returned | Yes |
-| `requested` | `cancelled` | requestor, source owner, PCC Admin | cancellation reason | `approval.cancelled` | Yes | resolve | emit cancelled | No |
-| `pending-review` | `cancelled` | requestor if not reviewed, source owner, PCC Admin | cancellation reason | `approval.cancelled` | Yes | resolve | emit cancelled | No |
-| `requested` | `superseded` | source owner, PCC Admin, policy engine | replacement source reference | `approval.superseded` | Yes | resolve/create replacement | emit superseded | Yes until replacement |
-| `pending-review` | `superseded` | source owner, PCC Admin, policy engine | replacement source reference | `approval.superseded` | Yes | resolve/create replacement | emit superseded | Yes until replacement |
-| `pending-review` | `expired` | SLA policy, PCC Admin | expiration reason | `approval.expired` | Yes | resolve/create escalation if required | emit expired | Yes |
-| `approved` | `execution-pending` | policy engine, PCC Admin | execution target, executor role | `approval.execution-pending` | No | create execution pending action | notify executor | Yes until executed |
-| `execution-pending` | `manually-closed` | PCC Admin, IT / Tenant Admin, Integration Admin | close reason, evidence | `approval.manually-closed` | Yes | resolve | emit manually-closed | No |
-| any terminal | `archived` | PCC Admin, retention policy | archive reason | `approval.archived` | Yes | none | archive-visible | No |
+| Source State        | Target State         | Actor Roles                                                    | Required Fields                                        | Audit Event                    | Terminal | Priority Action Impact                | Source Module Impact   | Blocks Downstream     |
+| ------------------- | -------------------- | -------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------ | -------- | ------------------------------------- | ---------------------- | --------------------- |
+| `draft`             | `requested`          | source module owner, PCC Admin                                 | source reference, policy, route                        | `approval.requested`           | No       | create/update                         | notify owner module    | policy-defined        |
+| `requested`         | `pending-review`     | system/backend, PCC Admin                                      | current step, assigned role                            | `approval.queued`              | No       | create                                | queue source prompt    | Yes if gate           |
+| `pending-review`    | `in-review`          | assigned reviewer/approver                                     | actor identity                                         | `approval.review-started`      | No       | update                                | mark in review         | Yes                   |
+| `pending-review`    | `revision-requested` | approver, reviewer if policy allows                            | comment, reason                                        | `approval.revision-requested`  | No       | update/resolve assigned action        | return to source       | Yes                   |
+| `in-review`         | `revision-requested` | approver, reviewer if policy allows                            | comment, reason                                        | `approval.revision-requested`  | No       | update/resolve assigned action        | return to source       | Yes                   |
+| `pending-review`    | `approved`           | authorized approver                                            | decision, optional comment, evidence if required       | `approval.approved`            | Yes      | resolve                               | emit approved          | No                    |
+| `in-review`         | `approved`           | authorized approver                                            | decision, optional comment, evidence if required       | `approval.approved`            | Yes      | resolve                               | emit approved          | No                    |
+| `pending-review`    | `rejected-returned`  | authorized approver                                            | reason, comment                                        | `approval.rejected-returned`   | Yes      | resolve/create source revision action | emit rejected-returned | Yes                   |
+| `in-review`         | `rejected-returned`  | authorized approver                                            | reason, comment                                        | `approval.rejected-returned`   | Yes      | resolve/create source revision action | emit rejected-returned | Yes                   |
+| `pending-review`    | `deferred`           | authorized approver, Project Executive, PCC Admin              | reason, defer-until date, owner                        | `approval.deferred`            | Yes      | resolve/create deferred follow-up     | emit deferred          | policy-defined        |
+| `in-review`         | `deferred`           | authorized approver, Project Executive, PCC Admin              | reason, defer-until date, owner                        | `approval.deferred`            | Yes      | resolve/create deferred follow-up     | emit deferred          | policy-defined        |
+| `pending-review`    | `waived`             | Project Executive, Executive Oversight, PCC Admin if technical | waiver reason, evidence, risk acknowledgement          | `approval.waived`              | Yes      | resolve/create risk follow-up         | emit waived            | No unless policy says |
+| `in-review`         | `waived`             | Project Executive, Executive Oversight, PCC Admin if technical | waiver reason, evidence, risk acknowledgement          | `approval.waived`              | Yes      | resolve/create risk follow-up         | emit waived            | No unless policy says |
+| `pending-review`    | `overridden`         | Executive Oversight, Project Executive where policy allows     | override reason, evidence, consequence acknowledgement | `approval.overridden`          | Yes      | resolve/create executive follow-up    | emit overridden        | No unless policy says |
+| `in-review`         | `overridden`         | Executive Oversight, Project Executive where policy allows     | override reason, evidence, consequence acknowledgement | `approval.overridden`          | Yes      | resolve/create executive follow-up    | emit overridden        | No unless policy says |
+| `pending-review`    | `escalated`          | assigned approver, source owner, PCC Admin, SLA policy         | escalation reason, escalation target                   | `approval.escalated`           | No       | create escalation action              | notify source owner    | Yes                   |
+| `in-review`         | `escalated`          | assigned approver, source owner, PCC Admin, SLA policy         | escalation reason, escalation target                   | `approval.escalated`           | No       | create escalation action              | notify source owner    | Yes                   |
+| `escalated`         | `approved`           | escalation approver                                            | decision, evidence if required                         | `approval.escalation-approved` | Yes      | resolve escalation                    | emit approved          | No                    |
+| `escalated`         | `rejected-returned`  | escalation approver                                            | reason, comment                                        | `approval.escalation-rejected` | Yes      | resolve/create revision action        | emit rejected-returned | Yes                   |
+| `requested`         | `cancelled`          | requestor, source owner, PCC Admin                             | cancellation reason                                    | `approval.cancelled`           | Yes      | resolve                               | emit cancelled         | No                    |
+| `pending-review`    | `cancelled`          | requestor if not reviewed, source owner, PCC Admin             | cancellation reason                                    | `approval.cancelled`           | Yes      | resolve                               | emit cancelled         | No                    |
+| `requested`         | `superseded`         | source owner, PCC Admin, policy engine                         | replacement source reference                           | `approval.superseded`          | Yes      | resolve/create replacement            | emit superseded        | Yes until replacement |
+| `pending-review`    | `superseded`         | source owner, PCC Admin, policy engine                         | replacement source reference                           | `approval.superseded`          | Yes      | resolve/create replacement            | emit superseded        | Yes until replacement |
+| `pending-review`    | `expired`            | SLA policy, PCC Admin                                          | expiration reason                                      | `approval.expired`             | Yes      | resolve/create escalation if required | emit expired           | Yes                   |
+| `approved`          | `execution-pending`  | policy engine, PCC Admin                                       | execution target, executor role                        | `approval.execution-pending`   | No       | create execution pending action       | notify executor        | Yes until executed    |
+| `execution-pending` | `manually-closed`    | PCC Admin, IT / Tenant Admin, Integration Admin                | close reason, evidence                                 | `approval.manually-closed`     | Yes      | resolve                               | emit manually-closed   | No                    |
+| any terminal        | `archived`           | PCC Admin, retention policy                                    | archive reason                                         | `approval.archived`            | Yes      | none                                  | archive-visible        | No                    |
 
 ## Approval Mode Semantics
 
@@ -103,17 +103,17 @@
 
 ## Stale and Superseded Source Rules
 
-| Condition | Required Result |
-| --- | --- |
-| Source record version changed after request | mark `stale-source`; require revalidation or supersession |
-| Evidence link changed after request | require evidence revalidation |
+| Condition                                      | Required Result                                           |
+| ---------------------------------------------- | --------------------------------------------------------- |
+| Source record version changed after request    | mark `stale-source`; require revalidation or supersession |
+| Evidence link changed after request            | require evidence revalidation                             |
 | Estimate snapshot changed after freeze request | supersede prior request and create replacement checkpoint |
-| Approver removed from project | reroute or escalate based on policy |
-| Underlying source item closed externally | cancel or manual-close with source reference |
-| Source module archived record | manual-close or archive after source owner confirmation |
-| Conflicting approval already exists | block duplicate and link to existing request |
-| Policy version changed | keep current request on original policy unless superseded |
-| Source item deleted/inaccessible | escalate to source owner/PCC Admin and block decision |
+| Approver removed from project                  | reroute or escalate based on policy                       |
+| Underlying source item closed externally       | cancel or manual-close with source reference              |
+| Source module archived record                  | manual-close or archive after source owner confirmation   |
+| Conflicting approval already exists            | block duplicate and link to existing request              |
+| Policy version changed                         | keep current request on original policy unless superseded |
+| Source item deleted/inaccessible               | escalate to source owner/PCC Admin and block decision     |
 
 ## Command Validation Layers
 

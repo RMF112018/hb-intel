@@ -4,19 +4,19 @@
 
 No package installation is authorized by this documentation update.
 
-| Package | Current / Candidate Posture | Guidance |
-| --- | --- | --- |
-| `@fluentui/react-components` | existing in repo areas | Use where already available and consistent with UI-kit governance |
-| `@tanstack/react-table` | existing in estimating app | Strong candidate for queue sorting/filtering if adopted through gated decision |
-| `@tanstack/react-virtual` | candidate | Adopt only if queue scale requires virtualization |
-| `@pnp/sp` | candidate | Defer for Phase 14 MVP; no direct SPFx mutation |
-| `@pnp/queryable` | existing root dev dependency | Evaluate only behind approved SharePoint data-access boundary |
-| `zod` | candidate / possibly existing in areas | Defer unless repo standardizes schema validation around it |
-| `ajv` | candidate | Adopt when gated for JSON Schema/runtime command validation |
-| `xstate` | candidate | Defer; consider only if state/routing complexity justifies visual statecharts/runtime actors |
-| `@testing-library/react` | existing | Use for component and accessibility-adjacent interaction tests |
-| `vitest` | existing | Use for model/state/validation tests |
-| `@playwright/test` | existing | Use for keyboard/responsive/high-level UX tests |
+| Package                      | Current / Candidate Posture            | Guidance                                                                                     |
+| ---------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `@fluentui/react-components` | existing in repo areas                 | Use where already available and consistent with UI-kit governance                            |
+| `@tanstack/react-table`      | existing in estimating app             | Strong candidate for queue sorting/filtering if adopted through gated decision               |
+| `@tanstack/react-virtual`    | candidate                              | Adopt only if queue scale requires virtualization                                            |
+| `@pnp/sp`                    | candidate                              | Defer for Phase 14 MVP; no direct SPFx mutation                                              |
+| `@pnp/queryable`             | existing root dev dependency           | Evaluate only behind approved SharePoint data-access boundary                                |
+| `zod`                        | candidate / possibly existing in areas | Defer unless repo standardizes schema validation around it                                   |
+| `ajv`                        | candidate                              | Adopt when gated for JSON Schema/runtime command validation                                  |
+| `xstate`                     | candidate                              | Defer; consider only if state/routing complexity justifies visual statecharts/runtime actors |
+| `@testing-library/react`     | existing                               | Use for component and accessibility-adjacent interaction tests                               |
+| `vitest`                     | existing                               | Use for model/state/validation tests                                                         |
+| `@playwright/test`           | existing                               | Use for keyboard/responsive/high-level UX tests                                              |
 
 ## Required Test Categories
 

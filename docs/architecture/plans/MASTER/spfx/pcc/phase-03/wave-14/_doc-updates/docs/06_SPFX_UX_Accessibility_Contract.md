@@ -140,18 +140,18 @@ Every source module panel must show:
 
 ## Decision Friction Rules
 
-| Action | Friction | Required UX |
-| --- | --- | --- |
-| `acknowledge` | low | inline action with confirmation toast/state |
-| `request-revision` | medium | comment required |
-| `defer` | medium | reason, date, owner |
-| `reject-return` | medium | reason and comment |
-| `waive-with-reason` | high | modal/drawer confirmation, reason, evidence, risk acknowledgement |
-| `override-with-reason` | high | elevated confirmation, reason, evidence, consequence acknowledgement |
-| `escalate` | medium/high | target role, reason |
-| `cancel` | high | cancellation reason and source impact notice |
-| `supersede` | high | replacement source reference |
-| `manual-close` | high | admin role, close reason, evidence |
+| Action                 | Friction    | Required UX                                                          |
+| ---------------------- | ----------- | -------------------------------------------------------------------- |
+| `acknowledge`          | low         | inline action with confirmation toast/state                          |
+| `request-revision`     | medium      | comment required                                                     |
+| `defer`                | medium      | reason, date, owner                                                  |
+| `reject-return`        | medium      | reason and comment                                                   |
+| `waive-with-reason`    | high        | modal/drawer confirmation, reason, evidence, risk acknowledgement    |
+| `override-with-reason` | high        | elevated confirmation, reason, evidence, consequence acknowledgement |
+| `escalate`             | medium/high | target role, reason                                                  |
+| `cancel`               | high        | cancellation reason and source impact notice                         |
+| `supersede`            | high        | replacement source reference                                         |
+| `manual-close`         | high        | admin role, close reason, evidence                                   |
 
 ## Accessibility Requirements
 

@@ -17,18 +17,18 @@ Phase 14 must use role-filtered read models and redaction. Do not rely on item-l
 
 ## Redaction Rules
 
-| Viewer Type | Default Visibility |
-| --- | --- |
-| PCC Admin | broad visibility except legally restricted notes unless explicitly authorized |
-| IT / Tenant Admin | technical/security/access details; financial details redacted unless needed |
-| Executive Oversight | executive and high-risk detail, with source restrictions honored |
-| Project Executive | project-level decision context, high-risk exposure, restricted legal notes if authorized |
-| Project Manager | operational context, source details, financial/legal redaction by policy |
-| Superintendent | field/readiness/inspection context; financial/legal redacted |
-| Project Accountant | financial/cost-code/budget seed details; legal/security redacted as needed |
-| Estimating Roles | estimating workbench context per Wave 13G; project financial authority by role |
-| External / Owner / Subcontractor | only explicitly shared items; internal comments and authority notes redacted |
-| HBI Assistant | may only summarize visible, cited content; no decision rights |
+| Viewer Type                      | Default Visibility                                                                       |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| PCC Admin                        | broad visibility except legally restricted notes unless explicitly authorized            |
+| IT / Tenant Admin                | technical/security/access details; financial details redacted unless needed              |
+| Executive Oversight              | executive and high-risk detail, with source restrictions honored                         |
+| Project Executive                | project-level decision context, high-risk exposure, restricted legal notes if authorized |
+| Project Manager                  | operational context, source details, financial/legal redaction by policy                 |
+| Superintendent                   | field/readiness/inspection context; financial/legal redacted                             |
+| Project Accountant               | financial/cost-code/budget seed details; legal/security redacted as needed               |
+| Estimating Roles                 | estimating workbench context per Wave 13G; project financial authority by role           |
+| External / Owner / Subcontractor | only explicitly shared items; internal comments and authority notes redacted             |
+| HBI Assistant                    | may only summarize visible, cited content; no decision rights                            |
 
 ## Audit Trail Types
 
