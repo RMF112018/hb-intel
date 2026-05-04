@@ -270,3 +270,20 @@ Wave relationship lock:
 
 - Wave 13G remains Estimating Workbench feature authority.
 - Phase 14 governs estimating-related checkpoint queue/routing/decision/audit semantics.
+
+## Prompt 04 Integration Addendum (2026-05-04)
+
+Wave 14 source-module integration authority is anchored in:
+
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-14/Wave_14_Source_Module_Integration_Contract.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-14/Wave_14_Wave13G_Estimating_Checkpoint_Contract.md`
+
+Prompt 04 alignment lock:
+
+- Source modules retain source-record ownership.
+- Phase 14 owns checkpoint queue/routing/decision/audit semantics.
+- Priority Actions behavior for checkpointed flows follows create/dedupe/resolve/suppress contract in Wave 14 docs.
+- Project Readiness gate behavior remains source-lineage aware and blocker/evidence/authority gated.
+- Wave 13G remains estimating feature/UX authority while checkpointed seams route through Phase 14 semantics.
+- HBI has citation/summarization rights only and no pricing/approval/waiver/override/award authority.
+- No Procore/Sage/Power Automate writeback and no tenant mutation are authorized by this addendum.

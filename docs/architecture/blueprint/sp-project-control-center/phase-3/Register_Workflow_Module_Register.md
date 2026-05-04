@@ -165,3 +165,17 @@ Wave relationship lock:
 
 - Wave 13G remains Estimating Workbench feature authority.
 - Phase 14 governs estimating-related checkpoint queue/routing/decision/audit semantics.
+
+## Prompt 04 Integration Addendum (2026-05-04)
+
+Wave 14 source-module integration contract references:
+
+- `wave-14/Wave_14_Source_Module_Integration_Contract.md`
+- `wave-14/Wave_14_Wave13G_Estimating_Checkpoint_Contract.md`
+
+Integration contract lock:
+
+- Team & Access, Document Control, Project Lifecycle Readiness Center, Permit & Inspection Control Center, Responsibility Matrix, Constraints Log, Buyout Log, External Systems, Site Health, Priority Actions, Project Readiness, Executive Oversight, and Admin Review Surfaces integrate via Phase 14 checkpoint semantics without source ownership transfer.
+- Wave 13G retains estimating feature contracts and UX; Phase 14 governs checkpoint queue semantics for freeze/baseline/handoff/validation override/buyout seed/template-admin/cost-code mapping exception seams.
+- HBI remains non-authoritative for pricing, approval, waiver, override, and award decisions.
+- No external writeback/runtime mutation is authorized.
