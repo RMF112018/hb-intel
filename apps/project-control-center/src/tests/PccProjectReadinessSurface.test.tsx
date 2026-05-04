@@ -99,10 +99,10 @@ describe('Project Readiness Center surface', () => {
     expect(wave11!.textContent).toContain('RACI');
   });
 
-  it('downstream modules region marks Wave 12 / Wave 13 / Wave 14 as preview-deferred', () => {
+  it('downstream modules region marks Wave 12 / Wave 14 as preview-deferred', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
-    const downstreamModuleIds = ['constraints-log', 'buyout-log', 'approvals-checkpoints'] as const;
+    const downstreamModuleIds = ['constraints-log', 'approvals-checkpoints'] as const;
     for (const id of downstreamModuleIds) {
       const node = container.querySelector(`[data-pcc-readiness-downstream-source="${id}"]`);
       expect(node, `expected downstream module ${id}`).not.toBeNull();
@@ -118,6 +118,16 @@ describe('Project Readiness Center surface', () => {
     expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe('implemented');
     expect(node!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 10');
     expect(node!.textContent).toContain('Permit & Inspection Control Center');
+  });
+
+  it('downstream modules region marks Wave 13 (buyout-log) as implemented', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const node = container.querySelector('[data-pcc-readiness-downstream-source="buyout-log"]');
+    expect(node).not.toBeNull();
+    expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe('implemented');
+    expect(node!.getAttribute('data-pcc-readiness-downstream-wave')).toBe('Wave 13');
+    expect(node!.textContent).toContain('Buyout Log');
   });
 
   it('readiness surface tree exposes no enabled action buttons', () => {
@@ -713,9 +723,7 @@ describe('Project Readiness Center surface — Constraints Log surface-level int
     // Responsibility Matrix embedding test pattern).
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
-    const markers = container.querySelectorAll(
-      '[data-pcc-readiness-section="constraints-log"]',
-    );
+    const markers = container.querySelectorAll('[data-pcc-readiness-section="constraints-log"]');
     expect(markers.length).toBeGreaterThan(0);
     for (const marker of Array.from(markers)) {
       const card = marker.closest('[data-pcc-card]');
@@ -727,12 +735,39 @@ describe('Project Readiness Center surface — Constraints Log surface-level int
   it('Constraints Log is not a separate route or active-surface workspace', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
-    expect(
-      container.querySelector('[data-pcc-surface-id="constraints-log"]'),
-    ).toBeNull();
-    expect(
-      container.querySelector('[data-pcc-active-surface-panel="constraints-log"]'),
-    ).toBeNull();
+    expect(container.querySelector('[data-pcc-surface-id="constraints-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-active-surface-panel="constraints-log"]')).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 13 / Prompt 05 — Buyout Log surface-level integration
+//
+// PccBuyoutLogRegions has its own region-level test file
+// (PccBuyoutLogRegions.test.tsx). The two checks below verify the
+// integration AT THE SURFACE LEVEL — that the buyout-log section
+// appears under the project-readiness panel and does not stand up a
+// separate route or active-surface workspace.
+// ─────────────────────────────────────────────────────────────────────
+
+describe('Project Readiness Center surface — Buyout Log surface-level integration', () => {
+  it('Buyout Log appears as a readiness input on the project-readiness surface; each card is a direct child of the bento grid', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const markers = container.querySelectorAll('[data-pcc-readiness-section="buyout-log"]');
+    expect(markers.length).toBeGreaterThan(0);
+    for (const marker of Array.from(markers)) {
+      const card = marker.closest('[data-pcc-card]');
+      expect(card).not.toBeNull();
+      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
+    }
+  });
+
+  it('Buyout Log is not a separate route or active-surface workspace', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    expect(container.querySelector('[data-pcc-surface-id="buyout-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
   });
 });
 
@@ -755,14 +790,15 @@ describe('Project Readiness Center surface — fixture-only fallback excludes un
     expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
     expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
     expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
-    // The existing five region groups must still render at least one
-    // card from each lifecycle-readiness / constraints-log section.
+    // The existing region groups must still render at least one card
+    // from each lifecycle-readiness / constraints-log / buyout-log section.
     expect(
       container.querySelector('[data-pcc-readiness-section="lifecycle-readiness-center"]'),
     ).not.toBeNull();
     expect(
       container.querySelector('[data-pcc-readiness-section="constraints-log"]'),
     ).not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-section="buyout-log"]')).not.toBeNull();
   });
 });
 
@@ -784,10 +820,7 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
 
   it('read-model-driven path renders three unified-lifecycle direct-child cards with the three body markers; warranty / closed-project / lens / search markers are NOT rendered', async () => {
     const { container } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     activateProjectReadiness(container);
     // Marker queries scoped to `container` (the new section's cards are
@@ -818,10 +851,7 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
 
   it('related-records panel renders source-lineage chips and adds no anchors', async () => {
     const { container } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     activateProjectReadiness(container);
     await waitFor(() =>
@@ -839,18 +869,13 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
 
   it('does not introduce a unified-lifecycle route or workspace marker, and adds no forbidden anchor href in the new section', async () => {
     const { container } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     activateProjectReadiness(container);
     await waitFor(() =>
       expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
     );
-    expect(
-      container.querySelector('[data-pcc-surface-id="unified-lifecycle"]'),
-    ).toBeNull();
+    expect(container.querySelector('[data-pcc-surface-id="unified-lifecycle"]')).toBeNull();
     expect(
       container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
     ).toBeNull();
@@ -914,6 +939,7 @@ describe('Project Readiness Center surface — non-call architectural lock', () 
     const permitInspectionSpy = vi.spyOn(client, 'getPermitInspectionControlCenter');
     const responsibilityMatrixSpy = vi.spyOn(client, 'getResponsibilityMatrix');
     const constraintsLogSpy = vi.spyOn(client, 'getConstraintsLog');
+    const buyoutLogSpy = vi.spyOn(client, 'getBuyoutLog');
     const unifiedLifecycleSpy = vi.spyOn(client, 'getUnifiedLifecycle');
 
     const { container } = render(
@@ -931,6 +957,7 @@ describe('Project Readiness Center surface — non-call architectural lock', () 
     expect(permitInspectionSpy).toHaveBeenCalledTimes(1);
     expect(responsibilityMatrixSpy).toHaveBeenCalledTimes(1);
     expect(constraintsLogSpy).toHaveBeenCalledTimes(1);
+    expect(buyoutLogSpy).toHaveBeenCalledTimes(1);
     // The new method is invoked exactly once — by the new section
     // via useUnifiedLifecycleReadModel — NOT by any existing region
     // hook.

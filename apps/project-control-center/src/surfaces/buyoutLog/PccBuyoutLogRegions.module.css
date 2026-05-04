@@ -1,0 +1,169 @@
+/* Phase 3 / Wave 13 / Prompt 05 — Buyout Log region styles.
+ * Mirrors the Wave 12 Constraints Log module pattern: auto-fit grids,
+ * min-width: 0 to respect bento overflow rules, word-break for long titles. */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.captionLine {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  word-break: break-word;
+}
+
+.captionStrong {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  word-break: break-word;
+}
+
+.boundaryNote {
+  margin: 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+  border-left: 2px solid var(--pcc-color-border-subtle);
+  padding-left: 8px;
+}
+
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--pcc-radius-md);
+  background: var(--pcc-color-surface-muted);
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.statValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--pcc-color-border-subtle);
+  border-radius: var(--pcc-radius-md);
+  background: var(--pcc-color-surface-base);
+  min-width: 0;
+}
+
+.rowSelected {
+  border-color: var(--pcc-color-border-strong, var(--pcc-color-text-primary));
+}
+
+.rowHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  word-break: break-word;
+}
+
+.rowMeta {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  word-break: break-word;
+}
+
+.rowSelect {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.rowSelect:focus-visible {
+  outline: 2px solid var(--pcc-color-focus-ring, currentColor);
+  outline-offset: 2px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.detailField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detailFieldLabel {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.detailFieldValue {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pcc-color-text-primary);
+  word-break: break-word;
+}
+
+.groupHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

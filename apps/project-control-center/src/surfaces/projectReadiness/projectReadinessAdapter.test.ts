@@ -88,14 +88,23 @@ describe('buildPccProjectReadinessViewModel — available envelope', () => {
     expect(wave11!.sourceModuleLabel).toContain('RACI');
   });
 
-  it('marks Wave 12, 13, 14 downstream modules as preview-deferred', () => {
+  it('marks Wave 12 / Wave 14 downstream modules as preview-deferred', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
-    const deferredIds = ['constraints-log', 'buyout-log', 'approvals-checkpoints'] as const;
+    const deferredIds = ['constraints-log', 'approvals-checkpoints'] as const;
     for (const id of deferredIds) {
       const entry = vm.downstreamModules.find((m) => m.sourceModuleId === id);
       expect(entry, `expected ${id} entry`).toBeDefined();
       expect(entry!.waveStatus).toBe('preview-deferred');
     }
+  });
+
+  it('marks Wave 13 (buyout-log) as implemented with the Buyout Control Center status caption', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const entry = vm.downstreamModules.find((m) => m.sourceModuleId === 'buyout-log');
+    expect(entry).toBeDefined();
+    expect(entry!.waveStatus).toBe('implemented');
+    expect(entry!.waveLabel).toBe('Wave 13');
+    expect(entry!.sourceModuleLabel).toBe('Buyout Log');
   });
 
   it('marks Wave 10 (permit-log) as implemented with the Permit & Inspection Control Center label', () => {

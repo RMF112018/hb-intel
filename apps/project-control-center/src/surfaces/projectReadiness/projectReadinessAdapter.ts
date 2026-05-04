@@ -152,8 +152,9 @@ const DOWNSTREAM_MODULE_REGISTRY: Readonly<
   'buyout-log': {
     label: 'Buyout Log',
     waveLabel: 'Wave 13',
-    waveStatus: 'preview-deferred',
-    statusCaption: 'Wave 13 — Buyout Log is deferred. Not implemented in Wave 8.',
+    waveStatus: 'implemented',
+    statusCaption:
+      'Wave 13 — Buyout Log / Buyout Control Center is live as the embedded Project Readiness module.',
   },
   'approvals-checkpoints': {
     label: 'Approvals / Checkpoints',
