@@ -19,5 +19,8 @@
       "Bash(git commit:*)"
     ],
     "deny": []
+  },
+  "env": {
+    "HB_ALLOW_CANONICAL_PLAN_LIBRARY_WRITE": "1"
   }
 }
