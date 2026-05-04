@@ -1,5 +1,29 @@
 # Repo Truth Audit and Remediation Gate
 
+> ## Authority Correction (added by corrective Prompt 13A-A)
+>
+> This file is **historical context only**. It was originally landed in commit
+> `a48d6ef21` under the Wave 99 Procore path before the active execution
+> authority for Wave 13A-13F was correctly identified.
+>
+> **Active execution authority** for Wave 13A-13F:
+> `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/`
+>
+> The corrected, authoritative version of this audit and gate decision lives
+> at the active path:
+> `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/06_WAVE_13A_REPO_TRUTH_AUDIT_AND_REMEDIATION_GATE.md`
+>
+> The substance of the audit is preserved below, but any claim in this file
+> that the Wave 99 scope lock, allowed-paths JSON, or module-remediation
+> contract is **active execution authority** is **superseded**. Those Wave 99
+> artifacts are historical source inputs reconciled into the active package's
+> machine-readable artifacts (`agent_execution_rules.json`,
+> `validation_gates.json`, `procore_data_layer_phase3_roadmap.json`,
+> `wave_13a_13f_execution_matrix.json`, `module_remediation_matrix.json`).
+>
+> Both `wave-99-procore/` and `wave-99-procore/_doc-updates/` are historical
+> context only and non-authoritative.
+
 > Prompt 13A output. Docs and JSON only. No runtime source change.
 >
 > This document captures current repo truth, verifies Wave 13 Buyout Log

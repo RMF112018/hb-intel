@@ -6,6 +6,23 @@
   "generated": "2026-05-04",
   "outputKind": "audit-and-remediation-gate",
   "runtimeAllowed": false,
+  "status": "historical_context_only_non_authoritative",
+  "supersededBy": {
+    "activeAuditDoc": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/06_WAVE_13A_REPO_TRUTH_AUDIT_AND_REMEDIATION_GATE.md",
+    "activeAuditJson": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_repo_truth_audit.json",
+    "activeMatrixJson": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_module_remediation_target_matrix.json",
+    "correctiveCommitSummary": "docs(pcc): align wave 13a procore audit with active authority path"
+  },
+  "authority": {
+    "activeExecutionAuthorityPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/",
+    "activeExecutionAuthorityWave": "wave-13",
+    "priorPlanningContextPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/_doc-updates/",
+    "priorPlanningContextStatus": "historical_context_only_non_authoritative",
+    "additionalHistoricalContextPaths": [
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/"
+    ],
+    "note": "This file's original authority claims targeting wave-99-procore are superseded. The active execution authority for Wave 13A-13F is the wave-13/procore-data-layer-roadmap-update package."
+  },
   "repoTruth": {
     "branch": "main",
     "headSha": "5e677d996080e829194cc820284de2bc12cd34bd",
@@ -130,20 +147,26 @@
     }
   },
   "remediationGate": {
-    "decision": "GO for 13B",
+    "decision": "GO for 13B under the active Wave 13 roadmap-update package",
+    "activeAuthorityForNextPrompts": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/",
     "conditionsMet": [
       "Wave 13 Buyout Log closed at HEAD 5e677d996080e829194cc820284de2bc12cd34bd",
       "Worktree clean",
       "pnpm-lock.yaml MD5 unchanged across Wave 13 implementation chain",
       "System of Record Matrix in place and unchanged",
       "Source-System Integration Contracts in place and unchanged",
-      "HB Central Projects mapping contract in place",
-      "Wave 99 scope lock, allowed-file-touches doc, and allowed-paths JSON in place and ratified",
-      "Module remediation contract in place; expanded target matrix produced alongside"
+      "HB Central Projects mapping contract (now reconciled into active execution-matrix) in place",
+      "Wave 99 docs and contracts retained as historical context only and reconciled into the active Wave 13 roadmap-update artifacts",
+      "Active machine-readable artifacts in place under the active path"
     ],
     "blockers": []
   },
   "outputs": [
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/06_WAVE_13A_REPO_TRUTH_AUDIT_AND_REMEDIATION_GATE.md",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_repo_truth_audit.json",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_module_remediation_target_matrix.json"
+  ],
+  "historicalOutputsAtThisPath": [
     "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/07_Repo_Truth_Audit_And_Remediation_Gate.md",
     "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/repo_truth_audit.json",
     "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/module_remediation_target_matrix.json"

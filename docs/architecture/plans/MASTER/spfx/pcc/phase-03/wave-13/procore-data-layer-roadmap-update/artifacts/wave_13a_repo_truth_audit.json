@@ -1,0 +1,204 @@
+{
+  "auditId": "wave-13a-repo-truth-audit",
+  "promptId": "13A",
+  "promptType": "audit_and_scope_lock",
+  "package": "pcc_procore_data_layer_phase3_wave13_execution_roadmap",
+  "phase": "Phase 3",
+  "generated": "2026-05-04",
+  "outputKind": "audit-and-remediation-gate",
+  "runtimeAllowed": false,
+  "supersedesHistoricalCommit": "a48d6ef21",
+  "supersedesHistoricalOutputs": [
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/07_Repo_Truth_Audit_And_Remediation_Gate.md",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/repo_truth_audit.json",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/module_remediation_target_matrix.json"
+  ],
+  "authority": {
+    "activeExecutionAuthorityPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/",
+    "activeExecutionAuthorityWave": "wave-13",
+    "priorPlanningContextPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/_doc-updates/",
+    "priorPlanningContextStatus": "historical_context_only_non_authoritative",
+    "additionalHistoricalContextPaths": [
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/"
+    ]
+  },
+  "repoTruth": {
+    "branch": "main",
+    "headSha": "c2636b2016a92b8105d9271024fcced6466a0447",
+    "headSubject": "chore(claude): enable canonical plan library write in local env",
+    "worktreeStatus": "clean",
+    "pnpmLockMd5": "c56df7b79986896624536aab74d609f4",
+    "captureCommands": [
+      "git rev-parse --abbrev-ref HEAD",
+      "git rev-parse HEAD",
+      "git status --short",
+      "md5 pnpm-lock.yaml",
+      "git log -1 --pretty='%H %s'"
+    ]
+  },
+  "wave13Status": {
+    "state": "closed",
+    "closeoutDoc": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/Wave_13_Buyout_Log_Implementation_Closeout.md",
+    "closeoutCommitSha": "5e677d996080e829194cc820284de2bc12cd34bd",
+    "implementationChain": [
+      {
+        "promptId": "01",
+        "stage": "implementation-readiness-audit",
+        "sha": null,
+        "subject": "no commit; decisions locked in wave-13/README.md and blueprint reference set"
+      },
+      {
+        "promptId": "02",
+        "stage": "shared-models-fixtures-state-machine-contracts",
+        "sha": "fa5012d2e",
+        "subject": "feat(models-pcc): add wave 13 buyout log contracts"
+      },
+      {
+        "promptId": "03",
+        "stage": "backend-get-only-mock-read-model",
+        "sha": "f7c8abbfb",
+        "subject": "feat(functions-pcc): add buyout log read model route"
+      },
+      {
+        "promptId": "04",
+        "stage": "spfx-read-model-client-seam",
+        "sha": "fc28fa0a3",
+        "subject": "feat(spfx-pcc): add buyout log read model client seam"
+      },
+      {
+        "promptId": "05",
+        "stage": "spfx-buyout-log-project-readiness-surface",
+        "sha": "937cd8d85",
+        "subject": "feat(spfx-pcc): add buyout log project readiness surface"
+      },
+      {
+        "promptId": "06",
+        "stage": "unified-lifecycle-integration-seams",
+        "sha": "0286c7d97",
+        "subject": "feat(spfx-pcc): wire buyout log lifecycle integration seams"
+      },
+      {
+        "promptId": "07",
+        "stage": "tests-guardrails-and-implementation-closeout",
+        "sha": "5e677d996",
+        "subject": "docs(pcc): close wave 13 buyout log implementation"
+      }
+    ],
+    "lockfileMd5UnchangedAcrossWave": true,
+    "procorePosture": "imported-lineage / reference-only",
+    "alignedWithActiveDoctrine": true
+  },
+  "activeAuthorityArtifacts": {
+    "manifest": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/manifest.json",
+    "phase3Roadmap": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/procore_data_layer_phase3_roadmap.json",
+    "executionMatrix": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_13f_execution_matrix.json",
+    "moduleRemediationMatrix": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/module_remediation_matrix.json",
+    "agentExecutionRules": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/agent_execution_rules.json",
+    "validationGates": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/validation_gates.json",
+    "documentationUpdateTargets": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/documentation_update_targets.json",
+    "priorBaselineDocs": [
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/01_REPO_TRUTH_AUDIT_FINDINGS.md",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/02_MACHINE_READABLE_ARTIFACT_AUTHORITY_NOTE.md",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/05_VALIDATION_CLOSEOUT.md"
+    ],
+    "priorRoadmapUpdateChain": [
+      { "promptId": "01", "sha": "fde17c719", "subject": "Wave 13 baseline repo-truth audit note" },
+      {
+        "promptId": "02",
+        "sha": "1d9379b64",
+        "subject": "Wave 13 machine-readable artifact intake + authority reconciliation"
+      },
+      {
+        "promptId": "03",
+        "sha": "7ba78d27b",
+        "subject": "Governing-doc authority/overlay bridge inserts"
+      },
+      {
+        "promptId": "04",
+        "sha": "1b1ecc3df",
+        "subject": "Wave 8/10/11/12/13 cross-reference guardrail inserts"
+      },
+      { "promptId": "05", "sha": "af85b6870", "subject": "Documentation closeout validation" }
+    ]
+  },
+  "historicalSourceInputs": {
+    "status": "historical_context_only_non_authoritative",
+    "reconciliation": [
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/02_Scope_Lock_And_Guardrails.md",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/agent_execution_rules.json",
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/procore_data_layer_phase3_roadmap.json"
+        ]
+      },
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/docs/04_Allowed_File_Touches_By_Prompt.md",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_13f_execution_matrix.json",
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/agent_execution_rules.json"
+        ]
+      },
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/allowed_paths.json",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_13f_execution_matrix.json",
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/agent_execution_rules.json"
+        ]
+      },
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/module_remediation_contract.json",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/module_remediation_matrix.json"
+        ]
+      },
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/hbcentral_projects_mapping_contract.json",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_13f_execution_matrix.json"
+        ]
+      },
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/artifacts/manifest.json",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/manifest.json"
+        ]
+      },
+      {
+        "input": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-99-procore/_doc-updates/",
+        "reconciledInto": [
+          "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/"
+        ]
+      }
+    ]
+  },
+  "scopeLockRatification": {
+    "ratifiedAt": "2026-05-04",
+    "ratifiedAtHeadSha": "c2636b2016a92b8105d9271024fcced6466a0447",
+    "edited": false,
+    "ratifiedSources": [
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/agent_execution_rules.json",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/validation_gates.json",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/procore_data_layer_phase3_roadmap.json",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_13f_execution_matrix.json"
+    ],
+    "permittedTouches13A": ["docs and JSON artifacts only, under the active package path"]
+  },
+  "remediationGate": {
+    "decision": "GO for 13B under the active Wave 13 roadmap-update package",
+    "activeAuthorityForNextPrompts": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/",
+    "conditionsMet": [
+      "Wave 13 Buyout Log closed",
+      "Worktree clean at audit start",
+      "pnpm-lock.yaml MD5 unchanged across Wave 13 implementation and roadmap-update chains",
+      "Active manifest, roadmap, execution matrix, module remediation matrix, agent execution rules, validation gates, and documentation update targets all in place",
+      "Authority block declared in every active-path JSON",
+      "Wave 99 materials reconciled into active artifacts and recorded as historical context only"
+    ],
+    "blockers": []
+  },
+  "outputs": [
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/docs/06_WAVE_13A_REPO_TRUTH_AUDIT_AND_REMEDIATION_GATE.md",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_repo_truth_audit.json",
+    "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/wave_13a_module_remediation_target_matrix.json"
+  ]
+}
