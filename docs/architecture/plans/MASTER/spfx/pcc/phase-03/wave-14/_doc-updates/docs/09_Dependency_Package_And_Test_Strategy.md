@@ -108,3 +108,22 @@ git diff --check
 ```
 
 Documentation-only prompts must not require runtime test suites if no runtime files are touched, but must include expected future validation gates.
+
+## Prompt 06 Dependency Posture Alignment Addendum (2026-05-04)
+
+Dependency posture lock for Phase 14 remains documentation-only and non-mutating:
+
+- Fluent UI, Testing Library, Playwright, and Vitest are existing posture entries and remain implementation-gated by module scope.
+- TanStack Table and TanStack Virtual remain adopt-when-gated candidates.
+- PnP, AJV, Zod, and XState remain deferred/adopt-when-gated by explicit dependency decision.
+
+Prompt 06 guardrails:
+
+- No package installation.
+- No package.json or pnpm-lock.yaml mutation.
+- No runtime adoption claims outside approved implementation gates.
+
+Validation/test gate lock:
+
+- Required test categories remain model/contract, state-machine, routing, permission/redaction, integration, UX/accessibility, and guardrail test families.
+- Documentation prompts must validate JSON, Prettier for touched files, `git diff --check`, and lockfile checksum stability.

@@ -2,45 +2,64 @@
 
 ## Purpose
 
-Define acceptance gates for Wave 14 architecture/contract completeness and no-runtime guardrail compliance.
+Define implementation acceptance contracts for Phase 14 documentation coverage and future-gated runtime readiness posture.
 
-## Contract Coverage Gates
+## Dependency Posture Gate
 
-1. Canonical states and terminal/non-terminal posture documented.
-2. Transition table documented with actor classes and required controls.
-3. Approval modes documented with completion semantics.
-4. Decision-action catalog and reason-code families documented.
-5. Reviewer vs approver vs admin-verification distinctions documented.
-6. HBI no-authority documented.
-7. Ball-in-court/current-action-owner model documented.
-8. Stale-source and supersession rules documented.
-9. Policy versioning documented.
-10. Evidence requirements and command validation layers documented.
+Dependency posture (documentation only, no install/mutation authorized):
 
-## Consistency Gates
+- `@fluentui/react-components`: existing usage where aligned with UI-kit doctrine.
+- `@tanstack/react-table`: adopt-when-gated for queue sorting/filtering.
+- `@tanstack/react-virtual`: adopt-when-gated if queue scale requires virtualization.
+- `@pnp/sp`: defer for MVP direct mutation paths.
+- `@pnp/queryable`: evaluate only behind approved SharePoint data boundary.
+- `ajv`: adopt-when-gated for schema/command validation.
+- `zod`: defer unless standardized by repo-level decision.
+- `xstate`: defer unless runtime statechart complexity justifies.
+- `@testing-library/react`: existing interaction/accessibility test support.
+- `@playwright/test`: existing keyboard/responsive/e2e test support.
+- `vitest`: existing model/state/contract test support.
 
-- Wave 14 source-module integration contract aligns with ownership boundaries.
-- Wave 14 Wave13G checkpoint contract preserves authority split.
-- HBI guardrail doc and storage/read-model posture docs do not contradict no-runtime/no-writeback policy.
+## Security/Redaction Gate
 
-## Validation Gates
+- inherited storage + backend read-model filtering/redaction is documented;
+- no default item-level unique permission strategy;
+- business audit and security/compliance audit split documented;
+- append-only audit event posture documented;
+- HBI no-authority/refusal behavior documented;
+- external writeback guard documented.
 
-- JSON artifacts parse with `python3 -m json.tool`.
-- Touched markdown/json pass Prettier check.
-- `pnpm-lock.yaml` MD5 remains unchanged.
-- `git diff --check` returns clean.
-- Consistency scan for contradictory markers is reviewed.
+## Test Category Gate
+
+Required test categories for future implementation:
+
+- model/contract tests;
+- state-machine transition tests (valid + invalid + stale/superseded paths);
+- routing-mode tests (single, sequential, parallel-all, parallel-any, advisory, acknowledgement, escalation, admin verification);
+- permission/redaction tests;
+- source-module integration tests;
+- UX/accessibility behavior tests;
+- guardrail tests (no writeback, no runtime mutation, no HBI decision execution).
+
+## Validation Command Gate
+
+Documentation validation commands:
+
+- `python3 -m json.tool <json-file>`
+- `pnpm exec prettier --check <touched-markdown-json-files>`
+- `git diff --check`
+- `md5 pnpm-lock.yaml`
+
+Future runtime-gated validation commands are documented in planning strategy and are not executed by this docs-only prompt.
+
+## Guardrail Gate
+
+- no package/dependency installation;
+- no package/lockfile mutation;
+- no tenant/list/group/security mutation;
+- no Procore/Sage/Power Automate writeback;
+- no production rollout authorization.
 
 ## Failure Conditions
 
-Fail Prompt 03 closeout when any of the following occur:
-
-- missing required architecture coverage;
-- contradictory authority boundaries;
-- runtime implementation claims;
-- writeback authorization claims;
-- tenant mutation authorization claims.
-
-## Prompt 03 Scope Lock
-
-Prompt 03 defines architecture and implementation contracts only. It does not create or modify TypeScript runtime models, backend routes, command handlers, SPFx components, SharePoint lists, package files, lockfiles, tenant resources, Procore/Sage/Power Automate integrations, deployment artifacts, or production rollout posture.
+Fail acceptance if contracts introduce runtime implementation claims, contradict no-writeback/no-mutation posture, omit required dependency posture/test categories, or weaken HBI/refusal/security guardrails.
