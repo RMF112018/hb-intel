@@ -119,6 +119,7 @@ The local agent must evaluate and amend the following target docs where applicab
 - `prompts/Prompt_05_Read_Model_SPFX_UX_Wireframes.md`
 - `prompts/Prompt_06_Security_HBI_Dependencies_Test_Gates.md`
 - `prompts/Prompt_07_Closeout_And_Auditor_Prompt.md`
+- `prompts/Prompt_07_Fresh_Session_Auditor_Wave14.md`
 - `reference/Architecture_Delta_Summary.md`
 - `reference/Generation_Validation_Report.json`
 - `reference/Prompt_01_Repo_Truth_And_Scope_Lock_Closeout.md`
@@ -127,6 +128,7 @@ The local agent must evaluate and amend the following target docs where applicab
 - `reference/Prompt_04_Module_Integration_And_Wave13G_Alignment_Closeout.md`
 - `reference/Prompt_05_Read_Model_SPFX_UX_Wireframes_Closeout.md`
 - `reference/Prompt_06_Security_HBI_Dependencies_Test_Gates_Closeout.md`
+- `reference/Prompt_07_Closeout_And_Auditor_Package_Closeout.md`
 - `reference/Repo_Truth_Findings_To_Verify.md`
 - `reference/Research_Basis.md`
 - `reference/Source_Inputs_Summary.md`
