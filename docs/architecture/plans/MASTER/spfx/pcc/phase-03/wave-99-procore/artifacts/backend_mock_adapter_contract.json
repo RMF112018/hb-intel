@@ -1,0 +1,22 @@
+{
+  "interfaces": [
+    "IPccProcoreDataLayerProvider",
+    "IPccProcoreProjectMappingProvider",
+    "IPccProcoreSyncHealthProvider",
+    "IPccProcoreSignalProvider"
+  ],
+  "routes": [
+    "pcc/projects/{projectId}/procore-data-layer",
+    "pcc/projects/{projectId}/procore-sync-health",
+    "pcc/projects/{projectId}/procore-signals"
+  ],
+  "routePolicy": "GET-only, mock-provider-backed, no external runtime",
+  "forbidden": [
+    "fetch to Procore",
+    "axios",
+    "Procore SDK",
+    "POST/PUT/PATCH/DELETE",
+    "secrets",
+    "timers/queues unless inert docs-only"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "sourceList": "HB Central Projects",
+  "schemaReference": "docs/reference/sharepoint/list-schemas/hbcentral/** and uploaded Projects schema",
+  "currentJoinFields": {
+    "pccProjectId": "ProjectId / field_1",
+    "projectNumber": "ProjectNumber / field_2",
+    "projectName": "ProjectName / field_3",
+    "siteUrl": "SiteUrl / field_23",
+    "legacyProcoreHint": "procoreProject",
+    "projectManagerUpn": "projectManagerUpn",
+    "projectExecutiveUpn": "projectExecutiveUpn",
+    "projectStage": "ProjectStage / field_6"
+  },
+  "decision": "Do not overload Projects.procoreProject. Create/maintain a normalized Procore project mapping contract and use Projects as the registry context."
+}

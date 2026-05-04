@@ -1,0 +1,16 @@
+{
+  "packageId": "pcc_procore_data_layer_wave13a_13f_remediation_implementation_package",
+  "generated": "2026-05-04",
+  "type": "implementation_prompt_package",
+  "phase": "Phase 3",
+  "currentWave": "Wave 13",
+  "runtimeAllowed": false,
+  "promptSequence": [
+    "13A",
+    "13B",
+    "13C",
+    "13D",
+    "13E",
+    "13F"
+  ]
+}

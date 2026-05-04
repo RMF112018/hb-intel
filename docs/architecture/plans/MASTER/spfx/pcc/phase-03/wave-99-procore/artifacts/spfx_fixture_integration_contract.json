@@ -1,0 +1,35 @@
+{
+  "surfaces": {
+    "project-home": [
+      "mapping status",
+      "sync health",
+      "operational signals",
+      "freshness warning"
+    ],
+    "priority-actions": [
+      "Procore-derived action candidates"
+    ],
+    "project-readiness": [
+      "readiness impacts and source confidence"
+    ],
+    "external-systems": [
+      "Procore configuration and launch/status posture"
+    ],
+    "site-health": [
+      "Procore integration health and repair request posture"
+    ],
+    "team-and-access": [
+      "directory comparison posture"
+    ],
+    "documents": [
+      "object-link/evidence-link posture"
+    ]
+  },
+  "forbidden": [
+    "live URL launch required for MVP",
+    "mutation buttons",
+    "enabled write actions",
+    "file uploads/downloads",
+    "direct Procore fetch"
+  ]
+}

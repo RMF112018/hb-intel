@@ -1,0 +1,25 @@
+{
+  "13A": [
+    "docs/architecture/**"
+  ],
+  "13B": [
+    "packages/models/src/pcc/**",
+    "docs/architecture/**"
+  ],
+  "13C": [
+    "packages/models/src/pcc/**"
+  ],
+  "13D": [
+    "backend/functions/src/hosts/pcc-read-model/**"
+  ],
+  "13E": [
+    "apps/project-control-center/src/api/**",
+    "apps/project-control-center/src/surfaces/**",
+    "apps/project-control-center/src/tests/**"
+  ],
+  "13F": [
+    "docs/architecture/**",
+    "apps/project-control-center/src/tests/**",
+    "apps/project-control-center/src/surfaces/**"
+  ]
+}

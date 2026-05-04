@@ -1,0 +1,86 @@
+[
+  {
+    "moduleOrWave": "Waves 1-3 Foundations",
+    "remediation": [
+      "Add Procore-aware source-lineage and degraded-state vocabulary where read models can later consume Procore-derived signals.",
+      "Add envelope/sourceStatus handling for mapping-missing, permission-denied, tool-disabled, stale, rate-limited, endpoint-deprecated, object-inaccessible.",
+      "Do not introduce live Procore runtime."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 4 Project Home",
+    "remediation": [
+      "Add fixture-backed Procore mapping status and sync-health cards.",
+      "Add operational-signal card for open/overdue RFIs, submittals, observations, punch, daily-log completeness, and drawing/spec currency.",
+      "Add source-of-record and freshness labels."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 5 Priority Actions",
+    "remediation": [
+      "Add Procore-derived priority action candidates with source-lineage and auto-close/stale behavior.",
+      "Maintain no source mutation; Procore object remains Procore-owned while PCC action is derived."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 6 Team & Access",
+    "remediation": [
+      "Add read-only Procore Directory Comparison posture.",
+      "No auto-granting SharePoint access from Procore directory data.",
+      "Add mismatch categories: in Procore not PCC, in PCC not Procore, inactive, company/role mismatch."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 7 Document Control",
+    "remediation": [
+      "Represent Procore documents/drawings/specs/photos as metadata/object links/evidence only.",
+      "No recursive file mirror, no binary replication, no SharePoint copy of Procore file tree.",
+      "Add document-currency signal contract."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 8 Project Readiness Framework",
+    "remediation": [
+      "Add Procore-derived readiness impacts: unresolved RFI, overdue submittal, open observation, open punch, missing daily log, stale drawing/spec, unmapped Procore project.",
+      "Stale Procore data cannot silently support green readiness posture."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 9 Lifecycle Readiness",
+    "remediation": [
+      "Bind startup/safety/closeout readiness to Procore supporting context through fixtures only.",
+      "Add source-confidence scoring based on mapping/sync health/freshness."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 10 Permit & Inspection",
+    "remediation": [
+      "Add Procore object-link evidence for drawings/specs/photos/daily logs/observations/RFIs/Procore inspections.",
+      "Preserve PCC ownership of Permit Log and Required Inspection Log unless the specific inspection object is generated in Procore."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 11 Responsibility Matrix",
+    "remediation": [
+      "Compare PCC planned responsibility against Procore actual workflow ownership.",
+      "Do not allow Procore assignments to overwrite PCC responsibility matrix records."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 12 Constraints Log",
+    "remediation": [
+      "Add Procore-derived constraint/risk/exposure candidate examples.",
+      "Human acceptance required before a Procore-derived candidate becomes a PCC-owned constraint.",
+      "Preserve legal/claim/delay boundary."
+    ]
+  },
+  {
+    "moduleOrWave": "Wave 13 Buyout Log",
+    "remediation": [
+      "Use Procore commitments/change events/submittals/vendors only as object links, curated summaries, reconciliation evidence, or derived signals.",
+      "No Procore commitment/PO/subcontract/SOV/CCO/invoice/payment write-back.",
+      "No Sage posting or accounting truth derived from Procore.",
+      "Patch existing Wave 13 contracts/tests if current repo truth lacks the common Procore data-layer contract references."
+    ]
+  }
+]

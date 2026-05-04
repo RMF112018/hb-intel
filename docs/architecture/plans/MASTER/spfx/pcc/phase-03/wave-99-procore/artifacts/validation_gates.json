@@ -1,0 +1,23 @@
+{
+  "requiredCommands": [
+    "git status --short",
+    "md5 pnpm-lock.yaml",
+    "pnpm --filter @hbc/models check-types",
+    "pnpm --filter @hbc/models test",
+    "pnpm --filter @hbc/functions check-types",
+    "pnpm --filter @hbc/functions test",
+    "pnpm --filter @hbc/spfx-project-control-center check-types",
+    "pnpm --filter @hbc/spfx-project-control-center test",
+    "pnpm --filter @hbc/spfx-project-control-center build",
+    "pnpm exec prettier --check <touched-docs-and-json>"
+  ],
+  "lockfileExpected": "unchanged unless a prompt explicitly authorizes package/dependency changes",
+  "hardStops": [
+    "Any Procore SDK dependency added without explicit authorization.",
+    "Any live Procore network call in SPFx.",
+    "Any Procore write-back method, route, or UI action.",
+    "Any secret-like token/client ID/client secret in docs, schema, fixtures, source, or test snapshots.",
+    "Any binary mirror/file replication behavior.",
+    "Any broad financial accounting-truth assertion from Procore data."
+  ]
+}

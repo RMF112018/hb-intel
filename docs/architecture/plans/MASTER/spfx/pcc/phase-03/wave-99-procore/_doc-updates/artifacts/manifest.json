@@ -1,0 +1,15 @@
+{
+  "packageId": "pcc_procore_data_layer_documentation_roadmap_update_package",
+  "generated": "2026-05-04",
+  "type": "documentation_prompt_package",
+  "phase": "Phase 3",
+  "currentWave": "Wave 13",
+  "primaryObjective": "Update documentation prompt package with machine-readable Procore data-layer implementation roadmap.",
+  "runtimeAllowed": false,
+  "expectedTopLevelFolders": [
+    "docs",
+    "artifacts",
+    "prompts",
+    "reference"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "types": [
+    "PccProcoreProjectMapping",
+    "PccProcoreSubjectAreaRegistry",
+    "PccProcoreSyncHealth",
+    "PccProcoreObjectLink",
+    "PccProcoreCuratedSummary",
+    "PccProcoreDerivedSignal",
+    "PccProcoreFreshnessBand",
+    "PccProcoreSourceLineage"
+  ],
+  "utilities": [
+    "deriveProcoreFreshnessBand",
+    "isProcoreSignalActionable",
+    "buildProcoreObjectLinkDedupeKey",
+    "mapProcoreSourceStatusToPccPreviewState",
+    "redactProcoreSyncErrorMessage"
+  ],
+  "tests": [
+    "fixtures deterministic",
+    "no real secrets/UPNs/live URLs",
+    "no runtime imports",
+    "writebackAllowed false for MVP",
+    "source-of-record owner preserved"
+  ]
+}

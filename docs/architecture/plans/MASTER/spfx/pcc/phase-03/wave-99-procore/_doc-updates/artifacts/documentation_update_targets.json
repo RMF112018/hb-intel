@@ -1,0 +1,19 @@
+{
+  "primaryTargets": [
+    "docs/architecture/blueprint/sp-project-control-center/phase-3/05_Phase_3_Development_Roadmap_Updated.md",
+    "docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md",
+    "docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md",
+    "docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md"
+  ],
+  "secondaryTargets": [
+    "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-8/**",
+    "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-10/**",
+    "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-11/**",
+    "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-12/**",
+    "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-13/**",
+    "docs/architecture/blueprint/sp-project-control-center/unified-lifecycle-developer-contracts/**",
+    "packages/project-site-template/schemas/families/integrations.schema.json",
+    "packages/project-site-template/fields/families/integrations.fields.json"
+  ],
+  "newSuggestedPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/procore-data-layer/"
+}
