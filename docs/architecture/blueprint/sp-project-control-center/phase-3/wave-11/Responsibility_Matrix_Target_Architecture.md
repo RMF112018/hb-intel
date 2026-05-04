@@ -336,3 +336,27 @@ No runtime delivery is claimed by this document.
 ## Prompt Sequencing Note
 
 `Wave_11_Documentation_Closeout.md` is intentionally deferred to Prompt 05 so closeout reflects the complete Wave 11 documentation package.
+
+## Cross-Reference: Procore Data-Layer Overlay Authority
+
+Active machine-readable authority path:
+`docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-13/procore-data-layer-roadmap-update/artifacts/`
+
+Interpretation bridge:
+
+- Apply this wave document with the Prompt 03 governing-doc bridge in:
+  - `docs/architecture/blueprint/sp-project-control-center/phase-3/05_Phase_3_Development_Roadmap_Updated.md`
+  - `docs/architecture/blueprint/sp-project-control-center/System_of_Record_Matrix.md`
+  - `docs/architecture/blueprint/sp-project-control-center/HB_Project_Control_Center_Target_Architecture_Blueprint.md`
+  - `docs/architecture/blueprint/sp-project-control-center/Standard_Project_Site_Template_Contract.md`
+
+Distinction lock:
+
+- Wave 13 Buyout Log remains the active module wave.
+- Wave 13A-13F is a cross-cutting Procore data-layer overlay.
+- `wave-99-procore/_doc-updates` is prior planning context only.
+
+Runtime guardrail lock:
+
+- This cross-reference does not authorize Procore runtime, Procore sync, Procore write-back, Procore SDK adoption, or Procore file mirroring.
+- Live Procore read behavior remains gated until 13A-13F completion and a separate approved live-read proof gate.
