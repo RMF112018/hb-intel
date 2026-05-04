@@ -24,6 +24,7 @@ import {
   type PccPermitInspectionControlCenterReadModel,
   type PccResponsibilityMatrixReadModel,
   type PccConstraintsLogReadModel,
+  type PccBuyoutLogReadModel,
   type PccUnifiedLifecycleReadModel,
   type PccProjectMemoryReadModel,
   type PccProjectLensesReadModel,
@@ -39,6 +40,7 @@ import {
 import { PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE } from './fixtures/permitInspectionControlCenter.js';
 import { SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL } from './fixtures/responsibilityMatrix.js';
 import { SAMPLE_CONSTRAINTS_LOG_READ_MODEL } from './fixtures/constraintsLog.js';
+import { SAMPLE_BUYOUT_LOG_READ_MODEL } from './fixtures/buyoutLog.js';
 import {
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
@@ -335,6 +337,14 @@ describe('PccReadModels exports and typing', () => {
       data: SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
     };
 
+    const buyoutLogEnvelope: PccReadModelEnvelope<PccBuyoutLogReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_BUYOUT_LOG_READ_MODEL,
+    };
+
     const unifiedLifecycleEnvelope: PccReadModelEnvelope<PccUnifiedLifecycleReadModel> = {
       mode: 'fixture',
       sourceStatus: 'available',
@@ -406,6 +416,7 @@ describe('PccReadModels exports and typing', () => {
       'permit-inspection-control-center': permitInspectionControlCenterEnvelope,
       'responsibility-matrix': responsibilityMatrixEnvelope,
       'constraints-log': constraintsLogEnvelope,
+      'buyout-log': buyoutLogEnvelope,
       'unified-lifecycle': unifiedLifecycleEnvelope,
       'project-memory': projectMemoryEnvelope,
       'project-lenses': projectLensesEnvelope,

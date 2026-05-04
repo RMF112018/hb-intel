@@ -26,6 +26,18 @@ const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'assertResidualReductionAllowed',
   'isRiskTransitionAllowed',
   'isConstraintTransitionAllowed',
+  // Wave 13 Prompt 02 — pure transition / completion-gate / waiver /
+  // reconciliation / lineage / HBI / dedupe-key helpers for the Buyout
+  // Log model. All functions are deterministic, side-effect-free, and
+  // read-only-by-design.
+  'isBuyoutPackageTransitionAllowed',
+  'assertBuyoutPackageTransition',
+  'evaluateBuyoutCompletionGate',
+  'validateBuyoutWaiver',
+  'reconcileBuyoutAmounts',
+  'requireBuyoutSourceLineage',
+  'isBuyoutHbiEligible',
+  'buyoutPriorityActionDedupeKey',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
