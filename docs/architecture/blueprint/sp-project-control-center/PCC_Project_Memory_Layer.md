@@ -122,3 +122,24 @@ HBI may summarize memory records only when lineage is available and permissions 
 - Security class: Permission and policy constrained.
 - Phase timing: Later-phase runtime.
 - Relationship to current PCC models: Extends existing evidence-link posture without ownership reassignment.
+
+## Phase 14 Authority Addendum (2026-05-04)
+
+Wave 14 authority path is `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-14/`.
+
+Phase 14 / Wave 14 is the PCC-native approval/checkpoint control layer and owns checkpoint queue semantics, route-step semantics, decision semantics, audit-event semantics, and decision-history semantics.
+
+Boundary lock:
+
+- Source modules retain ownership of underlying workflow records.
+- Procore retains ownership of Procore-native records.
+- Sage remains accounting book-of-record owner.
+- SharePoint/Document Control remain file/document storage owners where applicable.
+- HBI has citation/summarization rights only and no decision authority.
+- Power Automate remains reference-only for MVP posture.
+- No external writeback and no tenant/list/group/security mutation are authorized by this addendum.
+
+Wave relationship lock:
+
+- Wave 13G remains Estimating Workbench feature authority.
+- Phase 14 governs estimating-related checkpoint queue/routing/decision/audit semantics.
