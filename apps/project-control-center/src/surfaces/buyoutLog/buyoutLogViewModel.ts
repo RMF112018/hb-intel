@@ -103,6 +103,70 @@ export interface IPccBlEvidenceClassificationCount {
 }
 
 // ---------------------------------------------------------------------------
+// Cross-surface integration seams (Wave 13 / Prompt 06).
+//
+// Reference-only display vocabulary mirrors the Wave 12 Constraints Log
+// pattern. None of these markers introduce a runtime call, writeback,
+// approval execution, evidence binary upload, or sibling-surface
+// integration; they declare posture only.
+// ---------------------------------------------------------------------------
+
+export const PCC_BL_SEAM_KINDS = [
+  'priority-actions-candidate',
+  'document-control-evidence',
+  'lifecycle-readiness-gate',
+  'responsibility-role',
+  'approval-checkpoint',
+  'external-system-launcher',
+  'project-memory-contribution',
+  'traceability-edge',
+  'project-readiness-source-module',
+] as const;
+export type PccBlSeamKind = (typeof PCC_BL_SEAM_KINDS)[number];
+
+export interface IPccBlReferenceSeamRow {
+  readonly seamKind: PccBlSeamKind;
+  readonly label: string;
+  readonly reference: string;
+  readonly referenceOnlyLabel: string;
+}
+
+export const PCC_BL_INTEGRATION_TARGET_IDS = [
+  'project-readiness',
+  'priority-actions',
+  'lifecycle-readiness',
+  'permit-inspection',
+  'responsibility-matrix',
+  'constraints-log',
+  'approvals-checkpoints',
+  'document-control',
+  'external-systems',
+  'project-memory',
+  'traceability',
+] as const;
+export type PccBlIntegrationTargetId = (typeof PCC_BL_INTEGRATION_TARGET_IDS)[number];
+
+export interface IPccBlIntegrationPostureRow {
+  readonly targetId: PccBlIntegrationTargetId;
+  readonly targetLabel: string;
+  readonly postureCaption: string;
+}
+
+export const PCC_BL_BOUNDARY_KEYS = [
+  'no-procore-runtime',
+  'no-sage-accounting',
+  'no-evidence-binary',
+  'no-approval-execution',
+  'no-legal-determination',
+] as const;
+export type PccBlBoundaryKey = (typeof PCC_BL_BOUNDARY_KEYS)[number];
+
+export interface IPccBlBoundaryNotice {
+  readonly key: PccBlBoundaryKey;
+  readonly caption: string;
+}
+
+// ---------------------------------------------------------------------------
 // Region 1 — Buyout Command Center
 // ---------------------------------------------------------------------------
 
@@ -133,6 +197,8 @@ export interface IPccBlCommandCenterViewModel {
   readonly sourcePosture: IPccBlSourcePostureViewModel;
   readonly latestSnapshotDisplay?: string;
   readonly boundaryCaption: string;
+  readonly boundaryNotices: readonly IPccBlBoundaryNotice[];
+  readonly integrationPosture: readonly IPccBlIntegrationPostureRow[];
 }
 
 // ---------------------------------------------------------------------------
@@ -341,6 +407,7 @@ export interface IPccBlPackageDetailEntry {
   readonly auditTrail: readonly IPccBlPackageAuditDetail[];
   readonly priorityActionCandidates: readonly IPccBlPackagePriorityActionDetail[];
   readonly hbiEligibilityNotice: IPccBlHbiEligibilityNotice;
+  readonly referenceSeams: readonly IPccBlReferenceSeamRow[];
   readonly boundaryCaption: string;
 }
 

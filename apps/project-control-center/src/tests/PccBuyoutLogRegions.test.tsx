@@ -16,6 +16,8 @@ import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccBuyoutLogRegions } from '../surfaces/buyoutLog/PccBuyoutLogRegions';
 import { buildPccBuyoutLogViewModel } from '../surfaces/buyoutLog/buyoutLogAdapter';
 import {
+  PCC_BL_BOUNDARY_KEYS,
+  PCC_BL_INTEGRATION_TARGET_IDS,
   PCC_BL_REGION_IDS,
   type IPccBuyoutLogReadModelClient,
   type IPccBuyoutLogViewModel,
@@ -455,4 +457,142 @@ describe('Wave 13 Buyout Log — no forbidden runtime imports', () => {
       expect(offender, `${file} should not import ${offender ?? '<none>'}`).toBeUndefined();
     });
   }
+});
+
+// ---------------------------------------------------------------------------
+// Wave 13 / Prompt 06 — boundary notices, integration posture, reference seams
+// ---------------------------------------------------------------------------
+
+describe('Wave 13 Buyout Log — boundary notices in command center', () => {
+  it('renders one boundary-notice marker per canonical key inside the command-center region', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = blRegion(container, 'command-center');
+    expect(region).not.toBeNull();
+    for (const key of PCC_BL_BOUNDARY_KEYS) {
+      const notice = region!.querySelector(`[data-pcc-bl-boundary-notice="${key}"]`);
+      expect(notice, `missing boundary notice ${key}`).not.toBeNull();
+      const text = (notice!.textContent ?? '').toLowerCase();
+      expect(
+        text.includes('not enabled here') ||
+          text.includes('reference only') ||
+          text.includes('imported lineage only'),
+      ).toBe(true);
+    }
+  });
+
+  it('boundary notices live within the command-center boundary-notices list and are inert', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = container.querySelector(
+      '[data-pcc-bl-region-list="command-center-boundary-notices"]',
+    );
+    expect(region).not.toBeNull();
+    expect(region!.querySelectorAll('[data-pcc-bl-boundary-notice]').length).toBe(
+      PCC_BL_BOUNDARY_KEYS.length,
+    );
+    expect(region!.querySelector('a[href]')).toBeNull();
+    expect(region!.querySelector('button')).toBeNull();
+    expect(region!.querySelector('input')).toBeNull();
+    expect(region!.querySelector('form')).toBeNull();
+  });
+});
+
+describe('Wave 13 Buyout Log — integration posture in command center', () => {
+  it('renders one integration-posture marker per canonical target id in the command-center region', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = blRegion(container, 'command-center');
+    expect(region).not.toBeNull();
+    for (const targetId of PCC_BL_INTEGRATION_TARGET_IDS) {
+      const row = region!.querySelector(`[data-pcc-bl-integration-posture="${targetId}"]`);
+      expect(row, `missing integration posture row ${targetId}`).not.toBeNull();
+      expect(row!.textContent?.toLowerCase()).toContain('reference only');
+    }
+  });
+
+  it('integration-posture rows are inert (no anchors, no buttons, no inputs, no forms)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const region = container.querySelector(
+      '[data-pcc-bl-region-list="command-center-integration-posture"]',
+    );
+    expect(region).not.toBeNull();
+    expect(region!.querySelector('a[href]')).toBeNull();
+    expect(region!.querySelector('button')).toBeNull();
+    expect(region!.querySelector('input')).toBeNull();
+    expect(region!.querySelector('form')).toBeNull();
+  });
+});
+
+describe('Wave 13 Buyout Log — per-seam reference-only labels in package detail', () => {
+  // Map each fixture-populated seam kind to a package id whose detail entry
+  // surfaces that kind. The seam kinds and packages are taken directly from
+  // SAMPLE_BUYOUT_LOG_READ_MODEL fixtures (Prompt 02 / Prompt 05 carry-forward).
+  const KIND_TO_PACKAGE_ID: ReadonlyArray<readonly [string, string]> = [
+    ['document-control-evidence', 'pkg-w13-ready-001'],
+    ['lifecycle-readiness-gate', 'pkg-w13-ready-001'],
+    ['responsibility-role', 'pkg-w13-ready-001'],
+    ['priority-actions-candidate', 'pkg-w13-blocked-002'],
+    ['project-readiness-source-module', 'pkg-w13-ready-001'],
+  ];
+
+  it('each fixture-populated seam kind renders a data-pcc-bl-detail-seam-kind marker with a reference-only label', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    for (const [kind, pkgId] of KIND_TO_PACKAGE_ID) {
+      const selectButton = container.querySelector(`[data-pcc-bl-package-select="${pkgId}"]`);
+      expect(selectButton, `missing package row for ${pkgId}`).not.toBeNull();
+      fireEvent.click(selectButton!);
+
+      const detailRegion = blRegion(container, 'package-detail');
+      expect(detailRegion, `missing package-detail region after selecting ${pkgId}`).not.toBeNull();
+
+      const seamRow = detailRegion!.querySelector(`[data-pcc-bl-detail-seam-kind="${kind}"]`);
+      expect(seamRow, `missing seam kind ${kind} on detail entry ${pkgId}`).not.toBeNull();
+
+      const refOnlyLabel = seamRow!.querySelector(
+        `[data-pcc-bl-detail-seam-reference-only="${kind}"]`,
+      );
+      expect(refOnlyLabel, `missing reference-only label for ${kind}`).not.toBeNull();
+      const text = (refOnlyLabel!.textContent ?? '').toLowerCase();
+      expect(text.includes('reference only') || text.includes('not enabled here')).toBe(true);
+    }
+  });
+
+  it('every package surfaces the project-readiness-source-module seam declaring "buyout-log"', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    // Each package row click resolves the detail panel; the source-module
+    // seam must always render with reference value "buyout-log".
+    const packageRows = container.querySelectorAll('[data-pcc-bl-package-select]');
+    expect(packageRows.length).toBeGreaterThan(0);
+    for (const btn of Array.from(packageRows)) {
+      fireEvent.click(btn);
+      const detailRegion = blRegion(container, 'package-detail');
+      expect(detailRegion).not.toBeNull();
+      const seamRow = detailRegion!.querySelector(
+        '[data-pcc-bl-detail-seam-kind="project-readiness-source-module"]',
+      );
+      expect(seamRow).not.toBeNull();
+      expect(seamRow!.getAttribute('data-pcc-bl-detail-seam')).toBe('buyout-log');
+    }
+  });
+
+  it('reference-seams subsection is inert (no anchors, no buttons, no inputs, no forms)', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const detailRegion = blRegion(container, 'package-detail');
+    expect(detailRegion).not.toBeNull();
+    const seamsRegion = detailRegion!.querySelector(
+      '[data-pcc-bl-detail-region="reference-seams"]',
+    );
+    expect(seamsRegion).not.toBeNull();
+    expect(seamsRegion!.querySelector('a[href]')).toBeNull();
+    expect(seamsRegion!.querySelector('button')).toBeNull();
+    expect(seamsRegion!.querySelector('input')).toBeNull();
+    expect(seamsRegion!.querySelector('form')).toBeNull();
+  });
 });

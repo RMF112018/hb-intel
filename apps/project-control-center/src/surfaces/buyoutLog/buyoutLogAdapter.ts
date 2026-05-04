@@ -40,6 +40,7 @@ import {
   type BuyoutReconciliationIssue,
   type BuyoutReconciliationIssueKind,
   type BuyoutReconciliationState,
+  type BuyoutReferenceSeams,
   type BuyoutScopeLine,
   type BuyoutSourceLineage,
   type BuyoutSourceSystem,
@@ -52,48 +53,56 @@ import {
 import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMapping.js';
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState.js';
 import type { PccCardState } from '../projectHome/shared.js';
-import type {
-  IPccBlAuditEventRow,
-  IPccBlAuditHistoryViewModel,
-  IPccBlBudgetMatrixRow,
-  IPccBlBudgetVsCommitmentViewModel,
-  IPccBlCommandCenterViewModel,
-  IPccBlComplianceGroup,
-  IPccBlComplianceRow,
-  IPccBlComplianceSdiBondViewModel,
-  IPccBlEvidenceClassificationCount,
-  IPccBlEvidenceLineageEvidenceRow,
-  IPccBlEvidenceLineagePackageRow,
-  IPccBlEvidenceLineageViewModel,
-  IPccBlExceptionClassificationCount,
-  IPccBlHbiEligibilityNotice,
-  IPccBlHbiEligibilitySummary,
-  IPccBlPackageBudgetAllocationDetail,
-  IPccBlPackageCommitmentDetail,
-  IPccBlPackageDetailEntry,
-  IPccBlPackageDetailViewModel,
-  IPccBlPackageEvidenceDetail,
-  IPccBlPackagePriorityActionDetail,
-  IPccBlPackageRow,
-  IPccBlPackageScopeLineDetail,
-  IPccBlPackageStateCount,
-  IPccBlPackageTableViewModel,
-  IPccBlProcoreReconciliationViewModel,
-  IPccBlProcurementLeadTimeViewModel,
-  IPccBlProcurementMilestoneGroup,
-  IPccBlProcurementMilestoneRow,
-  IPccBlProjectMemoryRow,
-  IPccBlReconciliationCommitmentRow,
-  IPccBlReconciliationIssueRow,
-  IPccBlSourceLineageDisplay,
-  IPccBlSourcePostureViewModel,
-  IPccBlTraceabilityEdgeRow,
-  IPccBlUnboughtScopeQueueViewModel,
-  IPccBlUnboughtScopeRow,
-  IPccBlPackageAuditDetail,
-  IPccBuyoutLogViewModel,
-  PccBlStatusToneKey,
-  PccBlVarianceToneKey,
+import {
+  PCC_BL_BOUNDARY_KEYS,
+  PCC_BL_INTEGRATION_TARGET_IDS,
+  type IPccBlAuditEventRow,
+  type IPccBlAuditHistoryViewModel,
+  type IPccBlBoundaryNotice,
+  type IPccBlBudgetMatrixRow,
+  type IPccBlBudgetVsCommitmentViewModel,
+  type IPccBlCommandCenterViewModel,
+  type IPccBlComplianceGroup,
+  type IPccBlComplianceRow,
+  type IPccBlComplianceSdiBondViewModel,
+  type IPccBlEvidenceClassificationCount,
+  type IPccBlEvidenceLineageEvidenceRow,
+  type IPccBlEvidenceLineagePackageRow,
+  type IPccBlEvidenceLineageViewModel,
+  type IPccBlExceptionClassificationCount,
+  type IPccBlHbiEligibilityNotice,
+  type IPccBlHbiEligibilitySummary,
+  type IPccBlIntegrationPostureRow,
+  type IPccBlPackageBudgetAllocationDetail,
+  type IPccBlPackageCommitmentDetail,
+  type IPccBlPackageDetailEntry,
+  type IPccBlPackageDetailViewModel,
+  type IPccBlPackageEvidenceDetail,
+  type IPccBlPackagePriorityActionDetail,
+  type IPccBlPackageRow,
+  type IPccBlPackageScopeLineDetail,
+  type IPccBlPackageStateCount,
+  type IPccBlPackageTableViewModel,
+  type IPccBlProcoreReconciliationViewModel,
+  type IPccBlProcurementLeadTimeViewModel,
+  type IPccBlProcurementMilestoneGroup,
+  type IPccBlProcurementMilestoneRow,
+  type IPccBlProjectMemoryRow,
+  type IPccBlReconciliationCommitmentRow,
+  type IPccBlReconciliationIssueRow,
+  type IPccBlReferenceSeamRow,
+  type IPccBlSourceLineageDisplay,
+  type IPccBlSourcePostureViewModel,
+  type IPccBlTraceabilityEdgeRow,
+  type IPccBlUnboughtScopeQueueViewModel,
+  type IPccBlUnboughtScopeRow,
+  type IPccBlPackageAuditDetail,
+  type IPccBuyoutLogViewModel,
+  type PccBlBoundaryKey,
+  type PccBlIntegrationTargetId,
+  type PccBlSeamKind,
+  type PccBlStatusToneKey,
+  type PccBlVarianceToneKey,
 } from './buyoutLogViewModel.js';
 
 // ---------------------------------------------------------------------------
@@ -125,6 +134,187 @@ const HBI_FUTURE_GATED_CAPTION =
   'Eligibility is recorded for future grounded-answer surfaces. No grounded answer, summarization, or generation runs from this surface.';
 const PACKAGE_DETAIL_BOUNDARY_CAPTION =
   'Reference-only package detail. No legal, claim entitlement, compensability, delay-damages, accounting, payment, or approval determination is performed here.';
+
+// ---------------------------------------------------------------------------
+// Cross-surface integration seams (Wave 13 / Prompt 06).
+// All copy stays in "reference only" / "not enabled here" vocabulary so the
+// surface advertises its boundary without describing or enabling any
+// runtime call, writeback, approval execution, or evidence-binary action.
+// ---------------------------------------------------------------------------
+
+const SEAM_KIND_DISPLAY_LABELS: Readonly<Record<PccBlSeamKind, string>> = {
+  'priority-actions-candidate': 'Priority Actions candidate',
+  'document-control-evidence': 'Document Control evidence reference',
+  'lifecycle-readiness-gate': 'Lifecycle Readiness gate',
+  'responsibility-role': 'Responsibility role',
+  'approval-checkpoint': 'Approval / checkpoint',
+  'external-system-launcher': 'External system launcher',
+  'project-memory-contribution': 'Project memory contribution',
+  'traceability-edge': 'Traceability edge',
+  'project-readiness-source-module': 'Project Readiness source module',
+};
+
+const SEAM_KIND_REFERENCE_ONLY_LABELS: Readonly<Record<PccBlSeamKind, string>> = {
+  'priority-actions-candidate': 'Reference only — Priority Actions queue is not mutated here.',
+  'document-control-evidence':
+    'Reference only — evidence file ownership stays with Document Control.',
+  'lifecycle-readiness-gate':
+    'Reference only — lifecycle gate evaluation is owned by the lifecycle readiness surface.',
+  'responsibility-role':
+    'Reference only — role assignment is owned by the responsibility matrix surface.',
+  'approval-checkpoint':
+    'Reference only — approval and checkpoint execution is not enabled here; Wave 14 owns it.',
+  'external-system-launcher':
+    'Reference only — external system launcher; no runtime call is made here.',
+  'project-memory-contribution':
+    'Reference only — project memory contribution narrative; ownership stays with the project memory surface.',
+  'traceability-edge':
+    'Reference only — traceability edge is surfaced for lineage inspection only.',
+  'project-readiness-source-module':
+    'Reference only — declares this package as a Project Readiness source module signal.',
+};
+
+const INTEGRATION_POSTURE_ROWS: readonly IPccBlIntegrationPostureRow[] = [
+  {
+    targetId: 'project-readiness',
+    targetLabel: 'Project Readiness Center',
+    postureCaption:
+      'Reference only — Project Readiness owns the framework view and source-module registry.',
+  },
+  {
+    targetId: 'priority-actions',
+    targetLabel: 'Priority Actions',
+    postureCaption:
+      'Reference only — candidate references; the Priority Actions queue is not mutated here.',
+  },
+  {
+    targetId: 'lifecycle-readiness',
+    targetLabel: 'Lifecycle Readiness',
+    postureCaption:
+      'Reference only — lifecycle gate evaluation is owned by the lifecycle readiness surface.',
+  },
+  {
+    targetId: 'permit-inspection',
+    targetLabel: 'Permit & Inspection',
+    postureCaption:
+      'Reference only — permit and inspection lifecycle is owned by the permit & inspection surface.',
+  },
+  {
+    targetId: 'responsibility-matrix',
+    targetLabel: 'Responsibility Matrix',
+    postureCaption:
+      'Reference only — role assignment is owned by the responsibility matrix surface.',
+  },
+  {
+    targetId: 'constraints-log',
+    targetLabel: 'Constraints Log',
+    postureCaption:
+      'Reference only — make-ready constraints and risks are owned by the constraints log surface.',
+  },
+  {
+    targetId: 'approvals-checkpoints',
+    targetLabel: 'Approvals & Checkpoints',
+    postureCaption:
+      'Reference only — approval and checkpoint execution is not enabled here; Wave 14 owns it.',
+  },
+  {
+    targetId: 'document-control',
+    targetLabel: 'Document Control',
+    postureCaption: 'Reference only — evidence file ownership stays with Document Control.',
+  },
+  {
+    targetId: 'external-systems',
+    targetLabel: 'External Systems',
+    postureCaption:
+      'Reference only — external system launchers; no runtime call is made from here to Procore, Sage, or SharePoint.',
+  },
+  {
+    targetId: 'project-memory',
+    targetLabel: 'Project Memory',
+    postureCaption:
+      'Reference only — project memory contribution markers; ownership stays with the project memory surface.',
+  },
+  {
+    targetId: 'traceability',
+    targetLabel: 'Traceability',
+    postureCaption: 'Reference only — traceability edges surfaced for lineage inspection only.',
+  },
+];
+
+const BOUNDARY_NOTICE_CAPTIONS: Readonly<Record<PccBlBoundaryKey, string>> = {
+  'no-procore-runtime':
+    'Procore commitments, purchase orders, subcontracts, SOVs, CCOs, invoices, and payments are not enabled here. Procore commitment state is imported lineage only.',
+  'no-sage-accounting':
+    'Sage accounting writeback, payment authorization, and accounting determinations are not enabled here. Sage committed cost is imported lineage only.',
+  'no-evidence-binary':
+    'Evidence binary upload, download, and sync are not enabled here. Evidence references point to Document Control / SharePoint records only.',
+  'no-approval-execution':
+    'Approval and checkpoint execution is not enabled here. Wave 14 owns approval / checkpoint execution.',
+  'no-legal-determination':
+    'Legal, claim entitlement, compensability, delay-damages, and forensic schedule-analysis determinations are not enabled here.',
+};
+
+function buildBoundaryNotices(): readonly IPccBlBoundaryNotice[] {
+  return PCC_BL_BOUNDARY_KEYS.map((key) => ({
+    key,
+    caption: BOUNDARY_NOTICE_CAPTIONS[key],
+  }));
+}
+
+function buildIntegrationPosture(): readonly IPccBlIntegrationPostureRow[] {
+  // Validate that the registry covers every target id in the canonical
+  // tuple. Throws fast in tests if a new target is added without a row.
+  const present = new Set(INTEGRATION_POSTURE_ROWS.map((r) => r.targetId));
+  for (const targetId of PCC_BL_INTEGRATION_TARGET_IDS) {
+    if (!present.has(targetId)) {
+      throw new Error(
+        `INTEGRATION_POSTURE_ROWS missing entry for target ${targetId satisfies PccBlIntegrationTargetId}`,
+      );
+    }
+  }
+  return INTEGRATION_POSTURE_ROWS;
+}
+
+function makeSeamRow(seamKind: PccBlSeamKind, reference: string): IPccBlReferenceSeamRow {
+  return {
+    seamKind,
+    label: SEAM_KIND_DISPLAY_LABELS[seamKind],
+    reference,
+    referenceOnlyLabel: SEAM_KIND_REFERENCE_ONLY_LABELS[seamKind],
+  };
+}
+
+function buildReferenceSeamRows(seams: BuyoutReferenceSeams): readonly IPccBlReferenceSeamRow[] {
+  const rows: IPccBlReferenceSeamRow[] = [];
+  if (seams.priorityActionsCandidateRef) {
+    rows.push(makeSeamRow('priority-actions-candidate', seams.priorityActionsCandidateRef));
+  }
+  for (const ref of seams.documentControlEvidenceRefs ?? []) {
+    rows.push(makeSeamRow('document-control-evidence', ref));
+  }
+  if (seams.lifecycleReadinessGateRef) {
+    rows.push(makeSeamRow('lifecycle-readiness-gate', seams.lifecycleReadinessGateRef));
+  }
+  if (seams.responsibilityRoleRef) {
+    rows.push(makeSeamRow('responsibility-role', seams.responsibilityRoleRef));
+  }
+  if (seams.wave14ApprovalCheckpointRef) {
+    rows.push(makeSeamRow('approval-checkpoint', seams.wave14ApprovalCheckpointRef));
+  }
+  if (seams.externalSystemReferenceRef) {
+    rows.push(makeSeamRow('external-system-launcher', seams.externalSystemReferenceRef));
+  }
+  for (const ref of seams.projectMemoryContributionRefs ?? []) {
+    rows.push(makeSeamRow('project-memory-contribution', ref));
+  }
+  for (const ref of seams.traceabilityEdgeRefs ?? []) {
+    rows.push(makeSeamRow('traceability-edge', ref));
+  }
+  // Always-present marker — declares the package as a Project Readiness
+  // source module signal.
+  rows.push(makeSeamRow('project-readiness-source-module', seams.projectReadinessSourceModuleRef));
+  return rows;
+}
 
 // ---------------------------------------------------------------------------
 // Internal label maps (module-local; tests assert adapter outputs, not the
@@ -544,6 +734,8 @@ function buildCommandCenter(data: PccBuyoutLogReadModel): IPccBlCommandCenterVie
       ? `Snapshot ${latestSnapshot.snapshotId} · ${formatDateDisplay(latestSnapshot.generatedAtUtc) ?? ''}`
       : undefined,
     boundaryCaption: COMPLIANCE_BOUNDARY_CAPTION,
+    boundaryNotices: buildBoundaryNotices(),
+    integrationPosture: buildIntegrationPosture(),
   };
 }
 
@@ -956,6 +1148,7 @@ function buildPackageDetailEntry(
     auditTrail: auditTrailFor(data.auditEvents, pkg.id),
     priorityActionCandidates: priorityActionsFor(data.priorityActionCandidates, pkg.id),
     hbiEligibilityNotice: buildHbiEligibilityNoticeForPackage(hbiByPackage.get(pkg.id)),
+    referenceSeams: buildReferenceSeamRows(pkg),
     boundaryCaption: PACKAGE_DETAIL_BOUNDARY_CAPTION,
   };
 }

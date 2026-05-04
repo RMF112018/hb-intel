@@ -197,6 +197,38 @@ const CommandCenterCard: FC<CommandCenterCardProps> = ({ commandCenter, moduleSu
         </ul>
       ) : null}
 
+      <ul
+        className={styles.list}
+        aria-label="Boundary notices"
+        data-pcc-bl-region-list="command-center-boundary-notices"
+      >
+        {commandCenter.boundaryNotices.map((notice) => (
+          <li key={notice.key} className={styles.row} data-pcc-bl-boundary-notice={notice.key}>
+            <span className={styles.rowMeta}>{notice.caption}</span>
+          </li>
+        ))}
+      </ul>
+
+      <ul
+        className={styles.list}
+        aria-label="Integration posture"
+        data-pcc-bl-region-list="command-center-integration-posture"
+      >
+        {commandCenter.integrationPosture.map((row) => (
+          <li
+            key={row.targetId}
+            className={styles.row}
+            data-pcc-bl-integration-posture={row.targetId}
+          >
+            <div className={styles.rowHeader}>
+              <span className={styles.rowTitle}>{row.targetLabel}</span>
+              <PccStatusPill tone="neutral">Reference only</PccStatusPill>
+            </div>
+            <span className={styles.rowMeta}>{row.postureCaption}</span>
+          </li>
+        ))}
+      </ul>
+
       <p className={styles.boundaryNote} data-pcc-bl-boundary="compliance-legal-accounting">
         {commandCenter.boundaryCaption}
       </p>
@@ -761,6 +793,30 @@ const PackageDetailEntry: FC<PackageDetailEntryProps> = ({ entry }) => (
               <PccStatusPill tone="neutral">{event.occurredAtDisplay}</PccStatusPill>
             </div>
             <span className={styles.rowMeta}>{event.summary}</span>
+          </li>
+        ))}
+      </ul>
+    ) : null}
+
+    {entry.referenceSeams.length > 0 ? (
+      <ul
+        className={styles.list}
+        aria-label="Reference seams"
+        data-pcc-bl-detail-region="reference-seams"
+      >
+        {entry.referenceSeams.map((seam, idx) => (
+          <li
+            key={`${seam.seamKind}:${seam.reference}:${idx}`}
+            className={styles.row}
+            data-pcc-bl-detail-seam={seam.reference}
+            data-pcc-bl-detail-seam-kind={seam.seamKind}
+          >
+            <span className={styles.rowMeta}>
+              {seam.label}: {seam.reference}
+            </span>
+            <span className={styles.rowMeta} data-pcc-bl-detail-seam-reference-only={seam.seamKind}>
+              {seam.referenceOnlyLabel}
+            </span>
           </li>
         ))}
       </ul>

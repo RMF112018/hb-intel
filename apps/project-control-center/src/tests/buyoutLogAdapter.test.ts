@@ -9,7 +9,10 @@ import {
 } from '@hbc/models/pcc';
 import { buildPccBuyoutLogViewModel } from '../surfaces/buyoutLog/buyoutLogAdapter';
 import {
+  PCC_BL_BOUNDARY_KEYS,
+  PCC_BL_INTEGRATION_TARGET_IDS,
   PCC_BL_REGION_IDS,
+  PCC_BL_SEAM_KINDS,
   type IPccBuyoutLogViewModel,
 } from '../surfaces/buyoutLog/buyoutLogViewModel';
 import { PCC_STATUS_PILL_TONES, PccStatusPill } from '../ui/PccStatusPill';
@@ -260,5 +263,130 @@ describe('PccStatusPill primitive remains the only pill rendering primitive', ()
   it('PccStatusPill exports the canonical five tones used by the buyout-log view-model', () => {
     expect(typeof PccStatusPill).toBe('function');
     expect(PCC_STATUS_PILL_TONES).toEqual(['info', 'success', 'warning', 'danger', 'neutral']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Wave 13 / Prompt 06 — integration-seam coverage
+// ---------------------------------------------------------------------------
+
+describe('buildPccBuyoutLogViewModel — boundary-notice tuple coverage', () => {
+  it('emits one boundary-notice row per canonical key with reference-only / not-enabled-here copy', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    expect(vm.commandCenter.boundaryNotices.length).toBe(PCC_BL_BOUNDARY_KEYS.length);
+    const present = new Set(vm.commandCenter.boundaryNotices.map((n) => n.key));
+    for (const key of PCC_BL_BOUNDARY_KEYS) {
+      expect(present.has(key), `missing boundary-notice ${key}`).toBe(true);
+    }
+    for (const notice of vm.commandCenter.boundaryNotices) {
+      const text = notice.caption.toLowerCase();
+      expect(
+        text.includes('not enabled here') ||
+          text.includes('reference only') ||
+          text.includes('imported lineage only'),
+        `boundary-notice ${notice.key} should use "reference only" / "not enabled here" / "imported lineage only" vocabulary`,
+      ).toBe(true);
+    }
+  });
+});
+
+describe('buildPccBuyoutLogViewModel — integration-posture registry coverage', () => {
+  it('emits one integration-posture row per canonical target id', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    expect(vm.commandCenter.integrationPosture.length).toBe(PCC_BL_INTEGRATION_TARGET_IDS.length);
+    const present = new Set(vm.commandCenter.integrationPosture.map((r) => r.targetId));
+    for (const targetId of PCC_BL_INTEGRATION_TARGET_IDS) {
+      expect(present.has(targetId), `missing integration-posture target ${targetId}`).toBe(true);
+    }
+  });
+
+  it('every integration-posture caption uses "reference only" copy', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    for (const row of vm.commandCenter.integrationPosture) {
+      expect(row.postureCaption.toLowerCase()).toContain('reference only');
+    }
+  });
+
+  it('exposes the cross-surface targets named by the prompt (constraints-log, project-memory, traceability, document-control, external-systems, approvals-checkpoints)', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    const present = new Set(vm.commandCenter.integrationPosture.map((r) => r.targetId));
+    for (const required of [
+      'constraints-log',
+      'project-memory',
+      'traceability',
+      'document-control',
+      'external-systems',
+      'approvals-checkpoints',
+    ] as const) {
+      expect(present.has(required), `missing integration-posture target ${required}`).toBe(true);
+    }
+  });
+});
+
+describe('buildPccBuyoutLogViewModel — package-detail reference-seam rows', () => {
+  it('every package surfaces a project-readiness-source-module seam row with reference-only copy', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    expect(vm.packageDetail.entries.size).toBe(SAMPLE_BUYOUT_LOG_READ_MODEL.packages.length);
+    for (const entry of vm.packageDetail.entries.values()) {
+      const sourceModuleSeams = entry.referenceSeams.filter(
+        (s) => s.seamKind === 'project-readiness-source-module',
+      );
+      expect(sourceModuleSeams.length).toBe(1);
+      expect(sourceModuleSeams[0].reference).toBe('buyout-log');
+      expect(sourceModuleSeams[0].referenceOnlyLabel.toLowerCase()).toContain('reference only');
+    }
+  });
+
+  it('emits priority-actions / lifecycle-readiness / responsibility-role / approval-checkpoint seams when the package records the corresponding reference fields', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    const readyPkg = SAMPLE_BUYOUT_LOG_READ_MODEL.packages[0];
+    const entry = vm.packageDetail.entries.get(readyPkg.id);
+    expect(entry).toBeDefined();
+    const kinds = new Set(entry!.referenceSeams.map((s) => s.seamKind));
+    if (readyPkg.priorityActionsCandidateRef) {
+      expect(kinds.has('priority-actions-candidate')).toBe(true);
+    }
+    if (readyPkg.lifecycleReadinessGateRef) {
+      expect(kinds.has('lifecycle-readiness-gate')).toBe(true);
+    }
+    if (readyPkg.responsibilityRoleRef) {
+      expect(kinds.has('responsibility-role')).toBe(true);
+    }
+    if (readyPkg.wave14ApprovalCheckpointRef) {
+      expect(kinds.has('approval-checkpoint')).toBe(true);
+    }
+    if (readyPkg.externalSystemReferenceRef) {
+      expect(kinds.has('external-system-launcher')).toBe(true);
+    }
+    // documentControlEvidenceRefs fields produce one seam row per ref
+    for (const ref of readyPkg.documentControlEvidenceRefs ?? []) {
+      const matching = entry!.referenceSeams.filter(
+        (s) => s.seamKind === 'document-control-evidence' && s.reference === ref,
+      );
+      expect(matching.length).toBe(1);
+    }
+  });
+
+  it('every seam row uses reference-only / not-enabled-here vocabulary', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    for (const entry of vm.packageDetail.entries.values()) {
+      for (const seam of entry.referenceSeams) {
+        const label = seam.referenceOnlyLabel.toLowerCase();
+        expect(
+          label.includes('reference only') || label.includes('not enabled here'),
+          `seam ${seam.seamKind} reference-only label must use canonical vocabulary`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('seam-kind tuple covers every kind emitted by populated fixture packages', () => {
+    const vm = ready(buildPccBuyoutLogViewModel(envelope('available')));
+    const allowed = new Set<string>(PCC_BL_SEAM_KINDS);
+    for (const entry of vm.packageDetail.entries.values()) {
+      for (const seam of entry.referenceSeams) {
+        expect(allowed.has(seam.seamKind)).toBe(true);
+      }
+    }
   });
 });
