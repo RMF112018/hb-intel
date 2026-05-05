@@ -1,0 +1,15 @@
+{
+  "allowed": [
+    "explain",
+    "summarize",
+    "cite",
+    "draft justification"
+  ],
+  "refused": [
+    "change setting",
+    "approve",
+    "bypass approval",
+    "expose secret",
+    "mutate permissions"
+  ]
+}

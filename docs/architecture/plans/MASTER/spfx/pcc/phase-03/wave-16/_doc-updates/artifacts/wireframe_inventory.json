@@ -1,0 +1,19 @@
+{
+  "wireframes": [
+    "00_Wireframe_Index.md",
+    "01_Settings_Home.md",
+    "02_Category_Landing.md",
+    "03_Settings_Table.md",
+    "04_Setting_Detail_Drawer.md",
+    "05_Change_Request_Drawer.md",
+    "06_Approval_Handoff_Panel.md",
+    "07_Audit_History.md",
+    "08_Validation_Health.md",
+    "09_Role_Visibility_Matrix.md",
+    "10_Feature_Module_Flags.md",
+    "11_External_Systems_Configuration.md",
+    "12_Security_Secret_References.md",
+    "13_HBI_Settings.md",
+    "14_Mobile_Responsive.md"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "roles": [
+    "PM",
+    "PX",
+    "IT Admin",
+    "PCC Admin",
+    "Executive",
+    "Project Accountant",
+    "Viewer"
+  ],
+  "hardNo": [
+    "view_raw_secret",
+    "spfx_direct_tenant_mutation",
+    "hbi_mutation"
+  ]
+}

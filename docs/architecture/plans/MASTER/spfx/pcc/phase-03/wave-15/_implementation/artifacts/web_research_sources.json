@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-05-05",
+  "sources": [
+    {
+      "name": "Anthropic Claude Code slash commands",
+      "url": "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
+      "implementation_use": "Prompt packaging should support reusable, scoped command-style instructions; local agent can use /clear, /compact, /memory, /init, and project commands to manage context."
+    },
+    {
+      "name": "Anthropic Claude Code memory",
+      "url": "https://docs.anthropic.com/en/docs/claude-code/memory",
+      "implementation_use": "Prompt package should embed frequently used commands, project architecture, and conventions so agents avoid repeated discovery."
+    },
+    {
+      "name": "Anthropic Claude Code hooks reference",
+      "url": "https://docs.anthropic.com/en/docs/claude-code/hooks",
+      "implementation_use": "Hooks can enforce guardrails but execute arbitrary shell commands; package must treat hook changes as out of scope unless explicitly authorized and security-reviewed."
+    },
+    {
+      "name": "Microsoft SharePoint list view threshold",
+      "url": "https://support.microsoft.com/en-us/office/working-with-the-list-view-threshold-limit-for-all-versions-of-sharepoint-4a40bbdc-c5f8-4bbd-b9b6-745daf71c132",
+      "implementation_use": "Wave 15 list schemas must preserve indexed first-predicate query patterns and avoid uncontrolled list scans."
+    },
+    {
+      "name": "Microsoft Graph throttling guidance",
+      "url": "https://learn.microsoft.com/en-us/graph/throttling",
+      "implementation_use": "Future Graph-backed live reads should avoid polling, obey Retry-After, and use change tracking/notifications when available; current package remains mock/read-model first."
+    },
+    {
+      "name": "OWASP Open Redirect",
+      "url": "https://owasp.org/www-community/attacks/open_redirect",
+      "implementation_use": "Launch URLs must use standard URL parsing and strict allowed-host policy, not string matching or blocklist-only checks."
+    },
+    {
+      "name": "OWASP Clickjacking Defense Cheat Sheet",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html",
+      "implementation_use": "Iframe/current-image embed behavior remains future-gated; default launch behavior should be new-tab/open-link with provider policy reviewed separately."
+    },
+    {
+      "name": "WAI-ARIA modal dialog pattern",
+      "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+      "implementation_use": "Drawer and lineage panels require focus trap, Escape close, return focus, and keyboard navigation tests."
+    },
+    {
+      "name": "Microsoft Viva Connections card design guidance",
+      "url": "https://learn.microsoft.com/en-us/sharepoint/dev/spfx/viva/design/design-intro",
+      "implementation_use": "Launch Pad should favor card/quick-view task completion and curated entry points rather than dense admin screens."
+    },
+    {
+      "name": "TanStack Table sorting guide",
+      "url": "https://tanstack.com/table/latest/docs/guide/sorting",
+      "implementation_use": "If table dependencies are already present or later authorized, sorting state should be controlled/manual when backend sorted; do not add dependency in this package without approval."
+    }
+  ]
+}

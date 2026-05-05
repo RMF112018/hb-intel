@@ -1,0 +1,15 @@
+{
+  "changeRequest": [
+    "draft",
+    "submitted",
+    "routed",
+    "pending-approval",
+    "approved",
+    "rejected",
+    "admin-verification-required",
+    "execution-pending",
+    "completed",
+    "cancelled",
+    "superseded"
+  ]
+}

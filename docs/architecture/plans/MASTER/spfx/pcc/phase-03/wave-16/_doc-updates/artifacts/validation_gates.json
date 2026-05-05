@@ -1,0 +1,15 @@
+{
+  "documentation": [
+    "prettier",
+    "json validation",
+    "file inventory",
+    "no lockfile mutation"
+  ],
+  "futureRuntime": [
+    "GET-only",
+    "readOnly envelope",
+    "redaction",
+    "role gating",
+    "approval handoff"
+  ]
+}

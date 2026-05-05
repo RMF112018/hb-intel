@@ -1,0 +1,22 @@
+{
+  "scopes": [
+    "tenant-global",
+    "hbcentral-global",
+    "project-site",
+    "project-module",
+    "project-role",
+    "user-preference",
+    "feature-flag",
+    "integration-policy",
+    "security-sensitive",
+    "read-only-derived"
+  ],
+  "editablePolicies": [
+    "read-only",
+    "direct-draft",
+    "request-only",
+    "approval-required",
+    "admin-only",
+    "future-gated"
+  ]
+}

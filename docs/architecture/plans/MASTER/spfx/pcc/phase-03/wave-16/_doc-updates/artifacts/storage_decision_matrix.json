@@ -1,0 +1,21 @@
+{
+  "storageTiers": [
+    "global-platform",
+    "global-pcc-policy",
+    "project-effective",
+    "project-workflow",
+    "compliance-security-audit",
+    "secrets"
+  ],
+  "newSchemas": [
+    "control-center-setting-definitions.md",
+    "control-center-setting-policy-rules.md",
+    "control-center-setting-values.md",
+    "control-center-setting-overrides.md",
+    "control-center-setting-change-requests.md",
+    "control-center-setting-validation-results.md",
+    "control-center-setting-audit-events.md",
+    "control-center-setting-dependency-map.md",
+    "control-center-setting-health-snapshots.md"
+  ]
+}

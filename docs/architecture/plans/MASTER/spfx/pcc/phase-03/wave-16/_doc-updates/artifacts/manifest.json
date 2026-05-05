@@ -1,0 +1,7 @@
+{
+  "package": "wave16-control-center-settings",
+  "generated": "2026-05-05",
+  "docsOnly": true,
+  "authorizesRuntime": false,
+  "authorizesTenantMutation": false
+}
