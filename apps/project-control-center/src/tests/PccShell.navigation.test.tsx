@@ -87,19 +87,30 @@ describe('PccShell navigation + state', () => {
 
     // focus changes alone must not change aria-current
     expect(
-      container.querySelector('[data-pcc-surface-id][aria-current="page"]')?.getAttribute('data-pcc-surface-id'),
+      container
+        .querySelector('[data-pcc-surface-id][aria-current="page"]')
+        ?.getAttribute('data-pcc-surface-id'),
     ).toBe('project-home');
-    expect(container.querySelector('[data-pcc-active-surface-panel]')?.getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
+    expect(
+      container
+        .querySelector('[data-pcc-active-surface-panel]')
+        ?.getAttribute('data-pcc-active-surface-panel'),
+    ).toBe('project-home');
   });
 
   it('clicking the focused rail button activates it and updates the panel', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
-    const documentsButton = container.querySelector('[data-pcc-surface-id="documents"]') as HTMLButtonElement;
+    const documentsButton = container.querySelector(
+      '[data-pcc-surface-id="documents"]',
+    ) as HTMLButtonElement;
     documentsButton.focus();
     expect(document.activeElement).toBe(documentsButton);
     fireEvent.click(documentsButton);
     expect(documentsButton.getAttribute('aria-current')).toBe('page');
     expect(container.querySelector('[data-pcc-active-surface-panel="documents"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="project-home"]')).toBeNull();
+    const context = container.querySelector('[data-pcc-active-surface-context]');
+    expect(context?.textContent).toContain('Documents');
+    expect(context?.textContent).toContain('Unified access hub for SharePoint');
   });
 });

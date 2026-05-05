@@ -10,6 +10,9 @@ describe('PccApp shell', () => {
     expect(header, 'header should render').not.toBeNull();
     expect(header?.textContent).toContain('Project Control Center Preview');
     expect(header?.textContent).toContain('Wave 2');
+    expect(container.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
+      'Project Home',
+    );
   });
 
   it('renders the orange navigation rail with every PCC MVP surface from @hbc/models/pcc', () => {

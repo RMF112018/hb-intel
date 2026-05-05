@@ -36,9 +36,14 @@ const PCC_THEME_VARS: CSSProperties = {
   ['--pcc-color-header' as string]: HBC_DARK_HEADER,
   ['--pcc-color-header-text' as string]: HBC_HEADER_TEXT,
   ['--pcc-color-header-icon-muted' as string]: HBC_HEADER_ICON_MUTED,
-  ['--pcc-color-rail' as string]: HBC_ACCENT_ORANGE,
-  ['--pcc-color-rail-hover' as string]: HBC_ACCENT_ORANGE_HOVER,
-  ['--pcc-color-rail-pressed' as string]: HBC_ACCENT_ORANGE_PRESSED,
+  ['--pcc-color-rail' as string]: HBC_SURFACE_LIGHT['surface-0'],
+  ['--pcc-color-rail-hover' as string]: HBC_SURFACE_LIGHT['surface-1'],
+  ['--pcc-color-rail-pressed' as string]: HBC_SURFACE_LIGHT['surface-2'],
+  ['--pcc-color-rail-accent' as string]: HBC_ACCENT_ORANGE,
+  ['--pcc-color-rail-accent-hover' as string]: HBC_ACCENT_ORANGE_HOVER,
+  ['--pcc-color-rail-accent-pressed' as string]: HBC_ACCENT_ORANGE_PRESSED,
+  ['--pcc-color-rail-text' as string]: HBC_SURFACE_LIGHT['text-primary'],
+  ['--pcc-color-rail-muted' as string]: HBC_SURFACE_LIGHT['text-muted'],
   ['--pcc-color-canvas' as string]: HBC_SURFACE_LIGHT['surface-2'],
   ['--pcc-color-card' as string]: HBC_SURFACE_LIGHT['surface-0'],
   ['--pcc-color-border' as string]: HBC_SURFACE_LIGHT['border-default'],
@@ -68,6 +73,8 @@ export interface PccShellProps {
   subtitle: string;
   dateScope: string;
   pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
+  activeSurfaceLabel: string;
+  activeSurfaceWorkflowLabel: string;
   /**
    * Active surface — supplied by `PccApp` from `usePccShellState`. The shell
    * is stateless about which surface is active.
@@ -88,6 +95,8 @@ export const PccShell: FC<PccShellProps> = ({
   subtitle,
   dateScope,
   pills,
+  activeSurfaceLabel,
+  activeSurfaceWorkflowLabel,
   activeSurfaceId,
   onSelectSurface,
   forceMode,
@@ -118,6 +127,8 @@ export const PccShell: FC<PccShellProps> = ({
             subtitle={subtitle}
             dateScope={dateScope}
             pills={pills}
+            activeSurfaceLabel={activeSurfaceLabel}
+            activeSurfaceWorkflowLabel={activeSurfaceWorkflowLabel}
             mode={shellMode}
           />
           <main className={styles.canvas} data-pcc-canvas="">

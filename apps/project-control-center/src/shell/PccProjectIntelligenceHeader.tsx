@@ -9,6 +9,8 @@ export interface PccProjectIntelligenceHeaderProps {
   subtitle: string;
   dateScope: string;
   pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
+  activeSurfaceLabel: string;
+  activeSurfaceWorkflowLabel: string;
   /** Resolved responsive mode supplied by the shell. */
   mode: PccResponsiveMode;
 }
@@ -18,6 +20,8 @@ export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps>
   subtitle,
   dateScope,
   pills,
+  activeSurfaceLabel,
+  activeSurfaceWorkflowLabel,
   mode,
 }) => {
   const showSearchExpanded = mode === 'wideDesktop' || mode === 'standardDesktop';
@@ -25,14 +29,14 @@ export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps>
   const showDateScope = mode === 'wideDesktop' || mode === 'standardDesktop';
 
   return (
-    <header
-      className={styles.header}
-      data-pcc-header=""
-      data-pcc-mode={mode}
-    >
+    <header className={styles.header} data-pcc-header="" data-pcc-mode={mode}>
       <div className={styles.identity}>
         <p className={styles.eyebrow}>{subtitle}</p>
         <h1 className={styles.projectName}>{projectName}</h1>
+        <p className={styles.activeSurfaceContext} data-pcc-active-surface-context="">
+          <span className={styles.activeSurfaceLabel}>{activeSurfaceLabel}</span>
+          <span className={styles.activeSurfaceWorkflow}>{activeSurfaceWorkflowLabel}</span>
+        </p>
       </div>
       <div className={styles.commandArea}>
         {showSearchExpanded ? (

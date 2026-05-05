@@ -1,13 +1,13 @@
 .rail {
   background: var(--pcc-color-rail);
-  color: var(--pcc-color-on-status);
+  color: var(--pcc-color-rail-text);
   display: flex;
   flex-direction: column;
-  gap: var(--pcc-space-md);
-  padding: var(--pcc-space-md) 0;
-  width: 220px;
+  gap: var(--pcc-space-sm);
+  padding: var(--pcc-space-sm) 0;
+  width: 196px;
   flex-shrink: 0;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid var(--pcc-color-border);
 }
 
 .brandRow {
@@ -24,8 +24,8 @@
   width: 36px;
   height: 36px;
   border-radius: var(--pcc-radius-sm);
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--pcc-color-on-status);
+  background: color-mix(in srgb, var(--pcc-color-rail-accent) 16%, white);
+  color: var(--pcc-color-rail-accent-pressed);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -39,7 +39,7 @@
 }
 
 .brandLabelMark {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -47,7 +47,7 @@
 .brandLabelSubtitle {
   font-size: 11px;
   font-weight: 500;
-  opacity: 0.85;
+  color: var(--pcc-color-rail-muted);
 }
 
 .surfaceList {
@@ -61,24 +61,29 @@
 
 .surfaceButton {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--pcc-space-sm);
-  padding: 10px var(--pcc-space-md);
+  padding: 8px var(--pcc-space-md);
   width: 100%;
   background: transparent;
   border: none;
-  color: var(--pcc-color-on-status);
-  font-size: 13px;
+  color: var(--pcc-color-rail-text);
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
   cursor: pointer;
   text-align: left;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
+  transition: background 120ms ease;
+}
+
+.surfaceButton:hover {
+  background: var(--pcc-color-rail-hover);
 }
 
 .surfaceButton[data-pcc-surface-active='true'] {
-  background: rgba(255, 255, 255, 0.18);
-  border-left-color: var(--pcc-color-on-status);
+  background: color-mix(in srgb, var(--pcc-color-rail-accent) 14%, white);
+  border-left-color: var(--pcc-color-rail-accent-pressed);
   font-weight: 600;
 }
 
@@ -86,31 +91,47 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
+  width: 18px;
+  margin-top: 2px;
   flex-shrink: 0;
 }
 
-.surfaceLabel {
+.surfaceLabelGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
+.surfaceLabel {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.surfaceWorkflow {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--pcc-color-rail-muted);
+}
+
 .footer {
   margin-top: auto;
-  padding: var(--pcc-space-md);
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  padding: var(--pcc-space-sm) var(--pcc-space-md);
+  border-top: 1px solid var(--pcc-color-border);
   font-size: 12px;
-  opacity: 0.92;
+  color: var(--pcc-color-rail-muted);
 }
 
 /* Responsive variants */
 
 .rail[data-pcc-rail-variant='iconOnly'] {
-  width: 64px;
+  width: 56px;
 }
 
 .rail[data-pcc-rail-variant='iconOnly'] .brandLabel,
 .rail[data-pcc-rail-variant='iconOnly'] .surfaceLabel,
+.rail[data-pcc-rail-variant='iconOnly'] .surfaceWorkflow,
 .rail[data-pcc-rail-variant='iconOnly'] .footer {
   display: none;
 }
@@ -128,7 +149,7 @@
   gap: var(--pcc-space-sm);
   padding: var(--pcc-space-sm) var(--pcc-space-md);
   border-right: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--pcc-color-border);
   overflow-x: auto;
 }
 
@@ -147,16 +168,20 @@
 .rail[data-pcc-rail-variant='topStrip'] .surfaceButton {
   white-space: nowrap;
   border-left: none;
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
   padding: 6px var(--pcc-space-sm);
+  align-items: center;
 }
 
 .rail[data-pcc-rail-variant='topStrip'] .surfaceButton[data-pcc-surface-active='true'] {
-  border-bottom-color: var(--pcc-color-on-status);
-  background: rgba(255, 255, 255, 0.18);
+  border-bottom-color: var(--pcc-color-rail-accent-pressed);
 }
 
 .rail[data-pcc-rail-variant='topStrip'] .footer {
+  display: none;
+}
+
+.rail[data-pcc-rail-variant='topStrip'] .surfaceWorkflow {
   display: none;
 }
 
@@ -165,7 +190,7 @@
   flex-direction: column;
   padding: var(--pcc-space-sm) var(--pcc-space-md);
   border-right: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--pcc-color-border);
 }
 
 .rail[data-pcc-rail-variant='hamburger'] .brandRow {

@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccShell } from './shell/PccShell';
 import { PccSurfaceRouter, type IPccSurfaceRouterReadModelClient } from './shell/PccSurfaceRouter';
 import { usePccShellState } from './state/usePccShellState';
@@ -19,6 +20,7 @@ export interface PccAppProps {
 
 export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
   const shell = usePccShellState();
+  const activeSurface = PCC_MVP_SURFACES[shell.activeSurfaceId];
 
   return (
     <PccShell
@@ -26,14 +28,13 @@ export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
       subtitle={PCC_PROJECT_PLACEHOLDER.subtitle}
       dateScope={PCC_PROJECT_PLACEHOLDER.dateScope}
       pills={PCC_PROJECT_PLACEHOLDER.pills}
+      activeSurfaceLabel={activeSurface.displayName}
+      activeSurfaceWorkflowLabel={activeSurface.description}
       activeSurfaceId={shell.activeSurfaceId}
       onSelectSurface={shell.setActiveSurface}
       forceMode={forceMode}
     >
-      <PccSurfaceRouter
-        activeSurfaceId={shell.activeSurfaceId}
-        readModelClient={readModelClient}
-      />
+      <PccSurfaceRouter activeSurfaceId={shell.activeSurfaceId} readModelClient={readModelClient} />
     </PccShell>
   );
 };

@@ -28,12 +28,12 @@
 
 .canvas {
   flex: 1 1 auto;
-  padding: var(--pcc-space-lg) var(--pcc-space-xl);
+  padding: var(--pcc-space-md) var(--pcc-space-lg);
   display: block;
 }
 
 @media (max-width: 720px) {
   .canvas {
-    padding: var(--pcc-space-md);
+    padding: var(--pcc-space-sm);
   }
 }
