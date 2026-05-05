@@ -162,3 +162,14 @@ Wave relationship lock:
 
 - Wave 13G remains Estimating Workbench feature authority.
 - Phase 14 governs estimating-related checkpoint queue/routing/decision/audit semantics.
+
+## Wave 16 Authority Addendum (2026-05-05)
+
+Wave 16 authority path is `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-16/`.
+
+Boundary lock:
+
+- Wave 16 Control Center Settings architecture defines authority, inheritance/override policy posture, and read/command boundaries for settings governance.
+- Prompt 02 canonical schema contracts remain authoritative under `docs/reference/sharepoint/list-schemas/pcc/` and root `List-Map.md`.
+- This addendum does not alter Wave 1-15 feature posture or ownership boundaries.
+- No runtime/source mutation, package/manifest/lockfile mutation, tenant/provisioning mutation, or live integration execution is authorized.

@@ -266,3 +266,14 @@ Wave alignment lock:
 
 - Wave 13 Procore dependency posture remains authoritative for Procore data-layer boundaries.
 - Wave 14 remains the mapping-correction/checkpoint route-step/decision/audit authority layer.
+
+## Wave 16 Control Center Settings SOR Cross-Reference Addendum (2026-05-05)
+
+Wave 16 authority path is `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-16/`.
+
+Cross-reference lock:
+
+- Wave 16 settings architecture uses this matrix as the canonical SOR source for ownership boundaries.
+- Global defaults/policy settings remain HBCentral-governed; project effective values, approved overrides, workflow, validation, audit, and health artifacts remain PCC project-site governed per canonical schema contracts.
+- Source module ownership remains unchanged: Project Home, Priority Actions, Approvals/Checkpoints, Site Health, Admin Review, External Systems, Team & Access, and HBI keep their established boundaries while integrating with settings surfaces.
+- This addendum is registration/cross-reference only and does not modify prior Wave 1-15 ownership doctrine.

@@ -309,3 +309,17 @@ Execution guardrails:
 
 - This addendum is docs-governance only.
 - No runtime/source mutation, no manifest/package/lockfile mutation, no tenant mutation, and no live integration execution are authorized.
+
+## Wave 16 Control Center Settings Architecture Addendum (2026-05-05)
+
+Wave 16 authority path is `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-16/`.
+
+Prompt-03 architecture lock:
+
+- Wave 16 canonical architecture docs define settings authority, taxonomy/inheritance/override posture, read-model and future command boundaries, storage split summary, and cross-surface integration boundaries.
+- Wave 16 references Prompt 02 canonical schema contracts under `docs/reference/sharepoint/list-schemas/pcc/` and `docs/reference/sharepoint/list-schemas/List-Map.md` and does not rewrite those schema artifacts.
+
+Execution guardrails:
+
+- This addendum is registration/cross-reference only.
+- No runtime/source mutation, no manifest/package/lockfile mutation, no tenant/list/provisioning mutation, and no live integration execution are authorized.
