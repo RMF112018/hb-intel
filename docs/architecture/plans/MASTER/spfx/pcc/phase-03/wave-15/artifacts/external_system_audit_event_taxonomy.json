@@ -1,0 +1,22 @@
+{
+  "eventTypes": [
+    "launch-pad-rendered",
+    "launch-link-rendered",
+    "launch-attempted",
+    "launch-blocked",
+    "project-link-created",
+    "project-link-submitted",
+    "project-link-approved",
+    "project-link-rejected",
+    "project-link-archived",
+    "mapping-review-created",
+    "mapping-correction-requested",
+    "mapping-confirmed",
+    "mapping-conflict-detected",
+    "source-health-changed",
+    "admin-verification-created",
+    "review-item-closed",
+    "hbi-lineage-cited",
+    "hbi-refusal-issued"
+  ]
+}

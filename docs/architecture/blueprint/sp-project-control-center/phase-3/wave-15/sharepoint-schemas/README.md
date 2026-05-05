@@ -21,3 +21,20 @@ Wave 15 uses existing HB Central list schema truth for project identity, user vi
 6. `PCC External System Audit Events`
 
 Full schema details are in `docs/sharepoint-schemas/` and `artifacts/sharepoint_list_schemas.json`.
+
+## Prompt-04 Acceptance Criteria
+
+Prompt 04 requires each proposed Wave 15 list to prove:
+
+- purpose;
+- scope/location;
+- logical key;
+- required fields;
+- indexed fields;
+- query patterns;
+- no-secret posture;
+- no-overload relationship to existing HB Central lists.
+
+Acceptance evidence is tracked in:
+
+- `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_04_SharePoint_List_Schemas_And_JSON_Artifacts_Closeout.md`

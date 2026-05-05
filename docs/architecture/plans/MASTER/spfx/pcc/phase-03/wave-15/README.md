@@ -24,6 +24,13 @@ This canonical Wave 15 plan hub tracks promoted planning artifacts from `_doc-up
 - Closeout: `Prompt_03_Target_Architecture_And_System_Of_Record_Closeout.md`
 - Decision record: `Prompt_03_Target_Architecture_SOR_Lineage_Decision_Record.md`
 
+## Prompt 04 Execution
+
+- Execution mode: SharePoint schema docs + schema artifacts acceptance closeout only
+- Prompt: `prompts/Prompt_04_SharePoint_List_Schemas_And_JSON_Artifacts.md`
+- Closeout: `Prompt_04_SharePoint_List_Schemas_And_JSON_Artifacts_Closeout.md`
+- Decision record: `Prompt_04_SharePoint_Schemas_Artifacts_Decision_Record.md`
+
 ## Canonical Subpaths
 
 - `artifacts/`
