@@ -66,3 +66,14 @@ Prompt 06 is promoted as security/HBI/dependency/test-gates documentation scope 
 - `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Security_Secrets_Audit_And_HBI_Guardrails.md`
 - `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Dependency_Package_And_Test_Strategy.md`
 - `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_06_Security_HBI_Dependencies_And_Test_Gates_Closeout.md`
+
+## Prompt 07
+
+Prompt 07 finalizes Wave 15 documentation reconciliation and auditor handoff only.
+
+### Prompt-07 References
+
+- Final closeout: `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_07_Final_Wave15_Closeout_And_Auditor_Handoff.md`
+- Auditor prompt: `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/prompts/Fresh_Session_Auditor_Wave15_External_Systems_Launch_Pad.md`
+
+No new architecture scope is introduced in Prompt 07.

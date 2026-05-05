@@ -59,3 +59,12 @@ This canonical Wave 15 plan hub tracks promoted planning artifacts from `_doc-up
 - `prompts/`
 - `reference/`
 - `documentation-update-package/`
+
+## Prompt 07 Execution
+
+- Execution mode: final Wave 15 documentation closeout and auditor handoff only
+- Prompt: `prompts/Prompt_07_Closeout_And_Auditor_Handoff.md`
+- Closeout: `Prompt_07_Final_Wave15_Closeout_And_Auditor_Handoff.md`
+- Decision record: `Prompt_07_Final_Wave15_Closeout_And_Auditor_Handoff_Decision_Record.md`
+- Auditor handoff prompt: `prompts/Fresh_Session_Auditor_Wave15_External_Systems_Launch_Pad.md`
+- No-orphaned-docs proof: documented in Prompt-07 final closeout
