@@ -116,6 +116,18 @@ describe('buildPccProjectReadinessViewModel — available envelope', () => {
     expect(entry!.sourceModuleLabel).toBe('Permit & Inspection Control Center');
   });
 
+  it('marks Wave 15 (external-systems) as implemented with the External Systems Launch Pad status caption', () => {
+    if (vm.status !== 'preview') throw new Error('expected preview');
+    const entry = vm.downstreamModules.find((m) => m.sourceModuleId === 'external-systems');
+    expect(entry).toBeDefined();
+    expect(entry!.waveStatus).toBe('implemented');
+    expect(entry!.waveLabel).toBe('Wave 15');
+    const caption = entry!.statusCaption.toLowerCase();
+    expect(caption).toContain('launch pad');
+    expect(caption).not.toContain('runtime remains deferred');
+    expect(caption).not.toContain('not implemented in wave 8');
+  });
+
   it('hero exposes read-only badge and no-execution caption', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
     expect(vm.hero.readOnlyBadgeText).toBe('Read-only readiness framework preview');

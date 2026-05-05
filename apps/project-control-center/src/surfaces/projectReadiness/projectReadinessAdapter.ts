@@ -166,9 +166,10 @@ const DOWNSTREAM_MODULE_REGISTRY: Readonly<
   },
   'external-systems': {
     label: 'External Systems',
-    waveLabel: 'Wave 15+',
-    waveStatus: 'preview-deferred',
-    statusCaption: 'External system runtime remains deferred. Not implemented in Wave 8.',
+    waveLabel: 'Wave 15',
+    waveStatus: 'implemented',
+    statusCaption:
+      'Wave 15 — External Systems Launch Pad is implemented as a read-only / metadata-only PCC surface. No live external-system API or runtime is enabled.',
   },
   'site-health': {
     label: 'Site Health',
