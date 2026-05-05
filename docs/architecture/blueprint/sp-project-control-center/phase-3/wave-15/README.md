@@ -1,23 +1,28 @@
-# PCC Phase 3 Wave 15 — Prompt 01 Scope Lock Status
+# PCC Phase 3 Wave 15 — Prompt 01 and Prompt 02 Canonical Status
 
 ## Purpose
 
-This Wave 15 blueprint entrypoint records Prompt 01 scope-lock status for the External Systems Launch Pad documentation program.
+Wave 15 canonical blueprint status for documentation prompts completed so far.
 
-## Current Status (Prompt 01 Only)
+## Prompt 01
 
-- Prompt 01 is executed as a documentation-only run.
-- Canonical promotion in this run is intentionally limited to Prompt-01-relevant planning artifacts.
-- Full Wave 15 blueprint document promotion is deferred to later Wave 15 prompts.
+Prompt 01 closed repo-truth and scope-lock requirements in the Wave 15 canonical plan path.
 
-## Guardrails
+## Prompt 02
 
-- No runtime/source implementation changes.
-- No `package.json` or `pnpm-lock.yaml` changes.
-- No SPFx manifest/version bump in this run.
-- No tenant mutation or live integration work.
+Prompt 02 is promoted with schema/storage/indexing/data-contract scope only.
 
-## Canonical Plan References
+### Prompt-02 Assertions
 
-- `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/README.md`
-- `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_01_Repo_Truth_And_Scope_Lock_Closeout.md`
+- Projects is identity-anchor only.
+- Tool Launcher Contents is precedent only.
+- HB Platform Configuration Registry is global non-secret config only.
+- Project-specific launcher/mapping/review/audit records are stored in project-site lists.
+- New Wave 15 lists define indexed query dimensions.
+
+## Canonical References
+
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_HBCentral_Schema_Audit.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_SharePoint_Storage_And_Indexing_Posture.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/sharepoint-schemas/README.md`
+- `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_02_HBCentral_Schema_Audit_And_Storage_Model_Closeout.md`

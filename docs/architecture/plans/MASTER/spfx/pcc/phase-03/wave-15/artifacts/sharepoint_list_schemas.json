@@ -1,0 +1,1351 @@
+{
+  "PCC External System Definitions": {
+    "scope": "HBCentral",
+    "url": "/sites/HBCentral/Lists/PCC External System Definitions",
+    "attachments": false,
+    "versioning": true,
+    "folders": false,
+    "logicalKey": "SystemKey + IsActive",
+    "fields": [
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Category",
+        "internalName": "SystemCategory",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "microsoft-365",
+          "project-management",
+          "accounting",
+          "esignature",
+          "contract-analysis",
+          "permitting",
+          "progress-camera",
+          "reality-capture",
+          "crm-business-development",
+          "custom"
+        ]
+      },
+      {
+        "displayName": "System Posture",
+        "internalName": "SystemPosture",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "mvp-required",
+          "mvp-optional",
+          "conditional",
+          "project-configurable",
+          "project-configurable-approval-gated",
+          "later",
+          "deferred"
+        ]
+      },
+      {
+        "displayName": "Record Owner",
+        "internalName": "RecordOwner",
+        "type": "Text",
+        "required": true,
+        "indexed": false
+      },
+      {
+        "displayName": "MVP Mode",
+        "internalName": "MvpMode",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "launch-only",
+          "launch-and-mapping-context",
+          "launch-mapping-health-fixture",
+          "project-configurable-multiple-instances",
+          "project-configurable-approval-required",
+          "not-authorized"
+        ]
+      },
+      {
+        "displayName": "Live Read Posture",
+        "internalName": "LiveReadPosture",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["not-authorized", "future-gated", "backend-mediated-future-gated"]
+      },
+      {
+        "displayName": "Writeback Policy",
+        "internalName": "WritebackPolicy",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["prohibited"]
+      },
+      {
+        "displayName": "Allowed Link Types JSON",
+        "internalName": "AllowedLinkTypesJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Approved Domains JSON",
+        "internalName": "ApprovedDomainsJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Sort Order",
+        "internalName": "SortOrder",
+        "type": "Number",
+        "required": true,
+        "indexed": true,
+        "default": 100
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC External URL Policy Registry": {
+    "scope": "HBCentral",
+    "url": "/sites/HBCentral/Lists/PCC External URL Policy Registry",
+    "attachments": false,
+    "versioning": true,
+    "folders": false,
+    "logicalKey": "SystemKey + Hostname + PolicyState",
+    "fields": [
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Hostname",
+        "internalName": "Hostname",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "URL Scheme",
+        "internalName": "UrlScheme",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["https"]
+      },
+      {
+        "displayName": "Policy State",
+        "internalName": "PolicyState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["allowed", "blocked", "requires-review", "deprecated"]
+      },
+      {
+        "displayName": "Allow Iframe",
+        "internalName": "AllowIframe",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "No"
+      },
+      {
+        "displayName": "Allow Current Image Preview",
+        "internalName": "AllowCurrentImagePreview",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "No"
+      },
+      {
+        "displayName": "Requires PM PX Approval",
+        "internalName": "RequiresPmPxApproval",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "No"
+      },
+      {
+        "displayName": "Policy Reason",
+        "internalName": "PolicyReason",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Last Reviewed At",
+        "internalName": "LastReviewedAt",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Reviewed By UPN",
+        "internalName": "ReviewedByUpn",
+        "type": "Text",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC Project External Launch Links": {
+    "scope": "Project Site",
+    "url": "/sites/{ProjectSite}/Lists/PCC Project External Launch Links",
+    "attachments": false,
+    "versioning": true,
+    "folders": false,
+    "logicalKey": "ProjectId + SystemKey + LinkType + NormalizedTargetKey",
+    "fields": [
+      {
+        "displayName": "Project ID",
+        "internalName": "ProjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Project Number",
+        "internalName": "ProjectNumber",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Link Type",
+        "internalName": "LinkType",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "system",
+          "project",
+          "ahj-portal",
+          "private-provider-portal",
+          "progress-camera",
+          "custom",
+          "accounting",
+          "document-library",
+          "camera-viewer",
+          "share-link"
+        ]
+      },
+      {
+        "displayName": "Provider Name",
+        "internalName": "ProviderName",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Normalized Target Key",
+        "internalName": "NormalizedTargetKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Launch URL",
+        "internalName": "LaunchUrl",
+        "type": "URL",
+        "required": true,
+        "indexed": false
+      },
+      {
+        "displayName": "Hostname",
+        "internalName": "Hostname",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Open In New Tab",
+        "internalName": "OpenInNewTab",
+        "type": "Boolean",
+        "required": true,
+        "indexed": false,
+        "default": "Yes"
+      },
+      {
+        "displayName": "Approval State",
+        "internalName": "ApprovalState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["draft", "submitted", "approved", "rejected", "archived", "blocked-by-policy"],
+        "default": "approved"
+      },
+      {
+        "displayName": "Requires Approval",
+        "internalName": "RequiresApproval",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "No"
+      },
+      {
+        "displayName": "Submitted By UPN",
+        "internalName": "SubmittedByUpn",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Submitted At UTC",
+        "internalName": "SubmittedAtUtc",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Approved By UPN",
+        "internalName": "ApprovedByUpn",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Approved At UTC",
+        "internalName": "ApprovedAtUtc",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Sort Order",
+        "internalName": "SortOrder",
+        "type": "Number",
+        "required": true,
+        "indexed": true,
+        "default": 100
+      },
+      {
+        "displayName": "Audience Mode",
+        "internalName": "AudienceMode",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "all-project-members",
+          "role-driven",
+          "accounting-only",
+          "operations-only",
+          "estimating-only"
+        ],
+        "default": "all-project-members"
+      },
+      {
+        "displayName": "Audience Personas JSON",
+        "internalName": "AudiencePersonasJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Iframe Eligible",
+        "internalName": "IframeEligible",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "No"
+      },
+      {
+        "displayName": "Current Image Eligible",
+        "internalName": "CurrentImageEligible",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "No"
+      },
+      {
+        "displayName": "Admin Notes",
+        "internalName": "AdminNotes",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC Project External System Mappings": {
+    "scope": "Project Site",
+    "url": "/sites/{ProjectSite}/Lists/PCC Project External System Mappings",
+    "attachments": false,
+    "versioning": true,
+    "folders": false,
+    "logicalKey": "ProjectId + SystemKey + MappingScope + SourceObjectType",
+    "fields": [
+      {
+        "displayName": "Project ID",
+        "internalName": "ProjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Project Number",
+        "internalName": "ProjectNumber",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Mapping Scope",
+        "internalName": "MappingScope",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "project",
+          "company",
+          "folder",
+          "camera",
+          "permit-portal",
+          "accounting-project",
+          "custom"
+        ]
+      },
+      {
+        "displayName": "Source Object Type",
+        "internalName": "SourceObjectType",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "External Object ID",
+        "internalName": "ExternalObjectId",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "External Object Number",
+        "internalName": "ExternalObjectNumber",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "External Display Name",
+        "internalName": "ExternalDisplayName",
+        "type": "Text",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Mapping State",
+        "internalName": "MappingState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "unmapped",
+          "mapping-proposed",
+          "mapping-confirmed",
+          "mapping-stale",
+          "mapping-conflict",
+          "mapping-archived",
+          "manual-review-required",
+          "blocked-by-policy"
+        ]
+      },
+      {
+        "displayName": "Freshness Band",
+        "internalName": "FreshnessBand",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["fresh", "recent", "stale", "expired", "unknown"]
+      },
+      {
+        "displayName": "Last Verified At UTC",
+        "internalName": "LastVerifiedAtUtc",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Owner Persona",
+        "internalName": "OwnerPersona",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Owner UPN",
+        "internalName": "OwnerUpn",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Lineage JSON",
+        "internalName": "LineageJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Review Item ID",
+        "internalName": "ReviewItemId",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC External Object References": {
+    "scope": "Project Site",
+    "url": "/sites/{ProjectSite}/Lists/PCC External Object References",
+    "attachments": false,
+    "versioning": true,
+    "folders": false,
+    "logicalKey": "ProjectId + SystemKey + ObjectType + ExternalObjectId",
+    "fields": [
+      {
+        "displayName": "Project ID",
+        "internalName": "ProjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Object Type",
+        "internalName": "ObjectType",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "External Object ID",
+        "internalName": "ExternalObjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "External Object Number",
+        "internalName": "ExternalObjectNumber",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "External Object Display Name",
+        "internalName": "ExternalObjectDisplayName",
+        "type": "Text",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Source URL",
+        "internalName": "SourceUrl",
+        "type": "URL",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Source Owner",
+        "internalName": "SourceOwner",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Record Authority",
+        "internalName": "RecordAuthority",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["source-system", "pcc", "derived", "evidence-link"]
+      },
+      {
+        "displayName": "Last Seen At UTC",
+        "internalName": "LastSeenAtUtc",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Last Verified At UTC",
+        "internalName": "LastVerifiedAtUtc",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Permission State",
+        "internalName": "PermissionState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["available", "unauthorized", "forbidden", "unknown"]
+      },
+      {
+        "displayName": "Redaction State",
+        "internalName": "RedactionState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["none", "role-redacted", "source-redacted", "blocked"]
+      },
+      {
+        "displayName": "Evidence Refs JSON",
+        "internalName": "EvidenceRefsJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC External Review Items": {
+    "scope": "Project Site",
+    "url": "/sites/{ProjectSite}/Lists/PCC External Review Items",
+    "attachments": false,
+    "versioning": true,
+    "folders": false,
+    "logicalKey": "ProjectId + SystemKey + IssueType + SubjectKey",
+    "fields": [
+      {
+        "displayName": "Project ID",
+        "internalName": "ProjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Issue Type",
+        "internalName": "IssueType",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "mapping-missing",
+          "mapping-conflict",
+          "stale-mapping",
+          "launch-url-blocked",
+          "custom-link-approval",
+          "permission-unavailable",
+          "source-health-degraded",
+          "admin-verification"
+        ]
+      },
+      {
+        "displayName": "Subject Key",
+        "internalName": "SubjectKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Review State",
+        "internalName": "ReviewState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "open",
+          "assigned",
+          "submitted-to-approval",
+          "approved",
+          "rejected",
+          "deferred",
+          "suppressed",
+          "closed",
+          "superseded"
+        ]
+      },
+      {
+        "displayName": "Current Owner Persona",
+        "internalName": "CurrentOwnerPersona",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Current Owner UPN",
+        "internalName": "CurrentOwnerUpn",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Priority Action ID",
+        "internalName": "PriorityActionId",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Approval Request ID",
+        "internalName": "ApprovalRequestId",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Due At UTC",
+        "internalName": "DueAtUtc",
+        "type": "DateTime",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Issue Summary",
+        "internalName": "IssueSummary",
+        "type": "Note",
+        "required": true,
+        "indexed": false
+      },
+      {
+        "displayName": "Resolution Summary",
+        "internalName": "ResolutionSummary",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC External System Health Snapshots": {
+    "scope": "Project Site",
+    "url": "/sites/{ProjectSite}/Lists/PCC External System Health Snapshots",
+    "attachments": false,
+    "versioning": false,
+    "folders": false,
+    "logicalKey": "ProjectId + SystemKey + HealthSnapshotId",
+    "fields": [
+      {
+        "displayName": "Health Snapshot ID",
+        "internalName": "HealthSnapshotId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Project ID",
+        "internalName": "ProjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Source Status",
+        "internalName": "SourceStatus",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "available",
+          "backend-unavailable",
+          "source-unavailable",
+          "missing-config",
+          "stale",
+          "unauthorized",
+          "forbidden",
+          "degraded",
+          "blocked-by-policy"
+        ]
+      },
+      {
+        "displayName": "Health Tone",
+        "internalName": "HealthTone",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["success", "info", "warning", "danger", "neutral"]
+      },
+      {
+        "displayName": "Evaluated At UTC",
+        "internalName": "EvaluatedAtUtc",
+        "type": "DateTime",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Warning Count",
+        "internalName": "WarningCount",
+        "type": "Number",
+        "required": true,
+        "indexed": true,
+        "default": 0
+      },
+      {
+        "displayName": "Critical Count",
+        "internalName": "CriticalCount",
+        "type": "Number",
+        "required": true,
+        "indexed": true,
+        "default": 0
+      },
+      {
+        "displayName": "Warnings JSON",
+        "internalName": "WarningsJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  },
+  "PCC External System Audit Events": {
+    "scope": "Project Site",
+    "url": "/sites/{ProjectSite}/Lists/PCC External System Audit Events",
+    "attachments": false,
+    "versioning": false,
+    "folders": false,
+    "logicalKey": "EventId",
+    "fields": [
+      {
+        "displayName": "Event ID",
+        "internalName": "EventId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Correlation ID",
+        "internalName": "CorrelationId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Project ID",
+        "internalName": "ProjectId",
+        "type": "Text",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "System Key",
+        "internalName": "SystemKey",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Event Type",
+        "internalName": "EventType",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": [
+          "launch-rendered",
+          "launch-attempted",
+          "launch-blocked",
+          "link-created",
+          "link-submitted",
+          "link-approved",
+          "link-rejected",
+          "link-archived",
+          "mapping-review-created",
+          "mapping-confirmed",
+          "mapping-conflict-detected",
+          "source-health-changed",
+          "hbi-lineage-cited"
+        ]
+      },
+      {
+        "displayName": "Actor UPN",
+        "internalName": "ActorUpn",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Actor Persona",
+        "internalName": "ActorPersona",
+        "type": "Text",
+        "required": false,
+        "indexed": true
+      },
+      {
+        "displayName": "Event At UTC",
+        "internalName": "EventAtUtc",
+        "type": "DateTime",
+        "required": true,
+        "indexed": true
+      },
+      {
+        "displayName": "Redaction State",
+        "internalName": "RedactionState",
+        "type": "Choice",
+        "required": true,
+        "indexed": true,
+        "choices": ["none", "role-redacted", "system-redacted", "blocked"]
+      },
+      {
+        "displayName": "Event Payload JSON",
+        "internalName": "EventPayloadJson",
+        "type": "Note",
+        "required": false,
+        "indexed": false
+      },
+      {
+        "displayName": "Title",
+        "internalName": "Title",
+        "type": "Text",
+        "required": true,
+        "indexed": false,
+        "notes": "Human-readable row title."
+      },
+      {
+        "displayName": "Is Active",
+        "internalName": "IsActive",
+        "type": "Boolean",
+        "required": true,
+        "indexed": true,
+        "default": "Yes",
+        "notes": "Active row gate."
+      },
+      {
+        "displayName": "Created",
+        "internalName": "Created",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified",
+        "internalName": "Modified",
+        "type": "DateTime",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Created By",
+        "internalName": "Author",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      },
+      {
+        "displayName": "Modified By",
+        "internalName": "Editor",
+        "type": "User",
+        "required": false,
+        "indexed": false,
+        "readOnly": true,
+        "notes": "OOB audit."
+      }
+    ]
+  }
+}
