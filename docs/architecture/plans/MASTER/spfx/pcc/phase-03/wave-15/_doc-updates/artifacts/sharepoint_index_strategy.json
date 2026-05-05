@@ -1,0 +1,382 @@
+{
+  "PCC External System Definitions": [
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemCategory",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemPosture",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "MvpMode",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "LiveReadPosture",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "WritebackPolicy",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SortOrder",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC External URL Policy Registry": [
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "Hostname",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "UrlScheme",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "PolicyState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "AllowIframe",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "AllowCurrentImagePreview",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "RequiresPmPxApproval",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "LastReviewedAt",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC Project External Launch Links": [
+    {
+      "field": "ProjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ProjectNumber",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "LinkType",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ProviderName",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "NormalizedTargetKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "Hostname",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ApprovalState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "RequiresApproval",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SubmittedByUpn",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SubmittedAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ApprovedByUpn",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ApprovedAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SortOrder",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "AudienceMode",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IframeEligible",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "CurrentImageEligible",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC Project External System Mappings": [
+    {
+      "field": "ProjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ProjectNumber",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "MappingScope",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SourceObjectType",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ExternalObjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ExternalObjectNumber",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "MappingState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "FreshnessBand",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "LastVerifiedAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "OwnerPersona",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "OwnerUpn",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ReviewItemId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC External Object References": [
+    {
+      "field": "ProjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ObjectType",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ExternalObjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ExternalObjectNumber",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SourceOwner",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "RecordAuthority",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "LastSeenAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "LastVerifiedAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "PermissionState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "RedactionState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC External Review Items": [
+    {
+      "field": "ProjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IssueType",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SubjectKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ReviewState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "CurrentOwnerPersona",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "CurrentOwnerUpn",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "PriorityActionId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ApprovalRequestId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "DueAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC External System Health Snapshots": [
+    {
+      "field": "HealthSnapshotId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ProjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SourceStatus",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "HealthTone",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "EvaluatedAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "WarningCount",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "CriticalCount",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ],
+  "PCC External System Audit Events": [
+    {
+      "field": "EventId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "CorrelationId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ProjectId",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "SystemKey",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "EventType",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ActorUpn",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "ActorPersona",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "EventAtUtc",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "RedactionState",
+      "reason": "indexed query/filter dimension"
+    },
+    {
+      "field": "IsActive",
+      "reason": "indexed query/filter dimension"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "authorizedNow": [
+    "@hbc/models",
+    "@hbc/ui-kit",
+    "existing PCC read-model envelope",
+    "Vitest",
+    "Prettier",
+    "TypeScript"
+  ],
+  "futureGated": [
+    "Microsoft Graph SDK backend-only candidate",
+    "Azure Identity backend-only candidate",
+    "Azure Key Vault backend-only secret reference candidate",
+    "Procore SDK/API client blocked unless separately approved",
+    "Sage Web Services client blocked unless separately approved",
+    "Power Automate / Workato reference-only unless separately approved"
+  ],
+  "blockedInWave15": [
+    "direct SPFx external fetch",
+    "external writeback SDKs",
+    "source-system mutation clients",
+    "secret storage libraries in SPFx"
+  ]
+}

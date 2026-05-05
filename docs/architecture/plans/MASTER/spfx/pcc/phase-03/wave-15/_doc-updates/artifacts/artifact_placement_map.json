@@ -1,0 +1,191 @@
+[
+  {
+    "packageArtifact": "PACKAGE_MANIFEST.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/documentation-update-package/PACKAGE_MANIFEST.md",
+    "action": "retain-package-copy-and-reference-from-wave15-readme",
+    "required": true,
+    "notes": "Package manifest may remain in package folder, but Wave 15 README must link to it."
+  },
+  {
+    "packageArtifact": "README.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/documentation-update-package/README.md",
+    "action": "retain-package-copy-and-reference-from-wave15-readme",
+    "required": true,
+    "notes": "Package README is retained as execution package entry point."
+  },
+  {
+    "packageArtifact": "docs/00_Objective_And_Context.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/README.md",
+    "action": "merge",
+    "required": true,
+    "notes": "Create the Wave 15 blueprint folder and entry README if absent."
+  },
+  {
+    "packageArtifact": "docs/01_Complete_Target_Architecture.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_External_Systems_Launch_Pad_Target_Architecture.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "This must become the canonical Wave 15 target architecture, not remain package-only."
+  },
+  {
+    "packageArtifact": "docs/02_Repo_Truth_And_HBCentral_Schema_Audit.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_HBCentral_Schema_Audit.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Must reference the existing HB Central schema package and confirm no invented tenant fields."
+  },
+  {
+    "packageArtifact": "docs/03_System_Of_Record_And_Source_Lineage.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_System_Of_Record_And_Source_Lineage.md",
+    "action": "copy-or-merge-as-canonical-and-cross-reference-system-of-record-matrix",
+    "required": true,
+    "notes": "Also update the global System_of_Record_Matrix.md with a Wave 15 addendum."
+  },
+  {
+    "packageArtifact": "docs/04_Field_Level_Data_Contracts.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Field_Level_Data_Contracts.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Must align to artifacts/sharepoint_list_schemas.json and field dictionary semantics."
+  },
+  {
+    "packageArtifact": "docs/05_SharePoint_Storage_And_Indexing_Posture.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_SharePoint_Storage_And_Indexing_Posture.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Must include explicit list threshold/index strategy and do-not-overload Projects rule."
+  },
+  {
+    "packageArtifact": "docs/06_SharePoint_List_Schema_Overview.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/sharepoint-schemas/README.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Entry point for proposed Wave 15 list schemas."
+  },
+  {
+    "packageArtifact": "docs/sharepoint-schemas/*.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/sharepoint-schemas/",
+    "action": "copy-all",
+    "required": true,
+    "notes": "All proposed new list schemas must be promoted to the Wave 15 blueprint schema folder."
+  },
+  {
+    "packageArtifact": "docs/07_Route_Read_Model_And_Command_Boundary.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Read_Model_Route_And_Command_Boundary.md",
+    "action": "copy-or-merge-as-canonical-and-update-route-taxonomy",
+    "required": true,
+    "notes": "Also update PCC_Route_Taxonomy_And_Forbidden_Routes.md if new route families are documented."
+  },
+  {
+    "packageArtifact": "docs/08_State_Machines_And_Degraded_States.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_State_Machines_And_Degraded_States.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Must cross-reference machine-readable JSON artifacts."
+  },
+  {
+    "packageArtifact": "docs/09_Persona_Role_Action_And_Redaction_Model.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Persona_Role_Action_And_Redaction_Model.md",
+    "action": "copy-or-merge-as-canonical-and-update-persona-docs",
+    "required": true,
+    "notes": "Must add Accounting Specialist and Accounting Manager to relevant PCC persona docs/registers."
+  },
+  {
+    "packageArtifact": "docs/10_Project_Level_Launcher_Link_Configuration.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Project_Level_Launcher_Link_Configuration.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Permitting, progress camera, and custom-link workflows must be fully preserved."
+  },
+  {
+    "packageArtifact": "docs/11_Wave14_PriorityActions_And_Handoff.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Wave14_And_Priority_Actions_Handoff.md",
+    "action": "copy-or-merge-as-canonical-and-cross-reference-wave14",
+    "required": true,
+    "notes": "Must cross-reference Wave 14 mapping-correction/checkpoint semantics."
+  },
+  {
+    "packageArtifact": "docs/12_UX_Wireframes_And_Interaction_Model.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/wireframes/README.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Wireframe index must link every promoted wireframe."
+  },
+  {
+    "packageArtifact": "docs/wireframes/*.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/wireframes/",
+    "action": "copy-all",
+    "required": true,
+    "notes": "All wireframes must be promoted to canonical Wave 15 blueprint wireframes folder."
+  },
+  {
+    "packageArtifact": "docs/13_Security_Secrets_Audit_And_HBI_Guardrails.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Security_Secrets_Audit_And_HBI_Guardrails.md",
+    "action": "copy-or-merge-as-canonical-and-update-source-system-contracts",
+    "required": true,
+    "notes": "Must also update source-system integration/HBI grounding docs where applicable."
+  },
+  {
+    "packageArtifact": "docs/14_Dependency_Package_And_Test_Strategy.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Dependency_Package_And_Test_Strategy.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Must distinguish authorized packages from future-gated candidates."
+  },
+  {
+    "packageArtifact": "docs/15_Documentation_Update_Targets.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Documentation_Update_Targets.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Plan path copy must include exact documentation targets."
+  },
+  {
+    "packageArtifact": "docs/16_Validation_And_Closeout_Requirements.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Validation_And_Closeout_Requirements.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Validation/closeout gates must be available outside package folder."
+  },
+  {
+    "packageArtifact": "docs/17_ADRs.md",
+    "canonicalDestination": "docs/architecture/adr/",
+    "action": "split-into-individual-adrs-or-create-wave15-adr-bundle-with-index",
+    "required": true,
+    "notes": "Architecture decisions must be promoted into repo ADR location or approved canonical ADR-equivalent location."
+  },
+  {
+    "packageArtifact": "docs/18_TODO_NonBlocking_Items.md",
+    "canonicalDestination": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_TODO_NonBlocking_Items.md",
+    "action": "copy-or-merge-as-canonical",
+    "required": true,
+    "notes": "Only these TODOs may remain open."
+  },
+  {
+    "packageArtifact": "docs/19_Artifact_Placement_And_Canonical_Docs_Promotion_Map.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Artifact_Placement_And_Canonical_Docs_Promotion_Map.md",
+    "action": "copy-as-canonical-and-use-as-closeout-checklist",
+    "required": true,
+    "notes": "This new document is the authoritative placement checklist."
+  },
+  {
+    "packageArtifact": "artifacts/*.json",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/artifacts/",
+    "action": "copy-all-and-validate-json",
+    "required": true,
+    "notes": "Machine-readable contracts must be promoted as executable planning artifacts."
+  },
+  {
+    "packageArtifact": "reference/*.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/reference/",
+    "action": "copy-all",
+    "required": true,
+    "notes": "Research/repo-truth source notes must remain with Wave 15 plan package."
+  },
+  {
+    "packageArtifact": "prompts/*.md",
+    "canonicalDestination": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/prompts/",
+    "action": "copy-all",
+    "required": true,
+    "notes": "Execution prompts and auditor prompt must be stored with Wave 15 planning docs."
+  }
+]

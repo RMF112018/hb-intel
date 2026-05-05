@@ -1,0 +1,42 @@
+[
+  {
+    "capability": "launch pad home",
+    "wave15": "target-contract",
+    "mode": "fixture/mock/read-model"
+  },
+  {
+    "capability": "project launcher links",
+    "wave15": "target-contract",
+    "mode": "project-site list"
+  },
+  {
+    "capability": "custom link approval",
+    "wave15": "target-contract",
+    "mode": "PM/PX approval"
+  },
+  {
+    "capability": "permitting multiple instances",
+    "wave15": "target-contract",
+    "mode": "unlimited project links"
+  },
+  {
+    "capability": "progress camera launch links",
+    "wave15": "target-contract",
+    "mode": "launch-only"
+  },
+  {
+    "capability": "live external reads",
+    "wave15": "prohibited",
+    "mode": "future-gated"
+  },
+  {
+    "capability": "webhooks",
+    "wave15": "prohibited",
+    "mode": "future-gated"
+  },
+  {
+    "capability": "source-system writeback",
+    "wave15": "prohibited",
+    "mode": "not authorized"
+  }
+]

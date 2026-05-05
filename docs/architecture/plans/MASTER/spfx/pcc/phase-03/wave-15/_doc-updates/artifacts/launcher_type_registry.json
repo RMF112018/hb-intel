@@ -1,0 +1,36 @@
+[
+  {
+    "type": "system",
+    "approvalRequired": false,
+    "multiplePerProject": true
+  },
+  {
+    "type": "ahj-portal",
+    "approvalRequired": false,
+    "multiplePerProject": true
+  },
+  {
+    "type": "private-provider-portal",
+    "approvalRequired": false,
+    "multiplePerProject": true
+  },
+  {
+    "type": "progress-camera",
+    "approvalRequired": false,
+    "multiplePerProject": true
+  },
+  {
+    "type": "custom",
+    "approvalRequired": true,
+    "requiredApproverRoles": [
+      "project-manager",
+      "project-executive"
+    ],
+    "multiplePerProject": true
+  },
+  {
+    "type": "accounting",
+    "approvalRequired": false,
+    "multiplePerProject": true
+  }
+]

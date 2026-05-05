@@ -1,0 +1,27 @@
+{
+  "allowedSchemes": [
+    "https"
+  ],
+  "blockedSchemes": [
+    "http",
+    "javascript",
+    "data",
+    "file",
+    "ftp"
+  ],
+  "blockedHosts": [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0"
+  ],
+  "blockPrivateIpRanges": true,
+  "customLinksRequireApproval": true,
+  "requiredApproverRoles": [
+    "project-manager",
+    "project-executive"
+  ],
+  "queryStringPolicy": "allowed but must not contain token, secret, password, key, code, sig, or credential-like parameters",
+  "iframeDefault": "blocked",
+  "currentImageDefault": "blocked",
+  "policySource": "PCC External URL Policy Registry"
+}

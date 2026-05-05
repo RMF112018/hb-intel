@@ -1,0 +1,160 @@
+{
+  "projectExternalLaunchLink": {
+    "states": [
+      "draft",
+      "submitted",
+      "approved",
+      "rejected",
+      "archived",
+      "blocked-by-policy"
+    ],
+    "terminal": [
+      "approved",
+      "rejected",
+      "archived",
+      "blocked-by-policy"
+    ],
+    "transitions": {
+      "draft": [
+        "submitted",
+        "archived"
+      ],
+      "submitted": [
+        "approved",
+        "rejected",
+        "archived",
+        "blocked-by-policy"
+      ],
+      "approved": [
+        "archived",
+        "blocked-by-policy"
+      ],
+      "rejected": [
+        "draft",
+        "archived"
+      ],
+      "archived": [],
+      "blocked-by-policy": [
+        "submitted",
+        "archived"
+      ]
+    },
+    "rules": [
+      "Custom links require PM/PX approval before approved visibility.",
+      "Permitting/progress-camera links can be approved on creation by authorized creators unless URL policy blocks them.",
+      "All URLs must pass HTTPS and hostname policy."
+    ]
+  },
+  "externalSystemMapping": {
+    "states": [
+      "unmapped",
+      "mapping-proposed",
+      "mapping-confirmed",
+      "mapping-stale",
+      "mapping-conflict",
+      "manual-review-required",
+      "blocked-by-policy",
+      "mapping-archived"
+    ],
+    "terminal": [
+      "mapping-confirmed",
+      "blocked-by-policy",
+      "mapping-archived"
+    ],
+    "transitions": {
+      "unmapped": [
+        "mapping-proposed",
+        "manual-review-required",
+        "blocked-by-policy"
+      ],
+      "mapping-proposed": [
+        "mapping-confirmed",
+        "mapping-conflict",
+        "manual-review-required",
+        "mapping-archived"
+      ],
+      "mapping-confirmed": [
+        "mapping-stale",
+        "mapping-conflict",
+        "mapping-archived"
+      ],
+      "mapping-stale": [
+        "mapping-proposed",
+        "manual-review-required",
+        "mapping-conflict",
+        "mapping-archived"
+      ],
+      "mapping-conflict": [
+        "manual-review-required",
+        "mapping-confirmed",
+        "mapping-archived"
+      ],
+      "manual-review-required": [
+        "mapping-confirmed",
+        "mapping-conflict",
+        "blocked-by-policy",
+        "mapping-archived"
+      ],
+      "blocked-by-policy": [
+        "manual-review-required",
+        "mapping-archived"
+      ],
+      "mapping-archived": []
+    }
+  },
+  "externalReviewItem": {
+    "states": [
+      "open",
+      "assigned",
+      "submitted-to-approval",
+      "approved",
+      "rejected",
+      "deferred",
+      "suppressed",
+      "closed",
+      "superseded"
+    ],
+    "terminal": [
+      "approved",
+      "rejected",
+      "deferred",
+      "suppressed",
+      "closed",
+      "superseded"
+    ],
+    "transitions": {
+      "open": [
+        "assigned",
+        "submitted-to-approval",
+        "suppressed",
+        "closed"
+      ],
+      "assigned": [
+        "submitted-to-approval",
+        "deferred",
+        "suppressed",
+        "closed"
+      ],
+      "submitted-to-approval": [
+        "approved",
+        "rejected",
+        "deferred",
+        "superseded"
+      ],
+      "approved": [
+        "closed"
+      ],
+      "rejected": [
+        "assigned",
+        "closed"
+      ],
+      "deferred": [
+        "assigned",
+        "closed"
+      ],
+      "suppressed": [],
+      "closed": [],
+      "superseded": []
+    }
+  }
+}

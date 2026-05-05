@@ -1,0 +1,57 @@
+[
+  {
+    "gate": "repo-truth-audit",
+    "required": true,
+    "proof": "git status, branch, HEAD, recent commits, lockfile MD5"
+  },
+  {
+    "gate": "hbcentral-schema-review",
+    "required": true,
+    "proof": "verify README/List-Map and relevant per-list schema reports"
+  },
+  {
+    "gate": "json-validation",
+    "required": true,
+    "proof": "python3 -m json.tool on every artifact JSON"
+  },
+  {
+    "gate": "prettier",
+    "required": true,
+    "proof": "pnpm exec prettier --check on touched markdown/json"
+  },
+  {
+    "gate": "no-lockfile-change",
+    "required": true,
+    "proof": "pnpm-lock.yaml MD5 unchanged"
+  },
+  {
+    "gate": "no-runtime-change",
+    "required": true,
+    "proof": "no apps/packages/backend runtime edits in docs package"
+  },
+  {
+    "gate": "url-policy-tests",
+    "required": true,
+    "proof": "https-only, hostname policy, custom-link review, blocked scheme tests"
+  },
+  {
+    "gate": "role-action-matrix-tests",
+    "required": true,
+    "proof": "authorized creator/reviewer matrix coverage"
+  },
+  {
+    "gate": "degraded-state-tests",
+    "required": true,
+    "proof": "missing/stale/unauthorized/forbidden/conflict rendering"
+  },
+  {
+    "gate": "accessibility-tests",
+    "required": true,
+    "proof": "keyboard, aria, focus return, disabled action copy"
+  },
+  {
+    "gate": "artifact-placement-proof",
+    "required": true,
+    "proof": "closeout maps every package artifact to a canonical destination, merge/split target, or explicit package-only exception with reason"
+  }
+]
