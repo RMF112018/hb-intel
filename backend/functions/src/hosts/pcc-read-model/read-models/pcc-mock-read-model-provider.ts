@@ -41,12 +41,17 @@ import {
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
   SEVERITY_OVERRIDE_RULES,
   URGENCY_LABELS,
+  // Wave 14 / Prompt 03 — composite read-model + empty composite for
+  // unknown-project / backend-unavailable branches.
+  SAMPLE_APPROVALS_READ_MODEL,
+  EMPTY_APPROVALS_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
   IPccSettingsRef,
   IProjectProfile,
   LifecycleReadinessStatus,
+  PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
@@ -1565,6 +1570,72 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       this.statusForKnownProject(projectId),
       data,
       warnings,
+    );
+  }
+
+  /**
+   * Wave 14 / Prompt 03 — composite approvals/checkpoints read-model.
+   *
+   * Three branches mirror the existing PCC read-model contract:
+   *   - simulateBackendUnavailable → empty composite + backend-unavailable warning
+   *   - unknown project → empty composite + source-unavailable warning
+   *   - known project → SAMPLE_APPROVALS_READ_MODEL, optionally filtered
+   *
+   * When `viewerPersona` is undefined the `myApprovals` slice is returned
+   * unchanged. When a persona is provided, `myApprovals.viewerRole` is set
+   * to the persona and `myApprovals.entries` is filtered to entries whose
+   * `assignedRole === viewerPersona` (empty array when no matches).
+   * Other sub-models pass through unchanged.
+   *
+   * The route layer never derives `viewerPersona` from the request; the
+   * optional argument is exercised exclusively by provider-level tests.
+   */
+  async getApprovals(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_APPROVALS_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_APPROVALS_READ_MODEL,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    const data: PccApprovalsReadModel =
+      viewerPersona === undefined
+        ? SAMPLE_APPROVALS_READ_MODEL
+        : {
+            ...SAMPLE_APPROVALS_READ_MODEL,
+            myApprovals: {
+              viewerPrincipalKey: SAMPLE_APPROVALS_READ_MODEL.myApprovals.viewerPrincipalKey,
+              viewerRole: viewerPersona,
+              entries: SAMPLE_APPROVALS_READ_MODEL.myApprovals.entries.filter(
+                (e) => e.assignedRole === viewerPersona,
+              ),
+            },
+          };
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      data,
+      this.warningsForKnownProject(projectId),
     );
   }
 

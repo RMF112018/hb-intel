@@ -34,6 +34,7 @@ import {
   type PccWarrantyTraceReadModel,
   type PccCrossProjectKnowledgeReadModel,
   type PccUnifiedSearchAskHbiReadModel,
+  type PccApprovalsReadModel,
 } from './index.js';
 import {
   LIFECYCLE_READINESS_LIBRARY_FAMILY_COUNTS,
@@ -54,6 +55,7 @@ import {
   SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
   SAMPLE_WARRANTY_TRACE_READ_MODEL,
 } from './fixtures/unifiedLifecycleReadModels.js';
+import { SAMPLE_APPROVALS_READ_MODEL } from './fixtures/approvals.js';
 
 describe('PccReadModels exports and typing', () => {
   it('exports all required mode and source-status literals', () => {
@@ -421,6 +423,14 @@ describe('PccReadModels exports and typing', () => {
       data: SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
     };
 
+    const approvalsEnvelope: PccReadModelEnvelope<PccApprovalsReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_APPROVALS_READ_MODEL,
+    };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -446,6 +456,7 @@ describe('PccReadModels exports and typing', () => {
       'warranty-trace': warrantyTraceEnvelope,
       'cross-project-knowledge': crossProjectKnowledgeEnvelope,
       'unified-search': unifiedSearchEnvelope,
+      approvals: approvalsEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

@@ -25,6 +25,7 @@ const provider = {
   getWarrantyTrace: vi.fn(),
   getCrossProjectKnowledge: vi.fn(),
   getUnifiedSearch: vi.fn(),
+  getApprovals: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -172,6 +173,11 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     route: 'pcc/projects/{projectId}/unified-search',
     method: 'getUnifiedSearch',
   },
+  {
+    name: 'getPccProjectApprovals',
+    route: 'pcc/projects/{projectId}/approvals',
+    method: 'getApprovals',
+  },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -193,7 +199,7 @@ describe('PCC read-only route registrations', () => {
   });
 
   it('registers exactly the canonical route handlers', () => {
-    expect(registrations).toHaveLength(23);
+    expect(registrations).toHaveLength(24);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);

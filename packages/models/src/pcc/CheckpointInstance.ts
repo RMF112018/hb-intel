@@ -302,6 +302,28 @@ export interface ApprovalAnalyticsReadModel {
   readonly countsBySourceModule: Readonly<Record<CheckpointSourceModule, number>>;
 }
 
+/**
+ * Wave 14 / Prompt 03 composite read-model returned from
+ * `pcc/projects/{projectId}/approvals`.
+ *
+ * Intentionally excludes `detail` (`ApprovalDetailReadModel`) and
+ * `decisionHistory` (`DecisionHistoryReadModel`) — those are
+ * request-scoped and would require an `approvalRequestId` query param
+ * to be meaningful. They are deferred to a future per-request detail
+ * route (post-Wave-14) when SPFx surfaces require per-request drilldown.
+ * Defining them in the composite would force callers to ignore unused
+ * sub-shapes and would pay the response-map cascade twice.
+ */
+export interface PccApprovalsReadModel {
+  readonly queue: ApprovalQueueReadModel;
+  readonly myApprovals: MyApprovalsReadModel;
+  readonly registry: CheckpointRegistryReadModel;
+  readonly escalation: EscalationQueueReadModel;
+  readonly adminVerification: AdminVerificationQueueReadModel;
+  readonly policy: ApprovalPolicyReadModel;
+  readonly analytics: ApprovalAnalyticsReadModel;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers (parameter types defined in this file)
 // ---------------------------------------------------------------------------

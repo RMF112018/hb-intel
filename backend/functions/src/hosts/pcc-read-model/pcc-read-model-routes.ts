@@ -173,3 +173,13 @@ registerPccReadRoute(
   async (projectId, request) =>
     provider.getUnifiedSearch(projectId, undefined, request.query?.get('q') ?? undefined),
 );
+
+// Wave 14 / Prompt 03 — composite approvals/checkpoints read-model.
+// GET-only thin mapping layer: the route MUST NOT derive viewerPersona,
+// actor, or auth-role from the query string. Provider-level tests cover
+// the optional viewerPersona branch directly.
+registerPccReadRoute(
+  'getPccProjectApprovals',
+  'pcc/projects/{projectId}/approvals',
+  async (projectId) => provider.getApprovals(projectId),
+);

@@ -43,6 +43,7 @@ import type {
 } from './ResponsibilityMatrix.js';
 import type { PccConstraintsLogReadModel } from './ConstraintsLog.js';
 import type { PccBuyoutLogReadModel } from './BuyoutLog.js';
+import type { PccApprovalsReadModel } from './CheckpointInstance.js';
 import type { PccProcoreProjectMappingReadModel } from './PccProcoreProjectMapping.js';
 import type { PccProcoreSyncHealthReadModel } from './PccProcoreDataLayer.js';
 import type {
@@ -193,4 +194,11 @@ export interface PccReadModelResponseMap {
   'warranty-trace': PccReadModelEnvelope<PccWarrantyTraceReadModel>;
   'cross-project-knowledge': PccReadModelEnvelope<PccCrossProjectKnowledgeReadModel>;
   'unified-search': PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>;
+  /**
+   * Wave 14 / Prompt 03 — composite approvals/checkpoints read-model
+   * (queue, my-approvals, registry, escalation, admin-verification,
+   * policy, analytics). `detail` and `decisionHistory` are deferred to
+   * a future per-request route.
+   */
+  approvals: PccReadModelEnvelope<PccApprovalsReadModel>;
 }

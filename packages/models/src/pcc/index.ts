@@ -248,6 +248,7 @@ export {
   type AdminVerificationQueueReadModel,
   type ApprovalPolicyReadModel,
   type ApprovalAnalyticsReadModel,
+  type PccApprovalsReadModel,
 } from './CheckpointInstance.js';
 
 // Comments

@@ -42,6 +42,7 @@ import type {
   ICheckpointSourceReference,
   IEscalationQueueEntry,
   MyApprovalsReadModel,
+  PccApprovalsReadModel,
 } from '../CheckpointInstance.js';
 import { mapLegacyCheckpointToInstance } from '../CheckpointInstance.js';
 import type {
@@ -1106,6 +1107,82 @@ function buildAnalyticsView(): ApprovalAnalyticsReadModel {
 }
 
 export const SAMPLE_APPROVAL_ANALYTICS_VIEW: ApprovalAnalyticsReadModel = buildAnalyticsView();
+
+// ---------------------------------------------------------------------------
+// Wave 14 / Prompt 03 composite read-model + empty composite
+//
+// `SAMPLE_APPROVALS_READ_MODEL` assembles the seven sub-views above into
+// the composite shape returned from `pcc/projects/{projectId}/approvals`.
+// `EMPTY_APPROVALS_READ_MODEL` is the deterministic empty composite used
+// for unknown-project and backend-unavailable envelopes — every sub-model
+// has empty arrays / zero counts so the envelope shape is preserved.
+// ---------------------------------------------------------------------------
+
+export const SAMPLE_APPROVALS_READ_MODEL: PccApprovalsReadModel = {
+  queue: SAMPLE_APPROVAL_QUEUE_VIEW,
+  myApprovals: SAMPLE_MY_APPROVALS_VIEW,
+  registry: SAMPLE_CHECKPOINT_REGISTRY_VIEW,
+  escalation: SAMPLE_ESCALATION_QUEUE_VIEW,
+  adminVerification: SAMPLE_ADMIN_VERIFICATION_QUEUE_VIEW,
+  policy: SAMPLE_APPROVAL_POLICY_VIEW,
+  analytics: SAMPLE_APPROVAL_ANALYTICS_VIEW,
+};
+
+const EMPTY_COUNTS_BY_STATE: ApprovalAnalyticsReadModel['countsByState'] = {
+  draft: 0,
+  requested: 0,
+  'pending-review': 0,
+  'in-review': 0,
+  'revision-requested': 0,
+  approved: 0,
+  'rejected-returned': 0,
+  deferred: 0,
+  waived: 0,
+  overridden: 0,
+  escalated: 0,
+  cancelled: 0,
+  superseded: 0,
+  expired: 0,
+  'execution-pending': 0,
+  'manually-closed': 0,
+  archived: 0,
+};
+
+const EMPTY_COUNTS_BY_SOURCE_MODULE: ApprovalAnalyticsReadModel['countsBySourceModule'] = {
+  'team-and-access': 0,
+  'document-control': 0,
+  'project-lifecycle-readiness-center': 0,
+  'permit-and-inspection-control-center': 0,
+  'responsibility-matrix': 0,
+  'constraints-log': 0,
+  'buyout-log': 0,
+  'estimating-workbench-wave-13g': 0,
+  'external-systems': 0,
+  'site-health': 0,
+  'priority-actions': 0,
+  'project-readiness': 0,
+  'executive-oversight': 0,
+  'admin-review-surfaces': 0,
+};
+
+export const EMPTY_APPROVALS_READ_MODEL: PccApprovalsReadModel = {
+  queue: { entries: [] },
+  myApprovals: {
+    viewerPrincipalKey: '',
+    viewerRole: 'viewer',
+    entries: [],
+  },
+  registry: { definitions: [], checkpointInstances: [] },
+  escalation: { entries: [] },
+  adminVerification: { entries: [] },
+  policy: { policies: [], versions: [] },
+  analytics: {
+    totalRequests: 0,
+    countsByState: EMPTY_COUNTS_BY_STATE,
+    countsByMode: {},
+    countsBySourceModule: EMPTY_COUNTS_BY_SOURCE_MODULE,
+  },
+};
 
 // ---------------------------------------------------------------------------
 // Helpers (module-private)

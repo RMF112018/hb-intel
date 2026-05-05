@@ -9,6 +9,7 @@
  */
 
 import type {
+  PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccDocumentControlReadModel,
@@ -136,6 +137,19 @@ export interface IPccReadModelProvider {
     viewerPersona?: PccPersona,
     query?: string,
   ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
+  /**
+   * Wave 14 / Prompt 03 — composite approvals read-model
+   * (queue, my-approvals, registry, escalation, admin-verification,
+   * policy, analytics). When `viewerPersona` is provided, the
+   * `myApprovals` slice MUST be filtered to entries whose
+   * `assignedRole === viewerPersona` and `myApprovals.viewerRole`
+   * MUST equal that persona; otherwise `myApprovals` is returned
+   * unchanged from the underlying fixture/source.
+   */
+  getApprovals(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {

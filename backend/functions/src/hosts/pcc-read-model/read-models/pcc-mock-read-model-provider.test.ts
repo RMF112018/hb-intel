@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
+  EMPTY_APPROVALS_READ_MODEL,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
+  SAMPLE_APPROVALS_READ_MODEL,
   SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
@@ -966,5 +968,100 @@ describe('PccMockReadModelProvider source posture (no runtime, no mutation)', ()
     for (const pattern of FORBIDDEN_EXECUTABLE_TOKENS) {
       expect(stripped, `matched ${pattern}`).not.toMatch(pattern);
     }
+  });
+});
+
+// ===========================================================================
+// Wave 14 / Prompt 03 — getApprovals composite read-model behavior
+// ===========================================================================
+
+const UNKNOWN_APPROVALS_PROJECT_ID: PccProjectId =
+  'project-unknown-approvals-001' as PccProjectId;
+
+describe('PccMockReadModelProvider.getApprovals — known project, no viewerPersona', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the full SAMPLE_APPROVALS_READ_MODEL composite unchanged', async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID);
+    expect(env.mode).toBe('mock');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.viewerPersona).toBeUndefined();
+    expect(env.data).toBe(SAMPLE_APPROVALS_READ_MODEL);
+  });
+
+  it('exposes every required Wave 14 composite field', async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID);
+    expect(env.data.queue).toBeDefined();
+    expect(env.data.myApprovals).toBeDefined();
+    expect(env.data.registry).toBeDefined();
+    expect(env.data.escalation).toBeDefined();
+    expect(env.data.adminVerification).toBeDefined();
+    expect(env.data.policy).toBeDefined();
+    expect(env.data.analytics).toBeDefined();
+  });
+
+  it('does not include detail or decisionHistory (deferred to a future per-request route)', async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID);
+    expect((env.data as Record<string, unknown>).detail).toBeUndefined();
+    expect((env.data as Record<string, unknown>).decisionHistory).toBeUndefined();
+  });
+});
+
+describe('PccMockReadModelProvider.getApprovals — known project, viewerPersona provided', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it("filters myApprovals.entries by assignedRole === 'project-executive' and sets viewerRole", async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID, 'project-executive');
+    expect(env.viewerPersona).toBe('project-executive');
+    expect(env.data.myApprovals.viewerRole).toBe('project-executive');
+    for (const entry of env.data.myApprovals.entries) {
+      expect(entry.assignedRole).toBe('project-executive');
+    }
+    expect(env.data.myApprovals.entries.length).toBeGreaterThan(0);
+  });
+
+  it('returns an empty entries array for a persona with no fixture matches', async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID, 'subcontractor-limited');
+    expect(env.data.myApprovals.viewerRole).toBe('subcontractor-limited');
+    expect(env.data.myApprovals.entries).toEqual([]);
+  });
+
+  it('passes through other sub-models unchanged when viewerPersona is provided', async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID, 'project-executive');
+    expect(env.data.queue).toBe(SAMPLE_APPROVALS_READ_MODEL.queue);
+    expect(env.data.registry).toBe(SAMPLE_APPROVALS_READ_MODEL.registry);
+    expect(env.data.escalation).toBe(SAMPLE_APPROVALS_READ_MODEL.escalation);
+    expect(env.data.adminVerification).toBe(SAMPLE_APPROVALS_READ_MODEL.adminVerification);
+    expect(env.data.policy).toBe(SAMPLE_APPROVALS_READ_MODEL.policy);
+    expect(env.data.analytics).toBe(SAMPLE_APPROVALS_READ_MODEL.analytics);
+  });
+});
+
+describe('PccMockReadModelProvider.getApprovals — unknown project', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the EMPTY composite with source-unavailable status and a warning', async () => {
+    const env = await provider.getApprovals(UNKNOWN_APPROVALS_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data).toBe(EMPTY_APPROVALS_READ_MODEL);
+    expect(env.warnings.some((w) => w.code === 'source-unavailable')).toBe(true);
+    expect(env.readOnly).toBe(true);
+    expect(env.mode).toBe('mock');
+  });
+});
+
+describe('PccMockReadModelProvider.getApprovals — backend-unavailable simulation', () => {
+  const provider = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+
+  it('returns the EMPTY composite with backend-unavailable status and a warning', async () => {
+    const env = await provider.getApprovals(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data).toBe(EMPTY_APPROVALS_READ_MODEL);
+    expect(env.warnings.some((w) => w.code === 'backend-unavailable')).toBe(true);
+    expect(env.readOnly).toBe(true);
+    expect(env.mode).toBe('mock');
   });
 });

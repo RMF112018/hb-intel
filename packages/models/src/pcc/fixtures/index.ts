@@ -50,6 +50,9 @@ export {
   SAMPLE_DECISION_HISTORY_VIEW,
   SAMPLE_APPROVAL_POLICY_VIEW,
   SAMPLE_APPROVAL_ANALYTICS_VIEW,
+  // Wave 14 / Prompt 03 — composite read-model + empty composite.
+  SAMPLE_APPROVALS_READ_MODEL,
+  EMPTY_APPROVALS_READ_MODEL,
 } from './approvals.js';
 
 export { SAMPLE_BUSINESS_AUDIT_EVENTS } from './audit.js';
@@ -266,6 +269,8 @@ import {
   SAMPLE_DECISION_HISTORY_VIEW,
   SAMPLE_APPROVAL_POLICY_VIEW,
   SAMPLE_APPROVAL_ANALYTICS_VIEW,
+  SAMPLE_APPROVALS_READ_MODEL,
+  EMPTY_APPROVALS_READ_MODEL,
 } from './approvals.js';
 import { SAMPLE_BUSINESS_AUDIT_EVENTS } from './audit.js';
 import { SAMPLE_COMMENTS, SAMPLE_COMMENT_HISTORY } from './comments.js';
@@ -453,6 +458,8 @@ export const PCC_FIXTURES = {
     decisionHistoryView: SAMPLE_DECISION_HISTORY_VIEW,
     policyView: SAMPLE_APPROVAL_POLICY_VIEW,
     analyticsView: SAMPLE_APPROVAL_ANALYTICS_VIEW,
+    composite: SAMPLE_APPROVALS_READ_MODEL,
+    emptyComposite: EMPTY_APPROVALS_READ_MODEL,
   },
   audit: {
     events: SAMPLE_BUSINESS_AUDIT_EVENTS,
