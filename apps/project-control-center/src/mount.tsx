@@ -54,9 +54,7 @@ export async function mount(
   if (!mountedInstance.root) {
     mountedInstance.root = createRoot(el);
   }
-  const readModelClient = _config?.readModel
-    ? createPccReadModelClient(_config.readModel)
-    : undefined;
+  const readModelClient = createPccReadModelClient(_config?.readModel);
   mountedInstance.root.render(createElement(PccApp, { readModelClient }));
 }
 

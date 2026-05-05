@@ -260,6 +260,30 @@ describe('mount(...) opt-in', () => {
     expect(typeof (result as Promise<void> | undefined)?.then).toBe('function');
     await expect(result).resolves.toBeUndefined();
   });
+
+  it('mount(host) without a readModel config defaults to the fixture client and renders the read-model-driven surfaces', async () => {
+    fetchSpy.mockImplementation(() => {
+      throw new Error('fetch must not be called when mount() defaults to the fixture client');
+    });
+    await act(async () => {
+      await mountPcc(host);
+    });
+    await waitFor(() => {
+      const cards = host.querySelectorAll('[data-pcc-card]');
+      // Decisive assertion (primary): no-config mount must produce the same
+      // card count as the explicit fixture-mode mount above (line 171). The
+      // number itself is governed by that sibling test — this is intentionally
+      // mirroring the canonical fixture-mode contract, NOT an independent
+      // magic number. If the canonical fixture-mode count changes, both
+      // tests move together.
+      expect(cards.length).toBe(16);
+    });
+    // Secondary guard: confirms the new path stays inside the no-runtime
+    // posture (fixture client is synchronous/in-memory). Decisive proof of
+    // the fix is the card count above; this assertion only proves the fix
+    // didn't accidentally introduce a network call.
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client', () => {
