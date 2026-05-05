@@ -284,6 +284,38 @@ describe('mount(...) opt-in', () => {
     // didn't accidentally introduce a network call.
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it('mount(host) renders resolved Project Home fixture content (skeleton/busy markers cleared)', async () => {
+    // Wave 99: this test closes the resolved-content gap — prior tests
+    // counted cards (`length === 16`) but never asserted that the cards
+    // had actually exited skeleton state with fixture data populated.
+    // A regression that left `useProjectHomeReadModel` stuck at
+    // `'loading'` would still produce 16 card containers (each rendering
+    // `viewModel?.* ?? 'preview'`) and pass the count test, while the
+    // tenant rendered placeholder content. This assertion anchors to
+    // canonical fixture text from `@hbc/models/pcc` (project name and
+    // number) so the check moves with the canonical sample, not invented
+    // strings.
+    fetchSpy.mockImplementation(() => {
+      throw new Error('fetch must not be called when mount() defaults to the fixture client');
+    });
+    await act(async () => {
+      await mountPcc(host);
+    });
+    await waitFor(() => {
+      const text = host.textContent ?? '';
+      // Decisive primary: canonical Project Home fixture identifiers are
+      // visible in the rendered DOM. If the hook is stuck at `'loading'`
+      // (the prior bug), `viewModel` is undefined, the intelligence card
+      // renders no profile data, and these strings are absent.
+      expect(text).toContain(SAMPLE_PROJECT_PROFILE.projectName);
+      expect(text).toContain(SAMPLE_PROJECT_PROFILE.projectNumber);
+    });
+    // Decisive secondary: no element is left in `aria-busy="true"`
+    // posture. PccPreviewState renders `aria-busy` while in `'loading'`
+    // posture; once slots resolve, those flags clear.
+    expect(host.querySelectorAll('[aria-busy="true"]').length).toBe(0);
+  });
 });
 
 describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client', () => {

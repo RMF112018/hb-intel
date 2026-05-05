@@ -31,7 +31,7 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
   dataActiveSurfacePanel,
 }) => {
   const { mode } = usePccBentoContext();
-  const { ref, rowSpan } = useBentoRowSpan();
+  const { ref, rowSpan, measuredHeight } = useBentoRowSpan();
   const columnSpan = FOOTPRINT_COLUMN_SPANS[mode][footprint];
 
   const style: CSSProperties = {
@@ -46,6 +46,8 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       data-pcc-footprint={footprint}
       data-pcc-mode={mode}
       data-pcc-column-span={columnSpan}
+      data-pcc-row-span={rowSpan}
+      data-pcc-measured-height={measuredHeight}
       data-pcc-active-surface-panel={dataActiveSurfacePanel}
       style={style}
       aria-label={ariaLabel ?? title}

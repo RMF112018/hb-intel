@@ -6,10 +6,13 @@
  * them through `buildPccProjectHomeViewModel`, and exposes a stable
  * view-model.
  *
- * Returns `'loading'` on first render. Wave 4 clients always resolve
- * (Prompt 03 safe-fallback design), so the hook never enters an error
- * branch. Cancellation prevents stale envelope writes after unmount
- * or a `client` / `projectId` change.
+ * Returns `'loading'` on first render, then transitions to `'ready'`
+ * once the parallel fetches resolve. Each per-call result is wrapped
+ * in `.catch(() => undefined)` so a single rejected envelope degrades
+ * to a per-slot `'source-unavailable'` posture in the adapter without
+ * stalling the whole surface in `'loading'`. Cancellation prevents
+ * stale envelope writes after unmount or a `client` / `projectId`
+ * change.
  */
 
 import { useEffect, useState } from 'react';
@@ -37,11 +40,16 @@ export function useProjectHomeReadModel(
     let cancelled = false;
     setState({ status: 'loading' });
     void (async () => {
-      // Wave 14 / Prompt 06 — approvals fetch is wrapped in a per-call
-      // `.catch(() => undefined)` so an approvals-only failure degrades
-      // gracefully to zero approvals-derived candidates / fixture-fallback
-      // card. Other Project Home reads keep their existing failure
-      // semantics so this prompt does not change Wave 4 behaviour.
+      // Wave 14 / Prompt 06 introduced per-call `.catch(() => undefined)`
+      // for `getApprovals` so an approvals-only rejection degraded
+      // gracefully. The remaining five reads previously assumed clients
+      // never reject (`Wave 4 / Prompt 03 safe-fallback design`); under
+      // hosted SPFx runtime that assumption can break (any single
+      // rejection propagated unhandled, leaving the hook permanently in
+      // `loading` and the surface in skeleton). Wrapping every call in
+      // `.catch(() => undefined)` lets the adapter degrade per-slot to
+      // a `'source-unavailable'` posture rather than stalling the whole
+      // surface.
       const [
         home,
         priorityActions,
@@ -50,11 +58,11 @@ export function useProjectHomeReadModel(
         procoreSyncHealth,
         approvals,
       ] = await Promise.all([
-        client.getProjectHome(projectId),
-        client.getPriorityActions(projectId),
-        client.getDocumentControl(projectId),
-        client.getProcoreProjectMapping(projectId),
-        client.getProcoreSyncHealth(projectId),
+        client.getProjectHome(projectId).catch(() => undefined),
+        client.getPriorityActions(projectId).catch(() => undefined),
+        client.getDocumentControl(projectId).catch(() => undefined),
+        client.getProcoreProjectMapping(projectId).catch(() => undefined),
+        client.getProcoreSyncHealth(projectId).catch(() => undefined),
         client.getApprovals(projectId).catch(() => undefined),
       ]);
       if (cancelled) return;

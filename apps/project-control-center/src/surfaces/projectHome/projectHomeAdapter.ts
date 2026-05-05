@@ -46,11 +46,20 @@ import type {
 
 export interface IProjectHomeAdapterInput {
   readonly projectId: PccProjectId;
-  readonly home: PccReadModelEnvelope<PccProjectHomeReadModel>;
-  readonly documentControl: PccReadModelEnvelope<PccDocumentControlReadModel>;
+  /**
+   * All envelope fields are optional. When absent (runtime degraded path
+   * — the consuming hook caught a rejected client call with
+   * `.catch(() => undefined)`), the adapter emits a per-slot
+   * `'source-unavailable'` posture instead of throwing. Slots derived
+   * from the same envelope degrade together (e.g., when `home` is
+   * undefined, `intelligence`, `siteHealth`, and `missingConfigurations`
+   * all degrade).
+   */
+  readonly home?: PccReadModelEnvelope<PccProjectHomeReadModel>;
+  readonly documentControl?: PccReadModelEnvelope<PccDocumentControlReadModel>;
   readonly priorityActions?: PccReadModelEnvelope<PccPriorityActionsReadModel>;
-  readonly procoreProjectMapping: PccReadModelEnvelope<PccProcoreProjectMappingReadModel>;
-  readonly procoreSyncHealth: PccReadModelEnvelope<PccProcoreSyncHealthReadModel>;
+  readonly procoreProjectMapping?: PccReadModelEnvelope<PccProcoreProjectMappingReadModel>;
+  readonly procoreSyncHealth?: PccReadModelEnvelope<PccProcoreSyncHealthReadModel>;
   /**
    * Wave 14 / Prompt 06 — approvals composite envelope. Optional. When
    * absent (runtime degraded path), zero approvals-derived priority actions
@@ -58,6 +67,52 @@ export interface IProjectHomeAdapterInput {
    * back to its fixture render).
    */
   readonly approvals?: PccReadModelEnvelope<PccApprovalsReadModel>;
+}
+
+const DEGRADED_SOURCE_STATUS: PccReadModelSourceStatus = 'source-unavailable';
+
+/**
+ * Build a synthetic empty envelope used when a Procore read-model call
+ * was caught (`.catch(() => undefined)` in the hook). The Procore
+ * surface adapter already treats `'source-unavailable'` envelopes as
+ * fail-closed: when `mappingFailClosed` / `syncFailClosed` is true, the
+ * builder reads only `data.mappings` (or `data.syncHealthEntries` /
+ * `derivedSignals` / `curatedSummaries`) before short-circuiting to
+ * empty values. The remaining read-model fields
+ * (`moduleIdentity`, `registryContexts`, `subjectAreas`, etc.) are
+ * never accessed under fail-closed, so providing a minimal data shape
+ * via `as unknown as` cast is safe at runtime; the cast is scoped to
+ * these helpers only and the result feeds straight into
+ * `buildPccProcoreSurfaceViewModel`'s fail-closed path.
+ */
+function syntheticDegradedMappingEnvelope(
+  projectId: PccProjectId,
+): PccReadModelEnvelope<PccProcoreProjectMappingReadModel> {
+  return {
+    projectId,
+    mode: 'mock',
+    sourceStatus: DEGRADED_SOURCE_STATUS,
+    readOnly: true,
+    warnings: [],
+    data: { mappings: [] } as unknown as PccProcoreProjectMappingReadModel,
+  };
+}
+
+function syntheticDegradedSyncHealthEnvelope(
+  projectId: PccProjectId,
+): PccReadModelEnvelope<PccProcoreSyncHealthReadModel> {
+  return {
+    projectId,
+    mode: 'mock',
+    sourceStatus: DEGRADED_SOURCE_STATUS,
+    readOnly: true,
+    warnings: [],
+    data: {
+      syncHealthEntries: [],
+      derivedSignals: [],
+      curatedSummaries: [],
+    } as unknown as PccProcoreSyncHealthReadModel,
+  };
 }
 
 const PREVIEW_TO_CARD_STATE: Readonly<Record<PccPreviewStateKind, PccCardState>> = {
@@ -89,15 +144,27 @@ function slot<TData>(
 export function buildPccProjectHomeViewModel(
   input: IProjectHomeAdapterInput,
 ): IPccProjectHomeViewModel {
-  const homeStatus = input.home.sourceStatus;
-  const docStatus = input.documentControl.sourceStatus;
-  const home = input.home.data;
-  const docs = input.documentControl.data;
+  // When `home` or `documentControl` was caught (`.catch(() => undefined)`
+  // in the hook), the corresponding slots degrade to `'source-unavailable'`
+  // posture rather than throwing on `input.home.data` / `input.documentControl.data`.
+  const homeStatus: PccReadModelSourceStatus = input.home
+    ? input.home.sourceStatus
+    : DEGRADED_SOURCE_STATUS;
+  const docStatus: PccReadModelSourceStatus = input.documentControl
+    ? input.documentControl.sourceStatus
+    : DEGRADED_SOURCE_STATUS;
+  const homeData = input.home?.data;
+  const docs = input.documentControl?.data;
 
+  // Procore surface view-model: when either Procore envelope is undefined,
+  // synthesize an empty `'source-unavailable'` envelope so the existing
+  // `buildPccProcoreSurfaceViewModel` fail-closed branches handle the
+  // degraded path uniformly. No new branching in the Procore adapter.
   const procoreSnapshotData = buildPccProcoreSurfaceViewModel({
     projectId: input.projectId,
-    mapping: input.procoreProjectMapping,
-    syncHealth: input.procoreSyncHealth,
+    mapping: input.procoreProjectMapping ?? syntheticDegradedMappingEnvelope(input.projectId),
+    syncHealth:
+      input.procoreSyncHealth ?? syntheticDegradedSyncHealthEnvelope(input.projectId),
   });
   // Wave 13 Prompt 13E — Procore priority-action signals flow into the
   // existing Priority Actions Rail via category 'procore-sync', which the
@@ -107,7 +174,7 @@ export function buildPccProjectHomeViewModel(
   );
   const baseActions = input.priorityActions
     ? (input.priorityActions.data.actions ?? [])
-    : (home.priorityActions ?? []);
+    : (homeData?.priorityActions ?? []);
   const priorityActionsSourceStatus = input.priorityActions
     ? input.priorityActions.sourceStatus
     : homeStatus;
@@ -127,8 +194,13 @@ export function buildPccProjectHomeViewModel(
   ]);
   // Use the procore-mapping envelope's status as the canonical slot
   // sourceStatus; the adapter's `chooseEnvelopeStatus` already encodes
-  // fail-closed precedence across both envelopes.
-  const procoreSlotStatus: PccReadModelSourceStatus = input.procoreProjectMapping.sourceStatus;
+  // fail-closed precedence across both envelopes. When the mapping
+  // envelope was caught, the synthetic degraded envelope above carries
+  // `'source-unavailable'`, so this slot status reflects the degraded
+  // posture without extra branching here.
+  const procoreSlotStatus: PccReadModelSourceStatus = input.procoreProjectMapping
+    ? input.procoreProjectMapping.sourceStatus
+    : DEGRADED_SOURCE_STATUS;
 
   // Wave 14 / Prompt 06 — small approvals card view-model. Built only when
   // an approvals envelope is supplied (runtime degraded path → undefined →
@@ -138,11 +210,11 @@ export function buildPccProjectHomeViewModel(
     : undefined;
 
   return {
-    intelligence: slot(homeStatus, home.profile),
+    intelligence: slot(homeStatus, homeData?.profile),
     priorityActions: priorityActionsSlot,
-    siteHealth: slot(homeStatus, home.siteHealth),
-    documentControl: slot(docStatus, docs.sources ?? []),
-    missingConfigurations: slot(homeStatus, home.missingConfigurations ?? []),
+    siteHealth: slot(homeStatus, homeData?.siteHealth),
+    documentControl: slot(docStatus, docs?.sources ?? []),
+    missingConfigurations: slot(homeStatus, homeData?.missingConfigurations ?? []),
     procoreSnapshot: slot(procoreSlotStatus, procoreSnapshotData),
     approvalsCard,
   };

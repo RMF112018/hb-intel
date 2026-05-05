@@ -80,4 +80,32 @@ describe('PccBentoGrid footprint contract', () => {
     expect(footprints.size).toBeGreaterThan(1);
     expect(spans.size).toBeGreaterThan(1);
   });
+
+  it('emits data-pcc-row-span at or above initialMinRows on initial render (regression: tenant gridRow span 1 collapse)', () => {
+    // Tenant evidence (1.0.0.3) showed cards rendering with
+    // `gridRow: span 1` × 8px row unit = 8px tall, clipping content.
+    // This test asserts the diagnostic attribute is wired and that the
+    // initial-render row span (before any ResizeObserver fires) is at
+    // least the hook's documented `initialMinRows` floor (4). Deep
+    // collapse-resistance proof — including ResizeObserver behavior
+    // under constrained measurements — lives in
+    // `apps/project-control-center/src/layout/useBentoRowSpan.test.tsx`.
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccDashboardCard footprint="standard" title="x">
+          x
+        </PccDashboardCard>
+      </PccBentoGrid>,
+    );
+    const card = container.querySelector('[data-pcc-card]') as HTMLElement | null;
+    expect(card).not.toBeNull();
+    const rowSpanAttr = card?.getAttribute('data-pcc-row-span');
+    expect(rowSpanAttr).not.toBeNull();
+    // Anchor: the hook's documented `initialMinRows` default is 4.
+    // The browser-evidence regression was rowSpan === 1.
+    expect(Number(rowSpanAttr)).toBeGreaterThanOrEqual(4);
+    // Inline style mirrors the diagnostic attr — never `span 1`.
+    expect(card?.style.gridRow).toBe(`span ${rowSpanAttr}`);
+    expect(card?.style.gridRow).not.toBe('span 1');
+  });
 });

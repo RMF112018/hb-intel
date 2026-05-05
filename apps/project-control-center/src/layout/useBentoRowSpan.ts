@@ -20,10 +20,23 @@ export function useBentoRowSpan(initialMinRows = 4): UseBentoRowSpanResult {
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
-      const height = entry.contentBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+      const observedHeight =
+        entry.contentBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+      // Break the constrained-measurement feedback loop: when the card
+      // body is clipped by the current grid cell (`grid-auto-rows × span`),
+      // ResizeObserver reports the constrained box height, which would
+      // otherwise drive the next span calculation back down and keep
+      // the cell at 8px. `scrollHeight` reports the intrinsic content
+      // extent regardless of the parent clip, so taking the max of
+      // the two recovers from the constrained state on the next tick.
+      const intrinsicHeight =
+        typeof node.scrollHeight === 'number' ? node.scrollHeight : 0;
+      const height = Math.max(observedHeight, intrinsicHeight);
       setMeasuredHeight(height);
+      // Floor at `initialMinRows`. The row span is the hook's documented
+      // minimum vertical posture, not a value ResizeObserver can shrink.
       const span = Math.max(
-        1,
+        initialMinRows,
         Math.ceil(
           (height + PCC_BENTO_GRID_GAP_PX) /
             (PCC_BENTO_GRID_ROW_UNIT_PX + PCC_BENTO_GRID_GAP_PX),

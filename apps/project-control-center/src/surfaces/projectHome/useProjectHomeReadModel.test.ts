@@ -216,4 +216,77 @@ describe('useProjectHomeReadModel', () => {
       expect(result.current.viewModel?.intelligence.sourceStatus).toBe('backend-unavailable'),
     );
   });
+
+  it('reaches `ready` with `source-unavailable` slots when getProjectHome rejects (per-call catch)', async () => {
+    // Wave 99: under hosted SPFx runtime a single read-model call can reject
+    // (e.g., a transient transport failure). The hook wraps every call in
+    // `.catch(() => undefined)` so a rejection degrades to a per-slot
+    // `'source-unavailable'` posture rather than stalling the surface in
+    // `'loading'` forever (the prior bug that drove the tenant skeleton
+    // symptom). This test mocks `getProjectHome` to reject and asserts the
+    // hook still reaches `'ready'`, with home-derived slots flagged as
+    // source-unavailable while non-home-dependent slots resolve normally.
+    const baseClient = createPccFixtureReadModelClient();
+    const client: IPccProjectHomeReadModelClient = {
+      getProjectHome: () => Promise.reject(new Error('transient transport failure')),
+      getDocumentControl: (id, persona) => baseClient.getDocumentControl(id, persona),
+      getPriorityActions: (id, persona) => baseClient.getPriorityActions(id, persona),
+      getProcoreProjectMapping: (id, persona) => baseClient.getProcoreProjectMapping(id, persona),
+      getProcoreSyncHealth: (id, persona) => baseClient.getProcoreSyncHealth(id, persona),
+      getUnifiedLifecycle: (id, persona) => baseClient.getUnifiedLifecycle(id, persona),
+      getUnifiedSearch: (id, persona, query) => baseClient.getUnifiedSearch(id, persona, query),
+      getApprovals: (id, persona) => baseClient.getApprovals(id, persona),
+    };
+    const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    const vm = result.current.viewModel;
+    expect(vm).toBeDefined();
+    expect(vm?.intelligence.sourceStatus).toBe('source-unavailable');
+    expect(vm?.intelligence.state).toBe('unavailable-fixture');
+    expect(vm?.intelligence.data).toBeUndefined();
+    expect(vm?.siteHealth.sourceStatus).toBe('source-unavailable');
+    expect(vm?.missingConfigurations.sourceStatus).toBe('source-unavailable');
+    // documentControl slot stays resolved because its envelope didn't reject.
+    expect(vm?.documentControl.sourceStatus).toBe('available');
+  });
+
+  it('reaches `ready` with all degraded slots when every read-model call rejects', async () => {
+    // Worst-case rejection: every call fails. The hook must not hang in
+    // `'loading'`; it must produce a fully-degraded view-model so the
+    // surface renders `'unavailable-fixture'` cards rather than skeleton.
+    const reject = () => Promise.reject(new Error('all calls rejected'));
+    const client: IPccProjectHomeReadModelClient = {
+      getProjectHome: reject,
+      getDocumentControl: reject,
+      getPriorityActions: reject,
+      getProcoreProjectMapping: reject,
+      getProcoreSyncHealth: reject,
+      getUnifiedLifecycle: reject,
+      getUnifiedSearch: reject,
+      getApprovals: reject,
+    };
+    const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    const vm = result.current.viewModel;
+    expect(vm).toBeDefined();
+    for (const key of [
+      'intelligence',
+      'siteHealth',
+      'documentControl',
+      'missingConfigurations',
+      'priorityActions',
+      'procoreSnapshot',
+    ] as const) {
+      expect(vm?.[key].sourceStatus).toBe('source-unavailable');
+    }
+    expect(vm?.intelligence.data).toBeUndefined();
+    expect(vm?.siteHealth.data).toBeUndefined();
+    expect(vm?.documentControl.data).toEqual([]);
+    expect(vm?.missingConfigurations.data).toEqual([]);
+    expect(vm?.priorityActions.data).toEqual([]);
+    // Approvals card view-model is omitted when the approvals envelope is
+    // absent (existing Wave 14 contract; preserved when getApprovals
+    // rejects).
+    expect(vm?.approvalsCard).toBeUndefined();
+  });
 });

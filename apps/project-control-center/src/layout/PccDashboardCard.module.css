@@ -13,7 +13,12 @@
   flex-direction: column;
   gap: var(--pcc-space-sm);
   padding: var(--pcc-space-md);
-  height: 100%;
+  /* `min-height: 100%` (not `height: 100%`) lets the body grow to its
+     intrinsic content extent when the parent grid cell is undersized
+     so `useBentoRowSpan` can read a non-collapsed `scrollHeight` and
+     recover the row span. The card's `overflow: hidden` still clips
+     defensively when the span is correct. */
+  min-height: 100%;
   box-sizing: border-box;
 }
 
