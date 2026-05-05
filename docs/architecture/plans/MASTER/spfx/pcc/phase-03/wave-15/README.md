@@ -31,6 +31,20 @@ This canonical Wave 15 plan hub tracks promoted planning artifacts from `_doc-up
 - Closeout: `Prompt_04_SharePoint_List_Schemas_And_JSON_Artifacts_Closeout.md`
 - Decision record: `Prompt_04_SharePoint_Schemas_Artifacts_Decision_Record.md`
 
+## Prompt 05 Execution
+
+- Execution mode: UX/workflow canonical promotion
+- Prompt: `prompts/Prompt_05_SPFX_UX_Wireframes_And_Project_Link_Workflows.md`
+- Closeout: `Prompt_05_SPFX_UX_Wireframes_And_Project_Link_Workflows_Closeout.md`
+- Decision record: `Prompt_05_SPFX_UX_Wireframes_Workflows_Decision_Record.md`
+
+## Prompt 05R Execution (Corrective)
+
+- Execution mode: wireframe completeness remediation only
+- Decision record: `Prompt_05R_Wireframe_Remediation_Decision_Record.md`
+- Closeout: `Prompt_05R_Wireframe_Remediation_Closeout.md`
+- Corrective intent: supersedes Prompt 05 only for wireframe depth completeness
+
 ## Canonical Subpaths
 
 - `artifacts/`
