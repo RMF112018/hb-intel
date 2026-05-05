@@ -49,6 +49,8 @@ const ROUTE_METHOD_TUPLES: readonly IRouteMethodTuple[] = [
   { routeId: 'warranty-trace', clientMethod: 'getWarrantyTrace' },
   { routeId: 'cross-project-knowledge', clientMethod: 'getCrossProjectKnowledge' },
   { routeId: 'unified-search', clientMethod: 'getUnifiedSearch' },
+  // Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
+  { routeId: 'approvals', clientMethod: 'getApprovals' },
 ];
 
 function buildOkEnvelope(): PccReadModelEnvelope<PccProjectHomeReadModel> {
@@ -94,7 +96,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('createPccBackendReadModelClient — URL & method (all 23 routes)', () => {
+describe('createPccBackendReadModelClient — URL & method (all 24 routes)', () => {
   for (const tuple of ROUTE_METHOD_TUPLES) {
     it(`builds GET ${PCC_READ_MODEL_ROUTE_PATHS[tuple.routeId]}`, async () => {
       const okEnvelope: PccReadModelEnvelope<unknown> = {
@@ -402,6 +404,93 @@ describe('createPccBackendReadModelClient — buyout-log success path', () => {
     expect(env.data.sourcePosture.sourceStatus).toBe('backend-unavailable');
     expect(env.data.moduleIdentity.moduleId).toBe('buyout-log');
     expect(env.data.moduleIdentity.subtitle).toBe('Buyout Control Center');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────
+// Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
+// ─────────────────────────────────────────────────────────────────
+
+describe('createPccBackendReadModelClient — approvals success path', () => {
+  it('returns the backend envelope as-is on success — no client-side mutation, no viewerPersona injection', async () => {
+    // Backend route does NOT echo viewerPersona on a successful response
+    // (the route handler does not forward viewerPersona to the provider).
+    // The client must return the backend envelope unchanged.
+    const envelope: PccReadModelEnvelope<unknown> = {
+      ...buildOkEnvelope(),
+      data: {
+        queue: { entries: [] },
+        myApprovals: { viewerPrincipalKey: '', viewerRole: 'viewer', entries: [] },
+        registry: { definitions: [], checkpointInstances: [] },
+        escalation: { entries: [] },
+        adminVerification: { entries: [] },
+        policy: { policies: [], versions: [] },
+        analytics: {
+          totalRequests: 0,
+          countsByState: {},
+          countsByMode: {},
+          countsBySourceModule: {},
+        },
+      } as never,
+    };
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: envelope }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    const result = await client.getApprovals(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(result).toEqual(envelope);
+    // Successful backend response did NOT carry viewerPersona — client must not inject it.
+    expect('viewerPersona' in result).toBe(false);
+    const expectedUrl = `https://example.invalid/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/approvals`;
+    expect(fetchImpl).toHaveBeenCalledWith(expectedUrl, { method: 'GET' });
+  });
+
+  it('viewerPersona is NOT serialized into URL or query for getApprovals', async () => {
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    await client.getApprovals(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    const calledUrl = vi.mocked(fetchImpl).mock.calls[0]![0] as string;
+    expect(calledUrl).toBe(
+      `https://example.invalid/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/approvals`,
+    );
+    expect(calledUrl).not.toContain(SAMPLE_PERSONA);
+    expect(calledUrl).not.toContain('viewerPersona');
+    expect(calledUrl).not.toContain('?');
+  });
+
+  it('fetch reject → fixture fallback envelope with viewerPersona passed through to the fixture (per fixture convention)', async () => {
+    const fetchImpl = vi.fn<PccReadModelFetch>().mockRejectedValue(new TypeError('network'));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    const env = await client.getApprovals(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.mode).toBe('fixture');
+    // viewerPersona reaches the fixture fallback (which echoes it on the
+    // envelope per fixture convention). This is NOT a route-mirror —
+    // a successful backend response would not carry viewerPersona.
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    // Empty composite shape preserved across all sub-models.
+    expect(env.data.queue.entries).toEqual([]);
+    expect(env.data.myApprovals.entries).toEqual([]);
+    expect(env.data.registry.definitions).toEqual([]);
+    expect(env.data.registry.checkpointInstances).toEqual([]);
+    expect(env.data.escalation.entries).toEqual([]);
+    expect(env.data.adminVerification.entries).toEqual([]);
+    expect(env.data.policy.policies).toEqual([]);
+    expect(env.data.policy.versions).toEqual([]);
+    expect(env.data.analytics.totalRequests).toBe(0);
   });
 });
 

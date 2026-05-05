@@ -1,5 +1,6 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type {
+  PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccCrossProjectKnowledgeReadModel,
@@ -38,7 +39,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the twenty-three backend route ids', () => {
+  it('enumerates exactly the twenty-four backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -63,6 +64,7 @@ describe('IPccReadModelClient route metadata', () => {
       'warranty-trace',
       'cross-project-knowledge',
       'unified-search',
+      'approvals',
     ]);
   });
 
@@ -73,8 +75,19 @@ describe('IPccReadModelClient route metadata', () => {
     expect(ids[buyoutLogIndex - 1]).toBe('constraints-log');
   });
 
+  it('orders approvals immediately after unified-search (Wave 14 / Prompt 04 cascade)', () => {
+    const ids: readonly string[] = PCC_READ_MODEL_ROUTE_IDS;
+    const approvalsIndex = ids.indexOf('approvals');
+    expect(approvalsIndex).toBeGreaterThan(-1);
+    expect(ids[approvalsIndex - 1]).toBe('unified-search');
+  });
+
   it('exposes the exact buyout-log route path template', () => {
     expect(PCC_READ_MODEL_ROUTE_PATHS['buyout-log']).toBe('pcc/projects/{projectId}/buyout-log');
+  });
+
+  it('exposes the exact approvals route path template', () => {
+    expect(PCC_READ_MODEL_ROUTE_PATHS.approvals).toBe('pcc/projects/{projectId}/approvals');
   });
 
   // Wave 99 / Prompt 04A — guard against drift toward older non-canonical
@@ -177,6 +190,15 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getUnifiedSearch']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>
     >();
+    expectTypeOf<IPccReadModelClient['getApprovals']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<PccApprovalsReadModel>>
+    >();
+  });
+
+  it('getApprovals accepts only [projectId, viewerPersona?] (no extra args)', () => {
+    expectTypeOf<IPccReadModelClient['getApprovals']>().parameters.toEqualTypeOf<
+      [PccProjectId, (PccPersona | undefined)?]
+    >();
   });
 
   it('exposes optional query as the third positional arg on getUnifiedSearch only', () => {
@@ -196,7 +218,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the twenty-three id literals', () => {
+  it('is the union of the twenty-four id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -221,6 +243,7 @@ describe('PccReadModelRouteId', () => {
       'warranty-trace',
       'cross-project-knowledge',
       'unified-search',
+      'approvals',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

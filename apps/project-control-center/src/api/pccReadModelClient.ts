@@ -14,6 +14,7 @@
  */
 
 import type {
+  PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccCrossProjectKnowledgeReadModel,
@@ -68,6 +69,8 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'warranty-trace',
   'cross-project-knowledge',
   'unified-search',
+  // Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
+  'approvals',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -103,6 +106,7 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'warranty-trace': 'pcc/projects/{projectId}/warranty-trace',
   'cross-project-knowledge': 'pcc/projects/{projectId}/cross-project-knowledge',
   'unified-search': 'pcc/projects/{projectId}/unified-search',
+  approvals: 'pcc/projects/{projectId}/approvals',
 };
 
 /**
@@ -248,4 +252,19 @@ export interface IPccReadModelClient {
     viewerPersona?: PccPersona,
     query?: string,
   ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
+
+  /**
+   * Mirrors backend route `pcc/projects/{projectId}/approvals` (Wave 14
+   * composite read-model). Returns
+   * `PccReadModelEnvelope<PccApprovalsReadModel>` containing queue,
+   * myApprovals, registry, escalation, adminVerification, policy, and
+   * analytics sub-models. `viewerPersona` is a passthrough only — it is
+   * never serialized into the URL, and the live route does NOT pass it
+   * to the backend provider, so SPFx receives unfiltered `myApprovals`
+   * regardless of the value supplied here.
+   */
+  getApprovals(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>>;
 }

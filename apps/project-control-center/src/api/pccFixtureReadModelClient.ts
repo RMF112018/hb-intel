@@ -49,11 +49,15 @@ import {
   SAMPLE_WARRANTY_TRACE_READ_MODEL,
   SEVERITY_OVERRIDE_RULES,
   URGENCY_LABELS,
+  // Wave 14 / Prompt 04 — composite approvals read-model (sample + empty).
+  SAMPLE_APPROVALS_READ_MODEL,
+  EMPTY_APPROVALS_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
   IProjectProfile,
   LifecycleReadinessStatus,
+  PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
   PccCrossProjectKnowledgeReadModel,
@@ -1325,6 +1329,58 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
       viewerPersona,
       'available',
       SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
+      [],
+    );
+  }
+
+  /**
+   * Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
+   *
+   * Mirrors the live route (`pcc/projects/{projectId}/approvals`) in
+   * data shape only. The route handler does NOT pass `viewerPersona` to
+   * the backend provider, so a successful live response would return
+   * unfiltered `myApprovals`.
+   *
+   * `viewerPersona` here is pure envelope passthrough per the existing
+   * fixture-client convention (`this.envelope(...)` conditionally adds
+   * the field when defined). It is NOT a mirror of route behavior — the
+   * live route does NOT echo `viewerPersona` on its envelope. `data`
+   * (myApprovals included) is returned unfiltered for both with-persona
+   * and without-persona branches; tests assert the same data reference
+   * across both calls.
+   *
+   * The mock provider's persona-filter behavior (Prompt 03) is
+   * provider-only and is exercised by mock-provider unit tests — it is
+   * not exposed via the route, so neither this fixture client nor the
+   * backend HTTP client surface it.
+   */
+  async getApprovals(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        EMPTY_APPROVALS_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        EMPTY_APPROVALS_READ_MODEL,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      SAMPLE_APPROVALS_READ_MODEL,
       [],
     );
   }

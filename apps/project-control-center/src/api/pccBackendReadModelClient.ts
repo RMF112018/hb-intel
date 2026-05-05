@@ -192,5 +192,14 @@ export function createPccBackendReadModelClient(
         () => fallback.getUnifiedSearch(projectId, viewerPersona, query),
         query,
       ),
+    // Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
+    // viewerPersona is passed to the fixture fallback (so the fallback
+    // envelope echoes it per fixture convention) but is NEVER serialized
+    // into the URL. The live route does not forward viewerPersona to the
+    // backend provider, so a successful backend response will not echo it.
+    getApprovals: (projectId, viewerPersona) =>
+      callBackend('approvals', projectId, () =>
+        fallback.getApprovals(projectId, viewerPersona),
+      ),
   };
 }

@@ -19,6 +19,9 @@ import {
   SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
   SAMPLE_UNIFIED_SEARCH_ASK_HBI_READ_MODEL,
   SAMPLE_WARRANTY_TRACE_READ_MODEL,
+  // Wave 14 / Prompt 04 — composite approvals/checkpoints fixtures.
+  SAMPLE_APPROVALS_READ_MODEL,
+  EMPTY_APPROVALS_READ_MODEL,
 } from '@hbc/models/pcc';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
 import { createPccFixtureReadModelClient } from './pccFixtureReadModelClient.js';
@@ -55,8 +58,9 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getWarrantyTrace(KNOWN_PROJECT_ID),
       client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
       client.getUnifiedSearch(KNOWN_PROJECT_ID),
+      client.getApprovals(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(23);
+    expect(envelopes).toHaveLength(24);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -157,6 +161,7 @@ describe('createPccFixtureReadModelClient — simulateBackendUnavailable', () =>
       client.getWarrantyTrace(KNOWN_PROJECT_ID),
       client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
       client.getUnifiedSearch(KNOWN_PROJECT_ID),
+      client.getApprovals(KNOWN_PROJECT_ID),
     ]);
     for (const env of envelopes) {
       expect(env.sourceStatus).toBe('backend-unavailable');
@@ -930,5 +935,65 @@ describe('createPccFixtureReadModelClient — unified-lifecycle parity (Wave 99)
       expect(env.sourceStatus).toBe('backend-unavailable');
       expect(env.data.responses).toEqual([]);
     });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────
+// Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
+//
+// Fixture mirrors the live route in DATA SHAPE (returns the same
+// shared `SAMPLE_APPROVALS_READ_MODEL`/`EMPTY_APPROVALS_READ_MODEL`
+// constants, unfiltered). It echoes `viewerPersona` on the envelope by
+// the existing fixture-client convention — this is NOT a mirror of
+// route behavior; the live route does not echo `viewerPersona` since
+// the route handler does not forward it to the backend provider.
+// ─────────────────────────────────────────────────────────────────
+
+describe('createPccFixtureReadModelClient — getApprovals', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('known project returns canonical SAMPLE_APPROVALS_READ_MODEL with sourceStatus="available"', async () => {
+    const env = await client.getApprovals(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.warnings).toEqual([]);
+    expect(env.data).toBe(SAMPLE_APPROVALS_READ_MODEL);
+  });
+
+  it('echoes viewerPersona on the envelope when provided (fixture-client convention only — NOT a route mirror)', async () => {
+    const env = await client.getApprovals(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+  });
+
+  it('omits viewerPersona on the envelope when not provided', async () => {
+    const env = await client.getApprovals(KNOWN_PROJECT_ID);
+    expect('viewerPersona' in env).toBe(false);
+  });
+
+  it('returns IDENTICAL data reference whether viewerPersona is provided or omitted (no fixture-side filter)', async () => {
+    const envWithoutPersona = await client.getApprovals(KNOWN_PROJECT_ID);
+    const envWithPersona = await client.getApprovals(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(envWithPersona.data).toBe(envWithoutPersona.data);
+    expect(envWithPersona.data).toBe(SAMPLE_APPROVALS_READ_MODEL);
+    // myApprovals slice is the SAME reference too — proves no client-side filter.
+    expect(envWithPersona.data.myApprovals).toBe(envWithoutPersona.data.myApprovals);
+  });
+
+  it('unknown project returns EMPTY_APPROVALS_READ_MODEL with sourceStatus="source-unavailable"', async () => {
+    const env = await client.getApprovals(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data).toBe(EMPTY_APPROVALS_READ_MODEL);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+  });
+
+  it('simulateBackendUnavailable returns EMPTY_APPROVALS_READ_MODEL with sourceStatus="backend-unavailable"', async () => {
+    const env = await unavailable.getApprovals(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data).toBe(EMPTY_APPROVALS_READ_MODEL);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
   });
 });
