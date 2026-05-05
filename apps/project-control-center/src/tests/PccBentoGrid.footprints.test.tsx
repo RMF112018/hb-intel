@@ -4,6 +4,8 @@ import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccDashboardCard } from '../layout/PccDashboardCard';
 import {
   FOOTPRINT_COLUMN_SPANS,
+  FOOTPRINT_MIN_COLUMN_SPANS,
+  resolveFootprintColumnSpan,
   PCC_CARD_FOOTPRINTS,
 } from '../layout/footprints';
 import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
@@ -23,8 +25,29 @@ describe('PccBentoGrid footprint contract', () => {
       const card = container.querySelector(`[data-pcc-footprint="${footprint}"]`);
       expect(card, `card for footprint '${footprint}' should render`).not.toBeNull();
       const declaredSpan = Number(card?.getAttribute('data-pcc-column-span'));
-      expect(declaredSpan, `declared column span for '${footprint}' should be > 0`).toBeGreaterThan(0);
-      expect(declaredSpan).toBe(FOOTPRINT_COLUMN_SPANS.wideDesktop[footprint]);
+      expect(declaredSpan, `declared column span for '${footprint}' should be > 0`).toBeGreaterThan(
+        0,
+      );
+      expect(declaredSpan).toBe(resolveFootprintColumnSpan('wideDesktop', footprint));
+    }
+  });
+
+  it('enforces protected minimum spans on constrained modes', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="tabletPortrait">
+        {PCC_CARD_FOOTPRINTS.map((footprint) => (
+          <PccDashboardCard key={footprint} footprint={footprint} title={footprint}>
+            <p>content for {footprint}</p>
+          </PccDashboardCard>
+        ))}
+      </PccBentoGrid>,
+    );
+    for (const footprint of PCC_CARD_FOOTPRINTS) {
+      const card = container.querySelector(`[data-pcc-footprint="${footprint}"]`);
+      const declaredSpan = Number(card?.getAttribute('data-pcc-column-span'));
+      expect(declaredSpan).toBeGreaterThanOrEqual(
+        FOOTPRINT_MIN_COLUMN_SPANS.tabletPortrait[footprint],
+      );
     }
   });
 
@@ -40,6 +63,7 @@ describe('PccBentoGrid footprint contract', () => {
     expect(grid).not.toBeNull();
     const computed = grid ? grid.style.gridAutoFlow : '';
     expect(computed).not.toContain('dense');
+    expect(grid?.getAttribute('data-pcc-grid-safety')).toBe('enabled');
   });
 
   it('reduces column spans in narrower modes (no fixed equal-height row)', () => {
@@ -107,5 +131,25 @@ describe('PccBentoGrid footprint contract', () => {
     // Inline style mirrors the diagnostic attr — never `span 1`.
     expect(card?.style.gridRow).toBe(`span ${rowSpanAttr}`);
     expect(card?.style.gridRow).not.toBe('span 1');
+  });
+
+  it('supports shared hierarchy and density variants without changing surface markers', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccDashboardCard
+          footprint="wide"
+          hierarchy="primary"
+          density="compact"
+          dataActiveSurfacePanel="project-home"
+          title="variant"
+        >
+          variant content
+        </PccDashboardCard>
+      </PccBentoGrid>,
+    );
+    const card = container.querySelector('[data-pcc-card]');
+    expect(card?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(card?.getAttribute('data-pcc-card-density')).toBe('compact');
+    expect(card?.getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
   });
 });

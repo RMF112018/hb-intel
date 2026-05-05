@@ -50,19 +50,10 @@ interface ITestHarnessProps {
 
 function TestHarness({ initialMinRows }: ITestHarnessProps) {
   const { ref, rowSpan, measuredHeight } = useBentoRowSpan(initialMinRows);
-  return (
-    <div
-      ref={ref}
-      data-test-row-span={rowSpan}
-      data-test-measured-height={measuredHeight}
-    />
-  );
+  return <div ref={ref} data-test-row-span={rowSpan} data-test-measured-height={measuredHeight} />;
 }
 
-function fireObservation(opts: {
-  observedHeight: number;
-  intrinsicHeight?: number;
-}): void {
+function fireObservation(opts: { observedHeight: number; intrinsicHeight?: number }): void {
   const captured = observers[observers.length - 1];
   if (!captured?.target) {
     throw new Error('ResizeObserver mock was never observe()d on a target');
@@ -121,8 +112,7 @@ describe('useBentoRowSpan collapse resistance', () => {
     // intrinsic + 16px gap divided by (8px row + 16px gap) the ceiling
     // is 11.
     const expectedSpan = Math.ceil(
-      (240 + PCC_BENTO_GRID_GAP_PX) /
-        (PCC_BENTO_GRID_ROW_UNIT_PX + PCC_BENTO_GRID_GAP_PX),
+      (240 + PCC_BENTO_GRID_GAP_PX) / (PCC_BENTO_GRID_ROW_UNIT_PX + PCC_BENTO_GRID_GAP_PX),
     );
     expect(Number(node?.getAttribute('data-test-row-span'))).toBe(expectedSpan);
     expect(Number(node?.getAttribute('data-test-measured-height'))).toBe(240);
@@ -135,5 +125,13 @@ describe('useBentoRowSpan collapse resistance', () => {
     fireObservation({ observedHeight: 8, intrinsicHeight: 0 });
     const node = container.querySelector('[data-test-row-span]');
     expect(Number(node?.getAttribute('data-test-row-span'))).toBeGreaterThanOrEqual(6);
+  });
+
+  it('keeps the floor when both observed and intrinsic heights are zero', () => {
+    const { container } = render(<TestHarness initialMinRows={5} />);
+    fireObservation({ observedHeight: 0, intrinsicHeight: 0 });
+    const node = container.querySelector('[data-test-row-span]');
+    expect(Number(node?.getAttribute('data-test-row-span'))).toBeGreaterThanOrEqual(5);
+    expect(Number(node?.getAttribute('data-test-measured-height'))).toBe(0);
   });
 });

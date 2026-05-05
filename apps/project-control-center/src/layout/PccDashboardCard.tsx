@@ -1,11 +1,17 @@
 import type { CSSProperties, FC, ReactNode } from 'react';
-import { FOOTPRINT_COLUMN_SPANS, type PccCardFootprint } from './footprints';
+import {
+  FOOTPRINT_MIN_INLINE_SIZE_PX,
+  resolveFootprintColumnSpan,
+  type PccCardFootprint,
+} from './footprints';
 import { usePccBentoContext } from './PccBentoGrid';
 import { useBentoRowSpan } from './useBentoRowSpan';
 import styles from './PccDashboardCard.module.css';
 
 export interface PccDashboardCardProps {
   footprint?: PccCardFootprint;
+  hierarchy?: 'primary' | 'standard' | 'supporting';
+  density?: 'comfortable' | 'compact';
   title?: string;
   eyebrow?: string;
   action?: ReactNode;
@@ -23,6 +29,8 @@ export interface PccDashboardCardProps {
 
 export const PccDashboardCard: FC<PccDashboardCardProps> = ({
   footprint = 'standard',
+  hierarchy = 'standard',
+  density = 'comfortable',
   title,
   eyebrow,
   action,
@@ -32,11 +40,13 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
 }) => {
   const { mode } = usePccBentoContext();
   const { ref, rowSpan, measuredHeight } = useBentoRowSpan();
-  const columnSpan = FOOTPRINT_COLUMN_SPANS[mode][footprint];
+  const columnSpan = resolveFootprintColumnSpan(mode, footprint);
+  const minInlineSize = FOOTPRINT_MIN_INLINE_SIZE_PX[mode][footprint];
 
   const style: CSSProperties = {
     gridColumn: `span ${columnSpan}`,
     gridRow: `span ${rowSpan}`,
+    minInlineSize: minInlineSize > 0 ? `${minInlineSize}px` : undefined,
   };
 
   return (
@@ -44,6 +54,8 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       className={styles.card}
       data-pcc-card=""
       data-pcc-footprint={footprint}
+      data-pcc-card-hierarchy={hierarchy}
+      data-pcc-card-density={density}
       data-pcc-mode={mode}
       data-pcc-column-span={columnSpan}
       data-pcc-row-span={rowSpan}
@@ -53,7 +65,7 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       aria-label={ariaLabel ?? title}
     >
       <div ref={ref} className={styles.body}>
-        {(eyebrow || title || action) ? (
+        {eyebrow || title || action ? (
           <header className={styles.header}>
             <div className={styles.titleStack}>
               {eyebrow ? <span className={styles.eyebrow}>{eyebrow}</span> : null}

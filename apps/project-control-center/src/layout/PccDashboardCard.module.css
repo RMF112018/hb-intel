@@ -8,6 +8,18 @@
   min-width: 0;
 }
 
+.card[data-pcc-card-hierarchy='primary'] {
+  border-color: color-mix(
+    in srgb,
+    var(--pcc-color-rail-accent, #f28c28) 35%,
+    var(--pcc-color-border)
+  );
+}
+
+.card[data-pcc-card-hierarchy='supporting'] {
+  opacity: 0.96;
+}
+
 .body {
   display: flex;
   flex-direction: column;
@@ -20,6 +32,11 @@
      defensively when the span is correct. */
   min-height: 100%;
   box-sizing: border-box;
+}
+
+.card[data-pcc-card-density='compact'] .body {
+  padding: var(--pcc-space-sm);
+  gap: var(--pcc-space-xs);
 }
 
 .header {
@@ -67,11 +84,7 @@
 }
 
 .card[data-pcc-footprint='hero'] {
-  background: linear-gradient(
-    135deg,
-    var(--pcc-color-card) 0%,
-    var(--pcc-color-canvas) 100%
-  );
+  background: linear-gradient(135deg, var(--pcc-color-card) 0%, var(--pcc-color-canvas) 100%);
 }
 
 .card[data-pcc-footprint='full'] {

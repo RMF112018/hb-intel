@@ -50,6 +50,7 @@ export const PccBentoGrid: FC<PccBentoGridProps> = ({ children, forceMode }) => 
     '--pcc-grid-columns': String(columns),
     '--pcc-grid-row-unit': `${PCC_BENTO_GRID_ROW_UNIT_PX}px`,
     '--pcc-grid-gap': `${PCC_BENTO_GRID_GAP_PX}px`,
+    '--pcc-grid-safe-min-col': activeMode === 'phone' ? '0px' : '120px',
   } as React.CSSProperties;
 
   return (
@@ -59,6 +60,7 @@ export const PccBentoGrid: FC<PccBentoGridProps> = ({ children, forceMode }) => 
         className={styles.grid}
         data-pcc-bento-grid=""
         data-pcc-mode={activeMode}
+        data-pcc-grid-safety="enabled"
         style={gridStyle}
       >
         {children}

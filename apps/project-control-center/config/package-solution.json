@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-project-control-center",
     "id": "1bfcc4f0-d947-42d2-81c7-c6c2f2ab5923",
-    "version": "1.0.0.6",
+    "version": "1.0.0.7",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "Project Control Center",
         "description": "Deploys the Project Control Center webpart assets to HBCentral.",
         "id": "0ef9e6c6-89b6-48a9-bb8f-7e7163d83f2a",
-        "version": "1.0.0.6"
+        "version": "1.0.0.7"
       }
     ]
   },

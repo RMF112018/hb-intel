@@ -3,7 +3,7 @@
   "id": "6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27",
   "alias": "ProjectControlCenterWebPart",
   "componentType": "WebPart",
-  "version": "1.0.0.6",
+  "version": "1.0.0.7",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
