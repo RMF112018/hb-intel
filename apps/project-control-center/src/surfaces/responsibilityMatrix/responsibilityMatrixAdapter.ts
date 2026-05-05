@@ -71,9 +71,9 @@ import type {
 // Canonical copy
 // ---------------------------------------------------------------------------
 
-const READ_ONLY_CAPTION = 'Read-only Responsibility Matrix preview';
+const READ_ONLY_CAPTION = 'Responsibility Matrix';
 const NO_EXECUTION_CAPTION =
-  'No mutation, no approval execution, no Team & Access changes, and no evidence upload are enabled in Wave 11.';
+  'Approvals, Team & Access changes, and evidence upload are managed by your PCC administrator.';
 const RACI_VS_CONTRACT_PARTY_CAPTION =
   'Contract-party "C = Contractor" is never RACI "C = Consulted". Contract party (Owner / Architect-Engineer / Contractor) and RACI (Responsible / Accountable / Consulted / Informed) are stored on independent axes.';
 const EVIDENCE_REFERENCE_CAPTION =

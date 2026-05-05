@@ -132,7 +132,9 @@ describe('PccApprovalsSurface — async client-driven path', () => {
   });
 
   it('renders all eleven lane shells with degraded source-unavailable envelope', async () => {
-    const container = renderSurface(fixtureClient('source-unavailable', EMPTY_APPROVALS_READ_MODEL));
+    const container = renderSurface(
+      fixtureClient('source-unavailable', EMPTY_APPROVALS_READ_MODEL),
+    );
     await waitFor(() => {
       expect(container.querySelector('[data-pcc-approvals-lane="hbi-boundary"]')).not.toBeNull();
     });
@@ -194,18 +196,19 @@ describe('PccApprovalsSurface — structural no-mutation guards', () => {
     expect(container.querySelector('input[type="file"]')).toBeNull();
   });
 
-  it('every disabled action affordance carries a reason caption', () => {
+  it('every disabled action affordance is routed through PccDisabledAffordance with a reason', () => {
     const container = renderSurface();
-    const disabledButtons = container.querySelectorAll(
-      '[data-pcc-approvals-action-state="preview-disabled"]',
-    );
-    expect(disabledButtons.length).toBeGreaterThan(0);
-    for (const btn of Array.from(disabledButtons)) {
-      const key = btn.getAttribute('data-pcc-approvals-action-key');
-      expect(key).not.toBeNull();
-      const reason = container.querySelector(`[data-pcc-approvals-action-reason="${key}"]`);
-      expect(reason, `missing reason caption for action ${key}`).not.toBeNull();
-      expect((reason!.textContent ?? '').length).toBeGreaterThan(0);
+    const items = container.querySelectorAll('[data-pcc-approvals-action-key]');
+    expect(items.length).toBeGreaterThan(0);
+    for (const item of Array.from(items)) {
+      const button = item.querySelector('[data-pcc-disabled-affordance-variant]');
+      expect(button, 'each action item must render a PccDisabledAffordance button').not.toBeNull();
+      expect(button?.getAttribute('aria-disabled')).toBe('true');
+      const describedBy = button?.getAttribute('aria-describedby') ?? '';
+      const firstId = describedBy.split(' ')[0];
+      const reasonNode = item.querySelector(`#${CSS.escape(firstId)}`);
+      expect(reasonNode, 'aria-describedby must resolve to a reason node').not.toBeNull();
+      expect((reasonNode!.textContent ?? '').length).toBeGreaterThan(0);
     }
   });
 });

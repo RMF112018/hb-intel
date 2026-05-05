@@ -213,7 +213,7 @@ describe('Project Home bento dashboard', () => {
     expect(affordances.length).toBe(15);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
-      expect(el.textContent).toBe('Preview only');
+      expect(el.textContent).toBe('Reference');
     }
   });
 

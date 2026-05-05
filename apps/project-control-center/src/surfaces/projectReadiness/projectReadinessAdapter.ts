@@ -179,8 +179,9 @@ const DOWNSTREAM_MODULE_REGISTRY: Readonly<
   },
 };
 
-const READ_ONLY_BADGE_TEXT = 'Read-only readiness framework preview';
-const NO_EXECUTION_CAPTION = 'No workflow execution is enabled in Wave 8.';
+const READ_ONLY_BADGE_TEXT = 'Project readiness';
+const NO_EXECUTION_CAPTION =
+  'Workflow execution and approvals are managed by your PCC administrator.';
 const DOCUMENT_CONTROL_REFERENCE_CAPTION =
   'Evidence links are references only; HB Document Control Center remains the evidence source of record.';
 

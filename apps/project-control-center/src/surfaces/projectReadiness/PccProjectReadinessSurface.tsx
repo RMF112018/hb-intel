@@ -73,7 +73,12 @@ import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadines
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
 import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
+
+const POSTURE_REFERENCE_READINESS = pccSurfacePostureCopy('reference');
+const POSTURE_LOADING_READINESS = pccSurfacePostureCopy('loading');
+const POSTURE_ERROR_READINESS = pccSurfacePostureCopy('error');
 import { FIXTURE_PROCORE_SURFACE_VIEW_MODEL } from '../../viewModels/procoreSurfaceFixture';
 import type { IPccProcoreSurfaceClient } from '../../viewModels/procoreSurfaceAdapter';
 import { useProcoreSurfaceReadModel } from '../../viewModels/useProcoreSurfaceReadModel';
@@ -347,23 +352,19 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
         <PccDashboardCard
           footprint="full"
           eyebrow="Project Readiness Center"
-          title="Read-only readiness framework preview"
+          title="Project readiness"
           dataActiveSurfacePanel="project-readiness"
         >
           <div data-pcc-readiness-region="hero" className={styles.heroBody}>
             <PccSurfaceContextHeader
               surfaceId="project-readiness"
               projectLabel="Project 26-000-00 · Readiness Center"
-              postureLabel="Read-only preview"
-              sourceStatusLabel="Loading"
-              sourceConfidenceLabel="Pending envelope"
-              lastUpdatedLabel="Not available while loading"
+              postureLabel={POSTURE_LOADING_READINESS.postureLabel}
+              sourceStatusLabel={POSTURE_LOADING_READINESS.sourceStatusLabel}
+              sourceConfidenceLabel={POSTURE_LOADING_READINESS.sourceConfidenceLabel}
+              lastUpdatedLabel={POSTURE_LOADING_READINESS.lastUpdatedLabel}
             />
-            <PccPreviewState
-              state="loading"
-              title="Read-only readiness framework preview"
-              description="No workflow execution is enabled in Wave 8."
-            />
+            <PccPreviewState state="loading" title="Project readiness" />
           </div>
         </PccDashboardCard>
         <FixtureScaffoldRegions viewModel={FIXTURE_VIEW_MODEL} />
@@ -376,23 +377,19 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
         <PccDashboardCard
           footprint="full"
           eyebrow="Project Readiness Center"
-          title="Read-only readiness framework preview"
+          title="Project readiness"
           dataActiveSurfacePanel="project-readiness"
         >
           <div data-pcc-readiness-region="hero" className={styles.heroBody}>
             <PccSurfaceContextHeader
               surfaceId="project-readiness"
               projectLabel="Project 26-000-00 · Readiness Center"
-              postureLabel="Read-only preview"
-              sourceStatusLabel="Error"
-              sourceConfidenceLabel="Unavailable"
-              lastUpdatedLabel="Not available in error state"
+              postureLabel={POSTURE_ERROR_READINESS.postureLabel}
+              sourceStatusLabel={POSTURE_ERROR_READINESS.sourceStatusLabel}
+              sourceConfidenceLabel={POSTURE_ERROR_READINESS.sourceConfidenceLabel}
+              lastUpdatedLabel={POSTURE_ERROR_READINESS.lastUpdatedLabel}
             />
-            <PccPreviewState
-              state="error"
-              title="Read-only readiness framework preview"
-              description="No workflow execution is enabled in Wave 8."
-            />
+            <PccPreviewState state="error" title="Project readiness" />
           </div>
         </PccDashboardCard>
         <FixtureScaffoldRegions viewModel={FIXTURE_VIEW_MODEL} />
@@ -443,17 +440,17 @@ const HeroCard: FC<HeroCardProps> = ({ hero }) => (
   <PccDashboardCard
     footprint="full"
     eyebrow={PCC_MVP_SURFACES['project-readiness'].displayName}
-    title="Read-only readiness framework preview"
+    title="Project readiness"
     dataActiveSurfacePanel="project-readiness"
   >
     <div data-pcc-readiness-region="hero" className={styles.heroBody}>
       <PccSurfaceContextHeader
         surfaceId="project-readiness"
         projectLabel="Project 26-000-00 · Readiness Center"
-        postureLabel={hero.readOnlyBadgeText}
-        sourceStatusLabel="Read-model available"
-        sourceConfidenceLabel="Envelope confidence"
-        lastUpdatedLabel="Runtime envelope timestamp"
+        postureLabel={POSTURE_REFERENCE_READINESS.postureLabel}
+        sourceStatusLabel={POSTURE_REFERENCE_READINESS.sourceStatusLabel}
+        sourceConfidenceLabel={POSTURE_REFERENCE_READINESS.sourceConfidenceLabel}
+        lastUpdatedLabel={POSTURE_REFERENCE_READINESS.lastUpdatedLabel}
       />
       <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
       <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
@@ -732,7 +729,7 @@ const PriorityActionsPreviewCard: FC<PriorityActionsPreviewCardProps> = ({ previ
               <span className={styles.priorityActionMeta}>{item.domainLabel}</span>
               <span className={styles.priorityActionMeta}>{item.eligibilityCaption}</span>
               <span className={styles.inertChip} aria-disabled="true">
-                Preview only
+                Reference
               </span>
             </li>
           ))}
@@ -933,18 +930,14 @@ const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewMod
       <PccDashboardCard
         footprint="full"
         eyebrow="Project Lifecycle Readiness Center"
-        title="Read-only lifecycle readiness preview"
+        title="Lifecycle readiness"
       >
         <div
           data-pcc-readiness-region="lifecycle-hero"
           data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
           className={styles.heroBody}
         >
-          <PccPreviewState
-            state="loading"
-            title="Read-only lifecycle readiness preview"
-            description="No workflow execution is enabled in Wave 9."
-          />
+          <PccPreviewState state="loading" title="Lifecycle readiness" />
         </div>
       </PccDashboardCard>
     );
@@ -954,18 +947,14 @@ const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewMod
       <PccDashboardCard
         footprint="full"
         eyebrow="Project Lifecycle Readiness Center"
-        title="Read-only lifecycle readiness preview"
+        title="Lifecycle readiness"
       >
         <div
           data-pcc-readiness-region="lifecycle-hero"
           data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
           className={styles.heroBody}
         >
-          <PccPreviewState
-            state="error"
-            title="Read-only lifecycle readiness preview"
-            description="No workflow execution is enabled in Wave 9."
-          />
+          <PccPreviewState state="error" title="Lifecycle readiness" />
         </div>
       </PccDashboardCard>
     );
@@ -1421,19 +1410,19 @@ function lifecycleDegradedPreview(cardState: PccCardState, region: string): JSX.
   if (cardState === 'preview') return null;
   const description =
     cardState === 'unavailable-fixture'
-      ? 'Source fixture is unavailable; live data is operator-pending.'
+      ? 'Source data is not available for this project right now.'
       : cardState === 'missing-config'
-        ? 'Source configuration is incomplete for this preview.'
+        ? 'Source configuration is incomplete.'
         : cardState === 'unauthorized-persona'
-          ? 'This preview is not visible to your role.'
+          ? 'This area is not visible to your role.'
           : cardState === 'error'
-            ? 'Source could not be reached for this preview.'
-            : 'Preview content is not available right now.';
+            ? 'The source could not be reached.'
+            : 'Source content is not available right now.';
   return (
     <div data-pcc-lifecycle-degraded-region={region}>
       <PccPreviewState
         state={cardState}
-        title="Source preview unavailable"
+        title="Source content unavailable"
         description={description}
       />
     </div>
@@ -1484,7 +1473,7 @@ const LifecycleMyActionsCard: FC<LifecycleMyActionsCardProps> = ({ myActions }) 
                     {item.dueDateUtc ? ` · Due ${item.dueDateUtc.slice(0, 10)}` : ''}
                   </span>
                   <span className={styles.inertChip} aria-disabled="true">
-                    Preview only
+                    Reference
                   </span>
                   <details className={styles.lifecycleItemDetails}>
                     <summary

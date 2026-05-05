@@ -56,16 +56,11 @@ const RailRow: FC<RailRowProps> = ({ item }) => (
       <span className={styles.rowTitle}>{item.title}</span>
       {item.summary ? <span className={styles.rowSummary}>{item.summary}</span> : null}
       <span className={styles.rowMeta}>
-        <span
-          className={styles.rowToneLabel}
-          data-pcc-priority-rail-tone-label={item.tone}
-        >
+        <span className={styles.rowToneLabel} data-pcc-priority-rail-tone-label={item.tone}>
           Priority: {PRIORITY_TONE_LABELS[item.tone]}
         </span>
         <span className={styles.rowMetaSep}>{PRIORITY_ACTION_CATEGORY_LABELS[item.category]}</span>
-        {item.dueDate ? (
-          <span className={styles.rowMetaSep}>Due {item.dueDate}</span>
-        ) : null}
+        {item.dueDate ? <span className={styles.rowMetaSep}>Due {item.dueDate}</span> : null}
         {item.assigneePersona ? (
           <span className={styles.rowMetaSep}>{item.assigneePersona}</span>
         ) : null}
@@ -74,11 +69,8 @@ const RailRow: FC<RailRowProps> = ({ item }) => (
         ) : null}
       </span>
     </div>
-    <span
-      className={styles.rowAffordance}
-      data-pcc-priority-rail-disabled-action=""
-    >
-      Preview only
+    <span className={styles.rowAffordance} data-pcc-priority-rail-disabled-action="">
+      Reference
     </span>
   </li>
 );
@@ -104,10 +96,7 @@ const RailGroup: FC<RailGroupProps> = ({ group }) => {
         </span>
       </header>
       {group.count === 0 ? (
-        <p
-          className={styles.groupEmpty}
-          data-pcc-priority-rail-group-empty=""
-        >
+        <p className={styles.groupEmpty} data-pcc-priority-rail-group-empty="">
           No items
         </p>
       ) : (

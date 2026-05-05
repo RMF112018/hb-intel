@@ -15,20 +15,20 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
   const lane = model.permissionRequestLane;
 
   return (
-    <PccDashboardCard footprint="wide" eyebrow="Permission Request Lane" title="Request Access Preview">
+    <PccDashboardCard footprint="wide" eyebrow="Permission Request Lane" title="Request access">
       <div className={styles.body} data-pcc-team-access-lane="permission-request">
         <div className={styles.metaRow} data-pcc-permission-request-banner="preview">
-          <PccStatusPill tone="info">Preview only</PccStatusPill>
+          <PccStatusPill tone="info">Reference</PccStatusPill>
         </div>
 
         <PccAccessRequestForm
-          introText="Request intake preview only. Submission, persistence, and approval execution are disabled in Wave 2."
-          requestAccessButtonLabel="Request access (preview-only)"
-          requestChangeButtonLabel="Request role/permission change (preview-only)"
+          introText="Submission, persistence, and approval execution are managed by your PCC administrator."
+          requestAccessButtonLabel="Request access"
+          requestChangeButtonLabel="Request role or permission change"
           requestAccessEnabled={lane.requestAccessEnabled}
           requestChangeEnabled={lane.requestChangeEnabled}
-          deferredTitle="Request submission is deferred"
-          deferredDescription="Request persistence and workflow execution are intentionally disabled for Wave 2 preview."
+          deferredTitle="Request submission is not available here"
+          deferredDescription="Request persistence and workflow execution are managed by your PCC administrator."
         />
 
         <span className={styles.metaRow}>Requested permission templates:</span>
@@ -40,15 +40,9 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
           ))}
         </div>
 
-        <PccAccessRequestQueue
-          records={lane.requestPreviewRecords}
-          branch={model.branch}
-        />
+        <PccAccessRequestQueue records={lane.requestPreviewRecords} branch={model.branch} />
 
-        <p
-          className={styles.noPermissionChangeNotice}
-          data-pcc-no-permission-change-notice=""
-        >
+        <p className={styles.noPermissionChangeNotice} data-pcc-no-permission-change-notice="">
           {NO_PERMISSION_CHANGE_NOTICE}
         </p>
       </div>

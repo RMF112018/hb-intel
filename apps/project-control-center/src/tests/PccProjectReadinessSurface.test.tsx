@@ -38,13 +38,15 @@ describe('Project Readiness Center surface', () => {
     expect(readinessRegion(container, 'downstream-modules')).not.toBeNull();
   });
 
-  it('hero region exposes read-only / no-execution copy', () => {
+  it('hero region exposes the project-readiness badge and no-execution caption', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     const hero = readinessRegion(container, 'hero');
     expect(hero).not.toBeNull();
-    expect(hero!.textContent).toContain('Read-only readiness framework preview');
-    expect(hero!.textContent).toContain('No workflow execution is enabled in Wave 8.');
+    expect(hero!.textContent).toContain('Project readiness');
+    expect(hero!.textContent).toContain(
+      'Workflow execution and approvals are managed by your PCC administrator.',
+    );
   });
 
   it('lifecycle gates region renders gate items from structural markers', () => {
@@ -312,13 +314,13 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
     expect(sectioned.length).toBe(9);
   });
 
-  it('lifecycle hero surfaces canonical 157 library scope and read-only copy', () => {
+  it('lifecycle hero surfaces canonical 157 library scope and product-grade copy', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     activateProjectReadiness(container);
     const hero = lifecycleRegion(container, 'lifecycle-hero');
     expect(hero).not.toBeNull();
-    expect(hero!.textContent).toContain('Read-only lifecycle readiness preview');
-    expect(hero!.textContent).toContain('No workflow execution is enabled in Wave 9.');
+    expect(hero!.textContent).toContain('Lifecycle readiness');
+    expect(hero!.textContent).toContain('Workflow execution is managed by your PCC administrator.');
     expect(hero!.textContent).toContain('157');
   });
 

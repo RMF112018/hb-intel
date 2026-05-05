@@ -528,7 +528,7 @@ const PriorityActionSignalsCard: FC<{
       className={styles.laneList}
     >
       {signals.length === 0 ? (
-        <EmptyLaneNote message="No Wave 10 priority action signals." />
+        <EmptyLaneNote message="No priority action signals." />
       ) : (
         signals.map((s) => (
           <div
@@ -562,7 +562,7 @@ const ReadinessSignalsCard: FC<{
       className={styles.laneList}
     >
       {signals.length === 0 ? (
-        <EmptyLaneNote message="No Wave 10 readiness signals." />
+        <EmptyLaneNote message="No readiness signals." />
       ) : (
         signals.map((s) => (
           <div
@@ -595,7 +595,7 @@ const ApprovalSignalsCard: FC<{
       className={styles.laneList}
     >
       {signals.length === 0 ? (
-        <EmptyLaneNote message="No Wave 10 approval / checkpoint signals." />
+        <EmptyLaneNote message="No approval or checkpoint signals." />
       ) : (
         signals.map((s) => (
           <div

@@ -20,10 +20,7 @@
  */
 
 import type { FC } from 'react';
-import {
-  DOCUMENT_CONTROL_ROLE_CODES,
-  DOCUMENT_CONTROL_ROLE_VOCABULARY,
-} from '@hbc/models/pcc';
+import { DOCUMENT_CONTROL_ROLE_CODES, DOCUMENT_CONTROL_ROLE_VOCABULARY } from '@hbc/models/pcc';
 import type {
   IDocumentControlActionCode,
   IDocumentControlUniversalHardNoRule,
@@ -47,14 +44,12 @@ const WAVE7_HARD_NO_FALLBACK: readonly IDocumentControlUniversalHardNoRule[] = [
   {
     id: 'HN-01',
     title: 'No My Project Files root browsing in project-site UI',
-    description:
-      "Project-site instances must not expose the full 'My Project Files' root.",
+    description: "Project-site instances must not expose the full 'My Project Files' root.",
   },
   {
     id: 'HN-02',
     title: 'No other-project folder browsing in project-site UI',
-    description:
-      'Project-site instances must not expose folders mapped to other projects.',
+    description: 'Project-site instances must not expose folders mapped to other projects.',
   },
   {
     id: 'HN-03',
@@ -117,8 +112,8 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
     >
       <div className={styles.headerCopy} data-pcc-doc-permissions-card="true">
         <p className={styles.laneDescription}>
-          Read-only summary of the Wave 7 document control role / action availability and hard-no
-          guardrails. This is read-model rendering — not runtime authorization enforcement.
+          Document control role and action availability with hard-no guardrails. Permission changes
+          are managed by your PCC administrator.
         </p>
 
         {/* 1. Hard-no guardrails */}
@@ -126,11 +121,7 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
           <h4 className={styles.laneTitle}>Hard-no guardrails</h4>
           <ul className={styles.metaList}>
             {hardNoRules.map((rule) => (
-              <li
-                key={rule.id}
-                className={styles.metaRow}
-                data-pcc-doc-hard-no-id={rule.id}
-              >
+              <li key={rule.id} className={styles.metaRow} data-pcc-doc-hard-no-id={rule.id}>
                 <span className={styles.metaLabel}>{rule.id}</span>
                 <span>· {rule.title}</span>
                 <span className={styles.guardrail}>{rule.description}</span>
@@ -144,7 +135,7 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
           <h4 className={styles.laneTitle}>Action catalog</h4>
           {familyOrder.length === 0 ? (
             <p className={styles.guardrail} data-pcc-doc-action-catalog-empty="true">
-              No data in this preview.
+              No data to display.
             </p>
           ) : (
             familyOrder.map((family) => (
@@ -166,7 +157,7 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
                         <span className={styles.metaLabel}>{action.code}</span>
                         <span>· {action.label}</span>
                         {forbidden ? (
-                          <span className={styles.guardrail}>Not allowed in Wave 7</span>
+                          <span className={styles.guardrail}>Not allowed</span>
                         ) : (
                           <span className={styles.guardrail}>{action.description}</span>
                         )}
@@ -183,11 +174,8 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
         <section data-pcc-doc-permissions-section="role-action-availability">
           <h4 className={styles.laneTitle}>Role / action availability</h4>
           {roleActionAvailability.length === 0 ? (
-            <p
-              className={styles.guardrail}
-              data-pcc-doc-role-action-availability-empty="true"
-            >
-              No data in this preview.
+            <p className={styles.guardrail} data-pcc-doc-role-action-availability-empty="true">
+              No data to display.
             </p>
           ) : (
             <ul className={styles.metaList}>
@@ -221,11 +209,7 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
             {(roleCodes ?? []).map((code) => {
               const entry = roleVocabulary?.[code];
               return (
-                <li
-                  key={code}
-                  className={styles.metaRow}
-                  data-pcc-doc-role-legend-code={code}
-                >
+                <li key={code} className={styles.metaRow} data-pcc-doc-role-legend-code={code}>
                   <span className={styles.metaLabel}>{code}</span>
                   <span>· {entry?.label ?? code}</span>
                 </li>

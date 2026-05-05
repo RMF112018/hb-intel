@@ -30,8 +30,10 @@ import {
   type PccReadModelEnvelope,
 } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import { PccDisabledAffordance } from '../../ui/PccDisabledAffordance';
 import { PccPreviewState, type PccPreviewStateKind } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
+import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
 import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import { useApprovalsReadModel } from './useApprovalsReadModel';
 import { buildPccApprovalsViewModel } from './approvalsAdapter';
@@ -55,6 +57,10 @@ import {
 import styles from './PccApprovalsSurface.module.css';
 
 const SURFACE = PCC_MVP_SURFACES.approvals;
+const POSTURE_LOADING = pccSurfacePostureCopy('loading');
+const POSTURE_ERROR = pccSurfacePostureCopy('error');
+const POSTURE_REFERENCE = pccSurfacePostureCopy('reference');
+const POSTURE_UNAVAILABLE = pccSurfacePostureCopy('unavailable');
 
 const FIXTURE_PROJECT_ID = 'p-w14-approvals-fixture' as PccProjectId;
 
@@ -132,10 +138,10 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
           <PccSurfaceContextHeader
             surfaceId="approvals"
             projectLabel="Project 26-000-00 · Approvals and Checkpoints"
-            postureLabel="Read-only preview"
-            sourceStatusLabel="Loading"
-            sourceConfidenceLabel="Pending envelope"
-            lastUpdatedLabel="Not available while loading"
+            postureLabel={POSTURE_LOADING.postureLabel}
+            sourceStatusLabel={POSTURE_LOADING.sourceStatusLabel}
+            sourceConfidenceLabel={POSTURE_LOADING.sourceConfidenceLabel}
+            lastUpdatedLabel={POSTURE_LOADING.lastUpdatedLabel}
           />
           <PccPreviewState state="loading" />
         </div>
@@ -158,10 +164,10 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
           <PccSurfaceContextHeader
             surfaceId="approvals"
             projectLabel="Project 26-000-00 · Approvals and Checkpoints"
-            postureLabel="Read-only preview"
-            sourceStatusLabel="Error"
-            sourceConfidenceLabel="Unavailable"
-            lastUpdatedLabel="Not available in error state"
+            postureLabel={POSTURE_ERROR.postureLabel}
+            sourceStatusLabel={POSTURE_ERROR.sourceStatusLabel}
+            sourceConfidenceLabel={POSTURE_ERROR.sourceConfidenceLabel}
+            lastUpdatedLabel={POSTURE_ERROR.lastUpdatedLabel}
           />
           <PccPreviewState state="error" />
         </div>
@@ -294,20 +300,13 @@ interface DisabledActionsRowProps {
 const DisabledActionsRow: FC<DisabledActionsRowProps> = ({ actions }) => (
   <ul className={styles.actionRow} data-pcc-approvals-action-list="">
     {actions.map((action) => (
-      <li key={action.key} className={styles.actionRowItem}>
-        <button
-          type="button"
-          aria-disabled="true"
-          disabled
-          className={styles.disabledAction}
-          data-pcc-approvals-action-state="preview-disabled"
-          data-pcc-approvals-action-key={action.key}
-        >
-          {action.label}
-        </button>
-        <span className={styles.actionReason} data-pcc-approvals-action-reason={action.key}>
-          {action.reason}
-        </span>
+      <li
+        key={action.key}
+        className={styles.actionRowItem}
+        data-pcc-approvals-action-key={action.key}
+        data-pcc-approvals-action-reason={action.key}
+      >
+        <PccDisabledAffordance label={action.label} reason={action.reason} />
       </li>
     ))}
   </ul>
@@ -338,10 +337,14 @@ const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
       <PccSurfaceContextHeader
         surfaceId="approvals"
         projectLabel="Project 26-000-00 · Approvals and Checkpoints"
-        postureLabel="Read-only preview"
-        sourceStatusLabel={isAvailable ? 'Read-model available' : 'Source unavailable'}
-        sourceConfidenceLabel={isAvailable ? 'Envelope confidence' : 'Preview confidence'}
-        lastUpdatedLabel="Runtime envelope timestamp"
+        postureLabel={(isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).postureLabel}
+        sourceStatusLabel={
+          (isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).sourceStatusLabel
+        }
+        sourceConfidenceLabel={
+          (isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).sourceConfidenceLabel
+        }
+        lastUpdatedLabel={(isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).lastUpdatedLabel}
       />
       {isAvailable ? (
         <Fragment>

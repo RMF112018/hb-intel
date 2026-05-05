@@ -116,7 +116,7 @@ function getCommandDisabledReason(
     };
   }
   return {
-    reason: 'Save unavailable in read-only preview · future command only.',
+    reason: 'Save is not available in this view.',
     decision,
   };
 }
@@ -241,8 +241,7 @@ export const PccExternalSystemsAddEditLinkDrawer: FC<PccExternalSystemsAddEditLi
         </header>
         <div className={styles.drawerBody}>
           <p className={styles.drawerLead}>
-            Read-only preview · field values are local only. No persistence, no fetch, no launch
-            behavior.
+            Field values stay local. Saving is managed by your PCC administrator.
           </p>
 
           <div className={styles.drawerField}>
@@ -347,7 +346,7 @@ export const PccExternalSystemsAddEditLinkDrawer: FC<PccExternalSystemsAddEditLi
             data-pcc-launch-pad-drawer-policy-preview=""
             aria-live="polite"
           >
-            <h4 className={styles.policyPreviewTitle}>URL policy preview</h4>
+            <h4 className={styles.policyPreviewTitle}>URL policy check</h4>
             <div
               className={styles.policyPreviewRow}
               data-pcc-launch-pad-drawer-policy-reason={policy.reason}
@@ -415,7 +414,7 @@ export const PccExternalSystemsAddEditLinkDrawer: FC<PccExternalSystemsAddEditLi
             data-pcc-launch-pad-drawer-command="future-only"
             data-pcc-launch-pad-drawer-command-state="preview-disabled"
           >
-            Save unavailable in read-only preview
+            Save not available
           </button>
           <span className={styles.drawerCommandReason} data-pcc-launch-pad-drawer-command-reason="">
             {commandReason}

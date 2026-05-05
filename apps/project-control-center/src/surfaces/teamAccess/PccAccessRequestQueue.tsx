@@ -17,10 +17,7 @@ export const PccAccessRequestQueue: FC<PccAccessRequestQueueProps> = ({ records,
 
   if (records.length === 0) {
     return (
-      <div
-        className={styles.queue}
-        data-pcc-access-request-queue={0}
-      >
+      <div className={styles.queue} data-pcc-access-request-queue={0}>
         <PccPreviewState state="unavailable-fixture" />
       </div>
     );
@@ -28,16 +25,13 @@ export const PccAccessRequestQueue: FC<PccAccessRequestQueueProps> = ({ records,
 
   const selectedRecord =
     selectedRequestId !== null
-      ? records.find((record) => record.requestId === selectedRequestId) ?? null
+      ? (records.find((record) => record.requestId === selectedRequestId) ?? null)
       : null;
 
   const canReview = branch === 'access-manager';
 
   return (
-    <div
-      className={styles.queue}
-      data-pcc-access-request-queue={records.length}
-    >
+    <div className={styles.queue} data-pcc-access-request-queue={records.length}>
       <ul className={styles.list} data-pcc-access-request-queue-list="">
         {records.map((record) => {
           const isSelected = record.requestId === selectedRequestId;
@@ -64,7 +58,7 @@ export const PccAccessRequestQueue: FC<PccAccessRequestQueueProps> = ({ records,
                   data-pcc-access-request-queue-action="view-detail"
                   data-pcc-access-request-queue-action-target={record.requestId}
                 >
-                  View detail (preview)
+                  View detail
                 </button>
               </div>
             </li>

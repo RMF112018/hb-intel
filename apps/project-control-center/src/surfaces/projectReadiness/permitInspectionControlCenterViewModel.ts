@@ -71,10 +71,9 @@ export type PccPermitInspectionControlCenterViewModel =
       readonly snapshot: IPermitInspectionControlCenterUiSnapshot;
     };
 
-const READ_ONLY_CAPTION =
-  'Read-only Wave 10 preview — no AHJ, Procore, Graph, or SharePoint runtime.';
+const READ_ONLY_CAPTION = 'Permit and inspection reference view.';
 
-const DEGRADED_CAPTION = 'Read-only Wave 10 preview — backend unavailable, fixture fallback empty.';
+const DEGRADED_CAPTION = 'Permit and inspection content is temporarily unavailable.';
 
 const EMPTY_SUMMARY: IPermitInspectionControlCenterSummary = {
   permitCount: 0,

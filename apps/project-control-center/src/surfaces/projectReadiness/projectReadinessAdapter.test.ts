@@ -128,10 +128,12 @@ describe('buildPccProjectReadinessViewModel — available envelope', () => {
     expect(caption).not.toContain('not implemented in wave 8');
   });
 
-  it('hero exposes read-only badge and no-execution caption', () => {
+  it('hero exposes badge and caption with product-grade copy', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
-    expect(vm.hero.readOnlyBadgeText).toBe('Read-only readiness framework preview');
-    expect(vm.hero.noExecutionCaption).toBe('No workflow execution is enabled in Wave 8.');
+    expect(vm.hero.readOnlyBadgeText).toBe('Project readiness');
+    expect(vm.hero.noExecutionCaption).toBe(
+      'Workflow execution and approvals are managed by your PCC administrator.',
+    );
   });
 
   it('passes sourceStatus through and maps to a card state', () => {

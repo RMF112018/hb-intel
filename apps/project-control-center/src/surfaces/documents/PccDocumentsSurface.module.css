@@ -57,6 +57,14 @@
   outline-offset: 1px;
 }
 
+.actionReason {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+}
+
 .metaList {
   display: flex;
   flex-direction: column;

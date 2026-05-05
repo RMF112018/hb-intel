@@ -87,17 +87,16 @@ import {
 // Canonical copy
 // ---------------------------------------------------------------------------
 
-const READ_ONLY_CAPTION = 'Read-only Constraints Log preview';
+const READ_ONLY_CAPTION = 'Constraints Log';
 const NO_EXECUTION_CAPTION =
-  'No mutation, no approval execution, and no external-system writeback are enabled. Local UI selection only.';
+  'Approvals and external writebacks are managed by your PCC administrator. Local UI selection only.';
 const BOARD_DEFINITIONS_CAPTION =
   'Risk = uncertain future event. Constraint = known blocker to planned work. Issue = active problem. Delay-exposure / change-exposure = review flags only, not entitlement determinations.';
 const LOG_DEFINITIONS_CAPTION =
-  'All Constraints Log items are reference-only records. Mutations, approvals, and external writebacks are intentionally not exposed in this preview.';
+  'Constraints Log items are reference records. Mutations, approvals, and external writebacks are managed by your PCC administrator.';
 const HUDDLE_CADENCE_CAPTION =
   'Weekly Huddle focus: open commitments, overdue items, awaiting external party, high-exposure items, and triggered risks.';
-const EXEC_HEADLINE_CAPTION =
-  'Executive exposure posture summary derived from the latest read-model envelope.';
+const EXEC_HEADLINE_CAPTION = 'Executive exposure posture summary.';
 const LEGAL_BOUNDARY_CAPTION =
   'Reference-only review surface. No claim entitlement, no compensability determination, no delay-damages calculation, no forensic schedule analysis.';
 

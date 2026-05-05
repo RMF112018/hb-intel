@@ -11,10 +11,7 @@
  * `EMPTY_LIFECYCLE_READINESS_READ_MODEL` preserves it.
  */
 
-import {
-  LIFECYCLE_READINESS_FAMILIES,
-  LIFECYCLE_READINESS_PHASES,
-} from '@hbc/models/pcc';
+import { LIFECYCLE_READINESS_FAMILIES, LIFECYCLE_READINESS_PHASES } from '@hbc/models/pcc';
 import type {
   ILifecycleReadinessProjectItem,
   ILifecycleReadinessTemplateItem,
@@ -109,14 +106,13 @@ const GATE_LABELS: Readonly<Record<LifecycleReadinessGateId, string>> = {
   'project-closeout-complete': 'Project closeout complete',
 };
 
-const ZERO_SEVERITY_COUNTS: Readonly<Record<ProjectReadinessSeverity, number>> =
-  Object.freeze({
-    critical: 0,
-    high: 0,
-    medium: 0,
-    low: 0,
-    informational: 0,
-  });
+const ZERO_SEVERITY_COUNTS: Readonly<Record<ProjectReadinessSeverity, number>> = Object.freeze({
+  critical: 0,
+  high: 0,
+  medium: 0,
+  low: 0,
+  informational: 0,
+});
 
 // Mirror the Wave 8 adapter's preview→card mapping. Mapping for `loading` and
 // `not-yet-implemented-operation` is intentionally `preview` so the surface
@@ -183,18 +179,16 @@ const SIGNAL_LABELS: Readonly<Record<PccLifecycleReadinessSignalKind, string>> =
   'external-reference-issue': 'External setup or reference issue',
 };
 
-const HANDOFF_CAPTION =
-  'Display-only posture for future Priority Actions and Approvals/Checkpoints integration.';
+const HANDOFF_CAPTION = 'Reference posture for Priority Actions and Approvals / Checkpoints.';
 const SIGNALS_NO_EXECUTION_CAPTION =
-  'No queue mutation, approval execution, or workflow run is enabled in Wave 9.';
+  'Queue mutations, approvals, and workflow runs are managed by your PCC administrator.';
 
-const READ_ONLY_BADGE_TEXT = 'Read-only lifecycle readiness preview';
-const NO_EXECUTION_CAPTION =
-  'No workflow execution is enabled in Wave 9. Live tenant runtime is operator-pending.';
+const READ_ONLY_BADGE_TEXT = 'Lifecycle readiness';
+const NO_EXECUTION_CAPTION = 'Workflow execution is managed by your PCC administrator.';
 const DOCUMENT_CONTROL_REFERENCE_CAPTION =
-  'Evidence references resolve to Document Control sources; live document operations are not enabled in Wave 9.';
+  'Evidence references resolve to Document Control sources.';
 const AUDIT_CAPTION =
-  'Lifecycle readiness vocabulary is sourced from the canonical HB checklists; counts shown reflect the published library.';
+  'Lifecycle readiness vocabulary is sourced from the canonical HB checklists; counts reflect the published library.';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -212,14 +206,8 @@ export function buildPccLifecycleReadinessViewModel(
   const templateMap = new Map<string, ILifecycleReadinessTemplateItem>();
   for (const t of templateItems) templateMap.set(t.templateItemId, t);
 
-  const totalOpenBlockers = data.gates.reduce(
-    (sum, g) => sum + g.openBlockerCount,
-    0,
-  );
-  const totalPendingEvidence = data.gates.reduce(
-    (sum, g) => sum + g.pendingEvidenceCount,
-    0,
-  );
+  const totalOpenBlockers = data.gates.reduce((sum, g) => sum + g.openBlockerCount, 0);
+  const totalPendingEvidence = data.gates.reduce((sum, g) => sum + g.pendingEvidenceCount, 0);
 
   const hero: IPccLifecycleReadinessHeroViewModel = {
     headlinePosture: data.summary.headlinePosture,
@@ -243,13 +231,7 @@ export function buildPccLifecycleReadinessViewModel(
     cardState,
     generatedAtUtc,
   );
-  const blockers = buildBlockers(
-    data,
-    projectItems,
-    templateMap,
-    cardState,
-    generatedAtUtc,
-  );
+  const blockers = buildBlockers(data, projectItems, templateMap, cardState, generatedAtUtc);
   const evidence = buildEvidence(data, cardState);
   const futureCloseout = buildFutureCloseout(
     templateItems,
@@ -258,12 +240,7 @@ export function buildPccLifecycleReadinessViewModel(
     generatedAtUtc,
   );
   const sourceTraceability = buildSourceTraceability(data);
-  const signals = buildReadinessSignals(
-    projectItems,
-    templateMap,
-    cardState,
-    generatedAtUtc,
-  );
+  const signals = buildReadinessSignals(projectItems, templateMap, cardState, generatedAtUtc);
 
   return {
     status: 'preview',
@@ -302,35 +279,31 @@ function deriveActiveGateLabel(gates: PccLifecycleReadinessReadModel['gates']): 
   return GATE_LABELS[id];
 }
 
-function buildLifecycleMap(
-  data: PccLifecycleReadinessReadModel,
-): IPccLifecycleMapViewModel {
+function buildLifecycleMap(data: PccLifecycleReadinessReadModel): IPccLifecycleMapViewModel {
   const phaseMap = new Map(data.phases.map((p) => [p.phase, p]));
-  const phases: IPccLifecycleMapPhaseViewModel[] = LIFECYCLE_READINESS_PHASES.map(
-    (phaseId) => {
-      const summary = phaseMap.get(phaseId);
-      if (summary) {
-        return {
-          phaseId,
-          phaseLabel: PHASE_LABELS[phaseId],
-          posture: summary.posture,
-          openBlockerCount: summary.openBlockerCount,
-          pendingEvidenceCount: summary.pendingEvidenceCount,
-          criticalCount: summary.criticalCount,
-          isInSnapshot: true,
-        };
-      }
+  const phases: IPccLifecycleMapPhaseViewModel[] = LIFECYCLE_READINESS_PHASES.map((phaseId) => {
+    const summary = phaseMap.get(phaseId);
+    if (summary) {
       return {
         phaseId,
         phaseLabel: PHASE_LABELS[phaseId],
-        posture: 'not-applicable' as ProjectReadinessPosture,
-        openBlockerCount: 0,
-        pendingEvidenceCount: 0,
-        criticalCount: 0,
-        isInSnapshot: false,
+        posture: summary.posture,
+        openBlockerCount: summary.openBlockerCount,
+        pendingEvidenceCount: summary.pendingEvidenceCount,
+        criticalCount: summary.criticalCount,
+        isInSnapshot: true,
       };
-    },
-  );
+    }
+    return {
+      phaseId,
+      phaseLabel: PHASE_LABELS[phaseId],
+      posture: 'not-applicable' as ProjectReadinessPosture,
+      openBlockerCount: 0,
+      pendingEvidenceCount: 0,
+      criticalCount: 0,
+      isInSnapshot: false,
+    };
+  });
   const tracked = phases.filter((p) => p.isInSnapshot).length;
   return {
     phases,
@@ -411,7 +384,7 @@ function buildMyActions(
 
   const captionText = viewerPersona
     ? `Active items assigned to ${viewerPersona}.`
-    : 'Active readiness items across all owners (fixture preview — persona filter not applied).';
+    : 'Active readiness items across all owners.';
 
   return {
     cardState,
@@ -429,19 +402,14 @@ function buildBlockers(
   cardState: PccCardState,
   generatedAtUtc: string | undefined,
 ): IPccLifecycleBlockersViewModel {
-  const buckets: IPccLifecycleBlockerBucketViewModel[] = data.blockerSummary.map(
-    (b) => ({
-      blockerState: b.blockerState,
-      itemCount: b.itemIds.length,
-      severityCounts: { ...ZERO_SEVERITY_COUNTS, ...b.severityCounts },
-    }),
-  );
+  const buckets: IPccLifecycleBlockerBucketViewModel[] = data.blockerSummary.map((b) => ({
+    blockerState: b.blockerState,
+    itemCount: b.itemIds.length,
+    severityCounts: { ...ZERO_SEVERITY_COUNTS, ...b.severityCounts },
+  }));
 
   const blocked = projectItems.filter(
-    (p) =>
-      p.posture === 'blocked' ||
-      p.blockerState === 'open' ||
-      p.blockerState === 'escalated',
+    (p) => p.posture === 'blocked' || p.blockerState === 'open' || p.blockerState === 'escalated',
   );
   const items: IPccLifecycleBlockerItemViewModel[] = blocked.map((p) => {
     const tmpl = templateMap.get(p.templateItemId);
@@ -477,14 +445,12 @@ function buildEvidence(
   data: PccLifecycleReadinessReadModel,
   cardState: PccCardState,
 ): IPccLifecycleEvidenceViewModel {
-  const buckets: IPccLifecycleEvidenceBucketViewModel[] = data.evidenceSummary.map(
-    (e) => ({
-      evidenceState: e.evidenceState,
-      itemCount: e.itemIds.length,
-      documentControlSourceCount: e.documentControlSourceIds.length,
-      documentControlSourceIds: e.documentControlSourceIds,
-    }),
-  );
+  const buckets: IPccLifecycleEvidenceBucketViewModel[] = data.evidenceSummary.map((e) => ({
+    evidenceState: e.evidenceState,
+    itemCount: e.itemIds.length,
+    documentControlSourceCount: e.documentControlSourceIds.length,
+    documentControlSourceIds: e.documentControlSourceIds,
+  }));
   return {
     cardState,
     buckets,
@@ -499,27 +465,23 @@ function buildFutureCloseout(
   cardState: PccCardState,
   generatedAtUtc: string | undefined,
 ): IPccLifecycleFutureCloseoutViewModel {
-  const futureTemplates = templateItems.filter(
-    (t) => t.itemType === 'future-closeout-exposure',
-  );
+  const futureTemplates = templateItems.filter((t) => t.itemType === 'future-closeout-exposure');
   const projectByTemplate = new Map<string, ILifecycleReadinessProjectItem>();
   for (const p of projectItems) projectByTemplate.set(p.templateItemId, p);
 
-  const items: IPccLifecycleFutureCloseoutItemViewModel[] = futureTemplates.map(
-    (t) => {
-      const inst = projectByTemplate.get(t.templateItemId);
-      return {
-        templateItemId: t.templateItemId,
-        title: t.normalizedTitle,
-        family: t.family,
-        phaseLabel: PHASE_LABELS[t.lifecyclePhase],
-        criticality: t.criticality,
-        hasProjectInstance: inst !== undefined,
-        ...(inst?.status !== undefined ? { projectStatus: inst.status } : {}),
-        detail: buildItemDetail(t, inst, generatedAtUtc),
-      };
-    },
-  );
+  const items: IPccLifecycleFutureCloseoutItemViewModel[] = futureTemplates.map((t) => {
+    const inst = projectByTemplate.get(t.templateItemId);
+    return {
+      templateItemId: t.templateItemId,
+      title: t.normalizedTitle,
+      family: t.family,
+      phaseLabel: PHASE_LABELS[t.lifecyclePhase],
+      criticality: t.criticality,
+      hasProjectInstance: inst !== undefined,
+      ...(inst?.status !== undefined ? { projectStatus: inst.status } : {}),
+      detail: buildItemDetail(t, inst, generatedAtUtc),
+    };
+  });
 
   const captionText =
     items.length === 0
@@ -566,12 +528,13 @@ function buildItemDetail(
   const sourceTrace = template?.sourceTrace;
   const evidenceLink = project?.evidenceLink ?? template?.evidenceLink;
 
-  const externalReferences: IPccLifecycleItemExternalReferenceDetailViewModel[] =
-    (template?.externalReferences ?? []).map((ref) => ({
-      system: ref.system,
-      referenceLabel: ref.referenceLabel,
-      ...(ref.referenceUrl !== undefined ? { referenceUrlText: ref.referenceUrl } : {}),
-    }));
+  const externalReferences: IPccLifecycleItemExternalReferenceDetailViewModel[] = (
+    template?.externalReferences ?? []
+  ).map((ref) => ({
+    system: ref.system,
+    referenceLabel: ref.referenceLabel,
+    ...(ref.referenceUrl !== undefined ? { referenceUrlText: ref.referenceUrl } : {}),
+  }));
 
   const status = project?.status;
   const itemType = template?.itemType ?? 'reference-only';
@@ -607,12 +570,10 @@ function buildItemDetail(
       : {}),
 
     lifecyclePhase: template?.lifecyclePhase ?? 'contract-review',
-    phaseLabel: template?.lifecyclePhase
-      ? PHASE_LABELS[template.lifecyclePhase]
-      : '—',
+    phaseLabel: template?.lifecyclePhase ? PHASE_LABELS[template.lifecyclePhase] : '—',
     readinessDomain: template?.readinessDomain ?? 'contract-commercial',
     domainLabel: template?.readinessDomain
-      ? DOMAIN_LABELS[template.readinessDomain] ?? template.readinessDomain
+      ? (DOMAIN_LABELS[template.readinessDomain] ?? template.readinessDomain)
       : '—',
     defaultGateImpact: template?.defaultGateImpact ?? [],
 
@@ -646,9 +607,7 @@ function buildItemDetail(
     ...(project?.notApplicableReason !== undefined
       ? { notApplicableReason: project.notApplicableReason }
       : {}),
-    ...(project?.deferredReason !== undefined
-      ? { deferredReason: project.deferredReason }
-      : {}),
+    ...(project?.deferredReason !== undefined ? { deferredReason: project.deferredReason } : {}),
     ...(project?.blockedReason !== undefined ? { blockedReason: project.blockedReason } : {}),
     ...(project?.projectOverrideNotes !== undefined
       ? { projectOverrideNotes: project.projectOverrideNotes }
@@ -715,11 +674,7 @@ function deriveSignals(
   const evidenceState = project?.evidenceLink?.evidenceState;
 
   // 1. blocked
-  if (
-    posture === 'blocked' ||
-    blockerState === 'open' ||
-    blockerState === 'escalated'
-  ) {
+  if (posture === 'blocked' || blockerState === 'open' || blockerState === 'escalated') {
     result.push('blocked');
   }
 
@@ -743,8 +698,7 @@ function deriveSignals(
       evidencePolicy === 'required-before-complete' ||
       evidencePolicy === 'required-before-approval';
     const conditionalActivated =
-      evidencePolicy === 'conditional' &&
-      project?.evidenceLink !== undefined;
+      evidencePolicy === 'conditional' && project?.evidenceLink !== undefined;
     const evidenceUnsatisfied =
       evidenceState === undefined ||
       evidenceState === 'pending' ||
@@ -785,12 +739,10 @@ function deriveSignals(
   // 7. external-reference-issue — exception code OR external references
   // present and the item is currently blocked.
   const hasExternalReferences =
-    template?.externalReferences !== undefined &&
-    template.externalReferences.length > 0;
+    template?.externalReferences !== undefined && template.externalReferences.length > 0;
   if (
     project?.exceptionCode === 'awaiting-external-system-setup' ||
-    (hasExternalReferences &&
-      (posture === 'blocked' || blockerState === 'open'))
+    (hasExternalReferences && (posture === 'blocked' || blockerState === 'open'))
   ) {
     result.push('external-reference-issue');
   }

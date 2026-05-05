@@ -50,8 +50,8 @@ export const PccTeamAccessReadModelContent: FC<PccTeamAccessReadModelContentProp
       <div data-pcc-team-access-read-model-content="error">
         <PccPreviewState
           state="error"
-          title="Team & Access read model unavailable"
-          description="The team-access envelope could not be loaded. Showing preview-safe state."
+          title="Team and access content is temporarily unavailable"
+          description="Team and access content could not be loaded. Try again later."
         />
       </div>
     );

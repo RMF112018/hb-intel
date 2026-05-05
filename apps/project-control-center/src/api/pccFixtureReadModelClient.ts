@@ -201,7 +201,7 @@ const WAVE7_ACTION_CATALOG = [
     code: 'EX04',
     family: 'EX',
     label: 'External Writeback/Sync/Mirror',
-    description: 'Forbidden in Wave 7 fixture availability.',
+    description: 'Not supported.',
   },
   {
     code: 'WF01',

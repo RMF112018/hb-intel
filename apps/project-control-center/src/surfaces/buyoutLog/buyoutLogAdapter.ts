@@ -109,9 +109,9 @@ import {
 // Canonical copy
 // ---------------------------------------------------------------------------
 
-const READ_ONLY_CAPTION = 'Read-only Buyout Log preview';
+const READ_ONLY_CAPTION = 'Buyout Log';
 const NO_EXECUTION_CAPTION =
-  'No mutation, no commitment creation, no purchase orders, no subcontracts, no SOVs, no CCOs, no invoices, no payments, no approval execution, and no external-system writeback are enabled. Local UI selection only.';
+  'Commitments, purchase orders, subcontracts, SOVs, CCOs, invoices, payments, approvals, and external-system writebacks are managed by your PCC administrator. Local UI selection only.';
 const PACKAGE_TABLE_DEFINITIONS_CAPTION =
   'All Buyout Log records are reference-only. Status reflects the recorded lifecycle state; Procore and Sage references are imported lineage only.';
 const BUDGET_DEFINITIONS_CAPTION =

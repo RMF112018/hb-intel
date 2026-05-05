@@ -3,11 +3,13 @@ import { PCC_MVP_SURFACES, SAMPLE_SITE_HEALTH_SUMMARY } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
 import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import type { PccProjectHomeCardProps } from '../projectHome/shared';
 import styles from './PccSiteHealthSurface.module.css';
 
 const SURFACE = PCC_MVP_SURFACES['site-health'];
+const POSTURE = pccSurfacePostureCopy('reference');
 
 function severityTone(severity: string): 'info' | 'warning' | 'danger' | 'neutral' {
   switch (severity) {
@@ -31,14 +33,13 @@ const OverviewBody: FC = () => {
       <PccSurfaceContextHeader
         surfaceId="site-health"
         projectLabel="Project 26-000-00 · Site Health Context"
-        postureLabel="Read-only preview"
-        sourceStatusLabel="Fixture default"
-        sourceConfidenceLabel="Preview confidence"
-        lastUpdatedLabel={summary.lastRunUtc ?? 'Not listed'}
+        postureLabel={POSTURE.postureLabel}
+        sourceStatusLabel={POSTURE.sourceStatusLabel}
+        sourceConfidenceLabel={POSTURE.sourceConfidenceLabel}
+        lastUpdatedLabel={summary.lastRunUtc ?? POSTURE.lastUpdatedLabel}
       />
       <span className={styles.previewCue}>
-        Preview frame · Read-model summary only. No scanner or repair runner is active in this
-        preview.
+        Site health summary. Scans and repairs are managed in SharePoint admin tooling.
       </span>
       <div className={styles.metricGrid}>
         <div className={styles.metricCell} data-pcc-site-health-overall="">

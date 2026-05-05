@@ -173,7 +173,7 @@ describe('PccPriorityActionsRail', () => {
     expect(affordances.length).toBe(SAMPLE_VIEW_MODEL.visibleCount);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
-      expect(el.textContent).toBe('Preview only');
+      expect(el.textContent).toBe('Reference');
     }
   });
 

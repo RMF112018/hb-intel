@@ -22,10 +22,7 @@ import type { FC } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import styles from './PccDocumentsSurface.module.css';
 import type { IPccDocumentControlViewModel } from './documentControlViewModel';
-import {
-  resolveReviewStateMessage,
-  resolveReviewTypeLabel,
-} from './reviewMessaging';
+import { resolveReviewStateMessage, resolveReviewTypeLabel } from './reviewMessaging';
 
 export interface PccDocumentControlReviewsCardProps {
   readonly viewModel?: IPccDocumentControlViewModel;
@@ -43,9 +40,8 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
     <PccDashboardCard footprint="full" eyebrow="Reviews" title="Reviews & Approvals">
       <div className={styles.headerCopy} data-pcc-doc-reviews-card="true">
         <p className={styles.laneDescription}>
-          Read-only summary of the Wave 7 document-control review vocabulary, state legend, and
-          queue sample. This is read-model rendering — no live approval, rejection, return, or
-          reassignment behavior.
+          Document-control review vocabulary, state legend, and queue. Approvals, rejections, and
+          reassignments are managed by your PCC administrator.
         </p>
 
         {/* 1. Review type vocabulary */}
@@ -53,16 +49,12 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
           <h4 className={styles.laneTitle}>Review types</h4>
           {reviewTypes.length === 0 ? (
             <p className={styles.guardrail} data-pcc-doc-review-types-empty="true">
-              No data in this preview.
+              No data to display.
             </p>
           ) : (
             <ul className={styles.metaList} data-pcc-doc-review-types-list="true">
               {reviewTypes.map((typeId) => (
-                <li
-                  key={typeId}
-                  className={styles.metaRow}
-                  data-pcc-doc-review-type={typeId}
-                >
+                <li key={typeId} className={styles.metaRow} data-pcc-doc-review-type={typeId}>
                   <span className={styles.metaLabel}>{resolveReviewTypeLabel(typeId)}</span>
                 </li>
               ))}
@@ -75,7 +67,7 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
           <h4 className={styles.laneTitle}>Review states</h4>
           {reviewStates.length === 0 ? (
             <p className={styles.guardrail} data-pcc-doc-review-states-empty="true">
-              No data in this preview.
+              No data to display.
             </p>
           ) : (
             <ul className={styles.metaList} data-pcc-doc-review-state-legend="true">
@@ -101,7 +93,7 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
           <h4 className={styles.laneTitle}>Review queue</h4>
           {queue.length === 0 ? (
             <p className={styles.guardrail} data-pcc-doc-review-queue-empty="true">
-              No data in this preview.
+              No data to display.
             </p>
           ) : (
             <ul className={styles.metaList} data-pcc-doc-review-queue="true">
@@ -118,10 +110,7 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
                     className={styles.metaRow}
                     data-pcc-doc-review-queue-row={item.itemId}
                   >
-                    <span
-                      className={styles.metaLabel}
-                      data-pcc-doc-review-queue-file="true"
-                    >
+                    <span className={styles.metaLabel} data-pcc-doc-review-queue-file="true">
                       {item.fileName}
                     </span>
                     <span data-pcc-doc-review-queue-type={item.reviewType}>· {typeLabel}</span>
@@ -131,9 +120,7 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
                     >
                       · {stateMessage.label}
                     </span>
-                    <span data-pcc-doc-review-queue-role={item.assignedRoleCode}>
-                      · {roleText}
-                    </span>
+                    <span data-pcc-doc-review-queue-role={item.assignedRoleCode}>· {roleText}</span>
                   </li>
                 );
               })}

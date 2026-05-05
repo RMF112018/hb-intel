@@ -8,8 +8,8 @@ describe('PccApp shell', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const header = container.querySelector('[data-pcc-header]');
     expect(header, 'header should render').not.toBeNull();
-    expect(header?.textContent).toContain('Project Control Center Preview');
-    expect(header?.textContent).toContain('Wave 2');
+    expect(header?.textContent).toContain('Project Control Center');
+    expect(header?.textContent).toContain('Reference');
     expect(container.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
       'Project Home',
     );

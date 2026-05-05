@@ -15,28 +15,32 @@ export const PccAccessManagerLaneCard: FC<PccAccessManagerLaneCardProps> = ({ mo
   const lane = model.accessManagerLane;
 
   return (
-    <PccDashboardCard footprint="full" eyebrow="Access Manager Lane" title="Assignment + Approval Preview">
+    <PccDashboardCard
+      footprint="full"
+      eyebrow="Access Manager Lane"
+      title="Assignment and approval"
+    >
       <div className={styles.body} data-pcc-team-access-lane="access-manager">
         <p className={styles.previewCue}>
-          Access manager lifecycle preview only. No people lookup, no group mutation, and no backend/API
-          execution.
+          People lookup, group changes, and approval execution are managed by your PCC
+          administrator.
         </p>
 
         <div className={styles.metaRow}>
-          <button type="button" disabled className={styles.disabledAction}>
-            Add/search user (preview-only)
+          <button type="button" disabled aria-disabled="true" className={styles.disabledAction}>
+            Add or search user
           </button>
-          <button type="button" disabled className={styles.disabledAction}>
-            Submit assignment change (preview-only)
+          <button type="button" disabled aria-disabled="true" className={styles.disabledAction}>
+            Submit assignment change
           </button>
-          <button type="button" disabled className={styles.disabledAction}>
-            Approve/reject/comment (preview-only)
+          <button type="button" disabled aria-disabled="true" className={styles.disabledAction}>
+            Approve, reject, or comment
           </button>
         </div>
         <PccPreviewState
           state="not-yet-implemented-operation"
-          title="Access manager operations are deferred"
-          description="Execution remains manual/IT-handled or backend-gated later; no Wave 2 runtime action path exists."
+          title="Access manager actions are not available here"
+          description="These actions are managed by your PCC administrator."
         />
 
         <PccExecutionStatusPanel

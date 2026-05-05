@@ -32,7 +32,9 @@ export const PccTeamViewerLaneCard: FC<PccTeamViewerLaneCardProps> = ({ model })
             </li>
           ))}
         </ul>
-        <span className={styles.previewCue}>Read-only for non-access-manager personas.</span>
+        <span className={styles.previewCue}>
+          Only access managers can change project team and permissions.
+        </span>
       </div>
     </PccDashboardCard>
   );

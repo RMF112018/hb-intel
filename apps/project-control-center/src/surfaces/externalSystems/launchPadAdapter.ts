@@ -107,8 +107,7 @@ const URL_POLICY_REASON_LABELS: Readonly<Record<UrlPolicyReasonCode, string>> = 
   'policy-unavailable': 'URL policy could not be evaluated.',
 };
 
-const SURFACE_SUBTITLE =
-  'Launch and reference layer for project external systems. Read-only preview · no live external API calls in this prompt.';
+const SURFACE_SUBTITLE = 'Launch and reference layer for project external systems.';
 
 const ZERO_SUMMARY: IPccLaunchPadSummaryViewModel = {
   totalProjects: 0,

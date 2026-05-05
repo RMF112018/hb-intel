@@ -2,22 +2,24 @@ import { Fragment, type FC } from 'react';
 import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
+import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
 import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import styles from './PccControlCenterSettingsSurface.module.css';
 
 const SURFACE = PCC_MVP_SURFACES['control-center-settings'];
+const POSTURE = pccSurfacePostureCopy('reference');
 
 const SETTINGS_SCOPE_PREVIEW = [
-  { label: 'Project scope', value: 'PCC Project Profile (fixture)' },
-  { label: 'Site scope', value: 'Project Site baseline labels (preview)' },
-  { label: 'Persona scope', value: 'Role template selector preview' },
+  { label: 'Project scope', value: 'Project profile' },
+  { label: 'Site scope', value: 'Project site baseline labels' },
+  { label: 'Persona scope', value: 'Role template selector' },
   { label: 'Integration scope', value: 'External mapping visibility only' },
 ] as const;
 
-const MISSING_CONFIG_PREVIEW = [
+const MISSING_CONFIG_ITEMS = [
   'Template-to-role mapping review pending',
   'Integration endpoint ownership confirmation pending',
-  'Deployment readiness checklist not executed (Wave 2)',
+  'Deployment readiness checklist not yet completed',
 ] as const;
 
 export const PccControlCenterSettingsSurface: FC = () => (
@@ -25,22 +27,22 @@ export const PccControlCenterSettingsSurface: FC = () => (
     <PccDashboardCard
       footprint="full"
       eyebrow={SURFACE.displayName}
-      title="Control Center Settings Preview"
+      title="Control Center Settings"
       dataActiveSurfacePanel="control-center-settings"
     >
       <div className={styles.body}>
         <PccSurfaceContextHeader
           surfaceId="control-center-settings"
           projectLabel="Project 26-000-00 · Governance Configuration"
-          postureLabel="Read-only preview"
-          sourceStatusLabel="Fixture default"
-          sourceConfidenceLabel="Preview confidence"
-          lastUpdatedLabel="Not connected in this prompt"
+          postureLabel={POSTURE.postureLabel}
+          sourceStatusLabel={POSTURE.sourceStatusLabel}
+          sourceConfidenceLabel={POSTURE.sourceConfidenceLabel}
+          lastUpdatedLabel={POSTURE.lastUpdatedLabel}
         />
         <PccPreviewState
           state="preview"
-          title="Preview-only settings visibility"
-          description="No save, update, tenant mutation, or backend/API execution is enabled."
+          title="Settings overview"
+          description="Saving, updating, and tenant changes are managed by your PCC administrator."
         />
       </div>
     </PccDashboardCard>
@@ -60,15 +62,11 @@ export const PccControlCenterSettingsSurface: FC = () => (
       </div>
     </PccDashboardCard>
 
-    <PccDashboardCard
-      footprint="wide"
-      eyebrow="Missing Configuration"
-      title="Preview Backlog Items"
-    >
+    <PccDashboardCard footprint="wide" eyebrow="Configuration" title="Items needing setup">
       <div className={styles.body}>
         <PccPreviewState state="missing-config" />
         <ul className={styles.missingList}>
-          {MISSING_CONFIG_PREVIEW.map((item) => (
+          {MISSING_CONFIG_ITEMS.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>

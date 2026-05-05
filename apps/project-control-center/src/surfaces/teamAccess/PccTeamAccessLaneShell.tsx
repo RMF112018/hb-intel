@@ -31,18 +31,23 @@ export const PccTeamAccessLaneShell: FC<PccTeamAccessLaneShellProps> = ({
       : DEFAULT_TEAM_ACCESS_PREVIEW_MODEL;
 
   const showTeamViewer = model.branch === 'access-manager' || model.branch === 'has-project-access';
-  const showPermissionRequest = model.branch === 'access-manager' || model.branch === 'needs-project-access';
+  const showPermissionRequest =
+    model.branch === 'access-manager' || model.branch === 'needs-project-access';
   const showAccessManager = model.branch === 'access-manager';
 
   return (
     <Fragment>
       <PccTeamAccessHeaderCard />
       {model.branch !== 'access-manager' ? (
-        <PccDashboardCard footprint="wide" eyebrow="Access Manager Controls" title="Role Restriction Preview">
+        <PccDashboardCard
+          footprint="wide"
+          eyebrow="Access Manager Controls"
+          title="Access manager actions"
+        >
           <PccPreviewState
             state="unauthorized-persona"
             title="Access manager actions are restricted"
-            description="This persona can view context only. Assignment and approval controls remain unavailable."
+            description="Your role can view team and access context. Only access managers can assign and approve."
           />
         </PccDashboardCard>
       ) : null}

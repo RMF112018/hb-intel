@@ -52,13 +52,10 @@ export const PccAccessReviewControls: FC<PccAccessReviewControlsProps> = ({
       data-pcc-access-review-request={request.requestId}
     >
       <div className={styles.metaRow} data-pcc-review-banner="">
-        <PccStatusPill tone="info">Preview only</PccStatusPill>
+        <PccStatusPill tone="info">Reference</PccStatusPill>
       </div>
 
-      <p
-        className={styles.previewCue}
-        data-pcc-review-helper="local-only"
-      >
+      <p className={styles.previewCue} data-pcc-review-helper="local-only">
         Buttons update local UI only and execute no permission change.
       </p>
 
@@ -83,10 +80,7 @@ export const PccAccessReviewControls: FC<PccAccessReviewControlsProps> = ({
         </button>
       </div>
 
-      <label
-        className={styles.formLabel}
-        htmlFor={`${request.requestId}-review-comment`}
-      >
+      <label className={styles.formLabel} htmlFor={`${request.requestId}-review-comment`}>
         Reviewer comment (preview only)
       </label>
       <textarea
@@ -105,10 +99,7 @@ export const PccAccessReviewControls: FC<PccAccessReviewControlsProps> = ({
         Review decision preview: {decisionLabel}
       </p>
 
-      <p
-        className={styles.noPermissionChangeNotice}
-        data-pcc-no-permission-change-notice=""
-      >
+      <p className={styles.noPermissionChangeNotice} data-pcc-no-permission-change-notice="">
         {NO_PERMISSION_CHANGE_NOTICE}
       </p>
     </div>

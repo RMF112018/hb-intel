@@ -28,6 +28,21 @@
   color: var(--pcc-color-text-muted);
 }
 
+.reason {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pcc-color-text-primary);
+}
+
+.nextStep {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+}
+
 .action {
   display: flex;
   gap: var(--pcc-space-sm);
@@ -43,8 +58,15 @@
 }
 
 @keyframes pcc-preview-state-pulse {
-  0%, 100% { opacity: 0.3; transform: scale(0.85); }
-  50%      { opacity: 1;   transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
 .root[data-pcc-state-tone='danger'] {

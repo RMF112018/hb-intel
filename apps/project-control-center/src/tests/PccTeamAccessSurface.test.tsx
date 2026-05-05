@@ -12,9 +12,11 @@ describe('PccTeamAccessSurface preview branches', () => {
     );
 
     expect(container.querySelector('[data-pcc-team-access-lane="team-viewer"]')).not.toBeNull();
-    expect(container.querySelector('[data-pcc-team-access-lane="permission-request"]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-pcc-team-access-lane="permission-request"]'),
+    ).not.toBeNull();
     expect(container.querySelector('[data-pcc-team-access-lane="access-manager"]')).not.toBeNull();
-    expect(container.textContent).toContain('Add/search user (preview-only)');
+    expect(container.textContent).toContain('Add or search user');
     expect(
       container.querySelector('[data-pcc-execution-status="backend-gated-later"]'),
     ).not.toBeNull();
@@ -24,7 +26,10 @@ describe('PccTeamAccessSurface preview branches', () => {
   it('renders non-manager with project access as Team Viewer only', () => {
     const { container } = render(
       <PccBentoGrid>
-        <PccTeamAccessSurface previewPersona="project-team-member" previewHasProjectSiteAccess={true} />
+        <PccTeamAccessSurface
+          previewPersona="project-team-member"
+          previewHasProjectSiteAccess={true}
+        />
       </PccBentoGrid>,
     );
 
@@ -43,10 +48,12 @@ describe('PccTeamAccessSurface preview branches', () => {
     );
 
     expect(container.querySelector('[data-pcc-team-access-lane="team-viewer"]')).toBeNull();
-    expect(container.querySelector('[data-pcc-team-access-lane="permission-request"]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-pcc-team-access-lane="permission-request"]'),
+    ).not.toBeNull();
     expect(container.querySelector('[data-pcc-team-access-lane="access-manager"]')).toBeNull();
     expect(container.querySelector('[data-pcc-access-request-form]')).not.toBeNull();
-    expect(container.textContent).toContain('Request access (preview-only)');
+    expect(container.textContent).toContain('Request access');
     expect(container.querySelector('[data-pcc-no-permission-change-notice]')).not.toBeNull();
     expect(container.textContent).toContain('No permission change has been executed');
   });

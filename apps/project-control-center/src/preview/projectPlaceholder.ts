@@ -14,12 +14,11 @@ export interface PccProjectPlaceholder {
 }
 
 export const PCC_PROJECT_PLACEHOLDER: PccProjectPlaceholder = {
-  projectName: 'Project Control Center Preview',
-  subtitle: 'Wave 2 · fixture-driven',
+  projectName: 'Project Control Center',
+  subtitle: 'Project overview',
   dateScope: 'Last 12 Months',
   pills: [
-    { label: 'Preview', tone: 'info' },
-    { label: 'Wave 2', tone: 'neutral' },
-    { label: 'No live data', tone: 'warning' },
+    { label: 'Reference', tone: 'info' },
+    { label: 'PCC', tone: 'neutral' },
   ],
 };
