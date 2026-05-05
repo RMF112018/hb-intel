@@ -58,7 +58,7 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         sources={viewModel?.documentControl.data}
       />
       <PccProjectReadinessCard />
-      <PccApprovalsCheckpointsCard />
+      <PccApprovalsCheckpointsCard viewModel={viewModel?.approvalsCard} />
       <PccExternalSystemsCard />
       <PccTeamSnapshotCard />
       <PccMissingConfigurationsCard

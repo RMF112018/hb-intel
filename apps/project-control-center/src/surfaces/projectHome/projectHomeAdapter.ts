@@ -20,6 +20,7 @@
 import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMapping.js';
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState';
 import type {
+  PccApprovalsReadModel,
   PccDocumentControlReadModel,
   PccPriorityActionsReadModel,
   PccProcoreProjectMappingReadModel,
@@ -33,6 +34,10 @@ import {
   buildPccProcoreSurfaceViewModel,
   buildProcorePriorityActionsForRail,
 } from '../../viewModels/procoreSurfaceAdapter.js';
+import {
+  buildApprovalsDerivedPriorityActions,
+  buildPccApprovalsCheckpointsCardViewModel,
+} from '../../viewModels/approvalsPriorityActionsAdapter.js';
 import type { PccCardState } from './shared.js';
 import type {
   IPccProjectHomeViewModel,
@@ -46,6 +51,13 @@ export interface IProjectHomeAdapterInput {
   readonly priorityActions?: PccReadModelEnvelope<PccPriorityActionsReadModel>;
   readonly procoreProjectMapping: PccReadModelEnvelope<PccProcoreProjectMappingReadModel>;
   readonly procoreSyncHealth: PccReadModelEnvelope<PccProcoreSyncHealthReadModel>;
+  /**
+   * Wave 14 / Prompt 06 — approvals composite envelope. Optional. When
+   * absent (runtime degraded path), zero approvals-derived priority actions
+   * are merged and the approvals card view-model is omitted (card falls
+   * back to its fixture render).
+   */
+  readonly approvals?: PccReadModelEnvelope<PccApprovalsReadModel>;
 }
 
 const PREVIEW_TO_CARD_STATE: Readonly<Record<PccPreviewStateKind, PccCardState>> = {
@@ -99,14 +111,31 @@ export function buildPccProjectHomeViewModel(
   const priorityActionsSourceStatus = input.priorityActions
     ? input.priorityActions.sourceStatus
     : homeStatus;
+  const baseAndProcore = [...baseActions, ...procoreRailActions];
+  // Wave 14 / Prompt 06 — merge approvals-derived priority action candidates
+  // alongside base + Procore. Runtime callers pass `approvalsEnvelope` only
+  // (never `priorityActionLinks`); when the envelope is undefined the
+  // adapter returns an empty array — no fixture fallback at runtime.
+  const approvalsDerived = buildApprovalsDerivedPriorityActions({
+    projectId: input.projectId,
+    approvalsEnvelope: input.approvals,
+    existingActions: baseAndProcore,
+  });
   const priorityActionsSlot = slot(priorityActionsSourceStatus, [
-    ...baseActions,
-    ...procoreRailActions,
+    ...baseAndProcore,
+    ...approvalsDerived.priorityActions,
   ]);
   // Use the procore-mapping envelope's status as the canonical slot
   // sourceStatus; the adapter's `chooseEnvelopeStatus` already encodes
   // fail-closed precedence across both envelopes.
   const procoreSlotStatus: PccReadModelSourceStatus = input.procoreProjectMapping.sourceStatus;
+
+  // Wave 14 / Prompt 06 — small approvals card view-model. Built only when
+  // an approvals envelope is supplied (runtime degraded path → undefined →
+  // card falls back to its synchronous fixture render).
+  const approvalsCard = input.approvals
+    ? buildPccApprovalsCheckpointsCardViewModel(input.approvals)
+    : undefined;
 
   return {
     intelligence: slot(homeStatus, home.profile),
@@ -115,5 +144,6 @@ export function buildPccProjectHomeViewModel(
     documentControl: slot(docStatus, docs.sources ?? []),
     missingConfigurations: slot(homeStatus, home.missingConfigurations ?? []),
     procoreSnapshot: slot(procoreSlotStatus, procoreSnapshotData),
+    approvalsCard,
   };
 }

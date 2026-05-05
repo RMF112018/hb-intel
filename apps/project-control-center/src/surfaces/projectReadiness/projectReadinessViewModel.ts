@@ -14,6 +14,8 @@
  */
 
 import type {
+  CheckpointSourceModule,
+  PccApprovalsReadModel,
   PccLifecycleReadinessReadModel,
   PccPersona,
   PccProjectId,
@@ -42,6 +44,21 @@ export interface IPccProjectReadinessReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccLifecycleReadinessReadModel>>;
+
+  /**
+   * Wave 14 / Prompt 06 — approvals composite envelope. Consumed by the
+   * inline `useProjectReadinessReadModel` hook to project Wave 14 active
+   * approval entries into additive read-only blocker reference rows on the
+   * Project Readiness blockers card. The full `IPccReadModelClient`
+   * already exposes this method (Prompt 04). Wrapped per-call in
+   * `.catch(() => undefined)` at the call site so an approvals-only
+   * failure degrades to zero approvals-derived references — no fixture
+   * fallback at runtime.
+   */
+  getApprovals(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>>;
 
   /**
    * Wave 99 / Prompt 05C — supplemental unified-lifecycle context
@@ -117,6 +134,21 @@ export interface IPccReadinessBlockerItemViewModel {
   readonly sourceModuleId: ProjectReadinessSourceModuleId;
   readonly sourceModuleLabel: string;
   readonly riskTag: ProjectReadinessRiskTag;
+  /**
+   * Wave 14 / Prompt 06 — explicit origin marker for approvals-derived
+   * reference rows. Defaults to `'framework'` when omitted; framework-
+   * derived blocker rows do not set this field.
+   */
+  readonly blockerSource?: 'framework' | 'approvals-reference';
+  /** Wave 14 / Prompt 06 — fixed reference-only attestation copy. */
+  readonly approvalReferenceCaption?: string;
+  /**
+   * Wave 14 / Prompt 06 — original Wave 14 source module preserved for
+   * audit/caption visibility. Distinct from `sourceModuleId`, which carries
+   * the mapped readiness vocabulary. Never overload `riskTag` with this.
+   */
+  readonly checkpointSourceModule?: CheckpointSourceModule;
+  readonly checkpointSourceModuleLabel?: string;
 }
 
 export interface IPccReadinessOwnershipEntryViewModel {

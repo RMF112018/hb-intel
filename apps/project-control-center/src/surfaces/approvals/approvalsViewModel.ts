@@ -223,6 +223,12 @@ export interface IPccApprovalsPolicyViewModel {
 export interface IPccApprovalsModuleIntegrationRow {
   readonly sourceModule: CheckpointSourceModule;
   readonly count: number;
+  /**
+   * Wave 14 / Prompt 06 — per-source-module ownership-posture caption.
+   * For Wave 13G this asserts feature/UX authority; for other modules it
+   * cites source-module ownership boundaries.
+   */
+  readonly ownershipPosture: string;
 }
 
 export interface IPccApprovalsModuleIntegrationViewModel {

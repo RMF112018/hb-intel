@@ -284,9 +284,16 @@ function useProjectReadinessReadModel(
     setVm({ status: 'loading' });
     void (async () => {
       try {
-        const env = await client.getProjectReadiness(projectId);
+        // Wave 14 / Prompt 06 — approvals fetch is wrapped in a per-call
+        // `.catch(() => undefined)` so an approvals-only failure degrades
+        // gracefully to zero approvals-derived reference rows. The
+        // primary readiness fetch keeps its existing failure semantics.
+        const [env, approvalsEnv] = await Promise.all([
+          client.getProjectReadiness(projectId),
+          client.getApprovals(projectId).catch(() => undefined),
+        ]);
         if (cancelled) return;
-        setVm(buildPccProjectReadinessViewModel(env));
+        setVm(buildPccProjectReadinessViewModel(env, approvalsEnv));
       } catch {
         if (cancelled) return;
         setVm({ status: 'error' });
@@ -541,7 +548,12 @@ const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
       ) : (
         <ul className={styles.blockerListInner} aria-label="Blockers and exceptions">
           {blockers.map((b) => (
-            <li key={b.id} className={styles.blockerItem} data-pcc-readiness-blocker-id={b.id}>
+            <li
+              key={b.id}
+              className={styles.blockerItem}
+              data-pcc-readiness-blocker-id={b.id}
+              data-pcc-readiness-blocker-source={b.blockerSource ?? 'framework'}
+            >
               <span className={styles.blockerTitle}>{b.title}</span>
               <span className={styles.blockerMeta}>
                 {b.domainLabel} · {b.lifecycleGateLabel}
@@ -553,6 +565,22 @@ const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
               <span className={styles.blockerMeta}>
                 Source: {b.sourceModuleLabel} · Severity: {b.severity}
               </span>
+              {b.checkpointSourceModuleLabel ? (
+                <span
+                  className={styles.blockerMeta}
+                  data-pcc-readiness-blocker-checkpoint-source={b.checkpointSourceModule}
+                >
+                  Checkpoint origin: {b.checkpointSourceModuleLabel}
+                </span>
+              ) : null}
+              {b.approvalReferenceCaption ? (
+                <span
+                  className={styles.blockerMeta}
+                  data-pcc-readiness-blocker-approval-caption=""
+                >
+                  {b.approvalReferenceCaption}
+                </span>
+              ) : null}
               <PccStatusPill tone={postureToTone(b.posture)}>
                 {posturelabel(b.posture)}
               </PccStatusPill>

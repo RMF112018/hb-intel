@@ -736,6 +736,12 @@ const ModuleIntegrationCard: FC<ModuleIntegrationCardProps> = ({
                   Checkpoints: {row.count}
                 </PccStatusPill>
               </div>
+              <p
+                className={styles.captionLine}
+                data-pcc-approvals-module-ownership-posture={row.sourceModule}
+              >
+                {row.ownershipPosture}
+              </p>
             </li>
           ))}
         </ul>

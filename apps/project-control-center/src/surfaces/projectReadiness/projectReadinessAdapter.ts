@@ -25,6 +25,7 @@ import type {
   IProjectReadinessGateSummary,
   IProjectReadinessItem,
   IProjectReadinessSourceHealthSummary,
+  PccApprovalsReadModel,
   PccPersona,
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
@@ -35,6 +36,7 @@ import type {
   ProjectReadinessPosture,
   ProjectReadinessSourceModuleId,
 } from '@hbc/models/pcc';
+import { buildApprovalsReadinessReferences } from '../../viewModels/approvalsReadinessReferencesAdapter.js';
 import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMapping.js';
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState.js';
 import type { PccCardState } from '../projectHome/shared.js';
@@ -276,6 +278,47 @@ function buildBlockers(
     sourceModuleId: item.sourceModuleId,
     sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[item.sourceModuleId].label,
     riskTag: deriveRiskTag(item),
+    blockerSource: 'framework',
+  }));
+}
+
+/**
+ * Wave 14 / Prompt 06 — additive approvals-derived blocker reference rows.
+ *
+ * Pure projection. Source data is the approvals composite envelope; rows
+ * are read-only references that preserve the original Wave 14
+ * `CheckpointSourceModule` on the explicit `checkpointSourceModule` field
+ * and use the mapped `ProjectReadinessSourceModuleId` on `sourceModuleId`.
+ * Project Readiness owns readiness state; these rows never claim
+ * readiness ownership.
+ */
+function buildApprovalsReferenceBlockers(
+  approvalsEnvelope: PccReadModelEnvelope<PccApprovalsReadModel> | undefined,
+): readonly IPccReadinessBlockerItemViewModel[] {
+  const refRows = buildApprovalsReadinessReferences(approvalsEnvelope);
+  return refRows.map((ref) => ({
+    id: ref.id,
+    title: ref.title,
+    // Domain / lifecycle gate are framework concepts; reference rows have
+    // no direct framework anchor, so a stable fallback is used. The
+    // `blockerSource: 'approvals-reference'` marker discriminates them
+    // from framework rows in the surface.
+    domain: 'project-setup' as ProjectReadinessDomainId,
+    domainLabel: 'Approvals reference',
+    lifecycleGate: 'preconstruction' as ProjectReadinessLifecycleGateId,
+    lifecycleGateLabel: ref.checkpointSourceModuleLabel,
+    status: 'in-progress',
+    severity: 'medium',
+    blockerState: 'open',
+    posture: 'at-risk',
+    ownerPersona: 'project-executive' as PccPersona,
+    sourceModuleId: ref.readinessSourceModuleId,
+    sourceModuleLabel: DOWNSTREAM_MODULE_REGISTRY[ref.readinessSourceModuleId].label,
+    riskTag: 'monitor',
+    blockerSource: 'approvals-reference',
+    approvalReferenceCaption: ref.referenceCaption,
+    checkpointSourceModule: ref.checkpointSourceModule,
+    checkpointSourceModuleLabel: ref.checkpointSourceModuleLabel,
   }));
 }
 
@@ -469,10 +512,12 @@ function derivedActiveGate(
 
 export function buildPccProjectReadinessViewModel(
   envelope: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel>,
+  approvalsEnvelope?: PccReadModelEnvelope<PccApprovalsReadModel>,
 ): IPccProjectReadinessViewModel {
   const sourceStatus = envelope.sourceStatus;
   const cardState = toCardState(sourceStatus);
   const snapshot = envelope.data;
+  const approvalsRefBlockers = buildApprovalsReferenceBlockers(approvalsEnvelope);
 
   if (sourceStatus !== 'available') {
     return {
@@ -498,7 +543,7 @@ export function buildPccProjectReadinessViewModel(
         pendingEvidenceCount: 0,
         confidence: 'unknown' as ProjectReadinessConfidenceState,
       })),
-      blockers: [],
+      blockers: approvalsRefBlockers,
       ownershipAccountability: {
         entries: [],
         totalUnassignedCount: 0,
@@ -520,7 +565,8 @@ export function buildPccProjectReadinessViewModel(
     };
   }
 
-  const blockers = buildBlockers(snapshot);
+  const frameworkBlockers = buildBlockers(snapshot);
+  const blockers = [...frameworkBlockers, ...approvalsRefBlockers];
 
   return {
     status: 'preview',

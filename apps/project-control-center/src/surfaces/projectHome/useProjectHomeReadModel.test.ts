@@ -47,13 +47,16 @@ describe('useProjectHomeReadModel', () => {
     expect(vm?.intelligence.sourceStatus).toBe('available');
     expect(vm?.intelligence.data?.projectId).toBe(SAMPLE_PROJECT_PROFILE.projectId);
     // Wave 13E — Procore-derived candidates may append after the home
-    // envelope's priorityActions. Assert prefix-equality plus
-    // category='procore-sync' on every appended item.
+    // envelope's priorityActions. Wave 14 / Prompt 06 — approvals-derived
+    // candidates also append. Assert prefix-equality plus category
+    // membership in the approved appended-source set on every appended
+    // item.
     expect(vm?.priorityActions.data.slice(0, SAMPLE_PRIORITY_ACTIONS.length)).toEqual(
       SAMPLE_PRIORITY_ACTIONS,
     );
+    const appendedSources: ReadonlySet<string> = new Set(['procore-sync', 'approval']);
     for (const appended of vm?.priorityActions.data.slice(SAMPLE_PRIORITY_ACTIONS.length) ?? []) {
-      expect(appended.category).toBe('procore-sync');
+      expect(appendedSources.has(appended.category)).toBe(true);
     }
     expect(vm?.siteHealth.data).toEqual(SAMPLE_SITE_HEALTH_SUMMARY);
     expect(vm?.missingConfigurations.data).toEqual(SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS);
@@ -119,14 +122,18 @@ describe('useProjectHomeReadModel', () => {
       getProcoreSyncHealth: (id, persona) => baseClient.getProcoreSyncHealth(id, persona),
       getUnifiedLifecycle: async () => SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
       getUnifiedSearch: (id, persona, query) => baseClient.getUnifiedSearch(id, persona, query),
+      // Wave 14 / Prompt 06 — provider-family-test alignment: hook now
+      // also resolves getApprovals (via per-call `.catch(() => undefined)`).
+      getApprovals: (id, persona) => baseClient.getApprovals(id, persona),
     };
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));
-    // Wave 13E — Procore-derived candidates flow through `category:'procore-sync'`
-    // (existing rail seam). Filter them out to keep the standalone-envelope
+    // Wave 13E — Procore-derived candidates flow through `category:'procore-sync'`.
+    // Wave 14 / Prompt 06 — approvals-derived candidates flow through
+    // `category:'approval'`. Filter both out to keep the standalone-envelope
     // assertion focused on the supplied envelope contents.
     const nonProcoreActions = result.current.viewModel?.priorityActions.data?.filter(
-      (action) => action.category !== 'procore-sync',
+      (action) => action.category !== 'procore-sync' && action.category !== 'approval',
     );
     expect(nonProcoreActions).toEqual(altActions);
     expect(result.current.viewModel?.priorityActions.sourceStatus).toBe('available');
@@ -151,6 +158,9 @@ describe('useProjectHomeReadModel', () => {
       getProcoreSyncHealth: (id, persona) => baseClient.getProcoreSyncHealth(id, persona),
       getUnifiedLifecycle: async () => SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
       getUnifiedSearch: (id, persona, query) => baseClient.getUnifiedSearch(id, persona, query),
+      // Wave 14 / Prompt 06 — provider-family-test alignment: hook now
+      // also resolves getApprovals (via per-call `.catch(() => undefined)`).
+      getApprovals: (id, persona) => baseClient.getApprovals(id, persona),
     };
     const { result } = renderHook(() => useProjectHomeReadModel(client, PROJECT_ID));
     await waitFor(() => expect(result.current.status).toBe('ready'));

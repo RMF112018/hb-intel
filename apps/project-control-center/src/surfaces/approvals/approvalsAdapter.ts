@@ -232,6 +232,40 @@ function buildPolicy(data: PccApprovalsReadModel): IPccApprovalsPolicyViewModel 
   };
 }
 
+// Wave 14 / Prompt 06 — per-source-module ownership posture caption. Wave
+// 13G entry asserts feature/UX authority; other entries cite source-module
+// ownership boundaries. Local constant — no shared label registry edits.
+const CHECKPOINT_SOURCE_MODULE_OWNERSHIP_POSTURE: Readonly<Record<CheckpointSourceModule, string>> = {
+  'team-and-access':
+    'Team and Access owns role/principal records. Wave 14 owns access/security checkpoint queue, routing, decision, and audit semantics.',
+  'document-control':
+    'Document Control owns the document/file content. Wave 14 owns evidence-sufficiency checkpoint routing and decision audit.',
+  'project-lifecycle-readiness-center':
+    'Project Lifecycle Readiness Center owns lifecycle items and gates. Wave 14 owns readiness gate checkpoint routing and authority decision.',
+  'permit-and-inspection-control-center':
+    'Permit and Inspection Control Center owns permit and inspection records. Wave 14 owns waiver/exception checkpoint routing.',
+  'responsibility-matrix':
+    'Responsibility Matrix owns RACI assignments. Wave 14 owns exception and escalation checkpoint routing.',
+  'constraints-log':
+    'Constraints Log owns constraint and risk records. Wave 14 owns deferral, waiver, and override checkpoint routing.',
+  'buyout-log':
+    'Buyout Log owns procurement records. Wave 14 owns handoff, freeze, and checkpoint routing for buyout decisions.',
+  'estimating-workbench-wave-13g':
+    'Wave 13G owns estimating feature contracts and UX. Wave 14 owns queue, routing, decision, and audit semantics for checkpointed estimating prompts.',
+  'external-systems':
+    'External Systems owns the catalog and mapping references. Wave 14 owns mapping-correction checkpoint routing.',
+  'site-health':
+    'Site Health owns drift findings. Wave 14 owns repair-request review and admin-verification checkpoint routing.',
+  'priority-actions':
+    'Priority Actions owns the rail and rendering. Wave 14 owns the dedupe and resolve/suppress contract for approval-derived candidates.',
+  'project-readiness':
+    'Project Readiness owns the readiness rollup. Wave 14 owns the read-only reference rows for active approval items.',
+  'executive-oversight':
+    'Executive Oversight owns the executive view. Wave 14 owns escalation checkpoint visibility and executive decision audit.',
+  'admin-review-surfaces':
+    'Admin Review Surfaces own admin control surfaces. Wave 14 owns admin-verification and technical-governance checkpoint routing.',
+};
+
 function buildModuleIntegration(
   data: PccApprovalsReadModel,
 ): IPccApprovalsModuleIntegrationViewModel {
@@ -239,6 +273,7 @@ function buildModuleIntegration(
     (sourceModule: CheckpointSourceModule) => ({
       sourceModule,
       count: data.analytics.countsBySourceModule[sourceModule] ?? 0,
+      ownershipPosture: CHECKPOINT_SOURCE_MODULE_OWNERSHIP_POSTURE[sourceModule],
     }),
   );
   return { rows };

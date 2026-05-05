@@ -3,6 +3,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import {
   DOCUMENT_CONTROL_SOURCES,
   DOCUMENT_CONTROL_SOURCE_IDS,
+  SAMPLE_APPROVALS_READ_MODEL,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
@@ -25,6 +26,7 @@ const TEAM_ACCESS_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/
 const UNIFIED_LIFECYCLE_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/unified-lifecycle`;
 const PROCORE_MAPPING_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/procore-project-mapping`;
 const PROCORE_SYNC_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/procore-sync-health`;
+const APPROVALS_URL = `https://example.invalid/api/pcc/projects/${ENCODED_ID}/approvals`;
 
 function unifiedLifecycleOk() {
   return {
@@ -105,6 +107,18 @@ function procoreSyncOk() {
   };
 }
 
+function approvalsOk() {
+  return {
+    projectId: SAMPLE_PROJECT_PROFILE.projectId,
+    mode: 'mock',
+    sourceStatus: 'available',
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data: SAMPLE_APPROVALS_READ_MODEL,
+  };
+}
+
 function jsonResponse(body: unknown): Response {
   return {
     ok: true,
@@ -174,6 +188,10 @@ describe('mount(...) opt-in', () => {
       if (url === PROCORE_MAPPING_URL)
         return Promise.resolve(jsonResponse({ data: procoreMappingOk() }));
       if (url === PROCORE_SYNC_URL) return Promise.resolve(jsonResponse({ data: procoreSyncOk() }));
+      // Wave 14 / Prompt 06 — Project Home now also drives a getApprovals
+      // call (per-call .catch in the hook gracefully degrades on failure;
+      // the call still goes out and contributes to the canonical URL set).
+      if (url === APPROVALS_URL) return Promise.resolve(jsonResponse({ data: approvalsOk() }));
       throw new Error(`unexpected fetch URL: ${url}`);
     });
     await act(async () => {
@@ -185,7 +203,7 @@ describe('mount(...) opt-in', () => {
       });
     });
     await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalledTimes(6);
+      expect(fetchSpy).toHaveBeenCalledTimes(7);
     });
     const calls = fetchSpy.mock.calls.map((c) => ({ url: c[0], init: c[1] }));
     const urls = calls.map((c) => c.url).sort();
@@ -197,6 +215,7 @@ describe('mount(...) opt-in', () => {
         UNIFIED_LIFECYCLE_URL,
         PROCORE_MAPPING_URL,
         PROCORE_SYNC_URL,
+        APPROVALS_URL,
       ].sort(),
     );
     for (const c of calls) {

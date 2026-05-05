@@ -17,6 +17,7 @@ import type {
   IPriorityAction,
   IProjectProfile,
   ISiteHealthSummary,
+  PccApprovalsReadModel,
   PccDocumentControlReadModel,
   PccPersona,
   PccPriorityActionsReadModel,
@@ -29,6 +30,7 @@ import type {
   PccUnifiedLifecycleReadModel,
   PccUnifiedSearchAskHbiReadModel,
 } from '@hbc/models/pcc';
+import type { IPccApprovalsCheckpointsCardViewModel } from './PccApprovalsCheckpointsCard.js';
 import type { IPccProcoreSurfaceViewModel } from '../../viewModels/procoreSurfaceAdapter.js';
 import type { PccCardState } from './shared.js';
 
@@ -105,6 +107,22 @@ export interface IPccProjectHomeReadModelClient {
     viewerPersona?: PccPersona,
     query?: string,
   ): Promise<PccReadModelEnvelope<PccUnifiedSearchAskHbiReadModel>>;
+
+  /**
+   * Wave 14 / Prompt 06 — approvals composite envelope. Consumed by
+   * `useProjectHomeReadModel` to build the small approvals card view-model
+   * and to project Wave 14 priority-action candidates into the rail.
+   * The full `IPccReadModelClient` returned by `createPccReadModelClient`
+   * already exposes this method (Prompt 04). Project Home content wraps
+   * the call in a per-call `.catch(() => undefined)` so an approvals-only
+   * failure degrades gracefully — `approvalsEnvelope: undefined` flows
+   * downstream and adapters return zero candidates (no fixture fallback
+   * at runtime).
+   */
+  getApprovals(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>>;
 }
 
 export interface IPccProjectHomeViewModelSlot<TData> {
@@ -122,4 +140,11 @@ export interface IPccProjectHomeViewModel {
     readonly IExternalSystemMissingConfig[]
   >;
   readonly procoreSnapshot: IPccProjectHomeViewModelSlot<IPccProcoreSurfaceViewModel>;
+  /**
+   * Wave 14 / Prompt 06 — small approvals card view-model built from the
+   * approvals composite envelope. `undefined` when the approvals envelope
+   * is unavailable (runtime degraded path) — the card falls back to its
+   * fixture render in that case.
+   */
+  readonly approvalsCard?: IPccApprovalsCheckpointsCardViewModel;
 }

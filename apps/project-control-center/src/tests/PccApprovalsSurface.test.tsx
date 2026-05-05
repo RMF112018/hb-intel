@@ -257,10 +257,38 @@ describe('PccApprovalsSurface — HBI no-authority panel scoping', () => {
 // Router pass-through coverage
 // ---------------------------------------------------------------------------
 
+describe('PccApprovalsSurface — module-integration ownership posture (Wave 14 / Prompt 06)', () => {
+  it('emits one ownership-posture caption per module-integration row', () => {
+    const container = renderSurface();
+    const lane = container.querySelector('[data-pcc-approvals-lane="module-integration"]');
+    expect(lane).not.toBeNull();
+    const moduleRows = lane!.querySelectorAll('[data-pcc-approvals-module-row]');
+    const postures = lane!.querySelectorAll('[data-pcc-approvals-module-ownership-posture]');
+    expect(postures.length).toBe(moduleRows.length);
+  });
+
+  it('Wave 13G row carries the feature/UX-authority ownership posture caption (per-row scoped)', () => {
+    const container = renderSurface();
+    const wave13gPosture = container.querySelector(
+      '[data-pcc-approvals-module-ownership-posture="estimating-workbench-wave-13g"]',
+    );
+    expect(wave13gPosture).not.toBeNull();
+    expect(wave13gPosture!.textContent ?? '').toContain(
+      'Wave 13G owns estimating feature contracts and UX',
+    );
+  });
+});
+
 describe('PccSurfaceRouter — approvals route pass-through', () => {
   it('passes the readModelClient into PccApprovalsSurface and calls getApprovals once', async () => {
     const spy = vi.fn(async () => envelope('available'));
-    const router: IPccApprovalsReadModelClient = { getApprovals: spy };
+    // Router test stub: PccSurfaceRouter accepts the full router-level
+    // narrow client interface but only exercises `getApprovals` for the
+    // `approvals` case. A structural cast through `unknown` keeps the
+    // test focused without re-implementing every other read-model method.
+    const router = { getApprovals: spy } as unknown as Parameters<
+      typeof PccSurfaceRouter
+    >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="wideDesktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
@@ -275,7 +303,13 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
 
   it('renders only one active-surface-panel marker for approvals when router-mounted', async () => {
     const spy = vi.fn(async () => envelope('available'));
-    const router: IPccApprovalsReadModelClient = { getApprovals: spy };
+    // Router test stub: PccSurfaceRouter accepts the full router-level
+    // narrow client interface but only exercises `getApprovals` for the
+    // `approvals` case. A structural cast through `unknown` keeps the
+    // test focused without re-implementing every other read-model method.
+    const router = { getApprovals: spy } as unknown as Parameters<
+      typeof PccSurfaceRouter
+    >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="wideDesktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
@@ -290,7 +324,13 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
 
   it('preserves the bento direct-child invariant under router-wrapped render', async () => {
     const spy = vi.fn(async () => envelope('available'));
-    const router: IPccApprovalsReadModelClient = { getApprovals: spy };
+    // Router test stub: PccSurfaceRouter accepts the full router-level
+    // narrow client interface but only exercises `getApprovals` for the
+    // `approvals` case. A structural cast through `unknown` keeps the
+    // test focused without re-implementing every other read-model method.
+    const router = { getApprovals: spy } as unknown as Parameters<
+      typeof PccSurfaceRouter
+    >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="wideDesktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
@@ -314,7 +354,13 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       resolveFn = res;
     });
     const spy = vi.fn(() => promise);
-    const router: IPccApprovalsReadModelClient = { getApprovals: spy };
+    // Router test stub: PccSurfaceRouter accepts the full router-level
+    // narrow client interface but only exercises `getApprovals` for the
+    // `approvals` case. A structural cast through `unknown` keeps the
+    // test focused without re-implementing every other read-model method.
+    const router = { getApprovals: spy } as unknown as Parameters<
+      typeof PccSurfaceRouter
+    >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="wideDesktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />

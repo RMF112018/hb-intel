@@ -37,14 +37,26 @@ export function useProjectHomeReadModel(
     let cancelled = false;
     setState({ status: 'loading' });
     void (async () => {
-      const [home, priorityActions, documentControl, procoreProjectMapping, procoreSyncHealth] =
-        await Promise.all([
-          client.getProjectHome(projectId),
-          client.getPriorityActions(projectId),
-          client.getDocumentControl(projectId),
-          client.getProcoreProjectMapping(projectId),
-          client.getProcoreSyncHealth(projectId),
-        ]);
+      // Wave 14 / Prompt 06 — approvals fetch is wrapped in a per-call
+      // `.catch(() => undefined)` so an approvals-only failure degrades
+      // gracefully to zero approvals-derived candidates / fixture-fallback
+      // card. Other Project Home reads keep their existing failure
+      // semantics so this prompt does not change Wave 4 behaviour.
+      const [
+        home,
+        priorityActions,
+        documentControl,
+        procoreProjectMapping,
+        procoreSyncHealth,
+        approvals,
+      ] = await Promise.all([
+        client.getProjectHome(projectId),
+        client.getPriorityActions(projectId),
+        client.getDocumentControl(projectId),
+        client.getProcoreProjectMapping(projectId),
+        client.getProcoreSyncHealth(projectId),
+        client.getApprovals(projectId).catch(() => undefined),
+      ]);
       if (cancelled) return;
       setState({
         status: 'ready',
@@ -55,6 +67,7 @@ export function useProjectHomeReadModel(
           documentControl,
           procoreProjectMapping,
           procoreSyncHealth,
+          approvals,
         }),
       });
     })();
