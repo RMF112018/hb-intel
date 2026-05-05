@@ -45,9 +45,7 @@ const MissingConfigurationsBody: FC<{
           <span className={styles.listRowSummary}>{config.message}</span>
           <span className={styles.listRowMeta}>
             <span>Owner: {config.ownerPersona}</span>
-            <span className={styles.listRowMetaSep}>
-              Required before: {config.requiredBefore}
-            </span>
+            <span className={styles.listRowMetaSep}>Required before: {config.requiredBefore}</span>
           </span>
         </div>
         <PccStatusPill tone={severityToneFor(config.severity)} filled>
@@ -62,7 +60,7 @@ export const PccMissingConfigurationsCard: FC<PccMissingConfigurationsCardProps>
   state = 'preview',
   missingConfigurations,
 }) => (
-  <PccDashboardCard footprint="compact" eyebrow="Setup" title="Missing Configurations">
+  <PccDashboardCard footprint="standard" eyebrow="Setup" title="Missing Configurations">
     {state === 'preview' ? (
       <MissingConfigurationsBody
         missingConfigurations={missingConfigurations ?? SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS}

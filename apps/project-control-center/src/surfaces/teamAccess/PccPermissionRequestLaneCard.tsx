@@ -21,26 +21,34 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
           <PccStatusPill tone="info">Reference</PccStatusPill>
         </div>
 
-        <PccAccessRequestForm
-          introText="Submission, persistence, and approval execution are managed by your PCC administrator."
-          requestAccessButtonLabel="Request access"
-          requestChangeButtonLabel="Request role or permission change"
-          requestAccessEnabled={lane.requestAccessEnabled}
-          requestChangeEnabled={lane.requestChangeEnabled}
-          deferredTitle="Request submission is not available here"
-          deferredDescription="Request persistence and workflow execution are managed by your PCC administrator."
-        />
+        <section className={styles.laneSection} data-pcc-lane-section="request-form">
+          <h4 className={styles.laneSectionTitle}>Request</h4>
+          <PccAccessRequestForm
+            introText="Submission, persistence, and approval execution are managed by your PCC administrator."
+            requestAccessButtonLabel="Request access"
+            requestChangeButtonLabel="Request role or permission change"
+            requestAccessEnabled={lane.requestAccessEnabled}
+            requestChangeEnabled={lane.requestChangeEnabled}
+            deferredTitle="Request submission is not available here"
+            deferredDescription="Request persistence and workflow execution are managed by your PCC administrator."
+          />
+        </section>
 
-        <span className={styles.metaRow}>Requested permission templates:</span>
-        <div className={styles.tags}>
-          {lane.requestTemplateOptions.map((template) => (
-            <span key={template} className={styles.chip}>
-              {template}
-            </span>
-          ))}
-        </div>
+        <section className={styles.laneSection} data-pcc-lane-section="permission-templates">
+          <h4 className={styles.laneSectionTitle}>Requested permission templates</h4>
+          <div className={styles.tags}>
+            {lane.requestTemplateOptions.map((template) => (
+              <span key={template} className={styles.chip}>
+                {template}
+              </span>
+            ))}
+          </div>
+        </section>
 
-        <PccAccessRequestQueue records={lane.requestPreviewRecords} branch={model.branch} />
+        <section className={styles.laneSection} data-pcc-lane-section="request-queue">
+          <h4 className={styles.laneSectionTitle}>Open requests</h4>
+          <PccAccessRequestQueue records={lane.requestPreviewRecords} branch={model.branch} />
+        </section>
 
         <p className={styles.noPermissionChangeNotice} data-pcc-no-permission-change-notice="">
           {NO_PERMISSION_CHANGE_NOTICE}

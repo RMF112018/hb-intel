@@ -29,9 +29,13 @@ interface PccProjectHomeProps {
  *
  *   - exactly one `[data-pcc-active-surface-panel="project-home"]` exists,
  *     carried by the Project Intelligence card;
- *   - all 10 cards are direct children of `[data-pcc-bento-grid]`;
+ *   - every card is a direct child of `[data-pcc-bento-grid]`;
  *   - each card receives a non-zero `data-pcc-column-span` via the bento
  *     context.
+ *
+ * First-scan composition order surfaces the highest-frequency operational
+ * signals (priority actions → setup gaps → operational health → pending
+ * decisions → readiness) before reference and history content.
  */
 export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient }) => {
   if (readModelClient) {
@@ -41,13 +45,13 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient }) => 
     <Fragment>
       <PccProjectIntelligenceCard />
       <PccPriorityActionsCard />
+      <PccMissingConfigurationsCard />
       <PccSiteHealthSummaryCard />
-      <PccDocumentControlCard />
-      <PccProjectReadinessCard />
       <PccApprovalsCheckpointsCard />
+      <PccProjectReadinessCard />
+      <PccDocumentControlCard />
       <PccExternalSystemsCard />
       <PccTeamSnapshotCard />
-      <PccMissingConfigurationsCard />
       <PccRecentActivityCard />
     </Fragment>
   );
