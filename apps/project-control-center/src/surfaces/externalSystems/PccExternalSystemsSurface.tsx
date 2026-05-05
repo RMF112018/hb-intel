@@ -49,6 +49,11 @@ import { PccExternalSystemsProjectLinksCard } from './PccExternalSystemsProjectL
 import { PccExternalSystemsReviewQueueCard } from './PccExternalSystemsReviewQueueCard';
 import { PccExternalSystemsAddEditLinkDrawer } from './PccExternalSystemsAddEditLinkDrawer';
 import { PccExternalSystemsProcoreConfigurationStatusCard } from './PccExternalSystemsProcoreConfigurationStatusCard';
+import { PccExternalSystemsRegistryCard } from './PccExternalSystemsRegistryCard';
+import { PccExternalSystemsMappingStatusCard } from './PccExternalSystemsMappingStatusCard';
+import { PccExternalSystemsSourceHealthCard } from './PccExternalSystemsSourceHealthCard';
+import { PccExternalSystemsAuditHistoryCard } from './PccExternalSystemsAuditHistoryCard';
+import { PccExternalSystemsHbiLineageCard } from './PccExternalSystemsHbiLineageCard';
 import { buildPccLaunchPadViewModel } from './launchPadAdapter';
 import { useLaunchPadReadModel } from './useLaunchPadReadModel';
 import type {
@@ -162,6 +167,7 @@ const ReadyCards: FC<ReadyCardsProps> = ({ viewModel }) => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedReviewItemId, setSelectedReviewItemId] = useState<string | null>(null);
+  const [selectedMappingId, setSelectedMappingId] = useState<string | null>(null);
   const addLinkButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const handleOpenDrawer = useCallback((): void => {
@@ -199,6 +205,33 @@ const ReadyCards: FC<ReadyCardsProps> = ({ viewModel }) => {
       />
       <PccExternalSystemsProcoreConfigurationStatusCard
         viewModel={FIXTURE_PROCORE_SURFACE_VIEW_MODEL}
+      />
+      <PccExternalSystemsRegistryCard
+        registry={viewModel.registry}
+        cardState={viewModel.cardState}
+        isAvailable={isAvailable}
+      />
+      <PccExternalSystemsMappingStatusCard
+        mappingStatus={viewModel.mappingStatus}
+        cardState={viewModel.cardState}
+        isAvailable={isAvailable}
+        selectedMappingId={selectedMappingId}
+        onSelectMapping={setSelectedMappingId}
+      />
+      <PccExternalSystemsSourceHealthCard
+        sourceHealth={viewModel.sourceHealth}
+        cardState={viewModel.cardState}
+        isAvailable={isAvailable}
+      />
+      <PccExternalSystemsAuditHistoryCard
+        auditHistory={viewModel.auditHistory}
+        cardState={viewModel.cardState}
+        isAvailable={isAvailable}
+      />
+      <PccExternalSystemsHbiLineageCard
+        hbiLineage={viewModel.hbiLineage}
+        cardState={viewModel.cardState}
+        isAvailable={isAvailable}
       />
       <PccExternalSystemsAddEditLinkDrawer
         isOpen={drawerOpen}

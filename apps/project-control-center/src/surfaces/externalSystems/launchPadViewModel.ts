@@ -14,21 +14,35 @@
  * Prompt 06 scope adds: Custom Link Review Queue card, read-only Review
  * Item detail panel, and the Add/Edit Project Link drawer (controlled,
  * inert preview — local-only state, no commands, no writes).
- *
- * Registry inventory, mapping health, audit history, and HBI lineage are
- * intentionally absent — Prompts 07/08 own those surfaces.
+ * Prompt 07 scope adds: External System Registry, Mapping Status (with
+ * inline mapping detail), Source Health, Audit History (with metadata
+ * redacted), and HBI Source Lineage cards. All read-only / display-only;
+ * HBI no-authority preserved by structure, copy, and a forbidden-button
+ * scan.
  */
 
 import type {
   ExternalLauncherType,
   ExternalReviewState,
   ExternalSystemActionId,
+  ExternalSystemAuditEventType,
   ExternalSystemCategory,
   ExternalSystemKey,
+  ExternalSystemLiveReadPosture,
+  ExternalSystemMappingState,
+  ExternalSystemMvpMode,
+  ExternalSystemPostureKind,
+  ExternalSystemSourceHealthState,
+  ExternalSystemWritebackPolicy,
+  HbiRefusalReasonCode,
+  HbiSourceLineageState,
   IExternalReviewItem,
+  IExternalSystemAuditEvent,
+  IExternalSystemHealthSnapshot,
   IPccExternalSystemsLaunchPadReadModel,
   IPccExternalSystemsLaunchPadReadModelSummary,
   IProjectExternalLaunchLink,
+  IProjectExternalSystemMapping,
   PccPersona,
   PccProjectId,
   PccReadModelEnvelope,
@@ -61,6 +75,13 @@ export const PCC_LAUNCH_PAD_LANE_IDS = [
   'review-queue-detail',
   'add-edit-link-drawer',
   'procore-status',
+  // Wave 15 / Prompt 07 — registry, mapping, health, audit, HBI lineage lanes.
+  'registry',
+  'mapping-status',
+  'mapping-status-detail',
+  'source-health',
+  'audit-history',
+  'hbi-lineage',
 ] as const;
 export type PccLaunchPadLaneId = (typeof PCC_LAUNCH_PAD_LANE_IDS)[number];
 
@@ -171,6 +192,184 @@ export type IPccLaunchPadRoleActionVisibility = Readonly<
 >;
 
 // ---------------------------------------------------------------------------
+// Registry inventory (Prompt 07)
+// ---------------------------------------------------------------------------
+
+/**
+ * `'launch-only-inactive'` is mapped from `liveReadPosture: 'not-authorized'`
+ * (live read explicitly forbidden — launcher only). All other systems are
+ * considered `'active'`. The Wave 15 contract has no hard "inactive" flag;
+ * this mapping satisfies the Prompt 07 "registry active/inactive" UX brief.
+ */
+export type PccLaunchPadRegistryActiveState = 'active' | 'launch-only-inactive';
+
+export interface IPccLaunchPadRegistryRow {
+  readonly systemKey: ExternalSystemKey;
+  readonly displayName: string;
+  readonly category: ExternalSystemCategory;
+  readonly posture: ExternalSystemPostureKind;
+  readonly mvpMode: ExternalSystemMvpMode;
+  readonly liveReadPosture: ExternalSystemLiveReadPosture;
+  readonly writebackPolicy: ExternalSystemWritebackPolicy;
+  readonly activeState: PccLaunchPadRegistryActiveState;
+  readonly recordOwner: string;
+  readonly notes: string;
+}
+
+export interface IPccLaunchPadRegistryGroup {
+  readonly posture: ExternalSystemPostureKind;
+  readonly rows: readonly IPccLaunchPadRegistryRow[];
+}
+
+export interface IPccLaunchPadRegistryViewModel {
+  readonly totalSystems: number;
+  readonly groups: readonly IPccLaunchPadRegistryGroup[];
+}
+
+// ---------------------------------------------------------------------------
+// Mapping status + inline detail (Prompt 07)
+// ---------------------------------------------------------------------------
+
+export interface IPccLaunchPadMappingRow {
+  readonly id: string;
+  readonly systemKey: ExternalSystemKey;
+  readonly systemDisplayName: string;
+  readonly mappingState: ExternalSystemMappingState;
+  readonly mappingScope: IProjectExternalSystemMapping['mappingScope'];
+  readonly sourceObjectType: string;
+  readonly externalDisplayName: string;
+  readonly ownerPersona: PccPersona;
+  readonly ownerUpn: string;
+  readonly lastVerifiedAtUtc: string | null;
+  readonly lastVerifiedDisplay: string;
+  readonly externalObjectId?: string;
+  readonly externalObjectNumber?: string;
+  readonly conflictingMappingId?: string;
+  readonly reviewItemId: string | null;
+}
+
+export interface IPccLaunchPadMappingStatusGroup {
+  readonly mappingState: ExternalSystemMappingState;
+  readonly rows: readonly IPccLaunchPadMappingRow[];
+}
+
+export interface IPccLaunchPadMappingStatusViewModel {
+  readonly totalMappings: number;
+  readonly groups: readonly IPccLaunchPadMappingStatusGroup[];
+}
+
+// ---------------------------------------------------------------------------
+// Source health snapshots (Prompt 07)
+// ---------------------------------------------------------------------------
+
+export type PccLaunchPadHealthSeverity = IExternalSystemHealthSnapshot['severity'];
+
+export interface IPccLaunchPadHealthRow {
+  readonly healthSnapshotId: string;
+  readonly systemKey: ExternalSystemKey;
+  readonly systemDisplayName: string;
+  readonly healthState: ExternalSystemSourceHealthState;
+  readonly severity: PccLaunchPadHealthSeverity;
+  readonly statusMessage: string;
+  readonly recommendedAction: string | null;
+  readonly observedAtUtc: string;
+  readonly observedAtDisplay: string;
+  readonly lastSuccessfulReadAtUtc?: string | null;
+  readonly lastSuccessfulReadDisplay?: string;
+}
+
+export interface IPccLaunchPadSourceHealthGroup {
+  readonly severity: PccLaunchPadHealthSeverity;
+  readonly rows: readonly IPccLaunchPadHealthRow[];
+}
+
+export interface IPccLaunchPadSourceHealthViewModel {
+  readonly totalSnapshots: number;
+  readonly groups: readonly IPccLaunchPadSourceHealthGroup[];
+}
+
+// ---------------------------------------------------------------------------
+// Audit history (Prompt 07) — metadata redacted by construction
+// ---------------------------------------------------------------------------
+
+/**
+ * `metadataJson` is intentionally absent from this row. The adapter never
+ * copies that field onto the view-model; the audit card never renders it
+ * to text, `data-*`, `title`, or `aria-label`. The hard gate is no
+ * rendered or exposed metadata — the field name itself is unbanned in
+ * source-scan because legitimate fixture/test code references it.
+ */
+export interface IPccLaunchPadAuditEventRow {
+  readonly eventId: string;
+  readonly eventType: ExternalSystemAuditEventType;
+  readonly systemKey: ExternalSystemKey;
+  readonly systemDisplayName: string;
+  readonly actorPersona: PccPersona | null;
+  readonly actorUpn: string | null;
+  readonly actorDisplay: string;
+  readonly occurredAtUtc: string;
+  readonly occurredAtDisplay: string;
+  readonly subjectKey: string;
+  readonly correlationId: string;
+  readonly summary: string;
+}
+
+export interface IPccLaunchPadAuditHistoryViewModel {
+  readonly totalEvents: number;
+  readonly rows: readonly IPccLaunchPadAuditEventRow[];
+}
+
+// ---------------------------------------------------------------------------
+// HBI source lineage (Prompt 07) — discriminated by state, no authority
+// ---------------------------------------------------------------------------
+
+interface IPccLaunchPadHbiLineageEntryBase {
+  readonly fieldKey: string;
+  readonly fieldLabel: string;
+  readonly transformationNote: string;
+  readonly confidenceBand: 'high' | 'medium' | 'low';
+  readonly freshnessBand: 'current' | 'stale-30d' | 'stale-90d' | 'stale-1y';
+}
+
+export type IPccLaunchPadHbiLineageEntry =
+  | (IPccLaunchPadHbiLineageEntryBase & {
+      readonly state: 'citation-ready';
+      readonly sourceSystemKey: ExternalSystemKey;
+      readonly sourceListOrSystem: string;
+      readonly sourceObjectType: string;
+      readonly citationLabel: string;
+    })
+  | (IPccLaunchPadHbiLineageEntryBase & {
+      readonly state: 'refusal';
+      readonly refusalCode: HbiRefusalReasonCode;
+      readonly refusalCopy: string;
+    })
+  | (IPccLaunchPadHbiLineageEntryBase & {
+      readonly state: 'unauthorized';
+      readonly redactedCaption: string;
+    })
+  | (IPccLaunchPadHbiLineageEntryBase & {
+      readonly state: 'loading' | 'unavailable' | 'insufficient-evidence';
+    });
+
+export interface IPccLaunchPadHbiLineageGroup {
+  readonly state: HbiSourceLineageState;
+  readonly rows: readonly IPccLaunchPadHbiLineageEntry[];
+}
+
+export interface IPccLaunchPadHbiLineageViewModel {
+  readonly totalEntries: number;
+  readonly groups: readonly IPccLaunchPadHbiLineageGroup[];
+  /**
+   * Always-rendered authority disclaimer ("HBI is not an authority. Citation-
+   * ready entries reflect lineage only — HBI never approves, posts, claims,
+   * or overrides."). The card structurally renders this regardless of which
+   * states are present in the grouped rows.
+   */
+  readonly boundaryCopy: string;
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union — surface ready/loading/error
 // ---------------------------------------------------------------------------
 
@@ -183,6 +382,11 @@ export interface IPccLaunchPadReadyViewModel {
   readonly projectLinks: IPccLaunchPadProjectLinksViewModel;
   readonly reviewQueue: IPccLaunchPadReviewQueueViewModel;
   readonly roleActionVisibility: IPccLaunchPadRoleActionVisibility;
+  readonly registry: IPccLaunchPadRegistryViewModel;
+  readonly mappingStatus: IPccLaunchPadMappingStatusViewModel;
+  readonly sourceHealth: IPccLaunchPadSourceHealthViewModel;
+  readonly auditHistory: IPccLaunchPadAuditHistoryViewModel;
+  readonly hbiLineage: IPccLaunchPadHbiLineageViewModel;
 }
 
 export type IPccLaunchPadViewModel =
@@ -194,4 +398,10 @@ export type IPccLaunchPadViewModel =
 // Re-export domain aliases consumed by adapter inputs
 // ---------------------------------------------------------------------------
 
-export type { IExternalReviewItem, IProjectExternalLaunchLink };
+export type {
+  IExternalReviewItem,
+  IExternalSystemAuditEvent,
+  IExternalSystemHealthSnapshot,
+  IProjectExternalLaunchLink,
+  IProjectExternalSystemMapping,
+};

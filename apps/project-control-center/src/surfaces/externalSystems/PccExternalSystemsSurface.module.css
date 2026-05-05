@@ -499,3 +499,305 @@
   font-size: 12px;
   color: var(--pcc-color-text-muted);
 }
+
+/* ── Registry / Mapping / Health / Audit / HBI shared list scaffolding ───── */
+
+.registryGroupList,
+.mappingGroupList,
+.healthGroupList,
+.hbiGroupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+}
+
+.registryGroup,
+.mappingGroup,
+.healthGroup,
+.hbiGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.registryGroupTitle,
+.mappingGroupTitle,
+.healthGroupTitle,
+.hbiGroupTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.registryRowList,
+.mappingRowList,
+.healthRowList,
+.hbiRowList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.registryRow,
+.mappingRow,
+.healthRow,
+.hbiRow {
+  padding: var(--pcc-space-xs);
+  border: 1px solid var(--pcc-color-border-subtle, rgba(0, 0, 0, 0.08));
+  border-radius: 6px;
+  background: var(--pcc-color-surface-muted, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.registryRowTitleRow,
+.mappingRowTitleRow,
+.healthRowTitleRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pcc-space-xs);
+  flex-wrap: wrap;
+}
+
+.registryRowTitle,
+.mappingRowTitle,
+.healthRowTitle,
+.hbiRowTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.registryRowCategory,
+.mappingRowProvider {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.registryRowMetaRow,
+.mappingRowMetaRow,
+.healthRowMetaRow,
+.hbiRowMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  align-items: center;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.registryRowMetaItem,
+.mappingRowMetaItem,
+.healthRowMetaItem {
+  white-space: nowrap;
+}
+
+/* ── Mapping row trigger + detail ─────────────────────────────────────── */
+
+.mappingRow {
+  padding: 0;
+  overflow: hidden;
+}
+
+.mappingRowTrigger {
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  padding: var(--pcc-space-xs);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.mappingRowTrigger:focus-visible {
+  outline: 2px solid var(--pcc-status-info);
+  outline-offset: -2px;
+}
+
+.mappingReviewBadge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--pcc-color-surface-muted, rgba(0, 0, 0, 0.04));
+  color: var(--pcc-color-text-muted);
+}
+
+.mappingDetail {
+  border-top: 1px solid var(--pcc-color-border-subtle, rgba(0, 0, 0, 0.08));
+  padding: var(--pcc-space-xs);
+  background: var(--pcc-color-surface-muted, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mappingDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--pcc-space-xs);
+}
+
+.mappingDetailTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pcc-color-text-muted);
+}
+
+.mappingDetailDl {
+  display: grid;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  gap: 2px var(--pcc-space-xs);
+  margin: 0;
+  font-size: 12px;
+}
+
+.mappingDetailDl dt {
+  font-weight: 600;
+  color: var(--pcc-color-text-muted);
+}
+
+.mappingDetailDl dd {
+  margin: 0;
+  color: var(--pcc-color-text-primary);
+}
+
+.mappingReviewNote {
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+}
+
+/* ── Source health row body ───────────────────────────────────────────── */
+
+.healthRowMessage,
+.healthRowRecommendedAction {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-primary);
+}
+
+.healthRowRecommendedAction {
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+}
+
+/* ── Audit timeline ───────────────────────────────────────────────────── */
+
+.auditRedactionNote {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+}
+
+.auditList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.auditRow {
+  padding: var(--pcc-space-xs);
+  border: 1px solid var(--pcc-color-border-subtle, rgba(0, 0, 0, 0.08));
+  border-radius: 6px;
+  background: var(--pcc-color-surface-muted, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auditRowHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--pcc-space-xs);
+}
+
+.auditRowTime {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.auditRowMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  align-items: center;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.auditRowMetaItem {
+  white-space: nowrap;
+}
+
+.auditRowSummary {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-primary);
+}
+
+/* ── HBI lineage ──────────────────────────────────────────────────────── */
+
+.hbiBoundaryCopy {
+  margin: 0 0 var(--pcc-space-xs) 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcc-status-warning);
+}
+
+.hbiRowHeader {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pcc-space-xs);
+  flex-wrap: wrap;
+}
+
+.hbiRowTransformation {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-primary);
+}
+
+.hbiRowAttribution,
+.hbiRowCitationLabel {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.hbiRowCitationLabel {
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.hbiRowRefusal {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-status-warning);
+  font-weight: 600;
+}
+
+.hbiRowRedacted {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+}

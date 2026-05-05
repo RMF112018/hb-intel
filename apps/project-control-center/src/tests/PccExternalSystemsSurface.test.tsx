@@ -80,14 +80,33 @@ function renderSurface(): ReturnType<typeof render> {
 }
 
 describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallback path)', () => {
-  it('renders header + summary + project-links + review-queue + Procore status as direct bento-grid children', () => {
+  it('renders all bento cards as direct children of the bento grid (Prompt 05/06/07 lanes)', () => {
     const { container } = renderSurface();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards.length).toBe(5);
+    // Card count matches the lane id tuple's renderable lanes (header,
+    // summary, project-links, review-queue, procore-status, registry,
+    // mapping-status, source-health, audit-history, hbi-lineage). The
+    // drawer is portal-mounted and not a direct child of the grid.
+    expect(cards.length).toBe(10);
     for (const card of cards) {
       expect(card.parentElement).toBe(grid);
+    }
+  });
+
+  it('renders the Prompt 07 lane markers for registry, mapping-status, source-health, audit-history, and hbi-lineage', () => {
+    const { container } = renderSurface();
+    const lanes = [
+      'registry',
+      'mapping-status',
+      'source-health',
+      'audit-history',
+      'hbi-lineage',
+    ] as const;
+    for (const lane of lanes) {
+      const node = container.querySelector(`[data-pcc-launch-pad-lane="${lane}"]`);
+      expect(node, `expected lane ${lane} to be rendered`).not.toBeNull();
     }
   });
 
@@ -287,6 +306,25 @@ describe('PccExternalSystemsSurface — surface module source-scan', () => {
       'persistLink',
       'bootstrapSpfxAuth',
       'resolveSpfxPermissions',
+      // Prompt 07 — HBI authority + mapping/health/audit command terms.
+      // Note: `metadataJson` itself is NOT banned in source code so the
+      // adapter and tests can legitimately reference the fixture field
+      // while proving redaction. The hard gate is no rendered or exposed
+      // metadata, asserted at the DOM-output level by separate tests.
+      'approveCustomLink',
+      'postToSage',
+      'claimAuthority',
+      'bypassRedaction',
+      'grantApproval',
+      'denyApproval',
+      'confirmMapping',
+      'remapMapping',
+      'resolveMapping',
+      'repairMapping',
+      'retrySync',
+      'reconnectSource',
+      'replayAuditEvent',
+      'relaunchAuditEvent',
     ];
     for (const file of files) {
       const source = fs.readFileSync(path.join(dir, file), 'utf8');
