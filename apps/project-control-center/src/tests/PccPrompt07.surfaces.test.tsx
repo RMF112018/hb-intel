@@ -12,7 +12,10 @@ const PROMPT_07_SURFACES = [
 const SURFACE_PREVIEW_COPY: Record<(typeof PROMPT_07_SURFACES)[number], string> = {
   'team-and-access': 'Preview-only team and access lifecycle',
   'control-center-settings': 'Preview-only settings visibility',
-  approvals: 'Preview-only approval tracking',
+  // Wave 14 / Prompt 05 refactor: the approvals surface now consumes the
+  // approvals composite read-model and renders an "Approvals home" lane
+  // backed by the published `PCC_MVP_SURFACES.approvals.description`.
+  approvals: 'Approval checkpoints across PCC workflow modules',
   'project-readiness': 'Read-only readiness framework preview',
 };
 
