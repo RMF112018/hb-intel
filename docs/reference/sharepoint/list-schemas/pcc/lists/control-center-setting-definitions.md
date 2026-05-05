@@ -2,9 +2,9 @@
 
 ## 1. Objective
 
-- Defines the proposed Wave 16 schema for `PCC Control Center Setting Definitions`.
-- Runtime posture is read-model first and future command-gated.
-- Attachments should remain disabled.
+- Defines canonical Wave 16 setting definitions and governance metadata.
+- Storage posture: global policy/default definitions in HBCentral.
+- Attachments remain disabled.
 
 ## 2. List-Level Metadata
 
@@ -23,40 +23,40 @@
 
 ## 3. Field Schema
 
-| Display Name              | Internal Name               | Type                                             | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes |
-| ------------------------- | --------------------------- | ------------------------------------------------ | -------- | ------ | --------- | ------- | ---------------------------------- |
-| SettingDefinition ID      | `SettingDefinitionId`       | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SettingKey                | `SettingKey`                | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| DisplayName               | `DisplayName`               | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Category                  | `Category`                  | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ValueType                 | `ValueType`                 | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| SourceOwner               | `SourceOwner`               | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| StorageOwner              | `StorageOwner`              | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| EditablePolicy            | `EditablePolicy`            | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| RedactionClass            | `RedactionClass`            | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| RequiresApproval          | `RequiresApproval`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| RequiresAdminVerification | `RequiresAdminVerification` | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ValidationRule ID         | `ValidationRuleId`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| DependencyGroup ID        | `DependencyGroupId`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| IsActive                  | `IsActive`                  | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
+| Display Name              | Internal Name               | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                                |
+| ------------------------- | --------------------------- | ------- | -------- | ------ | --------- | ------- | --------------------------------------------------------------------------------- |
+| SettingDefinition ID      | `SettingDefinitionId`       | Text    | Yes      | No     | No        | Yes     | Stable unique key per definition.                                                 |
+| SettingKey                | `SettingKey`                | Text    | Yes      | No     | No        | Yes     | Stable semantic key used across definition/value/override lists.                  |
+| DisplayName               | `DisplayName`               | Text    | Yes      | No     | No        | No      | MaxLength=255.                                                                    |
+| Category                  | `Category`                  | Choice  | Yes      | No     | No        | Yes     | Choices: `Security`, `Integration`, `Workflow`, `ReadModel`, `UX`, `Operations`.  |
+| ValueType                 | `ValueType`                 | Choice  | Yes      | No     | No        | No      | Choices: `String`, `Number`, `Boolean`, `Json`, `Url`, `Guid`, `SecretReference`. |
+| SourceOwner               | `SourceOwner`               | Choice  | Yes      | No     | No        | Yes     | Choices: `HBCentral`, `ProjectSite`, `Derived`.                                   |
+| StorageOwner              | `StorageOwner`              | Choice  | Yes      | No     | No        | Yes     | Choices: `HBCentralPolicy`, `ProjectEffective`, `ProjectWorkflow`.                |
+| EditablePolicy            | `EditablePolicy`            | Choice  | Yes      | No     | No        | No      | Choices: `ReadOnly`, `AdminOnly`, `WorkflowApproved`.                             |
+| RedactionClass            | `RedactionClass`            | Choice  | Yes      | No     | No        | No      | Choices: `None`, `Internal`, `Sensitive`.                                         |
+| RequiresApproval          | `RequiresApproval`          | Boolean | Yes      | No     | No        | No      |                                                                                   |
+| RequiresAdminVerification | `RequiresAdminVerification` | Boolean | Yes      | No     | No        | No      |                                                                                   |
+| ValidationRule ID         | `ValidationRuleId`          | Text    | No       | No     | No        | Yes     | References policy rules by stable key.                                            |
+| DependencyGroup ID        | `DependencyGroupId`         | Text    | No       | No     | No        | Yes     | Groups related setting dependencies.                                              |
+| IsActive                  | `IsActive`                  | Boolean | Yes      | No     | No        | Yes     |                                                                                   |
 
 ## 4. Content Types / Forms / Behavioral Context
 
-- Standard list item content type unless a shared PCC settings content type is approved.
-- PCC SPFx is the preferred UX, not raw SharePoint list editing.
+- Standard list item content type unless a shared PCC settings type is approved.
+- SPFx/settings services are the primary authoring surface.
 
 ## 5. Relationship Observations
 
-- Use text/internal keys for portability unless local site-column/lookup authority exists.
-- Join by stable keys, not display labels.
+- `SettingDefinitionId` and `SettingKey` join to values, overrides, change requests, and validation results.
+- Definitions are global contract records; project-specific behavior is represented in project-site lists.
 
 ## 6. Implementation-Relevant Findings
 
-- Use indexed query dimensions first.
-- Do not store raw secrets.
-- Disable attachments.
-- Use backend-normalized read models.
+- Logical uniqueness: enforce unique active `SettingDefinitionId` and unique active `SettingKey`.
+- Query-critical indexes: `SettingDefinitionId`, `SettingKey`, `Category`, `SourceOwner`, `StorageOwner`, `IsActive`.
+- Secrets are never stored here; only metadata and behavior policy are stored.
 
 ## 7. Open Questions / Follow-Up Checks
 
-- Confirm GUIDs, entity type names, field IDs, and final URLs after provisioning.
+- Confirm final List ID, Entity Type Name, list URLs, and field IDs after provisioning.
+- Confirm tenant retention/sensitivity labels and final index enforcement behavior.

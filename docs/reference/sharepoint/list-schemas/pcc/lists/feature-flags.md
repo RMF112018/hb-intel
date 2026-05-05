@@ -26,19 +26,19 @@
 
 ## 3. Field Schema
 
-| Display Name    | Internal Name  | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                             |
-| --------------- | -------------- | ------- | -------- | ------ | --------- | ------- | ------------------------------------------------------------------------------ |
-| Title           | Title          | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                  |
-| Feature Flag ID | FeatureFlagId  | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Display Name    | DisplayName    | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                  |
-| Description     | Description    | Note    | No       | No     | No        | No      | RichText=false; Lines=6                                                        |
-| Posture         | Posture        | Choice  | Yes      | No     | No        | No      |                                                                                |
-| Default Enabled | DefaultEnabled | Boolean | Yes      | No     | No        | No      | Global default state; project/module overrides live in Wave 16 settings lists. |
-| Surface ID      | SurfaceId      | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Module ID       | ModuleId       | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Is Enabled      | IsEnabled      | Boolean | Yes      | No     | No        | No      |                                                                                |
-| Environment Key | EnvironmentKey | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Scope Key       | ScopeKey       | Choice  | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
+| Display Name    | Internal Name  | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                                           |
+| --------------- | -------------- | ------- | -------- | ------ | --------- | ------- | -------------------------------------------------------------------------------------------- |
+| Title           | Title          | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                                |
+| Feature Flag ID | FeatureFlagId  | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                                           |
+| Display Name    | DisplayName    | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                                |
+| Description     | Description    | Note    | No       | No     | No        | No      | RichText=false; Lines=6                                                                      |
+| Posture         | Posture        | Choice  | Yes      | No     | No        | Yes     | Choices: `Preview`, `EnabledByDefault`, `DisabledByDefault`, `Deprecated`.                   |
+| Default Enabled | DefaultEnabled | Boolean | Yes      | No     | No        | No      | Global default state; project/module overrides live in Wave 16 settings lists.               |
+| Surface ID      | SurfaceId      | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                                           |
+| Module ID       | ModuleId       | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                                           |
+| Is Enabled      | IsEnabled      | Boolean | Yes      | No     | No        | No      |                                                                                              |
+| Environment Key | EnvironmentKey | Choice  | Yes      | No     | No        | Yes     | Choices: `Production`, `Staging`, `Development`, `Local`; indexed for query/view performance |
+| Scope Key       | ScopeKey       | Choice  | Yes      | No     | No        | Yes     | Choices: `Global`, `Environment`; indexed for query/view performance                         |
 
 ## 4. Content Types / Forms / Behavioral Context
 
@@ -51,7 +51,7 @@
 
 ## 5. Relationship Observations
 
--
+- Feature flags are global defaults; project-specific behavior is represented via Wave 16 overrides/effective-value lists, not this list.
 
 ## 6. Implementation-Relevant Findings
 

@@ -2,9 +2,9 @@
 
 ## 1. Objective
 
-- Defines the proposed Wave 16 schema for `PCC Control Center Setting Audit Events`.
-- Runtime posture is read-model first and future command-gated.
-- Attachments should remain disabled.
+- Captures append-only audit records for settings reads, changes, and policy decisions.
+- Storage posture: project-site audit/event list.
+- Attachments remain disabled.
 
 ## 2. List-Level Metadata
 
@@ -23,38 +23,38 @@
 
 ## 3. Field Schema
 
-| Display Name       | Internal Name       | Type                                             | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes |
-| ------------------ | ------------------- | ------------------------------------------------ | -------- | ------ | --------- | ------- | ---------------------------------- |
-| AuditEvent ID      | `AuditEventId`      | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Project ID         | `ProjectId`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| EventType          | `EventType`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SettingKey         | `SettingKey`        | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| ActorUpn           | `ActorUpn`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ActorRole          | `ActorRole`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| BeforeSnapshot     | `BeforeSnapshot`    | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| AfterSnapshot      | `AfterSnapshot`     | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Redacted           | `Redacted`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ApprovalRequest ID | `ApprovalRequestId` | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Correlation ID     | `CorrelationId`     | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| EventAt UTC        | `EventAtUtc`        | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
+| Display Name       | Internal Name       | Type     | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                                            |
+| ------------------ | ------------------- | -------- | -------- | ------ | --------- | ------- | --------------------------------------------------------------------------------------------- |
+| AuditEvent ID      | `AuditEventId`      | Text     | Yes      | No     | No        | Yes     | Stable event key.                                                                             |
+| Project ID         | `ProjectId`         | Text     | Yes      | No     | No        | Yes     |                                                                                               |
+| EventType          | `EventType`         | Choice   | Yes      | No     | No        | Yes     | Choices: `Read`, `Create`, `Update`, `Delete`, `Validate`, `Approve`, `Reject`, `SystemSync`. |
+| SettingKey         | `SettingKey`        | Text     | Yes      | No     | No        | Yes     |                                                                                               |
+| ActorUpn           | `ActorUpn`          | Text     | No       | No     | No        | Yes     | Empty when system-generated.                                                                  |
+| ActorRole          | `ActorRole`         | Choice   | No       | No     | No        | Yes     | Choices: `User`, `Admin`, `System`, `ServicePrincipal`.                                       |
+| BeforeSnapshot     | `BeforeSnapshot`    | Note     | No       | No     | No        | No      | RichText=false; prior state payload.                                                          |
+| AfterSnapshot      | `AfterSnapshot`     | Note     | No       | No     | No        | No      | RichText=false; resulting state payload.                                                      |
+| Redacted           | `Redacted`          | Boolean  | Yes      | No     | No        | Yes     | Indicates payload redaction.                                                                  |
+| ApprovalRequest ID | `ApprovalRequestId` | Text     | No       | No     | No        | Yes     |                                                                                               |
+| Correlation ID     | `CorrelationId`     | Text     | No       | No     | No        | Yes     | Correlates related actions/events.                                                            |
+| EventAt UTC        | `EventAtUtc`        | DateTime | Yes      | No     | No        | Yes     |                                                                                               |
 
 ## 4. Content Types / Forms / Behavioral Context
 
-- Standard list item content type unless a shared PCC settings content type is approved.
-- PCC SPFx is the preferred UX, not raw SharePoint list editing.
+- Standard list item content type unless a shared PCC settings type is approved.
+- SPFx/settings services are the primary authoring surface.
 
 ## 5. Relationship Observations
 
-- Use text/internal keys for portability unless local site-column/lookup authority exists.
-- Join by stable keys, not display labels.
+- Events join to change requests/approvals and values by `SettingKey`, `ProjectId`, and `CorrelationId`.
+- Event lineage supports security/HBI redaction traceability.
 
 ## 6. Implementation-Relevant Findings
 
-- Use indexed query dimensions first.
-- Do not store raw secrets.
-- Disable attachments.
-- Use backend-normalized read models.
+- Logical uniqueness: unique `AuditEventId`; append-only write behavior expected.
+- Query-critical indexes: `AuditEventId`, `ProjectId`, `EventType`, `SettingKey`, `ActorUpn`, `ActorRole`, `Redacted`, `ApprovalRequestId`, `CorrelationId`, `EventAtUtc`.
+- Snapshot payloads must remain non-secret and redaction-safe.
 
 ## 7. Open Questions / Follow-Up Checks
 
-- Confirm GUIDs, entity type names, field IDs, and final URLs after provisioning.
+- Confirm final List ID, Entity Type Name, list URLs, and field IDs after provisioning.
+- Confirm tenant retention/sensitivity labels and final index enforcement behavior.

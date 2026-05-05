@@ -2,9 +2,9 @@
 
 ## 1. Objective
 
-- Defines the proposed Wave 16 schema for `PCC Control Center Setting Health Snapshots`.
-- Runtime posture is read-model first and future command-gated.
-- Attachments should remain disabled.
+- Stores point-in-time health summaries derived from validation and audit streams.
+- Storage posture: project-site health/status snapshot list.
+- Attachments remain disabled.
 
 ## 2. List-Level Metadata
 
@@ -23,36 +23,36 @@
 
 ## 3. Field Schema
 
-| Display Name         | Internal Name          | Type                                             | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes |
-| -------------------- | ---------------------- | ------------------------------------------------ | -------- | ------ | --------- | ------- | ---------------------------------- |
-| HealthSnapshot ID    | `HealthSnapshotId`     | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Project ID           | `ProjectId`            | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SnapshotType         | `SnapshotType`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| HealthState          | `HealthState`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| FindingCount         | `FindingCount`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| CriticalFindingCount | `CriticalFindingCount` | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| StaleFindingCount    | `StaleFindingCount`    | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ObservedAt UTC       | `ObservedAtUtc`        | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| SiteHealthFinding ID | `SiteHealthFindingId`  | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Summary              | `Summary`              | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
+| Display Name         | Internal Name          | Type     | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                                   |
+| -------------------- | ---------------------- | -------- | -------- | ------ | --------- | ------- | ------------------------------------------------------------------------------------ |
+| HealthSnapshot ID    | `HealthSnapshotId`     | Text     | Yes      | No     | No        | Yes     | Stable snapshot key.                                                                 |
+| Project ID           | `ProjectId`            | Text     | Yes      | No     | No        | Yes     |                                                                                      |
+| SnapshotType         | `SnapshotType`         | Choice   | Yes      | No     | No        | Yes     | Choices: `ValidationSummary`, `PolicyCompliance`, `DependencyHealth`, `Operational`. |
+| HealthState          | `HealthState`          | Choice   | Yes      | No     | No        | Yes     | Choices: `Healthy`, `Warning`, `Degraded`, `Blocked`.                                |
+| FindingCount         | `FindingCount`         | Number   | Yes      | No     | No        | No      | Integer >= 0.                                                                        |
+| CriticalFindingCount | `CriticalFindingCount` | Number   | Yes      | No     | No        | No      | Integer >= 0.                                                                        |
+| StaleFindingCount    | `StaleFindingCount`    | Number   | Yes      | No     | No        | No      | Integer >= 0.                                                                        |
+| ObservedAt UTC       | `ObservedAtUtc`        | DateTime | Yes      | No     | No        | Yes     |                                                                                      |
+| SiteHealthFinding ID | `SiteHealthFindingId`  | Text     | No       | No     | No        | Yes     | Optional linkage to site-health finding record.                                      |
+| Summary              | `Summary`              | Note     | No       | No     | No        | No      | RichText=false.                                                                      |
 
 ## 4. Content Types / Forms / Behavioral Context
 
-- Standard list item content type unless a shared PCC settings content type is approved.
-- PCC SPFx is the preferred UX, not raw SharePoint list editing.
+- Standard list item content type unless a shared PCC settings type is approved.
+- SPFx/settings services are the primary authoring surface.
 
 ## 5. Relationship Observations
 
-- Use text/internal keys for portability unless local site-column/lookup authority exists.
-- Join by stable keys, not display labels.
+- Snapshot aggregates validation results and dependency/audit signals for a project and time.
+- `SiteHealthFindingId` links into broader site health remediation streams when present.
 
 ## 6. Implementation-Relevant Findings
 
-- Use indexed query dimensions first.
-- Do not store raw secrets.
-- Disable attachments.
-- Use backend-normalized read models.
+- Logical uniqueness: unique snapshot key `HealthSnapshotId`; optionally enforce one per `ProjectId + SnapshotType + ObservedAtUtc`.
+- Query-critical indexes: `HealthSnapshotId`, `ProjectId`, `SnapshotType`, `HealthState`, `ObservedAtUtc`, `SiteHealthFindingId`.
+- Snapshot rows are derived evidence and should be treated as append-oriented history.
 
 ## 7. Open Questions / Follow-Up Checks
 
-- Confirm GUIDs, entity type names, field IDs, and final URLs after provisioning.
+- Confirm final List ID, Entity Type Name, list URLs, and field IDs after provisioning.
+- Confirm tenant retention/sensitivity labels and final index enforcement behavior.

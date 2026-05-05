@@ -2,9 +2,9 @@
 
 ## 1. Objective
 
-- Defines the proposed Wave 16 schema for `PCC Control Center Setting Change Requests`.
-- Runtime posture is read-model first and future command-gated.
-- Attachments should remain disabled.
+- Records requested changes and workflow context before overrides/values are updated.
+- Storage posture: project-site settings workflow list.
+- Attachments remain disabled.
 
 ## 2. List-Level Metadata
 
@@ -23,40 +23,40 @@
 
 ## 3. Field Schema
 
-| Display Name          | Internal Name           | Type                                             | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes |
-| --------------------- | ----------------------- | ------------------------------------------------ | -------- | ------ | --------- | ------- | ---------------------------------- |
-| ChangeRequest ID      | `ChangeRequestId`       | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Project ID            | `ProjectId`             | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SettingDefinition ID  | `SettingDefinitionId`   | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SettingKey            | `SettingKey`            | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| RequestType           | `RequestType`           | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| RequestState          | `RequestState`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| RequesterUpn          | `RequesterUpn`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| RequesterRole         | `RequesterRole`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| CurrentValueSnapshot  | `CurrentValueSnapshot`  | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ProposedValueSnapshot | `ProposedValueSnapshot` | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Justification         | `Justification`         | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ApprovalRequest ID    | `ApprovalRequestId`     | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| PriorityAction ID     | `PriorityActionId`      | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| AdminVerification ID  | `AdminVerificationId`   | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
+| Display Name          | Internal Name           | Type   | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                                           |
+| --------------------- | ----------------------- | ------ | -------- | ------ | --------- | ------- | -------------------------------------------------------------------------------------------- |
+| ChangeRequest ID      | `ChangeRequestId`       | Text   | Yes      | No     | No        | Yes     | Stable request key.                                                                          |
+| Project ID            | `ProjectId`             | Text   | Yes      | No     | No        | Yes     |                                                                                              |
+| SettingDefinition ID  | `SettingDefinitionId`   | Text   | Yes      | No     | No        | Yes     |                                                                                              |
+| SettingKey            | `SettingKey`            | Text   | Yes      | No     | No        | Yes     |                                                                                              |
+| RequestType           | `RequestType`           | Choice | Yes      | No     | No        | Yes     | Choices: `CreateOverride`, `UpdateOverride`, `RemoveOverride`, `Revalidate`.                 |
+| RequestState          | `RequestState`          | Choice | Yes      | No     | No        | Yes     | Choices: `Draft`, `Submitted`, `InReview`, `Approved`, `Rejected`, `Cancelled`, `Completed`. |
+| RequesterUpn          | `RequesterUpn`          | Text   | Yes      | No     | No        | Yes     |                                                                                              |
+| RequesterRole         | `RequesterRole`         | Choice | Yes      | No     | No        | No      | Choices: `ProjectManager`, `ProjectEngineer`, `Operations`, `Administrator`, `System`.       |
+| CurrentValueSnapshot  | `CurrentValueSnapshot`  | Note   | No       | No     | No        | No      | RichText=false; serialized snapshot at request time.                                         |
+| ProposedValueSnapshot | `ProposedValueSnapshot` | Note   | Yes      | No     | No        | No      | RichText=false; proposed payload.                                                            |
+| Justification         | `Justification`         | Note   | Yes      | No     | No        | No      | RichText=false.                                                                              |
+| ApprovalRequest ID    | `ApprovalRequestId`     | Text   | No       | No     | No        | Yes     | Set when routed to approvals.                                                                |
+| PriorityAction ID     | `PriorityActionId`      | Text   | No       | No     | No        | Yes     | Optional linkage to priority actions.                                                        |
+| AdminVerification ID  | `AdminVerificationId`   | Text   | No       | No     | No        | Yes     | Optional linkage to admin verification.                                                      |
 
 ## 4. Content Types / Forms / Behavioral Context
 
-- Standard list item content type unless a shared PCC settings content type is approved.
-- PCC SPFx is the preferred UX, not raw SharePoint list editing.
+- Standard list item content type unless a shared PCC settings type is approved.
+- SPFx/settings services are the primary authoring surface.
 
 ## 5. Relationship Observations
 
-- Use text/internal keys for portability unless local site-column/lookup authority exists.
-- Join by stable keys, not display labels.
+- Change requests connect definitions/keys to approvals, priority actions, and verification tracks.
+- Approved requests become source inputs for override and effective-value updates.
 
 ## 6. Implementation-Relevant Findings
 
-- Use indexed query dimensions first.
-- Do not store raw secrets.
-- Disable attachments.
-- Use backend-normalized read models.
+- Logical uniqueness: unique `ChangeRequestId`; workflows use `RequestState` transitions.
+- Query-critical indexes: `ChangeRequestId`, `ProjectId`, `SettingDefinitionId`, `SettingKey`, `RequestType`, `RequestState`, `RequesterUpn`, `ApprovalRequestId`, `PriorityActionId`, `AdminVerificationId`.
+- Value snapshots are immutable evidence rows once submitted.
 
 ## 7. Open Questions / Follow-Up Checks
 
-- Confirm GUIDs, entity type names, field IDs, and final URLs after provisioning.
+- Confirm final List ID, Entity Type Name, list URLs, and field IDs after provisioning.
+- Confirm tenant retention/sensitivity labels and final index enforcement behavior.

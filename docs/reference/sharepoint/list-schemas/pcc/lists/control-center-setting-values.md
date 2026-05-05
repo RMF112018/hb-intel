@@ -2,9 +2,9 @@
 
 ## 1. Objective
 
-- Defines the proposed Wave 16 schema for `PCC Control Center Setting Values`.
-- Runtime posture is read-model first and future command-gated.
-- Attachments should remain disabled.
+- Stores resolved/effective project-site values after precedence and policy evaluation.
+- Storage posture: project-site effective values list.
+- Attachments remain disabled.
 
 ## 2. List-Level Metadata
 
@@ -23,40 +23,40 @@
 
 ## 3. Field Schema
 
-| Display Name         | Internal Name         | Type                                             | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes |
-| -------------------- | --------------------- | ------------------------------------------------ | -------- | ------ | --------- | ------- | ---------------------------------- |
-| SettingValue ID      | `SettingValueId`      | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Project ID           | `ProjectId`           | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SettingDefinition ID | `SettingDefinitionId` | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| SettingKey           | `SettingKey`          | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| EnvironmentKey       | `EnvironmentKey`      | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| Scope                | `Scope`               | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ScopeKey             | `ScopeKey`            | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| EffectiveSource      | `EffectiveSource`     | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ResolvedValue        | `ResolvedValue`       | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ResolvedValueJson    | `ResolvedValueJson`   | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| IsSecretReference    | `IsSecretReference`   | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| SecretReferenceName  | `SecretReferenceName` | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | No      | See Wave 16 schema decision.       |
-| ValidationStatus     | `ValidationStatus`    | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
-| IsActive             | `IsActive`            | Text/Choice/DateTime/Boolean/Note as appropriate | TBD      | No     | No        | Yes     | See Wave 16 schema decision.       |
+| Display Name         | Internal Name         | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                     |
+| -------------------- | --------------------- | ------- | -------- | ------ | --------- | ------- | ---------------------------------------------------------------------- |
+| SettingValue ID      | `SettingValueId`      | Text    | Yes      | No     | No        | Yes     | Stable value-row key.                                                  |
+| Project ID           | `ProjectId`           | Text    | Yes      | No     | No        | Yes     | Project-site partition key.                                            |
+| SettingDefinition ID | `SettingDefinitionId` | Text    | Yes      | No     | No        | Yes     | Joins to definitions.                                                  |
+| SettingKey           | `SettingKey`          | Text    | Yes      | No     | No        | Yes     |                                                                        |
+| EnvironmentKey       | `EnvironmentKey`      | Choice  | Yes      | No     | No        | Yes     | Choices: `Production`, `Staging`, `Development`, `Local`.              |
+| Scope                | `Scope`               | Choice  | Yes      | No     | No        | Yes     | Choices: `Tenant`, `Project`, `Module`, `Persona`.                     |
+| ScopeKey             | `ScopeKey`            | Text    | Yes      | No     | No        | Yes     | Concrete scope discriminator.                                          |
+| EffectiveSource      | `EffectiveSource`     | Choice  | Yes      | No     | No        | Yes     | Choices: `GlobalDefault`, `PolicyRule`, `ApprovedOverride`, `Derived`. |
+| ResolvedValue        | `ResolvedValue`       | Text    | No       | No     | No        | No      | Optional scalar value; blank when JSON payload is used.                |
+| ResolvedValueJson    | `ResolvedValueJson`   | Note    | No       | No     | No        | No      | RichText=false; optional structured value.                             |
+| IsSecretReference    | `IsSecretReference`   | Boolean | Yes      | No     | No        | Yes     |                                                                        |
+| SecretReferenceName  | `SecretReferenceName` | Text    | No       | No     | No        | No      | Required only when `IsSecretReference=true`.                           |
+| ValidationStatus     | `ValidationStatus`    | Choice  | Yes      | No     | No        | Yes     | Choices: `NotValidated`, `Valid`, `Warning`, `Blocked`, `Expired`.     |
+| IsActive             | `IsActive`            | Boolean | Yes      | No     | No        | Yes     |                                                                        |
 
 ## 4. Content Types / Forms / Behavioral Context
 
-- Standard list item content type unless a shared PCC settings content type is approved.
-- PCC SPFx is the preferred UX, not raw SharePoint list editing.
+- Standard list item content type unless a shared PCC settings type is approved.
+- SPFx/settings services are the primary authoring surface.
 
 ## 5. Relationship Observations
 
-- Use text/internal keys for portability unless local site-column/lookup authority exists.
-- Join by stable keys, not display labels.
+- `SettingDefinitionId` and `SettingKey` bind each row to global definition contract.
+- Values are consumed by read-model composition and linked to overrides/change requests by keys.
 
 ## 6. Implementation-Relevant Findings
 
-- Use indexed query dimensions first.
-- Do not store raw secrets.
-- Disable attachments.
-- Use backend-normalized read models.
+- Logical uniqueness: one active row per `ProjectId + SettingKey + EnvironmentKey + Scope + ScopeKey`.
+- Query-critical indexes: `ProjectId`, `SettingDefinitionId`, `SettingKey`, `EnvironmentKey`, `Scope`, `ScopeKey`, `EffectiveSource`, `ValidationStatus`, `IsActive`.
+- Secret values are never stored directly; only secret references are allowed.
 
 ## 7. Open Questions / Follow-Up Checks
 
-- Confirm GUIDs, entity type names, field IDs, and final URLs after provisioning.
+- Confirm final List ID, Entity Type Name, list URLs, and field IDs after provisioning.
+- Confirm tenant retention/sensitivity labels and final index enforcement behavior.

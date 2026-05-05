@@ -26,18 +26,18 @@
 
 ## 3. Field Schema
 
-| Display Name    | Internal Name  | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                             |
-| --------------- | -------------- | ------- | -------- | ------ | --------- | ------- | ------------------------------------------------------------------------------ |
-| Title           | Title          | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                  |
-| Module Flag ID  | ModuleFlagId   | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Module ID       | ModuleId       | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Posture         | Posture        | Choice  | Yes      | No     | No        | No      |                                                                                |
-| Default Enabled | DefaultEnabled | Boolean | Yes      | No     | No        | No      | Global default state; project/module overrides live in Wave 16 settings lists. |
-| Is Enabled      | IsEnabled      | Boolean | Yes      | No     | No        | No      |                                                                                |
-| Project ID      | ProjectId      | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Notes           | Notes          | Note    | No       | No     | No        | No      | RichText=false; Lines=6                                                        |
-| Environment Key | EnvironmentKey | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
-| Scope Key       | ScopeKey       | Choice  | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
+| Display Name    | Internal Name  | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                                           |
+| --------------- | -------------- | ------- | -------- | ------ | --------- | ------- | -------------------------------------------------------------------------------------------- |
+| Title           | Title          | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                                |
+| Module Flag ID  | ModuleFlagId   | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                                           |
+| Module ID       | ModuleId       | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                                           |
+| Posture         | Posture        | Choice  | Yes      | No     | No        | No      |                                                                                              |
+| Default Enabled | DefaultEnabled | Boolean | Yes      | No     | No        | No      | Global default state; project/module overrides live in Wave 16 settings lists.               |
+| Is Enabled      | IsEnabled      | Boolean | Yes      | No     | No        | No      |                                                                                              |
+| Project ID      | ProjectId      | Text    | No       | No     | No        | Yes     | Optional legacy compatibility field; module defaults are global by contract.                 |
+| Notes           | Notes          | Note    | No       | No     | No        | No      | RichText=false; Lines=6                                                                      |
+| Environment Key | EnvironmentKey | Choice  | Yes      | No     | No        | Yes     | Choices: `Production`, `Staging`, `Development`, `Local`; indexed for query/view performance |
+| Scope Key       | ScopeKey       | Choice  | Yes      | No     | No        | Yes     | Choices: `Global`, `Environment`; indexed for query/view performance                         |
 
 ## 4. Content Types / Forms / Behavioral Context
 
@@ -50,7 +50,7 @@
 
 ## 5. Relationship Observations
 
-- Project-scoped records join to the PCC Project Profile / HBCentral Projects source through `ProjectId`.
+- Module flags define global defaults; project-level exceptions belong in the Wave 16 override/value lists.
 
 ## 6. Implementation-Relevant Findings
 
