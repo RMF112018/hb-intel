@@ -80,12 +80,12 @@ function renderSurface(): ReturnType<typeof render> {
 }
 
 describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallback path)', () => {
-  it('renders header + summary + project-links + Procore status as direct bento-grid children', () => {
+  it('renders header + summary + project-links + review-queue + Procore status as direct bento-grid children', () => {
     const { container } = renderSurface();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards.length).toBe(4);
+    expect(cards.length).toBe(5);
     for (const card of cards) {
       expect(card.parentElement).toBe(grid);
     }
@@ -261,5 +261,139 @@ describe('PccExternalSystemsSurface — surface module source-scan', () => {
         }
       }
     }
+  });
+
+  it('does not declare or call write/approval/persistence command identifiers (Prompt 06)', () => {
+    const dir = path.resolve(__dirname, '../surfaces/externalSystems');
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.ts') || f.endsWith('.tsx'));
+    // Forbidden write / approval / persistence handlers and Wave 14 mutation
+    // primitives. Modal dismissal vocabulary (`onDismiss`, `handleDismiss`,
+    // `dismissDrawer`, `requestDismiss`) is intentionally NOT forbidden so
+    // legitimate modal lifecycle code does not trigger false positives.
+    const forbiddenIdentifiers = [
+      'onApprove',
+      'onReject',
+      'onSubmit',
+      'onArchive',
+      'onSuppress',
+      'approveReviewItem',
+      'rejectReviewItem',
+      'submitReviewItem',
+      'archiveReviewItem',
+      'closeReviewItem',
+      'suppressReviewItem',
+      'saveLink',
+      'submitLink',
+      'persistLink',
+      'bootstrapSpfxAuth',
+      'resolveSpfxPermissions',
+    ];
+    for (const file of files) {
+      const source = fs.readFileSync(path.join(dir, file), 'utf8');
+      // Strip block + line comments AND simple string literals so docblock
+      // wording and product-safe copy do not trip the scan. Do not strip
+      // template literals (we don't use forbidden identifiers in any).
+      const stripped = source
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/.*$/gm, '$1')
+        .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+        .replace(/"(?:[^"\\]|\\.)*"/g, '""');
+      for (const ident of forbiddenIdentifiers) {
+        const re = new RegExp(`\\b${ident}\\b`);
+        expect(re.test(stripped), `${file} contains forbidden identifier ${ident}`).toBe(false);
+      }
+    }
+  });
+});
+
+describe('PccExternalSystemsSurface — review queue + drawer trigger (Prompt 06)', () => {
+  it('renders 4 review-state groups (pending, in-progress, closed, suppressed) with one row per fixture review item', () => {
+    const { container } = renderSurface();
+    const groupKeys = Array.from(
+      container.querySelectorAll('[data-pcc-launch-pad-review-group]'),
+      (el) => el.getAttribute('data-pcc-launch-pad-review-group'),
+    );
+    expect(groupKeys).toEqual(['pending', 'in-progress', 'closed', 'suppressed']);
+    const rows = container.querySelectorAll('[data-pcc-launch-pad-review-row]');
+    expect(rows.length).toBe(
+      SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT.reviewItems.length,
+    );
+  });
+
+  it('renders the linked-approval-request badge as a display-only element (no button affordance, carries the request id)', () => {
+    const { container } = renderSurface();
+    const badge = container.querySelector('[data-pcc-launch-pad-review-approval-request]');
+    expect(badge).not.toBeNull();
+    expect(badge!.getAttribute('data-pcc-launch-pad-review-approval-request')).toBe(
+      'fixture-approval-request-custom-link-001',
+    );
+    // Display-only — must not be a button or anchor.
+    expect(badge!.tagName.toLowerCase()).not.toBe('button');
+    expect(badge!.tagName.toLowerCase()).not.toBe('a');
+  });
+
+  it('selecting a pending row opens the read-only detail panel; selecting again collapses it', async () => {
+    const { container } = renderSurface();
+    const pendingRow = container.querySelector(
+      '[data-pcc-launch-pad-review-row="fixture-review-pending-001"]',
+    );
+    expect(pendingRow).not.toBeNull();
+    const trigger = pendingRow!.querySelector(
+      '[data-pcc-launch-pad-review-row-trigger]',
+    ) as HTMLButtonElement;
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    trigger.click();
+    await waitFor(() => {
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    });
+    const detail = container.querySelector(
+      '[data-pcc-launch-pad-review-detail="fixture-review-pending-001"]',
+    );
+    expect(detail).not.toBeNull();
+    trigger.click();
+    await waitFor(() => {
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    });
+    expect(
+      container.querySelector('[data-pcc-launch-pad-review-detail="fixture-review-pending-001"]'),
+    ).toBeNull();
+  });
+
+  it('closed review item exposes a resolutionSummary in the detail panel; cross-references the launch link title for custom-link-approval', async () => {
+    const { container } = renderSurface();
+    // closed row
+    const closedTrigger = container
+      .querySelector('[data-pcc-launch-pad-review-row="fixture-review-mapping-missing-003"]')
+      ?.querySelector('[data-pcc-launch-pad-review-row-trigger]') as HTMLButtonElement;
+    closedTrigger.click();
+    await waitFor(() => {
+      expect(
+        container.querySelector(
+          '[data-pcc-launch-pad-review-resolution="fixture-review-mapping-missing-003"]',
+        ),
+      ).not.toBeNull();
+    });
+    closedTrigger.click();
+
+    // custom-link-approval row cross-references the launch link title via
+    // subjectKey 'fixture-link-custom-submitted-008' → 'Submitted custom
+    // link awaiting PM/PX approval'.
+    const customLinkApprovalRow = container.querySelector(
+      '[data-pcc-launch-pad-review-row="fixture-review-pending-001"]',
+    );
+    expect(customLinkApprovalRow).not.toBeNull();
+    const subjectTitleEl = customLinkApprovalRow!.querySelector(
+      '[data-pcc-launch-pad-review-subject-title="fixture-link-custom-submitted-008"]',
+    );
+    expect(subjectTitleEl).not.toBeNull();
+    expect(subjectTitleEl!.textContent).toMatch(/Submitted custom link/);
+  });
+
+  it('renders the Add project link trigger and the drawer is closed by default', () => {
+    const { container, baseElement } = renderSurface();
+    const trigger = container.querySelector('[data-pcc-launch-pad-add-link-trigger]');
+    expect(trigger).not.toBeNull();
+    expect(trigger!.tagName.toLowerCase()).toBe('button');
+    expect(baseElement.querySelector('[data-pcc-launch-pad-drawer]')).toBeNull();
   });
 });

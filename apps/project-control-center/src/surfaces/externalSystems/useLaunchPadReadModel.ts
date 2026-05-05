@@ -26,7 +26,7 @@ export function useLaunchPadReadModel(
       try {
         const env = await client.getExternalSystemsLaunchPad(projectId, viewerPersona);
         if (cancelled) return;
-        setVm(buildPccLaunchPadViewModel(env));
+        setVm(buildPccLaunchPadViewModel(env, viewerPersona));
       } catch {
         if (cancelled) return;
         setVm({ status: 'error' });

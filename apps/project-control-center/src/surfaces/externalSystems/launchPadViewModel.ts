@@ -1,5 +1,5 @@
 /**
- * PCC External Systems Launch Pad view-model contract (Phase 3 / Wave 15 / Prompt 05).
+ * PCC External Systems Launch Pad view-model contract (Phase 3 / Wave 15).
  *
  * Authoritative shape returned by `buildPccLaunchPadViewModel`. Discriminated
  * union (`loading` / `error` / `ready`) mirroring the Wave 14 Approvals
@@ -10,16 +10,22 @@
  * so non-api consumers can type the client prop without re-exporting the
  * full `IPccReadModelClient` surface.
  *
- * Prompt 05 scope renders header, summary band, and Project Launch Links
- * only. Review queue, audit history, registry inventory, mapping health,
- * and HBI lineage are deferred to later Wave 15 prompts and intentionally
- * absent from this view-model.
+ * Prompt 05 scope: header, summary band, Project Launch Links card.
+ * Prompt 06 scope adds: Custom Link Review Queue card, read-only Review
+ * Item detail panel, and the Add/Edit Project Link drawer (controlled,
+ * inert preview — local-only state, no commands, no writes).
+ *
+ * Registry inventory, mapping health, audit history, and HBI lineage are
+ * intentionally absent — Prompts 07/08 own those surfaces.
  */
 
 import type {
   ExternalLauncherType,
+  ExternalReviewState,
+  ExternalSystemActionId,
   ExternalSystemCategory,
   ExternalSystemKey,
+  IExternalReviewItem,
   IPccExternalSystemsLaunchPadReadModel,
   IPccExternalSystemsLaunchPadReadModelSummary,
   IProjectExternalLaunchLink,
@@ -44,13 +50,16 @@ export interface IPccLaunchPadReadModelClient {
 }
 
 // ---------------------------------------------------------------------------
-// Lane IDs (one card per id in the ready path)
+// Lane IDs (one card / lane per id in the ready path)
 // ---------------------------------------------------------------------------
 
 export const PCC_LAUNCH_PAD_LANE_IDS = [
   'header',
   'summary',
   'project-links',
+  'review-queue',
+  'review-queue-detail',
+  'add-edit-link-drawer',
   'procore-status',
 ] as const;
 export type PccLaunchPadLaneId = (typeof PCC_LAUNCH_PAD_LANE_IDS)[number];
@@ -74,7 +83,7 @@ export interface IPccLaunchPadLinkRow {
   readonly policyReason: UrlPolicyReasonCode;
   /**
    * `true` only when both the URL policy permits the link AND the link is
-   * fully approved. Even when `true`, Prompt 05 renders an inert/disabled
+   * fully approved. Even when `true`, Prompt 05/06 render an inert/disabled
    * launch affordance — never an executable external anchor. Active launch
    * behavior is staged to a later prompt.
    */
@@ -116,6 +125,52 @@ export interface IPccLaunchPadProjectLinksViewModel {
 }
 
 // ---------------------------------------------------------------------------
+// Review Queue lane view-model (Prompt 06)
+// ---------------------------------------------------------------------------
+
+export interface IPccLaunchPadReviewItemRow {
+  readonly id: string;
+  readonly issueType: IExternalReviewItem['issueType'];
+  readonly reviewState: ExternalReviewState;
+  readonly systemKey: ExternalSystemKey;
+  readonly systemDisplayName: string;
+  readonly subjectKey: string;
+  readonly subjectLinkRow?: IPccLaunchPadLinkRow;
+  readonly currentOwnerPersona: PccPersona;
+  readonly currentOwnerUpn: string;
+  readonly priorityActionId: string | null;
+  readonly approvalRequestId: string | null;
+  readonly dueAtUtc: string | null;
+  readonly dueAtDisplay: string;
+  readonly issueSummary: string;
+  readonly resolutionSummary?: string;
+}
+
+export interface IPccLaunchPadReviewQueueGroup {
+  readonly reviewState: ExternalReviewState;
+  readonly rows: readonly IPccLaunchPadReviewItemRow[];
+}
+
+export interface IPccLaunchPadReviewQueueViewModel {
+  readonly totalItems: number;
+  readonly groups: readonly IPccLaunchPadReviewQueueGroup[];
+}
+
+// ---------------------------------------------------------------------------
+// Role/action visibility — drives disabled-reason copy only (no authority)
+// ---------------------------------------------------------------------------
+
+export type PccLaunchPadActionDecision =
+  | 'allow'
+  | 'deny'
+  | 'allow-with-redaction'
+  | 'allow-with-approval';
+
+export type IPccLaunchPadRoleActionVisibility = Readonly<
+  Partial<Record<ExternalSystemActionId, PccLaunchPadActionDecision>>
+>;
+
+// ---------------------------------------------------------------------------
 // Discriminated union — surface ready/loading/error
 // ---------------------------------------------------------------------------
 
@@ -126,6 +181,8 @@ export interface IPccLaunchPadReadyViewModel {
   readonly header: IPccLaunchPadHeaderViewModel;
   readonly summary: IPccLaunchPadSummaryViewModel;
   readonly projectLinks: IPccLaunchPadProjectLinksViewModel;
+  readonly reviewQueue: IPccLaunchPadReviewQueueViewModel;
+  readonly roleActionVisibility: IPccLaunchPadRoleActionVisibility;
 }
 
 export type IPccLaunchPadViewModel =
@@ -134,7 +191,7 @@ export type IPccLaunchPadViewModel =
   | IPccLaunchPadReadyViewModel;
 
 // ---------------------------------------------------------------------------
-// Re-export the link record alias for adapter inputs
+// Re-export domain aliases consumed by adapter inputs
 // ---------------------------------------------------------------------------
 
-export type { IProjectExternalLaunchLink };
+export type { IExternalReviewItem, IProjectExternalLaunchLink };

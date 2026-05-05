@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { forwardRef, type FC, type Ref } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState, type PccPreviewStateKind } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
@@ -25,14 +25,44 @@ export interface PccExternalSystemsProjectLinksCardProps {
   readonly projectLinks: IPccLaunchPadProjectLinksViewModel;
   readonly cardState: PccPreviewStateKind;
   readonly isAvailable: boolean;
+  readonly onOpenAddLinkDrawer?: () => void;
+  readonly addLinkButtonRef?: Ref<HTMLButtonElement>;
 }
 
-export const PccExternalSystemsProjectLinksCard: FC<PccExternalSystemsProjectLinksCardProps> = ({
+const AddLinkAction = forwardRef<HTMLButtonElement, { readonly onOpen: () => void }>(
+  function AddLinkAction({ onOpen }, ref) {
+    return (
+      <button
+        ref={ref}
+        type="button"
+        className={styles.addLinkAction}
+        onClick={onOpen}
+        data-pcc-launch-pad-add-link-trigger=""
+        aria-label="Add or edit project launch link"
+      >
+        Add project link
+      </button>
+    );
+  },
+);
+
+export const PccExternalSystemsProjectLinksCard = ({
   projectLinks,
   cardState,
   isAvailable,
-}) => (
-  <PccDashboardCard footprint="full" eyebrow="Launch links" title="Project launch links">
+  onOpenAddLinkDrawer,
+  addLinkButtonRef,
+}: PccExternalSystemsProjectLinksCardProps) => (
+  <PccDashboardCard
+    footprint="full"
+    eyebrow="Launch links"
+    title="Project launch links"
+    action={
+      onOpenAddLinkDrawer ? (
+        <AddLinkAction ref={addLinkButtonRef} onOpen={onOpenAddLinkDrawer} />
+      ) : undefined
+    }
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

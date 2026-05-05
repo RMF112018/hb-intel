@@ -1,11 +1,22 @@
 /**
- * PCC External Systems surface (Phase 3 / Wave 15 / Prompt 05).
+ * PCC External Systems surface (Phase 3 / Wave 15).
  *
  * Wave 15 Launch Pad shell. Read-only / preview-only composition for the
  * Wave 15 composite read-model (`pcc/projects/{projectId}/external-systems-launch-pad`).
- * Renders the header card, summary band, project launch links panel, and
- * preserves the Wave 13 Procore configuration & status card as a direct
- * grid sibling (display-only, fixture-driven).
+ *
+ * Composition (Fragment of direct PccDashboardCard children — bento
+ * direct-child invariant):
+ *   - header card (carries `data-pcc-active-surface-panel="external-systems"`);
+ *   - summary band (composite totals);
+ *   - Project Launch Links card with an "Add project link" trigger that
+ *     opens the inert Add/Edit drawer (Prompt 06);
+ *   - Custom Link Review Queue card with read-only Review Item detail
+ *     panel (Prompt 06);
+ *   - Procore configuration & status card (Wave 13 — display-only).
+ *
+ * The Add/Edit drawer is portal-mounted to `document.body`; it is *not*
+ * a sibling of the bento grid and never participates in the
+ * direct-child invariant.
  *
  * Two render paths (mirrors `PccApprovalsSurface`):
  *   - Router-supplied `readModelClient` → asynchronous fetch via
@@ -13,20 +24,14 @@
  *   - No client supplied → synchronous fixture envelope + adapter; the
  *     async hook is never invoked. Used by isolated previews and tests.
  *
- * Bento direct-child invariant: returns a `Fragment` of direct
- * `PccDashboardCard` children. Loading / error variants render a single
- * full-width card so the bento grid layout remains intact.
- *
- * Prompt 05 scope: header + summary + project launch links + Procore card.
- * Review queue (Prompt 06), registry/mapping/audit detail (Prompt 07),
- * and HBI lineage UI (Prompt 08) are intentionally absent.
- *
  * No active launch behavior: even policy-allowed + approved links render
  * inert/disabled launch affordances. No `<a href>` external anchors. No
- * iframe or current-image embeds. No live SDK calls.
+ * iframe or current-image embeds. No live SDK calls. No write/command
+ * handlers — drawer save is always disabled, review-queue rows expose
+ * detail-panel toggles only.
  */
 
-import { Fragment, type FC } from 'react';
+import { useCallback, useRef, useState, type FC } from 'react';
 import {
   SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
   SAMPLE_PROJECT_PROFILE,
@@ -41,6 +46,8 @@ import { FIXTURE_PROCORE_SURFACE_VIEW_MODEL } from '../../viewModels/procoreSurf
 import { PccExternalSystemsLaunchPadHeaderCard } from './PccExternalSystemsLaunchPadHeaderCard';
 import { PccExternalSystemsLaunchPadSummaryCard } from './PccExternalSystemsLaunchPadSummaryCard';
 import { PccExternalSystemsProjectLinksCard } from './PccExternalSystemsProjectLinksCard';
+import { PccExternalSystemsReviewQueueCard } from './PccExternalSystemsReviewQueueCard';
+import { PccExternalSystemsAddEditLinkDrawer } from './PccExternalSystemsAddEditLinkDrawer';
 import { PccExternalSystemsProcoreConfigurationStatusCard } from './PccExternalSystemsProcoreConfigurationStatusCard';
 import { buildPccLaunchPadViewModel } from './launchPadAdapter';
 import { useLaunchPadReadModel } from './useLaunchPadReadModel';
@@ -83,7 +90,7 @@ export const PccExternalSystemsSurface: FC<PccExternalSystemsSurfaceProps> = ({
       />
     );
   }
-  const vm = buildPccLaunchPadViewModel(FIXTURE_ENVELOPE);
+  const vm = buildPccLaunchPadViewModel(FIXTURE_ENVELOPE, viewerPersona);
   return <PccExternalSystemsSurfaceCards viewModel={vm} />;
 };
 
@@ -152,8 +159,20 @@ interface ReadyCardsProps {
 
 const ReadyCards: FC<ReadyCardsProps> = ({ viewModel }) => {
   const isAvailable = viewModel.cardState === 'preview';
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedReviewItemId, setSelectedReviewItemId] = useState<string | null>(null);
+  const addLinkButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const handleOpenDrawer = useCallback((): void => {
+    setDrawerOpen(true);
+  }, []);
+  const handleDismissDrawer = useCallback((): void => {
+    setDrawerOpen(false);
+  }, []);
+
   return (
-    <Fragment>
+    <>
       <PccExternalSystemsLaunchPadHeaderCard
         header={viewModel.header}
         cardState={viewModel.cardState}
@@ -168,11 +187,26 @@ const ReadyCards: FC<ReadyCardsProps> = ({ viewModel }) => {
         projectLinks={viewModel.projectLinks}
         cardState={viewModel.cardState}
         isAvailable={isAvailable}
+        onOpenAddLinkDrawer={handleOpenDrawer}
+        addLinkButtonRef={addLinkButtonRef}
+      />
+      <PccExternalSystemsReviewQueueCard
+        reviewQueue={viewModel.reviewQueue}
+        cardState={viewModel.cardState}
+        isAvailable={isAvailable}
+        selectedReviewItemId={selectedReviewItemId}
+        onSelectReviewItem={setSelectedReviewItemId}
       />
       <PccExternalSystemsProcoreConfigurationStatusCard
         viewModel={FIXTURE_PROCORE_SURFACE_VIEW_MODEL}
       />
-    </Fragment>
+      <PccExternalSystemsAddEditLinkDrawer
+        isOpen={drawerOpen}
+        onDismiss={handleDismissDrawer}
+        returnFocusRef={addLinkButtonRef}
+        roleActionVisibility={viewModel.roleActionVisibility}
+      />
+    </>
   );
 };
 
