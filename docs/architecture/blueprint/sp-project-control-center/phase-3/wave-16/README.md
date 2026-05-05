@@ -20,6 +20,11 @@ Wave 16 defines the canonical target architecture for Control Center Settings in
 - `Wave_16_Storage_Split_And_Canonical_Schema_References.md`
 - `Wave_16_Cross_Surface_Integration_Boundaries.md`
 
+## Wireframes
+
+- `wireframes/README.md`
+- `wireframes/00_Wireframe_Index.md`
+
 ## Canonical Schema Inputs (Prompt 02)
 
 Wave 16 architecture consumes, and does not rewrite, canonical schema references under:
