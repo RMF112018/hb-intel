@@ -34,6 +34,11 @@ Wave 16 defines the canonical target architecture for Control Center Settings in
 - `hbi/Wave_16_HBI_Citation_And_Refusal_Policy.md`
 - `validation/Wave_16_Validation_Error_Taxonomy_And_Acceptance_Gates.md`
 
+## Closeout / Handoff
+
+- `closeout/README.md`
+- `closeout/Wave_16_Documentation_Closeout.md`
+
 ## Canonical Schema Inputs (Prompt 02)
 
 Wave 16 architecture consumes, and does not rewrite, canonical schema references under:
