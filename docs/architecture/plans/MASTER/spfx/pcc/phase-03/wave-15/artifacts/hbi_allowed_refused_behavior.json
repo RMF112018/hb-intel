@@ -1,0 +1,15 @@
+{
+  "allowed": [
+    "summarize mapped systems visible to current user",
+    "explain stale/missing mapping with citations",
+    "list source-health warnings",
+    "show cited launch/mapping lineage"
+  ],
+  "refused": [
+    "approve a custom link",
+    "change a Procore/Sage/AHJ/camera system",
+    "post to Sage",
+    "make legal/accounting/claim determinations",
+    "bypass user access or redaction"
+  ]
+}

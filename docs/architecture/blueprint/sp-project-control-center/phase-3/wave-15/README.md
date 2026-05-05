@@ -48,3 +48,21 @@ Prompt 03 is promoted as architecture/SOR/source-lineage governance only.
 - `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Wave14_And_Priority_Actions_Handoff.md`
 - `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_TODO_NonBlocking_Items.md`
 - `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_03_Target_Architecture_And_System_Of_Record_Closeout.md`
+
+## Prompt 06
+
+Prompt 06 is promoted as security/HBI/dependency/test-gates documentation scope only.
+
+### Prompt-06 Assertions
+
+- Secrets remain non-SPFx and non-SharePoint payload data in this feature posture.
+- HBI allowed/refused behavior is canonicalized as policy guidance and machine-readable contract.
+- Role/action visibility and redaction remain governance contracts, not runtime authorization.
+- Dependency strategy and validation-gate interpretation are documented without runtime package mutation.
+- Prompt-02/04 artifact provenance remains authoritative and is referenced, not overwritten.
+
+## Prompt-06 Canonical References
+
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Security_Secrets_Audit_And_HBI_Guardrails.md`
+- `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/Wave_15_Dependency_Package_And_Test_Strategy.md`
+- `docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/Prompt_06_Security_HBI_Dependencies_And_Test_Gates_Closeout.md`

@@ -38,14 +38,22 @@ This canonical Wave 15 plan hub tracks promoted planning artifacts from `_doc-up
 - Closeout: `Prompt_05_SPFX_UX_Wireframes_And_Project_Link_Workflows_Closeout.md`
 - Decision record: `Prompt_05_SPFX_UX_Wireframes_Workflows_Decision_Record.md`
 
-## Prompt 05R Execution (Corrective)
+(## Prompt 05R Execution (Corrective)
 
 - Execution mode: wireframe completeness remediation only
 - Decision record: `Prompt_05R_Wireframe_Remediation_Decision_Record.md`
 - Closeout: `Prompt_05R_Wireframe_Remediation_Closeout.md`
 - Corrective intent: supersedes Prompt 05 only for wireframe depth completeness
 
-## Canonical Subpaths
+## Prompt 06 Execution
+
+- Execution mode: security/HBI/dependency/test-gates docs-only promotion
+- Prompt: `prompts/Prompt_06_Security_HBI_Dependencies_And_Test_Gates.md`
+- Closeout: `Prompt_06_Security_HBI_Dependencies_And_Test_Gates_Closeout.md`
+- Decision record: `Prompt_06_Security_HBI_Dependencies_Test_Gates_Decision_Record.md`
+- Provenance rule: Prompt-02/04 canonical artifacts are referenced without provenance overwrite
+
+)## Canonical Subpaths
 
 - `artifacts/`
 - `prompts/`
