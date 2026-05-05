@@ -3,6 +3,7 @@ import { PCC_MVP_SURFACES, SAMPLE_SITE_HEALTH_SUMMARY } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import type { PccProjectHomeCardProps } from '../projectHome/shared';
 import styles from './PccSiteHealthSurface.module.css';
 
@@ -27,9 +28,17 @@ const OverviewBody: FC = () => {
   const summary = SAMPLE_SITE_HEALTH_SUMMARY;
   return (
     <div className={styles.body} data-pcc-site-health-overview-body="">
-      <p className={styles.intro}>{SURFACE.description}</p>
+      <PccSurfaceContextHeader
+        surfaceId="site-health"
+        projectLabel="Project 26-000-00 · Site Health Context"
+        postureLabel="Read-only preview"
+        sourceStatusLabel="Fixture default"
+        sourceConfidenceLabel="Preview confidence"
+        lastUpdatedLabel={summary.lastRunUtc ?? 'Not listed'}
+      />
       <span className={styles.previewCue}>
-        Preview frame · Read-model summary only. No scanner or repair runner is active in this preview.
+        Preview frame · Read-model summary only. No scanner or repair runner is active in this
+        preview.
       </span>
       <div className={styles.metricGrid}>
         <div className={styles.metricCell} data-pcc-site-health-overall="">

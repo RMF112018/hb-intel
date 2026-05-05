@@ -73,6 +73,7 @@ import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadines
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import { FIXTURE_PROCORE_SURFACE_VIEW_MODEL } from '../../viewModels/procoreSurfaceFixture';
 import type { IPccProcoreSurfaceClient } from '../../viewModels/procoreSurfaceAdapter';
 import { useProcoreSurfaceReadModel } from '../../viewModels/useProcoreSurfaceReadModel';
@@ -350,6 +351,14 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
           dataActiveSurfacePanel="project-readiness"
         >
           <div data-pcc-readiness-region="hero" className={styles.heroBody}>
+            <PccSurfaceContextHeader
+              surfaceId="project-readiness"
+              projectLabel="Project 26-000-00 · Readiness Center"
+              postureLabel="Read-only preview"
+              sourceStatusLabel="Loading"
+              sourceConfidenceLabel="Pending envelope"
+              lastUpdatedLabel="Not available while loading"
+            />
             <PccPreviewState
               state="loading"
               title="Read-only readiness framework preview"
@@ -371,6 +380,14 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
           dataActiveSurfacePanel="project-readiness"
         >
           <div data-pcc-readiness-region="hero" className={styles.heroBody}>
+            <PccSurfaceContextHeader
+              surfaceId="project-readiness"
+              projectLabel="Project 26-000-00 · Readiness Center"
+              postureLabel="Read-only preview"
+              sourceStatusLabel="Error"
+              sourceConfidenceLabel="Unavailable"
+              lastUpdatedLabel="Not available in error state"
+            />
             <PccPreviewState
               state="error"
               title="Read-only readiness framework preview"
@@ -430,6 +447,14 @@ const HeroCard: FC<HeroCardProps> = ({ hero }) => (
     dataActiveSurfacePanel="project-readiness"
   >
     <div data-pcc-readiness-region="hero" className={styles.heroBody}>
+      <PccSurfaceContextHeader
+        surfaceId="project-readiness"
+        projectLabel="Project 26-000-00 · Readiness Center"
+        postureLabel={hero.readOnlyBadgeText}
+        sourceStatusLabel="Read-model available"
+        sourceConfidenceLabel="Envelope confidence"
+        lastUpdatedLabel="Runtime envelope timestamp"
+      />
       <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
       <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
       <p className={styles.heroCaption}>{PCC_MVP_SURFACES['project-readiness'].description}</p>
@@ -574,10 +599,7 @@ const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
                 </span>
               ) : null}
               {b.approvalReferenceCaption ? (
-                <span
-                  className={styles.blockerMeta}
-                  data-pcc-readiness-blocker-approval-caption=""
-                >
+                <span className={styles.blockerMeta} data-pcc-readiness-blocker-approval-caption="">
                   {b.approvalReferenceCaption}
                 </span>
               ) : null}

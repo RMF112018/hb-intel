@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { PCC_MVP_SURFACES, type PccReadModelSourceStatus } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import styles from './PccDocumentsSurface.module.css';
 import { HB_DOCUMENT_CONTROL_CENTER_TITLE } from './documentControlViewModel';
 
@@ -32,7 +33,20 @@ export const PccDocumentsHeaderCard: FC<PccDocumentsHeaderCardProps> = (props) =
     dataActiveSurfacePanel="documents"
   >
     <div className={styles.headerCopy}>
-      <p>{DOCUMENTS_SURFACE.description}</p>
+      <PccSurfaceContextHeader
+        surfaceId="documents"
+        projectLabel="Project 26-000-00 · Document Control"
+        postureLabel="Read-only preview"
+        sourceStatusLabel={props.sourceStatus ?? 'Source unavailable'}
+        sourceConfidenceLabel={
+          props.sourceStatus === 'available' ? 'Envelope confidence' : 'Preview confidence'
+        }
+        lastUpdatedLabel={
+          props.readModelStatus === 'preview'
+            ? 'Envelope timestamp available'
+            : 'Not connected in this prompt'
+        }
+      />
       <span className={styles.previewCue}>{previewCueFor(props)}</span>
     </div>
   </PccDashboardCard>

@@ -1,12 +1,9 @@
 import type { FC } from 'react';
-import {
-  PCC_MVP_SURFACES,
-  SAMPLE_PROJECT_PROFILE,
-  type IProjectProfile,
-} from '@hbc/models/pcc';
+import { PCC_MVP_SURFACES, SAMPLE_PROJECT_PROFILE, type IProjectProfile } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -26,15 +23,22 @@ const valueFormatter = new Intl.NumberFormat('en-US', {
 const ProjectIntelligenceBody: FC<{ profile: IProjectProfile }> = ({ profile }) => {
   return (
     <div className={styles.heroBody} data-pcc-project-intelligence-body="">
-      <p className={styles.contextNote} data-pcc-surface-description="">
-        {PROJECT_HOME_SURFACE.description}
-      </p>
+      <PccSurfaceContextHeader
+        surfaceId="project-home"
+        projectLabel={`Project ${profile.projectNumber} · ${profile.projectName}`}
+        postureLabel="Read-only preview"
+        sourceStatusLabel="Fixture default"
+        sourceConfidenceLabel="Preview confidence"
+        lastUpdatedLabel={profile.scheduledCompletionDate ?? 'Not listed'}
+      />
       <div>
         <span className={styles.heroNumber}>Project · {profile.projectNumber}</span>
         <h2 className={styles.heroProjectName}>{profile.projectName}</h2>
       </div>
       <div className={styles.heroPills}>
-        <PccStatusPill tone="info" filled>{profile.projectStage.replaceAll('_', ' ')}</PccStatusPill>
+        <PccStatusPill tone="info" filled>
+          {profile.projectStage.replaceAll('_', ' ')}
+        </PccStatusPill>
         <PccStatusPill tone={profile.projectStatus === 'Active' ? 'success' : 'neutral'}>
           {profile.projectStatus}
         </PccStatusPill>

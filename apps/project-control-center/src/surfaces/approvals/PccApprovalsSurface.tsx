@@ -32,6 +32,7 @@ import {
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState, type PccPreviewStateKind } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
+import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import { useApprovalsReadModel } from './useApprovalsReadModel';
 import { buildPccApprovalsViewModel } from './approvalsAdapter';
 import {
@@ -128,6 +129,14 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
           data-pcc-readiness-section="approvals"
           data-pcc-approvals-lane="home"
         >
+          <PccSurfaceContextHeader
+            surfaceId="approvals"
+            projectLabel="Project 26-000-00 · Approvals and Checkpoints"
+            postureLabel="Read-only preview"
+            sourceStatusLabel="Loading"
+            sourceConfidenceLabel="Pending envelope"
+            lastUpdatedLabel="Not available while loading"
+          />
           <PccPreviewState state="loading" />
         </div>
       </PccDashboardCard>
@@ -146,6 +155,14 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
           data-pcc-readiness-section="approvals"
           data-pcc-approvals-lane="home"
         >
+          <PccSurfaceContextHeader
+            surfaceId="approvals"
+            projectLabel="Project 26-000-00 · Approvals and Checkpoints"
+            postureLabel="Read-only preview"
+            sourceStatusLabel="Error"
+            sourceConfidenceLabel="Unavailable"
+            lastUpdatedLabel="Not available in error state"
+          />
           <PccPreviewState state="error" />
         </div>
       </PccDashboardCard>
@@ -288,10 +305,7 @@ const DisabledActionsRow: FC<DisabledActionsRowProps> = ({ actions }) => (
         >
           {action.label}
         </button>
-        <span
-          className={styles.actionReason}
-          data-pcc-approvals-action-reason={action.key}
-        >
+        <span className={styles.actionReason} data-pcc-approvals-action-reason={action.key}>
           {action.reason}
         </span>
       </li>
@@ -321,21 +335,27 @@ const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
       data-pcc-readiness-section="approvals"
       data-pcc-approvals-lane="home"
     >
-      <p className={styles.surfaceLead}>{SURFACE.description}</p>
+      <PccSurfaceContextHeader
+        surfaceId="approvals"
+        projectLabel="Project 26-000-00 · Approvals and Checkpoints"
+        postureLabel="Read-only preview"
+        sourceStatusLabel={isAvailable ? 'Read-model available' : 'Source unavailable'}
+        sourceConfidenceLabel={isAvailable ? 'Envelope confidence' : 'Preview confidence'}
+        lastUpdatedLabel="Runtime envelope timestamp"
+      />
       {isAvailable ? (
         <Fragment>
           <div className={styles.metricRow}>
             <PccStatusPill tone="info">Total requests: {home.totalRequests}</PccStatusPill>
-            <PccStatusPill tone="warning">Pending or active: {home.pendingActiveCount}</PccStatusPill>
+            <PccStatusPill tone="warning">
+              Pending or active: {home.pendingActiveCount}
+            </PccStatusPill>
             <PccStatusPill tone="neutral">Terminal: {home.terminalCount}</PccStatusPill>
             <PccStatusPill tone="warning">Escalated: {home.escalatedCount}</PccStatusPill>
           </div>
           <div className={styles.subSection}>
             <h4 className={styles.subSectionTitle}>States</h4>
-            <ul
-              className={styles.pillRow}
-              data-pcc-approvals-state-counts=""
-            >
+            <ul className={styles.pillRow} data-pcc-approvals-state-counts="">
               {home.stateCounts.map((entry) => (
                 <li key={entry.state}>
                   <PccStatusPill tone={stateToTone(entry.state)}>
@@ -347,10 +367,7 @@ const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
           </div>
           <div className={styles.subSection}>
             <h4 className={styles.subSectionTitle}>Modes</h4>
-            <ul
-              className={styles.pillRow}
-              data-pcc-approvals-mode-counts=""
-            >
+            <ul className={styles.pillRow} data-pcc-approvals-mode-counts="">
               {home.modeCounts.map((entry) => (
                 <li key={entry.mode}>
                   <PccStatusPill tone="neutral">
@@ -445,10 +462,7 @@ const MyApprovalsCard: FC<MyApprovalsCardProps> = ({
           {myApprovals.rows.length === 0 ? (
             <PccPreviewState state="empty" />
           ) : (
-            <ul
-              className={styles.rowList}
-              data-pcc-approvals-row-list="my-approvals"
-            >
+            <ul className={styles.rowList} data-pcc-approvals-row-list="my-approvals">
               {myApprovals.rows.map((row) => (
                 <li
                   key={row.approvalRequestId}
@@ -502,10 +516,7 @@ const RegistryCard: FC<RegistryCardProps> = ({ registry, cardState, isAvailable 
             {registry.definitionRows.length === 0 ? (
               <PccPreviewState state="empty" />
             ) : (
-              <ul
-                className={styles.rowList}
-                data-pcc-approvals-row-list="registry-definitions"
-              >
+              <ul className={styles.rowList} data-pcc-approvals-row-list="registry-definitions">
                 {registry.definitionRows.map((row) => (
                   <li
                     key={row.definitionId}
@@ -527,10 +538,7 @@ const RegistryCard: FC<RegistryCardProps> = ({ registry, cardState, isAvailable 
             {registry.instanceRows.length === 0 ? (
               <PccPreviewState state="empty" />
             ) : (
-              <ul
-                className={styles.rowList}
-                data-pcc-approvals-row-list="registry-instances"
-              >
+              <ul className={styles.rowList} data-pcc-approvals-row-list="registry-instances">
                 {registry.instanceRows.map((row) => (
                   <li
                     key={row.instanceId}
@@ -588,9 +596,7 @@ const EscalationCard: FC<EscalationCardProps> = ({
               <div className={styles.rowMeta}>
                 <PccStatusPill tone={stateToTone(row.state)}>{row.state}</PccStatusPill>
                 <span className={styles.rowMetaItem}>Reason: {row.escalationReason}</span>
-                <span className={styles.rowMetaItem}>
-                  Target: {row.escalationTargetRoleLabel}
-                </span>
+                <span className={styles.rowMetaItem}>Target: {row.escalationTargetRoleLabel}</span>
                 <span className={styles.rowMetaItem}>{row.createdAtDisplay}</span>
               </div>
             </li>
@@ -626,10 +632,7 @@ const AdminVerificationCard: FC<AdminVerificationCardProps> = ({
       ) : adminVerification.rows.length === 0 ? (
         <PccPreviewState state="empty" />
       ) : (
-        <ul
-          className={styles.rowList}
-          data-pcc-approvals-row-list="admin-verification"
-        >
+        <ul className={styles.rowList} data-pcc-approvals-row-list="admin-verification">
           {adminVerification.rows.map((row) => (
             <li
               key={row.approvalRequestId}
@@ -720,10 +723,7 @@ const ModuleIntegrationCard: FC<ModuleIntegrationCardProps> = ({
       {!isAvailable ? (
         <DegradedNotice cardState={cardState} />
       ) : (
-        <ul
-          className={styles.rowList}
-          data-pcc-approvals-row-list="module-integration"
-        >
+        <ul className={styles.rowList} data-pcc-approvals-row-list="module-integration">
           {moduleIntegration.rows.map((row) => (
             <li
               key={row.sourceModule}
@@ -769,9 +769,7 @@ const DecisionHistorySeamCard: FC<DecisionHistorySeamCardProps> = ({ seam, disab
         description={seam.description}
       />
       <p className={styles.captionLine}>{seam.deferredReason}</p>
-      <DisabledActionsRow
-        actions={disabledActions.filter((a) => a.key === 'open-detail')}
-      />
+      <DisabledActionsRow actions={disabledActions.filter((a) => a.key === 'open-detail')} />
     </div>
   </PccDashboardCard>
 );
@@ -798,14 +796,9 @@ const LineageSeamCard: FC<LineageSeamCardProps> = ({ seam }) => (
         <PccStatusPill tone="info">
           Registry definitions: {seam.registryDefinitionCount}
         </PccStatusPill>
-        <PccStatusPill tone="info">
-          Registry instances: {seam.registryInstanceCount}
-        </PccStatusPill>
+        <PccStatusPill tone="info">Registry instances: {seam.registryInstanceCount}</PccStatusPill>
       </div>
-      <ul
-        className={styles.rowList}
-        data-pcc-approvals-row-list="lineage-source-modules"
-      >
+      <ul className={styles.rowList} data-pcc-approvals-row-list="lineage-source-modules">
         {seam.sourceModuleSummaryRows.map((row) => (
           <li
             key={row.sourceModule}
@@ -814,9 +807,7 @@ const LineageSeamCard: FC<LineageSeamCardProps> = ({ seam }) => (
           >
             <div className={styles.rowMeta}>
               <span className={styles.rowMetaItem}>{row.sourceModule}</span>
-              <PccStatusPill tone={row.count > 0 ? 'info' : 'neutral'}>
-                {row.count}
-              </PccStatusPill>
+              <PccStatusPill tone={row.count > 0 ? 'info' : 'neutral'}>{row.count}</PccStatusPill>
             </div>
           </li>
         ))}

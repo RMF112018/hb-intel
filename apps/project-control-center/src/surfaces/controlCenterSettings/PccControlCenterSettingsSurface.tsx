@@ -2,6 +2,7 @@ import { Fragment, type FC } from 'react';
 import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
+import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import styles from './PccControlCenterSettingsSurface.module.css';
 
 const SURFACE = PCC_MVP_SURFACES['control-center-settings'];
@@ -28,7 +29,14 @@ export const PccControlCenterSettingsSurface: FC = () => (
       dataActiveSurfacePanel="control-center-settings"
     >
       <div className={styles.body}>
-        <p>{SURFACE.description}</p>
+        <PccSurfaceContextHeader
+          surfaceId="control-center-settings"
+          projectLabel="Project 26-000-00 · Governance Configuration"
+          postureLabel="Read-only preview"
+          sourceStatusLabel="Fixture default"
+          sourceConfidenceLabel="Preview confidence"
+          lastUpdatedLabel="Not connected in this prompt"
+        />
         <PccPreviewState
           state="preview"
           title="Preview-only settings visibility"
@@ -37,7 +45,11 @@ export const PccControlCenterSettingsSurface: FC = () => (
       </div>
     </PccDashboardCard>
 
-    <PccDashboardCard footprint="full" eyebrow="Settings Lanes" title="Project / Site / Persona / Integration Scope">
+    <PccDashboardCard
+      footprint="full"
+      eyebrow="Settings Lanes"
+      title="Project / Site / Persona / Integration Scope"
+    >
       <div className={styles.scopeGrid}>
         {SETTINGS_SCOPE_PREVIEW.map((item) => (
           <section key={item.label} className={styles.scopeCell}>
@@ -48,7 +60,11 @@ export const PccControlCenterSettingsSurface: FC = () => (
       </div>
     </PccDashboardCard>
 
-    <PccDashboardCard footprint="wide" eyebrow="Missing Configuration" title="Preview Backlog Items">
+    <PccDashboardCard
+      footprint="wide"
+      eyebrow="Missing Configuration"
+      title="Preview Backlog Items"
+    >
       <div className={styles.body}>
         <PccPreviewState state="missing-config" />
         <ul className={styles.missingList}>
