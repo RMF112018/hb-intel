@@ -73,6 +73,10 @@ const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'isStaleSourceReference',
   'mapLegacyCheckpointToInstance',
   'legacyCheckpointKind',
+  // Wave 15 Prompt 02 — pure URL-policy evaluator. Deterministic, side-
+  // effect-free, no I/O. Returns a structured allow/deny result and never
+  // throws — `invalid-url` is the failure shape for malformed input.
+  'evaluateExternalUrlPolicy',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {

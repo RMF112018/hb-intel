@@ -55,6 +55,17 @@ import type {
   PccUnifiedSearchAskHbiReadModel,
   PccWarrantyTraceReadModel,
 } from './UnifiedLifecycleReadModels.js';
+import type {
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
+} from './ExternalSystemsLaunchPad.js';
 
 export const PCC_READ_MODEL_MODES = ['fixture', 'mock', 'local'] as const;
 export type PccReadModelMode = (typeof PCC_READ_MODEL_MODES)[number];
@@ -201,4 +212,20 @@ export interface PccReadModelResponseMap {
    * a future per-request route.
    */
   approvals: PccReadModelEnvelope<PccApprovalsReadModel>;
+  /**
+   * Wave 15 / External Systems Launch Pad — composite + per-section
+   * read-model envelopes. All metadata-only; no live external-system
+   * calls, no Graph/PnP writes, no tenant mutation. The Wave 1 legacy
+   * `external-links` envelope above remains active for backward compat;
+   * Wave 15 keys are additive, never replacements.
+   */
+  'external-systems-launch-pad': PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>;
+  'external-system-registry': PccReadModelEnvelope<IPccExternalSystemRegistryReadModel>;
+  'project-external-launch-links': PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel>;
+  'project-external-system-mappings': PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel>;
+  'external-object-references': PccReadModelEnvelope<IPccExternalObjectReferencesReadModel>;
+  'external-review-items': PccReadModelEnvelope<IPccExternalReviewItemsReadModel>;
+  'external-system-health-snapshots': PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel>;
+  'external-system-audit-events': PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel>;
+  'hbi-source-lineage': PccReadModelEnvelope<IPccHbiSourceLineageReadModel>;
 }

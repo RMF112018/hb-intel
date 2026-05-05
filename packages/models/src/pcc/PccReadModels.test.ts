@@ -56,6 +56,28 @@ import {
   SAMPLE_WARRANTY_TRACE_READ_MODEL,
 } from './fixtures/unifiedLifecycleReadModels.js';
 import { SAMPLE_APPROVALS_READ_MODEL } from './fixtures/approvals.js';
+import {
+  SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
+} from './fixtures/externalSystemsLaunchPad.js';
+import type {
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
+} from './ExternalSystemsLaunchPad.js';
 
 describe('PccReadModels exports and typing', () => {
   it('exports all required mode and source-status literals', () => {
@@ -431,6 +453,85 @@ describe('PccReadModels exports and typing', () => {
       data: SAMPLE_APPROVALS_READ_MODEL,
     };
 
+    const externalSystemsLaunchPadEnvelope: PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+      };
+
+    const externalSystemRegistryEnvelope: PccReadModelEnvelope<IPccExternalSystemRegistryReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+      };
+
+    const projectExternalLaunchLinksEnvelope: PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
+      };
+
+    const projectExternalSystemMappingsEnvelope: PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
+      };
+
+    const externalObjectReferencesEnvelope: PccReadModelEnvelope<IPccExternalObjectReferencesReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL,
+      };
+
+    const externalReviewItemsEnvelope: PccReadModelEnvelope<IPccExternalReviewItemsReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL,
+    };
+
+    const externalSystemHealthSnapshotsEnvelope: PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL,
+      };
+
+    const externalSystemAuditEventsEnvelope: PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel> =
+      {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        data: SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL,
+      };
+
+    const hbiSourceLineageEnvelope: PccReadModelEnvelope<IPccHbiSourceLineageReadModel> = {
+      mode: 'fixture',
+      sourceStatus: 'available',
+      readOnly: true,
+      warnings: [],
+      data: SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+    };
+
     const map: PccReadModelResponseMap = {
       profile: profileEnvelope,
       modules: modulesEnvelope,
@@ -457,6 +558,15 @@ describe('PccReadModels exports and typing', () => {
       'cross-project-knowledge': crossProjectKnowledgeEnvelope,
       'unified-search': unifiedSearchEnvelope,
       approvals: approvalsEnvelope,
+      'external-systems-launch-pad': externalSystemsLaunchPadEnvelope,
+      'external-system-registry': externalSystemRegistryEnvelope,
+      'project-external-launch-links': projectExternalLaunchLinksEnvelope,
+      'project-external-system-mappings': projectExternalSystemMappingsEnvelope,
+      'external-object-references': externalObjectReferencesEnvelope,
+      'external-review-items': externalReviewItemsEnvelope,
+      'external-system-health-snapshots': externalSystemHealthSnapshotsEnvelope,
+      'external-system-audit-events': externalSystemAuditEventsEnvelope,
+      'hbi-source-lineage': hbiSourceLineageEnvelope,
     };
 
     expect(map.profile.readOnly).toBe(true);

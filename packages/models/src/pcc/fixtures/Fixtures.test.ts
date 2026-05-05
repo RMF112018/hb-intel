@@ -104,6 +104,27 @@ import { SEVERITY_BAND_KEYS } from '../ConstraintsLog.js';
 import { REPAIR_REQUEST_STATES } from '../RepairRequests.js';
 import { LAUNCH_LINK_STATES } from '../ExternalSystems.js';
 import { BUSINESS_AUDIT_SOURCE_CONTEXT_TYPES } from '../BusinessAuditEvent.js';
+import {
+  EXTERNAL_SYSTEM_DEGRADED_STATE_MATRIX,
+  EXTERNAL_SYSTEM_KEYS,
+  EXTERNAL_SYSTEM_MAPPING_STATES,
+  EXTERNAL_SYSTEM_SOURCE_HEALTH_STATES,
+  HBI_SOURCE_LINEAGE_STATES,
+  PROJECT_EXTERNAL_LINK_APPROVAL_STATES,
+} from '../ExternalSystemsLaunchPad.js';
+import {
+  SAMPLE_EXTERNAL_OBJECT_REFERENCES_KNOWN_PROJECT,
+  SAMPLE_EXTERNAL_REVIEW_ITEMS_KNOWN_PROJECT,
+  SAMPLE_EXTERNAL_SYSTEM_AUDIT_EVENTS_KNOWN_PROJECT,
+  SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS,
+  SAMPLE_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_KNOWN_PROJECT,
+  SAMPLE_HBI_SOURCE_LINEAGE_ENTRIES_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PROJECT_EXTERNAL_LAUNCH_LINKS_KNOWN_PROJECT,
+  SAMPLE_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_KNOWN_PROJECT,
+} from './externalSystemsLaunchPad.js';
 
 const FIXTURES_DIR = fileURLToPath(new URL('.', import.meta.url));
 
@@ -150,6 +171,44 @@ const NAMED_FIXTURES: ReadonlyArray<readonly [string, unknown]> = [
   ['SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS', SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS],
   ['SAMPLE_LAUNCH_LINKS', SAMPLE_LAUNCH_LINKS],
   ['SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS', SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS],
+  ['SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS', SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS],
+  [
+    'SAMPLE_PROJECT_EXTERNAL_LAUNCH_LINKS_KNOWN_PROJECT',
+    SAMPLE_PROJECT_EXTERNAL_LAUNCH_LINKS_KNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_KNOWN_PROJECT',
+    SAMPLE_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_KNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_EXTERNAL_OBJECT_REFERENCES_KNOWN_PROJECT',
+    SAMPLE_EXTERNAL_OBJECT_REFERENCES_KNOWN_PROJECT,
+  ],
+  ['SAMPLE_EXTERNAL_REVIEW_ITEMS_KNOWN_PROJECT', SAMPLE_EXTERNAL_REVIEW_ITEMS_KNOWN_PROJECT],
+  [
+    'SAMPLE_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_KNOWN_PROJECT',
+    SAMPLE_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_KNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_EXTERNAL_SYSTEM_AUDIT_EVENTS_KNOWN_PROJECT',
+    SAMPLE_EXTERNAL_SYSTEM_AUDIT_EVENTS_KNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_HBI_SOURCE_LINEAGE_ENTRIES_KNOWN_PROJECT',
+    SAMPLE_HBI_SOURCE_LINEAGE_ENTRIES_KNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT',
+    SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT',
+    SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  ],
+  [
+    'SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE',
+    SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  ],
   ['SAMPLE_TEAM_ACCESS_MEMBERS', SAMPLE_TEAM_ACCESS_MEMBERS],
   ['SAMPLE_TEAM_ACCESS_VIEWER_LANE', SAMPLE_TEAM_ACCESS_VIEWER_LANE],
   ['SAMPLE_TEAM_ACCESS_PERMISSION_REQUEST_LANE', SAMPLE_TEAM_ACCESS_PERMISSION_REQUEST_LANE],
@@ -361,5 +420,95 @@ describe('PCC fixtures', () => {
       expect(constraintBands.has(band), `constraint band coverage missing: ${band}`).toBe(true);
     }
     expect(SAMPLE_CONSTRAINTS_LOG_READ_MODEL.moduleIdentity.moduleId).toBe('constraints-log');
+  });
+
+  it('Wave 15 launch link fixtures cover every approval state', () => {
+    const observed = new Set(
+      SAMPLE_PROJECT_EXTERNAL_LAUNCH_LINKS_KNOWN_PROJECT.map((link) => link.approvalState),
+    );
+    for (const state of PROJECT_EXTERNAL_LINK_APPROVAL_STATES) {
+      expect(observed.has(state), `approval state coverage missing: ${state}`).toBe(true);
+    }
+  });
+
+  it('Wave 15 mapping fixtures cover all eight mapping states', () => {
+    const observed = new Set(
+      SAMPLE_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_KNOWN_PROJECT.map((m) => m.mappingState),
+    );
+    for (const state of EXTERNAL_SYSTEM_MAPPING_STATES) {
+      expect(observed.has(state), `mapping state coverage missing: ${state}`).toBe(true);
+    }
+  });
+
+  it('Wave 15 health snapshot fixtures cover all nine source-health states', () => {
+    const observed = new Set(
+      SAMPLE_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_KNOWN_PROJECT.map((s) => s.healthState),
+    );
+    for (const state of EXTERNAL_SYSTEM_SOURCE_HEALTH_STATES) {
+      expect(observed.has(state), `source-health state coverage missing: ${state}`).toBe(true);
+    }
+  });
+
+  it('Wave 15 audit event fixtures cover at least six event types', () => {
+    const observed = new Set(
+      SAMPLE_EXTERNAL_SYSTEM_AUDIT_EVENTS_KNOWN_PROJECT.map((e) => e.eventType),
+    );
+    expect(observed.size).toBeGreaterThanOrEqual(6);
+  });
+
+  it('Wave 15 HBI lineage fixtures cover all six lineage states including refusal', () => {
+    const observed = new Set(SAMPLE_HBI_SOURCE_LINEAGE_ENTRIES_KNOWN_PROJECT.map((e) => e.state));
+    for (const state of HBI_SOURCE_LINEAGE_STATES) {
+      expect(observed.has(state), `HBI lineage state coverage missing: ${state}`).toBe(true);
+    }
+    expect(observed.has('refusal')).toBe(true);
+  });
+
+  it('Wave 15 unknown-project read model has zero links/mappings/reviews/audits', () => {
+    const m = SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT;
+    expect(m.projectLaunchLinks).toEqual([]);
+    expect(m.projectMappings).toEqual([]);
+    expect(m.objectReferences).toEqual([]);
+    expect(m.reviewItems).toEqual([]);
+    expect(m.auditEvents).toEqual([]);
+    expect(m.hbiLineage).toEqual([]);
+    expect(m.summary.activeLinks).toBe(0);
+    expect(m.summary.pendingReviews).toBe(0);
+  });
+
+  it('Wave 15 backend-unavailable read model carries the verbatim degraded-matrix user copy', () => {
+    const m = SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE;
+    expect(m.healthSnapshots).toHaveLength(1);
+    expect(m.healthSnapshots[0]?.statusMessage).toBe(
+      EXTERNAL_SYSTEM_DEGRADED_STATE_MATRIX['backend-unavailable'].userCopy,
+    );
+    expect(m.healthSnapshots[0]?.healthState).toBe('unavailable');
+    expect(m.systemDefinitions).toEqual([]);
+    expect(m.projectLaunchLinks).toEqual([]);
+  });
+
+  it('Wave 15 system definitions mirror the registry and use known system keys', () => {
+    expect(SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS).toHaveLength(EXTERNAL_SYSTEM_KEYS.length);
+    const observedKeys = new Set(SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS.map((d) => d.systemKey));
+    for (const key of EXTERNAL_SYSTEM_KEYS) {
+      expect(observedKeys.has(key), `system definition missing: ${key}`).toBe(true);
+    }
+  });
+
+  it('Wave 15 review items cover all four review states', () => {
+    const observed = new Set(SAMPLE_EXTERNAL_REVIEW_ITEMS_KNOWN_PROJECT.map((r) => r.reviewState));
+    expect(observed.has('pending')).toBe(true);
+    expect(observed.has('in-progress')).toBe(true);
+    expect(observed.has('closed')).toBe(true);
+    expect(observed.has('suppressed')).toBe(true);
+  });
+
+  it('Wave 15 object references include authorized, unauthorized, and pending permission states', () => {
+    const states = new Set(
+      SAMPLE_EXTERNAL_OBJECT_REFERENCES_KNOWN_PROJECT.map((o) => o.permissionState),
+    );
+    expect(states.has('authorized')).toBe(true);
+    expect(states.has('unauthorized')).toBe(true);
+    expect(states.has('pending')).toBe(true);
   });
 });
