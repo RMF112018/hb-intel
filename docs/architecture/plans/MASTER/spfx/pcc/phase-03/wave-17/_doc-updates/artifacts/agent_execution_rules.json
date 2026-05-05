@@ -1,0 +1,31 @@
+{
+  "commitRequirements": {
+    "cleanWorktreeAfterCommit": true,
+    "stagedFileProof": true,
+    "traditionalCommitSummary": true,
+    "validationEvidence": true
+  },
+  "modeGuidance": {
+    "documentationPrompts": "Suggest or Auto Edit with shell-command approval; no full-auto tenant/network work.",
+    "runtimeImplementationPrompts": "Use a later explicit package only."
+  },
+  "mustRunBeforeEdits": [
+    "git status --short",
+    "git branch --show-current",
+    "git rev-parse HEAD",
+    "git log --oneline -12",
+    "md5 pnpm-lock.yaml"
+  ],
+  "neverDo": [
+    "runtime implementation",
+    "tenant mutation",
+    "permission mutation",
+    "schema mutation",
+    "external-system writeback",
+    "package mutation",
+    "lockfile mutation",
+    "production rollout"
+  ],
+  "requiredInstruction": "Do not re-read files that are still within your current context or memory unless you need to verify stale, missing, or contradictory repo truth.",
+  "workingDirectory": "/Users/bobbyfetting/hb-intel"
+}

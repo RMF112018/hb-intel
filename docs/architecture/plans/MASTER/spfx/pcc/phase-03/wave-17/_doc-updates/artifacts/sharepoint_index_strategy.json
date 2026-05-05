@@ -1,0 +1,173 @@
+{
+  "avoidAllItemsViews": true,
+  "avoidDefaultItemLevelUniquePermissions": true,
+  "defaultPageSize": 25,
+  "listStrategies": [
+    {
+      "displayName": "Site Health Check Definitions",
+      "indexedColumns": [
+        "CheckKey",
+        "Category",
+        "IsActive",
+        "AppliesToModule",
+        "TemplateVersion"
+      ],
+      "keyFields": [
+        "CheckKey",
+        "DisplayName",
+        "Category",
+        "DefaultSeverity",
+        "AppliesToModule",
+        "DesiredStateReference",
+        "EvidenceRequired",
+        "IsActive"
+      ],
+      "listFile": "site-health-check-definitions.md",
+      "scope": "HB Central"
+    },
+    {
+      "displayName": "Site Health Snapshots",
+      "indexedColumns": [
+        "ProjectId",
+        "SnapshotAt",
+        "OverallStatus",
+        "WorstSeverity",
+        "SourceStatus"
+      ],
+      "keyFields": [
+        "SnapshotId",
+        "ProjectId",
+        "SnapshotAt",
+        "OverallStatus",
+        "WorstSeverity",
+        "CheckCountsJson",
+        "SourceStatus",
+        "LastSuccessfulReadAt"
+      ],
+      "listFile": "site-health-snapshots.md",
+      "scope": "Project site"
+    },
+    {
+      "displayName": "Site Health Findings",
+      "indexedColumns": [
+        "ProjectId",
+        "Status",
+        "Severity",
+        "Category",
+        "OwnerPersona",
+        "DetectedAt",
+        "ResolvedAt"
+      ],
+      "keyFields": [
+        "FindingId",
+        "ProjectId",
+        "CheckKey",
+        "Category",
+        "Severity",
+        "Status",
+        "Title",
+        "Summary",
+        "DetectedAt",
+        "OwnerPersona",
+        "EvidenceBundleId"
+      ],
+      "listFile": "site-health-findings.md",
+      "scope": "Project site"
+    },
+    {
+      "displayName": "Site Health Evidence References",
+      "indexedColumns": [
+        "ProjectId",
+        "FindingId",
+        "SourceSystem",
+        "ObservedAt",
+        "RedactionLevel"
+      ],
+      "keyFields": [
+        "EvidenceId",
+        "ProjectId",
+        "FindingId",
+        "SourceSystem",
+        "SourceRecordType",
+        "SourceRecordId",
+        "ObservedAt",
+        "Confidence",
+        "RedactionLevel",
+        "DisplayLabel"
+      ],
+      "listFile": "site-health-evidence-references.md",
+      "scope": "Project site"
+    },
+    {
+      "displayName": "Site Health Repair Requests",
+      "indexedColumns": [
+        "ProjectId",
+        "FindingId",
+        "RequestStatus",
+        "RequestedByPersona",
+        "RequestedAt",
+        "Wave14CheckpointId"
+      ],
+      "keyFields": [
+        "RepairRequestId",
+        "ProjectId",
+        "FindingId",
+        "RequestedAction",
+        "RequestStatus",
+        "RequestedBy",
+        "RequestedAt",
+        "AdminVerificationId",
+        "Wave14CheckpointId"
+      ],
+      "listFile": "site-health-repair-requests.md",
+      "scope": "Project site"
+    },
+    {
+      "displayName": "Site Health Admin Verifications",
+      "indexedColumns": [
+        "ProjectId",
+        "FindingId",
+        "VerificationStatus",
+        "VerifierPersona",
+        "VerifiedAt"
+      ],
+      "keyFields": [
+        "AdminVerificationId",
+        "ProjectId",
+        "FindingId",
+        "VerificationStatus",
+        "Verifier",
+        "VerifiedAt",
+        "EvidenceBundleId",
+        "VerificationNotes"
+      ],
+      "listFile": "site-health-admin-verifications.md",
+      "scope": "Project site"
+    },
+    {
+      "displayName": "Site Health Audit Events",
+      "indexedColumns": [
+        "ProjectId",
+        "EventType",
+        "ActorPersona",
+        "OccurredAt",
+        "RelatedFindingId"
+      ],
+      "keyFields": [
+        "AuditEventId",
+        "ProjectId",
+        "EventType",
+        "Actor",
+        "ActorPersona",
+        "OccurredAt",
+        "RelatedFindingId",
+        "BeforeStateJson",
+        "AfterStateJson",
+        "CorrelationId"
+      ],
+      "listFile": "site-health-audit-events.md",
+      "scope": "Project site"
+    }
+  ],
+  "maxPageSize": 100
+}

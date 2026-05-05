@@ -1,0 +1,89 @@
+{
+  "routeRules": {
+    "backendUnavailableSourceStatus": "backend-unavailable",
+    "method": "GET",
+    "readOnly": true,
+    "unknownProjectSourceStatus": "source-unavailable",
+    "viewerPersonaSerialized": false,
+    "writeMethodsAllowed": false
+  },
+  "routes": [
+    {
+      "clientMethod": "getSiteHealth",
+      "description": "Composite Site Health home/overview model.",
+      "dto": "IPccSiteHealthReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health",
+      "routeId": "site-health"
+    },
+    {
+      "clientMethod": "getSiteHealthFindings",
+      "description": "Queue-ready findings list with filters and redaction.",
+      "dto": "IPccSiteHealthFindingsReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-findings",
+      "routeId": "site-health-findings"
+    },
+    {
+      "clientMethod": "getSiteHealthTemplateCompliance",
+      "description": "Template version, required objects, schema and layout compliance.",
+      "dto": "IPccSiteHealthTemplateComplianceReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-template-compliance",
+      "routeId": "site-health-template-compliance"
+    },
+    {
+      "clientMethod": "getSiteHealthProvisioningStatus",
+      "description": "Provisioning phase, last run, blocked checks, and stale run signal.",
+      "dto": "IPccSiteHealthProvisioningStatusReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-provisioning-status",
+      "routeId": "site-health-provisioning-status"
+    },
+    {
+      "clientMethod": "getSiteHealthListLibraryCompliance",
+      "description": "Required lists/libraries, indexed columns, views, threshold posture.",
+      "dto": "IPccSiteHealthListLibraryComplianceReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-list-library-compliance",
+      "routeId": "site-health-list-library-compliance"
+    },
+    {
+      "clientMethod": "getSiteHealthPermissionPosture",
+      "description": "Permission inheritance, group alignment, unique permission risk, redacted by persona.",
+      "dto": "IPccSiteHealthPermissionPostureReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-permission-posture",
+      "routeId": "site-health-permission-posture"
+    },
+    {
+      "clientMethod": "getSiteHealthSettingsHealth",
+      "description": "Wave 16 setting-health snapshot references and validation failures.",
+      "dto": "IPccSiteHealthSettingsHealthReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-settings-health",
+      "routeId": "site-health-settings-health"
+    },
+    {
+      "clientMethod": "getSiteHealthExternalSourceHealth",
+      "description": "Wave 15 external source health summary and stale/degraded signals.",
+      "dto": "IPccSiteHealthExternalSourceHealthReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-external-source-health",
+      "routeId": "site-health-external-source-health"
+    },
+    {
+      "clientMethod": "getSiteHealthAdminVerification",
+      "description": "Admin verification queue and evidence bundles.",
+      "dto": "IPccSiteHealthAdminVerificationReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-admin-verification",
+      "routeId": "site-health-admin-verification"
+    },
+    {
+      "clientMethod": "getSiteHealthAuditHistory",
+      "description": "Business audit events and health history, not Microsoft Purview replacement.",
+      "dto": "IPccSiteHealthAuditHistoryReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-audit-history",
+      "routeId": "site-health-audit-history"
+    },
+    {
+      "clientMethod": "getSiteHealthHbiContext",
+      "description": "Grounded evidence packets for HBI explanations and refusal boundaries.",
+      "dto": "IPccSiteHealthHbiContextReadModel",
+      "path": "/api/pcc/projects/{projectId}/site-health-hbi-context",
+      "routeId": "site-health-hbi-context"
+    }
+  ]
+}

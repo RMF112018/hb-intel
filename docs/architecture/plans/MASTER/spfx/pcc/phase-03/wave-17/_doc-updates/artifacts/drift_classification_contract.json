@@ -1,0 +1,63 @@
+{
+  "algorithm": [
+    "load desired state",
+    "load observed state",
+    "normalize keys",
+    "compare object families",
+    "classify differences",
+    "attach evidence references",
+    "apply persona redaction",
+    "derive action candidates"
+  ],
+  "rules": [
+    {
+      "adminVerificationRequired": true,
+      "autoRepairAllowed": false,
+      "differenceType": "required-list-missing",
+      "severity": "high",
+      "status": "missing-object"
+    },
+    {
+      "adminVerificationRequired": true,
+      "autoRepairAllowed": false,
+      "differenceType": "required-library-missing",
+      "severity": "critical",
+      "status": "missing-object"
+    },
+    {
+      "adminVerificationRequired": true,
+      "autoRepairAllowed": false,
+      "differenceType": "required-field-missing",
+      "severity": "high",
+      "status": "schema-mismatch"
+    },
+    {
+      "adminVerificationRequired": true,
+      "autoRepairAllowed": false,
+      "differenceType": "field-type-mismatch",
+      "severity": "high",
+      "status": "schema-mismatch"
+    },
+    {
+      "adminVerificationRequired": true,
+      "autoRepairAllowed": false,
+      "differenceType": "permission-inheritance-unexpected",
+      "severity": "critical",
+      "status": "permission-mismatch"
+    },
+    {
+      "adminVerificationRequired": true,
+      "autoRepairAllowed": false,
+      "differenceType": "settings-validation-failure",
+      "severity": "high",
+      "status": "degraded"
+    },
+    {
+      "adminVerificationRequired": false,
+      "autoRepairAllowed": false,
+      "differenceType": "external-source-unavailable",
+      "severity": "warning",
+      "status": "source-unavailable"
+    }
+  ]
+}

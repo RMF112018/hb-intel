@@ -1,0 +1,53 @@
+{
+  "actionModes": [
+    "read-only",
+    "view-evidence",
+    "request-review",
+    "request-repair",
+    "approval-required",
+    "admin-verification-required",
+    "future-command-gated",
+    "manual-external-action-required",
+    "blocked-by-policy",
+    "blocked-by-role",
+    "not-applicable"
+  ],
+  "allowedTransitions": [
+    "attention-required -> pending-review",
+    "attention-required -> admin-verification-required",
+    "admin-verification-required -> repair-ready",
+    "repair-ready -> repair-requested",
+    "repair-requested -> pending-review",
+    "pending-review -> resolved",
+    "pending-review -> suppressed"
+  ],
+  "blockedTransitions": [
+    "permission-mismatch -> automatic-repair",
+    "schema-mismatch -> tenant-schema-mutation",
+    "missing-object -> tenant-object-create",
+    "settings-health -> settings-writeback",
+    "external-system-source-health -> external-system-writeback"
+  ],
+  "futureCommands": [
+    {
+      "command": "requestSiteHealthReview",
+      "wave17Executable": false
+    },
+    {
+      "command": "requestSiteHealthRepair",
+      "wave17Executable": false
+    },
+    {
+      "command": "verifySiteHealthFinding",
+      "wave17Executable": false
+    },
+    {
+      "command": "suppressSiteHealthFinding",
+      "wave17Executable": false
+    },
+    {
+      "command": "resolveSiteHealthFinding",
+      "wave17Executable": false
+    }
+  ]
+}

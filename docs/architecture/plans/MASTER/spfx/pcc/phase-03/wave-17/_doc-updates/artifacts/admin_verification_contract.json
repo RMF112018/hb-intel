@@ -1,0 +1,27 @@
+{
+  "requiredFields": [
+    "adminVerificationId",
+    "projectId",
+    "findingId",
+    "verificationStatus",
+    "verifier",
+    "verifierPersona",
+    "verifiedAt",
+    "evidenceBundleId",
+    "repairReadinessOutcome"
+  ],
+  "statuses": [
+    "not-required",
+    "required",
+    "in-review",
+    "evidence-insufficient",
+    "verified-repair-ready",
+    "rejected",
+    "resolved"
+  ],
+  "wave14Handoff": {
+    "approvalDoesNotExecuteRepair": true,
+    "objectName": "SiteHealthCheckpointCandidate",
+    "requiresNoMutationAttestation": true
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "canonicalWave17Path": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-17/",
+  "docs": [
+    "README.md",
+    "Wave_17_Site_Health_Target_Architecture.md",
+    "Wave_17_Domain_Model_Health_Categories_Statuses_And_Drift.md",
+    "Wave_17_System_Of_Record_And_Health_Authority_Contract.md",
+    "Wave_17_Source_Module_Integration_Contract.md",
+    "Wave_17_Read_Model_Routes_Storage_And_Command_Gates.md",
+    "Wave_17_SPFX_UX_And_Wireframes.md",
+    "Wave_17_HBI_Security_Redaction_Audit_And_Guardrails.md",
+    "Wave_17_Test_And_Acceptance_Gates.md",
+    "Wave_17_Documentation_Closeout.md"
+  ],
+  "listSchemaFiles": [
+    "site-health-check-definitions.md",
+    "site-health-snapshots.md",
+    "site-health-findings.md",
+    "site-health-evidence-references.md",
+    "site-health-repair-requests.md",
+    "site-health-admin-verifications.md",
+    "site-health-audit-events.md"
+  ]
+}

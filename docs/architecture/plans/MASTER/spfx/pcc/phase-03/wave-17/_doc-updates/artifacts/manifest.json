@@ -1,0 +1,45 @@
+{
+  "createdDate": "2026-05-05",
+  "fileGroups": [
+    "docs",
+    "docs/wireframes",
+    "artifacts",
+    "prompts",
+    "reference"
+  ],
+  "intendedLocalPath": "/Users/bobbyfetting/hb-intel",
+  "objective": "Create Wave 17 Site Health documentation authority and implementation-ready prompt package.",
+  "packageName": "pcc_phase17_site_health_comprehensive_documentation_update_package",
+  "remoteAuditBaseline": {
+    "existing_site_health_artifacts": [
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/Prompt_09_PCC_Site_Health_Drift_Read_Model_Gated_Implementation.md",
+      "packages/models/src/pcc/SiteHealth.ts",
+      "packages/models/src/pcc/fixtures/siteHealth.ts",
+      "packages/project-site-template/schemas/families/site-health.schema.json",
+      "packages/project-site-template/fields/families/site-health.fields.json"
+    ],
+    "existing_wave16_artifacts": [
+      "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-16/README.md",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-16/README.md",
+      "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-16/_doc-updates/README.md",
+      "docs/reference/sharepoint/list-schemas/pcc/lists/control-center-setting-health-snapshots.md"
+    ],
+    "local_commands_not_run": [
+      "git status --short",
+      "git branch --show-current",
+      "git rev-parse HEAD",
+      "git log --oneline -12",
+      "md5 pnpm-lock.yaml"
+    ],
+    "local_repo_path": "/Users/bobbyfetting/hb-intel",
+    "must_verify_locally": true,
+    "remote_main_commit": "a444cebf999b92437ad1db6d630ca027409fd11c",
+    "remote_main_status": "Remote main was identical to the known Wave 15 reference commit during the audit.",
+    "remote_main_vs_wave16_closeout": "Remote main was five commits ahead of the Wave 16 closeout reference during the audit.",
+    "repo": "RMF112018/hb-intel",
+    "source": "Remote GitHub connector audit plus local revalidation requirements",
+    "wave16_closeout_reference": "714ca190c0dc12d738b10cc342b5253f94909895",
+    "wave17_blueprint_path_found_on_remote": false
+  },
+  "repo": "RMF112018/hb-intel"
+}

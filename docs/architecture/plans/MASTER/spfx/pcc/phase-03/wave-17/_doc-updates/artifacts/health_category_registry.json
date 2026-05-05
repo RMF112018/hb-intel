@@ -1,0 +1,76 @@
+{
+  "categories": [
+    {
+      "id": "provisioning",
+      "label": "Provisioning"
+    },
+    {
+      "id": "template-compliance",
+      "label": "Template Compliance"
+    },
+    {
+      "id": "site-metadata",
+      "label": "Site Metadata"
+    },
+    {
+      "id": "library-compliance",
+      "label": "Library Compliance"
+    },
+    {
+      "id": "list-schema-compliance",
+      "label": "List Schema Compliance"
+    },
+    {
+      "id": "permission-posture",
+      "label": "Permission Posture"
+    },
+    {
+      "id": "team-access-alignment",
+      "label": "Team Access Alignment"
+    },
+    {
+      "id": "settings-health",
+      "label": "Settings Health"
+    },
+    {
+      "id": "external-system-source-health",
+      "label": "External System Source Health"
+    },
+    {
+      "id": "document-control-posture",
+      "label": "Document Control Posture"
+    },
+    {
+      "id": "project-readiness-dependency",
+      "label": "Project Readiness Dependency"
+    },
+    {
+      "id": "priority-action-dependency",
+      "label": "Priority Action Dependency"
+    },
+    {
+      "id": "integration-source-availability",
+      "label": "Integration Source Availability"
+    },
+    {
+      "id": "audit-evidence",
+      "label": "Audit Evidence"
+    },
+    {
+      "id": "security-redaction",
+      "label": "Security Redaction"
+    },
+    {
+      "id": "hbi-grounding",
+      "label": "Hbi Grounding"
+    },
+    {
+      "id": "admin-verification",
+      "label": "Admin Verification"
+    },
+    {
+      "id": "repair-readiness",
+      "label": "Repair Readiness"
+    }
+  ]
+}

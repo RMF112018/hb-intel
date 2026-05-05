@@ -1,0 +1,33 @@
+{
+  "candidates": [
+    {
+      "decision": "prefer existing repo stack",
+      "name": "Fluent UI / SPFx controls"
+    },
+    {
+      "decision": "use existing repo stack",
+      "name": "Testing Library / Vitest"
+    },
+    {
+      "decision": "evaluate only if already installed or explicitly approved",
+      "name": "TanStack Table"
+    },
+    {
+      "decision": "evaluate only with explicit future approval",
+      "name": "TanStack Virtual"
+    },
+    {
+      "decision": "prefer existing validation conventions",
+      "name": "Zod or AJV"
+    },
+    {
+      "decision": "do not add unless future package proves need",
+      "name": "XState"
+    },
+    {
+      "decision": "use only if compatible and approved",
+      "name": "axe-core"
+    }
+  ],
+  "dependencyChangesAuthorized": false
+}

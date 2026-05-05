@@ -1,0 +1,88 @@
+{
+  "statuses": [
+    {
+      "id": "healthy",
+      "label": "Healthy"
+    },
+    {
+      "id": "attention-required",
+      "label": "Attention Required"
+    },
+    {
+      "id": "degraded",
+      "label": "Degraded"
+    },
+    {
+      "id": "drift-detected",
+      "label": "Drift Detected"
+    },
+    {
+      "id": "missing-config",
+      "label": "Missing Config"
+    },
+    {
+      "id": "missing-object",
+      "label": "Missing Object"
+    },
+    {
+      "id": "schema-mismatch",
+      "label": "Schema Mismatch"
+    },
+    {
+      "id": "permission-mismatch",
+      "label": "Permission Mismatch"
+    },
+    {
+      "id": "source-unavailable",
+      "label": "Source Unavailable"
+    },
+    {
+      "id": "backend-unavailable",
+      "label": "Backend Unavailable"
+    },
+    {
+      "id": "stale",
+      "label": "Stale"
+    },
+    {
+      "id": "pending-review",
+      "label": "Pending Review"
+    },
+    {
+      "id": "admin-verification-required",
+      "label": "Admin Verification Required"
+    },
+    {
+      "id": "repair-ready",
+      "label": "Repair Ready"
+    },
+    {
+      "id": "repair-requested",
+      "label": "Repair Requested"
+    },
+    {
+      "id": "repair-blocked",
+      "label": "Repair Blocked"
+    },
+    {
+      "id": "suppressed",
+      "label": "Suppressed"
+    },
+    {
+      "id": "resolved",
+      "label": "Resolved"
+    },
+    {
+      "id": "unauthorized",
+      "label": "Unauthorized"
+    },
+    {
+      "id": "forbidden",
+      "label": "Forbidden"
+    },
+    {
+      "id": "fixture-only",
+      "label": "Fixture Only"
+    }
+  ]
+}

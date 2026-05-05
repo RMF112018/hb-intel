@@ -1,0 +1,95 @@
+{
+  "components": [
+    "PccSiteHealthSurface",
+    "SiteHealthOverviewCards",
+    "SiteHealthCategoryNav",
+    "SiteHealthFindingsTable",
+    "SiteHealthFindingDrawer",
+    "SiteHealthEvidencePanel",
+    "SiteHealthDriftDiffPanel",
+    "SiteHealthPermissionPosturePanel",
+    "SiteHealthHbiPanel"
+  ],
+  "wireframes": [
+    {
+      "description": "Landing view showing overall site health, top findings, stale sources, and repair-readiness status.",
+      "file": "01_Site_Health_Home.md",
+      "title": "Site Health Home"
+    },
+    {
+      "description": "KPI and trend view grouped by category, severity, and source status.",
+      "file": "02_Health_Overview_Dashboard.md",
+      "title": "Health Overview Dashboard"
+    },
+    {
+      "description": "Filtered queue of unresolved findings with category, severity, status, owner, and action mode.",
+      "file": "03_Health_Findings_Queue.md",
+      "title": "Health Findings Queue"
+    },
+    {
+      "description": "Drawer showing finding detail, evidence, desired/observed diff, action eligibility, and HBI explanation.",
+      "file": "04_Health_Finding_Detail_Drawer.md",
+      "title": "Health Finding Detail Drawer"
+    },
+    {
+      "description": "View comparing required Standard Project Site Template objects with observed objects.",
+      "file": "05_Template_Compliance_View.md",
+      "title": "Template Compliance View"
+    },
+    {
+      "description": "Provisioning phase, last run, blocked steps, and repair-readiness status.",
+      "file": "06_Provisioning_Status_View.md",
+      "title": "Provisioning Status View"
+    },
+    {
+      "description": "Compliance matrix for required lists, libraries, fields, indexes, and views.",
+      "file": "07_List_And_Library_Compliance_View.md",
+      "title": "List and Library Compliance View"
+    },
+    {
+      "description": "Role/access alignment and permission inheritance summary with redaction.",
+      "file": "08_Permission_And_Access_Posture_View.md",
+      "title": "Permission and Access Posture View"
+    },
+    {
+      "description": "Wave 16 settings health snapshots and validation references.",
+      "file": "09_Settings_Health_Integration_View.md",
+      "title": "Settings Health Integration View"
+    },
+    {
+      "description": "Wave 15 external source health, stale status, mapping completeness, and lineage.",
+      "file": "10_External_Source_Health_View.md",
+      "title": "External Source Health View"
+    },
+    {
+      "description": "Authorized admin review queue for evidence sufficiency and repair-readiness.",
+      "file": "11_Admin_Verification_Queue.md",
+      "title": "Admin Verification Queue"
+    },
+    {
+      "description": "Future-gated repair request drawer with disabled reasons and no execution.",
+      "file": "12_Repair_Request_Drawer.md",
+      "title": "Repair Request Drawer"
+    },
+    {
+      "description": "Evidence records, timestamps, confidence, source systems, and redaction details.",
+      "file": "13_Evidence_And_Traceability_Panel.md",
+      "title": "Evidence and Traceability Panel"
+    },
+    {
+      "description": "Business audit events, finding lifecycle history, and source-read history.",
+      "file": "14_Audit_And_Health_History.md",
+      "title": "Audit and Health History"
+    },
+    {
+      "description": "Grounded HBI explanation, citations, uncertainty, and refusal boundaries.",
+      "file": "15_HBI_Health_Explanation_Panel.md",
+      "title": "HBI Health Explanation Panel"
+    },
+    {
+      "description": "Mobile-friendly stacked view preserving summary, findings, and drawer access.",
+      "file": "16_Mobile_Responsive_Health_View.md",
+      "title": "Mobile Responsive Health View"
+    }
+  ]
+}

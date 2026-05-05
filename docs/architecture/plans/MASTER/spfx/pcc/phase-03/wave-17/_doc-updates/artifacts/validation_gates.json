@@ -1,0 +1,22 @@
+{
+  "documentationOnlyCommands": [
+    "git status --short",
+    "git branch --show-current",
+    "git rev-parse HEAD",
+    "git log --oneline -12",
+    "md5 pnpm-lock.yaml",
+    "git diff --check",
+    "pnpm exec prettier --check <touched markdown/json files>",
+    "find <wave-17-package-path> -name \"*.json\" -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+    "rg -n \"TB[D]|TO[D]O|Open decisio[n]|PLACEHOLDE[R]\" <wave-17-package-path>",
+    "git diff --name-only",
+    "git diff --cached --name-only"
+  ],
+  "runtimeCommandsForFuturePackageOnly": [
+    "pnpm --filter @hbc/models test",
+    "pnpm --filter @hbc/spfx-project-control-center check-types",
+    "pnpm --filter @hbc/spfx-project-control-center test",
+    "pnpm --filter @hbc/spfx-project-control-center build",
+    "pnpm --filter @hbc/backend-functions test"
+  ]
+}

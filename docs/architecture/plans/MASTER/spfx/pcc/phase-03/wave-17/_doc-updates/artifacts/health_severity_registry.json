@@ -1,0 +1,28 @@
+{
+  "severities": [
+    {
+      "id": "info",
+      "rank": 1
+    },
+    {
+      "id": "notice",
+      "rank": 2
+    },
+    {
+      "id": "warning",
+      "rank": 3
+    },
+    {
+      "id": "high",
+      "rank": 4
+    },
+    {
+      "id": "critical",
+      "rank": 5
+    },
+    {
+      "id": "blocked",
+      "rank": 6
+    }
+  ]
+}

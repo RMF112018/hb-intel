@@ -1,0 +1,84 @@
+{
+  "modules": [
+    {
+      "contract": "Consumes aggregate health summary and top blocker cards; never owns Site Health findings.",
+      "module": "Project Home"
+    },
+    {
+      "contract": "Consumes provisioning/template readiness blockers and unresolved critical findings.",
+      "module": "Project Readiness"
+    },
+    {
+      "contract": "Supplies role/access posture; Site Health displays and redacts, never mutates permissions.",
+      "module": "Team & Access"
+    },
+    {
+      "contract": "Supplies library posture and document-control dependency status; Site Health does not move/open/copy files.",
+      "module": "Document Control"
+    },
+    {
+      "contract": "Supplies permitting/inspection dependency readiness signals; no AHJ writeback.",
+      "module": "Permit & Inspection Control Center"
+    },
+    {
+      "contract": "Supplies accountable owner references for health checks and findings.",
+      "module": "Responsibility Matrix"
+    },
+    {
+      "contract": "May receive derived constraints from critical unresolved health findings only through governed handoff.",
+      "module": "Constraints Log"
+    },
+    {
+      "contract": "May surface procurement/configuration dependency health where project setup affects buyout readiness.",
+      "module": "Buyout Log"
+    },
+    {
+      "contract": "Supplies preconstruction workspace setup readiness and project transition dependencies.",
+      "module": "Estimating Workbench / Wave 13G"
+    },
+    {
+      "contract": "Owns governed approval/checkpoint workflow for repair requests and exceptions.",
+      "module": "Approvals / Checkpoints / Wave 14"
+    },
+    {
+      "contract": "Owns registry, mappings, source-health snapshots, and external audit events consumed by Site Health.",
+      "module": "External Systems Launch Pad / Wave 15"
+    },
+    {
+      "contract": "Owns settings definitions, values, validation results, change requests, and settings health snapshots.",
+      "module": "Control Center Settings / Wave 16"
+    },
+    {
+      "contract": "Displays derived health action candidates; does not own health check authority.",
+      "module": "Priority Actions"
+    },
+    {
+      "contract": "Indexes health evidence and provides grounded explanation, with no mutation authority.",
+      "module": "Unified Search / HBI"
+    },
+    {
+      "contract": "Consumes portfolio/site risk summaries only; sensitive details redacted.",
+      "module": "Executive Oversight"
+    },
+    {
+      "contract": "May verify technical evidence; no tenant mutation unless a later explicit command package authorizes.",
+      "module": "Admin Review Surfaces"
+    },
+    {
+      "contract": "Stores narrative traceability and durable finding summaries where approved.",
+      "module": "Project Memory"
+    },
+    {
+      "contract": "Links setup, readiness, external systems, settings, and closeout dependencies.",
+      "module": "Cross-Stage Traceability"
+    },
+    {
+      "contract": "Primary desired-state authority for project site template compliance.",
+      "module": "Standard Project Site Template Contract"
+    },
+    {
+      "contract": "Global project/configuration authority; Site Health consumes references and check definitions.",
+      "module": "HB Central configuration and project records"
+    }
+  ]
+}

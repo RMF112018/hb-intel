@@ -1,0 +1,70 @@
+{
+  "roles": [
+    {
+      "notes": "Can see operational impact, not raw security detail.",
+      "persona": "project-manager",
+      "requestRepair": false,
+      "requestReview": true,
+      "suppressFinding": false,
+      "viewEvidence": "business-evidence-only",
+      "viewGroupUserNames": "redacted",
+      "viewOverallHealth": true,
+      "viewPermissionFindings": "summary-only"
+    },
+    {
+      "notes": "Can escalate findings and see project-level evidence.",
+      "persona": "project-executive",
+      "requestRepair": false,
+      "requestReview": true,
+      "suppressFinding": false,
+      "viewEvidence": "business-and-project-evidence",
+      "viewGroupUserNames": "redacted",
+      "viewOverallHealth": true,
+      "viewPermissionFindings": "summary-only"
+    },
+    {
+      "notes": "Can monitor readiness and process conformance.",
+      "persona": "manager-of-operational-excellence",
+      "requestRepair": false,
+      "requestReview": true,
+      "suppressFinding": false,
+      "viewEvidence": "business-and-process-evidence",
+      "viewGroupUserNames": "redacted",
+      "viewOverallHealth": true,
+      "viewPermissionFindings": "limited"
+    },
+    {
+      "notes": "Sees risk posture and trend, not raw admin details.",
+      "persona": "executive-oversight",
+      "requestRepair": false,
+      "requestReview": false,
+      "suppressFinding": false,
+      "viewEvidence": "summary-only",
+      "viewGroupUserNames": "redacted",
+      "viewOverallHealth": "portfolio-summary",
+      "viewPermissionFindings": "summary-only"
+    },
+    {
+      "notes": "May prepare repair-readiness records but cannot execute tenant mutation in Wave 17.",
+      "persona": "pcc-admin",
+      "requestRepair": "future-command-gated",
+      "requestReview": true,
+      "suppressFinding": "future-command-gated",
+      "viewEvidence": "full-with-redaction-rules",
+      "viewGroupUserNames": "allowed-when-authorized",
+      "viewOverallHealth": true,
+      "viewPermissionFindings": true
+    },
+    {
+      "notes": "May verify technical evidence; tenant/security mutation remains outside Wave 17.",
+      "persona": "it-admin",
+      "requestRepair": "future-command-gated",
+      "requestReview": true,
+      "suppressFinding": "future-command-gated",
+      "viewEvidence": "full-with-redaction-rules",
+      "viewGroupUserNames": "allowed-when-authorized",
+      "viewOverallHealth": true,
+      "viewPermissionFindings": true
+    }
+  ]
+}

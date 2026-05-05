@@ -1,0 +1,66 @@
+{
+  "authorityBoundaries": {
+    "consumes": [
+      "Standard Project Site Template Contract",
+      "Wave 14 approval/checkpoint candidates",
+      "Wave 15 source-health snapshots",
+      "Wave 16 settings-health snapshots",
+      "Team & Access posture",
+      "Document Control posture"
+    ],
+    "doesNotOwn": [
+      "tenant administration",
+      "permission mutation",
+      "settings writeback",
+      "external-system administration",
+      "compliance audit authority",
+      "legal/accounting/claim decisions"
+    ],
+    "owns": [
+      "health check normalization",
+      "health findings",
+      "evidence references",
+      "diagnostic business audit",
+      "repair-readiness display"
+    ]
+  },
+  "canonicalPath": "docs/architecture/blueprint/sp-project-control-center/phase-3/wave-17/",
+  "module": "Site Health",
+  "mvpScope": {
+    "authorized_for_future_implementation_package": [
+      "TypeScript model additions and tests",
+      "Fixture additions and determinism tests",
+      "GET-only backend mock provider routes",
+      "SPFx read-model client parity",
+      "SPFx Site Health surface components",
+      "View-model adapters and hooks",
+      "Accessibility and no-mutation tests"
+    ],
+    "implemented_in_wave17_docs": [
+      "Canonical target architecture",
+      "Domain model and data contracts",
+      "Health category/status/severity/action registries",
+      "Desired-state versus observed-state algorithm contract",
+      "Read-model route/client/provider contract",
+      "SharePoint storage/list schema posture",
+      "SPFx UX and wireframe contract",
+      "Role/redaction/action matrix",
+      "Security, audit, HBI, and no-mutation guardrails",
+      "Prompt sequence for documentation updates"
+    ],
+    "not_authorized_in_this_package": [
+      "Runtime source code changes",
+      "Tenant mutation",
+      "Graph write calls",
+      "SharePoint REST/PnP write calls",
+      "Permission changes",
+      "Schema mutation",
+      "Automatic repair",
+      "Production rollout",
+      "Package or lockfile mutation"
+    ]
+  },
+  "surfaceId": "site-health",
+  "typescriptRoot": "SiteHealth",
+  "wave": "phase-3-wave-17"
+}

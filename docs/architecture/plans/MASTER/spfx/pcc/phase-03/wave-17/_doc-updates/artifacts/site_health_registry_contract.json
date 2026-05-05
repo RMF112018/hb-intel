@@ -1,0 +1,29 @@
+{
+  "evidencePolicy": {
+    "requireObservedAt": true,
+    "requireSourceSystem": true,
+    "storeRawTokens": false,
+    "storeSafeDisplayLabels": true,
+    "storeSecretValues": false
+  },
+  "idRules": {
+    "adminVerification": "shv_{projectId}_{findingId}_{yyyyMMddHHmmss}",
+    "checkDefinition": "shc_{category}_{slug}",
+    "evidence": "she_{projectId}_{findingId}_{ordinal}",
+    "finding": "shf_{projectId}_{checkKey}_{yyyyMMddHHmmss}",
+    "repairRequest": "shr_{projectId}_{findingId}_{yyyyMMddHHmmss}",
+    "snapshot": "shs_{projectId}_{yyyyMMddHHmmss}"
+  },
+  "records": [
+    "SiteHealthCheckDefinition",
+    "SiteHealthSnapshot",
+    "SiteHealthFinding",
+    "SiteHealthEvidenceReference",
+    "SiteHealthDesiredState",
+    "SiteHealthObservedState",
+    "SiteHealthDriftClassification",
+    "SiteHealthRepairRequest",
+    "SiteHealthAdminVerification",
+    "SiteHealthAuditEvent"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "auditBoundary": "PCC business diagnostic audit only; Microsoft Purview remains Microsoft 365 audit authority.",
+  "events": [
+    "finding-created",
+    "finding-status-changed",
+    "evidence-viewed",
+    "review-requested",
+    "repair-request-attempted",
+    "repair-request-blocked",
+    "admin-verification-performed",
+    "finding-suppressed",
+    "finding-resolved",
+    "unauthorized-detail-access-attempted",
+    "hbi-explanation-generated",
+    "hbi-refusal-generated"
+  ]
+}
