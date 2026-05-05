@@ -1,0 +1,18 @@
+{
+  "packageId": "pcc_wave15_external_systems_launch_pad_documentation_update_package",
+  "generated": "2026-05-05",
+  "featureName": "External Systems Launch Pad",
+  "internalModuleName": "External Systems",
+  "routeId": "external-systems",
+  "repoLandingPath": "docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15/documentation-update-package/",
+  "todosAllowed": [
+    "example fixture scenarios for 2-3 projects",
+    "progress camera iframe/current-image viewer after separate security gate"
+  ],
+  "revision": "revised-canonical-docs-promotion",
+  "addedArtifacts": [
+    "docs/19_Artifact_Placement_And_Canonical_Docs_Promotion_Map.md",
+    "artifacts/artifact_placement_map.json"
+  ],
+  "canonicalPromotionRequired": true
+}
