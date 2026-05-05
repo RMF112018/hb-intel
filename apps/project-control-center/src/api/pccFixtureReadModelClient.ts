@@ -52,9 +52,32 @@ import {
   // Wave 14 / Prompt 04 — composite approvals read-model (sample + empty).
   SAMPLE_APPROVALS_READ_MODEL,
   EMPTY_APPROVALS_READ_MODEL,
+  // Wave 15 / Prompt 04 — External Systems Launch Pad composite + per-section
+  // fixtures. Metadata-only; no live external-system calls; no iframe/
+  // current-image embed behavior.
+  SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
   IProjectProfile,
   LifecycleReadinessStatus,
   PccApprovalsReadModel,
@@ -1376,11 +1399,293 @@ class PccFixtureReadModelClient implements IPccReadModelClient {
         this.unknownProjectWarnings(projectId),
       );
     }
+    return this.envelope(projectId, viewerPersona, 'available', SAMPLE_APPROVALS_READ_MODEL, []);
+  }
+
+  /**
+   * Wave 15 / Prompt 04 — External Systems Launch Pad composite. Mirrors
+   * Prompt 03 mock provider three-branch behavior:
+   *   - simulateBackendUnavailable → canonical backend-unavailable composite
+   *     (empty systemDefinitions + verbatim "Launch Pad data is temporarily
+   *     unavailable." snapshot from the degraded-state matrix);
+   *   - unknown project → canonical unknown-project composite (registry
+   *     retained, per-project arrays empty);
+   *   - known project → canonical known-project composite verbatim.
+   *
+   * `viewerPersona` is envelope passthrough only; never serialized.
+   */
+  async getExternalSystemsLaunchPad(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+        this.unknownProjectWarnings(projectId),
+      );
+    }
     return this.envelope(
       projectId,
       viewerPersona,
       'available',
-      SAMPLE_APPROVALS_READ_MODEL,
+      SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+      [],
+    );
+  }
+
+  /**
+   * Wave 15 / Prompt 04 — External system registry. Project-independent;
+   * the same canonical registry is returned on all three branches. The
+   * envelope sourceStatus still reflects host posture so consumers can
+   * render degraded surrounding context.
+   */
+  async getExternalSystemRegistry(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemRegistryReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getProjectExternalLaunchLinks(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, links: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, links: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL, projectId },
+      [],
+    );
+  }
+
+  async getProjectExternalSystemMappings(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, mappings: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, mappings: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL, projectId },
+      [],
+    );
+  }
+
+  async getExternalObjectReferences(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalObjectReferencesReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, references: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, references: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL, projectId },
+      [],
+    );
+  }
+
+  async getExternalReviewItems(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalReviewItemsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, items: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, items: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL, projectId },
+      [],
+    );
+  }
+
+  async getExternalSystemHealthSnapshots(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, snapshots: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, snapshots: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL, projectId },
+      [],
+    );
+  }
+
+  async getExternalSystemAuditEvents(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, events: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, events: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL, projectId },
+      [],
+    );
+  }
+
+  async getHbiSourceLineage(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccHbiSourceLineageReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, entries: [] },
+        [BACKEND_UNAVAILABLE_WARNING],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, entries: [] },
+        this.unknownProjectWarnings(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      'available',
+      { ...SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL, projectId },
       [],
     );
   }

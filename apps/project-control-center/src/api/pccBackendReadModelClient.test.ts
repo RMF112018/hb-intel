@@ -51,6 +51,16 @@ const ROUTE_METHOD_TUPLES: readonly IRouteMethodTuple[] = [
   { routeId: 'unified-search', clientMethod: 'getUnifiedSearch' },
   // Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
   { routeId: 'approvals', clientMethod: 'getApprovals' },
+  // Wave 15 / Prompt 04 — External Systems Launch Pad routes.
+  { routeId: 'external-systems-launch-pad', clientMethod: 'getExternalSystemsLaunchPad' },
+  { routeId: 'external-system-registry', clientMethod: 'getExternalSystemRegistry' },
+  { routeId: 'project-external-launch-links', clientMethod: 'getProjectExternalLaunchLinks' },
+  { routeId: 'project-external-system-mappings', clientMethod: 'getProjectExternalSystemMappings' },
+  { routeId: 'external-object-references', clientMethod: 'getExternalObjectReferences' },
+  { routeId: 'external-review-items', clientMethod: 'getExternalReviewItems' },
+  { routeId: 'external-system-health-snapshots', clientMethod: 'getExternalSystemHealthSnapshots' },
+  { routeId: 'external-system-audit-events', clientMethod: 'getExternalSystemAuditEvents' },
+  { routeId: 'hbi-source-lineage', clientMethod: 'getHbiSourceLineage' },
 ];
 
 function buildOkEnvelope(): PccReadModelEnvelope<PccProjectHomeReadModel> {
@@ -96,7 +106,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('createPccBackendReadModelClient — URL & method (all 24 routes)', () => {
+describe('createPccBackendReadModelClient — URL & method (all 33 routes)', () => {
   for (const tuple of ROUTE_METHOD_TUPLES) {
     it(`builds GET ${PCC_READ_MODEL_ROUTE_PATHS[tuple.routeId]}`, async () => {
       const okEnvelope: PccReadModelEnvelope<unknown> = {
@@ -126,6 +136,42 @@ describe('createPccBackendReadModelClient — URL & method (all 24 routes)', () 
       expect(fetchImpl).toHaveBeenCalledWith(expectedUrl, { method: 'GET' });
     });
   }
+
+  it('Wave 15: getExternalSystemsLaunchPad URL has no query string and does not serialize viewerPersona', async () => {
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    await client.getExternalSystemsLaunchPad(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    const expectedUrl = `https://example.invalid/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/external-systems-launch-pad`;
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledWith(expectedUrl, { method: 'GET' });
+    const calls = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls;
+    const [calledUrl] = calls[0]!;
+    expect(calledUrl).not.toContain('?');
+    expect(calledUrl).not.toContain('viewerPersona');
+    expect(calledUrl).not.toContain(SAMPLE_PERSONA);
+  });
+
+  it('Wave 15: getHbiSourceLineage URL has no query string and does not serialize viewerPersona', async () => {
+    const fetchImpl: PccReadModelFetch = vi
+      .fn<PccReadModelFetch>()
+      .mockResolvedValue(jsonResponse({ data: buildOkEnvelope() }));
+    const client = createPccBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      fetch: fetchImpl,
+    });
+    await client.getHbiSourceLineage(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    const expectedUrl = `https://example.invalid/api/pcc/projects/${ENCODED_KNOWN_PROJECT_ID}/hbi-source-lineage`;
+    expect(fetchImpl).toHaveBeenCalledWith(expectedUrl, { method: 'GET' });
+    const calls = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls;
+    const [calledUrl] = calls[0]!;
+    expect(calledUrl).not.toContain('?');
+    expect(calledUrl).not.toContain(SAMPLE_PERSONA);
+  });
 
   it('never generates POST/PUT/PATCH/DELETE requests across all 22 methods', async () => {
     const fetchImpl: PccReadModelFetch = vi

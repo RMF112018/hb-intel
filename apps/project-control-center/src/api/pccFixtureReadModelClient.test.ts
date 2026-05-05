@@ -1,9 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import {
+  EXTERNAL_SYSTEM_DEGRADED_STATE_MATRIX,
   LIFECYCLE_READINESS_LIBRARY_METADATA,
   LIFECYCLE_READINESS_STATUSES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_LIFECYCLE_READINESS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
   SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
   SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_PROFILES,
@@ -59,8 +71,18 @@ describe('createPccFixtureReadModelClient — defaults', () => {
       client.getCrossProjectKnowledge(KNOWN_PROJECT_ID),
       client.getUnifiedSearch(KNOWN_PROJECT_ID),
       client.getApprovals(KNOWN_PROJECT_ID),
+      // Wave 15 / Prompt 04 — External Systems Launch Pad client methods.
+      client.getExternalSystemsLaunchPad(KNOWN_PROJECT_ID),
+      client.getExternalSystemRegistry(KNOWN_PROJECT_ID),
+      client.getProjectExternalLaunchLinks(KNOWN_PROJECT_ID),
+      client.getProjectExternalSystemMappings(KNOWN_PROJECT_ID),
+      client.getExternalObjectReferences(KNOWN_PROJECT_ID),
+      client.getExternalReviewItems(KNOWN_PROJECT_ID),
+      client.getExternalSystemHealthSnapshots(KNOWN_PROJECT_ID),
+      client.getExternalSystemAuditEvents(KNOWN_PROJECT_ID),
+      client.getHbiSourceLineage(KNOWN_PROJECT_ID),
     ]);
-    expect(envelopes).toHaveLength(24);
+    expect(envelopes).toHaveLength(33);
     for (const env of envelopes) {
       expect(env.mode).toBe('fixture');
       expect(env.readOnly).toBe(true);
@@ -995,5 +1017,235 @@ describe('createPccFixtureReadModelClient — getApprovals', () => {
     expect(env.data).toBe(EMPTY_APPROVALS_READ_MODEL);
     expect(env.warnings.length).toBeGreaterThan(0);
     expect(env.warnings[0]!.code).toBe('backend-unavailable');
+  });
+});
+
+// ─── Wave 15 / Prompt 04 — External Systems Launch Pad fixture parity ────────
+
+describe('createPccFixtureReadModelClient — getExternalSystemsLaunchPad', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns the canonical composite for a known project with available status', async () => {
+    const env = await client.getExternalSystemsLaunchPad(KNOWN_PROJECT_ID, SAMPLE_PERSONA);
+    expect(env.mode).toBe('fixture');
+    expect(env.readOnly).toBe(true);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.viewerPersona).toBe(SAMPLE_PERSONA);
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT);
+  });
+
+  it('returns the unknown-project composite with sourceStatus="source-unavailable"', async () => {
+    const env = await client.getExternalSystemsLaunchPad(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT);
+    expect(env.warnings.length).toBeGreaterThan(0);
+    expect(env.warnings[0]!.code).toBe('source-unavailable');
+  });
+
+  it('returns the backend-unavailable composite carrying the canonical degraded-matrix user copy', async () => {
+    const env = await unavailable.getExternalSystemsLaunchPad(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE);
+    expect(env.warnings[0]!.code).toBe('backend-unavailable');
+    expect(env.data.healthSnapshots).toHaveLength(1);
+    expect(env.data.healthSnapshots[0]!.statusMessage).toBe(
+      EXTERNAL_SYSTEM_DEGRADED_STATE_MATRIX['backend-unavailable'].userCopy,
+    );
+  });
+});
+
+describe('createPccFixtureReadModelClient — getExternalSystemRegistry (project-independent)', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns the canonical registry for a known project', async () => {
+    const env = await client.getExternalSystemRegistry(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL);
+  });
+
+  it('returns the canonical registry even for an unknown project', async () => {
+    const env = await client.getExternalSystemRegistry(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL);
+  });
+
+  it('returns the canonical registry under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getExternalSystemRegistry(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getProjectExternalLaunchLinks', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical links for a known project with overridden inner projectId', async () => {
+    const env = await client.getProjectExternalLaunchLinks(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.links).toBe(SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL.links);
+  });
+
+  it('returns empty links for an unknown project', async () => {
+    const env = await client.getProjectExternalLaunchLinks(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.projectId).toBe(UNKNOWN_PROJECT_ID);
+    expect(env.data.links).toEqual([]);
+  });
+
+  it('returns empty links under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getProjectExternalLaunchLinks(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.links).toEqual([]);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getProjectExternalSystemMappings', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical mappings for a known project with overridden inner projectId', async () => {
+    const env = await client.getProjectExternalSystemMappings(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.mappings).toBe(SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL.mappings);
+  });
+
+  it('returns empty mappings for an unknown project', async () => {
+    const env = await client.getProjectExternalSystemMappings(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.mappings).toEqual([]);
+  });
+
+  it('returns empty mappings under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getProjectExternalSystemMappings(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.mappings).toEqual([]);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getExternalObjectReferences', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical references for a known project with overridden inner projectId', async () => {
+    const env = await client.getExternalObjectReferences(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.references).toBe(SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL.references);
+  });
+
+  it('returns empty references for an unknown project', async () => {
+    const env = await client.getExternalObjectReferences(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.references).toEqual([]);
+  });
+
+  it('returns empty references under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getExternalObjectReferences(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.references).toEqual([]);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getExternalReviewItems', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical review items for a known project with overridden inner projectId', async () => {
+    const env = await client.getExternalReviewItems(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.items).toBe(SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL.items);
+  });
+
+  it('returns empty items for an unknown project', async () => {
+    const env = await client.getExternalReviewItems(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.items).toEqual([]);
+  });
+
+  it('returns empty items under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getExternalReviewItems(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.items).toEqual([]);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getExternalSystemHealthSnapshots', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical snapshots for a known project with overridden inner projectId', async () => {
+    const env = await client.getExternalSystemHealthSnapshots(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.snapshots).toBe(
+      SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL.snapshots,
+    );
+  });
+
+  it('returns empty snapshots for an unknown project', async () => {
+    const env = await client.getExternalSystemHealthSnapshots(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.snapshots).toEqual([]);
+  });
+
+  it('returns empty snapshots under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getExternalSystemHealthSnapshots(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.snapshots).toEqual([]);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getExternalSystemAuditEvents', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical events for a known project with overridden inner projectId', async () => {
+    const env = await client.getExternalSystemAuditEvents(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.events).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL.events);
+  });
+
+  it('returns empty events for an unknown project', async () => {
+    const env = await client.getExternalSystemAuditEvents(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.events).toEqual([]);
+  });
+
+  it('returns empty events under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getExternalSystemAuditEvents(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.events).toEqual([]);
+  });
+});
+
+describe('createPccFixtureReadModelClient — getHbiSourceLineage', () => {
+  const client = createPccFixtureReadModelClient();
+  const unavailable = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
+
+  it('returns canonical lineage entries for a known project with overridden inner projectId', async () => {
+    const env = await client.getHbiSourceLineage(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.entries).toBe(SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL.entries);
+  });
+
+  it('returns empty entries for an unknown project', async () => {
+    const env = await client.getHbiSourceLineage(UNKNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.entries).toEqual([]);
+  });
+
+  it('returns empty entries under simulateBackendUnavailable', async () => {
+    const env = await unavailable.getHbiSourceLineage(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.entries).toEqual([]);
   });
 });

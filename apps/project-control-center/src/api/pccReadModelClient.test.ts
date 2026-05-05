@@ -1,5 +1,14 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type {
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
   PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
@@ -39,7 +48,7 @@ describe('IPccReadModelClient route metadata', () => {
     expect(PCC_READ_MODEL_NAMESPACE).toBe('pcc');
   });
 
-  it('enumerates exactly the twenty-four backend route ids', () => {
+  it('enumerates exactly the thirty-three backend route ids', () => {
     expect([...PCC_READ_MODEL_ROUTE_IDS]).toEqual([
       'profile',
       'modules',
@@ -65,6 +74,15 @@ describe('IPccReadModelClient route metadata', () => {
       'cross-project-knowledge',
       'unified-search',
       'approvals',
+      'external-systems-launch-pad',
+      'external-system-registry',
+      'project-external-launch-links',
+      'project-external-system-mappings',
+      'external-object-references',
+      'external-review-items',
+      'external-system-health-snapshots',
+      'external-system-audit-events',
+      'hbi-source-lineage',
     ]);
   });
 
@@ -88,6 +106,50 @@ describe('IPccReadModelClient route metadata', () => {
 
   it('exposes the exact approvals route path template', () => {
     expect(PCC_READ_MODEL_ROUTE_PATHS.approvals).toBe('pcc/projects/{projectId}/approvals');
+  });
+
+  it('orders external-systems-launch-pad immediately after approvals (Wave 15 / Prompt 04 cascade)', () => {
+    const ids: readonly string[] = PCC_READ_MODEL_ROUTE_IDS;
+    const launchPadIndex = ids.indexOf('external-systems-launch-pad');
+    expect(launchPadIndex).toBeGreaterThan(-1);
+    expect(ids[launchPadIndex - 1]).toBe('approvals');
+  });
+
+  it('exposes verbatim Wave 15 External Systems Launch Pad route path templates', () => {
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-systems-launch-pad']).toBe(
+      'pcc/projects/{projectId}/external-systems-launch-pad',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-system-registry']).toBe(
+      'pcc/projects/{projectId}/external-system-registry',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['project-external-launch-links']).toBe(
+      'pcc/projects/{projectId}/project-external-launch-links',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['project-external-system-mappings']).toBe(
+      'pcc/projects/{projectId}/project-external-system-mappings',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-object-references']).toBe(
+      'pcc/projects/{projectId}/external-object-references',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-review-items']).toBe(
+      'pcc/projects/{projectId}/external-review-items',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-system-health-snapshots']).toBe(
+      'pcc/projects/{projectId}/external-system-health-snapshots',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-system-audit-events']).toBe(
+      'pcc/projects/{projectId}/external-system-audit-events',
+    );
+    expect(PCC_READ_MODEL_ROUTE_PATHS['hbi-source-lineage']).toBe(
+      'pcc/projects/{projectId}/hbi-source-lineage',
+    );
+  });
+
+  it('preserves the legacy Wave 1 external-links route id and path verbatim', () => {
+    expect([...PCC_READ_MODEL_ROUTE_IDS]).toContain('external-links');
+    expect(PCC_READ_MODEL_ROUTE_PATHS['external-links']).toBe(
+      'pcc/projects/{projectId}/external-links',
+    );
   });
 
   // Wave 99 / Prompt 04A — guard against drift toward older non-canonical
@@ -193,6 +255,46 @@ describe('IPccReadModelClient interface symmetry', () => {
     expectTypeOf<IPccReadModelClient['getApprovals']>().returns.toEqualTypeOf<
       Promise<PccReadModelEnvelope<PccApprovalsReadModel>>
     >();
+    // Wave 15 / Prompt 04 — External Systems Launch Pad envelope returns.
+    expectTypeOf<IPccReadModelClient['getExternalSystemsLaunchPad']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getExternalSystemRegistry']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccExternalSystemRegistryReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getProjectExternalLaunchLinks']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getProjectExternalSystemMappings']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getExternalObjectReferences']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccExternalObjectReferencesReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getExternalReviewItems']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccExternalReviewItemsReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getExternalSystemHealthSnapshots']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getExternalSystemAuditEvents']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel>>
+    >();
+    expectTypeOf<IPccReadModelClient['getHbiSourceLineage']>().returns.toEqualTypeOf<
+      Promise<PccReadModelEnvelope<IPccHbiSourceLineageReadModel>>
+    >();
+  });
+
+  it('Wave 15 methods accept only [projectId, viewerPersona?] (no extra args)', () => {
+    expectTypeOf<IPccReadModelClient['getExternalSystemsLaunchPad']>().parameters.toEqualTypeOf<
+      [PccProjectId, (PccPersona | undefined)?]
+    >();
+    expectTypeOf<IPccReadModelClient['getHbiSourceLineage']>().parameters.toEqualTypeOf<
+      [PccProjectId, (PccPersona | undefined)?]
+    >();
+    expectTypeOf<
+      IPccReadModelClient['getProjectExternalSystemMappings']
+    >().parameters.toEqualTypeOf<[PccProjectId, (PccPersona | undefined)?]>();
   });
 
   it('getApprovals accepts only [projectId, viewerPersona?] (no extra args)', () => {
@@ -218,7 +320,7 @@ describe('IPccReadModelClient interface symmetry', () => {
 });
 
 describe('PccReadModelRouteId', () => {
-  it('is the union of the twenty-four id literals', () => {
+  it('is the union of the thirty-three id literals', () => {
     const all: PccReadModelRouteId[] = [
       'profile',
       'modules',
@@ -244,6 +346,15 @@ describe('PccReadModelRouteId', () => {
       'cross-project-knowledge',
       'unified-search',
       'approvals',
+      'external-systems-launch-pad',
+      'external-system-registry',
+      'project-external-launch-links',
+      'project-external-system-mappings',
+      'external-object-references',
+      'external-review-items',
+      'external-system-health-snapshots',
+      'external-system-audit-events',
+      'hbi-source-lineage',
     ];
     expect(all.length).toBe(PCC_READ_MODEL_ROUTE_IDS.length);
   });

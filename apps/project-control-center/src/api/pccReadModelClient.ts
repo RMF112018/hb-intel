@@ -14,6 +14,15 @@
  */
 
 import type {
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
   PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
@@ -71,6 +80,19 @@ export const PCC_READ_MODEL_ROUTE_IDS = [
   'unified-search',
   // Wave 14 / Prompt 04 — composite approvals/checkpoints read-model.
   'approvals',
+  // Wave 15 / Prompt 04 — External Systems Launch Pad composite + per-section
+  // route ids. Backend route paths registered by Wave 15 / Prompt 03 use the
+  // same string slugs verbatim, so the SPFx client → backend handshake is
+  // declarative.
+  'external-systems-launch-pad',
+  'external-system-registry',
+  'project-external-launch-links',
+  'project-external-system-mappings',
+  'external-object-references',
+  'external-review-items',
+  'external-system-health-snapshots',
+  'external-system-audit-events',
+  'hbi-source-lineage',
 ] as const;
 
 export type PccReadModelRouteId = (typeof PCC_READ_MODEL_ROUTE_IDS)[number];
@@ -107,6 +129,15 @@ export const PCC_READ_MODEL_ROUTE_PATHS: Readonly<Record<PccReadModelRouteId, st
   'cross-project-knowledge': 'pcc/projects/{projectId}/cross-project-knowledge',
   'unified-search': 'pcc/projects/{projectId}/unified-search',
   approvals: 'pcc/projects/{projectId}/approvals',
+  'external-systems-launch-pad': 'pcc/projects/{projectId}/external-systems-launch-pad',
+  'external-system-registry': 'pcc/projects/{projectId}/external-system-registry',
+  'project-external-launch-links': 'pcc/projects/{projectId}/project-external-launch-links',
+  'project-external-system-mappings': 'pcc/projects/{projectId}/project-external-system-mappings',
+  'external-object-references': 'pcc/projects/{projectId}/external-object-references',
+  'external-review-items': 'pcc/projects/{projectId}/external-review-items',
+  'external-system-health-snapshots': 'pcc/projects/{projectId}/external-system-health-snapshots',
+  'external-system-audit-events': 'pcc/projects/{projectId}/external-system-audit-events',
+  'hbi-source-lineage': 'pcc/projects/{projectId}/hbi-source-lineage',
 };
 
 /**
@@ -267,4 +298,101 @@ export interface IPccReadModelClient {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — External Systems Launch Pad composite. Mirrors
+   * backend route `pcc/projects/{projectId}/external-systems-launch-pad`.
+   * Metadata-only; no live external-system calls; no iframe/current-image
+   * embed behavior. `viewerPersona` is a passthrough only — never
+   * serialized into the URL.
+   */
+  getExternalSystemsLaunchPad(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — Project-independent external system registry.
+   * Mirrors backend route `pcc/projects/{projectId}/external-system-registry`.
+   * The same canonical registry is returned for known and unknown projects;
+   * the envelope `sourceStatus` reflects host posture so consumers can
+   * render degraded surrounding context. `viewerPersona` is a passthrough.
+   */
+  getExternalSystemRegistry(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemRegistryReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — Project external launch links. Mirrors backend
+   * route `pcc/projects/{projectId}/project-external-launch-links`.
+   * `viewerPersona` is a passthrough; never serialized into the URL.
+   */
+  getProjectExternalLaunchLinks(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — Project external system mappings. Mirrors backend
+   * route `pcc/projects/{projectId}/project-external-system-mappings`.
+   * `viewerPersona` is a passthrough; never serialized into the URL.
+   */
+  getProjectExternalSystemMappings(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — External object references. Mirrors backend
+   * route `pcc/projects/{projectId}/external-object-references`.
+   * `viewerPersona` is a passthrough; never serialized into the URL.
+   */
+  getExternalObjectReferences(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalObjectReferencesReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — External review items. Mirrors backend route
+   * `pcc/projects/{projectId}/external-review-items`. Wave 14 retains
+   * ownership of approval/checkpoint semantics; review items reference
+   * Wave 14 approval requests by ID only. `viewerPersona` is a passthrough.
+   */
+  getExternalReviewItems(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalReviewItemsReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — External system health snapshots. Mirrors
+   * backend route `pcc/projects/{projectId}/external-system-health-snapshots`.
+   * `viewerPersona` is a passthrough; never serialized into the URL.
+   */
+  getExternalSystemHealthSnapshots(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — External system audit events. Mirrors backend
+   * route `pcc/projects/{projectId}/external-system-audit-events`.
+   * `viewerPersona` is a passthrough; never serialized into the URL.
+   */
+  getExternalSystemAuditEvents(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel>>;
+
+  /**
+   * Wave 15 / Prompt 04 — HBI source lineage. Mirrors backend route
+   * `pcc/projects/{projectId}/hbi-source-lineage`. HBI no-authority is
+   * preserved by the discriminated `state` union — entries are
+   * citation-ready, refusal, unauthorized, loading, unavailable, or
+   * insufficient-evidence. `viewerPersona` is a passthrough.
+   */
+  getHbiSourceLineage(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccHbiSourceLineageReadModel>>;
 }

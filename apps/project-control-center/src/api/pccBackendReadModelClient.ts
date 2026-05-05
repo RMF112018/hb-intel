@@ -198,8 +198,49 @@ export function createPccBackendReadModelClient(
     // into the URL. The live route does not forward viewerPersona to the
     // backend provider, so a successful backend response will not echo it.
     getApprovals: (projectId, viewerPersona) =>
-      callBackend('approvals', projectId, () =>
-        fallback.getApprovals(projectId, viewerPersona),
+      callBackend('approvals', projectId, () => fallback.getApprovals(projectId, viewerPersona)),
+    // Wave 15 / Prompt 04 — External Systems Launch Pad composite + per-
+    // section getters. Each route flows through the existing callBackend
+    // helper, which constructs `${apiBaseUrl}/${PCC_READ_MODEL_ROUTE_PATHS[id]}`
+    // and uses `{ method: 'GET' }` only. viewerPersona is forwarded to the
+    // fixture fallback for envelope passthrough but is NEVER serialized
+    // into the URL. No iframe/current-image embed behavior, no live
+    // external-system calls.
+    getExternalSystemsLaunchPad: (projectId, viewerPersona) =>
+      callBackend('external-systems-launch-pad', projectId, () =>
+        fallback.getExternalSystemsLaunchPad(projectId, viewerPersona),
+      ),
+    getExternalSystemRegistry: (projectId, viewerPersona) =>
+      callBackend('external-system-registry', projectId, () =>
+        fallback.getExternalSystemRegistry(projectId, viewerPersona),
+      ),
+    getProjectExternalLaunchLinks: (projectId, viewerPersona) =>
+      callBackend('project-external-launch-links', projectId, () =>
+        fallback.getProjectExternalLaunchLinks(projectId, viewerPersona),
+      ),
+    getProjectExternalSystemMappings: (projectId, viewerPersona) =>
+      callBackend('project-external-system-mappings', projectId, () =>
+        fallback.getProjectExternalSystemMappings(projectId, viewerPersona),
+      ),
+    getExternalObjectReferences: (projectId, viewerPersona) =>
+      callBackend('external-object-references', projectId, () =>
+        fallback.getExternalObjectReferences(projectId, viewerPersona),
+      ),
+    getExternalReviewItems: (projectId, viewerPersona) =>
+      callBackend('external-review-items', projectId, () =>
+        fallback.getExternalReviewItems(projectId, viewerPersona),
+      ),
+    getExternalSystemHealthSnapshots: (projectId, viewerPersona) =>
+      callBackend('external-system-health-snapshots', projectId, () =>
+        fallback.getExternalSystemHealthSnapshots(projectId, viewerPersona),
+      ),
+    getExternalSystemAuditEvents: (projectId, viewerPersona) =>
+      callBackend('external-system-audit-events', projectId, () =>
+        fallback.getExternalSystemAuditEvents(projectId, viewerPersona),
+      ),
+    getHbiSourceLineage: (projectId, viewerPersona) =>
+      callBackend('hbi-source-lineage', projectId, () =>
+        fallback.getHbiSourceLineage(projectId, viewerPersona),
       ),
   };
 }
