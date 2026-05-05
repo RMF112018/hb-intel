@@ -254,6 +254,12 @@ describe('mount(...) opt-in', () => {
     // Wave 13 / Prompt 13E — Procore snapshot card adds 1 (15 → 16).
     expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(16);
   });
+
+  it('mount(...) returns a thenable that resolves so the SPFx shell can chain .catch()', async () => {
+    const result = mountPcc(host, undefined, { readModel: { readModelMode: 'fixture' } });
+    expect(typeof (result as Promise<void> | undefined)?.then).toBe('function');
+    await expect(result).resolves.toBeUndefined();
+  });
 });
 
 describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client', () => {

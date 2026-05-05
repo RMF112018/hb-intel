@@ -40,11 +40,11 @@ export interface IPccMountConfig {
  * for forward compatibility with future SPFx host wiring; this scaffold does
  * not call SPFx auth, permissions, Graph/PnP, or any live runtime.
  */
-export function mount(
+export async function mount(
   el: HTMLElement,
   _spfxContext?: unknown,
   _config?: IPccMountConfig,
-): void {
+): Promise<void> {
   if (mountedInstance.hostElement && mountedInstance.hostElement !== el) {
     teardownMountedInstance();
   }
