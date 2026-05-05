@@ -26,6 +26,16 @@ const provider = {
   getCrossProjectKnowledge: vi.fn(),
   getUnifiedSearch: vi.fn(),
   getApprovals: vi.fn(),
+  // Wave 15 / Prompt 03 — External Systems Launch Pad provider methods.
+  getExternalSystemsLaunchPad: vi.fn(),
+  getExternalSystemRegistry: vi.fn(),
+  getProjectExternalLaunchLinks: vi.fn(),
+  getProjectExternalSystemMappings: vi.fn(),
+  getExternalObjectReferences: vi.fn(),
+  getExternalReviewItems: vi.fn(),
+  getExternalSystemHealthSnapshots: vi.fn(),
+  getExternalSystemAuditEvents: vi.fn(),
+  getHbiSourceLineage: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -178,6 +188,52 @@ const EXPECTED_ROUTES: ReadonlyArray<{ name: string; route: string; method: stri
     route: 'pcc/projects/{projectId}/approvals',
     method: 'getApprovals',
   },
+  // Wave 15 / Prompt 03 — External Systems Launch Pad routes.
+  {
+    name: 'getPccExternalSystemsLaunchPad',
+    route: 'pcc/projects/{projectId}/external-systems-launch-pad',
+    method: 'getExternalSystemsLaunchPad',
+  },
+  {
+    name: 'getPccExternalSystemRegistry',
+    route: 'pcc/projects/{projectId}/external-system-registry',
+    method: 'getExternalSystemRegistry',
+  },
+  {
+    name: 'getPccProjectExternalLaunchLinks',
+    route: 'pcc/projects/{projectId}/project-external-launch-links',
+    method: 'getProjectExternalLaunchLinks',
+  },
+  {
+    name: 'getPccProjectExternalSystemMappings',
+    route: 'pcc/projects/{projectId}/project-external-system-mappings',
+    method: 'getProjectExternalSystemMappings',
+  },
+  {
+    name: 'getPccExternalObjectReferences',
+    route: 'pcc/projects/{projectId}/external-object-references',
+    method: 'getExternalObjectReferences',
+  },
+  {
+    name: 'getPccExternalReviewItems',
+    route: 'pcc/projects/{projectId}/external-review-items',
+    method: 'getExternalReviewItems',
+  },
+  {
+    name: 'getPccExternalSystemHealthSnapshots',
+    route: 'pcc/projects/{projectId}/external-system-health-snapshots',
+    method: 'getExternalSystemHealthSnapshots',
+  },
+  {
+    name: 'getPccExternalSystemAuditEvents',
+    route: 'pcc/projects/{projectId}/external-system-audit-events',
+    method: 'getExternalSystemAuditEvents',
+  },
+  {
+    name: 'getPccHbiSourceLineage',
+    route: 'pcc/projects/{projectId}/hbi-source-lineage',
+    method: 'getHbiSourceLineage',
+  },
 ];
 
 function findRegistration(name: string): { name: string; config: any } {
@@ -199,10 +255,48 @@ describe('PCC read-only route registrations', () => {
   });
 
   it('registers exactly the canonical route handlers', () => {
-    expect(registrations).toHaveLength(24);
+    expect(registrations).toHaveLength(33);
     for (const expected of EXPECTED_ROUTES) {
       const reg = findRegistration(expected.name);
       expect(reg.config.route).toBe(expected.route);
+    }
+  });
+
+  it('preserves the Wave 1 external-links route delegating to getExternalLinks', () => {
+    const wave1Path = 'pcc/projects/{projectId}/external-links';
+    const wave1Registrations = registrations.filter((reg) => reg.config.route === wave1Path);
+    expect(wave1Registrations).toHaveLength(1);
+    const wave1 = wave1Registrations[0]!;
+    expect(wave1.name).toBe('getPccProjectExternalLinks');
+    expect(wave1.config.methods).toEqual(['GET']);
+  });
+
+  it('exposes the Wave 15 External Systems Launch Pad routes as single GET-only registrations', () => {
+    const wave15Paths = [
+      'pcc/projects/{projectId}/external-systems-launch-pad',
+      'pcc/projects/{projectId}/external-system-registry',
+      'pcc/projects/{projectId}/project-external-launch-links',
+      'pcc/projects/{projectId}/project-external-system-mappings',
+      'pcc/projects/{projectId}/external-object-references',
+      'pcc/projects/{projectId}/external-review-items',
+      'pcc/projects/{projectId}/external-system-health-snapshots',
+      'pcc/projects/{projectId}/external-system-audit-events',
+      'pcc/projects/{projectId}/hbi-source-lineage',
+    ] as const;
+    const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
+    for (const path of wave15Paths) {
+      const matches = registrations.filter((reg) => reg.config.route === path);
+      expect(matches, `route registered exactly once: ${path}`).toHaveLength(1);
+      expect(matches[0]!.config.methods).toEqual(['GET']);
+      for (const method of writeMethods) {
+        const writeReg = registrations.find(
+          (reg) =>
+            reg.config.route === path &&
+            Array.isArray(reg.config.methods) &&
+            reg.config.methods.includes(method),
+        );
+        expect(writeReg, `no write registration for ${method} ${path}`).toBeUndefined();
+      }
     }
   });
 

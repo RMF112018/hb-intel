@@ -9,6 +9,15 @@
  */
 
 import type {
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
   PccApprovalsReadModel,
   PccBuyoutLogReadModel,
   PccConstraintsLogReadModel,
@@ -150,6 +159,54 @@ export interface IPccReadModelProvider {
     projectId: PccProjectId,
     viewerPersona?: PccPersona,
   ): Promise<PccReadModelEnvelope<PccApprovalsReadModel>>;
+  /**
+   * Wave 15 / External Systems Launch Pad — composite + per-section
+   * read-model getters. All metadata-only; no live external-system calls,
+   * no Graph/PnP/SharePoint/Procore/Sage/AHJ/camera writes, no tenant
+   * mutation. The Wave 1 `getExternalLinks` method above remains the
+   * canonical source for the legacy `external-links` envelope and is
+   * untouched.
+   *
+   * The `viewerPersona` argument is optional and preserved for parity
+   * with the rest of the interface; the route layer never derives it
+   * from the request.
+   */
+  getExternalSystemsLaunchPad(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>>;
+  getExternalSystemRegistry(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemRegistryReadModel>>;
+  getProjectExternalLaunchLinks(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel>>;
+  getProjectExternalSystemMappings(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel>>;
+  getExternalObjectReferences(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalObjectReferencesReadModel>>;
+  getExternalReviewItems(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalReviewItemsReadModel>>;
+  getExternalSystemHealthSnapshots(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel>>;
+  getExternalSystemAuditEvents(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel>>;
+  getHbiSourceLineage(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccHbiSourceLineageReadModel>>;
 }
 
 export interface PccMockReadModelProviderOptions {

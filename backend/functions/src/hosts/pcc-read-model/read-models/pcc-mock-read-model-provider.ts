@@ -45,9 +45,31 @@ import {
   // unknown-project / backend-unavailable branches.
   SAMPLE_APPROVALS_READ_MODEL,
   EMPTY_APPROVALS_READ_MODEL,
+  // Wave 15 / Prompt 03 — External Systems Launch Pad composite + per-
+  // section fixtures. Metadata-only; no live external-system calls.
+  SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   IDocumentControlSource,
+  IPccExternalObjectReferencesReadModel,
+  IPccExternalReviewItemsReadModel,
+  IPccExternalSystemAuditEventsReadModel,
+  IPccExternalSystemHealthSnapshotsReadModel,
+  IPccExternalSystemRegistryReadModel,
+  IPccExternalSystemsLaunchPadReadModel,
+  IPccHbiSourceLineageReadModel,
+  IPccProjectExternalLaunchLinksReadModel,
+  IPccProjectExternalSystemMappingsReadModel,
   IPccSettingsRef,
   IProjectProfile,
   LifecycleReadinessStatus,
@@ -1635,6 +1657,337 @@ export class PccMockReadModelProvider implements IPccReadModelProvider {
       viewerPersona,
       this.statusForKnownProject(projectId),
       data,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  /**
+   * Wave 15 / Prompt 03 — External Systems Launch Pad composite. Three
+   * branches mirror the existing read-model contract:
+   *   - simulateBackendUnavailable → empty composite + canonical
+   *     "Launch Pad data is temporarily unavailable." snapshot;
+   *   - unknown project → unknown-project composite (registry retained,
+   *     per-project arrays empty);
+   *   - known project → SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT.
+   */
+  async getExternalSystemsLaunchPad(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  /**
+   * Wave 15 / Prompt 03 — External system registry. Project-independent;
+   * the same canonical registry is returned for known and unknown project
+   * IDs. The envelope sourceStatus still reflects the host posture so
+   * consumers can render degraded state for the surrounding project
+   * context, but the registry data itself is stable.
+   */
+  async getExternalSystemRegistry(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemRegistryReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getProjectExternalLaunchLinks(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalLaunchLinksReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, links: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, links: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL, projectId },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getProjectExternalSystemMappings(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccProjectExternalSystemMappingsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, mappings: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, mappings: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL, projectId },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getExternalObjectReferences(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalObjectReferencesReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, references: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, references: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL, projectId },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getExternalReviewItems(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalReviewItemsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, items: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, items: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL, projectId },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getExternalSystemHealthSnapshots(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemHealthSnapshotsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, snapshots: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, snapshots: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL, projectId },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getExternalSystemAuditEvents(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccExternalSystemAuditEventsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, events: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, events: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL, projectId },
+      this.warningsForKnownProject(projectId),
+    );
+  }
+
+  async getHbiSourceLineage(
+    projectId: PccProjectId,
+    viewerPersona?: PccPersona,
+  ): Promise<PccReadModelEnvelope<IPccHbiSourceLineageReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'backend-unavailable',
+        { projectId, entries: [] },
+        [
+          {
+            code: 'backend-unavailable',
+            message: 'Mock provider configured to simulate backend-unavailable.',
+          },
+        ],
+      );
+    }
+    if (!this.knownProjects.has(projectId)) {
+      return this.envelope(
+        projectId,
+        viewerPersona,
+        'source-unavailable',
+        { projectId, entries: [] },
+        this.warningsForKnownProject(projectId),
+      );
+    }
+    return this.envelope(
+      projectId,
+      viewerPersona,
+      this.statusForKnownProject(projectId),
+      { ...SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL, projectId },
       this.warningsForKnownProject(projectId),
     );
   }

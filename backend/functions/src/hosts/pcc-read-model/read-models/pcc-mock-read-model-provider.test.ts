@@ -3,11 +3,23 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   EMPTY_APPROVALS_READ_MODEL,
+  EXTERNAL_SYSTEM_DEGRADED_STATE_MATRIX,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_APPROVALS_READ_MODEL,
   SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CROSS_PROJECT_KNOWLEDGE_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
+  SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
   SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
   SAMPLE_PROCORE_SYNC_HEALTH_READ_MODEL,
   SAMPLE_PROJECT_LENSES_READ_MODEL,
@@ -975,8 +987,7 @@ describe('PccMockReadModelProvider source posture (no runtime, no mutation)', ()
 // Wave 14 / Prompt 03 — getApprovals composite read-model behavior
 // ===========================================================================
 
-const UNKNOWN_APPROVALS_PROJECT_ID: PccProjectId =
-  'project-unknown-approvals-001' as PccProjectId;
+const UNKNOWN_APPROVALS_PROJECT_ID: PccProjectId = 'project-unknown-approvals-001' as PccProjectId;
 
 describe('PccMockReadModelProvider.getApprovals — known project, no viewerPersona', () => {
   const provider = new PccMockReadModelProvider();
@@ -1063,5 +1074,241 @@ describe('PccMockReadModelProvider.getApprovals — backend-unavailable simulati
     expect(env.warnings.some((w) => w.code === 'backend-unavailable')).toBe(true);
     expect(env.readOnly).toBe(true);
     expect(env.mode).toBe('mock');
+  });
+});
+
+// ─── Wave 15 / Prompt 03 — External Systems Launch Pad ──────────────────────
+
+const UNKNOWN_WAVE_15_PROJECT_ID: PccProjectId =
+  'project-unknown-wave-15-launch-pad-001' as PccProjectId;
+
+describe('PccMockReadModelProvider.getExternalSystemsLaunchPad', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical composite for a known project with available status', async () => {
+    const env = await provider.getExternalSystemsLaunchPad(KNOWN_PROJECT_ID);
+    expect(env.readOnly).toBe(true);
+    expect(env.mode).toBe('mock');
+    expect(env.sourceStatus).toBe('available');
+    expect(env.warnings).toEqual([]);
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT);
+  });
+
+  it('returns the unknown-project composite with source-unavailable status', async () => {
+    const env = await provider.getExternalSystemsLaunchPad(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT);
+    expect(env.warnings.some((w) => w.code === 'source-unavailable')).toBe(true);
+  });
+
+  it('returns the backend-unavailable composite carrying the canonical degraded-matrix user copy', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getExternalSystemsLaunchPad(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE);
+    expect(env.warnings.some((w) => w.code === 'backend-unavailable')).toBe(true);
+    expect(env.data.healthSnapshots).toHaveLength(1);
+    expect(env.data.healthSnapshots[0]?.statusMessage).toBe(
+      EXTERNAL_SYSTEM_DEGRADED_STATE_MATRIX['backend-unavailable'].userCopy,
+    );
+  });
+});
+
+describe('PccMockReadModelProvider.getExternalSystemRegistry', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical registry for a known project', async () => {
+    const env = await provider.getExternalSystemRegistry(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL);
+    expect(env.warnings).toEqual([]);
+  });
+
+  it('returns the canonical registry even for an unknown project (project-independent)', async () => {
+    const env = await provider.getExternalSystemRegistry(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL);
+    expect(env.warnings.some((w) => w.code === 'source-unavailable')).toBe(true);
+  });
+
+  it('returns the canonical registry with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getExternalSystemRegistry(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_REGISTRY_READ_MODEL);
+    expect(env.warnings.some((w) => w.code === 'backend-unavailable')).toBe(true);
+  });
+});
+
+describe('PccMockReadModelProvider.getProjectExternalLaunchLinks', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical links for a known project with overridden inner projectId', async () => {
+    const env = await provider.getProjectExternalLaunchLinks(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.links).toBe(SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL.links);
+  });
+
+  it('returns empty links for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getProjectExternalLaunchLinks(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.projectId).toBe(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.data.links).toEqual([]);
+  });
+
+  it('returns empty links with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getProjectExternalLaunchLinks(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.links).toEqual([]);
+  });
+});
+
+describe('PccMockReadModelProvider.getProjectExternalSystemMappings', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical mappings for a known project with overridden inner projectId', async () => {
+    const env = await provider.getProjectExternalSystemMappings(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.mappings).toBe(SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL.mappings);
+  });
+
+  it('returns empty mappings for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getProjectExternalSystemMappings(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.projectId).toBe(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.data.mappings).toEqual([]);
+  });
+
+  it('returns empty mappings with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getProjectExternalSystemMappings(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.mappings).toEqual([]);
+  });
+});
+
+describe('PccMockReadModelProvider.getExternalObjectReferences', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical references for a known project with overridden inner projectId', async () => {
+    const env = await provider.getExternalObjectReferences(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.references).toBe(SAMPLE_PCC_EXTERNAL_OBJECT_REFERENCES_READ_MODEL.references);
+  });
+
+  it('returns empty references for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getExternalObjectReferences(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.references).toEqual([]);
+  });
+
+  it('returns empty references with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getExternalObjectReferences(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.references).toEqual([]);
+  });
+});
+
+describe('PccMockReadModelProvider.getExternalReviewItems', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical review items for a known project with overridden inner projectId', async () => {
+    const env = await provider.getExternalReviewItems(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.items).toBe(SAMPLE_PCC_EXTERNAL_REVIEW_ITEMS_READ_MODEL.items);
+  });
+
+  it('returns empty items for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getExternalReviewItems(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.items).toEqual([]);
+  });
+
+  it('returns empty items with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getExternalReviewItems(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.items).toEqual([]);
+  });
+});
+
+describe('PccMockReadModelProvider.getExternalSystemHealthSnapshots', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical snapshots for a known project with overridden inner projectId', async () => {
+    const env = await provider.getExternalSystemHealthSnapshots(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.snapshots).toBe(
+      SAMPLE_PCC_EXTERNAL_SYSTEM_HEALTH_SNAPSHOTS_READ_MODEL.snapshots,
+    );
+  });
+
+  it('returns empty snapshots for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getExternalSystemHealthSnapshots(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.snapshots).toEqual([]);
+  });
+
+  it('returns empty snapshots with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getExternalSystemHealthSnapshots(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.snapshots).toEqual([]);
+  });
+});
+
+describe('PccMockReadModelProvider.getExternalSystemAuditEvents', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical events for a known project with overridden inner projectId', async () => {
+    const env = await provider.getExternalSystemAuditEvents(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.events).toBe(SAMPLE_PCC_EXTERNAL_SYSTEM_AUDIT_EVENTS_READ_MODEL.events);
+  });
+
+  it('returns empty events for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getExternalSystemAuditEvents(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.events).toEqual([]);
+  });
+
+  it('returns empty events with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getExternalSystemAuditEvents(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.events).toEqual([]);
+  });
+});
+
+describe('PccMockReadModelProvider.getHbiSourceLineage', () => {
+  const provider = new PccMockReadModelProvider();
+
+  it('returns the canonical lineage entries for a known project with overridden inner projectId', async () => {
+    const env = await provider.getHbiSourceLineage(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('available');
+    expect(env.data.projectId).toBe(KNOWN_PROJECT_ID);
+    expect(env.data.entries).toBe(SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL.entries);
+  });
+
+  it('returns empty entries for an unknown project with source-unavailable status', async () => {
+    const env = await provider.getHbiSourceLineage(UNKNOWN_WAVE_15_PROJECT_ID);
+    expect(env.sourceStatus).toBe('source-unavailable');
+    expect(env.data.entries).toEqual([]);
+  });
+
+  it('returns empty entries with backend-unavailable status under simulation', async () => {
+    const offline = new PccMockReadModelProvider({ simulateBackendUnavailable: true });
+    const env = await offline.getHbiSourceLineage(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.entries).toEqual([]);
   });
 });

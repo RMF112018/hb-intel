@@ -183,3 +183,62 @@ registerPccReadRoute(
   'pcc/projects/{projectId}/approvals',
   async (projectId) => provider.getApprovals(projectId),
 );
+
+// Wave 15 / Prompt 03 — External Systems Launch Pad GET-only routes.
+// All metadata-only; no live external-system calls, no Graph/PnP/
+// SharePoint/Procore/Sage/AHJ/camera writes, no tenant mutation. The
+// Wave 1 `getPccProjectExternalLinks` route above remains the canonical
+// source for the legacy `external-links` envelope and is unchanged.
+registerPccReadRoute(
+  'getPccExternalSystemsLaunchPad',
+  'pcc/projects/{projectId}/external-systems-launch-pad',
+  async (projectId) => provider.getExternalSystemsLaunchPad(projectId),
+);
+
+registerPccReadRoute(
+  'getPccExternalSystemRegistry',
+  'pcc/projects/{projectId}/external-system-registry',
+  async (projectId) => provider.getExternalSystemRegistry(projectId),
+);
+
+registerPccReadRoute(
+  'getPccProjectExternalLaunchLinks',
+  'pcc/projects/{projectId}/project-external-launch-links',
+  async (projectId) => provider.getProjectExternalLaunchLinks(projectId),
+);
+
+registerPccReadRoute(
+  'getPccProjectExternalSystemMappings',
+  'pcc/projects/{projectId}/project-external-system-mappings',
+  async (projectId) => provider.getProjectExternalSystemMappings(projectId),
+);
+
+registerPccReadRoute(
+  'getPccExternalObjectReferences',
+  'pcc/projects/{projectId}/external-object-references',
+  async (projectId) => provider.getExternalObjectReferences(projectId),
+);
+
+registerPccReadRoute(
+  'getPccExternalReviewItems',
+  'pcc/projects/{projectId}/external-review-items',
+  async (projectId) => provider.getExternalReviewItems(projectId),
+);
+
+registerPccReadRoute(
+  'getPccExternalSystemHealthSnapshots',
+  'pcc/projects/{projectId}/external-system-health-snapshots',
+  async (projectId) => provider.getExternalSystemHealthSnapshots(projectId),
+);
+
+registerPccReadRoute(
+  'getPccExternalSystemAuditEvents',
+  'pcc/projects/{projectId}/external-system-audit-events',
+  async (projectId) => provider.getExternalSystemAuditEvents(projectId),
+);
+
+registerPccReadRoute(
+  'getPccHbiSourceLineage',
+  'pcc/projects/{projectId}/hbi-source-lineage',
+  async (projectId) => provider.getHbiSourceLineage(projectId),
+);
