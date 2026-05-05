@@ -1,17 +1,77 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+/**
+ * Wave 15 / Prompt 05 — PCC External Systems Launch Pad surface tests.
+ *
+ * Replaces the Wave 1 / Wave 13 fixture-tile tests. Surface identity
+ * `external-systems` is preserved. Tests assert:
+ *
+ *   - render from the composite read-model fixture envelope (header,
+ *     summary, project links, Procore status card as direct grid
+ *     children of `[data-pcc-bento-grid]`);
+ *   - exactly one `[data-pcc-active-surface-panel="external-systems"]`;
+ *   - bento direct-child invariant via `marker.closest('[data-pcc-card]')`
+ *     then `card.parentElement.matches('[data-pcc-bento-grid]')`;
+ *   - sourceStatus → cardState mapping (`available` → ready,
+ *     `backend-unavailable` → degraded, `source-unavailable` → empty);
+ *   - per-link approval-state and URL-policy markers on each row;
+ *   - blocked-by-policy / unapproved links carry visible reason text;
+ *   - approved + policy-allowed links still render an inert/disabled
+ *     launch affordance — never an executable external anchor;
+ *   - no `<a href="http(s)://...">` anchors render anywhere on the
+ *     surface (no active launch behavior in this prompt);
+ *   - no `<iframe>` / current-image embeds render;
+ *   - source-scan: surface code does not import live SDKs.
+ *
+ * These tests do not import or exercise `PccSurfaceRouter` (the
+ * router-pass-through invariant has its own dedicated test file).
+ */
+
+import { describe, expect, it } from 'vitest';
+import { render, waitFor } from '@testing-library/react';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
-  EXTERNAL_SYSTEM_CATALOG,
-  EXTERNAL_SYSTEM_IDS,
   PCC_MVP_SURFACES,
-  SAMPLE_EXTERNAL_SYSTEM_LINKS,
-  SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
-  type ExternalSystemId,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
+  SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PROJECT_PROFILE,
+  type IPccExternalSystemsLaunchPadReadModel,
+  type PccProjectId,
+  type PccReadModelEnvelope,
+  type PccReadModelSourceStatus,
 } from '@hbc/models/pcc';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
+import type { IPccLaunchPadReadModelClient } from '../surfaces/externalSystems/launchPadViewModel';
 
-function renderSurface() {
+const KNOWN_PROJECT_ID: PccProjectId = SAMPLE_PROJECT_PROFILE.projectId;
+const UNKNOWN_PROJECT_ID = 'fixture-pcc-project-unknown-999' as PccProjectId;
+
+function buildEnvelope(
+  data: IPccExternalSystemsLaunchPadReadModel,
+  sourceStatus: PccReadModelSourceStatus,
+  projectId: PccProjectId,
+): PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel> {
+  return {
+    projectId,
+    mode: 'fixture',
+    sourceStatus,
+    readOnly: true,
+    warnings: [],
+    generatedAtUtc: '2026-04-30T00:00:00.000Z',
+    data,
+  };
+}
+
+function syncClient(
+  envelope: PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>,
+): IPccLaunchPadReadModelClient {
+  return {
+    getExternalSystemsLaunchPad: () => Promise.resolve(envelope),
+  };
+}
+
+function renderSurface(): ReturnType<typeof render> {
   return render(
     <PccBentoGrid forceMode="wideDesktop">
       <PccExternalSystemsSurface />
@@ -19,52 +79,187 @@ function renderSurface() {
   );
 }
 
-function expectedState(id: ExternalSystemId): 'configured' | 'missing' | 'unavailable-fixture' {
-  if (SAMPLE_EXTERNAL_SYSTEM_LINKS.some((l) => l.systemId === id)) return 'configured';
-  if (SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS.some((m) => m.systemId === id)) return 'missing';
-  return 'unavailable-fixture';
-}
-
-describe('PccExternalSystemsSurface (Wave 2 / Prompt 06)', () => {
-  it('renders the header + one tile per EXTERNAL_SYSTEM_CATALOG entry + Procore configuration & status card as direct grid children (Wave 13 / Prompt 13E)', () => {
+describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallback path)', () => {
+  it('renders header + summary + project-links + Procore status as direct bento-grid children', () => {
     const { container } = renderSurface();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(1 + Object.keys(EXTERNAL_SYSTEM_CATALOG).length + 1);
+    expect(cards.length).toBe(4);
     for (const card of cards) {
-      expect(card.parentElement === grid).toBe(true);
+      expect(card.parentElement).toBe(grid);
     }
   });
 
-  it('exactly one [data-pcc-active-surface-panel="external-systems"] exists', () => {
+  it('renders exactly one [data-pcc-active-surface-panel="external-systems"] carrying the registry display name', () => {
     const { container } = renderSurface();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('external-systems');
-    expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['external-systems'].displayName);
-    expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['external-systems'].description);
+    expect(panels.length).toBe(1);
+    expect(panels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe('external-systems');
+    expect(panels[0]?.textContent).toContain(PCC_MVP_SURFACES['external-systems'].displayName);
   });
 
-  it('every system has a tile carrying tri-state markers and the canonical displayName', () => {
+  it('renders one link row per fixture launch link with approval-state, policy-state, hostname markers', () => {
     const { container } = renderSurface();
-    for (const id of EXTERNAL_SYSTEM_IDS) {
-      const tile = container.querySelector(`[data-pcc-external-system-id="${id}"]`);
-      expect(tile, `tile for system '${id}' should render`).not.toBeNull();
-      const state = tile!.getAttribute('data-pcc-external-system-state');
-      expect(['configured', 'missing', 'unavailable-fixture']).toContain(state);
-      expect(state).toBe(expectedState(id));
-      const enclosingCard = tile!.closest('[data-pcc-card]');
-      expect(enclosingCard?.textContent).toContain(EXTERNAL_SYSTEM_CATALOG[id].displayName);
+    const rows = container.querySelectorAll('[data-pcc-launch-pad-link]');
+    expect(rows.length).toBe(
+      SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT.projectLaunchLinks.length,
+    );
+    for (const row of rows) {
+      expect(row.getAttribute('data-pcc-launch-pad-link-approval-state')).not.toBeNull();
+      expect(row.getAttribute('data-pcc-launch-pad-link-policy-state')).not.toBeNull();
+      expect(row.querySelector('[data-pcc-launch-pad-link-hostname]')).not.toBeNull();
     }
   });
 
-  it('renders no <a href="http(s)://"> elements anywhere on the surface', () => {
+  it('every row exposes a disabled launch affordance with a visible reason caption — never an executable anchor', () => {
+    const { container } = renderSurface();
+    const rows = container.querySelectorAll('[data-pcc-launch-pad-link]');
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const action = row.querySelector(
+        '[data-pcc-launch-pad-link-action="open"]',
+      ) as HTMLButtonElement | null;
+      expect(action).not.toBeNull();
+      expect(action!.tagName.toLowerCase()).toBe('button');
+      expect(action!.disabled).toBe(true);
+      expect(action!.getAttribute('aria-disabled')).toBe('true');
+      expect(action!.getAttribute('href')).toBeNull();
+      const reason = row.querySelector(`[data-pcc-launch-pad-link-disabled-reason]`);
+      expect(reason).not.toBeNull();
+      expect((reason!.textContent ?? '').trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it('approved + policy-allowed link still renders inert/disabled affordance (no executable anchor)', () => {
+    const { container } = renderSurface();
+    const allowedRow = container.querySelector('[data-pcc-launch-pad-link-allowed="true"]');
+    expect(allowedRow).not.toBeNull();
+    expect(allowedRow!.getAttribute('data-pcc-launch-pad-link-approval-state')).toBe('approved');
+    expect(allowedRow!.getAttribute('data-pcc-launch-pad-link-policy-state')).toBe('allowed');
+    const action = allowedRow!.querySelector(
+      '[data-pcc-launch-pad-link-action="open"]',
+    ) as HTMLButtonElement | null;
+    expect(action).not.toBeNull();
+    expect(action!.disabled).toBe(true);
+    expect(action!.tagName.toLowerCase()).toBe('button');
+    expect(allowedRow!.querySelectorAll('a[href]').length).toBe(0);
+  });
+
+  it('blocked-by-policy link surfaces an explanatory disabled-reason caption', () => {
+    const { container } = renderSurface();
+    const blockedRow = container.querySelector(
+      '[data-pcc-launch-pad-link-approval-state="blocked-by-policy"]',
+    );
+    expect(blockedRow).not.toBeNull();
+    const reason = blockedRow!.querySelector('[data-pcc-launch-pad-link-disabled-reason]');
+    expect(reason).not.toBeNull();
+    const text = (reason!.textContent ?? '').toLowerCase();
+    expect(text.length).toBeGreaterThan(0);
+    expect(text).toMatch(/host|policy|approved|allowed/);
+  });
+
+  it('renders no <a href="http(s)://"> anchors anywhere on the surface (no active launch behavior in this prompt)', () => {
     const { container } = renderSurface();
     const anchors = container.querySelectorAll('a[href]');
     for (const a of anchors) {
       const href = a.getAttribute('href') ?? '';
       expect(href).not.toMatch(/^https?:\/\//);
+    }
+  });
+
+  it('renders no <iframe> elements anywhere on the surface', () => {
+    const { container } = renderSurface();
+    expect(container.querySelectorAll('iframe').length).toBe(0);
+  });
+
+  it('Procore configuration & status card is preserved as a direct grid sibling', () => {
+    const { container } = renderSurface();
+    const procore = container.querySelector('[data-pcc-card-id="procore-configuration-status"]');
+    expect(procore).not.toBeNull();
+    const enclosingCard = procore!.closest('[data-pcc-card]');
+    expect(enclosingCard).not.toBeNull();
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(enclosingCard!.parentElement).toBe(grid);
+  });
+});
+
+describe('PccExternalSystemsSurface — sourceStatus → state UI', () => {
+  function renderWithEnvelope(
+    envelope: PccReadModelEnvelope<IPccExternalSystemsLaunchPadReadModel>,
+  ): ReturnType<typeof render> {
+    const client = syncClient(envelope);
+    return render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccExternalSystemsSurface readModelClient={client} projectId={envelope.projectId} />
+      </PccBentoGrid>,
+    );
+  }
+
+  async function waitForReady(container: HTMLElement): Promise<void> {
+    await waitFor(() => {
+      const panel = container.querySelector('[data-pcc-active-surface-panel="external-systems"]');
+      expect(panel).not.toBeNull();
+      // Active-surface panel renders for loading + error + ready states; wait
+      // until the panel body is no longer the loading preview spec.
+      const loadingBadge = panel!.querySelector('[data-pcc-state="loading"]');
+      expect(loadingBadge).toBeNull();
+    });
+  }
+
+  it('source-unavailable (unknown project) renders empty project-links state and zero link rows', async () => {
+    const envelope = buildEnvelope(
+      SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+      'source-unavailable',
+      UNKNOWN_PROJECT_ID,
+    );
+    const { container } = renderWithEnvelope(envelope);
+    await waitForReady(container);
+    const rows = container.querySelectorAll('[data-pcc-launch-pad-link]');
+    expect(rows.length).toBe(0);
+  });
+
+  it('backend-unavailable renders degraded preview state (no project-links rows)', async () => {
+    const envelope = buildEnvelope(
+      SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
+      'backend-unavailable',
+      KNOWN_PROJECT_ID,
+    );
+    const { container } = renderWithEnvelope(envelope);
+    await waitForReady(container);
+    const rows = container.querySelectorAll('[data-pcc-launch-pad-link]');
+    expect(rows.length).toBe(0);
+  });
+});
+
+describe('PccExternalSystemsSurface — surface module source-scan', () => {
+  it('does not import live external SDKs / auth runtime / Procore / Sage / Graph / PnP', () => {
+    const dir = path.resolve(__dirname, '../surfaces/externalSystems');
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.ts') || f.endsWith('.tsx'));
+    expect(files.length).toBeGreaterThan(0);
+    const forbiddenImportSpecifiers = [
+      '@hbc/auth/spfx',
+      '@pnp/sp',
+      '@pnp/graph',
+      '@microsoft/microsoft-graph-client',
+      '@microsoft/sp-http',
+      'procore-sdk',
+      'sage-intacct-sdk',
+    ];
+    const importPattern = /(?:from\s+['"]([^'"]+)['"]|require\(\s*['"]([^'"]+)['"]\s*\))/g;
+    for (const file of files) {
+      const source = fs.readFileSync(path.join(dir, file), 'utf8');
+      // strip block + line comments to avoid scanning prose
+      const stripped = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+      for (const match of stripped.matchAll(importPattern)) {
+        const spec = match[1] ?? match[2] ?? '';
+        for (const forbidden of forbiddenImportSpecifiers) {
+          expect(spec, `${file} imports forbidden specifier ${forbidden}`).not.toBe(forbidden);
+          expect(spec, `${file} imports forbidden specifier ${forbidden}`).not.toMatch(
+            new RegExp(`^${forbidden.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`),
+          );
+        }
+      }
     }
   });
 });

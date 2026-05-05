@@ -10,6 +10,18 @@
   gap: var(--pcc-space-xs);
   font-size: 12px;
   color: var(--pcc-color-text-muted);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.metricRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .title {
@@ -23,6 +35,7 @@
   font-size: 13px;
   line-height: 1.5;
   color: var(--pcc-color-text-primary);
+  margin: 0;
 }
 
 .previewCue {
@@ -34,4 +47,106 @@
 .message {
   font-size: 12px;
   color: var(--pcc-color-text-primary);
+}
+
+.linkGroupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+}
+
+.linkGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.linkGroupTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pcc-color-text-muted);
+  margin: 0;
+}
+
+.linkRowList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.linkRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--pcc-space-xs);
+  border: 1px solid var(--pcc-color-border-subtle, rgba(0, 0, 0, 0.08));
+  border-radius: 6px;
+  background: var(--pcc-color-surface-muted, transparent);
+}
+
+.linkRowTitleRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pcc-space-xs);
+  flex-wrap: wrap;
+}
+
+.linkRowTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.linkRowProvider {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.linkRowMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  align-items: center;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.linkRowMetaItem {
+  white-space: nowrap;
+}
+
+.linkRowActionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  align-items: center;
+  margin-top: 4px;
+}
+
+.linkRowAction {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--pcc-color-border-subtle, rgba(0, 0, 0, 0.16));
+  background: transparent;
+  color: var(--pcc-color-text-muted);
+  cursor: not-allowed;
+}
+
+.linkRowAction[disabled] {
+  opacity: 0.65;
+}
+
+.linkRowReason {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
 }

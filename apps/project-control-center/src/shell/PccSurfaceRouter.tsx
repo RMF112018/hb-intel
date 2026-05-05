@@ -19,6 +19,7 @@ import type { IPccResponsibilityMatrixReadModelClient } from '../surfaces/respon
 import type { IPccConstraintsLogReadModelClient } from '../surfaces/constraintsLog/constraintsLogViewModel';
 import type { IPccBuyoutLogReadModelClient } from '../surfaces/buyoutLog/buyoutLogViewModel';
 import type { IPccApprovalsReadModelClient } from '../surfaces/approvals/approvalsViewModel';
+import type { IPccLaunchPadReadModelClient } from '../surfaces/externalSystems/launchPadViewModel';
 
 /**
  * Combined narrow read-model client surface for the router. Lists the
@@ -26,9 +27,10 @@ import type { IPccApprovalsReadModelClient } from '../surfaces/approvals/approva
  * Home, Team & Access, Documents, Project Readiness — the latter also
  * hosts Wave 9 Lifecycle, Wave 10 Permit & Inspection, Wave 11
  * Responsibility Matrix, Wave 12 Constraints Log, and Wave 13 Buyout Log
- * regions — and the Wave 14 Approvals / Checkpoints surface). The full
- * `IPccReadModelClient` returned by `createPccReadModelClient` flows in
- * via TypeScript structural typing.
+ * regions — the Wave 14 Approvals / Checkpoints surface, and the Wave 15
+ * External Systems Launch Pad surface). The full `IPccReadModelClient`
+ * returned by `createPccReadModelClient` flows in via TypeScript
+ * structural typing.
  */
 export interface IPccSurfaceRouterReadModelClient
   extends
@@ -40,7 +42,8 @@ export interface IPccSurfaceRouterReadModelClient
     IPccResponsibilityMatrixReadModelClient,
     IPccConstraintsLogReadModelClient,
     IPccBuyoutLogReadModelClient,
-    IPccApprovalsReadModelClient {}
+    IPccApprovalsReadModelClient,
+    IPccLaunchPadReadModelClient {}
 
 export interface PccSurfaceRouterProps {
   activeSurfaceId: PccMvpSurfaceId;
@@ -84,7 +87,7 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
     case 'approvals':
       return <PccApprovalsSurface readModelClient={readModelClient} />;
     case 'external-systems':
-      return <PccExternalSystemsSurface />;
+      return <PccExternalSystemsSurface readModelClient={readModelClient} />;
     case 'control-center-settings':
       return <PccControlCenterSettingsSurface />;
     case 'site-health':
