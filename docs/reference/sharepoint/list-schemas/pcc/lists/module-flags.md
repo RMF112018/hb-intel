@@ -1,12 +1,14 @@
 # PCC Module Flags
 
 ## 1. Objective
+
 - Planned PCC schema/reference file for `PCC Module Flags`.
 - Category: `Workflow / Business Audit / Configuration`.
-- Storage posture: `Global / HBCentral; project overrides where needed`.
+- Storage posture: `Global / HBCentral defaults; project overrides are stored in Wave 16 control-center-setting-overrides`.
 - Classification posture: `model-derived-required`.
 
 ## 2. List-Level Metadata
+
 - List ID: ``
 - Entity Type Name: ``
 - URL: ``
@@ -14,7 +16,7 @@
 - Root Folder URL: ``
 - Base Template / Base Type: `100` / `0`
 - Classification: `model-derived-required`
-- Description: `Workflow / Business Audit / Configuration / Global / HBCentral; project overrides where needed`
+- Description: `Workflow / Business Audit / Configuration / Global / HBCentral defaults; project overrides are stored in Wave 16 control-center-setting-overrides`
 - Hidden: `false`
 - Item Count: ``
 - Content Types Enabled: ``
@@ -24,20 +26,21 @@
 
 ## 3. Field Schema
 
-| Display Name | Internal Name | Type | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes |
-|---|---|---|---|---|---|---|---|
-| Title | Title | Text | Yes | No | No | No | MaxLength=255 |
-| Module Flag ID | ModuleFlagId | Text | Yes | No | No | Yes | Indexed for query/view performance |
-| Module ID | ModuleId | Text | Yes | No | No | Yes | Indexed for query/view performance |
-| Posture | Posture | Choice | Yes | No | No | No |  |
-| Default Enabled | DefaultEnabled | Text | Yes | No | No | No | MaxLength=255 |
-| Is Enabled | IsEnabled | Boolean | Yes | No | No | No |  |
-| Project ID | ProjectId | Text | Yes | No | No | Yes | Indexed for query/view performance |
-| Notes | Notes | Note | No | No | No | No | RichText=false; Lines=6 |
-| Environment Key | EnvironmentKey | Text | Yes | No | No | Yes | Indexed for query/view performance |
-| Scope Key | ScopeKey | Choice | Yes | No | No | Yes | Indexed for query/view performance |
+| Display Name    | Internal Name  | Type    | Required | Hidden | Read Only | Indexed | Lookup / Choices / Formula / Notes                                             |
+| --------------- | -------------- | ------- | -------- | ------ | --------- | ------- | ------------------------------------------------------------------------------ |
+| Title           | Title          | Text    | Yes      | No     | No        | No      | MaxLength=255                                                                  |
+| Module Flag ID  | ModuleFlagId   | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
+| Module ID       | ModuleId       | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
+| Posture         | Posture        | Choice  | Yes      | No     | No        | No      |                                                                                |
+| Default Enabled | DefaultEnabled | Boolean | Yes      | No     | No        | No      | Global default state; project/module overrides live in Wave 16 settings lists. |
+| Is Enabled      | IsEnabled      | Boolean | Yes      | No     | No        | No      |                                                                                |
+| Project ID      | ProjectId      | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
+| Notes           | Notes          | Note    | No       | No     | No        | No      | RichText=false; Lines=6                                                        |
+| Environment Key | EnvironmentKey | Text    | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
+| Scope Key       | ScopeKey       | Choice  | Yes      | No     | No        | Yes     | Indexed for query/view performance                                             |
 
 ## 4. Content Types / Forms / Behavioral Context
+
 - Associated Content Types: ``
 - Default New Form: ``
 - Default Edit Form: ``
@@ -46,9 +49,11 @@
 - Observed Role Hint: `configuration / enablement registry`
 
 ## 5. Relationship Observations
+
 - Project-scoped records join to the PCC Project Profile / HBCentral Projects source through `ProjectId`.
 
 ## 6. Implementation-Relevant Findings
+
 - Non-hidden editable fields: `10`
 - Hidden fields: `0`
 - Non-hidden lookup fields: `0`
@@ -59,6 +64,7 @@
 - Default operational views should filter first on indexed fields such as `ProjectId`, active/status/state fields, module/system keys, or due-date fields.
 
 ## 7. Open Questions / Follow-Up Checks
+
 - Confirm final list URL, list GUID, entity type name, and form URLs after provisioning.
 - Confirm whether this list should use a shared PCC content type or a list-local item content type.
 - Confirm field IDs and site-column reuse before generating Graph/PnP provisioning assets.
