@@ -57,6 +57,22 @@ const ALLOWED_EXPORTED_FUNCTIONS: readonly string[] = [
   'buildProcoreObjectLinkDedupeKey',
   'mapProcoreSourceStatusToPccPreviewState',
   'redactProcoreSyncErrorMessage',
+  // Wave 14 Prompt 02 — pure approval-state, decision-shape, role-action,
+  // HBI-refusal, redaction, stale-source, and legacy-bridge helpers. All
+  // functions are deterministic, side-effect-free, read-only-by-design,
+  // and operate on Wave 14 contract types.
+  'isTerminalApprovalRequestState',
+  'isApprovalRequestTransitionAllowed',
+  'isActionAllowedForRole',
+  'validateDecisionShape',
+  'isSupersededRequest',
+  'requiresEvidenceForAction',
+  'isHbiPrincipalKey',
+  'assertNoHbiAuthorityOnDecision',
+  'redactionContextPreservedFor',
+  'isStaleSourceReference',
+  'mapLegacyCheckpointToInstance',
+  'legacyCheckpointKind',
 ];
 
 function listSourceFiles(dir: string, acc: string[] = []): string[] {
