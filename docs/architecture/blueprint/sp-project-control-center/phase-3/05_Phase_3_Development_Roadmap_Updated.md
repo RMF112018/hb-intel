@@ -287,3 +287,25 @@ Prompt 04 alignment lock:
 - Wave 13G remains estimating feature/UX authority while checkpointed seams route through Phase 14 semantics.
 - HBI has citation/summarization rights only and no pricing/approval/waiver/override/award authority.
 - No Procore/Sage/Power Automate writeback and no tenant mutation are authorized by this addendum.
+
+## Wave 15 External Systems Launch Pad Architecture Addendum (2026-05-05)
+
+Wave 15 architecture authority path is `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/`.
+
+Prompt-03 roadmap lock:
+
+- Final user-facing feature definition is `External Systems Launch Pad`.
+- Internal module/domain posture is `External Systems`.
+- System-of-record and source-lineage posture is documented in Wave 15 architecture narrative and cross-referenced to the canonical `System_of_Record_Matrix.md`.
+- `launcher_type_registry.json` is launch-type taxonomy only and is not a complete external-system registry or SOR catalog.
+- `external_system_degraded_state_matrix.json` may be used as architecture-level boundary only and does not represent full UX/degraded-state implementation guidance.
+
+Dependency and handoff lock:
+
+- Wave 13 Procore data-layer alignment remains required.
+- Wave 14 mapping-correction/checkpoint queue/routing/decision/audit semantics remain authoritative.
+
+Execution guardrails:
+
+- This addendum is docs-governance only.
+- No runtime/source mutation, no manifest/package/lockfile mutation, no tenant mutation, and no live integration execution are authorized.

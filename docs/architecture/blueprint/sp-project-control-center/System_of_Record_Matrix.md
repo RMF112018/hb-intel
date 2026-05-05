@@ -241,3 +241,28 @@ Wave relationship lock:
 
 - Wave 13G remains Estimating Workbench feature authority.
 - Phase 14 governs estimating-related checkpoint queue/routing/decision/audit semantics.
+
+## Wave 15 External Systems Launch Pad Addendum (2026-05-05)
+
+Wave 15 authority path is `docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15/`.
+
+Prompt-03 architecture lock:
+
+- User-facing feature is `External Systems Launch Pad`.
+- Internal module/domain posture is `External Systems`.
+- SOR/source-lineage posture is defined in Wave 15 architecture narrative docs, not solely in JSON artifacts.
+- `launcher_type_registry.json` is a launch-type taxonomy contract only and is not the complete external-system registry or SOR catalog.
+- `external_system_degraded_state_matrix.json` (when referenced) is architecture-level behavior boundary only and is not full UX/degraded-state implementation guidance.
+
+Doctrine lock:
+
+- No-writeback.
+- No-sync.
+- No-mirror.
+- No tenant/list/group/security mutation is authorized by this addendum.
+- No live external-system integration execution is authorized by this addendum.
+
+Wave alignment lock:
+
+- Wave 13 Procore dependency posture remains authoritative for Procore data-layer boundaries.
+- Wave 14 remains the mapping-correction/checkpoint route-step/decision/audit authority layer.

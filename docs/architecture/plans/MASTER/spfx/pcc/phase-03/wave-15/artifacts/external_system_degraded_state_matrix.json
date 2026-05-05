@@ -1,0 +1,74 @@
+[
+  {
+    "state": "available",
+    "userCopy": "Available",
+    "developerBehavior": "Render normal state",
+    "retryPosture": "none",
+    "priorityAction": "none",
+    "hbiBehavior": "May summarize with citations"
+  },
+  {
+    "state": "backend-unavailable",
+    "userCopy": "Launch Pad data is temporarily unavailable.",
+    "developerBehavior": "Show fallback/empty state; no SPFx retry loop",
+    "retryPosture": "manual refresh only in SPFx",
+    "priorityAction": "none unless persistent",
+    "hbiBehavior": "Refuse source-grounded claims"
+  },
+  {
+    "state": "source-unavailable",
+    "userCopy": "Source system is unavailable or not reachable.",
+    "developerBehavior": "Show source-specific warning",
+    "retryPosture": "future backend honors Retry-After/backoff",
+    "priorityAction": "create if required system unresolved",
+    "hbiBehavior": "May explain status with citations only"
+  },
+  {
+    "state": "missing-config",
+    "userCopy": "Configuration is missing.",
+    "developerBehavior": "Show owner and correction path",
+    "retryPosture": "none",
+    "priorityAction": "create mapping/config action",
+    "hbiBehavior": "May summarize missing config"
+  },
+  {
+    "state": "stale",
+    "userCopy": "Mapping or source status requires revalidation.",
+    "developerBehavior": "Block terminal confirmation until revalidated",
+    "retryPosture": "none",
+    "priorityAction": "create stale mapping action",
+    "hbiBehavior": "May explain stale reason"
+  },
+  {
+    "state": "unauthorized",
+    "userCopy": "You do not have access to this external source.",
+    "developerBehavior": "Redact URL/object details",
+    "retryPosture": "none",
+    "priorityAction": "optional access issue",
+    "hbiBehavior": "Must not reveal hidden details"
+  },
+  {
+    "state": "forbidden",
+    "userCopy": "This action is blocked by policy.",
+    "developerBehavior": "Disable action with policy reason",
+    "retryPosture": "none",
+    "priorityAction": "none unless reviewable",
+    "hbiBehavior": "Must not bypass policy"
+  },
+  {
+    "state": "mapping-conflict",
+    "userCopy": "Conflicting mappings require review.",
+    "developerBehavior": "Route to review and Wave 14 checkpoint if needed",
+    "retryPosture": "none",
+    "priorityAction": "create mapping review action",
+    "hbiBehavior": "May summarize conflict evidence"
+  },
+  {
+    "state": "blocked-by-policy",
+    "userCopy": "This link or system is blocked by policy.",
+    "developerBehavior": "Do not render launch href",
+    "retryPosture": "none",
+    "priorityAction": "none unless policy review allowed",
+    "hbiBehavior": "Must not provide workaround"
+  }
+]

@@ -17,6 +17,13 @@ This canonical Wave 15 plan hub tracks promoted planning artifacts from `_doc-up
 - Closeout: `Prompt_02_HBCentral_Schema_Audit_And_Storage_Model_Closeout.md`
 - Decision record: `Prompt_02_Schema_Storage_Indexing_Decision_Record.md`
 
+## Prompt 03 Execution
+
+- Execution mode: target architecture + SOR + source-lineage docs only
+- Prompt: `prompts/Prompt_03_Target_Architecture_And_System_Of_Record.md`
+- Closeout: `Prompt_03_Target_Architecture_And_System_Of_Record_Closeout.md`
+- Decision record: `Prompt_03_Target_Architecture_SOR_Lineage_Decision_Record.md`
+
 ## Canonical Subpaths
 
 - `artifacts/`
