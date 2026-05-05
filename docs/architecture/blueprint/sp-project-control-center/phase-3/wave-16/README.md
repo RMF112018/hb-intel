@@ -8,7 +8,9 @@ Wave 16 defines the canonical target architecture for Control Center Settings in
 
 - Architecture documentation only.
 - References Prompt 02 canonical schema promotion outputs.
-- No wireframe promotion in this wave architecture set.
+- Canonical architecture docs are maintained in this root Wave 16 folder.
+- Canonical wireframes are promoted under `wave-16/wireframes/`.
+- Canonical security, audit, HBI, and validation docs are promoted under `wave-16/security/`, `wave-16/audit/`, `wave-16/hbi/`, and `wave-16/validation/`.
 - No runtime/source/package/manifest/tenant/provisioning changes.
 
 ## Canonical Architecture Documents
@@ -24,6 +26,13 @@ Wave 16 defines the canonical target architecture for Control Center Settings in
 
 - `wireframes/README.md`
 - `wireframes/00_Wireframe_Index.md`
+
+## Security Audit HBI Validation
+
+- `security/Wave_16_Security_Posture_And_Command_Gating.md`
+- `audit/Wave_16_Business_Audit_And_M365_Audit_Separation.md`
+- `hbi/Wave_16_HBI_Citation_And_Refusal_Policy.md`
+- `validation/Wave_16_Validation_Error_Taxonomy_And_Acceptance_Gates.md`
 
 ## Canonical Schema Inputs (Prompt 02)
 
