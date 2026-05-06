@@ -21,6 +21,7 @@ export interface PccAppProps {
 export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
   const shell = usePccShellState();
   const activeSurface = PCC_MVP_SURFACES[shell.activeSurfaceId];
+  const sourceConfidence = shell.previewMode ? 'preview' : 'live';
 
   return (
     <PccShell
@@ -32,6 +33,7 @@ export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
       activeSurfaceWorkflowLabel={activeSurface.description}
       activeSurfaceId={shell.activeSurfaceId}
       onSelectSurface={shell.setActiveSurface}
+      sourceConfidence={sourceConfidence}
       forceMode={forceMode}
     >
       <PccSurfaceRouter activeSurfaceId={shell.activeSurfaceId} readModelClient={readModelClient} />

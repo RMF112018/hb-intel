@@ -1,0 +1,113 @@
+.band {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: var(--pcc-space-md);
+  align-items: center;
+  padding: var(--pcc-space-xs) var(--pcc-space-lg);
+  background: var(--pcc-color-card);
+  color: var(--pcc-color-text-primary);
+  border-bottom: 1px solid var(--pcc-color-border);
+  min-height: 44px;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.projectName {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--pcc-color-text-primary);
+  letter-spacing: 0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sourceConfidence {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.activeSurfaceContext {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.activeSurfaceLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pcc-color-text-primary);
+}
+
+.activeSurfaceWorkflow {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}
+
+.metaArea {
+  display: flex;
+  align-items: center;
+  gap: var(--pcc-space-md);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.pillRow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--pcc-space-xs);
+}
+
+.dateScope {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--pcc-color-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.band[data-pcc-mode='tabletLandscape'],
+.band[data-pcc-mode='tabletPortrait'] {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: var(--pcc-space-xs) var(--pcc-space-md);
+}
+
+.band[data-pcc-mode='tabletLandscape'] .activeSurfaceContext,
+.band[data-pcc-mode='tabletPortrait'] .activeSurfaceContext {
+  grid-column: 1 / -1;
+  grid-row: 2 / 3;
+}
+
+.band[data-pcc-mode='tabletLandscape'] .metaArea,
+.band[data-pcc-mode='tabletPortrait'] .metaArea {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.band[data-pcc-mode='phone'] {
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--pcc-space-xs) var(--pcc-space-md);
+  min-height: 56px;
+  gap: var(--pcc-space-xs);
+}
+
+.band[data-pcc-mode='phone'] .activeSurfaceContext {
+  grid-column: 1 / -1;
+}
+
+.band[data-pcc-mode='phone'] .metaArea {
+  display: none;
+}

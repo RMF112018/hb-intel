@@ -29,6 +29,10 @@ import type { PccResponsiveMode } from '../layout/footprints';
 import { useContainerBreakpoint } from '../layout/useContainerBreakpoint';
 import { PccNavigationRail } from './PccNavigationRail';
 import { PccProjectIntelligenceHeader } from './PccProjectIntelligenceHeader';
+import {
+  PccProjectContextBand,
+  type PccProjectContextSourceConfidence,
+} from './PccProjectContextBand';
 import styles from './PccShell.module.css';
 import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 
@@ -82,6 +86,11 @@ export interface PccShellProps {
   activeSurfaceId: PccMvpSurfaceId;
   /** Surface-selection callback wired from `usePccShellState.setActiveSurface`. */
   onSelectSurface?: (id: PccMvpSurfaceId) => void;
+  /**
+   * Source confidence for the persistent project-context band. Derived in
+   * `PccApp` from `usePccShellState.previewMode` (literal `true` today).
+   */
+  sourceConfidence: PccProjectContextSourceConfidence;
   /** Test override for the responsive mode. */
   forceMode?: PccResponsiveMode;
   /** Optional bottom-of-rail slot. */
@@ -99,6 +108,7 @@ export const PccShell: FC<PccShellProps> = ({
   activeSurfaceWorkflowLabel,
   activeSurfaceId,
   onSelectSurface,
+  sourceConfidence,
   forceMode,
   railFooter,
   children,
@@ -122,13 +132,14 @@ export const PccShell: FC<PccShellProps> = ({
           footer={railFooter}
         />
         <div className={styles.workArea}>
-          <PccProjectIntelligenceHeader
+          <PccProjectIntelligenceHeader subtitle={subtitle} mode={shellMode} />
+          <PccProjectContextBand
             projectName={projectName}
-            subtitle={subtitle}
-            dateScope={dateScope}
             pills={pills}
+            dateScope={dateScope}
             activeSurfaceLabel={activeSurfaceLabel}
             activeSurfaceWorkflowLabel={activeSurfaceWorkflowLabel}
+            sourceConfidence={sourceConfidence}
             mode={shellMode}
           />
           <main className={styles.canvas} data-pcc-canvas="">

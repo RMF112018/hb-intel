@@ -1,42 +1,31 @@
 import type { FC } from 'react';
-import { PccStatusPill } from '../ui/PccStatusPill';
 import { PccCommandSearch } from './PccCommandSearch';
 import type { PccResponsiveMode } from '../layout/footprints';
 import styles from './PccProjectIntelligenceHeader.module.css';
 
+/**
+ * Slim ambient header carrying only the eyebrow subtitle and the command
+ * search slot. Project identity, status pills, date scope, and the active
+ * surface label/workflow live in `PccProjectContextBand` (Wave 15A /
+ * Wave B / Prompt 02 — shell visual dominance reduced; project context
+ * promoted to a persistent band).
+ */
 export interface PccProjectIntelligenceHeaderProps {
-  projectName: string;
   subtitle: string;
-  dateScope: string;
-  pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
-  activeSurfaceLabel: string;
-  activeSurfaceWorkflowLabel: string;
   /** Resolved responsive mode supplied by the shell. */
   mode: PccResponsiveMode;
 }
 
 export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps> = ({
-  projectName,
   subtitle,
-  dateScope,
-  pills,
-  activeSurfaceLabel,
-  activeSurfaceWorkflowLabel,
   mode,
 }) => {
   const showSearchExpanded = mode === 'wideDesktop' || mode === 'standardDesktop';
-  const showPills = mode !== 'phone';
-  const showDateScope = mode === 'wideDesktop' || mode === 'standardDesktop';
 
   return (
     <header className={styles.header} data-pcc-header="" data-pcc-mode={mode}>
       <div className={styles.identity}>
         <p className={styles.eyebrow}>{subtitle}</p>
-        <h1 className={styles.projectName}>{projectName}</h1>
-        <p className={styles.activeSurfaceContext} data-pcc-active-surface-context="">
-          <span className={styles.activeSurfaceLabel}>{activeSurfaceLabel}</span>
-          <span className={styles.activeSurfaceWorkflow}>{activeSurfaceWorkflowLabel}</span>
-        </p>
       </div>
       <div className={styles.commandArea}>
         {showSearchExpanded ? (
@@ -44,22 +33,6 @@ export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps>
         ) : (
           <PccCommandSearch variant="icon" />
         )}
-      </div>
-      <div className={styles.metaArea}>
-        {showPills ? (
-          <ul className={styles.pillRow} data-pcc-pill-row="">
-            {pills.map((pill) => (
-              <li key={pill.label}>
-                <PccStatusPill tone={pill.tone}>{pill.label}</PccStatusPill>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {showDateScope ? (
-          <span className={styles.dateScope} data-pcc-date-scope="">
-            {dateScope}
-          </span>
-        ) : null}
       </div>
     </header>
   );

@@ -4,13 +4,23 @@ import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
 import { PccApp } from './PccApp';
 
 describe('PccApp shell', () => {
-  it('renders the project intelligence header with placeholder copy', () => {
+  it('renders the slim project intelligence header with the eyebrow subtitle', () => {
     const { container } = render(<PccApp forceMode="wideDesktop" />);
     const header = container.querySelector('[data-pcc-header]');
     expect(header, 'header should render').not.toBeNull();
-    expect(header?.textContent).toContain('Project Control Center');
-    expect(header?.textContent).toContain('Reference');
-    expect(container.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
+    expect(header?.textContent).toContain('Project overview');
+  });
+
+  it('renders the persistent project-context band with project identity, source confidence, pills, and active surface', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const band = container.querySelector('[data-pcc-context-band]');
+    expect(band, 'project-context band should render').not.toBeNull();
+    expect(band?.querySelector('[data-pcc-context-project]')?.textContent).toBe(
+      'Project Control Center',
+    );
+    expect(band?.getAttribute('data-pcc-source-confidence')).toBe('preview');
+    expect(band?.querySelector('[data-pcc-pill-row]')?.textContent).toContain('Reference');
+    expect(band?.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
       'Project Home',
     );
   });
