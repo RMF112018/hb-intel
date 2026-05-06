@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
+import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 import { usePccShellState } from '../state/usePccShellState';
 
 describe('usePccShellState contract', () => {
@@ -34,9 +35,7 @@ describe('usePccShellState contract', () => {
   });
 
   it('honors initial.activeSurfaceId override', () => {
-    const { result } = renderHook(() =>
-      usePccShellState({ activeSurfaceId: 'approvals' }),
-    );
+    const { result } = renderHook(() => usePccShellState({ activeSurfaceId: 'approvals' }));
     expect(result.current.activeSurfaceId).toBe('approvals');
     expect(result.current.previewMode).toBe(true);
   });
@@ -48,5 +47,24 @@ describe('usePccShellState contract', () => {
     rerender();
     expect(result.current.setActiveSurface).toBe(firstSetActive);
     expect(result.current.setSelectedProject).toBe(firstSetProject);
+  });
+
+  // Wave-b2 Prompt 05 — invalid active surface ids fall back to project-home
+  // (defense in depth alongside PccSurfaceRouter's `default:` case).
+
+  it('initializing with an invalid activeSurfaceId falls back to project-home', () => {
+    const { result } = renderHook(() =>
+      usePccShellState({
+        activeSurfaceId: 'apps' as unknown as PccMvpSurfaceId,
+      }),
+    );
+    expect(result.current.activeSurfaceId).toBe('project-home');
+  });
+
+  it('setActiveSurface(invalidId) falls back to project-home instead of accepting bad data', () => {
+    const { result } = renderHook(() => usePccShellState({ activeSurfaceId: 'documents' }));
+    expect(result.current.activeSurfaceId).toBe('documents');
+    act(() => result.current.setActiveSurface('legacy-systems' as unknown as PccMvpSurfaceId));
+    expect(result.current.activeSurfaceId).toBe('project-home');
   });
 });

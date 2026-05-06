@@ -833,15 +833,24 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     ).toEqual([]);
   });
 
-  it('PccSurfaceRouter threads readModelClient to exactly six surfaces (project-home + team-and-access + documents + project-readiness + approvals + external-systems)', () => {
+  it('PccSurfaceRouter threads readModelClient to exactly seven JSX usages (six surfaces + default Project Home fallback)', () => {
     // Wave 8 / Prompt 05 added the project-readiness surface as a
     // read-model consumer (Project Readiness Center framework shell
     // driven by the project-readiness envelope). Wave 14 / Prompt 05
     // added the approvals surface as the fifth read-model consumer
     // (Approvals / Checkpoints composite read-model). Wave 15 / Prompt 05
     // adds the external-systems surface as the sixth read-model
-    // consumer (External Systems Launch Pad composite read-model). The
-    // dormancy guard now allows exactly six JSX prop usages.
+    // consumer (External Systems Launch Pad composite read-model).
+    //
+    // Wave-b2 Prompt 05 added an invalid-active-surface fallback: the
+    // PccSurfaceRouter `default:` case now returns
+    // `<PccProjectHome readModelClient={readModelClient} />` so an
+    // unknown id (e.g., stale state bypassing the typed setter) renders
+    // Project Home rather than throwing on a `PCC_MVP_SURFACES[unknown]`
+    // dereference. That adds a seventh JSX prop usage. The set-equality
+    // assertion below still constrains which named cases consume the
+    // client; the count assertion now allows seven (six named + one
+    // default).
     expect(existsSync(ROUTER_FILE)).toBe(true);
     const raw = readFileSync(ROUTER_FILE, 'utf8');
     // Use comments-only stripping. The robust comment+string stripper
@@ -852,8 +861,8 @@ describe('PCC api controlled-consumption guard (Wave 4 / Prompts 02/04/05/06)', 
     const matches = commentStripped.match(/readModelClient\s*=\s*\{/g) ?? [];
     expect(
       matches.length,
-      'expected exactly six JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access + documents + project-readiness + approvals + external-systems)',
-    ).toBe(6);
+      'expected exactly seven JSX prop usages `readModelClient={...}` in PccSurfaceRouter (project-home + team-and-access + documents + project-readiness + approvals + external-systems + default Project Home fallback)',
+    ).toBe(7);
 
     // Set-equality assertion: the surfaces that receive the
     // readModelClient must equal exactly the six-surface set above.

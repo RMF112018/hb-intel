@@ -1,7 +1,5 @@
 import type { FC } from 'react';
-import { PCC_MVP_SURFACES, type PccMvpSurfaceId } from '@hbc/models/pcc';
-import { PccDashboardCard } from '../layout/PccDashboardCard';
-import { PccPreviewState } from '../ui/PccPreviewState';
+import { type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
@@ -62,9 +60,12 @@ export interface PccSurfaceRouterProps {
  *   children of the bento grid via a React fragment).
  * - `team-and-access` → Team & Access surface; receives the read-model
  *   client when provided so the seam round-trip is exercised.
- * - Prompt 06/07 preview surfaces route to dedicated fragment surfaces.
- * - Any remaining fallback surface ids route to a single full-width
- *   preview-only card with metadata from `PCC_MVP_SURFACES`.
+ * - All eight MVP surfaces route to their dedicated fragment surface.
+ * - Wave-b2 Prompt 05 — any unknown active surface id falls back to
+ *   Project Home rather than throwing or rendering an unavailable card.
+ *   The state hook (`usePccShellState`) canonicalizes invalid ids on
+ *   init and on setter; this `default:` is the defense-in-depth backstop
+ *   for callers that bypass the hook.
  *
  * The Prompt 03 corrective bento invariant and the Prompt 04 single
  * active-surface-panel invariant continue to hold: only one element in
@@ -93,25 +94,8 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
     case 'site-health':
       return <PccSiteHealthSurface />;
     default:
-      break;
+      return <PccProjectHome readModelClient={readModelClient} />;
   }
-
-  const surface = PCC_MVP_SURFACES[activeSurfaceId as PccMvpSurfaceId];
-  return (
-    <PccDashboardCard
-      key={activeSurfaceId}
-      footprint="full"
-      eyebrow="MVP Surface"
-      title={surface.displayName}
-      dataActiveSurfacePanel={activeSurfaceId}
-    >
-      <PccPreviewState
-        state="unavailable-fixture"
-        title={surface.displayName}
-        description={surface.description}
-      />
-    </PccDashboardCard>
-  );
 };
 
 export default PccSurfaceRouter;

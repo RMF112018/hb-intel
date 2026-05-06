@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccPersona } from '@hbc/models/pcc';
+import { PCC_MVP_SURFACE_IDS, PCC_MVP_SURFACES, type PccPersona } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurface';
@@ -120,4 +120,79 @@ describe('Team & Access first-view non-empty invariant (wave-b2 Prompt 03)', () 
       ).toBe(true);
     });
   }
+});
+
+/**
+ * Wave-b2 Prompt 05 — External Platforms taxonomy and active tab / hero /
+ * panel label-consistency invariants. Locks the External Platforms / Launch
+ * Pad copy landed by Prompts 03A + 04 and the per-surface aria-labelledby
+ * update wired by Prompt 04, scoped across every one of the eight surfaces.
+ */
+describe('External Platforms taxonomy and active tab/hero/panel consistency (wave-b2 Prompt 05)', () => {
+  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+    it(`'${surfaceId}': active tab, hero secondary title, panel marker, and aria-labelledby agree after click`, () => {
+      const { container } = render(<PccApp forceMode="standardLaptop" />);
+      const tab = container.querySelector(
+        `[data-pcc-tab-id="${surfaceId}"]`,
+      ) as HTMLButtonElement | null;
+      expect(tab, `tab for '${surfaceId}' should render`).not.toBeNull();
+      fireEvent.click(tab!);
+
+      const expectedDisplayName = PCC_MVP_SURFACES[surfaceId].displayName;
+
+      // The clicked tab is the only aria-selected tab. (Tab labels in
+      // PccHorizontalTabs are intentionally shorter than displayName for
+      // some surfaces — e.g., 'Team' for 'Team & Access' — so we don't
+      // assert tab text equals displayName. The hero band carries the
+      // canonical full displayName.)
+      expect(tab!.getAttribute('aria-selected')).toBe('true');
+      expect(tab!.textContent?.trim().length ?? 0).toBeGreaterThan(0);
+
+      // Hero secondary title is the canonical full display name.
+      const heroSecondary = container.querySelector('[data-pcc-hero-secondary-title]');
+      expect(heroSecondary?.textContent ?? '').toContain(expectedDisplayName);
+
+      // Active panel marker matches the active surface id.
+      const panel = container.querySelector('[data-pcc-active-surface-panel]');
+      expect(panel?.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
+
+      // <main data-pcc-canvas> aria-labelledby points at this tab's id.
+      const main = container.querySelector('[data-pcc-canvas]');
+      expect(main?.getAttribute('aria-labelledby')).toBe(`pcc-tab-${surfaceId}`);
+    });
+  }
+
+  it('no tab text equals "Apps" or contains a standalone "Systems" product token', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const tabs = container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]');
+    expect(tabs.length).toBe(PCC_MVP_SURFACE_IDS.length);
+    for (const tab of tabs) {
+      const text = (tab.textContent ?? '').trim();
+      expect(text, `tab '${tab.getAttribute('data-pcc-tab-id')}' must not equal 'Apps'`).not.toBe(
+        'Apps',
+      );
+      expect(
+        /\bSystems\b/.test(text),
+        `tab '${tab.getAttribute('data-pcc-tab-id')}' text '${text}' must not contain a standalone 'Systems' product token`,
+      ).toBe(false);
+    }
+  });
+
+  it('External Platforms active panel composes the "External Platforms Launch Pad" page title', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const tab = container.querySelector(
+      '[data-pcc-tab-id="external-systems"]',
+    ) as HTMLButtonElement | null;
+    expect(tab).not.toBeNull();
+    fireEvent.click(tab!);
+
+    const panel = container.querySelector(
+      '[data-pcc-active-surface-panel="external-systems"]',
+    ) as HTMLElement | null;
+    expect(panel).not.toBeNull();
+    // The header card composes eyebrow="External Platforms" + title="Launch Pad".
+    // Combined visible text reads as "External Platforms Launch Pad".
+    expect(panel!.textContent ?? '').toContain('External Platforms');
+    expect(panel!.textContent ?? '').toContain('Launch Pad');
+  });
 });
