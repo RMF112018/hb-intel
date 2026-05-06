@@ -27,12 +27,9 @@ import {
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import type { PccResponsiveMode } from '../layout/footprints';
 import { useContainerBreakpoint } from '../layout/useContainerBreakpoint';
+import type { IPccShellHeroViewModel } from '../preview/projectShellViewModel';
 import { PccHorizontalTabs } from './PccHorizontalTabs';
-import {
-  PccProjectHeroBand,
-  type PccProjectHeroPill,
-  type PccProjectHeroSourceConfidence,
-} from './PccProjectHeroBand';
+import { PccProjectHeroBand } from './PccProjectHeroBand';
 import styles from './PccShell.module.css';
 import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 
@@ -73,19 +70,12 @@ const PCC_THEME_VARS: CSSProperties = {
 };
 
 export interface PccShellProps {
-  projectName: string;
-  clientName: string;
-  location: string;
-  estimatedValue: string;
-  pills: ReadonlyArray<PccProjectHeroPill>;
-  activeSurfaceLabel: string;
-  activeSurfaceWorkflowLabel: string;
+  /** Hero view-model derived from an `IProjectProfile` plus active surface. */
+  heroViewModel: IPccShellHeroViewModel;
   /** Active surface — supplied by `PccApp` from `usePccShellState`. */
   activeSurfaceId: PccMvpSurfaceId;
   /** Surface-selection callback wired from `usePccShellState.setActiveSurface`. */
   onSelectSurface?: (id: PccMvpSurfaceId) => void;
-  /** Source confidence for the project hero band. */
-  sourceConfidence: PccProjectHeroSourceConfidence;
   /** Test override for the responsive mode. */
   forceMode?: PccResponsiveMode;
   /** Bento grid content (cards). */
@@ -93,16 +83,9 @@ export interface PccShellProps {
 }
 
 export const PccShell: FC<PccShellProps> = ({
-  projectName,
-  clientName,
-  location,
-  estimatedValue,
-  pills,
-  activeSurfaceLabel,
-  activeSurfaceWorkflowLabel,
+  heroViewModel,
   activeSurfaceId,
   onSelectSurface,
-  sourceConfidence,
   forceMode,
   children,
 }) => {
@@ -117,17 +100,7 @@ export const PccShell: FC<PccShellProps> = ({
       data-pcc-shell="thin"
       data-pcc-shell-mode={shellMode}
     >
-      <PccProjectHeroBand
-        mode={shellMode}
-        projectName={projectName}
-        clientName={clientName}
-        location={location}
-        estimatedValue={estimatedValue}
-        sourceConfidence={sourceConfidence}
-        pills={pills}
-        activeSurfaceLabel={activeSurfaceLabel}
-        activeSurfaceWorkflowLabel={activeSurfaceWorkflowLabel}
-      />
+      <PccProjectHeroBand mode={shellMode} viewModel={heroViewModel} />
       <PccHorizontalTabs
         mode={shellMode}
         activeSurfaceId={activeSurfaceId}

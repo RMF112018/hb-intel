@@ -139,7 +139,7 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     expect(panelAfterSpace?.getAttribute('data-pcc-active-surface-panel')).toBe('approvals');
   });
 
-  it('clicking a tab activates it and updates the panel + active-surface-context', () => {
+  it('clicking a tab activates it and updates the panel + hero secondary title and description', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const documentsTab = container.querySelector(
       '[data-pcc-tab-id="documents"]',
@@ -148,8 +148,11 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     expect(documentsTab.getAttribute('aria-selected')).toBe('true');
     expect(container.querySelector('[data-pcc-active-surface-panel="documents"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="project-home"]')).toBeNull();
-    const context = container.querySelector('[data-pcc-active-surface-context]');
-    expect(context?.textContent).toContain('Documents');
-    expect(context?.textContent).toContain('Unified access hub for SharePoint');
+    const secondary = container.querySelector('[data-pcc-hero-secondary-title]');
+    expect(secondary?.textContent).toBe('Documents');
+    const description = container.querySelector('[data-pcc-hero-surface-description]');
+    expect(description?.textContent).toBe(
+      'Project document access posture across SharePoint, OneDrive, and external platforms.',
+    );
   });
 });

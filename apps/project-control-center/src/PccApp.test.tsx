@@ -4,28 +4,21 @@ import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
 import { PccApp } from './PccApp';
 
 describe('PccApp shell', () => {
-  it('renders the project hero band with the eyebrow Project Control Center', () => {
+  it('renders the project hero band with the primary title "Project Control Center"', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const hero = container.querySelector('[data-pcc-project-hero-band]');
     expect(hero, 'hero band should render').not.toBeNull();
-    // Eyebrow renders the "Project Control Center" copy.
-    const eyebrow = hero?.querySelector('p');
-    expect(eyebrow?.textContent).toBe('Project Control Center');
+    const primary = hero?.querySelector('[data-pcc-hero-primary-title]');
+    expect(primary?.textContent).toBe('Project Control Center');
   });
 
-  it('renders the hero band with project identity, source confidence (reference), and active surface', () => {
+  it('renders the hero band with active-surface secondary title and mode marker', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const hero = container.querySelector('[data-pcc-project-hero-band]');
     expect(hero, 'hero band should render').not.toBeNull();
-    expect(hero?.querySelector('[data-pcc-project-identity]')?.textContent).toContain(
-      'Project Control Center',
-    );
     expect(hero?.getAttribute('data-pcc-mode')).toBe('desktop');
-    const sourceConfidence = hero?.querySelector('[data-pcc-source-confidence]');
-    expect(sourceConfidence?.getAttribute('data-pcc-source-confidence')).toBe('reference');
-    expect(hero?.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
-      'Project Home',
-    );
+    const secondary = hero?.querySelector('[data-pcc-hero-secondary-title]');
+    expect(secondary?.textContent).toBe('Project Home');
   });
 
   it('renders horizontal tabs with every PCC MVP surface from @hbc/models/pcc', () => {

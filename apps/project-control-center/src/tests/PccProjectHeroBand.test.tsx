@@ -1,125 +1,147 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
-import { PCC_RESPONSIVE_MODES, type PccResponsiveMode } from '../layout/footprints';
+import { render, cleanup } from '@testing-library/react';
 import {
-  PccProjectHeroBand,
-  type PccProjectHeroBandProps,
-  type PccProjectHeroPill,
-  type PccProjectHeroSourceConfidence,
-} from '../shell/PccProjectHeroBand';
+  PCC_MVP_SURFACES,
+  PCC_MVP_SURFACE_IDS,
+  SAMPLE_PROJECT_PROFILE,
+  type PccMvpSurfaceId,
+} from '@hbc/models/pcc';
+import { PCC_RESPONSIVE_MODES, type PccResponsiveMode } from '../layout/footprints';
+import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
+import { deriveShellHeroViewModel } from '../preview/projectShellViewModel';
+import { PccProjectHeroBand, type PccProjectHeroBandProps } from '../shell/PccProjectHeroBand';
 
 afterEach(() => {
   cleanup();
 });
 
-const PILLS: ReadonlyArray<PccProjectHeroPill> = [
-  { label: 'Reference', tone: 'info' },
-  { label: 'PCC', tone: 'neutral' },
-];
-
 function renderHero(overrides: Partial<PccProjectHeroBandProps> = {}) {
+  const activeSurfaceId: PccMvpSurfaceId = overrides.viewModel ? 'project-home' : 'project-home';
   const props: PccProjectHeroBandProps = {
     mode: 'standardLaptop',
-    projectName: 'Project Control Center',
-    clientName: 'Reference Client',
-    location: 'Reference Location',
-    estimatedValue: '$0',
-    sourceConfidence: 'reference',
-    pills: PILLS,
-    activeSurfaceLabel: 'Project Home',
-    activeSurfaceWorkflowLabel: 'Program Overview',
+    viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, activeSurfaceId),
     ...overrides,
   };
   return render(<PccProjectHeroBand {...props} />);
 }
 
-describe('PccProjectHeroBand primitive', () => {
-  it('renders the eyebrow "Project Control Center" at the top', () => {
+describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
+  it('renders primary title "Project Control Center"', () => {
     const { container } = renderHero();
-    const eyebrow = container.querySelector('[data-pcc-project-hero-band] p');
-    expect(eyebrow?.textContent).toBe('Project Control Center');
+    const primary = container.querySelector('[data-pcc-hero-primary-title]');
+    expect(primary?.textContent).toBe('Project Control Center');
   });
 
-  it('renders project identity marker with the project name', () => {
-    const { container } = renderHero({ projectName: '23-CC-2024 // Coastal Center' });
-    const identity = container.querySelector('[data-pcc-project-identity]');
-    expect(identity).not.toBeNull();
-    expect(identity?.textContent).toContain('23-CC-2024 // Coastal Center');
-  });
-
-  it('renders metadata marker with Client, Location, and Estimated Value', () => {
+  it('renders the active surface name as the secondary title', () => {
     const { container } = renderHero({
-      clientName: 'Sample Client LLC',
-      location: 'Tampa, FL',
-      estimatedValue: '$42M',
+      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'approvals'),
     });
-    const metadata = container.querySelector('[data-pcc-project-metadata]') as HTMLElement;
-    expect(metadata).not.toBeNull();
-    const text = metadata.textContent ?? '';
-    expect(text).toContain('Sample Client LLC');
-    expect(text).toContain('Tampa, FL');
-    expect(text).toContain('$42M');
-    expect(text).toContain('Client');
-    expect(text).toContain('Location');
-    expect(text).toContain('Estimated Value');
+    const secondary = container.querySelector('[data-pcc-hero-secondary-title]');
+    expect(secondary?.textContent).toBe(PCC_MVP_SURFACES.approvals.displayName);
   });
 
-  it('renders the active-surface marker with the active surface label', () => {
-    const { container } = renderHero({ activeSurfaceLabel: 'Approvals' });
-    const surface = container.querySelector('[data-pcc-active-surface-context]');
-    expect(surface).not.toBeNull();
-    expect(surface?.textContent).toContain('Approvals');
-  });
-
-  it('renders source-confidence "reference" with the label "Reference data"', () => {
-    const { container } = renderHero({ sourceConfidence: 'reference' });
-    const source = container.querySelector('[data-pcc-source-confidence="reference"]');
-    expect(source).not.toBeNull();
-    expect(source?.textContent).toContain('Reference data');
-    const label = container.querySelector('[data-pcc-source-confidence-label]');
-    expect(label?.textContent).toBe('Reference data');
-  });
-
-  it('renders source-confidence "live" with the label "Live project data"', () => {
-    const { container } = renderHero({ sourceConfidence: 'live' });
-    const source = container.querySelector('[data-pcc-source-confidence="live"]');
-    expect(source).not.toBeNull();
-    expect(source?.textContent).toContain('Live project data');
-    const label = container.querySelector('[data-pcc-source-confidence-label]');
-    expect(label?.textContent).toBe('Live project data');
-  });
-
-  it('source-confidence and metadata containers contain no forbidden phrases', () => {
-    const sourceConfidenceCases: PccProjectHeroSourceConfidence[] = ['reference', 'live'];
-    for (const sc of sourceConfidenceCases) {
+  it.each(PCC_MVP_SURFACE_IDS)(
+    'renders the local compact hero description for "%s" (never PCC_MVP_SURFACES.description)',
+    (surfaceId) => {
       cleanup();
-      const { container } = renderHero({ sourceConfidence: sc });
-      const sourceText = container.querySelector('[data-pcc-source-confidence]')?.textContent ?? '';
-      const metadataText =
-        container.querySelector('[data-pcc-project-metadata]')?.textContent ?? '';
-      for (const phrase of ['Preview mode', 'Mock data', 'Fixture data']) {
-        expect(
-          sourceText,
-          `source-confidence text contains forbidden phrase: ${phrase}`,
-        ).not.toContain(phrase);
-        expect(metadataText, `metadata text contains forbidden phrase: ${phrase}`).not.toContain(
-          phrase,
-        );
-      }
-    }
-  });
+      const { container } = renderHero({
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId),
+      });
+      const description = container.querySelector('[data-pcc-hero-surface-description]');
+      expect(description?.textContent).toBe(PCC_SURFACE_HERO_DESCRIPTIONS[surfaceId]);
+    },
+  );
 
-  it('renders status pills carrying their tone via data-tone', () => {
+  it('renders the four locked-in facts with formatter output for SAMPLE_PROJECT_PROFILE', () => {
     const { container } = renderHero();
-    const pillElements = container.querySelectorAll('[data-pcc-hero-pill]');
-    expect(pillElements.length).toBe(PILLS.length);
-    pillElements.forEach((el, idx) => {
-      expect(el.getAttribute('data-tone')).toBe(PILLS[idx].tone);
-      expect(el.textContent).toBe(PILLS[idx].label);
-    });
+    const location = container.querySelector('[data-pcc-hero-fact-location] dd');
+    const value = container.querySelector('[data-pcc-hero-fact-estimated-value] dd');
+    const completion = container.querySelector('[data-pcc-hero-fact-scheduled-completion] dd');
+    const stage = container.querySelector('[data-pcc-hero-fact-project-stage] dd');
+    expect(location?.textContent).toBe('Sample City, ST');
+    expect(value?.textContent).toBe('$25,000,000');
+    expect(completion?.textContent).toBe('Sep 30, 2027');
+    expect(stage?.textContent).toBe('Active Construction');
   });
 
+  it('renders the disabled command-search affordance inside the hero', () => {
+    const { container } = renderHero();
+    const slot = container.querySelector('[data-pcc-hero-command-search]');
+    expect(slot).not.toBeNull();
+    // PccCommandSearch renders a disabled button at standardLaptop (expanded variant
+    // includes a readonly input, but the search affordance itself is non-functional).
+    const button = slot?.querySelector('button');
+    const input = slot?.querySelector('input');
+    if (button) {
+      expect(button.disabled).toBe(true);
+    }
+    if (input) {
+      expect(input.readOnly).toBe(true);
+    }
+    expect(button !== null || input !== null).toBe(true);
+  });
+
+  it('renders the visual hero surface and the hero/tab seam', () => {
+    const { container } = renderHero();
+    expect(container.querySelector('[data-pcc-hero-surface]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-hero-tab-seam]')).not.toBeNull();
+  });
+
+  it('renders the hero facts grid container', () => {
+    const { container } = renderHero();
+    expect(container.querySelector('[data-pcc-hero-facts]')).not.toBeNull();
+  });
+});
+
+describe('PccProjectHeroBand — locked-out content (negative marker assertions)', () => {
+  it('does not render any source-confidence marker', () => {
+    const { container } = renderHero();
+    expect(container.querySelector('[data-pcc-source-confidence]')).toBeNull();
+    expect(container.querySelector('[data-pcc-source-confidence-label]')).toBeNull();
+    expect(container.querySelector('[data-pcc-source-confidence-dot]')).toBeNull();
+  });
+
+  it('does not render a client fact marker', () => {
+    const { container } = renderHero();
+    expect(container.querySelector('[data-pcc-hero-fact-client]')).toBeNull();
+  });
+
+  it('does not render project-status, project-number, or last-updated fact markers', () => {
+    const { container } = renderHero();
+    expect(container.querySelector('[data-pcc-hero-fact-project-status]')).toBeNull();
+    expect(container.querySelector('[data-pcc-hero-fact-project-number]')).toBeNull();
+    expect(container.querySelector('[data-pcc-hero-fact-last-updated]')).toBeNull();
+  });
+
+  it('does not render any pill row markers', () => {
+    const { container } = renderHero();
+    expect(
+      container.querySelectorAll(
+        '[data-pcc-status-pill],[data-pcc-pill],[data-pcc-hero-pill],[data-pcc-hero-pill-row]',
+      ).length,
+    ).toBe(0);
+  });
+
+  it('does not render the legacy phone-mode project-intel toggle', () => {
+    const { container } = renderHero({ mode: 'phone' });
+    expect(container.querySelector('[data-pcc-project-intel-toggle]')).toBeNull();
+    expect(container.querySelector('[data-pcc-project-intel-region]')).toBeNull();
+  });
+});
+
+describe('PccProjectHeroBand — forbidden preview literals', () => {
+  it('does not contain "Reference Client", "Reference Location", or "$0" in the default preview', () => {
+    const { container } = renderHero();
+    const text = container.textContent ?? '';
+    expect(text).not.toContain('Reference Client');
+    expect(text).not.toContain('Reference Location');
+    expect(text).not.toContain('$0');
+  });
+});
+
+describe('PccProjectHeroBand — responsive markers preserved', () => {
   it.each(PCC_RESPONSIVE_MODES)('mirrors mode "%s" on the hero band root', (mode) => {
+    cleanup();
     const { container } = renderHero({ mode });
     const root = container.querySelector('[data-pcc-project-hero-band]');
     expect(root?.getAttribute('data-pcc-mode')).toBe(mode);
@@ -147,102 +169,21 @@ describe('PccProjectHeroBand primitive', () => {
     }
   });
 
-  it('wide modes render metadata visibly with the expanded command-search variant', () => {
-    for (const mode of ['standardLaptop', 'desktop'] as const) {
+  it('wide modes render the expanded command-search variant', () => {
+    for (const mode of ['standardLaptop', 'largeLaptop', 'desktop', 'ultrawide'] as const) {
       cleanup();
       const { container } = renderHero({ mode });
-      const metadata = container.querySelector('[data-pcc-project-metadata]') as HTMLElement | null;
-      expect(metadata).not.toBeNull();
-      // Ancestor `hidden` is the only structural visibility lever we control here.
-      expect(metadata?.closest('[hidden]')).toBeNull();
       expect(container.querySelector('[data-pcc-command-search="expanded"]')).not.toBeNull();
       expect(container.querySelector('[data-pcc-command-search="icon"]')).toBeNull();
     }
   });
 
-  it('compact non-phone modes render the icon command-search variant', () => {
-    for (const mode of ['smallLaptop', 'tabletLandscape', 'tabletPortrait'] as const) {
+  it('compact modes render the icon command-search variant', () => {
+    for (const mode of ['phone', 'tabletPortrait', 'tabletLandscape', 'smallLaptop'] as const) {
       cleanup();
       const { container } = renderHero({ mode });
       expect(container.querySelector('[data-pcc-command-search="icon"]')).not.toBeNull();
       expect(container.querySelector('[data-pcc-command-search="expanded"]')).toBeNull();
     }
   });
-
-  it('phone mode collapses overflow content behind the Project Intel toggle', () => {
-    const { container } = renderHero({ mode: 'phone' });
-    const toggle = container.querySelector('[data-pcc-project-intel-toggle]') as HTMLButtonElement;
-    expect(toggle).not.toBeNull();
-    expect(toggle.textContent).toBe('Project Intel');
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(toggle.getAttribute('aria-controls')).toBe('pcc-project-intel-collapsible');
-
-    const region = container.querySelector('[data-pcc-project-intel-region]') as HTMLElement;
-    expect(region).not.toBeNull();
-    expect(region.hasAttribute('hidden')).toBe(true);
-
-    // Identity + active-surface remain visible (outside the collapsible).
-    const identity = container.querySelector('[data-pcc-project-identity]');
-    const activeSurfaces = container.querySelectorAll('[data-pcc-active-surface-context]');
-    expect(identity).not.toBeNull();
-    expect(activeSurfaces).toHaveLength(1);
-    expect(identity?.contains(activeSurfaces[0])).toBe(true);
-
-    // Active-surface marker is NOT inside the collapsible region.
-    expect(region.querySelector('[data-pcc-active-surface-context]')).toBeNull();
-
-    // Command-search is rendered inside the collapsible region only (icon variant on phone).
-    const search = container.querySelector('[data-pcc-command-search="icon"]');
-    expect(search).not.toBeNull();
-    expect(region.contains(search)).toBe(true);
-    expect(search?.closest('[hidden]')).toBe(region);
-  });
-
-  it('phone-mode toggle expands the collapsible on click', () => {
-    const { container } = renderHero({ mode: 'phone' });
-    const toggle = container.querySelector('[data-pcc-project-intel-toggle]') as HTMLButtonElement;
-    fireEvent.click(toggle);
-    expect(toggle.getAttribute('aria-expanded')).toBe('true');
-
-    const region = container.querySelector('[data-pcc-project-intel-region]') as HTMLElement;
-    expect(region.hasAttribute('hidden')).toBe(false);
-
-    // Metadata, source-confidence, command-search, and pills are now visible inside the region.
-    expect(region.querySelector('[data-pcc-project-metadata]')).not.toBeNull();
-    expect(region.querySelector('[data-pcc-source-confidence]')).not.toBeNull();
-    expect(region.querySelector('[data-pcc-command-search="icon"]')).not.toBeNull();
-    expect(region.querySelector('[data-pcc-hero-pill-row]')).not.toBeNull();
-  });
-
-  it('non-phone modes render the toggle in the DOM and the collapsible inline (no hidden)', () => {
-    for (const mode of [
-      'tabletPortrait',
-      'tabletLandscape',
-      'smallLaptop',
-      'standardLaptop',
-      'largeLaptop',
-      'desktop',
-      'ultrawide',
-    ] as const) {
-      cleanup();
-      const { container } = renderHero({ mode });
-      const toggle = container.querySelector('[data-pcc-project-intel-toggle]');
-      const region = container.querySelector('[data-pcc-project-intel-region]') as HTMLElement;
-      expect(toggle, `mode '${mode}' should still render the toggle for CSS hide`).not.toBeNull();
-      expect(region.hasAttribute('hidden'), `mode '${mode}' collapsible should not be hidden`).toBe(
-        false,
-      );
-    }
-  });
-
-  it.each(PCC_RESPONSIVE_MODES)(
-    'renders identity and exactly one active-surface marker at mode "%s"',
-    (mode) => {
-      const { container } = renderHero({ mode });
-      const identity = container.querySelector('[data-pcc-project-identity]');
-      const activeSurfaces = container.querySelectorAll('[data-pcc-active-surface-context]');
-      expect(identity).not.toBeNull();
-      expect(activeSurfaces).toHaveLength(1);
-    },
-  );
 });
