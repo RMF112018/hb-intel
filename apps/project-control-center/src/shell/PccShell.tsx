@@ -69,6 +69,8 @@ const PCC_THEME_VARS: CSSProperties = {
   ['--pcc-elevation-card' as string]: elevationCard,
 };
 
+const ACTIVE_PANEL_ID = 'pcc-active-surface-panel';
+
 export interface PccShellProps {
   /** Hero view-model derived from an `IProjectProfile` plus active surface. */
   heroViewModel: IPccShellHeroViewModel;
@@ -105,8 +107,15 @@ export const PccShell: FC<PccShellProps> = ({
         mode={shellMode}
         activeSurfaceId={activeSurfaceId}
         onSelectSurface={(id) => onSelectSurface?.(id)}
+        panelId={ACTIVE_PANEL_ID}
       />
-      <main className={styles.canvas} data-pcc-canvas="">
+      <main
+        id={ACTIVE_PANEL_ID}
+        role="tabpanel"
+        aria-labelledby={`pcc-tab-${activeSurfaceId}`}
+        className={styles.canvas}
+        data-pcc-canvas=""
+      >
         <PccBentoGrid forceMode={forceMode}>{children}</PccBentoGrid>
       </main>
     </div>

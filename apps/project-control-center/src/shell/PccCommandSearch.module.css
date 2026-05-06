@@ -1,0 +1,58 @@
+/* PccCommandSearch — non-interactive preview capsule (Wave 15A wave-b2 / Prompt 04)
+ *
+ * Purely informational. Renders no input, no button, no link, no role
+ * implying activation. Visible title + helper copy carry the accessible name.
+ *
+ * Tokens only: --pcc-color-* / --pcc-space-* / --pcc-radius-*. No hex literals.
+ */
+
+.previewCapsule {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--pcc-space-xs) var(--pcc-space-md);
+  background: var(--pcc-color-canvas);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-md);
+  color: var(--pcc-color-text-muted);
+  min-width: 0;
+  max-width: 360px;
+  /* The capsule is a <div>; ensure no inherited interactive cursor leaks in. */
+  cursor: default;
+  user-select: none;
+}
+
+.previewCapsule[data-pcc-command-search='icon'] {
+  padding: 4px var(--pcc-space-sm);
+  max-width: 240px;
+}
+
+.previewTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.previewHelper {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pcc-color-text-muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.previewCapsule[data-pcc-command-search='icon'] .previewHelper {
+  font-size: 11px;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}

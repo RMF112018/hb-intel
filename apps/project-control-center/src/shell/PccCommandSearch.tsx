@@ -1,44 +1,36 @@
 import type { FC } from 'react';
-import { Search } from '@hbc/ui-kit/icons';
-import styles from './PccProjectIntelligenceHeader.module.css';
+import styles from './PccCommandSearch.module.css';
+
+/**
+ * PccCommandSearch — Wave 15A wave-b2 / Prompt 04 posture.
+ *
+ * A purely informational, non-focusable preview capsule. Renders no
+ * `<input>`, `<button>`, `<a>`, no `role`/`tabindex` that implies
+ * activation. The visible title + helper copy carry the accessible name;
+ * no `aria-label` override is added (it would silently override the
+ * visible text for screen readers).
+ *
+ * The `variant` prop is preserved for layout-only signalling (wide vs
+ * compact) and continues to drive the `data-pcc-command-search` marker
+ * relied on by `PccProjectHeroBand` tests.
+ */
+
+const PREVIEW_TITLE = 'Command Search — Preview';
+const PREVIEW_HELPER = 'Search and project commands are unavailable in this preview.';
 
 export interface PccCommandSearchProps {
-  placeholder?: string;
-  /** Display-only: the input is non-functional in the Wave 2 scaffold. */
-  ariaLabel?: string;
   variant?: 'expanded' | 'icon';
 }
 
-export const PccCommandSearch: FC<PccCommandSearchProps> = ({
-  placeholder = 'Search the project control center…',
-  ariaLabel = 'Search the project control center',
-  variant = 'expanded',
-}) => {
-  if (variant === 'icon') {
-    return (
-      <button
-        type="button"
-        className={styles.searchIcon}
-        aria-label={ariaLabel}
-        data-pcc-command-search="icon"
-        disabled
-      >
-        <Search size="sm" aria-label="" />
-      </button>
-    );
-  }
-  return (
-    <label className={styles.searchField} data-pcc-command-search="expanded">
-      <Search size="sm" aria-label="" />
-      <input
-        type="search"
-        className={styles.searchInput}
-        placeholder={placeholder}
-        aria-label={ariaLabel}
-        readOnly
-      />
-    </label>
-  );
-};
+export const PccCommandSearch: FC<PccCommandSearchProps> = ({ variant = 'expanded' }) => (
+  <div
+    className={styles.previewCapsule}
+    data-pcc-command-search={variant}
+    data-pcc-command-search-state="preview"
+  >
+    <span className={styles.previewTitle}>{PREVIEW_TITLE}</span>
+    <span className={styles.previewHelper}>{PREVIEW_HELPER}</span>
+  </div>
+);
 
 export default PccCommandSearch;

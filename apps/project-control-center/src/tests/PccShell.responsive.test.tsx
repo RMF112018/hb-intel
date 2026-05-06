@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { PccApp } from '../PccApp';
 import {
   PCC_RESPONSIVE_MODES,
@@ -71,6 +71,52 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     const canvases = container.querySelectorAll('[data-pcc-canvas]');
     expect(canvases.length).toBe(1);
     expect(canvases[0]?.tagName).toBe('MAIN');
+  });
+
+  // Wave-b2 Prompt 04: tablist / tab / tabpanel ARIA contract.
+  it('wires the tablist/tab/tabpanel relationship via id, role, aria-labelledby, and aria-controls', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const main = container.querySelector('[data-pcc-canvas]') as HTMLElement | null;
+    expect(main).not.toBeNull();
+    expect(main!.getAttribute('id')).toBe('pcc-active-surface-panel');
+    expect(main!.getAttribute('role')).toBe('tabpanel');
+    expect(main!.getAttribute('aria-labelledby')).toBe('pcc-tab-project-home');
+
+    // Every tab carries aria-controls pointing at the tabpanel id.
+    const tabs = container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]');
+    expect(tabs.length).toBeGreaterThan(0);
+    for (const tab of tabs) {
+      expect(tab.getAttribute('aria-controls')).toBe('pcc-active-surface-panel');
+    }
+  });
+
+  it('updates <main> aria-labelledby to the new active tab id after a tab click', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const documentsTab = container.querySelector(
+      '[data-pcc-tab-id="documents"]',
+    ) as HTMLButtonElement | null;
+    expect(documentsTab).not.toBeNull();
+    fireEvent.click(documentsTab!);
+
+    const main = container.querySelector('[data-pcc-canvas]') as HTMLElement | null;
+    expect(main!.getAttribute('aria-labelledby')).toBe('pcc-tab-documents');
+  });
+
+  // Wave-b2 Prompt 04: command-search affordance is purely informational.
+  it('renders no <input type="search"> anywhere in the shell', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    expect(container.querySelectorAll('input[type="search"]').length).toBe(0);
+  });
+
+  it('command-search slot contains no focusable descendant in either variant', () => {
+    for (const mode of ['standardLaptop', 'phone'] as const) {
+      const { container, unmount } = render(<PccApp forceMode={mode} />);
+      const slot = container.querySelector('[data-pcc-hero-command-search]');
+      expect(slot, `slot should render at '${mode}'`).not.toBeNull();
+      expect(slot!.querySelectorAll('input,button,a,select,textarea').length).toBe(0);
+      expect(slot!.querySelectorAll('[tabindex="0"]').length).toBe(0);
+      unmount();
+    }
   });
 
   it('does not render the legacy phone-mode project-intel toggle', () => {

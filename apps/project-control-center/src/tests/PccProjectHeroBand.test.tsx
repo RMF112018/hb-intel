@@ -64,21 +64,25 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
     expect(stage?.textContent).toBe('Active Construction');
   });
 
-  it('renders the disabled command-search affordance inside the hero', () => {
+  it('renders a non-interactive command-search preview affordance inside the hero', () => {
     const { container } = renderHero();
     const slot = container.querySelector('[data-pcc-hero-command-search]');
     expect(slot).not.toBeNull();
-    // PccCommandSearch renders a disabled button at standardLaptop (expanded variant
-    // includes a readonly input, but the search affordance itself is non-functional).
-    const button = slot?.querySelector('button');
-    const input = slot?.querySelector('input');
-    if (button) {
-      expect(button.disabled).toBe(true);
-    }
-    if (input) {
-      expect(input.readOnly).toBe(true);
-    }
-    expect(button !== null || input !== null).toBe(true);
+
+    // Wave-b2 Prompt 04: the affordance is a purely informational preview
+    // capsule. No <input>, <button>, or <a> renders inside the slot.
+    expect(slot!.querySelectorAll('input').length).toBe(0);
+    expect(slot!.querySelectorAll('button').length).toBe(0);
+    expect(slot!.querySelectorAll('a').length).toBe(0);
+
+    // Stable preview-state marker on the capsule.
+    const capsule = slot!.querySelector('[data-pcc-command-search-state="preview"]');
+    expect(capsule).not.toBeNull();
+
+    // Visible text is the accessible name — no aria-label override.
+    const text = slot!.textContent ?? '';
+    expect(text).toContain('Command Search — Preview');
+    expect(text).toContain('Search and project commands are unavailable in this preview.');
   });
 
   it('renders the visual hero surface and the hero/tab seam', () => {
