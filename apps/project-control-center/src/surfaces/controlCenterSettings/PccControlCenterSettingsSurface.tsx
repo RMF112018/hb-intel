@@ -24,6 +24,9 @@ export const PccControlCenterSettingsSurface: FC = () => (
     <PccDashboardCard
       footprint="full"
       hierarchy="primary"
+      tier="tier1"
+      region="command"
+      headingLevel={2}
       eyebrow={SURFACE.displayName}
       title="Control Center Settings"
       dataActiveSurfacePanel="control-center-settings"
@@ -38,7 +41,9 @@ export const PccControlCenterSettingsSurface: FC = () => (
     </PccDashboardCard>
 
     <PccDashboardCard
-      footprint="full"
+      footprint="detail"
+      tier="tier2"
+      region="detail"
       eyebrow="Settings Lanes"
       title="Project / Site / Persona / Integration Scope"
     >
@@ -57,7 +62,13 @@ export const PccControlCenterSettingsSurface: FC = () => (
       </div>
     </PccDashboardCard>
 
-    <PccDashboardCard footprint="wide" eyebrow="Configuration" title="Items needing setup">
+    <PccDashboardCard
+      footprint="wide"
+      tier="state"
+      region="state"
+      eyebrow="Configuration"
+      title="Items needing setup"
+    >
       <div className={styles.body}>
         <PccPreviewState state="missing-config" />
         <ul className={styles.missingList}>

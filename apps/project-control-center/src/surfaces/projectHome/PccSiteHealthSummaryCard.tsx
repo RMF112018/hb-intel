@@ -1,8 +1,5 @@
 import type { FC } from 'react';
-import {
-  SAMPLE_SITE_HEALTH_SUMMARY,
-  type ISiteHealthSummary,
-} from '@hbc/models/pcc';
+import { SAMPLE_SITE_HEALTH_SUMMARY, type ISiteHealthSummary } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
@@ -59,7 +56,13 @@ export const PccSiteHealthSummaryCard: FC<PccSiteHealthSummaryCardProps> = ({
   state = 'preview',
   summary,
 }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Site Health" title="Site Health Summary">
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier2"
+    region="operational"
+    eyebrow="Site Health"
+    title="Site Health Summary"
+  >
     {state === 'preview' ? (
       <SiteHealthSummaryBody summary={summary ?? SAMPLE_SITE_HEALTH_SUMMARY} />
     ) : (

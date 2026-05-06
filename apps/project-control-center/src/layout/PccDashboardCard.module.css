@@ -87,6 +87,70 @@
   background: linear-gradient(135deg, var(--pcc-color-card) 0%, var(--pcc-color-canvas) 100%);
 }
 
-.card[data-pcc-footprint='full'] {
+/* Wave 15A wave-b3 Prompt 02 — tier-driven visual hierarchy.
+   The tier markers are emitted by `PccDashboardCard` from the
+   resolver helpers introduced in Prompt 01, so these selectors win
+   over the legacy `data-pcc-card-hierarchy` rules whenever a card
+   resolves to a concrete tier. Existing hierarchy rules above
+   remain in place to preserve current visuals on unmigrated
+   surfaces until route migration in Prompts 04–07. */
+.card[data-pcc-card-tier='tier1'] {
+  border-color: color-mix(in srgb, var(--pcc-color-rail-accent) 52%, var(--pcc-color-border));
+  box-shadow: 0 16px 32px rgba(16, 24, 40, 0.12);
+}
+
+.card[data-pcc-card-tier='tier1'] .title {
+  font-size: clamp(18px, 1.4vw, 22px);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.card[data-pcc-card-tier='tier2'] {
+  border-color: color-mix(in srgb, var(--pcc-color-border) 72%, var(--pcc-color-rail-accent));
+}
+
+.card[data-pcc-card-tier='tier3'] {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--pcc-color-card) 94%, var(--pcc-color-canvas));
+}
+
+.card[data-pcc-card-tier='state'] {
   border-style: dashed;
+  background: color-mix(in srgb, var(--pcc-color-canvas) 72%, var(--pcc-color-card));
+}
+
+.card[data-pcc-card-region='command'] {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--pcc-color-rail-accent) 8%, transparent),
+      transparent 38%
+    ),
+    var(--pcc-color-card);
+}
+
+.card[data-pcc-card-region='operational'] .body {
+  gap: var(--pcc-space-md);
+}
+
+.card[data-pcc-card-region='reference'] .title {
+  font-size: 14px;
+}
+
+.card[data-pcc-card-region='state'] {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--pcc-color-canvas) 72%, var(--pcc-color-card));
+}
+
+.card[data-pcc-card-region='deferred'] {
+  border-style: dashed;
+  opacity: 0.94;
+}
+
+.card[data-pcc-card-region='detail'] .content {
+  gap: var(--pcc-space-md);
+}
+
+.card[data-pcc-card-region='rail'] {
+  background: color-mix(in srgb, var(--pcc-color-card) 88%, var(--pcc-color-canvas));
 }

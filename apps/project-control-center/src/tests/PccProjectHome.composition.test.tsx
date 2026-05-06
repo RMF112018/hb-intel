@@ -19,7 +19,11 @@ afterEach(() => {
 });
 
 function readCardTitlesInOrder(grid: Element): string[] {
-  return Array.from(grid.querySelectorAll('[data-pcc-card] h3')).map((el) =>
+  // Wave 15A wave-b3 Prompt 04 — Tier 1 command cards now render `h2`
+  // (per `01_CARD_TIER_REGION_CONTRACT.md`) while every other card
+  // stays `h3`. Use the heading-tag union so the Project Intelligence
+  // hero card's title participates in the ordering check.
+  return Array.from(grid.querySelectorAll('[data-pcc-card] :is(h2,h3,h4)')).map((el) =>
     (el.textContent ?? '').trim(),
   );
 }

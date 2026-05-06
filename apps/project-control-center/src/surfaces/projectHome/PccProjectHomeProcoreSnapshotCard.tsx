@@ -50,7 +50,13 @@ export const PccProjectHomeProcoreSnapshotCard: FC<PccProjectHomeProcoreSnapshot
     degradedStateId === null ? 'Procore data layer healthy' : DEGRADED_LABELS[degradedStateId];
 
   return (
-    <PccDashboardCard footprint="standard" eyebrow="Procore" title="Procore snapshot">
+    <PccDashboardCard
+      footprint="standard"
+      tier="tier3"
+      region="deferred"
+      eyebrow="Procore"
+      title="Procore snapshot"
+    >
       <div
         data-pcc-card-id="procore-snapshot"
         data-pcc-procore-degraded-state={degradedStateId ?? 'available'}

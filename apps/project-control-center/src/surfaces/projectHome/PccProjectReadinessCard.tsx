@@ -1,9 +1,5 @@
 import type { FC } from 'react';
-import {
-  SAMPLE_WORKFLOW_ITEMS,
-  type IWorkflowItem,
-  type WorkflowModuleId,
-} from '@hbc/models/pcc';
+import { SAMPLE_WORKFLOW_ITEMS, type IWorkflowItem, type WorkflowModuleId } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import type { PccProjectHomeCardProps } from './shared';
@@ -48,7 +44,13 @@ const ProjectReadinessBody: FC = () => {
 };
 
 export const PccProjectReadinessCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Readiness" title="Project Readiness">
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier2"
+    region="operational"
+    eyebrow="Readiness"
+    title="Project Readiness"
+  >
     {state === 'preview' ? <ProjectReadinessBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

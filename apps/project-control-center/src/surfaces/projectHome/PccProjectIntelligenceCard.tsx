@@ -74,6 +74,9 @@ export const PccProjectIntelligenceCard: FC<PccProjectIntelligenceCardProps> = (
   <PccDashboardCard
     footprint="hero"
     hierarchy="primary"
+    tier="tier1"
+    region="command"
+    headingLevel={2}
     eyebrow={PROJECT_HOME_SURFACE.displayName}
     title="Project Intelligence Header"
     dataActiveSurfacePanel="project-home"

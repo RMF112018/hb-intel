@@ -37,7 +37,13 @@ export const PccDocumentControlReviewsCard: FC<PccDocumentControlReviewsCardProp
   const roleVocabulary = viewModel?.roleVocabulary;
 
   return (
-    <PccDashboardCard footprint="full" eyebrow="Reviews" title="Reviews & Approvals">
+    <PccDashboardCard
+      footprint="detail"
+      tier="tier2"
+      region="detail"
+      eyebrow="Reviews"
+      title="Reviews & Approvals"
+    >
       <div className={styles.headerCopy} data-pcc-doc-reviews-card="true">
         <p className={styles.laneDescription}>
           Document-control review vocabulary, state legend, and queue. Approvals, rejections, and

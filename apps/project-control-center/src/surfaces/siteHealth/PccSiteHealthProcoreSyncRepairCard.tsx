@@ -22,7 +22,13 @@ export const PccSiteHealthProcoreSyncRepairCard: FC<PccSiteHealthProcoreSyncRepa
 }) => {
   const degradedStateId = viewModel?.degradedStateId ?? null;
   return (
-    <PccDashboardCard footprint="standard" eyebrow="Procore" title="Procore sync & repair posture">
+    <PccDashboardCard
+      footprint="standard"
+      tier="tier3"
+      region="deferred"
+      eyebrow="Procore"
+      title="Procore sync & repair posture"
+    >
       <div
         data-pcc-card-id="procore-sync-repair"
         data-pcc-procore-degraded-state={degradedStateId ?? 'available'}

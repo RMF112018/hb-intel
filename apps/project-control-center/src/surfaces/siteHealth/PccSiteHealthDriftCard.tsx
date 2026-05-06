@@ -33,7 +33,13 @@ const DriftBody: FC = () => {
 };
 
 export const PccSiteHealthDriftCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Drift" title="Drift Indicators">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Drift"
+    title="Drift Indicators"
+  >
     {state === 'preview' ? <DriftBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

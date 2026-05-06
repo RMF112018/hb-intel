@@ -53,6 +53,47 @@ describe('Control Center Settings — composition + bento invariants', () => {
   });
 });
 
+// Wave 15A wave-b3 Prompt 05 — tier/region/footprint contract per
+// 02_SURFACE_CARD_INVENTORY_MATRIX.md.
+describe('Control Center Settings — wave-b3 tier/region contract', () => {
+  it('overview card is Tier 1 command with an h2 heading and retains hierarchy="primary"', () => {
+    const { container } = renderSurface();
+    const overview = container.querySelector(
+      '[data-pcc-active-surface-panel="control-center-settings"]',
+    );
+    expect(overview, 'overview card should render').not.toBeNull();
+    expect(overview!.getAttribute('data-pcc-card-tier')).toBe('tier1');
+    expect(overview!.getAttribute('data-pcc-card-region')).toBe('command');
+    expect(overview!.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(overview!.querySelector('h2')).not.toBeNull();
+  });
+
+  it('scope-lanes card is Tier 2 detail with footprint="detail"', () => {
+    const { container } = renderSurface();
+    const scopeGrid = container.querySelector('[data-pcc-settings-scope-grid]');
+    expect(scopeGrid, 'scope grid should render').not.toBeNull();
+    const card = scopeGrid!.closest('[data-pcc-card]');
+    expect(card, 'scope grid should be wrapped in a card').not.toBeNull();
+    expect(card!.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card!.getAttribute('data-pcc-card-region')).toBe('detail');
+    expect(card!.getAttribute('data-pcc-footprint')).toBe('detail');
+  });
+
+  it('missing-setup card is tier="state" with footprint="wide"', () => {
+    const { container } = renderSurface();
+    // The missing-setup card hosts the third <PccDashboardCard> (with a
+    // PccPreviewState `state="missing-config"` body); pick it by tier
+    // marker so the assertion is robust against future order changes.
+    const stateCards = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-pcc-card][data-pcc-card-tier="state"]'),
+    );
+    expect(stateCards.length).toBe(1);
+    const card = stateCards[0]!;
+    expect(card.getAttribute('data-pcc-card-region')).toBe('state');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('wide');
+  });
+});
+
 describe('Control Center Settings — scope-cell structural markers', () => {
   it('renders each of the four scope cells with data-pcc-settings-scope-id and state="preview"', () => {
     const { container } = renderSurface();

@@ -36,7 +36,13 @@ const RecentActivityBody: FC = () => (
 );
 
 export const PccRecentActivityCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="tall" eyebrow="Activity" title="Recent Activity">
+  <PccDashboardCard
+    footprint="tall"
+    tier="tier3"
+    region="reference"
+    eyebrow="Activity"
+    title="Recent Activity"
+  >
     {state === 'preview' ? <RecentActivityBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

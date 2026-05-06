@@ -43,7 +43,9 @@ export const PccProjectHomeAskHbiSection: FC<IPccProjectHomeAskHbiSectionProps> 
   viewerPersona,
 }) => (
   <PccDashboardCard
-    footprint="wide"
+    footprint="detail"
+    tier="tier2"
+    region="detail"
     eyebrow="Ask HBI"
     title="Ask HBI — Grounded Project Answers"
   >

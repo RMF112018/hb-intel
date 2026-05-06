@@ -105,6 +105,54 @@ describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
     expect(card?.getAttribute('data-pcc-footprint')).toBe('wide');
   });
 
+  // Wave 15A wave-b3 Prompt 05 — tier/region contract assertions per
+  // 02_SURFACE_CARD_INVENTORY_MATRIX.md. Existing footprint and
+  // hierarchy assertions are preserved above.
+
+  it('overview card emits Tier 1 command markers and an h2 heading', () => {
+    const { container } = renderSurface();
+    const overviewPanel = container.querySelector('[data-pcc-active-surface-panel="site-health"]');
+    expect(overviewPanel, 'overview card should render').not.toBeNull();
+    expect(overviewPanel!.getAttribute('data-pcc-card-tier')).toBe('tier1');
+    expect(overviewPanel!.getAttribute('data-pcc-card-region')).toBe('command');
+    expect(overviewPanel!.querySelector('h2'), 'tier1 command card renders an h2').not.toBeNull();
+  });
+
+  it('checks card is Tier 2 operational', () => {
+    const { container } = renderSurface();
+    const card = container
+      .querySelector('[data-pcc-site-health-checks-body]')!
+      .closest('[data-pcc-card]')!;
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('operational');
+  });
+
+  it('drift card is Tier 2 operational and was promoted to footprint="wide"', () => {
+    const { container } = renderSurface();
+    const card = container.querySelector('[data-pcc-drift-key]')!.closest('[data-pcc-card]')!;
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('wide');
+  });
+
+  it('repair-requests card is Tier 3 deferred', () => {
+    const { container } = renderSurface();
+    const card = container
+      .querySelector('[data-pcc-site-health-repair-requests-body]')!
+      .closest('[data-pcc-card]')!;
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
+  });
+
+  it('procore sync & repair card is Tier 3 deferred', () => {
+    const { container } = renderSurface();
+    const card = container
+      .querySelector('[data-pcc-card-id="procore-sync-repair"]')!
+      .closest('[data-pcc-card]')!;
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
+  });
+
   it('every check row emits a data-pcc-site-health-check-severity-tier marker (Prompt 08 additive marker)', () => {
     const { container } = renderSurface();
     const checksBody = container.querySelector('[data-pcc-site-health-checks-body]');

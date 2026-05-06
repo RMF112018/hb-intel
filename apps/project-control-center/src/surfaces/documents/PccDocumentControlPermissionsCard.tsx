@@ -106,7 +106,9 @@ export const PccDocumentControlPermissionsCard: FC<PccDocumentControlPermissions
 
   return (
     <PccDashboardCard
-      footprint="full"
+      footprint="detail"
+      tier="tier3"
+      region="detail"
       eyebrow="Permissions & Guardrails"
       title="Permissions & Guardrails"
     >

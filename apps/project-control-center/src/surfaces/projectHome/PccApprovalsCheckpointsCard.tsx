@@ -17,10 +17,7 @@
  */
 
 import type { FC } from 'react';
-import {
-  SAMPLE_APPROVAL_CHECKPOINTS,
-  type ApprovalRequestState,
-} from '@hbc/models/pcc';
+import { SAMPLE_APPROVAL_CHECKPOINTS, type ApprovalRequestState } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
@@ -94,7 +91,9 @@ const ReadModelBody: FC<{ viewModel: IPccApprovalsCheckpointsCardViewModel }> = 
   <div className={styles.list} data-pcc-approvals-body="">
     <div className={styles.listRow} data-pcc-approvals-card-summary="">
       <PccStatusPill tone="info">Total: {viewModel.totalRequests}</PccStatusPill>
-      <PccStatusPill tone="warning">Pending or active: {viewModel.pendingActiveCount}</PccStatusPill>
+      <PccStatusPill tone="warning">
+        Pending or active: {viewModel.pendingActiveCount}
+      </PccStatusPill>
       <PccStatusPill tone="neutral">Terminal: {viewModel.terminalCount}</PccStatusPill>
     </div>
     {viewModel.rows.length === 0 ? (
@@ -156,7 +155,13 @@ export const PccApprovalsCheckpointsCard: FC<PccApprovalsCheckpointsCardProps> =
 }) => {
   const sourceMarker = viewModel ? 'read-model' : 'fixture';
   return (
-    <PccDashboardCard footprint="standard" eyebrow="Approvals" title="Approvals & Checkpoints">
+    <PccDashboardCard
+      footprint="standard"
+      tier="tier2"
+      region="operational"
+      eyebrow="Approvals"
+      title="Approvals & Checkpoints"
+    >
       <div data-pcc-approvals-card-source={sourceMarker}>
         {state === 'preview' ? (
           viewModel ? (

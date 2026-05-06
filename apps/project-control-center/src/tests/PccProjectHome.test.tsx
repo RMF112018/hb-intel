@@ -95,9 +95,9 @@ describe('Project Home bento dashboard', () => {
     // satisfy a card-title assertion (per
     // feedback_per_lane_marker_assertions /
     // feedback_per_component_marker_scoping).
-    const headingTexts = Array.from(grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3')).map(
-      (el) => el.textContent?.trim() ?? '',
-    );
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] :is(h2,h3,h4)'),
+    ).map((el) => el.textContent?.trim() ?? '');
     for (const title of REQUIRED_CARD_TITLES) {
       expect(headingTexts, `card title '${title}' should render as a card heading`).toContain(
         title,
@@ -123,7 +123,16 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('promotes Project Intelligence and Priority Actions as primary cards with laptop-priority footprints', () => {
+  it('promotes Project Intelligence as Tier 1 command and assigns Priority Actions Tier 2 operational, with active panel ownership on Project Intelligence', () => {
+    // Wave 15A wave-b3 Prompt 04 — Project Intelligence is the Tier 1
+    // command card (legacy `hierarchy='primary'` is preserved alongside
+    // the new `tier='tier1'` / `region='command'` markers from
+    // 02_SURFACE_CARD_INVENTORY_MATRIX.md). Priority Actions drops
+    // `hierarchy='primary'` because the matrix locks it as Tier 2
+    // operational, so its hierarchy marker resolves to the default
+    // 'standard' — never preserve a stale legacy marker just to keep
+    // an old assertion green (per
+    // feedback_no_legacy_marker_preservation.md).
     const { container } = render(<PccApp forceMode="desktop" />);
     const cards = Array.from(container.querySelectorAll('[data-pcc-card]')) as HTMLElement[];
 
@@ -133,6 +142,8 @@ describe('Project Home bento dashboard', () => {
     expect(projectIntelligenceCard).toBeDefined();
     expect(projectIntelligenceCard?.getAttribute('data-pcc-footprint')).toBe('hero');
     expect(projectIntelligenceCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(projectIntelligenceCard?.getAttribute('data-pcc-card-tier')).toBe('tier1');
+    expect(projectIntelligenceCard?.getAttribute('data-pcc-card-region')).toBe('command');
     expect(projectIntelligenceCard?.getAttribute('data-pcc-active-surface-panel')).toBe(
       'project-home',
     );
@@ -142,7 +153,9 @@ describe('Project Home bento dashboard', () => {
     );
     expect(priorityActionsCard).toBeDefined();
     expect(priorityActionsCard?.getAttribute('data-pcc-footprint')).toBe('wide');
-    expect(priorityActionsCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(priorityActionsCard?.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
+    expect(priorityActionsCard?.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(priorityActionsCard?.getAttribute('data-pcc-card-region')).toBe('operational');
     expect(priorityActionsCard?.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
 
     const activePanels = container.querySelectorAll('[data-pcc-active-surface-panel]');
@@ -481,9 +494,9 @@ describe('Project Home bento dashboard', () => {
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
-    const headingTexts = Array.from(grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3')).map(
-      (el) => el.textContent?.trim() ?? '',
-    );
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] :is(h2,h3,h4)'),
+    ).map((el) => el.textContent?.trim() ?? '');
     for (const title of UNIFIED_LIFECYCLE_CARD_TITLES) {
       expect(
         headingTexts,
@@ -519,9 +532,9 @@ describe('Project Home bento dashboard', () => {
       const span = Number(card.getAttribute('data-pcc-column-span'));
       expect(span).toBeGreaterThan(0);
     }
-    const headingTexts = Array.from(grid!.querySelectorAll<HTMLElement>('[data-pcc-card] h3')).map(
-      (el) => el.textContent?.trim() ?? '',
-    );
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] :is(h2,h3,h4)'),
+    ).map((el) => el.textContent?.trim() ?? '');
     for (const title of [
       ...REQUIRED_CARD_TITLES,
       ...UNIFIED_LIFECYCLE_CARD_TITLES,
@@ -611,7 +624,7 @@ describe('Project Home bento dashboard', () => {
     const askHbiHeading = await findByText('Ask HBI — Grounded Project Answers');
     const card = askHbiHeading.closest('[data-pcc-card]');
     expect(card, 'Ask HBI heading must live inside a PccDashboardCard').not.toBeNull();
-    expect(card!.getAttribute('data-pcc-footprint')).toBe('wide');
+    expect(card!.getAttribute('data-pcc-footprint')).toBe('detail');
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(card!.parentElement === grid).toBe(true);
     const panel = card!.querySelector('[data-pcc-ask-hbi-panel]');

@@ -1181,6 +1181,40 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 06 reviews summary', () => {
     }
   });
 
+  // Wave 15A wave-b3 Prompt 05 — additive tier/region contract
+  // assertions for the three matrix-locked Documents card targets that
+  // are not lane cards (lanes are covered by
+  // `PccDocumentsSurface.tier.test.tsx`).
+
+  it('header card emits Tier 1 command markers and an h2 heading', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const headerPanel = container.querySelector('[data-pcc-active-surface-panel="documents"]');
+    expect(headerPanel, 'header card should render').not.toBeNull();
+    expect(headerPanel!.getAttribute('data-pcc-card-tier')).toBe('tier1');
+    expect(headerPanel!.getAttribute('data-pcc-card-region')).toBe('command');
+    expect(headerPanel!.querySelector('h2'), 'tier1 command card renders an h2').not.toBeNull();
+  });
+
+  it('permissions & guardrails card is Tier 3 detail with footprint="detail"', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container
+      .querySelector('[data-pcc-doc-permissions-card="true"]')!
+      .closest('[data-pcc-card]')!;
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('detail');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('detail');
+  });
+
+  it('reviews & approvals card is Tier 2 detail with footprint="detail"', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const card = container
+      .querySelector('[data-pcc-doc-reviews-card="true"]')!
+      .closest('[data-pcc-card]')!;
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('detail');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('detail');
+  });
+
   it('backend-unavailable: card renders, types + states still publish, queue empty', async () => {
     const { container } = await renderWithClient(unavailableClient());
     const card = container.querySelector('[data-pcc-doc-reviews-card="true"]');

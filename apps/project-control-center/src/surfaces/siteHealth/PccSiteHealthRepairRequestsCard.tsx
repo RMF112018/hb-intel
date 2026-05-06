@@ -33,7 +33,13 @@ const RepairRequestsBody: FC = () => (
 export const PccSiteHealthRepairRequestsCard: FC<PccProjectHomeCardProps> = ({
   state = 'preview',
 }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Repairs" title="Repair Requests">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="deferred"
+    eyebrow="Repairs"
+    title="Repair Requests"
+  >
     {state === 'preview' ? <RepairRequestsBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

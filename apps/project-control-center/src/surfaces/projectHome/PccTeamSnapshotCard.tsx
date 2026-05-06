@@ -26,7 +26,13 @@ const TeamSnapshotBody: FC = () => (
 );
 
 export const PccTeamSnapshotCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="compact" eyebrow="People" title="Team Snapshot">
+  <PccDashboardCard
+    footprint="rail"
+    tier="tier3"
+    region="rail"
+    eyebrow="People"
+    title="Team Snapshot"
+  >
     {state === 'preview' ? <TeamSnapshotBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

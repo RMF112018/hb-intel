@@ -28,6 +28,9 @@ export const PccDocumentsHeaderCard: FC<PccDocumentsHeaderCardProps> = (props) =
   return (
     <PccDashboardCard
       footprint="full"
+      tier="tier1"
+      region="command"
+      headingLevel={2}
       eyebrow={DOCUMENTS_SURFACE.displayName}
       title={HB_DOCUMENT_CONTROL_CENTER_TITLE}
       dataActiveSurfacePanel="documents"

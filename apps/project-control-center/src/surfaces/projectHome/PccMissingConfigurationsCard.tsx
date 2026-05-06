@@ -60,7 +60,13 @@ export const PccMissingConfigurationsCard: FC<PccMissingConfigurationsCardProps>
   state = 'preview',
   missingConfigurations,
 }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Setup" title="Missing Configurations">
+  <PccDashboardCard
+    footprint="standard"
+    tier="state"
+    region="state"
+    eyebrow="Setup"
+    title="Missing Configurations"
+  >
     {state === 'preview' ? (
       <MissingConfigurationsBody
         missingConfigurations={missingConfigurations ?? SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS}

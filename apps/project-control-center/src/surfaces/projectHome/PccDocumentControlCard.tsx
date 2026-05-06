@@ -55,9 +55,7 @@ function fixtureSourcesInLane(lane: DocumentControlLane): readonly IDocumentCont
  * `IDocumentControlSource` lane / capabilityPosture / sourceOfRecordLabel
  * fields). No app-local lane or action duplication.
  */
-const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = ({
-  sources,
-}) => (
+const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = ({ sources }) => (
   <div className={styles.sourceGrid} data-pcc-document-control-body="">
     {DOCUMENT_CONTROL_LANES.map((lane) => (
       <section key={lane} data-pcc-doc-lane={lane}>
@@ -80,9 +78,7 @@ const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = 
                 data-pcc-doc-lane={source.lane}
               >
                 <span className={styles.sourceName}>{source.displayName}</span>
-                <PccStatusPill tone={postureTone(source.posture)}>
-                  {source.posture}
-                </PccStatusPill>
+                <PccStatusPill tone={postureTone(source.posture)}>{source.posture}</PccStatusPill>
                 <span className={styles.sourceMeta}>{source.sourceOfRecordLabel}</span>
                 {source.lane === 'microsoft-files' ? (
                   <ul
@@ -144,6 +140,8 @@ export const PccDocumentControlCard: FC<PccDocumentControlCardProps> = ({
 }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier2"
+    region="operational"
     eyebrow="Documents"
     title="Document Control Center"
   >

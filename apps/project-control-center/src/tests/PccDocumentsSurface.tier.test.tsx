@@ -67,23 +67,37 @@ describe('Documents — lane tier markers', () => {
   });
 });
 
-describe('Documents — lane card hierarchy distinction', () => {
-  it('Project Record lane card emits data-pcc-card-hierarchy="primary"', async () => {
+describe('Documents — lane card tier/region/footprint distinction', () => {
+  // Wave 15A wave-b3 Prompt 05 — lane cards bind to the shared
+  // `PccDashboardCard` tier/region contract from
+  // 02_SURFACE_CARD_INVENTORY_MATRIX.md. The legacy
+  // `data-pcc-card-hierarchy` distinction was retired here (the
+  // redesign moves away from `hierarchy` for non-tier-1 cards) and the
+  // assertions retarget to the matrix-locked tier/region/footprint
+  // markers (per feedback_no_legacy_marker_preservation.md).
+
+  it('Project Record lane card is Tier 2 operational with footprint="wide"', async () => {
     const { container } = await renderDocuments();
     const card = laneCard(container as HTMLElement, 'project-record');
-    expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('wide');
   });
 
-  it('My Project Files lane card emits data-pcc-card-hierarchy="standard"', async () => {
+  it('My Project Files lane card is Tier 2 operational with footprint="standard"', async () => {
     const { container } = await renderDocuments();
     const card = laneCard(container as HTMLElement, 'my-project-files');
-    expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('standard');
   });
 
-  it('External Platforms lane card emits data-pcc-card-hierarchy="supporting"', async () => {
+  it('External Platforms lane card is Tier 3 deferred with footprint="standard"', async () => {
     const { container } = await renderDocuments();
     const card = laneCard(container as HTMLElement, 'external-systems');
-    expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('supporting');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('standard');
   });
 });
 

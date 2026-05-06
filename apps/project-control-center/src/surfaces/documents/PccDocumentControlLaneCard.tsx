@@ -12,7 +12,12 @@
 
 import { Fragment, type FC } from 'react';
 import type { DocumentControlSourceHealthState } from '@hbc/models/pcc';
-import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import {
+  PccDashboardCard,
+  type PccCardRegion,
+  type PccCardTier,
+} from '../../layout/PccDashboardCard';
+import type { PccCardFootprint } from '../../layout/footprints';
 import styles from './PccDocumentsSurface.module.css';
 import type {
   DocumentControlWave7LaneId,
@@ -50,12 +55,30 @@ const LANE_EYEBROW: Readonly<Record<DocumentControlWave7LaneId, string>> = {
   'external-systems': 'External launches',
 };
 
-const LANE_HIERARCHY: Readonly<
-  Record<DocumentControlWave7LaneId, 'primary' | 'standard' | 'supporting'>
-> = {
-  'project-record': 'primary',
+// Wave 15A wave-b3 Prompt 05 — per-lane card-tier / card-region /
+// footprint maps drive the shared `PccDashboardCard` contract for each
+// lane. The Documents-internal `LANE_TIER` taxonomy above (emitted as
+// `data-pcc-document-lane-tier`) is a different vocabulary and stays
+// independent. Legacy `LANE_HIERARCHY` was removed: the redesign moves
+// away from `data-pcc-card-hierarchy` for non-tier-1 cards (per
+// 02_SURFACE_CARD_INVENTORY_MATRIX.md), and tests retarget to
+// tier/region/footprint.
+const LANE_CARD_TIER: Readonly<Record<DocumentControlWave7LaneId, PccCardTier>> = {
+  'project-record': 'tier2',
+  'my-project-files': 'tier2',
+  'external-systems': 'tier3',
+};
+
+const LANE_CARD_REGION: Readonly<Record<DocumentControlWave7LaneId, PccCardRegion>> = {
+  'project-record': 'operational',
+  'my-project-files': 'operational',
+  'external-systems': 'deferred',
+};
+
+const LANE_FOOTPRINT: Readonly<Record<DocumentControlWave7LaneId, PccCardFootprint>> = {
+  'project-record': 'wide',
   'my-project-files': 'standard',
-  'external-systems': 'supporting',
+  'external-systems': 'standard',
 };
 
 function bindingPathLabel(
@@ -82,10 +105,15 @@ export const PccDocumentControlLaneCard: FC<PccDocumentControlLaneCardProps> = (
   const actionReason = LANE_ACTION_REASONS[laneId];
   const tier = LANE_TIER[laneId];
   const eyebrow = LANE_EYEBROW[laneId];
-  const hierarchy = LANE_HIERARCHY[laneId];
 
   return (
-    <PccDashboardCard footprint="standard" hierarchy={hierarchy} eyebrow={eyebrow} title={title}>
+    <PccDashboardCard
+      footprint={LANE_FOOTPRINT[laneId]}
+      tier={LANE_CARD_TIER[laneId]}
+      region={LANE_CARD_REGION[laneId]}
+      eyebrow={eyebrow}
+      title={title}
+    >
       <div
         className={styles.headerCopy}
         data-pcc-doc-lane={laneId}

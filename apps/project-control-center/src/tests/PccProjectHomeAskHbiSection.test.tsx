@@ -56,13 +56,15 @@ function renderSection(
 // ─────────────────────────────────────────────────────────────────────
 
 describe('PccProjectHomeAskHbiSection — card chrome and idle-on-mount posture', () => {
-  it('renders exactly one PccDashboardCard with the canonical title and footprint="wide"', () => {
+  it('renders exactly one PccDashboardCard with the canonical title and footprint="detail"', () => {
     const client = createPccFixtureReadModelClient();
     const { container } = renderSection(client);
     const cards = container.querySelectorAll('[data-pcc-card]');
     expect(cards).toHaveLength(1);
     const card = cards[0]!;
-    expect(card.getAttribute('data-pcc-footprint')).toBe('wide');
+    // Wave 15A wave-b3 Prompt 04 — Ask HBI is a Tier 2 detail workbench
+    // per 02_SURFACE_CARD_INVENTORY_MATRIX.md.
+    expect(card.getAttribute('data-pcc-footprint')).toBe('detail');
     const heading = card.querySelector('h3');
     expect(heading?.textContent?.trim()).toBe('Ask HBI — Grounded Project Answers');
     const grid = container.querySelector('[data-pcc-bento-grid]');

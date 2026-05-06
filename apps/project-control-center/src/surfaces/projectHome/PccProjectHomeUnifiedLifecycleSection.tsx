@@ -50,7 +50,9 @@ export const PccProjectHomeUnifiedLifecycleSection: FC<
   return (
     <Fragment>
       <PccDashboardCard
-        footprint="wide"
+        footprint="detail"
+        tier="tier2"
+        region="detail"
         eyebrow="Project lifecycle"
         title="Lifecycle Timeline"
       >
@@ -58,20 +60,26 @@ export const PccProjectHomeUnifiedLifecycleSection: FC<
       </PccDashboardCard>
       <PccDashboardCard
         footprint="standard"
+        tier="tier3"
+        region="reference"
         eyebrow="Project memory"
         title="Project Memory"
       >
         {renderProjectMemory(state)}
       </PccDashboardCard>
       <PccDashboardCard
-        footprint="compact"
+        footprint="rail"
+        tier="tier3"
+        region="rail"
         eyebrow="Lenses"
         title="Project Lens"
       >
         {renderProjectLens(state)}
       </PccDashboardCard>
       <PccDashboardCard
-        footprint="standard"
+        footprint="detail"
+        tier="tier3"
+        region="detail"
         eyebrow="Traceability"
         title="Related Records"
       >

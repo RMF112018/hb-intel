@@ -60,7 +60,13 @@ const ChecksBody: FC = () => (
 );
 
 export const PccSiteHealthChecksCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Checks" title="Site Health Checks">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Checks"
+    title="Site Health Checks"
+  >
     {state === 'preview' ? <ChecksBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );
