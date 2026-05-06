@@ -12,7 +12,13 @@ export const PccTeamViewerLaneCard: FC<PccTeamViewerLaneCardProps> = ({ model })
   const { viewerLane } = model;
 
   return (
-    <PccDashboardCard footprint="wide" eyebrow="Team Viewer Lane" title="Project Team Map">
+    <PccDashboardCard
+      footprint="wide"
+      tier="tier2"
+      region="operational"
+      eyebrow="Team Viewer Lane"
+      title="Project Team Map"
+    >
       <div className={styles.body} data-pcc-team-access-lane="team-viewer">
         <span className={styles.metaRow}>
           <PccStatusPill tone="info">internal: {viewerLane.internalCount}</PccStatusPill>

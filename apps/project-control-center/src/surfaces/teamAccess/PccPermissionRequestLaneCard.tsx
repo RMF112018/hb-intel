@@ -15,7 +15,13 @@ export const PccPermissionRequestLaneCard: FC<PccPermissionRequestLaneCardProps>
   const lane = model.permissionRequestLane;
 
   return (
-    <PccDashboardCard footprint="wide" eyebrow="Permission Request Lane" title="Request access">
+    <PccDashboardCard
+      footprint="wide"
+      tier="tier2"
+      region="operational"
+      eyebrow="Permission Request Lane"
+      title="Request access"
+    >
       <div className={styles.body} data-pcc-team-access-lane="permission-request">
         <div className={styles.metaRow} data-pcc-permission-request-banner="preview">
           <PccStatusPill tone="info">Reference</PccStatusPill>

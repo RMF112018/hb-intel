@@ -33,7 +33,13 @@ export const PccExternalSystemsSourceHealthCard: FC<PccExternalSystemsSourceHeal
   cardState,
   isAvailable,
 }) => (
-  <PccDashboardCard footprint="full" eyebrow="Source health" title="External source health">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier3"
+    region="reference"
+    eyebrow="Source health"
+    title="External source health"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

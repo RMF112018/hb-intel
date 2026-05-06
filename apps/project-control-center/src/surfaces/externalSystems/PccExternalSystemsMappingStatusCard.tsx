@@ -48,7 +48,13 @@ export const PccExternalSystemsMappingStatusCard: FC<PccExternalSystemsMappingSt
   selectedMappingId,
   onSelectMapping,
 }) => (
-  <PccDashboardCard footprint="full" eyebrow="Mapping" title="Mapping status">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="detail"
+    eyebrow="Mapping"
+    title="Mapping status"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

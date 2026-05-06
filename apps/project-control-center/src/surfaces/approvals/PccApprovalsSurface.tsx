@@ -392,7 +392,13 @@ interface QueueCardProps {
 }
 
 const QueueCard: FC<QueueCardProps> = ({ queue, cardState, isAvailable, disabledActions }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Queue" title="Approval queue">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Queue"
+    title="Approval queue"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -445,7 +451,13 @@ const MyApprovalsCard: FC<MyApprovalsCardProps> = ({
   isAvailable,
   disabledActions,
 }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Mine" title="My approvals">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Mine"
+    title="My approvals"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -496,7 +508,13 @@ interface RegistryCardProps {
 }
 
 const RegistryCard: FC<RegistryCardProps> = ({ registry, cardState, isAvailable }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Registry" title="Checkpoint registry">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Registry"
+    title="Checkpoint registry"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -573,7 +591,13 @@ const EscalationCard: FC<EscalationCardProps> = ({
   isAvailable,
   disabledActions,
 }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Escalation" title="Escalation queue">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Escalation"
+    title="Escalation queue"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -620,7 +644,13 @@ const AdminVerificationCard: FC<AdminVerificationCardProps> = ({
   isAvailable,
   disabledActions,
 }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Admin verify" title="Admin verification queue">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Admin verify"
+    title="Admin verification queue"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -664,7 +694,13 @@ interface PolicyCardProps {
 }
 
 const PolicyCard: FC<PolicyCardProps> = ({ policy, cardState, isAvailable }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Policy" title="Approval policy summary">
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier3"
+    region="reference"
+    eyebrow="Policy"
+    title="Approval policy summary"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -713,7 +749,13 @@ const ModuleIntegrationCard: FC<ModuleIntegrationCardProps> = ({
   cardState,
   isAvailable,
 }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Modules" title="Source-module integration">
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier3"
+    region="reference"
+    eyebrow="Modules"
+    title="Source-module integration"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -755,7 +797,13 @@ interface DecisionHistorySeamCardProps {
 }
 
 const DecisionHistorySeamCard: FC<DecisionHistorySeamCardProps> = ({ seam, disabledActions }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Deferred" title={seam.title}>
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier3"
+    region="deferred"
+    eyebrow="Deferred"
+    title={seam.title}
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -778,7 +826,13 @@ interface LineageSeamCardProps {
 }
 
 const LineageSeamCard: FC<LineageSeamCardProps> = ({ seam }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Deferred" title={seam.title}>
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier3"
+    region="deferred"
+    eyebrow="Deferred"
+    title={seam.title}
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"
@@ -820,7 +874,13 @@ interface HbiBoundaryCardProps {
 }
 
 const HbiBoundaryCard: FC<HbiBoundaryCardProps> = ({ hbi }) => (
-  <PccDashboardCard footprint="standard" eyebrow="HBI" title={hbi.title}>
+  <PccDashboardCard
+    footprint="standard"
+    tier="tier3"
+    region="reference"
+    eyebrow="HBI"
+    title={hbi.title}
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="approvals"

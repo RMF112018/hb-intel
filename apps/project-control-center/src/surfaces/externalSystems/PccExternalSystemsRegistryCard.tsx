@@ -37,7 +37,13 @@ export const PccExternalSystemsRegistryCard: FC<PccExternalSystemsRegistryCardPr
   cardState,
   isAvailable,
 }) => (
-  <PccDashboardCard footprint="full" eyebrow="Registry" title="External system registry">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier3"
+    region="reference"
+    eyebrow="Registry"
+    title="External system registry"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

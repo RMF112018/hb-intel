@@ -14,7 +14,13 @@ export interface PccExternalSystemsLaunchPadSummaryCardProps {
 export const PccExternalSystemsLaunchPadSummaryCard: FC<
   PccExternalSystemsLaunchPadSummaryCardProps
 > = ({ summary, cardState, isAvailable }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Summary" title="Launch Pad summary">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Summary"
+    title="Launch Pad summary"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

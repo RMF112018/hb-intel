@@ -56,6 +56,8 @@ export const PccExternalSystemsProjectLinksCard = ({
 }: PccExternalSystemsProjectLinksCardProps) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="operational"
     eyebrow="Launch links"
     title="Project launch links"
     action={

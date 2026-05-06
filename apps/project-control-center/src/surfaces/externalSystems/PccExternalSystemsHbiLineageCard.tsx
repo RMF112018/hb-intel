@@ -58,7 +58,13 @@ export const PccExternalSystemsHbiLineageCard: FC<PccExternalSystemsHbiLineageCa
   cardState,
   isAvailable,
 }) => (
-  <PccDashboardCard footprint="full" eyebrow="HBI" title="HBI source lineage">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier3"
+    region="reference"
+    eyebrow="HBI"
+    title="HBI source lineage"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

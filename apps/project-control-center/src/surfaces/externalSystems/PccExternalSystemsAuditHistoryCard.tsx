@@ -32,7 +32,13 @@ export const PccExternalSystemsAuditHistoryCard: FC<PccExternalSystemsAuditHisto
   cardState,
   isAvailable,
 }) => (
-  <PccDashboardCard footprint="full" eyebrow="Audit" title="Audit history">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier3"
+    region="reference"
+    eyebrow="Audit"
+    title="Audit history"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"

@@ -27,6 +27,8 @@ export const PccAccessManagerLaneCard: FC<PccAccessManagerLaneCardProps> = ({ mo
   return (
     <PccDashboardCard
       footprint="full"
+      tier="tier2"
+      region="operational"
       eyebrow="Access Manager Lane"
       title="Assignment and approval"
     >

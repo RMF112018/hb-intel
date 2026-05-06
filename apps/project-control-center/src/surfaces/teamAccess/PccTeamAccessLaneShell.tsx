@@ -41,6 +41,8 @@ export const PccTeamAccessLaneShell: FC<PccTeamAccessLaneShellProps> = ({
       {model.branch !== 'access-manager' ? (
         <PccDashboardCard
           footprint="wide"
+          tier="state"
+          region="state"
           eyebrow="Access Manager Controls"
           title="Access manager actions"
         >

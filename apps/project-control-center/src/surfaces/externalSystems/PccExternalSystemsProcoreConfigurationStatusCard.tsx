@@ -44,7 +44,13 @@ export const PccExternalSystemsProcoreConfigurationStatusCard: FC<
       : 'missing';
 
   return (
-    <PccDashboardCard footprint="standard" eyebrow="Procore" title="Procore configuration & status">
+    <PccDashboardCard
+      footprint="standard"
+      tier="tier3"
+      region="reference"
+      eyebrow="Procore"
+      title="Procore configuration & status"
+    >
       <div
         data-pcc-card-id="procore-configuration-status"
         data-pcc-procore-degraded-state={degradedStateId ?? 'available'}

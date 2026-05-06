@@ -40,7 +40,13 @@ export const PccExternalSystemsReviewQueueCard: FC<PccExternalSystemsReviewQueue
   selectedReviewItemId,
   onSelectReviewItem,
 }) => (
-  <PccDashboardCard footprint="full" eyebrow="Review queue" title="Custom link review queue">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="operational"
+    eyebrow="Review queue"
+    title="Custom link review queue"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section="external-systems"
