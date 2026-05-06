@@ -4,43 +4,49 @@ import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
 import { PccApp } from './PccApp';
 
 describe('PccApp shell', () => {
-  it('renders the slim project intelligence header with the eyebrow subtitle', () => {
+  it('renders the project hero band with the eyebrow Project Control Center', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const header = container.querySelector('[data-pcc-header]');
-    expect(header, 'header should render').not.toBeNull();
-    expect(header?.textContent).toContain('Project overview');
+    const hero = container.querySelector('[data-pcc-project-hero-band]');
+    expect(hero, 'hero band should render').not.toBeNull();
+    // Eyebrow renders the "Project Control Center" copy.
+    const eyebrow = hero?.querySelector('p');
+    expect(eyebrow?.textContent).toBe('Project Control Center');
   });
 
-  it('renders the persistent project-context band with project identity, source confidence, pills, and active surface', () => {
+  it('renders the hero band with project identity, source confidence (reference), and active surface', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const band = container.querySelector('[data-pcc-context-band]');
-    expect(band, 'project-context band should render').not.toBeNull();
-    expect(band?.querySelector('[data-pcc-context-project]')?.textContent).toBe(
+    const hero = container.querySelector('[data-pcc-project-hero-band]');
+    expect(hero, 'hero band should render').not.toBeNull();
+    expect(hero?.querySelector('[data-pcc-project-identity]')?.textContent).toContain(
       'Project Control Center',
     );
-    expect(band?.getAttribute('data-pcc-source-confidence')).toBe('preview');
-    expect(band?.querySelector('[data-pcc-pill-row]')?.textContent).toContain('Reference');
-    expect(band?.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
+    expect(hero?.getAttribute('data-pcc-mode')).toBe('desktop');
+    const sourceConfidence = hero?.querySelector('[data-pcc-source-confidence]');
+    expect(sourceConfidence?.getAttribute('data-pcc-source-confidence')).toBe('reference');
+    expect(hero?.querySelector('[data-pcc-active-surface-context]')?.textContent).toContain(
       'Project Home',
     );
   });
 
-  it('renders the orange navigation rail with every PCC MVP surface from @hbc/models/pcc', () => {
+  it('renders horizontal tabs with every PCC MVP surface from @hbc/models/pcc', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const rail = container.querySelector('[data-pcc-rail]');
-    expect(rail, 'rail should render').not.toBeNull();
+    const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
+    expect(tablist, 'tablist should render').not.toBeNull();
     for (const id of PCC_MVP_SURFACE_IDS) {
-      const surface = PCC_MVP_SURFACES[id];
-      const item = rail?.querySelector(`[data-pcc-surface-id="${id}"]`);
-      expect(item, `rail entry for ${id} should render`).not.toBeNull();
-      expect(item?.textContent).toContain(surface.displayName);
+      const tab = tablist?.querySelector(`[data-pcc-tab-id="${id}"]`);
+      expect(tab, `tab for ${id} should render`).not.toBeNull();
+      // Tab labels are PCC-local overrides (not PCC_MVP_SURFACES.displayName).
+      // Just confirm the tab renders for the surface id; surface display name
+      // appears inside the active panel, not on the tab.
+      void PCC_MVP_SURFACES;
     }
   });
 
-  it('marks project-home as the active surface by default', () => {
+  it('marks project-home as the active tab by default', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const active = container.querySelector('[data-pcc-surface-id="project-home"]');
-    expect(active?.getAttribute('data-pcc-surface-active')).toBe('true');
+    const active = container.querySelector('[data-pcc-tab-id="project-home"]');
+    expect(active?.getAttribute('data-pcc-tab-active')).toBe('true');
+    expect(active?.getAttribute('aria-selected')).toBe('true');
   });
 
   it('renders the bento grid with mode marker', () => {

@@ -214,13 +214,13 @@ describe('PccProjectHomeUnifiedLifecycleSection — non-routing posture', () => 
     }
   });
 
-  it('renders no [data-pcc-surface-id] or [data-pcc-active-surface-panel] for unified-lifecycle', async () => {
+  it('renders no [data-pcc-tab-id] or [data-pcc-active-surface-panel] for unified-lifecycle', async () => {
     const client = createPccFixtureReadModelClient();
     const { container } = renderSection(client);
     await waitFor(() =>
       expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
     );
-    expect(container.querySelector('[data-pcc-surface-id="unified-lifecycle"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-tab-id="unified-lifecycle"]')).toBeNull();
     expect(
       container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
     ).toBeNull();

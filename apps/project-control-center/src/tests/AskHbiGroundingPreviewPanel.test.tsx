@@ -569,7 +569,7 @@ describe('AskHbiGroundingPreviewPanel — no live external URLs and no routed-su
     expect(anchors.length).toBe(0);
   });
 
-  it('does not emit canonical routed-surface markers (data-pcc-active-surface-panel, data-pcc-surface-id) and defensively no data-pcc-surface-active', async () => {
+  it('does not emit canonical routed-surface markers (data-pcc-active-surface-panel, data-pcc-tab-id) and defensively no data-pcc-surface-active', async () => {
     const client = createPccFixtureReadModelClient();
     const { container } = render(
       <AskHbiGroundingPreviewPanel
@@ -586,7 +586,7 @@ describe('AskHbiGroundingPreviewPanel — no live external URLs and no routed-su
       ).toBe('ready'),
     );
     expect(container.querySelector('[data-pcc-active-surface-panel]')).toBeNull();
-    expect(container.querySelector('[data-pcc-surface-id]')).toBeNull();
+    expect(container.querySelector('[data-pcc-tab-id]')).toBeNull();
     // defensive (non-canonical):
     expect(container.querySelector('[data-pcc-surface-active]')).toBeNull();
     expect(container.querySelector('[data-pcc-workspace]')).toBeNull();

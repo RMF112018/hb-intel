@@ -165,9 +165,7 @@ describe('Cross-surface no-nested-dashboard-card invariant (Wave 99 / Prompt 05D
     const { container } = render(
       <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
-    const projectReadinessButton = container.querySelector(
-      '[data-pcc-surface-id="project-readiness"]',
-    );
+    const projectReadinessButton = container.querySelector('[data-pcc-tab-id="project-readiness"]');
     expect(projectReadinessButton).not.toBeNull();
     fireEvent.click(projectReadinessButton!);
     await waitFor(() =>
@@ -255,9 +253,7 @@ describe('Constraints Log surface integration — read-only / no-execution postu
     // is intentionally NOT asserted disabled here — those are
     // legitimate read-model-driven non-mutating affordances.
     const { container } = render(<PccApp forceMode="desktop" />);
-    const projectReadinessButton = container.querySelector(
-      '[data-pcc-surface-id="project-readiness"]',
-    );
+    const projectReadinessButton = container.querySelector('[data-pcc-tab-id="project-readiness"]');
     expect(projectReadinessButton).not.toBeNull();
     fireEvent.click(projectReadinessButton!);
     const sections = container.querySelectorAll<HTMLElement>(

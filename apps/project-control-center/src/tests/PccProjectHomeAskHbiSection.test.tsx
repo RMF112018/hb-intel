@@ -156,7 +156,7 @@ describe('PccProjectHomeAskHbiSection — non-routing posture and no live extern
     const client = createPccFixtureReadModelClient();
     const { container } = renderSection(client);
     for (const id of ['ask-hbi', 'unified-search'] as const) {
-      expect(container.querySelector(`[data-pcc-surface-id="${id}"]`)).toBeNull();
+      expect(container.querySelector(`[data-pcc-tab-id="${id}"]`)).toBeNull();
       expect(container.querySelector(`[data-pcc-active-surface-panel="${id}"]`)).toBeNull();
     }
   });
@@ -173,7 +173,7 @@ describe('PccProjectHomeAskHbiSection — non-routing posture and no live extern
       expect(panel?.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('ready');
     });
     for (const id of ['ask-hbi', 'unified-search'] as const) {
-      expect(container.querySelector(`[data-pcc-surface-id="${id}"]`)).toBeNull();
+      expect(container.querySelector(`[data-pcc-tab-id="${id}"]`)).toBeNull();
       expect(container.querySelector(`[data-pcc-active-surface-panel="${id}"]`)).toBeNull();
     }
   });

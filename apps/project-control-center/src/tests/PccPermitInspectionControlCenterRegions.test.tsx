@@ -22,7 +22,7 @@ const REQUIRED_REGIONS: readonly string[] = [
 ];
 
 function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-surface-id="project-readiness"]');
+  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
   expect(button).not.toBeNull();
   fireEvent.click(button!);
   const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');

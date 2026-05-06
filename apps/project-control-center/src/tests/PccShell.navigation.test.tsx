@@ -3,39 +3,41 @@ import { fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 
-describe('PccShell navigation + state', () => {
-  it('renders a rail entry for every PCC_MVP_SURFACE_IDS and defaults to project-home', () => {
+describe('PccShell navigation + state (horizontal tabs)', () => {
+  it('renders a horizontal tab for every PCC_MVP_SURFACE_IDS and defaults to project-home', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     for (const id of PCC_MVP_SURFACE_IDS) {
-      const button = container.querySelector(`[data-pcc-rail] [data-pcc-surface-id="${id}"]`);
-      expect(button, `rail entry for '${id}' should render`).not.toBeNull();
+      const tab = container.querySelector(`[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`);
+      expect(tab, `tab for '${id}' should render`).not.toBeNull();
     }
     const initialPanel = container.querySelector('[data-pcc-active-surface-panel="project-home"]');
     expect(initialPanel, 'project-home is the default active surface panel').not.toBeNull();
-    const initialButton = container.querySelector('[data-pcc-surface-id="project-home"]');
-    expect(initialButton?.getAttribute('aria-current')).toBe('page');
+    const initialTab = container.querySelector('[data-pcc-tab-id="project-home"]');
+    expect(initialTab?.getAttribute('aria-selected')).toBe('true');
+    expect(initialTab?.getAttribute('data-pcc-tab-active')).toBe('true');
   });
 
   for (const id of PCC_MVP_SURFACE_IDS) {
-    it(`clicking the '${id}' rail button updates aria-current and the active surface panel`, () => {
+    it(`clicking the '${id}' tab updates aria-selected and the active surface panel`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const allButtons = Array.from(
-        container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]'),
+      const allTabs = Array.from(
+        container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]'),
       ) as HTMLButtonElement[];
-      const target = allButtons.find((b) => b.getAttribute('data-pcc-surface-id') === id);
-      expect(target, `rail button for '${id}' should exist`).toBeDefined();
+      const target = allTabs.find((t) => t.getAttribute('data-pcc-tab-id') === id);
+      expect(target, `tab for '${id}' should exist`).toBeDefined();
       fireEvent.click(target!);
 
-      // 1. clicked button is aria-current page
-      expect(target!.getAttribute('aria-current')).toBe('page');
+      // 1. clicked tab is aria-selected
+      expect(target!.getAttribute('aria-selected')).toBe('true');
+      expect(target!.getAttribute('data-pcc-tab-active')).toBe('true');
 
-      // 2. all other rail buttons are not aria-current page
-      for (const other of allButtons) {
+      // 2. all other tabs are not aria-selected
+      for (const other of allTabs) {
         if (other === target) continue;
         expect(
-          other.getAttribute('aria-current'),
-          `'${other.getAttribute('data-pcc-surface-id')}' must not be aria-current after selecting '${id}'`,
-        ).toBeNull();
+          other.getAttribute('aria-selected'),
+          `'${other.getAttribute('data-pcc-tab-id')}' must not be aria-selected after selecting '${id}'`,
+        ).toBe('false');
       }
 
       // 3. exactly one active panel exists
@@ -52,61 +54,73 @@ describe('PccShell navigation + state', () => {
     });
   }
 
-  it('rail surface buttons are not disabled', () => {
+  it('tab buttons are not disabled', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const buttons = Array.from(
-      container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]'),
+    const tabs = Array.from(
+      container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]'),
     ) as HTMLButtonElement[];
-    for (const button of buttons) {
-      expect(button.disabled).toBe(false);
+    for (const tab of tabs) {
+      expect(tab.disabled).toBe(false);
     }
   });
 
-  it('ArrowDown / ArrowUp / Home / End move focus only and do not auto-activate', () => {
+  it('ArrowLeft / ArrowRight / Home / End move focus and auto-select per tablist contract', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const buttons = Array.from(
-      container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]'),
-    ) as HTMLButtonElement[];
-    const initialActive = container.querySelector('[data-pcc-surface-id][aria-current="page"]');
-    expect(initialActive?.getAttribute('data-pcc-surface-id')).toBe('project-home');
+    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
+    const initialActive = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
+    expect(initialActive?.getAttribute('data-pcc-tab-id')).toBe('project-home');
 
-    buttons[0].focus();
-    expect(document.activeElement).toBe(buttons[0]);
-
-    fireEvent.keyDown(buttons[0], { key: 'ArrowDown' });
-    expect(document.activeElement).toBe(buttons[1]);
-
-    fireEvent.keyDown(buttons[1], { key: 'End' });
-    expect(document.activeElement).toBe(buttons[buttons.length - 1]);
-
-    fireEvent.keyDown(buttons[buttons.length - 1], { key: 'Home' });
-    expect(document.activeElement).toBe(buttons[0]);
-
-    fireEvent.keyDown(buttons[0], { key: 'ArrowUp' });
-    expect(document.activeElement).toBe(buttons[buttons.length - 1]);
-
-    // focus changes alone must not change aria-current
+    // ArrowRight from first → second surface auto-selects.
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
     expect(
       container
-        .querySelector('[data-pcc-surface-id][aria-current="page"]')
-        ?.getAttribute('data-pcc-surface-id'),
-    ).toBe('project-home');
+        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
+        ?.getAttribute('data-pcc-tab-id'),
+    ).toBe(PCC_MVP_SURFACE_IDS[1]);
     expect(
       container
         .querySelector('[data-pcc-active-surface-panel]')
         ?.getAttribute('data-pcc-active-surface-panel'),
+    ).toBe(PCC_MVP_SURFACE_IDS[1]);
+
+    // End → last surface.
+    fireEvent.keyDown(tablist, { key: 'End' });
+    const lastId = PCC_MVP_SURFACE_IDS[PCC_MVP_SURFACE_IDS.length - 1];
+    expect(
+      container
+        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
+        ?.getAttribute('data-pcc-tab-id'),
+    ).toBe(lastId);
+    expect(
+      container
+        .querySelector('[data-pcc-active-surface-panel]')
+        ?.getAttribute('data-pcc-active-surface-panel'),
+    ).toBe(lastId);
+
+    // Home → first surface.
+    fireEvent.keyDown(tablist, { key: 'Home' });
+    expect(
+      container
+        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
+        ?.getAttribute('data-pcc-tab-id'),
     ).toBe('project-home');
+
+    // ArrowLeft from first → wraps to last.
+    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
+    expect(
+      container
+        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
+        ?.getAttribute('data-pcc-tab-id'),
+    ).toBe(lastId);
   });
 
-  it('clicking the focused rail button activates it and updates the panel', () => {
+  it('clicking a tab activates it and updates the panel + active-surface-context', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const documentsButton = container.querySelector(
-      '[data-pcc-surface-id="documents"]',
+    const documentsTab = container.querySelector(
+      '[data-pcc-tab-id="documents"]',
     ) as HTMLButtonElement;
-    documentsButton.focus();
-    expect(document.activeElement).toBe(documentsButton);
-    fireEvent.click(documentsButton);
-    expect(documentsButton.getAttribute('aria-current')).toBe('page');
+    fireEvent.click(documentsTab);
+    expect(documentsTab.getAttribute('aria-selected')).toBe('true');
     expect(container.querySelector('[data-pcc-active-surface-panel="documents"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="project-home"]')).toBeNull();
     const context = container.querySelector('[data-pcc-active-surface-context]');

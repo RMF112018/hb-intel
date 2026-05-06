@@ -39,7 +39,7 @@ const REQUIRED_REGIONS: readonly string[] = [
 ];
 
 function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-surface-id="project-readiness"]');
+  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
   expect(button).not.toBeNull();
   fireEvent.click(button!);
   const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
@@ -172,7 +172,7 @@ describe('Wave 13 Buyout Log — read-only structural posture', () => {
   it('does not introduce a standalone buyout-log shell route or active surface marker', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    expect(container.querySelector('[data-pcc-surface-id="buyout-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-tab-id="buyout-log"]')).toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
   });
 });

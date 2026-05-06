@@ -6,7 +6,7 @@ import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProj
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
 function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-surface-id="project-readiness"]');
+  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
   expect(button).not.toBeNull();
   fireEvent.click(button!);
   const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
@@ -737,7 +737,7 @@ describe('Project Readiness Center surface — Constraints Log surface-level int
   it('Constraints Log is not a separate route or active-surface workspace', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    expect(container.querySelector('[data-pcc-surface-id="constraints-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-tab-id="constraints-log"]')).toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="constraints-log"]')).toBeNull();
   });
 });
@@ -768,7 +768,7 @@ describe('Project Readiness Center surface — Buyout Log surface-level integrat
   it('Buyout Log is not a separate route or active-surface workspace', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    expect(container.querySelector('[data-pcc-surface-id="buyout-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-tab-id="buyout-log"]')).toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
   });
 });
@@ -877,7 +877,7 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
     await waitFor(() =>
       expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
     );
-    expect(container.querySelector('[data-pcc-surface-id="unified-lifecycle"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-tab-id="unified-lifecycle"]')).toBeNull();
     expect(
       container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
     ).toBeNull();

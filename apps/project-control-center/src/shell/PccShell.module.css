@@ -1,35 +1,18 @@
 .shell {
-  min-height: 100vh;
   background: var(--pcc-color-canvas);
   color: var(--pcc-color-text-primary);
   display: flex;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.layout {
-  display: flex;
-  flex-direction: row;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.layout[data-pcc-layout]:has([data-pcc-rail-variant='topStrip']),
-.layout[data-pcc-layout]:has([data-pcc-rail-variant='hamburger']) {
-  flex-direction: column;
-}
-
-.workArea {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
   min-width: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .canvas {
   flex: 1 1 auto;
+  min-width: 0;
   padding: var(--pcc-space-md) var(--pcc-space-lg);
   display: block;
+  overflow-x: hidden;
 }
 
 @media (max-width: 720px) {

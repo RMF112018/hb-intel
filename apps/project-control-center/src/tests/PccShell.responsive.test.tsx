@@ -7,35 +7,39 @@ import {
   type PccResponsiveMode,
 } from '../layout/footprints';
 
-// Temporary mapping: rail variants for the new 8-mode contract preserve
-// today's behavior at equivalent screen sizes. The vertical rail is removed
-// in `Prompt_04_Shell_Recomposition_And_Rail_Removal.md`; this map exits
-// alongside the rail.
-const EXPECTED_RAIL_VARIANT: Record<PccResponsiveMode, string> = {
-  phone: 'hamburger',
-  tabletPortrait: 'topStrip',
-  tabletLandscape: 'iconOnly',
-  smallLaptop: 'expanded',
-  standardLaptop: 'expanded',
-  largeLaptop: 'expanded',
-  desktop: 'expanded',
-  ultrawide: 'expanded',
-};
+const COMPACT_MODES = new Set<PccResponsiveMode>([
+  'phone',
+  'tabletPortrait',
+  'tabletLandscape',
+  'smallLaptop',
+]);
 
-describe('PccShell responsive behaviour', () => {
+describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () => {
   for (const mode of PCC_RESPONSIVE_MODES) {
-    it(`renders the '${mode}' mode with the expected rail variant`, () => {
+    it(`renders the '${mode}' mode with the hero band, tablist, and bento mode markers`, () => {
       const { container } = render(<PccApp forceMode={mode} />);
+
+      // Bento mode marker (preserved from prior contract).
       const grid = container.querySelector('[data-pcc-bento-grid]');
       expect(grid?.getAttribute('data-pcc-mode')).toBe(mode);
 
-      const rail = container.querySelector('[data-pcc-rail]');
-      expect(rail).not.toBeNull();
-      expect(rail?.getAttribute('data-pcc-rail-variant')).toBe(EXPECTED_RAIL_VARIANT[mode]);
-      expect(rail?.getAttribute('data-pcc-mode')).toBe(mode);
+      // Hero band renders with the matching mode marker.
+      const hero = container.querySelector('[data-pcc-project-hero-band]');
+      expect(hero, `hero band should render at '${mode}'`).not.toBeNull();
+      expect(hero?.getAttribute('data-pcc-mode')).toBe(mode);
 
-      const header = container.querySelector('[data-pcc-header]');
-      expect(header?.getAttribute('data-pcc-mode')).toBe(mode);
+      // Horizontal tabs render with the matching mode marker and density.
+      const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
+      expect(tablist, `tablist should render at '${mode}'`).not.toBeNull();
+      expect(tablist?.getAttribute('data-pcc-mode')).toBe(mode);
+      expect(tablist?.getAttribute('data-pcc-tabs-density')).toBe(
+        COMPACT_MODES.has(mode) ? 'compact' : 'comfortable',
+      );
+
+      // Thin-shell stamp.
+      const shell = container.querySelector('[data-pcc-shell]');
+      expect(shell?.getAttribute('data-pcc-shell')).toBe('thin');
+      expect(shell?.getAttribute('data-pcc-shell-mode')).toBe(mode);
     });
   }
 });

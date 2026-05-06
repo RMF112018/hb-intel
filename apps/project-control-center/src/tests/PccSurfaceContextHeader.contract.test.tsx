@@ -7,9 +7,9 @@ describe('PccSurfaceContextHeader contract', () => {
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
     it(`renders standardized context fields for '${surfaceId}'`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const button = container.querySelector(`[data-pcc-surface-id="${surfaceId}"]`);
-      expect(button).not.toBeNull();
-      fireEvent.click(button!);
+      const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      expect(tab).not.toBeNull();
+      fireEvent.click(tab!);
 
       const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
       expect(panels).toHaveLength(1);

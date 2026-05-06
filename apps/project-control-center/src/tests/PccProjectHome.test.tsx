@@ -545,8 +545,8 @@ describe('Project Home bento dashboard', () => {
     await findByText('Ask HBI — Grounded Project Answers');
     for (const id of ['unified-lifecycle', 'unified-search', 'ask-hbi'] as const) {
       expect(
-        container.querySelector(`[data-pcc-surface-id="${id}"]`),
-        `read-model-driven Project Home must not register a [data-pcc-surface-id="${id}"]`,
+        container.querySelector(`[data-pcc-tab-id="${id}"]`),
+        `read-model-driven Project Home must not register a [data-pcc-tab-id="${id}"]`,
       ).toBeNull();
       expect(
         container.querySelector(`[data-pcc-active-surface-panel="${id}"]`),

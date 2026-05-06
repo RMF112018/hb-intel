@@ -27,12 +27,12 @@ import {
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import type { PccResponsiveMode } from '../layout/footprints';
 import { useContainerBreakpoint } from '../layout/useContainerBreakpoint';
-import { PccNavigationRail } from './PccNavigationRail';
-import { PccProjectIntelligenceHeader } from './PccProjectIntelligenceHeader';
+import { PccHorizontalTabs } from './PccHorizontalTabs';
 import {
-  PccProjectContextBand,
-  type PccProjectContextSourceConfidence,
-} from './PccProjectContextBand';
+  PccProjectHeroBand,
+  type PccProjectHeroPill,
+  type PccProjectHeroSourceConfidence,
+} from './PccProjectHeroBand';
 import styles from './PccShell.module.css';
 import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 
@@ -74,35 +74,29 @@ const PCC_THEME_VARS: CSSProperties = {
 
 export interface PccShellProps {
   projectName: string;
-  subtitle: string;
-  dateScope: string;
-  pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
+  clientName: string;
+  location: string;
+  estimatedValue: string;
+  pills: ReadonlyArray<PccProjectHeroPill>;
   activeSurfaceLabel: string;
   activeSurfaceWorkflowLabel: string;
-  /**
-   * Active surface — supplied by `PccApp` from `usePccShellState`. The shell
-   * is stateless about which surface is active.
-   */
+  /** Active surface — supplied by `PccApp` from `usePccShellState`. */
   activeSurfaceId: PccMvpSurfaceId;
   /** Surface-selection callback wired from `usePccShellState.setActiveSurface`. */
   onSelectSurface?: (id: PccMvpSurfaceId) => void;
-  /**
-   * Source confidence for the persistent project-context band. Derived in
-   * `PccApp` from `usePccShellState.previewMode` (literal `true` today).
-   */
-  sourceConfidence: PccProjectContextSourceConfidence;
+  /** Source confidence for the project hero band. */
+  sourceConfidence: PccProjectHeroSourceConfidence;
   /** Test override for the responsive mode. */
   forceMode?: PccResponsiveMode;
-  /** Optional bottom-of-rail slot. */
-  railFooter?: ReactNode;
   /** Bento grid content (cards). */
   children: ReactNode;
 }
 
 export const PccShell: FC<PccShellProps> = ({
   projectName,
-  subtitle,
-  dateScope,
+  clientName,
+  location,
+  estimatedValue,
   pills,
   activeSurfaceLabel,
   activeSurfaceWorkflowLabel,
@@ -110,7 +104,6 @@ export const PccShell: FC<PccShellProps> = ({
   onSelectSurface,
   sourceConfidence,
   forceMode,
-  railFooter,
   children,
 }) => {
   const { ref: shellRef, mode: measuredShellMode } = useContainerBreakpoint();
@@ -121,32 +114,28 @@ export const PccShell: FC<PccShellProps> = ({
       ref={shellRef}
       className={styles.shell}
       style={PCC_THEME_VARS}
-      data-pcc-shell="wave-2"
+      data-pcc-shell="thin"
       data-pcc-shell-mode={shellMode}
     >
-      <div className={styles.layout} data-pcc-layout="">
-        <PccNavigationRail
-          mode={shellMode}
-          activeSurfaceId={activeSurfaceId}
-          onSelectSurface={onSelectSurface}
-          footer={railFooter}
-        />
-        <div className={styles.workArea}>
-          <PccProjectIntelligenceHeader subtitle={subtitle} mode={shellMode} />
-          <PccProjectContextBand
-            projectName={projectName}
-            pills={pills}
-            dateScope={dateScope}
-            activeSurfaceLabel={activeSurfaceLabel}
-            activeSurfaceWorkflowLabel={activeSurfaceWorkflowLabel}
-            sourceConfidence={sourceConfidence}
-            mode={shellMode}
-          />
-          <main className={styles.canvas} data-pcc-canvas="">
-            <PccBentoGrid forceMode={forceMode}>{children}</PccBentoGrid>
-          </main>
-        </div>
-      </div>
+      <PccProjectHeroBand
+        mode={shellMode}
+        projectName={projectName}
+        clientName={clientName}
+        location={location}
+        estimatedValue={estimatedValue}
+        sourceConfidence={sourceConfidence}
+        pills={pills}
+        activeSurfaceLabel={activeSurfaceLabel}
+        activeSurfaceWorkflowLabel={activeSurfaceWorkflowLabel}
+      />
+      <PccHorizontalTabs
+        mode={shellMode}
+        activeSurfaceId={activeSurfaceId}
+        onSelectSurface={(id) => onSelectSurface?.(id)}
+      />
+      <main className={styles.canvas} data-pcc-canvas="">
+        <PccBentoGrid forceMode={forceMode}>{children}</PccBentoGrid>
+      </main>
     </div>
   );
 };
