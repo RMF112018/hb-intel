@@ -66,6 +66,13 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     expect(container.querySelector('[data-pcc-hero-tab-seam]')).not.toBeNull();
   });
 
+  it('renders the canvas marker on a <main> element', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const canvases = container.querySelectorAll('[data-pcc-canvas]');
+    expect(canvases.length).toBe(1);
+    expect(canvases[0]?.tagName).toBe('MAIN');
+  });
+
   it('does not render the legacy phone-mode project-intel toggle', () => {
     const { container } = render(<PccApp forceMode="phone" />);
     expect(container.querySelector('[data-pcc-project-intel-toggle]')).toBeNull();
