@@ -35,25 +35,6 @@ Create `PccProjectHeroBand` as the replacement target for `PccProjectIntelligenc
 
 Do not mount it in `PccShell` yet unless the prompt is explicitly extended later. Do not delete the old header in this prompt.
 
-## Allowed Files to Edit
-
-```text
-apps/project-control-center/src/shell/PccProjectHeroBand.tsx
-apps/project-control-center/src/shell/PccProjectHeroBand.module.css
-apps/project-control-center/src/preview/projectPlaceholder.ts
-apps/project-control-center/src/tests/PccProjectHeroBand.test.tsx
-docs/architecture/blueprint/sp-project-control-center/phase-3/wave-15A/wave-b/prompt-03-project-hero-band/closeout/PROMPT_03_PROJECT_HERO_BAND_CLOSEOUT.md
-```
-
-## Allowed Reads
-
-Use active context first. Read only:
-
-- `docs/03_SHELL_TARGET_SPECIFICATION.md`
-- `docs/02_SOURCE_OWNERSHIP_MAP.md`
-- `PccStatusPill.tsx` only if you need exact prop names and it is not in current context.
-- `PccCommandSearch.tsx` only if you need exact prop names and it is not in current context.
-
 ## Implementation Requirements
 
 1. Create `PccProjectHeroBand`.
@@ -84,10 +65,14 @@ Use active context first. Read only:
    - `Prompt`
 
 6. Responsive target:
-   - `standardLaptop`: 72–85px target height,
-   - `smallLaptop`: compact metadata/search,
-   - `tabletLandscape` and below: retain identity + active surface + source confidence,
-   - `phone`: visible minimum identity + active surface + source confidence.
+   - `ultrawide`: 72–85px target height; project name, active surface, full metadata row, status/source-confidence indicators, and expanded metadata/search area all visible.
+   - `desktop`: 72–85px target height; project name, active surface, metadata row, status/source-confidence indicators, and expanded metadata/search area visible.
+   - `largeLaptop`: 72–85px target height; project name, active surface, metadata row, and expanded metadata/search area visible with slightly tighter spacing.
+   - `standardLaptop`: 72–85px target height; project name, active surface, metadata row, and metadata/search area remain visible; use compact spacing only, not content removal.
+   - `smallLaptop`: compact density; project name, active surface, metadata row, and metadata/search area remain visible with reduced gaps, shorter labels if needed, and controlled truncation.
+   - `tabletLandscape`: compact two-row layout allowed; project name, active surface, metadata row, and metadata/search area remain visible.
+   - `tabletPortrait`: stacked/compact layout allowed; project name, active surface, metadata row, and metadata/search area remain visible, with wrapping or reduced-width search if needed.
+   - `phone`: project name and active surface remain visible. Metadata/search collapses behind a toggle labeled `Project Intel`; when toggled, the metadata/search content displays below the project name. Do not remove the metadata/search affordance entirely.
 
 7. Required markers:
    - `data-pcc-project-hero-band=""`

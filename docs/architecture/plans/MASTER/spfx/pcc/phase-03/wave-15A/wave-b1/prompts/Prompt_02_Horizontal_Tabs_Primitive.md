@@ -59,14 +59,14 @@ Do not read rail files unless you need icon mapping and it is not in current con
 2. Required order:
 
 ```text
-Project Home
-Team & Access
-Documents
-Project Readiness
-Approvals
-External Systems
-Control Center Settings
-Site Health
+Project Home as `Project Home`
+Team & Access as `Team`
+Documents as `Documents`
+Project Readiness as `Project Readiness`
+Approvals as `Approvals`
+External Systems as `Apps`
+Control Center Settings as `Settings`
+Site Health as `Site Health`
 ```
 
 3. Required markers:
