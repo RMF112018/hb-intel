@@ -1,9 +1,8 @@
 /**
- * Wave 2 / Prompt 03 — display-only header context.
- *
- * Tiny local placeholder for the project intelligence header. Not a fixture
- * record; not consumed from `PCC_FIXTURES`. Replaced when the header binds to
- * real read-models in a later wave.
+ * Local project context placeholder used by PCC shell-level surfaces (header,
+ * hero band, context band) before they bind to live read-models. The values
+ * are reference-only product copy; this constant is not a fixture record and
+ * is not consumed from any shared fixture aggregate.
  */
 
 export interface PccProjectPlaceholder {
@@ -11,6 +10,10 @@ export interface PccProjectPlaceholder {
   readonly subtitle: string;
   readonly dateScope: string;
   readonly pills: ReadonlyArray<{ label: string; tone: 'info' | 'neutral' | 'warning' }>;
+  readonly clientName: string;
+  readonly location: string;
+  readonly estimatedValue: string;
+  readonly sourceConfidence: 'reference' | 'live';
 }
 
 export const PCC_PROJECT_PLACEHOLDER: PccProjectPlaceholder = {
@@ -21,4 +24,8 @@ export const PCC_PROJECT_PLACEHOLDER: PccProjectPlaceholder = {
     { label: 'Reference', tone: 'info' },
     { label: 'PCC', tone: 'neutral' },
   ],
+  clientName: 'Reference Client',
+  location: 'Reference Location',
+  estimatedValue: '$0',
+  sourceConfidence: 'reference',
 };

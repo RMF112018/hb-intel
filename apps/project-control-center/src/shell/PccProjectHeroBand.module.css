@@ -1,0 +1,252 @@
+/* PccProjectHeroBand — premium project-context surface
+ *
+ * Visual contract (Wave 15A Wave B b1, Prompt 03):
+ *  - target band height 72–85px on comfortable modes
+ *  - eyebrow: 11px / 600 / 0.08em uppercase, muted
+ *  - project name: 17px / 700 (compact) → 19px / 700 (comfortable)
+ *  - metadata: 13px / 500 with 11px labels
+ *  - active-surface marker rendered exactly once, in the always-visible row
+ *  - phone: identity row + Project Intel toggle always visible; metadata,
+ *    command search, source-confidence, pills collapse behind the toggle
+ *
+ * Accent color is supplied as `--pcc-hero-accent` from the component (TS
+ * theme tokens are bridged via inline-style CSS custom properties on the
+ * hero root).
+ */
+
+.heroBand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.heroBand[data-pcc-hero-density='compact'] {
+  gap: 6px;
+  padding: 8px 14px;
+}
+
+.heroBand[data-pcc-mode='phone'] {
+  gap: 8px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.identityRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 32px;
+}
+
+.heroBand[data-pcc-mode='tabletPortrait'] .identityRow,
+.heroBand[data-pcc-mode='phone'] .identityRow {
+  flex-wrap: wrap;
+}
+
+.identity {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.projectName {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgba(15, 23, 42, 0.96);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heroBand[data-pcc-hero-density='compact'] .projectName {
+  font-size: 17px;
+}
+
+.activeSurfaceContext {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.72);
+  white-space: nowrap;
+}
+
+.activeSurfaceLabel {
+  font-weight: 600;
+}
+
+.activeSurfaceWorkflow {
+  color: rgba(15, 23, 42, 0.55);
+}
+
+/* Toggle button — visible only at phone width; non-phone modes hide it. */
+.intelToggle {
+  display: none;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--pcc-hero-accent, #f37021);
+  background: transparent;
+  border: 1px solid var(--pcc-hero-accent, #f37021);
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.heroBand[data-pcc-mode='phone'] .intelToggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.intelToggle:hover {
+  background-color: rgba(243, 112, 33, 0.08);
+}
+
+.intelToggle:focus-visible {
+  outline: 2px solid var(--pcc-hero-accent, #f37021);
+  outline-offset: 2px;
+}
+
+.collapsible {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.heroBand[data-pcc-mode='tabletPortrait'] .collapsible,
+.heroBand[data-pcc-mode='phone'] .collapsible {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.pillRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.pill[data-tone='info'] {
+  color: #1d4ed8;
+  background-color: rgba(29, 78, 216, 0.08);
+  border-color: rgba(29, 78, 216, 0.24);
+}
+
+.pill[data-tone='warning'] {
+  color: #b45309;
+  background-color: rgba(180, 83, 9, 0.1);
+  border-color: rgba(180, 83, 9, 0.24);
+}
+
+.pill[data-tone='neutral'] {
+  color: rgba(15, 23, 42, 0.72);
+  background-color: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+.metadata {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.metadataItem {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.metadataLabel {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.55);
+}
+
+.metadataValue {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(15, 23, 42, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchSlot {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 220px;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.heroBand[data-pcc-hero-density='compact'] .searchSlot {
+  flex-basis: 0;
+}
+
+.sourceConfidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.72);
+  white-space: nowrap;
+}
+
+.sourceConfidenceDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: rgba(15, 23, 42, 0.32);
+}
+
+.sourceConfidence[data-pcc-source-confidence='live'] .sourceConfidenceDot {
+  background-color: var(--pcc-hero-accent, #f37021);
+}
+
+.sourceConfidenceLabel {
+  font-weight: 600;
+}
