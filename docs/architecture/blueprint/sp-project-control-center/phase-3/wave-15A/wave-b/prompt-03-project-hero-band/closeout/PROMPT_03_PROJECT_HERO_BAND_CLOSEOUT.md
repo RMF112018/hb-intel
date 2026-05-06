@@ -2,6 +2,17 @@
 
 `PccProjectHeroBand` primitive — replacement target for `PccProjectIntelligenceHeader`.
 
+## Post-Commit Comment-Only Remediation
+
+The original Prompt 03 commit (`00fa96a72`) carried over forbidden source-comment language that contradicted the closeout's "product-safe language confirmation" claim:
+
+- `apps/project-control-center/src/preview/projectPlaceholder.ts` header retained `fixture` (twice) in the rewritten docblock.
+- `apps/project-control-center/src/shell/PccProjectHeroBand.module.css` header included `Wave 15A Wave B b1, Prompt 03` in the visual-contract comment.
+
+A follow-up comment-only commit removes both. The placeholder docblock is rewritten to drop `fixture` references; the CSS module's `Visual contract` line is shortened to omit the wave / prompt identifier. No runtime, type, or test behavior changes; no markup, class names, or CSS rules change.
+
+A residual mention of `Preview mode`, `Mock data`, and `Fixture data` remains in `apps/project-control-center/src/tests/PccProjectHeroBand.test.tsx` line 100 as a forbidden-phrase enumeration the test uses to assert their **absence** from rendered output — this enforces the rule rather than violating it.
+
 ## Outcome
 
 `PccProjectHeroBand` is a PCC-local project-context surface built and tested in isolation. The component is **not** mounted in `PccShell`; mounting and removal of the legacy `PccProjectIntelligenceHeader` + `PccProjectContextBand` are deferred to `Prompt_04_Shell_Recomposition_And_Rail_Removal.md`. The placeholder constant is extended additively with the four hero fields. No surface, router, shell, rail, header, context-band, command-search, app entry, backend, package, manifest, or lockfile change in this prompt.
@@ -26,16 +37,15 @@ No other file is created, modified, deleted, or renamed.
 
 `apps/project-control-center/src/preview/projectPlaceholder.ts`:
 
-1. **File header rewritten** with product-safe neutral language:
+1. **File header rewritten** with product-safe neutral language. Final wording (after the post-commit comment-only remediation noted below):
 
    ```
-   Local project context placeholder used by PCC shell-level surfaces (header,
-   hero band, context band) before they bind to live read-models. The values
-   are reference-only product copy; this constant is not a fixture record and
-   is not consumed from any shared fixture aggregate.
+   Local project context placeholder used by PCC shell-level surfaces before
+   they bind to live read-models. The values are reference-only product copy.
+   This constant is local to the PCC preview shell context.
    ```
 
-   The previous header referenced `Wave 2 / Prompt 03`, `header`, `fixture record`, and `PCC_FIXTURES`; that language is removed. No `Wave`, `Prompt`, `fixture`, `mock`, or `preview mode` language remains.
+   The previous header referenced `Wave 2 / Prompt 03`, `fixture record`, and `PCC_FIXTURES`; that language is removed.
 
 2. **`PccProjectPlaceholder` interface extended** with four new required fields:
 

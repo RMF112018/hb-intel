@@ -1,8 +1,7 @@
 /**
- * Local project context placeholder used by PCC shell-level surfaces (header,
- * hero band, context band) before they bind to live read-models. The values
- * are reference-only product copy; this constant is not a fixture record and
- * is not consumed from any shared fixture aggregate.
+ * Local project context placeholder used by PCC shell-level surfaces before
+ * they bind to live read-models. The values are reference-only product copy.
+ * This constant is local to the PCC preview shell context.
  */
 
 export interface PccProjectPlaceholder {
