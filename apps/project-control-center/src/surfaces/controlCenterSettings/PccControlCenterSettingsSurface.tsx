@@ -2,12 +2,9 @@ import { Fragment, type FC } from 'react';
 import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
-import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
-import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import styles from './PccControlCenterSettingsSurface.module.css';
 
 const SURFACE = PCC_MVP_SURFACES['control-center-settings'];
-const POSTURE = pccSurfacePostureCopy('reference');
 
 const SETTINGS_SCOPE_PREVIEW = [
   { id: 'project', label: 'Project scope', value: 'Project profile' },
@@ -32,14 +29,6 @@ export const PccControlCenterSettingsSurface: FC = () => (
       dataActiveSurfacePanel="control-center-settings"
     >
       <div className={styles.body}>
-        <PccSurfaceContextHeader
-          surfaceId="control-center-settings"
-          projectLabel="Project 26-000-00 · Governance Configuration"
-          postureLabel={POSTURE.postureLabel}
-          sourceStatusLabel={POSTURE.sourceStatusLabel}
-          sourceConfidenceLabel={POSTURE.sourceConfidenceLabel}
-          lastUpdatedLabel={POSTURE.lastUpdatedLabel}
-        />
         <PccPreviewState
           state="preview"
           title="Settings overview"

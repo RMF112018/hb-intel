@@ -47,10 +47,20 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
       // 4. active panel marker equals the clicked surface id
       expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe(id);
 
-      // 5. panel includes that surface's display name and description from PCC_MVP_SURFACES
+      // 5. panel includes that surface's display name from PCC_MVP_SURFACES (the
+      //    eyebrow on the surface's primary dashboard card). The surface
+      //    description is shell-owned (rendered by PccProjectHeroBand outside the
+      //    panel using PCC_SURFACE_HERO_DESCRIPTIONS, which differs from
+      //    PCC_MVP_SURFACES.description) and is asserted by the shell hero tests.
+      //    Wave-b2 Prompt 03 removed the duplicated context header from happy-path
+      //    surfaces, so the surface description is no longer asserted in the panel.
       const surface = PCC_MVP_SURFACES[id];
       expect(panels[0].textContent).toContain(surface.displayName);
-      expect(panels[0].textContent).toContain(surface.description);
+
+      // Hero owns surface description; assert the marker is present and non-empty.
+      const heroDescription = container.querySelector('[data-pcc-hero-surface-description]');
+      expect(heroDescription).not.toBeNull();
+      expect(heroDescription?.textContent?.trim().length ?? 0).toBeGreaterThan(0);
     });
   }
 

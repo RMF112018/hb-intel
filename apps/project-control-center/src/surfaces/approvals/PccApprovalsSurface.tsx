@@ -59,8 +59,6 @@ import styles from './PccApprovalsSurface.module.css';
 const SURFACE = PCC_MVP_SURFACES.approvals;
 const POSTURE_LOADING = pccSurfacePostureCopy('loading');
 const POSTURE_ERROR = pccSurfacePostureCopy('error');
-const POSTURE_REFERENCE = pccSurfacePostureCopy('reference');
-const POSTURE_UNAVAILABLE = pccSurfacePostureCopy('unavailable');
 
 const FIXTURE_PROJECT_ID = 'p-w14-approvals-fixture' as PccProjectId;
 
@@ -335,18 +333,6 @@ const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
       data-pcc-readiness-section="approvals"
       data-pcc-approvals-lane="home"
     >
-      <PccSurfaceContextHeader
-        surfaceId="approvals"
-        projectLabel="Project 26-000-00 · Approvals and Checkpoints"
-        postureLabel={(isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).postureLabel}
-        sourceStatusLabel={
-          (isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).sourceStatusLabel
-        }
-        sourceConfidenceLabel={
-          (isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).sourceConfidenceLabel
-        }
-        lastUpdatedLabel={(isAvailable ? POSTURE_REFERENCE : POSTURE_UNAVAILABLE).lastUpdatedLabel}
-      />
       {isAvailable ? (
         <Fragment>
           <div className={styles.metricRow}>

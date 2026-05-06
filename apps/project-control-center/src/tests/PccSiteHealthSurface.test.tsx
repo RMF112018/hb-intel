@@ -36,7 +36,8 @@ describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
     expect(panels).toHaveLength(1);
     expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('site-health');
     expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['site-health'].displayName);
-    expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['site-health'].description);
+    // surface.description is shell-hero-owned (PccProjectHeroBand) post wave-b2
+    // Prompt 03; not asserted in the surface panel.
   });
 
   it('overview card displays SAMPLE_SITE_HEALTH_SUMMARY values', () => {

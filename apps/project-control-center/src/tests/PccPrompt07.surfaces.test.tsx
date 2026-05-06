@@ -9,10 +9,14 @@ const PROMPT_07_SURFACES = [
   'project-readiness',
 ] as const;
 
+// Surface-owned panel copy. After wave-b2 Prompt 03 removed the duplicated
+// PccSurfaceContextHeader from happy-path, the panel no longer carries the
+// surface description from PCC_MVP_SURFACES; assert against copy that is
+// genuinely panel-owned (PreviewState titles / dashboard card titles).
 const SURFACE_PREVIEW_COPY: Record<(typeof PROMPT_07_SURFACES)[number], string> = {
   'team-and-access': 'Team and access overview',
   'control-center-settings': 'Settings overview',
-  approvals: 'Approval checkpoints across PCC workflow modules',
+  approvals: 'Approvals home',
   'project-readiness': 'Project readiness',
 };
 

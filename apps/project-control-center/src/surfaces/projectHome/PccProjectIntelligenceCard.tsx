@@ -3,8 +3,6 @@ import { PCC_MVP_SURFACES, SAMPLE_PROJECT_PROFILE, type IProjectProfile } from '
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
-import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
-import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -14,7 +12,6 @@ interface PccProjectIntelligenceCardProps extends PccProjectHomeCardProps {
 }
 
 const PROJECT_HOME_SURFACE = PCC_MVP_SURFACES['project-home'];
-const POSTURE = pccSurfacePostureCopy('reference');
 
 const valueFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -25,14 +22,6 @@ const valueFormatter = new Intl.NumberFormat('en-US', {
 const ProjectIntelligenceBody: FC<{ profile: IProjectProfile }> = ({ profile }) => {
   return (
     <div className={styles.heroBody} data-pcc-project-intelligence-body="">
-      <PccSurfaceContextHeader
-        surfaceId="project-home"
-        projectLabel={`Project ${profile.projectNumber} · ${profile.projectName}`}
-        postureLabel={POSTURE.postureLabel}
-        sourceStatusLabel={POSTURE.sourceStatusLabel}
-        sourceConfidenceLabel={POSTURE.sourceConfidenceLabel}
-        lastUpdatedLabel={profile.scheduledCompletionDate ?? POSTURE.lastUpdatedLabel}
-      />
       <div>
         <span className={styles.heroNumber}>Project · {profile.projectNumber}</span>
         <h2 className={styles.heroProjectName}>{profile.projectName}</h2>

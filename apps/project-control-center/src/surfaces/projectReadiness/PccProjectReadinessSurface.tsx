@@ -77,7 +77,6 @@ import { PccStatusPill } from '../../ui/PccStatusPill';
 import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
 import { PccSurfaceContextHeader } from '../shared/PccSurfaceContextHeader';
 
-const POSTURE_REFERENCE_READINESS = pccSurfacePostureCopy('reference');
 const POSTURE_LOADING_READINESS = pccSurfacePostureCopy('loading');
 const POSTURE_ERROR_READINESS = pccSurfacePostureCopy('error');
 import { FIXTURE_PROCORE_SURFACE_VIEW_MODEL } from '../../viewModels/procoreSurfaceFixture';
@@ -446,14 +445,6 @@ const HeroCard: FC<HeroCardProps> = ({ hero }) => (
     dataActiveSurfacePanel="project-readiness"
   >
     <div data-pcc-readiness-region="hero" className={styles.heroBody}>
-      <PccSurfaceContextHeader
-        surfaceId="project-readiness"
-        projectLabel="Project 26-000-00 · Readiness Center"
-        postureLabel={POSTURE_REFERENCE_READINESS.postureLabel}
-        sourceStatusLabel={POSTURE_REFERENCE_READINESS.sourceStatusLabel}
-        sourceConfidenceLabel={POSTURE_REFERENCE_READINESS.sourceConfidenceLabel}
-        lastUpdatedLabel={POSTURE_REFERENCE_READINESS.lastUpdatedLabel}
-      />
       <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
       <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
       <p className={styles.heroCaption}>{PCC_MVP_SURFACES['project-readiness'].description}</p>
