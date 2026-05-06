@@ -95,7 +95,10 @@
    remain in place to preserve current visuals on unmigrated
    surfaces until route migration in Prompts 04–07. */
 .card[data-pcc-card-tier='tier1'] {
-  border-color: color-mix(in srgb, var(--pcc-color-rail-accent) 52%, var(--pcc-color-border));
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--pcc-color-rail-accent) 62%, var(--pcc-color-border));
+  border-top-width: 3px;
+  border-top-color: color-mix(in srgb, var(--pcc-color-rail-accent) 78%, var(--pcc-color-border));
   box-shadow: 0 16px 32px rgba(16, 24, 40, 0.12);
 }
 
@@ -103,19 +106,32 @@
   font-size: clamp(18px, 1.4vw, 22px);
   line-height: 1.2;
   font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+.card[data-pcc-card-tier='tier1'] .eyebrow {
+  color: color-mix(in srgb, var(--pcc-color-rail-accent) 70%, var(--pcc-color-text-muted));
 }
 
 .card[data-pcc-card-tier='tier2'] {
   border-color: color-mix(in srgb, var(--pcc-color-border) 72%, var(--pcc-color-rail-accent));
+  border-top: 2px solid
+    color-mix(in srgb, var(--pcc-color-rail-accent) 38%, var(--pcc-color-border));
 }
 
 .card[data-pcc-card-tier='tier3'] {
   box-shadow: none;
-  background: color-mix(in srgb, var(--pcc-color-card) 94%, var(--pcc-color-canvas));
+  background: color-mix(in srgb, var(--pcc-color-card) 92%, var(--pcc-color-canvas));
+  border-color: color-mix(in srgb, var(--pcc-color-border) 70%, var(--pcc-color-canvas));
+}
+
+.card[data-pcc-card-tier='tier3'] .title {
+  color: color-mix(in srgb, var(--pcc-color-text-primary) 82%, var(--pcc-color-text-muted));
 }
 
 .card[data-pcc-card-tier='state'] {
   border-style: dashed;
+  border-color: color-mix(in srgb, var(--pcc-status-neutral) 48%, var(--pcc-color-border));
   background: color-mix(in srgb, var(--pcc-color-canvas) 72%, var(--pcc-color-card));
 }
 
@@ -144,7 +160,13 @@
 
 .card[data-pcc-card-region='deferred'] {
   border-style: dashed;
+  border-color: color-mix(in srgb, var(--pcc-color-border) 60%, var(--pcc-color-canvas));
+  background: color-mix(in srgb, var(--pcc-color-canvas) 36%, var(--pcc-color-card));
   opacity: 0.94;
+}
+
+.card[data-pcc-card-region='detail'] .body {
+  padding: var(--pcc-space-lg);
 }
 
 .card[data-pcc-card-region='detail'] .content {
@@ -153,4 +175,9 @@
 
 .card[data-pcc-card-region='rail'] {
   background: color-mix(in srgb, var(--pcc-color-card) 88%, var(--pcc-color-canvas));
+}
+
+.card[data-pcc-card-region='rail'] .body {
+  padding: var(--pcc-space-sm);
+  gap: var(--pcc-space-xs);
 }

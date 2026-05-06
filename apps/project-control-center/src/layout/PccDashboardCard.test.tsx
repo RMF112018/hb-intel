@@ -142,14 +142,101 @@ describe('PccDashboardCard tier / region / heading contract', () => {
       'data-pcc-row-span',
       'data-pcc-measured-height',
       'data-pcc-active-surface-panel',
-      // New markers introduced in Wave 15A wave-b3 Prompt 01.
       'data-pcc-card-tier',
       'data-pcc-card-region',
+      // Source markers introduced in Wave 15A wave-b3 Prompt 01.
+      'data-pcc-card-tier-source',
+      'data-pcc-card-region-source',
+      'data-pcc-heading-level',
     ];
     for (const attr of requiredAttrs) {
       expect(card.hasAttribute(attr)).toBe(true);
     }
     // Spot-check the legacy hierarchy marker is unchanged.
     expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+  });
+});
+
+describe('PccDashboardCard contract source markers', () => {
+  it("explicit tier prop emits tier-source='explicit'", () => {
+    const { container } = renderCard({ tier: 'tier2', title: 'Explicit tier' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
+  });
+
+  it("hierarchy='primary' (no explicit tier) emits tier-source='hierarchy'", () => {
+    const { container } = renderCard({ hierarchy: 'primary', title: 'Hierarchy primary' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier1');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('hierarchy');
+  });
+
+  it("hierarchy='supporting' (no explicit tier) emits tier-source='hierarchy'", () => {
+    const { container } = renderCard({ hierarchy: 'supporting', title: 'Hierarchy supporting' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('hierarchy');
+  });
+
+  it("default props (no tier, no non-standard hierarchy) emit tier-source='default'", () => {
+    const { container } = renderCard({ title: 'Default tier' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('default');
+  });
+
+  it("explicit tier overrides non-standard hierarchy and emits tier-source='explicit'", () => {
+    const { container } = renderCard({
+      hierarchy: 'primary',
+      tier: 'tier3',
+      title: 'Override',
+    });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
+  });
+
+  it("explicit region prop emits region-source='explicit'", () => {
+    const { container } = renderCard({ region: 'detail', title: 'Explicit region' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-region')).toBe('detail');
+    expect(card.getAttribute('data-pcc-card-region-source')).toBe('explicit');
+  });
+
+  it("region omitted emits region-source='resolved'", () => {
+    const { container } = renderCard({ tier: 'tier1', title: 'Resolved region' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-region')).toBe('command');
+    expect(card.getAttribute('data-pcc-card-region-source')).toBe('resolved');
+  });
+
+  it('emits resolved heading level marker for tier1 default (h2)', () => {
+    const { container } = renderCard({ tier: 'tier1', title: 'Tier1 heading' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-heading-level')).toBe('2');
+  });
+
+  it('emits resolved heading level marker for tier2 default (h3)', () => {
+    const { container } = renderCard({ tier: 'tier2', title: 'Tier2 heading' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-heading-level')).toBe('3');
+  });
+
+  it('emits resolved heading level marker for tier3 default (h3)', () => {
+    const { container } = renderCard({ tier: 'tier3', title: 'Tier3 heading' });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-heading-level')).toBe('3');
+  });
+
+  it('explicit headingLevel={4} overrides tier-derived default', () => {
+    const { container } = renderCard({
+      tier: 'tier1',
+      headingLevel: 4,
+      title: 'Explicit heading',
+    });
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-heading-level')).toBe('4');
+    expect(container.querySelector('h4')?.textContent).toBe('Explicit heading');
+    expect(container.querySelector('h2')).toBeNull();
   });
 });

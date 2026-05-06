@@ -44,25 +44,28 @@ export interface PccDashboardCardProps {
   dataActiveSurfacePanel?: string;
 }
 
+export type PccCardTierSource = 'explicit' | 'hierarchy' | 'default';
+export type PccCardRegionSource = 'explicit' | 'resolved';
+
 function resolveCardTier(
   explicitTier: PccCardTier | undefined,
   hierarchy: 'primary' | 'standard' | 'supporting',
-): PccCardTier {
-  if (explicitTier) return explicitTier;
-  if (hierarchy === 'primary') return 'tier1';
-  if (hierarchy === 'supporting') return 'tier3';
-  return 'tier2';
+): { tier: PccCardTier; source: PccCardTierSource } {
+  if (explicitTier) return { tier: explicitTier, source: 'explicit' };
+  if (hierarchy === 'primary') return { tier: 'tier1', source: 'hierarchy' };
+  if (hierarchy === 'supporting') return { tier: 'tier3', source: 'hierarchy' };
+  return { tier: 'tier2', source: 'default' };
 }
 
 function resolveCardRegion(
   explicitRegion: PccCardRegion | undefined,
   tier: PccCardTier,
-): PccCardRegion {
-  if (explicitRegion) return explicitRegion;
-  if (tier === 'tier1') return 'command';
-  if (tier === 'state') return 'state';
-  if (tier === 'tier3') return 'reference';
-  return 'operational';
+): { region: PccCardRegion; source: PccCardRegionSource } {
+  if (explicitRegion) return { region: explicitRegion, source: 'explicit' };
+  if (tier === 'tier1') return { region: 'command', source: 'resolved' };
+  if (tier === 'state') return { region: 'state', source: 'resolved' };
+  if (tier === 'tier3') return { region: 'reference', source: 'resolved' };
+  return { region: 'operational', source: 'resolved' };
 }
 
 function resolveHeadingLevel(
@@ -95,8 +98,8 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
   const minInlineSize = FOOTPRINT_MIN_INLINE_SIZE_PX[mode][footprint];
 
   const headingId = useId();
-  const resolvedTier = resolveCardTier(tier, hierarchy);
-  const resolvedRegion = resolveCardRegion(region, resolvedTier);
+  const { tier: resolvedTier, source: tierSource } = resolveCardTier(tier, hierarchy);
+  const { region: resolvedRegion, source: regionSource } = resolveCardRegion(region, resolvedTier);
   const resolvedHeadingLevel = resolveHeadingLevel(headingLevel, resolvedTier);
   const HeadingTag = `h${resolvedHeadingLevel}` as keyof JSX.IntrinsicElements;
 
@@ -113,8 +116,11 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       data-pcc-footprint={footprint}
       data-pcc-card-hierarchy={hierarchy}
       data-pcc-card-tier={resolvedTier}
+      data-pcc-card-tier-source={tierSource}
       data-pcc-card-region={resolvedRegion}
+      data-pcc-card-region-source={regionSource}
       data-pcc-card-density={density}
+      data-pcc-heading-level={String(resolvedHeadingLevel)}
       data-pcc-mode={mode}
       data-pcc-column-span={columnSpan}
       data-pcc-row-span={rowSpan}
