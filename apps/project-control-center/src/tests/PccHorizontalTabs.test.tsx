@@ -162,6 +162,30 @@ describe('PccHorizontalTabs primitive', () => {
     }
   });
 
+  it('Enter activation dispatches exactly one onSelectSurface call', () => {
+    const onSelectSurface = vi.fn();
+    const { container } = renderTabs({ activeSurfaceId: 'project-home', onSelectSurface });
+    const target = container.querySelector('[data-pcc-tab-id="documents"]') as HTMLButtonElement;
+
+    fireEvent.keyDown(target, { key: 'Enter' });
+    fireEvent.keyUp(target, { key: 'Enter' });
+
+    expect(onSelectSurface).toHaveBeenCalledTimes(1);
+    expect(onSelectSurface).toHaveBeenCalledWith('documents');
+  });
+
+  it('Space activation dispatches exactly one onSelectSurface call', () => {
+    const onSelectSurface = vi.fn();
+    const { container } = renderTabs({ activeSurfaceId: 'project-home', onSelectSurface });
+    const target = container.querySelector('[data-pcc-tab-id="approvals"]') as HTMLButtonElement;
+
+    fireEvent.keyDown(target, { key: ' ' });
+    fireEvent.keyUp(target, { key: ' ' });
+
+    expect(onSelectSurface).toHaveBeenCalledTimes(1);
+    expect(onSelectSurface).toHaveBeenCalledWith('approvals');
+  });
+
   it('passes panelId through as aria-controls on every tab when supplied', () => {
     const { container } = renderTabs({ panelId: 'pcc-active-panel' });
     for (const id of PCC_MVP_SURFACE_IDS) {
@@ -185,6 +209,18 @@ describe('PccHorizontalTabs primitive', () => {
     expect(tablist?.getAttribute('data-pcc-tabs-density')).toBe('compact');
     const tabs = container.querySelectorAll('[data-pcc-tab-id]');
     expect(tabs).toHaveLength(PCC_MVP_SURFACE_IDS.length);
+  });
+
+  it('exposes a structural active indicator independent of text labels', () => {
+    const { container } = renderTabs({ activeSurfaceId: 'approvals' });
+    for (const id of PCC_MVP_SURFACE_IDS) {
+      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
+      const indicator = tab.querySelector(':scope > [data-pcc-tab-active-indicator]');
+      expect(indicator, `tab ${id} should include structural active indicator`).not.toBeNull();
+      expect(indicator?.getAttribute('data-pcc-tab-active-indicator-state')).toBe(
+        id === 'approvals' ? 'active' : 'inactive',
+      );
+    }
   });
 
   it('marks compact density at smallLaptop and below; comfortable above', () => {

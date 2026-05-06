@@ -35,6 +35,10 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
       expect(tablist?.getAttribute('data-pcc-tabs-density')).toBe(
         COMPACT_MODES.has(mode) ? 'compact' : 'comfortable',
       );
+      const selectedTab = container.querySelector(
+        '[data-pcc-horizontal-tabs] [data-pcc-tab-id][aria-selected="true"]',
+      );
+      expect(selectedTab, `active tab should be discoverable at '${mode}'`).not.toBeNull();
 
       // Thin-shell stamp.
       const shell = container.querySelector('[data-pcc-shell]');
@@ -42,6 +46,19 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
       expect(shell?.getAttribute('data-pcc-shell-mode')).toBe(mode);
     });
   }
+
+  it('keeps phone navigation visible and discoverable (no hidden-nav fallback)', () => {
+    const { container } = render(<PccApp forceMode="phone" />);
+    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement | null;
+    expect(tablist).not.toBeNull();
+    expect(tablist?.getAttribute('aria-hidden')).not.toBe('true');
+    expect(tablist?.hasAttribute('hidden')).toBe(false);
+
+    const selectedTab = container.querySelector(
+      '[data-pcc-horizontal-tabs] [data-pcc-tab-id][aria-selected="true"]',
+    );
+    expect(selectedTab).not.toBeNull();
+  });
 });
 
 describe('resolveResponsiveMode 8-mode boundary contract', () => {

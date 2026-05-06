@@ -102,6 +102,18 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
     }
   };
 
+  const handleTabKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    surfaceId: PccMvpSurfaceId,
+  ) => {
+    if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Spacebar') {
+      return;
+    }
+    // Prevent native button key synthesis from dispatching an additional click.
+    event.preventDefault();
+    onSelectSurface(surfaceId);
+  };
+
   const themeVars: CSSProperties = {
     ['--pcc-tabs-accent' as string]: HBC_ACCENT_ORANGE,
   };
@@ -142,10 +154,17 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
             data-pcc-tab-active={isActive ? 'true' : 'false'}
             data-pcc-tab-mode={mode}
             className={styles.tab}
+            onKeyDown={(event) => handleTabKeyDown(event, surfaceId)}
             onClick={() => onSelectSurface(surfaceId)}
           >
             {iconNode}
             <span className={styles.label}>{label}</span>
+            <span
+              aria-hidden="true"
+              data-pcc-tab-active-indicator=""
+              data-pcc-tab-active-indicator-state={isActive ? 'active' : 'inactive'}
+              className={styles.activeIndicator}
+            />
           </button>
         );
       })}

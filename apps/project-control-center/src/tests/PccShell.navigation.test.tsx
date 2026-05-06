@@ -114,6 +114,31 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     ).toBe(lastId);
   });
 
+  it('Enter and Space activate tabs once and keep selected-tab/panel ids aligned', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const documentsTab = container.querySelector(
+      '[data-pcc-tab-id="documents"]',
+    ) as HTMLButtonElement;
+    fireEvent.keyDown(documentsTab, { key: 'Enter' });
+    fireEvent.keyUp(documentsTab, { key: 'Enter' });
+
+    const selectedAfterEnter = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
+    const panelAfterEnter = container.querySelector('[data-pcc-active-surface-panel]');
+    expect(selectedAfterEnter?.getAttribute('data-pcc-tab-id')).toBe('documents');
+    expect(panelAfterEnter?.getAttribute('data-pcc-active-surface-panel')).toBe('documents');
+
+    const approvalsTab = container.querySelector(
+      '[data-pcc-tab-id="approvals"]',
+    ) as HTMLButtonElement;
+    fireEvent.keyDown(approvalsTab, { key: ' ' });
+    fireEvent.keyUp(approvalsTab, { key: ' ' });
+
+    const selectedAfterSpace = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
+    const panelAfterSpace = container.querySelector('[data-pcc-active-surface-panel]');
+    expect(selectedAfterSpace?.getAttribute('data-pcc-tab-id')).toBe('approvals');
+    expect(panelAfterSpace?.getAttribute('data-pcc-active-surface-panel')).toBe('approvals');
+  });
+
   it('clicking a tab activates it and updates the panel + active-surface-context', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const documentsTab = container.querySelector(
