@@ -123,7 +123,7 @@ const PccExternalSystemsSurfaceCards: FC<PccExternalSystemsSurfaceCardsProps> = 
     return (
       <PccDashboardCard
         footprint="full"
-        eyebrow="External Systems"
+        eyebrow="External Platforms"
         title="Launch Pad"
         dataActiveSurfacePanel="external-systems"
       >
@@ -141,7 +141,7 @@ const PccExternalSystemsSurfaceCards: FC<PccExternalSystemsSurfaceCardsProps> = 
     return (
       <PccDashboardCard
         footprint="full"
-        eyebrow="External Systems"
+        eyebrow="External Platforms"
         title="Launch Pad"
         dataActiveSurfacePanel="external-systems"
       >

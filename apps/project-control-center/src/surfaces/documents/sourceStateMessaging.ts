@@ -219,7 +219,7 @@ const ENVELOPE_COPY: Readonly<Record<DegradedEnvelopeStatus, LaneCopy>> = {
     'external-systems': {
       tone: 'error',
       label: 'Sources unavailable',
-      message: 'External systems are not available for this project.',
+      message: 'External platforms are not available for this project.',
     },
   },
   'missing-config': {
@@ -236,7 +236,7 @@ const ENVELOPE_COPY: Readonly<Record<DegradedEnvelopeStatus, LaneCopy>> = {
     'external-systems': {
       tone: 'warning',
       label: 'Mapping required',
-      message: 'External systems are not configured for this project.',
+      message: 'External platforms are not configured for this project.',
     },
   },
   stale: {

@@ -60,7 +60,7 @@ describe('Documents — lane tier markers', () => {
     expect(root.getAttribute('data-pcc-document-lane-tier')).toBe('working-files');
   });
 
-  it('External Systems lane carries data-pcc-document-lane-tier="external-launch"', async () => {
+  it('External Platforms lane carries data-pcc-document-lane-tier="external-launch"', async () => {
     const { container } = await renderDocuments();
     const root = laneRoot(container as HTMLElement, 'external-systems');
     expect(root.getAttribute('data-pcc-document-lane-tier')).toBe('external-launch');
@@ -80,7 +80,7 @@ describe('Documents — lane card hierarchy distinction', () => {
     expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
   });
 
-  it('External Systems lane card emits data-pcc-card-hierarchy="supporting"', async () => {
+  it('External Platforms lane card emits data-pcc-card-hierarchy="supporting"', async () => {
     const { container } = await renderDocuments();
     const card = laneCard(container as HTMLElement, 'external-systems');
     expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('supporting');

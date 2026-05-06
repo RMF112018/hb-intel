@@ -169,7 +169,7 @@ const WAVE7_HARD_NO_RULES = [
     id: 'HN-03',
     title: 'No external writeback or sync in Wave 7',
     description:
-      'External systems remain launch/deep-link visibility only with no mirror/sync/writeback.',
+      'External platforms remain launch/deep-link visibility only with no mirror/sync/writeback.',
   },
 ] as const;
 const WAVE7_ACTION_CATALOG = [

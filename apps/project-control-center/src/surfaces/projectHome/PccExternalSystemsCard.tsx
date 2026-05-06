@@ -68,7 +68,7 @@ const ExternalSystemsBody: FC = () => (
 );
 
 export const PccExternalSystemsCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Integrations" title="External Systems">
+  <PccDashboardCard footprint="standard" eyebrow="Integrations" title="External Platforms">
     {state === 'preview' ? <ExternalSystemsBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

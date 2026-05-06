@@ -99,7 +99,7 @@ const DOMAIN_LABELS: Readonly<Record<ProjectReadinessDomainId, string>> = {
   constraints: 'Constraints',
   'schedule-milestones': 'Schedule / Milestones',
   'financial-accounting-setup': 'Financial / Accounting Setup',
-  'external-systems': 'External Systems',
+  'external-systems': 'External Platforms',
   'site-health': 'Site Health',
   'closeout-turnover': 'Closeout / Turnover',
 };
@@ -165,11 +165,11 @@ const DOWNSTREAM_MODULE_REGISTRY: Readonly<
     statusCaption: 'Wave 14 — Approvals runtime is deferred. Not implemented in Wave 8.',
   },
   'external-systems': {
-    label: 'External Systems',
+    label: 'External Platforms',
     waveLabel: 'Wave 15',
     waveStatus: 'implemented',
     statusCaption:
-      'Wave 15 — External Systems Launch Pad is implemented as a read-only / metadata-only PCC surface. No live external-system API or runtime is enabled.',
+      'Wave 15 — External Platforms Launch Pad is implemented as a read-only / metadata-only PCC surface. No live external-system API or runtime is enabled.',
   },
   'site-health': {
     label: 'Site Health',

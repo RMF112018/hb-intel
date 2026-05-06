@@ -29,18 +29,18 @@ This add-on package focuses on the shell operating frame beyond the visual hero 
 
 The Hero + Tab Rail package owns these locked decisions and this add-on must not contradict them:
 
-| Area | Locked Decision |
-|---|---|
-| Hero primary title | `Project Control Center` |
-| Hero secondary title | active surface name |
-| Project number | do **not** include in hero; SharePoint chrome exposes it |
-| Mandatory hero facts | location, estimated value, scheduled completion, project stage |
-| Excluded hero facts | client, project status, source confidence, last updated |
-| External platform tab label | `External Platforms` |
-| External platform page title | `External Platforms Launch Pad` |
-| Tab icons | remove icons for now |
-| Command search | disabled preview affordance, not functional search |
-| Colors/tokens | use branded colors available in existing UI-kit |
+| Area                         | Locked Decision                                                |
+| ---------------------------- | -------------------------------------------------------------- |
+| Hero primary title           | `Project Control Center`                                       |
+| Hero secondary title         | active surface name                                            |
+| Project number               | do **not** include in hero; SharePoint chrome exposes it       |
+| Mandatory hero facts         | location, estimated value, scheduled completion, project stage |
+| Excluded hero facts          | client, project status, source confidence, last updated        |
+| External platform tab label  | `External Platforms`                                           |
+| External platform page title | `External Platforms Launch Pad`                                |
+| Tab icons                    | remove icons for now                                           |
+| Command search               | disabled preview affordance, not functional search             |
+| Colors/tokens                | use branded colors available in existing UI-kit                |
 
 ## Repo-Truth Basis
 
@@ -66,12 +66,15 @@ This package expands implementation coverage to the host shell operating system 
 
 Run prompts in order:
 
-1. `prompts/Prompt_01_AddOn_Scope_Lock_And_Shell_Ownership.md`
-2. `prompts/Prompt_02_Project_Identity_Context_And_Canvas_Boundary.md`
-3. `prompts/Prompt_03_Surface_Context_DeDup_And_State_Model.md`
-4. `prompts/Prompt_04_Command_Preview_And_Active_Panel_A11y.md`
-5. `prompts/Prompt_05_External_Platforms_And_Routing_Integrity.md`
-6. `prompts/Prompt_06_Host_Fit_Responsive_Evidence_And_Closeout.md`
+1. `prompts-2/Prompt_01_AddOn_Scope_Lock_And_Shell_Ownership.md`
+2. `prompts-2/Prompt_02_Project_Identity_Context_And_Canvas_Boundary.md`
+3. `prompts-2/Prompt_03_Surface_Context_DeDup_And_State_Model.md`
+4. `prompts-2/Prompt_03A_External_Platforms_Surface_Copy_Alignment.md`
+5. `prompts-2/Prompt_04_Command_Preview_And_Active_Panel_A11y.md`
+6. `prompts-2/Prompt_05_External_Platforms_And_Routing_Integrity.md`
+7. `prompts-2/Prompt_06_Host_Fit_Responsive_Evidence_And_Closeout.md`
+
+Prompt 03A is a narrow user-facing copy alignment between the locked tab label / page title (`External Platforms` / `External Platforms Launch Pad`) and residual `External Systems` strings still rendered across the External Platforms surface, the Project Home dashboard card, cross-surface reference labels (Approvals references, Constraints, Buyout, Project Readiness, Document Control), and adapter/fixture display labels. It runs **after** Prompt 03 (so context de-duplication has stabilized which copy belongs where) and **before** Prompt 04 (so command-preview a11y validates against the final user-facing label set). 03A must not change routes, the `PccSurfaceRouter` shape, internal IDs (`'external-systems'`), component/file/folder names, manifest/package versions, or `pnpm-lock.yaml`. It must not absorb Prompt 05 routing-integrity scope.
 
 ## Context-Efficiency Rules for Local Agent
 

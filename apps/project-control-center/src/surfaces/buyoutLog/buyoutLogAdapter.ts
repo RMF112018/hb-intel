@@ -224,7 +224,7 @@ const INTEGRATION_POSTURE_ROWS: readonly IPccBlIntegrationPostureRow[] = [
   },
   {
     targetId: 'external-systems',
-    targetLabel: 'External Systems',
+    targetLabel: 'External Platforms',
     postureCaption:
       'Reference only — external system launchers; no runtime call is made from here to Procore, Sage, or SharePoint.',
   },

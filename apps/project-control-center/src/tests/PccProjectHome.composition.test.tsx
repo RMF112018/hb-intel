@@ -45,7 +45,7 @@ describe('Project Home — first-impression composition order', () => {
       const approvals = indexOfTitle(titles, 'Approvals & Checkpoints');
       const readiness = indexOfTitle(titles, 'Project Readiness');
       const documents = indexOfTitle(titles, 'Document Control Center');
-      const externalSystems = indexOfTitle(titles, 'External Systems');
+      const externalSystems = indexOfTitle(titles, 'External Platforms');
       const recentActivity = indexOfTitle(titles, 'Recent Activity');
 
       // Hero is always first.

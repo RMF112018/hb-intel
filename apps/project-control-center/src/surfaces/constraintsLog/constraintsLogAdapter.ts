@@ -165,7 +165,7 @@ const INTEGRATION_POSTURE_ROWS: readonly IPccClIntegrationPostureRow[] = [
   },
   {
     targetId: 'external-systems',
-    targetLabel: 'External Systems',
+    targetLabel: 'External Platforms',
     postureCaption:
       'Reference only — external system launchers; no runtime calls are made from here.',
   },

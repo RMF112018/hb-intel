@@ -191,7 +191,7 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     expect(container.textContent).not.toContain('Other Project Leak');
   });
 
-  it('External Systems lane renders Procore, Document Crunch, and Adobe Sign as launch/status only', async () => {
+  it('External Platforms lane renders Procore, Document Crunch, and Adobe Sign as launch/status only', async () => {
     const { container } = await renderWithClient(fixtureClient());
     const lane = container.querySelector('[data-pcc-doc-lane="external-systems"]');
     expect(lane).not.toBeNull();
@@ -942,7 +942,7 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', ()
     expect(lane.textContent).not.toContain('graph 5xx');
   });
 
-  it('External Systems: disabled entry renders product-safe disabled copy via stable marker', async () => {
+  it('External Platforms: disabled entry renders product-safe disabled copy via stable marker', async () => {
     const client = clientReturning(
       envelopeWithHealth({
         sourceStatus: 'available',

@@ -123,13 +123,13 @@ export const PCC_CAPABILITIES: Readonly<Record<PccCapabilityId, IPccCapability>>
   },
   'view-external-systems': {
     id: 'view-external-systems',
-    displayName: 'View External Systems',
+    displayName: 'View External Platforms',
     description: 'See the external system catalog and mapping status.',
     surfaceId: 'external-systems',
   },
   'configure-external-systems': {
     id: 'configure-external-systems',
-    displayName: 'Configure External Systems',
+    displayName: 'Configure External Platforms',
     description: 'Configure project mappings for integrated external systems.',
     surfaceId: 'external-systems',
   },
@@ -177,9 +177,7 @@ export const PCC_CAPABILITIES: Readonly<Record<PccCapabilityId, IPccCapability>>
  * cleanly across SPFx and backend. Membership lookups go through
  * `personaHasCapability` below.
  */
-export const PCC_PERSONA_CAPABILITIES: Readonly<
-  Record<PccPersona, readonly PccCapabilityId[]>
-> = {
+export const PCC_PERSONA_CAPABILITIES: Readonly<Record<PccPersona, readonly PccCapabilityId[]>> = {
   'pcc-admin': [
     'view-project-home',
     'view-priority-actions',
@@ -258,7 +256,7 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
     'view-buyout-log',
     'view-constraints-log',
   ],
-  'superintendent': [
+  superintendent: [
     'view-project-home',
     'view-priority-actions',
     'view-documents',
@@ -287,15 +285,8 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
     'view-approvals',
     'view-external-systems',
   ],
-  'external-contributor': [
-    'view-documents',
-  ],
-  'viewer': [
-    'view-project-home',
-    'view-documents',
-    'view-project-readiness',
-    'view-approvals',
-  ],
+  'external-contributor': ['view-documents'],
+  viewer: ['view-project-home', 'view-documents', 'view-project-readiness', 'view-approvals'],
   'estimating-coordinator': [
     'view-project-home',
     'manage-team-access',
@@ -311,12 +302,7 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
     'manage-startup-checklist',
     'view-buyout-log',
   ],
-  estimator: [
-    'view-project-home',
-    'view-documents',
-    'view-project-readiness',
-    'view-approvals',
-  ],
+  estimator: ['view-project-home', 'view-documents', 'view-project-readiness', 'view-approvals'],
   'chief-estimator': [
     'view-project-home',
     'view-priority-actions',
@@ -346,20 +332,14 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
     'view-external-systems',
     'view-constraints-log',
   ],
-  'external-design-team': [
-    'view-documents',
-    'view-project-readiness',
-  ],
+  'external-design-team': ['view-documents', 'view-project-readiness'],
   'owner-client-viewer': [
     'view-project-home',
     'view-documents',
     'view-project-readiness',
     'view-approvals',
   ],
-  'subcontractor-limited': [
-    'view-documents',
-    'view-project-readiness',
-  ],
+  'subcontractor-limited': ['view-documents', 'view-project-readiness'],
   'manager-of-operational-excellence': [
     'view-project-home',
     'view-priority-actions',
@@ -382,10 +362,7 @@ export const PCC_PERSONA_CAPABILITIES: Readonly<
   ],
 };
 
-export function personaHasCapability(
-  persona: PccPersona,
-  capability: PccCapabilityId,
-): boolean {
+export function personaHasCapability(persona: PccPersona, capability: PccCapabilityId): boolean {
   return PCC_PERSONA_CAPABILITIES[persona].includes(capability);
 }
 

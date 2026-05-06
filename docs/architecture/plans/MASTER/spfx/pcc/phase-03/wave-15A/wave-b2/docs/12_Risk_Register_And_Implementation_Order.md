@@ -14,6 +14,7 @@ status: Planning and local-code-agent handoff package
 2. Project identity source alignment.
 3. Shell ownership and canvas boundary.
 4. Surface context de-duplication.
+   4a. **Prompt 03A — External Platforms surface copy alignment** (narrow user-facing copy sweep; preserves internal `external-systems` ID).
 5. Disabled command preview.
 6. Active panel accessibility.
 7. External Platforms naming/launch posture.
@@ -21,22 +22,27 @@ status: Planning and local-code-agent handoff package
 9. Responsive/host-fit evidence.
 10. Documentation and closeout.
 
+### Prompt 03A Position Rule
+
+Prompt 03A runs **after** Prompt 03 (Surface Context De-Duplication) so the alignment lands once each surface owns the right copy, and **before** Prompt 04 (Command Preview / a11y) so accessibility work validates against the final user-facing label set. 03A is copy-only — it does not absorb Prompt 05 (External Platforms and Routing Integrity).
+
 ## Risk Register
 
-| Risk | Severity | Mitigation |
-|---|---|---|
-| Developer redoes broad repo audit and wastes context | Medium | Prompts explicitly forbid re-reading unchanged context |
-| Hero package and add-on package conflict | High | Locked hero/tab package wins on visual/title/nav decisions |
-| Search remains input-shaped | High | Replace with non-interactive preview capsule |
-| Surface context duplication persists | Medium-High | Remove happy-path context headers |
-| Team & Access remains blank above fold | High | Require intentional state card or content summary |
-| External Platforms label drifts | Medium | Centralize label map and tests |
-| Accessibility remains partial | High | Wire tabpanel and focus behavior |
-| Responsive proof remains incomplete | Medium-High | Require evidence matrix |
-| Source/reference copy dominates UI | Medium | Compress to subordinate status/details |
-| Scope creep into all surfaces | High | Only touch surface first-view/state where shell contract requires it |
-| Live integration accidentally introduced | High | Guardrails prohibit backend/API/Graph/PnP/Procore runtime changes |
-| Sticky shell breaks SharePoint | Medium | Explicitly prohibit sticky/fixed in this phase |
+| Risk                                                 | Severity    | Mitigation                                                                                                                                     |
+| ---------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Developer redoes broad repo audit and wastes context | Medium      | Prompts explicitly forbid re-reading unchanged context                                                                                         |
+| Hero package and add-on package conflict             | High        | Locked hero/tab package wins on visual/title/nav decisions                                                                                     |
+| Search remains input-shaped                          | High        | Replace with non-interactive preview capsule                                                                                                   |
+| Surface context duplication persists                 | Medium-High | Remove happy-path context headers                                                                                                              |
+| Team & Access remains blank above fold               | High        | Require intentional state card or content summary                                                                                              |
+| External Platforms label drifts                      | Medium      | Centralize label map and tests; Prompt 03A sweeps residual `External Systems` user-facing copy after de-duplication and before a11y validation |
+| Prompt 03A broadens beyond copy alignment            | Medium      | Hard guardrails: no route/router/internal-ID/component-rename/version/lockfile changes; no Prompt 05 routing-integrity absorption              |
+| Accessibility remains partial                        | High        | Wire tabpanel and focus behavior                                                                                                               |
+| Responsive proof remains incomplete                  | Medium-High | Require evidence matrix                                                                                                                        |
+| Source/reference copy dominates UI                   | Medium      | Compress to subordinate status/details                                                                                                         |
+| Scope creep into all surfaces                        | High        | Only touch surface first-view/state where shell contract requires it                                                                           |
+| Live integration accidentally introduced             | High        | Guardrails prohibit backend/API/Graph/PnP/Procore runtime changes                                                                              |
+| Sticky shell breaks SharePoint                       | Medium      | Explicitly prohibit sticky/fixed in this phase                                                                                                 |
 
 ## Files Likely to Change
 

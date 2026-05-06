@@ -116,7 +116,7 @@ describe('buildPccProjectReadinessViewModel — available envelope', () => {
     expect(entry!.sourceModuleLabel).toBe('Permit & Inspection Control Center');
   });
 
-  it('marks Wave 15 (external-systems) as implemented with the External Systems Launch Pad status caption', () => {
+  it('marks Wave 15 (external-systems) as implemented with the External Platforms Launch Pad status caption', () => {
     if (vm.status !== 'preview') throw new Error('expected preview');
     const entry = vm.downstreamModules.find((m) => m.sourceModuleId === 'external-systems');
     expect(entry).toBeDefined();

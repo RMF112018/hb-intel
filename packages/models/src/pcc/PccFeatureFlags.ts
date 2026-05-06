@@ -33,12 +33,7 @@ export const PCC_FEATURE_FLAG_IDS = [
 
 export type PccFeatureFlagId = (typeof PCC_FEATURE_FLAG_IDS)[number];
 
-export const PCC_FEATURE_FLAG_POSTURES = [
-  'mvp',
-  'later',
-  'deferred',
-  'proof-gated',
-] as const;
+export const PCC_FEATURE_FLAG_POSTURES = ['mvp', 'later', 'deferred', 'proof-gated'] as const;
 
 export type PccFeatureFlagPosture = (typeof PCC_FEATURE_FLAG_POSTURES)[number];
 
@@ -97,7 +92,8 @@ export const PCC_FEATURE_FLAGS: Readonly<Record<PccFeatureFlagId, IPccFeatureFla
   'external-system-launch-links': {
     id: 'external-system-launch-links',
     displayName: 'External System Launch Links',
-    description: 'Render launch links for configured external systems on the External Systems surface.',
+    description:
+      'Render launch links for configured external systems on the External Platforms surface.',
     posture: 'mvp',
     defaultEnabled: true,
     surfaceId: 'external-systems',
@@ -105,7 +101,8 @@ export const PCC_FEATURE_FLAGS: Readonly<Record<PccFeatureFlagId, IPccFeatureFla
   'external-system-missing-config': {
     id: 'external-system-missing-config',
     displayName: 'External System Missing Config',
-    description: 'Surface missing-configuration messages for external systems alongside launch links.',
+    description:
+      'Surface missing-configuration messages for external systems alongside launch links.',
     posture: 'mvp',
     defaultEnabled: true,
     surfaceId: 'external-systems',
@@ -120,7 +117,8 @@ export const PCC_FEATURE_FLAGS: Readonly<Record<PccFeatureFlagId, IPccFeatureFla
   'cupix-luxury-residential-conditional': {
     id: 'cupix-luxury-residential-conditional',
     displayName: 'Cupix (Luxury Residential)',
-    description: 'Conditional Cupix integration enablement when project type is luxury_residential.',
+    description:
+      'Conditional Cupix integration enablement when project type is luxury_residential.',
     posture: 'proof-gated',
     defaultEnabled: false,
     surfaceId: 'external-systems',
@@ -128,7 +126,8 @@ export const PCC_FEATURE_FLAGS: Readonly<Record<PccFeatureFlagId, IPccFeatureFla
   'procore-launch-link': {
     id: 'procore-launch-link',
     displayName: 'Procore Launch Link',
-    description: 'Render the read-only Procore launch link on Project Home and supporting surfaces.',
+    description:
+      'Render the read-only Procore launch link on Project Home and supporting surfaces.',
     posture: 'mvp',
     defaultEnabled: true,
     surfaceId: 'external-systems',

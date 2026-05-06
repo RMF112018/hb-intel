@@ -101,7 +101,7 @@ const CHECKPOINT_SOURCE_MODULE_LABELS: Readonly<Record<CheckpointSourceModule, s
   'constraints-log': 'Constraints Log',
   'buyout-log': 'Buyout Log',
   'estimating-workbench-wave-13g': 'Estimating Workbench (Wave 13G)',
-  'external-systems': 'External Systems',
+  'external-systems': 'External Platforms',
   'site-health': 'Site Health',
   'priority-actions': 'Priority Actions',
   'project-readiness': 'Project Readiness',

@@ -1,6 +1,6 @@
 /**
  * Wave 13 Prompt 13E — surface-level tests for the Procore cards
- * across External Systems, Site Health, Project Readiness (fixture
+ * across External Platforms, Site Health, Project Readiness (fixture
  * path), and Project Home (read-model path).
  *
  * Locks:
@@ -75,7 +75,7 @@ function expectAllowedDegradedStateAndTone(container: HTMLElement, cardId: strin
   }
 }
 
-describe('External Systems — Procore configuration & status card (Wave 13 / Prompt 13E)', () => {
+describe('External Platforms — Procore configuration & status card (Wave 13 / Prompt 13E)', () => {
   it('renders one card with data-pcc-card-id="procore-configuration-status" as a direct bento child', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">

@@ -9,7 +9,7 @@ export const PccExternalSystemsHeaderCard: FC = () => (
   <PccDashboardCard
     footprint="full"
     eyebrow={SURFACE.displayName}
-    title="External Systems"
+    title="Launch Pad"
     dataActiveSurfacePanel="external-systems"
   >
     <div className={styles.body}>

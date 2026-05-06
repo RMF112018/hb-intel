@@ -615,7 +615,7 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     ]);
   });
 
-  it('source registry includes Project Record, My Project Files, and at least one External Systems entry', async () => {
+  it('source registry includes Project Record, My Project Files, and at least one External Platforms entry', async () => {
     const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
     const registry = env.data.sourceRegistry ?? [];
     const projectRecord = registry.find((r) => r.wave7Lane === 'project-record');

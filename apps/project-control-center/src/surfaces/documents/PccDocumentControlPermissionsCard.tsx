@@ -55,7 +55,7 @@ const WAVE7_HARD_NO_FALLBACK: readonly IDocumentControlUniversalHardNoRule[] = [
     id: 'HN-03',
     title: 'No external writeback or sync in Wave 7',
     description:
-      'External systems remain launch/deep-link visibility only with no mirror/sync/writeback.',
+      'External platforms remain launch/deep-link visibility only with no mirror/sync/writeback.',
   },
 ];
 
@@ -63,7 +63,7 @@ const ACTION_FAMILY_TITLES: Readonly<Record<string, string>> = {
   PR: 'Project Record',
   MP: 'My Project Files',
   SB: 'Source Binding / Repair',
-  EX: 'External Systems',
+  EX: 'External Platforms',
   WF: 'Workflow / Admin',
 };
 

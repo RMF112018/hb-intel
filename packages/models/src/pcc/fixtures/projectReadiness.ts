@@ -155,8 +155,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
     lifecycleGate: 'preconstruction',
     sourceModuleId: 'buyout-log',
     title: 'Buyout package preparation posture',
-    description:
-      'Buyout package preparation posture normalized from the buyout log module.',
+    description: 'Buyout package preparation posture normalized from the buyout log module.',
     ownerPersona: 'project-executive',
     status: 'not-started',
     severity: 'medium',
@@ -182,7 +181,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
     domain: 'closeout-turnover',
     lifecycleGate: 'closeout-planning',
     sourceModuleId: 'external-systems',
-    title: 'External systems closeout posture',
+    title: 'External platforms closeout posture',
     description:
       'External system closeout posture normalized from the external systems module; deferred until the source is online.',
     ownerPersona: 'project-manager',
@@ -194,7 +193,7 @@ export const SAMPLE_PROJECT_READINESS_ITEMS: readonly IProjectReadinessItem[] = 
     sourceHealthStatus: 'source-unavailable',
     sourceLineage: {
       sourceModuleId: 'external-systems',
-      sourceReferenceLabel: 'External Systems closeout posture',
+      sourceReferenceLabel: 'External Platforms closeout posture',
     },
     dependencyItemIds: ['fixture-pcc-readiness-007'],
     createdAtUtc: '2026-04-19T08:00:00Z',
@@ -294,37 +293,36 @@ export const SAMPLE_PROJECT_READINESS_DOMAIN_SUMMARIES: readonly IProjectReadine
     },
   ];
 
-export const SAMPLE_PROJECT_READINESS_GATE_SUMMARIES: readonly IProjectReadinessGateSummary[] =
-  [
-    {
-      lifecycleGate: 'preconstruction',
-      itemIds: ['fixture-pcc-readiness-001', 'fixture-pcc-readiness-005'],
-      posture: 'at-risk',
-      openBlockerCount: 0,
-      pendingEvidenceCount: 2,
-    },
-    {
-      lifecycleGate: 'startup-mobilization',
-      itemIds: ['fixture-pcc-readiness-002', 'fixture-pcc-readiness-003'],
-      posture: 'blocked',
-      openBlockerCount: 2,
-      pendingEvidenceCount: 1,
-    },
-    {
-      lifecycleGate: 'active-construction',
-      itemIds: ['fixture-pcc-readiness-004', 'fixture-pcc-readiness-007'],
-      posture: 'at-risk',
-      openBlockerCount: 0,
-      pendingEvidenceCount: 0,
-    },
-    {
-      lifecycleGate: 'closeout-planning',
-      itemIds: ['fixture-pcc-readiness-006'],
-      posture: 'unknown',
-      openBlockerCount: 0,
-      pendingEvidenceCount: 0,
-    },
-  ];
+export const SAMPLE_PROJECT_READINESS_GATE_SUMMARIES: readonly IProjectReadinessGateSummary[] = [
+  {
+    lifecycleGate: 'preconstruction',
+    itemIds: ['fixture-pcc-readiness-001', 'fixture-pcc-readiness-005'],
+    posture: 'at-risk',
+    openBlockerCount: 0,
+    pendingEvidenceCount: 2,
+  },
+  {
+    lifecycleGate: 'startup-mobilization',
+    itemIds: ['fixture-pcc-readiness-002', 'fixture-pcc-readiness-003'],
+    posture: 'blocked',
+    openBlockerCount: 2,
+    pendingEvidenceCount: 1,
+  },
+  {
+    lifecycleGate: 'active-construction',
+    itemIds: ['fixture-pcc-readiness-004', 'fixture-pcc-readiness-007'],
+    posture: 'at-risk',
+    openBlockerCount: 0,
+    pendingEvidenceCount: 0,
+  },
+  {
+    lifecycleGate: 'closeout-planning',
+    itemIds: ['fixture-pcc-readiness-006'],
+    posture: 'unknown',
+    openBlockerCount: 0,
+    pendingEvidenceCount: 0,
+  },
+];
 
 export const SAMPLE_PROJECT_READINESS_OWNERSHIP_SUMMARIES: readonly IProjectReadinessOwnershipSummary[] =
   [

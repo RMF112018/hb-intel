@@ -53,7 +53,7 @@ export const WAVE7_LANE_ORDER: readonly DocumentControlWave7LaneId[] = [
 export const WAVE7_LANE_TITLES: Readonly<Record<DocumentControlWave7LaneId, string>> = {
   'project-record': 'Project Record',
   'my-project-files': 'My Project Files',
-  'external-systems': 'External Systems',
+  'external-systems': 'External Platforms',
 };
 
 export const WAVE7_LANE_DESCRIPTIONS: Readonly<Record<DocumentControlWave7LaneId, string>> = {

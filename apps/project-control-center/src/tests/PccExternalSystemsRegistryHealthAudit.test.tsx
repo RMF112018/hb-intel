@@ -347,7 +347,7 @@ describe('PccExternalSystemsHbiLineageCard — Prompt 07', () => {
 // Cross-card guardrails
 // ---------------------------------------------------------------------------
 
-describe('External Systems surface — Prompt 07 cross-card guardrails', () => {
+describe('External Platforms surface — Prompt 07 cross-card guardrails', () => {
   it('renders no <a href="http(s)://"> anchors and no <iframe> across the surface', () => {
     const { container } = renderSurface();
     const anchors = container.querySelectorAll('a[href]');

@@ -44,7 +44,7 @@ const REQUIRED_CARD_TITLES = [
   'Document Control Center',
   'Project Readiness',
   'Approvals & Checkpoints',
-  'External Systems',
+  'External Platforms',
   'Team Snapshot',
   'Missing Configurations',
   'Recent Activity',
@@ -391,9 +391,9 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  // ── External Systems ─────────────────────────────────────────────────
+  // ── External Platforms ───────────────────────────────────────────────
 
-  it('External Systems card renders SAMPLE_EXTERNAL_SYSTEM_LINKS.length rows with no anchor elements', () => {
+  it('External Platforms card renders SAMPLE_EXTERNAL_SYSTEM_LINKS.length rows with no anchor elements', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const body = container.querySelector('[data-pcc-external-systems-body]');
     expect(body).not.toBeNull();
