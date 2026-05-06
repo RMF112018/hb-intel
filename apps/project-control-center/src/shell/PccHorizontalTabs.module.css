@@ -1,0 +1,86 @@
+/* PccHorizontalTabs — premium PCC-local tablist primitive
+ *
+ * Visual contract (Wave 15A Wave B b1, Prompt 02):
+ *  - 2px orange underline on active tab
+ *  - 8% orange background wash on active tab
+ *  - 13px / 600 / 0.02em letter-spacing typography
+ *  - 120ms transitions
+ *  - compact density at smallLaptop and below
+ *  - phone keeps the tablist visible (horizontal overflow scroll)
+ *
+ * Accent color is supplied as `--pcc-tabs-accent` from the component (TS
+ * theme tokens are bridged via inline-style CSS custom properties on the
+ * tablist root).
+ */
+
+.tablist {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tablist[data-pcc-tabs-density='compact'] {
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: rgba(15, 23, 42, 0.72);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.tablist[data-pcc-tabs-density='compact'] .tab {
+  height: 36px;
+  padding: 0 8px;
+  gap: 4px;
+}
+
+.tab:hover {
+  color: rgba(15, 23, 42, 0.92);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--pcc-tabs-accent, #f37021);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tab[data-pcc-tab-active='true'] {
+  color: var(--pcc-tabs-accent, #f37021);
+  border-bottom-color: var(--pcc-tabs-accent, #f37021);
+  background-color: rgba(243, 112, 33, 0.08);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.label {
+  display: inline-block;
+}
