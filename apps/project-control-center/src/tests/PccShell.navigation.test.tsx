@@ -5,7 +5,7 @@ import { PccApp } from '../PccApp';
 
 describe('PccShell navigation + state', () => {
   it('renders a rail entry for every PCC_MVP_SURFACE_IDS and defaults to project-home', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     for (const id of PCC_MVP_SURFACE_IDS) {
       const button = container.querySelector(`[data-pcc-rail] [data-pcc-surface-id="${id}"]`);
       expect(button, `rail entry for '${id}' should render`).not.toBeNull();
@@ -18,7 +18,7 @@ describe('PccShell navigation + state', () => {
 
   for (const id of PCC_MVP_SURFACE_IDS) {
     it(`clicking the '${id}' rail button updates aria-current and the active surface panel`, () => {
-      const { container } = render(<PccApp forceMode="wideDesktop" />);
+      const { container } = render(<PccApp forceMode="desktop" />);
       const allButtons = Array.from(
         container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]'),
       ) as HTMLButtonElement[];
@@ -53,7 +53,7 @@ describe('PccShell navigation + state', () => {
   }
 
   it('rail surface buttons are not disabled', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const buttons = Array.from(
       container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]'),
     ) as HTMLButtonElement[];
@@ -63,7 +63,7 @@ describe('PccShell navigation + state', () => {
   });
 
   it('ArrowDown / ArrowUp / Home / End move focus only and do not auto-activate', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const buttons = Array.from(
       container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]'),
     ) as HTMLButtonElement[];
@@ -99,7 +99,7 @@ describe('PccShell navigation + state', () => {
   });
 
   it('clicking the focused rail button activates it and updates the panel', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const documentsButton = container.querySelector(
       '[data-pcc-surface-id="documents"]',
     ) as HTMLButtonElement;

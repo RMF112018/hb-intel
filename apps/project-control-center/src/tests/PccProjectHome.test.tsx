@@ -51,7 +51,7 @@ const REQUIRED_CARD_TITLES = [
 ] as const;
 
 // Wave 99 / Prompt 05B — unified lifecycle cards are appended to the
-// read-model-driven path only. `<PccApp forceMode="wideDesktop" />`
+// read-model-driven path only. `<PccApp forceMode="desktop" />`
 // without a `readModelClient` renders the fixture-only fallback (10
 // cards); to render the read-model-driven path, supply a fixture
 // client via `readModelClient={createPccFixtureReadModelClient()}`.
@@ -86,7 +86,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('renders all 10 required Project Home card titles inside the active panel', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     // Card-scoped title check: query each card's heading slot rather
@@ -106,7 +106,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('every Project Home card emits a non-empty data-pcc-footprint and is a direct child of the bento grid', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
@@ -124,7 +124,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('exactly one [data-pcc-active-surface-panel] exists with value "project-home", carried by the Project Intelligence card', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(panels).toHaveLength(1);
     expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
@@ -132,14 +132,14 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('the bento grid does not use grid-auto-flow: dense', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     expect(grid).not.toBeNull();
     expect(grid.style.gridAutoFlow ?? '').not.toContain('dense');
   });
 
   it('renders no anchor elements with live launch URLs (no http/https hrefs anywhere on Project Home)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const anchors = container.querySelectorAll('a[href]');
     for (const a of anchors) {
       const href = a.getAttribute('href') ?? '';
@@ -152,7 +152,7 @@ describe('Project Home bento dashboard', () => {
   // ── Priority Actions Rail (Wave 5) ───────────────────────────────────
 
   it('Priority Actions card renders the Wave 5 four-group rail in canonical order', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rails = container.querySelectorAll('[data-pcc-priority-rail]');
     expect(rails).toHaveLength(1);
     const rail = rails[0]!;
@@ -162,7 +162,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('Priority Actions rail renders 15 visible rows from SAMPLE_PRIORITY_ACTIONS, each with valid tone', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rail = container.querySelector('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     const rows = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-action-id]');
@@ -178,7 +178,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('Priority Actions rail suppresses documents/health/safety from the user-facing MVP rail (scoped to rail root)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     const railText = rail!.textContent ?? '';
@@ -201,7 +201,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('Priority Actions rail renders inert non-executing affordances (no anchors, no hrefs, no buttons)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     expect(rail!.querySelectorAll('a')).toHaveLength(0);
@@ -218,7 +218,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('Priority Actions rail renders visible Priority: <Tone> labels matching each row tone', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     expect(rail!.textContent ?? '').toContain('Priority: ');
@@ -233,7 +233,7 @@ describe('Project Home bento dashboard', () => {
 
   it('Priority Actions card non-preview state renders PccPreviewState and does NOT render the rail', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccPriorityActionsCard state="error" />
       </PccBentoGrid>,
     );
@@ -268,7 +268,7 @@ describe('Project Home bento dashboard', () => {
   // ── Site Health Summary ──────────────────────────────────────────────
 
   it('Site Health Summary card displays overallSeverity, failingChecks, and warningChecks from the fixture', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const body = container.querySelector('[data-pcc-site-health-body]');
     expect(body).not.toBeNull();
     expect(body!.textContent).toContain(SAMPLE_SITE_HEALTH_SUMMARY.overallSeverity);
@@ -283,7 +283,7 @@ describe('Project Home bento dashboard', () => {
   // ── Document Control ─────────────────────────────────────────────────
 
   it('Document Control card renders one tile per DOCUMENT_CONTROL_SOURCE_IDS entry with posture metadata, grouped by canonical lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const body = container.querySelector('[data-pcc-document-control-body]');
     expect(body).not.toBeNull();
 
@@ -304,7 +304,7 @@ describe('Project Home bento dashboard', () => {
   });
 
   it('Document Control card Microsoft-lane action chips are disabled buttons with no executable handler or href', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const body = container.querySelector('[data-pcc-document-control-body]');
     expect(body).not.toBeNull();
 
@@ -346,7 +346,7 @@ describe('Project Home bento dashboard', () => {
   // ── Project Readiness ────────────────────────────────────────────────
 
   it('Project Readiness card renders a row per readiness-module workflow item', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const expected = SAMPLE_WORKFLOW_ITEMS.filter((i) => READINESS_MODULES.has(i.moduleId));
     const rows = container.querySelectorAll('[data-pcc-readiness-item-id]');
     expect(rows).toHaveLength(expected.length);
@@ -355,7 +355,7 @@ describe('Project Home bento dashboard', () => {
   // ── Approvals & Checkpoints ──────────────────────────────────────────
 
   it('Approvals & Checkpoints card renders SAMPLE_APPROVAL_CHECKPOINTS.length rows', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rows = container.querySelectorAll('[data-pcc-approval-checkpoint-id]');
     expect(rows).toHaveLength(SAMPLE_APPROVAL_CHECKPOINTS.length);
     for (const row of rows) {
@@ -367,7 +367,7 @@ describe('Project Home bento dashboard', () => {
   // ── External Systems ─────────────────────────────────────────────────
 
   it('External Systems card renders SAMPLE_EXTERNAL_SYSTEM_LINKS.length rows with no anchor elements', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const body = container.querySelector('[data-pcc-external-systems-body]');
     expect(body).not.toBeNull();
     const rows = body!.querySelectorAll('[data-pcc-external-system-id]');
@@ -378,7 +378,7 @@ describe('Project Home bento dashboard', () => {
   // ── Team Snapshot ────────────────────────────────────────────────────
 
   it('Team Snapshot card renders TEAM_SNAPSHOT_PLACEHOLDER.length entries; every visible label carries the (preview) suffix', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const entries = container.querySelectorAll('[data-pcc-team-entry-persona]');
     expect(entries).toHaveLength(TEAM_SNAPSHOT_PLACEHOLDER.length);
     for (const entry of entries) {
@@ -389,7 +389,7 @@ describe('Project Home bento dashboard', () => {
   // ── Missing Configurations ───────────────────────────────────────────
 
   it('Missing Configurations card renders SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS.length rows with system + message', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rows = container.querySelectorAll('[data-pcc-missing-config-system]');
     expect(rows).toHaveLength(SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS.length);
     for (const config of SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS) {
@@ -402,7 +402,7 @@ describe('Project Home bento dashboard', () => {
   // ── Recent Activity ──────────────────────────────────────────────────
 
   it('Recent Activity card renders SAMPLE_BUSINESS_AUDIT_EVENTS.length rows', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const rows = container.querySelectorAll('[data-pcc-activity-event-id]');
     expect(rows).toHaveLength(SAMPLE_BUSINESS_AUDIT_EVENTS.length);
   });
@@ -410,7 +410,7 @@ describe('Project Home bento dashboard', () => {
   // ── Project Intelligence ─────────────────────────────────────────────
 
   it('Project Intelligence card displays SAMPLE_PROJECT_PROFILE fields', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const body = container.querySelector('[data-pcc-project-intelligence-body]');
     expect(body).not.toBeNull();
     expect(body!.textContent).toContain(SAMPLE_PROJECT_PROFILE.projectName);
@@ -440,7 +440,7 @@ describe('Project Home bento dashboard', () => {
 
   it('fixture-only fallback (no readModelClient) preserves the original 10-card baseline and renders no unified-lifecycle titles', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
       </PccBentoGrid>,
     );
@@ -473,7 +473,7 @@ describe('Project Home bento dashboard', () => {
 
   it('read-model-driven path renders 16 cards (10 existing + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     // Wait for the read-model-driven hook to resolve so the section
     // renders body markers (rather than the loading PccPreviewState).
@@ -523,7 +523,7 @@ describe('Project Home bento dashboard', () => {
 
   it('read-model-driven path: unified lifecycle lens switcher renders only preview-disabled buttons and no anchors', async () => {
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Project Lens');
     const lensSwitcher = container.querySelector('[data-pcc-project-lens-switcher]');
@@ -539,7 +539,7 @@ describe('Project Home bento dashboard', () => {
 
   it('read-model-driven path: Project Home does not introduce a unified-lifecycle, unified-search, or ask-hbi route or workspace marker', async () => {
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Lifecycle Timeline');
     await findByText('Ask HBI — Grounded Project Answers');
@@ -579,7 +579,7 @@ describe('Project Home bento dashboard', () => {
   // the focused PccProjectHomeAskHbiSection test file.
   it('read-model-driven path: Ask HBI card mounts in idle posture inside a wide PccDashboardCard, with the panel disclaimer', async () => {
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     const askHbiHeading = await findByText('Ask HBI — Grounded Project Answers');
     const card = askHbiHeading.closest('[data-pcc-card]');

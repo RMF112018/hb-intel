@@ -41,7 +41,7 @@ function renderSection(
   viewerPersona: PccPersona = 'project-manager',
 ) {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccProjectHomeAskHbiSection
         client={client}
         projectId={PROJECT_ID}

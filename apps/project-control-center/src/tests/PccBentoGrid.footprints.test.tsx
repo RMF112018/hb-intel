@@ -13,7 +13,7 @@ import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
 describe('PccBentoGrid footprint contract', () => {
   it('renders one card per footprint and each carries data-pcc-footprint', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         {PCC_CARD_FOOTPRINTS.map((footprint) => (
           <PccDashboardCard key={footprint} footprint={footprint} title={footprint}>
             <p>content for {footprint}</p>
@@ -28,7 +28,7 @@ describe('PccBentoGrid footprint contract', () => {
       expect(declaredSpan, `declared column span for '${footprint}' should be > 0`).toBeGreaterThan(
         0,
       );
-      expect(declaredSpan).toBe(resolveFootprintColumnSpan('wideDesktop', footprint));
+      expect(declaredSpan).toBe(resolveFootprintColumnSpan('desktop', footprint));
     }
   });
 
@@ -53,7 +53,7 @@ describe('PccBentoGrid footprint contract', () => {
 
   it('does not use grid-auto-flow: dense on the bento root', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDashboardCard footprint="standard" title="x">
           x
         </PccDashboardCard>
@@ -68,7 +68,7 @@ describe('PccBentoGrid footprint contract', () => {
 
   it('reduces column spans in narrower modes (no fixed equal-height row)', () => {
     const { container, rerender } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDashboardCard footprint="hero" title="hero">
           hero
         </PccDashboardCard>
@@ -93,7 +93,7 @@ describe('PccBentoGrid footprint contract', () => {
 
   it('Project Home registry renders variable footprints with non-uniform spans (no paired-row dependency)', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
       </PccBentoGrid>,
     );
@@ -115,7 +115,7 @@ describe('PccBentoGrid footprint contract', () => {
     // under constrained measurements — lives in
     // `apps/project-control-center/src/layout/useBentoRowSpan.test.tsx`.
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDashboardCard footprint="standard" title="x">
           x
         </PccDashboardCard>
@@ -135,7 +135,7 @@ describe('PccBentoGrid footprint contract', () => {
 
   it('supports shared hierarchy and density variants without changing surface markers', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDashboardCard
           footprint="wide"
           hierarchy="primary"

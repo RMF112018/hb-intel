@@ -95,7 +95,7 @@ function makeClient(
 
 describe('Wave 11 Responsibility Matrix — bento direct-child invariant', () => {
   it('every Wave 11 lane marker resolves to a card whose parent is the bento grid', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(REQUIRED_LANES.length);
@@ -109,7 +109,7 @@ describe('Wave 11 Responsibility Matrix — bento direct-child invariant', () =>
 
 describe('Wave 11 Responsibility Matrix — required lanes', () => {
   it('renders every required lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     for (const lane of REQUIRED_LANES) {
       expect(rmLane(container, lane), `missing lane ${lane}`).not.toBeNull();
@@ -119,7 +119,7 @@ describe('Wave 11 Responsibility Matrix — required lanes', () => {
 
 describe('Wave 11 Responsibility Matrix — overview-scoped count posture', () => {
   it('109 / 98 / 0 posture appears in the overview lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const overview = rmLane(container, 'overview');
     expect(overview).not.toBeNull();
@@ -130,7 +130,7 @@ describe('Wave 11 Responsibility Matrix — overview-scoped count posture', () =
   });
 
   it('count posture does NOT leak into other lanes', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const matrix = rmLane(container, 'matrix');
     expect(matrix).not.toBeNull();
@@ -140,7 +140,7 @@ describe('Wave 11 Responsibility Matrix — overview-scoped count posture', () =
 
 describe('Wave 11 Responsibility Matrix — owner-contract placeholder messaging', () => {
   it('placeholder caption + RACI vs contract-party clarification render in the owner-contract lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const lane = rmLane(container, 'owner-contract-mapping');
     expect(lane).not.toBeNull();
@@ -154,7 +154,7 @@ describe('Wave 11 Responsibility Matrix — owner-contract placeholder messaging
 
 describe('Wave 11 Responsibility Matrix — read-only structural posture', () => {
   it('the responsibility matrix region group contains no anchors, forms, or file inputs', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(1);
@@ -168,7 +168,7 @@ describe('Wave 11 Responsibility Matrix — read-only structural posture', () =>
   });
 
   it('every data-pcc-rm-action element is disabled and aria-disabled="true"', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const actions = container.querySelectorAll('[data-pcc-rm-action]');
     expect(actions.length).toBeGreaterThanOrEqual(1);
@@ -182,7 +182,7 @@ describe('Wave 11 Responsibility Matrix — read-only structural posture', () =>
   });
 
   it('there are no enabled action buttons within the responsibility matrix region group', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     for (const marker of Array.from(markers)) {
@@ -198,7 +198,7 @@ describe('Wave 11 Responsibility Matrix — read-only structural posture', () =>
 
 describe('Wave 11 Responsibility Matrix — Who Owns This results from envelope only', () => {
   it('renders Who-Owns results from the current envelope entries', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const overview = rmLane(container, 'overview');
     expect(overview).not.toBeNull();
@@ -210,7 +210,7 @@ describe('Wave 11 Responsibility Matrix — Who Owns This results from envelope 
 
 describe('Wave 11 Responsibility Matrix — role/person toggle', () => {
   it('renders both role and person toggle buttons (preview-only)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const matrix = rmLane(container, 'matrix');
     expect(matrix).not.toBeNull();
@@ -221,7 +221,7 @@ describe('Wave 11 Responsibility Matrix — role/person toggle', () => {
 
 describe('Wave 11 Responsibility Matrix — exception groups in gaps lane', () => {
   it('renders exception group markers per code', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const lane = rmLane(container, 'gaps-and-conflicts');
     expect(lane).not.toBeNull();
@@ -234,7 +234,7 @@ describe('Wave 11 Responsibility Matrix — exception groups in gaps lane', () =
 
 describe('Wave 11 Responsibility Matrix — handoffs and template admin', () => {
   it('renders the pending handoff row and audit events', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const handoffs = rmLane(container, 'handoffs');
     expect(handoffs).not.toBeNull();
@@ -247,7 +247,7 @@ describe('Wave 11 Responsibility Matrix — handoffs and template admin', () => 
 
 describe('Wave 11 Responsibility Matrix — item register has rich rendering (not a spreadsheet launcher)', () => {
   it('renders register rows with classification, criticality, and inline detail elements', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const lane = rmLane(container, 'register');
     expect(lane).not.toBeNull();
@@ -269,7 +269,7 @@ import { PccResponsibilityMatrixRegions } from '../surfaces/responsibilityMatrix
 function renderRegions(env: PccReadModelEnvelope<PccResponsibilityMatrixReadModel>): HTMLElement {
   const vm = buildPccResponsibilityMatrixViewModel(env);
   const { container } = render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <Fragment>
         <PccResponsibilityMatrixRegions viewModel={vm} />
       </Fragment>

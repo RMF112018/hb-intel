@@ -15,7 +15,7 @@ afterEach(() => {
 
 function renderAccessManagerSurface() {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccTeamAccessSurface previewPersona="project-manager" previewHasProjectSiteAccess={true} />
     </PccBentoGrid>,
   );

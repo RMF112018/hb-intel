@@ -39,7 +39,7 @@ function lifecycleSectionRegion(container: HTMLElement, regionId: string): HTMLE
 
 describe('Project Readiness — Wave 8 blocker hierarchy', () => {
   it('BlockersCard adopts hierarchy="primary" and footprint="full"', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     const card = regionCard(container, 'blockers');
@@ -48,7 +48,7 @@ describe('Project Readiness — Wave 8 blocker hierarchy', () => {
   });
 
   it('Wave 8 BlockersCard appears before DomainGridCard in DOM order', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     const blockersCard = regionCard(container, 'blockers');
@@ -61,7 +61,7 @@ describe('Project Readiness — Wave 8 blocker hierarchy', () => {
   });
 
   it('EvidenceSourceHealthCard footprint is "full" so the row stays visually clean', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const card = regionCard(container, 'evidence-source-health');
     expect(card.getAttribute('data-pcc-footprint')).toBe('full');
@@ -70,7 +70,7 @@ describe('Project Readiness — Wave 8 blocker hierarchy', () => {
 
 describe('Project Readiness — Wave 9 lifecycle blocker hierarchy', () => {
   it('LifecycleBlockersCard adopts hierarchy="primary" and footprint="full"', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     // The lifecycle blocker region is keyed by data-pcc-readiness-region
@@ -86,7 +86,7 @@ describe('Project Readiness — Wave 9 lifecycle blocker hierarchy', () => {
   });
 
   it('LifecycleBlockersCard appears before LifecycleFamilyDomainsCard in DOM order', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     const blockersRegion = lifecycleSectionRegion(container, 'lifecycle-blockers-exceptions');
@@ -101,7 +101,7 @@ describe('Project Readiness — Wave 9 lifecycle blocker hierarchy', () => {
 
 describe('Project Readiness — active-panel ownership preserved', () => {
   it('HeroCard remains the sole [data-pcc-active-surface-panel="project-readiness"] owner', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(panels).toHaveLength(1);
@@ -111,7 +111,7 @@ describe('Project Readiness — active-panel ownership preserved', () => {
 
 describe('Project Readiness — Ownership escalation disabled-affordance contract', () => {
   it('every escalation chip is routed through PccDisabledAffordance with a paired reason', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     const ownershipRegion = container.querySelector(

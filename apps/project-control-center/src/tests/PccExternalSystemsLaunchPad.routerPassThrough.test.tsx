@@ -74,7 +74,7 @@ describe('PccSurfaceRouter — external-systems pass-through (Wave 15 / Prompt 0
     const spy = vi.fn().mockResolvedValue(buildKnownEnvelope());
     const client = buildRouterClient(spy);
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="external-systems" readModelClient={client} />
       </PccBentoGrid>,
     );

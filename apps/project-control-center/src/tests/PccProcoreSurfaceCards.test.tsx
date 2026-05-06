@@ -78,7 +78,7 @@ function expectAllowedDegradedStateAndTone(container: HTMLElement, cardId: strin
 describe('External Systems — Procore configuration & status card (Wave 13 / Prompt 13E)', () => {
   it('renders one card with data-pcc-card-id="procore-configuration-status" as a direct bento child', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccExternalSystemsSurface />
       </PccBentoGrid>,
     );
@@ -88,7 +88,7 @@ describe('External Systems — Procore configuration & status card (Wave 13 / Pr
 
   it('emits no http(s) anchors and no enabled mutation buttons on the Procore configuration card', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccExternalSystemsSurface />
       </PccBentoGrid>,
     );
@@ -98,7 +98,7 @@ describe('External Systems — Procore configuration & status card (Wave 13 / Pr
 
   it("Procore configuration_state is 'configured' only when mapping is confirmed AND envelope is available", () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccExternalSystemsSurface />
       </PccBentoGrid>,
     );
@@ -114,7 +114,7 @@ describe('External Systems — Procore configuration & status card (Wave 13 / Pr
 describe('Site Health — Procore sync & repair card (Wave 13 / Prompt 13E)', () => {
   it('renders the card with data-pcc-card-id="procore-sync-repair" as a direct bento child', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSiteHealthSurface />
       </PccBentoGrid>,
     );
@@ -124,7 +124,7 @@ describe('Site Health — Procore sync & repair card (Wave 13 / Prompt 13E)', ()
 
   it('emits no http(s) anchors and no enabled mutation buttons on the Procore sync card', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSiteHealthSurface />
       </PccBentoGrid>,
     );
@@ -136,7 +136,7 @@ describe('Site Health — Procore sync & repair card (Wave 13 / Prompt 13E)', ()
 describe('Project Readiness — Procore source-confidence region (Wave 13 / Prompt 13E)', () => {
   it('renders the region card with data-pcc-readiness-region="procore-source-confidence" as a direct bento child', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface />
       </PccBentoGrid>,
     );
@@ -149,7 +149,7 @@ describe('Project Readiness — Procore source-confidence region (Wave 13 / Prom
 
   it('emits no http(s) anchors on the Procore source-confidence card', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface />
       </PccBentoGrid>,
     );
@@ -161,7 +161,7 @@ describe('Project Readiness — Procore source-confidence region (Wave 13 / Prom
 describe('Project Home — Procore snapshot card (Wave 13 / Prompt 13E, read-model path)', () => {
   it('renders one card with data-pcc-card-id="procore-snapshot" as a direct bento child', async () => {
     const { container, findAllByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     // Wait for read-model-driven render.
     await findAllByText('Procore snapshot');
@@ -171,7 +171,7 @@ describe('Project Home — Procore snapshot card (Wave 13 / Prompt 13E, read-mod
 
   it('emits no http(s) anchors and no enabled mutation buttons on the Procore snapshot card', async () => {
     const { container, findAllByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findAllByText('Procore snapshot');
     expectNoHttpAnchorsOnCard(container, 'procore-snapshot');

@@ -54,7 +54,7 @@ function envelope(
 
 function renderSection(client: IPccUnifiedLifecycleReadModelClient) {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccProjectHomeUnifiedLifecycleSection client={client} projectId={PROJECT_ID} />
     </PccBentoGrid>,
   );
@@ -188,9 +188,7 @@ describe('PccProjectHomeUnifiedLifecycleSection — degraded paths', () => {
     await waitFor(() =>
       expect(container.querySelector('[data-pcc-project-memory]')).not.toBeNull(),
     );
-    expect(
-      container.querySelector('[data-pcc-memory-record-id="TST-MEM-WITHHELD"]'),
-    ).toBeNull();
+    expect(container.querySelector('[data-pcc-memory-record-id="TST-MEM-WITHHELD"]')).toBeNull();
     expect(container.textContent ?? '').not.toContain('WITHHELD_DO_NOT_EXPOSE');
   });
 });
@@ -222,9 +220,7 @@ describe('PccProjectHomeUnifiedLifecycleSection — non-routing posture', () => 
     await waitFor(() =>
       expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
     );
-    expect(
-      container.querySelector('[data-pcc-surface-id="unified-lifecycle"]'),
-    ).toBeNull();
+    expect(container.querySelector('[data-pcc-surface-id="unified-lifecycle"]')).toBeNull();
     expect(
       container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
     ).toBeNull();

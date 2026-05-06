@@ -15,7 +15,7 @@ afterEach(() => {
 
 function renderSurface() {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccControlCenterSettingsSurface />
     </PccBentoGrid>,
   );

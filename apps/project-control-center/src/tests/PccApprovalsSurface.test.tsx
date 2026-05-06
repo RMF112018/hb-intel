@@ -55,7 +55,7 @@ function rejectingClient(): IPccApprovalsReadModelClient {
 
 function renderSurface(client?: IPccApprovalsReadModelClient): HTMLElement {
   const { container } = render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccApprovalsSurface readModelClient={client} projectId={PROJECT_ID} />
     </PccBentoGrid>,
   );
@@ -293,7 +293,7 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
       </PccBentoGrid>,
     );
@@ -314,7 +314,7 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
       </PccBentoGrid>,
     );
@@ -335,7 +335,7 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
       </PccBentoGrid>,
     );
@@ -357,7 +357,7 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
       </PccBentoGrid>,
     );
@@ -382,7 +382,7 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
       </PccBentoGrid>,
     );

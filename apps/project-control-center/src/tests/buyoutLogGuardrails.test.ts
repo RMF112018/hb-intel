@@ -250,7 +250,7 @@ describe('Wave 13 Buyout Log — degraded state accessibility', () => {
   function renderWithViewModel(vm: IPccBuyoutLogViewModel): HTMLElement {
     const { container } = render(
       createElement(PccBentoGrid, {
-        forceMode: 'wideDesktop',
+        forceMode: 'desktop',
         children: createElement(PccBuyoutLogRegions, { viewModel: vm }),
       }),
     );
@@ -276,12 +276,12 @@ describe('Wave 13 Buyout Log — degraded state accessibility', () => {
 
 describe('Wave 13 Buyout Log — no shell-route or active-surface marker', () => {
   it('the rendered PccApp tree has no [data-pcc-surface-id="buyout-log"] node', () => {
-    const { container } = render(createElement(PccApp, { forceMode: 'wideDesktop' }));
+    const { container } = render(createElement(PccApp, { forceMode: 'desktop' }));
     expect(container.querySelector('[data-pcc-surface-id="buyout-log"]')).toBeNull();
   });
 
   it('the rendered PccApp tree has no [data-pcc-active-surface-panel="buyout-log"] node', () => {
-    const { container } = render(createElement(PccApp, { forceMode: 'wideDesktop' }));
+    const { container } = render(createElement(PccApp, { forceMode: 'desktop' }));
     expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
   });
 });

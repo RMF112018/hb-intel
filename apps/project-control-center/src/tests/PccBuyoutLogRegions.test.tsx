@@ -82,7 +82,7 @@ function makeClient(
 
 function renderRegions(vm: IPccBuyoutLogViewModel): HTMLElement {
   const { container } = render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <Fragment>
         <PccBuyoutLogRegions viewModel={vm} />
       </Fragment>
@@ -107,7 +107,7 @@ describe('Wave 13 Buyout Log — region-id tuple', () => {
 
 describe('Wave 13 Buyout Log — bento direct-child invariant', () => {
   it('every Buyout Log region marker resolves to a card whose parent is the bento grid', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(REQUIRED_REGIONS.length);
@@ -121,7 +121,7 @@ describe('Wave 13 Buyout Log — bento direct-child invariant', () => {
 
 describe('Wave 13 Buyout Log — required regions', () => {
   it('renders every required region', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     for (const region of REQUIRED_REGIONS) {
       expect(blRegion(container, region), `missing region ${region}`).not.toBeNull();
@@ -129,7 +129,7 @@ describe('Wave 13 Buyout Log — required regions', () => {
   });
 
   it('emits exactly ten buyout-log section markers (one per region) in the ready path', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBe(REQUIRED_REGIONS.length);
@@ -138,7 +138,7 @@ describe('Wave 13 Buyout Log — required regions', () => {
 
 describe('Wave 13 Buyout Log — read-only structural posture', () => {
   it('the buyout log region group contains no anchors, forms, or file inputs', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(1);
@@ -152,7 +152,7 @@ describe('Wave 13 Buyout Log — read-only structural posture', () => {
   });
 
   it('the only enabled buttons in the buyout log region group are local-selection package-row buttons', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     for (const marker of Array.from(markers)) {
@@ -170,7 +170,7 @@ describe('Wave 13 Buyout Log — read-only structural posture', () => {
   });
 
   it('does not introduce a standalone buyout-log shell route or active surface marker', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     expect(container.querySelector('[data-pcc-surface-id="buyout-log"]')).toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
@@ -183,7 +183,7 @@ describe('Wave 13 Buyout Log — read-only structural posture', () => {
 
 describe('Wave 13 Buyout Log — local package-detail selection', () => {
   it('clicking a package row updates the package-detail region to the selected entry', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     const detailRegion = blRegion(container, 'package-detail');
@@ -280,7 +280,7 @@ describe('Wave 13 Buyout Log — narrow client wired through adapter', () => {
 
 describe('Wave 13 Buyout Log — source-lineage badges', () => {
   it('package-table source-system markers cover PCC, Procore, and workbook-template entries', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'package-table');
     expect(region).not.toBeNull();
@@ -299,7 +299,7 @@ describe('Wave 13 Buyout Log — source-lineage badges', () => {
 
 describe('Wave 13 Buyout Log — HBI eligibility future-gated', () => {
   it('evidence-lineage region shows a future-gated HBI eligibility summary', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'evidence-lineage');
     expect(region).not.toBeNull();
@@ -309,7 +309,7 @@ describe('Wave 13 Buyout Log — HBI eligibility future-gated', () => {
   });
 
   it('package-detail region surfaces a future-eligible HBI eligibility marker for the default package', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'package-detail');
     expect(region).not.toBeNull();
@@ -325,7 +325,7 @@ describe('Wave 13 Buyout Log — HBI eligibility future-gated', () => {
 
 describe('Wave 13 Buyout Log — project memory and traceability reference-only', () => {
   it('audit-history region surfaces project-memory and traceability rows with reference-only captions', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'audit-history');
     expect(region).not.toBeNull();
@@ -343,7 +343,7 @@ describe('Wave 13 Buyout Log — project memory and traceability reference-only'
 
 describe('Wave 13 Buyout Log — compliance and procurement grouping', () => {
   it('compliance region groups requirements by type', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'compliance-sdi-bond');
     expect(region).not.toBeNull();
@@ -351,7 +351,7 @@ describe('Wave 13 Buyout Log — compliance and procurement grouping', () => {
   });
 
   it('procurement-leadtime region groups milestones by type', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'procurement-leadtime');
     expect(region).not.toBeNull();
@@ -465,7 +465,7 @@ describe('Wave 13 Buyout Log — no forbidden runtime imports', () => {
 
 describe('Wave 13 Buyout Log — boundary notices in command center', () => {
   it('renders one boundary-notice marker per canonical key inside the command-center region', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'command-center');
     expect(region).not.toBeNull();
@@ -482,7 +482,7 @@ describe('Wave 13 Buyout Log — boundary notices in command center', () => {
   });
 
   it('boundary notices live within the command-center boundary-notices list and are inert', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = container.querySelector(
       '[data-pcc-bl-region-list="command-center-boundary-notices"]',
@@ -500,7 +500,7 @@ describe('Wave 13 Buyout Log — boundary notices in command center', () => {
 
 describe('Wave 13 Buyout Log — integration posture in command center', () => {
   it('renders one integration-posture marker per canonical target id in the command-center region', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = blRegion(container, 'command-center');
     expect(region).not.toBeNull();
@@ -512,7 +512,7 @@ describe('Wave 13 Buyout Log — integration posture in command center', () => {
   });
 
   it('integration-posture rows are inert (no anchors, no buttons, no inputs, no forms)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = container.querySelector(
       '[data-pcc-bl-region-list="command-center-integration-posture"]',
@@ -538,7 +538,7 @@ describe('Wave 13 Buyout Log — per-seam reference-only labels in package detai
   ];
 
   it('each fixture-populated seam kind renders a data-pcc-bl-detail-seam-kind marker with a reference-only label', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     for (const [kind, pkgId] of KIND_TO_PACKAGE_ID) {
@@ -562,7 +562,7 @@ describe('Wave 13 Buyout Log — per-seam reference-only labels in package detai
   });
 
   it('every package surfaces the project-readiness-source-module seam declaring "buyout-log"', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     // Each package row click resolves the detail panel; the source-module
@@ -582,7 +582,7 @@ describe('Wave 13 Buyout Log — per-seam reference-only labels in package detai
   });
 
   it('reference-seams subsection is inert (no anchors, no buttons, no inputs, no forms)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const detailRegion = blRegion(container, 'package-detail');
     expect(detailRegion).not.toBeNull();

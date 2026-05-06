@@ -24,7 +24,7 @@ function fixtureClient(): IPccDocumentsReadModelClient {
 
 async function renderDocuments() {
   const utils = render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccDocumentsSurface readModelClient={fixtureClient()} />
     </PccBentoGrid>,
   );

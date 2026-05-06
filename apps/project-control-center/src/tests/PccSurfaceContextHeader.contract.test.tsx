@@ -6,7 +6,7 @@ import { PccApp } from '../PccApp';
 describe('PccSurfaceContextHeader contract', () => {
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
     it(`renders standardized context fields for '${surfaceId}'`, () => {
-      const { container } = render(<PccApp forceMode="wideDesktop" />);
+      const { container } = render(<PccApp forceMode="desktop" />);
       const button = container.querySelector(`[data-pcc-surface-id="${surfaceId}"]`);
       expect(button).not.toBeNull();
       fireEvent.click(button!);

@@ -20,7 +20,11 @@ export const PccProjectIntelligenceHeader: FC<PccProjectIntelligenceHeaderProps>
   subtitle,
   mode,
 }) => {
-  const showSearchExpanded = mode === 'wideDesktop' || mode === 'standardDesktop';
+  const showSearchExpanded =
+    mode === 'standardLaptop' ||
+    mode === 'largeLaptop' ||
+    mode === 'desktop' ||
+    mode === 'ultrawide';
 
   return (
     <header className={styles.header} data-pcc-header="" data-pcc-mode={mode}>

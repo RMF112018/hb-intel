@@ -27,7 +27,7 @@ import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExtern
 
 function renderSurface(): ReturnType<typeof render> {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccExternalSystemsSurface />
     </PccBentoGrid>,
   );

@@ -12,7 +12,7 @@ import { PccSiteHealthSurface } from '../surfaces/siteHealth/PccSiteHealthSurfac
 
 function renderSurface() {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccSiteHealthSurface />
     </PccBentoGrid>,
   );

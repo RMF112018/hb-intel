@@ -100,7 +100,7 @@ const SURFACE_ROUTER_FILE = resolve(__dirname, '..', 'shell', 'PccSurfaceRouter.
 describe('Ask-HBI closeout — integrated Project Home idle posture and bento invariants', () => {
   it('renders 16 cards (15 + Wave 13E Procore snapshot), the Ask-HBI card mounts in idle posture, no answer rows are visible, no card is nested inside another card, and the panel disclaimer is present', async () => {
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Ask HBI — Grounded Project Answers');
     const grid = container.querySelector('[data-pcc-bento-grid]');
@@ -140,7 +140,7 @@ describe('Ask-HBI closeout — integrated Project Home idle posture and bento in
 describe('Ask-HBI closeout — integrated sample-query click renders grounded chips with source identity', () => {
   it('clicking a sample query in the integrated Ask-HBI card transitions to ready, renders citation chips that carry the canonical recordType + recordId, and renders refusal rows with refusal reason and zero citations', async () => {
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Ask HBI — Grounded Project Answers');
     const target = ASK_HBI_SAMPLE_QUERIES[0];
@@ -243,7 +243,7 @@ describe('Ask-HBI closeout — integrated restricted/degraded posture does not l
     const baseClient = createPccFixtureReadModelClient();
     vi.spyOn(baseClient, 'getUnifiedSearch').mockResolvedValue(restrictedEnvelope);
     const { container, findByText } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={baseClient} />,
+      <PccApp forceMode="desktop" readModelClient={baseClient} />,
     );
     await findByText('Ask HBI — Grounded Project Answers');
     const target = ASK_HBI_SAMPLE_QUERIES[0];

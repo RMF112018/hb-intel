@@ -78,7 +78,7 @@ function makeClient(
 
 function renderRegions(vm: IPccConstraintsLogViewModel): HTMLElement {
   const { container } = render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <Fragment>
         <PccConstraintsLogRegions viewModel={vm} />
       </Fragment>
@@ -93,7 +93,7 @@ function renderRegions(vm: IPccConstraintsLogViewModel): HTMLElement {
 
 describe('Wave 12 Constraints Log — bento direct-child invariant', () => {
   it('every Constraints Log lane marker resolves to a card whose parent is the bento grid', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(REQUIRED_LANES.length);
@@ -107,7 +107,7 @@ describe('Wave 12 Constraints Log — bento direct-child invariant', () => {
 
 describe('Wave 12 Constraints Log — required lanes', () => {
   it('renders every required lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     for (const lane of REQUIRED_LANES) {
       expect(clLane(container, lane), `missing lane ${lane}`).not.toBeNull();
@@ -115,7 +115,7 @@ describe('Wave 12 Constraints Log — required lanes', () => {
   });
 
   it('emits exactly nine constraints-log section markers (one per lane)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBe(REQUIRED_LANES.length);
@@ -124,7 +124,7 @@ describe('Wave 12 Constraints Log — required lanes', () => {
 
 describe('Wave 12 Constraints Log — read-only structural posture', () => {
   it('the constraints log region group contains no anchors, forms, or file inputs', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(1);
@@ -138,7 +138,7 @@ describe('Wave 12 Constraints Log — read-only structural posture', () => {
   });
 
   it('the only enabled buttons in the constraints log region group are local-selection log-row buttons', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     for (const marker of Array.from(markers)) {
@@ -156,7 +156,7 @@ describe('Wave 12 Constraints Log — read-only structural posture', () => {
   });
 
   it('the legal/claim/delay boundary marker appears on the root-cause and executive lanes (and on the default detail entry)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const rootCause = clLane(container, 'root-cause-lessons-learned');
     const executive = clLane(container, 'executive-exposure-summary');
@@ -176,7 +176,7 @@ describe('Wave 12 Constraints Log — read-only structural posture', () => {
 
 describe('Wave 12 Constraints Log — local detail-panel selection', () => {
   it('clicking a log-table row updates the detail-panel lane to the selected entry', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     // Default detail entry is the first risk (risk-w12-001).
@@ -286,7 +286,7 @@ const REQUIRED_INTEGRATION_TARGETS: readonly string[] = [
 
 describe('Wave 12 Constraints Log — boundary notices in command center', () => {
   it('renders one boundary-notice marker per canonical key inside the command-center lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const lane = clLane(container, 'command-center');
     expect(lane).not.toBeNull();
@@ -299,7 +299,7 @@ describe('Wave 12 Constraints Log — boundary notices in command center', () =>
   });
 
   it('boundary notices live within the command-center boundary-notices region', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = container.querySelector(
       '[data-pcc-cl-region="command-center-boundary-notices"]',
@@ -313,7 +313,7 @@ describe('Wave 12 Constraints Log — boundary notices in command center', () =>
 
 describe('Wave 12 Constraints Log — integration posture in command center', () => {
   it('renders one integration-posture marker per canonical target in the command-center lane', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const lane = clLane(container, 'command-center');
     expect(lane).not.toBeNull();
@@ -325,7 +325,7 @@ describe('Wave 12 Constraints Log — integration posture in command center', ()
   });
 
   it('integration posture rows are inert (no anchors, no buttons, no inputs)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = container.querySelector(
       '[data-pcc-cl-region="command-center-integration-posture"]',
@@ -357,7 +357,7 @@ describe('Wave 12 Constraints Log — per-seam reference-only labels in detail p
   ];
 
   it('each fixture-populated seam kind renders a data-pcc-cl-detail-seam-kind marker with a reference-only label', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     for (const [kind, rowId] of KIND_TO_ROW_ID) {

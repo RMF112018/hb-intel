@@ -8,7 +8,7 @@ export interface UseContainerBreakpointResult {
 }
 
 export function useContainerBreakpoint(
-  initialMode: PccResponsiveMode = 'standardDesktop',
+  initialMode: PccResponsiveMode = 'standardLaptop',
 ): UseContainerBreakpointResult {
   const ref = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<PccResponsiveMode>(initialMode);

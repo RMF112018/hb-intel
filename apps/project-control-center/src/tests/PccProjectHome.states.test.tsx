@@ -10,9 +10,7 @@ import { PccProjectReadinessCard } from '../surfaces/projectHome/PccProjectReadi
 import { PccRecentActivityCard } from '../surfaces/projectHome/PccRecentActivityCard';
 import { PccSiteHealthSummaryCard } from '../surfaces/projectHome/PccSiteHealthSummaryCard';
 import { PccTeamSnapshotCard } from '../surfaces/projectHome/PccTeamSnapshotCard';
-import {
-  PccBentoGrid,
-} from '../layout/PccBentoGrid';
+import { PccBentoGrid } from '../layout/PccBentoGrid';
 import type { PccCardState } from '../surfaces/projectHome/shared';
 
 const CARDS = [
@@ -41,7 +39,7 @@ describe('Project Home card states', () => {
     for (const state of NON_PREVIEW_STATES) {
       it(`${name} renders the '${state}' state with data-pcc-state marker and preserves data-pcc-footprint`, () => {
         const { container } = render(
-          <PccBentoGrid forceMode="wideDesktop">
+          <PccBentoGrid forceMode="desktop">
             <Card state={state} />
           </PccBentoGrid>,
         );

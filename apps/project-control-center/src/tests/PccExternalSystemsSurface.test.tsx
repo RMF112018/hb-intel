@@ -73,7 +73,7 @@ function syncClient(
 
 function renderSurface(): ReturnType<typeof render> {
   return render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccExternalSystemsSurface />
     </PccBentoGrid>,
   );
@@ -218,7 +218,7 @@ describe('PccExternalSystemsSurface — sourceStatus → state UI', () => {
   ): ReturnType<typeof render> {
     const client = syncClient(envelope);
     return render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccExternalSystemsSurface readModelClient={client} projectId={envelope.projectId} />
       </PccBentoGrid>,
     );

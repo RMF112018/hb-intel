@@ -20,7 +20,7 @@ function readinessRegion(container: HTMLElement, region: string): HTMLElement | 
 
 describe('Project Readiness Center surface', () => {
   it('renders exactly one active-surface marker for project-readiness', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(markers).toHaveLength(1);
@@ -28,7 +28,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('renders all six framework regions', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     expect(readinessRegion(container, 'hero')).not.toBeNull();
     expect(readinessRegion(container, 'lifecycle-gates')).not.toBeNull();
@@ -39,7 +39,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('hero region exposes the project-readiness badge and no-execution caption', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const hero = readinessRegion(container, 'hero');
     expect(hero).not.toBeNull();
@@ -50,21 +50,21 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('lifecycle gates region renders gate items from structural markers', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const gates = container.querySelectorAll('[data-pcc-readiness-gate-id]');
     expect(gates.length).toBeGreaterThanOrEqual(1);
   });
 
   it('domain grid region renders multiple domains from structural markers', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const domains = container.querySelectorAll('[data-pcc-readiness-domain-id]');
     expect(domains.length).toBeGreaterThanOrEqual(2);
   });
 
   it('blockers region renders the escalated fixture blocker', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const blocker = container.querySelector(
       '[data-pcc-readiness-blocker-id="fixture-pcc-readiness-003"]',
@@ -73,7 +73,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('evidence and source-health region renders evidence and source-health entries', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = readinessRegion(container, 'evidence-source-health');
     expect(region).not.toBeNull();
@@ -84,7 +84,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 9 as preview-deferred and Wave 11 RACI as implemented', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const wave9 = container.querySelector(
       '[data-pcc-readiness-downstream-source="project-lifecycle-readiness"]',
@@ -102,7 +102,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 12 / Wave 14 as preview-deferred', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const downstreamModuleIds = ['constraints-log', 'approvals-checkpoints'] as const;
     for (const id of downstreamModuleIds) {
@@ -113,7 +113,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 10 (permit-log) as implemented', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const node = container.querySelector('[data-pcc-readiness-downstream-source="permit-log"]');
     expect(node).not.toBeNull();
@@ -123,7 +123,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 13 (buyout-log) as implemented', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const node = container.querySelector('[data-pcc-readiness-downstream-source="buyout-log"]');
     expect(node).not.toBeNull();
@@ -133,7 +133,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('readiness surface tree exposes no enabled action buttons', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const panel = activateProjectReadiness(container);
     const buttons = panel.querySelectorAll('button');
     for (const button of Array.from(buttons)) {
@@ -150,7 +150,7 @@ function readinessRegionsAll(container: HTMLElement): readonly HTMLElement[] {
 
 describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () => {
   it('renders the ownership-accountability region with per-persona entries', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const ownership = readinessRegion(container, 'ownership-accountability');
     expect(ownership).not.toBeNull();
@@ -159,7 +159,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('flags unassigned-gap items in the ownership region', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const unassignedEntries = container.querySelectorAll(
       '[data-pcc-readiness-ownership-unassigned="true"]',
@@ -168,7 +168,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('flags safety-qaqc as having an unassigned-gap signal (item 004)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const safety = container.querySelector('[data-pcc-readiness-ownership-persona="safety-qaqc"]');
     expect(safety).not.toBeNull();
@@ -176,7 +176,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('renders escalation chips that include project-executive and manager-of-operational-excellence', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const escalations = Array.from(
       container.querySelectorAll('[data-pcc-readiness-ownership-escalation]'),
@@ -186,7 +186,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('renders the priority-actions-preview region with the eligible item', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const preview = readinessRegion(container, 'priority-actions-preview');
     expect(preview).not.toBeNull();
@@ -197,7 +197,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('priority-actions-preview region exposes no enabled actions', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const preview = readinessRegion(container, 'priority-actions-preview');
     expect(preview).not.toBeNull();
@@ -210,7 +210,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('renders a risk-tag chip on blocker item 003 as open-blocker', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const blocker = container.querySelector(
       '[data-pcc-readiness-blocker-id="fixture-pcc-readiness-003"]',
@@ -222,7 +222,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('evidence-source-health region has no upload controls', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = readinessRegion(container, 'evidence-source-health');
     expect(region).not.toBeNull();
@@ -235,7 +235,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('readiness panel has no enabled Upload button', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const panel = activateProjectReadiness(container);
     const enabledUpload = Array.from(panel.querySelectorAll('button')).filter(
       (btn) => /^upload$/i.test((btn.textContent ?? '').trim()) && !btn.hasAttribute('disabled'),
@@ -244,7 +244,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('renders degraded source-health entries for permit-log (stale), buyout-log and external-systems (source-unavailable)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const permit = container.querySelector('[data-pcc-readiness-source-health="permit-log"]');
     const buyout = container.querySelector('[data-pcc-readiness-source-health="buyout-log"]');
@@ -259,7 +259,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   it('readiness regions expose no executable-label buttons', () => {
     const forbiddenLabel =
       /^(submit|approve|upload|run|execute|sync|write\s*back|writeback|complete\s*checklist|run\s*workflow)$/i;
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const regions = readinessRegionsAll(container);
     expect(regions.length).toBeGreaterThan(0);
@@ -286,7 +286,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   }
 
   it('still renders exactly one active-surface marker for project-readiness', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(markers).toHaveLength(1);
@@ -294,7 +294,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('renders all nine lifecycle-readiness regions with their markers', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     expect(lifecycleRegion(container, 'lifecycle-hero')).not.toBeNull();
     expect(lifecycleRegion(container, 'lifecycle-map')).not.toBeNull();
@@ -308,14 +308,14 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('each lifecycle region carries the lifecycle-readiness-center section marker', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const sectioned = lifecycleSectionRegions(container);
     expect(sectioned.length).toBe(9);
   });
 
   it('lifecycle hero surfaces canonical 157 library scope and product-grade copy', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const hero = lifecycleRegion(container, 'lifecycle-hero');
     expect(hero).not.toBeNull();
@@ -325,14 +325,14 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('lifecycle map renders a row for every canonical phase', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const phases = container.querySelectorAll('[data-pcc-lifecycle-phase-id]');
     expect(phases.length).toBe(10);
   });
 
   it('family region renders 3 family cards with library counts 55 / 32 / 70 (per-lane scoped queries)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const familyRegion = lifecycleRegion(container, 'lifecycle-family-domains');
     expect(familyRegion).not.toBeNull();
@@ -348,14 +348,14 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('my actions region renders at least one assigned readiness item', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const items = container.querySelectorAll('[data-pcc-lifecycle-item-id]');
     expect(items.length).toBeGreaterThan(0);
   });
 
   it('blockers region renders blocker-state buckets and flags the escalated fixture project item', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const blockerRegion = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
     expect(blockerRegion).not.toBeNull();
@@ -368,7 +368,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('evidence region renders 4 evidence-state buckets', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const evidence = lifecycleRegion(container, 'lifecycle-evidence-readiness');
     expect(evidence).not.toBeNull();
@@ -377,7 +377,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('future closeout region surfaces the fixture future-closeout item and excludes reference-only', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const future = lifecycleRegion(container, 'lifecycle-future-closeout');
     expect(future).not.toBeNull();
@@ -392,7 +392,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('source traceability region surfaces 157 total + 3 source documents with family + sourceFile', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const trace = lifecycleRegion(container, 'lifecycle-source-traceability');
     expect(trace).not.toBeNull();
@@ -412,7 +412,7 @@ describe('Wave 9 Lifecycle Readiness Center surface', () => {
   });
 
   it('lifecycle regions contain no <a href> links and no enabled buttons (inert by structural assertion)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const sectioned = lifecycleSectionRegions(container);
     expect(sectioned.length).toBe(9);
@@ -439,14 +439,14 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
   }
 
   it('renders <details>/<summary> toggles for each item in My Actions, Blockers, and Future Closeout', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const toggles = container.querySelectorAll('[data-pcc-lifecycle-item-detail-toggle]');
     expect(toggles.length).toBeGreaterThan(0);
   });
 
   it('detail panel reveals source traceability fields (file, page, section, item-key, exact text)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
     const myActions = lifecycleRegion(container, 'lifecycle-my-actions');
@@ -480,7 +480,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
   });
 
   it('detail panel renders unpopulated optional fields as "Not listed" (honest placeholder)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
     // At least some optional fields are unpopulated in fixture, e.g. completedAtUtc
@@ -494,7 +494,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
   });
 
   it('evidence external reference URL renders as plain text inside the detail panel — no <a href>', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
     const myActions = lifecycleRegion(container, 'lifecycle-my-actions');
@@ -507,7 +507,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
   });
 
   it('inst-safety-003 detail panel surfaces failed-state marker + exception code without compliance editorializing', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
     const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
@@ -532,7 +532,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
   });
 
   it('closeout-from-day-one chip renders for closeout-family items with activeByDefault=true', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
     const chips = container.querySelectorAll('[data-pcc-lifecycle-closeout-from-day-one="true"]');
@@ -540,7 +540,7 @@ describe('Wave 9 lifecycle item detail and degraded states', () => {
   });
 
   it('all detail-panel buttons (if any) are disabled or aria-disabled', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     openAllDetails(container);
     const sectioned = container.querySelectorAll(
@@ -563,7 +563,7 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
   }
 
   it('renders 7 signal-bucket markers inside the signals region', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
     expect(region).not.toBeNull();
@@ -584,7 +584,7 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
   });
 
   it('renders the seeded approval-posture entries with their checkpoint references', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
     expect(region).not.toBeNull();
@@ -605,7 +605,7 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
   });
 
   it('renders the seeded priority-action promotion entries with their related ids', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
     expect(region).not.toBeNull();
@@ -626,7 +626,7 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
   });
 
   it('renders per-item signal chips inside the detail panel after opening <details>', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const elements = container.querySelectorAll('details');
     for (const el of Array.from(elements)) (el as HTMLDetailsElement).open = true;
@@ -647,7 +647,7 @@ describe('Wave 9 readiness signals (Prompt 07)', () => {
   });
 
   it('signals region contains no <a href> and no enabled buttons (display-only / inert)', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
     expect(region).not.toBeNull();
@@ -681,7 +681,7 @@ describe('Project Readiness surface — Wave 11 Responsibility Matrix embedding'
   ];
 
   it('renders all 8 Responsibility Matrix lane markers within the project-readiness surface output', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     for (const lane of RM_LANES) {
       expect(
@@ -692,7 +692,7 @@ describe('Project Readiness surface — Wave 11 Responsibility Matrix embedding'
   });
 
   it('Responsibility Matrix region cards remain direct children of the bento grid', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll(
       '[data-pcc-readiness-section="responsibility-matrix"]',
@@ -723,7 +723,7 @@ describe('Project Readiness Center surface — Constraints Log surface-level int
     // card; the constraints-log cards are siblings in the bento grid,
     // so scope the marker query to `container` (matching the existing
     // Responsibility Matrix embedding test pattern).
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll('[data-pcc-readiness-section="constraints-log"]');
     expect(markers.length).toBeGreaterThan(0);
@@ -735,7 +735,7 @@ describe('Project Readiness Center surface — Constraints Log surface-level int
   });
 
   it('Constraints Log is not a separate route or active-surface workspace', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     expect(container.querySelector('[data-pcc-surface-id="constraints-log"]')).toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="constraints-log"]')).toBeNull();
@@ -754,7 +754,7 @@ describe('Project Readiness Center surface — Constraints Log surface-level int
 
 describe('Project Readiness Center surface — Buyout Log surface-level integration', () => {
   it('Buyout Log appears as a readiness input on the project-readiness surface; each card is a direct child of the bento grid', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const markers = container.querySelectorAll('[data-pcc-readiness-section="buyout-log"]');
     expect(markers.length).toBeGreaterThan(0);
@@ -766,7 +766,7 @@ describe('Project Readiness Center surface — Buyout Log surface-level integrat
   });
 
   it('Buyout Log is not a separate route or active-surface workspace', () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     expect(container.querySelector('[data-pcc-surface-id="buyout-log"]')).toBeNull();
     expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
@@ -785,7 +785,7 @@ describe('Project Readiness Center surface — Buyout Log surface-level integrat
 describe('Project Readiness Center surface — fixture-only fallback excludes unified lifecycle section', () => {
   it('renders the surface without unified-lifecycle body markers when no readModelClient is supplied', () => {
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface />
       </PccBentoGrid>,
     );
@@ -822,7 +822,7 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
 
   it('read-model-driven path renders three unified-lifecycle direct-child cards with the three body markers; warranty / closed-project / lens / search markers are NOT rendered', async () => {
     const { container } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     activateProjectReadiness(container);
     // Marker queries scoped to `container` (the new section's cards are
@@ -853,7 +853,7 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
 
   it('related-records panel renders source-lineage chips and adds no anchors', async () => {
     const { container } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     activateProjectReadiness(container);
     await waitFor(() =>
@@ -871,7 +871,7 @@ describe('Project Readiness Center surface — unified lifecycle integration (re
 
   it('does not introduce a unified-lifecycle route or workspace marker, and adds no forbidden anchor href in the new section', async () => {
     const { container } = render(
-      <PccApp forceMode="wideDesktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     activateProjectReadiness(container);
     await waitFor(() =>
@@ -945,7 +945,7 @@ describe('Project Readiness Center surface — non-call architectural lock', () 
     const unifiedLifecycleSpy = vi.spyOn(client, 'getUnifiedLifecycle');
 
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface readModelClient={client} />
       </PccBentoGrid>,
     );

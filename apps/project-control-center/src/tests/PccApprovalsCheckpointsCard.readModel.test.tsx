@@ -9,7 +9,7 @@ import {
 } from '../surfaces/projectHome/PccApprovalsCheckpointsCard';
 
 function renderInBento(node: ReactElement): ReturnType<typeof render> {
-  return render(<PccBentoGrid forceMode="wideDesktop">{node}</PccBentoGrid>);
+  return render(<PccBentoGrid forceMode="desktop">{node}</PccBentoGrid>);
 }
 
 function viewModel(): IPccApprovalsCheckpointsCardViewModel {

@@ -33,7 +33,7 @@ function indexOfTitle(titles: readonly string[], expected: string): number {
 describe('Project Home — first-impression composition order', () => {
   describe('fixture path', () => {
     it('renders the priority cluster (priority actions, missing configurations, site health, approvals, readiness) before reference and history cards', () => {
-      const { container } = render(<PccApp forceMode="wideDesktop" />);
+      const { container } = render(<PccApp forceMode="desktop" />);
       const grid = container.querySelector('[data-pcc-bento-grid]');
       expect(grid, 'bento grid should render').not.toBeNull();
       const titles = readCardTitlesInOrder(grid!);
@@ -61,7 +61,7 @@ describe('Project Home — first-impression composition order', () => {
     });
 
     it('Missing Configurations card adopts the standard footprint for first-scan presence', () => {
-      const { container } = render(<PccApp forceMode="wideDesktop" />);
+      const { container } = render(<PccApp forceMode="desktop" />);
       const body = container.querySelector('[data-pcc-missing-configurations-body]');
       expect(body, 'Missing Configurations body should render').not.toBeNull();
       const card = body?.closest('[data-pcc-card]');
@@ -70,7 +70,7 @@ describe('Project Home — first-impression composition order', () => {
     });
 
     it('exactly one [data-pcc-active-surface-panel="project-home"] exists, carried by the Project Intelligence card (active-panel ownership preserved)', () => {
-      const { container } = render(<PccApp forceMode="wideDesktop" />);
+      const { container } = render(<PccApp forceMode="desktop" />);
       const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
       expect(panels).toHaveLength(1);
       expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
@@ -81,7 +81,7 @@ describe('Project Home — first-impression composition order', () => {
   describe('read-model path', () => {
     it('renders priority, missing-config, site-health, procore, approvals, and readiness before document/reference and unified-lifecycle cards', async () => {
       const client = createPccFixtureReadModelClient();
-      const { container } = render(<PccApp forceMode="wideDesktop" readModelClient={client} />);
+      const { container } = render(<PccApp forceMode="desktop" readModelClient={client} />);
 
       // The read-model path renders Procore + unified lifecycle + Ask HBI
       // after a microtask resolves; wait for at least the Procore snapshot

@@ -44,7 +44,11 @@ export const PccProjectContextBand: FC<PccProjectContextBandProps> = ({
   mode,
 }) => {
   const showPills = mode !== 'phone';
-  const showDateScope = mode === 'wideDesktop' || mode === 'standardDesktop';
+  const showDateScope =
+    mode === 'standardLaptop' ||
+    mode === 'largeLaptop' ||
+    mode === 'desktop' ||
+    mode === 'ultrawide';
 
   return (
     <div

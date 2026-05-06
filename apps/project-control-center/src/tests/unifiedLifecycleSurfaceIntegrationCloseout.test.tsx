@@ -51,9 +51,7 @@ const PROJECT_READINESS_SECTION_FILE = resolve(
 // ids stay visible. Matches the discipline used by
 // `useUnifiedLifecycleReadModel.test.ts` and `pcc-api-dormancy.test.ts`.
 function stripCommentsOnly(src: string): string {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/(^|[^:\\])\/\/[^\n]*/g, '$1');
+  return src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/[^\n]*/g, '$1');
 }
 
 // Comments + strings stripper for identifier scans. Static template
@@ -150,10 +148,7 @@ describe('Cross-surface no-nested-dashboard-card invariant (Wave 99 / Prompt 05D
 
   it('Project Home read-model-driven path: every [data-pcc-card] has no descendant [data-pcc-card]', async () => {
     const { container, findByText } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     await findByText('Lifecycle Timeline');
     const cards = container.querySelectorAll<HTMLElement>('[data-pcc-card]');
@@ -168,10 +163,7 @@ describe('Cross-surface no-nested-dashboard-card invariant (Wave 99 / Prompt 05D
 
   it('Project Readiness read-model-driven path: every [data-pcc-card] has no descendant [data-pcc-card]', async () => {
     const { container } = render(
-      <PccApp
-        forceMode="wideDesktop"
-        readModelClient={createPccFixtureReadModelClient()}
-      />,
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
     const projectReadinessButton = container.querySelector(
       '[data-pcc-surface-id="project-readiness"]',
@@ -262,7 +254,7 @@ describe('Constraints Log surface integration — read-only / no-execution postu
     // Local-state UI (filters, <details>/<summary> toggles, etc.)
     // is intentionally NOT asserted disabled here — those are
     // legitimate read-model-driven non-mutating affordances.
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const projectReadinessButton = container.querySelector(
       '[data-pcc-surface-id="project-readiness"]',
     );

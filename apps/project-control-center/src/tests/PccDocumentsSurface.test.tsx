@@ -39,14 +39,14 @@ function unknownProjectClient(): IPccDocumentsReadModelClient {
   return {
     getDocumentControl: (id, persona) => {
       const base = createPccFixtureReadModelClient();
-      return base.getDocumentControl(UNKNOWN_PROJECT_ID, persona ?? id ? undefined : undefined);
+      return base.getDocumentControl(UNKNOWN_PROJECT_ID, (persona ?? id) ? undefined : undefined);
     },
   };
 }
 
 async function renderWithClient(client?: IPccDocumentsReadModelClient) {
   const utils = render(
-    <PccBentoGrid forceMode="wideDesktop">
+    <PccBentoGrid forceMode="desktop">
       <PccDocumentsSurface readModelClient={client} />
     </PccBentoGrid>,
   );
@@ -196,7 +196,9 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     const lane = container.querySelector('[data-pcc-doc-lane="external-systems"]');
     expect(lane).not.toBeNull();
     const procore = lane!.querySelector('[data-pcc-document-source-id="external-procore"]');
-    const docCrunch = lane!.querySelector('[data-pcc-document-source-id="external-document-crunch"]');
+    const docCrunch = lane!.querySelector(
+      '[data-pcc-document-source-id="external-document-crunch"]',
+    );
     const adobeSign = lane!.querySelector('[data-pcc-document-source-id="external-adobe-sign"]');
     expect(procore).not.toBeNull();
     expect(docCrunch).not.toBeNull();
@@ -395,7 +397,7 @@ describe('PccDocumentsSurface — MPF deterministic allow-path enforcement (Wave
       envelopeWithRegistry([legitMpfEntry(), tamperedSameProjectIdEntry()]),
     );
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDocumentsSurface readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -419,7 +421,7 @@ describe('PccDocumentsSurface — MPF deterministic allow-path enforcement (Wave
       envelopeWithRegistry([tamperedSameProjectIdEntry(), legitMpfEntry()]),
     );
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDocumentsSurface readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -441,7 +443,7 @@ describe('PccDocumentsSurface — MPF deterministic allow-path enforcement (Wave
   it('Case 3 — tamper-only registry: MPF lane renders empty, tamper text absent', async () => {
     const client = clientReturning(envelopeWithRegistry([tamperedSameProjectIdEntry()]));
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccDocumentsSurface readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -833,7 +835,9 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', ()
       envelopeWithHealth({
         sourceStatus: 'available',
         registry: [PROJECT_RECORD_LIBRARY_ENTRY],
-        health: [{ sourceKey: 'project-record-primary', state: 'access-denied', message: 'graph 403' }],
+        health: [
+          { sourceKey: 'project-record-primary', state: 'access-denied', message: 'graph 403' },
+        ],
       }),
     );
     const { container } = await renderWithClient(client);
@@ -870,7 +874,13 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', ()
       envelopeWithHealth({
         sourceStatus: 'available',
         registry: [PROJECT_RECORD_LIBRARY_ENTRY],
-        health: [{ sourceKey: 'project-record-primary', state: 'missing-binding', message: 'binding null' }],
+        health: [
+          {
+            sourceKey: 'project-record-primary',
+            state: 'missing-binding',
+            message: 'binding null',
+          },
+        ],
       }),
     );
     const { container } = await renderWithClient(client);
@@ -888,13 +898,19 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', ()
         sourceStatus: 'available',
         registry: [legitMpfEntry()],
         health: [
-          { sourceKey: 'my-project-files-current-user', state: 'pending-initialization', message: 'graph drive create pending' },
+          {
+            sourceKey: 'my-project-files-current-user',
+            state: 'pending-initialization',
+            message: 'graph drive create pending',
+          },
         ],
       }),
     );
     const { container } = await renderWithClient(client);
     const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
-    const message = lane.querySelector('[data-pcc-doc-source-health-message="pending-initialization"]');
+    const message = lane.querySelector(
+      '[data-pcc-doc-source-health-message="pending-initialization"]',
+    );
     expect(message).not.toBeNull();
     expect(message!.textContent).toMatch(/being prepared|setting up/i);
     expect(lane.textContent).not.toContain('pending-initialization');
@@ -907,13 +923,19 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 05 source-state rendering', ()
         sourceStatus: 'available',
         registry: [legitMpfEntry()],
         health: [
-          { sourceKey: 'my-project-files-current-user', state: 'folder-creation-failed', message: 'graph 5xx during drive create' },
+          {
+            sourceKey: 'my-project-files-current-user',
+            state: 'folder-creation-failed',
+            message: 'graph 5xx during drive create',
+          },
         ],
       }),
     );
     const { container } = await renderWithClient(client);
     const lane = container.querySelector('[data-pcc-doc-lane="my-project-files"]')!;
-    const message = lane.querySelector('[data-pcc-doc-source-health-message="folder-creation-failed"]');
+    const message = lane.querySelector(
+      '[data-pcc-doc-source-health-message="folder-creation-failed"]',
+    );
     expect(message).not.toBeNull();
     expect(message!.textContent).toMatch(/could not be created|administrator/i);
     expect(lane.textContent).not.toContain('folder-creation-failed');
@@ -1174,9 +1196,7 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 06 reviews summary', () => {
       expect(card!.querySelector(`[data-pcc-doc-review-type="${id}"]`)).not.toBeNull();
     }
     for (const id of ['not-required', 'pending', 'in-review', 'approved', 'rejected', 'waived']) {
-      expect(
-        card!.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`),
-      ).not.toBeNull();
+      expect(card!.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`)).not.toBeNull();
     }
     expect(card!.querySelector('[data-pcc-doc-review-queue-empty="true"]')).not.toBeNull();
     expect(card!.querySelectorAll('[data-pcc-doc-review-queue-row]').length).toBe(0);
@@ -1190,9 +1210,7 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 06 reviews summary', () => {
       expect(card!.querySelector(`[data-pcc-doc-review-type="${id}"]`)).not.toBeNull();
     }
     for (const id of ['pending', 'rejected']) {
-      expect(
-        card!.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`),
-      ).not.toBeNull();
+      expect(card!.querySelector(`[data-pcc-doc-review-state-legend-code="${id}"]`)).not.toBeNull();
     }
     expect(card!.querySelector('[data-pcc-doc-review-queue-empty="true"]')).not.toBeNull();
   });

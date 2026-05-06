@@ -45,8 +45,11 @@ function railVariantForMode(
   mode: PccResponsiveMode,
 ): 'expanded' | 'iconOnly' | 'topStrip' | 'hamburger' {
   switch (mode) {
-    case 'wideDesktop':
-    case 'standardDesktop':
+    case 'ultrawide':
+    case 'desktop':
+    case 'largeLaptop':
+    case 'standardLaptop':
+    case 'smallLaptop':
       return 'expanded';
     case 'tabletLandscape':
       return 'iconOnly';

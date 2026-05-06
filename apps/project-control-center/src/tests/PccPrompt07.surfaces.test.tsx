@@ -19,7 +19,7 @@ const SURFACE_PREVIEW_COPY: Record<(typeof PROMPT_07_SURFACES)[number], string> 
 describe('Prompt 07 routed surface invariants', () => {
   for (const surfaceId of PROMPT_07_SURFACES) {
     it(`renders '${surfaceId}' with exactly one active-surface marker`, () => {
-      const { container } = render(<PccApp forceMode="wideDesktop" />);
+      const { container } = render(<PccApp forceMode="desktop" />);
       const button = container.querySelector(`[data-pcc-surface-id="${surfaceId}"]`);
       expect(button).not.toBeNull();
       fireEvent.click(button!);

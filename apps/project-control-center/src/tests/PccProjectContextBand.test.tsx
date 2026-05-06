@@ -17,13 +17,13 @@ describe('PccProjectContextBand', () => {
         activeSurfaceLabel="Project Home"
         activeSurfaceWorkflowLabel="Daily entry point with priority actions, project hero, and rollups."
         sourceConfidence="preview"
-        mode="wideDesktop"
+        mode="desktop"
       />,
     );
 
     const band = container.querySelector('[data-pcc-context-band]');
     expect(band, 'band should render').not.toBeNull();
-    expect(band?.getAttribute('data-pcc-mode')).toBe('wideDesktop');
+    expect(band?.getAttribute('data-pcc-mode')).toBe('desktop');
     expect(band?.getAttribute('data-pcc-source-confidence')).toBe('preview');
     expect(band?.getAttribute('aria-label')).toBe('Project context');
 
@@ -53,7 +53,7 @@ describe('PccProjectContextBand', () => {
         activeSurfaceLabel="Project Home"
         activeSurfaceWorkflowLabel="Daily entry point."
         sourceConfidence="live"
-        mode="wideDesktop"
+        mode="desktop"
       />,
     );
 
@@ -126,7 +126,7 @@ describe('PccProjectContextBand', () => {
   });
 
   it('renders the band once for every active surface (persistent across surface routes)', () => {
-    const { container, rerender } = render(<PccApp forceMode="wideDesktop" />);
+    const { container, rerender } = render(<PccApp forceMode="desktop" />);
     // every rail click triggers a fresh active surface; band must remain
     const railButtons = container.querySelectorAll('[data-pcc-rail] [data-pcc-surface-id]');
     expect(railButtons.length).toBeGreaterThan(0);

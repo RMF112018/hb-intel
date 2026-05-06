@@ -145,7 +145,7 @@ afterEach(() => {
 
 describe('PccApp default fixture path', () => {
   it('renders all 10 cards without invoking fetch when no readModelClient is supplied', async () => {
-    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    const { container } = render(<PccApp forceMode="desktop" />);
     const cards = container.querySelectorAll('[data-pcc-card]');
     expect(cards).toHaveLength(10);
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client',
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
     render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="site-health" readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -347,7 +347,7 @@ describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client',
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
     render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="documents" readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -366,7 +366,7 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
     render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="project-home" readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -383,7 +383,7 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
     render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="team-and-access" readModelClient={client} />
       </PccBentoGrid>,
     );
@@ -400,7 +400,7 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     const client = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
 
     const { container } = render(
-      <PccBentoGrid forceMode="wideDesktop">
+      <PccBentoGrid forceMode="desktop">
         <PccSurfaceRouter activeSurfaceId="team-and-access" readModelClient={client} />
       </PccBentoGrid>,
     );

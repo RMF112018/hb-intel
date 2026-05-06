@@ -6,8 +6,11 @@ export const PCC_RESPONSIVE_MODES = [
   'phone',
   'tabletPortrait',
   'tabletLandscape',
-  'standardDesktop',
-  'wideDesktop',
+  'smallLaptop',
+  'standardLaptop',
+  'largeLaptop',
+  'desktop',
+  'ultrawide',
 ] as const;
 
 export type PccResponsiveMode = (typeof PCC_RESPONSIVE_MODES)[number];
@@ -16,13 +19,19 @@ export const PCC_RESPONSIVE_COLUMNS: Record<PccResponsiveMode, number> = {
   phone: 1,
   tabletPortrait: 2,
   tabletLandscape: 6,
-  standardDesktop: 8,
-  wideDesktop: 12,
+  smallLaptop: 8,
+  standardLaptop: 10,
+  largeLaptop: 12,
+  desktop: 12,
+  ultrawide: 12,
 };
 
 export const FOOTPRINT_COLUMN_SPANS: Record<PccResponsiveMode, Record<PccCardFootprint, number>> = {
-  wideDesktop: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
-  standardDesktop: { hero: 6, wide: 5, standard: 3, compact: 2, tall: 3, full: 8 },
+  ultrawide: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
+  desktop: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
+  largeLaptop: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
+  standardLaptop: { hero: 6, wide: 5, standard: 3, compact: 2, tall: 3, full: 10 },
+  smallLaptop: { hero: 6, wide: 5, standard: 3, compact: 2, tall: 3, full: 8 },
   tabletLandscape: { hero: 4, wide: 3, standard: 2, compact: 2, tall: 2, full: 6 },
   tabletPortrait: { hero: 2, wide: 2, standard: 1, compact: 1, tall: 1, full: 2 },
   phone: { hero: 1, wide: 1, standard: 1, compact: 1, tall: 1, full: 1 },
@@ -37,8 +46,11 @@ export const FOOTPRINT_MIN_COLUMN_SPANS: Record<
   PccResponsiveMode,
   Record<PccCardFootprint, number>
 > = {
-  wideDesktop: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
-  standardDesktop: { hero: 6, wide: 5, standard: 3, compact: 2, tall: 3, full: 8 },
+  ultrawide: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
+  desktop: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
+  largeLaptop: { hero: 8, wide: 6, standard: 4, compact: 3, tall: 4, full: 12 },
+  standardLaptop: { hero: 6, wide: 5, standard: 3, compact: 2, tall: 3, full: 10 },
+  smallLaptop: { hero: 6, wide: 5, standard: 3, compact: 2, tall: 3, full: 8 },
   tabletLandscape: { hero: 4, wide: 3, standard: 2, compact: 2, tall: 2, full: 6 },
   tabletPortrait: { hero: 2, wide: 2, standard: 2, compact: 1, tall: 1, full: 2 },
   phone: { hero: 1, wide: 1, standard: 1, compact: 1, tall: 1, full: 1 },
@@ -48,8 +60,11 @@ export const FOOTPRINT_MIN_INLINE_SIZE_PX: Record<
   PccResponsiveMode,
   Record<PccCardFootprint, number>
 > = {
-  wideDesktop: { hero: 320, wide: 280, standard: 240, compact: 200, tall: 220, full: 320 },
-  standardDesktop: { hero: 300, wide: 260, standard: 220, compact: 190, tall: 210, full: 300 },
+  ultrawide: { hero: 320, wide: 280, standard: 240, compact: 200, tall: 220, full: 320 },
+  desktop: { hero: 320, wide: 280, standard: 240, compact: 200, tall: 220, full: 320 },
+  largeLaptop: { hero: 320, wide: 280, standard: 240, compact: 200, tall: 220, full: 320 },
+  standardLaptop: { hero: 300, wide: 260, standard: 220, compact: 190, tall: 210, full: 300 },
+  smallLaptop: { hero: 300, wide: 260, standard: 220, compact: 190, tall: 210, full: 300 },
   tabletLandscape: { hero: 260, wide: 230, standard: 210, compact: 180, tall: 190, full: 260 },
   tabletPortrait: { hero: 220, wide: 200, standard: 200, compact: 168, tall: 168, full: 220 },
   phone: { hero: 0, wide: 0, standard: 0, compact: 0, tall: 0, full: 0 },
@@ -58,22 +73,33 @@ export const FOOTPRINT_MIN_INLINE_SIZE_PX: Record<
 export const PCC_BENTO_GRID_ROW_UNIT_PX = 8;
 export const PCC_BENTO_GRID_GAP_PX = 16;
 
+/**
+ * Upper-inclusive width thresholds (px) per mode, excluding `ultrawide` which
+ * has no upper bound. Mirrors the deterministic resolver contract in
+ * `wave-b1/docs/04_BREAKPOINT_POLICY_SPECIFICATION.md`.
+ */
 export const PCC_RESPONSIVE_THRESHOLDS_PX: Record<
-  Exclude<PccResponsiveMode, 'wideDesktop'>,
+  Exclude<PccResponsiveMode, 'ultrawide'>,
   number
 > = {
-  phone: 480,
-  tabletPortrait: 720,
+  phone: 479,
+  tabletPortrait: 768,
   tabletLandscape: 1024,
-  standardDesktop: 1280,
+  smallLaptop: 1180,
+  standardLaptop: 1440,
+  largeLaptop: 1599,
+  desktop: 1919,
 };
 
 export function resolveResponsiveMode(inlineSizePx: number): PccResponsiveMode {
-  if (inlineSizePx < PCC_RESPONSIVE_THRESHOLDS_PX.phone) return 'phone';
-  if (inlineSizePx < PCC_RESPONSIVE_THRESHOLDS_PX.tabletPortrait) return 'tabletPortrait';
-  if (inlineSizePx < PCC_RESPONSIVE_THRESHOLDS_PX.tabletLandscape) return 'tabletLandscape';
-  if (inlineSizePx < PCC_RESPONSIVE_THRESHOLDS_PX.standardDesktop) return 'standardDesktop';
-  return 'wideDesktop';
+  if (inlineSizePx < 480) return 'phone';
+  if (inlineSizePx <= 768) return 'tabletPortrait';
+  if (inlineSizePx <= 1024) return 'tabletLandscape';
+  if (inlineSizePx <= 1180) return 'smallLaptop';
+  if (inlineSizePx <= 1440) return 'standardLaptop';
+  if (inlineSizePx <= 1599) return 'largeLaptop';
+  if (inlineSizePx <= 1919) return 'desktop';
+  return 'ultrawide';
 }
 
 export function resolveFootprintColumnSpan(
