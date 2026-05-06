@@ -70,6 +70,7 @@ const OverviewBody: FC = () => {
 export const PccSiteHealthOverviewCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
   <PccDashboardCard
     footprint="full"
+    hierarchy="primary"
     eyebrow={SURFACE.displayName}
     title="Site Health"
     dataActiveSurfacePanel="site-health"

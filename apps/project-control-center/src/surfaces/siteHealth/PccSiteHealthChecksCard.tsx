@@ -6,6 +6,24 @@ import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { PccProjectHomeCardProps } from '../projectHome/shared';
 import styles from './PccSiteHealthSurface.module.css';
 
+export type PccSiteHealthSeverityTier = 'security' | 'repair' | 'warning' | 'info' | 'other';
+
+function severityTier(severity: string): PccSiteHealthSeverityTier {
+  switch (severity) {
+    case 'Blocking':
+    case 'Security Risk':
+      return 'security';
+    case 'Repair Required':
+      return 'repair';
+    case 'Warning':
+      return 'warning';
+    case 'Info':
+      return 'info';
+    default:
+      return 'other';
+  }
+}
+
 const ChecksBody: FC = () => (
   <ul className={styles.list} data-pcc-site-health-checks-body="">
     {SAMPLE_SITE_HEALTH_CHECKS.map((check) => (
@@ -15,10 +33,21 @@ const ChecksBody: FC = () => (
         data-pcc-site-health-check-id={check.id}
         data-pcc-site-health-check-state={check.state}
         data-pcc-site-health-severity={check.severity}
+        data-pcc-site-health-check-severity-tier={severityTier(check.severity)}
       >
         <span className={styles.rowTitle}>{check.title}</span>
         <span className={styles.rowMeta}>
-          <PccStatusPill tone={check.state === 'pass' ? 'success' : check.state === 'warning' ? 'warning' : check.state === 'fail' ? 'danger' : 'neutral'}>
+          <PccStatusPill
+            tone={
+              check.state === 'pass'
+                ? 'success'
+                : check.state === 'warning'
+                  ? 'warning'
+                  : check.state === 'fail'
+                    ? 'danger'
+                    : 'neutral'
+            }
+          >
             {check.state}
           </PccStatusPill>
           <span>severity: {check.severity}</span>

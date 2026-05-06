@@ -351,6 +351,23 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     }
   });
 
+  it('home card emits data-pcc-card-hierarchy="primary" (Prompt 08 promotion)', async () => {
+    const spy = vi.fn(async () => envelope('available'));
+    const router = { getApprovals: spy } as unknown as Parameters<
+      typeof PccSurfaceRouter
+    >[0]['readModelClient'];
+    const { container } = render(
+      <PccBentoGrid forceMode="wideDesktop">
+        <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => {
+      expect(container.querySelector('[data-pcc-active-surface-panel="approvals"]')).not.toBeNull();
+    });
+    const homeCard = container.querySelector('[data-pcc-active-surface-panel="approvals"]');
+    expect(homeCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+  });
+
   it('renders the loading card before the spy resolves and the ready lanes after', async () => {
     let resolveFn: ((env: PccReadModelEnvelope<PccApprovalsReadModel>) => void) | undefined;
     const promise = new Promise<PccReadModelEnvelope<PccApprovalsReadModel>>((res) => {

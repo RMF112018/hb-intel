@@ -23,15 +23,17 @@ const RepairRequestsBody: FC = () => (
           <span>owner: {request.ownerPersona}</span>
         </span>
         <span className={styles.placeholderCue}>
-          Preview placeholder · no live repair runner is active in this preview.
+          Repair runs are managed in SharePoint admin tooling.
         </span>
       </li>
     ))}
   </ul>
 );
 
-export const PccSiteHealthRepairRequestsCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
-  <PccDashboardCard footprint="standard" eyebrow="Repairs" title="Repair Requests">
+export const PccSiteHealthRepairRequestsCard: FC<PccProjectHomeCardProps> = ({
+  state = 'preview',
+}) => (
+  <PccDashboardCard footprint="wide" eyebrow="Repairs" title="Repair Requests">
     {state === 'preview' ? <RepairRequestsBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>
 );

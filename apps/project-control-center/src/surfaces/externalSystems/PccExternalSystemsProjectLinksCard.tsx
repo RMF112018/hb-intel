@@ -1,5 +1,6 @@
 import { forwardRef, type FC, type Ref } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import { PccDisabledAffordance } from '../../ui/PccDisabledAffordance';
 import { PccPreviewState, type PccPreviewStateKind } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
 import type {
@@ -132,16 +133,13 @@ const LinkRow: FC<LinkRowProps> = ({ row }) => {
         ) : null}
       </div>
       <div className={styles.linkRowActionRow}>
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
+        <PccDisabledAffordance
+          label="Open external system"
+          reason={row.disabledReason}
           className={styles.linkRowAction}
           data-pcc-launch-pad-link-action="open"
           data-pcc-launch-pad-link-action-state="preview-disabled"
-        >
-          Open external system
-        </button>
+        />
         <span className={styles.linkRowReason} data-pcc-launch-pad-link-disabled-reason={row.id}>
           {row.disabledReason}
         </span>

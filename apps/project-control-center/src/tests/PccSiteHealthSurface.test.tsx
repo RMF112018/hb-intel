@@ -71,8 +71,9 @@ describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
     const rows = repairBody!.querySelectorAll('[data-pcc-repair-request-id]');
     expect(rows).toHaveLength(SAMPLE_REPAIR_REQUESTS.length);
     for (const row of rows) {
-      // placeholder cue substring is present per row
-      expect(row.textContent).toContain('Preview placeholder');
+      // Each row carries a product-grade administrator-tooling cue that
+      // points the user to where repair runs are actually managed.
+      expect(row.textContent).toContain('Repair runs are managed in SharePoint admin tooling.');
     }
     // Repair-requests card body has no <button> elements (no operational affordances).
     const buttons = repairBody!.querySelectorAll('button');
@@ -85,6 +86,38 @@ describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
     for (const a of anchors) {
       const href = a.getAttribute('href') ?? '';
       expect(href).not.toMatch(/^https?:\/\//);
+    }
+  });
+
+  it('overview card emits data-pcc-card-hierarchy="primary" (Prompt 08 promotion)', () => {
+    const { container } = renderSurface();
+    const overviewPanel = container.querySelector('[data-pcc-active-surface-panel="site-health"]');
+    expect(overviewPanel, 'overview card should render').not.toBeNull();
+    expect(overviewPanel?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+  });
+
+  it('repair requests card emits data-pcc-footprint="wide" (Prompt 08 promotion)', () => {
+    const { container } = renderSurface();
+    const body = container.querySelector('[data-pcc-site-health-repair-requests-body]');
+    expect(body, 'repair requests body should render').not.toBeNull();
+    const card = body?.closest('[data-pcc-card]');
+    expect(card?.getAttribute('data-pcc-footprint')).toBe('wide');
+  });
+
+  it('every check row emits a data-pcc-site-health-check-severity-tier marker (Prompt 08 additive marker)', () => {
+    const { container } = renderSurface();
+    const checksBody = container.querySelector('[data-pcc-site-health-checks-body]');
+    expect(checksBody, 'checks body should render').not.toBeNull();
+    const rows = checksBody!.querySelectorAll('[data-pcc-site-health-check-id]');
+    expect(rows.length).toBeGreaterThan(0);
+    const allowedTiers = new Set(['security', 'repair', 'warning', 'info', 'other']);
+    for (const row of Array.from(rows)) {
+      const tier = row.getAttribute('data-pcc-site-health-check-severity-tier');
+      expect(
+        tier,
+        `check row '${row.getAttribute('data-pcc-site-health-check-id')}' should emit a severity-tier marker`,
+      ).not.toBeNull();
+      expect(allowedTiers.has(tier ?? '')).toBe(true);
     }
   });
 });

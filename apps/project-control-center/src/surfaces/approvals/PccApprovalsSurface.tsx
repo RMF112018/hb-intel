@@ -325,6 +325,7 @@ interface HomeCardProps {
 const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
   <PccDashboardCard
     footprint="full"
+    hierarchy="primary"
     eyebrow={SURFACE.displayName}
     title="Approvals home"
     dataActiveSurfacePanel="approvals"

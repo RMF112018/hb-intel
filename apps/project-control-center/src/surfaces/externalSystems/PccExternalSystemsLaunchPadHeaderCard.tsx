@@ -21,6 +21,7 @@ export const PccExternalSystemsLaunchPadHeaderCard: FC<
 > = ({ header, cardState, isAvailable }) => (
   <PccDashboardCard
     footprint="full"
+    hierarchy="primary"
     eyebrow={SURFACE.displayName}
     title="Launch Pad"
     dataActiveSurfacePanel="external-systems"

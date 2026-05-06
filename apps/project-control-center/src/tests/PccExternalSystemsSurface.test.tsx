@@ -118,6 +118,15 @@ describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallba
     expect(panels[0]?.textContent).toContain(PCC_MVP_SURFACES['external-systems'].displayName);
   });
 
+  it('LaunchPad header card emits data-pcc-card-hierarchy="primary" (Prompt 08 promotion)', () => {
+    const { container } = renderSurface();
+    const headerPanel = container.querySelector(
+      '[data-pcc-active-surface-panel="external-systems"]',
+    );
+    expect(headerPanel, 'launch pad header card should render').not.toBeNull();
+    expect(headerPanel?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+  });
+
   it('renders one link row per fixture launch link with approval-state, policy-state, hostname markers', () => {
     const { container } = renderSurface();
     const rows = container.querySelectorAll('[data-pcc-launch-pad-link]');
@@ -138,11 +147,11 @@ describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallba
     for (const row of rows) {
       const action = row.querySelector(
         '[data-pcc-launch-pad-link-action="open"]',
-      ) as HTMLButtonElement | null;
+      ) as HTMLElement | null;
       expect(action).not.toBeNull();
       expect(action!.tagName.toLowerCase()).toBe('button');
-      expect(action!.disabled).toBe(true);
       expect(action!.getAttribute('aria-disabled')).toBe('true');
+      expect(action!.getAttribute('data-pcc-disabled-affordance-variant')).not.toBeNull();
       expect(action!.getAttribute('href')).toBeNull();
       const reason = row.querySelector(`[data-pcc-launch-pad-link-disabled-reason]`);
       expect(reason).not.toBeNull();
@@ -158,9 +167,9 @@ describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallba
     expect(allowedRow!.getAttribute('data-pcc-launch-pad-link-policy-state')).toBe('allowed');
     const action = allowedRow!.querySelector(
       '[data-pcc-launch-pad-link-action="open"]',
-    ) as HTMLButtonElement | null;
+    ) as HTMLElement | null;
     expect(action).not.toBeNull();
-    expect(action!.disabled).toBe(true);
+    expect(action!.getAttribute('aria-disabled')).toBe('true');
     expect(action!.tagName.toLowerCase()).toBe('button');
     expect(allowedRow!.querySelectorAll('a[href]').length).toBe(0);
   });

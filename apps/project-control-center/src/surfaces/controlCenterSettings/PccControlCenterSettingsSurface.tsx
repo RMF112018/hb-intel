@@ -10,10 +10,10 @@ const SURFACE = PCC_MVP_SURFACES['control-center-settings'];
 const POSTURE = pccSurfacePostureCopy('reference');
 
 const SETTINGS_SCOPE_PREVIEW = [
-  { label: 'Project scope', value: 'Project profile' },
-  { label: 'Site scope', value: 'Project site baseline labels' },
-  { label: 'Persona scope', value: 'Role template selector' },
-  { label: 'Integration scope', value: 'External mapping visibility only' },
+  { id: 'project', label: 'Project scope', value: 'Project profile' },
+  { id: 'site', label: 'Site scope', value: 'Project site baseline labels' },
+  { id: 'persona', label: 'Persona scope', value: 'Role template selector' },
+  { id: 'integration', label: 'Integration scope', value: 'External mapping visibility only' },
 ] as const;
 
 const MISSING_CONFIG_ITEMS = [
@@ -26,6 +26,7 @@ export const PccControlCenterSettingsSurface: FC = () => (
   <Fragment>
     <PccDashboardCard
       footprint="full"
+      hierarchy="primary"
       eyebrow={SURFACE.displayName}
       title="Control Center Settings"
       dataActiveSurfacePanel="control-center-settings"
@@ -52,9 +53,14 @@ export const PccControlCenterSettingsSurface: FC = () => (
       eyebrow="Settings Lanes"
       title="Project / Site / Persona / Integration Scope"
     >
-      <div className={styles.scopeGrid}>
+      <div className={styles.scopeGrid} data-pcc-settings-scope-grid="">
         {SETTINGS_SCOPE_PREVIEW.map((item) => (
-          <section key={item.label} className={styles.scopeCell}>
+          <section
+            key={item.id}
+            className={styles.scopeCell}
+            data-pcc-settings-scope-id={item.id}
+            data-pcc-settings-scope-state="preview"
+          >
             <span className={styles.scopeLabel}>{item.label}</span>
             <span className={styles.scopeValue}>{item.value}</span>
           </section>
