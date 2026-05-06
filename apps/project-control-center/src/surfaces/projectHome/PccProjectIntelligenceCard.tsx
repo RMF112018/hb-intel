@@ -84,6 +84,7 @@ export const PccProjectIntelligenceCard: FC<PccProjectIntelligenceCardProps> = (
 }) => (
   <PccDashboardCard
     footprint="hero"
+    hierarchy="primary"
     eyebrow={PROJECT_HOME_SURFACE.displayName}
     title="Project Intelligence Header"
     dataActiveSurfacePanel="project-home"

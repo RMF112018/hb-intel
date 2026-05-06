@@ -152,4 +152,25 @@ describe('PccBentoGrid footprint contract', () => {
     expect(card?.getAttribute('data-pcc-card-density')).toBe('compact');
     expect(card?.getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
   });
+
+  it('gives promoted laptop-priority footprints stronger spans at smallLaptop and standardLaptop', () => {
+    for (const mode of ['smallLaptop', 'standardLaptop'] as const) {
+      const heroSpan = resolveFootprintColumnSpan(mode, 'hero');
+      const wideSpan = resolveFootprintColumnSpan(mode, 'wide');
+      const tallSpan = resolveFootprintColumnSpan(mode, 'tall');
+      const standardSpan = resolveFootprintColumnSpan(mode, 'standard');
+
+      expect(heroSpan, `${mode}: hero should remain a top-priority span`).toBeGreaterThanOrEqual(
+        wideSpan,
+      );
+      expect(
+        wideSpan,
+        `${mode}: wide should outrank prior tall mapping for Priority Actions`,
+      ).toBeGreaterThan(tallSpan);
+      expect(
+        wideSpan,
+        `${mode}: wide should not be below standard supporting cards`,
+      ).toBeGreaterThanOrEqual(standardSpan);
+    }
+  });
 });

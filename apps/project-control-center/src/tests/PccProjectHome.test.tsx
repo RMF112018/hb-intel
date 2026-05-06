@@ -123,6 +123,33 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
+  it('promotes Project Intelligence and Priority Actions as primary cards with laptop-priority footprints', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const cards = Array.from(container.querySelectorAll('[data-pcc-card]')) as HTMLElement[];
+
+    const projectIntelligenceCard = cards.find((card) =>
+      card.textContent?.includes('Project Intelligence Header'),
+    );
+    expect(projectIntelligenceCard).toBeDefined();
+    expect(projectIntelligenceCard?.getAttribute('data-pcc-footprint')).toBe('hero');
+    expect(projectIntelligenceCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(projectIntelligenceCard?.getAttribute('data-pcc-active-surface-panel')).toBe(
+      'project-home',
+    );
+
+    const priorityActionsCard = cards.find((card) =>
+      card.textContent?.includes('Priority Actions'),
+    );
+    expect(priorityActionsCard).toBeDefined();
+    expect(priorityActionsCard?.getAttribute('data-pcc-footprint')).toBe('wide');
+    expect(priorityActionsCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(priorityActionsCard?.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
+
+    const activePanels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(activePanels).toHaveLength(1);
+    expect(activePanels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
+  });
+
   it('exactly one [data-pcc-active-surface-panel] exists with value "project-home", carried by the Project Intelligence card', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');

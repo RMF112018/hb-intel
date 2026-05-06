@@ -25,7 +25,7 @@ export const PccPriorityActionsCard: FC<PccPriorityActionsCardProps> = ({
   state = 'preview',
   actions,
 }) => (
-  <PccDashboardCard footprint="tall" eyebrow="Today" title="Priority Actions">
+  <PccDashboardCard footprint="wide" hierarchy="primary" eyebrow="Today" title="Priority Actions">
     {state === 'preview' ? (
       <PccPriorityActionsRail
         viewModel={buildPccPriorityActionsRailViewModel(actions ?? SAMPLE_PRIORITY_ACTIONS)}
