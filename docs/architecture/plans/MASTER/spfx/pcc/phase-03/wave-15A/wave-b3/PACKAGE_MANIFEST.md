@@ -1,68 +1,105 @@
-# Package Manifest — PCC Wave 15A Prompt 02 Remediation
+# PCC Card Tier Contract Remediation Package — Package Manifest
 
-**Package date:** 2026-05-06  
-**Package purpose:** Developer-ready remediation package for the PCC shared bento/card primitive tier contract.  
-**Execution target:** Local code agent working in `RMF112018/hb-intel`.  
-**Runtime area:** `apps/project-control-center`.  
-**Wave:** Phase 3 / Wave 15A.  
-**Prompt stage:** Prompt 02 — Shared Bento/Card Primitive Tier Contract Remediation.
+## Package Objective
 
-## Closed Decisions
+This package instructs the local code agent to remediate the Project Control Center shared card and bento card usage contract across all current PCC surfaces, based on the completed Prompt 02 audit.
 
-This package resolves all decisions needed for implementation. Do not reopen them unless the codebase has already diverged in a way that makes the exact instruction impossible.
+The implementation objective is to close the resolution issue by ensuring every card element in the current PCC route surface set has an explicit, testable, doctrine-aligned `tier`, `region`, `footprint`, heading, state, and active-panel posture.
 
-| Decision | Final Answer |
-| --- | --- |
-| Does `PccDashboardCard` get a new tier contract? | Yes. Add `tier?: 'tier1' | 'tier2' | 'tier3' | 'state'`. |
-| Does `PccDashboardCard` get a region contract? | Yes. Add `region?: 'command' | 'operational' | 'reference' | 'state' | 'deferred' | 'detail' | 'rail'`. |
-| Does `hierarchy` remain? | Yes, as a backward-compatible visual alias. Explicit `tier` wins. Keep `data-pcc-card-hierarchy` during migration. |
-| Does the primitive get a heading contract? | Yes. Add `headingLevel?: 2 | 3 | 4`; default by tier. |
-| Should cards use `aria-labelledby`? | Yes. If a visible title exists, generate a stable heading id and use `aria-labelledby`. `aria-label` remains fallback only when no visible title exists. |
-| Add `rail` and `detail` footprints? | Yes. Add them to all footprint maps and tests. |
-| Does `full` remain dashed? | No. Remove global dashed border from full footprint. Dashed/tinted treatments belong to `region='state'` or `region='deferred'`, not layout footprint. |
-| Do surfaces need explicit card inventory tests? | Yes. Every routed PCC surface must prove exactly one Tier 1 command card and complete card tier/region coverage. |
-| Are backend/read-model changes allowed? | No, except type-only UI props inside app-local UI files if strictly required. |
-| Are package installs or lockfile changes allowed? | No. |
-| Are live integrations or enabled mutations allowed? | No. |
+## Resolution Scope
 
-## Files in This Package
+This package covers the current PCC surfaces and embedded subregions under:
 
-| File | Purpose |
-| --- | --- |
-| `README.md` | Package overview and execution instructions. |
-| `PACKAGE_MANIFEST.md` | This manifest and closed decision register. |
-| `00_REMEDIATION_BLUEPRINT.md` | End-state architecture and remediation doctrine. |
-| `01_CARD_TIER_REGION_CONTRACT.md` | Exact `PccDashboardCard` API and behavior contract. |
-| `02_SURFACE_CARD_INVENTORY_MATRIX.md` | Locked target card inventory for every routed surface. |
-| `03_VISUAL_HIERARCHY_AND_TOKEN_SPEC.md` | Tier/region visual design specification. |
-| `04_HEADING_ARIA_ACCESSIBILITY_CONTRACT.md` | Heading, ARIA, keyboard, and state accessibility rules. |
-| `05_FOOTPRINT_RAIL_DETAIL_SPAN_SPEC.md` | Exact `rail` and `detail` footprint spans and min widths. |
-| `06_SURFACE_FIRST_SCREEN_PRIORITY_RULES.md` | Per-surface first-screen and above-fold rules. |
-| `07_TEST_ACCEPTANCE_MATRIX.md` | Required tests and expected assertions. |
-| `08_SCREENSHOT_AND_HOSTED_EVIDENCE_PLAN.md` | Hosted evidence plan and screenshot matrix. |
-| `09_NON_GOALS_AND_HARD_STOPS.md` | Explicit exclusions and stop conditions. |
-| `10_IMPLEMENTATION_SEQUENCE.md` | Ordered implementation plan with validation gates. |
-| `11_RISK_REGISTER_AND_DECISION_LOG.md` | Risks, mitigations, and resolved decisions. |
-| `wireframes/README.md` | Wireframe index. |
-| `wireframes/01_PRIMITIVE_CARD_WIREFRAMES.md` | Primitive-level card wireframes. |
-| `wireframes/02_SURFACE_WIREFRAMES.md` | Surface-level desktop/laptop/mobile wireframes. |
-| `prompts/Prompt_01...md` through `prompts/Prompt_09...md` | Executable local-code-agent prompts. |
-| `artifacts/surface_card_inventory.csv` | Machine-readable surface inventory. |
-| `artifacts/target_card_contract.json` | Machine-readable primitive contract. |
+- `apps/project-control-center/src/layout/`
+- `apps/project-control-center/src/shell/`
+- `apps/project-control-center/src/surfaces/projectHome/`
+- `apps/project-control-center/src/surfaces/teamAccess/`
+- `apps/project-control-center/src/surfaces/documents/`
+- `apps/project-control-center/src/surfaces/projectReadiness/`
+- `apps/project-control-center/src/surfaces/approvals/`
+- `apps/project-control-center/src/surfaces/externalSystems/`
+- `apps/project-control-center/src/surfaces/controlCenterSettings/`
+- `apps/project-control-center/src/surfaces/siteHealth/`
+- `apps/project-control-center/src/surfaces/responsibilityMatrix/`
+- `apps/project-control-center/src/surfaces/constraintsLog/`
+- `apps/project-control-center/src/surfaces/buyoutLog/`
+- `apps/project-control-center/src/tests/`
 
-## Required Repo Validation Commands
+## Prompt Execution Order
 
-Run from repo root unless a command must be scoped otherwise.
+Execute the prompt files in this order:
+
+1. `prompts/Prompt_01_Primitive_Contract_Instrumentation_And_Visual_Tier_Hardening.md`
+2. `prompts/Prompt_02_Route_Command_Card_Lockdown.md`
+3. `prompts/Prompt_03_State_Deferred_Reference_Reclassification.md`
+4. `prompts/Prompt_04_Project_Readiness_Embedded_Subregion_Classification.md`
+5. `prompts/Prompt_05_Cross_Surface_Tests_Accessibility_And_Bento_Invariants.md`
+6. `prompts/Prompt_06_Closeout_Documentation_Validation_And_Resolution_Closure.md`
+
+## Required Final Outcome
+
+At completion:
+
+- Every PCC `PccDashboardCard` usage in current routeable and embedded PCC surfaces has explicit `tier` and `region`.
+- Every active surface has exactly one active-panel carrier.
+- Every active-panel carrier resolves to a route command posture or a deliberate state posture.
+- No deferred, reference, policy, lineage, HBI-boundary, unavailable, loading, error, missing-config, or restricted card resolves as default Tier 2 operational content.
+- The primitive emits enough contract markers for tests to distinguish explicit classification from default fallback.
+- Cross-surface tests prove the contract.
+- Visual tier styling is stronger and still token-driven.
+- No runtime mutation, live integration, SDK, writeback, or launch-link behavior is introduced.
+- A closeout document is created with validation evidence and residual hosted-evidence requirements.
+- The local agent commits the completed remediation using the commit-message format specified in this package.
+
+## Non-Negotiable Constraints
+
+- Do not introduce live backend writes or command behavior.
+- Do not add Procore, SharePoint, Microsoft Graph, PnP, Sage, Document Crunch, Adobe Sign, or external SDK calls.
+- Do not convert preview/inert controls into live controls.
+- Do not add live `http(s)` anchors where launch behavior is intentionally disabled or preview-only.
+- Do not introduce wrappers between `[data-pcc-bento-grid]` and `[data-pcc-card]` children.
+- Do not introduce `grid-auto-flow: dense`.
+- Do not remove row-span collapse resistance.
+- Do not treat `hierarchy` as the new canonical classification model; it remains backward-compatible legacy input only.
+- Do not re-read files that are still available in your current context or memory unless the file may have changed or you need exact current contents for editing.
+
+## Validation Commands
+
+Run targeted validation before and after meaningful changes:
 
 ```bash
 git status --short
-git rev-parse HEAD
-md5 pnpm-lock.yaml
-pnpm --filter @hbc/spfx-project-control-center exec tsc --noEmit
-pnpm --filter @hbc/spfx-project-control-center test
-pnpm --filter @hbc/spfx-project-control-center build
-pnpm exec prettier --check <changed files>
+pnpm --filter @hbc/project-control-center check-types
+pnpm --filter @hbc/project-control-center test
+pnpm exec prettier --check \
+  apps/project-control-center/src/layout \
+  apps/project-control-center/src/shell \
+  apps/project-control-center/src/surfaces \
+  apps/project-control-center/src/tests
 git diff --check
 ```
 
-If the package manager scripts differ locally, use the closest repo-truth command and document the substitution in closeout.
+If workspace scripts differ, inspect `package.json` and use the closest existing workspace commands without weakening the validation intent.
+
+## Final Commit Requirement
+
+Use this commit structure:
+
+```text
+Commit Summary
+
+feat(pcc): remediate shared card tier contract across PCC surfaces
+
+Commit Description
+
+Implement the PCC card tier / region / footprint contract remediation across all current Project Control Center route surfaces and embedded subregions.
+
+- Adds shared card contract instrumentation so tests can distinguish explicit tier / region declarations from legacy hierarchy or default fallback.
+- Strengthens token-driven Tier 1 / Tier 2 / Tier 3 / state / deferred / detail / rail visual hierarchy.
+- Migrates route command, operational, reference, deferred, state, and embedded workbench cards to explicit tier and region declarations.
+- Adds cross-surface tests for active-panel ownership, direct bento children, tier / region classification, heading levels, deferred-state integrity, and no dense grid behavior.
+- Adds closeout documentation with validation evidence and hosted-evidence follow-up requirements.
+
+Validation:
+- <paste exact commands and pass/fail results>
+```

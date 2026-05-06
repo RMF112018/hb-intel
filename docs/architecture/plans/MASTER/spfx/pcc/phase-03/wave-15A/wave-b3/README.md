@@ -1,86 +1,61 @@
-# PCC Wave 15A — Prompt 02 Remediation Package
+# PCC Card Tier Contract Remediation Package
 
 ## Objective
 
-Implement the shared PCC bento/card primitive contract that governs hierarchy, semantics, visual weight, state posture, and surface composition across every current Project Control Center route.
+Use this package to instruct a local code agent to close the PCC card tier contract resolution issue.
 
-This package converts Prompt 02 from a narrow card-prop exercise into a durable **surface composition system**. The output must prevent future PCC routes from drifting back into equal-weight white-card grids.
+The code agent must make source changes, tests, and closeout documentation that convert the current shared `PccDashboardCard` system from a partially migrated primitive into a fully enforced cross-surface card classification contract.
 
-## What This Stage Must Deliver
+## What This Package Resolves
 
-1. A shared `PccDashboardCard` contract with:
-   - explicit `tier`
-   - explicit `region`
-   - explicit `headingLevel`
-   - ARIA labeling tied to visible headings
-   - preserved legacy `hierarchy`
-   - preserved existing data markers
+The Prompt 02 audit found that the primitive architecture is materially improved but still incomplete:
 
-2. A completed footprint expansion:
-   - keep `hero`, `wide`, `standard`, `compact`, `tall`, `full`
-   - add `rail`
-   - add `detail`
-   - update every responsive map and test
+- `PccDashboardCard` already supports `tier`, `region`, `headingLevel`, `density`, `ariaDescribedBy`, and active-surface data markers.
+- `PccBentoGrid` already supports container-aware layout and direct child card placement.
+- `footprints.ts` already includes `rail` and `detail`, with 8 responsive modes.
+- `useBentoRowSpan` already protects against the prior 8px collapse symptom.
+- Project Home has the best current tests, but the cross-surface contract is not yet enforced.
+- Several current route surfaces still rely on legacy `hierarchy` or defaults.
+- Deferred, reference, unavailable, and seam cards frequently risk appearing as normal operational cards.
+- Hosted screenshots still show too much generic thin-border white-card posture.
 
-3. A visual hierarchy system:
-   - Tier 1 command card treatment
-   - Tier 2 operational treatment
-   - Tier 3 reference treatment
-   - State/deferred treatment
-   - region-specific styling hooks
+## Package Contents
 
-4. Surface-wide migration:
-   - Project Home
-   - Team & Access
-   - Documents
-   - Project Readiness
-   - Approvals
-   - External Systems
-   - Control Center Settings
-   - Site Health
+- `PACKAGE_MANIFEST.md` — execution overview, constraints, validation, and commit requirements.
+- `docs/00_REPO_TRUTH_BASELINE.md` — audited baseline facts.
+- `docs/01_TARGET_CARD_CONTRACT.md` — desired primitive/card architecture.
+- `docs/02_SURFACE_CLASSIFICATION_MATRIX.md` — required target classification by surface/card pattern.
+- `docs/03_TEST_AND_EVIDENCE_REQUIREMENTS.md` — required automated and hosted validation evidence.
+- `docs/04_IMPLEMENTATION_GUARDRAILS.md` — constraints and regression guards.
+- `prompts/*.md` — executable local code-agent prompts in sequence.
 
-5. Validation:
-   - primitive tests
-   - route/surface composition tests
-   - footprint map tests
-   - accessibility tests
-   - no direct-child bento regression
-   - screenshot evidence plan and closeout notes
+## How To Use
 
-## Execution Rules
+Run each prompt in order in a clean local code-agent session unless your workflow intentionally uses one long session.
 
-- Treat this package as the authoritative implementation contract for Prompt 02.
-- Do not re-read files that are still within the current agent context or memory. Use targeted reads only when needed to verify current repo truth.
-- Preserve read-only / preview-only / inert behavior.
-- Do not enable any mutation, integration, launch, save, approval, repair, access, sync, or HBI execution flow.
-- Do not install packages.
-- Do not change `pnpm-lock.yaml`.
-- Do not modify backend/functions.
-- Do not change read-model business semantics.
-- Do not introduce wrappers between `PccBentoGrid` and `PccDashboardCard` direct children.
+Before executing each prompt:
 
-## Implementation Order
+```bash
+git status --short
+```
 
-1. Read `01_CARD_TIER_REGION_CONTRACT.md`.
-2. Read `03_VISUAL_HIERARCHY_AND_TOKEN_SPEC.md`.
-3. Read `05_FOOTPRINT_RAIL_DETAIL_SPAN_SPEC.md`.
-4. Execute prompts 01–03.
-5. Read `02_SURFACE_CARD_INVENTORY_MATRIX.md`.
-6. Execute prompts 04–07.
-7. Execute prompt 08 for tests.
-8. Execute prompt 09 for evidence and closeout.
+After each prompt:
 
-## Definition of Done
+```bash
+pnpm --filter @hbc/project-control-center check-types
+pnpm --filter @hbc/project-control-center test
+git diff --check
+```
 
-Prompt 02 is done only when all of the following are true:
+At final closeout, run the full validation set from `PACKAGE_MANIFEST.md`.
 
-- `PccDashboardCard` supports `tier`, `region`, and `headingLevel`.
-- Every rendered PCC card has a testable tier and region.
-- Every routed surface has exactly one Tier 1 command card in ready state.
-- State/deferred/reference cards cannot visually compete with Tier 1 cards.
-- `rail` and `detail` footprints exist and resolve for all responsive modes.
-- Card headings label card containers through `aria-labelledby` where visible titles exist.
-- Existing `data-pcc-*` markers are preserved unless intentionally replaced and tests updated.
-- Route-level tests prove direct-child bento invariants.
-- Hosted screenshot/evidence plan is completed or explicitly attached as a post-implementation gate.
-- All required validation commands pass or documented substitutions are provided.
+## Expected Closeout State
+
+The issue is resolved only when:
+
+1. All current PCC card elements have explicit card classification.
+2. All route command cards are explicit Tier 1 command cards.
+3. Loading/error/missing/restricted cards are explicit state cards.
+4. Deferred/read-only/reference seams are not operational by default.
+5. Automated tests enforce the contract across every current route.
+6. Closeout documentation records validation evidence and any remaining hosted screenshot obligations.
