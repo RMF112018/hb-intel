@@ -58,7 +58,7 @@ export const PCC_MVP_SURFACES: Readonly<Record<PccMvpSurfaceId, IPccMvpSurface>>
     mvpTier: 'MVP',
     primaryWorkCenterIds: ['team-and-access', 'project-directory'],
   },
-  'documents': {
+  documents: {
     id: 'documents',
     displayName: 'Documents',
     description:
@@ -79,7 +79,7 @@ export const PCC_MVP_SURFACES: Readonly<Record<PccMvpSurfaceId, IPccMvpSurface>>
       'responsibility-matrix',
     ],
   },
-  'approvals': {
+  approvals: {
     id: 'approvals',
     displayName: 'Approvals',
     description: 'Approval checkpoints across PCC workflow modules.',
@@ -88,7 +88,7 @@ export const PCC_MVP_SURFACES: Readonly<Record<PccMvpSurfaceId, IPccMvpSurface>>
   },
   'external-systems': {
     id: 'external-systems',
-    displayName: 'External Systems',
+    displayName: 'External Platforms',
     description: 'Catalog of integrated systems with launch links and mapping status.',
     mvpTier: 'MVP',
     primaryWorkCenterIds: ['control-center-settings'],

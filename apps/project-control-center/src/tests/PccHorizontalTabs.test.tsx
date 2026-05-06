@@ -14,7 +14,7 @@ const TAB_LABELS: Record<PccMvpSurfaceId, string> = {
   documents: 'Documents',
   'project-readiness': 'Project Readiness',
   approvals: 'Approvals',
-  'external-systems': 'Apps',
+  'external-systems': 'External Platforms',
   'control-center-settings': 'Settings',
   'site-health': 'Site Health',
 };
@@ -91,20 +91,60 @@ describe('PccHorizontalTabs primitive', () => {
     }
   });
 
-  it('icons are decorative (aria-hidden wrapper, no aria-label leak into tab name)', () => {
+  it('renders no icon wrapper or SVG inside any tab (text-only navigation)', () => {
     const { container } = renderTabs();
-    // Each tab carries exactly one decorative icon wrapper marked
-    // aria-hidden="true". The wrapper isolates the icon from the accessible
-    // name; SVG internals are out of scope for this contract.
     for (const id of PCC_MVP_SURFACE_IDS) {
       const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
+      // No aria-label leakage on the tab itself.
       expect(tab.getAttribute('aria-label')).toBeNull();
-      const decorativeWrapper = tab.querySelector(':scope > [aria-hidden="true"]');
-      expect(
-        decorativeWrapper,
-        `tab ${id} should have a decorative aria-hidden icon wrapper`,
-      ).not.toBeNull();
+      // No SVG element anywhere inside the tab.
+      expect(tab.querySelector('svg')).toBeNull();
+      // No descendant element with an icon-suffixed class name.
+      expect(tab.querySelector('[class*="icon" i]')).toBeNull();
     }
+  });
+
+  it('includes the "External Platforms" tab label and not the legacy "Apps" label', () => {
+    const { container } = renderTabs();
+    const tabs = Array.from(container.querySelectorAll<HTMLButtonElement>('[data-pcc-tab-id]'));
+    const labels = tabs.map((tab) => tab.textContent?.trim());
+    expect(labels).toContain('External Platforms');
+    // Exact-match check: no tab's text equals 'Apps' (avoids false positives
+    // from substrings of other labels).
+    expect(labels.some((label) => label === 'Apps')).toBe(false);
+    // The external-systems tab carries the new label.
+    const externalSystemsTab = container.querySelector('[data-pcc-tab-id="external-systems"]');
+    expect(externalSystemsTab?.textContent?.trim()).toBe('External Platforms');
+  });
+
+  it('active-indicator state follows the active tab when selection changes', () => {
+    const { container, rerender } = render(
+      <PccHorizontalTabs
+        mode="standardLaptop"
+        activeSurfaceId="project-home"
+        onSelectSurface={vi.fn()}
+      />,
+    );
+    const initialIndicator = container
+      .querySelector('[data-pcc-tab-id="project-home"]')
+      ?.querySelector('[data-pcc-tab-active-indicator]');
+    expect(initialIndicator?.getAttribute('data-pcc-tab-active-indicator-state')).toBe('active');
+
+    rerender(
+      <PccHorizontalTabs
+        mode="standardLaptop"
+        activeSurfaceId="approvals"
+        onSelectSurface={vi.fn()}
+      />,
+    );
+    const previous = container
+      .querySelector('[data-pcc-tab-id="project-home"]')
+      ?.querySelector('[data-pcc-tab-active-indicator]');
+    const next = container
+      .querySelector('[data-pcc-tab-id="approvals"]')
+      ?.querySelector('[data-pcc-tab-active-indicator]');
+    expect(previous?.getAttribute('data-pcc-tab-active-indicator-state')).toBe('inactive');
+    expect(next?.getAttribute('data-pcc-tab-active-indicator-state')).toBe('active');
   });
 
   it('clicking a non-active tab calls onSelectSurface with that surface id', () => {

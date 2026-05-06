@@ -1,16 +1,5 @@
-import { useRef, type CSSProperties, type FC, type KeyboardEvent, type ReactNode } from 'react';
+import { useRef, type FC, type KeyboardEvent } from 'react';
 import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
-import {
-  AlertTriangle,
-  BlueprintRoll,
-  ExternalLink,
-  HardHat,
-  Home,
-  Inspection,
-  Settings,
-  Submittal,
-} from '@hbc/ui-kit/icons';
-import { HBC_ACCENT_ORANGE } from '@hbc/ui-kit/theme';
 import type { PccResponsiveMode } from '../layout/footprints';
 import styles from './PccHorizontalTabs.module.css';
 
@@ -20,22 +9,9 @@ const TAB_LABELS: Record<PccMvpSurfaceId, string> = {
   documents: 'Documents',
   'project-readiness': 'Project Readiness',
   approvals: 'Approvals',
-  'external-systems': 'Apps',
+  'external-systems': 'External Platforms',
   'control-center-settings': 'Settings',
   'site-health': 'Site Health',
-};
-
-type IconComponent = FC<{ size?: 'sm' | 'md' | 'lg'; 'aria-label'?: string }>;
-
-const TAB_ICONS: Record<PccMvpSurfaceId, IconComponent> = {
-  'project-home': Home,
-  'team-and-access': HardHat,
-  documents: BlueprintRoll,
-  'project-readiness': Inspection,
-  approvals: Submittal,
-  'external-systems': ExternalLink,
-  'control-center-settings': Settings,
-  'site-health': AlertTriangle,
 };
 
 const COMPACT_MODES: ReadonlySet<PccResponsiveMode> = new Set([
@@ -114,10 +90,6 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
     onSelectSurface(surfaceId);
   };
 
-  const themeVars: CSSProperties = {
-    ['--pcc-tabs-accent' as string]: HBC_ACCENT_ORANGE,
-  };
-
   return (
     <div
       role="tablist"
@@ -126,18 +98,11 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
       data-pcc-mode={mode}
       data-pcc-tabs-density={isCompact ? 'compact' : 'comfortable'}
       className={styles.tablist}
-      style={themeVars}
       onKeyDown={handleKeyDown}
     >
       {PCC_MVP_SURFACE_IDS.map((surfaceId, index) => {
         const isActive = surfaceId === activeSurfaceId;
-        const Icon = TAB_ICONS[surfaceId];
         const label = TAB_LABELS[surfaceId];
-        const iconNode: ReactNode = (
-          <span aria-hidden="true" className={styles.icon}>
-            <Icon size="sm" />
-          </span>
-        );
         return (
           <button
             key={surfaceId}
@@ -157,7 +122,6 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
             onKeyDown={(event) => handleTabKeyDown(event, surfaceId)}
             onClick={() => onSelectSurface(surfaceId)}
           >
-            {iconNode}
             <span className={styles.label}>{label}</span>
             <span
               aria-hidden="true"
