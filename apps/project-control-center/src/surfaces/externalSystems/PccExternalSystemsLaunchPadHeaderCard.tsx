@@ -19,6 +19,9 @@ export const PccExternalSystemsLaunchPadHeaderCard: FC<
   <PccDashboardCard
     footprint="full"
     hierarchy="primary"
+    tier="tier1"
+    region="command"
+    headingLevel={2}
     eyebrow={SURFACE.displayName}
     title="Launch Pad"
     dataActiveSurfacePanel="external-systems"

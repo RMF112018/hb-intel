@@ -9,6 +9,9 @@ const SURFACE = PCC_MVP_SURFACES['team-and-access'];
 export const PccTeamAccessHeaderCard: FC = () => (
   <PccDashboardCard
     footprint="full"
+    tier="tier1"
+    region="command"
+    headingLevel={2}
     eyebrow={SURFACE.displayName}
     title="Team & Access Center"
     dataActiveSurfacePanel="team-and-access"

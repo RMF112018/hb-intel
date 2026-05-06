@@ -351,6 +351,9 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
       <Fragment>
         <PccDashboardCard
           footprint="full"
+          tier="state"
+          region="state"
+          headingLevel={2}
           eyebrow="Project Readiness Center"
           title="Project readiness"
           dataActiveSurfacePanel="project-readiness"
@@ -376,6 +379,9 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
       <Fragment>
         <PccDashboardCard
           footprint="full"
+          tier="state"
+          region="state"
+          headingLevel={2}
           eyebrow="Project Readiness Center"
           title="Project readiness"
           dataActiveSurfacePanel="project-readiness"
@@ -440,6 +446,9 @@ interface HeroCardProps {
 const HeroCard: FC<HeroCardProps> = ({ hero }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier1"
+    region="command"
+    headingLevel={2}
     eyebrow={PCC_MVP_SURFACES['project-readiness'].displayName}
     title="Project readiness"
     dataActiveSurfacePanel="project-readiness"

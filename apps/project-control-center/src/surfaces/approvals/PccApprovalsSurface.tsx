@@ -124,6 +124,9 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
+        headingLevel={2}
         eyebrow={SURFACE.displayName}
         title="Approvals & Checkpoints"
         dataActiveSurfacePanel="approvals"
@@ -150,6 +153,9 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
+        headingLevel={2}
         eyebrow={SURFACE.displayName}
         title="Approvals & Checkpoints"
         dataActiveSurfacePanel="approvals"
@@ -324,6 +330,9 @@ const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
   <PccDashboardCard
     footprint="full"
     hierarchy="primary"
+    tier="tier1"
+    region="command"
+    headingLevel={2}
     eyebrow={SURFACE.displayName}
     title="Approvals home"
     dataActiveSurfacePanel="approvals"
