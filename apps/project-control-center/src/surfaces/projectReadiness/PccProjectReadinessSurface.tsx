@@ -71,6 +71,7 @@ import type {
 import { PccProjectReadinessProcoreSourceConfidenceCard } from './PccProjectReadinessProcoreSourceConfidenceCard';
 import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadinessUnifiedLifecycleSection';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import { PccDisabledAffordance } from '../../ui/PccDisabledAffordance';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import { pccSurfacePostureCopy } from '../../ui/pccSurfacePostureCopy';
@@ -400,8 +401,8 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
     <Fragment>
       <HeroCard hero={viewModel.hero} />
       <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
-      <DomainGridCard domains={viewModel.domains} />
       <BlockersCard blockers={viewModel.blockers} />
+      <DomainGridCard domains={viewModel.domains} />
       <OwnershipAccountabilityCard ownership={viewModel.ownershipAccountability} />
       <PriorityActionsPreviewCard preview={viewModel.priorityActionsPreview} />
       <EvidenceSourceHealthCard evidence={viewModel.evidence} />
@@ -410,16 +411,17 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
   );
 };
 
-// While loading or in error, still render the seven non-hero regions
-// from the fixture snapshot so the bento grid stays populated and tests
-// can locate the structural region markers.
+// While loading or in error, still render the non-hero regions from the
+// fixture snapshot so the bento grid stays populated and tests can locate
+// the structural region markers. The blocker card precedes the domain
+// grid to mirror the ready-path first-impression hierarchy.
 const FixtureScaffoldRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status !== 'preview') return null;
   return (
     <Fragment>
       <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
-      <DomainGridCard domains={viewModel.domains} />
       <BlockersCard blockers={viewModel.blockers} />
+      <DomainGridCard domains={viewModel.domains} />
       <OwnershipAccountabilityCard ownership={viewModel.ownershipAccountability} />
       <PriorityActionsPreviewCard preview={viewModel.priorityActionsPreview} />
       <EvidenceSourceHealthCard evidence={viewModel.evidence} />
@@ -559,7 +561,12 @@ interface BlockersCardProps {
 }
 
 const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Blockers" title="Blockers and exceptions">
+  <PccDashboardCard
+    footprint="full"
+    hierarchy="primary"
+    eyebrow="Blockers"
+    title="Blockers and exceptions"
+  >
     <div data-pcc-readiness-region="blockers" className={styles.blockerList}>
       {blockers.length === 0 ? (
         <PccPreviewState
@@ -673,12 +680,12 @@ const OwnershipAccountabilityCard: FC<OwnershipAccountabilityCardProps> = ({ own
                   <span className={styles.ownershipEscalationRow}>
                     <span className={styles.ownershipMeta}>Escalation:</span>
                     {entry.escalationPersonas.map((persona) => (
-                      <span
-                        key={persona}
-                        className={styles.inertChip}
-                        data-pcc-readiness-ownership-escalation={persona}
-                      >
-                        {persona}
+                      <span key={persona} data-pcc-readiness-ownership-escalation={persona}>
+                        <PccDisabledAffordance
+                          variant="chip"
+                          label={persona}
+                          reason="Escalations are managed by your PCC administrator."
+                        />
                       </span>
                     ))}
                   </span>
@@ -746,7 +753,7 @@ interface EvidenceSourceHealthCardProps {
 
 const EvidenceSourceHealthCard: FC<EvidenceSourceHealthCardProps> = ({ evidence }) => (
   <PccDashboardCard
-    footprint="wide"
+    footprint="full"
     eyebrow="Evidence and source health"
     title="Evidence and source-health posture"
   >
@@ -963,9 +970,9 @@ const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewMod
     <Fragment>
       <LifecycleHeroCard hero={viewModel.hero} />
       <LifecycleMapCard map={viewModel.lifecycleMap} />
+      <LifecycleBlockersCard blockers={viewModel.blockers} />
       <LifecycleFamilyDomainsCard familyDomains={viewModel.familyDomains} />
       <LifecycleMyActionsCard myActions={viewModel.myActions} />
-      <LifecycleBlockersCard blockers={viewModel.blockers} />
       <LifecycleEvidenceCard evidence={viewModel.evidence} />
       <LifecycleFutureCloseoutCard futureCloseout={viewModel.futureCloseout} />
       <LifecycleSourceTraceabilityCard sourceTraceability={viewModel.sourceTraceability} />
@@ -1502,7 +1509,8 @@ const LifecycleBlockersCard: FC<LifecycleBlockersCardProps> = ({ blockers }) => 
   const degraded = lifecycleDegradedPreview(blockers.cardState, 'lifecycle-blockers-exceptions');
   return (
     <PccDashboardCard
-      footprint="wide"
+      footprint="full"
+      hierarchy="primary"
       eyebrow="Blockers and exceptions"
       title="Blocked, escalated, and at-risk items"
     >

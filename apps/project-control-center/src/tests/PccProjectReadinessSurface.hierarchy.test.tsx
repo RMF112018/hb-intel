@@ -1,0 +1,144 @@
+/**
+ * Project Readiness — blocker hierarchy and ownership escalation
+ * disabled-affordance contracts. Per-component scoped
+ * (feedback_per_component_marker_scoping). No shared layout primitive
+ * edits. Order assertions use region markers, not sibling indexes
+ * (feedback_per_lane_marker_assertions).
+ */
+
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { PccApp } from '../PccApp';
+
+afterEach(() => {
+  cleanup();
+});
+
+function activateProjectReadiness(container: HTMLElement): HTMLElement {
+  const button = container.querySelector('[data-pcc-surface-id="project-readiness"]');
+  expect(button).not.toBeNull();
+  fireEvent.click(button!);
+  const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
+  expect(panel).not.toBeNull();
+  return panel as HTMLElement;
+}
+
+function regionCard(container: HTMLElement, regionId: string): HTMLElement {
+  const region = container.querySelector(`[data-pcc-readiness-region="${regionId}"]`);
+  expect(region, `region '${regionId}' should render`).not.toBeNull();
+  const card = region!.closest('[data-pcc-card]');
+  expect(card, `region '${regionId}' should be wrapped in a PccDashboardCard`).not.toBeNull();
+  return card as HTMLElement;
+}
+
+function lifecycleSectionRegion(container: HTMLElement, regionId: string): HTMLElement {
+  const region = container.querySelector(`[data-pcc-readiness-region="${regionId}"]`);
+  expect(region, `lifecycle region '${regionId}' should render`).not.toBeNull();
+  return region as HTMLElement;
+}
+
+describe('Project Readiness — Wave 8 blocker hierarchy', () => {
+  it('BlockersCard adopts hierarchy="primary" and footprint="full"', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    const card = regionCard(container, 'blockers');
+    expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('full');
+  });
+
+  it('Wave 8 BlockersCard appears before DomainGridCard in DOM order', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    const blockersCard = regionCard(container, 'blockers');
+    const domainsCard = regionCard(container, 'domains');
+    const compare = blockersCard.compareDocumentPosition(domainsCard);
+    expect(
+      compare & Node.DOCUMENT_POSITION_FOLLOWING,
+      'blockers card must precede domain grid card in DOM order',
+    ).toBeTruthy();
+  });
+
+  it('EvidenceSourceHealthCard footprint is "full" so the row stays visually clean', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const card = regionCard(container, 'evidence-source-health');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('full');
+  });
+});
+
+describe('Project Readiness — Wave 9 lifecycle blocker hierarchy', () => {
+  it('LifecycleBlockersCard adopts hierarchy="primary" and footprint="full"', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    // The lifecycle blocker region is keyed by data-pcc-readiness-region
+    // string declared in PccProjectReadinessSurface.tsx.
+    const region = container.querySelector(
+      '[data-pcc-readiness-region="lifecycle-blockers-exceptions"]',
+    );
+    expect(region, 'lifecycle blockers region should render').not.toBeNull();
+    const card = region!.closest('[data-pcc-card]');
+    expect(card).not.toBeNull();
+    expect(card?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(card?.getAttribute('data-pcc-footprint')).toBe('full');
+  });
+
+  it('LifecycleBlockersCard appears before LifecycleFamilyDomainsCard in DOM order', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    const blockersRegion = lifecycleSectionRegion(container, 'lifecycle-blockers-exceptions');
+    const familyRegion = lifecycleSectionRegion(container, 'lifecycle-family-domains');
+    const compare = blockersRegion.compareDocumentPosition(familyRegion);
+    expect(
+      compare & Node.DOCUMENT_POSITION_FOLLOWING,
+      'lifecycle blockers must precede lifecycle family domains in DOM order',
+    ).toBeTruthy();
+  });
+});
+
+describe('Project Readiness — active-panel ownership preserved', () => {
+  it('HeroCard remains the sole [data-pcc-active-surface-panel="project-readiness"] owner', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(panels).toHaveLength(1);
+    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
+  });
+});
+
+describe('Project Readiness — Ownership escalation disabled-affordance contract', () => {
+  it('every escalation chip is routed through PccDisabledAffordance with a paired reason', () => {
+    const { container } = render(<PccApp forceMode="wideDesktop" />);
+    activateProjectReadiness(container);
+
+    const ownershipRegion = container.querySelector(
+      '[data-pcc-readiness-region="ownership-accountability"]',
+    );
+    expect(ownershipRegion, 'ownership-accountability region should render').not.toBeNull();
+
+    const escalationWrappers = ownershipRegion!.querySelectorAll(
+      '[data-pcc-readiness-ownership-escalation]',
+    );
+    expect(
+      escalationWrappers.length,
+      'expected at least one escalation chip in the ownership region',
+    ).toBeGreaterThan(0);
+
+    for (const wrapper of Array.from(escalationWrappers)) {
+      const button = wrapper.querySelector('[data-pcc-disabled-affordance-variant]');
+      expect(
+        button,
+        'each escalation chip must be wrapped in PccDisabledAffordance',
+      ).not.toBeNull();
+      expect(button?.getAttribute('aria-disabled')).toBe('true');
+      const describedBy = button?.getAttribute('aria-describedby') ?? '';
+      const firstId = describedBy.split(' ')[0];
+      const reasonNode = wrapper.querySelector(`#${CSS.escape(firstId)}`);
+      expect(reasonNode, 'aria-describedby must resolve to a reason node').not.toBeNull();
+      expect((reasonNode!.textContent ?? '').length).toBeGreaterThan(0);
+    }
+  });
+});

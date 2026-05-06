@@ -20,6 +20,8 @@ import type {
 } from './documentControlViewModel';
 import { resolveDisabledMessage, resolveEntryHealthMessage } from './sourceStateMessaging';
 
+export type DocumentControlLaneTier = 'source-of-record' | 'working-files' | 'external-launch';
+
 export interface PccDocumentControlLaneCardProps {
   readonly laneViewModel: IPccDocumentControlLaneViewModel;
 }
@@ -34,6 +36,26 @@ const LANE_ACTION_REASONS: Readonly<Record<DocumentControlWave7LaneId, string>> 
   'project-record': 'Document actions are managed in SharePoint.',
   'my-project-files': 'File actions are managed in OneDrive.',
   'external-systems': 'Launch links open the source system in a new tab.',
+};
+
+const LANE_TIER: Readonly<Record<DocumentControlWave7LaneId, DocumentControlLaneTier>> = {
+  'project-record': 'source-of-record',
+  'my-project-files': 'working-files',
+  'external-systems': 'external-launch',
+};
+
+const LANE_EYEBROW: Readonly<Record<DocumentControlWave7LaneId, string>> = {
+  'project-record': 'Source of record',
+  'my-project-files': 'Working files',
+  'external-systems': 'External launches',
+};
+
+const LANE_HIERARCHY: Readonly<
+  Record<DocumentControlWave7LaneId, 'primary' | 'standard' | 'supporting'>
+> = {
+  'project-record': 'primary',
+  'my-project-files': 'standard',
+  'external-systems': 'supporting',
 };
 
 function bindingPathLabel(
@@ -58,10 +80,17 @@ export const PccDocumentControlLaneCard: FC<PccDocumentControlLaneCardProps> = (
   const { laneId, title, description, entries, health, warningText, degraded } = laneViewModel;
   const actionLabels = LANE_ACTION_LABELS[laneId];
   const actionReason = LANE_ACTION_REASONS[laneId];
+  const tier = LANE_TIER[laneId];
+  const eyebrow = LANE_EYEBROW[laneId];
+  const hierarchy = LANE_HIERARCHY[laneId];
 
   return (
-    <PccDashboardCard footprint="standard" eyebrow="Lane" title={title}>
-      <div className={styles.headerCopy} data-pcc-doc-lane={laneId}>
+    <PccDashboardCard footprint="standard" hierarchy={hierarchy} eyebrow={eyebrow} title={title}>
+      <div
+        className={styles.headerCopy}
+        data-pcc-doc-lane={laneId}
+        data-pcc-document-lane-tier={tier}
+      >
         <p className={styles.laneDescription}>{description}</p>
         {degraded ? (
           <p

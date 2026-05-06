@@ -33,10 +33,7 @@ import type {
   PccReadModelSourceStatus,
   PccReadModelWarning,
 } from '@hbc/models/pcc';
-import {
-  resolveLaneEnvelopeMessage,
-  type ISourceStateMessage,
-} from './sourceStateMessaging';
+import { resolveLaneEnvelopeMessage, type ISourceStateMessage } from './sourceStateMessaging';
 
 export interface IPccDocumentsReadModelClient {
   getDocumentControl(
@@ -45,10 +42,7 @@ export interface IPccDocumentsReadModelClient {
   ): Promise<PccReadModelEnvelope<PccDocumentControlReadModel>>;
 }
 
-export type DocumentControlWave7LaneId =
-  | 'project-record'
-  | 'my-project-files'
-  | 'external-systems';
+export type DocumentControlWave7LaneId = 'project-record' | 'my-project-files' | 'external-systems';
 
 export const WAVE7_LANE_ORDER: readonly DocumentControlWave7LaneId[] = [
   'project-record',
@@ -64,7 +58,7 @@ export const WAVE7_LANE_TITLES: Readonly<Record<DocumentControlWave7LaneId, stri
 
 export const WAVE7_LANE_DESCRIPTIONS: Readonly<Record<DocumentControlWave7LaneId, string>> = {
   'project-record':
-    'Formal project files in the SharePoint project-site libraries. Project Record is the formal project record; file actions are read-only in this preview.',
+    'Formal project files in the SharePoint project-site libraries. Project Record is the formal project record; document actions are managed in SharePoint.',
   'my-project-files':
     'Working files for this project in the current user’s Microsoft 365 file space. Working files are not part of the formal project record unless submitted to Project Record.',
   'external-systems':
@@ -109,7 +103,9 @@ export interface IPccDocumentControlViewModel {
   readonly warnings: readonly PccReadModelWarning[];
   readonly actionCatalog: readonly IDocumentControlActionCode[];
   readonly roleActionAvailability: readonly PccDocumentControlRoleActionAvailability[];
-  readonly roleVocabulary: Readonly<Record<DocumentControlRoleCode, IDocumentControlRoleVocabularyEntry>>;
+  readonly roleVocabulary: Readonly<
+    Record<DocumentControlRoleCode, IDocumentControlRoleVocabularyEntry>
+  >;
   readonly roleCodes: readonly DocumentControlRoleCode[];
 }
 
@@ -183,7 +179,9 @@ function isSafeMyProjectFilesEntry(
   return true;
 }
 
-function laneFor(entry: IProjectDocumentSourceRegistryEntry): DocumentControlWave7LaneId | undefined {
+function laneFor(
+  entry: IProjectDocumentSourceRegistryEntry,
+): DocumentControlWave7LaneId | undefined {
   if (entry.wave7Lane === 'project-record') return 'project-record';
   if (entry.wave7Lane === 'my-project-files') return 'my-project-files';
   if (entry.wave7Lane === 'external-systems') return 'external-systems';
@@ -208,8 +206,10 @@ export function buildPccDocumentControlViewModel(
   for (const entry of registry) {
     const laneId = laneFor(entry);
     if (!laneId) continue;
-    if (laneId === 'my-project-files'
-      && !isSafeMyProjectFilesEntry(entry, envelopeProjectId, sourceStatus)) {
+    if (
+      laneId === 'my-project-files' &&
+      !isSafeMyProjectFilesEntry(entry, envelopeProjectId, sourceStatus)
+    ) {
       continue;
     }
     const current = lanes[laneId];
