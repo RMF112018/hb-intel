@@ -1,0 +1,107 @@
+{
+  "runId": "pcc-live-surface-smoke-1778175784234",
+  "generatedAtIso": "2026-05-07T17:43:04.234Z",
+  "tenantSiteUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob]",
+  "tenantPageUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob].aspx",
+  "expectedPackageVersion": "1.0.0",
+  "evRefs": [
+    "EV-52",
+    "EV-55"
+  ],
+  "selfSkipped": false,
+  "runState": "completed",
+  "surfaces": [
+    {
+      "surfaceId": "project-home",
+      "label": "Project Home",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 16,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "team-and-access",
+      "label": "Team & Access",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 4,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "documents",
+      "label": "Documents",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 6,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "project-readiness",
+      "label": "Project Readiness",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 62,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "approvals",
+      "label": "Approvals",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 11,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "external-systems",
+      "label": "External Platforms",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 10,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "control-center-settings",
+      "label": "Control Center Settings",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 3,
+      "tabActive": true
+    },
+    {
+      "surfaceId": "site-health",
+      "label": "Site Health",
+      "passed": true,
+      "activePanelFound": true,
+      "gridCount": 1,
+      "cardCount": 5,
+      "tabActive": true
+    }
+  ],
+  "runtimeErrors": {
+    "consoleErrorCount": 0,
+    "pageErrorCount": 0,
+    "items": []
+  },
+  "summary": {
+    "totalSurfaces": 8,
+    "passedSurfaces": 8,
+    "failedSurfaces": 0,
+    "totalGridCount": 8,
+    "totalCardCount": 117,
+    "consoleErrorCount": 0,
+    "pageErrorCount": 0
+  },
+  "warnings": [],
+  "artifactPaths": [
+    "/tmp/pcc-live-evidence/20260507-134047/surface-smoke-1778175784234/pcc-live-surface-smoke.json",
+    "/tmp/pcc-live-evidence/20260507-134047/surface-smoke-1778175784234/pcc-live-surface-smoke.md"
+  ],
+  "disclaimer": "This output is baseline live-runtime evidence for EV-52 and EV-55 only. It is not a final scorecard result and does not mark any EV captured without operator review."
+}
