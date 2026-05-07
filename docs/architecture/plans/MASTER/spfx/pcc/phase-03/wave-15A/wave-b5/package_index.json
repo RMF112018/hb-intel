@@ -1,0 +1,32 @@
+{
+  "package": "pcc_project_readiness_command_surface_remediation_package",
+  "generated_at_utc": "2026-05-07T19:06:49.781037Z",
+  "objective": "Command-first Project Readiness density remediation",
+  "closed_decisions": [
+    "Local segmented/module-index drill-down controls",
+    "Default command overview",
+    "Selected detail replaces card wall",
+    "Non-selected module cards absent from DOM",
+    "No shared primitive changes",
+    "No manifest/package/lockfile changes",
+    "No internal module compression in first pass",
+    "Evidence closeout only, no score/pass claim"
+  ],
+  "files": [
+    "00_REPO_TRUTH_SUMMARY.md",
+    "01_OPEN_DECISIONS_CLOSED.md",
+    "02_IMPLEMENTATION_PLAN.md",
+    "03_ACCEPTANCE_CRITERIA.md",
+    "04_VALIDATION_AND_EVIDENCE_CLOSEOUT.md",
+    "README.md",
+    "checklists/LOCAL_AGENT_EXECUTION_CHECKLIST.md",
+    "checklists/POST_IMPLEMENTATION_REVIEW_CHECKLIST.md",
+    "prompts/Prompt_01_Command_Surface_Skeleton_And_Density_Contract.md",
+    "prompts/Prompt_02_Detail_Section_Renderer_And_Selected_Module_Tests.md",
+    "prompts/Prompt_03_Read_Model_Parity_And_Unified_Lifecycle_Refactor.md",
+    "prompts/Prompt_04_State_Density_And_False_Affordance_Hardening.md",
+    "prompts/Prompt_05_Card_Tier_Contract_And_Evidence_Closeout.md",
+    "wireframes/PROJECT_READINESS_COMMAND_SURFACE_WIREFRAME.md",
+    "wireframes/PROJECT_READINESS_DETAIL_SECTION_WIREFRAME.md"
+  ]
+}
