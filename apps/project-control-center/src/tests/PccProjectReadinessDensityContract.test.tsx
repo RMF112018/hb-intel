@@ -20,7 +20,7 @@
  * its cards are absent.
  */
 
-import { afterEach, describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { cleanup, render, waitFor } from '@testing-library/react';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
@@ -203,6 +203,63 @@ describe('PccProjectReadinessSurface — density contract (read-model path)', ()
         container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
       ).not.toBeNull(),
     );
+    assertDensityInvariants(container);
+  });
+});
+
+// Wave 15A B5 / Prompt 03 — density invariants must survive degraded
+// read-model envelopes. These two variants prove the <= 12 cap holds
+// when the unified-lifecycle hook rejects and when every read-model
+// client method never resolves (loading state). Detail-mode density is
+// intentionally not capped — only the default command view is gated.
+
+const ALL_FIXTURE_CLIENT_METHODS = [
+  'getProjectReadiness',
+  'getApprovals',
+  'getLifecycleReadiness',
+  'getPermitInspectionControlCenter',
+  'getResponsibilityMatrix',
+  'getConstraintsLog',
+  'getBuyoutLog',
+  'getProcoreProjectMapping',
+  'getProcoreSyncHealth',
+  'getUnifiedLifecycle',
+] as const;
+
+describe('PccProjectReadinessSurface — density contract (Wave 15A B5 / Prompt 03 degraded read-model paths)', () => {
+  it('default command view satisfies all density invariants when getUnifiedLifecycle rejects', async () => {
+    const client = createPccFixtureReadModelClient();
+    const ulSpy = vi.spyOn(client, 'getUnifiedLifecycle').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => expect(ulSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
+      ).not.toBeNull(),
+    );
+    assertDensityInvariants(container);
+  });
+
+  it('default command view satisfies all density invariants when every read-model client method never resolves', () => {
+    const client = createPccFixtureReadModelClient();
+    for (const method of ALL_FIXTURE_CLIENT_METHODS) {
+      vi.spyOn(client, method).mockImplementation(
+        (): Promise<never> => new Promise<never>(() => undefined),
+      );
+    }
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    // Loading-state hero renders synchronously; module-index card too.
+    expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();
     assertDensityInvariants(container);
   });
 });

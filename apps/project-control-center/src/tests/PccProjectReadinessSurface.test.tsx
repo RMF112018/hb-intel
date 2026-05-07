@@ -1,5 +1,10 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import {
+  SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE,
+  type PccReadModelEnvelope,
+  type PccUnifiedLifecycleReadModel,
+} from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
@@ -132,15 +137,28 @@ describe('Project Readiness Center surface', () => {
     expect(node!.textContent).toContain('Buyout Log');
   });
 
-  it('readiness surface tree exposes no enabled action buttons', () => {
+  it('readiness surface tree exposes only local view-selection drilldown controls as enabled buttons (Wave 15A B5 / Prompt 03 — replaces the legacy "all buttons disabled" assertion now that the module-index card intentionally enables drilldown controls)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const panel = activateProjectReadiness(container);
-    const buttons = panel.querySelectorAll('button');
-    for (const button of Array.from(buttons)) {
-      expect(button.hasAttribute('disabled')).toBe(true);
+    activateProjectReadiness(container);
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    expect(bento, '[data-pcc-bento-grid] must mount').not.toBeNull();
+    const enabledButtons = Array.from(bento.querySelectorAll<HTMLButtonElement>('button')).filter(
+      (b) => !b.disabled && b.getAttribute('aria-disabled') !== 'true',
+    );
+    const forbiddenVerb =
+      /\b(approve|reject|submit|upload|sync|write[\s-]?back|create|delete|save|launch|open\s+report|mark\s+complete|complete|checklist|assign|escalate|acknowledge)\b/i;
+    for (const button of enabledButtons) {
+      expect(
+        button.hasAttribute('data-pcc-readiness-drilldown-control'),
+        `enabled button "${(button.textContent ?? '').trim()}" must be a local drilldown control`,
+      ).toBe(true);
+      const accessibleName = `${button.textContent ?? ''} ${button.getAttribute('aria-label') ?? ''}`;
+      expect(
+        forbiddenVerb.test(accessibleName),
+        `enabled drilldown control "${accessibleName.trim()}" must not use executable-verb labels`,
+      ).toBe(false);
     }
-    const links = panel.querySelectorAll('a[href^="http"]');
-    expect(links.length).toBe(0);
+    expect(bento.querySelectorAll('a[href^="http"]').length).toBe(0);
   });
 });
 
@@ -643,5 +661,389 @@ describe('Project Readiness Center surface — non-call architectural lock', () 
     expect(buyoutLogSpy).toHaveBeenCalledTimes(1);
     expect(procoreMappingSpy).toHaveBeenCalledTimes(1);
     expect(unifiedLifecycleSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 15A B5 / Prompt 03 — read-model parity and degraded-state tests
+//
+// Hooks are unconditional and fire on mount; clicks reveal already-
+// resolved (or in-flight) view-models rather than triggering fetches.
+// These tests pin structural invariants under degraded read-model
+// envelopes (rejection, never-resolution, source-unavailable) for
+// both the default command view and the unified-lifecycle detail
+// view, and verify that React selection state survives the hook
+// state machine.
+// ─────────────────────────────────────────────────────────────────────
+
+const ALL_FIXTURE_CLIENT_METHODS = [
+  'getProjectReadiness',
+  'getApprovals',
+  'getLifecycleReadiness',
+  'getPermitInspectionControlCenter',
+  'getResponsibilityMatrix',
+  'getConstraintsLog',
+  'getBuyoutLog',
+  'getProcoreProjectMapping',
+  'getProcoreSyncHealth',
+  'getUnifiedLifecycle',
+] as const;
+
+const NEVER_RESOLVED = (): Promise<never> => new Promise<never>(() => undefined);
+
+function buildSourceUnavailableUnifiedLifecycleEnvelope(): PccReadModelEnvelope<PccUnifiedLifecycleReadModel> {
+  return { ...SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE, sourceStatus: 'source-unavailable' };
+}
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 default command resilience', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('default command view still renders 9 cards with all structural invariants when getUnifiedLifecycle rejects', async () => {
+    const client = createPccFixtureReadModelClient();
+    const ulSpy = vi.spyOn(client, 'getUnifiedLifecycle').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    // The hook fires on mount even though the section is not rendered.
+    await waitFor(() => expect(ulSpy).toHaveBeenCalledTimes(1));
+
+    // No unified-lifecycle body markers leak into the default command view.
+    expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
+    expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length).toBeLessThanOrEqual(12);
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+    for (const card of cards) {
+      expect(card.parentElement).toBe(bento);
+    }
+  });
+
+  it('default command view degrades approvals-derived blocker rows to zero when getApprovals rejects', async () => {
+    const client = createPccFixtureReadModelClient();
+    const approvalsSpy = vi.spyOn(client, 'getApprovals').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    // Hero stays ready — primary readiness fetch is independent of approvals.
+    await waitFor(() => expect(approvalsSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
+      ).not.toBeNull(),
+    );
+
+    // Approvals-derived blocker rows degrade to zero (per
+    // feedback_no_runtime_fixture_fallback_for_envelope_failure: never
+    // auto-fall back to a fixture; emit zero derived rows).
+    expect(
+      container.querySelectorAll('[data-pcc-readiness-blocker-source="approvals-reference"]')
+        .length,
+      'approvals-derived blocker rows must be absent when getApprovals rejects',
+    ).toBe(0);
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length).toBeLessThanOrEqual(12);
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+    for (const card of cards) {
+      expect(card.parentElement).toBe(bento);
+    }
+  });
+
+  it('default command view renders the loading hero + scaffold + module-index when every read-model client method never resolves', () => {
+    const client = createPccFixtureReadModelClient();
+    for (const method of ALL_FIXTURE_CLIENT_METHODS) {
+      vi.spyOn(client, method).mockImplementation(NEVER_RESOLVED);
+    }
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    // Hero state card surfaces loading posture; module-index still renders.
+    const loadingState = container.querySelector('[data-pcc-state="loading"]');
+    expect(loadingState, 'loading-state preview must render in the hero').not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length).toBeLessThanOrEqual(12);
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+    for (const card of cards) {
+      expect(card.parentElement).toBe(bento);
+    }
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 selected unified-lifecycle state', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('selecting unified-lifecycle when getUnifiedLifecycle rejects renders 3 cards with error-state inner content', async () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getUnifiedLifecycle').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    const drilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    ) as HTMLButtonElement | null;
+    expect(drilldown).not.toBeNull();
+    fireEvent.click(drilldown!);
+
+    // Hook rejection settles → presentational section emits 3 cards in error state.
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-pcc-state="error"]').length).toBeGreaterThanOrEqual(
+        3,
+      ),
+    );
+    expect(container.querySelectorAll('[role="alert"]').length).toBeGreaterThanOrEqual(3);
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    for (const card of cards) {
+      expect(card.parentElement).toBe(bento);
+    }
+  });
+
+  it('selecting unified-lifecycle when getUnifiedLifecycle never resolves renders 3 cards with loading-state inner content', () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getUnifiedLifecycle').mockImplementation(NEVER_RESOLVED);
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    const drilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    ) as HTMLButtonElement | null;
+    expect(drilldown).not.toBeNull();
+    fireEvent.click(drilldown!);
+
+    // Three loading-state preview slots inside the three unified-lifecycle cards.
+    expect(container.querySelectorAll('[data-pcc-state="loading"]').length).toBeGreaterThanOrEqual(
+      3,
+    );
+    // Hero/module-index unaffected.
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
+    ).not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+  });
+
+  it('selecting unified-lifecycle when getUnifiedLifecycle resolves to a source-unavailable envelope still renders 3 direct bento children with body markers', async () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getUnifiedLifecycle').mockResolvedValue(
+      buildSourceUnavailableUnifiedLifecycleEnvelope(),
+    );
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    const drilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    ) as HTMLButtonElement | null;
+    expect(drilldown).not.toBeNull();
+    fireEvent.click(drilldown!);
+
+    // Body markers appear once the ready branch resolves (the leaf 04C
+    // components surface degraded posture internally; the surface-level
+    // contract is "three direct bento children with body markers").
+    await waitFor(() =>
+      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
+    );
+    expect(container.querySelector('[data-pcc-project-memory]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).not.toBeNull();
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+    for (const marker of [
+      'data-pcc-lifecycle-timeline',
+      'data-pcc-project-memory',
+      'data-pcc-related-records',
+    ] as const) {
+      const node = container.querySelector(`[${marker}]`);
+      expect(node).not.toBeNull();
+      const card = node!.closest('[data-pcc-card]');
+      expect(card).not.toBeNull();
+      expect(card!.parentElement).toBe(bento);
+    }
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 selection persistence across hook state transitions', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('selecting unified-lifecycle while the hook is loading keeps aria-pressed=true and surfaces body markers when the promise resolves', async () => {
+    const client = createPccFixtureReadModelClient();
+    let resolveUL!: (value: PccReadModelEnvelope<PccUnifiedLifecycleReadModel>) => void;
+    vi.spyOn(client, 'getUnifiedLifecycle').mockImplementation(
+      () =>
+        new Promise<PccReadModelEnvelope<PccUnifiedLifecycleReadModel>>((resolve) => {
+          resolveUL = resolve;
+        }),
+    );
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    const drilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    ) as HTMLButtonElement | null;
+    expect(drilldown).not.toBeNull();
+    fireEvent.click(drilldown!);
+
+    // Loading state visible immediately; selection state is set.
+    expect(drilldown!.getAttribute('aria-pressed')).toBe('true');
+    expect(drilldown!.getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
+    expect(container.querySelectorAll('[data-pcc-state="loading"]').length).toBeGreaterThanOrEqual(
+      3,
+    );
+    expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
+
+    // Resolve the promise; selection persists across the loading→ready
+    // transition (React useState is independent of hook state).
+    resolveUL(SAMPLE_UNIFIED_LIFECYCLE_ENVELOPE);
+    await waitFor(() =>
+      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
+    );
+    expect(container.querySelector('[data-pcc-project-memory]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).not.toBeNull();
+
+    // Drilldown still shows selected — selection survived the transition.
+    const drilldownAfter = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    );
+    expect(drilldownAfter!.getAttribute('aria-pressed')).toBe('true');
+    expect(drilldownAfter!.getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 non-UL read-model parity', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('non-UL detail sections each surface their hook-backed marker when selected; the matching client method was acquired unconditionally on mount', async () => {
+    const client = createPccFixtureReadModelClient();
+    // Hooks are unconditional and fire on mount — these spies record
+    // acquisition, not click-driven invocation
+    // (feedback_unconditional_hooks_fire_on_mount).
+    const spies = {
+      'lifecycle-readiness': vi.spyOn(client, 'getLifecycleReadiness'),
+      'permits-inspections': vi.spyOn(client, 'getPermitInspectionControlCenter'),
+      'responsibility-matrix': vi.spyOn(client, 'getResponsibilityMatrix'),
+      constraints: vi.spyOn(client, 'getConstraintsLog'),
+      buyout: vi.spyOn(client, 'getBuyoutLog'),
+    } as const;
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    // Mount-time fetch acquisition: each method invoked at least once
+    // before any click (architectural-lock test still owns exact counts).
+    for (const [drilldownId, spy] of Object.entries(spies)) {
+      await waitFor(() =>
+        expect(spy, `${drilldownId} client method must be invoked at mount`).toHaveBeenCalled(),
+      );
+    }
+
+    const sectionMarkers: Readonly<Record<string, string>> = {
+      'lifecycle-readiness': '[data-pcc-readiness-section="lifecycle-readiness-center"]',
+      'permits-inspections': '[data-pcc-readiness-section="permit-inspection-control-center"]',
+      'responsibility-matrix': '[data-pcc-readiness-section="responsibility-matrix"]',
+      constraints: '[data-pcc-readiness-section="constraints-log"]',
+      buyout: '[data-pcc-readiness-section="buyout-log"]',
+    };
+
+    for (const drilldownId of Object.keys(spies)) {
+      const drilldown = container.querySelector(
+        `[data-pcc-readiness-drilldown-control="${drilldownId}"]`,
+      ) as HTMLButtonElement | null;
+      expect(drilldown, `expected drilldown control for ${drilldownId}`).not.toBeNull();
+      fireEvent.click(drilldown!);
+      await waitFor(() =>
+        expect(
+          container.querySelector(sectionMarkers[drilldownId]),
+          `selecting ${drilldownId} must reveal ${sectionMarkers[drilldownId]}`,
+        ).not.toBeNull(),
+      );
+    }
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 command/detail return under degraded UL', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('selecting unified-lifecycle then returning to command restores the seven native command-critical cards with no UL body markers', async () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getUnifiedLifecycle').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    // Wait for hero ready so the seven native command-critical cards exist.
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]'),
+      ).not.toBeNull(),
+    );
+
+    const ulDrilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(ulDrilldown);
+    // Detail mode: native command card absent.
+    expect(container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]')).toBeNull();
+
+    const commandDrilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="command"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(commandDrilldown);
+    // Back to default command: native cards re-render, no UL body markers.
+    expect(container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
+    expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
   });
 });
