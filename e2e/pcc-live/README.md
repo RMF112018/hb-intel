@@ -150,3 +150,33 @@ pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pc
 Do not commit live evidence outputs until operator review/scrubbing is complete. Never commit storageState/auth/session files or raw Playwright artifacts.
 
 This is baseline runtime traceability only and not a final scorecard result.
+
+## Prompt 05 screenshots and DOM summaries
+
+Prompt 05 adds opt-in screenshot and DOM summary tooling for initial evidence support:
+
+- screenshot kinds: above-fold, full-page, scroll-segment;
+- DOM summaries persist only `data-pcc-*` attributes plus short sanitized heading/aria-label fallback;
+- initial EV support scope: `EV-37..EV-49` and `EV-125..EV-134`.
+
+Artifacts are written under `PCC_EVIDENCE_OUTPUT_DIR` in a run folder:
+
+- `pcc-live-screenshot-evidence.json`
+- `pcc-live-screenshot-evidence.md`
+- `pcc-live-screenshot-inventory.json`
+- `pcc-live-dom-card-summary.json`
+- `screenshots/*.png`
+
+Policy boundary:
+
+- screenshot PNG files are operator-review required and not auto-commit eligible;
+- JSON/markdown metadata is commit-eligible only after review/scrubbing;
+- raw Playwright outputs are never-commit.
+
+Run command:
+
+```bash
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts
+```
+
+This is evidence collection and traceability support only; it is not a final scorecard result.
