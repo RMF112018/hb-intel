@@ -56,6 +56,8 @@ export class PccLivePageObject {
   private readonly rawPageErrors: string[] = [];
 
   private listenersAttached = false;
+  private expectedOrigin?: string;
+  private expectedHostname?: string;
 
   constructor(private readonly page: Page) {}
 
@@ -76,7 +78,28 @@ export class PccLivePageObject {
 
   async goto(pageUrl: string): Promise<void> {
     this.ensureListeners();
+    const expected = new URL(pageUrl);
+    this.expectedOrigin = expected.origin;
+    this.expectedHostname = expected.hostname;
     await this.page.goto(pageUrl, { waitUntil: 'domcontentloaded' });
+    await this.assertCurrentUrlWithinExpectedOrigin();
+  }
+
+  async assertCurrentUrlWithinExpectedOrigin(): Promise<void> {
+    const currentUrl = this.page.url();
+    expect(currentUrl, `Current URL must remain HTTPS: ${currentUrl}`).toMatch(/^https:\/\//);
+
+    if (!this.expectedOrigin || !this.expectedHostname) return;
+
+    const current = new URL(currentUrl);
+    expect(
+      current.origin,
+      `Current URL origin drifted. expected=${this.expectedOrigin} actual=${current.origin}`,
+    ).toBe(this.expectedOrigin);
+    expect(
+      current.hostname,
+      `Current URL host drifted. expected=${this.expectedHostname} actual=${current.hostname}`,
+    ).toBe(this.expectedHostname);
   }
 
   async waitForPccRoot(): Promise<void> {
@@ -150,7 +173,7 @@ export class PccLivePageObject {
       const gridCount = await this.page.locator(ROOT_MARKERS.grid).count();
       const cardCount = await this.page.locator(ROOT_MARKERS.card).count();
 
-      await expect(this.page).toHaveURL(/^https:\/\//);
+      await this.assertCurrentUrlWithinExpectedOrigin();
 
       const passed = tabActive && panelCount > 0 && gridCount > 0 && cardCount > 0;
 

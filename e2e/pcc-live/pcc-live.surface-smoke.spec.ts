@@ -97,15 +97,34 @@ test('PCC smoke evidence writer preserves sanitized output policy', async () => 
           gridCount: 1,
           cardCount: 3,
           tabActive: true,
+          warning:
+            'Warning for qa.user@hedrickbrothers.com token=ABCDEFGHIJKLMNOPQRSTUVWXYZ123456 and https://tenant/site?p=secret',
         },
       ],
       runtimeErrors: {
-        consoleErrorCount: 0,
-        pageErrorCount: 0,
-        items: [],
+        consoleErrorCount: 1,
+        pageErrorCount: 1,
+        items: [
+          {
+            type: 'console',
+            count: 1,
+            messageHash: 'h1',
+            message:
+              'console error for qa.user@hedrickbrothers.com storageState token=ABCDEFGHIJKLMNOPQRSTUVWXYZ123456 session cookie https://tenant/site?p=secret',
+          },
+          {
+            type: 'pageerror',
+            count: 1,
+            messageHash: 'h2',
+            message: 'pageerror has auth secrets and query https://tenant/page?token=secret',
+          },
+        ],
       },
       selfSkipped: false,
       runState: 'writer-test-only',
+      warnings: [
+        'warning with email qa.user@hedrickbrothers.com token=ABCDEFGHIJKLMNOPQRSTUVWXYZ123456 cookie session storageState https://tenant/path?q=secret',
+      ],
       artifactPaths: [
         curated,
         'test-results/raw-output.json',
@@ -136,12 +155,25 @@ test('PCC smoke evidence writer preserves sanitized output policy', async () => 
       'trace.zip',
       'video.webm',
       'network.har',
+      'qa.user@hedrickbrothers.com',
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456',
+      '?q=secret',
+      'cookie',
+      'token',
+      'session',
     ];
 
     for (const bad of forbidden) {
       expect(jsonText).not.toContain(bad);
       expect(markdownText).not.toContain(bad);
     }
+
+    expect(jsonText).toContain('[redacted-email]');
+    expect(markdownText).toContain('[redacted-email]');
+    expect(jsonText).toContain('[redacted-blob]');
+    expect(markdownText).toContain('[redacted-blob]');
+    expect(jsonText).toContain('[redacted-cred]');
+    expect(markdownText).toContain('[redacted-cred]');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

@@ -31,6 +31,34 @@ const DISCLAIMER =
 const UNSAFE_ARTIFACT_PATH_PATTERN =
   /(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookie|token|auth|secrets|session|trace|video|har/i;
 
+function sanitizeText(input: string): string {
+  const noQuery = input.replace(/\?.*$/g, '');
+  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
+  const noSensitiveKeywords = noEmail.replace(
+    /\b(storageState|storage-state|cookie|token|auth|session|secrets)\b/gi,
+    '[redacted-cred]',
+  );
+  const noTokenLike = noSensitiveKeywords.replace(
+    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
+    '[redacted-blob]',
+  );
+  return noTokenLike.slice(0, 240);
+}
+
+function sanitizeUrl(input: string): string {
+  return sanitizeText(input);
+}
+
+function sanitizeArtifactPath(input: string): string {
+  const noQuery = input.replace(/\?.*$/g, '');
+  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
+  const noTokenLike = noEmail.replace(
+    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
+    '[redacted-blob]',
+  );
+  return noTokenLike.slice(0, 240);
+}
+
 function safeArtifactPaths(artifactPaths: readonly string[] | undefined): string[] {
   return (artifactPaths ?? []).filter(
     (artifactPath) => !UNSAFE_ARTIFACT_PATH_PATTERN.test(artifactPath),
@@ -52,20 +80,38 @@ export async function writePccLiveSurfaceSmokeEvidence(
     pageErrorCount: input.runtimeErrors.pageErrorCount,
   };
 
+  const sanitizedSurfaces = input.surfaces.map((surface) => ({
+    ...surface,
+    warning: surface.warning ? sanitizeText(surface.warning) : undefined,
+  }));
+
+  const sanitizedRuntimeErrors = {
+    ...input.runtimeErrors,
+    items: input.runtimeErrors.items.map((item) => ({
+      ...item,
+      message: sanitizeText(item.message),
+    })),
+  };
+
+  const sanitizedWarnings = (input.warnings ?? []).map((warning) => sanitizeText(warning));
+  const sanitizedArtifacts = safeArtifactPaths(input.artifactPaths).map((artifactPath) =>
+    sanitizeArtifactPath(artifactPath),
+  );
+
   const payload = {
     runId: input.runId,
     generatedAtIso: input.generatedAtIso,
-    tenantSiteUrl: input.tenantSiteUrl,
-    tenantPageUrl: input.tenantPageUrl,
+    tenantSiteUrl: sanitizeUrl(input.tenantSiteUrl),
+    tenantPageUrl: sanitizeUrl(input.tenantPageUrl),
     expectedPackageVersion: input.expectedPackageVersion,
     evRefs: ['EV-52', 'EV-55'] as const,
     selfSkipped: input.selfSkipped,
     runState: input.runState,
-    surfaces: input.surfaces,
-    runtimeErrors: input.runtimeErrors,
+    surfaces: sanitizedSurfaces,
+    runtimeErrors: sanitizedRuntimeErrors,
     summary,
-    warnings: input.warnings ?? [],
-    artifactPaths: safeArtifactPaths(input.artifactPaths),
+    warnings: sanitizedWarnings,
+    artifactPaths: sanitizedArtifacts,
     disclaimer: DISCLAIMER,
   };
 
@@ -79,8 +125,8 @@ export async function writePccLiveSurfaceSmokeEvidence(
   lines.push('');
   lines.push(`- Run ID: ${input.runId}`);
   lines.push(`- Generated: ${input.generatedAtIso}`);
-  lines.push(`- Tenant site: ${input.tenantSiteUrl}`);
-  lines.push(`- Tenant page: ${input.tenantPageUrl}`);
+  lines.push(`- Tenant site: ${sanitizeUrl(input.tenantSiteUrl)}`);
+  lines.push(`- Tenant page: ${sanitizeUrl(input.tenantPageUrl)}`);
   lines.push(`- Expected package version: ${input.expectedPackageVersion}`);
   lines.push(`- EV refs: EV-52, EV-55`);
   lines.push(`- selfSkipped: ${input.selfSkipped}`);
@@ -89,7 +135,7 @@ export async function writePccLiveSurfaceSmokeEvidence(
   lines.push('## Surface Results');
   lines.push('| Surface | Passed | Panel | Tab Active | Grid Count | Card Count | Warning |');
   lines.push('|---|---|---|---|---:|---:|---|');
-  for (const surface of input.surfaces) {
+  for (const surface of sanitizedSurfaces) {
     lines.push(
       `| ${surface.surfaceId} | ${surface.passed ? 'yes' : 'no'} | ${surface.activePanelFound ? 'yes' : 'no'} | ${surface.tabActive ? 'yes' : 'no'} | ${surface.gridCount} | ${surface.cardCount} | ${surface.warning ?? ''} |`,
     );
@@ -105,21 +151,19 @@ export async function writePccLiveSurfaceSmokeEvidence(
   lines.push(`- Page errors: ${summary.pageErrorCount}`);
   lines.push('');
   lines.push('## Artifact Paths');
-  const filteredArtifacts = safeArtifactPaths(input.artifactPaths);
-  if (filteredArtifacts.length === 0) {
+  if (sanitizedArtifacts.length === 0) {
     lines.push('- None supplied');
   } else {
-    for (const artifactPath of filteredArtifacts) {
+    for (const artifactPath of sanitizedArtifacts) {
       lines.push(`- ${artifactPath}`);
     }
   }
   lines.push('');
   lines.push('## Warnings');
-  const warnings = input.warnings ?? [];
-  if (warnings.length === 0) {
+  if (sanitizedWarnings.length === 0) {
     lines.push('- None');
   } else {
-    for (const warning of warnings) {
+    for (const warning of sanitizedWarnings) {
       lines.push(`- ${warning}`);
     }
   }
