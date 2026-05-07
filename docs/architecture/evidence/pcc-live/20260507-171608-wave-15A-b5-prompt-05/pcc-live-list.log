@@ -1,0 +1,81 @@
+
+> hb-intel@ pcc:e2e:live:list /Users/bobbyfetting/hb-intel
+> playwright test --config=playwright.pcc-live.config.ts --list
+
+Listing tests:
+  [chromium] › pcc-evidence.registry.spec.ts:51:5 › registry contains exactly 80 required EV records
+  [chromium] › pcc-evidence.registry.spec.ts:56:5 › registry contains required IDs with no duplicates or unexpected IDs
+  [chromium] › pcc-evidence.registry.spec.ts:62:5 › every record includes required metadata fields
+  [chromium] › pcc-evidence.registry.spec.ts:74:5 › no record defaults to captured and EV-52..EV-58 are not captured
+  [chromium] › pcc-evidence.registry.spec.ts:83:5 › coverage helper reports no missing, duplicate, or unexpected IDs for canonical registry
+  [chromium] › pcc-evidence.registry.spec.ts:93:5 › manifest creator includes all EV IDs and traceability disclaimer
+  [chromium] › pcc-evidence.registry.spec.ts:104:5 › manifest writer keeps curated artifact paths and excludes raw/sensitive artifacts
+  [chromium] › pcc-live.accessibility.spec.ts:21:5 › Accessibility EV tuple is valid
+  [chromium] › pcc-live.accessibility.spec.ts:36:5 › Accessibility writer preserves sanitized output policy
+  [chromium] › pcc-live.accessibility.spec.ts:217:5 › Accessibility capture helpers preserve synthetic DOM boundaries
+  [chromium] › pcc-live.accessibility.spec.ts:255:5 › Axe summary strips raw DOM HTML
+  [chromium] › pcc-live.accessibility.spec.ts:287:5 › Live accessibility capture self-skips without live env
+  [chromium] › pcc-live.breakpoint.spec.ts:26:5 › Breakpoint EV tuple and viewport matrix are valid
+  [chromium] › pcc-live.breakpoint.spec.ts:58:5 › Breakpoint writer preserves sanitized output policy
+  [chromium] › pcc-live.breakpoint.spec.ts:217:5 › Breakpoint capture helpers preserve measurement boundaries
+  [chromium] › pcc-live.breakpoint.spec.ts:256:5 › Live breakpoint capture self-skips without live env
+  [chromium] › pcc-live.conditional.spec.ts:17:5 › Conditional EV tuple is valid
+  [chromium] › pcc-live.conditional.spec.ts:50:5 › Conditional writer preserves sanitized output policy
+  [chromium] › pcc-live.conditional.spec.ts:206:5 › Conditional capture helper records operator-pending when conditional disabled
+  [chromium] › pcc-live.conditional.spec.ts:254:5 › Synthetic high-zoom / short-height / drawer / special-state boundaries
+  [chromium] › pcc-live.conditional.spec.ts:319:5 › Unauthorized lane synthetic/not-configured behavior
+  [chromium] › pcc-live.conditional.spec.ts:375:5 › Live conditional capture self-skips or operator-pending without conditional env
+  [chromium] › pcc-live.content.spec.ts:18:5 › Content-language EV tuple is valid
+  [chromium] › pcc-live.content.spec.ts:30:5 › Content writer preserves sanitized output policy
+  [chromium] › pcc-live.content.spec.ts:169:5 › Synthetic visible-copy extraction covers required copy kinds
+  [chromium] › pcc-live.content.spec.ts:276:5 › Synthetic review templates include required sections
+  [chromium] › pcc-live.content.spec.ts:321:5 › Content capture does not click or mutate
+  [chromium] › pcc-live.content.spec.ts:366:5 › Live content capture self-skips without live env
+  [chromium] › pcc-live.doctrine-source.spec.ts:126:5 › Doctrine/source EV tuple is valid
+  [chromium] › pcc-live.doctrine-source.spec.ts:144:5 › Governing document verification detects required docs
+  [chromium] › pcc-live.doctrine-source.spec.ts:176:5 › Source index is bounded and metadata-only
+  [chromium] › pcc-live.doctrine-source.spec.ts:213:5 › Writer produces all expected artifacts with sanitized output
+  [chromium] › pcc-live.doctrine-source.spec.ts:266:5 › Doctrine categories and Mold Breaker themes are complete
+  [chromium] › pcc-live.doctrine-source.spec.ts:302:5 › Package version proof is review-support only
+  [chromium] › pcc-live.doctrine-source.spec.ts:320:5 › Real repo source/doc audit can write outputs to temp directory
+  [chromium] › pcc-live.runtime.spec.ts:32:5 › PCC live environment is configured or self-skips clearly
+  [chromium] › pcc-live.runtime.spec.ts:43:5 › PCC hosted page loads with Project Control Center root markers
+  [chromium] › pcc-live.runtime.spec.ts:94:5 › PCC navigation/tab markers are present when hosted web part is installed
+  [chromium] › pcc-live.scorecard-report.spec.ts:65:5 › Report type / coverage assembly
+  [chromium] › pcc-live.scorecard-report.spec.ts:75:5 › Pillar and hard-stop worksheets
+  [chromium] › pcc-live.scorecard-report.spec.ts:90:5 › Synthetic full report assembly
+  [chromium] › pcc-live.scorecard-report.spec.ts:109:5 › Missing source handling
+  [chromium] › pcc-live.scorecard-report.spec.ts:116:5 › Writer artifact completeness
+  [chromium] › pcc-live.scorecard-report.spec.ts:133:5 › Sanitization and forbidden claim lockdown
+  [chromium] › pcc-live.scorecard-report.spec.ts:174:5 › No automatic scoring
+  [chromium] › pcc-live.scorecard-report.spec.ts:190:5 › Regression compatibility
+  [chromium] › pcc-live.screenshot.spec.ts:31:5 › Screenshot evidence EV tuple is valid
+  [chromium] › pcc-live.screenshot.spec.ts:48:5 › Screenshot writer preserves sanitized output policy
+  [chromium] › pcc-live.screenshot.spec.ts:182:5 › DOM card summary sanitizer trims unsafe heading text
+  [chromium] › pcc-live.screenshot.spec.ts:197:5 › Screenshot capture self-skips without live env
+  [chromium] › pcc-live.surface-blocks.spec.ts:100:5 › EV tuple and fixed mapping validity
+  [chromium] › pcc-live.surface-blocks.spec.ts:185:5 › Synthetic full block assembly
+  [chromium] › pcc-live.surface-blocks.spec.ts:290:5 › Missing source handling
+  [chromium] › pcc-live.surface-blocks.spec.ts:302:5 › Writer artifact completeness
+  [chromium] › pcc-live.surface-blocks.spec.ts:323:5 › Sanitization and EV scope lockdown
+  [chromium] › pcc-live.surface-blocks.spec.ts:378:5 › Surface coverage and primitive/cross-surface completeness
+  [chromium] › pcc-live.surface-smoke.spec.ts:10:5 › PCC live surface registry is complete and selector-safe
+  [chromium] › pcc-live.surface-smoke.spec.ts:23:5 › PCC hosted runtime exposes root shell markers
+  [chromium] › pcc-live.surface-smoke.spec.ts:37:5 › PCC hosted runtime navigates all eight surfaces through safe tabs
+  [chromium] › pcc-live.surface-smoke.spec.ts:78:5 › PCC smoke evidence writer preserves sanitized output policy
+  [chromium] › pcc-live.workflow.spec.ts:16:5 › Workflow EV tuple is valid
+  [chromium] › pcc-live.workflow.spec.ts:31:5 › Workflow writer preserves sanitized output policy
+  [chromium] › pcc-live.workflow.spec.ts:224:5 › Workflow capture helpers preserve synthetic DOM boundaries
+  [chromium] › pcc-live.workflow.spec.ts:339:5 › Live workflow capture self-skips without live env
+  [chromium] › pcc-scorecard.traceability.spec.ts:21:5 › pillar model has exact IDs, required metadata, and total weight 100
+  [chromium] › pcc-scorecard.traceability.spec.ts:35:5 › hard-stop model has exact IDs and blocking/manual-review posture
+  [chromium] › pcc-scorecard.traceability.spec.ts:49:5 › pillar and hard-stop evidence maps include all keys with at least one EV
+  [chromium] › pcc-scorecard.traceability.spec.ts:65:5 › evidence-to-scorecard map includes all 80 EV IDs with known refs only
+  [chromium] › pcc-scorecard.traceability.spec.ts:82:5 › worksheets are manual-only placeholders and do not default to score or pass/fail
+  [chromium] › pcc-scorecard.traceability.spec.ts:103:5 › traceability coverage reports complete coverage for canonical registry
+  [chromium] › pcc-scorecard.traceability.spec.ts:116:5 › coverage flags unknown pillar refs in malformed records
+  [chromium] › pcc-scorecard.traceability.spec.ts:129:5 › coverage flags unknown hard-stop refs in malformed records
+  [chromium] › pcc-scorecard.traceability.spec.ts:142:5 › coverage flags unknown EV IDs in malformed records
+  [chromium] › pcc-scorecard.traceability.spec.ts:155:5 › coverage flags missing pillar coverage
+  [chromium] › pcc-scorecard.traceability.spec.ts:165:5 › coverage flags missing hard-stop coverage
+Total: 75 tests in 13 files

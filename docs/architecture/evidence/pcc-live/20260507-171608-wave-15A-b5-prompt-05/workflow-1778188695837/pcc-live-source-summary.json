@@ -1,0 +1,66 @@
+[
+  {
+    "surfaceId": "project-home",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "team-and-access",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "documents",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-readiness",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "approvals",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "external-systems",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "control-center-settings",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "site-health",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  }
+]

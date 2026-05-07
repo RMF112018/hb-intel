@@ -1,0 +1,74 @@
+[
+  {
+    "laneId": "edit-mode",
+    "status": "not-configured",
+    "configured": false,
+    "attempted": false,
+    "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+    "evRefs": [
+      "EV-57",
+      "EV-94",
+      "EV-96",
+      "EV-102"
+    ]
+  },
+  {
+    "laneId": "high-zoom",
+    "status": "operator-pending",
+    "configured": false,
+    "attempted": false,
+    "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+    "evRefs": [
+      "EV-67",
+      "EV-68"
+    ]
+  },
+  {
+    "laneId": "short-height",
+    "status": "operator-pending",
+    "configured": false,
+    "attempted": false,
+    "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+    "evRefs": [
+      "EV-67",
+      "EV-68"
+    ]
+  },
+  {
+    "laneId": "drawer-modal",
+    "status": "operator-pending",
+    "configured": false,
+    "attempted": false,
+    "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+    "evRefs": [
+      "EV-82"
+    ]
+  },
+  {
+    "laneId": "unauthorized",
+    "status": "not-configured",
+    "configured": false,
+    "attempted": false,
+    "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+    "evRefs": [
+      "EV-96",
+      "EV-102"
+    ]
+  },
+  {
+    "laneId": "special-state",
+    "status": "operator-pending",
+    "configured": false,
+    "attempted": false,
+    "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+    "evRefs": [
+      "EV-57",
+      "EV-67",
+      "EV-68",
+      "EV-82",
+      "EV-94",
+      "EV-96",
+      "EV-102"
+    ]
+  }
+]
