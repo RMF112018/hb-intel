@@ -15,8 +15,7 @@
  * detail component is rendered.
  */
 
-import { Fragment, type FC } from 'react';
-import { LifecycleReadinessRegions } from './PccProjectReadinessSurface';
+import { Fragment, type FC, type ReactNode } from 'react';
 import { PccPermitInspectionControlCenterRegions } from './PccPermitInspectionControlCenterRegions';
 import type { PccPermitInspectionControlCenterViewModel } from './permitInspectionControlCenterViewModel';
 import { PccResponsibilityMatrixRegions } from '../responsibilityMatrix/PccResponsibilityMatrixRegions';
@@ -29,12 +28,15 @@ import { PccProjectReadinessProcoreSourceConfidenceCard } from './PccProjectRead
 import type { IPccProcoreSurfaceViewModel } from '../../viewModels/procoreSurfaceAdapter';
 import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadinessUnifiedLifecycleSection';
 import type { IUseUnifiedLifecycleReadModelState } from '../unifiedLifecycle/index.js';
-import type { IPccLifecycleReadinessViewModel } from './lifecycleReadinessViewModel';
 import type { PccProjectReadinessSectionId } from './projectReadinessSectionTypes';
 
 export interface IPccProjectReadinessDetailSectionRendererProps {
   readonly selectedSection: PccProjectReadinessSectionId;
-  readonly lifecycleViewModel: IPccLifecycleReadinessViewModel;
+  // Wave 15A B5 / Prompt 04 — render-prop slot avoids the circular
+  // import that previously had the renderer reach back into the
+  // surface for `LifecycleReadinessRegions`. The surface constructs
+  // the lifecycle ReactElement and forwards it as `lifecycleSlot`.
+  readonly lifecycleSlot: ReactNode;
   readonly permitInspectionViewModel: PccPermitInspectionControlCenterViewModel;
   readonly responsibilityMatrixViewModel: IPccResponsibilityMatrixViewModel;
   readonly constraintsLogViewModel: IPccConstraintsLogViewModel;
@@ -47,7 +49,7 @@ export const PccProjectReadinessDetailSectionRenderer: FC<
   IPccProjectReadinessDetailSectionRendererProps
 > = ({
   selectedSection,
-  lifecycleViewModel,
+  lifecycleSlot,
   permitInspectionViewModel,
   responsibilityMatrixViewModel,
   constraintsLogViewModel,
@@ -59,11 +61,7 @@ export const PccProjectReadinessDetailSectionRenderer: FC<
     case 'command':
       return null;
     case 'lifecycle-readiness':
-      return (
-        <Fragment>
-          <LifecycleReadinessRegions viewModel={lifecycleViewModel} />
-        </Fragment>
-      );
+      return <Fragment>{lifecycleSlot}</Fragment>;
     case 'permits-inspections':
       return (
         <Fragment>

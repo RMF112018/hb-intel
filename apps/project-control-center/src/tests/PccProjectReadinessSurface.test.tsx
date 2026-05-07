@@ -765,7 +765,7 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 default c
     }
   });
 
-  it('default command view renders the loading hero + scaffold + module-index when every read-model client method never resolves', () => {
+  it('default command view collapses to the loading hero + module-index (compact) when every read-model client method never resolves', () => {
     const client = createPccFixtureReadModelClient();
     for (const method of ALL_FIXTURE_CLIENT_METHODS) {
       vi.spyOn(client, method).mockImplementation(NEVER_RESOLVED);
@@ -1046,4 +1046,329 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 command/d
     expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
     expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
   });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 15A B5 / Prompt 04 — compact loading/error, source-unavailable
+// preview preservation, false-affordance exact-match overlay,
+// accessibility, and selected-detail tier/region/footprint consistency.
+// ─────────────────────────────────────────────────────────────────────
+
+const PROMPT_04_FORBIDDEN_ENABLED_LABEL =
+  /^(submit|approve|upload|run|execute|sync|write\s*back|writeback|complete\s*checklist|launch|create|modify|delete|save)$/i;
+
+const ALL_DETAIL_SECTION_DRILLDOWN_IDS: readonly string[] = [
+  'lifecycle-readiness',
+  'permits-inspections',
+  'responsibility-matrix',
+  'constraints',
+  'buyout',
+  'procore-source-confidence',
+  'unified-lifecycle',
+];
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 compact loading & error', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('default command view renders exactly 2 cards (hero state + module-index) when getProjectReadiness never resolves', () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getProjectReadiness').mockImplementation(NEVER_RESOLVED);
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length, 'compact loading must render exactly 2 cards').toBe(2);
+
+    // Hero state card surfaces loading posture.
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
+    ).not.toBeNull();
+    expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();
+    // Module-index renders.
+    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
+
+    // Fixture-scaffold framework markers must NOT render in compact loading.
+    expect(container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="domains"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="blockers"]')).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-readiness-region="evidence-source-health"]'),
+    ).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="downstream-modules"]')).toBeNull();
+    // No embedded module section markers.
+    expect(
+      container.querySelector('[data-pcc-readiness-section="lifecycle-readiness-center"]'),
+    ).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-section="constraints-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-section="buyout-log"]')).toBeNull();
+    expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+    for (const card of cards) {
+      expect(card.parentElement).toBe(bento);
+    }
+  });
+
+  it('default command view renders exactly 2 cards (hero state + module-index) when getProjectReadiness rejects', async () => {
+    const client = createPccFixtureReadModelClient();
+    const spy = vi.spyOn(client, 'getProjectReadiness').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => expect(spy).toHaveBeenCalled());
+    await waitFor(() => expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull());
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length, 'compact error must render exactly 2 cards').toBe(2);
+
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
+    ).not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
+
+    // No fixture-scaffold framework markers; no embedded module markers.
+    expect(container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="domains"]')).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-readiness-section="lifecycle-readiness-center"]'),
+    ).toBeNull();
+    for (const card of cards) {
+      expect(card.parentElement).toBe(bento);
+    }
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 source-unavailable preview preservation', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('default command view preserves the safe 9-card preview layout when getProjectReadiness resolves with a source-unavailable envelope', async () => {
+    const client = createPccFixtureReadModelClient();
+    const original = client.getProjectReadiness.bind(client);
+    vi.spyOn(client, 'getProjectReadiness').mockImplementation(async (projectId) => {
+      const envelope = await original(projectId);
+      return { ...envelope, sourceStatus: 'source-unavailable' };
+    });
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
+      ).not.toBeNull(),
+    );
+    // Source-unavailable adapter output is `preview` status, not `loading` or `error`.
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]'),
+      ).not.toBeNull(),
+    );
+
+    // Seven framework markers all render.
+    for (const region of [
+      'hero',
+      'lifecycle-gates',
+      'domains',
+      'blockers',
+      'evidence-source-health',
+      'downstream-modules',
+      'ownership-accountability',
+      'priority-actions-preview',
+    ]) {
+      expect(
+        container.querySelector(`[data-pcc-readiness-region="${region}"]`),
+        `framework region "${region}" must render in source-unavailable preview`,
+      ).not.toBeNull();
+    }
+
+    // No embedded module section markers leak in.
+    for (const sectionMarker of [
+      'lifecycle-readiness-center',
+      'permit-inspection-control-center',
+      'responsibility-matrix',
+      'constraints-log',
+      'buyout-log',
+    ]) {
+      expect(
+        container.querySelector(`[data-pcc-readiness-section="${sectionMarker}"]`),
+        `embedded section "${sectionMarker}" must remain absent in default command view`,
+      ).toBeNull();
+    }
+    expect(
+      container.querySelector('[data-pcc-readiness-region="procore-source-confidence"]'),
+    ).toBeNull();
+
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length, 'source-unavailable preview retains the 9-card command layout').toBe(9);
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 false-affordance exact-match overlay', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('no enabled button anywhere in the active surface bento has an exact-match executable-verb label', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const enabledButtons = Array.from(bento.querySelectorAll<HTMLButtonElement>('button')).filter(
+      (b) => !b.disabled && b.getAttribute('aria-disabled') !== 'true',
+    );
+    for (const button of enabledButtons) {
+      const trimmed = (button.textContent ?? '').trim();
+      expect(
+        PROMPT_04_FORBIDDEN_ENABLED_LABEL.test(trimmed),
+        `enabled button text "${trimmed}" must not match the exact-match forbidden-verb regex`,
+      ).toBe(false);
+    }
+  });
+
+  it('every enabled button in the active surface bento is a drilldown control; non-drilldown buttons are disabled or aria-disabled="true"', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const allButtons = Array.from(bento.querySelectorAll<HTMLButtonElement>('button'));
+    for (const button of allButtons) {
+      const isEnabled = !button.disabled && button.getAttribute('aria-disabled') !== 'true';
+      const isDrilldown = button.hasAttribute('data-pcc-readiness-drilldown-control');
+      if (isEnabled) {
+        expect(
+          isDrilldown,
+          `enabled button "${(button.textContent ?? '').trim()}" must carry data-pcc-readiness-drilldown-control`,
+        ).toBe(true);
+      } else if (!isDrilldown) {
+        expect(
+          button.disabled || button.getAttribute('aria-disabled') === 'true',
+          `non-drilldown button "${(button.textContent ?? '').trim()}" must be disabled or aria-disabled`,
+        ).toBe(true);
+      }
+    }
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 drilldown accessibility lock', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('every drilldown control is a button[type="button"] with a non-empty accessible name; exactly one is aria-pressed=true and carries data-pcc-readiness-drilldown-state="selected"', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    const drilldowns = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-pcc-readiness-drilldown-control]'),
+    );
+    expect(drilldowns).toHaveLength(8);
+
+    for (const button of drilldowns) {
+      expect(button.tagName).toBe('BUTTON');
+      expect(button.getAttribute('type')).toBe('button');
+      const accessibleName = (
+        (button.textContent ?? '') +
+        ' ' +
+        (button.getAttribute('aria-label') ?? '')
+      ).trim();
+      expect(
+        accessibleName.length,
+        `drilldown control "${button.getAttribute('data-pcc-readiness-drilldown-control')}" must have a non-empty accessible name`,
+      ).toBeGreaterThan(0);
+    }
+
+    const pressed = drilldowns.filter((b) => b.getAttribute('aria-pressed') === 'true');
+    expect(pressed, 'exactly one drilldown must be aria-pressed="true"').toHaveLength(1);
+    const selectedMarker = drilldowns.filter(
+      (b) => b.getAttribute('data-pcc-readiness-drilldown-state') === 'selected',
+    );
+    expect(
+      selectedMarker,
+      'exactly one drilldown must carry data-pcc-readiness-drilldown-state="selected"',
+    ).toHaveLength(1);
+    expect(pressed[0]).toBe(selectedMarker[0]);
+    expect(pressed[0].getAttribute('data-pcc-readiness-drilldown-control')).toBe('command');
+  });
+
+  it('clicking each detail drilldown produces exclusive aria-pressed="true" and selected-state markers on that control', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    for (const drilldownId of ALL_DETAIL_SECTION_DRILLDOWN_IDS) {
+      const target = container.querySelector(
+        `[data-pcc-readiness-drilldown-control="${drilldownId}"]`,
+      ) as HTMLButtonElement;
+      fireEvent.click(target);
+      const drilldowns = Array.from(
+        container.querySelectorAll<HTMLButtonElement>('[data-pcc-readiness-drilldown-control]'),
+      );
+      const pressed = drilldowns.filter((b) => b.getAttribute('aria-pressed') === 'true');
+      expect(
+        pressed,
+        `selecting "${drilldownId}" must produce exactly one aria-pressed`,
+      ).toHaveLength(1);
+      expect(pressed[0].getAttribute('data-pcc-readiness-drilldown-control')).toBe(drilldownId);
+      expect(pressed[0].getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
+    }
+  });
+});
+
+describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 selected-detail tier/region/footprint consistency', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it.each(ALL_DETAIL_SECTION_DRILLDOWN_IDS)(
+    'every card rendered after selecting "%s" carries explicit tier-source, region-source, and a non-empty footprint',
+    async (drilldownId) => {
+      const { container } = render(
+        <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+      );
+      activateProjectReadiness(container);
+      const drilldown = container.querySelector(
+        `[data-pcc-readiness-drilldown-control="${drilldownId}"]`,
+      ) as HTMLButtonElement;
+      fireEvent.click(drilldown);
+
+      // Wait for the section's first card to render. For unified-lifecycle
+      // the body marker resolves on the next hook microtask; for fixture-
+      // backed sections the markers render synchronously.
+      await waitFor(() => {
+        const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+        // Detail mode = hero + module-index + at least one detail card.
+        expect(bento.querySelectorAll('[data-pcc-card]').length).toBeGreaterThanOrEqual(3);
+      });
+
+      const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+      const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+      for (const card of cards) {
+        const cardId = card.getAttribute('data-pcc-card-id') ?? '<unidentified>';
+        expect(
+          card.getAttribute('data-pcc-card-tier-source'),
+          `card "${cardId}" in section "${drilldownId}" must have explicit tier source`,
+        ).toBe('explicit');
+        expect(
+          card.getAttribute('data-pcc-card-region-source'),
+          `card "${cardId}" in section "${drilldownId}" must have explicit region source`,
+        ).toBe('explicit');
+        const footprint = card.getAttribute('data-pcc-footprint');
+        expect(
+          footprint && footprint.length > 0,
+          `card "${cardId}" in section "${drilldownId}" must have non-empty footprint`,
+        ).toBe(true);
+        // Direct-child invariant under detail mode.
+        expect(card.parentElement).toBe(bento);
+      }
+    },
+  );
 });

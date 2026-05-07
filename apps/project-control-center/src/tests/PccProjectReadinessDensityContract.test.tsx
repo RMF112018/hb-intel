@@ -263,3 +263,48 @@ describe('PccProjectReadinessSurface — density contract (Wave 15A B5 / Prompt 
     assertDensityInvariants(container);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 15A B5 / Prompt 04 — compact loading/error density
+//
+// After Prompt 04, ReadinessNativeCommandCards returns null in
+// loading/error so the default command view collapses to exactly two
+// cards (hero state + module-index). FixtureScaffoldRegions was deleted
+// in the same change; these tests pin the new behavior.
+// ─────────────────────────────────────────────────────────────────────
+
+describe('PccProjectReadinessSurface — density contract (Wave 15A B5 / Prompt 04 compact loading/error)', () => {
+  it('default command view renders exactly 2 cards (hero state + module-index) when getProjectReadiness never resolves', () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getProjectReadiness').mockImplementation(
+      (): Promise<never> => new Promise<never>(() => undefined),
+    );
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length, 'compact loading must render exactly 2 cards').toBe(2);
+    expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();
+    assertDensityInvariants(container);
+  });
+
+  it('default command view renders exactly 2 cards (hero state + module-index) when getProjectReadiness rejects', async () => {
+    const client = createPccFixtureReadModelClient();
+    vi.spyOn(client, 'getProjectReadiness').mockRejectedValue(new Error('boom'));
+
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull());
+    const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+    const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+    expect(cards.length, 'compact error must render exactly 2 cards').toBe(2);
+    assertDensityInvariants(container);
+  });
+});

@@ -262,7 +262,7 @@ const FixtureContent: FC = () => {
       {inCommandMode ? null : (
         <PccProjectReadinessDetailSectionRenderer
           selectedSection={selectedSectionId}
-          lifecycleViewModel={FIXTURE_LIFECYCLE_VIEW_MODEL}
+          lifecycleSlot={<LifecycleReadinessRegions viewModel={FIXTURE_LIFECYCLE_VIEW_MODEL} />}
           permitInspectionViewModel={FIXTURE_PERMIT_INSPECTION_VIEW_MODEL}
           responsibilityMatrixViewModel={FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL}
           constraintsLogViewModel={FIXTURE_CONSTRAINTS_LOG_VIEW_MODEL}
@@ -339,7 +339,7 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
       {inCommandMode ? null : (
         <PccProjectReadinessDetailSectionRenderer
           selectedSection={selectedSectionId}
-          lifecycleViewModel={lifecycleViewModel}
+          lifecycleSlot={<LifecycleReadinessRegions viewModel={lifecycleViewModel} />}
           permitInspectionViewModel={permitInspectionViewModel}
           responsibilityMatrixViewModel={responsibilityMatrixViewModel}
           constraintsLogViewModel={constraintsLogViewModel}
@@ -484,32 +484,18 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
 };
 
 // Wave 15A B5 / Prompt 02 — the seven non-hero command-critical
-// readiness cards. In loading / error states the fixture scaffold
-// stands in. Rendered only in command mode; detail mode omits this
-// component and renders the selected detail group instead.
+// readiness cards. Rendered only in command mode; detail mode omits
+// this component and renders the selected detail group instead.
+//
+// Wave 15A B5 / Prompt 04 — loading and error branches return null so
+// the default render collapses to hero (state) + module-index = 2
+// cards. Source-unavailable / stale / etc. envelopes still resolve to
+// the `preview` status from the adapter and continue to render the
+// safe seven-card framework layout.
 const ReadinessNativeCommandCards: FC<ReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status === 'loading' || viewModel.status === 'error') {
-    return <FixtureScaffoldRegions viewModel={FIXTURE_VIEW_MODEL} />;
+    return null;
   }
-  return (
-    <Fragment>
-      <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
-      <BlockersCard blockers={viewModel.blockers} />
-      <DomainGridCard domains={viewModel.domains} />
-      <OwnershipAccountabilityCard ownership={viewModel.ownershipAccountability} />
-      <PriorityActionsPreviewCard preview={viewModel.priorityActionsPreview} />
-      <EvidenceSourceHealthCard evidence={viewModel.evidence} />
-      <DownstreamModulesCard modules={viewModel.downstreamModules} />
-    </Fragment>
-  );
-};
-
-// While loading or in error, still render the non-hero regions from the
-// fixture snapshot so the bento grid stays populated and tests can locate
-// the structural region markers. The blocker card precedes the domain
-// grid to mirror the ready-path first-impression hierarchy.
-const FixtureScaffoldRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
-  if (viewModel.status !== 'preview') return null;
   return (
     <Fragment>
       <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
@@ -1044,7 +1030,7 @@ interface LifecycleReadinessRegionsProps {
   readonly viewModel: IPccLifecycleReadinessViewModel;
 }
 
-export const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewModel }) => {
+const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status === 'loading') {
     return (
       <PccDashboardCard
