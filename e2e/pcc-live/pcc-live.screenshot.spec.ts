@@ -104,10 +104,10 @@ test('Screenshot writer preserves sanitized output policy', async () => {
         runState: 'writer-test-only',
         evRefs: PCC_SCREENSHOT_INITIAL_EVIDENCE_IDS,
         surfaces,
+        warnings: [
+          'global warning qa.user@hedrickbrothers.com token ABCDEFGHIJKLMNOPQRSTUVWXYZ123456 session cookie storageState https://tenant/page?x=1',
+        ],
       },
-      warnings: [
-        'global warning qa.user@hedrickbrothers.com token ABCDEFGHIJKLMNOPQRSTUVWXYZ123456',
-      ],
       artifactPaths: [
         curated,
         'test-results/raw-output.json',
@@ -122,12 +122,19 @@ test('Screenshot writer preserves sanitized output policy', async () => {
 
     const jsonText = fs.readFileSync(result.evidenceJsonPath, 'utf-8');
     const markdownText = fs.readFileSync(result.evidenceMarkdownPath, 'utf-8');
+    const inventoryText = fs.readFileSync(result.inventoryJsonPath, 'utf-8');
+    const domSummaryText = fs.readFileSync(result.domSummaryJsonPath, 'utf-8');
 
     expect(fs.existsSync(result.inventoryJsonPath)).toBe(true);
     expect(fs.existsSync(result.domSummaryJsonPath)).toBe(true);
 
     expect(jsonText).toContain(curated);
     expect(markdownText).toContain(curated);
+    expect(jsonText).toContain('[redacted-email]');
+    expect(jsonText).toContain('[redacted-cred]');
+    expect(jsonText).toContain('[redacted-blob]');
+    expect(markdownText).toContain('[redacted-email]');
+    expect(markdownText).toContain('[redacted-cred]');
 
     const forbidden = [
       'qa.user@hedrickbrothers.com',
@@ -148,19 +155,22 @@ test('Screenshot writer preserves sanitized output policy', async () => {
     for (const bad of forbidden) {
       expect(jsonText).not.toContain(bad);
       expect(markdownText).not.toContain(bad);
+      expect(inventoryText).not.toContain(bad);
+      expect(domSummaryText).not.toContain(bad);
     }
 
-    expect(jsonText).toContain('[redacted-email]');
-    expect(jsonText).toContain('[redacted-cred]');
-    expect(jsonText).toContain('[redacted-blob]');
     expect(markdownText).toContain('operator-review required');
 
-    const inventory = JSON.parse(fs.readFileSync(result.inventoryJsonPath, 'utf-8')) as Array<{
+    const inventory = JSON.parse(inventoryText) as Array<{
       operatorReviewRequired: boolean;
+      path: string;
     }>;
     expect(inventory.length).toBeGreaterThan(0);
     for (const shot of inventory) {
       expect(shot.operatorReviewRequired).toBe(true);
+      expect(shot.path).not.toContain('test-results');
+      expect(shot.path).not.toContain('playwright-report');
+      expect(shot.path).not.toContain('.auth');
     }
 
     expect(jsonText).not.toContain('"captured"');
