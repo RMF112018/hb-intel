@@ -65,6 +65,25 @@ function getSoleActivePanel(container: HTMLElement, surfaceId: string): Element 
   return panel;
 }
 
+// Wave 15A wave-b3 Prompt 05 — accessibility helpers. PccPreviewState
+// already emits aria-busy="true" on loading and role="alert" on error;
+// these helpers lock that contract for the active-panel card.
+function expectLoadingA11y(card: Element, surfaceId: string): void {
+  const busy = card.querySelector('[aria-busy="true"]');
+  expect(
+    busy,
+    `surface '${surfaceId}' loading branch must expose aria-busy="true" inside the active-panel card`,
+  ).not.toBeNull();
+}
+
+function expectErrorA11y(card: Element, surfaceId: string): void {
+  const alert = card.querySelector('[role="alert"]');
+  expect(
+    alert,
+    `surface '${surfaceId}' error branch must expose role="alert" inside the active-panel card`,
+  ).not.toBeNull();
+}
+
 describe('PCC route command card — ready (tier1 / command, explicit, h2)', () => {
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
     it(`'${surfaceId}' route renders one tier1 / command active-panel card`, () => {
@@ -91,6 +110,7 @@ describe('PCC route command card — loading branches (state / state, explicit, 
     );
     const card = getSoleActivePanel(container, 'approvals');
     expectCommandCardPosture(card, 'approvals', { tier: 'state', region: 'state' });
+    expectLoadingA11y(card, 'approvals');
   });
 
   it('external-systems loading branch carries state / state with explicit sources', () => {
@@ -104,6 +124,7 @@ describe('PCC route command card — loading branches (state / state, explicit, 
     );
     const card = getSoleActivePanel(container, 'external-systems');
     expectCommandCardPosture(card, 'external-systems', { tier: 'state', region: 'state' });
+    expectLoadingA11y(card, 'external-systems');
   });
 
   it('project-readiness loading branch carries state / state with explicit sources', () => {
@@ -133,6 +154,7 @@ describe('PCC route command card — loading branches (state / state, explicit, 
     );
     const card = getSoleActivePanel(container, 'project-readiness');
     expectCommandCardPosture(card, 'project-readiness', { tier: 'state', region: 'state' });
+    expectLoadingA11y(card, 'project-readiness');
   });
 });
 
@@ -149,6 +171,7 @@ describe('PCC route command card — error branches (state / state, explicit, h2
     await waitFor(() => {
       const card = getSoleActivePanel(container, 'approvals');
       expectCommandCardPosture(card, 'approvals', { tier: 'state', region: 'state' });
+      expectErrorA11y(card, 'approvals');
     });
   });
 
@@ -164,6 +187,7 @@ describe('PCC route command card — error branches (state / state, explicit, h2
     await waitFor(() => {
       const card = getSoleActivePanel(container, 'external-systems');
       expectCommandCardPosture(card, 'external-systems', { tier: 'state', region: 'state' });
+      expectErrorA11y(card, 'external-systems');
     });
   });
 
@@ -189,6 +213,7 @@ describe('PCC route command card — error branches (state / state, explicit, h2
     await waitFor(() => {
       const card = getSoleActivePanel(container, 'project-readiness');
       expectCommandCardPosture(card, 'project-readiness', { tier: 'state', region: 'state' });
+      expectErrorA11y(card, 'project-readiness');
     });
   });
 });

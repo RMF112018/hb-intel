@@ -23,8 +23,8 @@
  * test already locks the project-readiness route command and state cards.
  */
 
-import { describe, it, expect } from 'vitest';
-import { fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, it, expect } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
@@ -33,6 +33,13 @@ import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
+
+// Wave 15A wave-b3 Prompt 05 — explicit cleanup between cases keeps each
+// surface render isolated. PCC SPFx workspace runs vitest with
+// `globals: false`, so DOM does not auto-clear between `it()` blocks.
+afterEach(() => {
+  cleanup();
+});
 
 const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
   'project-home',
@@ -57,24 +64,35 @@ function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
   return container;
 }
 
-function activePanelCards(container: HTMLElement, surfaceId: PccMvpSurfaceId): readonly Element[] {
-  // Scope to the surface panel container so we don't pick up other surfaces' cards
-  // (the shell may keep prior surface DOM mounted in some test harnesses).
+function getActiveBento(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
+  // The active-panel card is a direct child of the bento grid; its
+  // parentElement IS the [data-pcc-bento-grid] node. Asserting the marker
+  // on that node prevents future regressions where the active panel card
+  // gets wrapped in an extra container.
   const surfacePanel = container.querySelector(`[data-pcc-active-surface-panel="${surfaceId}"]`);
   expect(surfacePanel, `surface '${surfaceId}' must mount its active-panel carrier`).not.toBeNull();
-  // Every card in the rendered tree of this surface — including the active-panel
-  // carrier itself — must be reachable from the same render. The active-panel
-  // carrier is the route command card. Sibling cards may live at the bento-grid
-  // level alongside it, so we walk up to the bento grid and select all cards.
-  const bento = surfacePanel!.parentElement;
-  expect(bento, `bento parent for '${surfaceId}' must exist`).not.toBeNull();
-  return Array.from(bento!.querySelectorAll('[data-pcc-card]'));
+  const parent = surfacePanel!.parentElement;
+  expect(parent, `bento parent for '${surfaceId}' must exist`).not.toBeNull();
+  expect(
+    (parent as HTMLElement).hasAttribute('data-pcc-bento-grid'),
+    `surface '${surfaceId}' active-panel parent must be [data-pcc-bento-grid]`,
+  ).toBe(true);
+  return parent as HTMLElement;
+}
+
+function activePanelCards(container: HTMLElement, surfaceId: PccMvpSurfaceId): readonly Element[] {
+  const bento = getActiveBento(container, surfaceId);
+  return Array.from(bento.querySelectorAll('[data-pcc-card]'));
+}
+
+function cardTitle(card: Element): string {
+  return card.querySelector('h2, h3, h4')?.textContent?.trim() ?? '(untitled)';
 }
 
 function expectAllCardsExplicit(cards: readonly Element[], surfaceId: PccMvpSurfaceId): void {
   expect(cards.length, `surface '${surfaceId}' must render at least one card`).toBeGreaterThan(0);
   for (const card of cards) {
-    const title = card.querySelector('h2, h3, h4')?.textContent ?? '(untitled)';
+    const title = cardTitle(card);
     expect(
       card.getAttribute('data-pcc-card-tier-source'),
       `surface '${surfaceId}' card '${title}' tier-source must be explicit`,
@@ -83,6 +101,93 @@ function expectAllCardsExplicit(cards: readonly Element[], surfaceId: PccMvpSurf
       card.getAttribute('data-pcc-card-region-source'),
       `surface '${surfaceId}' card '${title}' region-source must be explicit`,
     ).toBe('explicit');
+    // Negative form of the same constraint — locks the absence of fallback
+    // resolution explicitly so a regression to default/resolved fails on a
+    // different assertion line and is easier to attribute.
+    expect(
+      card.getAttribute('data-pcc-card-tier-source'),
+      `surface '${surfaceId}' card '${title}' tier-source must not be 'default'`,
+    ).not.toBe('default');
+    expect(
+      card.getAttribute('data-pcc-card-region-source'),
+      `surface '${surfaceId}' card '${title}' region-source must not be 'resolved'`,
+    ).not.toBe('resolved');
+  }
+}
+
+function expectAllCardsHaveLayoutMarkers(
+  cards: readonly Element[],
+  surfaceId: PccMvpSurfaceId,
+): void {
+  for (const card of cards) {
+    const title = cardTitle(card);
+    const footprint = card.getAttribute('data-pcc-footprint');
+    expect(
+      footprint,
+      `surface '${surfaceId}' card '${title}' missing data-pcc-footprint`,
+    ).toBeTruthy();
+    expect(
+      (footprint ?? '').length,
+      `surface '${surfaceId}' card '${title}' has empty data-pcc-footprint`,
+    ).toBeGreaterThan(0);
+
+    const columnSpanRaw = card.getAttribute('data-pcc-column-span');
+    expect(
+      columnSpanRaw,
+      `surface '${surfaceId}' card '${title}' missing data-pcc-column-span`,
+    ).toBeTruthy();
+    const columnSpan = Number(columnSpanRaw);
+    expect(
+      Number.isFinite(columnSpan) && columnSpan > 0,
+      `surface '${surfaceId}' card '${title}' data-pcc-column-span must be numeric > 0 (got '${columnSpanRaw}')`,
+    ).toBe(true);
+
+    const rowSpanRaw = card.getAttribute('data-pcc-row-span');
+    expect(
+      rowSpanRaw,
+      `surface '${surfaceId}' card '${title}' missing data-pcc-row-span`,
+    ).toBeTruthy();
+    const rowSpan = Number(rowSpanRaw);
+    expect(
+      Number.isFinite(rowSpan) && rowSpan > 0,
+      `surface '${surfaceId}' card '${title}' data-pcc-row-span must be numeric > 0 (got '${rowSpanRaw}')`,
+    ).toBe(true);
+  }
+}
+
+function expectTitledCardsHaveAriaLabelledBy(
+  cards: readonly Element[],
+  surfaceId: PccMvpSurfaceId,
+): void {
+  for (const card of cards) {
+    const heading = card.querySelector('h2, h3, h4');
+    if (!heading) continue;
+    const headingText = heading.textContent?.trim();
+    if (!headingText) continue;
+    const headingId = heading.getAttribute('id');
+    expect(
+      headingId,
+      `surface '${surfaceId}' card '${headingText}' heading must have an id for aria-labelledby`,
+    ).toBeTruthy();
+    const ariaLabelledBy = card.getAttribute('aria-labelledby');
+    expect(
+      ariaLabelledBy,
+      `surface '${surfaceId}' card '${headingText}' must have aria-labelledby pointing at heading id`,
+    ).toBe(headingId);
+  }
+}
+
+function expectCardsAreDirectChildrenOfBento(
+  bento: HTMLElement,
+  cards: readonly Element[],
+  surfaceId: PccMvpSurfaceId,
+): void {
+  for (const card of cards) {
+    const title = cardTitle(card);
+    expect(
+      card.parentElement,
+      `surface '${surfaceId}' card '${title}' must be a direct child of [data-pcc-bento-grid]`,
+    ).toBe(bento);
   }
 }
 
@@ -103,12 +208,92 @@ function findCardByHeading(container: HTMLElement, headingText: string): Element
   return card!;
 }
 
-describe('PCC card-tier contract — every in-scope surface card has explicit sources', () => {
+describe('PCC card-tier contract — every in-scope surface card has explicit sources, layout markers, aria-labelledby, and is a direct bento child', () => {
   for (const surfaceId of IN_SCOPE_SURFACES) {
-    it(`'${surfaceId}' surface — every card has explicit tier/region source`, () => {
+    it(`'${surfaceId}' surface — explicit sources, layout markers, aria-labelledby, direct bento children`, () => {
       const container = renderPccAppOnSurface(surfaceId);
-      const cards = activePanelCards(container, surfaceId);
+      const bento = getActiveBento(container, surfaceId);
+      const cards = Array.from(bento.querySelectorAll('[data-pcc-card]'));
+      expect(cards.length, `surface '${surfaceId}' must render at least one card`).toBeGreaterThan(
+        0,
+      );
       expectAllCardsExplicit(cards, surfaceId);
+      expectAllCardsHaveLayoutMarkers(cards, surfaceId);
+      expectTitledCardsHaveAriaLabelledBy(cards, surfaceId);
+      expectCardsAreDirectChildrenOfBento(bento, cards, surfaceId);
+    });
+  }
+});
+
+describe('PCC card-tier contract — active command card heading-level is "2" on every surface', () => {
+  for (const surfaceId of IN_SCOPE_SURFACES) {
+    it(`'${surfaceId}' active-panel card emits data-pcc-heading-level="2"`, () => {
+      const container = renderPccAppOnSurface(surfaceId);
+      const surfacePanel = container.querySelector(
+        `[data-pcc-active-surface-panel="${surfaceId}"]`,
+      );
+      expect(surfacePanel, `surface '${surfaceId}' must mount its active panel`).not.toBeNull();
+      expect(
+        surfacePanel!.getAttribute('data-pcc-heading-level'),
+        `surface '${surfaceId}' active-panel card must declare heading level 2`,
+      ).toBe('2');
+    });
+  }
+});
+
+describe('PCC card-tier contract — no live http(s) anchors inside the bento grid on any surface', () => {
+  for (const surfaceId of IN_SCOPE_SURFACES) {
+    it(`'${surfaceId}' surface bento grid contains zero <a href^="http(s)"> anchors`, () => {
+      const container = renderPccAppOnSurface(surfaceId);
+      const bento = getActiveBento(container, surfaceId);
+      // Scope to the bento grid; shell-level links (help, feedback, etc.)
+      // live outside the grid and are intentionally not in scope here.
+      const anchors = bento.querySelectorAll('a[href^="http"]');
+      expect(
+        anchors.length,
+        `surface '${surfaceId}' bento grid must not render live http(s) anchors`,
+      ).toBe(0);
+    });
+  }
+});
+
+describe('PCC card-tier contract — disabled-affordance reason linkage is intact on every surface', () => {
+  for (const surfaceId of IN_SCOPE_SURFACES) {
+    it(`'${surfaceId}' disabled affordances resolve aria-describedby to a reason node`, () => {
+      const container = renderPccAppOnSurface(surfaceId);
+      const bento = getActiveBento(container, surfaceId);
+      const affordances = bento.querySelectorAll('[data-pcc-disabled-affordance-variant]');
+      // Surfaces without disabled affordances pass trivially. The point of
+      // this loop is to lock the linkage WHEN affordances are present, not
+      // to require their presence on every surface.
+      for (const affordance of Array.from(affordances)) {
+        const describedBy = affordance.getAttribute('aria-describedby');
+        expect(
+          describedBy,
+          `surface '${surfaceId}' disabled affordance must declare aria-describedby`,
+        ).toBeTruthy();
+        const ids = (describedBy ?? '').split(/\s+/).filter((id) => id.length > 0);
+        expect(
+          ids.length,
+          `surface '${surfaceId}' disabled affordance aria-describedby must list at least one id`,
+        ).toBeGreaterThan(0);
+        const linkedNodes = ids
+          .map((id) => container.ownerDocument.getElementById(id))
+          .filter((node): node is HTMLElement => node !== null);
+        expect(
+          linkedNodes.length,
+          `surface '${surfaceId}' disabled affordance describedby ids must resolve to live nodes`,
+        ).toBeGreaterThan(0);
+        const hasReason = linkedNodes.some(
+          (node) =>
+            node.hasAttribute('data-pcc-disabled-affordance-reason') ||
+            (node.textContent ?? '').trim().length > 0,
+        );
+        expect(
+          hasReason,
+          `surface '${surfaceId}' disabled affordance must link to a [data-pcc-disabled-affordance-reason] node or a non-empty reason`,
+        ).toBe(true);
+      }
     });
   }
 });
@@ -242,6 +427,13 @@ describe('PCC card-tier contract — locked state cards', () => {
     const card = findCardByHeading(container, 'Items needing setup');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('state');
     expect(card.getAttribute('data-pcc-card-region')).toBe('state');
+  });
+
+  it('Site Health "Repair Requests" card is tier3 / deferred', () => {
+    const container = renderPccAppOnSurface('site-health');
+    const card = findCardByHeading(container, 'Repair Requests');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
   });
 });
 
