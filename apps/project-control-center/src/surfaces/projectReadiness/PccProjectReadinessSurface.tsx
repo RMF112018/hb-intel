@@ -70,6 +70,15 @@ import type {
 } from '../buyoutLog/buyoutLogViewModel';
 import { PccProjectReadinessProcoreSourceConfidenceCard } from './PccProjectReadinessProcoreSourceConfidenceCard';
 import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadinessUnifiedLifecycleSection';
+import {
+  useUnifiedLifecycleReadModel,
+  type IPccUnifiedLifecycleReadModelClient,
+} from '../unifiedLifecycle/index.js';
+import { PccProjectReadinessModuleIndexCard } from './PccProjectReadinessModuleIndexCard';
+import {
+  PCC_PROJECT_READINESS_DEFAULT_SECTION,
+  type PccProjectReadinessSectionId,
+} from './projectReadinessSectionTypes';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccDisabledAffordance } from '../../ui/PccDisabledAffordance';
 import { PccPreviewState } from '../../ui/PccPreviewState';
@@ -120,7 +129,8 @@ interface PccProjectReadinessSurfaceProps {
     IPccResponsibilityMatrixReadModelClient &
     IPccConstraintsLogReadModelClient &
     IPccBuyoutLogReadModelClient &
-    IPccProcoreSurfaceClient;
+    IPccProcoreSurfaceClient &
+    IPccUnifiedLifecycleReadModelClient;
 }
 
 const FIXTURE_ENVELOPE: PccReadModelEnvelope<PccProjectReadinessFrameworkReadModel> = {
@@ -213,16 +223,19 @@ export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = (
   if (readModelClient) {
     return <ReadModelContent client={readModelClient} />;
   }
+  return <FixtureContent />;
+};
+
+const FixtureContent: FC = () => {
+  const [selectedSectionId, setSelectedSectionId] = useState<PccProjectReadinessSectionId>(
+    PCC_PROJECT_READINESS_DEFAULT_SECTION,
+  );
   return (
     <Fragment>
       <ReadinessRegions viewModel={FIXTURE_VIEW_MODEL} />
-      <LifecycleReadinessRegions viewModel={FIXTURE_LIFECYCLE_VIEW_MODEL} />
-      <PccPermitInspectionControlCenterRegions viewModel={FIXTURE_PERMIT_INSPECTION_VIEW_MODEL} />
-      <PccResponsibilityMatrixRegions viewModel={FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL} />
-      <PccConstraintsLogRegions viewModel={FIXTURE_CONSTRAINTS_LOG_VIEW_MODEL} />
-      <PccBuyoutLogRegions viewModel={FIXTURE_BUYOUT_LOG_VIEW_MODEL} />
-      <PccProjectReadinessProcoreSourceConfidenceCard
-        viewModel={FIXTURE_PROCORE_SURFACE_VIEW_MODEL}
+      <PccProjectReadinessModuleIndexCard
+        selectedSectionId={selectedSectionId}
+        onSelect={setSelectedSectionId}
       />
     </Fragment>
   );
@@ -240,41 +253,37 @@ interface ReadModelContentProps {
     IPccResponsibilityMatrixReadModelClient &
     IPccConstraintsLogReadModelClient &
     IPccBuyoutLogReadModelClient &
-    IPccProcoreSurfaceClient;
+    IPccProcoreSurfaceClient &
+    IPccUnifiedLifecycleReadModelClient;
 }
 
 const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
+  // Wave 15A B5 / Prompt 01 — read-model hook acquisition is unconditional
+  // and non-gating. All eight hooks (six readiness/embedded-module hooks +
+  // Procore + Unified Lifecycle) are called every render regardless of
+  // `selectedSectionId`. Default `'command'` view does not render the
+  // detail-section components, but their data continues to load so the
+  // Prompt 02 detail renderer can swap content in without an extra fetch
+  // round-trip and so Wave decision #8 (unconditional read-model hooks)
+  // is preserved during the command-first transition.
   const viewModel = useProjectReadinessReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  const lifecycleViewModel = useLifecycleReadinessReadModel(
-    client,
-    SAMPLE_PROJECT_PROFILE.projectId,
+  void useLifecycleReadinessReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  void usePermitInspectionControlCenterReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  void useResponsibilityMatrixReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  void useConstraintsLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  void useBuyoutLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  void useProcoreSurfaceReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  void useUnifiedLifecycleReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+
+  const [selectedSectionId, setSelectedSectionId] = useState<PccProjectReadinessSectionId>(
+    PCC_PROJECT_READINESS_DEFAULT_SECTION,
   );
-  const permitInspectionViewModel = usePermitInspectionControlCenterReadModel(
-    client,
-    SAMPLE_PROJECT_PROFILE.projectId,
-  );
-  const responsibilityMatrixViewModel = useResponsibilityMatrixReadModel(
-    client,
-    SAMPLE_PROJECT_PROFILE.projectId,
-  );
-  const constraintsLogViewModel = useConstraintsLogReadModel(
-    client,
-    SAMPLE_PROJECT_PROFILE.projectId,
-  );
-  const buyoutLogViewModel = useBuyoutLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  const procoreViewModel = useProcoreSurfaceReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
   return (
     <Fragment>
       <ReadinessRegions viewModel={viewModel} />
-      <LifecycleReadinessRegions viewModel={lifecycleViewModel} />
-      <PccPermitInspectionControlCenterRegions viewModel={permitInspectionViewModel} />
-      <PccResponsibilityMatrixRegions viewModel={responsibilityMatrixViewModel} />
-      <PccConstraintsLogRegions viewModel={constraintsLogViewModel} />
-      <PccBuyoutLogRegions viewModel={buyoutLogViewModel} />
-      <PccProjectReadinessProcoreSourceConfidenceCard viewModel={procoreViewModel} />
-      <PccProjectReadinessUnifiedLifecycleSection
-        client={client}
-        projectId={SAMPLE_PROJECT_PROFILE.projectId}
+      <PccProjectReadinessModuleIndexCard
+        selectedSectionId={selectedSectionId}
+        onSelect={setSelectedSectionId}
       />
     </Fragment>
   );

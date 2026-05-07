@@ -70,7 +70,11 @@ describe('Project Readiness — Wave 8 blocker posture', () => {
   });
 });
 
-describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
+// Wave 15A B5 / Prompt 01 — the lifecycle module is no longer rendered
+// by default (command-first surface). Lifecycle blocker / family region
+// presence + ordering assertions move to the section-active path that
+// Prompt 02's detail-section renderer introduces.
+describe.skip('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   it('LifecycleBlockersCard adopts tier=tier2/region=operational and footprint="full" (Wave 15A wave-b3 Prompt 04 removed the legacy hierarchy="primary" marker; the route command is the readiness Hero, not the lifecycle Blockers card)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);

@@ -495,3 +495,75 @@
   border: 1px solid var(--pcc-color-border);
   border-radius: var(--pcc-radius-sm);
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Wave 15A B5 / Prompt 01 — Project Readiness module-index card
+ * ──────────────────────────────────────────────────────────────────── */
+
+.moduleIndexBody {
+  display: grid;
+  gap: 10px;
+}
+
+.moduleIndexCaption {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  margin: 0;
+}
+
+.moduleIndexList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.moduleIndexItem {
+  display: flex;
+}
+
+.moduleIndexButton {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--pcc-color-border);
+  border-left: 3px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-sm);
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-color-text-primary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.moduleIndexButton:disabled,
+.moduleIndexButton[aria-disabled='true'] {
+  cursor: not-allowed;
+  color: var(--pcc-color-text-muted);
+}
+
+.moduleIndexButtonSelected {
+  border-color: var(--pcc-color-border);
+  border-left-color: var(--pcc-status-info);
+  background: var(--pcc-color-canvas-raised, var(--pcc-color-canvas));
+  font-weight: 700;
+}
+
+.moduleIndexButtonLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.moduleIndexButtonSelected .moduleIndexButtonLabel {
+  font-weight: 700;
+  color: var(--pcc-status-info);
+}
+
+.moduleIndexButtonSummary {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+}

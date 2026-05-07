@@ -276,514 +276,109 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 });
 
-describe('Wave 9 Lifecycle Readiness Center surface', () => {
-  function lifecycleRegion(container: HTMLElement, region: string): HTMLElement | null {
-    return container.querySelector(`[data-pcc-readiness-region="${region}"]`);
-  }
-
-  function lifecycleSectionRegions(container: HTMLElement): NodeListOf<Element> {
-    return container.querySelectorAll('[data-pcc-readiness-section="lifecycle-readiness-center"]');
-  }
-
-  it('still renders exactly one active-surface marker for project-readiness', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(markers).toHaveLength(1);
-    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
-  });
-
-  it('renders all nine lifecycle-readiness regions with their markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    expect(lifecycleRegion(container, 'lifecycle-hero')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-map')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-family-domains')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-my-actions')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-blockers-exceptions')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-evidence-readiness')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-future-closeout')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-source-traceability')).not.toBeNull();
-    expect(lifecycleRegion(container, 'lifecycle-readiness-signals')).not.toBeNull();
-  });
-
-  it('each lifecycle region carries the lifecycle-readiness-center section marker', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const sectioned = lifecycleSectionRegions(container);
-    expect(sectioned.length).toBe(9);
-  });
-
-  it('lifecycle hero surfaces canonical 157 library scope and product-grade copy', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const hero = lifecycleRegion(container, 'lifecycle-hero');
-    expect(hero).not.toBeNull();
-    expect(hero!.textContent).toContain('Lifecycle readiness');
-    expect(hero!.textContent).toContain('Workflow execution is managed by your PCC administrator.');
-    expect(hero!.textContent).toContain('157');
-  });
-
-  it('lifecycle map renders a row for every canonical phase', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const phases = container.querySelectorAll('[data-pcc-lifecycle-phase-id]');
-    expect(phases.length).toBe(10);
-  });
-
-  it('family region renders 3 family cards with library counts 55 / 32 / 70 (per-lane scoped queries)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const familyRegion = lifecycleRegion(container, 'lifecycle-family-domains');
-    expect(familyRegion).not.toBeNull();
-    const startup = familyRegion!.querySelector('[data-pcc-lifecycle-family="startup"]');
-    const safety = familyRegion!.querySelector('[data-pcc-lifecycle-family="safety"]');
-    const closeout = familyRegion!.querySelector('[data-pcc-lifecycle-family="closeout"]');
-    expect(startup).not.toBeNull();
-    expect(safety).not.toBeNull();
-    expect(closeout).not.toBeNull();
-    expect(startup!.textContent).toContain('55');
-    expect(safety!.textContent).toContain('32');
-    expect(closeout!.textContent).toContain('70');
-  });
-
-  it('my actions region renders at least one assigned readiness item', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const items = container.querySelectorAll('[data-pcc-lifecycle-item-id]');
-    expect(items.length).toBeGreaterThan(0);
-  });
-
-  it('blockers region renders blocker-state buckets and flags the escalated fixture project item', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const blockerRegion = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
-    expect(blockerRegion).not.toBeNull();
-    const buckets = blockerRegion!.querySelectorAll('[data-pcc-lifecycle-blocker-state]');
-    expect(buckets.length).toBeGreaterThanOrEqual(3);
-    const escalated = blockerRegion!.querySelector(
-      '[data-pcc-lifecycle-blocker-item-id="inst-safety-003"]',
-    );
-    expect(escalated).not.toBeNull();
-  });
-
-  it('evidence region renders 4 evidence-state buckets', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const evidence = lifecycleRegion(container, 'lifecycle-evidence-readiness');
-    expect(evidence).not.toBeNull();
-    const buckets = evidence!.querySelectorAll('[data-pcc-lifecycle-evidence-state]');
-    expect(buckets.length).toBe(4);
-  });
-
-  it('future closeout region surfaces the fixture future-closeout item and excludes reference-only', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const future = lifecycleRegion(container, 'lifecycle-future-closeout');
-    expect(future).not.toBeNull();
-    const expected = future!.querySelector(
-      '[data-pcc-lifecycle-future-closeout-item-id="tpl-closeout-002"]',
-    );
-    expect(expected).not.toBeNull();
-    const referenceOnly = future!.querySelector(
-      '[data-pcc-lifecycle-future-closeout-item-id="tpl-closeout-003"]',
-    );
-    expect(referenceOnly).toBeNull();
-  });
-
-  it('source traceability region surfaces 157 total + 3 source documents with family + sourceFile', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const trace = lifecycleRegion(container, 'lifecycle-source-traceability');
-    expect(trace).not.toBeNull();
-    expect(trace!.textContent).toContain('157');
-    const docs = trace!.querySelectorAll('[data-pcc-lifecycle-source-document]');
-    expect(docs.length).toBe(3);
-    const docFiles = Array.from(docs).map((el) =>
-      el.getAttribute('data-pcc-lifecycle-source-document'),
-    );
-    expect(docFiles).toEqual(
-      expect.arrayContaining([
-        'Project_Startup_Checklist(2).pdf',
-        'Project_Safety_Checklist(1).pdf',
-        'Project_Closeout_Checklist(2).pdf',
-      ]),
-    );
-  });
-
-  it('lifecycle regions contain no <a href> links and no enabled buttons (inert by structural assertion)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const sectioned = lifecycleSectionRegions(container);
-    expect(sectioned.length).toBe(9);
-    for (const region of Array.from(sectioned)) {
-      expect(region.querySelectorAll('a[href]').length).toBe(0);
-      const buttons = region.querySelectorAll('button');
-      for (const btn of Array.from(buttons)) {
-        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
-          true,
-        );
-      }
-    }
-  });
-});
-
-describe('Wave 9 lifecycle item detail and degraded states', () => {
-  function lifecycleRegion(container: HTMLElement, region: string): HTMLElement | null {
-    return container.querySelector(`[data-pcc-readiness-region="${region}"]`);
-  }
-
-  function openAllDetails(container: HTMLElement): void {
-    const elements = container.querySelectorAll('details');
-    for (const el of Array.from(elements)) (el as HTMLDetailsElement).open = true;
-  }
-
-  it('renders <details>/<summary> toggles for each item in My Actions, Blockers, and Future Closeout', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const toggles = container.querySelectorAll('[data-pcc-lifecycle-item-detail-toggle]');
-    expect(toggles.length).toBeGreaterThan(0);
-  });
-
-  it('detail panel reveals source traceability fields (file, page, section, item-key, exact text)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    openAllDetails(container);
-    const myActions = lifecycleRegion(container, 'lifecycle-my-actions');
-    expect(myActions).not.toBeNull();
-    const exactText = myActions!.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="exact-item-text"]',
-    );
-    expect(exactText.length).toBeGreaterThan(0);
-    const sourceFile = myActions!.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="source-file"]',
-    );
-    const sourcePage = myActions!.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="source-page"]',
-    );
-    const sourceSection = myActions!.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="source-section"]',
-    );
-    const sourceItemKey = myActions!.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="source-item-key"]',
-    );
-    expect(sourceFile.length).toBeGreaterThan(0);
-    expect(sourcePage.length).toBeGreaterThan(0);
-    expect(sourceSection.length).toBeGreaterThan(0);
-    expect(sourceItemKey.length).toBeGreaterThan(0);
-    // Exact source text rendered separately from normalized title.
-    const titles = myActions!.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="normalized-title"]',
-    );
-    expect(titles.length).toBeGreaterThan(0);
-    expect(titles[0].textContent).not.toBe(exactText[0].textContent);
-  });
-
-  it('detail panel renders unpopulated optional fields as "Not listed" (honest placeholder)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    openAllDetails(container);
-    // At least some optional fields are unpopulated in fixture, e.g. completedAtUtc
-    // for items still in `not-started`/`in-progress`/`needs-evidence` status.
-    const completedCells = container.querySelectorAll(
-      '[data-pcc-lifecycle-item-detail-field="completed"]',
-    );
-    expect(completedCells.length).toBeGreaterThan(0);
-    const hasNotListed = Array.from(completedCells).some((el) => el.textContent === 'Not listed');
-    expect(hasNotListed).toBe(true);
-  });
-
-  it('evidence external reference URL renders as plain text inside the detail panel — no <a href>', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    openAllDetails(container);
-    const myActions = lifecycleRegion(container, 'lifecycle-my-actions');
-    expect(myActions).not.toBeNull();
-    expect(myActions!.querySelectorAll('a[href]').length).toBe(0);
-    const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
-    expect(blockers!.querySelectorAll('a[href]').length).toBe(0);
-    const future = lifecycleRegion(container, 'lifecycle-future-closeout');
-    expect(future!.querySelectorAll('a[href]').length).toBe(0);
-  });
-
-  it('inst-safety-003 detail panel surfaces failed-state marker + exception code without compliance editorializing', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    openAllDetails(container);
-    const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
-    expect(blockers).not.toBeNull();
-    const safetyItem = blockers!.querySelector(
-      '[data-pcc-lifecycle-blocker-item-id="inst-safety-003"]',
-    );
-    expect(safetyItem).not.toBeNull();
-    const failedMarker = safetyItem!.querySelector(
-      '[data-pcc-lifecycle-safety-failed-state="true"]',
-    );
-    expect(failedMarker).not.toBeNull();
-    const exceptionCell = safetyItem!.querySelector(
-      '[data-pcc-lifecycle-item-detail-field="exception-code"]',
-    );
-    expect(exceptionCell).not.toBeNull();
-    expect(exceptionCell!.textContent).toContain('failed-safety-check');
-    // Compliance-language guard is scoped to THIS detail panel only — not
-    // the whole lifecycle section — to avoid colliding with approved copy.
-    const panelText = safetyItem!.textContent ?? '';
-    expect(/compliant|non-compliant|violation|audit pass/i.test(panelText)).toBe(false);
-  });
-
-  it('closeout-from-day-one chip renders for closeout-family items with activeByDefault=true', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    openAllDetails(container);
-    const chips = container.querySelectorAll('[data-pcc-lifecycle-closeout-from-day-one="true"]');
-    expect(chips.length).toBeGreaterThan(0);
-  });
-
-  it('all detail-panel buttons (if any) are disabled or aria-disabled', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    openAllDetails(container);
-    const sectioned = container.querySelectorAll(
-      '[data-pcc-readiness-section="lifecycle-readiness-center"]',
-    );
-    for (const region of Array.from(sectioned)) {
-      const buttons = region.querySelectorAll('button');
-      for (const btn of Array.from(buttons)) {
-        expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
-          true,
-        );
-      }
-    }
-  });
-});
-
-describe('Wave 9 readiness signals (Prompt 07)', () => {
-  function lifecycleRegion(container: HTMLElement, region: string): HTMLElement | null {
-    return container.querySelector(`[data-pcc-readiness-region="${region}"]`);
-  }
-
-  it('renders 7 signal-bucket markers inside the signals region', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
-    expect(region).not.toBeNull();
-    const buckets = region!.querySelectorAll('[data-pcc-lifecycle-signal-kind]');
-    expect(buckets.length).toBe(7);
-    const kinds = Array.from(buckets).map((el) =>
-      el.getAttribute('data-pcc-lifecycle-signal-kind'),
-    );
-    expect(kinds).toEqual([
-      'blocked',
-      'overdue',
-      'missing-evidence',
-      'failed-safety',
-      'gate-blocking',
-      'awaiting-approval',
-      'external-reference-issue',
-    ]);
-  });
-
-  it('renders the seeded approval-posture entries with their checkpoint references', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
-    expect(region).not.toBeNull();
-    const startup = region!.querySelector(
-      '[data-pcc-lifecycle-approval-posture-item-id="inst-startup-002"]',
-    );
-    const safety = region!.querySelector(
-      '[data-pcc-lifecycle-approval-posture-item-id="inst-safety-002"]',
-    );
-    expect(startup).not.toBeNull();
-    expect(safety).not.toBeNull();
-    expect(startup!.getAttribute('data-pcc-lifecycle-approval-checkpoint')).toBe(
-      'apc-startup-insurance-coi-001',
-    );
-    expect(safety!.getAttribute('data-pcc-lifecycle-approval-checkpoint')).toBe(
-      'apc-safety-hot-work-permits-001',
-    );
-  });
-
-  it('renders the seeded priority-action promotion entries with their related ids', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
-    expect(region).not.toBeNull();
-    const startup = region!.querySelector(
-      '[data-pcc-lifecycle-priority-action-item-id="inst-startup-003"]',
-    );
-    const closeout = region!.querySelector(
-      '[data-pcc-lifecycle-priority-action-item-id="inst-closeout-001"]',
-    );
-    expect(startup).not.toBeNull();
-    expect(closeout).not.toBeNull();
-    expect(startup!.getAttribute('data-pcc-lifecycle-priority-action-promotion-id')).toBe(
-      'pa-startup-systems-setup-003',
-    );
-    expect(closeout!.getAttribute('data-pcc-lifecycle-priority-action-promotion-id')).toBe(
-      'pa-closeout-owner-utility-setup-001',
-    );
-  });
-
-  it('renders per-item signal chips inside the detail panel after opening <details>', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const elements = container.querySelectorAll('details');
-    for (const el of Array.from(elements)) (el as HTMLDetailsElement).open = true;
-    const blockers = lifecycleRegion(container, 'lifecycle-blockers-exceptions');
-    expect(blockers).not.toBeNull();
-    const safetyItem = blockers!.querySelector(
-      '[data-pcc-lifecycle-blocker-item-id="inst-safety-003"]',
-    );
-    expect(safetyItem).not.toBeNull();
-    const failedSafetyChip = safetyItem!.querySelector(
-      '[data-pcc-lifecycle-item-signal-kind="failed-safety"]',
-    );
-    expect(failedSafetyChip).not.toBeNull();
-    const blockedChip = safetyItem!.querySelector(
-      '[data-pcc-lifecycle-item-signal-kind="blocked"]',
-    );
-    expect(blockedChip).not.toBeNull();
-  });
-
-  it('signals region contains no <a href> and no enabled buttons (display-only / inert)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const region = lifecycleRegion(container, 'lifecycle-readiness-signals');
-    expect(region).not.toBeNull();
-    expect(region!.querySelectorAll('a[href]').length).toBe(0);
-    const buttons = region!.querySelectorAll('button');
-    for (const btn of Array.from(buttons)) {
-      expect(btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true').toBe(
-        true,
-      );
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Wave 11 — Responsibility Matrix region group is mounted inside the
-// Project Readiness surface (not its own router case). These additive
-// assertions confirm the embedding without duplicating the comprehensive
-// coverage in `PccResponsibilityMatrixRegions.test.tsx`.
-// ---------------------------------------------------------------------------
-
-describe('Project Readiness surface — Wave 11 Responsibility Matrix embedding', () => {
-  const RM_LANES: readonly string[] = [
-    'overview',
-    'matrix',
-    'register',
-    'owner-contract-mapping',
-    'my-responsibilities',
-    'gaps-and-conflicts',
-    'handoffs',
-    'template-and-admin',
-  ];
-
-  it('renders all 8 Responsibility Matrix lane markers within the project-readiness surface output', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    for (const lane of RM_LANES) {
-      expect(
-        container.querySelector(`[data-pcc-rm-lane="${lane}"]`),
-        `missing Responsibility Matrix lane "${lane}"`,
-      ).not.toBeNull();
-    }
-  });
-
-  it('Responsibility Matrix region cards remain direct children of the bento grid', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const markers = container.querySelectorAll(
-      '[data-pcc-readiness-section="responsibility-matrix"]',
-    );
-    expect(markers.length).toBeGreaterThanOrEqual(RM_LANES.length);
-    for (const marker of Array.from(markers)) {
-      const card = marker.closest('[data-pcc-card]');
-      expect(card).not.toBeNull();
-      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
-    }
-  });
-});
-
 // ─────────────────────────────────────────────────────────────────────
-// Wave 99 / Prompt 05C — Constraints Log surface-level integration
+// Wave 15A B5 / Prompt 01 — command-first inversion
 //
-// PccConstraintsLogRegions has its own 18-case test file
-// (PccConstraintsLogRegions.test.tsx). The two checks below verify
-// the integration AT THE SURFACE LEVEL — that the constraints-log
-// section appears under the project-readiness panel and does not
-// stand up a separate route or active-surface workspace. No
-// duplication of lane-content assertions.
+// The default Project Readiness view is now command-first: only the
+// hero/native command-critical readiness cards plus a single
+// module-index card render. The seven embedded module sections
+// (lifecycle-readiness-center, permit-inspection-control-center,
+// responsibility-matrix, constraints-log, buyout-log, procore-source-
+// confidence, unified-lifecycle) are absent from the default DOM.
+// Wiring the detail-section renderer that brings them back is
+// Prompt 02's deliverable; presence-based assertions move there.
 // ─────────────────────────────────────────────────────────────────────
 
-describe('Project Readiness Center surface — Constraints Log surface-level integration', () => {
-  it('Constraints Log appears as a readiness input on the project-readiness surface; each card is a direct child of the bento grid', () => {
-    // The "panel" returned by activateProjectReadiness is the hero
-    // card; the constraints-log cards are siblings in the bento grid,
-    // so scope the marker query to `container` (matching the existing
-    // Responsibility Matrix embedding test pattern).
+describe('Project Readiness Center surface — Wave 15A B5 default command-first absence', () => {
+  it('default render contains no lifecycle-readiness-center section markers', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    const markers = container.querySelectorAll('[data-pcc-readiness-section="constraints-log"]');
-    expect(markers.length).toBeGreaterThan(0);
-    for (const marker of Array.from(markers)) {
-      const card = marker.closest('[data-pcc-card]');
-      expect(card).not.toBeNull();
-      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
-    }
+    expect(
+      container.querySelectorAll('[data-pcc-readiness-section="lifecycle-readiness-center"]')
+        .length,
+    ).toBe(0);
   });
 
-  it('Constraints Log is not a separate route or active-surface workspace', () => {
+  it('default render contains no permit-inspection-control-center section markers', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    expect(container.querySelector('[data-pcc-tab-id="constraints-log"]')).toBeNull();
-    expect(container.querySelector('[data-pcc-active-surface-panel="constraints-log"]')).toBeNull();
+    expect(
+      container.querySelectorAll('[data-pcc-readiness-section="permit-inspection-control-center"]')
+        .length,
+    ).toBe(0);
+  });
+
+  it('default render contains no responsibility-matrix section markers', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    expect(
+      container.querySelectorAll('[data-pcc-readiness-section="responsibility-matrix"]').length,
+    ).toBe(0);
+  });
+
+  it('default render contains no constraints-log section markers', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    expect(
+      container.querySelectorAll('[data-pcc-readiness-section="constraints-log"]').length,
+    ).toBe(0);
+  });
+
+  it('default render contains no buyout-log section markers', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    expect(container.querySelectorAll('[data-pcc-readiness-section="buyout-log"]').length).toBe(0);
+  });
+
+  it('default render contains no procore-source-confidence region marker', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    expect(
+      container.querySelectorAll('[data-pcc-readiness-region="procore-source-confidence"]').length,
+    ).toBe(0);
+  });
+
+  it('default render contains no unified-lifecycle body markers (timeline / project-memory / related-records)', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
+    expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
+  });
+
+  it('default render exposes a module-index region with strictly local view-selection controls', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    const moduleIndex = container.querySelector('[data-pcc-readiness-region="module-index"]');
+    expect(moduleIndex).not.toBeNull();
+    const controls = moduleIndex!.querySelectorAll('[data-pcc-readiness-drilldown-control]');
+    // 1 command overview + 7 detail sections
+    expect(controls).toHaveLength(8);
+    const enabled = Array.from(controls).filter(
+      (c) =>
+        !(c as HTMLButtonElement).disabled &&
+        (c as HTMLButtonElement).getAttribute('aria-disabled') !== 'true',
+    );
+    // Only the command-overview control is enabled in Prompt 01;
+    // detail controls are disabled until Prompt 02 wires the renderer.
+    expect(enabled).toHaveLength(1);
+    expect(enabled[0].getAttribute('data-pcc-readiness-drilldown-control')).toBe('command');
+    expect(enabled[0].getAttribute('aria-pressed')).toBe('true');
+    expect(enabled[0].getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────
-// Wave 13 / Prompt 05 — Buyout Log surface-level integration
+// Wave 15A B5 / Prompt 01 — fixture-only fallback (no readModelClient)
 //
-// PccBuyoutLogRegions has its own region-level test file
-// (PccBuyoutLogRegions.test.tsx). The two checks below verify the
-// integration AT THE SURFACE LEVEL — that the buyout-log section
-// appears under the project-readiness panel and does not stand up a
-// separate route or active-surface workspace.
+// When no readModelClient is supplied, the surface renders the
+// hero/native command-critical readiness cards plus the module-index
+// card. None of the seven embedded module sections render in the
+// default command view.
 // ─────────────────────────────────────────────────────────────────────
 
-describe('Project Readiness Center surface — Buyout Log surface-level integration', () => {
-  it('Buyout Log appears as a readiness input on the project-readiness surface; each card is a direct child of the bento grid', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const markers = container.querySelectorAll('[data-pcc-readiness-section="buyout-log"]');
-    expect(markers.length).toBeGreaterThan(0);
-    for (const marker of Array.from(markers)) {
-      const card = marker.closest('[data-pcc-card]');
-      expect(card).not.toBeNull();
-      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
-    }
-  });
-
-  it('Buyout Log is not a separate route or active-surface workspace', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    expect(container.querySelector('[data-pcc-tab-id="buyout-log"]')).toBeNull();
-    expect(container.querySelector('[data-pcc-active-surface-panel="buyout-log"]')).toBeNull();
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────
-// Wave 99 / Prompt 05C — Project Readiness fixture-only fallback
-//
-// When no readModelClient is supplied, the surface renders the five
-// existing region groups but does NOT mount the new unified-
-// lifecycle section. This locks the unchanged fixture-only path
-// per feedback_subsection_integration_non_gating.
-// ─────────────────────────────────────────────────────────────────────
-
-describe('Project Readiness Center surface — fixture-only fallback excludes unified lifecycle section', () => {
-  it('renders the surface without unified-lifecycle body markers when no readModelClient is supplied', () => {
+describe('Project Readiness Center surface — fixture-only fallback (command-first default)', () => {
+  it('renders no embedded module section markers when no readModelClient is supplied', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface />
@@ -792,136 +387,74 @@ describe('Project Readiness Center surface — fixture-only fallback excludes un
     expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
     expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
     expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
-    // The existing region groups must still render at least one card
-    // from each lifecycle-readiness / constraints-log / buyout-log section.
     expect(
       container.querySelector('[data-pcc-readiness-section="lifecycle-readiness-center"]'),
-    ).not.toBeNull();
+    ).toBeNull();
     expect(
-      container.querySelector('[data-pcc-readiness-section="constraints-log"]'),
+      container.querySelector('[data-pcc-readiness-section="permit-inspection-control-center"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-readiness-section="responsibility-matrix"]'),
+    ).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-section="constraints-log"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-section="buyout-log"]')).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-readiness-region="procore-source-confidence"]'),
+    ).toBeNull();
+    // Hero (active-surface marker) and module-index region must still render.
+    expect(
+      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
     ).not.toBeNull();
-    expect(container.querySelector('[data-pcc-readiness-section="buyout-log"]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────
-// Wave 99 / Prompt 05C — Project Readiness unified lifecycle integration
+// Wave 15A B5 / Prompt 01 — unified-lifecycle hook unconditional-call
+// lock under command-first default
 //
-// Tests in this block mount <PccApp readModelClient={…} /> and use
-// waitFor to allow the new section's hook microtask to resolve.
-// `afterEach(cleanup)` is scoped to this block (per
-// feedback_subsection_integration_non_gating: read-model-driven async
-// renders accumulate document.body DOM otherwise; the existing 47
-// synchronous tests above don't need cleanup and aren't affected).
+// Even though the unified-lifecycle section is NOT rendered by default
+// in Prompt 01, its hook is still called from ReadModelContent so the
+// Wave decision #8 (unconditional read-model hooks) contract holds and
+// Prompt 02's detail-section renderer can swap content in without an
+// extra fetch round-trip. This block replaces the pre-Prompt-01
+// presence-of-body-markers test with a hook-call-count assertion plus
+// a structural absence assertion.
 // ─────────────────────────────────────────────────────────────────────
 
-describe('Project Readiness Center surface — unified lifecycle integration (read-model-driven)', () => {
+describe('Project Readiness Center surface — unified lifecycle hook unconditional-call lock', () => {
   afterEach(() => {
     cleanup();
   });
 
-  it('read-model-driven path renders three unified-lifecycle direct-child cards with the three body markers; warranty / closed-project / lens / search markers are NOT rendered', async () => {
+  it('mounting the surface with a read-model client invokes getUnifiedLifecycle exactly once even though body markers are absent in the default command view', async () => {
+    const client = createPccFixtureReadModelClient();
+    const unifiedLifecycleSpy = vi.spyOn(client, 'getUnifiedLifecycle');
     const { container } = render(
-      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={client} />
+      </PccBentoGrid>,
     );
-    activateProjectReadiness(container);
-    // Marker queries scoped to `container` (the new section's cards are
-    // siblings of the project-readiness hero in the bento grid).
-    await waitFor(() =>
-      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
-    );
-    // Three expected body markers, each inside a card that is a
-    // direct child of the bento grid.
-    for (const marker of [
-      'data-pcc-lifecycle-timeline',
-      'data-pcc-project-memory',
-      'data-pcc-related-records',
-    ] as const) {
-      const node = container.querySelector(`[${marker}]`);
-      expect(node, `expected [${marker}] to render`).not.toBeNull();
-      const card = node!.closest('[data-pcc-card]');
-      expect(card).not.toBeNull();
-      expect(card!.parentElement?.matches('[data-pcc-bento-grid]')).toBe(true);
-    }
-    // Four other 04C component markers are NOT integrated on Project
-    // Readiness in 05C.
-    expect(container.querySelector('[data-pcc-project-lens-switcher]')).toBeNull();
-    expect(container.querySelector('[data-pcc-warranty-trace]')).toBeNull();
-    expect(container.querySelector('[data-pcc-closed-project-reference]')).toBeNull();
-    expect(container.querySelector('[data-pcc-unified-search]')).toBeNull();
-  });
-
-  it('related-records panel renders source-lineage chips and adds no anchors', async () => {
-    const { container } = render(
-      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
-    );
-    activateProjectReadiness(container);
-    await waitFor(() =>
-      expect(container.querySelector('[data-pcc-related-records]')).not.toBeNull(),
-    );
-    const relatedRecords = container.querySelector('[data-pcc-related-records]');
-    expect(relatedRecords).not.toBeNull();
-    // The 04C RelatedRecordsPanel renders source-lineage chips for
-    // unredacted edges via the existing PccStatusPill primitive
-    // (data-pcc-pill-tone="info" inside [data-pcc-trace-edge-id]).
-    const traceEdges = relatedRecords!.querySelectorAll('[data-pcc-trace-edge-id]');
-    expect(traceEdges.length).toBeGreaterThan(0);
-    expect(relatedRecords!.querySelectorAll('a[href]').length).toBe(0);
-  });
-
-  it('does not introduce a unified-lifecycle route or workspace marker, and adds no forbidden anchor href in the new section', async () => {
-    const { container } = render(
-      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
-    );
-    activateProjectReadiness(container);
-    await waitFor(() =>
-      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
-    );
+    await waitFor(() => expect(unifiedLifecycleSpy).toHaveBeenCalledTimes(1));
+    // Default command view does not render the unified-lifecycle cards.
+    expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
+    expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
+    expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
+    // No unified-lifecycle route or workspace marker is introduced.
     expect(container.querySelector('[data-pcc-tab-id="unified-lifecycle"]')).toBeNull();
     expect(
       container.querySelector('[data-pcc-active-surface-panel="unified-lifecycle"]'),
     ).toBeNull();
-    // Scope anchor scan to the three new section cards (each card body
-    // marker's nearest ancestor card). Existing PCC surfaces may legit-
-    // imately render anchors elsewhere (e.g., Recent Activity in
-    // Project Home) — those are not introduced by this prompt and
-    // must not be re-asserted here.
-    const sectionCards: HTMLElement[] = [];
-    for (const marker of [
-      'data-pcc-lifecycle-timeline',
-      'data-pcc-project-memory',
-      'data-pcc-related-records',
-    ] as const) {
-      const node = container.querySelector(`[${marker}]`);
-      const card = node?.closest('[data-pcc-card]') as HTMLElement | null;
-      if (card) sectionCards.push(card);
-    }
-    expect(sectionCards.length).toBe(3);
-    for (const card of sectionCards) {
-      const anchors = card.querySelectorAll<HTMLAnchorElement>('a[href]');
-      for (const anchor of Array.from(anchors)) {
-        const href = anchor.getAttribute('href') ?? '';
-        for (const forbidden of [
-          'unified-lifecycle',
-          'lifecycle-timeline',
-          'traceability-graph',
-          'closed-project-references',
-        ]) {
-          expect(href.includes(forbidden)).toBe(false);
-        }
-      }
-    }
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────
-// Wave 99 / Prompt 05C — non-call architectural lock
+// Wave 15A B5 / Prompt 01 — non-call architectural lock (extended)
 //
-// The new getUnifiedLifecycle method is consumed exclusively by
-// PccProjectReadinessUnifiedLifecycleSection through
-// useUnifiedLifecycleReadModel. None of the five existing Project
-// Readiness region hooks call it; they each call only their own
-// canonical method exactly once.
+// Eight read-model hook acquisitions (six embedded-module/readiness
+// hooks + Procore + Unified Lifecycle) each call their canonical
+// client method exactly once. The lock holds even though detail
+// section components are not rendered in the default command view.
 // ─────────────────────────────────────────────────────────────────────
 
 describe('Project Readiness Center surface — non-call architectural lock', () => {
@@ -929,12 +462,7 @@ describe('Project Readiness Center surface — non-call architectural lock', () 
     cleanup();
   });
 
-  it('mounting the surface invokes each existing region method exactly once and getUnifiedLifecycle exactly once (consumed only by the new section)', async () => {
-    // Mount the surface directly (not through PccApp navigation) so the
-    // call counts reflect ONLY project-readiness-side hooks. Mounting
-    // through PccApp would also activate Project Home first, whose
-    // unified-lifecycle section also calls getUnifiedLifecycle —
-    // doubling the count and obscuring the architectural contract.
+  it('mounting the surface invokes each of the eight read-model client methods exactly once', async () => {
     const client = createPccFixtureReadModelClient();
     const projectReadinessSpy = vi.spyOn(client, 'getProjectReadiness');
     const lifecycleReadinessSpy = vi.spyOn(client, 'getLifecycleReadiness');
@@ -942,27 +470,25 @@ describe('Project Readiness Center surface — non-call architectural lock', () 
     const responsibilityMatrixSpy = vi.spyOn(client, 'getResponsibilityMatrix');
     const constraintsLogSpy = vi.spyOn(client, 'getConstraintsLog');
     const buyoutLogSpy = vi.spyOn(client, 'getBuyoutLog');
+    // Procore hook calls two client methods in parallel; spying on the
+    // mapping method is sufficient as canonical proof the procore hook
+    // ran once.
+    const procoreMappingSpy = vi.spyOn(client, 'getProcoreProjectMapping');
     const unifiedLifecycleSpy = vi.spyOn(client, 'getUnifiedLifecycle');
 
-    const { container } = render(
+    render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface readModelClient={client} />
       </PccBentoGrid>,
     );
-    await waitFor(() =>
-      expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
-    );
 
-    // Each existing region hook calls its own method exactly once.
-    expect(projectReadinessSpy).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(projectReadinessSpy).toHaveBeenCalledTimes(1));
     expect(lifecycleReadinessSpy).toHaveBeenCalledTimes(1);
     expect(permitInspectionSpy).toHaveBeenCalledTimes(1);
     expect(responsibilityMatrixSpy).toHaveBeenCalledTimes(1);
     expect(constraintsLogSpy).toHaveBeenCalledTimes(1);
     expect(buyoutLogSpy).toHaveBeenCalledTimes(1);
-    // The new method is invoked exactly once — by the new section
-    // via useUnifiedLifecycleReadModel — NOT by any existing region
-    // hook.
+    expect(procoreMappingSpy).toHaveBeenCalledTimes(1);
     expect(unifiedLifecycleSpy).toHaveBeenCalledTimes(1);
   });
 });

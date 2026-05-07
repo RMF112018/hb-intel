@@ -8,6 +8,7 @@
  * children — they should never be wrapped in an intermediate node.
  */
 
+import type { FC } from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import {
@@ -25,7 +26,10 @@ import {
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccProjectReadinessUnifiedLifecycleSection } from '../surfaces/projectReadiness/PccProjectReadinessUnifiedLifecycleSection';
-import type { IPccUnifiedLifecycleReadModelClient } from '../surfaces/unifiedLifecycle/index.js';
+import {
+  useUnifiedLifecycleReadModel,
+  type IPccUnifiedLifecycleReadModelClient,
+} from '../surfaces/unifiedLifecycle/index.js';
 
 const PROJECT_ID: PccProjectId = SAMPLE_PROJECT_PROFILE.projectId;
 
@@ -52,10 +56,21 @@ function envelope(
   };
 }
 
+// Wave 15A B5 / Prompt 01 — the section component is now presentational
+// (`{ state }` prop). This harness colocates the hook call so the
+// existing test scenarios continue to exercise the live read-model
+// path through the section.
+const SectionHarness: FC<{ readonly client: IPccUnifiedLifecycleReadModelClient }> = ({
+  client,
+}) => {
+  const state = useUnifiedLifecycleReadModel(client, PROJECT_ID);
+  return <PccProjectReadinessUnifiedLifecycleSection state={state} />;
+};
+
 function renderSection(client: IPccUnifiedLifecycleReadModelClient) {
   return render(
     <PccBentoGrid forceMode="desktop">
-      <PccProjectReadinessUnifiedLifecycleSection client={client} projectId={PROJECT_ID} />
+      <SectionHarness client={client} />
     </PccBentoGrid>,
   );
 }
