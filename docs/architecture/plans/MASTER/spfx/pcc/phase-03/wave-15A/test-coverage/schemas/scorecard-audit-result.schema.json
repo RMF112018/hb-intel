@@ -2,12 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PCC 100 Point Scorecard Audit Result",
   "type": "object",
-  "required": [
-    "totalScore",
-    "pillars",
-    "hardStops",
-    "phase4Readiness"
-  ],
+  "required": ["totalScore", "pillars", "hardStops", "phase4Readiness"],
   "properties": {
     "totalScore": {
       "type": "number",

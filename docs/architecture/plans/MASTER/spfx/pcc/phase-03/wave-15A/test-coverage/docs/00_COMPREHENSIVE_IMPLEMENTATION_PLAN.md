@@ -8,15 +8,15 @@ Build a scorecard evidence and audit-support system for PCC Phase 3 closeout / P
 
 The final score cannot be fully automated. The system must separate:
 
-| Area | Automation Level |
-|---|---|
-| Screenshots, console logs, runtime errors, breakpoints, DOM markers | Highly automatable |
-| Keyboard/focus/ARIA/disabled-control checks | Highly automatable |
-| Accessibility scans and contrast | Partially/highly automatable with axe + computed checks |
-| Source/doctrine file inventory | Automatable |
-| Mold Breaker differentiation | Expert review supported by structured evidence |
-| Cognitive load and visual polish scoring | Expert review supported by screenshots and heuristics |
-| Final 100-point scoring | Human/expert-scored using generated evidence |
+| Area                                                                | Automation Level                                        |
+| ------------------------------------------------------------------- | ------------------------------------------------------- |
+| Screenshots, console logs, runtime errors, breakpoints, DOM markers | Highly automatable                                      |
+| Keyboard/focus/ARIA/disabled-control checks                         | Highly automatable                                      |
+| Accessibility scans and contrast                                    | Partially/highly automatable with axe + computed checks |
+| Source/doctrine file inventory                                      | Automatable                                             |
+| Mold Breaker differentiation                                        | Expert review supported by structured evidence          |
+| Cognitive load and visual polish scoring                            | Expert review supported by screenshots and heuristics   |
+| Final 100-point scoring                                             | Human/expert-scored using generated evidence            |
 
 ## 3. Implementation Workstreams
 

@@ -364,15 +364,15 @@ docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Brea
 For each, record:
 
 ```ts
-path
-exists
-sizeBytes
-lineCount
-sha256
-detectedHeadings
-requiredReferenceRole
-reviewDisposition
-notes
+path;
+exists;
+sizeBytes;
+lineCount;
+sha256;
+detectedHeadings;
+requiredReferenceRole;
+reviewDisposition;
+notes;
 ```
 
 Do not copy large sections. Store only detected headings and short sanitized snippets where needed.
@@ -930,10 +930,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.doctrine-source.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.content.spec.ts` — <result>
@@ -953,6 +955,7 @@ Validation:
 - `pnpm install --frozen-lockfile` — <result or environment validation exception>
 
 Evidence / scorecard impact:
+
 - Doctrine/governing document verification tooling established.
 - PCC source file index tooling established.
 - Doctrine conformance map tooling established.
@@ -968,6 +971,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - No storageState path/content committed.
 - No raw Playwright artifacts committed.
@@ -980,5 +984,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

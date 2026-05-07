@@ -425,16 +425,7 @@ export type PccEvidenceCategory =
   | 'hard-stop'
   | 'closure-reproducibility';
 
-export type PccScorecardPillarRef =
-  | 'P1'
-  | 'P2'
-  | 'P3'
-  | 'P4'
-  | 'P5'
-  | 'P6'
-  | 'P7'
-  | 'P8'
-  | 'P9';
+export type PccScorecardPillarRef = 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6' | 'P7' | 'P8' | 'P9';
 
 export type PccHardStopRef =
   | 'HS-01'
@@ -526,13 +517,19 @@ tenant/page URL metadata when supplied
 Recommended exported functions:
 
 ```ts
-export function createPccEvidenceManifest(input: CreatePccEvidenceManifestInput): PccEvidenceManifest;
+export function createPccEvidenceManifest(
+  input: CreatePccEvidenceManifestInput,
+): PccEvidenceManifest;
 
-export function writePccEvidenceManifest(input: WritePccEvidenceManifestInput): Promise<PccEvidenceManifestWriteResult>;
+export function writePccEvidenceManifest(
+  input: WritePccEvidenceManifestInput,
+): Promise<PccEvidenceManifestWriteResult>;
 
 export function renderPccEvidenceMarkdownSummary(manifest: PccEvidenceManifest): string;
 
-export function getPccEvidenceCoverage(registry: readonly PccEvidenceRecord[]): PccEvidenceCoverageResult;
+export function getPccEvidenceCoverage(
+  registry: readonly PccEvidenceRecord[],
+): PccEvidenceCoverageResult;
 ```
 
 Writer requirements:
@@ -653,7 +650,7 @@ Required assertions:
 Use Node temp directory APIs for writer tests, such as:
 
 ```ts
-fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-evidence-'))
+fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-evidence-'));
 ```
 
 Clean up temp directories after tests where practical.
@@ -851,10 +848,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-evidence.registry.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts --list` — <result>
@@ -864,12 +863,14 @@ Validation:
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result>
 
 Evidence / scorecard impact:
+
 - Registry coverage for EV-37..EV-106 and EV-125..EV-134.
 - Manifest/writer foundation only.
 - No EV item marked captured unless backed by reviewed artifact output.
 - No final 100-point score calculated.
 
 Safety confirmation:
+
 - No tenant mutation.
 - No live tenant run required.
 - No storageState committed.
@@ -878,5 +879,6 @@ Safety confirmation:
 - `pnpm-lock.yaml` unchanged.
 
 Residual risks or pending items:
+
 - <items>
 ```

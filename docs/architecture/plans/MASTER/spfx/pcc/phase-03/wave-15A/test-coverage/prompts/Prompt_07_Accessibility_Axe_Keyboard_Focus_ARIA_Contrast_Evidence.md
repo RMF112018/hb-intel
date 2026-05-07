@@ -565,9 +565,10 @@ Required behavior:
    - Do not open drawers/modals unless there is a clearly safe non-mutating control marked with a stable PCC data attribute indicating preview/open only.
    - If none are present, record `status: 'not-observed'` and do not fail.
 10. Touch targets:
-   - measure interactive controls without clicking.
-   - use 44px x 44px threshold for touch/accessibility evidence.
-   - record selector/dimensions only.
+
+- measure interactive controls without clicking.
+- use 44px x 44px threshold for touch/accessibility evidence.
+- record selector/dimensions only.
 
 Sanitization requirements:
 
@@ -791,7 +792,7 @@ Live env required only if configured.
 Use:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 When env is missing, this test self-skips clearly.
@@ -1018,10 +1019,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - dependency action — <not needed/already present/added @axe-core/playwright>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.accessibility.spec.ts` — <result>
@@ -1037,6 +1040,7 @@ Validation:
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result>
 
 Evidence / scorecard impact:
+
 - Accessibility/Axe evidence tooling established.
 - Keyboard/focus/focus-visible evidence support established.
 - ARIA/label/disabled-reason evidence support established.
@@ -1048,6 +1052,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live accessibility capture <ran/self-skipped/not run> with reason.
 - No storageState committed.
@@ -1060,5 +1065,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

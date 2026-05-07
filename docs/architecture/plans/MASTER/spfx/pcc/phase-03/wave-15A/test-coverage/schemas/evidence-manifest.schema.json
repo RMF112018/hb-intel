@@ -2,11 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PCC Evidence Manifest",
   "type": "object",
-  "required": [
-    "runId",
-    "tenantUrl",
-    "records"
-  ],
+  "required": ["runId", "tenantUrl", "records"],
   "properties": {
     "runId": {
       "type": "string"
@@ -18,14 +14,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "evidenceId",
-          "title",
-          "status",
-          "artifactPaths",
-          "assertions",
-          "timestamp"
-        ],
+        "required": ["evidenceId", "title", "status", "artifactPaths", "assertions", "timestamp"],
         "properties": {
           "evidenceId": {
             "type": "string",

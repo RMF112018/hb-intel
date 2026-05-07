@@ -395,10 +395,28 @@ Viewport matrix:
 ```ts
 export const PCC_LIVE_VIEWPORT_MATRIX = [
   { id: 'phone-390', label: 'Phone 390', width: 390, height: 844, touch: true },
-  { id: 'tablet-portrait-768', label: 'Tablet Portrait 768', width: 768, height: 1024, touch: true },
-  { id: 'tablet-landscape-1024', label: 'Tablet Landscape 1024', width: 1024, height: 768, touch: true },
+  {
+    id: 'tablet-portrait-768',
+    label: 'Tablet Portrait 768',
+    width: 768,
+    height: 1024,
+    touch: true,
+  },
+  {
+    id: 'tablet-landscape-1024',
+    label: 'Tablet Landscape 1024',
+    width: 1024,
+    height: 768,
+    touch: true,
+  },
   { id: 'small-laptop-1180', label: 'Small Laptop 1180', width: 1180, height: 820, touch: false },
-  { id: 'standard-laptop-1366', label: 'Standard Laptop 1366', width: 1366, height: 900, touch: false },
+  {
+    id: 'standard-laptop-1366',
+    label: 'Standard Laptop 1366',
+    width: 1366,
+    height: 900,
+    touch: false,
+  },
   { id: 'large-laptop-1536', label: 'Large Laptop 1536', width: 1536, height: 960, touch: false },
   { id: 'desktop-1728', label: 'Desktop 1728', width: 1728, height: 1117, touch: false },
   { id: 'ultrawide-2048', label: 'Ultrawide 2048', width: 2048, height: 1280, touch: false },
@@ -630,7 +648,7 @@ Record:
 A card is direct-child stable when:
 
 ```ts
-card.parentElement?.matches('[data-pcc-bento-grid]') === true
+card.parentElement?.matches('[data-pcc-bento-grid]') === true;
 ```
 
 Record direct-child issues as warnings. Do not mutate DOM.
@@ -865,7 +883,7 @@ Live env required only if configured.
 Use:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 When env is missing, this test self-skips clearly.
@@ -1077,10 +1095,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.breakpoint.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts` — <result>
@@ -1094,6 +1114,7 @@ Validation:
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result>
 
 Evidence / scorecard impact:
+
 - Breakpoint/viewport matrix evidence tooling established.
 - Container-width/resolved-mode/derived-mode capture established.
 - Card span/rowspan/direct-child/overflow/touch target measurement established.
@@ -1104,6 +1125,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live breakpoint capture <ran/self-skipped/not run> with reason.
 - No storageState committed.
@@ -1115,5 +1137,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

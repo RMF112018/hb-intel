@@ -322,8 +322,8 @@ export interface PccLiveSurfaceDefinition {
 Recommended selector strategy:
 
 ```ts
-expectedTabSelector: `[data-pcc-tab-id="${id}"]`
-expectedActivePanelSelector: `[data-pcc-active-surface-panel="${id}"]`
+expectedTabSelector: `[data-pcc-tab-id="${id}"]`;
+expectedActivePanelSelector: `[data-pcc-active-surface-panel="${id}"]`;
 ```
 
 Add compile-time guards:
@@ -360,7 +360,9 @@ export class PccLivePageObject {
   async getConsoleAndPageErrorSummary(): Promise<PccLiveRuntimeErrorSummary>;
   async navigateToSurface(surface: PccLiveSurfaceDefinition): Promise<void>;
   async assertSurfaceActive(surface: PccLiveSurfaceDefinition): Promise<PccLiveSurfaceSmokeResult>;
-  async inspectAllSurfaces(surfaces: readonly PccLiveSurfaceDefinition[]): Promise<PccLiveSurfaceSmokeResult[]>;
+  async inspectAllSurfaces(
+    surfaces: readonly PccLiveSurfaceDefinition[],
+  ): Promise<PccLiveSurfaceSmokeResult[]>;
 }
 ```
 
@@ -522,7 +524,7 @@ e2e/pcc-live/pcc-live.surface-smoke.spec.ts
 Tests must self-skip clearly when `PCC_LIVE_*` env/storageState is missing by using the existing Prompt 01 helper:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 Recommended tests:
@@ -722,10 +724,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.surface-smoke.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-evidence.registry.spec.ts` — <result>
@@ -737,6 +741,7 @@ Validation:
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result>
 
 Evidence / scorecard impact:
+
 - Surface page object established.
 - Eight-surface live navigation smoke established.
 - Baseline EV-52 / EV-55 evidence writer established.
@@ -745,6 +750,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live tenant run <ran/self-skipped/not run> with reason.
 - No storageState committed.
@@ -755,5 +761,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

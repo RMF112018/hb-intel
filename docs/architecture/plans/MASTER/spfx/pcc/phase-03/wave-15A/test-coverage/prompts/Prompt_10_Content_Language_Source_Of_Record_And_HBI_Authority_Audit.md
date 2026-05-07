@@ -410,10 +410,11 @@ e2e/pcc-live/pcc-live.content.types.ts
 Required exported constants and types:
 
 ```ts
-export const PCC_CONTENT_LANGUAGE_EVIDENCE_IDS = [/* EV-83..EV-106 */] as const;
+export const PCC_CONTENT_LANGUAGE_EVIDENCE_IDS = [
+  /* EV-83..EV-106 */
+] as const;
 
-export type PccContentLanguageEvidenceId =
-  (typeof PCC_CONTENT_LANGUAGE_EVIDENCE_IDS)[number];
+export type PccContentLanguageEvidenceId = (typeof PCC_CONTENT_LANGUAGE_EVIDENCE_IDS)[number];
 
 export type PccContentRunState =
   | 'completed'
@@ -630,9 +631,10 @@ Required behavior:
    - detect read-only/source-owned boundaries;
    - detect freshness/stale/confidence labels.
 10. Content review findings:
-   - generate review-support / needs-review items, not final conclusions;
-   - each finding must reference relevant EV IDs;
-   - each finding must include reviewer prompts for human evaluation.
+
+- generate review-support / needs-review items, not final conclusions;
+- each finding must reference relevant EV IDs;
+- each finding must include reviewer prompts for human evaluation.
 
 ### Sanitization
 
@@ -926,7 +928,7 @@ Live env required only if configured.
 Use:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 When base live env is missing, this test self-skips clearly.
@@ -1084,10 +1086,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.content.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.conditional.spec.ts` — <result>
@@ -1106,6 +1110,7 @@ Validation:
 - `pnpm install --frozen-lockfile` — <result or environment authorization blocker>
 
 Evidence / scorecard impact:
+
 - Visible-copy extraction tooling established.
 - Construction-language review support established.
 - State-copy quality review support established.
@@ -1120,6 +1125,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live content capture <ran/self-skipped/not run> with reason.
 - No storageState path/content committed.
@@ -1132,5 +1138,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

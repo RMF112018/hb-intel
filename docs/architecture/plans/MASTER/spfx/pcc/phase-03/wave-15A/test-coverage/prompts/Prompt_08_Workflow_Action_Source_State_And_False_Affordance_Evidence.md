@@ -877,7 +877,7 @@ Live env required only if configured.
 Use:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 When env is missing, this test self-skips clearly.
@@ -1107,10 +1107,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.workflow.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.accessibility.spec.ts` — <result>
@@ -1127,6 +1129,7 @@ Validation:
 - `pnpm install --frozen-lockfile` — <result>
 
 Evidence / scorecard impact:
+
 - Workflow/action evidence tooling established.
 - Primary action / priority ordering evidence support established.
 - Disabled reason and false-affordance evidence support established.
@@ -1140,6 +1143,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live workflow capture <ran/self-skipped/not run> with reason.
 - No storageState committed.
@@ -1152,5 +1156,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

@@ -200,34 +200,35 @@ Define the 9 scorecard pillars from the governing scorecard.
 Create typed IDs:
 
 ```ts
-export type PccScorecardPillarId =
-  | 'P1'
-  | 'P2'
-  | 'P3'
-  | 'P4'
-  | 'P5'
-  | 'P6'
-  | 'P7'
-  | 'P8'
-  | 'P9';
+export type PccScorecardPillarId = 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6' | 'P7' | 'P8' | 'P9';
 ```
 
 Define a strict ordered tuple:
 
 ```ts
-export const PCC_SCORECARD_PILLAR_IDS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9'] as const;
+export const PCC_SCORECARD_PILLAR_IDS = [
+  'P1',
+  'P2',
+  'P3',
+  'P4',
+  'P5',
+  'P6',
+  'P7',
+  'P8',
+  'P9',
+] as const;
 ```
 
 Each pillar model must include:
 
 ```ts
-id
-title
-weight
-purpose
-manualScoringRequired
-scorecardSectionRef
-sourceRefs
+id;
+title;
+weight;
+purpose;
+manualScoringRequired;
+scorecardSectionRef;
+sourceRefs;
 ```
 
 The weights must total exactly 100:
@@ -304,20 +305,20 @@ export const PCC_HARD_STOP_IDS = [
 Each hard-stop model must include:
 
 ```ts
-id
-title
-failure
-blocksPhase4
-manualReviewRequired
-scorecardSectionRef
-sourceRefs
+id;
+title;
+failure;
+blocksPhase4;
+manualReviewRequired;
+scorecardSectionRef;
+sourceRefs;
 ```
 
 All hard stops must have:
 
 ```ts
-blocksPhase4: true
-manualReviewRequired: true
+blocksPhase4: true;
+manualReviewRequired: true;
 ```
 
 Hard-stop failures must map to the scorecard:
@@ -398,17 +399,29 @@ e2e/pcc-live/pcc-scorecard.traceability.ts
 Required exports:
 
 ```ts
-export function buildPccPillarEvidenceMap(registry: readonly PccEvidenceRecord[]): PccPillarEvidenceMap;
+export function buildPccPillarEvidenceMap(
+  registry: readonly PccEvidenceRecord[],
+): PccPillarEvidenceMap;
 
-export function buildPccHardStopEvidenceMap(registry: readonly PccEvidenceRecord[]): PccHardStopEvidenceMap;
+export function buildPccHardStopEvidenceMap(
+  registry: readonly PccEvidenceRecord[],
+): PccHardStopEvidenceMap;
 
-export function buildPccEvidenceScorecardMap(registry: readonly PccEvidenceRecord[]): PccEvidenceScorecardMap;
+export function buildPccEvidenceScorecardMap(
+  registry: readonly PccEvidenceRecord[],
+): PccEvidenceScorecardMap;
 
-export function buildPccScorecardWorksheet(registry: readonly PccEvidenceRecord[]): PccScorecardWorksheetRow[];
+export function buildPccScorecardWorksheet(
+  registry: readonly PccEvidenceRecord[],
+): PccScorecardWorksheetRow[];
 
-export function buildPccHardStopWorksheet(registry: readonly PccEvidenceRecord[]): PccHardStopWorksheetRow[];
+export function buildPccHardStopWorksheet(
+  registry: readonly PccEvidenceRecord[],
+): PccHardStopWorksheetRow[];
 
-export function getPccScorecardTraceabilityCoverage(registry: readonly PccEvidenceRecord[]): PccScorecardTraceabilityCoverage;
+export function getPccScorecardTraceabilityCoverage(
+  registry: readonly PccEvidenceRecord[],
+): PccScorecardTraceabilityCoverage;
 ```
 
 Map requirements:
@@ -491,11 +504,11 @@ e2e/pcc-live/pcc-scorecard.model.ts
 It should export:
 
 ```ts
-PCC_SCORECARD_PILLARS
-PCC_HARD_STOPS
-getPccScorecardPillarById
-getPccHardStopById
-getPccTotalScorecardWeight
+PCC_SCORECARD_PILLARS;
+PCC_HARD_STOPS;
+getPccScorecardPillarById;
+getPccHardStopById;
+getPccTotalScorecardWeight;
 ```
 
 Requirements:
@@ -687,10 +700,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-scorecard.traceability.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-evidence.registry.spec.ts` — <result>
@@ -701,6 +716,7 @@ Validation:
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result>
 
 Evidence / scorecard impact:
+
 - Scorecard pillar model established for P1..P9.
 - Hard-stop model established for HS-01..HS-10.
 - Pillar evidence map generated.
@@ -709,6 +725,7 @@ Evidence / scorecard impact:
 - No final 100-point score calculated.
 
 Safety confirmation:
+
 - No tenant mutation.
 - No live tenant run required.
 - No storageState committed.
@@ -719,5 +736,6 @@ Safety confirmation:
 - No hard stop marked passed/failed.
 
 Residual risks or pending items:
+
 - <items>
 ```

@@ -314,11 +314,12 @@ The document must include:
    - no Mold Breaker achievement claim;
    - no deployment readiness claim.
 10. Commit / handoff:
-   - starting HEAD;
-   - ending HEAD;
-   - commit SHA created by Prompt 14, if any;
-   - list of committed files;
-   - list of deliberately uncommitted files, if any.
+
+- starting HEAD;
+- ending HEAD;
+- commit SHA created by Prompt 14, if any;
+- list of committed files;
+- list of deliberately uncommitted files, if any.
 
 Do not include raw secrets, raw auth paths, raw traces, raw console dumps, raw DOM HTML, full generated evidence payloads, full source file excerpts, or raw screenshots.
 

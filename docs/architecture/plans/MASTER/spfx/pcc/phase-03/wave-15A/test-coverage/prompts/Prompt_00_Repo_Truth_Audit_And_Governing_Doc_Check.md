@@ -7,6 +7,7 @@ Use current repo truth. Do not re-read files that are already in context unless 
 Tenant target: `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject`
 
 Governing documents:
+
 - `docs/explanation/design-decisions/con-tech-ui-study.md`
 - `docs/explanation/design-decisions/con-tech-ux-study.md`
 - `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
@@ -14,7 +15,6 @@ Governing documents:
 - `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md`
 
 Critical distinction: automate evidence and traceability; do not claim the full 100-point score is automatically calculated without expert review.
-
 
 ## Objective
 

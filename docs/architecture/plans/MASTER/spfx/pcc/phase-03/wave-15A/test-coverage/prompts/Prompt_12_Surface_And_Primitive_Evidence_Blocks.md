@@ -133,18 +133,18 @@ No Prompt 12 runtime payload, block, JSON artifact, Markdown artifact, summary, 
 
 Implement this block mapping exactly:
 
-| EV ID | Block ID | Block Type | Target |
-|---|---|---|---|
-| `EV-125` | `project-home-surface-block` | `surface` | `project-home` |
-| `EV-126` | `team-and-access-surface-block` | `surface` | `team-and-access` |
-| `EV-127` | `documents-surface-block` | `surface` | `documents` |
-| `EV-128` | `project-readiness-surface-block` | `surface` | `project-readiness` |
-| `EV-129` | `approvals-surface-block` | `surface` | `approvals` |
-| `EV-130` | `external-systems-surface-block` | `surface` | `external-systems` |
-| `EV-131` | `control-center-settings-surface-block` | `surface` | `control-center-settings` |
-| `EV-132` | `site-health-surface-block` | `surface` | `site-health` |
-| `EV-133` | `shared-primitive-system-block` | `primitive-system` | shared shell/layout/card/navigation/source primitives |
-| `EV-134` | `cross-surface-evidence-index-block` | `cross-surface-index` | all surfaces and pending gaps |
+| EV ID    | Block ID                                | Block Type            | Target                                                |
+| -------- | --------------------------------------- | --------------------- | ----------------------------------------------------- |
+| `EV-125` | `project-home-surface-block`            | `surface`             | `project-home`                                        |
+| `EV-126` | `team-and-access-surface-block`         | `surface`             | `team-and-access`                                     |
+| `EV-127` | `documents-surface-block`               | `surface`             | `documents`                                           |
+| `EV-128` | `project-readiness-surface-block`       | `surface`             | `project-readiness`                                   |
+| `EV-129` | `approvals-surface-block`               | `surface`             | `approvals`                                           |
+| `EV-130` | `external-systems-surface-block`        | `surface`             | `external-systems`                                    |
+| `EV-131` | `control-center-settings-surface-block` | `surface`             | `control-center-settings`                             |
+| `EV-132` | `site-health-surface-block`             | `surface`             | `site-health`                                         |
+| `EV-133` | `shared-primitive-system-block`         | `primitive-system`    | shared shell/layout/card/navigation/source primitives |
+| `EV-134` | `cross-surface-evidence-index-block`    | `cross-surface-index` | all surfaces and pending gaps                         |
 
 Use `PCC_LIVE_SURFACES` as the source of truth for the eight surface IDs and labels.
 

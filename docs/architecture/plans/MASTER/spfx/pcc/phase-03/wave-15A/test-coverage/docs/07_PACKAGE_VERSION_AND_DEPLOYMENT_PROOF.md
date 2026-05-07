@@ -20,8 +20,7 @@ Use all available sources:
 If PCC does not expose a runtime marker, recommend a future non-visual diagnostic marker:
 
 ```html
-data-pcc-package-version="1.0.0.16"
-data-pcc-build-sha="<short-sha>"
+data-pcc-package-version="1.0.0.16" data-pcc-build-sha="<short-sha>"</short-sha>
 ```
 
 Do not add this marker unless the implementation prompt explicitly allows source changes.

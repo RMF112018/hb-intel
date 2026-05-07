@@ -272,11 +272,9 @@ Define a strict tuple:
 export const PCC_SCREENSHOT_INITIAL_EVIDENCE_IDS = [
   'EV-37',
   'EV-38',
-  ...
-  'EV-49',
+  ...'EV-49',
   'EV-125',
-  ...
-  'EV-134',
+  ...'EV-134',
 ] as const;
 ```
 
@@ -626,7 +624,7 @@ Live env required only if configured.
 Use:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 When env is missing, this test self-skips clearly.
@@ -825,10 +823,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.surface-smoke.spec.ts` — <result>
@@ -841,6 +841,7 @@ Validation:
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result>
 
 Evidence / scorecard impact:
+
 - Screenshot evidence tooling established.
 - Above-fold/full-page/scroll-segment capture support established.
 - DOM card-summary extraction established.
@@ -850,6 +851,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live screenshot capture <ran/self-skipped/not run> with reason.
 - No storageState committed.
@@ -861,5 +863,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```

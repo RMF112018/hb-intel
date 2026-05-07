@@ -923,7 +923,7 @@ No live tenant env required.
 Use a fake/minimal `PccLiveEnv` object with:
 
 ```ts
-conditionalEnabled: false
+conditionalEnabled: false;
 ```
 
 and a synthetic page/page object where needed.
@@ -978,7 +978,7 @@ Live env required only if configured.
 Use:
 
 ```ts
-skipIfMissingPccLiveEnv(test)
+skipIfMissingPccLiveEnv(test);
 ```
 
 When base live env is missing, this test self-skips clearly.
@@ -1178,10 +1178,12 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.conditional.spec.ts` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.workflow.spec.ts` — <result>
@@ -1199,6 +1201,7 @@ Validation:
 - `pnpm install --frozen-lockfile` — <result>
 
 Evidence / scorecard impact:
+
 - Conditional setup/status evidence tooling established.
 - Edit-mode/read-only boundary evidence support established.
 - High-zoom and short-height evidence support established.
@@ -1212,6 +1215,7 @@ Evidence / scorecard impact:
 - No hard stop marked passed/failed.
 
 Safety confirmation:
+
 - No tenant mutation.
 - Live conditional capture <ran/self-skipped/operator-pending/not run> with reason.
 - No storageState path/content committed.
@@ -1224,5 +1228,6 @@ Safety confirmation:
 - No EV marked captured.
 
 Residual risks or pending items:
+
 - <items>
 ```
