@@ -406,10 +406,13 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     );
 
     await waitFor(() => {
-      const marker = container.querySelector('[data-pcc-team-access-read-model-content]');
-      expect(marker?.getAttribute('data-pcc-team-access-read-model-content')).toBe('error');
+      expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
     });
-    expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    const errorCard = container
+      .querySelector('[data-pcc-state="error"]')!
+      .closest('[data-pcc-card]');
+    expect(errorCard?.parentElement === grid).toBe(true);
     expect(container.querySelector('[data-pcc-team-access-lane]')).toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();
   });

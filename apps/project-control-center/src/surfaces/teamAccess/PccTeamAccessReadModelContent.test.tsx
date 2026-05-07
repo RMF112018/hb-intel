@@ -47,7 +47,7 @@ describe('PccTeamAccessReadModelContent — state-rendering coverage', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renders preview marker and lane shell when the envelope is available', async () => {
+  it('renders the lane shell when the envelope is available', async () => {
     const client: IPccTeamAccessReadModelClient = {
       async getTeamAccess() {
         return availableEnvelope();
@@ -60,16 +60,14 @@ describe('PccTeamAccessReadModelContent — state-rendering coverage', () => {
     );
 
     await waitFor(() => {
-      const marker = container.querySelector('[data-pcc-team-access-read-model-content]');
-      expect(marker?.getAttribute('data-pcc-team-access-read-model-content')).toBe('preview');
+      expect(container.querySelector('[data-pcc-team-access-lane="team-viewer"]')).not.toBeNull();
     });
-    expect(
-      container.querySelector('[data-pcc-team-access-lane="team-viewer"]'),
-    ).not.toBeNull();
+    const panels = container.querySelectorAll('[data-pcc-active-surface-panel="team-and-access"]');
+    expect(panels).toHaveLength(1);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('renders error marker and PccPreviewState when the envelope is backend-unavailable', async () => {
+  it('renders an error PccPreviewState card when the envelope is backend-unavailable', async () => {
     const client: IPccTeamAccessReadModelClient = {
       async getTeamAccess() {
         return backendUnavailableEnvelope();
@@ -82,15 +80,18 @@ describe('PccTeamAccessReadModelContent — state-rendering coverage', () => {
     );
 
     await waitFor(() => {
-      const marker = container.querySelector('[data-pcc-team-access-read-model-content]');
-      expect(marker?.getAttribute('data-pcc-team-access-read-model-content')).toBe('error');
+      expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
     });
-    expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    const errorCard = container
+      .querySelector('[data-pcc-state="error"]')!
+      .closest('[data-pcc-card]');
+    expect(errorCard?.parentElement === grid).toBe(true);
     expect(container.querySelector('[data-pcc-team-access-lane]')).toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('renders loading marker and loading PccPreviewState when the envelope is pending', () => {
+  it('renders a loading PccPreviewState card when the envelope is pending', () => {
     const client: IPccTeamAccessReadModelClient = {
       getTeamAccess() {
         return new Promise<PccReadModelEnvelope<PccTeamAccessReadModel>>(() => {
@@ -104,14 +105,17 @@ describe('PccTeamAccessReadModelContent — state-rendering coverage', () => {
       </PccBentoGrid>,
     );
 
-    const marker = container.querySelector('[data-pcc-team-access-read-model-content]');
-    expect(marker?.getAttribute('data-pcc-team-access-read-model-content')).toBe('loading');
     expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    const loadingCard = container
+      .querySelector('[data-pcc-state="loading"]')!
+      .closest('[data-pcc-card]');
+    expect(loadingCard?.parentElement === grid).toBe(true);
     expect(container.querySelector('[data-pcc-team-access-lane]')).toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('renders error marker when the client rejects (no crash)', async () => {
+  it('renders an error card when the client rejects (no crash)', async () => {
     const client: IPccTeamAccessReadModelClient = {
       async getTeamAccess() {
         throw new Error('boom');
@@ -124,10 +128,13 @@ describe('PccTeamAccessReadModelContent — state-rendering coverage', () => {
     );
 
     await waitFor(() => {
-      const marker = container.querySelector('[data-pcc-team-access-read-model-content]');
-      expect(marker?.getAttribute('data-pcc-team-access-read-model-content')).toBe('error');
+      expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
     });
-    expect(container.querySelector('[data-pcc-state="error"]')).not.toBeNull();
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    const errorCard = container
+      .querySelector('[data-pcc-state="error"]')!
+      .closest('[data-pcc-card]');
+    expect(errorCard?.parentElement === grid).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

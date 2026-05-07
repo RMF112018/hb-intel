@@ -1,18 +1,20 @@
 /**
- * Team & Access opt-in child (Phase 3 / Wave 6 / Prompt 06).
+ * Team & Access opt-in child (Phase 3 / Wave 6 / Prompt 06; direct-child
+ * remediation Phase 3 / Wave 15A / wave-b4 / Prompt 01).
  *
  * Rendered by `PccTeamAccessSurface` only when an explicit
  * `IPccTeamAccessReadModelClient` is supplied via mount config. Calls
  * `useTeamAccessReadModel` unconditionally so the rule against
  * conditional hook invocation is preserved.
  *
- * Imports `PccTeamAccessLaneShell` directly. Does not import
- * `PccTeamAccessSurface` — see the dependency-direction diagram in the
- * Wave 6 / Prompt 06 plan.
+ * Every render state returns a Fragment of `PccDashboardCard`s (or, for
+ * loading/error, a single `PccDashboardCard`) so each card is a direct
+ * child of `[data-pcc-bento-grid]`.
  */
 
-import type { FC } from 'react';
-import { SAMPLE_PROJECT_PROFILE, type PccPersona } from '@hbc/models/pcc';
+import { Fragment, type FC } from 'react';
+import { PCC_MVP_SURFACES, SAMPLE_PROJECT_PROFILE, type PccPersona } from '@hbc/models/pcc';
+import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccTeamAccessLaneShell } from './PccTeamAccessLaneShell';
 import {
@@ -26,6 +28,8 @@ export interface PccTeamAccessReadModelContentProps {
   readonly previewHasProjectSiteAccess?: boolean;
 }
 
+const SURFACE = PCC_MVP_SURFACES['team-and-access'];
+
 export const PccTeamAccessReadModelContent: FC<PccTeamAccessReadModelContentProps> = ({
   client,
   previewPersona,
@@ -35,35 +39,51 @@ export const PccTeamAccessReadModelContent: FC<PccTeamAccessReadModelContentProp
 
   if (result.status === 'loading') {
     return (
-      <div data-pcc-team-access-read-model-content="loading">
+      <PccDashboardCard
+        footprint="full"
+        tier="state"
+        region="state"
+        headingLevel={2}
+        eyebrow={SURFACE.displayName}
+        title="Loading team & access"
+        dataActiveSurfacePanel="team-and-access"
+      >
         <PccPreviewState
           state="loading"
           title="Loading team & access"
           description="Reading the latest team-access envelope."
         />
-      </div>
+      </PccDashboardCard>
     );
   }
 
   if (result.status === 'error') {
     return (
-      <div data-pcc-team-access-read-model-content="error">
+      <PccDashboardCard
+        footprint="full"
+        tier="state"
+        region="state"
+        headingLevel={2}
+        eyebrow={SURFACE.displayName}
+        title="Team and access unavailable"
+        dataActiveSurfacePanel="team-and-access"
+      >
         <PccPreviewState
           state="error"
-          title="Team and access content is temporarily unavailable"
+          title="Team and access unavailable"
           description="Team and access content could not be loaded. Try again later."
         />
-      </div>
+      </PccDashboardCard>
     );
   }
 
   return (
-    <div data-pcc-team-access-read-model-content="preview">
+    <Fragment>
       <PccTeamAccessLaneShell
         previewPersona={previewPersona}
         previewHasProjectSiteAccess={previewHasProjectSiteAccess}
       />
-    </div>
+    </Fragment>
   );
 };
 
