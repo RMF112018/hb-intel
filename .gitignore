@@ -81,6 +81,14 @@ storybook-static/
 *.swo
 playwright-report/
 test-results/
+.auth/
+.storage-state/
+.e2e-auth/
+.secrets/
+*.storageState.json
+*storage-state*.json
+*pcc*storage*.json
+*pcc*auth*.json
 # Claude Code local settings (may contain approved commands with env-specific values)
 .claude/settings.local.json
 .claude/plans/spicy-forging-knuth.md
