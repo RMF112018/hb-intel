@@ -131,7 +131,12 @@ function sanitizeText(input: string): string {
   const noClaim = noArtifact.replace(FORBIDDEN_CLAIMS_RE, '[redacted-claim]');
   const noHtml = noClaim.replace(HTML_RE, '[redacted-html]');
   const noBlob = noHtml.replace(TOKEN_RE, '[redacted-blob]');
-  return noBlob.slice(0, MAX_SNIPPET_CHARS);
+  const evScoped = noBlob.replace(/\bEV-(\d+)\b/g, (_match, idRaw: string) => {
+    const id = Number(idRaw);
+    if (Number.isNaN(id)) return '[redacted-ev]';
+    return id >= 37 && id <= 58 ? `EV-${id}` : '[redacted-ev]';
+  });
+  return evScoped.slice(0, MAX_SNIPPET_CHARS);
 }
 
 function safeRepoRelative(relPath: string): boolean {
@@ -273,7 +278,7 @@ const DOCTRINE_CATEGORY_CONFIG: Record<
     questions: ['Are navigation orientation signals explicit and consistent across surfaces?'],
   },
   'bento-card-hierarchy': {
-    evRefs: ['EV-39', 'EV-40', 'EV-83'],
+    evRefs: ['EV-39', 'EV-40', 'EV-52'],
     markerHints: ['PccDashboardCard', 'data-pcc-card'],
     questions: ['Do bento/card hierarchies reinforce priority-first operational decisions?'],
   },
@@ -283,39 +288,39 @@ const DOCTRINE_CATEGORY_CONFIG: Record<
     questions: ['Does source evidence indicate disciplined responsive container behavior?'],
   },
   'accessibility-semantics': {
-    evRefs: ['EV-72', 'EV-73', 'EV-74'],
+    evRefs: ['EV-53', 'EV-54', 'EV-55'],
     markerHints: ['aria-', 'role='],
     questions: ['Are semantic accessibility primitives present in source and test coverage?'],
   },
   'state-feedback': {
-    evRefs: ['EV-56', 'EV-57', 'EV-94', 'EV-96'],
+    evRefs: ['EV-56', 'EV-57', 'EV-58'],
     markerHints: ['read-only', 'preview', 'deferred', 'blocked', 'degraded'],
     questions: ['Do state feedback patterns provide clear condition-impact-next-step posture?'],
   },
   'source-of-record-boundary': {
-    evRefs: ['EV-45', 'EV-46', 'EV-97', 'EV-99'],
+    evRefs: ['EV-45', 'EV-46', 'EV-57'],
     markerHints: ['source of record', 'system of record', 'source-confidence'],
     questions: ['Are source-of-record boundaries and confidence/freshness cues explicit?'],
   },
   'hbi-authority-boundary': {
-    evRefs: ['EV-50', 'EV-51', 'EV-100', 'EV-102'],
+    evRefs: ['EV-50', 'EV-51', 'EV-58'],
     markerHints: ['HBI', 'command search'],
     questions: [
       'Is HBI language constrained to advisory boundaries rather than mutation authority?',
     ],
   },
   'external-launch-boundary': {
-    evRefs: ['EV-49', 'EV-90', 'EV-99'],
+    evRefs: ['EV-49', 'EV-50', 'EV-57'],
     markerHints: ['external systems', 'launch'],
     questions: ['Do external launch boundaries avoid implied mutation authority in PCC?'],
   },
   'approval-mutation-boundary': {
-    evRefs: ['EV-88', 'EV-89', 'EV-90'],
+    evRefs: ['EV-49', 'EV-50', 'EV-57'],
     markerHints: ['approve', 'reject', 'submit'],
     questions: ['Are approval/posture boundaries explicit and defensible for review-only context?'],
   },
   'content-language-quality': {
-    evRefs: ['EV-83', 'EV-84', 'EV-85', 'EV-106'],
+    evRefs: ['EV-44', 'EV-45', 'EV-46', 'EV-47'],
     markerHints: ['owner', 'next action', 'mock', 'fixture'],
     questions: [
       'Does visible language support construction-operational clarity over dashboard genericity?',
@@ -351,7 +356,7 @@ const MOLD_BREAKER_THEME_CONFIG: Record<
     questions: ['Which concrete signals demonstrate contrast versus incumbent failure modes?'],
   },
   'cognitive-load-reduction': {
-    evRefs: ['EV-47', 'EV-83', 'EV-84'],
+    evRefs: ['EV-47', 'EV-48', 'EV-52'],
     contrast:
       'Evaluate whether signals suggest reduced cognitive overload and clearer operational prioritization.',
     questions: [
@@ -365,13 +370,13 @@ const MOLD_BREAKER_THEME_CONFIG: Record<
     questions: ['Are progressive-disclosure cues explicit across source and governance documents?'],
   },
   'field-office-continuity': {
-    evRefs: ['EV-49', 'EV-85', 'EV-91'],
+    evRefs: ['EV-49', 'EV-52', 'EV-55'],
     contrast:
       'Review continuity cues between field and office contexts, ownership handoff, and lifecycle references.',
     questions: ['Do references support cross-module continuity for field/office roles?'],
   },
   'source-clarity-and-confidence': {
-    evRefs: ['EV-46', 'EV-97', 'EV-98', 'EV-99'],
+    evRefs: ['EV-46', 'EV-56', 'EV-57', 'EV-58'],
     contrast:
       'Review source-of-record, confidence, and freshness boundary signals against incumbent ambiguity.',
     questions: [
@@ -379,7 +384,7 @@ const MOLD_BREAKER_THEME_CONFIG: Record<
     ],
   },
   'role-action-clarity': {
-    evRefs: ['EV-86', 'EV-87', 'EV-88'],
+    evRefs: ['EV-45', 'EV-49', 'EV-50'],
     contrast:
       'Review role/action ownership and disabled-reason cues versus ambiguous incumbent control posture.',
     questions: [
@@ -487,14 +492,6 @@ async function indexSourceArea(
 
   entries.sort((a, b) => a.path.localeCompare(b.path));
   return { entries, missing: false };
-}
-
-function selectEvidenceSet(...evidence: PccEvidenceId[][]): readonly PccEvidenceId[] {
-  const dedup = new Set<PccEvidenceId>();
-  for (const group of evidence) {
-    for (const ev of group) dedup.add(ev);
-  }
-  return Array.from(dedup);
 }
 
 function buildDoctrineConformance(
@@ -691,11 +688,7 @@ export async function capturePccDoctrineSource(
   const moldBreakerReview = buildMoldBreakerReview(governingDocs, sourceIndex);
   const packageVersionProof = await buildPackageVersionProof(repoRoot, sourceIndex);
 
-  const evRefs = selectEvidenceSet(
-    PCC_DOCTRINE_SOURCE_EVIDENCE_IDS as unknown as PccEvidenceId[],
-    doctrineConformance.flatMap((item) => [...item.relatedEvidenceIds]),
-    moldBreakerReview.flatMap((item) => [...item.relatedEvidenceIds]),
-  );
+  const evRefs = [...PCC_DOCTRINE_SOURCE_EVIDENCE_IDS] as readonly PccEvidenceId[];
 
   const runId = input.runId ?? `doctrine-source-${Date.now()}`;
 

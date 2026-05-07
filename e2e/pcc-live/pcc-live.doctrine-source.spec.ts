@@ -100,6 +100,8 @@ const MOLD_BREAKER_THEMES: readonly PccMoldBreakerTheme[] = [
   'mold-breaker-differentiation',
 ] as const;
 
+const OUT_OF_SCOPE_EVS = ['EV-72', 'EV-83', 'EV-100', 'EV-106'] as const;
+
 function assertNoForbiddenStrings(text: string): void {
   const normalized = text
     .replace(/does not mark any hard stop passed or failed\.?/gi, '')
@@ -109,6 +111,15 @@ function assertNoForbiddenStrings(text: string): void {
   }
   for (const pattern of FORBIDDEN_CLAIM_PATTERNS) {
     expect(normalized).not.toMatch(pattern);
+  }
+}
+
+function expectPrompt11EvScope(ids: readonly string[]): void {
+  for (const id of ids) {
+    expect(id).toMatch(/^EV-\d+$/);
+    const value = Number(id.replace('EV-', ''));
+    expect(value).toBeGreaterThanOrEqual(37);
+    expect(value).toBeLessThanOrEqual(58);
   }
 }
 
@@ -147,6 +158,13 @@ test('Governing document verification detects required docs', async () => {
     expect(doc.exists).toBe(true);
     expect(doc.lineCount).toBeGreaterThan(0);
     expect(doc.detectedHeadings.length + doc.notes.length).toBeGreaterThan(0);
+  }
+  expectPrompt11EvScope(result.evRefs);
+  for (const item of result.doctrineConformance) {
+    expectPrompt11EvScope(item.relatedEvidenceIds);
+  }
+  for (const item of result.moldBreakerReview) {
+    expectPrompt11EvScope(item.relatedEvidenceIds);
   }
 
   const serialized = JSON.stringify(result);
@@ -235,6 +253,9 @@ test('Writer produces all expected artifacts with sanitized output', async () =>
 
     for (const text of generated) {
       assertNoForbiddenStrings(text);
+      for (const ev of OUT_OF_SCOPE_EVS) {
+        expect(text).not.toContain(ev);
+      }
     }
     expect(generated.some((text) => text.includes('not a final scorecard result'))).toBe(true);
   } finally {
@@ -251,6 +272,7 @@ test('Doctrine categories and Mold Breaker themes are complete', async () => {
 
   expect(run.doctrineConformance).toHaveLength(DOCTRINE_CATEGORIES.length);
   expect(run.moldBreakerReview).toHaveLength(MOLD_BREAKER_THEMES.length);
+  expectPrompt11EvScope(run.evRefs);
 
   const categorySet = new Set(run.doctrineConformance.map((item) => item.category));
   for (const category of DOCTRINE_CATEGORIES) {
@@ -264,12 +286,14 @@ test('Doctrine categories and Mold Breaker themes are complete', async () => {
 
   for (const item of run.doctrineConformance) {
     expect(item.relatedEvidenceIds.length).toBeGreaterThan(0);
+    expectPrompt11EvScope(item.relatedEvidenceIds);
     expect(item.expertReviewQuestions.length).toBeGreaterThan(0);
     expect(item.reviewDisposition).not.toBe('source-present');
   }
 
   for (const item of run.moldBreakerReview) {
     expect(item.relatedEvidenceIds.length).toBeGreaterThan(0);
+    expectPrompt11EvScope(item.relatedEvidenceIds);
     expect(item.expertReviewQuestions.length).toBeGreaterThan(0);
     expect(item.reviewDisposition).toBe('expert-review-required');
   }
@@ -311,11 +335,22 @@ test('Real repo source/doc audit can write outputs to temp directory', async () 
 
     expect(evidence.summary.governingDocCount).toBe(5);
     expect(evidence.summary.indexedSourceFileCount).toBeGreaterThan(0);
+    expectPrompt11EvScope(evidence.evRefs);
+    for (const item of evidence.doctrineConformance) {
+      expectPrompt11EvScope(item.relatedEvidenceIds);
+    }
+    for (const item of evidence.moldBreakerReview) {
+      expectPrompt11EvScope(item.relatedEvidenceIds);
+    }
 
     for (const filename of REQUIRED_ARTIFACT_FILES) {
       const full = path.join(tmpDir, filename);
       expect(fs.existsSync(full)).toBe(true);
-      assertNoForbiddenStrings(fs.readFileSync(full, 'utf-8'));
+      const text = fs.readFileSync(full, 'utf-8');
+      assertNoForbiddenStrings(text);
+      for (const ev of OUT_OF_SCOPE_EVS) {
+        expect(text).not.toContain(ev);
+      }
     }
 
     expect(fs.readFileSync(out.evidenceMarkdownPath, 'utf-8')).toContain('expert-review-required');
