@@ -101,3 +101,18 @@ This lane is opt-in only and is not required in default CI/test pipelines.
 ## EV / scorecard impact
 
 Prompt 01 provides harness foundation only for future EV-52 through EV-58 evidence collection and future HS-08/HS-09 review. No EV item is marked captured by this prompt alone.
+
+## Prompt 02 registry and manifest
+
+Prompt 02 adds a typed EV registry and deterministic manifest/summary writer for traceability coverage (`EV-37..EV-106`, `EV-125..EV-134`).
+
+- Registry purpose: define required evidence contracts and status posture without claiming final scoring.
+- Manifest writer purpose: emit reproducible JSON/markdown traceability outputs for operator-reviewed curated evidence.
+- Preferred curated evidence output path: `docs/architecture/evidence/pcc-live/<run-id>/`.
+- This output is evidence traceability only and not a final 100-point scorecard result.
+
+Run registry validation:
+
+```bash
+pnpm pcc:e2e:evidence:registry
+```

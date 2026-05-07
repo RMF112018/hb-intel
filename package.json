@@ -17,6 +17,7 @@
     "e2e:install": "playwright install --with-deps chromium",
     "pcc:e2e:live:list": "playwright test --config=playwright.pcc-live.config.ts --list",
     "pcc:e2e:live": "playwright test --config=playwright.pcc-live.config.ts",
+    "pcc:e2e:evidence:registry": "playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-evidence.registry.spec.ts",
     "test:webparts:e2e": "playwright test --config=playwright.webparts.config.ts",
     "test:webparts:e2e:ui": "playwright test --config=playwright.webparts.config.ts --ui"
   },
