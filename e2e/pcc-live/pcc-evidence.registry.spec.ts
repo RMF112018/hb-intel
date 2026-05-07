@@ -3,18 +3,38 @@ import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import {
-  writePccEvidenceManifest,
   createPccEvidenceManifest,
   getPccEvidenceCoverage,
+  writePccEvidenceManifest,
 } from './pcc-evidence.manifest';
 import { PCC_EVIDENCE_REGISTRY } from './pcc-evidence.registry';
 import {
   PCC_EVIDENCE_DISCLAIMER,
   REQUIRED_PCC_EVIDENCE_IDS,
+  type PccEvidenceId,
   type PccEvidenceRunMetadata,
 } from './pcc-evidence.types';
 
 const EV_52_THROUGH_58 = new Set(['EV-52', 'EV-53', 'EV-54', 'EV-55', 'EV-56', 'EV-57', 'EV-58']);
+
+const CURATED_ARTIFACT = 'docs/architecture/evidence/pcc-live/run-001/pcc-evidence-manifest.json';
+const EXCLUDED_ARTIFACT_PATHS = [
+  'test-results/raw-output.json',
+  'playwright-report/index.html',
+  'tmp/storageState.json',
+  'logs/cookie-dump.txt',
+  'logs/token-dump.txt',
+  'out/trace.zip',
+  'out/video.webm',
+  'out/network.har',
+  'tmp/session-context.json',
+  '.auth/private.json',
+  '.secrets/tenant.json',
+] as const;
+
+type IsExactlyString<T> = [T] extends [string] ? ([string] extends [T] ? true : false) : false;
+type AssertFalse<T extends false> = T;
+type _EvidenceIdMustNotBeStringInSpec = AssertFalse<IsExactlyString<PccEvidenceId>>;
 
 function metadata(outputDir: string): PccEvidenceRunMetadata {
   return {
@@ -81,38 +101,45 @@ test('manifest creator includes all EV IDs and traceability disclaimer', () => {
   expect(manifest.records.map((r) => r.id).sort()).toEqual([...REQUIRED_PCC_EVIDENCE_IDS].sort());
 });
 
-test('manifest writer emits JSON/MD output and excludes sensitive key material', async () => {
+test('manifest writer keeps curated artifact paths and excludes raw/sensitive artifacts', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-evidence-'));
 
   try {
     const result = await writePccEvidenceManifest({
       outputDir: tmpDir,
-      metadata: {
-        ...(metadata(tmpDir) as PccEvidenceRunMetadata & Record<string, string>),
-        token: 'secret',
-      } as PccEvidenceRunMetadata,
+      metadata: metadata(tmpDir),
       registry: PCC_EVIDENCE_REGISTRY,
-      artifactPaths: [
-        'docs/architecture/evidence/pcc-live/run-001/pcc-evidence-manifest.json',
-        'test-results/raw-output.json',
-      ],
+      artifactPaths: [CURATED_ARTIFACT, ...EXCLUDED_ARTIFACT_PATHS],
     });
 
     expect(fs.existsSync(result.manifestPath)).toBeTruthy();
     expect(fs.existsSync(result.summaryPath)).toBeTruthy();
 
+    expect(result.manifest.artifactPaths).toContain(CURATED_ARTIFACT);
+    for (const excluded of EXCLUDED_ARTIFACT_PATHS) {
+      expect(result.manifest.artifactPaths).not.toContain(excluded);
+    }
+
     const parsed = JSON.parse(fs.readFileSync(result.manifestPath, 'utf-8')) as {
       records: unknown[];
+      artifactPaths: string[];
     };
     expect(parsed.records).toHaveLength(80);
+    expect(parsed.artifactPaths).toContain(CURATED_ARTIFACT);
+    for (const excluded of EXCLUDED_ARTIFACT_PATHS) {
+      expect(parsed.artifactPaths).not.toContain(excluded);
+    }
 
     const summary = fs.readFileSync(result.summaryPath, 'utf-8');
     expect(summary).toContain(PCC_EVIDENCE_DISCLAIMER);
 
     const jsonText = fs.readFileSync(result.manifestPath, 'utf-8');
-    expect(jsonText).not.toContain('storageState');
-    expect(jsonText).not.toContain('cookie');
-    expect(jsonText).not.toContain('token');
+    expect(jsonText).toContain(CURATED_ARTIFACT);
+    expect(jsonText).not.toContain('test-results/raw-output.json');
+    expect(jsonText).not.toContain('playwright-report/index.html');
+    for (const excluded of EXCLUDED_ARTIFACT_PATHS) {
+      expect(jsonText).not.toContain(excluded);
+    }
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

@@ -37,6 +37,13 @@ function sanitizeMetadata(metadata: PccEvidenceRunMetadata): PccEvidenceRunMetad
   };
 }
 
+const UNSAFE_ARTIFACT_PATH_PATTERN =
+  /(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookie|token|auth|secrets|session|trace|video|har/i;
+
+function isSafeArtifactPath(artifactPath: string): boolean {
+  return !UNSAFE_ARTIFACT_PATH_PATTERN.test(artifactPath);
+}
+
 function hasMalformedFields(record: PccEvidenceRecord): boolean {
   return (
     !record.title.trim() ||
@@ -120,9 +127,7 @@ export function createPccEvidenceManifest(
   const sorted = sortPccEvidenceRecords(input.registry);
   const coverage = getPccEvidenceCoverage(sorted);
 
-  const artifactPaths = (input.artifactPaths ?? []).filter(
-    (artifactPath) => !/(storageState|cookie|token|trace|video|har|session)/i.test(artifactPath),
-  );
+  const artifactPaths = (input.artifactPaths ?? []).filter(isSafeArtifactPath);
 
   return {
     metadata: sanitizeMetadata(input.metadata),
