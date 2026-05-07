@@ -82,7 +82,7 @@ export const PccProjectReadinessModuleIndexCard: FC<IPccProjectReadinessModuleIn
             false,
           )}
           {PCC_PROJECT_READINESS_MODULE_INDEX_ENTRIES.map((entry) =>
-            renderButton(entry.sectionId, entry.label, entry.summary, true),
+            renderButton(entry.sectionId, entry.label, entry.summary, false),
           )}
         </ul>
       </div>

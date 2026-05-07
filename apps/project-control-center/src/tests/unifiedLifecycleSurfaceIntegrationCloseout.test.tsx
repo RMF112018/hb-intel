@@ -46,6 +46,19 @@ const PROJECT_READINESS_SECTION_FILE = resolve(
   'projectReadiness',
   'PccProjectReadinessUnifiedLifecycleSection.tsx',
 );
+// Wave 15A B5 / Prompt 02 — Project Readiness lifted the
+// `useUnifiedLifecycleReadModel` call out of its section component and
+// into the surface so the hook is unconditional even when the detail
+// section is not rendered. The "imports-and-uses" half of the
+// architectural-boundary scan now points at the surface for Project
+// Readiness; the leaf-route / no-direct-getUnifiedLifecycle scans
+// continue to apply to the section component itself.
+const PROJECT_READINESS_SURFACE_FILE = resolve(
+  SRC_ROOT,
+  'surfaces',
+  'projectReadiness',
+  'PccProjectReadinessSurface.tsx',
+);
 
 // Comments-only stripper: preserves string literals so quoted route
 // ids stay visible. Matches the discipline used by
@@ -168,6 +181,13 @@ describe('Cross-surface no-nested-dashboard-card invariant (Wave 99 / Prompt 05D
     const projectReadinessButton = container.querySelector('[data-pcc-tab-id="project-readiness"]');
     expect(projectReadinessButton).not.toBeNull();
     fireEvent.click(projectReadinessButton!);
+    // Wave 15A B5 / Prompt 02 — unified-lifecycle cards render only
+    // when the 'unified-lifecycle' detail section is selected.
+    const unifiedLifecycleDrilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
+    );
+    expect(unifiedLifecycleDrilldown).not.toBeNull();
+    fireEvent.click(unifiedLifecycleDrilldown!);
     await waitFor(() =>
       expect(container.querySelector('[data-pcc-lifecycle-timeline]')).not.toBeNull(),
     );
@@ -187,8 +207,13 @@ describe('Cross-surface no-nested-dashboard-card invariant (Wave 99 / Prompt 05D
 // method identifiers directly
 // ─────────────────────────────────────────────────────────────────────
 
-describe('Unified-lifecycle section files — architectural boundary (Wave 99 / Prompt 05D)', () => {
-  const cases: ReadonlyArray<{ readonly name: string; readonly file: string }> = [
+describe('Unified-lifecycle section files — architectural boundary (Wave 99 / Prompt 05D, refined Wave 15A B5 / Prompt 02)', () => {
+  // The leaf-route + no-direct-getUnifiedLifecycle scans apply to BOTH
+  // section component files. Project Home still owns its hook call
+  // inside the section component; Project Readiness lifted its hook
+  // call into the surface in Wave 15A B5 / Prompt 01 to keep the
+  // unconditional-hook contract intact under command-first.
+  const sectionScanCases: ReadonlyArray<{ readonly name: string; readonly file: string }> = [
     {
       name: 'PccProjectHomeUnifiedLifecycleSection.tsx',
       file: PROJECT_HOME_SECTION_FILE,
@@ -199,14 +224,12 @@ describe('Unified-lifecycle section files — architectural boundary (Wave 99 / 
     },
   ];
 
-  it.each(cases)(
-    '$name references no leaf-route client method identifier, does not call getUnifiedLifecycle directly, and imports/uses useUnifiedLifecycleReadModel',
+  it.each(sectionScanCases)(
+    '$name references no leaf-route client method identifier and does not call getUnifiedLifecycle directly',
     ({ file }) => {
       const raw = readFileSync(file, 'utf8');
-      const commentsStripped = stripCommentsOnly(raw);
       const tokensStripped = stripCommentsAndStrings(raw);
 
-      // No leaf-route client method identifier appears as code.
       for (const identifier of LEAF_ROUTE_CLIENT_METHODS) {
         const re = new RegExp(`\\b${identifier}\\b`);
         expect(
@@ -215,26 +238,43 @@ describe('Unified-lifecycle section files — architectural boundary (Wave 99 / 
         ).toBe(false);
       }
 
-      // The section file does NOT call client.getUnifiedLifecycle
-      // directly — only the 05A hook does.
       expect(
         /\bgetUnifiedLifecycle\b/.test(tokensStripped),
         'getUnifiedLifecycle must not appear in section file source; the hook owns the call',
       ).toBe(false);
-
-      // The 05A hook IS imported (string-literal import path stays
-      // visible after comments-only stripping) AND is invoked as an
-      // identifier in code (visible after comments+strings stripping).
-      expect(
-        commentsStripped.includes('useUnifiedLifecycleReadModel'),
-        'section file must import useUnifiedLifecycleReadModel',
-      ).toBe(true);
-      expect(
-        /\buseUnifiedLifecycleReadModel\b/.test(tokensStripped),
-        'section file must invoke useUnifiedLifecycleReadModel as a code identifier',
-      ).toBe(true);
     },
   );
+
+  // The "imports and uses useUnifiedLifecycleReadModel" half points at
+  // the file that actually owns the hook call:
+  //   - Project Home: the section component still owns the hook.
+  //   - Project Readiness: the surface owns the hook (lifted in
+  //     Wave 15A B5 / Prompt 01).
+  const hookOwnershipCases: ReadonlyArray<{ readonly name: string; readonly file: string }> = [
+    {
+      name: 'PccProjectHomeUnifiedLifecycleSection.tsx (section owns the hook)',
+      file: PROJECT_HOME_SECTION_FILE,
+    },
+    {
+      name: 'PccProjectReadinessSurface.tsx (surface owns the hook after Prompt 01 lift)',
+      file: PROJECT_READINESS_SURFACE_FILE,
+    },
+  ];
+
+  it.each(hookOwnershipCases)('$name imports and uses useUnifiedLifecycleReadModel', ({ file }) => {
+    const raw = readFileSync(file, 'utf8');
+    const commentsStripped = stripCommentsOnly(raw);
+    const tokensStripped = stripCommentsAndStrings(raw);
+
+    expect(
+      commentsStripped.includes('useUnifiedLifecycleReadModel'),
+      'hook-owning file must import useUnifiedLifecycleReadModel',
+    ).toBe(true);
+    expect(
+      /\buseUnifiedLifecycleReadModel\b/.test(tokensStripped),
+      'hook-owning file must invoke useUnifiedLifecycleReadModel as a code identifier',
+    ).toBe(true);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────
@@ -256,6 +296,13 @@ describe('Constraints Log surface integration — read-only / no-execution postu
     const projectReadinessButton = container.querySelector('[data-pcc-tab-id="project-readiness"]');
     expect(projectReadinessButton).not.toBeNull();
     fireEvent.click(projectReadinessButton!);
+    // Wave 15A B5 / Prompt 02 — constraints-log renders only when the
+    // 'constraints' detail section is selected via the module-index card.
+    const constraintsDrilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="constraints"]',
+    );
+    expect(constraintsDrilldown).not.toBeNull();
+    fireEvent.click(constraintsDrilldown!);
     const sections = container.querySelectorAll<HTMLElement>(
       '[data-pcc-readiness-section="constraints-log"]',
     );

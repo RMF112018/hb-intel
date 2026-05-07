@@ -23,6 +23,14 @@ function activateProjectReadiness(container: HTMLElement): HTMLElement {
   return panel as HTMLElement;
 }
 
+function selectProjectReadinessSection(container: HTMLElement, sectionId: string): void {
+  const control = container.querySelector(
+    `[data-pcc-readiness-drilldown-control="${sectionId}"]`,
+  ) as HTMLButtonElement | null;
+  expect(control, `expected drilldown control for "${sectionId}"`).not.toBeNull();
+  fireEvent.click(control!);
+}
+
 function regionCard(container: HTMLElement, regionId: string): HTMLElement {
   const region = container.querySelector(`[data-pcc-readiness-region="${regionId}"]`);
   expect(region, `region '${regionId}' should render`).not.toBeNull();
@@ -70,14 +78,15 @@ describe('Project Readiness — Wave 8 blocker posture', () => {
   });
 });
 
-// Wave 15A B5 / Prompt 01 — the lifecycle module is no longer rendered
-// by default (command-first surface). Lifecycle blocker / family region
-// presence + ordering assertions move to the section-active path that
-// Prompt 02's detail-section renderer introduces.
-describe.skip('Project Readiness — Wave 9 lifecycle blocker posture', () => {
+// Wave 15A B5 / Prompt 02 — the lifecycle module renders only when the
+// 'lifecycle-readiness' detail section is selected. Each test selects
+// it via the module-index drilldown control before asserting on
+// lifecycle region markers.
+describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   it('LifecycleBlockersCard adopts tier=tier2/region=operational and footprint="full" (Wave 15A wave-b3 Prompt 04 removed the legacy hierarchy="primary" marker; the route command is the readiness Hero, not the lifecycle Blockers card)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
+    selectProjectReadinessSection(container, 'lifecycle-readiness');
 
     // The lifecycle blocker region is keyed by data-pcc-readiness-region
     // string declared in PccProjectReadinessSurface.tsx.
@@ -96,6 +105,7 @@ describe.skip('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   it('LifecycleBlockersCard appears before LifecycleFamilyDomainsCard in DOM order', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
+    selectProjectReadinessSection(container, 'lifecycle-readiness');
 
     const blockersRegion = lifecycleSectionRegion(container, 'lifecycle-blockers-exceptions');
     const familyRegion = lifecycleSectionRegion(container, 'lifecycle-family-domains');

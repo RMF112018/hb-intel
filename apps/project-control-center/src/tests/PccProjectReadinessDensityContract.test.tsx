@@ -139,26 +139,30 @@ function assertDensityInvariants(container: HTMLElement) {
   // No external-launch anchors anywhere in the active surface bento.
   expect(bento.querySelectorAll('a[href^="http"]').length).toBe(0);
 
-  // 7. Exactly one enabled drilldown control (the command overview);
-  //    none of the seven detail-section drilldown controls are enabled
-  //    in Prompt 01 (Prompt 01 false-affordance lock).
+  // 7. Wave 15A B5 / Prompt 02 — all eight drilldown controls (command
+  //    + seven detail sections) are enabled because every click causes
+  //    a real selected-section view change. Default selection is
+  //    `command`; that button is `aria-pressed="true"` and carries
+  //    `data-pcc-readiness-drilldown-state="selected"`.
   const enabledControls = enabledButtons.filter((b) =>
     b.hasAttribute('data-pcc-readiness-drilldown-control'),
   );
-  expect(
-    enabledControls.filter(
-      (b) => b.getAttribute('data-pcc-readiness-drilldown-control') === 'command',
-    ),
-  ).toHaveLength(1);
+  const enabledIds = new Set(
+    enabledControls.map((b) => b.getAttribute('data-pcc-readiness-drilldown-control') ?? ''),
+  );
+  expect(enabledIds.has('command'), 'command drilldown must be enabled by default').toBe(true);
   for (const detailSectionId of DRILLDOWN_DETAIL_SECTION_IDS) {
-    const enabledForDetail = enabledControls.filter(
-      (b) => b.getAttribute('data-pcc-readiness-drilldown-control') === detailSectionId,
-    );
     expect(
-      enabledForDetail,
-      `detail-section drilldown control "${detailSectionId}" must be disabled in Prompt 01`,
-    ).toHaveLength(0);
+      enabledIds.has(detailSectionId),
+      `detail-section drilldown control "${detailSectionId}" must be enabled in Prompt 02`,
+    ).toBe(true);
   }
+  const commandSelected = enabledControls.find(
+    (b) => b.getAttribute('data-pcc-readiness-drilldown-control') === 'command',
+  );
+  expect(commandSelected, 'command control must exist').toBeDefined();
+  expect(commandSelected!.getAttribute('aria-pressed')).toBe('true');
+  expect(commandSelected!.getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
 }
 
 describe('PccProjectReadinessSurface — density contract (fixture path)', () => {

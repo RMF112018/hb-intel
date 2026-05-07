@@ -442,12 +442,21 @@ describe('PCC card-tier contract — locked state cards', () => {
 // ---------------------------------------------------------------------------
 
 describe('PCC card-tier contract — Project Readiness specific assertions', () => {
-  function renderProjectReadiness(): HTMLElement {
+  function renderProjectReadiness(sectionId?: string): HTMLElement {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface />
       </PccBentoGrid>,
     );
+    if (sectionId) {
+      // Wave 15A B5 / Prompt 02 — detail-section cards render only
+      // when the matching module-index drilldown is selected.
+      const drilldown = container.querySelector(
+        `[data-pcc-readiness-drilldown-control="${sectionId}"]`,
+      ) as HTMLButtonElement | null;
+      expect(drilldown, `expected drilldown control for "${sectionId}"`).not.toBeNull();
+      fireEvent.click(drilldown!);
+    }
     return container;
   }
 
@@ -459,7 +468,7 @@ describe('PCC card-tier contract — Project Readiness specific assertions', () 
 
   it('Lifecycle Blockers card is not Tier 1', () => {
     const card = findCardByHeading(
-      renderProjectReadiness(),
+      renderProjectReadiness('lifecycle-readiness'),
       'Blocked, escalated, and at-risk items',
     );
     expect(card.getAttribute('data-pcc-card-tier')).not.toBe('tier1');
@@ -467,19 +476,28 @@ describe('PCC card-tier contract — Project Readiness specific assertions', () 
   });
 
   it('Lifecycle "Future closeout exposure" card is region=deferred', () => {
-    const card = findCardByHeading(renderProjectReadiness(), 'Early closeout-risk surface');
+    const card = findCardByHeading(
+      renderProjectReadiness('lifecycle-readiness'),
+      'Early closeout-risk surface',
+    );
     expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
   });
 
   it('AHJ launcher panel card is region=deferred', () => {
-    const card = findCardByHeading(renderProjectReadiness(), 'AHJ launcher panel');
+    const card = findCardByHeading(
+      renderProjectReadiness('permits-inspections'),
+      'AHJ launcher panel',
+    );
     expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
   });
 
   it('Responsibility Matrix template-and-admin card is region=deferred', () => {
-    const card = findCardByHeading(renderProjectReadiness(), 'Template and source-mapping admin');
+    const card = findCardByHeading(
+      renderProjectReadiness('responsibility-matrix'),
+      'Template and source-mapping admin',
+    );
     expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
   });
@@ -491,14 +509,17 @@ describe('PCC card-tier contract — Project Readiness specific assertions', () 
   });
 
   it('Procore source confidence card is region=reference', () => {
-    const card = findCardByHeading(renderProjectReadiness(), 'Procore source confidence');
+    const card = findCardByHeading(
+      renderProjectReadiness('procore-source-confidence'),
+      'Procore source confidence',
+    );
     expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
   });
 
   it('Responsibility Matrix integration signals card is region=reference', () => {
     const card = findCardByHeading(
-      renderProjectReadiness(),
+      renderProjectReadiness('responsibility-matrix'),
       'Integration signals (read-only references)',
     );
     expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
@@ -506,7 +527,7 @@ describe('PCC card-tier contract — Project Readiness specific assertions', () 
   });
 
   it('Buyout Procore Reconciliation card is region=reference', () => {
-    const card = findCardByHeading(renderProjectReadiness(), 'Procore Reconciliation View');
+    const card = findCardByHeading(renderProjectReadiness('buyout'), 'Procore Reconciliation View');
     expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
   });

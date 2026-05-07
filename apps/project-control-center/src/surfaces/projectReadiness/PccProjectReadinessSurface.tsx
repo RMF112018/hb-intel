@@ -30,6 +30,7 @@ import {
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_PROJECT_READINESS_FRAMEWORK_READ_MODEL,
   SAMPLE_RESPONSIBILITY_MATRIX_READ_MODEL,
+  SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
 } from '@hbc/models/pcc';
 import type {
   PccBuyoutLogReadModel,
@@ -40,6 +41,7 @@ import type {
   PccProjectReadinessFrameworkReadModel,
   PccReadModelEnvelope,
   PccResponsibilityMatrixReadModel,
+  PccUnifiedLifecycleReadModel,
 } from '@hbc/models/pcc';
 import { PccPermitInspectionControlCenterRegions } from './PccPermitInspectionControlCenterRegions';
 import {
@@ -71,10 +73,13 @@ import type {
 import { PccProjectReadinessProcoreSourceConfidenceCard } from './PccProjectReadinessProcoreSourceConfidenceCard';
 import { PccProjectReadinessUnifiedLifecycleSection } from './PccProjectReadinessUnifiedLifecycleSection';
 import {
+  buildPccUnifiedLifecycleViewModel,
   useUnifiedLifecycleReadModel,
   type IPccUnifiedLifecycleReadModelClient,
+  type IUseUnifiedLifecycleReadModelState,
 } from '../unifiedLifecycle/index.js';
 import { PccProjectReadinessModuleIndexCard } from './PccProjectReadinessModuleIndexCard';
+import { PccProjectReadinessDetailSectionRenderer } from './PccProjectReadinessDetailSectionRenderer';
 import {
   PCC_PROJECT_READINESS_DEFAULT_SECTION,
   type PccProjectReadinessSectionId,
@@ -226,17 +231,46 @@ export const PccProjectReadinessSurface: FC<PccProjectReadinessSurfaceProps> = (
   return <FixtureContent />;
 };
 
+const FIXTURE_UNIFIED_LIFECYCLE_ENVELOPE: PccReadModelEnvelope<PccUnifiedLifecycleReadModel> = {
+  projectId: SAMPLE_PROJECT_PROFILE.projectId,
+  mode: 'fixture',
+  sourceStatus: 'available',
+  readOnly: true,
+  warnings: [],
+  generatedAtUtc: '2026-04-30T00:00:00.000Z',
+  data: SAMPLE_UNIFIED_LIFECYCLE_READ_MODEL,
+};
+
+const FIXTURE_UNIFIED_LIFECYCLE_FIXTURE_STATE: IUseUnifiedLifecycleReadModelState = {
+  status: 'ready',
+  viewModel: buildPccUnifiedLifecycleViewModel(FIXTURE_UNIFIED_LIFECYCLE_ENVELOPE),
+};
+
 const FixtureContent: FC = () => {
   const [selectedSectionId, setSelectedSectionId] = useState<PccProjectReadinessSectionId>(
     PCC_PROJECT_READINESS_DEFAULT_SECTION,
   );
+  const inCommandMode = selectedSectionId === 'command';
   return (
     <Fragment>
-      <ReadinessRegions viewModel={FIXTURE_VIEW_MODEL} />
+      <ReadinessHeroSlot viewModel={FIXTURE_VIEW_MODEL} />
+      {inCommandMode ? <ReadinessNativeCommandCards viewModel={FIXTURE_VIEW_MODEL} /> : null}
       <PccProjectReadinessModuleIndexCard
         selectedSectionId={selectedSectionId}
         onSelect={setSelectedSectionId}
       />
+      {inCommandMode ? null : (
+        <PccProjectReadinessDetailSectionRenderer
+          selectedSection={selectedSectionId}
+          lifecycleViewModel={FIXTURE_LIFECYCLE_VIEW_MODEL}
+          permitInspectionViewModel={FIXTURE_PERMIT_INSPECTION_VIEW_MODEL}
+          responsibilityMatrixViewModel={FIXTURE_RESPONSIBILITY_MATRIX_VIEW_MODEL}
+          constraintsLogViewModel={FIXTURE_CONSTRAINTS_LOG_VIEW_MODEL}
+          buyoutLogViewModel={FIXTURE_BUYOUT_LOG_VIEW_MODEL}
+          procoreViewModel={FIXTURE_PROCORE_SURFACE_VIEW_MODEL}
+          unifiedLifecycleState={FIXTURE_UNIFIED_LIFECYCLE_FIXTURE_STATE}
+        />
+      )}
     </Fragment>
   );
 };
@@ -267,24 +301,53 @@ const ReadModelContent: FC<ReadModelContentProps> = ({ client }) => {
   // round-trip and so Wave decision #8 (unconditional read-model hooks)
   // is preserved during the command-first transition.
   const viewModel = useProjectReadinessReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void useLifecycleReadinessReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void usePermitInspectionControlCenterReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void useResponsibilityMatrixReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void useConstraintsLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void useBuyoutLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void useProcoreSurfaceReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
-  void useUnifiedLifecycleReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  const lifecycleViewModel = useLifecycleReadinessReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
+  const permitInspectionViewModel = usePermitInspectionControlCenterReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
+  const responsibilityMatrixViewModel = useResponsibilityMatrixReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
+  const constraintsLogViewModel = useConstraintsLogReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
+  const buyoutLogViewModel = useBuyoutLogReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  const procoreViewModel = useProcoreSurfaceReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
+  const unifiedLifecycleState = useUnifiedLifecycleReadModel(
+    client,
+    SAMPLE_PROJECT_PROFILE.projectId,
+  );
 
   const [selectedSectionId, setSelectedSectionId] = useState<PccProjectReadinessSectionId>(
     PCC_PROJECT_READINESS_DEFAULT_SECTION,
   );
+  const inCommandMode = selectedSectionId === 'command';
   return (
     <Fragment>
-      <ReadinessRegions viewModel={viewModel} />
+      <ReadinessHeroSlot viewModel={viewModel} />
+      {inCommandMode ? <ReadinessNativeCommandCards viewModel={viewModel} /> : null}
       <PccProjectReadinessModuleIndexCard
         selectedSectionId={selectedSectionId}
         onSelect={setSelectedSectionId}
       />
+      {inCommandMode ? null : (
+        <PccProjectReadinessDetailSectionRenderer
+          selectedSection={selectedSectionId}
+          lifecycleViewModel={lifecycleViewModel}
+          permitInspectionViewModel={permitInspectionViewModel}
+          responsibilityMatrixViewModel={responsibilityMatrixViewModel}
+          constraintsLogViewModel={constraintsLogViewModel}
+          buyoutLogViewModel={buyoutLogViewModel}
+          procoreViewModel={procoreViewModel}
+          unifiedLifecycleState={unifiedLifecycleState}
+        />
+      )}
     </Fragment>
   );
 };
@@ -354,66 +417,82 @@ interface ReadinessRegionsProps {
   readonly viewModel: IPccProjectReadinessViewModel;
 }
 
-const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => {
+const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => (
+  <Fragment>
+    <ReadinessHeroSlot viewModel={viewModel} />
+    <ReadinessNativeCommandCards viewModel={viewModel} />
+  </Fragment>
+);
+
+// Wave 15A B5 / Prompt 02 — hero card is the sole carrier of the
+// `data-pcc-active-surface-panel="project-readiness"` marker across
+// loading / error / ready states. Rendered in both command mode and
+// detail mode (detail mode omits the native command cards but keeps
+// the hero so the active-surface marker remains unique).
+const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status === 'loading') {
     return (
-      <Fragment>
-        <PccDashboardCard
-          footprint="full"
-          tier="state"
-          region="state"
-          headingLevel={2}
-          eyebrow="Project Readiness Center"
-          title="Project readiness"
-          dataActiveSurfacePanel="project-readiness"
-        >
-          <div data-pcc-readiness-region="hero" className={styles.heroBody}>
-            <PccSurfaceContextHeader
-              surfaceId="project-readiness"
-              projectLabel="Project 26-000-00 · Readiness Center"
-              postureLabel={POSTURE_LOADING_READINESS.postureLabel}
-              sourceStatusLabel={POSTURE_LOADING_READINESS.sourceStatusLabel}
-              sourceConfidenceLabel={POSTURE_LOADING_READINESS.sourceConfidenceLabel}
-              lastUpdatedLabel={POSTURE_LOADING_READINESS.lastUpdatedLabel}
-            />
-            <PccPreviewState state="loading" title="Project readiness" />
-          </div>
-        </PccDashboardCard>
-        <FixtureScaffoldRegions viewModel={FIXTURE_VIEW_MODEL} />
-      </Fragment>
+      <PccDashboardCard
+        footprint="full"
+        tier="state"
+        region="state"
+        headingLevel={2}
+        eyebrow="Project Readiness Center"
+        title="Project readiness"
+        dataActiveSurfacePanel="project-readiness"
+      >
+        <div data-pcc-readiness-region="hero" className={styles.heroBody}>
+          <PccSurfaceContextHeader
+            surfaceId="project-readiness"
+            projectLabel="Project 26-000-00 · Readiness Center"
+            postureLabel={POSTURE_LOADING_READINESS.postureLabel}
+            sourceStatusLabel={POSTURE_LOADING_READINESS.sourceStatusLabel}
+            sourceConfidenceLabel={POSTURE_LOADING_READINESS.sourceConfidenceLabel}
+            lastUpdatedLabel={POSTURE_LOADING_READINESS.lastUpdatedLabel}
+          />
+          <PccPreviewState state="loading" title="Project readiness" />
+        </div>
+      </PccDashboardCard>
     );
   }
   if (viewModel.status === 'error') {
     return (
-      <Fragment>
-        <PccDashboardCard
-          footprint="full"
-          tier="state"
-          region="state"
-          headingLevel={2}
-          eyebrow="Project Readiness Center"
-          title="Project readiness"
-          dataActiveSurfacePanel="project-readiness"
-        >
-          <div data-pcc-readiness-region="hero" className={styles.heroBody}>
-            <PccSurfaceContextHeader
-              surfaceId="project-readiness"
-              projectLabel="Project 26-000-00 · Readiness Center"
-              postureLabel={POSTURE_ERROR_READINESS.postureLabel}
-              sourceStatusLabel={POSTURE_ERROR_READINESS.sourceStatusLabel}
-              sourceConfidenceLabel={POSTURE_ERROR_READINESS.sourceConfidenceLabel}
-              lastUpdatedLabel={POSTURE_ERROR_READINESS.lastUpdatedLabel}
-            />
-            <PccPreviewState state="error" title="Project readiness" />
-          </div>
-        </PccDashboardCard>
-        <FixtureScaffoldRegions viewModel={FIXTURE_VIEW_MODEL} />
-      </Fragment>
+      <PccDashboardCard
+        footprint="full"
+        tier="state"
+        region="state"
+        headingLevel={2}
+        eyebrow="Project Readiness Center"
+        title="Project readiness"
+        dataActiveSurfacePanel="project-readiness"
+      >
+        <div data-pcc-readiness-region="hero" className={styles.heroBody}>
+          <PccSurfaceContextHeader
+            surfaceId="project-readiness"
+            projectLabel="Project 26-000-00 · Readiness Center"
+            postureLabel={POSTURE_ERROR_READINESS.postureLabel}
+            sourceStatusLabel={POSTURE_ERROR_READINESS.sourceStatusLabel}
+            sourceConfidenceLabel={POSTURE_ERROR_READINESS.sourceConfidenceLabel}
+            lastUpdatedLabel={POSTURE_ERROR_READINESS.lastUpdatedLabel}
+          />
+          <PccPreviewState state="error" title="Project readiness" />
+        </div>
+      </PccDashboardCard>
     );
+  }
+  return <HeroCard hero={viewModel.hero} />;
+};
+
+// Wave 15A B5 / Prompt 02 — the seven non-hero command-critical
+// readiness cards. In loading / error states the fixture scaffold
+// stands in. Rendered only in command mode; detail mode omits this
+// component and renders the selected detail group instead.
+const ReadinessNativeCommandCards: FC<ReadinessRegionsProps> = ({ viewModel }) => {
+  if (viewModel.status === 'loading' || viewModel.status === 'error') {
+    return <FixtureScaffoldRegions viewModel={FIXTURE_VIEW_MODEL} />;
   }
   return (
     <Fragment>
-      <HeroCard hero={viewModel.hero} />
       <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
       <BlockersCard blockers={viewModel.blockers} />
       <DomainGridCard domains={viewModel.domains} />
@@ -965,7 +1044,7 @@ interface LifecycleReadinessRegionsProps {
   readonly viewModel: IPccLifecycleReadinessViewModel;
 }
 
-const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewModel }) => {
+export const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status === 'loading') {
     return (
       <PccDashboardCard

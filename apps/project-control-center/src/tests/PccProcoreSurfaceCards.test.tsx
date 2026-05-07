@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccApp } from '../PccApp';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
@@ -134,12 +134,25 @@ describe('Site Health — Procore sync & repair card (Wave 13 / Prompt 13E)', ()
 });
 
 describe('Project Readiness — Procore source-confidence region (Wave 13 / Prompt 13E)', () => {
-  it('renders the region card with data-pcc-readiness-region="procore-source-confidence" as a direct bento child', () => {
+  // Wave 15A B5 / Prompt 02 — Procore source confidence card renders
+  // only when the 'procore-source-confidence' detail section is
+  // selected via the module-index card.
+  function renderAndSelectProcoreSourceConfidence(): HTMLElement {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectReadinessSurface />
       </PccBentoGrid>,
     );
+    const drilldown = container.querySelector(
+      '[data-pcc-readiness-drilldown-control="procore-source-confidence"]',
+    ) as HTMLButtonElement | null;
+    expect(drilldown, 'expected procore-source-confidence drilldown control').not.toBeNull();
+    fireEvent.click(drilldown!);
+    return container;
+  }
+
+  it('renders the region card with data-pcc-readiness-region="procore-source-confidence" as a direct bento child', () => {
+    const container = renderAndSelectProcoreSourceConfidence();
     expectBentoDirectChildByMarker(
       container,
       '[data-pcc-readiness-region="procore-source-confidence"]',
@@ -148,11 +161,7 @@ describe('Project Readiness — Procore source-confidence region (Wave 13 / Prom
   });
 
   it('emits no http(s) anchors on the Procore source-confidence card', () => {
-    const { container } = render(
-      <PccBentoGrid forceMode="desktop">
-        <PccProjectReadinessSurface />
-      </PccBentoGrid>,
-    );
+    const container = renderAndSelectProcoreSourceConfidence();
     expectNoHttpAnchorsOnCard(container, 'procore-source-confidence');
     expectNoEnabledMutationButtonsOnCard(container, 'procore-source-confidence');
   });

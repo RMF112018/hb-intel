@@ -359,12 +359,165 @@ describe('Project Readiness Center surface — Wave 15A B5 default command-first
         !(c as HTMLButtonElement).disabled &&
         (c as HTMLButtonElement).getAttribute('aria-disabled') !== 'true',
     );
-    // Only the command-overview control is enabled in Prompt 01;
-    // detail controls are disabled until Prompt 02 wires the renderer.
-    expect(enabled).toHaveLength(1);
-    expect(enabled[0].getAttribute('data-pcc-readiness-drilldown-control')).toBe('command');
-    expect(enabled[0].getAttribute('aria-pressed')).toBe('true');
-    expect(enabled[0].getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
+    // Wave 15A B5 / Prompt 02 — all 8 drilldown controls are enabled
+    // because every click causes a real selected-section view change.
+    expect(enabled).toHaveLength(8);
+    const commandControl = Array.from(controls).find(
+      (c) => c.getAttribute('data-pcc-readiness-drilldown-control') === 'command',
+    );
+    expect(commandControl).toBeDefined();
+    expect(commandControl!.getAttribute('aria-pressed')).toBe('true');
+    expect(commandControl!.getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Wave 15A B5 / Prompt 02 — selected-section click-and-assert coverage
+//
+// Clicking a detail-section drilldown control swaps the surface from
+// the default command view (hero + 7 native command-critical cards +
+// module-index) to the focused detail view (hero + module-index +
+// selected detail group). Non-selected detail-section markers remain
+// absent. Hero stays unique. Bento direct-child invariant holds.
+// ─────────────────────────────────────────────────────────────────────
+
+interface ISectionCase {
+  readonly drilldownId: string;
+  readonly markerSelector: string;
+  readonly additionalPresentMarkers: readonly string[];
+  readonly otherMarkerSelectors: readonly string[];
+}
+
+const ALL_SECTION_DOM_MARKERS: readonly { readonly id: string; readonly selector: string }[] = [
+  {
+    id: 'lifecycle-readiness',
+    selector: '[data-pcc-readiness-section="lifecycle-readiness-center"]',
+  },
+  {
+    id: 'permits-inspections',
+    selector: '[data-pcc-readiness-section="permit-inspection-control-center"]',
+  },
+  { id: 'responsibility-matrix', selector: '[data-pcc-readiness-section="responsibility-matrix"]' },
+  { id: 'constraints', selector: '[data-pcc-readiness-section="constraints-log"]' },
+  { id: 'buyout', selector: '[data-pcc-readiness-section="buyout-log"]' },
+  { id: 'procore-source-confidence', selector: '[data-pcc-card-id="procore-source-confidence"]' },
+  { id: 'unified-lifecycle', selector: '[data-pcc-lifecycle-timeline]' },
+];
+
+const ADDITIONAL_PRESENT_MARKERS_BY_ID: Readonly<Record<string, readonly string[]>> = {
+  // Wave 15A B5 / Prompt 02 — unified-lifecycle renders three direct
+  // bento children whose body markers must all be present after
+  // selection: timeline, project memory, related records.
+  'unified-lifecycle': ['[data-pcc-project-memory]', '[data-pcc-related-records]'],
+};
+
+const SECTION_CASES: readonly ISectionCase[] = ALL_SECTION_DOM_MARKERS.map((selected) => ({
+  drilldownId: selected.id,
+  markerSelector: selected.selector,
+  additionalPresentMarkers: ADDITIONAL_PRESENT_MARKERS_BY_ID[selected.id] ?? [],
+  otherMarkerSelectors: ALL_SECTION_DOM_MARKERS.filter((s) => s.id !== selected.id).map(
+    (s) => s.selector,
+  ),
+}));
+
+function selectProjectReadinessSection(container: HTMLElement, sectionId: string): HTMLElement {
+  const control = container.querySelector(
+    `[data-pcc-readiness-drilldown-control="${sectionId}"]`,
+  ) as HTMLButtonElement | null;
+  expect(control, `expected drilldown control for "${sectionId}"`).not.toBeNull();
+  expect(control!.disabled).toBe(false);
+  fireEvent.click(control!);
+  expect(control!.getAttribute('aria-pressed')).toBe('true');
+  expect(control!.getAttribute('data-pcc-readiness-drilldown-state')).toBe('selected');
+  return control!;
+}
+
+describe('Project Readiness Center surface — Wave 15A B5 selected-section view selection', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  for (const testCase of SECTION_CASES) {
+    it(`click drilldown "${testCase.drilldownId}" renders only the selected detail group; non-selected section markers absent`, async () => {
+      const { container } = render(
+        <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+      );
+      activateProjectReadiness(container);
+      selectProjectReadinessSection(container, testCase.drilldownId);
+
+      // Wait for the selected detail group to render. For sections with
+      // a synchronous fixture path the marker appears immediately; for
+      // unified-lifecycle (read-model-driven) waitFor lets the hook
+      // microtask resolve.
+      await waitFor(() =>
+        expect(
+          container.querySelector(testCase.markerSelector),
+          `selected section "${testCase.drilldownId}" must render its marker`,
+        ).not.toBeNull(),
+      );
+
+      // Section-specific additional markers (e.g. unified-lifecycle's
+      // three body markers — timeline / project-memory / related-records).
+      for (const additional of testCase.additionalPresentMarkers) {
+        expect(
+          container.querySelector(additional),
+          `selected section "${testCase.drilldownId}" must render additional marker ${additional}`,
+        ).not.toBeNull();
+      }
+
+      // Non-selected detail-section markers are absent.
+      for (const otherSelector of testCase.otherMarkerSelectors) {
+        expect(
+          container.querySelectorAll(otherSelector).length,
+          `non-selected section marker "${otherSelector}" must be absent when "${testCase.drilldownId}" is selected`,
+        ).toBe(0);
+      }
+
+      // Hero/active-surface marker remains unique.
+      const surfaceMarkers = container.querySelectorAll('[data-pcc-active-surface-panel]');
+      expect(surfaceMarkers).toHaveLength(1);
+      expect(surfaceMarkers[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+        'project-readiness',
+      );
+
+      // No card-in-card nesting.
+      expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
+
+      // Every rendered card is a direct child of the bento grid.
+      const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
+      expect(bento).not.toBeNull();
+      const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
+      for (const card of cards) {
+        expect(
+          card.parentElement,
+          `card "${
+            card.getAttribute('data-pcc-card-id') ?? '<unidentified>'
+          }" must be a direct child of [data-pcc-bento-grid]`,
+        ).toBe(bento);
+      }
+    });
+  }
+
+  it('selecting a detail section then returning to command restores the seven native command-critical cards', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    activateProjectReadiness(container);
+    // Default: native command cards present.
+    expect(
+      container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]'),
+      'lifecycle-gates region (native command card) must render in default view',
+    ).not.toBeNull();
+
+    selectProjectReadinessSection(container, 'constraints');
+    // Detail mode: native command cards absent, constraints-log present.
+    expect(container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]')).toBeNull();
+    expect(
+      container.querySelector('[data-pcc-readiness-section="constraints-log"]'),
+    ).not.toBeNull();
+
+    selectProjectReadinessSection(container, 'command');
+    // Back to default: native command cards present, constraints-log absent.
+    expect(container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-section="constraints-log"]')).toBeNull();
   });
 });
 

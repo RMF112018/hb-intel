@@ -31,6 +31,13 @@ function activateProjectReadiness(container: HTMLElement): HTMLElement {
   fireEvent.click(button!);
   const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
   expect(panel).not.toBeNull();
+  // Wave 15A B5 / Prompt 02 — RM Integration renders only when the
+  // 'responsibility-matrix' detail section is selected via the module-index card.
+  const drilldown = container.querySelector(
+    '[data-pcc-readiness-drilldown-control="responsibility-matrix"]',
+  );
+  expect(drilldown, 'expected responsibility-matrix drilldown control').not.toBeNull();
+  fireEvent.click(drilldown!);
   return panel as HTMLElement;
 }
 

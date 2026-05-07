@@ -27,6 +27,13 @@ function activateProjectReadiness(container: HTMLElement): HTMLElement {
   fireEvent.click(button!);
   const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
   expect(panel).not.toBeNull();
+  // Wave 15A B5 / Prompt 02 — Permit/Inspection renders only when the
+  // 'permits-inspections' detail section is selected via the module-index card.
+  const drilldown = container.querySelector(
+    '[data-pcc-readiness-drilldown-control="permits-inspections"]',
+  );
+  expect(drilldown, 'expected permits-inspections drilldown control').not.toBeNull();
+  fireEvent.click(drilldown!);
   return panel as HTMLElement;
 }
 
