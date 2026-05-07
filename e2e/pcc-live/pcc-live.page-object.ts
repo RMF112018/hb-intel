@@ -103,8 +103,34 @@ export class PccLivePageObject {
   }
 
   async waitForPccRoot(): Promise<void> {
-    await expect(this.page.locator(ROOT_MARKERS.tabs).first()).toBeVisible({ timeout: 15000 });
-    await expect(this.page.locator(ROOT_MARKERS.tab).first()).toBeVisible({ timeout: 15000 });
+    await this.waitForAnyPccRootMarker(60000);
+    await expect(this.page.locator(ROOT_MARKERS.tabs).first()).toBeVisible({ timeout: 60000 });
+    await expect(this.page.locator(ROOT_MARKERS.tab).first()).toBeVisible({ timeout: 60000 });
+  }
+
+  async waitForAnyPccRootMarker(timeoutMs = 60000): Promise<void> {
+    const markerSelectors = [
+      ROOT_MARKERS.grid,
+      ROOT_MARKERS.card,
+      ROOT_MARKERS.tabs,
+      ROOT_MARKERS.tab,
+      ROOT_MARKERS.panel,
+    ];
+
+    await expect
+      .poll(
+        async () => {
+          const counts = await Promise.all(
+            markerSelectors.map(async (selector) => this.page.locator(selector).count()),
+          );
+          return counts.some((count) => count > 0);
+        },
+        {
+          timeout: timeoutMs,
+          message: `No PCC root marker detected within ${timeoutMs}ms. Markers checked: ${markerSelectors.join(', ')}`,
+        },
+      )
+      .toBe(true);
   }
 
   async getRootMarkerCounts(): Promise<Record<string, number>> {

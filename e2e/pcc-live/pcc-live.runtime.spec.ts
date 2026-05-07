@@ -9,6 +9,26 @@ const PCC_ROOT_MARKERS = [
   '[data-pcc-active-surface-panel]',
 ] as const;
 
+async function waitForAnyPccRootMarker(
+  page: Parameters<typeof test>[0]['page'],
+  timeoutMs = 60000,
+) {
+  await expect
+    .poll(
+      async () => {
+        const counts = await Promise.all(
+          PCC_ROOT_MARKERS.map(async (selector) => page.locator(selector).count()),
+        );
+        return counts.some((count) => count > 0);
+      },
+      {
+        timeout: timeoutMs,
+        message: `No PCC root marker detected within ${timeoutMs}ms. Markers checked: ${PCC_ROOT_MARKERS.join(', ')}`,
+      },
+    )
+    .toBe(true);
+}
+
 test('PCC live environment is configured or self-skips clearly', () => {
   const check = checkPccLiveEnv();
   if (check.status !== 'ready') {
@@ -39,6 +59,11 @@ test('PCC hosted page loads with Project Control Center root markers', async ({ 
 
   await page.goto(env.pageUrl, { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(new RegExp('^https://'));
+  const waitStart = Date.now();
+  await waitForAnyPccRootMarker(page, 60000);
+  const elapsedWaitMs = Date.now() - waitStart;
+  const currentUrl = page.url();
+  const pageTitle = await page.title();
 
   const markerCounts = await Promise.all(
     PCC_ROOT_MARKERS.map(async (selector) => ({
@@ -54,10 +79,14 @@ test('PCC hosted page loads with Project Control Center root markers', async ({ 
     [
       `No PCC data markers found on page: ${env.pageUrl}`,
       'Set PCC_LIVE_PAGE_URL to the exact SharePoint page hosting the PCC web part.',
+      `Current URL: ${currentUrl}`,
+      `Page title: ${pageTitle}`,
       `Markers checked: ${PCC_ROOT_MARKERS.join(', ')}`,
+      `Marker counts: ${JSON.stringify(markerCounts)}`,
       `Expected package version (operator-supplied): ${env.expectedPackageVersion}`,
       `Console errors observed: ${consoleErrors.length}`,
       `Page errors observed: ${pageErrors.length}`,
+      `Elapsed wait ms: ${elapsedWaitMs}`,
     ].join('\n'),
   ).toBeGreaterThan(0);
 });

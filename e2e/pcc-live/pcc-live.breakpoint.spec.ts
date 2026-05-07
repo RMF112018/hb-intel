@@ -254,6 +254,7 @@ test('Breakpoint capture helpers preserve measurement boundaries', async ({ page
 });
 
 test('Live breakpoint capture self-skips without live env', async ({ page }) => {
+  test.setTimeout(300_000);
   const check = skipIfMissingPccLiveEnv(test);
   const env = check.env!;
 
