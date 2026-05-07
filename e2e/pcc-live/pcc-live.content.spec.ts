@@ -183,6 +183,8 @@ test('Synthetic visible-copy extraction covers required copy kinds', async ({ pa
       <div data-pcc-hbi="true">HBI suggest review before approve/commit</div>
       <div data-pcc-mock="true">Owner: Superintendent. Next action due today. Mock fixture demo only. See approvals and documents.</div>
       <a href="#approvals">Open approvals and documents flow</a>
+      <div style="display:none">HIDDEN_SENTINEL_DO_NOT_CAPTURE</div>
+      <div hidden><span>HIDDEN_PARENT_SENTINEL_DO_NOT_CAPTURE</span></div>
     </div>
   `);
 
@@ -227,6 +229,48 @@ test('Synthetic visible-copy extraction covers required copy kinds', async ({ pa
   const serialized = JSON.stringify(result);
   expect(serialized).not.toContain('<div');
   expect(serialized).not.toContain('?');
+  expect(JSON.stringify(result.copyRecords)).not.toContain('HIDDEN_SENTINEL_DO_NOT_CAPTURE');
+  expect(JSON.stringify(result.copyRecords)).not.toContain('HIDDEN_PARENT_SENTINEL_DO_NOT_CAPTURE');
+  expect(JSON.stringify(result.findings)).not.toContain('HIDDEN_SENTINEL_DO_NOT_CAPTURE');
+  expect(JSON.stringify(result.findings)).not.toContain('HIDDEN_PARENT_SENTINEL_DO_NOT_CAPTURE');
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-content-hidden-sentinel-'));
+  try {
+    const out = await writePccContentReview({
+      outputDir: tmpDir,
+      run: {
+        runId: 'hidden-sentinel-test',
+        generatedAtIso: new Date().toISOString(),
+        tenantSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject',
+        tenantPageUrl:
+          'https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/pcc.aspx',
+        expectedPackageVersion: '1.0.0.16',
+        selfSkipped: false,
+        runState: 'writer-test-only',
+        evRefs: PCC_CONTENT_LANGUAGE_EVIDENCE_IDS,
+        surfaces: result.surfaces,
+        copyRecords: result.copyRecords,
+        findings: result.findings,
+      },
+    });
+    const generatedFiles = [
+      out.evidenceJsonPath,
+      out.evidenceMarkdownPath,
+      out.extractedVisibleCopyPath,
+      out.findingsPath,
+      out.constructionReviewPath,
+      out.stateCopyReviewPath,
+      out.sourceOfRecordReviewPath,
+      out.hbiAuthorityReviewPath,
+      out.disabledReasonReviewPath,
+    ].map((file) => fs.readFileSync(file, 'utf-8'));
+    for (const text of generatedFiles) {
+      expect(text).not.toContain('HIDDEN_SENTINEL_DO_NOT_CAPTURE');
+      expect(text).not.toContain('HIDDEN_PARENT_SENTINEL_DO_NOT_CAPTURE');
+    }
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 test('Synthetic review templates include required sections', async () => {

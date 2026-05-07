@@ -240,6 +240,7 @@ export async function capturePccContent(
 
     const surfaceRecords: PccVisibleCopyRecord[] = [];
     for (const row of raw) {
+      if (row.visible !== true) continue;
       const snippet = sanitizeText(`${row.text} ${row.disabledReason}`);
       if (!snippet) continue;
       const kind = inferKind(row.selector, snippet, {
