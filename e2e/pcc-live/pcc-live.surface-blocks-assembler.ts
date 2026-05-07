@@ -82,8 +82,27 @@ function toNotes(...items: unknown[]): string[] {
 
 function summarizeFromObject(source: unknown, keys: string[], fallback = 0): number {
   if (!source || typeof source !== 'object') return fallback;
+
+  const resolvePath = (value: unknown, path: string): unknown => {
+    const segments = path.split('.').filter(Boolean);
+    let current: unknown = value;
+    for (const segment of segments) {
+      if (segment === 'length') {
+        if (Array.isArray(current) || typeof current === 'string') {
+          current = current.length;
+          continue;
+        }
+        return undefined;
+      }
+
+      if (!current || typeof current !== 'object') return undefined;
+      current = (current as Record<string, unknown>)[segment];
+    }
+    return current;
+  };
+
   for (const key of keys) {
-    const value = (source as Record<string, unknown>)[key];
+    const value = resolvePath(source, key);
     if (typeof value === 'number' && Number.isFinite(value)) return value;
   }
   return fallback;

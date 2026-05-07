@@ -259,6 +259,32 @@ test('Synthetic full block assembly', () => {
 
   const projectHome = run.blocks.find((b) => b.evId === 'EV-125');
   expect(projectHome?.surfaceId).toBe('project-home');
+  expect(projectHome?.screenshotSummary.referenceCount).toBe(1);
+  expect(projectHome?.screenshotSummary.hasSurfaceScreenshot).toBe(true);
+
+  expect(projectHome?.breakpointSummary.viewportCount).toBe(7);
+  expect(projectHome?.cardHierarchySummary.cardCount).toBe(44);
+  expect(projectHome?.breakpointSummary.overflowIssueCount).toBe(2);
+
+  expect(projectHome?.accessibilitySummary.axeViolationCount).toBe(4);
+  expect(projectHome?.accessibilitySummary.keyboardFocusStopCount).toBe(11);
+  expect(projectHome?.accessibilitySummary.ariaNeedsReviewCount).toBe(2);
+  expect(projectHome?.accessibilitySummary.contrastNeedsReviewCount).toBe(1);
+
+  expect(projectHome?.workflowSummary.actionCount).toBe(2);
+  expect(projectHome?.sourceStateSummary.stateMarkerCount).toBe(2);
+  expect(projectHome?.sourceStateSummary.sourceMarkerCount).toBe(1);
+  expect(projectHome?.sourceStateSummary.needsReviewCount).toBe(1);
+  expect(projectHome?.workflowSummary.disabledWithoutReasonCount).toBe(1);
+  expect(projectHome?.workflowSummary.falseAffordanceNeedsReviewCount).toBe(2);
+
+  expect(projectHome?.contentSummary.copySignalCount).toBe(8);
+  expect(projectHome?.contentSummary.findingCount).toBe(5);
+  expect(projectHome?.contentSummary.needsReviewCount).toBe(2);
+
+  expect(projectHome?.doctrineSummary.doctrineSignalCount).toBe(14);
+  expect(projectHome?.doctrineSummary.moldBreakerSignalCount).toBe(8);
+  expect(projectHome?.doctrineSummary.expertReviewRequiredCount).toBe(21);
 });
 
 test('Missing source handling', () => {
