@@ -116,3 +116,37 @@ Run registry validation:
 ```bash
 pnpm pcc:e2e:evidence:registry
 ```
+
+## Prompt 04 surface smoke and baseline EV evidence
+
+Prompt 04 adds a safe surface page object and live navigation smoke for all eight PCC surfaces:
+
+- `project-home`
+- `team-and-access`
+- `documents`
+- `project-readiness`
+- `approvals`
+- `external-systems`
+- `control-center-settings`
+- `site-health`
+
+Safe navigation rule: tab navigation is limited to controls that are `role="tab"`, `data-pcc-tab-id="<surface-id>"`, and `type="button"`.
+
+Prompt 04 baseline evidence scope supports EV-52 and EV-55 only (operator-review pending).
+
+Evidence outputs written under `PCC_EVIDENCE_OUTPUT_DIR`:
+
+- `pcc-live-surface-smoke.json`
+- `pcc-live-surface-smoke.md`
+
+Run-state metadata is included (`selfSkipped`, `runState`) so auditors can distinguish self-skipped vs completed live runs vs local writer-only runs.
+
+Run command:
+
+```bash
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.surface-smoke.spec.ts
+```
+
+Do not commit live evidence outputs until operator review/scrubbing is complete. Never commit storageState/auth/session files or raw Playwright artifacts.
+
+This is baseline runtime traceability only and not a final scorecard result.
