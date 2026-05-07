@@ -1,0 +1,125 @@
+{
+  "package_name": "pcc_project_home_flagship_remediation_package",
+  "version": "2.0",
+  "baseline_commit": "17e4273ebd070dd62ca477297393e6c787441111",
+  "baseline_evidence": "docs/architecture/evidence/pcc-live/20260507-171608-wave-15A-b5-prompt-05",
+  "canonical_scorecard": "docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md",
+  "intent": "Local code-agent prompt package to remediate Project Home toward flagship 100-point scorecard posture.",
+  "files": [
+    {
+      "path": "00_REPO_TRUTH_SUMMARY.md",
+      "bytes": 7745,
+      "sha256": "2a19923127ecb88b065487d6612e94b152aef349be2bac5f891f036be874cdc6"
+    },
+    {
+      "path": "01_OPEN_DECISIONS_CLOSED.md",
+      "bytes": 5696,
+      "sha256": "6c7f372c53559751560e4b94f836f257541b1e32356e9b3365640336918ee6d4"
+    },
+    {
+      "path": "02_TARGET_ARCHITECTURE.md",
+      "bytes": 5711,
+      "sha256": "a5ac69dc4b3aefb326ee5a5a75d2b5fcf91be2825f3fb33574c3303b327e23ed"
+    },
+    {
+      "path": "03_IMPLEMENTATION_PLAN.md",
+      "bytes": 7597,
+      "sha256": "8c39e7ed087c86d3467e7d0e137b659cad55240a97d43d2caed4b3e9728698fd"
+    },
+    {
+      "path": "04_ACCEPTANCE_CRITERIA.md",
+      "bytes": 4438,
+      "sha256": "a851d1da333c59f96289eff060b50476441dc51bba0ec143a6164b3d9d6c469f"
+    },
+    {
+      "path": "05_VALIDATION_AND_EVIDENCE_CLOSEOUT.md",
+      "bytes": 5410,
+      "sha256": "71b80b4cf6d4255d9c00018c5f0d58b6e8d9bc1d3c28addd6aa8255a7c74a967"
+    },
+    {
+      "path": "06_EVIDENCE_GAP_MATRIX.md",
+      "bytes": 2766,
+      "sha256": "6410e4b3c955985110b73e40c2118982676574fe6060e462f3aeecab3515ab9d"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4969,
+      "sha256": "adc047b2406a33bcbc0fa789e891cfa0caa66c2e56670d9bd932c02e1438be04"
+    },
+    {
+      "path": "checklists/LOCAL_AGENT_EXECUTION_CHECKLIST.md",
+      "bytes": 1382,
+      "sha256": "d19077294d09e77ce102a9333a1daa1c6f820c4dc70a70d63653fe1c9b24a747"
+    },
+    {
+      "path": "checklists/POST_IMPLEMENTATION_REVIEW_CHECKLIST.md",
+      "bytes": 1252,
+      "sha256": "6c274d3ca41d8fc16bb812308ee634117d0e178c54e41f87467115a5f2daf37f"
+    },
+    {
+      "path": "checklists/SCORECARD_REVIEW_CHECKLIST.md",
+      "bytes": 1773,
+      "sha256": "8c813bb60c35bbbffcf2f596e807baa9344926b230ffb0decc8df3c5eb4e0eff"
+    },
+    {
+      "path": "evidence/PROJECT_HOME_EVIDENCE_BASELINE_MATRIX.md",
+      "bytes": 3244,
+      "sha256": "353a497663aa96ae872964b878deffd56215e32d2f83659a5d13fe85db56d1de"
+    },
+    {
+      "path": "prompts/Prompt_01_Project_Home_Baseline_Audit_And_Guarded_Workplan.md",
+      "bytes": 5683,
+      "sha256": "0b475d042eeb4a834acbbe9f687be772ffc19c1d3de81de330317a44c4150744"
+    },
+    {
+      "path": "prompts/Prompt_02_Command_Hero_And_First_Fold_Hierarchy.md",
+      "bytes": 6515,
+      "sha256": "4e4afd207d8facf0181ce4399fa0c8b4bcc05e6681bdb7ab238b48d5e672a75e"
+    },
+    {
+      "path": "prompts/Prompt_03_Priority_Actions_Command_Rail_Compression.md",
+      "bytes": 6804,
+      "sha256": "1976891c2f9a37f73d2c187ca21e80202284c58def7d7b9de16597cd800da5d3"
+    },
+    {
+      "path": "prompts/Prompt_04_Core_Control_Module_Cluster_And_Card_Order.md",
+      "bytes": 6818,
+      "sha256": "775e7bba02b0844a245657619f10896d7f54c181c23f44f0568b9388b148e61b"
+    },
+    {
+      "path": "prompts/Prompt_05_Lifecycle_HBI_And_Source_Intelligence_Promotion.md",
+      "bytes": 6360,
+      "sha256": "9c59a092b1d4b73bf42c2262f80fab1118301b54c5a4c336a7ce74ecfbd44b1b"
+    },
+    {
+      "path": "prompts/Prompt_06_Content_Source_HBI_Authority_Copy_Pass.md",
+      "bytes": 6991,
+      "sha256": "dace5c015886a4e0a23293dbccf3d0ae946a53afd8060b003b50fd269bcdd9af"
+    },
+    {
+      "path": "prompts/Prompt_07_Accessibility_Responsive_And_Screenshot_Evidence_Closeout.md",
+      "bytes": 6770,
+      "sha256": "dde556559e281f005b58aeac7504fa48e473fcfc92e6ac96f4476879b8613b26"
+    },
+    {
+      "path": "prompts/Prompt_08_Final_Scorecard_Audit_And_Closeout_Docs.md",
+      "bytes": 5217,
+      "sha256": "340a16b44c9b289854267c9f26f943dfc3fe42ff5a241f616e3791f080748b0f"
+    },
+    {
+      "path": "wireframes/PROJECT_HOME_FLAGSHIP_COMMAND_SURFACE_WIREFRAME.md",
+      "bytes": 5919,
+      "sha256": "5446fe2c13de81f6ab80056c17f3dfcab1d9b738bc3c46804d7de0a2ad8edb6c"
+    },
+    {
+      "path": "wireframes/PROJECT_HOME_MOBILE_FIELD_MODE_WIREFRAME.md",
+      "bytes": 1600,
+      "sha256": "edd857b40d31d7112620883d660b650b22230b7474401219196122a380f7ea0c"
+    },
+    {
+      "path": "wireframes/PROJECT_HOME_PROGRESSIVE_DISCLOSURE_WIREFRAME.md",
+      "bytes": 833,
+      "sha256": "12d03ee59b512475eb22854ee2582b8bc8ec30d475e4724342863d0788286173"
+    }
+  ]
+}
