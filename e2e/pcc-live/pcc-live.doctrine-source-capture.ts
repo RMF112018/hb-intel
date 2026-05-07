@@ -83,7 +83,7 @@ const REQUIRED_GOVERNING_DOCS = [
     role: 'acceptance-scoring-model',
   },
   {
-    path: 'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+    path: 'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     role: 'pcc-scorecard',
   },
 ] as const;

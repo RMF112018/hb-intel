@@ -20,7 +20,7 @@ const REQUIRED_DOC_PATHS = [
   'docs/explanation/design-decisions/con-tech-ux-study.md',
   'docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md',
   'docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md',
-  'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+  'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
 ] as const;
 
 const REQUIRED_ARTIFACT_FILES = [
