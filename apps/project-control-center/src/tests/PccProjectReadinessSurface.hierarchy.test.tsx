@@ -37,13 +37,15 @@ function lifecycleSectionRegion(container: HTMLElement, regionId: string): HTMLE
   return region as HTMLElement;
 }
 
-describe('Project Readiness — Wave 8 blocker hierarchy', () => {
-  it('BlockersCard adopts hierarchy="primary" and footprint="full"', () => {
+describe('Project Readiness — Wave 8 blocker posture', () => {
+  it('BlockersCard adopts tier=tier2/region=operational and footprint="full" (Wave 15A wave-b3 Prompt 04 removed the legacy hierarchy="primary" marker; the route command is the readiness Hero, not Blockers)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
     const card = regionCard(container, 'blockers');
-    expect(card.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
     expect(card.getAttribute('data-pcc-footprint')).toBe('full');
   });
 
@@ -68,8 +70,8 @@ describe('Project Readiness — Wave 8 blocker hierarchy', () => {
   });
 });
 
-describe('Project Readiness — Wave 9 lifecycle blocker hierarchy', () => {
-  it('LifecycleBlockersCard adopts hierarchy="primary" and footprint="full"', () => {
+describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
+  it('LifecycleBlockersCard adopts tier=tier2/region=operational and footprint="full" (Wave 15A wave-b3 Prompt 04 removed the legacy hierarchy="primary" marker; the route command is the readiness Hero, not the lifecycle Blockers card)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
 
@@ -81,7 +83,9 @@ describe('Project Readiness — Wave 9 lifecycle blocker hierarchy', () => {
     expect(region, 'lifecycle blockers region should render').not.toBeNull();
     const card = region!.closest('[data-pcc-card]');
     expect(card).not.toBeNull();
-    expect(card?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(card?.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card?.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(card?.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
     expect(card?.getAttribute('data-pcc-footprint')).toBe('full');
   });
 

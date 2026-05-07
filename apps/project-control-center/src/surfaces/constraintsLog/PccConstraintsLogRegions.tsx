@@ -72,6 +72,8 @@ export const PccConstraintsLogRegions: FC<PccConstraintsLogRegionsProps> = ({ vi
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Constraints Log"
         title="Loading Constraints Log read-model"
       >
@@ -85,6 +87,8 @@ export const PccConstraintsLogRegions: FC<PccConstraintsLogRegionsProps> = ({ vi
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Constraints Log"
         title="Constraints Log read-model failed"
       >
@@ -146,6 +150,8 @@ interface CommandCenterCardProps {
 const CommandCenterCard: FC<CommandCenterCardProps> = ({ commandCenter, moduleSubtitle }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="operational"
     eyebrow="Constraints Log"
     title="Make-Ready Constraint & Risk Exposure Center"
   >
@@ -237,7 +243,13 @@ interface MakeReadyBoardCardProps {
 }
 
 const MakeReadyBoardCard: FC<MakeReadyBoardCardProps> = ({ board }) => (
-  <PccDashboardCard footprint="full" eyebrow="Constraints Log" title="Make-Ready Board">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="operational"
+    eyebrow="Constraints Log"
+    title="Make-Ready Board"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -295,7 +307,13 @@ interface RiskMatrixCardProps {
 }
 
 const RiskMatrixCard: FC<RiskMatrixCardProps> = ({ riskMatrix }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Constraints Log" title="Risk Matrix">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Constraints Log"
+    title="Risk Matrix"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -357,7 +375,13 @@ interface ConstraintExposureMatrixCardProps {
 }
 
 const ConstraintExposureMatrixCard: FC<ConstraintExposureMatrixCardProps> = ({ matrix }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Constraints Log" title="Constraint Exposure Matrix">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Constraints Log"
+    title="Constraint Exposure Matrix"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -417,7 +441,13 @@ interface LogTableCardProps {
 }
 
 const LogTableCard: FC<LogTableCardProps> = ({ logTable, selectedId, onSelect }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Constraints Log" title="Log Table">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Constraints Log"
+    title="Log Table"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -497,7 +527,13 @@ interface DetailPanelCardProps {
 }
 
 const DetailPanelCard: FC<DetailPanelCardProps> = ({ detailPanel, selectedEntry }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Constraints Log" title="Detail Panel">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Constraints Log"
+    title="Detail Panel"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -640,7 +676,13 @@ interface WeeklyHuddleCardProps {
 }
 
 const WeeklyHuddleCard: FC<WeeklyHuddleCardProps> = ({ huddle }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Constraints Log" title="Weekly Huddle">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="reference"
+    eyebrow="Constraints Log"
+    title="Weekly Huddle"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -711,6 +753,8 @@ interface RootCauseLessonsLearnedCardProps {
 const RootCauseLessonsLearnedCard: FC<RootCauseLessonsLearnedCardProps> = ({ rootCause }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="reference"
     eyebrow="Constraints Log"
     title="Root Cause and Lessons Learned"
   >
@@ -800,7 +844,13 @@ interface ExecutiveExposureSummaryCardProps {
 }
 
 const ExecutiveExposureSummaryCard: FC<ExecutiveExposureSummaryCardProps> = ({ summary }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Constraints Log" title="Executive Exposure Summary">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="reference"
+    eyebrow="Constraints Log"
+    title="Executive Exposure Summary"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}

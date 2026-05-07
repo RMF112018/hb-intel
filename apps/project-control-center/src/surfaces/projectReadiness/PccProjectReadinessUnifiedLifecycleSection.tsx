@@ -59,6 +59,8 @@ export const PccProjectReadinessUnifiedLifecycleSection: FC<
     <Fragment>
       <PccDashboardCard
         footprint="wide"
+        tier="tier2"
+        region="detail"
         eyebrow="Project lifecycle"
         title="Lifecycle Timeline"
       >
@@ -66,6 +68,8 @@ export const PccProjectReadinessUnifiedLifecycleSection: FC<
       </PccDashboardCard>
       <PccDashboardCard
         footprint="standard"
+        tier="tier3"
+        region="reference"
         eyebrow="Project memory"
         title="Project Memory"
       >
@@ -73,6 +77,8 @@ export const PccProjectReadinessUnifiedLifecycleSection: FC<
       </PccDashboardCard>
       <PccDashboardCard
         footprint="standard"
+        tier="tier3"
+        region="reference"
         eyebrow="Traceability"
         title="Related Records"
       >

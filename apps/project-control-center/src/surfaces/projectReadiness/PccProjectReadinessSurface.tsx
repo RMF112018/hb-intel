@@ -498,7 +498,13 @@ interface LifecycleGateMapCardProps {
 }
 
 const LifecycleGateMapCard: FC<LifecycleGateMapCardProps> = ({ gates }) => (
-  <PccDashboardCard footprint="full" eyebrow="Lifecycle gates" title="Project lifecycle map">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="detail"
+    eyebrow="Lifecycle gates"
+    title="Project lifecycle map"
+  >
     <ol
       data-pcc-readiness-region="lifecycle-gates"
       className={styles.gateMapList}
@@ -528,7 +534,13 @@ interface DomainGridCardProps {
 }
 
 const DomainGridCard: FC<DomainGridCardProps> = ({ domains }) => (
-  <PccDashboardCard footprint="full" eyebrow="Readiness domains" title="Domain posture">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="detail"
+    eyebrow="Readiness domains"
+    title="Domain posture"
+  >
     <div
       data-pcc-readiness-region="domains"
       className={styles.domainGrid}
@@ -563,7 +575,8 @@ interface BlockersCardProps {
 const BlockersCard: FC<BlockersCardProps> = ({ blockers }) => (
   <PccDashboardCard
     footprint="full"
-    hierarchy="primary"
+    tier="tier2"
+    region="operational"
     eyebrow="Blockers"
     title="Blockers and exceptions"
   >
@@ -630,7 +643,13 @@ interface OwnershipAccountabilityCardProps {
 }
 
 const OwnershipAccountabilityCard: FC<OwnershipAccountabilityCardProps> = ({ ownership }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Ownership" title="Ownership and accountability">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Ownership"
+    title="Ownership and accountability"
+  >
     <div
       data-pcc-readiness-region="ownership-accountability"
       className={styles.ownershipList}
@@ -706,6 +725,8 @@ interface PriorityActionsPreviewCardProps {
 const PriorityActionsPreviewCard: FC<PriorityActionsPreviewCardProps> = ({ preview }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier2"
+    region="operational"
     eyebrow="Priority Actions preview"
     title="Eligible for Priority Actions"
   >
@@ -754,6 +775,8 @@ interface EvidenceSourceHealthCardProps {
 const EvidenceSourceHealthCard: FC<EvidenceSourceHealthCardProps> = ({ evidence }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="detail"
     eyebrow="Evidence and source health"
     title="Evidence and source-health posture"
   >
@@ -818,6 +841,8 @@ interface DownstreamModulesCardProps {
 const DownstreamModulesCard: FC<DownstreamModulesCardProps> = ({ modules }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier3"
+    region="reference"
     eyebrow="Downstream modules"
     title="Downstream module readiness"
   >
@@ -936,6 +961,8 @@ const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewMod
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Project Lifecycle Readiness Center"
         title="Lifecycle readiness"
       >
@@ -953,6 +980,8 @@ const LifecycleReadinessRegions: FC<LifecycleReadinessRegionsProps> = ({ viewMod
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Project Lifecycle Readiness Center"
         title="Lifecycle readiness"
       >
@@ -988,6 +1017,8 @@ interface LifecycleHeroCardProps {
 const LifecycleHeroCard: FC<LifecycleHeroCardProps> = ({ hero }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="detail"
     eyebrow="Project Lifecycle Readiness Center"
     title="Lifecycle readiness — command surface"
   >
@@ -1039,6 +1070,8 @@ interface LifecycleMapCardProps {
 const LifecycleMapCard: FC<LifecycleMapCardProps> = ({ map }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="detail"
     eyebrow="Lifecycle map"
     title="Phases — startup → mobilization → safety → controls → pre-CO → turnover → closeout → warranty"
   >
@@ -1075,6 +1108,8 @@ interface LifecycleFamilyDomainsCardProps {
 const LifecycleFamilyDomainsCard: FC<LifecycleFamilyDomainsCardProps> = ({ familyDomains }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="detail"
     eyebrow="Families and domains"
     title="Startup, safety, closeout — and contributing domains"
   >
@@ -1443,7 +1478,13 @@ interface LifecycleMyActionsCardProps {
 const LifecycleMyActionsCard: FC<LifecycleMyActionsCardProps> = ({ myActions }) => {
   const degraded = lifecycleDegradedPreview(myActions.cardState, 'lifecycle-my-actions');
   return (
-    <PccDashboardCard footprint="wide" eyebrow="My readiness actions" title="Active assignments">
+    <PccDashboardCard
+      footprint="wide"
+      tier="tier2"
+      region="operational"
+      eyebrow="My readiness actions"
+      title="Active assignments"
+    >
       <div
         data-pcc-readiness-region="lifecycle-my-actions"
         data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
@@ -1510,7 +1551,8 @@ const LifecycleBlockersCard: FC<LifecycleBlockersCardProps> = ({ blockers }) => 
   return (
     <PccDashboardCard
       footprint="full"
-      hierarchy="primary"
+      tier="tier2"
+      region="operational"
       eyebrow="Blockers and exceptions"
       title="Blocked, escalated, and at-risk items"
     >
@@ -1584,7 +1626,13 @@ interface LifecycleEvidenceCardProps {
 const LifecycleEvidenceCard: FC<LifecycleEvidenceCardProps> = ({ evidence }) => {
   const degraded = lifecycleDegradedPreview(evidence.cardState, 'lifecycle-evidence-readiness');
   return (
-    <PccDashboardCard footprint="wide" eyebrow="Evidence readiness" title="Evidence-state buckets">
+    <PccDashboardCard
+      footprint="wide"
+      tier="tier2"
+      region="detail"
+      eyebrow="Evidence readiness"
+      title="Evidence-state buckets"
+    >
       <div
         data-pcc-readiness-region="lifecycle-evidence-readiness"
         data-pcc-readiness-section={LIFECYCLE_SECTION_MARKER}
@@ -1634,6 +1682,8 @@ const LifecycleFutureCloseoutCard: FC<LifecycleFutureCloseoutCardProps> = ({ fut
   return (
     <PccDashboardCard
       footprint="standard"
+      tier="tier3"
+      region="deferred"
       eyebrow="Future closeout exposure"
       title="Early closeout-risk surface"
     >
@@ -1697,6 +1747,8 @@ const LifecycleSourceTraceabilityCard: FC<LifecycleSourceTraceabilityCardProps> 
 }) => (
   <PccDashboardCard
     footprint="standard"
+    tier="tier3"
+    region="reference"
     eyebrow="Source traceability"
     title="Library scope and source documents"
   >
@@ -1766,6 +1818,8 @@ const LifecycleReadinessSignalsCard: FC<LifecycleReadinessSignalsCardProps> = ({
   return (
     <PccDashboardCard
       footprint="full"
+      tier="tier2"
+      region="detail"
       eyebrow="Readiness signals"
       title="Posture for future Priority Actions and Approvals integration"
     >

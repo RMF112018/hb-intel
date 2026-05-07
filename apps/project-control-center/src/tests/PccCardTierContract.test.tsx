@@ -32,6 +32,7 @@ import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurfac
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
+import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 
 const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
   'project-home',
@@ -41,6 +42,11 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
   'external-systems',
   'control-center-settings',
   'site-health',
+  // Wave 15A wave-b3 Prompt 04 — Project Readiness embedded subregions are
+  // now classified explicitly; the surface joins the generic explicit-source
+  // loop here. Targeted Project Readiness assertions live in their own block
+  // below.
+  'project-readiness',
 ];
 
 function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
@@ -236,5 +242,102 @@ describe('PCC card-tier contract — locked state cards', () => {
     const card = findCardByHeading(container, 'Items needing setup');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('state');
     expect(card.getAttribute('data-pcc-card-region')).toBe('state');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Wave 15A wave-b3 Prompt 04 — Project Readiness specific assertions.
+// ---------------------------------------------------------------------------
+
+describe('PCC card-tier contract — Project Readiness specific assertions', () => {
+  function renderProjectReadiness(): HTMLElement {
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface />
+      </PccBentoGrid>,
+    );
+    return container;
+  }
+
+  it('Blockers card is not Tier 1 (Project Readiness route command is the readiness Hero)', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'Blockers and exceptions');
+    expect(card.getAttribute('data-pcc-card-tier')).not.toBe('tier1');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
+  });
+
+  it('Lifecycle Blockers card is not Tier 1', () => {
+    const card = findCardByHeading(
+      renderProjectReadiness(),
+      'Blocked, escalated, and at-risk items',
+    );
+    expect(card.getAttribute('data-pcc-card-tier')).not.toBe('tier1');
+    expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
+  });
+
+  it('Lifecycle "Future closeout exposure" card is region=deferred', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'Early closeout-risk surface');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('AHJ launcher panel card is region=deferred', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'AHJ launcher panel');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('Responsibility Matrix template-and-admin card is region=deferred', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'Template and source-mapping admin');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('Downstream module readiness card is region=reference', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'Downstream module readiness');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('Procore source confidence card is region=reference', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'Procore source confidence');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('Responsibility Matrix integration signals card is region=reference', () => {
+    const card = findCardByHeading(
+      renderProjectReadiness(),
+      'Integration signals (read-only references)',
+    );
+    expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('Buyout Procore Reconciliation card is region=reference', () => {
+    const card = findCardByHeading(renderProjectReadiness(), 'Procore Reconciliation View');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('reference');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+  });
+
+  it('every Project Readiness card is a direct child of [data-pcc-bento-grid]', () => {
+    // Strict invariant: card.parentElement must equal the bento grid node
+    // itself — not "all cards share one parent" (which would pass if cards
+    // were wrapped in any common container).
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface />
+      </PccBentoGrid>,
+    );
+    const bento = container.querySelector('[data-pcc-bento-grid]');
+    expect(bento, '[data-pcc-bento-grid] must mount').not.toBeNull();
+    const cards = container.querySelectorAll('[data-pcc-card]');
+    expect(cards.length, 'Project Readiness must render at least one card').toBeGreaterThan(0);
+    for (const card of cards) {
+      const title = card.querySelector('h2, h3, h4')?.textContent ?? '(untitled)';
+      expect(
+        card.parentElement,
+        `Project Readiness card '${title}' must be a direct child of [data-pcc-bento-grid]`,
+      ).toBe(bento);
+    }
   });
 });

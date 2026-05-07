@@ -49,6 +49,8 @@ export const PccPermitInspectionControlCenterRegions: FC<
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Permit & Inspection Control Center"
         title="Loading permit & inspection read-model"
       >
@@ -62,6 +64,8 @@ export const PccPermitInspectionControlCenterRegions: FC<
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Permit & Inspection Control Center"
         title="Permit & inspection read-model failed"
       >
@@ -105,6 +109,8 @@ const HeroCard: FC<{ snapshot: IPermitInspectionControlCenterUiSnapshot }> = ({ 
   return (
     <PccDashboardCard
       footprint="full"
+      tier="tier2"
+      region="detail"
       eyebrow="Permit & Inspection Control Center"
       title="Permit and inspection — command surface"
     >
@@ -139,6 +145,8 @@ const Stat: FC<{ label: string; value: number }> = ({ label, value }) => (
 const PermitsBlockingWorkCard: FC<{ permits: readonly IPermitRecord[] }> = ({ permits }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier2"
+    region="operational"
     eyebrow="Permit & Inspection Control Center"
     title="Permits blocking work"
   >
@@ -175,6 +183,8 @@ const InspectionsReadyCard: FC<{ inspections: readonly IInspectionRecord[] }> = 
 }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier2"
+    region="operational"
     eyebrow="Permit & Inspection Control Center"
     title="Inspections ready to request"
   >
@@ -212,6 +222,8 @@ const FailedReinspectionQueueCard: FC<{
   return (
     <PccDashboardCard
       footprint="wide"
+      tier="tier2"
+      region="operational"
       eyebrow="Permit & Inspection Control Center"
       title="Failed and reinspection queue"
     >
@@ -279,6 +291,8 @@ const FailedReinspectionQueueCard: FC<{
 const ExpiringPermitsCard: FC<{ permits: readonly IPermitRecord[] }> = ({ permits }) => (
   <PccDashboardCard
     footprint="standard"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Expiring permits"
   >
@@ -307,6 +321,8 @@ const ExpiringPermitsCard: FC<{ permits: readonly IPermitRecord[] }> = ({ permit
 const FeeExposureOpenCard: FC<{ fees: readonly IFeeExposureRecord[] }> = ({ fees }) => (
   <PccDashboardCard
     footprint="standard"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Fees and receipts open"
   >
@@ -352,6 +368,8 @@ const EvidenceMissingCard: FC<{ links: readonly IPermitInspectionEvidenceLink[] 
 }) => (
   <PccDashboardCard
     footprint="standard"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Evidence missing"
   >
@@ -378,6 +396,8 @@ const EvidenceMissingCard: FC<{ links: readonly IPermitInspectionEvidenceLink[] 
 const CloseoutExposureCard: FC<{ fees: readonly IFeeExposureRecord[] }> = ({ fees }) => (
   <PccDashboardCard
     footprint="standard"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Closeout, TCO, and CO exposure"
   >
@@ -408,6 +428,8 @@ const AhjLauncherPanelCard: FC<{ profiles: readonly IAhjJurisdictionProfile[] }>
 }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="deferred"
     eyebrow="Permit & Inspection Control Center"
     title="AHJ launcher panel"
   >
@@ -445,6 +467,8 @@ const AhjLauncherPanelCard: FC<{ profiles: readonly IAhjJurisdictionProfile[] }>
 const RecordDetailRegionCard: FC<{ permits: readonly IPermitRecord[] }> = ({ permits }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="detail"
     eyebrow="Permit & Inspection Control Center"
     title="Permit record detail"
   >
@@ -519,6 +543,8 @@ const PriorityActionSignalsCard: FC<{
 }> = ({ signals }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Priority action signals"
   >
@@ -553,6 +579,8 @@ const ReadinessSignalsCard: FC<{
 }> = ({ signals }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Readiness signals"
   >
@@ -586,6 +614,8 @@ const ApprovalSignalsCard: FC<{
 }> = ({ signals }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="reference"
     eyebrow="Permit & Inspection Control Center"
     title="Approvals and checkpoints metadata"
   >

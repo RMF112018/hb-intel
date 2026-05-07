@@ -51,6 +51,8 @@ export const PccResponsibilityMatrixRegions: FC<PccResponsibilityMatrixRegionsPr
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Responsibility Matrix"
         title="Loading Responsibility Matrix read-model"
       >
@@ -64,6 +66,8 @@ export const PccResponsibilityMatrixRegions: FC<PccResponsibilityMatrixRegionsPr
     return (
       <PccDashboardCard
         footprint="full"
+        tier="state"
+        region="state"
         eyebrow="Responsibility Matrix"
         title="Responsibility Matrix read-model failed"
       >
@@ -103,6 +107,8 @@ const OverviewCard: FC<OverviewCardProps> = ({ overview }) => {
   return (
     <PccDashboardCard
       footprint="full"
+      tier="tier2"
+      region="operational"
       eyebrow="Responsibility Matrix"
       title="RACI + Owner-Contract Responsibility Control Center"
     >
@@ -243,6 +249,8 @@ interface MatrixViewCardProps {
 const MatrixViewCard: FC<MatrixViewCardProps> = ({ matrixView }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier2"
+    region="detail"
     eyebrow="Responsibility Matrix"
     title="Matrix view (role / person)"
   >
@@ -317,7 +325,13 @@ interface ItemRegisterCardProps {
 }
 
 const ItemRegisterCard: FC<ItemRegisterCardProps> = ({ itemRegister }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Responsibility Matrix" title="Item register">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Responsibility Matrix"
+    title="Item register"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -377,7 +391,13 @@ interface OwnerContractCardProps {
 }
 
 const OwnerContractCard: FC<OwnerContractCardProps> = ({ ownerContract }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Responsibility Matrix" title="Owner-contract mapping">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Responsibility Matrix"
+    title="Owner-contract mapping"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -468,7 +488,13 @@ interface MyResponsibilitiesCardProps {
 }
 
 const MyResponsibilitiesCard: FC<MyResponsibilitiesCardProps> = ({ my }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Responsibility Matrix" title="My responsibilities">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Responsibility Matrix"
+    title="My responsibilities"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -519,7 +545,13 @@ interface GapsConflictsCardProps {
 }
 
 const GapsConflictsCard: FC<GapsConflictsCardProps> = ({ gaps }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Responsibility Matrix" title="Gaps and conflicts">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Responsibility Matrix"
+    title="Gaps and conflicts"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -580,7 +612,13 @@ interface HandoffsCardProps {
 }
 
 const HandoffsCard: FC<HandoffsCardProps> = ({ handoffs }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Responsibility Matrix" title="Handoffs">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Responsibility Matrix"
+    title="Handoffs"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -648,6 +686,8 @@ interface TemplateAdminCardProps {
 const TemplateAdminCard: FC<TemplateAdminCardProps> = ({ templateAdmin }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="deferred"
     eyebrow="Responsibility Matrix"
     title="Template and source-mapping admin"
   >

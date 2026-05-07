@@ -46,6 +46,8 @@ export const PccResponsibilityMatrixIntegrationCard: FC<
 > = ({ integration }) => (
   <PccDashboardCard
     footprint="full"
+    tier="tier3"
+    region="reference"
     eyebrow="Responsibility Matrix"
     title="Integration signals (read-only references)"
   >

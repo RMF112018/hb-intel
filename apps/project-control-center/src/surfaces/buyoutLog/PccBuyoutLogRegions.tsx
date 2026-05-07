@@ -70,7 +70,13 @@ export interface PccBuyoutLogRegionsProps {
 export const PccBuyoutLogRegions: FC<PccBuyoutLogRegionsProps> = ({ viewModel }) => {
   if (viewModel.status === 'loading') {
     return (
-      <PccDashboardCard footprint="full" eyebrow="Buyout Log" title="Loading Buyout Log read-model">
+      <PccDashboardCard
+        footprint="full"
+        tier="state"
+        region="state"
+        eyebrow="Buyout Log"
+        title="Loading Buyout Log read-model"
+      >
         <div data-pcc-readiness-section={SECTION_MARKER} data-pcc-bl-region="command-center">
           <PccPreviewState state="loading" />
         </div>
@@ -79,7 +85,13 @@ export const PccBuyoutLogRegions: FC<PccBuyoutLogRegionsProps> = ({ viewModel })
   }
   if (viewModel.status === 'error') {
     return (
-      <PccDashboardCard footprint="full" eyebrow="Buyout Log" title="Buyout Log read-model failed">
+      <PccDashboardCard
+        footprint="full"
+        tier="state"
+        region="state"
+        eyebrow="Buyout Log"
+        title="Buyout Log read-model failed"
+      >
         <div data-pcc-readiness-section={SECTION_MARKER} data-pcc-bl-region="command-center">
           <PccPreviewState state="error" />
         </div>
@@ -137,7 +149,13 @@ interface CommandCenterCardProps {
 }
 
 const CommandCenterCard: FC<CommandCenterCardProps> = ({ commandCenter, moduleSubtitle }) => (
-  <PccDashboardCard footprint="full" eyebrow="Buyout Log" title="Buyout Command Center">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="operational"
+    eyebrow="Buyout Log"
+    title="Buyout Command Center"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -247,7 +265,13 @@ interface PackageTableCardProps {
 }
 
 const PackageTableCard: FC<PackageTableCardProps> = ({ packageTable, selectedId, onSelect }) => (
-  <PccDashboardCard footprint="full" eyebrow="Buyout Log" title="Buyout Package Table">
+  <PccDashboardCard
+    footprint="full"
+    tier="tier2"
+    region="detail"
+    eyebrow="Buyout Log"
+    title="Buyout Package Table"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -348,7 +372,13 @@ interface BudgetVsCommitmentCardProps {
 }
 
 const BudgetVsCommitmentCard: FC<BudgetVsCommitmentCardProps> = ({ budget }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Budget vs Commitment Matrix">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Buyout Log"
+    title="Budget vs Commitment Matrix"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -416,7 +446,13 @@ interface UnboughtScopeQueueCardProps {
 }
 
 const UnboughtScopeQueueCard: FC<UnboughtScopeQueueCardProps> = ({ queue }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Unbought Scope Queue">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="operational"
+    eyebrow="Buyout Log"
+    title="Unbought Scope Queue"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -471,7 +507,13 @@ interface ProcoreReconciliationCardProps {
 }
 
 const ProcoreReconciliationCard: FC<ProcoreReconciliationCardProps> = ({ reconciliation }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Procore Reconciliation View">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="reference"
+    eyebrow="Buyout Log"
+    title="Procore Reconciliation View"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -575,7 +617,13 @@ interface PackageDetailCardProps {
 }
 
 const PackageDetailCard: FC<PackageDetailCardProps> = ({ packageDetail, selectedEntry }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Buyout Package Detail">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier2"
+    region="detail"
+    eyebrow="Buyout Log"
+    title="Buyout Package Detail"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -857,7 +905,13 @@ interface ComplianceCardProps {
 }
 
 const ComplianceCard: FC<ComplianceCardProps> = ({ compliance }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Compliance / SDI / Bond">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="reference"
+    eyebrow="Buyout Log"
+    title="Compliance / SDI / Bond"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -938,6 +992,8 @@ interface ProcurementLeadTimeCardProps {
 const ProcurementLeadTimeCard: FC<ProcurementLeadTimeCardProps> = ({ procurement }) => (
   <PccDashboardCard
     footprint="wide"
+    tier="tier3"
+    region="reference"
     eyebrow="Buyout Log"
     title="Procurement / Submittal / Lead-Time"
   >
@@ -1008,7 +1064,13 @@ interface EvidenceLineageCardProps {
 }
 
 const EvidenceLineageCard: FC<EvidenceLineageCardProps> = ({ evidenceLineage }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Evidence and Source Lineage">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="reference"
+    eyebrow="Buyout Log"
+    title="Evidence and Source Lineage"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}
@@ -1133,7 +1195,13 @@ interface AuditHistoryCardProps {
 }
 
 const AuditHistoryCard: FC<AuditHistoryCardProps> = ({ auditHistory }) => (
-  <PccDashboardCard footprint="wide" eyebrow="Buyout Log" title="Audit History">
+  <PccDashboardCard
+    footprint="wide"
+    tier="tier3"
+    region="reference"
+    eyebrow="Buyout Log"
+    title="Audit History"
+  >
     <div
       className={styles.body}
       data-pcc-readiness-section={SECTION_MARKER}

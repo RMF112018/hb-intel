@@ -23,7 +23,13 @@ export const PccProjectReadinessProcoreSourceConfidenceCard: FC<
 > = ({ viewModel }) => {
   const degradedStateId = viewModel?.degradedStateId ?? null;
   return (
-    <PccDashboardCard footprint="standard" eyebrow="Procore" title="Procore source confidence">
+    <PccDashboardCard
+      footprint="standard"
+      tier="tier3"
+      region="reference"
+      eyebrow="Procore"
+      title="Procore source confidence"
+    >
       <div
         data-pcc-readiness-region="procore-source-confidence"
         data-pcc-card-id="procore-source-confidence"
