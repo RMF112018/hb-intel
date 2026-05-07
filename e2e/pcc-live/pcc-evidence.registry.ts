@@ -43,10 +43,35 @@ function statusFor(id: number): PccEvidenceRecord['status'] {
 }
 
 function hardStopsFor(id: number): PccEvidenceRecord['hardStopRefs'] {
-  if (id >= 52 && id <= 58) return ['HS-08', 'HS-09'];
-  if (id >= 77 && id <= 84) return ['HS-03'];
-  if (id >= 125 && id <= 134) return ['HS-09', 'HS-10'];
-  return [];
+  const refs = new Set<PccEvidenceRecord['hardStopRefs'][number]>();
+
+  if ((id >= 44 && id <= 51) || (id >= 59 && id <= 68)) refs.add('HS-01');
+  if ((id >= 37 && id <= 43) || (id >= 59 && id <= 68) || (id >= 85 && id <= 92)) refs.add('HS-02');
+  if (id >= 59 && id <= 76) refs.add('HS-03');
+  if ((id >= 85 && id <= 92) || (id >= 93 && id <= 99)) refs.add('HS-04');
+  if (id >= 69 && id <= 76) refs.add('HS-05');
+  if ((id >= 93 && id <= 99) || (id >= 100 && id <= 106)) refs.add('HS-06');
+  if (id >= 77 && id <= 84) refs.add('HS-07');
+  if ((id >= 52 && id <= 58) || (id >= 69 && id <= 76)) refs.add('HS-08');
+  if ((id >= 37 && id <= 43) || (id >= 52 && id <= 58) || (id >= 125 && id <= 134))
+    refs.add('HS-09');
+  if ((id >= 85 && id <= 92) || (id >= 100 && id <= 106) || (id >= 125 && id <= 134))
+    refs.add('HS-10');
+
+  return Array.from(refs).sort();
+}
+
+function pillarRefsFor(id: number): PccEvidenceRecord['pillarRefs'] {
+  if (id >= 37 && id <= 43) return ['P1', 'P2', 'P8', 'P9'];
+  if (id >= 44 && id <= 51) return ['P1', 'P2', 'P5'];
+  if (id >= 52 && id <= 58) return ['P3', 'P7', 'P9'];
+  if (id >= 59 && id <= 68) return ['P1', 'P3', 'P4', 'P5'];
+  if (id >= 69 && id <= 76) return ['P4', 'P7', 'P8'];
+  if (id >= 77 && id <= 84) return ['P8'];
+  if (id >= 85 && id <= 92) return ['P5', 'P6'];
+  if (id >= 93 && id <= 99) return ['P6'];
+  if (id >= 100 && id <= 106) return ['P6', 'P9'];
+  return ['P9'];
 }
 
 function titleFor(id: number): string {
@@ -160,7 +185,7 @@ function createRecord(id: PccEvidenceId): PccEvidenceRecord {
     id,
     title: titleFor(number),
     objective: objectiveFor(number),
-    pillarRefs: ['P1', 'P2'],
+    pillarRefs: pillarRefsFor(number),
     hardStopRefs: hardStopsFor(number),
     evidenceCategory: categoryFor(number),
     automationLevel: number >= 125 ? 'manual-review' : 'semi-automated',
