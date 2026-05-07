@@ -38,7 +38,7 @@ const SUPPRESSED_FIXTURES = SAMPLE_PRIORITY_ACTIONS.filter((a) =>
 );
 
 const REQUIRED_CARD_TITLES = [
-  'Project Intelligence Header',
+  'Project Intelligence',
   'Priority Actions',
   'Site Health Summary',
   'Document Control Center',
@@ -137,7 +137,7 @@ describe('Project Home bento dashboard', () => {
     const cards = Array.from(container.querySelectorAll('[data-pcc-card]')) as HTMLElement[];
 
     const projectIntelligenceCard = cards.find((card) =>
-      card.textContent?.includes('Project Intelligence Header'),
+      card.textContent?.includes('Project Intelligence'),
     );
     expect(projectIntelligenceCard).toBeDefined();
     expect(projectIntelligenceCard?.getAttribute('data-pcc-footprint')).toBe('hero');
@@ -168,7 +168,11 @@ describe('Project Home bento dashboard', () => {
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
     expect(panels).toHaveLength(1);
     expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
-    expect(panels[0].textContent).toContain('Project Intelligence Header');
+    expect(panels[0].textContent).toContain('Project Intelligence');
+    // Wave 15A wave-b6 Prompt 02 — the legacy "Header" suffix was an
+    // internal-feeling label; the operator-facing title drops it. Defend
+    // against accidental regression to the pre-rename string.
+    expect(panels[0].textContent).not.toContain('Project Intelligence Header');
   });
 
   it('the bento grid does not use grid-auto-flow: dense', () => {
@@ -455,6 +459,78 @@ describe('Project Home bento dashboard', () => {
     expect(body).not.toBeNull();
     expect(body!.textContent).toContain(SAMPLE_PROJECT_PROFILE.projectName);
     expect(body!.textContent).toContain(SAMPLE_PROJECT_PROFILE.projectNumber);
+  });
+
+  // ── Wave 15A wave-b6 Prompt 02 — Project Command Summary posture row ──
+
+  it('Project Intelligence card renders the first-fold command summary row with source and HBI advisory cues (fixture path)', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const summary = container.querySelector('[data-pcc-command-summary]');
+    expect(summary, 'command summary row should render on the fixture path').not.toBeNull();
+    const sourceCue = summary!.querySelector('[data-pcc-command-summary-source]');
+    expect(sourceCue, 'source cue must render').not.toBeNull();
+    expect(sourceCue!.textContent ?? '').toContain('Source:');
+    expect(sourceCue!.textContent ?? '').toContain('fixture preview');
+    const hbiCue = summary!.querySelector('[data-pcc-command-summary-hbi]');
+    expect(hbiCue, 'HBI advisory cue must render').not.toBeNull();
+    expect(hbiCue!.textContent ?? '').toContain('HBI advisory');
+    expect(hbiCue!.textContent ?? '').toContain('no writeback');
+  });
+
+  it('Project Intelligence command summary row renders inert spans only — no anchors, no buttons, no http hrefs (fixture path)', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const summary = container.querySelector<HTMLElement>('[data-pcc-command-summary]');
+    expect(summary).not.toBeNull();
+    expect(summary!.querySelectorAll('a').length).toBe(0);
+    expect(summary!.querySelectorAll('button').length).toBe(0);
+    expect(summary!.querySelectorAll('[href]').length).toBe(0);
+    const anchors = summary!.querySelectorAll('a[href]');
+    for (const a of Array.from(anchors)) {
+      expect(a.getAttribute('href') ?? '').not.toMatch(/^https?:\/\//);
+    }
+  });
+
+  it('Project Intelligence command summary row renders the high-priority and blocking-setup chips with numeric values (fixture path)', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const summary = container.querySelector<HTMLElement>('[data-pcc-command-summary]');
+    expect(summary).not.toBeNull();
+    const highPriorityChip = summary!.querySelector(
+      '[data-pcc-command-summary-chip="high-priority-actions"]',
+    );
+    expect(highPriorityChip, 'high-priority chip should render on the fixture path').not.toBeNull();
+    const highPriorityValue = Number(highPriorityChip!.textContent?.match(/\d+/)?.[0] ?? 'NaN');
+    expect(highPriorityValue).toBeGreaterThanOrEqual(0);
+    const blockingChip = summary!.querySelector(
+      '[data-pcc-command-summary-chip="blocking-missing-configs"]',
+    );
+    expect(
+      blockingChip,
+      'blocking-missing-configs chip should render on the fixture path',
+    ).not.toBeNull();
+    const blockingValue = Number(blockingChip!.textContent?.match(/\d+/)?.[0] ?? 'NaN');
+    expect(blockingValue).toBeGreaterThanOrEqual(0);
+    // Pending-approvals chip is read-model-only; the fixture path supplies
+    // no approvalsCard, so the helper returns undefined and the chip is omitted.
+    const pendingChip = summary!.querySelector(
+      '[data-pcc-command-summary-chip="pending-approvals"]',
+    );
+    expect(pendingChip, 'pending-approvals chip must NOT render on the fixture path').toBeNull();
+  });
+
+  it('Project Intelligence card renders an operator-facing source cue on the read-model path (not the fixture-preview label)', async () => {
+    const { container, findByText } = render(
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+    );
+    await findByText('Lifecycle Timeline');
+    const summary = container.querySelector<HTMLElement>('[data-pcc-command-summary]');
+    expect(summary).not.toBeNull();
+    const sourceCue = summary!.querySelector('[data-pcc-command-summary-source]');
+    expect(sourceCue).not.toBeNull();
+    const sourceText = sourceCue!.textContent ?? '';
+    expect(sourceText.startsWith('Source:')).toBe(true);
+    expect(sourceText, 'read-model path must not render the fixture-preview label').not.toContain(
+      'fixture preview',
+    );
   });
 
   // ── Card-state contract sanity ───────────────────────────────────────

@@ -1,4 +1,5 @@
 import { Fragment, type FC } from 'react';
+import { SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS, SAMPLE_PRIORITY_ACTIONS } from '@hbc/models/pcc';
 import { PccProjectIntelligenceCard } from './PccProjectIntelligenceCard';
 import { PccPriorityActionsCard } from './PccPriorityActionsCard';
 import { PccSiteHealthSummaryCard } from './PccSiteHealthSummaryCard';
@@ -10,6 +11,7 @@ import { PccTeamSnapshotCard } from './PccTeamSnapshotCard';
 import { PccMissingConfigurationsCard } from './PccMissingConfigurationsCard';
 import { PccRecentActivityCard } from './PccRecentActivityCard';
 import { PccProjectHomeReadModelContent } from './PccProjectHomeReadModelContent';
+import { buildProjectCommandSummary } from './projectCommandSummary';
 import type { IPccProjectHomeReadModelClient } from './projectHomeViewModel';
 
 interface PccProjectHomeProps {
@@ -41,9 +43,14 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient }) => 
   if (readModelClient) {
     return <PccProjectHomeReadModelContent client={readModelClient} />;
   }
+  const fixtureCommandSummary = buildProjectCommandSummary({
+    priorityActions: SAMPLE_PRIORITY_ACTIONS,
+    missingConfigurations: SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
+    sourceMode: 'fixture',
+  });
   return (
     <Fragment>
-      <PccProjectIntelligenceCard />
+      <PccProjectIntelligenceCard commandSummary={fixtureCommandSummary} />
       <PccPriorityActionsCard />
       <PccMissingConfigurationsCard />
       <PccSiteHealthSummaryCard />

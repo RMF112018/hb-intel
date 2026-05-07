@@ -42,7 +42,7 @@ describe('Project Home — first-impression composition order', () => {
       expect(grid, 'bento grid should render').not.toBeNull();
       const titles = readCardTitlesInOrder(grid!);
 
-      const intelligence = indexOfTitle(titles, 'Project Intelligence Header');
+      const intelligence = indexOfTitle(titles, 'Project Intelligence');
       const priority = indexOfTitle(titles, 'Priority Actions');
       const missingConfig = indexOfTitle(titles, 'Missing Configurations');
       const siteHealth = indexOfTitle(titles, 'Site Health Summary');
@@ -78,7 +78,7 @@ describe('Project Home — first-impression composition order', () => {
       const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
       expect(panels).toHaveLength(1);
       expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
-      expect(panels[0].textContent).toContain('Project Intelligence Header');
+      expect(panels[0].textContent).toContain('Project Intelligence');
     });
   });
 
@@ -100,7 +100,7 @@ describe('Project Home — first-impression composition order', () => {
       const grid = container.querySelector('[data-pcc-bento-grid]')!;
       const titles = readCardTitlesInOrder(grid);
 
-      const intelligence = indexOfTitle(titles, 'Project Intelligence Header');
+      const intelligence = indexOfTitle(titles, 'Project Intelligence');
       const priority = indexOfTitle(titles, 'Priority Actions');
       const missingConfig = indexOfTitle(titles, 'Missing Configurations');
       const siteHealth = indexOfTitle(titles, 'Site Health Summary');

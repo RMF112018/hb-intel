@@ -27,7 +27,10 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--pcc-color-text-muted);
+  /* Wave 15A wave-b6 Prompt 02 — push toward primary so the four hero
+     metric labels pass WCAG AA against the canvas, while the value cells
+     (700 weight, 22px, full primary) remain visually dominant. */
+  color: color-mix(in srgb, var(--pcc-color-text-primary) 75%, var(--pcc-color-text-muted));
 }
 
 /* List rows (priority actions, approvals, recent activity, etc.) */
@@ -134,6 +137,43 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--pcc-space-sm);
+}
+
+/* Wave 15A wave-b6 Prompt 02 — first-fold posture row inside the
+   Project Intelligence command card. Inert spans only; no buttons,
+   no anchors, no handlers. */
+
+.commandSummaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  align-items: center;
+}
+
+.commandSummaryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pcc-space-xs);
+  padding: 4px 10px;
+  border-radius: var(--pcc-radius-full);
+  background: var(--pcc-color-canvas);
+  border: 1px solid var(--pcc-color-border);
+  font-size: 11px;
+  color: var(--pcc-color-text-primary);
+}
+
+.commandSummaryChipLabel {
+  font-weight: 500;
+}
+
+.commandSummaryChipValue {
+  font-weight: 700;
+}
+
+.commandSummaryMeta {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--pcc-color-text-primary) 70%, var(--pcc-color-text-muted));
 }
 
 /* Site Health Summary */
