@@ -34,9 +34,9 @@ The output of this prompt must establish:
 2. PCC live env parsing and missing-env/self-skip behavior.
 3. A minimal runtime smoke spec proving the harness can load or clearly block without ambiguous failures.
 4. Root package scripts for listing/running the lane.
-5. `.gitignore` protection for auth state and generated PCC evidence artifacts.
+5. `.gitignore` protection for auth/session/raw Playwright artifacts.
 6. Documentation for operator setup, safety boundaries, and optional Brave parity.
-7. No tenant mutation, no committed auth state, no generated evidence committed, and no PCC runtime/source changes unless strictly necessary for harness compilation.
+7. No tenant mutation, no committed auth/session-sensitive artifacts, no raw Playwright artifacts committed, and no PCC runtime/source changes unless strictly necessary for harness compilation.
 
 This prompt is a foundation step. It should not attempt to capture all EV evidence yet.
 
@@ -73,14 +73,14 @@ Expected current posture to confirm, not assume:
 - Root `playwright.config.ts` targets local/dev-harness behavior and starts local web servers; do not modify it for the PCC live lane.
 - `playwright.kudos-live.config.ts` is the live SharePoint precedent: no local web server, serial, storageState-based, opt-in.
 - The PCC scorecard file exists at the required path.
-- `.gitignore` already ignores general Playwright output, but may not yet ignore PCC-specific evidence artifacts or storage state.
+- `.gitignore` already ignores general Playwright output, but may not yet ignore PCC-specific auth/session/raw Playwright artifacts.
 
 ## Non-Negotiable Safety Rules
 
 Do **not**:
 
 - Commit or create a real `storageState` JSON file.
-- Commit tenant cookies, auth tokens, screenshots, traces, videos, HAR files, or generated evidence artifacts.
+- Commit tenant cookies, auth tokens, screenshots, traces, videos, HAR files, or raw auth/session-sensitive Playwright artifacts.
 - Store raw secrets in code, docs, examples, logs, or comments.
 - Use `.env` auto-loading for live tenant variables.
 - Add live SharePoint/Graph/Procore/Sage/Autodesk/Document Crunch/Adobe Sign mutation.
@@ -90,6 +90,16 @@ Do **not**:
 - Modify PCC runtime source, surface source, layout primitives, manifests, packages, or SharePoint packaging files unless a compile blocker proves it is unavoidable.
 - Reuse SharePoint-generated CSS class names as primary selectors.
 - Claim EV evidence is “captured” in this prompt unless a real artifact is created by the harness run. This prompt should usually mark EV impact as “foundation only.”
+
+Never-commit list (must remain true for this prompt and all follow-ups):
+
+- storageState/session files
+- cookies/auth context
+- raw traces/videos
+- raw `test-results/`
+- raw `playwright-report/`
+- unsanitized console dumps
+- secrets/tokens/personal data/auth context
 
 ## Tenant Target
 
@@ -317,16 +327,22 @@ Do not modify `apps/project-control-center/package.json`.
 
 ## `.gitignore` Requirements
 
-Update `.gitignore` to protect at least:
+Update `.gitignore` to protect auth/session/raw Playwright artifacts only. Do not add a blanket ignore for curated PCC evidence paths.
 
 ```text
-# PCC live SharePoint evidence and auth artifacts
-artifacts/pcc-live-evidence/
+# PCC live SharePoint auth/session/raw Playwright artifacts
 .e2e-auth/
 .secrets/
 *.storageState.json
 *pcc*storage*.json
 *pcc*auth*.json
+```
+
+Curated and sanitized PCC evidence is repo-visible and commit-eligible after operator review.
+Preferred curated evidence path:
+
+```text
+docs/architecture/evidence/pcc-live/<run-id>/
 ```
 
 Also verify the repo already ignores:
@@ -385,6 +401,7 @@ Explicitly instruct:
 - Prefer `$HOME/.config/hbc/`.
 - Rotate the file periodically.
 - Never paste its contents into chat or tickets.
+- Curated/sanitized evidence may be committed after operator review under `docs/architecture/evidence/pcc-live/<run-id>/`.
 
 ## Scorecard / EV Impact For This Prompt
 
@@ -474,7 +491,7 @@ pcc:e2e:live
 
 ### Step 7 — Update `.gitignore`
 
-Add PCC live auth/evidence artifact ignores without disturbing existing rules.
+Add PCC live auth/session/raw Playwright artifact ignores without disturbing existing rules.
 
 ### Step 8 — Validate
 
@@ -484,7 +501,7 @@ Run these commands:
 git status --short
 pnpm exec playwright test --config=playwright.pcc-live.config.ts --list
 pnpm pcc:e2e:live:list
-pnpm exec prettier --check playwright.pcc-live.config.ts e2e/pcc-live package.json .gitignore
+pnpm exec prettier --check --ignore-unknown playwright.pcc-live.config.ts e2e/pcc-live package.json .gitignore
 git diff --check
 ```
 
@@ -509,14 +526,14 @@ Prompt 01 is complete only when:
 - Brave is optional and absent unless `PCC_LIVE_BRAVE_EXECUTABLE_PATH` is set.
 - Missing env/storageState produces clear self-skip behavior.
 - Root scripts exist and are opt-in only.
-- `.gitignore` protects PCC live evidence/auth artifacts.
+- `.gitignore` protects PCC live auth/session/raw Playwright artifacts.
 - README documents setup, storageState safety, required/optional env vars, tenant target, no mutation, CI posture, and troubleshooting.
 - The smoke spec does not mutate tenant data.
 - The smoke spec uses PCC `data-pcc-*` selectors first.
 - Validation commands above are run and reported.
 - No forbidden files are changed.
 - `pnpm-lock.yaml` is unchanged.
-- No generated screenshots/traces/videos/storageState/evidence artifacts are staged.
+- No unreviewed, raw, auth/session-sensitive, or unsanitized evidence artifacts are staged.
 
 ## Required Closeout Response
 
@@ -526,31 +543,36 @@ Return exactly this structure:
 Prompt completed.
 
 Files changed:
+
 - <path>
 - <path>
 
 Validation:
+
 - `git status --short` — <result>
 - `pnpm exec playwright test --config=playwright.pcc-live.config.ts --list` — <result>
 - `pnpm pcc:e2e:live:list` — <result>
-- `pnpm exec prettier --check playwright.pcc-live.config.ts e2e/pcc-live package.json .gitignore` — <result>
+- `pnpm exec prettier --check --ignore-unknown playwright.pcc-live.config.ts e2e/pcc-live package.json .gitignore` — <result>
 - `git diff --check` — <result>
 - `pnpm --filter @hbc/spfx-project-control-center check-types` — <result or not run with reason>
 - `pnpm --filter @hbc/spfx-project-control-center test` — <result or not run with reason>
 
 Evidence / scorecard impact:
+
 - Foundation for EV-52 through EV-58.
 - Supports future HS-08 / HS-09 review.
 - No EV item marked captured by this prompt unless live run artifacts were intentionally produced and kept outside git.
 
 Safety confirmation:
+
 - No tenant mutation added.
 - No storageState committed.
-- No generated screenshots/traces/videos/evidence artifacts staged.
+- No unreviewed, raw, auth/session-sensitive, or unsanitized evidence artifacts staged.
 - No PCC runtime source modified.
 - `pnpm-lock.yaml` unchanged.
 
 Residual risks or pending items:
+
 - <items>
 ```
 
