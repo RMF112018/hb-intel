@@ -33,7 +33,7 @@ export function resolvePccLiveResponsiveMode(inlineSizePx: number): PccLiveRespo
   return 'ultrawide';
 }
 
-export const PCC_LIVE_VIEWPORT_MATRIX: readonly PccLiveViewportDefinition[] = [
+export const PCC_LIVE_VIEWPORT_MATRIX = [
   { id: 'phone-390', label: 'Phone 390', width: 390, height: 844, touch: true },
   {
     id: 'tablet-portrait-768',
@@ -84,7 +84,7 @@ export const PCC_LIVE_VIEWPORT_MATRIX: readonly PccLiveViewportDefinition[] = [
     height: 1280,
     touch: false,
   },
-] as const;
+] as const satisfies readonly PccLiveViewportDefinition[];
 
 type AssertTrue<T extends true> = T;
 type _ModeCount = AssertTrue<(typeof PCC_LIVE_RESPONSIVE_MODES)['length'] extends 8 ? true : false>;
