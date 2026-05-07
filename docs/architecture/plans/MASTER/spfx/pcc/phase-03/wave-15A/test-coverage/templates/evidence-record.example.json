@@ -1,0 +1,26 @@
+{
+  "evidenceId": "EV-40",
+  "title": "Project Home screenshot evidence",
+  "status": "captured",
+  "pillarRefs": [
+    "P1",
+    "P4",
+    "P5"
+  ],
+  "hardStopRefs": [
+    "HS-02",
+    "HS-03"
+  ],
+  "surface": "project-home",
+  "viewport": "desktop",
+  "artifactPaths": [
+    "screenshots/project-home/desktop/EV-40_project-home_full-page.png"
+  ],
+  "assertions": [
+    "project-home active panel visible",
+    "bento grid rendered",
+    "card hierarchy captured"
+  ],
+  "reviewerNotes": [],
+  "timestamp": "2026-05-07T00:00:00.000Z"
+}

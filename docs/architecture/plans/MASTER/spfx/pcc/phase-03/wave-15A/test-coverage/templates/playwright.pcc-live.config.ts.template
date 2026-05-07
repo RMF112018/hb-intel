@@ -1,0 +1,23 @@
+import { defineConfig, devices } from '@playwright/test';
+
+const storageState = process.env.PCC_LIVE_STORAGE_STATE;
+const braveExecutablePath = process.env.PCC_LIVE_BRAVE_EXECUTABLE_PATH;
+
+export default defineConfig({
+  testDir: './e2e/pcc-live',
+  fullyParallel: false,
+  workers: 1,
+  retries: process.env.CI ? 1 : 0,
+  reporter: process.env.CI ? 'github' : [['list'], ['html', { open: 'never' }]],
+  use: {
+    storageState: storageState && storageState.length > 0 ? storageState : undefined,
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    ...(braveExecutablePath
+      ? [{ name: 'brave', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: braveExecutablePath } } }]
+      : []),
+  ],
+});

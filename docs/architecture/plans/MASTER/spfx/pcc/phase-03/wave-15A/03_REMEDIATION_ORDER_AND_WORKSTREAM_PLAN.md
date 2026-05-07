@@ -2,198 +2,191 @@
 
 ## 1. Purpose
 
-This file defines the mandatory execution order for Wave 15A. The order matters. Surface-level styling before shared-system correction will not reach 56/56.
+This document defines the recommended remediation order for Wave 15A under the 100-point scorecard.
+
+The sequence is dependency-driven. Shared systems must be corrected before individual surfaces are polished.
 
 ## 2. Execution Rule
 
-Do not remediate individual pages first.
-
-Begin with doctrine, shell, host fit, grid, card, state, and project context. Then remediate surfaces.
+Do not optimize isolated pages before the shared shell, navigation, bento, card, and state systems are stable.
 
 ## 3. Workstream Overview
 
-| Workstream | Name | Primary Outcome |
-|---|---|---|
-| A | Baseline and Doctrine Contract | Scorecard and evidence rules locked. |
-| B | Shell, Host Fit, and Navigation | PCC frame becomes tenant-aware and command-centered. |
-| C | Project Context and Surface Header | Every surface becomes project-specific. |
-| D | Grid, Bento, and Card Hierarchy | Layout system supports product-grade surfaces. |
-| E | State Model and Product Language | Preview/read-only/degraded states become operationally clear. |
-| F | First-Impression Surfaces | Home, Team & Access, Documents, Readiness corrected. |
-| G | Governance / Risk / Integration Surfaces | Site Health, Settings, Approvals, External Systems corrected. |
-| H | Validation and Closeout | 56/56 evidence package completed. |
+| Workstream | Priority | Primary Scorecard Pillars |
+|---|---:|---|
+| Scorecard adoption and reference update | 0 | P9 |
+| Shared shell, host fit, navigation, project context | 1 | P1, P3, P7, P8 |
+| Bento, card hierarchy, density | 2 | P1, P2, P4, P7 |
+| State model, disabled/read-only/degraded language | 3 | P5, P6, P8 |
+| Project Home command-center recomposition | 4 | P1, P2, P4, P5 |
+| Project Readiness decomposition | 5 | P1, P2, P4, P5, P6 |
+| External Platforms false-affordance correction | 6 | P2, P5, P6 |
+| Approvals workflow clarity | 7 | P2, P5, P6 |
+| Documents operational clarity | 8 | P1, P5, P6 |
+| Team & Access clarity | 9 | P5, P6, P8 |
+| Site Health risk/control clarity | 10 | P1, P5, P6 |
+| Settings governance clarity | 11 | P5, P6 |
+| Responsive/host-fit/accessibility evidence | 12 | P7, P8, P9 |
+| Final independent 100-point scoring | 13 | P9 |
 
 ## 4. Detailed Sequence
 
+### Step 0 — Canonical Scorecard Adoption
+
+Update all Wave 15A docs to reference:
+
+```text
+docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md
+docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md
+```
+
+Remove final readiness dependence on the prior 56/56 model.
+
 ### Step 1 — Repo Truth Audit
 
-Required actions:
+Confirm current PCC source, surfaces, docs, evidence, package version, and current visual proof.
 
-- Inspect current PCC source.
-- Inventory actual current surfaces.
-- Inventory shell, nav, grid, card, state, and style components.
-- Inspect UI doctrine files.
-- Inspect scorecard/checklist/evidence files.
-- Inspect current Wave 15 architecture and closeout docs.
-- Inspect existing screenshots.
+Required outputs:
 
-Exit criteria:
+- Surface inventory.
+- Shared primitive inventory.
+- Evidence inventory.
+- Current score estimate.
+- Hard-stop risk list.
 
-- Source file map is complete.
-- Existing shared primitive ownership is understood.
-- No implementation begins until the file map is documented.
+### Step 2 — Shared Shell and Host Fit
 
-### Step 2 — Scorecard Contract
+Correct:
 
-Required actions:
+- SharePoint host fit.
+- App canvas ownership.
+- Project identity.
+- Active surface clarity.
+- Navigation behavior.
+- Command/search/HBI affordance posture.
 
-- Create adapted PCC scorecard.
-- Define 4/4 criteria for each category.
-- Define evidence required for each category.
-- Record current baseline score.
+### Step 3 — Bento, Card, and Layout Primitives
 
-Exit criteria:
+Correct:
 
-- Scorecard contract approved.
-- Hard gates identified.
+- Equal-weight card wall behavior.
+- Primary/secondary/supporting hierarchy.
+- Card footprint and row-span stability.
+- Density and scanability.
+- Breakpoint behavior.
 
-### Step 3 — Shared Shell and Host Fit
+### Step 4 — State Model and Product Language
 
-Required actions:
+Correct:
 
-- Reduce shell dominance.
-- Create project context band.
-- Reposition preview diagnostics.
-- Improve nav active/hover/focus states.
-- Validate against SharePoint chrome.
+- Preview/read-only/deferred language.
+- Disabled action explanations.
+- Empty/error/degraded/missing-config states.
+- Source-of-record and data confidence language.
+- HBI authority boundaries.
 
-Exit criteria:
+### Step 5 — Project Home
 
-- PCC content becomes primary.
-- Header/nav no longer overpower content.
-- Screenshots demonstrate fit.
+Project Home must become the flagship command-center entry point.
 
-### Step 4 — Surface Header Standard
+Focus:
 
-Required actions:
+- Priority actions.
+- Project intelligence.
+- Risk/status posture.
+- Work center navigation.
+- Recent activity subordinated to priority work.
 
-- Create or update shared surface header.
-- Add project identity to every surface.
-- Add purpose, state, next action, and data confidence fields.
+### Step 6 — Project Readiness
 
-Exit criteria:
+Project Readiness must be decomposed or reorganized so it does not function as an overloaded module aggregate.
 
-- Every surface starts with a consistent project-specific operational header.
+Focus:
 
-### Step 5 — Grid and Card System
+- Readiness overview.
+- Blockers.
+- Lifecycle readiness.
+- Permit/inspection.
+- Responsibility matrix.
+- Constraints.
+- Buyout.
+- Procore/source confidence.
+- Progressive disclosure.
 
-Required actions:
+### Step 7 — External Platforms and Approvals
 
-- Define Tier 1/Tier 2/Tier 3 card patterns.
-- Fix bento/grid span behavior.
-- Eliminate narrow-column failures.
-- Add layout tests.
-- Validate responsive collapse.
+Correct high false-affordance risk:
 
-Exit criteria:
+- External Platforms should not imply launch/write/edit behavior that is not available.
+- Approvals should not look like an executable workflow if it is read-only/preview.
+- Disabled actions must explain reason and next step.
 
-- No surface has unusable layout or excessive dead canvas.
+### Step 8 — Supporting Surfaces
 
-### Step 6 — State Model
+Refine:
 
-Required actions:
+- Documents.
+- Team & Access.
+- Site Health.
+- Settings.
 
-- Replace generic preview/unavailable language.
-- Define state variants.
-- Add operational consequence and next-step language.
-- Update state components and tests.
+### Step 9 — Evidence Completion
 
-Exit criteria:
+Collect:
 
-- No primary surface is dominated by generic unavailable placeholders.
+- Tenant-hosted screenshots.
+- Breakpoint screenshots.
+- Full-scroll screenshots.
+- State screenshots.
+- Accessibility/keyboard evidence.
+- Console/runtime evidence.
+- Package/version evidence.
+- Final evidence index.
 
-### Step 7 — Remediate First-Impression Surfaces
+### Step 10 — Final 100-Point Scoring
 
-Priority order:
+Apply the canonical scorecard.
 
-1. Project Home.
-2. Team & Access.
-3. Documents.
-4. Project Readiness.
+Do not proceed to Phase 4 unless:
 
-Exit criteria:
-
-- These surfaces collectively score at flagship baseline.
-- User can understand project status, access posture, document posture, and readiness posture without confusion.
-
-### Step 8 — Remediate Remaining Surfaces
-
-Priority order:
-
-1. Site Health.
-2. Control Center Settings.
-3. Approvals.
-4. External Systems.
-
-Exit criteria:
-
-- Risk/governance/integration surfaces are coherent and preview-safe.
-
-### Step 9 — Tenant Validation
-
-Required actions:
-
-- Build and deploy to non-production SharePoint tenant.
-- Capture screenshots.
-- Validate edit and published modes.
-- Validate keyboard and accessibility basics.
-- Re-score.
-
-Exit criteria:
-
-- Final scorecard is 56/56.
-- No hard gates remain.
+- Final score is at least 95/100.
+- No hard stops remain.
+- No pillar is below 80%.
+- Evidence is reproducible.
 
 ## 5. Prompt-by-Prompt Suggested Execution
 
-### Prompt 01 — Repo Truth and Scorecard Contract
-
-No implementation. Produce source inventory, doctrine matrix, and 56/56 acceptance contract.
-
-### Prompt 02 — Shared Shell and Host Fit
-
-Implement shell/nav/project-context changes and tests.
-
-### Prompt 03 — Grid, Card, and Layout Primitives
-
-Implement card tiering, grid rules, responsive behavior, and Team & Access layout correction.
-
-### Prompt 04 — State Model and Product Language
-
-Implement state taxonomy, preview language, disabled-action explanations, and tests.
-
-### Prompt 05 — Project Home and Team & Access
-
-Remediate the first two highest-impact surfaces.
-
-### Prompt 06 — Documents and Project Readiness
-
-Remediate operational control and lifecycle readiness surfaces.
-
-### Prompt 07 — Site Health and Settings
-
-Remediate governance/risk surfaces.
-
-### Prompt 08 — Approvals and External Systems
-
-Remediate workflow/integration surfaces.
-
-### Prompt 09 — Tenant Validation and 56/56 Closeout
-
-Capture evidence, score, close, and hand off.
+| Prompt | Focus | Expected Output |
+|---|---|---|
+| Prompt 00 | Scorecard adoption and canonical reference update | Updated docs and scoring references |
+| Prompt 01 | Repo-truth audit against 100-point scorecard | Audit report and gap list |
+| Prompt 02 | Shared shell/nav/project context | Remediation implementation plan |
+| Prompt 03 | Bento/card/layout hierarchy | Remediation implementation plan |
+| Prompt 04 | State model and product language | Remediation implementation plan |
+| Prompt 05 | Project Home | Surface remediation package |
+| Prompt 06 | Project Readiness | Surface remediation package |
+| Prompt 07 | External Platforms and Approvals | Surface remediation package |
+| Prompt 08 | Documents, Team & Access, Site Health, Settings | Surface remediation package |
+| Prompt 09 | Responsive, accessibility, and hosted evidence | Evidence package |
+| Prompt 10 | Final independent scoring | Phase 4 readiness report |
 
 ## 6. Dependency Notes
 
-- Do not run Prompt 05 before Prompt 02–04 are complete.
-- Do not claim surface completion before shared state and card primitives exist.
-- Do not close Wave 15A before tenant screenshots exist.
+- Project Home should not be finalized until shell/card/state standards are locked.
+- Project Readiness should not be polished until its information architecture is resolved.
+- External Platforms and Approvals must be reviewed for false affordance before final screenshots.
+- Accessibility cannot be deferred to the end if primitives are still changing.
+- Evidence collection should begin early but final scoring must use final package/version proof.
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

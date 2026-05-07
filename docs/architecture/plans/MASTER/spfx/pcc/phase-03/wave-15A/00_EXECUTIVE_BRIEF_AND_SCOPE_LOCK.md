@@ -2,87 +2,107 @@
 
 ## 1. Executive Summary
 
-Wave 15A is a required PCC UI doctrine remediation wave. The current PCC implementation demonstrates route coverage and fixture-driven preview behavior, but it does not yet meet the product-grade command-center standard required for Phase 3 closeout or Phase 4 tenant validation.
+Wave 15A exists to correct PCC UI/UX doctrine drift before Phase 3 closeout and before Phase 4 tenant validation. The remediation is not cosmetic. It is a product-readiness program intended to move PCC toward a flagship, evidence-backed, SharePoint-hosted SPFx project control center.
 
-The remediation target is not a better-looking prototype. The target is a flagship SharePoint-hosted project operations surface that scores 56/56 against the adapted SPFx full-page product surface scorecard.
+The prior 56/56 scoring model is superseded for PCC readiness. Wave 15A now uses the reusable PCC 100-point UI/UX Mold Breaker scorecard.
 
 ## 2. Why Wave 15A Exists
 
-The doctrine audit identified systemic UX/UI drift in the PCC:
+The PCC Phase 3 implementation has produced a broad set of operational surfaces and shared primitives. However, current UI/UX concerns show that PCC risks entering Phase 4 with:
 
-- The shell visually dominates the content.
-- Project context is strongest on Project Home but fades across other surfaces.
-- The navigation is module-based rather than workflow-oriented.
-- The grid/card system produces equal-weight content and at least one severe layout failure.
-- Preview/read-only/unavailable states are technically present but too developer-facing.
-- Several surfaces read as unfinished fixtures rather than governed product previews.
-- The SharePoint host chrome materially reduces available viewport and the current layout does not fully account for it.
+- Dense card-grid behavior.
+- Module-first navigation.
+- Weak command-center hierarchy.
+- Overloaded surfaces.
+- Read-only / preview / disabled affordance ambiguity.
+- Incomplete tenant-hosted evidence.
+- Incomplete accessibility and breakpoint proof.
+- Limited differentiation from incumbent construction-tech UI/UX failure modes.
 
-Wave 15A resolves these issues before they become normalized as the PCC baseline.
+Wave 15A exists to prevent those issues from becoming Phase 4 defects.
 
-## 3. Wave 15A Objective
+## 3. Updated Success Standard
 
-Remediate PCC shared UX/UI foundations and primary surfaces so that:
+Wave 15A success means PCC can be scored under:
 
-- PCC operates as a coherent project command center.
-- Every surface has clear project context, state, and next action.
-- Shared shell, grid, card, and state patterns align with UI doctrine.
-- Every major surface is usable inside actual SharePoint tenant chrome.
-- The final scorecard result is 56/56 with evidence.
+```text
+docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md
+```
+
+With the following readiness target:
+
+- **100/100 desired.**
+- **95/100 minimum for Phase 4 entry consideration.**
+- **No hard-stop failures.**
+- **No pillar below 80% of available points.**
+- **Complete evidence package.**
+- **Independent re-score possible from evidence.**
 
 ## 4. Scope
 
 ### In Scope
 
-- PCC shared shell and top command header.
-- SharePoint host fit.
-- Left navigation and information architecture.
-- Project context and surface header standard.
-- Bento/grid/card hierarchy system.
-- Preview/read-only/degraded/unavailable/blocked state model.
-- Product language remediation.
-- Project Home.
-- Team & Access.
-- Documents.
-- Project Readiness.
-- Site Health.
-- Control Center Settings.
-- Approvals.
-- External Systems.
-- Tests tied to layout, rendering, state, accessibility, and host fit.
-- Tenant-hosted screenshot evidence.
-- Scorecard closeout documentation.
+- Shared shell, host-fit, and page-canvas behavior.
+- Project identity and project context hierarchy.
+- Navigation and active-surface clarity.
+- Command/search/HBI affordance posture.
+- Bento/grid behavior.
+- Card hierarchy, density, and footprint behavior.
+- Shared state model.
+- Preview/read-only/deferred/degraded/missing-config language.
+- Accessibility, keyboard, focus, contrast, ARIA, and touch viability.
+- Responsive behavior across desktop, laptop, tablet, phone/narrow, high-zoom, short-height, and constrained host contexts.
+- Surface-level remediation for:
+  - Project Home
+  - Project Readiness
+  - Documents
+  - External Platforms
+  - Approvals
+  - Team & Access
+  - Site Health
+  - Control Center Settings
+- Mold Breaker differentiation from incumbent construction-tech patterns documented in the design-decision studies.
+- Evidence collection and Phase 4 readiness scoring.
 
 ### Out of Scope
 
-- New backend feature execution.
-- New external API integrations unless required to support existing preview content.
-- New live approval workflow execution.
-- New authorization architecture.
-- Major data-model redesign unless required by current UI defects.
-- Replacing the PCC feature roadmap.
-- Rebranding HB Central or HB Intel.
-- Implementing unrelated Phase 16+ scope.
+- Live write-side integrations.
+- New production backend mutation behavior.
+- New Procore, Sage, SharePoint, or HBI runtime authority beyond approved architecture.
+- Feature expansion unrelated to UI/UX readiness.
+- Surface redesigns that bypass shared primitive remediation.
+- Cosmetic styling without a documented UX failure mode.
+- Treating Phase 4 as the discovery stage for basic UI doctrine issues.
 
 ## 5. Scope Boundary Rules
 
-1. Do not widen Wave 15A into a backend integration wave.
-2. Do not add new business functionality to compensate for weak UX hierarchy.
-3. Do not defer shared primitive defects to surface-level styling.
-4. Do not close Wave 15A with “near flagship” language. The objective is 56/56.
-5. Do not rely on dev-server screenshots only. Tenant-hosted evidence is required.
+- Wave 15A may change UI structure, layout, language, state treatment, accessibility behavior, and evidence requirements.
+- Wave 15A should not change source-of-record ownership.
+- Wave 15A should not convert preview/read-only workflows into live workflows unless separately authorized.
+- Wave 15A should not hide honest limitations; it should communicate them better.
+- Wave 15A should not mimic incumbent construction-tech density simply because that pattern is familiar.
 
 ## 6. Go / No-Go Standard
 
-PCC may proceed beyond Wave 15A only if all are true:
+PCC is **Go for Phase 4 UI/UX entry** only if:
 
-- Final scorecard is 56/56.
-- Every category is 4/4.
-- Team & Access layout failure is corrected.
-- All major surfaces have before/after screenshots.
-- Published and edit-mode SharePoint screenshots are captured.
-- State model language is product-grade.
-- Project context is visible on every surface.
-- Disabled controls either explain why they are disabled, provide preview alternatives, or are removed.
-- Accessibility/keyboard review has no unresolved hard-stop issues.
-- Closeout includes source, test, screenshot, and residual-risk evidence.
+- Score is 95/100 or higher.
+- No hard stops remain.
+- All required evidence categories are complete.
+- All critical surfaces pass their surface-specific evidence block.
+- The final score references the package/version being validated.
+
+PCC is **No-Go** if any hard stop remains, even if the weighted score appears acceptable.
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

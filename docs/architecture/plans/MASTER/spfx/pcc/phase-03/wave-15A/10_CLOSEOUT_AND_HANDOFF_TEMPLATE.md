@@ -1,133 +1,179 @@
 # 10 — Wave 15A Closeout and Handoff Template
 
-# PCC Phase 3 Wave 15A — UI Doctrine Remediation Closeout
+# PCC Phase 3 Wave 15A — UI/UX 100-Point Remediation Closeout
 
 ## 1. Executive Summary
 
-[Summarize what Wave 15A remediated, whether PCC reached 56/56, and whether PCC can proceed to Phase 3 closeout.]
+State whether Wave 15A achieved Phase 4 UI/UX readiness under the canonical PCC 100-point scorecard.
+
+Required statement:
+
+```text
+PCC is / is not ready to proceed to Phase 4 tenant validation from a UI/UX readiness standpoint.
+```
 
 ## 2. Scope Completed
 
 ### Shared System
 
-- [ ] Shell / host fit
-- [ ] Navigation / IA
-- [ ] Project context band
-- [ ] Surface header standard
-- [ ] Grid / bento / card hierarchy
-- [ ] State model
-- [ ] Product language
-- [ ] Accessibility / keyboard basics
+- Shell / host fit:
+- Navigation:
+- Project context:
+- Bento/grid:
+- Card hierarchy:
+- State model:
+- Accessibility:
+- Responsive behavior:
 
 ### Surfaces
 
-- [ ] Project Home
-- [ ] Team & Access
-- [ ] Documents
-- [ ] Project Readiness
-- [ ] Site Health
-- [ ] Control Center Settings
-- [ ] Approvals
-- [ ] External Systems
+- Project Home:
+- Project Readiness:
+- Documents:
+- External Platforms:
+- Approvals:
+- Team & Access:
+- Site Health:
+- Control Center Settings:
 
 ## 3. Files Changed
 
-```text
-[list exact files]
-```
+| Path | Change Summary | Scorecard Pillars |
+|---|---|---|
+|  |  |  |
 
 ## 4. Doctrine Criteria Addressed
 
-| Category | Result |
-|---|---|
-| Surface purpose and product clarity | [result] |
-| Project context and operational hierarchy | [result] |
-| Information architecture / navigation | [result] |
-| Shell / host fit | [result] |
-| Layout / grid composition | [result] |
-| Card hierarchy and density | [result] |
-| Visual hierarchy / scan path | [result] |
-| Typography / spacing / rhythm | [result] |
-| Color / token discipline | [result] |
-| State model clarity | [result] |
-| Interaction affordance | [result] |
-| Accessibility / keyboard confidence | [result] |
-| Responsive/container behavior | [result] |
-| Product confidence / executive polish | [result] |
+List governing doctrine criteria addressed.
 
-## 5. Final Scorecard
+## 5. Mold Breaker Criteria Addressed
 
-| Category | Score | Evidence |
-|---|---:|---|
-| Surface purpose and product clarity | 4/4 | [link/path] |
-| Project context and operational hierarchy | 4/4 | [link/path] |
-| Information architecture / navigation | 4/4 | [link/path] |
-| Shell / host fit | 4/4 | [link/path] |
-| Layout / grid composition | 4/4 | [link/path] |
-| Card hierarchy and density | 4/4 | [link/path] |
-| Visual hierarchy / scan path | 4/4 | [link/path] |
-| Typography / spacing / rhythm | 4/4 | [link/path] |
-| Color / token discipline | 4/4 | [link/path] |
-| State model clarity | 4/4 | [link/path] |
-| Interaction affordance | 4/4 | [link/path] |
-| Accessibility / keyboard confidence | 4/4 | [link/path] |
-| Responsive/container behavior | 4/4 | [link/path] |
-| Product confidence / executive polish | 4/4 | [link/path] |
-| **Total** | **56/56** | [summary] |
+List construction-tech incumbent failure modes corrected.
 
-## 6. Test Evidence
+Examples:
 
-```bash
-[command] — [result]
-[command] — [result]
-[command] — [result]
-```
+- Reduced cognitive overload.
+- Reduced dense module navigation.
+- Improved progressive disclosure.
+- Improved field-office continuity.
+- Improved responsibility/owner/action clarity.
+- Improved read-only/degraded/offline-aware posture.
+- Improved HBI command-intelligence value.
 
-## 7. Screenshot Evidence
+## 6. Final 100-Point Scorecard
 
-| Surface | Before | After | Tenant Published | Tenant Edit Mode | Keyboard Focus |
-|---|---|---|---|---|---|
-| Project Home | [path] | [path] | [path] | [path] | [path] |
-| Team & Access | [path] | [path] | [path] | [path] | [path] |
-| Documents | [path] | [path] | [path] | [path] | [path] |
-| Project Readiness | [path] | [path] | [path] | [path] | [path] |
-| Site Health | [path] | [path] | [path] | [path] | [path] |
-| Control Center Settings | [path] | [path] | [path] | [path] | [path] |
-| Approvals | [path] | [path] | [path] | [path] | [path] |
-| External Systems | [path] | [path] | [path] | [path] | [path] |
+| Pillar | Weight | Final Score | Evidence IDs | Notes |
+|---|---:|---:|---|---|
+| PCC Product Strategy and Command-Center Clarity | 15 |  |  |  |
+| Construction-Tech Mold Breaker Differentiation | 20 |  |  |  |
+| Shell, Navigation, and Project Context | 12 |  |  |  |
+| Layout, Bento, Card Hierarchy, and Density | 12 |  |  |  |
+| Workflow, Interaction, and Next-Action Clarity | 12 |  |  |  |
+| State Model, Read-Only, Preview, Degraded, and Source Confidence | 10 |  |  |  |
+| Responsive, Field, Touch, and Host-Fit Behavior | 8 |  |  |  |
+| Accessibility, Visual Semantics, and Inclusive Use | 6 |  |  |  |
+| Evidence, Validation, and Phase 4 Readiness | 5 |  |  |  |
+| **Total** | **100** |  |  |  |
 
-## 8. Accessibility and Keyboard Evidence
+## 7. Hard-Stop Checklist
 
-- [ ] Keyboard nav through left rail.
-- [ ] Keyboard nav through primary actions.
-- [ ] Focus visible.
-- [ ] Disabled controls explained.
-- [ ] Contrast reviewed.
-- [ ] Headings logical.
-- [ ] Links/buttons semantically correct.
+| Hard Stop | Pass / Fail / N/A | Evidence IDs | Notes |
+|---|---|---|---|
+| HS-01 Incumbent mimicry failure |  |  |  |
+| HS-02 Command-center failure |  |  |  |
+| HS-03 Cognitive-overload failure |  |  |  |
+| HS-04 False-affordance failure |  |  |  |
+| HS-05 Field-office divergence failure |  |  |  |
+| HS-06 State-model failure |  |  |  |
+| HS-07 Accessibility failure |  |  |  |
+| HS-08 SharePoint host-fit failure |  |  |  |
+| HS-09 Evidence failure |  |  |  |
+| HS-10 HBI authority failure |  |  |  |
 
-## 9. Residual Risks
+## 8. Test Evidence
 
-| Risk | Severity | Disposition |
+| Command / Test | Result | Notes |
 |---|---|---|
-| [risk] | [severity] | [accepted/deferred/resolved] |
+| `git status --short` |  |  |
+| `pnpm exec prettier --check ...` |  |  |
+| `pnpm test ...` |  |  |
+| `pnpm exec tsc --noEmit` |  |  |
+| `git diff --check` |  |  |
 
-## 10. Deferred Items
+## 9. Screenshot Evidence
 
-| Item | Reason Deferred | Target Wave |
-|---|---|---|
-| [item] | [reason] | [wave] |
+| Surface | Desktop | Laptop | Tablet | Narrow | Full Scroll | State Evidence |
+|---|---|---|---|---|---|---|
+| Shell / Navigation |  |  |  |  | N/A |  |
+| Project Home |  |  |  |  |  |  |
+| Project Readiness |  |  |  |  |  |  |
+| Documents |  |  |  |  |  |  |
+| External Platforms |  |  |  |  |  |  |
+| Approvals |  |  |  |  |  |  |
+| Team & Access |  |  |  |  |  |  |
+| Site Health |  |  |  |  |  |  |
+| Settings |  |  |  |  |  |  |
 
-## 11. Phase 3 Closeout Recommendation
+## 10. Accessibility and Keyboard Evidence
 
-[State whether PCC may proceed to Phase 3 closeout.]
+- Keyboard path:
+- Focus order:
+- Focus-visible:
+- ARIA/semantic relationships:
+- Contrast:
+- Touch target:
+- Reduced motion:
+- Hover-only meaning:
+- Drawer/modal focus behavior:
 
-Recommended language if successful:
+## 11. Runtime and Package Evidence
 
-```text
-Wave 15A has remediated the systemic PCC UI doctrine drift identified during the Phase 3 UX/UI conformance audit. The PCC now meets the adapted SPFx full-page product surface scorecard at 56/56 with supporting source, test, screenshot, tenant-host, accessibility, and closeout evidence. PCC is recommended to proceed to Phase 3 closeout from a UI doctrine readiness standpoint.
-```
+- Package/version:
+- Commit SHA:
+- Tenant URL or evidence path:
+- Console/runtime status:
+- SharePoint edit-mode status:
+- Host-fit notes:
 
-## 12. Handoff to Next Phase
+## 12. Residual Risks
 
-[Summarize what Phase 4 tenant validation or subsequent waves should do next.]
+| Risk | Severity | Accepted? | Owner | Follow-Up |
+|---|---|---:|---|---|
+|  |  |  |  |  |
+
+## 13. Deferred Items
+
+| Deferred Item | Reason | Allowed? | Phase / Owner |
+|---|---|---:|---|
+|  |  |  |  |
+
+## 14. Phase 3 Closeout Recommendation
+
+Choose one:
+
+- Proceed to Phase 3 closeout and Phase 4 tenant validation.
+- Proceed to Phase 3 closeout but not Phase 4 UI/UX validation.
+- Do not close Phase 3; remediation remains open.
+
+## 15. Handoff to Next Phase
+
+Document:
+
+- Remaining evidence tasks.
+- Future Phase 4 tenant validation steps.
+- Known non-critical exceptions.
+- Owners and dates.
+- Scorecard re-use requirements.
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

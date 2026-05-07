@@ -2,284 +2,290 @@
 
 ## 1. Purpose
 
-This file defines the required remediation direction for each major PCC surface. Surface work must begin only after shared shell, layout, card, and state primitives are corrected.
+This document defines surface-specific remediation targets under the PCC 100-point UI/UX Mold Breaker scorecard.
+
+Each surface should be remediated only after shared shell, navigation, layout, card, and state contracts are stable.
 
 ## 2. Surface Completion Standard
 
-A surface is complete only when it satisfies all of the following:
+A surface is complete only when it has:
 
-- Uses shared project context.
-- Uses the standardized surface header.
-- Has a clear primary operational purpose.
-- Has one dominant command/action/status region.
-- Uses card tiers correctly.
-- Handles live/preview/read-only/degraded/unavailable states.
-- Avoids generic placeholder dominance.
-- Works in SharePoint tenant screenshots.
-- Has tests or documented validation.
-- Is scored against relevant scorecard categories.
+- Source review.
+- Full-page screenshot evidence.
+- Above-the-fold screenshot evidence.
+- Full-scroll screenshot evidence.
+- Relevant state screenshots.
+- Breakpoint evidence.
+- Accessibility evidence.
+- Interaction/affordance evidence.
+- Source-of-record/data-confidence evidence where applicable.
+- Mold Breaker differentiation notes.
+- Scorecard pillar impact statement.
+- Hard-stop review.
 
----
+## 3. Project Home
 
-# 3. Project Home
+### Target Role
 
-## Target Role
+Flagship command-center entry surface.
 
-Daily project command center.
+### Required Content Hierarchy
 
-## Required Content Hierarchy
+1. Project identity and command context.
+2. Priority actions.
+3. Project intelligence / status / risk posture.
+4. Work center navigation.
+5. Site health / readiness / approvals / documents signals.
+6. Recent activity and reference context.
 
-1. Project command summary.
-2. Priority Actions / required decisions.
-3. Project health/readiness/site/document/access rollups.
-4. Secondary operational detail.
-5. Reference metadata.
+### Required Remediation
 
-## Required Remediation
+- Avoid passive dashboard-index behavior.
+- Prioritize action and risk.
+- Clarify “what matters now.”
+- Avoid equal-weight card wall.
+- Make HBI/command search useful, not decorative.
+- Support field/tablet scanability.
 
-- Elevate Priority Actions.
-- Add “needs attention” summary.
-- Strengthen severity hierarchy.
-- Make project health posture obvious.
-- Reduce prototype-like metric/card equality.
+### Acceptance Criteria
 
-## Acceptance Criteria
+Supports P1, P2, P3, P4, P5, P6, P7, P8, and P9.
 
-- User knows the top project issues without scrolling.
-- Project Home establishes the PCC product standard.
+## 4. Project Readiness
 
----
+### Target Role
 
-# 4. Team & Access
+Readiness command/workbench surface.
 
-## Target Role
+### Required Content Hierarchy
 
-Access posture, project team membership, role coverage, pending requests, permission templates, and audit history.
+1. Readiness status.
+2. Blockers and unresolved exposure.
+3. Next actions.
+4. Lifecycle readiness areas.
+5. Permit/inspection.
+6. Responsibility matrix.
+7. Constraints.
+8. Buyout.
+9. Procore/source confidence.
+10. Supporting reference context.
 
-## Required Content Hierarchy
+### Required Remediation
 
-1. Access posture summary.
-2. Current project team and role coverage.
-3. Pending access requests.
-4. Permission template status.
-5. Access exceptions and audit history.
+- Decompose overloaded bento behavior.
+- Separate overview from workbench detail.
+- Use progressive disclosure.
+- Surface blockers and owner/action first.
+- Subordinate reference/registry content.
+- Clarify source confidence and read-only limitations.
 
-## Required Remediation
+### Acceptance Criteria
 
-- Fix narrow-column collapse.
-- Replace preview-only skinny card with full-width operational layout.
-- Add role/persona coverage.
-- Add pending request and access risk sections.
-- Explain disabled invite/action behavior.
+Supports P1, P2, P4, P5, P6, P7, P8, and P9.
 
-## Acceptance Criteria
+## 5. Documents
 
-- Surface is usable at all required widths.
-- User can answer:
-  - Who has access?
-  - Who needs access?
-  - What role coverage is missing?
-  - Are permission templates healthy?
-  - What is disabled in preview?
+### Target Role
 
----
+Project record / working-file / external-document control surface.
 
-# 5. Documents
+### Required Content Hierarchy
 
-## Target Role
+1. Project Record as formal source-of-record lane.
+2. My Project Files as working-file lane.
+3. External Systems as connected reference lane.
+4. Permissions/reviews.
+5. Empty/source-unavailable states.
 
-Formal Project Record and working-file control center.
+### Required Remediation
 
-## Required Content Hierarchy
+- Clarify formal record vs. working copy.
+- Clarify external system boundaries.
+- Avoid sparse preview appearance.
+- Make review/permission responsibilities clear.
+- Use state copy for source unavailable/empty lanes.
 
-1. Document control posture.
-2. Project Record lane.
-3. My Project Files lane.
-4. External document systems lane.
-5. Binding health / recent activity / policy notes.
+### Acceptance Criteria
 
-## Required Remediation
+Supports P1, P5, P6, P7, P8, and P9.
 
-- Make Project Record the dominant source of truth.
-- Clearly distinguish working files from formal project record.
-- Replace confusing disabled buttons with preview-safe action explanations.
-- Show source health and binding state.
-- Add document risk callouts.
+## 6. External Platforms
 
-## Acceptance Criteria
+### Target Role
 
-- User understands formal record versus working files.
-- Each source has status, purpose, and next action.
+Read-only / metadata-aware launch and system mapping surface.
 
----
+### Required Content Hierarchy
 
-# 6. Project Readiness
+1. Surface posture: launch/read-only/metadata-only.
+2. Active project links.
+3. Mapping status and source health.
+4. Review queue.
+5. Registry.
+6. Audit/history.
+7. HBI lineage.
 
-## Target Role
+### Required Remediation
 
-Lifecycle readiness, blockers, evidence confidence, and gate posture.
+- Do not imply unavailable launch behavior.
+- Do not expose inert add/edit drawers as live actions.
+- Explain disabled actions.
+- Clarify Procore/SharePoint/Sage/HBI boundaries.
+- Reduce registry/mapping density through hierarchy.
+- Make read-only posture visible before action affordances.
 
-## Required Content Hierarchy
+### Acceptance Criteria
 
-1. Readiness posture.
-2. Top blockers.
-3. Lifecycle gate map.
-4. Evidence/source confidence.
-5. Gate detail and reference data.
+Supports P2, P5, P6, P7, P8, and P9.
 
-## Required Remediation
+## 7. Approvals
 
-- Make blocked/at-risk status visually dominant.
-- Prioritize blockers.
-- Convert lifecycle cards into guided map.
-- Clarify evidence confidence.
-- Add source dependency language.
+### Target Role
 
-## Acceptance Criteria
+Read-only approval/checkpoint visibility surface until executable workflow is authorized.
 
-- User can tell whether the project can proceed and why.
+### Required Content Hierarchy
 
----
+1. Queue status.
+2. My approvals / relevant responsibilities.
+3. Escalations.
+4. Admin verification.
+5. Registry/policy.
+6. Decision history/deferred seams.
+7. HBI boundary.
 
-# 7. Site Health
+### Required Remediation
 
-## Target Role
+- Avoid making preview queues look like broken live workflows.
+- Explain disabled approve/reject/detail actions.
+- Clarify what PCC shows vs. what PCC can execute.
+- Surface next step and owner for each blocked/deferred action.
+- Keep policy/registry content subordinate to operational queue clarity.
 
-Project site health, drift, security, sync, and repair posture.
+### Acceptance Criteria
 
-## Required Content Hierarchy
+Supports P2, P5, P6, P8, and P9.
 
-1. Site health top risk.
-2. Required repair/acknowledgement action.
-3. Checks list.
-4. Drift indicators.
-5. Scanner metadata and history.
+## 8. Team & Access
 
-## Required Remediation
+### Target Role
 
-- Elevate security risk.
-- Highlight broken inheritance and sensitive-library issues.
-- Add repair workflow state.
-- Use semantic severity treatment.
-- Explain consequence of high-risk findings.
+Team visibility and permission/access clarity surface.
 
-## Acceptance Criteria
+### Required Content Hierarchy
 
-- Highest risk and next repair step are visible above the fold.
+1. Team roster / responsibility context.
+2. Permission request path.
+3. Access manager lane.
+4. Restricted/unauthorized state.
+5. Role/persona explanations.
 
----
+### Required Remediation
 
-# 8. Control Center Settings
+- Clarify who can view, request, approve, or manage.
+- Avoid punitive unauthorized states.
+- Explain restricted controls.
+- Ensure role/persona copy is construction-operations clear.
+- Validate keyboard and focus behavior.
 
-## Target Role
+### Acceptance Criteria
 
-Governance configuration across project, site, persona, and integration scopes.
+Supports P5, P6, P8, and P9.
 
-## Required Content Hierarchy
+## 9. Site Health
 
-1. Configuration readiness.
-2. Settings scope cards.
-3. Missing configuration queue.
-4. Locked/editable/preview-only distinction.
-5. Policy and audit references.
+### Target Role
 
-## Required Remediation
+Risk, drift, repair, and configuration health surface.
 
-- Add ownership/responsible role.
-- Convert settings lanes into governance cards.
-- Clarify locked versus editable.
-- Present missing configuration as readiness work, not backlog clutter.
+### Required Content Hierarchy
 
-## Acceptance Criteria
+1. Health summary and severity.
+2. Checks requiring attention.
+3. Drift.
+4. Repair requests.
+5. Procore sync/repair posture.
+6. Source confidence/degraded states.
 
-- User understands what is configured, missing, locked, and preview-only.
+### Required Remediation
 
----
+- Convert passive diagnostics into risk/control hierarchy.
+- Clarify severity, owner, and next step.
+- Explain repair limitations if no repair runner exists.
+- Avoid overwhelming diagnostic detail.
+- Validate degraded/read-only posture.
 
-# 9. Approvals
+### Acceptance Criteria
 
-## Target Role
+Supports P1, P5, P6, P7, P8, and P9.
 
-Approval checkpoint and decision queue.
+## 10. Control Center Settings
 
-## Required Content Hierarchy
+### Target Role
 
-1. Approval posture summary.
-2. Pending/overdue/blocked/returned approval queue.
-3. Checkpoint categories.
-4. Decision history.
-5. Preview limitation statement.
+Governance, scope, inheritance, and missing-configuration surface.
 
-## Required Remediation
+### Required Content Hierarchy
 
-- Remove primary reliance on unavailable placeholder.
-- Create preview-safe queue content.
-- Add owner, aging, linked module, and consequence.
-- Replace disabled approve/reject confusion with view-only preview actions.
+1. Scope overview.
+2. Site/project/persona/integration settings.
+3. Missing configuration.
+4. Locked/inherited/overridden states.
+5. Admin ownership.
 
-## Acceptance Criteria
+### Required Remediation
 
-- Surface demonstrates approval workflow intent even when execution is disabled.
+- Clarify what is configurable now vs. locked/read-only.
+- Clarify ownership of missing setup.
+- Avoid sparse preview feeling.
+- Distinguish inherited vs. overridden settings.
+- Keep governance language clear and non-technical.
 
----
+### Acceptance Criteria
 
-# 10. External Systems
+Supports P5, P6, P8, and P9.
 
-## Target Role
-
-Integration visibility, launch paths, mapping state, and system-of-record clarity.
-
-## Required Content Hierarchy
-
-1. Integration health summary.
-2. MVP-required systems.
-3. Optional/future systems.
-4. Mapping diagnostics and ownership.
-
-## Required Remediation
-
-- Replace repeated unavailable cards with system-specific status cards.
-- Show purpose, data direction, mapping state, availability, and next action.
-- Group by operational purpose.
-- Keep preview limitation secondary.
-
-## Acceptance Criteria
-
-- User understands why each system matters and what is currently connected, preview-only, or unavailable.
-
----
-
-# 11. Surface Remediation Closeout Template
-
-Each surface remediation closeout must include:
+## 11. Surface Remediation Closeout Template
 
 ```markdown
 ## Surface
-[Name]
+
+## Scorecard Pillars Addressed
 
 ## Files Changed
-- [path]
 
 ## Doctrine Issues Resolved
-- [issue]
+
+## Mold Breaker Issues Resolved
 
 ## UX Outcome
-[Plain-English operational outcome]
 
 ## Screenshots
-- before:
-- after:
-- tenant published:
-- tenant edit mode:
+
+## State Evidence
+
+## Breakpoint Evidence
+
+## Accessibility Evidence
 
 ## Tests
-- [command/result]
+
+## Hard Stops Closed
 
 ## Scorecard Impact
-- category:
-- previous:
-- new:
 
 ## Residual Issues
-- [none or itemized]
 ```
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

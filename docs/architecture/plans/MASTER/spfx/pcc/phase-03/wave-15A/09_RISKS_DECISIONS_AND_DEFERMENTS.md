@@ -2,126 +2,132 @@
 
 ## 1. Purpose
 
-This file tracks decisions and risks that must be controlled during Wave 15A.
+This document identifies major Wave 15A risks, decisions, and allowed/not-allowed deferments under the PCC 100-point scorecard.
 
 ## 2. Required Decisions
 
-| ID | Decision | Recommended Position | Owner | Required Before |
-|---|---|---|---|---|
-| D01 | Should Wave/build/fixture metadata remain visible to business users? | Move to diagnostics/status area; keep business language primary. | Product / UX | State model implementation |
-| D02 | Should orange nav remain full-height and high-saturation? | Reduce visual dominance; preserve brand cue but not content competition. | Product / UI doctrine reviewer | Shell remediation |
-| D03 | What surfaces must be tenant-validated before Phase 3 closeout? | All eight primary surfaces. | Product / QA | Final closeout |
-| D04 | Should approvals show sample queue content if execution is disabled? | Yes, show preview-safe decision context. | Product / workflow owner | Approvals remediation |
-| D05 | Should External Systems show unavailable cards or workflow value cards? | Workflow value/status cards. | Product / integration owner | External Systems remediation |
-| D06 | What is the minimum supported SharePoint viewport width? | Determine through tenant evidence; validate common laptop widths. | UX / SPFx dev | Host-fit remediation |
-| D07 | Should surface headers be mandatory on every PCC surface? | Yes. | Product / UI doctrine reviewer | Surface remediation |
+| Decision ID | Decision | Required Before Phase 4? |
+|---|---|---|
+| D01 | Confirm canonical scorecard location under `docs/reference/spfx-surfaces/project-control-center/`. | Yes |
+| D02 | Confirm the old 56/56 model is superseded for PCC readiness. | Yes |
+| D03 | Confirm 95/100 minimum Phase 4 entry threshold. | Yes |
+| D04 | Confirm no hard-stop failures may carry into Phase 4. | Yes |
+| D05 | Confirm whether narrow/phone views must be fully supported or clearly non-primary but graceful. | Yes |
+| D06 | Confirm required tenant-hosted evidence package. | Yes |
+| D07 | Confirm whether Wave 15A remediation can modify shared primitives. | Yes |
+| D08 | Confirm HBI authority boundaries in user-facing language. | Yes |
 
 ## 3. Major Risks
 
 ### R01 — Shared Primitive Work Becomes Surface Styling
 
-Risk: Agents remediate screenshots one page at a time and create inconsistent local styling.
+If agents remediate surfaces locally, PCC may remain inconsistent.
 
-Mitigation:
+**Mitigation:** Remediate shell, layout, card, and state primitives first.
 
-- Force shared primitive work first.
-- Reject surface-only fixes for shared defects.
-- Require card tier and state model standards.
+### R02 — 100-Point Score Claimed Without Evidence
 
-### R02 — 56/56 Claimed Without Tenant Evidence
+A high score without tenant, breakpoint, state, accessibility, and package evidence is invalid.
 
-Risk: Final score is claimed using local dev server only.
-
-Mitigation:
-
-- Require SharePoint published/edit-mode screenshot evidence.
-- Treat missing tenant evidence as hard stop.
+**Mitigation:** Use the evidence matrix and use guide.
 
 ### R03 — Preview State Still Reads as Unfinished Product
 
-Risk: State messages remain technically accurate but product-hostile.
+Preview/read-only/deferred states may appear broken or incomplete.
 
-Mitigation:
-
-- Apply state language standard.
-- Hide diagnostics from primary content.
-- Make each unavailable state explain consequence and next step.
+**Mitigation:** Apply state and language standard to every major surface.
 
 ### R04 — New Feature Creep Delays Remediation
 
-Risk: Agents add backend/integration functionality instead of fixing UX foundations.
+Agents may try to add live workflows to fix affordance problems.
 
-Mitigation:
-
-- Keep Wave 15A scope locked.
-- Use preview-safe content instead of building new live actions.
+**Mitigation:** Improve honest UX posture without expanding runtime authority.
 
 ### R05 — Accessibility Deferred Too Late
 
-Risk: Accessibility issues appear after visual remediation.
+Accessibility issues in shared primitives can create late rework.
 
-Mitigation:
+**Mitigation:** Validate keyboard/focus/ARIA/touch behavior during primitive remediation.
 
-- Include focus, keyboard, semantic controls, and contrast in every prompt.
+### R06 — Incumbent Mimicry Persists
 
-### R06 — Existing Phase 15 Architecture Conflicts with Wave 15A UI Targets
+PCC may look cleaner but still behave like dense incumbent platforms.
 
-Risk: External Systems or other Wave 15 scope introduces surface-specific patterns that conflict with shared doctrine.
+**Mitigation:** Apply Mold Breaker criteria explicitly to shell, navigation, Project Home, Project Readiness, and operational surfaces.
 
-Mitigation:
+### R07 — Field-Office Divide Persists
 
-- Treat Wave 15A as a remediation overlay.
-- Preserve business architecture but adjust presentation patterns.
+Desktop may improve while tablet/high-zoom/constrained host usage remains weak.
+
+**Mitigation:** Collect responsive and field/touch evidence before final scoring.
+
+### R08 — HBI Appears Over-Authoritative
+
+HBI may be perceived as approving, rejecting, certifying, or mutating records.
+
+**Mitigation:** Use HBI authority boundary language and interaction constraints.
 
 ## 4. Allowed Deferments
 
-The following may be deferred beyond Wave 15A if clearly documented:
+The following may be deferred if documented and non-blocking:
 
-- Live approval execution.
-- Live external system API calls.
-- Full Graph/Procore/Sage integration execution.
-- Advanced personalization.
-- Advanced analytics/visualizations not needed for 56/56.
-- Final production rollout hardening beyond UI doctrine conformance.
+- Minor icon refinements.
+- Non-critical motion polish.
+- Optional theme variations.
+- Future live integration behavior.
+- Future write-side workflows.
+- Advanced personalization not required for scorecard pass.
+- Secondary/tertiary surface refinements that do not affect hard stops.
 
 ## 5. Not Allowed to Defer
 
-The following may not be deferred if claiming 56/56:
+The following may not be deferred if Phase 4 readiness is claimed:
 
-- Shell/host fit.
-- Team & Access layout correction.
-- Project context across all surfaces.
-- Preview/read-only state model.
-- Disabled action explanation.
-- Tenant screenshot evidence.
-- Accessibility/keyboard validation.
-- Responsive/container validation.
-- Scorecard closeout.
+- Hard-stop failures.
+- Project Home command-center hierarchy.
+- Project Readiness overload if it creates cognitive-overload failure.
+- False affordances in External Platforms or Approvals.
+- Preview/read-only/degraded state ambiguity.
+- Host-fit evidence.
+- Accessibility proof.
+- Breakpoint/container proof.
+- Source-of-record clarity.
+- Package/version evidence.
+- Mold Breaker differentiation evidence.
 
 ## 6. Decision Log Template
 
 ```markdown
 ## Decision ID
-D##
 
 ## Date
-YYYY-MM-DD
 
 ## Decision
-[decision]
 
 ## Rationale
-[why]
 
 ## Alternatives Rejected
-- [alternative]
 
 ## Impact
-[impact]
 
 ## Owner
-[name/role]
 
 ## Status
-Accepted / Deferred / Superseded
+
+## Related Scorecard Pillars
+
+## Related Hard Stops
 ```
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

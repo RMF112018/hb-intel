@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PCC Evidence Manifest",
+  "type": "object",
+  "required": [
+    "runId",
+    "tenantUrl",
+    "records"
+  ],
+  "properties": {
+    "runId": {
+      "type": "string"
+    },
+    "tenantUrl": {
+      "type": "string"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "evidenceId",
+          "title",
+          "status",
+          "artifactPaths",
+          "assertions",
+          "timestamp"
+        ],
+        "properties": {
+          "evidenceId": {
+            "type": "string",
+            "pattern": "^EV-(37|38|39|4[0-9]|5[0-9]|6[0-9]|7[0-9]|8[0-9]|9[0-9]|10[0-6]|12[5-9]|13[0-4])$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "captured",
+              "asserted",
+              "partially-captured",
+              "operator-pending",
+              "expert-review-required",
+              "not-automatable-current-host",
+              "blocked",
+              "failed"
+            ]
+          },
+          "pillarRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hardStopRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "surface": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "string"
+          },
+          "artifactPaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assertions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reviewerNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

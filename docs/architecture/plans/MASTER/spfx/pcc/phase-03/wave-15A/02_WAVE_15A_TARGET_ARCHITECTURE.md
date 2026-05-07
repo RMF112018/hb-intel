@@ -2,199 +2,250 @@
 
 ## 1. Purpose
 
-This file defines the target UX/UI architecture for PCC after Wave 15A. It describes how PCC must look, behave, and communicate to qualify as a 56/56 doctrine-conformant SPFx product surface.
+This document defines the target UI/UX architecture Wave 15A should produce under the 100-point PCC scorecard.
+
+The target is not merely doctrine-compliant UI. The target is a flagship construction project control center that is clearer, more actionable, and less cognitively burdensome than incumbent construction platforms.
 
 ## 2. Target Product Definition
 
-PCC is the project-specific operational command center inside HB Central. It connects project health, document control, team/access, readiness, approvals, external systems, site health, and settings into one coherent project control experience.
+PCC should operate as a SharePoint-hosted SPFx project control center that:
 
-PCC must not feel like:
-
-- a generic SaaS dashboard,
-- a set of disconnected cards,
-- an internal developer preview,
-- a SharePoint page with embedded test panels,
-- or a route coverage demonstration.
+- Establishes project identity immediately.
+- Surfaces risk, status, urgency, owner, and next action.
+- Connects project lifecycle signals across surfaces.
+- Distinguishes live, preview, read-only, degraded, deferred, mock, and source-owned conditions.
+- Avoids equal-weight dashboard walls.
+- Reduces navigation burden through clear hierarchy and command/search/HBI affordances.
+- Supports office and field mental models without creating separate experiences.
+- Respects SharePoint host constraints.
+- Provides evidence-backed Phase 4 readiness.
 
 ## 3. Target Information Architecture
 
 ### Command Layer
 
-- Project Home
-- Priority Actions
-- Project Readiness
+The command layer establishes:
+
+- Project identity.
+- Active surface.
+- Current operating context.
+- Priority actions.
+- Search/command/HBI entry point.
+- Risk/health posture.
+- Source confidence where needed.
 
 ### Operational Controls Layer
 
-- Documents
-- Team & Access
-- Approvals
+The operational layer presents work that requires attention:
+
+- Action queues.
+- Readiness blockers.
+- Approvals/checkpoints.
+- Site health risks.
+- Missing configurations.
+- External system mapping issues.
+- Document control review needs.
 
 ### Governance and Health Layer
 
-- Site Health
-- Control Center Settings
+The governance layer presents:
+
+- Source-of-record posture.
+- Integration confidence.
+- Role/permission scope.
+- Configuration gaps.
+- Read-only/deferred/missing setup status.
+- HBI authority boundaries.
 
 ### Connected Systems Layer
 
-- External Systems
+The connected systems layer presents:
 
-Navigation should present these as operational groups, with status indicators where useful.
+- Procore, SharePoint, Sage, and other external system references.
+- Launch/read-only boundaries.
+- Mapping status.
+- Source health.
+- Registry and audit posture.
 
 ## 4. Target Shell Architecture
 
-The shell must contain:
+The shell must:
 
-1. Compact product identity.
-2. Project context band.
-3. Surface navigation.
-4. Surface state indicators.
-5. Search or command input only if useful.
-6. Diagnostics/preview state moved to a subordinate position.
+- Respect SharePoint host boundaries.
+- Avoid fake SharePoint chrome.
+- Keep PCC canvas productized.
+- Keep project identity persistent.
+- Make active surface unmistakable.
+- Support keyboard navigation.
+- Support responsive container behavior.
+- Avoid consuming excessive field/tablet canvas space.
+- Provide command/search/HBI entry without turning HBI into decorative branding.
 
-### Required Shell Qualities
+## 5. Target Navigation Architecture
 
-- Compact.
-- Tenant-aware.
-- Project-centered.
-- Low visual noise.
-- Supports keyboard traversal.
-- Does not compete with content.
-- Does not assume standalone app viewport.
+Navigation should move beyond module switching.
 
-## 5. Target Surface Header Architecture
+It must support:
 
-Every surface must start with a standardized surface header.
+- Active surface clarity.
+- Priority work discovery.
+- Work-center movement.
+- Project lifecycle continuity.
+- Reduced reliance on learned module paths.
+- Keyboard accessibility.
+- Responsive overflow handling.
 
-Required fields:
+## 6. Target Project Context Architecture
 
-- Surface name.
-- Surface purpose.
-- Project number.
+The project context treatment should include:
+
+- PCC identity.
 - Project name.
-- Lifecycle phase or operational category.
-- Surface state.
-- Primary next action or key limitation.
-- Source freshness/confidence when applicable.
+- Active surface label.
+- Current project phase/stage.
+- Project status or risk posture where appropriate.
+- Schedule/completion or milestone facts where appropriate.
+- Location/value facts where useful.
+- Command/search entry point.
+- Source confidence or degraded data status where relevant.
 
-Example:
+The project context band should not become an overloaded data table. It must orient, not crowd.
 
-```text
-Documents
-Formal project record, working files, and connected document systems for 26-999-99 HB Central Test.
+## 7. Target Layout Architecture
 
-Status: SharePoint Project Record connected · Procore preview · OneDrive working files available
-Next action: Review Project Record binding health.
-```
+The layout system must:
 
-## 6. Target Layout Architecture
+- Use bento/grid behavior deliberately.
+- Distinguish primary, operational, supporting, reference, and state content.
+- Avoid equal-weight card walls.
+- Preserve scanability in compact density.
+- Maintain stable row/column behavior across breakpoints.
+- Remain usable in SharePoint-hosted constrained widths.
+- Support full-scroll evidence without density collapse.
 
-Every surface must define:
-
-- One primary command region.
-- One or more operational content regions.
-- Supporting/reference content regions.
-- Responsive collapse behavior.
-- Empty-state behavior.
-- Preview/read-only behavior.
-
-No surface may be left as a single placeholder panel unless the surface is intentionally blocked and the blocked state is itself the operational content.
-
-## 7. Target Card Architecture
+## 8. Target Card Architecture
 
 ### Tier 1 — Command Cards
 
-Purpose: make the highest-priority state/action obvious.
+Command cards should:
 
-Examples:
-
-- Project health summary.
-- Access posture.
-- Readiness blocked state.
-- Site Health top risk.
-- Document control binding status.
+- Carry primary status, risk, or action.
+- Use distinct visual hierarchy.
+- Appear early in the surface.
+- Avoid competing with reference cards.
+- Be few in number.
 
 ### Tier 2 — Operational Cards
 
-Purpose: support actual project work.
+Operational cards should:
 
-Examples:
-
-- Action queue.
-- Document lanes.
-- Team roster.
-- Approval queue.
-- Health checks.
+- Present actionable work.
+- Clarify owner and next step.
+- Use status semantics beyond color alone.
+- Preserve responsive behavior.
 
 ### Tier 3 — Reference Cards
 
-Purpose: provide supporting facts.
+Reference cards should:
 
-Examples:
+- Provide supporting context.
+- Avoid competing visually with command cards.
+- Defer advanced detail where possible.
+- Use clear, compact language.
 
-- Policy notes.
-- System mappings.
-- Last run metadata.
-- Diagnostic facts.
+### State Cards
 
-## 8. Target State Architecture
+State cards should:
 
-State must be operationally meaningful.
+- Explain condition.
+- Explain impact.
+- Identify owner/system where possible.
+- Provide next step.
+- Avoid looking like errors when they are intentional read-only or preview states.
 
-Required state variants:
+## 9. Target State Architecture
 
-- `live`
-- `preview`
-- `readOnly`
-- `unavailable`
-- `setupRequired`
-- `degraded`
-- `blocked`
-- `error`
-- `empty`
-- `loading`
+Every state must align with the state model in:
 
-Each state must answer:
+```text
+docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md
+docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md
+```
 
-1. What is available?
-2. What is not available?
-3. Why?
-4. What can the user do next?
-5. Who owns resolution, if applicable?
+Required state categories include:
 
-## 9. Target Visual Architecture
+- Live.
+- Preview.
+- Read-only.
+- Deferred.
+- Unavailable.
+- Setup required.
+- Degraded.
+- Blocked.
+- Error.
+- Empty.
+- Unauthorized/no access.
+- Missing configuration.
+- Stale data.
+- Mock/demo data.
 
-Required qualities:
+## 10. Target Mold Breaker Architecture
 
-- Strong but restrained HB identity.
-- Semantic status language.
-- Reduced decorative dominance.
-- Clear scan path.
-- Compact project-operations density.
-- Consistent headings and labels.
-- Professional SharePoint-hosted fit.
-- No false precision or misleading controls.
+PCC must explicitly avoid:
 
-## 10. Target Tenant Architecture
+- Dense module-first navigation as the primary mental model.
+- Incumbent-style overloaded dashboards.
+- Large uniform tables as the first user experience.
+- Passive status badges without owner/action.
+- Overexposed system seams.
+- Web/field divergence.
+- AI-as-addon behavior.
+- Unsupported claims of offline/PWA readiness.
 
-PCC must be validated in:
+PCC should instead provide:
 
-- SharePoint published mode.
-- SharePoint edit mode.
-- Standard laptop width.
-- Constrained browser width.
-- At least one large desktop width.
-- Any supported tablet/constrained breakpoints.
+- Role/context-aware priority.
+- Progressive disclosure.
+- Clear responsibility attribution.
+- Command/search/HBI assistive pathways.
+- Accessible semantic status.
+- Offline/degraded/read-only clarity.
+- Construction-specific lifecycle continuity.
 
-## 11. Target User Outcomes
+## 11. Target Tenant Architecture
 
-After Wave 15A, a user should be able to answer these questions within seconds:
+Wave 15A target behavior must be validated in tenant-hosted SPFx conditions, including:
 
-- What project am I viewing?
-- Is the project operationally healthy?
-- What needs my attention today?
-- Which module am I in?
-- What can I do here?
-- What is live versus preview/read-only?
-- What is blocked or degraded?
-- Where do I go next?
+- SharePoint chrome boundary.
+- App canvas fit.
+- Edit-mode resilience.
+- Console/runtime stability.
+- Package/version alignment.
+- Breakpoint evidence.
+- High-zoom / short-height behavior.
+- Constrained host width behavior.
+
+## 12. Target User Outcomes
+
+A user should be able to:
+
+- Identify the project and active surface immediately.
+- Understand current risk/priority posture quickly.
+- Know what work requires attention.
+- Understand what is live versus preview/read-only/deferred.
+- Move from signal to action without hunting through modules.
+- Use PCC on laptop/tablet/field-like contexts without a new mental model.
+- Trust the source/status/ownership of information.
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

@@ -2,151 +2,147 @@
 
 ## 1. Purpose
 
-This file defines how local code agents should execute Wave 15A without creating scope drift, token waste, or unsupported 56/56 claims.
+This document defines execution controls for agents implementing or auditing Wave 15A remediation.
 
 ## 2. Universal Agent Instructions
 
-Every agent must:
+Agents must:
 
-1. Start with repo-truth inspection.
-2. Do not rely on chat memory.
+1. Use repo truth, not prior chat memory.
+2. Review the canonical PCC scorecard and use guide before scoring or remediation.
 3. Do not re-read files still in current context unless exact wording, line references, or changed repo state must be verified.
-4. Keep scope limited to Wave 15A.
-5. Preserve existing architecture unless it conflicts with doctrine acceptance.
-6. Prefer shared primitives over one-off surface fixes.
-7. Update or produce closeout documentation for each prompt.
-8. Run appropriate tests.
-9. Capture evidence.
-10. Never claim 56/56 without evidence.
+4. Separate confirmed findings from suspected findings.
+5. Tie every remediation to a scorecard pillar.
+6. Tie every claimed improvement to evidence.
+7. Avoid generic “polish” language.
+8. Preserve no-runtime/no-mutation/no-live-integration guardrails unless explicitly changed.
+9. Do not make read-only/preview/deferred controls appear executable.
+10. Stop when a change would violate source-of-record, HBI authority, or integration boundaries.
 
 ## 3. Required Pre-Implementation Repo Truth Pass
 
-Before code changes, inspect:
+Before implementation, inspect:
 
-- PCC source under `apps/project-control-center/`
-- PCC shell/router files
-- PCC surface files
-- PCC UI/shared components
-- CSS/SCSS/module styles
-- fixtures/adapters/read-model clients
-- tests
-- SPFx manifests/package files
-- UI doctrine files
-- SPFx audit checklist/scorecard/evidence docs
-- PCC Phase 3 architecture and Wave 15 docs
-- Wave 15A guide files
+- Current branch/commit.
+- PCC package/version.
+- Current Wave 15A docs.
+- Canonical scorecard and use guide.
+- PCC shell/source files.
+- Shared primitives.
+- Target surfaces.
+- Existing tests.
+- Current evidence screenshots.
+- Existing hard-stop risks.
 
 ## 4. Implementation Rules
 
 ### Shared First
 
-Do not begin with a surface unless the prompt specifically says the shared system is already corrected.
+Correct shared shell, navigation, layout, card, and state systems before page-local styling.
 
 ### No Local Styling Drift
 
-Do not introduce one-off CSS that bypasses shared primitives unless documented as temporary and followed by consolidation.
+Do not introduce ad hoc one-off styles when a shared primitive or token should be used.
 
 ### No Feature Creep
 
-Do not add backend execution, Graph integration, Procore execution, approval execution, or new data stores unless explicitly in scope.
+Do not add new live features to satisfy UX scoring. Improve clarity and honest boundaries.
 
 ### No False Actions
 
-Do not show actions that appear executable unless they work or clearly explain preview/read-only limitations.
+Every visible action must either work, clearly explain why it is unavailable, or be removed from the primary path.
 
 ### No Diagnostic Dominance
 
-Do not make build/wave/fixture metadata the primary business-facing message.
+Developer diagnostics, seams, fixture states, and integration boundaries should not dominate user-facing hierarchy.
+
+### Mold Breaker Required
+
+Do not simply reproduce incumbent construction-tech patterns in cleaner styling. Reduce cognitive load, module hunting, and field-office divergence.
 
 ## 5. Prompt Closeout Requirements
 
-Each prompt response/closeout must include:
+Each prompt/agent execution should close with:
 
 ```markdown
 ## Objective Completed
-[summary]
 
 ## Files Changed
-- [path]
+
+## Scorecard Pillars Addressed
+
+## Hard Stops Addressed
 
 ## Doctrine Criteria Addressed
-- [category]
+
+## Mold Breaker Criteria Addressed
 
 ## Tests Run
-- [command] — [result]
 
 ## Screenshots / Evidence
-- [path or note]
 
 ## Scorecard Impact
-- [category]: [old] → [new]
 
 ## Residual Issues
-- [item or none]
 
 ## Next Recommended Prompt
-[short next step]
 ```
 
 ## 6. Validation Commands
 
-Agents must determine current repo-appropriate commands through repo truth. Common expected commands may include:
+Use the applicable repo validation commands for the scope changed. Typical commands may include:
 
 ```bash
-pnpm --filter @hbc/spfx-project-control-center check-types
-pnpm --filter @hbc/spfx-project-control-center test
-pnpm --filter @hbc/spfx-project-control-center build
-pnpm exec prettier --check <touched-files>
+git status --short
+pnpm exec prettier --check <changed-files>
+pnpm exec tsc --noEmit
+pnpm test <targeted-tests>
+git diff --check
 ```
 
-Do not assume command names without checking package scripts.
+Use package-specific commands where the repo defines them.
 
 ## 7. Branch / Commit Guidance
 
-Recommended branch naming:
+Commit messages should identify:
+
+- PCC scope.
+- Wave 15A.
+- Prompt/step number if applicable.
+- User-facing outcome.
+- Scorecard or hard-stop impact.
+
+Suggested format:
 
 ```text
-pcc/phase-3-wave-15a-ui-doctrine-remediation
-```
-
-Recommended commit structure:
-
-```text
-docs(pcc): add wave 15A UI doctrine remediation guide
-feat(pcc): remediate wave 15A shell and host fit
-feat(pcc): remediate wave 15A grid card and state model
-feat(pcc): remediate wave 15A project home and access surfaces
-feat(pcc): remediate wave 15A documents and readiness surfaces
-feat(pcc): remediate wave 15A governance and integration surfaces
-docs(pcc): finalize wave 15A 56 scorecard closeout
+feat(pcc): Wave 15A 100-point UI/UX remediation — <scope>
 ```
 
 ## 8. Agent Stop Conditions
 
 Stop and report if:
 
-- A required doctrine file is missing.
-- Existing source state materially differs from this guide.
-- Required changes exceed Wave 15A scope.
-- A compile error requires touching unrelated systems.
-- Tenant validation cannot be performed.
-- Scorecard criteria are ambiguous.
-- A hard-stop issue cannot be resolved without product decision.
+- A hard-stop failure cannot be resolved without scope expansion.
+- A proposed change requires live mutation/integration authority.
+- A source-of-record boundary is unclear.
+- Evidence contradicts a claimed score.
+- Accessibility or host-fit behavior cannot be verified.
+- A local fix would bypass shared primitives.
+- Requirements conflict with governing doctrine.
 
 ## 9. Required Agent Mindset
 
-Treat Wave 15A as a readiness gate, not a design preference pass.
+Treat Wave 15A as a product-readiness program. The goal is not visual polish. The goal is a credible flagship PCC surface that can enter Phase 4 with a durable, evidence-backed UI/UX standard.
 
-Use direct findings:
 
-- “This surface lacks project context.”
-- “This card hierarchy does not communicate priority.”
-- “This disabled action is misleading.”
-- “This layout fails inside SharePoint chrome.”
+## Canonical References
 
-Avoid vague findings:
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
 
-- “Make cleaner.”
-- “Improve polish.”
-- “Modernize UI.”
-- “Looks better.”
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

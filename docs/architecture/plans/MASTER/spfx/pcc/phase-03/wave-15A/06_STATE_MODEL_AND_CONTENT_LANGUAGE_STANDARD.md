@@ -2,229 +2,296 @@
 
 ## 1. Purpose
 
-This file defines the required state and product language model for Wave 15A. The current preview/read-only/unavailable language must be remediated because it is too developer-facing and makes surfaces feel unfinished.
+This document defines Wave 15A state and content language rules under the PCC 100-point scorecard.
+
+The state model is central to:
+
+- Workflow clarity.
+- Source confidence.
+- Read-only/preview honesty.
+- False-affordance prevention.
+- Phase 4 readiness.
 
 ## 2. Content Principle
 
-Every state message must tell the user:
+Every state must tell the user:
 
-1. What is available.
-2. What is not available.
-3. Why.
-4. What the user can do next.
-5. Who owns resolution, when applicable.
+1. What condition exists.
+2. Why it matters.
+3. Who or what owns it.
+4. What happens next.
+5. Whether the user can act now.
 
 ## 3. Forbidden Primary User-Facing Language
 
-The following terms should not appear as primary surface content unless they are inside a diagnostics drawer, admin-only panel, or implementation closeout:
+Avoid using these as primary user-facing state labels unless paired with operational explanation:
 
-- Fixture-driven
-- Wave 2
-- Wave 15A internal build
-- No live data
-- Read-model summary only
-- Preview content not available
-- No fixture content available
-- Mock-only
-- Route coverage
-- Shell frame
-- Implementation placeholder
+- Mock
+- Stub
+- Placeholder
+- TODO
+- Future
+- Demo only
+- Fixture
+- Disabled
+- Not wired
+- Not implemented
+- Coming soon
+- System unavailable
+- Unknown
+- N/A
+
+These terms may appear in developer diagnostics, but not as the primary user-facing explanation.
 
 ## 4. Approved User-Facing Replacements
 
-| Avoid | Use Instead |
+| Internal Meaning | Preferred User-Facing Language |
 |---|---|
-| Fixture-driven | Sample project data |
-| No live data | Sample data mode |
-| Preview content not available | This source is not connected in the selected preview. |
-| Read-model summary only | Read-only project summary |
-| No workflow execution enabled | Actions are disabled in this preview. |
-| Mock-only | Preview demonstration |
-| Unavailable | Setup required / source unavailable / not connected |
-| Wave 2 | Preview build status, diagnostics only |
+| Mock / fixture | Preview data |
+| Stub / placeholder | Preview capability |
+| Not wired | Read-only in this phase |
+| Disabled | Action unavailable |
+| Future | Planned capability |
+| Missing integration | Source connection required |
+| Error | Unable to load |
+| Degraded | Limited data available |
+| Unauthorized | Access required |
+| Missing config | Setup required |
+| Stale | Data may be out of date |
 
 ## 5. Required State Taxonomy
 
 ### Live
 
-Use when data is connected and actions are available.
+Use when the feature is production-live for the current scope.
 
-Required message:
+Must show:
 
-```text
-Live project data is available. Actions are enabled for your role.
-```
+- Current status.
+- Data/source if relevant.
+- Action path if applicable.
 
 ### Preview
 
-Use when fixture/sample data demonstrates intended workflow.
+Use when content demonstrates future or planned behavior.
 
-Required message:
+Must show:
 
-```text
-This preview demonstrates the intended workflow using sample project data. Live updates are not being made.
-```
+- Preview posture.
+- What is being demonstrated.
+- What is not live.
+- Next phase or owner if known.
 
 ### Read-Only
 
-Use when real or sample data is visible but execution is disabled.
+Use when the surface displays information but does not mutate records.
 
-Required message:
+Must show:
 
-```text
-You can review this information. Updates are disabled in this preview.
-```
+- Read-only label.
+- Source of displayed data.
+- Where edits occur, if applicable.
+- Why PCC is not executing the action.
+
+### Deferred
+
+Use when capability is intentionally out of current scope.
+
+Must show:
+
+- Deferred capability.
+- Reason or phase boundary.
+- Owner or future wave if known.
+- Safe next step.
 
 ### Unavailable
 
-Use when a source is not available in the selected context.
+Use when data/capability cannot be reached.
 
-Required message:
+Must show:
 
-```text
-This source is not connected in the selected preview context.
-```
+- What is unavailable.
+- Whether this is temporary or setup-related.
+- Recovery or next step.
 
 ### Setup Required
 
-Use when configuration is missing.
+Use when configuration is incomplete.
 
-Required message:
+Must show:
 
-```text
-Configuration is required before this control can be activated.
-```
+- Missing setup item.
+- Owner.
+- Impact.
+- Next step.
 
 ### Degraded
 
-Use when data exists but confidence is reduced.
+Use when partial data/function is available.
 
-Required message:
+Must show:
 
-```text
-Data is available, but source confidence is reduced. Review the listed warning before relying on this result.
-```
+- What is limited.
+- What remains reliable.
+- What the user should not assume.
+- Refresh/recovery behavior if applicable.
 
 ### Blocked
 
-Use when workflow cannot proceed.
+Use when progress is blocked by a known condition.
 
-Required message:
+Must show:
 
-```text
-This process is blocked until the listed issue is resolved.
-```
+- Blocking condition.
+- Owner.
+- Required action.
+- Downstream impact.
 
 ### Error
 
-Use when the app or source failed unexpectedly.
+Use for failure states.
 
-Required message:
+Must show:
 
-```text
-This information could not be loaded. Retry or contact the listed owner if the issue continues.
-```
+- What failed.
+- Recovery path.
+- Whether data is safe.
+- Whether to retry or contact owner/support.
 
 ### Empty
 
-Use when there are no records, not when content is missing.
+Use when no records exist or filters yield no results.
 
-Required message:
+Must show:
 
-```text
-No items match this view.
-```
+- Why the area is empty.
+- Whether this is good, neutral, or requires setup.
+- Next action if applicable.
+
+### Unauthorized / No Access
+
+Use when user permissions prevent access.
+
+Must show:
+
+- Access limitation.
+- Request path.
+- Owner/approver if known.
+- Avoid punitive tone.
+
+### Stale Data
+
+Use when recency matters.
+
+Must show:
+
+- Last updated time if available.
+- Source.
+- Whether stale data can still be used.
+- Refresh/reconnect path.
 
 ## 6. State Component Fields
 
-Every reusable state component should support:
+A standard PCC state component should support:
 
-- `stateKind`
-- `severity`
-- `title`
-- `summary`
-- `whatIsAvailable`
-- `whatIsDisabled`
-- `why`
-- `nextAction`
-- `owner`
-- `source`
-- `lastUpdated`
-- `diagnosticDetail`
-- `actions`
+- State label.
+- Severity.
+- Title.
+- Explanation.
+- Impact.
+- Owner/system.
+- Next step.
+- Primary or secondary action, if safe.
+- Source.
+- Timestamp/freshness.
+- ARIA status/alert behavior.
 
 ## 7. Disabled Control Standard
 
-A disabled control must be paired with one of:
+A disabled control must never appear unexplained.
 
-- adjacent explanatory text,
-- tooltip or help text,
-- read-only alternative action,
-- visible preview banner explaining disabled execution.
+Every disabled control should have one of:
 
-Bad:
+- Inline helper copy.
+- Tooltip/popover.
+- Adjacent state card.
+- Disabled reason text.
+- Next-step link or owner reference.
 
-```text
-[Approve disabled]
-```
-
-Good:
+Required disabled-control explanation:
 
 ```text
-Approve
-Disabled in this preview. Open the approval package to review the decision context.
+This action is unavailable because [reason]. [Owner/system] must [next step] before this can be completed in PCC.
 ```
 
 ## 8. Surface-Level State Rules
 
 ### Project Home
 
-Preview state should be secondary. The user should primarily see project health and priority actions.
-
-### Team & Access
-
-If invites are disabled, show current roster, role coverage, and pending-request preview.
-
-### Documents
-
-If Browse/Open actions are disabled, show source binding health and explain activation requirements.
+State language should prioritize project status, priority actions, and configuration gaps.
 
 ### Project Readiness
 
-Blocked/degraded states must appear as operational posture, not generic banners.
+State language should prioritize blockers, owner, and next action.
+
+### Documents
+
+State language should distinguish Project Record, My Project Files, and External Systems.
+
+### External Platforms
+
+State language should distinguish metadata-only, launch unavailable, source health, mapping, and registry states.
 
 ### Approvals
 
-No approval surface may be dominated by unavailable content. Show a preview-safe approval queue.
+State language should distinguish preview queue, read-only workflow, disabled decision controls, and HBI no-authority boundaries.
 
-### External Systems
+### Team & Access
 
-Unavailable integrations must still show purpose, owner, expected data direction, and activation state.
-
-### Settings
-
-Settings must distinguish locked, preview-only, missing, and editable.
+State language should distinguish viewer, requester, manager, unauthorized, and restricted action states.
 
 ### Site Health
 
-Security-risk and repair states must be visually prominent and action-oriented.
+State language should distinguish health check, drift, degraded, repair request, and no-runner conditions.
+
+### Settings
+
+State language should distinguish inherited, locked, editable, missing config, and admin-owned states.
 
 ## 9. Diagnostics Placement
 
-Developer/build metadata belongs in:
+Diagnostics must not dominate the user surface.
 
-- admin diagnostics drawer,
-- footer diagnostics,
-- query-enabled debug mode,
-- test output,
-- closeout documentation.
+Use diagnostics for:
 
-It should not be the primary user-facing product message.
+- Admin visibility.
+- Development confidence.
+- Evidence and validation.
+- Source confidence where operationally useful.
+
+Do not expose raw system seams where user action is not improved.
 
 ## 10. Acceptance Criteria
 
-- No primary surface shows generic placeholder content as the main experience.
-- Every preview/read-only state explains operational consequence.
-- Disabled actions are understandable.
-- State language is consistent across surfaces.
-- Diagnostic language is separated from user-facing product language.
+State model remediation is complete when:
+
+- Every major state has evidence.
+- Preview/read-only/deferred states are unmistakable.
+- Disabled controls explain reason and next step.
+- Source-of-record boundaries are clear.
+- HBI authority boundaries are clear.
+- No false-affordance hard stop remains.
+- No state-model hard stop remains.
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+

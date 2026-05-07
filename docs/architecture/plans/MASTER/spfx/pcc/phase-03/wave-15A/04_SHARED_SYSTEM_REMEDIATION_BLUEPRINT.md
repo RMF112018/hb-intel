@@ -2,220 +2,283 @@
 
 ## 1. Purpose
 
-This file defines the shared-system corrections required before surface-specific remediation. These are the highest-leverage Wave 15A changes.
+This document defines Wave 15A remediation requirements for shared PCC systems: shell, navigation, project context, layout, cards, state components, accessibility, and host fit.
+
+Shared-system work must precede surface-local polish.
 
 ## 2. Shared Shell
 
 ### Current Failure Mode
 
-The current PCC shell is visually dominant. It presents preview/build metadata and module navigation with more force than the operational project state.
+A technically valid shell can still underperform if it frames modules without establishing a decisive command-center posture.
 
 ### Target Behavior
 
-The shell should quietly frame the work. The project state and current surface should dominate.
+The shell should:
+
+- Respect SharePoint host boundaries.
+- Establish PCC as a productized project control center.
+- Keep project identity visible.
+- Identify active surface.
+- Provide command/search/HBI entry.
+- Avoid crowding the working canvas.
+- Support tenant-hosted and responsive contexts.
 
 ### Required Remediation
 
-- Reduce top header height.
-- Reduce left nav width or visual mass.
-- Move build/wave/fixture diagnostics into a compact status region or diagnostics drawer.
-- Add persistent project context band.
-- Add surface state indicator.
-- Preserve search only if it has clear scope and utility.
-- Ensure scroll ownership is predictable under SharePoint chrome.
+- Verify host chrome boundary.
+- Verify app canvas fit.
+- Verify active surface labelling.
+- Verify project context clarity.
+- Verify shell density across breakpoints.
+- Verify keyboard navigation.
+- Verify edit-mode and constrained-container resilience.
 
 ### Acceptance Criteria
 
-- Project identity appears before or at the same priority as the product title.
-- Operational status is more prominent than preview metadata.
-- Tenant screenshots show no wasted vertical header stack.
+- Supports P1, P3, P7, P8, and P9.
+- No host-fit hard stop.
+- No navigation hard stop.
+- No accessibility hard stop.
 
 ## 3. Navigation
 
 ### Current Failure Mode
 
-Navigation presents modules as a flat list.
+Module tabs can become a learned-navigation burden if they only expose surface names.
 
 ### Target Behavior
 
-Navigation should support workflow orientation and risk awareness.
+Navigation should:
+
+- Make the active location unmistakable.
+- Support work-center movement.
+- Reduce module hunting.
+- Reinforce lifecycle continuity.
+- Support keyboard and responsive behavior.
 
 ### Required Remediation
 
-- Group nav into:
-  - Command
-  - Controls
-  - Governance
-  - Connected Systems
-- Add lightweight status indicators.
-- Improve active state.
-- Add keyboard/focus support.
-- Avoid large high-saturation active blocks that dominate the page.
+- Validate active tab state.
+- Validate tab/panel relationships.
+- Consider status/priority cues where appropriate.
+- Ensure overflow behavior works in constrained widths.
+- Ensure keyboard Arrow/Home/End/Enter/Space behavior remains intact.
 
 ### Acceptance Criteria
 
-- Users can see what area is active and what requires attention.
-- Nav communicates operational relationship between modules.
+- Users know where they are.
+- Users can move from project status to relevant surface without confusion.
+- Navigation does not reproduce incumbent dense module navigation as the dominant mental model.
 
 ## 4. Project Context Band
 
 ### Required Fields
 
-- Project number.
+The context band should include only what improves orientation:
+
+- PCC identity.
 - Project name.
-- Phase/status.
-- Risk/readiness posture.
-- Source/data state.
-- Last refreshed timestamp.
-- Optional current user role/persona when relevant.
+- Active surface.
+- Surface-specific purpose.
+- Project stage/phase.
+- Key project facts where useful.
+- Command/search/HBI affordance.
+- Source confidence where relevant.
 
 ### Required Behaviors
 
-- Present on every surface.
-- Collapse gracefully on constrained widths.
-- Provide enough context without repeating full Project Home metadata.
+- Compact at constrained widths.
+- Does not become a data dump.
+- Does not crowd primary work.
+- Does not rely only on color/status badges.
+- Supports screen-reader and keyboard use.
 
 ### Acceptance Criteria
 
-- User never loses project context while navigating.
+- Project context is visible and useful.
+- First-screen hierarchy improves.
+- Field/tablet density remains usable.
 
 ## 5. Surface Header Component
 
 ### Required Fields
 
-- Surface label.
-- Purpose statement.
-- Current state.
-- Primary next action.
-- Key limitation if preview/read-only.
-- Source confidence where applicable.
+A surface header should clarify:
+
+- Surface title.
+- Surface purpose.
+- Current operating state.
+- Primary next action or limitation.
+- Source/degraded/read-only posture where relevant.
 
 ### Acceptance Criteria
 
-- Every surface starts with purpose + status + next action.
-- Headings are consistent across the app.
+- Users understand what the surface is for before reading the cards.
+- Preview/read-only/deferred surfaces are not misleading.
+- HBI authority boundaries are clear where HBI appears.
 
 ## 6. Grid and Layout System
 
 ### Current Failure Mode
 
-The Team & Access page demonstrates severe layout failure. Other surfaces show equal-weight cards and empty canvas.
+Bento grids can solve placement mechanics while still creating a dense card wall.
 
 ### Target Behavior
 
-The grid should support surface comprehension and SharePoint constraints.
+Layout should:
+
+- Prioritize command cards.
+- Group related operational content.
+- Subordinate reference content.
+- Prevent equal-weight overload.
+- Preserve scanability across breakpoints.
 
 ### Required Layout Patterns
 
-- Full-width command panel.
-- Two-column operational split.
-- Three/four-metric summary row.
-- Side-by-side queue + detail.
-- Responsive single-column collapse.
-- Compact reference card grid.
-- No unintended narrow-column-only rendering.
+- Primary command row.
+- Operational work zone.
+- Supporting/reference zone.
+- State/diagnostic zone.
+- Responsive row/column behavior.
+- Full-scroll scanability.
 
-### Required Tests
+### Required Tests / Evidence
 
-- Surface render tests.
-- Span assignment tests.
-- Constrained-width tests where feasible.
-- Snapshot or visual regression tests if the repo supports them.
+- Direct-child bento invariants.
+- Row-span stability.
+- Breakpoint screenshots.
+- Full-scroll screenshots.
+- Overflow/clipping checks.
+- Short-height checks.
 
 ## 7. Card Hierarchy
 
 ### Tier 1 — Command Card
 
-Use for:
+Used for:
 
-- project health
-- readiness posture
-- access posture
-- site health top risk
-- document control state
-- approval queue posture
+- Project intelligence.
+- Priority actions.
+- Critical risk/status.
+- Highest-value decisions.
+
+Required qualities:
+
+- Visually dominant but not decorative.
+- Clear owner/action.
+- Not overused.
 
 ### Tier 2 — Operational Card
 
-Use for:
+Used for:
 
-- work queues
-- health checks
-- document lanes
-- team roster
-- lifecycle gates
-- integration cards
+- Queues.
+- Work in progress.
+- Blockers.
+- Reviews.
+- Health checks.
+
+Required qualities:
+
+- Actionable.
+- Clear state and owner.
+- Compact.
+- Not visually equal to command cards.
 
 ### Tier 3 — Reference Card
 
-Use for:
+Used for:
 
-- notes
-- metadata
-- policy references
-- diagnostics
-- last run detail
+- Logs.
+- Registry information.
+- Passive context.
+- Historical summaries.
 
-### Acceptance Criteria
+Required qualities:
 
-- Only true primary content gets Tier 1 visual weight.
-- Reference content does not compete with action content.
-- Every surface has a deliberate card hierarchy.
+- Subordinate hierarchy.
+- Progressive disclosure where possible.
+- Clear purpose.
+
+### State Card
+
+Used for:
+
+- Empty.
+- Error.
+- Read-only.
+- Preview.
+- Degraded.
+- Deferred.
+- Unauthorized.
+- Missing configuration.
+
+Required qualities:
+
+- Meaning, impact, owner, next step.
+- Does not imply broken UI when the state is intentional.
 
 ## 8. State Model Component System
 
-Required components or patterns:
+Shared state components must support:
 
-- State banner.
-- Inline state chip.
-- Empty state panel.
-- Blocked state panel.
-- Degraded data notice.
-- Preview action explanation.
-- Disabled-control explanation.
-
-Each must support:
-
-- state kind
-- severity
-- operational consequence
-- next step
-- owner/resolution where applicable
+- Title.
+- Status/severity.
+- Explanation.
+- Impact.
+- Owner/system.
+- Next step.
+- Optional action.
+- Optional source confidence.
+- Optional timestamp/freshness.
+- ARIA alert/status behavior where applicable.
 
 ## 9. Accessibility
 
-Shared system requirements:
+Shared systems must support:
 
-- Visible focus states.
-- Keyboard-accessible nav and actions.
-- Proper button/link semantics.
-- Disabled controls with explanatory text.
-- No reliance on color alone.
-- Adequate contrast.
-- Meaningful headings and landmarks.
+- Keyboard reachability.
+- Logical focus order.
+- Focus-visible states.
+- ARIA labels and relationships.
+- Color-independent status.
+- Contrast.
+- Reduced motion.
+- Touch target adequacy.
+- No hover-only critical meaning.
 
 ## 10. Host Fit
 
-Required validation:
+Shared systems must prove:
 
-- SharePoint published mode.
-- SharePoint edit mode.
-- Top Microsoft chrome present.
-- Site header present.
-- Page command bar present.
-- Left app rail present.
-- Vertical scrollbar present.
-- Common laptop widths.
+- SharePoint-hosted canvas fit.
+- No fake shell.
+- No host chrome collision.
+- Edit-mode resilience.
+- Console/runtime stability.
+- Package/version alignment.
+- High-zoom behavior.
+- Constrained width behavior.
 
 ## 11. Shared System Exit Criteria
 
-Before surface remediation begins:
+Shared-system remediation is complete only when:
 
-- Shell no longer dominates content.
-- Project context band exists.
-- Surface header standard exists.
-- Navigation is grouped and state-aware.
-- Card tiers exist.
-- Grid span failure is fixed.
-- State model standard exists.
-- Tests cover key shared behaviors.
+- Shell, navigation, grid, card, and state primitives are stable.
+- The major hard stops tied to shared systems are closed.
+- Project Home and other surfaces can consume the primitives without surface-local hacks.
+- Evidence exists for source, screenshot, tenant, breakpoint, and accessibility categories.
+
+
+## Canonical References
+
+Wave 15A now consumes the PCC 100-point scorecard as a durable reference standard, not as a wave-owned scoring file.
+
+- PCC scorecard: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md`
+- PCC scorecard use guide: `docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Scorecard_Use_Guide.md`
+- Construction-tech UI study: `docs/explanation/design-decisions/con-tech-ui-study.md`
+- Construction-tech UX study: `docs/explanation/design-decisions/con-tech-ux-study.md`
+- SPFx governing standard: `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- Acceptance and scoring model: `docs/reference/ui-kit/doctrine/UI-Doctrine-Acceptance-and-Scoring-Model.md`
+
