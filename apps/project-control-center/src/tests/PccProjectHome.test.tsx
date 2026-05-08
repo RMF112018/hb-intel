@@ -476,6 +476,73 @@ describe('Project Home bento dashboard', () => {
 
   // ── Wave 15A wave-b6 Prompt 04 — core operational cluster order ──────
 
+  // Wave 15A wave-b6 Prompt 05 — Lifecycle / HBI promotion on the read-model path.
+  it('read-model path promotes Lifecycle Timeline and Ask HBI above Procore/reference and keeps lower-detail lifecycle cards at the tail', async () => {
+    const { container } = render(
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+    );
+
+    await waitFor(() => {
+      const grid = container.querySelector('[data-pcc-bento-grid]');
+      expect(grid).not.toBeNull();
+      const titles = Array.from(grid!.children)
+        .filter(
+          (child): child is HTMLElement =>
+            child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+        )
+        .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
+      expect(titles).toHaveLength(16);
+      const idx = (t: string): number => {
+        const i = titles.indexOf(t);
+        expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
+        return i;
+      };
+      // Lifecycle Timeline is promoted above Procore + reference + history.
+      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Procore snapshot'));
+      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('External Platforms'));
+      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Team Snapshot'));
+      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Recent Activity'));
+      // Ask HBI is promoted above Procore and is not last.
+      expect(idx('Ask HBI — Grounded Project Answers')).toBeLessThan(idx('Procore snapshot'));
+      expect(idx('Ask HBI — Grounded Project Answers')).toBeLessThan(titles.length - 1);
+      // Lower-detail lifecycle cards remain at the tail.
+      expect(idx('Project Memory')).toBeGreaterThan(idx('Recent Activity'));
+      expect(idx('Project Lens')).toBeGreaterThan(idx('Recent Activity'));
+      expect(idx('Related Records')).toBeGreaterThan(idx('Recent Activity'));
+    });
+
+    // Bento direct-child invariant + active-panel marker stay correct on the
+    // promoted layout. Active-panel is exactly one and stays on Project
+    // Intelligence — never assert "zero active-panel markers in the grid"
+    // (Project Intelligence legitimately carries one).
+    const grid = container.querySelector('[data-pcc-bento-grid]')!;
+    for (const card of Array.from(grid.querySelectorAll('[data-pcc-card]'))) {
+      expect(card.parentElement === grid).toBe(true);
+    }
+    const panels = grid.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(panels).toHaveLength(1);
+    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
+    expect(panels[0].textContent).toContain('Project Intelligence');
+
+    // Promoted lifecycle/HBI children must NOT register routing/tab/workspace
+    // ownership: scope the no-marker check to the routing taxonomy.
+    expect(grid.querySelectorAll('[data-pcc-tab-id]')).toHaveLength(0);
+    expect(grid.querySelectorAll('[data-pcc-surface-active]')).toHaveLength(0);
+    expect(grid.querySelectorAll('[data-pcc-workspace]')).toHaveLength(0);
+
+    // Ask HBI remains idle on mount: panel state attribute is "idle" and no
+    // unified-search answer rows render before a sample-query click.
+    const askHbiPanel = grid.querySelector('[data-pcc-ask-hbi-panel]');
+    expect(askHbiPanel, 'Ask HBI panel marker should render').not.toBeNull();
+    expect(askHbiPanel!.getAttribute('data-pcc-ask-hbi-panel-state')).toBe('idle');
+    expect(grid.querySelectorAll('[data-pcc-unified-search-answer-id]')).toHaveLength(0);
+
+    // No http(s) anchors anywhere in the bento grid.
+    for (const a of Array.from(grid.querySelectorAll('a[href]'))) {
+      expect(a.getAttribute('href') ?? '').not.toMatch(/^https?:\/\//);
+    }
+  });
+
   it('Project Home fixture path orders the core operational cluster before state/deferred/reference cards', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]');

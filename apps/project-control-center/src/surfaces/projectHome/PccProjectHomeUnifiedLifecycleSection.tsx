@@ -23,7 +23,7 @@
  * search is intentionally NOT included on Project Home in 05B.
  */
 
-import { Fragment, type FC } from 'react';
+import { Fragment, type FC, type ReactNode } from 'react';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
@@ -41,11 +41,19 @@ export interface IPccProjectHomeUnifiedLifecycleSectionProps {
   readonly client: IPccUnifiedLifecycleReadModelClient;
   readonly projectId: PccProjectId;
   readonly viewerPersona?: PccPersona;
+  /**
+   * Wave 15A wave-b6 Prompt 05 — optional Project-Home-supplied slot
+   * rendered as siblings between Lifecycle Timeline and the lower-detail
+   * lifecycle cards. Each child must be a `PccDashboardCard` (or a
+   * Fragment of them) so the bento direct-child invariant holds. Local
+   * to this section — do not generalize into a shared primitive.
+   */
+  readonly renderAfterTimeline?: ReactNode;
 }
 
 export const PccProjectHomeUnifiedLifecycleSection: FC<
   IPccProjectHomeUnifiedLifecycleSectionProps
-> = ({ client, projectId, viewerPersona }) => {
+> = ({ client, projectId, viewerPersona, renderAfterTimeline }) => {
   const state = useUnifiedLifecycleReadModel(client, projectId, viewerPersona);
   return (
     <Fragment>
@@ -58,6 +66,7 @@ export const PccProjectHomeUnifiedLifecycleSection: FC<
       >
         {renderLifecycleTimeline(state)}
       </PccDashboardCard>
+      {renderAfterTimeline}
       <PccDashboardCard
         footprint="standard"
         tier="tier3"

@@ -84,6 +84,20 @@ describe('AskHbiGroundingPreviewPanel — disclaimers and project-scoped copy', 
     expect(disclaimer?.textContent ?? '').toBe(ASK_HBI_PANEL_DISCLAIMER);
     expect(container.textContent ?? '').toContain(ASK_HBI_PANEL_TITLE);
   });
+
+  // Wave 15A wave-b6 Prompt 05 — bounded HBI authority obligations on the
+  // disclaimer constant. Pinned independent of identity equality with the
+  // imported constant so future copy revisions cannot quietly drop one of
+  // these textual obligations.
+  it('disclaimer asserts no source-of-truth, no decision/approval/writeback authority, and grounded preview posture', () => {
+    const text = ASK_HBI_PANEL_DISCLAIMER.toLowerCase();
+    expect(text).toContain('not the source of truth');
+    expect(text).toContain('no decision');
+    expect(text).toContain('approval');
+    expect(text).toContain('writeback');
+    expect(text).toContain('grounded');
+    expect(text).toContain('preview');
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────

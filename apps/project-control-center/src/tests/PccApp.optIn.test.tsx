@@ -218,6 +218,12 @@ describe('mount(...) opt-in', () => {
         APPROVALS_URL,
       ].sort(),
     );
+    // Wave 15A wave-b6 Prompt 05 — defensive guard: Ask HBI must remain
+    // idle on mount; no initial unified-search request may be dispatched.
+    expect(
+      urls.filter((u) => u.includes('unified-search')),
+      'Ask HBI must remain idle on mount; no initial unified-search request expected',
+    ).toEqual([]);
     for (const c of calls) {
       expect(c.init?.method).toBe('GET');
     }

@@ -43,6 +43,9 @@ const FIXTURE_EXPECTED_ORDER = [
   'Recent Activity',
 ] as const;
 
+// Wave 15A wave-b6 Prompt 05 — Lifecycle Timeline and Ask HBI promoted
+// above Procore / reference / history; lower-detail lifecycle cards
+// (Project Memory, Project Lens, Related Records) remain at the tail.
 const READ_MODEL_EXPECTED_ORDER = [
   'Project Intelligence',
   'Priority Actions',
@@ -51,15 +54,15 @@ const READ_MODEL_EXPECTED_ORDER = [
   'Document Control Center',
   'Site Health Summary',
   'Missing Configurations',
+  'Lifecycle Timeline',
+  'Ask HBI — Grounded Project Answers',
   'Procore snapshot',
   'External Platforms',
   'Team Snapshot',
   'Recent Activity',
-  'Lifecycle Timeline',
   'Project Memory',
   'Project Lens',
   'Related Records',
-  'Ask HBI — Grounded Project Answers',
 ] as const;
 
 describe('Project Home — first-impression composition order', () => {

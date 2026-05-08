@@ -73,18 +73,25 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         state={viewModel?.missingConfigurations.state ?? 'preview'}
         missingConfigurations={viewModel?.missingConfigurations.data}
       />
-      <PccProjectHomeProcoreSnapshotCard
-        state={viewModel?.procoreSnapshot.state ?? 'preview'}
-        snapshot={viewModel?.procoreSnapshot.data}
-      />
-      <PccExternalSystemsCard />
-      <PccTeamSnapshotCard />
-      <PccRecentActivityCard />
       <PccProjectHomeUnifiedLifecycleSection
         client={client}
         projectId={SAMPLE_PROJECT_PROFILE.projectId}
+        renderAfterTimeline={
+          <>
+            <PccProjectHomeAskHbiSection
+              client={client}
+              projectId={SAMPLE_PROJECT_PROFILE.projectId}
+            />
+            <PccProjectHomeProcoreSnapshotCard
+              state={viewModel?.procoreSnapshot.state ?? 'preview'}
+              snapshot={viewModel?.procoreSnapshot.data}
+            />
+            <PccExternalSystemsCard />
+            <PccTeamSnapshotCard />
+            <PccRecentActivityCard />
+          </>
+        }
       />
-      <PccProjectHomeAskHbiSection client={client} projectId={SAMPLE_PROJECT_PROFILE.projectId} />
     </>
   );
 };

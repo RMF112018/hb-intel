@@ -31,10 +31,7 @@
 import { useState, type FC } from 'react';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
 import { PccPreviewState } from '../../../ui/PccPreviewState';
-import {
-  useUnifiedSearchReadModel,
-  type IPccUnifiedSearchReadModelClient,
-} from '../index.js';
+import { useUnifiedSearchReadModel, type IPccUnifiedSearchReadModelClient } from '../index.js';
 import type { IPccUnifiedSearchViewModel } from '../unifiedLifecycleViewModel.js';
 import { UnifiedProjectSearchPreview } from './UnifiedProjectSearchPreview.js';
 import styles from './AskHbiGroundingPreviewPanel.module.css';
@@ -49,7 +46,7 @@ export const ASK_HBI_SAMPLE_QUERIES = [
 
 export const ASK_HBI_PANEL_TITLE = 'Ask HBI — project-scoped grounded preview';
 export const ASK_HBI_PANEL_DISCLAIMER =
-  'HBI is not the source of truth. Answers are grounded in this project’s fixture data and shown as a preview only.';
+  'HBI is not the source of truth and has no decision, approval, or writeback authority. Answers are grounded in this project’s fixture data and shown as a preview only.';
 export const ASK_HBI_IDLE_TITLE = 'Select a sample question to see a grounded preview.';
 export const ASK_HBI_IDLE_DESCRIPTION =
   'Each sample question is project-scoped and answered from this project’s fixture data only.';
@@ -69,14 +66,10 @@ export interface IAskHbiGroundingPreviewPanelProps {
   readonly initialQuery?: string | null;
 }
 
-function withSafeGroundingPosture(
-  vm: IPccUnifiedSearchViewModel,
-): IPccUnifiedSearchViewModel {
+function withSafeGroundingPosture(vm: IPccUnifiedSearchViewModel): IPccUnifiedSearchViewModel {
   return {
     ...vm,
-    answers: vm.answers.filter(
-      (a) => a.kind === 'refusal' || a.citations.length > 0,
-    ),
+    answers: vm.answers.filter((a) => a.kind === 'refusal' || a.citations.length > 0),
   };
 }
 
@@ -89,12 +82,7 @@ export const AskHbiGroundingPreviewPanel: FC<IAskHbiGroundingPreviewPanelProps> 
   const [selectedQuery, setSelectedQuery] = useState<string | undefined>(() =>
     initialQuery === null ? undefined : (initialQuery ?? ASK_HBI_SAMPLE_QUERIES[0]),
   );
-  const state = useUnifiedSearchReadModel(
-    client,
-    projectId,
-    viewerPersona,
-    selectedQuery,
-  );
+  const state = useUnifiedSearchReadModel(client, projectId, viewerPersona, selectedQuery);
 
   return (
     <section
@@ -142,9 +130,7 @@ export const AskHbiGroundingPreviewPanel: FC<IAskHbiGroundingPreviewPanelProps> 
         {state.status === 'loading' ? <PccPreviewState state="loading" /> : null}
         {state.status === 'error' ? <PccPreviewState state="error" /> : null}
         {state.status === 'ready' ? (
-          <UnifiedProjectSearchPreview
-            viewModel={withSafeGroundingPosture(state.viewModel)}
-          />
+          <UnifiedProjectSearchPreview viewModel={withSafeGroundingPosture(state.viewModel)} />
         ) : null}
       </div>
     </section>
