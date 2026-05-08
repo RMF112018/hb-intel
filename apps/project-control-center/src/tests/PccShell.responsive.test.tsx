@@ -164,21 +164,22 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
   // Wave 15A wave-b7 Prompt 02 — shell hero metadata zones (summary, cues,
   // read-only cue) render at every responsive mode covered by the shell.
   // Per-surface and inert-content coverage lives in
-  // PccProjectHeroBand.test.tsx; this is a presence-only smoke at the shell
-  // composition layer.
-  it('renders the shell hero surface metadata zones in standardLaptop mode', () => {
-    const { container } = render(<PccApp forceMode="standardLaptop" />);
-    expect(container.querySelectorAll('[data-pcc-hero-surface-summary]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-pcc-hero-surface-cues]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-pcc-hero-read-only-cue]')).toHaveLength(1);
-  });
-
-  it('renders the shell hero surface metadata zones in phone mode', () => {
-    const { container } = render(<PccApp forceMode="phone" />);
-    expect(container.querySelectorAll('[data-pcc-hero-surface-summary]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-pcc-hero-surface-cues]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-pcc-hero-read-only-cue]')).toHaveLength(1);
-  });
+  // PccProjectHeroBand.test.tsx; this is shell-composition presence-only
+  // coverage under <PccApp forceMode={mode}> at every breakpoint. Density
+  // and command-search variant are unit-covered in PccProjectHeroBand.test.tsx
+  // and intentionally not duplicated here. (wave-b8 Prompt 04 extended this
+  // to the full eight-mode loop.)
+  it.each(PCC_RESPONSIVE_MODES)(
+    'renders the shell hero surface metadata zones at "%s" mode',
+    (mode) => {
+      const { container, unmount } = render(<PccApp forceMode={mode} />);
+      expect(container.querySelectorAll('[data-pcc-hero-surface-summary]')).toHaveLength(1);
+      expect(container.querySelectorAll('[data-pcc-hero-surface-cues]')).toHaveLength(1);
+      expect(container.querySelectorAll('[data-pcc-hero-read-only-cue]')).toHaveLength(1);
+      expect(container.querySelectorAll('[data-pcc-hero-command-search]')).toHaveLength(1);
+      unmount();
+    },
+  );
 });
 
 describe('resolveResponsiveMode 8-mode boundary contract', () => {

@@ -103,6 +103,18 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
   });
 });
 
+describe('PccProjectHeroBand — accessible region semantics (wave-b8 Prompt 04)', () => {
+  it('exposes role="region" with a non-empty accessible label that names the Project Control Center', () => {
+    const { container } = renderHero();
+    const root = container.querySelector('[data-pcc-project-hero-band]');
+    expect(root).not.toBeNull();
+    expect(root!.getAttribute('role')).toBe('region');
+    const label = root!.getAttribute('aria-label');
+    expect(label).toBeTruthy();
+    expect(label).toMatch(/Project|Control Center/);
+  });
+});
+
 describe('PccProjectHeroBand — locked-out content (negative marker assertions)', () => {
   it('does not render any source-confidence marker', () => {
     const { container } = renderHero();
