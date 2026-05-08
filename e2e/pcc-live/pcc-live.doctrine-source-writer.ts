@@ -11,7 +11,7 @@ const DISCLAIMER =
 
 const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
 const UNSAFE_PATH_PATTERN =
-  /(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookie|token|auth|session|secrets|trace|video|har/gi;
+  /(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookies?|tokens?|auth|sessions?|secrets|trace|video|har/gi;
 
 function sanitizeText(input: string): string {
   const normalized = input.replace(/\s+/g, ' ').trim();
@@ -19,7 +19,7 @@ function sanitizeText(input: string): string {
   const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
   const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
   const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secrets?)\b/gi,
+    /\b(storageState|storage-state|cookies?|tokens?|auth|sessions?|secrets?)\b/gi,
     '[redacted-cred]',
   );
   const noArtifacts = noCred

@@ -25,7 +25,8 @@ const TOKEN_RE =
   /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g;
 const QUERY_RE = /\?.*$/g;
 
-const REDACT_TERMS_RE = /\b(storageState|storage-state|cookie|token|auth|session|secrets?)\b/gi;
+const REDACT_TERMS_RE =
+  /\b(storageState|storage-state|cookies?|tokens?|auth|sessions?|secrets?)\b/gi;
 const FORBIDDEN_CLAIMS_RE =
   /(hard stop passed|hard stop failed|score-ready|phase 4 ready|56\/56 achieved|100\/100|mold breaker achieved)/gi;
 const PLAYWRIGHT_ARTIFACT_RE =

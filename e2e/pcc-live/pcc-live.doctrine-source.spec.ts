@@ -109,6 +109,7 @@ function assertNoForbiddenStrings(text: string): void {
   for (const token of FORBIDDEN_STRINGS) {
     expect(normalized).not.toContain(token);
   }
+  expect(normalized).not.toMatch(/\bcookies?\b/i);
   for (const pattern of FORBIDDEN_CLAIM_PATTERNS) {
     expect(normalized).not.toMatch(pattern);
   }
