@@ -54,6 +54,7 @@ const WORD_BOUNDARY_FORBIDDEN = [
 ] as const;
 
 const REQUIRED_OUTPUTS = [...PCC_SCORECARD_REPORT_OUTPUT_FILES];
+const FORBIDDEN_SCORECARD_V2 = 'PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md';
 
 function normalizeAllowed(text: string): string {
   return text
@@ -70,6 +71,7 @@ test('Report type / coverage assembly', () => {
   expect(new Set(run.evidenceCoverage.map((row) => row.evidenceId)).size).toBe(
     REQUIRED_PCC_EVIDENCE_IDS.length,
   );
+  expect(JSON.stringify(run)).not.toContain(FORBIDDEN_SCORECARD_V2);
 });
 
 test('Pillar and hard-stop worksheets', () => {
@@ -124,6 +126,8 @@ test('Writer artifact completeness', async () => {
     expect(names).toEqual([...REQUIRED_OUTPUTS].sort());
     for (const file of REQUIRED_OUTPUTS) {
       expect(fs.existsSync(path.join(tmpDir, file))).toBe(true);
+      const text = fs.readFileSync(path.join(tmpDir, file), 'utf-8');
+      expect(text).not.toContain(FORBIDDEN_SCORECARD_V2);
     }
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

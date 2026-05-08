@@ -104,7 +104,7 @@ function sourceRefsFor(id: number): PccEvidenceRecord['sourceRefs'] {
   const refs: PccEvidenceRecord['sourceRefs'] = [
     {
       type: 'scorecard',
-      ref: 'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      ref: 'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     },
     { type: 'prompt', ref: 'Prompt 02 — Evidence Registry and Manifest Writer' },
   ];

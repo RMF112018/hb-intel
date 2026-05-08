@@ -18,6 +18,10 @@ import {
 } from './pcc-scorecard.traceability';
 import { PCC_HARD_STOP_IDS, PCC_SCORECARD_PILLAR_IDS } from './pcc-scorecard.types';
 
+const CANONICAL_SCORECARD_PATH =
+  'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md';
+const FORBIDDEN_SCORECARD_V2 = 'PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md';
+
 test('pillar model has exact IDs, required metadata, and total weight 100', () => {
   expect(PCC_SCORECARD_PILLARS).toHaveLength(9);
   expect(PCC_SCORECARD_PILLARS.map((p) => p.id)).toEqual(PCC_SCORECARD_PILLAR_IDS);
@@ -29,6 +33,19 @@ test('pillar model has exact IDs, required metadata, and total weight 100', () =
     expect(pillar.sourceRefs.length).toBeGreaterThan(0);
     expect(pillar.manualScoringRequired).toBe(true);
     expect(getPccScorecardPillarById(pillar.id)?.id).toBe(pillar.id);
+  }
+});
+
+test('pillar and hard-stop source refs enforce canonical scorecard path and reject _v2', () => {
+  const allSourceRefs = [
+    ...PCC_SCORECARD_PILLARS.flatMap((pillar) => pillar.sourceRefs),
+    ...PCC_HARD_STOPS.flatMap((hardStop) => hardStop.sourceRefs),
+  ];
+
+  expect(allSourceRefs.length).toBeGreaterThan(0);
+  expect(allSourceRefs).toContain(CANONICAL_SCORECARD_PATH);
+  for (const ref of allSourceRefs) {
+    expect(ref).not.toContain(FORBIDDEN_SCORECARD_V2);
   }
 });
 

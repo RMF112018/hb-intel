@@ -15,6 +15,10 @@ import {
   type PccEvidenceRunMetadata,
 } from './pcc-evidence.types';
 
+const CANONICAL_SCORECARD_PATH =
+  'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md';
+const FORBIDDEN_SCORECARD_V2 = 'PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md';
+
 const EV_52_THROUGH_58 = new Set(['EV-52', 'EV-53', 'EV-54', 'EV-55', 'EV-56', 'EV-57', 'EV-58']);
 
 const CURATED_ARTIFACT = 'docs/architecture/evidence/pcc-live/run-001/pcc-evidence-manifest.json';
@@ -68,6 +72,20 @@ test('every record includes required metadata fields', () => {
     expect(typeof record.reviewerNotes).toBe('string');
     expect(record.sourceRefs.length).toBeGreaterThan(0);
     expect(record.requiredArtifacts.length).toBeGreaterThan(0);
+  }
+});
+
+test('registry scorecard source refs enforce canonical path and reject _v2', () => {
+  const scorecardRefs = PCC_EVIDENCE_REGISTRY.flatMap((record) =>
+    record.sourceRefs
+      .filter((sourceRef) => sourceRef.type === 'scorecard')
+      .map((sourceRef) => sourceRef.ref),
+  );
+
+  expect(scorecardRefs.length).toBeGreaterThan(0);
+  expect(scorecardRefs).toContain(CANONICAL_SCORECARD_PATH);
+  for (const ref of scorecardRefs) {
+    expect(ref).not.toContain(FORBIDDEN_SCORECARD_V2);
   }
 });
 

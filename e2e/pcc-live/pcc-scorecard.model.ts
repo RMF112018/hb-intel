@@ -14,7 +14,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P1',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -26,7 +26,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P2',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -37,7 +37,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P3',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -48,7 +48,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P4',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -60,7 +60,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P5',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -72,7 +72,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P6',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -83,7 +83,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P7',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -94,7 +94,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P8',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -106,7 +106,7 @@ export const PCC_SCORECARD_PILLARS: readonly PccScorecardPillarModel[] = [
     manualScoringRequired: true,
     scorecardSectionRef: 'P9',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
 ];
@@ -121,7 +121,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-01',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -132,7 +132,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-02',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -143,7 +143,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-03',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -154,7 +154,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-04',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -165,7 +165,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-05',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -177,7 +177,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-06',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -188,7 +188,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-07',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -199,7 +199,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-08',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -211,7 +211,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-09',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
   {
@@ -223,7 +223,7 @@ export const PCC_HARD_STOPS: readonly PccHardStopModel[] = [
     manualReviewRequired: true,
     scorecardSectionRef: 'HS-10',
     sourceRefs: [
-      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
+      'docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Mold_Breaker_Scorecard.md',
     ],
   },
 ];
