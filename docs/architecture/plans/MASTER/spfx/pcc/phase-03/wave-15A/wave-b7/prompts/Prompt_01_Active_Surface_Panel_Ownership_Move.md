@@ -1,87 +1,195 @@
-# Updated Prompt 01 — Active Surface Panel Ownership Move and Immediate Test Compatibility Repair
+# Updated Prompt 01 — Active Surface Panel Ownership Move and Shell-Rendered Test Compatibility Repair
 
 ## Objective
 
-Move semantic active-surface panel ownership from the first bento card to the shell `main[role="tabpanel"]`, while preserving the existing tab ARIA behavior, bento direct-child invariants, card-marker compatibility, and full local test-suite viability.
+Move semantic active-surface panel ownership from the first bento card to the shell `main[role="tabpanel"]`, while preserving tab ARIA behavior, bento direct-child invariants, card-marker compatibility, and full local test-suite viability.
 
-This is an updated Prompt 01 because current repo truth shows that at least one existing test helper still treats `[data-pcc-active-surface-panel="<surfaceId>"]` as the first bento card. Once `main` receives that same marker, broad `querySelector` logic will resolve to `main` first and incorrectly fail the direct-child/card-tier assertions. This prompt therefore includes a narrow, immediate test compatibility repair so Prompt 01 can safely run the full package test suite.
+This prompt is updated after Prompt 00 repo-truth intake. Prompt 00 confirmed that the original Prompt 01 scope was directionally correct but under-scoped. The implementation must repair not only `PccCardTierContract.test.tsx`, but also shell-rendered tests that currently assert a global active-panel marker count of exactly one.
+
+Phase 2 posture:
+
+- shell `main[role="tabpanel"]` becomes the semantic active-panel owner;
+- card-level `data-pcc-active-surface-panel` markers remain temporarily as compatibility markers;
+- tests must distinguish semantic shell ownership from compatibility card markers;
+- Playwright/e2e evidence enrichment is deferred to Prompt 05 unless a local unit test depends on it.
 
 ## Mandatory Opening Instruction
 
-Before making any changes, confirm you are operating on the current repo state.
+Before making changes, confirm you are operating on the current repo state.
 
 Do not re-read files that are still within your current context or memory unless you need to verify stale, missing, or contradictory repo truth.
 
+## Scope Control
+
+This is an implementation prompt, but it is narrow.
+
+Do not:
+
+- remove duplicate top-level/header cards;
+- implement a Modules launcher;
+- introduce active module state;
+- introduce URL routing;
+- change shared layout primitives;
+- edit Playwright/e2e files;
+- edit package dependencies, lockfile, manifests, or package-solution files;
+- broadly format unrelated files;
+- claim Phase 2 completion, scorecard pass, duplicate-card remediation completion, or Phase 4 readiness.
+
 ## Required Repo-Truth Checks Before Editing
 
-Perform these checks before editing. Keep the intake targeted; do not conduct a broad repo audit unless one of these checks returns contradictory results.
+Perform these checks before editing. Keep the intake targeted.
 
-1. Inspect `apps/project-control-center/src/shell/PccShell.tsx`.
-   - Confirm `ACTIVE_PANEL_ID` still equals `'pcc-active-surface-panel'`.
-   - Confirm `main` still has `id={ACTIVE_PANEL_ID}`, `role="tabpanel"`, `aria-labelledby={`pcc-tab-${activeSurfaceId}`}`, `className={styles.canvas}`, and `data-pcc-canvas=""`.
-   - Confirm `main` still lacks `data-pcc-active-surface-panel={activeSurfaceId}` before this prompt.
+### 1. Confirm local baseline
 
-2. Inspect `apps/project-control-center/src/shell/PccHorizontalTabs.tsx`.
-   - Confirm `PccHorizontalTabs` still receives `panelId={ACTIVE_PANEL_ID}` from `PccShell`.
-   - Confirm tabs still emit `role="tab"`, `aria-selected`, `aria-controls={panelId}`, `id={`pcc-tab-${surfaceId}`}`, and `data-pcc-tab-id`.
+Run:
 
-3. Inspect `apps/project-control-center/src/tests/PccShell.responsive.test.tsx`.
-   - Confirm existing tests already assert the `id`, `role`, `aria-labelledby`, and `aria-controls` tabpanel relationship.
-   - Identify where to add shell active-panel marker assertions.
+```bash
+git status --short
+md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
+```
 
-4. Search tests for stale active-panel ownership assumptions before editing:
-   - `getActiveBento`
-   - `data-pcc-active-surface-panel`
-   - `dataActiveSurfacePanel`
-   - `active-panel card`
-   - `active-panel parent`
-   - `must mount its active panel`
+If relevant files are dirty, stop and report before editing.
 
-5. Specifically inspect `apps/project-control-center/src/tests/PccCardTierContract.test.tsx`.
-   - Confirm whether `getActiveBento` currently uses a broad selector like:
-     ```ts
-     container.querySelector(`[data-pcc-active-surface-panel="${surfaceId}"]`)
-     ```
-   - Confirm whether it then assumes the selected element’s parent is `[data-pcc-bento-grid]`.
-   - Confirm whether the active command card heading-level test also uses the broad selector.
-
-6. Inspect `apps/project-control-center/src/layout/PccDashboardCard.tsx` only if needed to confirm compatibility behavior.
-   - Do not modify this shared primitive in Prompt 01.
-   - Confirm card-level `dataActiveSurfacePanel` remains a compatibility bridge.
-
-7. Inspect `apps/project-control-center/src/shell/PccSurfaceRouter.tsx` only to check for stale source comments.
-   - If the file still claims that only one rendered element carries `data-pcc-active-surface-panel`, make a narrow comment-only correction because Prompt 01 intentionally creates shell ownership while preserving temporary card-level compatibility markers.
-   - Do not alter router runtime behavior.
-
-8. Confirm package/manifest/lockfile posture:
-   - `git status --short`
-   - `md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml`
-   - Confirm `apps/project-control-center/config/package-solution.json` exists.
-   - Confirm root `config/package-solution.json` is absent or irrelevant to this prompt.
-   - Do not modify `pnpm-lock.yaml`, package dependency sections, SPFx manifests, or package-solution files.
-
-## Expected Files
-
-Primary files expected:
+Relevant files include:
 
 ```text
 apps/project-control-center/src/shell/PccShell.tsx
+apps/project-control-center/src/shell/PccSurfaceRouter.tsx
+apps/project-control-center/src/shell/PccHorizontalTabs.tsx
 apps/project-control-center/src/tests/PccShell.responsive.test.tsx
+apps/project-control-center/src/tests/PccShell.navigation.test.tsx
+apps/project-control-center/src/tests/PccShell.surfaceSmoke.test.tsx
+apps/project-control-center/src/tests/PccCardTierContract.test.tsx
+apps/project-control-center/config/package-solution.json
+package.json
+pnpm-lock.yaml
 ```
 
-Allowed narrow test compatibility file, if the repo-truth check confirms the stale selector logic is still present:
+### 2. Confirm shell markup
+
+Inspect:
 
 ```text
+apps/project-control-center/src/shell/PccShell.tsx
+```
+
+Confirm:
+
+- `ACTIVE_PANEL_ID` equals `'pcc-active-surface-panel'`;
+- `PccHorizontalTabs` receives `panelId={ACTIVE_PANEL_ID}`;
+- `main` still has:
+  - `id={ACTIVE_PANEL_ID}`;
+  - `role="tabpanel"`;
+  - `aria-labelledby={`pcc-tab-${activeSurfaceId}`}`;
+  - `className={styles.canvas}`;
+  - `data-pcc-canvas=""`;
+- `main` still lacks `data-pcc-active-surface-panel={activeSurfaceId}` before this prompt.
+
+If `main` already has the marker, do not re-add it. Narrow the work to validation/comment/test posture and explain the drift.
+
+### 3. Confirm tab ARIA contract
+
+Inspect:
+
+```text
+apps/project-control-center/src/shell/PccHorizontalTabs.tsx
+```
+
+Confirm tabs still emit:
+
+- `id={`pcc-tab-${surfaceId}`}`;
+- `role="tab"`;
+- `type="button"`;
+- `aria-selected`;
+- `aria-controls={panelId}`;
+- `data-pcc-tab-id={surfaceId}`;
+- active/inactive state marker;
+- click handler;
+- keyboard handling for ArrowRight, ArrowLeft, Home, End, Enter, and Space.
+
+Do not change `PccHorizontalTabs.tsx` unless repo truth materially contradicts this prompt and you stop to report.
+
+### 4. Confirm stale active-panel assumptions
+
+Search tests before editing:
+
+```bash
+rg -n "dataActiveSurfacePanel|data-pcc-active-surface-panel|getActiveBento|active-panel card|active-panel parent|must mount its active panel|active-panel carrier" apps/project-control-center/src/tests apps/project-control-center/src/shell
+```
+
+You must inspect and classify all shell-rendered active-panel marker assertions in:
+
+```text
+apps/project-control-center/src/tests/PccShell.responsive.test.tsx
+apps/project-control-center/src/tests/PccShell.navigation.test.tsx
+apps/project-control-center/src/tests/PccShell.surfaceSmoke.test.tsx
 apps/project-control-center/src/tests/PccCardTierContract.test.tsx
 ```
 
-Allowed narrow comment-only file, if repo truth confirms a stale “single active-surface-panel element” comment remains:
+If execution reveals any additional shell-rendered test that asserts a global `[data-pcc-active-surface-panel]` count of exactly `1`, treat that as in-scope for Prompt 01 repair.
+
+Do not blanket-change surface-only tests that render without `PccShell`; only repair tests whose rendered tree includes shell `main` and therefore legitimately has shell marker + card compatibility marker coexistence.
+
+### 5. Confirm card compatibility primitive, without editing it
+
+Inspect only if needed:
+
+```text
+apps/project-control-center/src/layout/PccDashboardCard.tsx
+```
+
+Confirm:
+
+- card-level `dataActiveSurfacePanel` remains a temporary compatibility bridge;
+- `data-pcc-active-surface-panel={dataActiveSurfacePanel}` is still emitted on `[data-pcc-card]`.
+
+Do not modify `PccDashboardCard.tsx`.
+
+### 6. Confirm stale router comment
+
+Inspect:
 
 ```text
 apps/project-control-center/src/shell/PccSurfaceRouter.tsx
 ```
 
-Do not edit these files in this prompt unless a directly related failing test proves a narrow correction is required and you explain why in the completion report:
+If it still claims that only one rendered element carries `data-pcc-active-surface-panel`, make a narrow comment-only correction.
+
+Do not alter router runtime behavior.
+
+### 7. Confirm package/manifest/lockfile posture
+
+Confirm:
+
+- root `config/package-solution.json` is absent or irrelevant;
+- `apps/project-control-center/config/package-solution.json` exists;
+- Prompt 01 requires no package-solution edit;
+- Prompt 01 requires no dependency, lockfile, package, or manifest edit.
+
+## Expected Files
+
+Expected production file:
+
+```text
+apps/project-control-center/src/shell/PccShell.tsx
+```
+
+Expected test files:
+
+```text
+apps/project-control-center/src/tests/PccShell.responsive.test.tsx
+apps/project-control-center/src/tests/PccShell.navigation.test.tsx
+apps/project-control-center/src/tests/PccShell.surfaceSmoke.test.tsx
+apps/project-control-center/src/tests/PccCardTierContract.test.tsx
+```
+
+Expected comment-only file if stale comment is still present:
+
+```text
+apps/project-control-center/src/shell/PccSurfaceRouter.tsx
+```
+
+Do not edit these files in Prompt 01:
 
 ```text
 apps/project-control-center/src/layout/PccBentoGrid.tsx
@@ -90,8 +198,8 @@ apps/project-control-center/src/layout/footprints.ts
 apps/project-control-center/src/surfaces/**/*
 e2e/pcc-live/**/*
 apps/project-control-center/config/package-solution.json
-pnpm-lock.yaml
 package.json
+pnpm-lock.yaml
 ```
 
 ## Implementation Requirements
@@ -104,7 +212,9 @@ In `apps/project-control-center/src/shell/PccShell.tsx`, add:
 data-pcc-active-surface-panel={activeSurfaceId}
 ```
 
-to the existing shell `main` element so the resulting semantic owner is:
+to the existing shell `main` element.
+
+The resulting semantic owner must be:
 
 ```tsx
 <main
@@ -117,7 +227,7 @@ to the existing shell `main` element so the resulting semantic owner is:
 >
 ```
 
-Preserve all existing attributes and child structure:
+Preserve this structure:
 
 ```text
 PccShell
@@ -130,7 +240,9 @@ PccShell
 
 ### 2. Preserve tab ARIA behavior
 
-Do not change the keyboard model or tab control semantics. Preserve:
+Do not change the tab keyboard model or tab control semantics.
+
+Preserve:
 
 - `role="tablist"` on the tabs container;
 - `role="tab"` on each tab;
@@ -144,14 +256,26 @@ Do not change the keyboard model or tab control semantics. Preserve:
 
 Do not remove `dataActiveSurfacePanel` props from cards in this prompt.
 
-Card-level markers may temporarily coexist with the shell marker, but tests must distinguish:
+Tests must distinguish:
 
-- semantic active-panel owner: `main[role="tabpanel"][data-pcc-active-surface-panel="<surfaceId>"]`;
-- deprecated compatibility marker: card-level `[data-pcc-card][data-pcc-active-surface-panel="<surfaceId>"]`.
+- semantic active-panel owner:
+  ```text
+  main[role="tabpanel"][data-pcc-active-surface-panel="<surfaceId>"]
+  ```
+- temporary compatibility marker:
+  ```text
+  [data-pcc-bento-grid] > [data-pcc-card][data-pcc-active-surface-panel="<surfaceId>"]
+  ```
 
 Do not write tests that require active-panel ownership to be card-based.
 
-### 4. Correct stale source comments, if present
+Do not assert that a broad selector like this has count `1` in shell-rendered trees:
+
+```text
+[data-pcc-active-surface-panel]
+```
+
+### 4. Correct stale router comment
 
 If `apps/project-control-center/src/shell/PccSurfaceRouter.tsx` still states that only one element in the rendered tree carries `data-pcc-active-surface-panel`, update that comment only.
 
@@ -159,17 +283,149 @@ Required comment posture:
 
 - shell `main` is now the semantic active-panel owner;
 - card-level markers may remain temporarily for compatibility;
-- tests must not infer semantic ownership from the card marker.
+- tests must not infer semantic ownership from the card marker;
+- broad marker count may legitimately be greater than one in shell-rendered trees.
 
 Do not change router runtime behavior.
 
-### 5. Repair stale test selector assumptions immediately
+## Required Test Updates
 
-If `PccCardTierContract.test.tsx` still resolves the active bento by selecting the first `[data-pcc-active-surface-panel="<surfaceId>"]`, update only the stale helper/test logic needed to keep Prompt 01 valid.
+### 1. `PccShell.responsive.test.tsx`
 
-Replace card-owner assumptions with shell-owner scoping.
+Add or update tests to verify:
 
-Preferred helper shape:
+1. Default render has exactly one shell-owned active panel:
+
+```ts
+const shellPanels = container.querySelectorAll(
+  'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
+);
+expect(shellPanels.length).toBe(1);
+```
+
+2. Default shell panel has:
+   - `id="pcc-active-surface-panel"`;
+   - `role="tabpanel"`;
+   - `aria-labelledby="pcc-tab-project-home"`;
+   - `data-pcc-canvas`.
+
+3. Clicking Documents updates:
+   - shell marker to `documents`;
+   - `aria-labelledby` to `pcc-tab-documents`.
+
+4. Clicking Site Health updates:
+   - shell marker to `site-health`;
+   - `aria-labelledby` to `pcc-tab-site-health`.
+
+5. Every tab still has:
+   - `role="tab"`;
+   - `aria-controls="pcc-active-surface-panel"`;
+   - non-empty `id`.
+
+Do not assert broad `[data-pcc-active-surface-panel="<surfaceId>"]` count equals `1`.
+
+### 2. `PccShell.navigation.test.tsx`
+
+Repair shell-rendered broad-marker assumptions.
+
+Required pattern:
+
+- Replace global count assertions such as:
+  ```ts
+  const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+  expect(panels).toHaveLength(1);
+  ```
+  with structural assertions.
+
+Required assertions:
+
+1. The selected tab remains unique:
+
+```ts
+const selectedTabs = container.querySelectorAll(
+  '[data-pcc-horizontal-tabs] [data-pcc-tab-id][aria-selected="true"]',
+);
+expect(selectedTabs).toHaveLength(1);
+expect(selectedTabs[0]?.getAttribute('data-pcc-tab-id')).toBe(id);
+```
+
+2. The shell panel exists and owns the active surface:
+
+```ts
+const shellPanel = container.querySelector(
+  `main[role="tabpanel"][data-pcc-active-surface-panel="${id}"]`,
+);
+expect(shellPanel, `shell panel must own active surface '${id}'`).not.toBeNull();
+expect(shellPanel?.getAttribute('id')).toBe('pcc-active-surface-panel');
+expect(shellPanel?.getAttribute('aria-labelledby')).toBe(`pcc-tab-${id}`);
+```
+
+3. The shell panel contains the active surface grid:
+
+```ts
+const bento = shellPanel!.querySelector('[data-pcc-bento-grid]');
+expect(bento).not.toBeNull();
+```
+
+4. Exactly one direct bento child remains the compatibility command/card carrier for the active surface:
+
+```ts
+const compatibilityCards = Array.from(bento!.children).filter((child) =>
+  child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${id}"]`),
+);
+expect(compatibilityCards).toHaveLength(1);
+```
+
+5. Text assertions that previously used the broad active panel should point to the compatibility card, not shell `main`, if the assertion is about the surface card’s visible content.
+
+6. Keyboard tests that query the active marker must use shell-owner selectors, not broad selectors.
+
+7. The test that clicks Documents must no longer assert that `[data-pcc-active-surface-panel="project-home"]` is null globally. Instead assert:
+   - no shell panel exists for project-home:
+     ```ts
+     expect(
+       container.querySelector('main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]'),
+     ).toBeNull();
+     ```
+   - shell panel exists for documents;
+   - compatibility card exists under the bento grid for documents.
+
+### 3. `PccShell.surfaceSmoke.test.tsx`
+
+Repair the all-surface smoke test.
+
+Rename the test from “keeps exactly one active panel” to wording that reflects shell ownership plus card compatibility.
+
+For each surface:
+
+- selected tab count remains exactly one;
+- shell panel count for the active surface is exactly one:
+  ```ts
+  const shellPanels = container.querySelectorAll(
+    `main[role="tabpanel"][data-pcc-active-surface-panel="${id}"]`,
+  );
+  expect(shellPanels).toHaveLength(1);
+  ```
+- shell panel `aria-labelledby` equals `pcc-tab-${id}`;
+- shell panel contains `[data-pcc-bento-grid]`;
+- direct bento child compatibility card count for the active surface is exactly one:
+  ```ts
+  const compatibilityCards = Array.from(bento.children).filter((child) =>
+    child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${id}"]`),
+  );
+  expect(compatibilityCards).toHaveLength(1);
+  ```
+- do not assert broad `[data-pcc-active-surface-panel]` count equals `1`.
+
+### 4. `PccCardTierContract.test.tsx`
+
+Repair stale selector assumptions immediately.
+
+Required changes:
+
+1. Update `getActiveBento` so it finds the bento grid through shell `main`, not through a card parent assumption.
+
+Preferred helper:
 
 ```ts
 function getActiveBento(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
@@ -181,99 +437,98 @@ function getActiveBento(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTM
   expect(shellPanel!.getAttribute('aria-labelledby')).toBe(`pcc-tab-${surfaceId}`);
 
   const bento = shellPanel!.querySelector('[data-pcc-bento-grid]');
-  expect(bento, `surface '${surfaceId}' shell panel must contain [data-pcc-bento-grid]`).not.toBeNull();
+  expect(
+    bento,
+    `surface '${surfaceId}' shell panel must contain [data-pcc-bento-grid]`,
+  ).not.toBeNull();
+
   return bento as HTMLElement;
 }
 ```
 
-For any test that needs the active command card, do not use a broad `container.querySelector('[data-pcc-active-surface-panel="..."]')` selector. Scope to direct bento children and card markers, for example:
+2. For tests that need the compatibility command card, do not use broad `container.querySelector('[data-pcc-active-surface-panel="..."]')`.
+
+Use direct bento-child scoping:
 
 ```ts
-const bento = getActiveBento(container, surfaceId);
-const activeCommandCard = Array.from(bento.children).find((child) =>
-  child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
-);
-expect(activeCommandCard, `surface '${surfaceId}' compatibility active command card must render`).toBeTruthy();
+function getActiveCompatibilityCard(
+  bento: HTMLElement,
+  surfaceId: PccMvpSurfaceId,
+): HTMLElement {
+  const matches = Array.from(bento.children).filter((child) =>
+    child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+  );
+  expect(
+    matches,
+    `surface '${surfaceId}' must render one direct bento child compatibility card`,
+  ).toHaveLength(1);
+  return matches[0] as HTMLElement;
+}
 ```
 
-This preserves compatibility-card validation without treating the card as the semantic active panel.
+3. Update the active command card heading-level test to use `getActiveCompatibilityCard`.
 
-## Required Test Updates
+4. Update comments/messages from “active-panel card” / “active-panel carrier” to “compatibility command card” or equivalent.
 
-### `PccShell.responsive.test.tsx`
+5. Keep direct-child assertions intact.
 
-Add or update tests to verify:
+6. Do not edit `PccDashboardCard.tsx`.
 
-1. Default render has exactly one shell active panel:
+### 5. Additional shell-rendered broad-marker tests discovered during execution
+
+If another shell-rendered test fails because it asserts global active-panel marker count equals `1`, repair it using the same structural pattern:
+
+- exactly one shell main for active surface;
+- exactly one direct bento child compatibility card for active surface, if card compatibility is being asserted;
+- no broad global marker count assertion.
+
+Do not change surface-only tests unless they fail for a directly related reason.
+
+## Recommended Test Helper Pattern
+
+To avoid duplicating brittle selector logic, it is acceptable to introduce small local helper functions inside touched test files only.
+
+Suggested names:
 
 ```ts
-const panels = container.querySelectorAll(
-  'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
-);
-expect(panels.length).toBe(1);
+function getShellActivePanel(container: HTMLElement, surfaceId: string): HTMLElement
+function getBentoFromShellPanel(shellPanel: HTMLElement): HTMLElement
+function getCompatibilityActiveCard(bento: HTMLElement, surfaceId: string): HTMLElement
 ```
 
-2. Default shell panel has:
-   - `id="pcc-active-surface-panel"`;
-   - `role="tabpanel"`;
-   - `aria-labelledby="pcc-tab-project-home"`;
-   - `data-pcc-canvas`.
-
-3. Clicking Documents updates the shell marker and ARIA linkage:
-   - `data-pcc-active-surface-panel="documents"`;
-   - `aria-labelledby="pcc-tab-documents"`.
-
-4. Clicking Site Health updates the shell marker and ARIA linkage:
-   - `data-pcc-active-surface-panel="site-health"`;
-   - `aria-labelledby="pcc-tab-site-health"`.
-
-5. Every tab still has:
-   - `role="tab"`;
-   - `aria-controls="pcc-active-surface-panel"`;
-   - non-empty `id`.
-
-6. Do not assert that the broad selector `[data-pcc-active-surface-panel="<surfaceId>"]` has count `1`, because card-level compatibility markers may remain temporarily. Assert exactly one shell-owned marker instead.
-
-### `PccCardTierContract.test.tsx`, if stale selector logic exists
-
-Add or update assertions proving:
-
-- `getActiveBento` finds the bento grid through shell `main`, not through a card parent assumption;
-- every `[data-pcc-card]` remains a direct child of `[data-pcc-bento-grid]`;
-- no `[data-pcc-card] [data-pcc-card]` nesting exists if such an assertion is already present or easy to add without broad refactor;
-- card-level `data-pcc-active-surface-panel` checks are compatibility-only and scoped to direct bento children.
-
-## Do Not
-
-- Do not remove duplicate top-level header cards.
-- Do not implement a Modules launcher.
-- Do not introduce active module state.
-- Do not introduce URL routing.
-- Do not change shared layout primitives.
-- Do not change surface runtime files unless a directly related failing test proves an unavoidable narrow fix.
-- Do not introduce live SharePoint, Graph, Procore, Sage, Autodesk, or tenant mutation.
-- Do not change package dependencies, lockfile, SPFx manifests, or package-solution files.
-- Do not broadly format unrelated files.
-- Do not claim Phase 2 completion, duplicate-card remediation completion, scorecard pass, or Phase 4 readiness from Prompt 01 alone.
+Do not add new shared production helpers for this prompt.
 
 ## Validation Required
 
-Run these commands and report results exactly:
+Run and report these commands exactly:
 
 ```bash
 git status --short
 md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
 pnpm --filter @hbc/spfx-project-control-center check-types
 pnpm --filter @hbc/spfx-project-control-center test -- PccShell.responsive.test.tsx
+pnpm --filter @hbc/spfx-project-control-center test -- PccShell.navigation.test.tsx
+pnpm --filter @hbc/spfx-project-control-center test -- PccShell.surfaceSmoke.test.tsx
 pnpm --filter @hbc/spfx-project-control-center test -- PccCardTierContract.test.tsx
 pnpm --filter @hbc/spfx-project-control-center test
-pnpm exec prettier --check apps/project-control-center/src/shell/PccShell.tsx apps/project-control-center/src/tests/PccShell.responsive.test.tsx apps/project-control-center/src/tests/PccCardTierContract.test.tsx
+pnpm exec prettier --check apps/project-control-center/src/shell/PccShell.tsx apps/project-control-center/src/shell/PccSurfaceRouter.tsx apps/project-control-center/src/tests/PccShell.responsive.test.tsx apps/project-control-center/src/tests/PccShell.navigation.test.tsx apps/project-control-center/src/tests/PccShell.surfaceSmoke.test.tsx apps/project-control-center/src/tests/PccCardTierContract.test.tsx
 git diff --check
 md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
 git status --short
 ```
 
-If filename-based test filtering is unsupported in this workspace, run the full package test and report the limitation.
+If filename-based test filtering is unsupported in this workspace, run the full package test and report that limitation.
+
+If `prettier --check` fails only for touched files, run `prettier --write` only on touched files, then rerun:
+
+```bash
+pnpm --filter @hbc/spfx-project-control-center check-types
+pnpm --filter @hbc/spfx-project-control-center test
+pnpm exec prettier --check apps/project-control-center/src/shell/PccShell.tsx apps/project-control-center/src/shell/PccSurfaceRouter.tsx apps/project-control-center/src/tests/PccShell.responsive.test.tsx apps/project-control-center/src/tests/PccShell.navigation.test.tsx apps/project-control-center/src/tests/PccShell.surfaceSmoke.test.tsx apps/project-control-center/src/tests/PccCardTierContract.test.tsx
+git diff --check
+```
+
+Do not run `pnpm install`, `pnpm add`, or any command that intentionally changes the lockfile.
 
 ## Required Plan Response Format
 
@@ -287,6 +542,8 @@ Before execution, respond with:
 ## Files Proposed
 
 ## Implementation Plan
+
+## Shell-Rendered Test Repair Plan
 
 ## Test / Validation Plan
 
@@ -310,7 +567,11 @@ After execution, respond with:
 
 ## Shell Active-Panel Ownership Proof
 
-## Test Compatibility Repair
+## Shell-Rendered Test Compatibility Repair
+
+## Card Compatibility Marker Proof
+
+## Direct-Child / Layout Proof
 
 ## Tests / Validation Run
 
@@ -328,8 +589,12 @@ Prompt 01 is complete only when:
 - shell `main[role="tabpanel"]` owns `data-pcc-active-surface-panel={activeSurfaceId}`;
 - tab ARIA linkage remains intact;
 - Project Home, Documents, and Site Health tab changes update the shell marker and `aria-labelledby`;
-- stale tests no longer infer active-panel ownership from a card-level marker;
+- `PccShell.navigation.test.tsx` no longer asserts global broad-marker count of exactly one;
+- `PccShell.surfaceSmoke.test.tsx` no longer asserts global broad-marker count of exactly one;
+- `PccCardTierContract.test.tsx` no longer infers active-panel ownership from a card-level marker;
+- tests distinguish semantic shell owner from temporary card compatibility marker;
 - bento cards remain direct children of `[data-pcc-bento-grid]`;
 - duplicate header cards remain in place;
 - card-level markers remain compatibility-only;
-- no package/lockfile/manifest drift occurs.
+- no package/lockfile/manifest/package-solution drift occurs;
+- Playwright/e2e remains untouched.
