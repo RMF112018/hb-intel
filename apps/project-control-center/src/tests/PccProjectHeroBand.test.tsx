@@ -70,11 +70,16 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
     const slot = container.querySelector('[data-pcc-hero-command-search]');
     expect(slot).not.toBeNull();
 
-    // Wave-b2 Prompt 04: the affordance is a purely informational preview
-    // capsule. No <input>, <button>, or <a> renders inside the slot.
+    // Wave-b2 Prompt 04 + wave-b8 Prompt 03: the affordance is a purely
+    // informational preview capsule. No interactive descendant renders
+    // inside the slot.
     expect(slot!.querySelectorAll('input').length).toBe(0);
     expect(slot!.querySelectorAll('button').length).toBe(0);
     expect(slot!.querySelectorAll('a').length).toBe(0);
+    expect(slot!.querySelectorAll('select').length).toBe(0);
+    expect(slot!.querySelectorAll('textarea').length).toBe(0);
+    expect(slot!.querySelectorAll('[tabindex="0"]').length).toBe(0);
+    expect(slot!.querySelectorAll('[role="button"]').length).toBe(0);
 
     // Stable preview-state marker on the capsule.
     const capsule = slot!.querySelector('[data-pcc-command-search-state="preview"]');
@@ -251,6 +256,7 @@ describe('PccProjectHeroBand — wave-b7 Prompt 02 surface metadata zones', () =
     const zones = [
       container.querySelector('[data-pcc-hero-surface-summary]'),
       container.querySelector('[data-pcc-hero-surface-cues]'),
+      container.querySelector('[data-pcc-hero-read-only-cue]'),
     ];
     for (const zone of zones) {
       expect(zone).not.toBeNull();

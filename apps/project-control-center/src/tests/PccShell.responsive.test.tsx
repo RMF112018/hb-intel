@@ -342,8 +342,16 @@ describe('PccShell — all-eight-surface metadata switching (wave-b8 Prompt 02)'
       const summaryItems = container.querySelectorAll('[data-pcc-hero-summary-item]');
       expect(summaryItems).toHaveLength(metadata.surfaceSummaryItems.length);
 
+      const summaryItemIds = Array.from(summaryItems).map((n) =>
+        n.getAttribute('data-pcc-hero-summary-item'),
+      );
+      expect(summaryItemIds).toEqual(metadata.surfaceSummaryItems.map((s) => s.id));
+
       const cues = container.querySelectorAll('[data-pcc-hero-surface-cue]');
       expect(cues).toHaveLength(metadata.surfaceCues.length);
+
+      const cueIds = Array.from(cues).map((n) => n.getAttribute('data-pcc-hero-surface-cue'));
+      expect(cueIds).toEqual(metadata.surfaceCues.map((c) => c.id));
 
       const readOnlyCue = container.querySelector('[data-pcc-hero-read-only-cue]');
       expect(readOnlyCue?.textContent).toBe(metadata.readOnlyCue);
