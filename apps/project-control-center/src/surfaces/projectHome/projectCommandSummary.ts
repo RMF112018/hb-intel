@@ -52,7 +52,7 @@ function isHighSeverity(severity: SiteHealthSeverity | undefined): boolean {
 function readModelSourceLabel(status: PccReadModelSourceStatus): string {
   switch (status) {
     case 'available':
-      return 'Source: live system feeds';
+      return 'Source: PCC read-model available';
     case 'backend-unavailable':
       return 'Source: backend unavailable · preview posture';
     case 'source-unavailable':

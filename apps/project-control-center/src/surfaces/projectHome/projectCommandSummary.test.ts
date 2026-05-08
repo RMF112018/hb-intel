@@ -127,6 +127,28 @@ describe('buildProjectCommandSummary', () => {
     expect(summary.sourceLabel).toContain('status pending');
   });
 
+  it('uses bounded read-model wording for the available status (does not claim "live" external feeds)', () => {
+    const summary = buildProjectCommandSummary({
+      sourceMode: 'read-model',
+      sourceStatus: 'available',
+    });
+    expect(summary.sourceLabel).toBe('Source: PCC read-model available');
+    expect(summary.sourceLabel.toLowerCase()).not.toContain('live');
+  });
+
+  it('every PccReadModelSourceStatus label avoids the word "live" (read-model availability is not the same as upstream-feed liveness)', () => {
+    for (const status of ALL_STATUSES) {
+      const summary = buildProjectCommandSummary({
+        sourceMode: 'read-model',
+        sourceStatus: status,
+      });
+      expect(
+        summary.sourceLabel.toLowerCase(),
+        `status '${status}' label must not contain 'live'`,
+      ).not.toContain('live');
+    }
+  });
+
   it('always sets the HBI advisory cue to the canonical no-writeback wording', () => {
     const summary = buildProjectCommandSummary({ sourceMode: 'fixture' });
     expect(summary.hbiAdvisoryCue).toBe(PROJECT_COMMAND_HBI_ADVISORY_CUE);
