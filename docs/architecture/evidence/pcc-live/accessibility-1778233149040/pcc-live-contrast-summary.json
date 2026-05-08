@@ -1,0 +1,114 @@
+[
+  {
+    "surfaceId": "project-home",
+    "ruleId": "color-contrast",
+    "count": 4,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "project-home",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "team-and-access",
+    "ruleId": "color-contrast",
+    "count": 0,
+    "needsReview": false,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "team-and-access",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "documents",
+    "ruleId": "color-contrast",
+    "count": 0,
+    "needsReview": false,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "documents",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "project-readiness",
+    "ruleId": "color-contrast",
+    "count": 11,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "project-readiness",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "approvals",
+    "ruleId": "color-contrast",
+    "count": 0,
+    "needsReview": false,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "approvals",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "external-systems",
+    "ruleId": "color-contrast",
+    "count": 0,
+    "needsReview": false,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "external-systems",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "control-center-settings",
+    "ruleId": "color-contrast",
+    "count": 0,
+    "needsReview": false,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "control-center-settings",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "site-health",
+    "ruleId": "color-contrast",
+    "count": 5,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "site-health",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  }
+]

@@ -1,0 +1,1951 @@
+{
+  "runId": "accessibility-1778233149040",
+  "generatedAtIso": "2026-05-08T09:39:25.607Z",
+  "summary": {
+    "totalIssueCount": 63,
+    "issueCountByType": {
+      "axe-violation": 3,
+      "aria-name-missing": 14,
+      "disabled-reason-missing": 0,
+      "focus-indicator-missing": 27,
+      "contrast-needs-review": 11,
+      "touch-target-size": 0,
+      "hover-only-risk": 8,
+      "reduced-motion-risk": 0,
+      "dialog-focus-needs-review": 0
+    },
+    "majorIssueCount": 41,
+    "moderateIssueCount": 20,
+    "reviewIssueCount": 2
+  },
+  "issues": [
+    {
+      "id": "A11Y-ISSUE-0022",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(28)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0021",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(4)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0056",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(29)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0012",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(24)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0011",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(3)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0026",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(28)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0025",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(4)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0003",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(23)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0002",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(3)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0017",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(28)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0016",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(4)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0060",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(29)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0008",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(23)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0007",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(3)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0001",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 4,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0015",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 11,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0059",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 5,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0023",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0057",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0013",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0054",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0004",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 4,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0005",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0018",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 11,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0019",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0061",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 5,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0062",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0009",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0027",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "div > header > div > button",
+      "focusStep": 1,
+      "tagName": "button",
+      "boundingWidth": 114.84375,
+      "boundingHeight": 25
+    },
+    {
+      "id": "A11Y-ISSUE-0028",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 15,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 64
+    },
+    {
+      "id": "A11Y-ISSUE-0029",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 16,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 62
+    },
+    {
+      "id": "A11Y-ISSUE-0030",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 17,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 62
+    },
+    {
+      "id": "A11Y-ISSUE-0031",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 18,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 62
+    },
+    {
+      "id": "A11Y-ISSUE-0032",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 19,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0033",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 20,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0034",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 21,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0035",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 22,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 45
+    },
+    {
+      "id": "A11Y-ISSUE-0036",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 23,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 45
+    },
+    {
+      "id": "A11Y-ISSUE-0037",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 24,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 45
+    },
+    {
+      "id": "A11Y-ISSUE-0038",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 25,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0039",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 26,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0040",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 27,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0041",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 28,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0042",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 29,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0043",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 30,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0044",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 31,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0045",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 32,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0046",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 33,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0047",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 34,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0048",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 35,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0049",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 36,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0050",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 37,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0051",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 38,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0052",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 39,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0053",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 40,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0024",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0058",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "hover-only-risk",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0014",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0055",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0006",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0020",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0063",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "hover-only-risk",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0010",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    }
+  ],
+  "disclaimer": "Review support only. Expert review required. No final score is calculated. No hard stop is passed or failed. No EV is finally captured. No WCAG conformance result is claimed. No Phase 4 readiness is approved."
+}

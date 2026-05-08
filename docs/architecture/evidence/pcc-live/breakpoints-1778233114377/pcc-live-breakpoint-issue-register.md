@@ -1,0 +1,15105 @@
+# PCC Live Breakpoint Issue Register
+
+- Review support only.
+- No final score is calculated.
+- No hard stop is passed or failed.
+- No EV is finally captured.
+- No Phase 4 readiness is approved.
+
+- Run ID: breakpoints-1778233114377
+- Generated: 2026-05-08T09:39:06.885Z
+- Total issues: 1054
+
+## Issue Count By Type
+- mode-mismatch: 0
+- horizontal-overflow: 0
+- card-clipping: 30
+- card-overflow-x: 512
+- card-overflow-y: 512
+- direct-child-invariant: 0
+- touch-target-size: 0
+- missing-grid: 0
+
+## card-clipping
+
+### approvals (Approvals)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0597
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0602
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0605
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0610
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### control-center-settings (Control Center Settings)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0651
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### documents (Documents)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0558
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0567
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### external-systems (External Platforms)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0623
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0628
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0631
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0636
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0639
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0642
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0645
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0648
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### project-home (Project Home)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0538
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0527
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### project-readiness (Project Readiness)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0572
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0575
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0578
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0581
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0586
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0589
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0592
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### site-health (Site Health)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0658
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0663
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0666
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+### team-and-access (Team & Access)
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0547
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0552
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0555
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64, EV-69
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review clipped card content and confirm whether critical action or status content is hidden.
+- Recommended action: Adjust card sizing/content density and rerun the affected surface/viewport pair.
+- Artifact policy: operator-review-required; operator-review-required
+
+## card-overflow-x
+
+### approvals (Approvals)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0869
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0871
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0889
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0873
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0875
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0877
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0879
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0881
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0883
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0885
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.34375x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0887
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0741
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0743
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0761
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0745
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0747
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0749
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0751
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0753
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0755
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0757
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0759
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0071
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0073
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0091
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0075
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0077
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0079
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0081
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0083
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0085
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0087
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0089
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1016; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0455
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0457
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0475
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0459
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0461
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0463
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0465
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0467
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0469
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0471
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0473
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0598
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0600
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0621
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0603
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0606
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0608
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0611
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0613
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0615
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0617
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0619
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0327
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 927.984375x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0329
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0347
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0331
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0333
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0335
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0337
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0339
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0341
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0343
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0345
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x1064; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0199
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0201
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0219
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0203
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0205
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0207
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0209
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0211
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0213
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0215
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0217
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0997
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0999
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1017
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1001
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1003
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1005
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1007
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1009
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1011
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1013
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1015
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### control-center-settings (Control Center Settings)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0911
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0913
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0915
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0783
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0785
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.1875x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0787
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0113
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0115
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0117
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0497
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0499
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0501
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0652
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0654
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0656
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0369
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0371
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0373
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0241
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0243
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0245
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-1039
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1041
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1043
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### documents (Documents)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0839
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0841
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0843
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0845
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0847
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.671875x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0849
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0711
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0713
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0715
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0717
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0719
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0721
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.1875x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0041
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0043
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0045
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0047
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0049
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2000; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0051
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x680; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0425
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0427
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0429
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0431
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0433
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x1640; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0435
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0559
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0561
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0563
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0565
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0568
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0570
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0297
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 927.984375x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0299
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0301
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0303
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0305
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x1640; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0307
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0169
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0171
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0173
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0175
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0177
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1640; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0179
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0967
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0969
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0971
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0973
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0975
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0977
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### external-systems (External Platforms)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0891
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0893
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0895
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0897
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0899
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0901
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0903
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0905
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0907
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0909
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0763
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0765
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0767
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0769
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0771
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0773
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0775
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0777
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0779
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0781
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0093
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0095
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0097
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2192; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0099
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0101
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0103
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2528; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0105
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x920; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0107
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1160; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0109
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x824; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0111
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0477
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0479
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0481
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0483
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0485
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0487
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0489
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0491
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0493
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0495
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0624
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0626
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0629
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0632
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0634
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0637
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0640
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0643
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0646
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0649
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0349
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0351
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0353
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0355
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0357
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0359
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0361
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0363
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0365
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0367
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0221
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0223
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0225
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0227
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0229
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0231
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x2000; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0233
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0235
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0237
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0239
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-1019
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1021
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1023
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1025
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1027
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1029
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1031
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1033
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1035
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1037
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### project-home (Project Home)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0799
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0801
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0819
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0821
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0823
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.34375x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0825
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 396x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0827
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0829
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0803
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0805
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0807
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0809
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0811
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0813
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0815
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0817
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 396x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0671
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 857.59375x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0673
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x1592; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0691
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0693
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0695
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x920; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0697
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0699
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0701
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0675
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0677
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0679
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0681
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0683
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0685
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0687
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0689
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0001
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0003
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2576; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0021
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0023
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0025
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0027
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0029
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0031
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0005
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0007
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0009
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0011
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0013
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0015
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0017
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0019
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0385
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0387
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x1616; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0405
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0407
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0409
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x920; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0411
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1180x820; card 259x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0413
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0415
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0389
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0391
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0393
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0395
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0397
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0399
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0401
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0403
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1180x820; card 259x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0513
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 800x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0515
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x1616; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0534
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0536
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0539
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0541
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0543
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0545
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0517
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0519
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0521
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0523
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0525
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0528
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0530
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0532
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0257
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0259
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x2024; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0277
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0279
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0281
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0283
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0285
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0287
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0261
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0263
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0265
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0267
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0269
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0271
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0273
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0275
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0129
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0131
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1592; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0149
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 768x1024; card 352x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0151
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0153
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0155
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 768x1024; card 352x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0157
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0159
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0133
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0135
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0137
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0139
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0141
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0143
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0145
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0147
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 768x1024; card 352x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0927
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0929
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0947
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0949
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0951
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0953
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 476x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0955
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0957
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0931
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0933
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0935
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0937
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0939
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0941
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0943
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0945
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 476x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### project-readiness (Project Readiness)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0851
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0853
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0855
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0857
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0859
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0861
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0863
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0865
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0867
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0723
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0725
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0727
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0729
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0731
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0733
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0735
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0737
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0739
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0053
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x536; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0055
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0057
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0059
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2048; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0061
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x632; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0063
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0065
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x704; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0067
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1040; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0069
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x704; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0437
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0439
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0441
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0443
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0445
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0447
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0449
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0451
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0453
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0573
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0576
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0579
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0582
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0584
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0587
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0590
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0593
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0595
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0309
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0311
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0313
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0315
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0317
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0319
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0321
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0323
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0325
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0181
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0183
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0185
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0187
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x800; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0189
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0191
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0193
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0195
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0197
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0979
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0981
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0983
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0985
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0987
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0989
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0991
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0993
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0995
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### site-health (Site Health)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0917
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0919
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0921
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0923
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0925
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0789
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0791
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0793
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0795
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0797
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0119
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0121
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0123
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0125
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0127
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0503
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0505
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0507
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0509
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0511
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0659
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0661
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0664
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0667
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0669
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0375
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0377
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0379
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456.015625x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0381
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456.015625x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0383
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0247
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0249
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0251
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0253
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0255
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-1045
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1047
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1049
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1051
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1053
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### team-and-access (Team & Access)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0831
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0833
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0835
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0837
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1160; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0703
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0705
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0707
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0709
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0033
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0035
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0037
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x752; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0039
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1664; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0417
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0419
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0421
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0423
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0548
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0550
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0553
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0556
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0289
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0291
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0293
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0295
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1304; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0161
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0163
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0165
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0167
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1328; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0959
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0961
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0963
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0965
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1160; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-63, EV-64, EV-69, EV-70
+- Pillar refs: P1, P3, P4, P5, P7, P8
+- Hard-stop refs: HS-01, HS-02, HS-03, HS-05, HS-08
+- Review prompt: Review horizontal overflow in this card and confirm text/control wrapping behavior.
+- Recommended action: Adjust wrapping/overflow policy for card content and rerun this viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+## card-overflow-y
+
+### approvals (Approvals)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0870
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0872
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0890
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0874
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0876
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0878
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0880
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0882
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0884
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0886
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.34375x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0888
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0742
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0744
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0762
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0746
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0748
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0750
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0752
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0754
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0756
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0758
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0760
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0072
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0074
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0092
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0076
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0078
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0080
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0082
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0084
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0086
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0088
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0090
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1016; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0456
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0458
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0476
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0460
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0462
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0464
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0466
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0468
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0470
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0472
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0474
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0599
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0601
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0622
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0604
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0607
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0609
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0612
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0614
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0616
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0618
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0620
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0328
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 927.984375x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0330
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0348
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0332
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0334
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0336
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0338
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0340
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0342
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0344
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0346
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x1064; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0200
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0202
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0220
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0204
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0206
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0208
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0210
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0212
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0214
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0216
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0218
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0998
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1000
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1018
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1002
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1004
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1006
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1008
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1010
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1012
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1014
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1016
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### control-center-settings (Control Center Settings)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0912
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0914
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0916
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0784
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0786
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.1875x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0788
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0114
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0116
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0118
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0498
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0500
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0502
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0653
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0655
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0657
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0370
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0372
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0374
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0242
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0244
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0246
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-1040
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1042
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1044
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### documents (Documents)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0840
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0842
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0844
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0846
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0848
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.671875x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0850
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0712
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0714
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0716
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0718
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0720
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0722
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.1875x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0042
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0044
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0046
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0048
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0050
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2000; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0052
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x680; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0426
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0428
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0430
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0432
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0434
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x1640; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0436
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0560
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0562
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0564
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0566
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0569
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0571
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0298
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 927.984375x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0300
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0302
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0304
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0306
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x1640; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0308
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0170
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0172
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0174
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0176
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0178
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1640; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0180
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0968
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0970
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0972
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0974
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0976
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0978
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x584; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### external-systems (External Platforms)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0892
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0894
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0896
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0898
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0900
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0902
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0904
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0906
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0908
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0910
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0764
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0766
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0768
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0770
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0772
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0774
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0776
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0778
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0780
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0782
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0094
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0096
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0098
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2192; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0100
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0102
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0104
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2528; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0106
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x920; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0108
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1160; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0110
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x824; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0112
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0478
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0480
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0482
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0484
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0486
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0488
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0490
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0492
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0494
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0496
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0625
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0627
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0630
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0633
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0635
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0638
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0641
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0644
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0647
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0650
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0350
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0352
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0354
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0356
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0358
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0360
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0362
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0364
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0366
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0368
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0222
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0224
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0226
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0228
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0230
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0232
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x2000; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0234
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0236
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0238
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0240
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-1020
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1022
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x104; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1024
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1688; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1026
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1028
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1030
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1928; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1032
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1034
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1036
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1038
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x896; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### project-home (Project Home)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0800
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0802
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0820
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0822
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0824
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.34375x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0826
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 396x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0828
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0830
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1082.65625x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0804
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0806
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0808
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0810
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0812
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0814
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0816
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0818
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 396x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0672
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 857.59375x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0674
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x1592; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0692
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0694
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0696
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x920; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0698
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0700
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0702
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1003.203125x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0676
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0678
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0680
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0682
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0684
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0686
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0688
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0690
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0002
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0004
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2576; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0022
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0024
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0026
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x968; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0028
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0030
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0032
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0006
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0008
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0010
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0012
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0014
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0016
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0018
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0020
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0386
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0388
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x1616; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0406
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0408
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0410
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x920; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0412
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1180x820; card 259x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0414
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0416
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1180x820; card 809x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0390
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0392
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0394
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0396
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0398
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0400
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0402
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0404
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1180x820; card 259x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0514
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 800x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0516
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x1616; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0535
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0537
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0540
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0542
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0544
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0546
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1366x900; card 936x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0518
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0520
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0522
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0524
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0526
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0529
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0531
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0533
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0258
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0260
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x2024; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0278
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0280
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0282
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x992; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0284
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0286
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0288
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 1024x768; card 613.328125x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0262
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0264
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0266
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0268
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0270
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.671875x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0272
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0274
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0276
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0130
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0132
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1592; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0150
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 768x1024; card 352x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0152
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0154
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0156
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 768x1024; card 352x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0158
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0160
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0134
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0136
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0138
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0140
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0142
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0144
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0146
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0148
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 768x1024; card 352x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0928
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0930
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x1568; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0948
+- Severity signal: review
+- Card index: 10
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0950
+- Severity signal: review
+- Card index: 11
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x464; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0952
+- Severity signal: review
+- Card index: 12
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0954
+- Severity signal: review
+- Card index: 13
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 476x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0956
+- Severity signal: review
+- Card index: 14
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0958
+- Severity signal: review
+- Card index: 15
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1296x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0932
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0934
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x152; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0936
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0938
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0940
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0942
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0944
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0946
+- Severity signal: review
+- Card index: 9
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 476x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### project-readiness (Project Readiness)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0852
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0854
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0856
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0858
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0860
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0862
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0864
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0866
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0868
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0724
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0726
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0728
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0730
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0732
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0734
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0736
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0738
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0740
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0054
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x536; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0056
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x944; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0058
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0060
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x2048; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0062
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x632; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0064
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0066
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x704; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0068
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1040; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0070
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x704; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0438
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0440
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x344; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0442
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0444
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0446
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0448
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0450
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0452
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0454
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0574
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0577
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0580
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0583
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0585
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0588
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0591
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0594
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0596
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0310
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0312
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x440; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0314
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0316
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0318
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0320
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0322
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0324
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x488; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0326
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0182
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0184
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x512; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0186
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0188
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x800; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0190
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0192
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0194
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0196
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0198
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0980
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0982
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0984
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0986
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x392; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0988
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0990
+- Severity signal: review
+- Card index: 5
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0992
+- Severity signal: review
+- Card index: 6
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0994
+- Severity signal: review
+- Card index: 7
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0996
+- Severity signal: review
+- Card index: 8
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### site-health (Site Health)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0918
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0920
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0922
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0924
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0926
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 533.328125x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0790
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0792
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0794
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0796
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0798
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1536x960; card 420.796875x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0120
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0122
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x416; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0124
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x272; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0126
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x608; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0128
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0504
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0506
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0508
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0510
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0512
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1180x820; card 396.5x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0660
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0662
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0665
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0668
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0670
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1366x900; card 392x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0376
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0378
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 455.984375x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0380
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456.015625x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0382
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456.015625x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0384
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 1024x768; card 298.65625x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0248
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0250
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0252
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0254
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0256
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-1046
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1048
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x368; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1050
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x248; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1052
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x560; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-1054
+- Severity signal: review
+- Card index: 4
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 640x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+### team-and-access (Team & Access)
+
+#### desktop-1728 (Desktop 1728)
+
+- ID: BP-ISSUE-0832
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0834
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0836
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 808x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0838
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1728x1117; card 1632x1160; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode desktop; derivedMode desktop; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### large-laptop-1536 (Large Laptop 1536)
+
+- ID: BP-ISSUE-0704
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0706
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0708
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1536x960; card 712x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0710
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1536x960; card 1440x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### phone-390 (Phone 390)
+
+- ID: BP-ISSUE-0034
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x224; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0036
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x320; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0038
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x752; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0040
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 390x844; card 374x1664; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode phone; derivedMode phone; expectedColumns 1; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### small-laptop-1180 (Small Laptop 1180)
+
+- ID: BP-ISSUE-0418
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0420
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0422
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1180x820; card 671.5x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0424
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1180x820; card 1084x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode smallLaptop; derivedMode smallLaptop; expectedColumns 8; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### standard-laptop-1366 (Standard Laptop 1366)
+
+- ID: BP-ISSUE-0549
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0551
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0554
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1366x900; card 664x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0557
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1366x900; card 1344x1208; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode standardLaptop; derivedMode standardLaptop; expectedColumns 10; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-landscape-1024 (Tablet Landscape 1024)
+
+- ID: BP-ISSUE-0290
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x176; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0292
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0294
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 1024x768; card 456x728; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0296
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 1024x768; card 928x1304; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletLandscape; derivedMode tabletLandscape; expectedColumns 6; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### tablet-portrait-768 (Tablet Portrait 768)
+
+- ID: BP-ISSUE-0162
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0164
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0166
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0168
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 768x1024; card 720x1328; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode tabletPortrait; derivedMode tabletPortrait; expectedColumns 2; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+#### ultrawide-2048 (Ultrawide 2048)
+
+- ID: BP-ISSUE-0960
+- Severity signal: review
+- Card index: 0
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x200; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0962
+- Severity signal: review
+- Card index: 1
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x296; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0964
+- Severity signal: review
+- Card index: 2
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 968x656; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+- ID: BP-ISSUE-0966
+- Severity signal: review
+- Card index: 3
+- Selector: n/a
+- Measurements: viewport 2048x1280; card 1952x1160; touch n/axn/a
+- Touch target context: threshold n/apx; lane n/a
+- Grid/meta: observedMode ultrawide; derivedMode ultrawide; expectedColumns 12; overflowX 0
+- EV refs: EV-61, EV-62, EV-63, EV-64
+- Pillar refs: P1, P3, P4, P5
+- Hard-stop refs: HS-01, HS-02, HS-03
+- Review prompt: Review vertical overflow in this card and confirm content truncation and scroll affordance.
+- Recommended action: Adjust card height/content hierarchy and rerun the affected viewport.
+- Artifact policy: operator-review-required; operator-review-required
+
+> Review support only. No final score is calculated. No hard stop is passed or failed. No EV is finally captured. No Phase 4 readiness is approved.

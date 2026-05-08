@@ -1,0 +1,87 @@
+[
+  {
+    "surfaceId": "project-home",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 4,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "._heroFacts_1iqr6_133 > ._metricCell_1iqr6_9:nth-child(1) > ._metricLabel_1iqr6_25",
+      "._heroFacts_1iqr6_133 > ._metricCell_1iqr6_9:nth-child(2) > ._metricLabel_1iqr6_25",
+      "._metricCell_1iqr6_9:nth-child(3) > ._metricLabel_1iqr6_25",
+      "._metricCell_1iqr6_9:nth-child(4) > ._metricLabel_1iqr6_25"
+    ]
+  },
+  {
+    "surfaceId": "project-readiness",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 11,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "span[data-pcc-readiness-stat=\"active-gate\"] > ._heroStatLabel_7xh6v_34",
+      "span[data-pcc-readiness-stat=\"overall-posture\"] > ._heroStatLabel_7xh6v_34",
+      "span[data-pcc-readiness-stat=\"blocker-count\"] > ._heroStatLabel_7xh6v_34",
+      "span[data-pcc-readiness-stat=\"evidence-confidence\"] > ._heroStatLabel_7xh6v_34",
+      "span[data-pcc-readiness-source-health-badge=\"team-access\"]",
+      "span[data-pcc-readiness-source-health-badge=\"document-control\"]",
+      "span[data-pcc-readiness-source-health-badge=\"permit-log\"]",
+      "span[data-pcc-readiness-source-health-badge=\"project-lifecycle-readiness\"]",
+      "span[data-pcc-readiness-source-health-badge=\"buyout-log\"]",
+      "span[data-pcc-readiness-source-health-badge=\"external-systems\"]"
+    ]
+  },
+  {
+    "surfaceId": "site-health",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 5,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "div[data-pcc-site-health-overall=\"\"] > ._metricLabel_xeyi9_35",
+      "div[data-pcc-site-health-overall=\"\"] > ._filled_ddpqh_20[data-pcc-pill-fill=\"filled\"][data-pcc-pill-tone=\"danger\"]",
+      "div[data-pcc-site-health-failing=\"\"] > ._metricLabel_xeyi9_35",
+      "div[data-pcc-site-health-warning=\"\"] > ._metricLabel_xeyi9_35",
+      "div[data-pcc-site-health-last-run=\"\"] > ._metricLabel_xeyi9_35"
+    ]
+  }
+]
