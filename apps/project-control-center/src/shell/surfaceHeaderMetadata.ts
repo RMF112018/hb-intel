@@ -202,7 +202,8 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
         value: 'No setting changes from this header',
       },
     ],
-    readOnlyCue: 'Read-only preview — configuration changes require governed settings workflows.',
+    readOnlyCue:
+      'Read-only preview — saving, updating, and tenant changes require governed settings workflows managed by your PCC administrator.',
   },
   'site-health': {
     surfaceSummaryItems: [
