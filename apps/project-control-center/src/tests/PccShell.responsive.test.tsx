@@ -316,6 +316,24 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
       readOnlyCueIncludes: 'repair acknowledgements require governed source workflows',
     });
   });
+
+  it('clicking Team & Access switches metadata to Team access preview', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const teamTab = container.querySelector(
+      '[data-pcc-tab-id="team-and-access"]',
+    ) as HTMLButtonElement | null;
+    expect(teamTab).not.toBeNull();
+    fireEvent.click(teamTab!);
+
+    expectShellHeroMetadata(container, {
+      surfaceId: 'team-and-access',
+      secondaryTitle: 'Team & Access',
+      modeValue: 'Team access preview',
+      authorityValue: 'Request context only',
+      cueId: 'access-boundary',
+      readOnlyCueIncludes: 'access changes require governed workflows',
+    });
+  });
 });
 
 describe('PccShell — all-eight-surface metadata switching (wave-b8 Prompt 02)', () => {
