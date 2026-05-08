@@ -28,6 +28,33 @@ export interface PccLiveSurfaceSmokeResult {
   label: string;
   passed: boolean;
   activePanelFound: boolean;
+  /**
+   * Wave 15A wave-b7 Prompt 05 — total elements matching the broad
+   * `expectedActivePanelSelector`. Carried as evidence; not part of
+   * the `passed` calculation beyond the existing `> 0` check.
+   */
+  activePanelCount: number;
+  /**
+   * Tag name of the first broad active-panel element, or `null` if
+   * none. Used as evidence to distinguish shell `<main>` ownership
+   * (Phase 2) from card-level compatibility ownership.
+   */
+  activePanelOwnerTagName: string | null;
+  /** ARIA role on the first broad active-panel element. */
+  activePanelRole: string | null;
+  /** DOM `id` attribute on the first broad active-panel element. */
+  activePanelId: string | null;
+  /**
+   * `true` iff the first broad active-panel element is shell `<main
+   * role="tabpanel" id="pcc-active-surface-panel">`. Soft signal —
+   * not a hard pass/fail gate while tenant deployments may lag local
+   * source.
+   */
+  activePanelIsShellMain: boolean;
+  /** `true` iff at least one element matches the shell selector. */
+  shellActivePanelFound: boolean;
+  /** Total elements matching the shell selector. */
+  shellActivePanelCount: number;
   gridCount: number;
   cardCount: number;
   tabActive: boolean;
@@ -186,6 +213,51 @@ export class PccLivePageObject {
     await tab.click();
   }
 
+  private async inspectActivePanelOwner(surface: PccLiveSurfaceDefinition): Promise<{
+    readonly activePanelCount: number;
+    readonly activePanelOwnerTagName: string | null;
+    readonly activePanelRole: string | null;
+    readonly activePanelId: string | null;
+    readonly activePanelIsShellMain: boolean;
+    readonly shellActivePanelCount: number;
+  }> {
+    const broadPanels = this.page.locator(surface.expectedActivePanelSelector);
+    const shellPanels = this.page.locator(surface.expectedShellActivePanelSelector);
+    const activePanelCount = await broadPanels.count();
+    const shellActivePanelCount = await shellPanels.count();
+
+    if (activePanelCount === 0) {
+      return {
+        activePanelCount,
+        shellActivePanelCount,
+        activePanelOwnerTagName: null,
+        activePanelRole: null,
+        activePanelId: null,
+        activePanelIsShellMain: false,
+      };
+    }
+
+    const owner = await broadPanels.first().evaluate((node) => ({
+      tagName: node instanceof HTMLElement ? node.tagName : node.nodeName,
+      role: node instanceof HTMLElement ? node.getAttribute('role') : null,
+      id: node instanceof HTMLElement ? node.getAttribute('id') : null,
+    }));
+
+    const activePanelIsShellMain =
+      owner.tagName.toUpperCase() === 'MAIN' &&
+      owner.role === 'tabpanel' &&
+      owner.id === 'pcc-active-surface-panel';
+
+    return {
+      activePanelCount,
+      shellActivePanelCount,
+      activePanelOwnerTagName: owner.tagName,
+      activePanelRole: owner.role,
+      activePanelId: owner.id,
+      activePanelIsShellMain,
+    };
+  }
+
   async assertSurfaceActive(surface: PccLiveSurfaceDefinition): Promise<PccLiveSurfaceSmokeResult> {
     try {
       await this.navigateToSurface(surface);
@@ -195,25 +267,63 @@ export class PccLivePageObject {
       const dataActive = (await tab.getAttribute('data-pcc-tab-active')) === 'true';
       const tabActive = ariaSelected || dataActive;
 
-      const panelCount = await this.page.locator(surface.expectedActivePanelSelector).count();
+      const {
+        activePanelCount,
+        shellActivePanelCount,
+        activePanelOwnerTagName,
+        activePanelRole,
+        activePanelId,
+        activePanelIsShellMain,
+      } = await this.inspectActivePanelOwner(surface);
       const gridCount = await this.page.locator(ROOT_MARKERS.grid).count();
       const cardCount = await this.page.locator(ROOT_MARKERS.card).count();
 
       await this.assertCurrentUrlWithinExpectedOrigin();
 
-      const passed = tabActive && panelCount > 0 && gridCount > 0 && cardCount > 0;
+      // Wave 15A wave-b7 Prompt 05 — `passed` stays compatibility-based.
+      // Shell-main ownership (`activePanelIsShellMain`) and shell panel
+      // count are EVIDENCE only and never gate live tenant smoke. The
+      // hosted package may legitimately lag local source until the next
+      // .sppkg deploy.
+      const passed = tabActive && activePanelCount > 0 && gridCount > 0 && cardCount > 0;
+
+      let warning: string | undefined;
+      if (!passed) {
+        warning = `Surface ${surface.id} failed checks: tabActive=${tabActive} panel=${activePanelCount} shellPanel=${shellActivePanelCount} grid=${gridCount} card=${cardCount}`;
+      } else if (!activePanelIsShellMain || shellActivePanelCount !== 1) {
+        const ownerTag = activePanelOwnerTagName ?? 'none';
+        const ownerRole = activePanelRole ?? 'none';
+        const ownerId = activePanelId ?? 'none';
+        const notes: string[] = [];
+        if (!activePanelIsShellMain) {
+          notes.push(
+            `active panel owner is ${ownerTag}/${ownerRole}/${ownerId}; shell main ownership not observed`,
+          );
+        }
+        if (shellActivePanelCount !== 1) {
+          notes.push(
+            `shell active-panel count is ${shellActivePanelCount}; expected 1 for Phase 2 shell ownership`,
+          );
+        }
+        warning = `Surface ${surface.id} passed compatibility smoke but ${notes.join('; ')}. Tenant package may lag Phase 2.`;
+      }
 
       return {
         surfaceId: surface.id,
         label: surface.label,
         passed,
-        activePanelFound: panelCount > 0,
+        activePanelFound: activePanelCount > 0,
+        activePanelCount,
+        activePanelOwnerTagName,
+        activePanelRole,
+        activePanelId,
+        activePanelIsShellMain,
+        shellActivePanelFound: shellActivePanelCount > 0,
+        shellActivePanelCount,
         gridCount,
         cardCount,
         tabActive,
-        warning: passed
-          ? undefined
-          : `Surface ${surface.id} failed checks: tabActive=${tabActive} panel=${panelCount} grid=${gridCount} card=${cardCount}`,
+        warning,
       };
     } catch (error) {
       return {
@@ -221,6 +331,13 @@ export class PccLivePageObject {
         label: surface.label,
         passed: false,
         activePanelFound: false,
+        activePanelCount: 0,
+        activePanelOwnerTagName: null,
+        activePanelRole: null,
+        activePanelId: null,
+        activePanelIsShellMain: false,
+        shellActivePanelFound: false,
+        shellActivePanelCount: 0,
         gridCount: 0,
         cardCount: 0,
         tabActive: false,

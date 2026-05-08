@@ -82,6 +82,21 @@ export async function writePccLiveSurfaceSmokeEvidence(
 
   const sanitizedSurfaces = input.surfaces.map((surface) => ({
     ...surface,
+    // Wave 15A wave-b7 Prompt 05 — owner tag/role/id come from
+    // controlled DOM (`tagName`, `getAttribute('role')`,
+    // `getAttribute('id')`) and should not contain anything sensitive.
+    // Apply the existing sanitizeText path defensively so any future
+    // change that sources owner metadata from a less constrained DOM
+    // node still flows through redaction.
+    activePanelOwnerTagName: surface.activePanelOwnerTagName
+      ? sanitizeText(surface.activePanelOwnerTagName)
+      : surface.activePanelOwnerTagName,
+    activePanelRole: surface.activePanelRole
+      ? sanitizeText(surface.activePanelRole)
+      : surface.activePanelRole,
+    activePanelId: surface.activePanelId
+      ? sanitizeText(surface.activePanelId)
+      : surface.activePanelId,
     warning: surface.warning ? sanitizeText(surface.warning) : undefined,
   }));
 
@@ -133,11 +148,19 @@ export async function writePccLiveSurfaceSmokeEvidence(
   lines.push(`- runState: ${input.runState}`);
   lines.push('');
   lines.push('## Surface Results');
-  lines.push('| Surface | Passed | Panel | Tab Active | Grid Count | Card Count | Warning |');
-  lines.push('|---|---|---|---|---:|---:|---|');
+  lines.push(
+    '| Surface | Passed | Panel | Active Panel Count | Owner | Shell Main | Shell Count | Tab Active | Grid Count | Card Count | Warning |',
+  );
+  lines.push('|---|---|---|---:|---|---|---:|---|---:|---:|---|');
   for (const surface of sanitizedSurfaces) {
+    const ownerParts = [
+      surface.activePanelOwnerTagName ?? 'none',
+      surface.activePanelRole ? `role=${surface.activePanelRole}` : undefined,
+      surface.activePanelId ? `id=${surface.activePanelId}` : undefined,
+    ].filter((part): part is string => Boolean(part));
+    const owner = sanitizeText(ownerParts.join(' '));
     lines.push(
-      `| ${surface.surfaceId} | ${surface.passed ? 'yes' : 'no'} | ${surface.activePanelFound ? 'yes' : 'no'} | ${surface.tabActive ? 'yes' : 'no'} | ${surface.gridCount} | ${surface.cardCount} | ${surface.warning ?? ''} |`,
+      `| ${surface.surfaceId} | ${surface.passed ? 'yes' : 'no'} | ${surface.activePanelFound ? 'yes' : 'no'} | ${surface.activePanelCount} | ${owner} | ${surface.activePanelIsShellMain ? 'yes' : 'no'} | ${surface.shellActivePanelCount} | ${surface.tabActive ? 'yes' : 'no'} | ${surface.gridCount} | ${surface.cardCount} | ${surface.warning ?? ''} |`,
     );
   }
   lines.push('');
