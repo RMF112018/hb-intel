@@ -8,6 +8,7 @@ import {
 } from '@hbc/models/pcc';
 import { PCC_RESPONSIVE_MODES, type PccResponsiveMode } from '../layout/footprints';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
+import { PCC_SHELL_SURFACE_HEADER_METADATA } from '../shell/surfaceHeaderMetadata';
 import { deriveShellHeroViewModel } from '../preview/projectShellViewModel';
 import { PccProjectHeroBand, type PccProjectHeroBandProps } from '../shell/PccProjectHeroBand';
 
@@ -189,5 +190,90 @@ describe('PccProjectHeroBand — responsive markers preserved', () => {
       expect(container.querySelector('[data-pcc-command-search="icon"]')).not.toBeNull();
       expect(container.querySelector('[data-pcc-command-search="expanded"]')).toBeNull();
     }
+  });
+});
+
+describe('PccProjectHeroBand — wave-b7 Prompt 02 surface metadata zones', () => {
+  it.each(PCC_MVP_SURFACE_IDS)(
+    'renders the metadata summary, cues, and read-only cue for "%s"',
+    (surfaceId) => {
+      cleanup();
+      const { container } = renderHero({
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId),
+      });
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+
+      const summaryZones = container.querySelectorAll('[data-pcc-hero-surface-summary]');
+      expect(summaryZones).toHaveLength(1);
+      const summaryZone = summaryZones[0]!;
+      const summaryItems = summaryZone.querySelectorAll('[data-pcc-hero-summary-item]');
+      expect(summaryItems).toHaveLength(metadata.surfaceSummaryItems.length);
+      metadata.surfaceSummaryItems.forEach((expected, index) => {
+        const node = summaryItems[index]!;
+        expect(node.getAttribute('data-pcc-hero-summary-item')).toBe(expected.id);
+        expect(node.getAttribute('data-pcc-hero-summary-tone')).toBe(expected.tone ?? 'neutral');
+        expect(node.textContent).toContain(expected.label);
+        expect(node.textContent).toContain(expected.value);
+      });
+
+      const cueZones = container.querySelectorAll('[data-pcc-hero-surface-cues]');
+      expect(cueZones).toHaveLength(1);
+      const cueZone = cueZones[0]!;
+      const cues = cueZone.querySelectorAll('[data-pcc-hero-surface-cue]');
+      expect(cues).toHaveLength(metadata.surfaceCues.length);
+      metadata.surfaceCues.forEach((expected, index) => {
+        const node = cues[index]!;
+        expect(node.getAttribute('data-pcc-hero-surface-cue')).toBe(expected.id);
+        expect(node.textContent).toContain(expected.label);
+        expect(node.textContent).toContain(expected.value);
+      });
+
+      const readOnlyCues = container.querySelectorAll('[data-pcc-hero-read-only-cue]');
+      expect(readOnlyCues).toHaveLength(1);
+      expect(readOnlyCues[0]!.textContent).toBe(metadata.readOnlyCue);
+    },
+  );
+
+  it('defaults summary tone to "neutral" when the metadata entry omits tone', () => {
+    cleanup();
+    const { container } = renderHero();
+    // SAMPLE_PROJECT_PROFILE on project-home renders source / authority items
+    // without a `tone`, so they must surface as the explicit "neutral" default.
+    const sourceItem = container.querySelector('[data-pcc-hero-summary-item="source"]');
+    const authorityItem = container.querySelector('[data-pcc-hero-summary-item="authority"]');
+    expect(sourceItem?.getAttribute('data-pcc-hero-summary-tone')).toBe('neutral');
+    expect(authorityItem?.getAttribute('data-pcc-hero-summary-tone')).toBe('neutral');
+  });
+
+  it('renders no interactive descendants inside the metadata, cue, and read-only zones', () => {
+    cleanup();
+    const { container } = renderHero();
+    const zones = [
+      container.querySelector('[data-pcc-hero-surface-summary]'),
+      container.querySelector('[data-pcc-hero-surface-cues]'),
+    ];
+    for (const zone of zones) {
+      expect(zone).not.toBeNull();
+      expect(zone!.querySelectorAll('input').length).toBe(0);
+      expect(zone!.querySelectorAll('button').length).toBe(0);
+      expect(zone!.querySelectorAll('a').length).toBe(0);
+      expect(zone!.querySelectorAll('select').length).toBe(0);
+      expect(zone!.querySelectorAll('textarea').length).toBe(0);
+      expect(zone!.querySelectorAll('[tabindex="0"]').length).toBe(0);
+      expect(zone!.querySelectorAll('[role="button"]').length).toBe(0);
+    }
+  });
+
+  it('does not introduce forbidden source-confidence or pill markers in the new zones', () => {
+    cleanup();
+    const { container } = renderHero();
+    const summaryZone = container.querySelector('[data-pcc-hero-surface-summary]');
+    const cueZone = container.querySelector('[data-pcc-hero-surface-cues]');
+    expect(summaryZone?.querySelector('[data-pcc-source-confidence]')).toBeNull();
+    expect(cueZone?.querySelector('[data-pcc-source-confidence]')).toBeNull();
+    expect(summaryZone?.querySelector('[data-pcc-pill]')).toBeNull();
+    expect(cueZone?.querySelector('[data-pcc-pill]')).toBeNull();
+    expect(summaryZone?.querySelector('[data-pcc-hero-pill]')).toBeNull();
+    expect(cueZone?.querySelector('[data-pcc-hero-pill-row]')).toBeNull();
   });
 });

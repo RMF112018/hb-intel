@@ -158,6 +158,25 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     expect(container.querySelector('[data-pcc-project-intel-toggle]')).toBeNull();
     expect(container.querySelector('[data-pcc-project-intel-region]')).toBeNull();
   });
+
+  // Wave 15A wave-b7 Prompt 02 — shell hero metadata zones (summary, cues,
+  // read-only cue) render at every responsive mode covered by the shell.
+  // Per-surface and inert-content coverage lives in
+  // PccProjectHeroBand.test.tsx; this is a presence-only smoke at the shell
+  // composition layer.
+  it('renders the shell hero surface metadata zones in standardLaptop mode', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    expect(container.querySelectorAll('[data-pcc-hero-surface-summary]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-hero-surface-cues]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-hero-read-only-cue]')).toHaveLength(1);
+  });
+
+  it('renders the shell hero surface metadata zones in phone mode', () => {
+    const { container } = render(<PccApp forceMode="phone" />);
+    expect(container.querySelectorAll('[data-pcc-hero-surface-summary]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-hero-surface-cues]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-hero-read-only-cue]')).toHaveLength(1);
+  });
 });
 
 describe('resolveResponsiveMode 8-mode boundary contract', () => {

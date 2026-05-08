@@ -24,6 +24,8 @@
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     'identity command'
+    'summary  summary'
+    'cues     cues'
     'facts    facts';
   align-items: start;
   gap: var(--pcc-space-md) var(--pcc-space-lg);
@@ -42,6 +44,8 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     'identity'
+    'summary'
+    'cues'
     'facts'
     'command';
   padding: var(--pcc-space-md) var(--pcc-space-md);
@@ -156,4 +160,104 @@
   height: var(--pcc-space-sm);
   background: var(--pcc-color-canvas);
   border-bottom: 1px solid var(--pcc-color-border);
+}
+
+/* Wave 15A wave-b7 Prompt 02 — surface metadata seam zones.
+ * Inert summary, cue, and read-only zones rendered between identity
+ * and facts. No interactive descendants and no new color literals. */
+
+.surfaceSummary {
+  grid-area: summary;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-md);
+  margin: 0;
+  padding: var(--pcc-space-sm) 0;
+  border-top: 1px solid var(--pcc-color-border);
+}
+
+.heroBand[data-pcc-hero-density='compact'] .surfaceSummary {
+  gap: var(--pcc-space-sm);
+}
+
+.surfaceSummaryItem {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.surfaceSummaryLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.surfaceSummaryValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.surfaceSummaryItem[data-pcc-hero-summary-tone='info'] .surfaceSummaryLabel {
+  color: var(--pcc-status-info);
+}
+
+.surfaceSummaryItem[data-pcc-hero-summary-tone='success'] .surfaceSummaryLabel {
+  color: var(--pcc-status-success);
+}
+
+.surfaceSummaryItem[data-pcc-hero-summary-tone='warning'] .surfaceSummaryLabel {
+  color: var(--pcc-status-warning);
+}
+
+.surfaceSummaryItem[data-pcc-hero-summary-tone='danger'] .surfaceSummaryLabel {
+  color: var(--pcc-status-danger);
+}
+
+.surfaceCueRow {
+  grid-area: cues;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pcc-space-sm);
+  margin: 0;
+}
+
+.surfaceCue {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--pcc-space-xs);
+  padding: 2px var(--pcc-space-sm);
+  border-radius: var(--pcc-radius-sm);
+  border-left: 2px solid var(--pcc-hero-accent);
+  background: var(--pcc-color-rail);
+}
+
+.surfaceCueLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.surfaceCueValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}
+
+.readOnlyCue {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+  margin-inline-start: auto;
+}
+
+.heroBand[data-pcc-mode='phone'] .readOnlyCue {
+  margin-inline-start: 0;
+  flex-basis: 100%;
 }

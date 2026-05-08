@@ -1,10 +1,28 @@
 import type { IProjectProfile, PccMvpSurfaceId, PccProjectStage } from '@hbc/models/pcc';
 import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
+import {
+  PCC_SHELL_SURFACE_HEADER_METADATA,
+  type IPccShellSurfaceCue,
+  type IPccShellSurfaceHeaderMetadata,
+  type IPccShellSurfaceSummaryItem,
+  type PccShellSurfaceSummaryTone,
+} from '../shell/surfaceHeaderMetadata';
+
+export type {
+  PccShellSurfaceSummaryTone,
+  IPccShellSurfaceSummaryItem,
+  IPccShellSurfaceCue,
+  IPccShellSurfaceHeaderMetadata,
+};
 
 /**
  * Hero view-model the PCC shell renders. Profile-derived; no source-confidence,
- * no client name, no status pills, no last-updated, no project number.
+ * no client name, no status pills, no last-updated, no project number. Wave 15A
+ * wave-b7 Prompt 02 — extends the seam with typed shell surface metadata
+ * (`surfaceSummaryItems`, `surfaceCues`, `readOnlyCue`) sourced from
+ * `PCC_SHELL_SURFACE_HEADER_METADATA`. The new fields are inert at render
+ * time and carry no live counts or writeback authority.
  */
 export interface IPccShellHeroViewModel {
   readonly primaryTitle: 'Project Control Center';
@@ -15,6 +33,9 @@ export interface IPccShellHeroViewModel {
   readonly estimatedValueDisplay: string;
   readonly scheduledCompletionDisplay: string;
   readonly projectStageLabel: string;
+  readonly surfaceSummaryItems: readonly IPccShellSurfaceSummaryItem[];
+  readonly surfaceCues: readonly IPccShellSurfaceCue[];
+  readonly readOnlyCue: string;
 }
 
 const NOT_LISTED = 'Not listed' as const;
@@ -68,6 +89,7 @@ export function deriveShellHeroViewModel(
   activeSurfaceId: PccMvpSurfaceId,
 ): IPccShellHeroViewModel {
   const surface = PCC_MVP_SURFACES[activeSurfaceId];
+  const headerMetadata = PCC_SHELL_SURFACE_HEADER_METADATA[activeSurfaceId];
   return {
     primaryTitle: 'Project Control Center',
     secondaryTitle: surface.displayName,
@@ -77,5 +99,8 @@ export function deriveShellHeroViewModel(
     estimatedValueDisplay: formatEstimatedValue(profile.estimatedValue),
     scheduledCompletionDisplay: formatScheduledCompletion(profile.scheduledCompletionDate),
     projectStageLabel: formatProjectStage(profile.projectStage),
+    surfaceSummaryItems: headerMetadata.surfaceSummaryItems,
+    surfaceCues: headerMetadata.surfaceCues,
+    readOnlyCue: headerMetadata.readOnlyCue,
   };
 }

@@ -7,6 +7,7 @@ import {
   type PccProjectStage,
 } from '@hbc/models/pcc';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
+import { PCC_SHELL_SURFACE_HEADER_METADATA } from '../shell/surfaceHeaderMetadata';
 import {
   deriveShellHeroViewModel,
   formatEstimatedValue,
@@ -104,5 +105,73 @@ describe('deriveShellHeroViewModel', () => {
     expect(vm.location).toBe('Not listed');
     expect(vm.estimatedValueDisplay).toBe('Not listed');
     expect(vm.scheduledCompletionDisplay).toBe('Not listed');
+  });
+});
+
+describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata', () => {
+  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+    it(`exposes non-empty surfaceSummaryItems / surfaceCues / readOnlyCue for "${surfaceId}"`, () => {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
+      expect(vm.surfaceSummaryItems.length).toBeGreaterThan(0);
+      expect(vm.surfaceCues.length).toBeGreaterThan(0);
+      expect(vm.readOnlyCue.trim().length).toBeGreaterThan(0);
+
+      for (const item of vm.surfaceSummaryItems) {
+        expect(item.id.length).toBeGreaterThan(0);
+        expect(item.label.length).toBeGreaterThan(0);
+        expect(item.value.length).toBeGreaterThan(0);
+      }
+      for (const cue of vm.surfaceCues) {
+        expect(cue.id.length).toBeGreaterThan(0);
+        expect(cue.label.length).toBeGreaterThan(0);
+        expect(cue.value.length).toBeGreaterThan(0);
+      }
+    });
+  }
+
+  it('mirrors the canonical PCC_SHELL_SURFACE_HEADER_METADATA entries by reference', () => {
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      expect(vm.surfaceSummaryItems).toBe(metadata.surfaceSummaryItems);
+      expect(vm.surfaceCues).toBe(metadata.surfaceCues);
+      expect(vm.readOnlyCue).toBe(metadata.readOnlyCue);
+    }
+  });
+
+  it('Project Home metadata locks command-preview / advisory / hbi-boundary copy', () => {
+    const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'project-home');
+    const mode = vm.surfaceSummaryItems.find((item) => item.id === 'mode');
+    const authority = vm.surfaceSummaryItems.find((item) => item.id === 'authority');
+    const hbiBoundary = vm.surfaceCues.find((cue) => cue.id === 'hbi-boundary');
+    expect(mode?.value).toBe('Command preview');
+    expect(authority?.value).toBe('Advisory only');
+    expect(hbiBoundary?.value).toBe('Grounded preview, no writeback');
+    expect(vm.readOnlyCue).toContain('no decisions');
+    expect(vm.readOnlyCue).toContain('approvals');
+    expect(vm.readOnlyCue).toContain('writeback');
+  });
+
+  it('Approvals metadata locks no-approval-authority and explicit-governed-action copy', () => {
+    const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'approvals');
+    const authority = vm.surfaceSummaryItems.find((item) => item.id === 'authority');
+    const approvalBoundary = vm.surfaceCues.find((cue) => cue.id === 'approval-boundary');
+    expect(authority?.value).toBe('No approval authority');
+    expect(approvalBoundary).toBeDefined();
+    expect(vm.readOnlyCue).toContain('approvals require explicit governed action');
+  });
+
+  it('does not leak forbidden DOM-marker strings into metadata copy', () => {
+    // Structural guard only — keeps `data-pcc-source-confidence` and
+    // `data-pcc-pill*` marker tokens out of the copy. Word blocklists
+    // (e.g. "writeback authority", "source of truth") are intentionally
+    // omitted: per-surface readOnlyCue copy legitimately describes the
+    // *absence* of writeback authority and asserting against the bare
+    // phrase produces false positives on negating copy
+    // (feedback_word_blocklists_break_on_corrected_copy).
+    const serialized = JSON.stringify(PCC_SHELL_SURFACE_HEADER_METADATA);
+    expect(serialized).not.toContain('data-pcc-source-confidence');
+    expect(serialized).not.toContain('data-pcc-pill');
+    expect(serialized).not.toContain('data-pcc-hero-pill');
   });
 });
