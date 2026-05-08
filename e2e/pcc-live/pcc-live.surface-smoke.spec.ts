@@ -83,6 +83,78 @@ test('PCC hosted runtime navigates all eight surfaces through safe tabs', async 
     failed,
     `Surface smoke failed for: ${failed.map((surface) => `${surface.surfaceId} (${surface.warning ?? 'no warning'})`).join(', ')}`,
   ).toHaveLength(0);
+
+  // Wave 15A wave-b8 Prompt 05A — Phase 03 conditional command-header
+  // hero markers must render in hosted DOM for every surface. Evidence
+  // is already written above; these assertions gate the test outcome
+  // on actual tenant-served Phase 03 behavior. A tenant package
+  // lagging the local 1.0.0.19 source will fail here with diagnostic
+  // surface-by-surface output. Cue-id contracts for project-readiness
+  // (`no-execution`) and external-systems (`launch-context`) are
+  // asserted as per-surface inclusion checks.
+  for (const surface of surfaceResults) {
+    expect(
+      surface.heroSummaryZoneCount,
+      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-surface-summary]`,
+    ).toBe(1);
+    expect(
+      surface.heroCueZoneCount,
+      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-surface-cues]`,
+    ).toBe(1);
+    expect(
+      surface.heroReadOnlyCueCount,
+      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-read-only-cue]`,
+    ).toBe(1);
+    expect(
+      surface.heroCommandSearchCount,
+      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-command-search]`,
+    ).toBe(1);
+    expect(
+      surface.heroCommandSearchPreviewStateFound,
+      `Surface ${surface.surfaceId}: expected [data-pcc-command-search-state="preview"] in command-search slot`,
+    ).toBe(true);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.input,
+      `Surface ${surface.surfaceId}: command-search must contain zero <input>`,
+    ).toBe(0);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.button,
+      `Surface ${surface.surfaceId}: command-search must contain zero <button>`,
+    ).toBe(0);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.anchor,
+      `Surface ${surface.surfaceId}: command-search must contain zero <a>`,
+    ).toBe(0);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.select,
+      `Surface ${surface.surfaceId}: command-search must contain zero <select>`,
+    ).toBe(0);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.textarea,
+      `Surface ${surface.surfaceId}: command-search must contain zero <textarea>`,
+    ).toBe(0);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.tabindex0,
+      `Surface ${surface.surfaceId}: command-search must contain zero [tabindex="0"]`,
+    ).toBe(0);
+    expect(
+      surface.heroCommandSearchInteractiveCounts.roleButton,
+      `Surface ${surface.surfaceId}: command-search must contain zero [role="button"]`,
+    ).toBe(0);
+
+    if (surface.surfaceId === 'project-readiness') {
+      expect(
+        surface.heroCueIds,
+        `Surface project-readiness: expected [data-pcc-hero-surface-cue="no-execution"] (Prompt 02 cue marker)`,
+      ).toContain('no-execution');
+    }
+    if (surface.surfaceId === 'external-systems') {
+      expect(
+        surface.heroCueIds,
+        `Surface external-systems: expected [data-pcc-hero-surface-cue="launch-context"] (Prompt 02 cue marker)`,
+      ).toContain('launch-context');
+    }
+  }
 });
 
 test('PCC smoke evidence writer preserves sanitized output policy', async () => {
@@ -114,6 +186,26 @@ test('PCC smoke evidence writer preserves sanitized output policy', async () => 
           gridCount: 1,
           cardCount: 3,
           tabActive: true,
+          heroBandFound: true,
+          heroSummaryZoneCount: 1,
+          heroSummaryItemIds: ['mode', 'authority', 'source'],
+          heroCueZoneCount: 1,
+          heroCueIds: ['hbi-boundary'],
+          heroReadOnlyCueCount: 1,
+          heroReadOnlyCueText:
+            'Read-only preview — no decisions, approvals, or writeback authority.',
+          heroSecondaryTitleText: 'Project Home',
+          heroCommandSearchCount: 1,
+          heroCommandSearchPreviewStateFound: true,
+          heroCommandSearchInteractiveCounts: {
+            input: 0,
+            button: 0,
+            anchor: 0,
+            select: 0,
+            textarea: 0,
+            tabindex0: 0,
+            roleButton: 0,
+          },
           warning:
             'Warning for qa.user@hedrickbrothers.com token=ABCDEFGHIJKLMNOPQRSTUVWXYZ123456 and https://tenant/site?p=secret',
         },
@@ -203,6 +295,20 @@ test('PCC smoke evidence writer preserves sanitized output policy', async () => 
     expect(jsonText).toContain('"activePanelId": "pcc-active-surface-panel"');
     expect(jsonText).toContain('"activePanelIsShellMain": true');
     expect(jsonText).toContain('"shellActivePanelCount": 1');
+
+    // Wave 15A wave-b8 Prompt 05A — Phase 03 hero capture flows
+    // through the writer's surface spread. Lock the new schema keys so
+    // a regression that drops them surfaces here, not silently in
+    // hosted evidence.
+    expect(jsonText).toContain('"heroBandFound": true');
+    expect(jsonText).toContain('"heroSummaryZoneCount": 1');
+    expect(jsonText).toContain('"heroCueZoneCount": 1');
+    expect(jsonText).toContain('"heroReadOnlyCueCount": 1');
+    expect(jsonText).toContain('"heroCommandSearchCount": 1');
+    expect(jsonText).toContain('"heroCommandSearchPreviewStateFound": true');
+    expect(jsonText).toContain('"heroCueIds"');
+    expect(jsonText).toContain('"heroSummaryItemIds"');
+    expect(jsonText).toContain('"heroCommandSearchInteractiveCounts"');
 
     expect(markdownText).toContain('Active Panel Count');
     expect(markdownText).toContain('Shell Main');

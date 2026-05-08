@@ -9,6 +9,28 @@ const ROOT_MARKERS = {
   card: '[data-pcc-card]',
 } as const;
 
+const HERO_MARKERS = {
+  band: '[data-pcc-project-hero-band]',
+  secondaryTitle: '[data-pcc-hero-secondary-title]',
+  summaryZone: '[data-pcc-hero-surface-summary]',
+  summaryItem: '[data-pcc-hero-summary-item]',
+  cueZone: '[data-pcc-hero-surface-cues]',
+  cue: '[data-pcc-hero-surface-cue]',
+  readOnlyCue: '[data-pcc-hero-read-only-cue]',
+  commandSearch: '[data-pcc-hero-command-search]',
+  commandSearchPreviewState: '[data-pcc-command-search-state="preview"]',
+} as const;
+
+export interface PccLiveCommandSearchInteractiveCounts {
+  readonly input: number;
+  readonly button: number;
+  readonly anchor: number;
+  readonly select: number;
+  readonly textarea: number;
+  readonly tabindex0: number;
+  readonly roleButton: number;
+}
+
 export interface PccLiveRuntimeErrorItem {
   type: 'console' | 'pageerror';
   message: string;
@@ -58,6 +80,25 @@ export interface PccLiveSurfaceSmokeResult {
   gridCount: number;
   cardCount: number;
   tabActive: boolean;
+  /**
+   * Wave 15A wave-b8 Prompt 05A — Phase 03 conditional command-header
+   * markers captured per active surface. Evidence only — does not gate
+   * `passed`. Live spec asserts presence and per-surface cue-id
+   * contracts separately so a tenant package lagging the local
+   * 1.0.0.19 source still produces diagnostic evidence rather than
+   * hiding behind a generic surface-failed warning.
+   */
+  heroBandFound: boolean;
+  heroSummaryZoneCount: number;
+  heroSummaryItemIds: readonly string[];
+  heroCueZoneCount: number;
+  heroCueIds: readonly string[];
+  heroReadOnlyCueCount: number;
+  heroReadOnlyCueText: string | null;
+  heroSecondaryTitleText: string | null;
+  heroCommandSearchCount: number;
+  heroCommandSearchPreviewStateFound: boolean;
+  heroCommandSearchInteractiveCounts: PccLiveCommandSearchInteractiveCounts;
   warning?: string;
 }
 
@@ -258,6 +299,97 @@ export class PccLivePageObject {
     };
   }
 
+  private async inspectHeroBandMetadata(): Promise<{
+    readonly heroBandFound: boolean;
+    readonly heroSummaryZoneCount: number;
+    readonly heroSummaryItemIds: readonly string[];
+    readonly heroCueZoneCount: number;
+    readonly heroCueIds: readonly string[];
+    readonly heroReadOnlyCueCount: number;
+    readonly heroReadOnlyCueText: string | null;
+    readonly heroSecondaryTitleText: string | null;
+    readonly heroCommandSearchCount: number;
+    readonly heroCommandSearchPreviewStateFound: boolean;
+    readonly heroCommandSearchInteractiveCounts: PccLiveCommandSearchInteractiveCounts;
+  }> {
+    const heroBandCount = await this.page.locator(HERO_MARKERS.band).count();
+    const heroSummaryZoneCount = await this.page.locator(HERO_MARKERS.summaryZone).count();
+    const heroCueZoneCount = await this.page.locator(HERO_MARKERS.cueZone).count();
+    const heroReadOnlyCueCount = await this.page.locator(HERO_MARKERS.readOnlyCue).count();
+    const heroCommandSearchCount = await this.page.locator(HERO_MARKERS.commandSearch).count();
+    const heroCommandSearchPreviewStateCount = await this.page
+      .locator(HERO_MARKERS.commandSearchPreviewState)
+      .count();
+
+    const heroSummaryItemIdsRaw = await this.page
+      .locator(HERO_MARKERS.summaryItem)
+      .evaluateAll((nodes) =>
+        nodes.map((node) =>
+          node instanceof HTMLElement
+            ? (node.getAttribute('data-pcc-hero-summary-item') ?? '')
+            : '',
+        ),
+      );
+    const heroCueIdsRaw = await this.page
+      .locator(HERO_MARKERS.cue)
+      .evaluateAll((nodes) =>
+        nodes.map((node) =>
+          node instanceof HTMLElement ? (node.getAttribute('data-pcc-hero-surface-cue') ?? '') : '',
+        ),
+      );
+
+    let heroReadOnlyCueText: string | null = null;
+    if (heroReadOnlyCueCount > 0) {
+      const text = await this.page.locator(HERO_MARKERS.readOnlyCue).first().textContent();
+      heroReadOnlyCueText = text ? redact(text.trim()) : null;
+    }
+
+    let heroSecondaryTitleText: string | null = null;
+    const heroSecondaryTitleCount = await this.page.locator(HERO_MARKERS.secondaryTitle).count();
+    if (heroSecondaryTitleCount > 0) {
+      const text = await this.page.locator(HERO_MARKERS.secondaryTitle).first().textContent();
+      heroSecondaryTitleText = text ? redact(text.trim()) : null;
+    }
+
+    let heroCommandSearchInteractiveCounts: PccLiveCommandSearchInteractiveCounts = {
+      input: 0,
+      button: 0,
+      anchor: 0,
+      select: 0,
+      textarea: 0,
+      tabindex0: 0,
+      roleButton: 0,
+    };
+    if (heroCommandSearchCount > 0) {
+      const slot = this.page.locator(HERO_MARKERS.commandSearch).first();
+      heroCommandSearchInteractiveCounts = {
+        input: await slot.locator('input').count(),
+        button: await slot.locator('button').count(),
+        anchor: await slot.locator('a').count(),
+        select: await slot.locator('select').count(),
+        textarea: await slot.locator('textarea').count(),
+        tabindex0: await slot.locator('[tabindex="0"]').count(),
+        roleButton: await slot.locator('[role="button"]').count(),
+      };
+    }
+
+    return {
+      heroBandFound: heroBandCount > 0,
+      heroSummaryZoneCount,
+      heroSummaryItemIds: heroSummaryItemIdsRaw
+        .map((id) => redact(id))
+        .filter((id) => id.length > 0),
+      heroCueZoneCount,
+      heroCueIds: heroCueIdsRaw.map((id) => redact(id)).filter((id) => id.length > 0),
+      heroReadOnlyCueCount,
+      heroReadOnlyCueText,
+      heroSecondaryTitleText,
+      heroCommandSearchCount,
+      heroCommandSearchPreviewStateFound: heroCommandSearchPreviewStateCount > 0,
+      heroCommandSearchInteractiveCounts,
+    };
+  }
+
   async assertSurfaceActive(surface: PccLiveSurfaceDefinition): Promise<PccLiveSurfaceSmokeResult> {
     try {
       await this.navigateToSurface(surface);
@@ -277,6 +409,7 @@ export class PccLivePageObject {
       } = await this.inspectActivePanelOwner(surface);
       const gridCount = await this.page.locator(ROOT_MARKERS.grid).count();
       const cardCount = await this.page.locator(ROOT_MARKERS.card).count();
+      const hero = await this.inspectHeroBandMetadata();
 
       await this.assertCurrentUrlWithinExpectedOrigin();
 
@@ -323,6 +456,7 @@ export class PccLivePageObject {
         gridCount,
         cardCount,
         tabActive,
+        ...hero,
         warning,
       };
     } catch (error) {
@@ -341,6 +475,25 @@ export class PccLivePageObject {
         gridCount: 0,
         cardCount: 0,
         tabActive: false,
+        heroBandFound: false,
+        heroSummaryZoneCount: 0,
+        heroSummaryItemIds: [],
+        heroCueZoneCount: 0,
+        heroCueIds: [],
+        heroReadOnlyCueCount: 0,
+        heroReadOnlyCueText: null,
+        heroSecondaryTitleText: null,
+        heroCommandSearchCount: 0,
+        heroCommandSearchPreviewStateFound: false,
+        heroCommandSearchInteractiveCounts: {
+          input: 0,
+          button: 0,
+          anchor: 0,
+          select: 0,
+          textarea: 0,
+          tabindex0: 0,
+          roleButton: 0,
+        },
         warning: `Surface ${surface.id} threw during navigation/assertion: ${redact(String(error))}`,
       };
     }
