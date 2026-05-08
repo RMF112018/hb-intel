@@ -258,4 +258,42 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor
       }
     }
   });
+
+  it('locks project-readiness no-execution cue (wave-b8 Prompt 02)', () => {
+    const cue = PCC_SHELL_SURFACE_HEADER_METADATA['project-readiness'].surfaceCues.find(
+      (c) => c.id === 'no-execution',
+    );
+    expect(cue, 'no-execution cue must exist on project-readiness').toBeDefined();
+    expect(cue!.label).toBe('Posture');
+    expect(cue!.value).toContain('No checklist completion');
+    expect(cue!.value).toContain('evidence execution');
+    expect(cue!.value).toContain('from this header');
+  });
+
+  it('locks external-systems launch-context cue (wave-b8 Prompt 02)', () => {
+    const cue = PCC_SHELL_SURFACE_HEADER_METADATA['external-systems'].surfaceCues.find(
+      (c) => c.id === 'launch-context',
+    );
+    expect(cue, 'launch-context cue must exist on external-systems').toBeDefined();
+    expect(cue!.label).toBe('Boundary');
+    expect(cue!.value).toContain('Launch links open');
+    expect(cue!.value).toContain('source system');
+    expect(cue!.value).toContain('new tab');
+  });
+
+  it('keeps cue and summary-item ids unique per surface', () => {
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      const cueIds = metadata.surfaceCues.map((c) => c.id);
+      const summaryIds = metadata.surfaceSummaryItems.map((s) => s.id);
+      expect(
+        new Set(cueIds).size,
+        `cue ids on "${surfaceId}" must be unique (got [${cueIds.join(', ')}])`,
+      ).toBe(cueIds.length);
+      expect(
+        new Set(summaryIds).size,
+        `summary item ids on "${surfaceId}" must be unique (got [${summaryIds.join(', ')}])`,
+      ).toBe(summaryIds.length);
+    }
+  });
 });

@@ -1,11 +1,13 @@
 import { afterEach, describe, it, expect } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
+import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import {
   PCC_RESPONSIVE_MODES,
   resolveResponsiveMode,
   type PccResponsiveMode,
 } from '../layout/footprints';
+import { PCC_SHELL_SURFACE_HEADER_METADATA } from '../shell/surfaceHeaderMetadata';
 
 const COMPACT_MODES = new Set<PccResponsiveMode>([
   'phone',
@@ -312,5 +314,39 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
       cueId: 'repair-boundary',
       readOnlyCueIncludes: 'repair acknowledgements require governed source workflows',
     });
+  });
+});
+
+describe('PccShell — all-eight-surface metadata switching (wave-b8 Prompt 02)', () => {
+  it('switches hero metadata zones for every PCC_MVP_SURFACE_IDS tab click', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+
+    for (const id of PCC_MVP_SURFACE_IDS) {
+      const tab = container.querySelector(
+        `[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`,
+      ) as HTMLButtonElement | null;
+      expect(tab, `tab '${id}' should render`).not.toBeNull();
+      fireEvent.click(tab!);
+
+      const shellPanel = container.querySelector(
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${id}"]`,
+      );
+      expect(shellPanel, `shell panel must own active surface '${id}'`).not.toBeNull();
+
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[id];
+      const surface = PCC_MVP_SURFACES[id];
+
+      const secondaryTitle = container.querySelector('[data-pcc-hero-secondary-title]');
+      expect(secondaryTitle?.textContent).toBe(surface.displayName);
+
+      const summaryItems = container.querySelectorAll('[data-pcc-hero-summary-item]');
+      expect(summaryItems).toHaveLength(metadata.surfaceSummaryItems.length);
+
+      const cues = container.querySelectorAll('[data-pcc-hero-surface-cue]');
+      expect(cues).toHaveLength(metadata.surfaceCues.length);
+
+      const readOnlyCue = container.querySelector('[data-pcc-hero-read-only-cue]');
+      expect(readOnlyCue?.textContent).toBe(metadata.readOnlyCue);
+    }
   });
 });

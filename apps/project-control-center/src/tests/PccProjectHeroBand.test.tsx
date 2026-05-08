@@ -276,4 +276,26 @@ describe('PccProjectHeroBand — wave-b7 Prompt 02 surface metadata zones', () =
     expect(summaryZone?.querySelector('[data-pcc-hero-pill]')).toBeNull();
     expect(cueZone?.querySelector('[data-pcc-hero-pill-row]')).toBeNull();
   });
+
+  it('renders the no-execution cue marker for project-readiness (wave-b8 Prompt 02)', () => {
+    cleanup();
+    const { container } = renderHero({
+      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'project-readiness'),
+    });
+    const node = container.querySelector('[data-pcc-hero-surface-cue="no-execution"]');
+    expect(node).not.toBeNull();
+    expect(node!.textContent).toContain('Posture');
+    expect(node!.textContent).toContain('No checklist completion');
+  });
+
+  it('renders the launch-context cue marker for external-systems (wave-b8 Prompt 02)', () => {
+    cleanup();
+    const { container } = renderHero({
+      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'external-systems'),
+    });
+    const node = container.querySelector('[data-pcc-hero-surface-cue="launch-context"]');
+    expect(node).not.toBeNull();
+    expect(node!.textContent).toContain('Boundary');
+    expect(node!.textContent).toContain('Launch links open');
+  });
 });

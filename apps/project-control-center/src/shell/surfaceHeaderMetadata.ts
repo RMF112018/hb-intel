@@ -112,6 +112,11 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
         label: 'Boundary',
         value: 'No checklist completion from this header',
       },
+      {
+        id: 'no-execution',
+        label: 'Posture',
+        value: 'No checklist completion or evidence execution from this header',
+      },
     ],
     readOnlyCue: 'Read-only preview — readiness actions remain governed by source modules.',
   },
@@ -166,6 +171,11 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
         id: 'integration-boundary',
         label: 'Boundary',
         value: 'No sync or external writeback',
+      },
+      {
+        id: 'launch-context',
+        label: 'Boundary',
+        value: 'Launch links open the source system in a new tab',
       },
     ],
     readOnlyCue: 'Read-only preview — external platform actions remain outside this header.',
