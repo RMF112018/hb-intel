@@ -100,6 +100,15 @@ surface-blocks-*/
 scorecard-report-*/
 ```
 
+Completeness support artifacts (machine + human review):
+
+```text
+<run-id>/evidence-package-completeness.json
+<run-id>/evidence-package-completeness.md
+```
+
+These completeness artifacts are closeout support only. They do not calculate final scorecard points, do not pass/fail hard stops, do not mark EVs finally captured, and do not approve Phase 4 readiness.
+
 ## 7. Commit Eligibility
 
 Commit-eligible after operator review and scrubbing:
@@ -108,6 +117,7 @@ Commit-eligible after operator review and scrubbing:
 - Markdown reports.
 - Evidence indexes.
 - Coverage matrices.
+- Evidence package completeness reports (`.json` and `.md`).
 - Hard-stop worksheets.
 - Expert scoring worksheets.
 - Findings registers.
