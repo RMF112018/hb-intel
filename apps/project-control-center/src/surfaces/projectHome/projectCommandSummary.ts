@@ -37,7 +37,7 @@ export interface IBuildProjectCommandSummaryInput {
   readonly sourceStatus?: PccReadModelSourceStatus;
 }
 
-export const PROJECT_COMMAND_HBI_ADVISORY_CUE = 'HBI advisory · no decisions or writeback';
+export const PROJECT_COMMAND_HBI_ADVISORY_CUE = 'HBI advisory · no writeback';
 
 const HIGH_SEVERITIES: readonly SiteHealthSeverity[] = [
   'Blocking',

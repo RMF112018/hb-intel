@@ -74,7 +74,7 @@ const RailRow: FC<RailRowProps> = ({ item }) => (
       </span>
     </div>
     <span className={styles.rowAffordance} data-pcc-priority-rail-disabled-action="">
-      Source-owned · act in owning module
+      Source-owned
     </span>
   </li>
 );

@@ -47,9 +47,6 @@ const MissingConfigurationsBody: FC<{
             <span>Owner: {config.ownerPersona}</span>
             <span className={styles.listRowMetaSep}>Required before: {config.requiredBefore}</span>
           </span>
-          <span className={styles.contextNote} data-pcc-missing-config-next-step={config.systemId}>
-            Next step: {config.ownerPersona} resolves this in the source configuration workflow.
-          </span>
         </div>
         <PccStatusPill tone={severityToneFor(config.severity)} filled>
           {config.severity}

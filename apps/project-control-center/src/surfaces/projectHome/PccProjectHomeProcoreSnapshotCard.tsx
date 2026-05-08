@@ -16,7 +16,6 @@ import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { IPccProcoreSurfaceViewModel } from '../../viewModels/procoreSurfaceAdapter';
 import type { PccCardState } from './shared';
-import styles from './PccProjectHome.module.css';
 
 export interface PccProjectHomeProcoreSnapshotCardProps {
   readonly state?: PccCardState;
@@ -73,10 +72,6 @@ export const PccProjectHomeProcoreSnapshotCard: FC<PccProjectHomeProcoreSnapshot
               </PccStatusPill>
             </div>
             <p>{headlineLabel}</p>
-            <p className={styles.contextNote} data-pcc-procore-source-boundary="">
-              Read-model snapshot only — Procore remains the system of record; no PCC writeback from
-              this card.
-            </p>
             <ul>
               <li>
                 Mapping:{' '}
